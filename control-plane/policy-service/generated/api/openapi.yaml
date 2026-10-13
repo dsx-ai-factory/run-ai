@@ -7800,23 +7800,57 @@ components:
       nullable: true
       pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
       type: string
+    GpuMemoryPortionLimit:
+      description: Maximum GPU memory fraction consumed per GPU device. Must be no
+        less than gpuMemoryPortionRequest.
+      example: 0.5
+      format: double
+      minimum: 0
+      nullable: true
+      type: number
+      x-gorm-ignore: true
     GpuPortionLimit:
-      description: "Limitations on the portion consumed by the workload, per GPU device.\
-        \ The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
+      deprecated: true
+      description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations on\
+        \ the portion consumed by the workload, per GPU device. The system guarantees\
+        \ The gpuPotionLimit must be no less than the gpuPortionRequest."
       example: 0.5
       format: double
       minimum: 0
       nullable: true
       type: number
+    GpuMemoryPortionRequest:
+      description: "GPU memory fraction to allocate per GPU device, between 0 and\
+        \ 1. Required when gpuRequestType is portion."
+      example: 0.5
+      format: double
+      maximum: 1
+      minimum: 0
+      nullable: true
+      type: number
+      x-gorm-ignore: true
     GpuPortionRequest:
-      description: "Required if and only if gpuRequestType is portion. States the\
-        \ portion of the GPU to allocate for the created workload, per GPU device,\
-        \ between 0 and 1. The default is no allocated GPUs."
+      deprecated: true
+      description: "Deprecated. Use gpuMemoryPortionRequest instead. Required if and\
+        \ only if gpuRequestType is portion. States the portion of the GPU to allocate\
+        \ for the created workload, per GPU device, between 0 and 1. The default is\
+        \ no allocated GPUs."
       example: 0.5
       format: double
       minimum: 0
       nullable: true
       type: number
+    GpuComputeMode:
+      description: GPU compute sharing mode. Policy and template defaults apply before
+        the built-in time-slicing fallback. Explicit modes require an available GPU
+        fractioning runtime on the selected cluster.
+      enum:
+      - time-slicing
+      - sm-sharing
+      minLength: 1
+      nullable: true
+      type: string
+      x-gorm-ignore: true
     GpuRequestType:
       description: "Sets the unit type for GPU resources requests. Stated in terms\
         \ of portion or memory. Sets the unit type for other GPU request fields. If\
@@ -7858,16 +7892,19 @@ components:
             quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-        gpuMemoryRequest: 10M
-        gpuPortionRequest: 0.5
         gpuMemoryLimit: 10M
         cpuCoreLimit: 2
-        largeShmRequest: false
-        cpuCoreRequest: 0.5
-        gpuPortionLimit: 0.5
         gpuRequestType: portion
         cpuMemoryRequest: 20M
         gpuDevicesRequest: 1
+        gpuMemoryRequest: 10M
+        gpuMemoryPortionLimit: 0.5
+        gpuPortionRequest: 0.5
+        gpuComputeMode: time-slicing
+        gpuMemoryPortionRequest: 0.5
+        largeShmRequest: false
+        cpuCoreRequest: 0.5
+        gpuPortionLimit: 0.5
       nullable: true
       properties:
         cpuCoreLimit:
@@ -7939,24 +7976,48 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuMemoryPortionLimit:
+          description: Maximum GPU memory fraction consumed per GPU device. Must be
+            no less than gpuMemoryPortionRequest.
+          example: 0.5
+          format: double
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
         gpuPortionLimit:
-          description: "Limitations on the portion consumed by the workload, per GPU\
-            \ device. The system guarantees The gpuPotionLimit must be no less than\
-            \ the gpuPortionRequest."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations\
+            \ on the portion consumed by the workload, per GPU device. The system\
+            \ guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
           example: 0.5
           format: double
           minimum: 0
           nullable: true
           type: number
+        gpuMemoryPortionRequest:
+          description: "GPU memory fraction to allocate per GPU device, between 0\
+            \ and 1. Required when gpuRequestType is portion."
+          example: 0.5
+          format: double
+          maximum: 1
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
         gpuPortionRequest:
-          description: "Required if and only if gpuRequestType is portion. States\
-            \ the portion of the GPU to allocate for the created workload, per GPU\
-            \ device, between 0 and 1. The default is no allocated GPUs."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionRequest instead. Required\
+            \ if and only if gpuRequestType is portion. States the portion of the\
+            \ GPU to allocate for the created workload, per GPU device, between 0\
+            \ and 1. The default is no allocated GPUs."
           example: 0.5
           format: double
           minimum: 0
           nullable: true
           type: number
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestType'
         largeShmRequest:
@@ -12106,6 +12167,35 @@ components:
         instances:
           $ref: '#/components/schemas/ItemRules'
       type: object
+    GpuComputeModeOptions:
+      nullable: true
+      properties:
+        options:
+          description: Limit the permitted values for gpuComputeMode to a given set
+            of values.
+          items:
+            $ref: '#/components/schemas/GpuComputeModeOptions_options_inner'
+          nullable: true
+          type: array
+      type: object
+    GpuComputeModeRules:
+      allOf:
+      - $ref: '#/components/schemas/StringRulesCommon'
+      - $ref: '#/components/schemas/GpuComputeModeOptions'
+      example:
+        sourceOfRule:
+          scope: project
+          projectId: 3
+        blocked: true
+        canEdit: true
+        options:
+        - displayed: displayed
+          value: null
+        - displayed: displayed
+          value: null
+        required: true
+      nullable: true
+      type: object
     GpuRequestOptions:
       nullable: true
       properties:
@@ -12190,29 +12280,6 @@ components:
               - value: value
                 displayed: A description of the value.
               required: true
-        gpuMemoryRequest:
-          sourceOfRule:
-            scope: project
-            projectId: 3
-          min: min
-          max: max
-          defaultFrom:
-            field: field
-            factor: 6.84685269835264
-          canEdit: true
-          required: true
-        gpuPortionRequest:
-          sourceOfRule:
-            scope: project
-            projectId: 3
-          min: 7.457744773683766
-          max: 1.1730742509559433
-          defaultFrom:
-            field: field
-            factor: 6.84685269835264
-          canEdit: true
-          step: 4.965218492984954
-          required: true
         gpuMemoryLimit:
           sourceOfRule:
             scope: project
@@ -12225,36 +12292,6 @@ components:
           canEdit: true
           required: true
         cpuCoreLimit:
-          sourceOfRule:
-            scope: project
-            projectId: 3
-          min: 7.457744773683766
-          max: 1.1730742509559433
-          defaultFrom:
-            field: field
-            factor: 6.84685269835264
-          canEdit: true
-          step: 4.965218492984954
-          required: true
-        largeShmRequest:
-          sourceOfRule:
-            scope: project
-            projectId: 3
-          canEdit: true
-          required: true
-        cpuCoreRequest:
-          sourceOfRule:
-            scope: project
-            projectId: 3
-          min: 7.457744773683766
-          max: 1.1730742509559433
-          defaultFrom:
-            field: field
-            factor: 6.84685269835264
-          canEdit: true
-          step: 4.965218492984954
-          required: true
-        gpuPortionLimit:
           sourceOfRule:
             scope: project
             projectId: 3
@@ -12301,6 +12338,73 @@ components:
           canEdit: true
           step: 1
           required: true
+        gpuMemoryRequest:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          min: min
+          max: max
+          defaultFrom:
+            field: field
+            factor: 6.84685269835264
+          canEdit: true
+          required: true
+        gpuMemoryPortionLimit:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          min: 7.457744773683766
+          max: 1.1730742509559433
+          defaultFrom:
+            field: field
+            factor: 6.84685269835264
+          canEdit: true
+          step: 4.965218492984954
+          required: true
+        gpuPortionRequest: ""
+        gpuComputeMode:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          blocked: true
+          canEdit: true
+          options:
+          - displayed: displayed
+            value: null
+          - displayed: displayed
+            value: null
+          required: true
+        gpuMemoryPortionRequest:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          min: 7.457744773683766
+          max: 1.1730742509559433
+          defaultFrom:
+            field: field
+            factor: 6.84685269835264
+          canEdit: true
+          step: 4.965218492984954
+          required: true
+        largeShmRequest:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          canEdit: true
+          required: true
+        cpuCoreRequest:
+          sourceOfRule:
+            scope: project
+            projectId: 3
+          min: 7.457744773683766
+          max: 1.1730742509559433
+          defaultFrom:
+            field: field
+            factor: 6.84685269835264
+          canEdit: true
+          step: 4.965218492984954
+          required: true
+        gpuPortionLimit: ""
       nullable: true
       properties:
         cpuCoreLimit:
@@ -12319,10 +12423,20 @@ components:
           $ref: '#/components/schemas/QuantityRules'
         gpuMemoryRequest:
           $ref: '#/components/schemas/QuantityRules'
+        gpuMemoryPortionLimit:
+          $ref: '#/components/schemas/NumberRules'
         gpuPortionLimit:
+          allOf:
+          - $ref: '#/components/schemas/NumberRules'
+          deprecated: true
+        gpuMemoryPortionRequest:
           $ref: '#/components/schemas/NumberRules'
         gpuPortionRequest:
-          $ref: '#/components/schemas/NumberRules'
+          allOf:
+          - $ref: '#/components/schemas/NumberRules'
+          deprecated: true
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeModeRules'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestRules'
         largeShmRequest:
@@ -16698,16 +16812,19 @@ components:
               quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           privileged: ""
@@ -17962,16 +18079,19 @@ components:
                 quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: null
           cleanPodPolicy: None
           security:
@@ -19058,16 +19178,19 @@ components:
                 quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -20254,29 +20377,6 @@ components:
                 - value: value
                   displayed: A description of the value.
                 required: true
-          gpuMemoryRequest:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            min: min
-            max: max
-            defaultFrom:
-              field: field
-              factor: 6.84685269835264
-            canEdit: true
-            required: true
-          gpuPortionRequest:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            min: 7.457744773683766
-            max: 1.1730742509559433
-            defaultFrom:
-              field: field
-              factor: 6.84685269835264
-            canEdit: true
-            step: 4.965218492984954
-            required: true
           gpuMemoryLimit:
             sourceOfRule:
               scope: project
@@ -20289,36 +20389,6 @@ components:
             canEdit: true
             required: true
           cpuCoreLimit:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            min: 7.457744773683766
-            max: 1.1730742509559433
-            defaultFrom:
-              field: field
-              factor: 6.84685269835264
-            canEdit: true
-            step: 4.965218492984954
-            required: true
-          largeShmRequest:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            canEdit: true
-            required: true
-          cpuCoreRequest:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            min: 7.457744773683766
-            max: 1.1730742509559433
-            defaultFrom:
-              field: field
-              factor: 6.84685269835264
-            canEdit: true
-            step: 4.965218492984954
-            required: true
-          gpuPortionLimit:
             sourceOfRule:
               scope: project
               projectId: 3
@@ -20365,6 +20435,73 @@ components:
             canEdit: true
             step: 1
             required: true
+          gpuMemoryRequest:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            min: min
+            max: max
+            defaultFrom:
+              field: field
+              factor: 6.84685269835264
+            canEdit: true
+            required: true
+          gpuMemoryPortionLimit:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            min: 7.457744773683766
+            max: 1.1730742509559433
+            defaultFrom:
+              field: field
+              factor: 6.84685269835264
+            canEdit: true
+            step: 4.965218492984954
+            required: true
+          gpuPortionRequest: ""
+          gpuComputeMode:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            blocked: true
+            canEdit: true
+            options:
+            - displayed: displayed
+              value: null
+            - displayed: displayed
+              value: null
+            required: true
+          gpuMemoryPortionRequest:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            min: 7.457744773683766
+            max: 1.1730742509559433
+            defaultFrom:
+              field: field
+              factor: 6.84685269835264
+            canEdit: true
+            step: 4.965218492984954
+            required: true
+          largeShmRequest:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            canEdit: true
+            required: true
+          cpuCoreRequest:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            min: 7.457744773683766
+            max: 1.1730742509559433
+            defaultFrom:
+              field: field
+              factor: 6.84685269835264
+            canEdit: true
+            step: 4.965218492984954
+            required: true
+          gpuPortionLimit: ""
         preemptibility:
           sourceOfRule:
             scope: project
@@ -21744,29 +21881,6 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
-            gpuMemoryRequest:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              min: min
-              max: max
-              defaultFrom:
-                field: field
-                factor: 6.84685269835264
-              canEdit: true
-              required: true
-            gpuPortionRequest:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              min: 7.457744773683766
-              max: 1.1730742509559433
-              defaultFrom:
-                field: field
-                factor: 6.84685269835264
-              canEdit: true
-              step: 4.965218492984954
-              required: true
             gpuMemoryLimit:
               sourceOfRule:
                 scope: project
@@ -21779,36 +21893,6 @@ components:
               canEdit: true
               required: true
             cpuCoreLimit:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              min: 7.457744773683766
-              max: 1.1730742509559433
-              defaultFrom:
-                field: field
-                factor: 6.84685269835264
-              canEdit: true
-              step: 4.965218492984954
-              required: true
-            largeShmRequest:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              canEdit: true
-              required: true
-            cpuCoreRequest:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              min: 7.457744773683766
-              max: 1.1730742509559433
-              defaultFrom:
-                field: field
-                factor: 6.84685269835264
-              canEdit: true
-              step: 4.965218492984954
-              required: true
-            gpuPortionLimit:
               sourceOfRule:
                 scope: project
                 projectId: 3
@@ -21855,6 +21939,73 @@ components:
               canEdit: true
               step: 1
               required: true
+            gpuMemoryRequest:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              min: min
+              max: max
+              defaultFrom:
+                field: field
+                factor: 6.84685269835264
+              canEdit: true
+              required: true
+            gpuMemoryPortionLimit:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              min: 7.457744773683766
+              max: 1.1730742509559433
+              defaultFrom:
+                field: field
+                factor: 6.84685269835264
+              canEdit: true
+              step: 4.965218492984954
+              required: true
+            gpuPortionRequest: ""
+            gpuComputeMode:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              blocked: true
+              canEdit: true
+              options:
+              - displayed: displayed
+                value: null
+              - displayed: displayed
+                value: null
+              required: true
+            gpuMemoryPortionRequest:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              min: 7.457744773683766
+              max: 1.1730742509559433
+              defaultFrom:
+                field: field
+                factor: 6.84685269835264
+              canEdit: true
+              step: 4.965218492984954
+              required: true
+            largeShmRequest:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              canEdit: true
+              required: true
+            cpuCoreRequest:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              min: 7.457744773683766
+              max: 1.1730742509559433
+              defaultFrom:
+                field: field
+                factor: 6.84685269835264
+              canEdit: true
+              step: 4.965218492984954
+              required: true
+            gpuPortionLimit: ""
           preemptibility:
             sourceOfRule:
               scope: project
@@ -23213,29 +23364,6 @@ components:
                   - value: value
                     displayed: A description of the value.
                   required: true
-            gpuMemoryRequest:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              min: min
-              max: max
-              defaultFrom:
-                field: field
-                factor: 6.84685269835264
-              canEdit: true
-              required: true
-            gpuPortionRequest:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              min: 7.457744773683766
-              max: 1.1730742509559433
-              defaultFrom:
-                field: field
-                factor: 6.84685269835264
-              canEdit: true
-              step: 4.965218492984954
-              required: true
             gpuMemoryLimit:
               sourceOfRule:
                 scope: project
@@ -23248,36 +23376,6 @@ components:
               canEdit: true
               required: true
             cpuCoreLimit:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              min: 7.457744773683766
-              max: 1.1730742509559433
-              defaultFrom:
-                field: field
-                factor: 6.84685269835264
-              canEdit: true
-              step: 4.965218492984954
-              required: true
-            largeShmRequest:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              canEdit: true
-              required: true
-            cpuCoreRequest:
-              sourceOfRule:
-                scope: project
-                projectId: 3
-              min: 7.457744773683766
-              max: 1.1730742509559433
-              defaultFrom:
-                field: field
-                factor: 6.84685269835264
-              canEdit: true
-              step: 4.965218492984954
-              required: true
-            gpuPortionLimit:
               sourceOfRule:
                 scope: project
                 projectId: 3
@@ -23324,6 +23422,73 @@ components:
               canEdit: true
               step: 1
               required: true
+            gpuMemoryRequest:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              min: min
+              max: max
+              defaultFrom:
+                field: field
+                factor: 6.84685269835264
+              canEdit: true
+              required: true
+            gpuMemoryPortionLimit:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              min: 7.457744773683766
+              max: 1.1730742509559433
+              defaultFrom:
+                field: field
+                factor: 6.84685269835264
+              canEdit: true
+              step: 4.965218492984954
+              required: true
+            gpuPortionRequest: ""
+            gpuComputeMode:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              blocked: true
+              canEdit: true
+              options:
+              - displayed: displayed
+                value: null
+              - displayed: displayed
+                value: null
+              required: true
+            gpuMemoryPortionRequest:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              min: 7.457744773683766
+              max: 1.1730742509559433
+              defaultFrom:
+                field: field
+                factor: 6.84685269835264
+              canEdit: true
+              step: 4.965218492984954
+              required: true
+            largeShmRequest:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              canEdit: true
+              required: true
+            cpuCoreRequest:
+              sourceOfRule:
+                scope: project
+                projectId: 3
+              min: 7.457744773683766
+              max: 1.1730742509559433
+              defaultFrom:
+                field: field
+                factor: 6.84685269835264
+              canEdit: true
+              step: 4.965218492984954
+              required: true
+            gpuPortionLimit: ""
           preemptibility:
             sourceOfRule:
               scope: project
@@ -24575,16 +24740,19 @@ components:
                   quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: null
             cleanPodPolicy: None
             security:
@@ -25671,16 +25839,19 @@ components:
                   quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -26884,29 +27055,6 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
-              gpuMemoryRequest:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                min: min
-                max: max
-                defaultFrom:
-                  field: field
-                  factor: 6.84685269835264
-                canEdit: true
-                required: true
-              gpuPortionRequest:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                min: 7.457744773683766
-                max: 1.1730742509559433
-                defaultFrom:
-                  field: field
-                  factor: 6.84685269835264
-                canEdit: true
-                step: 4.965218492984954
-                required: true
               gpuMemoryLimit:
                 sourceOfRule:
                   scope: project
@@ -26919,36 +27067,6 @@ components:
                 canEdit: true
                 required: true
               cpuCoreLimit:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                min: 7.457744773683766
-                max: 1.1730742509559433
-                defaultFrom:
-                  field: field
-                  factor: 6.84685269835264
-                canEdit: true
-                step: 4.965218492984954
-                required: true
-              largeShmRequest:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                canEdit: true
-                required: true
-              cpuCoreRequest:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                min: 7.457744773683766
-                max: 1.1730742509559433
-                defaultFrom:
-                  field: field
-                  factor: 6.84685269835264
-                canEdit: true
-                step: 4.965218492984954
-                required: true
-              gpuPortionLimit:
                 sourceOfRule:
                   scope: project
                   projectId: 3
@@ -26995,6 +27113,73 @@ components:
                 canEdit: true
                 step: 1
                 required: true
+              gpuMemoryRequest:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                min: min
+                max: max
+                defaultFrom:
+                  field: field
+                  factor: 6.84685269835264
+                canEdit: true
+                required: true
+              gpuMemoryPortionLimit:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                min: 7.457744773683766
+                max: 1.1730742509559433
+                defaultFrom:
+                  field: field
+                  factor: 6.84685269835264
+                canEdit: true
+                step: 4.965218492984954
+                required: true
+              gpuPortionRequest: ""
+              gpuComputeMode:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - displayed: displayed
+                  value: null
+                - displayed: displayed
+                  value: null
+                required: true
+              gpuMemoryPortionRequest:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                min: 7.457744773683766
+                max: 1.1730742509559433
+                defaultFrom:
+                  field: field
+                  factor: 6.84685269835264
+                canEdit: true
+                step: 4.965218492984954
+                required: true
+              largeShmRequest:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
+              cpuCoreRequest:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                min: 7.457744773683766
+                max: 1.1730742509559433
+                defaultFrom:
+                  field: field
+                  factor: 6.84685269835264
+                canEdit: true
+                step: 4.965218492984954
+                required: true
+              gpuPortionLimit: ""
             preemptibility:
               sourceOfRule:
                 scope: project
@@ -28353,29 +28538,6 @@ components:
                     - value: value
                       displayed: A description of the value.
                     required: true
-              gpuMemoryRequest:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                min: min
-                max: max
-                defaultFrom:
-                  field: field
-                  factor: 6.84685269835264
-                canEdit: true
-                required: true
-              gpuPortionRequest:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                min: 7.457744773683766
-                max: 1.1730742509559433
-                defaultFrom:
-                  field: field
-                  factor: 6.84685269835264
-                canEdit: true
-                step: 4.965218492984954
-                required: true
               gpuMemoryLimit:
                 sourceOfRule:
                   scope: project
@@ -28388,36 +28550,6 @@ components:
                 canEdit: true
                 required: true
               cpuCoreLimit:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                min: 7.457744773683766
-                max: 1.1730742509559433
-                defaultFrom:
-                  field: field
-                  factor: 6.84685269835264
-                canEdit: true
-                step: 4.965218492984954
-                required: true
-              largeShmRequest:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                canEdit: true
-                required: true
-              cpuCoreRequest:
-                sourceOfRule:
-                  scope: project
-                  projectId: 3
-                min: 7.457744773683766
-                max: 1.1730742509559433
-                defaultFrom:
-                  field: field
-                  factor: 6.84685269835264
-                canEdit: true
-                step: 4.965218492984954
-                required: true
-              gpuPortionLimit:
                 sourceOfRule:
                   scope: project
                   projectId: 3
@@ -28464,6 +28596,73 @@ components:
                 canEdit: true
                 step: 1
                 required: true
+              gpuMemoryRequest:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                min: min
+                max: max
+                defaultFrom:
+                  field: field
+                  factor: 6.84685269835264
+                canEdit: true
+                required: true
+              gpuMemoryPortionLimit:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                min: 7.457744773683766
+                max: 1.1730742509559433
+                defaultFrom:
+                  field: field
+                  factor: 6.84685269835264
+                canEdit: true
+                step: 4.965218492984954
+                required: true
+              gpuPortionRequest: ""
+              gpuComputeMode:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                blocked: true
+                canEdit: true
+                options:
+                - displayed: displayed
+                  value: null
+                - displayed: displayed
+                  value: null
+                required: true
+              gpuMemoryPortionRequest:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                min: 7.457744773683766
+                max: 1.1730742509559433
+                defaultFrom:
+                  field: field
+                  factor: 6.84685269835264
+                canEdit: true
+                step: 4.965218492984954
+                required: true
+              largeShmRequest:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                canEdit: true
+                required: true
+              cpuCoreRequest:
+                sourceOfRule:
+                  scope: project
+                  projectId: 3
+                min: 7.457744773683766
+                max: 1.1730742509559433
+                defaultFrom:
+                  field: field
+                  factor: 6.84685269835264
+                canEdit: true
+                step: 4.965218492984954
+                required: true
+              gpuPortionLimit: ""
             preemptibility:
               sourceOfRule:
                 scope: project
@@ -29710,16 +29909,19 @@ components:
                       quantity: "2"
                       resource: hardware-vendor.example/foo
                       exclude: false
-                  gpuMemoryRequest: 10M
-                  gpuPortionRequest: 0.5
                   gpuMemoryLimit: 10M
                   cpuCoreLimit: 2
-                  largeShmRequest: false
-                  cpuCoreRequest: 0.5
-                  gpuPortionLimit: 0.5
                   gpuRequestType: portion
                   cpuMemoryRequest: 20M
                   gpuDevicesRequest: 1
+                  gpuMemoryRequest: 10M
+                  gpuMemoryPortionLimit: 0.5
+                  gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
+                  gpuMemoryPortionRequest: 0.5
+                  largeShmRequest: false
+                  cpuCoreRequest: 0.5
+                  gpuPortionLimit: 0.5
                 preemptibility: null
                 cleanPodPolicy: None
                 security:
@@ -30806,16 +31008,19 @@ components:
                       quantity: "2"
                       resource: hardware-vendor.example/foo
                       exclude: false
-                  gpuMemoryRequest: 10M
-                  gpuPortionRequest: 0.5
                   gpuMemoryLimit: 10M
                   cpuCoreLimit: 2
-                  largeShmRequest: false
-                  cpuCoreRequest: 0.5
-                  gpuPortionLimit: 0.5
                   gpuRequestType: portion
                   cpuMemoryRequest: 20M
                   gpuDevicesRequest: 1
+                  gpuMemoryRequest: 10M
+                  gpuMemoryPortionLimit: 0.5
+                  gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
+                  gpuMemoryPortionRequest: 0.5
+                  largeShmRequest: false
+                  cpuCoreRequest: 0.5
+                  gpuPortionLimit: 0.5
                 preemptibility: preemptible
                 security:
                   privileged: ""
@@ -32019,29 +32224,6 @@ components:
                         - value: value
                           displayed: A description of the value.
                         required: true
-                  gpuMemoryRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: min
-                    max: max
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    required: true
-                  gpuPortionRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
                   gpuMemoryLimit:
                     sourceOfRule:
                       scope: project
@@ -32054,36 +32236,6 @@ components:
                     canEdit: true
                     required: true
                   cpuCoreLimit:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  largeShmRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    canEdit: true
-                    required: true
-                  cpuCoreRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  gpuPortionLimit:
                     sourceOfRule:
                       scope: project
                       projectId: 3
@@ -32130,6 +32282,73 @@ components:
                     canEdit: true
                     step: 1
                     required: true
+                  gpuMemoryRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: min
+                    max: max
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    required: true
+                  gpuMemoryPortionLimit:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
+                  gpuMemoryPortionRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  largeShmRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    canEdit: true
+                    required: true
+                  cpuCoreRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionLimit: ""
                 preemptibility:
                   sourceOfRule:
                     scope: project
@@ -33488,29 +33707,6 @@ components:
                         - value: value
                           displayed: A description of the value.
                         required: true
-                  gpuMemoryRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: min
-                    max: max
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    required: true
-                  gpuPortionRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
                   gpuMemoryLimit:
                     sourceOfRule:
                       scope: project
@@ -33523,36 +33719,6 @@ components:
                     canEdit: true
                     required: true
                   cpuCoreLimit:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  largeShmRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    canEdit: true
-                    required: true
-                  cpuCoreRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  gpuPortionLimit:
                     sourceOfRule:
                       scope: project
                       projectId: 3
@@ -33599,6 +33765,73 @@ components:
                     canEdit: true
                     step: 1
                     required: true
+                  gpuMemoryRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: min
+                    max: max
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    required: true
+                  gpuMemoryPortionLimit:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
+                  gpuMemoryPortionRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  largeShmRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    canEdit: true
+                    required: true
+                  cpuCoreRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionLimit: ""
                 preemptibility:
                   sourceOfRule:
                     scope: project
@@ -34827,16 +35060,19 @@ components:
                       quantity: "2"
                       resource: hardware-vendor.example/foo
                       exclude: false
-                  gpuMemoryRequest: 10M
-                  gpuPortionRequest: 0.5
                   gpuMemoryLimit: 10M
                   cpuCoreLimit: 2
-                  largeShmRequest: false
-                  cpuCoreRequest: 0.5
-                  gpuPortionLimit: 0.5
                   gpuRequestType: portion
                   cpuMemoryRequest: 20M
                   gpuDevicesRequest: 1
+                  gpuMemoryRequest: 10M
+                  gpuMemoryPortionLimit: 0.5
+                  gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
+                  gpuMemoryPortionRequest: 0.5
+                  largeShmRequest: false
+                  cpuCoreRequest: 0.5
+                  gpuPortionLimit: 0.5
                 preemptibility: null
                 cleanPodPolicy: None
                 security:
@@ -35923,16 +36159,19 @@ components:
                       quantity: "2"
                       resource: hardware-vendor.example/foo
                       exclude: false
-                  gpuMemoryRequest: 10M
-                  gpuPortionRequest: 0.5
                   gpuMemoryLimit: 10M
                   cpuCoreLimit: 2
-                  largeShmRequest: false
-                  cpuCoreRequest: 0.5
-                  gpuPortionLimit: 0.5
                   gpuRequestType: portion
                   cpuMemoryRequest: 20M
                   gpuDevicesRequest: 1
+                  gpuMemoryRequest: 10M
+                  gpuMemoryPortionLimit: 0.5
+                  gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
+                  gpuMemoryPortionRequest: 0.5
+                  largeShmRequest: false
+                  cpuCoreRequest: 0.5
+                  gpuPortionLimit: 0.5
                 preemptibility: preemptible
                 security:
                   privileged: ""
@@ -37136,29 +37375,6 @@ components:
                         - value: value
                           displayed: A description of the value.
                         required: true
-                  gpuMemoryRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: min
-                    max: max
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    required: true
-                  gpuPortionRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
                   gpuMemoryLimit:
                     sourceOfRule:
                       scope: project
@@ -37171,36 +37387,6 @@ components:
                     canEdit: true
                     required: true
                   cpuCoreLimit:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  largeShmRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    canEdit: true
-                    required: true
-                  cpuCoreRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  gpuPortionLimit:
                     sourceOfRule:
                       scope: project
                       projectId: 3
@@ -37247,6 +37433,73 @@ components:
                     canEdit: true
                     step: 1
                     required: true
+                  gpuMemoryRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: min
+                    max: max
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    required: true
+                  gpuMemoryPortionLimit:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
+                  gpuMemoryPortionRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  largeShmRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    canEdit: true
+                    required: true
+                  cpuCoreRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionLimit: ""
                 preemptibility:
                   sourceOfRule:
                     scope: project
@@ -38605,29 +38858,6 @@ components:
                         - value: value
                           displayed: A description of the value.
                         required: true
-                  gpuMemoryRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: min
-                    max: max
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    required: true
-                  gpuPortionRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
                   gpuMemoryLimit:
                     sourceOfRule:
                       scope: project
@@ -38640,36 +38870,6 @@ components:
                     canEdit: true
                     required: true
                   cpuCoreLimit:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  largeShmRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    canEdit: true
-                    required: true
-                  cpuCoreRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  gpuPortionLimit:
                     sourceOfRule:
                       scope: project
                       projectId: 3
@@ -38716,6 +38916,73 @@ components:
                     canEdit: true
                     step: 1
                     required: true
+                  gpuMemoryRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: min
+                    max: max
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    required: true
+                  gpuMemoryPortionLimit:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
+                  gpuMemoryPortionRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  largeShmRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    canEdit: true
+                    required: true
+                  cpuCoreRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionLimit: ""
                 preemptibility:
                   sourceOfRule:
                     scope: project
@@ -40405,16 +40672,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: null
               cleanPodPolicy: None
               security:
@@ -41501,16 +41771,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -42714,29 +42987,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -42749,36 +42999,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -42825,6 +43045,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -44183,29 +44470,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -44218,36 +44482,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -44294,6 +44528,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -45524,16 +45825,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: null
               cleanPodPolicy: None
               security:
@@ -46620,16 +46924,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -47833,29 +48140,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -47868,36 +48152,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -47944,6 +48198,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -49302,29 +49623,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -49337,36 +49635,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -49413,6 +49681,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -50653,16 +50988,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: null
               cleanPodPolicy: None
               security:
@@ -51749,16 +52087,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -52962,29 +53303,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -52997,36 +53315,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -53073,6 +53361,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -54431,29 +54786,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -54466,36 +54798,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -54542,6 +54844,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -55776,16 +56145,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: null
               cleanPodPolicy: None
               security:
@@ -56872,16 +57244,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -58085,29 +58460,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -58120,36 +58472,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -58196,6 +58518,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -59554,29 +59943,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -59589,36 +59955,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -59665,6 +60001,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -62546,16 +62949,19 @@ components:
                       quantity: "2"
                       resource: hardware-vendor.example/foo
                       exclude: false
-                  gpuMemoryRequest: 10M
-                  gpuPortionRequest: 0.5
                   gpuMemoryLimit: 10M
                   cpuCoreLimit: 2
-                  largeShmRequest: false
-                  cpuCoreRequest: 0.5
-                  gpuPortionLimit: 0.5
                   gpuRequestType: portion
                   cpuMemoryRequest: 20M
                   gpuDevicesRequest: 1
+                  gpuMemoryRequest: 10M
+                  gpuMemoryPortionLimit: 0.5
+                  gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
+                  gpuMemoryPortionRequest: 0.5
+                  largeShmRequest: false
+                  cpuCoreRequest: 0.5
+                  gpuPortionLimit: 0.5
                 preemptibility: null
                 cleanPodPolicy: None
                 security:
@@ -63642,16 +64048,19 @@ components:
                       quantity: "2"
                       resource: hardware-vendor.example/foo
                       exclude: false
-                  gpuMemoryRequest: 10M
-                  gpuPortionRequest: 0.5
                   gpuMemoryLimit: 10M
                   cpuCoreLimit: 2
-                  largeShmRequest: false
-                  cpuCoreRequest: 0.5
-                  gpuPortionLimit: 0.5
                   gpuRequestType: portion
                   cpuMemoryRequest: 20M
                   gpuDevicesRequest: 1
+                  gpuMemoryRequest: 10M
+                  gpuMemoryPortionLimit: 0.5
+                  gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
+                  gpuMemoryPortionRequest: 0.5
+                  largeShmRequest: false
+                  cpuCoreRequest: 0.5
+                  gpuPortionLimit: 0.5
                 preemptibility: preemptible
                 security:
                   privileged: ""
@@ -64855,29 +65264,6 @@ components:
                         - value: value
                           displayed: A description of the value.
                         required: true
-                  gpuMemoryRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: min
-                    max: max
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    required: true
-                  gpuPortionRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
                   gpuMemoryLimit:
                     sourceOfRule:
                       scope: project
@@ -64890,36 +65276,6 @@ components:
                     canEdit: true
                     required: true
                   cpuCoreLimit:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  largeShmRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    canEdit: true
-                    required: true
-                  cpuCoreRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  gpuPortionLimit:
                     sourceOfRule:
                       scope: project
                       projectId: 3
@@ -64966,6 +65322,73 @@ components:
                     canEdit: true
                     step: 1
                     required: true
+                  gpuMemoryRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: min
+                    max: max
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    required: true
+                  gpuMemoryPortionLimit:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
+                  gpuMemoryPortionRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  largeShmRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    canEdit: true
+                    required: true
+                  cpuCoreRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionLimit: ""
                 preemptibility:
                   sourceOfRule:
                     scope: project
@@ -66324,29 +66747,6 @@ components:
                         - value: value
                           displayed: A description of the value.
                         required: true
-                  gpuMemoryRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: min
-                    max: max
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    required: true
-                  gpuPortionRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
                   gpuMemoryLimit:
                     sourceOfRule:
                       scope: project
@@ -66359,36 +66759,6 @@ components:
                     canEdit: true
                     required: true
                   cpuCoreLimit:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  largeShmRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    canEdit: true
-                    required: true
-                  cpuCoreRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  gpuPortionLimit:
                     sourceOfRule:
                       scope: project
                       projectId: 3
@@ -66435,6 +66805,73 @@ components:
                     canEdit: true
                     step: 1
                     required: true
+                  gpuMemoryRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: min
+                    max: max
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    required: true
+                  gpuMemoryPortionLimit:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
+                  gpuMemoryPortionRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  largeShmRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    canEdit: true
+                    required: true
+                  cpuCoreRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionLimit: ""
                 preemptibility:
                   sourceOfRule:
                     scope: project
@@ -67665,16 +68102,19 @@ components:
                       quantity: "2"
                       resource: hardware-vendor.example/foo
                       exclude: false
-                  gpuMemoryRequest: 10M
-                  gpuPortionRequest: 0.5
                   gpuMemoryLimit: 10M
                   cpuCoreLimit: 2
-                  largeShmRequest: false
-                  cpuCoreRequest: 0.5
-                  gpuPortionLimit: 0.5
                   gpuRequestType: portion
                   cpuMemoryRequest: 20M
                   gpuDevicesRequest: 1
+                  gpuMemoryRequest: 10M
+                  gpuMemoryPortionLimit: 0.5
+                  gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
+                  gpuMemoryPortionRequest: 0.5
+                  largeShmRequest: false
+                  cpuCoreRequest: 0.5
+                  gpuPortionLimit: 0.5
                 preemptibility: null
                 cleanPodPolicy: None
                 security:
@@ -68761,16 +69201,19 @@ components:
                       quantity: "2"
                       resource: hardware-vendor.example/foo
                       exclude: false
-                  gpuMemoryRequest: 10M
-                  gpuPortionRequest: 0.5
                   gpuMemoryLimit: 10M
                   cpuCoreLimit: 2
-                  largeShmRequest: false
-                  cpuCoreRequest: 0.5
-                  gpuPortionLimit: 0.5
                   gpuRequestType: portion
                   cpuMemoryRequest: 20M
                   gpuDevicesRequest: 1
+                  gpuMemoryRequest: 10M
+                  gpuMemoryPortionLimit: 0.5
+                  gpuPortionRequest: 0.5
+                  gpuComputeMode: time-slicing
+                  gpuMemoryPortionRequest: 0.5
+                  largeShmRequest: false
+                  cpuCoreRequest: 0.5
+                  gpuPortionLimit: 0.5
                 preemptibility: preemptible
                 security:
                   privileged: ""
@@ -69974,29 +70417,6 @@ components:
                         - value: value
                           displayed: A description of the value.
                         required: true
-                  gpuMemoryRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: min
-                    max: max
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    required: true
-                  gpuPortionRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
                   gpuMemoryLimit:
                     sourceOfRule:
                       scope: project
@@ -70009,36 +70429,6 @@ components:
                     canEdit: true
                     required: true
                   cpuCoreLimit:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  largeShmRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    canEdit: true
-                    required: true
-                  cpuCoreRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  gpuPortionLimit:
                     sourceOfRule:
                       scope: project
                       projectId: 3
@@ -70085,6 +70475,73 @@ components:
                     canEdit: true
                     step: 1
                     required: true
+                  gpuMemoryRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: min
+                    max: max
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    required: true
+                  gpuMemoryPortionLimit:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
+                  gpuMemoryPortionRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  largeShmRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    canEdit: true
+                    required: true
+                  cpuCoreRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionLimit: ""
                 preemptibility:
                   sourceOfRule:
                     scope: project
@@ -71443,29 +71900,6 @@ components:
                         - value: value
                           displayed: A description of the value.
                         required: true
-                  gpuMemoryRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: min
-                    max: max
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    required: true
-                  gpuPortionRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
                   gpuMemoryLimit:
                     sourceOfRule:
                       scope: project
@@ -71478,36 +71912,6 @@ components:
                     canEdit: true
                     required: true
                   cpuCoreLimit:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  largeShmRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    canEdit: true
-                    required: true
-                  cpuCoreRequest:
-                    sourceOfRule:
-                      scope: project
-                      projectId: 3
-                    min: 7.457744773683766
-                    max: 1.1730742509559433
-                    defaultFrom:
-                      field: field
-                      factor: 6.84685269835264
-                    canEdit: true
-                    step: 4.965218492984954
-                    required: true
-                  gpuPortionLimit:
                     sourceOfRule:
                       scope: project
                       projectId: 3
@@ -71554,6 +71958,73 @@ components:
                     canEdit: true
                     step: 1
                     required: true
+                  gpuMemoryRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: min
+                    max: max
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    required: true
+                  gpuMemoryPortionLimit:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionRequest: ""
+                  gpuComputeMode:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    blocked: true
+                    canEdit: true
+                    options:
+                    - displayed: displayed
+                      value: null
+                    - displayed: displayed
+                      value: null
+                    required: true
+                  gpuMemoryPortionRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  largeShmRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    canEdit: true
+                    required: true
+                  cpuCoreRequest:
+                    sourceOfRule:
+                      scope: project
+                      projectId: 3
+                    min: 7.457744773683766
+                    max: 1.1730742509559433
+                    defaultFrom:
+                      field: field
+                      factor: 6.84685269835264
+                    canEdit: true
+                    step: 4.965218492984954
+                    required: true
+                  gpuPortionLimit: ""
                 preemptibility:
                   sourceOfRule:
                     scope: project
@@ -75268,6 +75739,20 @@ components:
           type: string
       required:
       - value
+    GpuComputeModeOptions_options_inner:
+      example:
+        displayed: displayed
+        value: null
+      properties:
+        value:
+          $ref: '#/components/schemas/GpuComputeMode'
+        displayed:
+          description: Textual description of the value
+          nullable: true
+          pattern: .*
+          type: string
+      required:
+      - value
     GpuRequestOptions_options_inner:
       example:
         displayed: displayed
@@ -76775,16 +77260,19 @@ components:
               quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: null
         cleanPodPolicy: None
         security:
@@ -78017,29 +78505,6 @@ components:
                 - value: value
                   displayed: A description of the value.
                 required: true
-          gpuMemoryRequest:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            min: min
-            max: max
-            defaultFrom:
-              field: field
-              factor: 6.84685269835264
-            canEdit: true
-            required: true
-          gpuPortionRequest:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            min: 7.457744773683766
-            max: 1.1730742509559433
-            defaultFrom:
-              field: field
-              factor: 6.84685269835264
-            canEdit: true
-            step: 4.965218492984954
-            required: true
           gpuMemoryLimit:
             sourceOfRule:
               scope: project
@@ -78052,36 +78517,6 @@ components:
             canEdit: true
             required: true
           cpuCoreLimit:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            min: 7.457744773683766
-            max: 1.1730742509559433
-            defaultFrom:
-              field: field
-              factor: 6.84685269835264
-            canEdit: true
-            step: 4.965218492984954
-            required: true
-          largeShmRequest:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            canEdit: true
-            required: true
-          cpuCoreRequest:
-            sourceOfRule:
-              scope: project
-              projectId: 3
-            min: 7.457744773683766
-            max: 1.1730742509559433
-            defaultFrom:
-              field: field
-              factor: 6.84685269835264
-            canEdit: true
-            step: 4.965218492984954
-            required: true
-          gpuPortionLimit:
             sourceOfRule:
               scope: project
               projectId: 3
@@ -78128,6 +78563,73 @@ components:
             canEdit: true
             step: 1
             required: true
+          gpuMemoryRequest:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            min: min
+            max: max
+            defaultFrom:
+              field: field
+              factor: 6.84685269835264
+            canEdit: true
+            required: true
+          gpuMemoryPortionLimit:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            min: 7.457744773683766
+            max: 1.1730742509559433
+            defaultFrom:
+              field: field
+              factor: 6.84685269835264
+            canEdit: true
+            step: 4.965218492984954
+            required: true
+          gpuPortionRequest: ""
+          gpuComputeMode:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            blocked: true
+            canEdit: true
+            options:
+            - displayed: displayed
+              value: null
+            - displayed: displayed
+              value: null
+            required: true
+          gpuMemoryPortionRequest:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            min: 7.457744773683766
+            max: 1.1730742509559433
+            defaultFrom:
+              field: field
+              factor: 6.84685269835264
+            canEdit: true
+            step: 4.965218492984954
+            required: true
+          largeShmRequest:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            canEdit: true
+            required: true
+          cpuCoreRequest:
+            sourceOfRule:
+              scope: project
+              projectId: 3
+            min: 7.457744773683766
+            max: 1.1730742509559433
+            defaultFrom:
+              field: field
+              factor: 6.84685269835264
+            canEdit: true
+            step: 4.965218492984954
+            required: true
+          gpuPortionLimit: ""
         preemptibility:
           sourceOfRule:
             scope: project
@@ -79464,16 +79966,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: null
               cleanPodPolicy: None
               security:
@@ -80560,16 +81065,19 @@ components:
                     quantity: "2"
                     resource: hardware-vendor.example/foo
                     exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -81773,29 +82281,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -81808,36 +82293,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -81884,6 +82339,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -83242,29 +83764,6 @@ components:
                       - value: value
                         displayed: A description of the value.
                       required: true
-                gpuMemoryRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: min
-                  max: max
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  required: true
-                gpuPortionRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
                 gpuMemoryLimit:
                   sourceOfRule:
                     scope: project
@@ -83277,36 +83776,6 @@ components:
                   canEdit: true
                   required: true
                 cpuCoreLimit:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                largeShmRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  canEdit: true
-                  required: true
-                cpuCoreRequest:
-                  sourceOfRule:
-                    scope: project
-                    projectId: 3
-                  min: 7.457744773683766
-                  max: 1.1730742509559433
-                  defaultFrom:
-                    field: field
-                    factor: 6.84685269835264
-                  canEdit: true
-                  step: 4.965218492984954
-                  required: true
-                gpuPortionLimit:
                   sourceOfRule:
                     scope: project
                     projectId: 3
@@ -83353,6 +83822,73 @@ components:
                   canEdit: true
                   step: 1
                   required: true
+                gpuMemoryRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: min
+                  max: max
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  required: true
+                gpuMemoryPortionLimit:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionRequest: ""
+                gpuComputeMode:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  blocked: true
+                  canEdit: true
+                  options:
+                  - displayed: displayed
+                    value: null
+                  - displayed: displayed
+                    value: null
+                  required: true
+                gpuMemoryPortionRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                largeShmRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  canEdit: true
+                  required: true
+                cpuCoreRequest:
+                  sourceOfRule:
+                    scope: project
+                    projectId: 3
+                  min: 7.457744773683766
+                  max: 1.1730742509559433
+                  defaultFrom:
+                    field: field
+                    factor: 6.84685269835264
+                  canEdit: true
+                  step: 4.965218492984954
+                  required: true
+                gpuPortionLimit: ""
               preemptibility:
                 sourceOfRule:
                   scope: project
@@ -84135,6 +84671,8 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuDevicesRequest:
           description: "Requested number of GPU devices. Currently if more than one\
             \ device is requested, it is not possible to provide values for gpuMemory\
@@ -84153,6 +84691,25 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuMemoryPortionLimit:
+          description: Maximum GPU memory fraction consumed per GPU device. Must be
+            no less than gpuMemoryPortionRequest.
+          example: 0.5
+          format: double
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
+        gpuMemoryPortionRequest:
+          description: "GPU memory fraction to allocate per GPU device, between 0\
+            \ and 1. Required when gpuRequestType is portion."
+          example: 0.5
+          format: double
+          maximum: 1
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
         gpuMemoryRequest:
           description: "Required if and only if gpuRequestType is memory. States the\
             \ GPU memory to allocate for the created workload, per GPU device. Note\
@@ -84164,18 +84721,21 @@ components:
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
         gpuPortionLimit:
-          description: "Limitations on the portion consumed by the workload, per GPU\
-            \ device. The system guarantees The gpuPotionLimit must be no less than\
-            \ the gpuPortionRequest."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations\
+            \ on the portion consumed by the workload, per GPU device. The system\
+            \ guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
           example: 0.5
           format: double
           minimum: 0
           nullable: true
           type: number
         gpuPortionRequest:
-          description: "Required if and only if gpuRequestType is portion. States\
-            \ the portion of the GPU to allocate for the created workload, per GPU\
-            \ device, between 0 and 1. The default is no allocated GPUs."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionRequest instead. Required\
+            \ if and only if gpuRequestType is portion. States the portion of the\
+            \ GPU to allocate for the created workload, per GPU device, between 0\
+            \ and 1. The default is no allocated GPUs."
           example: 0.5
           format: double
           minimum: 0
@@ -84274,16 +84834,26 @@ components:
           $ref: '#/components/schemas/QuantityRules'
         cpuMemoryRequest:
           $ref: '#/components/schemas/QuantityRules'
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeModeRules'
         gpuDevicesRequest:
           $ref: '#/components/schemas/IntegerRules'
         gpuMemoryLimit:
           $ref: '#/components/schemas/QuantityRules'
+        gpuMemoryPortionLimit:
+          $ref: '#/components/schemas/NumberRules'
+        gpuMemoryPortionRequest:
+          $ref: '#/components/schemas/NumberRules'
         gpuMemoryRequest:
           $ref: '#/components/schemas/QuantityRules'
         gpuPortionLimit:
-          $ref: '#/components/schemas/NumberRules'
+          allOf:
+          - $ref: '#/components/schemas/NumberRules'
+          deprecated: true
         gpuPortionRequest:
-          $ref: '#/components/schemas/NumberRules'
+          allOf:
+          - $ref: '#/components/schemas/NumberRules'
+          deprecated: true
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestRules'
       type: object

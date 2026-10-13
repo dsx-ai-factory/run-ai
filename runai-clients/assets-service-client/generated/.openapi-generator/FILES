@@ -225,6 +225,7 @@ docs/GitRules.md
 docs/GitSecretRef.md
 docs/GitUpdateRequest.md
 docs/GitsRules.md
+docs/GpuComputeMode.md
 docs/GpuRequestType.md
 docs/HealthAPI.md
 docs/HistoryRecord.md
@@ -682,6 +683,7 @@ model_git_rules.go
 model_git_secret_ref.go
 model_git_update_request.go
 model_gits_rules.go
+model_gpu_compute_mode.go
 model_gpu_request_type.go
 model_history_record.go
 model_history_record_meta.go

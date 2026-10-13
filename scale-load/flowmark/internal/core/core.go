@@ -17,6 +17,8 @@ import (
 type Suite interface {
 	Name() string
 	Category() Category
+	Knobs() []string
+	Validate(scenario Scenario) error
 	Run(ctx context.Context, target Target, scenario Scenario) (Section, error)
 }
 
@@ -111,6 +113,22 @@ func (s Scenario) Map(key string) (map[string]any, error) {
 	return value, nil
 }
 
+func (s Scenario) IntMap(key string) (map[string]int, error) {
+	raw, err := s.Map(key)
+	if err != nil || raw == nil {
+		return nil, err
+	}
+	values := make(map[string]int, len(raw))
+	for entry, value := range raw {
+		number, ok := value.(int)
+		if !ok {
+			return nil, fmt.Errorf("knob %q entry %q must be a whole number, got %T", key, entry, value)
+		}
+		values[entry] = number
+	}
+	return values, nil
+}
+
 func (s Scenario) String(key string, fallback string) (string, error) {
 	raw, ok := s.Knobs[key]
 	if !ok || raw == nil {
@@ -141,6 +159,16 @@ const (
 type Section struct {
 	Category Category       `json:"category"`
 	Metrics  map[string]any `json:"metrics"`
+	SLO      map[string]int `json:"slo,omitempty"`
 	Failed   bool           `json:"failed"`
 	Error    string         `json:"error,omitempty"`
+}
+
+func (s *Section) Fail(message string) {
+	s.Failed = true
+	if s.Error == "" {
+		s.Error = message
+		return
+	}
+	s.Error += "; " + message
 }

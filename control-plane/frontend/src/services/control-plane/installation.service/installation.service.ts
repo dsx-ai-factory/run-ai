@@ -4,9 +4,7 @@
  */
 
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
-import { serviceAccountsService } from "@/services/control-plane/service-accounts.service/service-accounts.service";
 import type { DisplayedCluster } from "@/swagger-models/cluster-service-client";
-import type { ServiceAccountPostResponse } from "@/swagger-models/identity-manager-client";
 import { InstallationErrorType } from "@/components/onboarding/models/admin-onboarding.model";
 import type { InstallationResult } from "@/components/onboarding/models/admin-onboarding.model";
 
@@ -71,19 +69,6 @@ const createOrFindCluster = async (
   }
 };
 
-// Function to get client secret
-const getClientSecret = async (): Promise<string> => {
-  try {
-    const clusterControlPlaneConfigAgentClient: ServiceAccountPostResponse =
-      await serviceAccountsService.getRunAiInstallerServiceAccountClient();
-
-    return clusterControlPlaneConfigAgentClient?.clientSecret || "";
-  } catch (error) {
-    console.error("Error getting client secret:", error);
-    throw error;
-  }
-};
-
 // Function to get installation instructions
 const getInstallationInstructions = async (
   cluster: DisplayedCluster,
@@ -117,10 +102,7 @@ const prepareInstallation = async (
   try {
     // Step 1: Create or find cluster
     const createdCluster = await createOrFindCluster(clusterName);
-    // Step 2: Get client secret
-    const clientSecret = await getClientSecret();
-
-    // Step 3: Get installation instructions
+    // Step 2: Get installation instructions
     const installationInstructions = await getInstallationInstructions(
       createdCluster.cluster,
       clusterVersion,
@@ -133,7 +115,7 @@ const prepareInstallation = async (
       success: true,
       data: {
         createdCluster: createdCluster.cluster,
-        clientSecret,
+        clientSecret: "",
         installationInstructions,
         isExistingCluster: createdCluster.isExisting,
         installationCommand,

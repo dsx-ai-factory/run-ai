@@ -42,7 +42,7 @@ func (r ApiCreateAccessRuleRequest) Execute() (*AccessRule, *http.Response, erro
 }
 
 /*
-CreateAccessRule Create an access rule. Bind a predefined role to a subject (user, group or app) in some scope.
+CreateAccessRule Create an access rule. Bind a predefined role to a subject (user, group or service account) in some scope.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiCreateAccessRuleRequest

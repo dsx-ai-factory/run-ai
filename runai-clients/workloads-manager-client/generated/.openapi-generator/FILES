@@ -35,6 +35,7 @@ docs/ExternalAccess.md
 docs/GVK.md
 docs/GetYamlSubmission.md
 docs/GetYamlSubmissionValue.md
+docs/GpuComputeMode.md
 docs/GpuRequestType.md
 docs/HealthAPI.md
 docs/ImagePullPolicy.md
@@ -149,6 +150,7 @@ model_error.go
 model_external_access.go
 model_get_yaml_submission.go
 model_get_yaml_submission_value.go
+model_gpu_compute_mode.go
 model_gpu_request_type.go
 model_gvk.go
 model_image_pull_policy.go

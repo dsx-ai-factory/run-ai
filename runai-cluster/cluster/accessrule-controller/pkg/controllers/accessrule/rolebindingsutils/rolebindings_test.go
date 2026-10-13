@@ -59,4 +59,8 @@ var _ = Describe("GetSubjectKind", func() {
 	It("maps service account to the user kind", func() {
 		Expect(GetSubjectKind(v1alpha1.ServiceAccountSubject)).To(Equal(UserKind))
 	})
+
+	It("defaults any other subject type to the group kind", func() {
+		Expect(GetSubjectKind(v1alpha1.AccessRuleSubjectType("unknown"))).To(Equal(GroupKind))
+	})
 })

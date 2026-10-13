@@ -18,7 +18,7 @@ import (
 	"fmt"
 )
 
-// SubjectTypeExtended Subject type enum for access rule responses. Extends SubjectType with the built-in all-authenticated-users subject, which applies to every authenticated user and service account.  Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
+// SubjectTypeExtended Subject type enum for access rule responses. Extends SubjectType with the built-in all-authenticated-users subject, which applies to every authenticated user and service account.  Note: The 'app' subject type is DEPRECATED and is no longer returned. Please use 'service-account' instead for service accounts.
 type SubjectTypeExtended string
 
 // List of SubjectTypeExtended

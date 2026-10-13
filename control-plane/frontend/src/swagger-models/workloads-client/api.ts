@@ -8973,6 +8973,89 @@ export interface GitsRules {
     'instances'?: ItemRules | null;
 }
 /**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeOptions
+ */
+export interface GpuComputeModeOptions {
+    /**
+     * Limit the permitted values for gpuComputeMode to a given set of values.
+     * @type {Array<GpuComputeModeOptionsOptionsInner>}
+     * @memberof GpuComputeModeOptions
+     */
+    'options'?: Array<GpuComputeModeOptionsOptionsInner> | null;
+}
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeOptionsOptionsInner
+ */
+export interface GpuComputeModeOptionsOptionsInner {
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof GpuComputeModeOptionsOptionsInner
+     */
+    'value': GpuComputeMode | null;
+    /**
+     * Textual description of the value
+     * @type {string}
+     * @memberof GpuComputeModeOptionsOptionsInner
+     */
+    'displayed'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeRules
+ */
+export interface GpuComputeModeRules {
+    /**
+     * 
+     * @type {SourceOfRule}
+     * @memberof GpuComputeModeRules
+     */
+    'sourceOfRule'?: SourceOfRule | null;
+    /**
+     * Whether the field is mandatory, default to false.
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'required'?: boolean | null;
+    /**
+     * Whether the value of the field is editable, default to true
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'canEdit'?: boolean | null;
+    /**
+     * Blocks the field to prevent workloads from specifying any value for it.
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'blocked'?: boolean | null;
+    /**
+     * Limit the permitted values for gpuComputeMode to a given set of values.
+     * @type {Array<GpuComputeModeOptionsOptionsInner>}
+     * @memberof GpuComputeModeRules
+     */
+    'options'?: Array<GpuComputeModeOptionsOptionsInner> | null;
+}
+/**
  * 
  * @export
  * @interface GpuOverProvisioningSetting
@@ -16691,17 +16774,37 @@ export interface SupersetDefaultsAllOfCompute {
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
      * @type {number}
      * @memberof SupersetDefaultsAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * @type {number}
+     * @memberof SupersetDefaultsAllOfCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
      * @type {number}
      * @memberof SupersetDefaultsAllOfCompute
      */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * @type {number}
+     * @memberof SupersetDefaultsAllOfCompute
+     * @deprecated
+     */
     'gpuPortionRequest'?: number | null;
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof SupersetDefaultsAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
     /**
      * 
      * @type {GpuRequestType}
@@ -17486,13 +17589,33 @@ export interface SupersetRulesAllOfCompute {
      * @type {NumberRules}
      * @memberof SupersetRulesAllOfCompute
      */
-    'gpuPortionLimit'?: NumberRules | null;
+    'gpuMemoryPortionLimit'?: NumberRules | null;
+    /**
+     * 
+     * @type {SupersetRulesAllOfComputeGpuPortionLimit}
+     * @memberof SupersetRulesAllOfCompute
+     * @deprecated
+     */
+    'gpuPortionLimit'?: SupersetRulesAllOfComputeGpuPortionLimit;
     /**
      * 
      * @type {NumberRules}
      * @memberof SupersetRulesAllOfCompute
      */
-    'gpuPortionRequest'?: NumberRules | null;
+    'gpuMemoryPortionRequest'?: NumberRules | null;
+    /**
+     * 
+     * @type {SupersetRulesAllOfComputeGpuPortionLimit}
+     * @memberof SupersetRulesAllOfCompute
+     * @deprecated
+     */
+    'gpuPortionRequest'?: SupersetRulesAllOfComputeGpuPortionLimit;
+    /**
+     * 
+     * @type {GpuComputeModeRules}
+     * @memberof SupersetRulesAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeModeRules | null;
     /**
      * 
      * @type {GpuRequestRules}
@@ -17505,6 +17628,55 @@ export interface SupersetRulesAllOfCompute {
      * @memberof SupersetRulesAllOfCompute
      */
     'largeShmRequest'?: BooleanRules | null;
+}
+/**
+ * 
+ * @export
+ * @interface SupersetRulesAllOfComputeGpuPortionLimit
+ */
+export interface SupersetRulesAllOfComputeGpuPortionLimit {
+    /**
+     * 
+     * @type {SourceOfRule}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'sourceOfRule'?: SourceOfRule | null;
+    /**
+     * Whether the field is mandatory. default to false.
+     * @type {boolean}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'required'?: boolean | null;
+    /**
+     * Whether the value of the field is editable. default to true
+     * @type {boolean}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'canEdit'?: boolean | null;
+    /**
+     * The minimum value that the field can be assigned to.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'min'?: number | null;
+    /**
+     * The maximum value that the field can be assigned to.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'max'?: number | null;
+    /**
+     * The minimal difference between two values the field can be assigned to. For example, min=2, max=3, step=0.25 implies that the values the field can hold are 2, 2.25, 2.5 and 3.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'step'?: number | null;
+    /**
+     * 
+     * @type {DefaultFromRule}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'defaultFrom'?: DefaultFromRule | null;
 }
 /**
  * 
@@ -25682,6 +25854,12 @@ export interface WorkspaceSpecSpecAllOfCompute {
      */
     'extendedResources'?: Array<ExtendedResource> | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof WorkspaceSpecSpecAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof WorkspaceSpecSpecAllOfCompute
@@ -25694,21 +25872,35 @@ export interface WorkspaceSpecSpecAllOfCompute {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof WorkspaceSpecSpecAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof WorkspaceSpecSpecAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof WorkspaceSpecSpecAllOfCompute
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof WorkspaceSpecSpecAllOfCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof WorkspaceSpecSpecAllOfCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**

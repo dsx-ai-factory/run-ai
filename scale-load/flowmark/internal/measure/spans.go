@@ -59,7 +59,7 @@ func OutOfOrder(submissions []Submission, tolerance time.Duration) []string {
 		if !s.Accepted() {
 			continue
 		}
-		if seenTooEarly(s.ClusterSyncedAt, s.ApiAcceptedAt, tolerance) || seenTooEarly(s.PodCreatedAt, s.ClusterSyncedAt, tolerance) {
+		if seenTooEarly(s.ClusterSyncedAt, s.ApiAcceptedAt, tolerance) || seenTooEarly(s.PodCreatedAt, s.ClusterSyncedAt, tolerance) || seenTooEarly(s.PodCreatedAt, s.ApiAcceptedAt, tolerance) {
 			names = append(names, s.Name)
 		}
 	}
@@ -68,17 +68,4 @@ func OutOfOrder(submissions []Submission, tolerance time.Duration) []string {
 
 func seenTooEarly(event, previous time.Time, tolerance time.Duration) bool {
 	return !event.IsZero() && !previous.IsZero() && previous.Sub(event) > tolerance
-}
-
-func SuccessRate(submissions []Submission) float64 {
-	if len(submissions) == 0 {
-		return 0
-	}
-	accepted := 0
-	for _, s := range submissions {
-		if s.Accepted() {
-			accepted++
-		}
-	}
-	return float64(accepted) / float64(len(submissions))
 }

@@ -160,7 +160,7 @@ func (s *RealmApiService) ReconcileRealm(ctx context.Context, realmName string, 
 }
 
 func (s *RealmApiService) getClientsResponse(ctx context.Context, realm string) ([]api.Client, error) {
-	clientsIds := []string{s.config.DefaultClientId, utils.RunaiInstallerClientId}
+	clientsIds := []string{s.config.DefaultClientId}
 	respClients := []api.Client{}
 	for _, clientId := range clientsIds {
 		client, err := s.iamServices.ClientService.GetClientByClientId(ctx, realm, clientId)

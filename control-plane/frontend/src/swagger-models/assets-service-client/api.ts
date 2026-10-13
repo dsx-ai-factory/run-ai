@@ -2248,6 +2248,12 @@ export interface ComputeAssetSpec {
      */
     'extendedResources'?: Array<ExtendedResource> | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof ComputeAssetSpec
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof ComputeAssetSpec
@@ -2260,21 +2266,35 @@ export interface ComputeAssetSpec {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof ComputeAssetSpec
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof ComputeAssetSpec
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof ComputeAssetSpec
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof ComputeAssetSpec
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof ComputeAssetSpec
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -2346,6 +2366,12 @@ export interface ComputeCreationRequestSpec {
      */
     'extendedResources'?: Array<ExtendedResource> | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof ComputeCreationRequestSpec
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof ComputeCreationRequestSpec
@@ -2358,21 +2384,35 @@ export interface ComputeCreationRequestSpec {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof ComputeCreationRequestSpec
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof ComputeCreationRequestSpec
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof ComputeCreationRequestSpec
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof ComputeCreationRequestSpec
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof ComputeCreationRequestSpec
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -4671,6 +4711,12 @@ export interface DistributedInferenceLeaderWorkerSpecCompute {
      */
     'extendedResources'?: Array<ExtendedResource> | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof DistributedInferenceLeaderWorkerSpecCompute
@@ -4683,21 +4729,35 @@ export interface DistributedInferenceLeaderWorkerSpecCompute {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof DistributedInferenceLeaderWorkerSpecCompute
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -6766,6 +6826,20 @@ export interface GitsRules {
      */
     'instances'?: ItemRules | null;
 }
+/**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
 /**
  * Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.
  * @export

@@ -197,6 +197,10 @@ func (h *EWConverter) fillStatus(riStatus *riresource.Status, externalWorkload *
 	externalWorkload.Status.ObservedStatus.Conditions = conditions
 }
 
+// mapResourceStatusToEwPhase maps the Karta statuses matched on the root component to an ExternalWorkload phase.
+// Resuming, Suspending, Suspended and Degraded are checked last so that a Karta which also matches Running, Failed,
+// Completed or Initializing keeps the phase it had before they were mapped; they only replace what used to be Unknown.
+// Resuming has no ExternalWorkload equivalent, so it is reported as Initializing, like a workload that is starting up.
 func (h *EWConverter) mapResourceStatusToEwPhase(statuses []kartav1alpha1.ResourceStatus) v1alpha1.ExternalWorkloadPhase {
 	statusesSet := make(map[kartav1alpha1.ResourceStatus]bool)
 	for _, status := range statuses {
@@ -213,6 +217,18 @@ func (h *EWConverter) mapResourceStatusToEwPhase(statuses []kartav1alpha1.Resour
 	}
 	if statusesSet[kartav1alpha1.InitializingStatus] {
 		return v1alpha1.ExWInitializingPhase
+	}
+	if statusesSet[kartav1alpha1.ResumingStatus] {
+		return v1alpha1.ExWInitializingPhase
+	}
+	if statusesSet[kartav1alpha1.SuspendingStatus] {
+		return v1alpha1.ExWStoppingPhase
+	}
+	if statusesSet[kartav1alpha1.SuspendedStatus] {
+		return v1alpha1.ExWStoppedPhase
+	}
+	if statusesSet[kartav1alpha1.DegradedStatus] {
+		return v1alpha1.ExWDegradedPhase
 	}
 	return v1alpha1.ExWUnknownPhase
 }

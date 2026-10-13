@@ -1,7 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "labels": [
-    "skip-jira-validation",
     "renovate",
     "skip-env-setup"
   ],

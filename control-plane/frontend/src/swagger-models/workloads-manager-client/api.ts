@@ -588,6 +588,20 @@ export interface GetYamlSubmissionValue {
     'enabled'?: boolean | null;
 }
 /**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
+/**
  * Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.
  * @export
  * @enum {string}
@@ -1326,6 +1340,12 @@ export interface NimServiceSpecAllOfCompute {
      */
     'cpuMemoryRequest'?: string | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
@@ -1338,21 +1358,35 @@ export interface NimServiceSpecAllOfCompute {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof NimServiceSpecAllOfCompute
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**

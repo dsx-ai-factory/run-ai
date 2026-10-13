@@ -189,7 +189,7 @@ func TestReconcileRealm_HappyFlow_ClientsFlow(t *testing.T) {
 	checkRunaiCliClient(t, ctx)
 	checkRunaiAdminUiClient(t, ctx)
 	checkRunaiTokenExchangeClient(t, ctx)
-	checkRunaiInternalInstallerClient(t, ctx)
+	checkSharedInstallerClientNotCreated(t, ctx)
 	checkMcpClient(t, ctx)
 }
 
@@ -319,7 +319,7 @@ func TestReconcile_InternalClients_HappyFlow_ValidateFields(t *testing.T) {
 	internalClients, err := IamServices.ClientService.GetClients(ctx, realmName, &models.ClientFilter{IsExternal: ptr.To(false)})
 	require.NoError(t, err)
 	require.NotNil(t, internalClients)
-	require.Len(t, internalClients, 2)
+	require.Len(t, internalClients, 1)
 
 	reconcilerType, err := openapi.NewReconcilerTypeFromValue("internalApps")
 	require.NoError(t, err)
@@ -330,12 +330,10 @@ func TestReconcile_InternalClients_HappyFlow_ValidateFields(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, internalClients)
 
-	require.Len(t, internalClients, 2)
+	require.Len(t, internalClients, 1)
 	for _, client := range internalClients {
 		clientType := getClientType(client)
-		if clientType == realm_client.ClientTypeInstaller {
-			checkInstallerClientFields(t, client)
-		} else if clientType == realm_client.ClientTypeAgent {
+		if clientType == realm_client.ClientTypeAgent {
 			checkAgentClientFields(t, client)
 		} else {
 			require.Fail(t, "unsupported client type for internal clients reconciler")
@@ -419,18 +417,10 @@ func checkRunaiCliClient(t *testing.T, ctx context.Context) {
 	require.NotNil(t, client.Attributes)
 }
 
-func checkRunaiInternalInstallerClient(t *testing.T, ctx context.Context) {
+func checkSharedInstallerClientNotCreated(t *testing.T, ctx context.Context) {
 	client, err := IamServices.ClientService.GetClientByClientId(ctx, BaseRealmName, serviceUtils.RunaiInstallerClientId)
 	require.NoError(t, err)
-	require.NotEmpty(t, client)
-	require.Equal(t, serviceUtils.RunaiInstallerClientId, *client.Name)
-	require.Equal(t, serviceUtils.RunaiInstallerClientId, *client.ClientID)
-	require.True(t, *client.Enabled)
-	require.True(t, client.IsClientAuthenticationEnabled())
-	require.NotNil(t, client.Attributes)
-
-	require.NotNil(t, client.Attributes.ClientType)
-	require.Equal(t, realm_client.ClientTypeInstaller, *client.Attributes.ClientType)
+	require.Nil(t, client, "the shared installer client is no longer created in new realms")
 }
 
 func checkCliClient(t *testing.T, ctx context.Context) {
@@ -466,22 +456,6 @@ func getClientType(client iamModels.Client) string {
 		return "unsupported type"
 	}
 	return *client.Attributes.ClientType
-}
-
-func checkInstallerClientFields(t *testing.T, client models.Client) {
-	require.Equal(t, "runai-internal.installer", *client.ClientID, "client ID should be runai-internal.installer")
-	require.Equal(t, "runai-internal.installer", *client.Name, "client name should be runai-internal.installer")
-	require.True(t, *client.Enabled, "client should be enabled")
-	require.NotNil(t, client.Attributes, "client attributes should not be empty")
-	require.True(t, client.IsClientAuthenticationEnabled(), "client authentication should be enabled")
-	require.NotNil(t, client.Secret, "client secret should not be nil")
-	require.Equal(t, "false", *client.Attributes.Oauth2AuthGrantEnabled)
-	require.Equal(t, "false", *client.Attributes.OidcGrantEnabled, "oidc grant should be disabled")
-	require.True(t, utils.IsValidLogoutRedirectUris(*client.Attributes.LogoutRedirectUris), "logout redirect uris should start with +")
-	require.False(t, *client.Attributes.IsExternal, "is external should be false")
-	require.Equal(t, realm_client.ClientTypeInstaller, *client.Attributes.ClientType, "client type should be installer")
-	require.NotNil(t, client.Attributes.UpdatedAt, "update time should not be nil")
-	require.NotNil(t, client.Attributes.CreatedAt, "creation time should not be nil")
 }
 
 func checkAgentClientFields(t *testing.T, client models.Client) {

@@ -77,7 +77,6 @@ type AccessRuleSubjectType string
 const (
 	UserSubject                  AccessRuleSubjectType = "user"
 	GroupSubject                 AccessRuleSubjectType = "group"
-	AppSubject                   AccessRuleSubjectType = "app"
 	ServiceAccountSubject        AccessRuleSubjectType = "service-account"
 	AllAuthenticatedUsersSubject AccessRuleSubjectType = "all-authenticated-users"
 )

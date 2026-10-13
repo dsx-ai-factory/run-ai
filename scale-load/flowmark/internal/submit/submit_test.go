@@ -242,15 +242,15 @@ func TestClusterID(t *testing.T) {
 				Servers: clusterclient.ServerConfigurations{{URL: server.URL}},
 			})}
 
-			got, err := ClusterID(context.Background(), clients, tc.pick)
+			got, err := clients.Cluster(context.Background(), tc.pick)
 			if tc.wantErr != "" {
 				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
 					t.Fatalf("expected error containing %q, got %v", tc.wantErr, err)
 				}
 				return
 			}
-			if err != nil || got != tc.want {
-				t.Fatalf("got %q (%v), want %q", got, err, tc.want)
+			if err != nil || got.Uuid != tc.want {
+				t.Fatalf("got %q (%v), want %q", got.Uuid, err, tc.want)
 			}
 		})
 	}

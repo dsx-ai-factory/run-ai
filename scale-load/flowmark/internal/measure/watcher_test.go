@@ -8,6 +8,7 @@ package measure
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -407,8 +408,8 @@ func TestAWatchTheServerKeepsEndingIsGivenUpWithTheClosedError(t *testing.T) {
 	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) {
 		t.Fatalf("a watch that keeps closing must end as a closed watch, not a slow cluster: %+v", got)
 	}
-	if opened != 1+maxReconnectCycles || w.Reconnects() != maxReconnectCycles {
-		t.Fatalf("expected %d reopen cycles, got opened=%d reconnects=%d", maxReconnectCycles, opened, w.Reconnects())
+	if opened != 1+maxConsecutiveClosures || w.Interruptions() != maxConsecutiveClosures {
+		t.Fatalf("a watch that never saw an event has no resume point, so every reopen is lossy: expected %d, got opened=%d interruptions=%d", maxConsecutiveClosures, opened, w.Interruptions())
 	}
 }
 
@@ -436,7 +437,159 @@ func TestAWatchTheServerKeepsFailingWithAnErrorEventIsGivenUp(t *testing.T) {
 	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) {
 		t.Fatalf("a watch that keeps failing must end as a closed watch: %+v", got)
 	}
-	if opened != 1+maxReconnectCycles {
-		t.Fatalf("expected %d reopen cycles, got %d opens", maxReconnectCycles, opened-1)
+	if opened != 1+maxConsecutiveClosures {
+		t.Fatalf("expected %d reopen cycles, got %d opens", maxConsecutiveClosures, opened-1)
+	}
+}
+
+func TestReopenStartsAtOnceAndResumesFromTheLastSeenResourceVersion(t *testing.T) {
+	first := watch.NewFake()
+	var resumedFrom []string
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(ctx context.Context, c k8sclient.WithWatch, list k8sclient.ObjectList, opts ...k8sclient.ListOption) (watch.Interface, error) {
+			options := &k8sclient.ListOptions{}
+			for _, opt := range opts {
+				opt.ApplyToList(options)
+			}
+			if options.Raw != nil {
+				resumedFrom = append(resumedFrom, options.Raw.ResourceVersion)
+			}
+			if len(resumedFrom) == 1 {
+				return first, nil
+			}
+			return c.Watch(ctx, list, opts...)
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	added := runner("seen")
+	added.SetResourceVersion("5")
+	first.Add(added)
+	deleted := runner("gone")
+	deleted.SetResourceVersion("7")
+	first.Delete(deleted)
+	waitForArrival(t, w, "seen")
+	closedAt := time.Now()
+	first.Stop()
+
+	for w.Reconnects() == 0 && time.Since(closedAt) < 2*time.Second {
+		time.Sleep(time.Millisecond)
+	}
+	if elapsed := time.Since(closedAt); w.Reconnects() != 1 || elapsed > 500*time.Millisecond {
+		t.Fatalf("the first reopen attempt must not wait for the reconnect delay, reconnects=%d after %s", w.Reconnects(), elapsed)
+	}
+	if len(resumedFrom) != 2 || resumedFrom[1] != "7" {
+		t.Fatalf("the reopened watch must resume from the resourceVersion of the last event, including a Deleted one, got %v", resumedFrom)
+	}
+}
+
+func TestAReconnectWithAResumePointIsNotAnInterruption(t *testing.T) {
+	first := watch.NewFake()
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(ctx context.Context, c k8sclient.WithWatch, list k8sclient.ObjectList, opts ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			if opened == 1 {
+				return first, nil
+			}
+			return c.Watch(ctx, list, opts...)
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	seen := runner("seen")
+	seen.SetResourceVersion("12")
+	first.Add(seen)
+	waitForArrival(t, w, "seen")
+	first.Stop()
+	for w.Reconnects() == 0 {
+		time.Sleep(time.Millisecond)
+	}
+
+	if w.Reconnects() != 1 || w.Interruptions() != 0 {
+		t.Fatalf("a watch resumed from resourceVersion 12 loses nothing, reconnects=%d interruptions=%d", w.Reconnects(), w.Interruptions())
+	}
+}
+
+func TestAReconnectAfterTheServerDroppedTheVersionIsAnInterruption(t *testing.T) {
+	reconnectDelay = time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+	first := watch.NewFake()
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(ctx context.Context, c k8sclient.WithWatch, list k8sclient.ObjectList, opts ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			if opened == 1 {
+				return first, nil
+			}
+			return c.Watch(ctx, list, opts...)
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+
+	seen := runner("seen")
+	seen.SetResourceVersion("12")
+	first.Add(seen)
+	waitForArrival(t, w, "seen")
+	first.Error(&metav1.Status{Code: 410, Reason: metav1.StatusReasonGone, Message: "too old resource version"})
+	for w.Reconnects() == 0 {
+		time.Sleep(time.Millisecond)
+	}
+
+	if w.Reconnects() != 1 || w.Interruptions() != 1 {
+		t.Fatalf("after a 410 the watch restarts without a resume point and events may be missed, reconnects=%d interruptions=%d", w.Reconnects(), w.Interruptions())
+	}
+}
+
+func TestAWatchTheServerKeepsClosingWithoutEventsIsGivenUpEvenWithAResumePoint(t *testing.T) {
+	reconnectDelay = time.Millisecond
+	t.Cleanup(func() { reconnectDelay = time.Second })
+	opened := 0
+	kube := fake.NewClientBuilder().WithInterceptorFuncs(interceptor.Funcs{
+		Watch: func(context.Context, k8sclient.WithWatch, k8sclient.ObjectList, ...k8sclient.ListOption) (watch.Interface, error) {
+			opened++
+			events := watch.NewFake()
+			if opened == 1 {
+				seen := runner("seen")
+				seen.SetResourceVersion("12")
+				go func() {
+					events.Add(seen)
+					events.Stop()
+				}()
+				return events, nil
+			}
+			events.Stop()
+			return events, nil
+		},
+	}).Build()
+	w, err := WatchWorkloads(context.Background(), kube, testNamespace)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(w.Stop)
+	w.MarkCreated("w1", time.Now())
+
+	got := byName(w.WaitAll(10 * time.Second))["w1"]
+
+	if got.Outcome != NeverArrived || !errors.Is(got.Err, ErrWatchClosed) || !strings.Contains(got.Err.Error(), "times in a row") {
+		t.Fatalf("a server that keeps closing the watch without events must be given up, got %+v", got)
+	}
+	if w.Interruptions() != 0 {
+		t.Fatalf("every reopen resumed from resourceVersion 12, none was lossy, got %d interruptions", w.Interruptions())
+	}
+	if opened != 1+maxConsecutiveClosures {
+		t.Fatalf("expected the first watch plus %d consecutive reopens before giving up, got %d opens", maxConsecutiveClosures, opened)
 	}
 }

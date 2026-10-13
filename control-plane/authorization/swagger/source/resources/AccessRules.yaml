@@ -1,6 +1,6 @@
 post:
   summary: Create an access rule. 
-  description: Use to bind a predefined role to a subject (user, group or application) in a scope.
+  description: Use to bind a predefined role to a subject (user, group or service account) in a scope.
   operationId: create_access_rule
   x-service: authorization
   x-test-coverage:

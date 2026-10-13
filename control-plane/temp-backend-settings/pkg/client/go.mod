@@ -1,10 +1,10 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client
 
-go 1.27.1
+go 1.27.2
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29
 	github.com/stretchr/testify v1.12.1
 	gopkg.in/validator.v2 v2.0.1
 )

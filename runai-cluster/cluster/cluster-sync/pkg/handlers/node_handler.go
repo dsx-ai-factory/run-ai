@@ -369,6 +369,19 @@ func (nodeHandler *NodeHandler) SyncNodesForNodepool(nodePoolName string) {
 	nodeHandler.syncAllNodes()
 }
 
+// SyncNumaNodesForNodepool resyncs NUMA details when a node pool's NUMA-aware
+// scheduling is toggled. The NRT objects do not change when it flips, so the
+// NRT informer sees nothing and the reported NUMA nodes would stay stale until
+// the next periodic full sync.
+func (nodeHandler *NodeHandler) SyncNumaNodesForNodepool(nodePoolName string) {
+	// nil when the NodeResourceTopology CRD is absent and NUMA sync is disabled.
+	if nodeHandler.numaNodeHandler == nil {
+		return
+	}
+	zap.S().Infof("Syncing NUMA node details (triggered by node pool %s change)", nodePoolName)
+	nodeHandler.numaNodeHandler.SyncAll()
+}
+
 func (nodeHandler *NodeHandler) taintsChanged(old []swagger.NodeTaint, new []swagger.NodeTaint) bool {
 	if len(old) != len(new) {
 		return true

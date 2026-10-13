@@ -636,7 +636,7 @@
       ],
       "post": {
         "summary": "Create an access rule.",
-        "description": "Use to bind a predefined role to a subject (user, group or application) in a scope.",
+        "description": "Use to bind a predefined role to a subject (user, group or service account) in a scope.",
         "operationId": "create_access_rule",
         "x-service": "authorization",
         "x-test-coverage": [
@@ -3020,7 +3020,7 @@
           "subjectId": {
             "type": "string",
             "example": "user@run.ai",
-            "description": "The unique identifier of the subject (e.g., user, group, or app)."
+            "description": "The unique identifier of the subject (e.g., user, group, or service account)."
           },
           "roleId": {
             "type": "integer",
@@ -3050,7 +3050,7 @@
       },
       "SubjectTypeExtended": {
         "type": "string",
-        "description": "Subject type enum for access rule responses. Extends SubjectType with the built-in\nall-authenticated-users subject, which applies to every authenticated user and service account.\n\nNote: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.\n",
+        "description": "Subject type enum for access rule responses. Extends SubjectType with the built-in\nall-authenticated-users subject, which applies to every authenticated user and service account.\n\nNote: The 'app' subject type is DEPRECATED and is no longer returned. Please use 'service-account' instead for service accounts.\n",
         "enum": [
           "user",
           "app",
@@ -3201,7 +3201,7 @@
       },
       "SubjectType": {
         "type": "string",
-        "description": "Subject type enum for access rules.\n\nNote: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.\n",
+        "description": "Subject type enum for access rules.\n\nNote: The 'app' subject type is DEPRECATED and no longer supported. Please use 'service-account' instead for service accounts.\nRequests that create an access rule with 'app' are rejected with 415 Unsupported Media Type.\n",
         "enum": [
           "user",
           "app",
@@ -3461,7 +3461,7 @@
           "properties": {
             "subjectId": {
               "type": "string",
-              "description": "The unique identifier of the subject e.g., user, group, or app).",
+              "description": "The unique identifier of the subject e.g., user, group, or service account).",
               "example": "user@run.ai"
             },
             "subjectType": {
@@ -3470,7 +3470,7 @@
                   "$ref": "#/components/schemas/SubjectType"
                 },
                 {
-                  "description": "The subject assigned to the access rule. Valid values: user, group, app."
+                  "description": "The subject assigned to the access rule. Valid values: user, group, service-account."
                 }
               ]
             }
