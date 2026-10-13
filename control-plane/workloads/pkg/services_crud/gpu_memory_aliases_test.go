@@ -93,7 +93,7 @@ func assertWorkspaceMemoryAliasRoundTrip(t *testing.T, spec *workloadsApi.Supers
 	}
 	params := createWorkloadParams{Response: workloadsApi.SupersetWorkload{Spec: spec}}
 	record := NewWorkloadFromWorkloadParams(&params, nil)
-	stored, marshalErr := json.Marshal(record.Spec)
+	stored, marshalErr := json.Marshal(gpucompat.StoredWorkloadSpec(record.Spec))
 	if marshalErr != nil {
 		t.Fatal(marshalErr)
 	}
@@ -106,7 +106,7 @@ func assertWorkspaceMemoryAliasRoundTrip(t *testing.T, spec *workloadsApi.Supers
 		t.Fatal("response aliases differ")
 	}
 	*returned.GpuPortionRequest.Get() = .9
-	if record.Spec.Compute.Get().GetGpuPortionRequest() != value || spec.Compute.Get().GetGpuMemoryPortionRequest() != value {
+	if record.Spec.Compute.Get().GetGpuMemoryPortionRequest() != value || spec.Compute.Get().GetGpuMemoryPortionRequest() != value {
 		t.Fatal("response mutated stored/canonical values")
 	}
 }

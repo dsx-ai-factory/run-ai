@@ -6,30 +6,12 @@
 package services_crud
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpumode"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 )
-
-// Inference updates historically validate other derived defaults without saving
-// them. Project only mode resolution here, preserving that endpoint behavior.
-func copyResolvedGpuModes(spec *workloadsApi.SupersetSpec, values map[string]interface{}) error {
-	submitted, err := gojsonq.LoadJson(spec)
-	if err != nil {
-		return fmt.Errorf("read submitted GPU configuration: %w", err)
-	}
-	gpumode.ProjectResolvedModes(values, submitted)
-	var resolved workloadsApi.SupersetSpec
-	if err := convutils.CopySpecs(&resolved, submitted); err != nil {
-		return fmt.Errorf("decode resolved GPU mode: %w", err)
-	}
-	*spec = resolved
-	return nil
-}
 
 func validateNativeGpuMode(spec any) *workloadsApi.SubmissionErrorV2 {
 	values, err := gojsonq.LoadJson(spec)

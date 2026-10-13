@@ -79,7 +79,15 @@ func ProjectGPUFieldsForStorage(source map[string]any) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	err = visitCompute(result, "", func(compute map[string]any, _ string) error {
+	if err := projectGPUFieldsForStorage(result); err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+// projectGPUFieldsForStorage operates on the caller's already normalized copy.
+func projectGPUFieldsForStorage(result map[string]any) error {
+	return visitCompute(result, "", func(compute map[string]any, _ string) error {
 		for _, alias := range memoryAliases {
 			if value, exists := compute[alias[1]]; exists {
 				compute[alias[0]] = value
@@ -88,10 +96,6 @@ func ProjectGPUFieldsForStorage(source map[string]any) (map[string]any, error) {
 		}
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
-	return result, nil
 }
 
 // ProjectGPUPolicyForStorage translates policy references as well as field names.
@@ -101,8 +105,7 @@ func ProjectGPUPolicyForStorage(source map[string]any) (map[string]any, error) {
 	if err != nil {
 		return nil, err
 	}
-	result, err = ProjectGPUFieldsForStorage(result)
-	if err != nil {
+	if err := projectGPUFieldsForStorage(result); err != nil {
 		return nil, err
 	}
 	storageReferences(result)

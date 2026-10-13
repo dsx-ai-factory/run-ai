@@ -38,8 +38,8 @@ func NewWorkloadFromWorkloadParams(params *createWorkloadParams, assetsMapping [
 
 		Name: params.Response.Name,
 
-		Spec:       gpucompat.StoredWorkloadSpec(params.Response.Spec),
-		MasterSpec: gpucompat.StoredMasterSpec(params.Response.MasterSpec.Get()),
+		Spec:       params.Response.Spec,
+		MasterSpec: params.Response.MasterSpec.Get(),
 
 		MasterSameAsWorker: params.Response.MasterSpecSameAsWorker.Get(),
 
@@ -72,8 +72,8 @@ func NewWorkloadV2SnapshotFromWorkloadParams(params *createWorkloadParams, asset
 		Name:      params.Response.Name,
 		Namespace: namespace,
 
-		Spec:       gpucompat.StoredWorkloadSpec(params.Response.Spec),
-		MasterSpec: gpucompat.StoredMasterSpec(params.Response.MasterSpec.Get()),
+		Spec:       params.Response.Spec,
+		MasterSpec: params.Response.MasterSpec.Get(),
 
 		MasterSameAsWorker: params.Response.MasterSpecSameAsWorker.Get(),
 

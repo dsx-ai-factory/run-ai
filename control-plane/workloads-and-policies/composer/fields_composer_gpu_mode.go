@@ -39,7 +39,7 @@ func (fc *FieldsComposer) ComposeGpuComputeMode(ctx context.Context, src *string
 				}
 			}
 			if !available {
-				return workloadsApi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("compute.gpuComputeMode %q is unavailable on the selected cluster: %s", *src, reason))
+				return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("compute.gpuComputeMode %q is unavailable on the selected cluster: %s", *src, reason))
 			}
 		}
 		if len(containerName) > maxContainerNameLenForAnnotationKey(gpumode.AnnotationFormat) {

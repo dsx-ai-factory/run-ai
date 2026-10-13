@@ -120,9 +120,7 @@ func CalculateEffectiveOfGvkPolicy(ctx context.Context, tx orm.DB,
 	return ht.calculateEffectivePolicy(withEffective, tx, appliedPolicyId, 0, nil, nil, nil, nil)
 }
 
-// calculateEffectivePolicy receives list of hierarchy nodes (proj -> dept -> tenant, for example) and
-// calculates the effective policy of the node in "idxToCalculate". the function is recursive, because it is possible
-// that the parent node, from which we inherit our effective policy, needs also to re-calculate its effective policy
+// calculateEffectivePolicy normalizes sources once before calculating inheritance.
 func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB,
 	appliedPolicyId string, idxToCalculate int,
 	imposedAssets map[string]interface{}, masterImposedAssets map[string]interface{},
@@ -144,9 +142,6 @@ func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB
 			}
 			*source = normalized
 		}
-	}
-
-	if !effectiveContext.GvkWorkload {
 		for _, source := range []*map[string]interface{}{&imposedAssetsRules, &masterImposedAssetsRules} {
 			normalized, err := gpucompat.NormalizeLegacyGPUPolicy(*source)
 			if err != nil {
@@ -155,6 +150,19 @@ func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB
 			*source = normalized
 		}
 	}
+
+	return ht.calculateEffectivePolicyAt(ctx, tx, appliedPolicyId, idxToCalculate,
+		imposedAssets, masterImposedAssets, imposedAssetsRules, masterImposedAssetsRules)
+}
+
+// calculateEffectivePolicyAt recalculates missing parent policies using the normalized context.
+func (ht *HierarchyTree) calculateEffectivePolicyAt(ctx context.Context, tx orm.DB,
+	appliedPolicyId string, idxToCalculate int,
+	imposedAssets map[string]interface{}, masterImposedAssets map[string]interface{},
+	imposedAssetsRules map[string]interface{}, masterImposedAssetsRules map[string]interface{}) (
+	*dbmodel.EffectivePolicy, *api.Error,
+) {
+	effectiveContext := ctx.Value(EffectiveContextKey).(*EffectiveContext)
 
 	currentPolicyId := effectiveContext.Hierarchy[idxToCalculate].Policy.ID.String()
 	currentGivenPolicy := effectiveContext.Hierarchy[idxToCalculate].Policy.Policy
@@ -216,7 +224,7 @@ func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB
 
 	// if the effective policy of the parent scope is missing, calculate it.
 	if effectiveContext.Hierarchy[inheritFrom].Policy.EffectivePolicy.IsDeleted() {
-		if _, err := ht.calculateEffectivePolicy(ctx, tx, appliedPolicyId, inheritFrom, nil, nil, nil, nil); err != nil {
+		if _, err := ht.calculateEffectivePolicyAt(ctx, tx, appliedPolicyId, inheritFrom, nil, nil, nil, nil); err != nil {
 			return nil, err
 		}
 	}

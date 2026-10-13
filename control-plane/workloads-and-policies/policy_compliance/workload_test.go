@@ -62,7 +62,7 @@ var _ = Describe("workload policy preparation", func() {
 				"gpuComputeMode":    map[string]interface{}{"options": []interface{}{map[string]interface{}{"value": "sm-sharing"}}},
 			}}
 			defaults[replica] = map[string]interface{}{"compute": map[string]interface{}{"gpuPortionRequest": portion}}
-			values[replica] = map[string]interface{}{"compute": map[string]interface{}{"gpuMemoryPortionRequest": portion}}
+			values[replica] = map[string]interface{}{"compute": map[string]interface{}{"gpuMemoryPortionRequest": portion, "gpuComputeMode": "time-slicing"}}
 		}
 		_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, true)
 		Expect(err).NotTo(HaveOccurred())
@@ -71,7 +71,82 @@ var _ = Describe("workload policy preparation", func() {
 		Expect(issues[1].WorkloadField).To(Equal("masterSpec.compute.gpuComputeMode"))
 		Expect(issues[1].PolicyField).To(Equal("masterSpec.compute.gpuComputeMode"))
 		for _, replica := range []string{"worker", "master"} {
-			Expect(convutils.MapMe(convutils.MapMe(values[replica])["compute"])).NotTo(HaveKey("gpuComputeMode"))
+			Expect(convutils.MapMe(convutils.MapMe(values[replica])["compute"])).To(HaveKeyWithValue("gpuComputeMode", "time-slicing"))
 		}
 	})
+})
+
+var _ = Describe("GPU mode uses ordinary optional enum policy rules", func() {
+	DescribeTable("matches imagePullPolicy",
+		func(value, defaultValue, rule, wantIssue string) {
+			for _, field := range []struct {
+				name, allowed, other string
+			}{
+				{"gpuComputeMode", "sm-sharing", "time-slicing"},
+				{"imagePullPolicy", "Always", "IfNotPresent"},
+			} {
+				values := map[string]interface{}{"compute": map[string]interface{}{"gpuDevicesRequest": 1}}
+				defaults := map[string]interface{}{}
+				rules := map[string]interface{}{}
+				fieldValues, fieldDefaults, fieldRules := values, defaults, rules
+				if field.name == "gpuComputeMode" {
+					fieldValues = convutils.MapMe(values["compute"])
+					fieldDefaults, fieldRules = map[string]interface{}{}, map[string]interface{}{}
+					defaults["compute"], rules["compute"] = fieldDefaults, fieldRules
+				}
+				if defaultValue != "" {
+					fieldDefaults[field.name] = field.allowed
+				}
+				if value != "" {
+					fieldValues[field.name] = field.allowed
+					if value == "other" {
+						fieldValues[field.name] = field.other
+					}
+				}
+				constraint := map[string]interface{}{}
+				switch rule {
+				case "options":
+					constraint[rule] = []interface{}{map[string]interface{}{"value": field.allowed}}
+				case "canEdit":
+					constraint[rule] = false
+				case "required", "blocked":
+					constraint[rule] = true
+				}
+				fieldRules[field.name] = constraint
+				merged := map[string]interface{}{}
+				Expect(convutils.CopySpecs(&merged, defaults)).To(Succeed())
+				Expect(ApplyDefaults(values, merged, nil)).To(BeNil())
+				values = merged
+				_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, false)
+				Expect(err).NotTo(HaveOccurred())
+				if wantIssue == "" {
+					Expect(issues).To(BeEmpty(), field.name)
+				} else {
+					Expect(issues).To(HaveLen(1), field.name)
+					Expect(string(*issues[0].Rule)).To(Equal(wantIssue), field.name)
+				}
+				resolved := values
+				if field.name == "gpuComputeMode" {
+					resolved = convutils.MapMe(values["compute"])
+				}
+				if value == "" && defaultValue == "" {
+					Expect(resolved).NotTo(HaveKey(field.name), field.name)
+				} else {
+					Expect(resolved).To(HaveKey(field.name), field.name)
+				}
+			}
+		},
+		Entry("optional omission", "", "", "", ""),
+		Entry("options do not require a value", "", "", "options", ""),
+		Entry("required omission", "", "", "required", "required"),
+		Entry("blocked omission", "", "", "blocked", ""),
+		Entry("allowed explicit value", "allowed", "", "options", ""),
+		Entry("forbidden explicit value", "other", "", "options", "options"),
+		Entry("blocked explicit value", "allowed", "", "blocked", "blocked"),
+		Entry("policy default satisfies required", "", "allowed", "required", ""),
+		Entry("policy default is validated", "", "allowed", "blocked", "blocked"),
+		Entry("locked default fills omission", "", "allowed", "canEdit", ""),
+		Entry("locked matching value", "allowed", "allowed", "canEdit", ""),
+		Entry("locked conflicting value", "other", "allowed", "canEdit", "canEdit"),
+	)
 })

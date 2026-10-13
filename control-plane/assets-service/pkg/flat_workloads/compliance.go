@@ -39,7 +39,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 
 	authApi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpumode"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	k8sTrackerApi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
 	policyApi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
@@ -537,13 +536,8 @@ func validateComplianceOfAsset(ctx context.Context, assetInfo assetChanInfo) {
 			}
 		}
 
-		// Resolve mode on the copied payload; compliance must not fill the saved asset.
-		gpumode.ApplyModeDefaults(payloadMap, defaults)
-		applyFallback, cleanupFallback := gpumode.PolicyFallback()
-		defer cleanupFallback()
-		options := &policy_compliance.ValidateComplianceOptions{ApplyBuiltInDefaults: applyFallback}
 		policy_compliance.ValidateCompliance("", rules, defaults, payloadMap,
-			*defaultFromOrder, &fieldsWithCantEditRule, options, &complianceResults)
+			*defaultFromOrder, &fieldsWithCantEditRule, nil, &complianceResults)
 
 		for _, complianceResult := range complianceResults {
 			belongsToAsset, shortName := fieldBelongsToTheAsset(complianceResult.PolicyField, assetKind)

@@ -47,7 +47,7 @@ var _ = Describe("GPU compute mode", func() {
 		Entry("CPU zero devices", convutils.Ref("sm-sharing"), int32(0), false, int32(0), false),
 		Entry("explicit time slicing", convutils.Ref("time-slicing"), int32(1), true, int32(0), true),
 		Entry("SM sharing on multiple devices", convutils.Ref("sm-sharing"), int32(2), true, int32(0), true),
-		Entry("unavailable runtime", convutils.Ref("sm-sharing"), int32(1), false, int32(503), false),
+		Entry("unsupported mode", convutils.Ref("sm-sharing"), int32(1), false, int32(http.StatusBadRequest), false),
 		Entry("unknown enum", convutils.Ref("unsupported"), int32(1), true, int32(400), false),
 	)
 	DescribeTable("validates sizing before evaluating the compute mode",

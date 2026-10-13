@@ -16,20 +16,7 @@ import (
 // Min supported cluster version is 2.22, so capabilities introduced at <= 2.21 are
 // always supported and no longer appear here. See checker.clusterVersionToCapabilityMap.
 func SetClusterDependentOptions(ctx context.Context, options *composer.FieldsComposerOptions, validator *checker.ClusterCapabilitiesChecker) error {
-	options.GpuComputeModeStatus = func(ctx context.Context, mode string) (bool, string, error) {
-		configuration, err := validator.ClusterConfiguration(ctx)
-		if err != nil {
-			return false, "", err
-		}
-		if configuration == nil {
-			return false, "GPU compute mode availability has not been reported", nil
-		}
-		status, found := configuration.GpuComputeModes[mode]
-		if !found {
-			return false, "GPU compute mode availability has not been reported", nil
-		}
-		return status.Available, status.Reason, nil
-	}
+	options.GpuComputeModeStatus = validator.GpuComputeModeStatus
 
 	capabilitiesToOption := map[int]*bool{
 		checker.MinVersionOfFlexiblePriorityClasses:     &options.FlexiblePriorityClassesSupported,

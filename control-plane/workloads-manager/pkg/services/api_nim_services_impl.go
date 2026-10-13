@@ -444,12 +444,6 @@ func (nsi *NimServicesImpl) UpdateNimServiceSpec(ctx context.Context, id string,
 		return nil, api.NewError(http.StatusBadRequest, "failed to merge NIMService spec for update", err)
 	}
 
-	if request.Spec.Compute != nil {
-		if err := nsi.resolveUpdatedNimGpuMode(ctx, existingNimService.Metadata.ProjectId, &mergedSpec); err != nil {
-			return nil, err
-		}
-	}
-
 	if err := validateNimServingPortUrlRequiresExposure(mergedSpec.ServingPort); err != nil {
 		return nil, err
 	}

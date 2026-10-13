@@ -168,7 +168,7 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		}
 
 		// validate policy
-		_, policyErr := validatePolicy(ctx, nativeWorkload, request.Spec.Compute != nil)
+		_, policyErr := validatePolicy(ctx, nativeWorkload)
 		if policyErr != nil {
 			policyErr = redactSensitiveValuesFromResponse(policyErr, sensitiveRequestValues)
 			return api.Response(int(policyErr.Code), policyErr), nil
@@ -225,7 +225,7 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		apiErr := NewSubmissionErrorWithDetails(copyErr.Code, copyErr.Message, copyErr.Details)
 		return api.Response(int(apiErr.Code), apiErr), nil
 	}
-	if _, policyErr := validatePolicy(ctx, mergedWorkload, request.Spec.Compute != nil); policyErr != nil {
+	if _, policyErr := validatePolicy(ctx, mergedWorkload); policyErr != nil {
 		policyErr = redactSensitiveValuesFromResponse(policyErr, sensitiveRequestValues)
 		return api.Response(int(policyErr.Code), policyErr), nil
 	}

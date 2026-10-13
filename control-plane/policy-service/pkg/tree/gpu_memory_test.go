@@ -6,6 +6,7 @@
 package tree
 
 import (
+	"context"
 	"encoding/json"
 	"reflect"
 	"testing"
@@ -14,7 +15,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/scopes"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
+	dbtesting "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/testing"
+	"github.com/google/uuid"
+	"github.com/stretchr/testify/require"
 )
 
 func TestGPUMemoryPolicyPatchAndReset(t *testing.T) {
@@ -130,5 +135,46 @@ func TestLegacyWholePolicyCanBeNormalizedAndPatched(t *testing.T) {
 	}
 	if stored.RulesV2["compute"].(map[string]any)["gpuPortionRequest"].(map[string]any)["canEdit"] != false {
 		t.Fatal("lost lock")
+	}
+}
+
+func TestGPUMemoryAliasesDuringRecursivePolicyCalculation(t *testing.T) {
+	for _, parentKey := range []string{"gpuPortionRequest", "gpuMemoryPortionRequest"} {
+		t.Run(parentKey, func(t *testing.T) {
+			childKey := "gpuMemoryPortionRequest"
+			if parentKey == childKey {
+				childKey = "gpuPortionRequest"
+			}
+			parent := &dbmodel.PolicyWithOptionalEffective{Policy: dbmodel.Policy{
+				BaseModel: dbmodels.BaseModel{ID: uuid.New()}, TenantId: 1,
+				Scope: api.SCOPETYPE_TENANT, WorkloadType: string(WorkloadTypeWorkspace),
+				DefaultsV2: dbmodels.JsonBMap{"compute": map[string]any{parentKey: .25}},
+				RulesV2:    dbmodels.JsonBMap{"compute": map[string]any{parentKey: map[string]any{"canEdit": true}}},
+			}}
+			child := &dbmodel.PolicyWithOptionalEffective{Policy: dbmodel.Policy{
+				BaseModel: dbmodels.BaseModel{ID: uuid.New()}, TenantId: 1,
+				Scope: api.SCOPETYPE_PROJECT, ProjectId: convutils.Ref(int32(2)), WorkloadType: string(WorkloadTypeWorkspace),
+				DefaultsV2: dbmodels.JsonBMap{"compute": map[string]any{childKey: .5}},
+			}}
+			db, mock := dbtesting.NewMocker(t)
+			for _, policy := range []*dbmodel.PolicyWithOptionalEffective{parent, child} {
+				mock.ExpectQuery("SELECT * FROM effective_policies WHERE effective_policies.policy_id = ? ORDER BY effective_policies.policy_id LIMIT ?", policy.ID, 1).
+					Returns([]dbmodel.EffectivePolicy{})
+				mock.ExpectTransaction().Begin()
+				mock.ExpectExec("INSERT INTO effective_policies (policy_id,tenant_id,defaults_v2,rules_v2,imposed_assets,updated_at,update_count,default_from_order,validation_error,deleted_at) VALUES (?,?,?,?,?,?,?,?,?,?)").Returns(1)
+				mock.ExpectTransaction().Commit()
+			}
+			ctx := context.Background()
+			policies := map[string]*dbmodel.PolicyWithOptionalEffective{parent.ID.String(): parent, child.ID.String(): child}
+			effectiveContext := NewEffectiveContext(ctx, WorkloadTypeWorkspace, []scopes.OrgUnit{child.OrgUnit(), parent.OrgUnit()}, policies)
+			ctx = context.WithValue(ctx, EffectiveContextKey, effectiveContext)
+			ht := NewHierarchyTree(1, WorkloadTypeWorkspace)
+			result, err := ht.calculateEffectivePolicy(ctx, db, child.ID.String(), 0, nil, nil, nil, nil)
+			require.Nil(t, err)
+			require.Equal(t, map[string]any{"gpuMemoryPortionRequest": .5}, result.DefaultsV2["compute"])
+			require.Equal(t, map[string]any{"gpuMemoryPortionRequest": .25}, parent.EffectivePolicy.DefaultsV2["compute"])
+			require.NotContains(t, result.RulesV2["compute"], "gpuPortionRequest")
+			require.Contains(t, result.RulesV2["compute"], "gpuMemoryPortionRequest")
+		})
 	}
 }

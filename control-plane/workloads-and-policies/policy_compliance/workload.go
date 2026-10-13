@@ -7,7 +7,6 @@ package policy_compliance
 
 import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpumode"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils"
@@ -18,7 +17,7 @@ var masterSpecField = workloadJsonCracker.NameOf(&workloadJsonCracker.Struct().M
 
 // ValidateWorkloadCompliance validates a spec after source defaults have been merged.
 // It normalizes aliases and resolves derived fields in mutatedSpec, returning a copy
-// of normalized policy defaults. Implicit GPU modes are used only during validation.
+// of normalized policy defaults.
 // Distributed training validates worker and master policies separately.
 func ValidateWorkloadCompliance(rules, defaults, mutatedSpec map[string]interface{}, distributed bool) (map[string]interface{}, ComplianceErrors, error) {
 	var aliasErr error
@@ -55,16 +54,12 @@ func ValidateWorkloadCompliance(rules, defaults, mutatedSpec map[string]interfac
 		return nil, nil, orderErr
 	}
 
-	applyFallback, cleanupFallback := gpumode.PolicyFallback()
-	defer cleanupFallback()
-	options := &ValidateComplianceOptions{ApplyBuiltInDefaults: applyFallback}
-
 	fieldsWithCantEditRule := make([]string, 0)
 	complianceErrors := make(ComplianceErrors, 0)
 
 	if !distributed {
 		ValidateCompliance("", rules, defaults, mutatedSpec, workerOrder,
-			&fieldsWithCantEditRule, options, &complianceErrors)
+			&fieldsWithCantEditRule, nil, &complianceErrors)
 	} else {
 		// check the workers spec VS the workers policy
 		ValidateCompliance("",
@@ -72,7 +67,7 @@ func ValidateWorkloadCompliance(rules, defaults, mutatedSpec map[string]interfac
 			convutils.MapMe(defaults[workerDefaultsSection]),
 			convutils.MapMe(mutatedSpec[workerDefaultsSection]),
 			workerOrder,
-			&fieldsWithCantEditRule, options, &complianceErrors)
+			&fieldsWithCantEditRule, nil, &complianceErrors)
 
 		// if there is a master policy, we need to validate the master spec VS the master policy
 		// no need to validate master if no master is provided
@@ -84,7 +79,7 @@ func ValidateWorkloadCompliance(rules, defaults, mutatedSpec map[string]interfac
 				convutils.MapMe(defaults[masterDefaultsSection]),
 				convutils.MapMe(mutatedSpec[masterDefaultsSection]),
 				masterOrder,
-				&fieldsWithCantEditRule, options, &masterComplianceErrors)
+				&fieldsWithCantEditRule, nil, &masterComplianceErrors)
 
 			for _, err := range masterComplianceErrors {
 				complianceErrors.Add(err.Rule, err.Details,

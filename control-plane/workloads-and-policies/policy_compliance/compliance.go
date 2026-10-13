@@ -63,9 +63,6 @@ type ValidateComplianceOptions struct {
 	//     adding a policy and want to check that the defaults themselves are sensible), in this case PolicySelfValidation
 	//     option should be true
 	PolicySelfValidation bool
-
-	// Applied after defaultFrom resolution and before validation of workload values.
-	ApplyBuiltInDefaults func(map[string]interface{})
 }
 
 var defaultOptions = &ValidateComplianceOptions{}
@@ -124,10 +121,6 @@ func ValidateCompliance(fieldPrefix string, rulesToCheck map[string]interface{},
 				}
 			}
 		}
-	}
-
-	if !options.PolicySelfValidation && options.ApplyBuiltInDefaults != nil {
-		options.ApplyBuiltInDefaults(valuesAsMap)
 	}
 
 	for fieldName, fieldRules := range rulesMap {

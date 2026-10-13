@@ -13,7 +13,6 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpumode"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
@@ -56,7 +55,7 @@ type patchingTaskInfo struct {
 	effectivePolicy *policyCompliance.EffectivePolicyOfProject
 }
 
-func validatePolicy(ctx context.Context, workload *models_crud.Workload, computeUpdated bool) (map[string]interface{}, *workloadApi.SubmissionErrorV2) {
+func validatePolicy(ctx context.Context, workload *models_crud.Workload) (map[string]interface{}, *workloadApi.SubmissionErrorV2) {
 	values, valuesErr := gojsonq.LoadJson(workload.Spec)
 	if valuesErr != nil {
 		return nil, &workloadApi.SubmissionErrorV2{
@@ -66,24 +65,10 @@ func validatePolicy(ctx context.Context, workload *models_crud.Workload, compute
 		}
 	}
 
-	cleanup := func() {}
-	if !computeUpdated {
-		cleanup = gpumode.PreserveImplicitModeForInferenceUpdate(values)
-	}
-	defaults, policyErr := validatePolicyHelper(ctx, workload.WorkloadType, workload.ProjectId, values, computeUpdated)
-	cleanup()
-	if policyErr != nil {
-		return nil, policyErr
-	}
-	resolved := *workload.Spec
-	if err := copyResolvedGpuModes(&resolved, values); err != nil {
-		return nil, workloadApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
-	}
-	workload.Spec = &resolved
-	return defaults, nil
+	return validatePolicyHelper(ctx, workload.WorkloadType, workload.ProjectId, values)
 }
 
-func validatePolicyHelper(ctx context.Context, workloadType string, projectId string, values map[string]interface{}, computeUpdated bool) (map[string]interface{}, *workloadApi.SubmissionErrorV2) {
+func validatePolicyHelper(ctx context.Context, workloadType string, projectId string, values map[string]interface{}) (map[string]interface{}, *workloadApi.SubmissionErrorV2) {
 	effectivePolicy, getErr := policyCompliance.GetEffectivePolicyOfProject(ctx, policies.Get().Client(), projectId, workloadApi.WorkloadType(workloadType))
 	if getErr != nil {
 		return nil, &workloadApi.SubmissionErrorV2{
@@ -92,9 +77,6 @@ func validatePolicyHelper(ctx context.Context, workloadType string, projectId st
 		}
 	}
 
-	if computeUpdated {
-		gpumode.ApplyModeDefaults(values, effectivePolicy.DefaultsV2)
-	}
 	validationErr := validateSpecAgainstPolicy(workloadType, effectivePolicy.RulesV2, effectivePolicy.DefaultsV2, values)
 	if validationErr != nil {
 		return nil, validationErr
@@ -265,17 +247,11 @@ func validateComplianceOfTemplate(ctx context.Context, task patchingTaskInfo) {
 	}
 	payloadAsMap = canonicalPayload
 
-	// Resolve mode on the copied payload; compliance must not fill the saved template.
-	gpumode.ApplyModeDefaults(payloadAsMap, defaults)
-	applyFallback, cleanupFallback := gpumode.PolicyFallback()
-	defer cleanupFallback()
-	options := &policyCompliance.ValidateComplianceOptions{ApplyBuiltInDefaults: applyFallback}
-
 	fieldsWithCantEditRule := make([]string, 0)
 	complianceResults := policyCompliance.ComplianceErrors{}
 
 	policyCompliance.ValidateCompliance("", rules, defaults, payloadAsMap,
-		*defaultFromOrder, &fieldsWithCantEditRule, options, &complianceResults)
+		*defaultFromOrder, &fieldsWithCantEditRule, nil, &complianceResults)
 
 	for _, complianceResult := range complianceResults {
 		issue := api.ComplianceInfoReason{
