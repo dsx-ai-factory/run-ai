@@ -338,11 +338,15 @@ func TestManageEnvironmentRejectsStaleUpdate(t *testing.T) {
 	})
 
 	updateCount := int64(3)
-	_, err := manageEnvironmentRun(context.Background(), client, manageEnvironmentInput{
+	out, err := manageEnvironmentRun(context.Background(), client, manageEnvironmentInput{
 		Action: "update", EnvironmentID: testEnvironmentID, ExpectedUpdateCount: &updateCount, Confirm: true,
 		Request: map[string]any{"meta": map[string]any{"name": "python"}, "spec": map[string]any{}},
 	})
 	require.ErrorIs(t, err, runaimcp.ErrConflict)
+	require.NotNil(t, out)
+	assert.Equal(t, "update", out.Action)
+	assert.Equal(t, testEnvironmentID, out.EnvironmentID)
+	assert.Equal(t, "python", out.Name)
 }
 
 func TestDeleteEnvironmentIgnoreMissing(t *testing.T) {

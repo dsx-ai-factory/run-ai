@@ -88,7 +88,7 @@ type manageEnvironmentOutput struct {
 }
 
 func registerManageEnvironment(r *runaimcp.Registry, client *runaiclient.Client) {
-	runaimcp.Register(r, runaimcp.Tool[manageEnvironmentInput, manageEnvironmentOutput]{
+	runaimcp.Register(r, runaimcp.Tool[manageEnvironmentInput, *manageEnvironmentOutput]{
 		Name: "manage_environment",
 		Description: "Create, fully replace, or delete one Run:ai environment asset through the Assets API. Create requires " +
 			"meta.name, meta.scope, meta.workloadSupportedTypes, and spec. Update requires the complete update request returned by " +
@@ -96,13 +96,13 @@ func registerManageEnvironment(r *runaimcp.Registry, client *runaiclient.Client)
 			"are read-only. Do not use this tool to list environments.",
 		ReadOnly:    false,
 		Destructive: true,
-		Handler: func(ctx context.Context, in manageEnvironmentInput) (manageEnvironmentOutput, error) {
+		Handler: func(ctx context.Context, in manageEnvironmentInput) (*manageEnvironmentOutput, error) {
 			return manageEnvironmentRun(ctx, client, in)
 		},
 	})
 }
 
-func manageEnvironmentRun(ctx context.Context, client *runaiclient.Client, in manageEnvironmentInput) (manageEnvironmentOutput, error) {
+func manageEnvironmentRun(ctx context.Context, client *runaiclient.Client, in manageEnvironmentInput) (*manageEnvironmentOutput, error) {
 	switch common.WriteAction(in.Action) {
 	case common.ActionCreate:
 		return createEnvironment(ctx, client, in)
@@ -111,92 +111,98 @@ func manageEnvironmentRun(ctx context.Context, client *runaiclient.Client, in ma
 	case common.ActionDelete:
 		return deleteEnvironment(ctx, client, in)
 	default:
-		return manageEnvironmentOutput{}, fmt.Errorf("unsupported action %q: %w", in.Action, runaimcp.ErrValidation)
+		return newManageEnvironmentOutput(in), fmt.Errorf("unsupported action %q: %w", in.Action, runaimcp.ErrValidation)
 	}
 }
 
-func createEnvironment(ctx context.Context, client *runaiclient.Client, in manageEnvironmentInput) (manageEnvironmentOutput, error) {
+func createEnvironment(ctx context.Context, client *runaiclient.Client, in manageEnvironmentInput) (*manageEnvironmentOutput, error) {
+	out := newManageEnvironmentOutput(in)
 	request, err := decodeEnvironmentCreateRequest(in.Request)
 	if err != nil {
-		return manageEnvironmentOutput{}, fmt.Errorf("create environment request: %w", err)
+		return out, fmt.Errorf("create environment request: %w", err)
 	}
+	out.Name = request.Meta.Name
 	created, resp, err := client.Assets.EnvironmentAPI.CreateEnvironmentAsset(ctx).EnvironmentCreationRequest(request).Execute()
 	if err != nil {
-		return manageEnvironmentOutput{}, fmt.Errorf("create environment %q: %w", request.Meta.Name, runaimcp.MapHTTPError(resp, err))
+		return out, fmt.Errorf("create environment %q: %w", request.Meta.Name, runaimcp.MapHTTPError(resp, err))
 	}
 	raw, err := readEnvironmentResponse(resp, fmt.Sprintf("create environment %q", request.Meta.Name))
 	if err != nil {
-		return manageEnvironmentOutput{}, err
+		return out, err
 	}
 	snapshot, err := newEnvironmentSnapshot(created, raw)
 	if err != nil {
-		return manageEnvironmentOutput{}, fmt.Errorf("create environment %q: %w", request.Meta.Name, err)
+		return out, fmt.Errorf("create environment %q: %w", request.Meta.Name, err)
 	}
 	if snapshot.name != request.Meta.Name || snapshot.scope != request.Meta.Scope {
-		return manageEnvironmentOutput{}, fmt.Errorf("create environment %q returned name %q and scope %q: %w",
+		return out, fmt.Errorf("create environment %q returned name %q and scope %q: %w",
 			request.Meta.Name, snapshot.name, snapshot.scope, runaimcp.ErrUpstream)
 	}
-	out := environmentMutationOutput(in.Action, snapshot)
+	out = environmentMutationOutput(in.Action, snapshot)
 	out.Applied = true
 	return out, nil
 }
 
-func updateEnvironment(ctx context.Context, client *runaiclient.Client, in manageEnvironmentInput) (manageEnvironmentOutput, error) {
+func updateEnvironment(ctx context.Context, client *runaiclient.Client, in manageEnvironmentInput) (*manageEnvironmentOutput, error) {
+	out := newManageEnvironmentOutput(in)
 	request, err := decodeEnvironmentUpdateRequest(in.Request)
 	if err != nil {
-		return manageEnvironmentOutput{}, fmt.Errorf("update environment request: %w", err)
+		return out, fmt.Errorf("update environment request: %w", err)
 	}
 	current, err := getEnvironment(ctx, client, in.EnvironmentID)
 	if err != nil {
-		return manageEnvironmentOutput{}, err
+		return out, err
 	}
+	out = environmentMutationOutput(in.Action, current)
 	if err := validateMutableEnvironment(current, in); err != nil {
-		return environmentMutationOutput(in.Action, current), err
+		return out, err
 	}
 	diff := common.DiffMaps(current.updateRequest, in.Request)
 	if err := common.ConfirmWrite(ctx, in.Confirm, "update", "environment", current.name, current.id, diff); err != nil {
-		return environmentMutationOutput(in.Action, current), err
+		return out, err
 	}
 
 	current, err = getEnvironment(ctx, client, in.EnvironmentID)
 	if err != nil {
-		return manageEnvironmentOutput{}, err
+		return out, err
 	}
+	out = environmentMutationOutput(in.Action, current)
 	if err := validateMutableEnvironment(current, in); err != nil {
-		return environmentMutationOutput(in.Action, current), err
+		return out, err
 	}
 
 	updated, resp, err := client.Assets.EnvironmentAPI.UpdateEnvironmentAssetById(ctx, in.EnvironmentID).
 		EnvironmentUpdateRequest(request).Execute()
 	if err != nil {
-		return manageEnvironmentOutput{}, fmt.Errorf("update environment %q: %w", in.EnvironmentID, runaimcp.MapHTTPError(resp, err))
+		return out, fmt.Errorf("update environment %q: %w", in.EnvironmentID, runaimcp.MapHTTPError(resp, err))
 	}
 	raw, err := readEnvironmentResponse(resp, fmt.Sprintf("update environment %q", in.EnvironmentID))
 	if err != nil {
-		return manageEnvironmentOutput{}, err
+		return out, err
 	}
 	snapshot, err := newEnvironmentSnapshot(updated, raw)
 	if err != nil {
-		return manageEnvironmentOutput{}, fmt.Errorf("update environment %q: %w", in.EnvironmentID, err)
+		return out, fmt.Errorf("update environment %q: %w", in.EnvironmentID, err)
 	}
 	if !strings.EqualFold(snapshot.id, in.EnvironmentID) {
-		return manageEnvironmentOutput{}, fmt.Errorf("update environment %q returned id %q: %w",
+		return out, fmt.Errorf("update environment %q returned id %q: %w",
 			in.EnvironmentID, snapshot.id, runaimcp.ErrUpstream)
 	}
-	out := environmentMutationOutput(in.Action, snapshot)
+	out = environmentMutationOutput(in.Action, snapshot)
 	out.Applied = true
 	return out, nil
 }
 
-func deleteEnvironment(ctx context.Context, client *runaiclient.Client, in manageEnvironmentInput) (manageEnvironmentOutput, error) {
+func deleteEnvironment(ctx context.Context, client *runaiclient.Client, in manageEnvironmentInput) (*manageEnvironmentOutput, error) {
+	out := newManageEnvironmentOutput(in)
 	current, err := getEnvironment(ctx, client, in.EnvironmentID)
 	if err != nil {
 		if in.IgnoreMissing && common.IsNotFound(err) {
 			return ignoredMissingEnvironmentOutput(in), nil
 		}
-		return manageEnvironmentOutput{}, err
+		return out, err
 	}
-	out := environmentMutationOutput(in.Action, current)
+	out = environmentMutationOutput(in.Action, current)
 	if current.scope == assets.SCOPE_SYSTEM {
 		return out, fmt.Errorf("system-scoped environment %q is read-only: %w", in.EnvironmentID, runaimcp.ErrForbidden)
 	}
@@ -210,7 +216,7 @@ func deleteEnvironment(ctx context.Context, client *runaiclient.Client, in manag
 		if in.IgnoreMissing && common.IsNotFound(mapped) {
 			return ignoredMissingEnvironmentOutput(in), nil
 		}
-		return manageEnvironmentOutput{}, fmt.Errorf("delete environment %q: %w", in.EnvironmentID, mapped)
+		return out, fmt.Errorf("delete environment %q: %w", in.EnvironmentID, mapped)
 	}
 	out.Environment = nil
 	out.Applied = true
@@ -386,8 +392,12 @@ func validEnvironmentProjectID(value any) bool {
 	}
 }
 
-func environmentMutationOutput(action string, snapshot environmentSnapshot) manageEnvironmentOutput {
-	return manageEnvironmentOutput{
+func newManageEnvironmentOutput(in manageEnvironmentInput) *manageEnvironmentOutput {
+	return &manageEnvironmentOutput{Action: in.Action, EnvironmentID: in.EnvironmentID}
+}
+
+func environmentMutationOutput(action string, snapshot environmentSnapshot) *manageEnvironmentOutput {
+	return &manageEnvironmentOutput{
 		Action:        action,
 		EnvironmentID: snapshot.id,
 		Name:          snapshot.name,
@@ -395,8 +405,8 @@ func environmentMutationOutput(action string, snapshot environmentSnapshot) mana
 	}
 }
 
-func ignoredMissingEnvironmentOutput(in manageEnvironmentInput) manageEnvironmentOutput {
-	return manageEnvironmentOutput{
+func ignoredMissingEnvironmentOutput(in manageEnvironmentInput) *manageEnvironmentOutput {
+	return &manageEnvironmentOutput{
 		Action:        in.Action,
 		EnvironmentID: in.EnvironmentID,
 		Warnings:      []string{fmt.Sprintf("environment %q not found; nothing to delete", in.EnvironmentID)},

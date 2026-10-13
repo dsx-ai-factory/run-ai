@@ -22,6 +22,13 @@ func TestReadJSONResponse(t *testing.T) {
 	assert.Equal(t, "ok", result["value"])
 }
 
+func TestReadJSONResponseString(t *testing.T) {
+	resp := &http.Response{Body: io.NopCloser(strings.NewReader(`"ok"`))}
+	var result string
+	require.NoError(t, ReadJSONResponse(resp, &result))
+	assert.Equal(t, "ok", result)
+}
+
 func TestReadJSONResponseRejectsMissingBody(t *testing.T) {
 	assert.ErrorContains(t, ReadJSONResponse(nil, &map[string]any{}), "missing response body")
 }

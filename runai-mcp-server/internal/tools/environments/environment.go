@@ -70,46 +70,26 @@ func newEnvironmentSnapshot(environment *assets.EnvironmentAsset, raw map[string
 	if !ok || meta == nil {
 		return environmentSnapshot{}, fmt.Errorf("environment response meta must be an object: %w", runaimcp.ErrUpstream)
 	}
-	id, err := common.RequiredString("environment response meta.id", meta["id"])
+	id, err := validatedEnvironmentID(meta, environment.Meta.Id)
 	if err != nil {
-		return environmentSnapshot{}, fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
+		return environmentSnapshot{}, err
 	}
-	if err := common.ValidateUUID("environment response meta.id", id); err != nil {
-		return environmentSnapshot{}, fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
-	}
-	if !strings.EqualFold(id, environment.Meta.Id) {
-		return environmentSnapshot{}, fmt.Errorf("environment response id %q does not match decoded id %q: %w",
-			id, environment.Meta.Id, runaimcp.ErrUpstream)
-	}
-	name, err := common.RequiredString("environment response meta.name", meta["name"])
+	name, err := validatedEnvironmentName(meta, environment.Meta.Name)
 	if err != nil {
-		return environmentSnapshot{}, fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
+		return environmentSnapshot{}, err
 	}
-	if name != environment.Meta.Name {
-		return environmentSnapshot{}, fmt.Errorf("environment response name %q does not match decoded name %q: %w",
-			name, environment.Meta.Name, runaimcp.ErrUpstream)
+	if err := validateEnvironmentKind(meta, environment.Meta.Kind); err != nil {
+		return environmentSnapshot{}, err
 	}
-	kind, err := common.RequiredString("environment response meta.kind", meta["kind"])
+	scope, err := validatedEnvironmentScope(meta, environment.Meta.Scope)
 	if err != nil {
-		return environmentSnapshot{}, fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
-	}
-	if kind != string(assets.ASSETKIND_ENVIRONMENT) || environment.Meta.Kind != assets.ASSETKIND_ENVIRONMENT {
-		return environmentSnapshot{}, fmt.Errorf("environment response kind must be %q: %w",
-			assets.ASSETKIND_ENVIRONMENT, runaimcp.ErrUpstream)
-	}
-	scope, err := common.RequiredString("environment response meta.scope", meta["scope"])
-	if err != nil {
-		return environmentSnapshot{}, fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
-	}
-	if assets.Scope(scope) != environment.Meta.Scope || !validEnvironmentResponseScope(environment.Meta.Scope) {
-		return environmentSnapshot{}, fmt.Errorf("environment response scope %q does not match decoded valid scope %q: %w",
-			scope, environment.Meta.Scope, runaimcp.ErrUpstream)
+		return environmentSnapshot{}, err
 	}
 
 	snapshot := environmentSnapshot{
-		id:          environment.Meta.Id,
-		name:        environment.Meta.Name,
-		scope:       environment.Meta.Scope,
+		id:          id,
+		name:        name,
+		scope:       scope,
 		environment: raw,
 	}
 	if updateCount, ok := environment.Meta.GetUpdateCountOk(); ok {
@@ -127,6 +107,57 @@ func newEnvironmentSnapshot(environment *assets.EnvironmentAsset, raw map[string
 	}
 	snapshot.updateRequest = request
 	return snapshot, nil
+}
+
+func validatedEnvironmentID(meta map[string]any, decoded string) (string, error) {
+	id, err := common.RequiredString("environment response meta.id", meta["id"])
+	if err != nil {
+		return "", fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
+	}
+	if err := common.ValidateUUID("environment response meta.id", id); err != nil {
+		return "", fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
+	}
+	if !strings.EqualFold(id, decoded) {
+		return "", fmt.Errorf("environment response id %q does not match decoded id %q: %w",
+			id, decoded, runaimcp.ErrUpstream)
+	}
+	return id, nil
+}
+
+func validatedEnvironmentName(meta map[string]any, decoded string) (string, error) {
+	name, err := common.RequiredString("environment response meta.name", meta["name"])
+	if err != nil {
+		return "", fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
+	}
+	if name != decoded {
+		return "", fmt.Errorf("environment response name %q does not match decoded name %q: %w",
+			name, decoded, runaimcp.ErrUpstream)
+	}
+	return name, nil
+}
+
+func validateEnvironmentKind(meta map[string]any, decoded assets.AssetKind) error {
+	kind, err := common.RequiredString("environment response meta.kind", meta["kind"])
+	if err != nil {
+		return fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
+	}
+	if kind != string(assets.ASSETKIND_ENVIRONMENT) || decoded != assets.ASSETKIND_ENVIRONMENT {
+		return fmt.Errorf("environment response kind must be %q: %w",
+			assets.ASSETKIND_ENVIRONMENT, runaimcp.ErrUpstream)
+	}
+	return nil
+}
+
+func validatedEnvironmentScope(meta map[string]any, decoded assets.Scope) (assets.Scope, error) {
+	scope, err := common.RequiredString("environment response meta.scope", meta["scope"])
+	if err != nil {
+		return "", fmt.Errorf("%w: %w", err, runaimcp.ErrUpstream)
+	}
+	if assets.Scope(scope) != decoded || !validEnvironmentResponseScope(decoded) {
+		return "", fmt.Errorf("environment response scope %q does not match decoded valid scope %q: %w",
+			scope, decoded, runaimcp.ErrUpstream)
+	}
+	return decoded, nil
 }
 
 func validEnvironmentResponseScope(scope assets.Scope) bool {
