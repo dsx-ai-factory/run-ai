@@ -94,14 +94,14 @@ func (s *RctApiService) CreateRct(ctx context.Context, request api.RctCreationRe
 		return NewErrorResponse(metaErr), nil
 	}
 
+	// validate the spec and return it for more specific validations.
 	spec, specErr := validateRctObjectSpec(request.Spec.ObjectSpec)
 	if specErr != nil {
 		return NewErrorResponse(specErr), nil
 	}
 
-	// ValidateAssetCreateRequestMeta (called above) resolves request.Meta.ClusterId
-	// for every RCT scope (RCT is in ClusterAndBelow — see helper.go), so by this
-	// point the pointer is populated and the validator can hit the tracker.
+	// the specific validation for resource claim template is making sure the device class exist
+	// in the cluster (this is known to the object tracker).
 	if dcErr := validateRctDeviceClasses(ctx, spec, request.Meta.ClusterId); dcErr != nil {
 		return NewErrorResponse(dcErr), nil
 	}
@@ -228,9 +228,7 @@ func (s *RctApiService) UpdateRctById(ctx context.Context, id string, request ap
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
 	}
 
-	// Deferred until after rbac so we don't echo cluster-inventory details to
-	// callers who aren't allowed to update this RCT. clusterId lives on the
-	// stored assetMeta — the request body itself carries only name/description.
+	// for update, we also need to validate the device classes. we do it after rbac validation.
 	if dcErr := validateRctDeviceClasses(ctx, spec, assetMeta.ClusterId); dcErr != nil {
 		return NewErrorResponse(dcErr), nil
 	}
@@ -300,10 +298,8 @@ func requireRctKind(assetMeta *dbmodel.AssetMeta, id string) *api.Error {
 }
 
 // validateRctObjectSpec is a thin adapter over the generic
-// validateK8sObjectSpec, specialised to the K8s ResourceClaimSpec type.
+// validateK8sObjectSpec, for K8s ResourceClaimSpec type.
 // Returns the typed spec on success so callers can run RCT-specific checks
-// (e.g. verifying referenced DeviceClass names exist in the target cluster)
-// without re-parsing the free-form map.
 func validateRctObjectSpec(objectSpec map[string]any) (*resourcev1.ResourceClaimSpec, *api.Error) {
 	return validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 		objectSpec, rctObjectSpecSchema,
@@ -344,12 +340,6 @@ func collectDeviceClassNames(spec *resourcev1.ResourceClaimSpec) datastructs.Set
 // an RCT spec exists in the target cluster's inventory per the k8s-objects
 // tracker.
 //
-// Fail-open on tracker outages: a transient inability to read the tracker
-// should not block RCT edits. The failure is logged for ops; the request
-// proceeds. The scheduler will reject the claim at pod-bind time if the class
-// really is missing, so correctness is preserved — this check is a usability
-// aid, not an authoritative gate.
-//
 // clusterId is a pointer because that's how it's carried on both the create
 // request (populated by ValidateAssetCreateRequestMeta — see helper.go) and
 // on the asset-meta row read for updates. A nil / empty pointer short-circuits
@@ -366,6 +356,9 @@ func validateRctDeviceClasses(ctx context.Context, spec *resourcev1.ResourceClai
 
 	resp, trackerErr := k8sObjectsTracker.Get().GetDeviceClassesOfCluster(ctx, *clusterId)
 	if trackerErr != nil {
+		// in case of tracker cannot return the list of device class, just log error and avoid
+		// the check. in such case, if the spec has unknown device classes, the agent will fail to
+		// apply the RCT and report back the problems as sync issues.
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf(
 			"rct: skipping device-class validation for cluster %s (%d device class(es) referenced): %v",
 			*clusterId, len(referenced), trackerErr)

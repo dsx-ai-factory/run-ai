@@ -91,15 +91,8 @@ var _ = Describe("AgentSync", func() {
 				WithCluster(anotherOldCluster.ClusterId, testing.BuildDisplayedCluster(anotherOldCluster, clusterNotSupportingAgentSync, false)))
 			checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
 
-			// Seed the DeviceClass that any RCT asset built via
-			// buildRandom*RctAsset / validRctObjectSpec references. Agent-sync
-			// specs call createRctAsset, which goes through CreateRct and the
-			// new validateRctDeviceClasses gate. Seed on every cluster this
-			// suite exercises so future tests that create RCTs on
-			// anotherNewCluster / anotherOldCluster don't need to re-seed.
-			// Tests that later clear the tracker (e.g. "clean all the
-			// resources from the tracker mock" at the start of each It) do so
-			// AFTER asset creation, so the seed has already served its purpose.
+			// Register the device classes that our tests use to the tracker mock otherwise they'll fail for
+			// unknown device class.
 			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
 				WithDeviceClass(randoms.ClusterId, rctDeviceClassForTests).
 				WithDeviceClass(anotherNewCluster.ClusterId, rctDeviceClassForTests).
