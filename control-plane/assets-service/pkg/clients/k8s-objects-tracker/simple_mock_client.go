@@ -25,6 +25,7 @@ type SimpleMockClient struct {
 	PvcResponse            *k8sObjectsTracker.PVCListResponse
 	SecretsResponse        *k8sObjectsTracker.SecretListResponse
 	ConfigMapsResponse     *k8sObjectsTracker.ConfigMapsListResponse
+	DeviceClassesResponse  *k8sObjectsTracker.DeviceClasses
 	ClusterObjectsResponse *k8sObjectsTracker.ClusterObjectsStatus
 	Error                  *k8sObjectsTracker.Error
 }
@@ -39,6 +40,9 @@ func NewSimpleMockClient() SimpleMockClient {
 		},
 		ConfigMapsResponse: &k8sObjectsTracker.ConfigMapsListResponse{
 			ConfigMaps: make([]k8sObjectsTracker.ConfigMapListInfo, 0),
+		},
+		DeviceClassesResponse: &k8sObjectsTracker.DeviceClasses{
+			Items: make([]k8sObjectsTracker.DeviceClass, 0),
 		},
 		ClusterObjectsResponse: &k8sObjectsTracker.ClusterObjectsStatus{
 			Entries: make([]k8sObjectsTracker.ClusterObjectStatus, 0),
@@ -335,6 +339,16 @@ func (s SimpleMockClient) secretClusterResourceName(assetKind api.AssetKind, ass
 	}
 }
 
+// WithDeviceClass appends a device class entry to the mock inventory for the given cluster.
+// Used by RCT validation tests that need the tracker to report specific deviceClassName values.
+func (s SimpleMockClient) WithDeviceClass(clusterId string, name string) SimpleMockClient {
+	s.DeviceClassesResponse.Items = append(s.DeviceClassesResponse.Items, k8sObjectsTracker.DeviceClass{
+		ClusterId:       &clusterId,
+		DeviceClassName: name,
+	})
+	return s
+}
+
 func (s SimpleMockClient) WithError(code int32, message string) SimpleMockClient {
 	s.Error = k8sObjectsTracker.NewError(code, message)
 	return s
@@ -350,6 +364,25 @@ func (s SimpleMockClient) GetPvcsOfCluster(ctx context.Context, clusterId string
 
 func (s SimpleMockClient) GetConfigMapsOfCluster(_ context.Context, _ string) (*k8sObjectsTracker.ConfigMapsListResponse, *k8sObjectsTracker.Error) {
 	return s.ConfigMapsResponse, s.Error
+}
+
+// GetDeviceClassesOfCluster filters the mock inventory to the entries matching clusterId.
+// Device classes without a ClusterId pointer are treated as unmatched (consistent with the
+// tracker's own cluster-scoped list semantics).
+func (s SimpleMockClient) GetDeviceClassesOfCluster(_ context.Context, clusterId string) (*k8sObjectsTracker.DeviceClasses, *k8sObjectsTracker.Error) {
+	if s.Error != nil {
+		return nil, s.Error
+	}
+
+	result := k8sObjectsTracker.DeviceClasses{
+		Items: make([]k8sObjectsTracker.DeviceClass, 0),
+	}
+	for _, dc := range s.DeviceClassesResponse.Items {
+		if dc.ClusterId != nil && *dc.ClusterId == clusterId {
+			result.Items = append(result.Items, dc)
+		}
+	}
+	return &result, nil
 }
 
 func (s SimpleMockClient) GetClusterResourcesStatus(ctx context.Context, resourceType *k8sObjectsTracker.ClusterResourceType,

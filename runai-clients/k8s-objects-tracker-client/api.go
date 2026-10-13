@@ -54,6 +54,10 @@ type IK8SObjectTrackerExternalClient interface {
 	UpdateDeviceClass(ctx context.Context, deviceClass openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error)
 	DeleteDeviceClass(ctx context.Context, clusterId string, name string) (*http.Response, error)
 	SyncDeviceClass(ctx context.Context, clusterId string, deviceClasses []openapi.DeviceClass) (*openapi.DeviceClasses, *http.Response, error)
+	// ListDeviceClasses returns every device class the tracker knows about for the given cluster.
+	// Intended for validators that need to check whether a referenced deviceClassName exists
+	// (e.g. the resource-claim-template validation path in assets-service).
+	ListDeviceClasses(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *http.Response, error)
 
 	// ResourceClaimTemplate uses the same per-item CRUD + full-set sync shape
 	// as DeviceClass. Per-item ops hit a single row (no pruning); SyncResourceClaimTemplates
@@ -79,6 +83,7 @@ type IK8SObjectTrackerExternalClient interface {
 	GetSecretsOfCluster(ctx context.Context, clusterId string) (*openapi.SecretListResponse, *openapi.Error)
 	GetPvcsOfCluster(ctx context.Context, clusterId string) (*openapi.PVCListResponse, *openapi.Error)
 	GetConfigMapsOfCluster(ctx context.Context, clusterId string) (*openapi.ConfigMapsListResponse, *openapi.Error)
+	GetDeviceClassesOfCluster(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *openapi.Error)
 	GetClusterResourcesStatus(ctx context.Context, resourceType *openapi.ClusterResourceType,
 		scopeType *string, scopeId *string, secretType *openapi.SecretType) (*openapi.ClusterObjectsStatus, *openapi.Error)
 }

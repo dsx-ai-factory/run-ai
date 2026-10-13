@@ -29,6 +29,7 @@ import (
 	backend "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
@@ -90,7 +91,8 @@ func (s *RctApiService) CreateRct(ctx context.Context, request api.RctCreationRe
 		return NewErrorResponse(metaErr), nil
 	}
 
-	if specErr := validateRctObjectSpec(request.Spec.ObjectSpec); specErr != nil {
+	_, specErr := validateRctObjectSpec(request.Spec.ObjectSpec)
+	if specErr != nil {
 		return NewErrorResponse(specErr), nil
 	}
 
@@ -197,7 +199,8 @@ func (s *RctApiService) UpdateRctById(ctx context.Context, id string, request ap
 		return NewErrorResponse(metaErr), nil
 	}
 
-	if specErr := validateRctObjectSpec(request.Spec.ObjectSpec); specErr != nil {
+	_, specErr := validateRctObjectSpec(request.Spec.ObjectSpec)
+	if specErr != nil {
 		return NewErrorResponse(specErr), nil
 	}
 
@@ -281,14 +284,43 @@ func requireRctKind(assetMeta *dbmodel.AssetMeta, id string) *api.Error {
 
 // validateRctObjectSpec is a thin adapter over the generic
 // validateK8sObjectSpec, specialised to the K8s ResourceClaimSpec type.
-// Kept here (rather than inlined at each callsite) so future RCT-only
-// validation can slot in alongside the generic call without changing the
-// callers, and so the RCT-specific schema label lives with the RCT service.
-func validateRctObjectSpec(objectSpec map[string]any) *api.Error {
+// Returns the typed spec on success so callers can run RCT-specific checks
+// (e.g. verifying referenced DeviceClass names exist in the target cluster)
+// without re-parsing the free-form map.
+func validateRctObjectSpec(objectSpec map[string]any) (*resourcev1.ResourceClaimSpec, *api.Error) {
 	return validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 		objectSpec, rctObjectSpecSchema,
 		"spec.objectSpec", rctObjectTypeName,
 	)
+}
+
+// collectDeviceClassNames returns the de-duplicated set of DeviceClass names
+// referenced anywhere in an RCT spec. The DRA v1 ResourceClaimSpec has two
+// equivalent branches per request:
+//
+//   - spec.devices.requests[*].exactly.deviceClassName — the common case
+//   - spec.devices.requests[*].firstAvailable[*].deviceClassName — a prioritised
+//     list of fallback device-class selections the scheduler tries in order
+//
+// Both are user-authored and both can reference an unknown class, so both are
+// walked. Empty names (rejected earlier by schema validation) are skipped
+// defensively so this helper is safe on partially-validated specs.
+func collectDeviceClassNames(spec *resourcev1.ResourceClaimSpec) datastructs.Set[string] {
+	seen := datastructs.NewSet[string]()
+	if spec == nil {
+		return seen
+	}
+	for _, req := range spec.Devices.Requests {
+		if req.Exactly != nil && req.Exactly.DeviceClassName != "" {
+			seen.Add(req.Exactly.DeviceClassName)
+		}
+		for _, sub := range req.FirstAvailable {
+			if sub.DeviceClassName != "" {
+				seen.Add(sub.DeviceClassName)
+			}
+		}
+	}
+	return seen
 }
 
 func initRctObjectSpecValidator() {

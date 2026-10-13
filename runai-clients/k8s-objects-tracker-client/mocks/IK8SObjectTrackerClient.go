@@ -997,6 +997,88 @@ func (_c *IK8SObjectTrackerClient_CreateProjectsConfigmap_Call) RunAndReturn(run
 	return _c
 }
 
+// CreateResourceClaimTemplate provides a mock function for the type IK8SObjectTrackerClient
+func (_mock *IK8SObjectTrackerClient) CreateResourceClaimTemplate(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error) {
+	ret := _mock.Called(ctx, clusterId, rct)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateResourceClaimTemplate")
+	}
+
+	var r0 *openapi.ResourceClaimTemplate
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error)); ok {
+		return returnFunc(ctx, clusterId, rct)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.ResourceClaimTemplate) *openapi.ResourceClaimTemplate); ok {
+		r0 = returnFunc(ctx, clusterId, rct)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ResourceClaimTemplate)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, openapi.ResourceClaimTemplate) *http.Response); ok {
+		r1 = returnFunc(ctx, clusterId, rct)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, openapi.ResourceClaimTemplate) error); ok {
+		r2 = returnFunc(ctx, clusterId, rct)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateResourceClaimTemplate'
+type IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call struct {
+	*mock.Call
+}
+
+// CreateResourceClaimTemplate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - rct openapi.ResourceClaimTemplate
+func (_e *IK8SObjectTrackerClient_Expecter) CreateResourceClaimTemplate(ctx any, clusterId any, rct any) *IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call {
+	return &IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call{Call: _e.mock.On("CreateResourceClaimTemplate", ctx, clusterId, rct)}
+}
+
+func (_c *IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call) Run(run func(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate)) *IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 openapi.ResourceClaimTemplate
+		if args[2] != nil {
+			arg2 = args[2].(openapi.ResourceClaimTemplate)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call) Return(resourceClaimTemplate *openapi.ResourceClaimTemplate, response *http.Response, err error) *IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call {
+	_c.Call.Return(resourceClaimTemplate, response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call) RunAndReturn(run func(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error)) *IK8SObjectTrackerClient_CreateResourceClaimTemplate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateStorageClass provides a mock function for the type IK8SObjectTrackerClient
 func (_mock *IK8SObjectTrackerClient) CreateStorageClass(ctx context.Context, storageClass openapi.StorageClass) (*openapi.StorageClass, *http.Response, error) {
 	ret := _mock.Called(ctx, storageClass)
@@ -1849,6 +1931,92 @@ func (_c *IK8SObjectTrackerClient_DeleteProjectsConfigmap_Call) RunAndReturn(run
 	return _c
 }
 
+// DeleteResourceClaimTemplate provides a mock function for the type IK8SObjectTrackerClient
+func (_mock *IK8SObjectTrackerClient) DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeType openapi.ResourceScopeType, scopeId string, name string) (*http.Response, error) {
+	ret := _mock.Called(ctx, clusterId, scopeType, scopeId, name)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteResourceClaimTemplate")
+	}
+
+	var r0 *http.Response
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.ResourceScopeType, string, string) (*http.Response, error)); ok {
+		return returnFunc(ctx, clusterId, scopeType, scopeId, name)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.ResourceScopeType, string, string) *http.Response); ok {
+		r0 = returnFunc(ctx, clusterId, scopeType, scopeId, name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, openapi.ResourceScopeType, string, string) error); ok {
+		r1 = returnFunc(ctx, clusterId, scopeType, scopeId, name)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteResourceClaimTemplate'
+type IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call struct {
+	*mock.Call
+}
+
+// DeleteResourceClaimTemplate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - scopeType openapi.ResourceScopeType
+//   - scopeId string
+//   - name string
+func (_e *IK8SObjectTrackerClient_Expecter) DeleteResourceClaimTemplate(ctx any, clusterId any, scopeType any, scopeId any, name any) *IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call {
+	return &IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call{Call: _e.mock.On("DeleteResourceClaimTemplate", ctx, clusterId, scopeType, scopeId, name)}
+}
+
+func (_c *IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call) Run(run func(ctx context.Context, clusterId string, scopeType openapi.ResourceScopeType, scopeId string, name string)) *IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 openapi.ResourceScopeType
+		if args[2] != nil {
+			arg2 = args[2].(openapi.ResourceScopeType)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		var arg4 string
+		if args[4] != nil {
+			arg4 = args[4].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call) Return(response *http.Response, err error) *IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call {
+	_c.Call.Return(response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call) RunAndReturn(run func(ctx context.Context, clusterId string, scopeType openapi.ResourceScopeType, scopeId string, name string) (*http.Response, error)) *IK8SObjectTrackerClient_DeleteResourceClaimTemplate_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // DeleteStorageClass provides a mock function for the type IK8SObjectTrackerClient
 func (_mock *IK8SObjectTrackerClient) DeleteStorageClass(ctx context.Context, clusterId string, name string) (*http.Response, error) {
 	ret := _mock.Called(ctx, clusterId, name)
@@ -2077,6 +2245,76 @@ func (_c *IK8SObjectTrackerClient_GetConfigMapsOfCluster_Call) Return(configMaps
 }
 
 func (_c *IK8SObjectTrackerClient_GetConfigMapsOfCluster_Call) RunAndReturn(run func(ctx context.Context, clusterId string) (*openapi.ConfigMapsListResponse, *openapi.Error)) *IK8SObjectTrackerClient_GetConfigMapsOfCluster_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetDeviceClassesOfCluster provides a mock function for the type IK8SObjectTrackerClient
+func (_mock *IK8SObjectTrackerClient) GetDeviceClassesOfCluster(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *openapi.Error) {
+	ret := _mock.Called(ctx, clusterId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetDeviceClassesOfCluster")
+	}
+
+	var r0 *openapi.DeviceClasses
+	var r1 *openapi.Error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*openapi.DeviceClasses, *openapi.Error)); ok {
+		return returnFunc(ctx, clusterId)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *openapi.DeviceClasses); ok {
+		r0 = returnFunc(ctx, clusterId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.DeviceClasses)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) *openapi.Error); ok {
+		r1 = returnFunc(ctx, clusterId)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*openapi.Error)
+		}
+	}
+	return r0, r1
+}
+
+// IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetDeviceClassesOfCluster'
+type IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call struct {
+	*mock.Call
+}
+
+// GetDeviceClassesOfCluster is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+func (_e *IK8SObjectTrackerClient_Expecter) GetDeviceClassesOfCluster(ctx any, clusterId any) *IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call {
+	return &IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call{Call: _e.mock.On("GetDeviceClassesOfCluster", ctx, clusterId)}
+}
+
+func (_c *IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call) Run(run func(ctx context.Context, clusterId string)) *IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call) Return(deviceClasses *openapi.DeviceClasses, error *openapi.Error) *IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call {
+	_c.Call.Return(deviceClasses, error)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call) RunAndReturn(run func(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *openapi.Error)) *IK8SObjectTrackerClient_GetDeviceClassesOfCluster_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -2621,6 +2859,82 @@ func (_c *IK8SObjectTrackerClient_ListConfigMapsByScopeAndName_Call) Return(conf
 }
 
 func (_c *IK8SObjectTrackerClient_ListConfigMapsByScopeAndName_Call) RunAndReturn(run func(ctx context.Context, scopeType string, scopeId string, name string) (*openapi.ConfigMapsListResponse, *openapi.Error)) *IK8SObjectTrackerClient_ListConfigMapsByScopeAndName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// ListDeviceClasses provides a mock function for the type IK8SObjectTrackerClient
+func (_mock *IK8SObjectTrackerClient) ListDeviceClasses(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *http.Response, error) {
+	ret := _mock.Called(ctx, clusterId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListDeviceClasses")
+	}
+
+	var r0 *openapi.DeviceClasses
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) (*openapi.DeviceClasses, *http.Response, error)); ok {
+		return returnFunc(ctx, clusterId)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) *openapi.DeviceClasses); ok {
+		r0 = returnFunc(ctx, clusterId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.DeviceClasses)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string) *http.Response); ok {
+		r1 = returnFunc(ctx, clusterId)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string) error); ok {
+		r2 = returnFunc(ctx, clusterId)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// IK8SObjectTrackerClient_ListDeviceClasses_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListDeviceClasses'
+type IK8SObjectTrackerClient_ListDeviceClasses_Call struct {
+	*mock.Call
+}
+
+// ListDeviceClasses is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+func (_e *IK8SObjectTrackerClient_Expecter) ListDeviceClasses(ctx any, clusterId any) *IK8SObjectTrackerClient_ListDeviceClasses_Call {
+	return &IK8SObjectTrackerClient_ListDeviceClasses_Call{Call: _e.mock.On("ListDeviceClasses", ctx, clusterId)}
+}
+
+func (_c *IK8SObjectTrackerClient_ListDeviceClasses_Call) Run(run func(ctx context.Context, clusterId string)) *IK8SObjectTrackerClient_ListDeviceClasses_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_ListDeviceClasses_Call) Return(deviceClasses *openapi.DeviceClasses, response *http.Response, err error) *IK8SObjectTrackerClient_ListDeviceClasses_Call {
+	_c.Call.Return(deviceClasses, response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_ListDeviceClasses_Call) RunAndReturn(run func(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *http.Response, error)) *IK8SObjectTrackerClient_ListDeviceClasses_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -3609,88 +3923,6 @@ func (_c *IK8SObjectTrackerClient_SyncDeviceClass_Call) RunAndReturn(run func(ct
 	return _c
 }
 
-// SyncResourceClaimTemplates provides a mock function for the type IK8SObjectTrackerClient
-func (_mock *IK8SObjectTrackerClient) SyncResourceClaimTemplates(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error) {
-	ret := _mock.Called(ctx, clusterId, rcts)
-
-	if len(ret) == 0 {
-		panic("no return value specified for SyncResourceClaimTemplates")
-	}
-
-	var r0 *openapi.ResourceClaimTemplates
-	var r1 *http.Response
-	var r2 error
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error)); ok {
-		return returnFunc(ctx, clusterId, rcts)
-	}
-	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []openapi.ResourceClaimTemplate) *openapi.ResourceClaimTemplates); ok {
-		r0 = returnFunc(ctx, clusterId, rcts)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*openapi.ResourceClaimTemplates)
-		}
-	}
-	if returnFunc, ok := ret.Get(1).(func(context.Context, string, []openapi.ResourceClaimTemplate) *http.Response); ok {
-		r1 = returnFunc(ctx, clusterId, rcts)
-	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(*http.Response)
-		}
-	}
-	if returnFunc, ok := ret.Get(2).(func(context.Context, string, []openapi.ResourceClaimTemplate) error); ok {
-		r2 = returnFunc(ctx, clusterId, rcts)
-	} else {
-		r2 = ret.Error(2)
-	}
-	return r0, r1, r2
-}
-
-// IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SyncResourceClaimTemplates'
-type IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call struct {
-	*mock.Call
-}
-
-// SyncResourceClaimTemplates is a helper method to define mock.On call
-//   - ctx context.Context
-//   - clusterId string
-//   - rcts []openapi.ResourceClaimTemplate
-func (_e *IK8SObjectTrackerClient_Expecter) SyncResourceClaimTemplates(ctx any, clusterId any, rcts any) *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call {
-	return &IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call{Call: _e.mock.On("SyncResourceClaimTemplates", ctx, clusterId, rcts)}
-}
-
-func (_c *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call) Run(run func(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate)) *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		var arg0 context.Context
-		if args[0] != nil {
-			arg0 = args[0].(context.Context)
-		}
-		var arg1 string
-		if args[1] != nil {
-			arg1 = args[1].(string)
-		}
-		var arg2 []openapi.ResourceClaimTemplate
-		if args[2] != nil {
-			arg2 = args[2].([]openapi.ResourceClaimTemplate)
-		}
-		run(
-			arg0,
-			arg1,
-			arg2,
-		)
-	})
-	return _c
-}
-
-func (_c *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call) Return(resourceClaimTemplates1 *openapi.ResourceClaimTemplates, response *http.Response, err error) *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call {
-	_c.Call.Return(resourceClaimTemplates1, response, err)
-	return _c
-}
-
-func (_c *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call) RunAndReturn(run func(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error)) *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
 // SyncProjectPvcs provides a mock function for the type IK8SObjectTrackerClient
 func (_mock *IK8SObjectTrackerClient) SyncProjectPvcs(ctx context.Context, clusterId string, projectId string, pvcs []openapi.PVC) (*openapi.PVCs, *http.Response, error) {
 	ret := _mock.Called(ctx, clusterId, projectId, pvcs)
@@ -3955,6 +4187,88 @@ func (_c *IK8SObjectTrackerClient_SyncProjectsConfigmap_Call) RunAndReturn(run f
 	return _c
 }
 
+// SyncResourceClaimTemplates provides a mock function for the type IK8SObjectTrackerClient
+func (_mock *IK8SObjectTrackerClient) SyncResourceClaimTemplates(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error) {
+	ret := _mock.Called(ctx, clusterId, rcts)
+
+	if len(ret) == 0 {
+		panic("no return value specified for SyncResourceClaimTemplates")
+	}
+
+	var r0 *openapi.ResourceClaimTemplates
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error)); ok {
+		return returnFunc(ctx, clusterId, rcts)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, []openapi.ResourceClaimTemplate) *openapi.ResourceClaimTemplates); ok {
+		r0 = returnFunc(ctx, clusterId, rcts)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ResourceClaimTemplates)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, []openapi.ResourceClaimTemplate) *http.Response); ok {
+		r1 = returnFunc(ctx, clusterId, rcts)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, []openapi.ResourceClaimTemplate) error); ok {
+		r2 = returnFunc(ctx, clusterId, rcts)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'SyncResourceClaimTemplates'
+type IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call struct {
+	*mock.Call
+}
+
+// SyncResourceClaimTemplates is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - rcts []openapi.ResourceClaimTemplate
+func (_e *IK8SObjectTrackerClient_Expecter) SyncResourceClaimTemplates(ctx any, clusterId any, rcts any) *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call {
+	return &IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call{Call: _e.mock.On("SyncResourceClaimTemplates", ctx, clusterId, rcts)}
+}
+
+func (_c *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call) Run(run func(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate)) *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 []openapi.ResourceClaimTemplate
+		if args[2] != nil {
+			arg2 = args[2].([]openapi.ResourceClaimTemplate)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call) Return(resourceClaimTemplates *openapi.ResourceClaimTemplates, response *http.Response, err error) *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call {
+	_c.Call.Return(resourceClaimTemplates, response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call) RunAndReturn(run func(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error)) *IK8SObjectTrackerClient_SyncResourceClaimTemplates_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SyncStorageClass provides a mock function for the type IK8SObjectTrackerClient
 func (_mock *IK8SObjectTrackerClient) SyncStorageClass(ctx context.Context, clusterId string, storageClasses []openapi.StorageClass) (*openapi.StorageClasses, *http.Response, error) {
 	ret := _mock.Called(ctx, clusterId, storageClasses)
@@ -4109,6 +4423,88 @@ func (_c *IK8SObjectTrackerClient_UpdateDeviceClass_Call) Return(deviceClass1 *o
 }
 
 func (_c *IK8SObjectTrackerClient_UpdateDeviceClass_Call) RunAndReturn(run func(ctx context.Context, deviceClass openapi.DeviceClass) (*openapi.DeviceClass, *http.Response, error)) *IK8SObjectTrackerClient_UpdateDeviceClass_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateResourceClaimTemplate provides a mock function for the type IK8SObjectTrackerClient
+func (_mock *IK8SObjectTrackerClient) UpdateResourceClaimTemplate(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error) {
+	ret := _mock.Called(ctx, clusterId, rct)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateResourceClaimTemplate")
+	}
+
+	var r0 *openapi.ResourceClaimTemplate
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error)); ok {
+		return returnFunc(ctx, clusterId, rct)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.ResourceClaimTemplate) *openapi.ResourceClaimTemplate); ok {
+		r0 = returnFunc(ctx, clusterId, rct)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ResourceClaimTemplate)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, openapi.ResourceClaimTemplate) *http.Response); ok {
+		r1 = returnFunc(ctx, clusterId, rct)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(context.Context, string, openapi.ResourceClaimTemplate) error); ok {
+		r2 = returnFunc(ctx, clusterId, rct)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateResourceClaimTemplate'
+type IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call struct {
+	*mock.Call
+}
+
+// UpdateResourceClaimTemplate is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - rct openapi.ResourceClaimTemplate
+func (_e *IK8SObjectTrackerClient_Expecter) UpdateResourceClaimTemplate(ctx any, clusterId any, rct any) *IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call {
+	return &IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call{Call: _e.mock.On("UpdateResourceClaimTemplate", ctx, clusterId, rct)}
+}
+
+func (_c *IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call) Run(run func(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate)) *IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 openapi.ResourceClaimTemplate
+		if args[2] != nil {
+			arg2 = args[2].(openapi.ResourceClaimTemplate)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call) Return(resourceClaimTemplate *openapi.ResourceClaimTemplate, response *http.Response, err error) *IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call {
+	_c.Call.Return(resourceClaimTemplate, response, err)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call) RunAndReturn(run func(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error)) *IK8SObjectTrackerClient_UpdateResourceClaimTemplate_Call {
 	_c.Call.Return(run)
 	return _c
 }

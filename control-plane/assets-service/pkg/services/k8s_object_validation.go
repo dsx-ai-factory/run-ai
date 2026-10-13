@@ -142,6 +142,11 @@ func validateLabelValue(key, value string) *api.Error {
 // K8s struct T with strict-unknown-field checking (layer 2). Callers specialise
 // the type parameter to their kind (e.g. resourcev1.ResourceClaimSpec for RCT).
 //
+// Returns the decoded typed value so callers can run kind-specific checks
+// (e.g. verifying referenced DeviceClass names exist) without re-parsing
+// the free-form map. The returned pointer is nil iff a non-nil error is
+// returned.
+//
 // Two-layer validation:
 //  1. OpenAPI JSON Schema (santhosh-tekuri) — types, enums, required fields,
 //     and constraints declared in the schema (min/max, length, ...).
@@ -162,25 +167,25 @@ func validateK8sObjectSpec[T any](
 	schema *jsschema.Schema,
 	pathPrefix string,
 	kindLabel string,
-) *api.Error {
+) (*T, *api.Error) {
 	if len(objectSpec) == 0 {
-		return api.NewError(http.StatusBadRequest, fmt.Sprintf("%s is required", pathPrefix), nil)
+		return nil, api.NewError(http.StatusBadRequest, fmt.Sprintf("%s is required", pathPrefix), nil)
 	}
 	if schema == nil {
-		return api.NewError(http.StatusServiceUnavailable,
+		return nil, api.NewError(http.StatusServiceUnavailable,
 			fmt.Sprintf("%s: schema-based validator is not initialized; check server logs", pathPrefix), nil)
 	}
 
 	// Layer 1: JSON Schema.
 	if err := schema.Validate(objectSpec); err != nil {
-		return api.NewError(http.StatusBadRequest,
+		return nil, api.NewError(http.StatusBadRequest,
 			fmt.Sprintf("%s does not conform to %s: %v", pathPrefix, kindLabel, err), nil)
 	}
 
 	// Layer 2: typed struct decode with strict unknown-field checking.
 	raw, err := json.Marshal(objectSpec)
 	if err != nil {
-		return api.NewError(http.StatusBadRequest,
+		return nil, api.NewError(http.StatusBadRequest,
 			fmt.Sprintf("%s: marshal failed: %v", pathPrefix, err), nil)
 	}
 
@@ -189,9 +194,9 @@ func validateK8sObjectSpec[T any](
 	dec.DisallowUnknownFields()
 
 	if err := dec.Decode(&typed); err != nil {
-		return api.NewError(http.StatusBadRequest,
+		return nil, api.NewError(http.StatusBadRequest,
 			fmt.Sprintf("%s: %v", pathPrefix, err), nil)
 	}
 
-	return nil
+	return &typed, nil
 }
