@@ -406,6 +406,7 @@ Class | Method | HTTP request | Description
  - [GitSecretRef](docs/GitSecretRef.md)
  - [GitUpdateRequest](docs/GitUpdateRequest.md)
  - [GitsRules](docs/GitsRules.md)
+ - [GpuComputeMode](docs/GpuComputeMode.md)
  - [GpuRequestType](docs/GpuRequestType.md)
  - [HistoryRecord](docs/HistoryRecord.md)
  - [HistoryRecordMeta](docs/HistoryRecordMeta.md)

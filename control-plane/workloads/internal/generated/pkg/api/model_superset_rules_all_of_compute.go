@@ -63,13 +63,30 @@ type SupersetRulesAllOfCompute struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryPortionLimit *NumberRules `json:"gpuMemoryPortionLimit,omitempty"`
+	GpuMemoryPortionLimit *NumberRules `json:"gpuMemoryPortionLimit,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Deprecated
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuPortionLimit *NumberRules `json:"gpuPortionLimit,omitempty"`
 	GpuPortionLimit *NumberRules `json:"gpuPortionLimit,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuMemoryPortionRequest *NumberRules `json:"gpuMemoryPortionRequest,omitempty"`
+	GpuMemoryPortionRequest *NumberRules `json:"gpuMemoryPortionRequest,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Deprecated
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuPortionRequest *NumberRules `json:"gpuPortionRequest,omitempty"`
 	GpuPortionRequest *NumberRules `json:"gpuPortionRequest,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuComputeMode *GpuComputeModeRules `json:"gpuComputeMode,omitempty"`
+	GpuComputeMode *GpuComputeModeRules `json:"gpuComputeMode,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -125,13 +142,28 @@ func AssertSupersetRulesAllOfComputeRequired(obj SupersetRulesAllOfCompute) erro
 			return err
 		}
 	}
+	if obj.GpuMemoryPortionLimit != nil {
+		if err := AssertNumberRulesRequired(*obj.GpuMemoryPortionLimit); err != nil {
+			return err
+		}
+	}
 	if obj.GpuPortionLimit != nil {
 		if err := AssertNumberRulesRequired(*obj.GpuPortionLimit); err != nil {
 			return err
 		}
 	}
+	if obj.GpuMemoryPortionRequest != nil {
+		if err := AssertNumberRulesRequired(*obj.GpuMemoryPortionRequest); err != nil {
+			return err
+		}
+	}
 	if obj.GpuPortionRequest != nil {
 		if err := AssertNumberRulesRequired(*obj.GpuPortionRequest); err != nil {
+			return err
+		}
+	}
+	if obj.GpuComputeMode != nil {
+		if err := AssertGpuComputeModeRulesRequired(*obj.GpuComputeMode); err != nil {
 			return err
 		}
 	}
@@ -235,6 +267,16 @@ func AssertSupersetRulesAllOfComputeConstraints(obj SupersetRulesAllOfCompute) e
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuMemoryPortionLimit != nil {
+		if err := AssertNumberRulesConstraints(*obj.GpuMemoryPortionLimit); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuPortionLimit != nil {
 		if err := AssertNumberRulesConstraints(*obj.GpuPortionLimit); err != nil {
 			return err
@@ -245,8 +287,28 @@ func AssertSupersetRulesAllOfComputeConstraints(obj SupersetRulesAllOfCompute) e
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuMemoryPortionRequest != nil {
+		if err := AssertNumberRulesConstraints(*obj.GpuMemoryPortionRequest); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuPortionRequest != nil {
 		if err := AssertNumberRulesConstraints(*obj.GpuPortionRequest); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuComputeMode != nil {
+		if err := AssertGpuComputeModeRulesConstraints(*obj.GpuComputeMode); err != nil {
 			return err
 		}
 	}

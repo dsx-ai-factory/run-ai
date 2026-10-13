@@ -122,7 +122,7 @@ func UpdateDepartmentWithChildren(ctx context.Context, department *models.Depart
 		Name:         department.Name,
 	}
 	if _, err := tx.Table(models.DepartmentTable).Where(&departmentWhere).
-		Omit(orgUnitNodeTypeOmitFields()...).
+		Omit(append(orgUnitNodeTypeOmitFields(), resourcesStatusOmitFields()...)...).
 		Updates(department); err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed department update: %v", err)
 		return nil, err

@@ -37,10 +37,17 @@ type SupersetDefaultsAllOfCompute struct {
 	GpuMemoryLimit NullableString `json:"gpuMemoryLimit,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
 	// Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
 	GpuMemoryRequest NullableString `json:"gpuMemoryRequest,omitempty" validate:"regexp=^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"`
-	// Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+	// Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+	GpuMemoryPortionLimit NullableFloat64 `json:"gpuMemoryPortionLimit,omitempty"`
+	// Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+	// Deprecated
 	GpuPortionLimit NullableFloat64 `json:"gpuPortionLimit,omitempty"`
-	// Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+	// GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+	GpuMemoryPortionRequest NullableFloat64 `json:"gpuMemoryPortionRequest,omitempty"`
+	// Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+	// Deprecated
 	GpuPortionRequest NullableFloat64        `json:"gpuPortionRequest,omitempty"`
+	GpuComputeMode    NullableGpuComputeMode `json:"gpuComputeMode,omitempty"`
 	GpuRequestType    NullableGpuRequestType `json:"gpuRequestType,omitempty"`
 	// A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM.
 	LargeShmRequest NullableBool `json:"largeShmRequest,omitempty"`
@@ -407,7 +414,51 @@ func (o *SupersetDefaultsAllOfCompute) UnsetGpuMemoryRequest() {
 	o.GpuMemoryRequest.Unset()
 }
 
+// GetGpuMemoryPortionLimit returns the GpuMemoryPortionLimit field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetDefaultsAllOfCompute) GetGpuMemoryPortionLimit() float64 {
+	if o == nil || IsNil(o.GpuMemoryPortionLimit.Get()) {
+		var ret float64
+		return ret
+	}
+	return *o.GpuMemoryPortionLimit.Get()
+}
+
+// GetGpuMemoryPortionLimitOk returns a tuple with the GpuMemoryPortionLimit field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetDefaultsAllOfCompute) GetGpuMemoryPortionLimitOk() (*float64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuMemoryPortionLimit.Get(), o.GpuMemoryPortionLimit.IsSet()
+}
+
+// HasGpuMemoryPortionLimit returns a boolean if a field has been set.
+func (o *SupersetDefaultsAllOfCompute) HasGpuMemoryPortionLimit() bool {
+	if o != nil && o.GpuMemoryPortionLimit.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuMemoryPortionLimit gets a reference to the given NullableFloat64 and assigns it to the GpuMemoryPortionLimit field.
+func (o *SupersetDefaultsAllOfCompute) SetGpuMemoryPortionLimit(v float64) {
+	o.GpuMemoryPortionLimit.Set(&v)
+}
+
+// SetGpuMemoryPortionLimitNil sets the value for GpuMemoryPortionLimit to be an explicit nil
+func (o *SupersetDefaultsAllOfCompute) SetGpuMemoryPortionLimitNil() {
+	o.GpuMemoryPortionLimit.Set(nil)
+}
+
+// UnsetGpuMemoryPortionLimit ensures that no value is present for GpuMemoryPortionLimit, not even an explicit nil
+func (o *SupersetDefaultsAllOfCompute) UnsetGpuMemoryPortionLimit() {
+	o.GpuMemoryPortionLimit.Unset()
+}
+
 // GetGpuPortionLimit returns the GpuPortionLimit field value if set, zero value otherwise (both if not set or set to explicit null).
+// Deprecated
 func (o *SupersetDefaultsAllOfCompute) GetGpuPortionLimit() float64 {
 	if o == nil || IsNil(o.GpuPortionLimit.Get()) {
 		var ret float64
@@ -419,6 +470,7 @@ func (o *SupersetDefaultsAllOfCompute) GetGpuPortionLimit() float64 {
 // GetGpuPortionLimitOk returns a tuple with the GpuPortionLimit field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
+// Deprecated
 func (o *SupersetDefaultsAllOfCompute) GetGpuPortionLimitOk() (*float64, bool) {
 	if o == nil {
 		return nil, false
@@ -436,6 +488,7 @@ func (o *SupersetDefaultsAllOfCompute) HasGpuPortionLimit() bool {
 }
 
 // SetGpuPortionLimit gets a reference to the given NullableFloat64 and assigns it to the GpuPortionLimit field.
+// Deprecated
 func (o *SupersetDefaultsAllOfCompute) SetGpuPortionLimit(v float64) {
 	o.GpuPortionLimit.Set(&v)
 }
@@ -450,7 +503,51 @@ func (o *SupersetDefaultsAllOfCompute) UnsetGpuPortionLimit() {
 	o.GpuPortionLimit.Unset()
 }
 
+// GetGpuMemoryPortionRequest returns the GpuMemoryPortionRequest field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetDefaultsAllOfCompute) GetGpuMemoryPortionRequest() float64 {
+	if o == nil || IsNil(o.GpuMemoryPortionRequest.Get()) {
+		var ret float64
+		return ret
+	}
+	return *o.GpuMemoryPortionRequest.Get()
+}
+
+// GetGpuMemoryPortionRequestOk returns a tuple with the GpuMemoryPortionRequest field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetDefaultsAllOfCompute) GetGpuMemoryPortionRequestOk() (*float64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuMemoryPortionRequest.Get(), o.GpuMemoryPortionRequest.IsSet()
+}
+
+// HasGpuMemoryPortionRequest returns a boolean if a field has been set.
+func (o *SupersetDefaultsAllOfCompute) HasGpuMemoryPortionRequest() bool {
+	if o != nil && o.GpuMemoryPortionRequest.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuMemoryPortionRequest gets a reference to the given NullableFloat64 and assigns it to the GpuMemoryPortionRequest field.
+func (o *SupersetDefaultsAllOfCompute) SetGpuMemoryPortionRequest(v float64) {
+	o.GpuMemoryPortionRequest.Set(&v)
+}
+
+// SetGpuMemoryPortionRequestNil sets the value for GpuMemoryPortionRequest to be an explicit nil
+func (o *SupersetDefaultsAllOfCompute) SetGpuMemoryPortionRequestNil() {
+	o.GpuMemoryPortionRequest.Set(nil)
+}
+
+// UnsetGpuMemoryPortionRequest ensures that no value is present for GpuMemoryPortionRequest, not even an explicit nil
+func (o *SupersetDefaultsAllOfCompute) UnsetGpuMemoryPortionRequest() {
+	o.GpuMemoryPortionRequest.Unset()
+}
+
 // GetGpuPortionRequest returns the GpuPortionRequest field value if set, zero value otherwise (both if not set or set to explicit null).
+// Deprecated
 func (o *SupersetDefaultsAllOfCompute) GetGpuPortionRequest() float64 {
 	if o == nil || IsNil(o.GpuPortionRequest.Get()) {
 		var ret float64
@@ -462,6 +559,7 @@ func (o *SupersetDefaultsAllOfCompute) GetGpuPortionRequest() float64 {
 // GetGpuPortionRequestOk returns a tuple with the GpuPortionRequest field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
+// Deprecated
 func (o *SupersetDefaultsAllOfCompute) GetGpuPortionRequestOk() (*float64, bool) {
 	if o == nil {
 		return nil, false
@@ -479,6 +577,7 @@ func (o *SupersetDefaultsAllOfCompute) HasGpuPortionRequest() bool {
 }
 
 // SetGpuPortionRequest gets a reference to the given NullableFloat64 and assigns it to the GpuPortionRequest field.
+// Deprecated
 func (o *SupersetDefaultsAllOfCompute) SetGpuPortionRequest(v float64) {
 	o.GpuPortionRequest.Set(&v)
 }
@@ -491,6 +590,49 @@ func (o *SupersetDefaultsAllOfCompute) SetGpuPortionRequestNil() {
 // UnsetGpuPortionRequest ensures that no value is present for GpuPortionRequest, not even an explicit nil
 func (o *SupersetDefaultsAllOfCompute) UnsetGpuPortionRequest() {
 	o.GpuPortionRequest.Unset()
+}
+
+// GetGpuComputeMode returns the GpuComputeMode field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetDefaultsAllOfCompute) GetGpuComputeMode() GpuComputeMode {
+	if o == nil || IsNil(o.GpuComputeMode.Get()) {
+		var ret GpuComputeMode
+		return ret
+	}
+	return *o.GpuComputeMode.Get()
+}
+
+// GetGpuComputeModeOk returns a tuple with the GpuComputeMode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetDefaultsAllOfCompute) GetGpuComputeModeOk() (*GpuComputeMode, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuComputeMode.Get(), o.GpuComputeMode.IsSet()
+}
+
+// HasGpuComputeMode returns a boolean if a field has been set.
+func (o *SupersetDefaultsAllOfCompute) HasGpuComputeMode() bool {
+	if o != nil && o.GpuComputeMode.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuComputeMode gets a reference to the given NullableGpuComputeMode and assigns it to the GpuComputeMode field.
+func (o *SupersetDefaultsAllOfCompute) SetGpuComputeMode(v GpuComputeMode) {
+	o.GpuComputeMode.Set(&v)
+}
+
+// SetGpuComputeModeNil sets the value for GpuComputeMode to be an explicit nil
+func (o *SupersetDefaultsAllOfCompute) SetGpuComputeModeNil() {
+	o.GpuComputeMode.Set(nil)
+}
+
+// UnsetGpuComputeMode ensures that no value is present for GpuComputeMode, not even an explicit nil
+func (o *SupersetDefaultsAllOfCompute) UnsetGpuComputeMode() {
+	o.GpuComputeMode.Unset()
 }
 
 // GetGpuRequestType returns the GpuRequestType field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -613,11 +755,20 @@ func (o SupersetDefaultsAllOfCompute) ToMap() (map[string]interface{}, error) {
 	if o.GpuMemoryRequest.IsSet() {
 		toSerialize["gpuMemoryRequest"] = o.GpuMemoryRequest.Get()
 	}
+	if o.GpuMemoryPortionLimit.IsSet() {
+		toSerialize["gpuMemoryPortionLimit"] = o.GpuMemoryPortionLimit.Get()
+	}
 	if o.GpuPortionLimit.IsSet() {
 		toSerialize["gpuPortionLimit"] = o.GpuPortionLimit.Get()
 	}
+	if o.GpuMemoryPortionRequest.IsSet() {
+		toSerialize["gpuMemoryPortionRequest"] = o.GpuMemoryPortionRequest.Get()
+	}
 	if o.GpuPortionRequest.IsSet() {
 		toSerialize["gpuPortionRequest"] = o.GpuPortionRequest.Get()
+	}
+	if o.GpuComputeMode.IsSet() {
+		toSerialize["gpuComputeMode"] = o.GpuComputeMode.Get()
 	}
 	if o.GpuRequestType.IsSet() {
 		toSerialize["gpuRequestType"] = o.GpuRequestType.Get()

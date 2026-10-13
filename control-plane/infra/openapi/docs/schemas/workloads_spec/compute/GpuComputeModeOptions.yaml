@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+properties:
+  options:
+    description: Limit the permitted values for gpuComputeMode to a given set of values.
+    type: array
+    items:
+      required:
+        - value
+      properties:
+        value:
+          $ref: "./GpuComputeMode.yaml"
+        displayed:
+          description: Textual description of the value
+          type: string
+          nullable: true
+          pattern: .*
+    nullable: true
+nullable: true
+type: object

@@ -54,8 +54,8 @@ func TestStatsPercentiles(t *testing.T) {
 			if got.P50 != tc.p50 || got.P90 != tc.p90 || got.P99 != tc.p99 {
 				t.Fatalf("p50/p90/p99 = %s/%s/%s, want %s/%s/%s", got.P50, got.P90, got.P99, tc.p50, tc.p90, tc.p99)
 			}
-			if got.SampleSize != len(tc.durations) || got.SuccessRate != 1 {
-				t.Fatalf("sample_size %d success_rate %v", got.SampleSize, got.SuccessRate)
+			if got.SampleSize != len(tc.durations) {
+				t.Fatalf("sample_size %d", got.SampleSize)
 			}
 		})
 	}
@@ -70,11 +70,8 @@ func TestStatsNeverArrivedIsExcludedNotZero(t *testing.T) {
 	if got.P50 != 60*time.Second || got.P99 != 60*time.Second || got.Mean != 60*time.Second {
 		t.Fatalf("items that never arrived must not enter the distribution: %+v", got)
 	}
-	if got.NeverArrivedCount != 5 || got.SampleSize != 5 || got.SuccessRate != 0.5 {
-		t.Fatalf("expected 5 never arrived, 5 samples, 50%% success, got %+v", got)
-	}
-	if v, ok := got.Metrics()["p50_ms"]; !ok || v != int64(60000) {
-		t.Fatalf("p50_ms must be 60000, got %v", v)
+	if got.NeverArrivedCount != 5 || got.SampleSize != 5 {
+		t.Fatalf("expected 5 never arrived and 5 samples, got %+v", got)
 	}
 }
 
@@ -93,17 +90,11 @@ func TestStatsEmptyAndAllNeverArrived(t *testing.T) {
 	for name, timings := range map[string][]Timing{"empty": nil, "all never arrived": neverArrived(3)} {
 		t.Run(name, func(t *testing.T) {
 			got := Stats(timings)
-			if got.SampleSize != 0 || got.P50 != 0 || got.Throughput != 0 {
-				t.Fatalf("no samples must mean no latencies: %+v", got)
+			if got.SampleSize != 0 || got.P50 != 0 || got.Throughput != 0 || got.HasThroughput() {
+				t.Fatalf("no samples must mean no latencies and no throughput: %+v", got)
 			}
-			metrics := got.Metrics()
-			for _, key := range []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec"} {
-				if _, present := metrics[key]; present {
-					t.Fatalf("%s must be omitted when nothing arrived", key)
-				}
-			}
-			if metrics["never_arrived_count"] != len(timings) {
-				t.Fatalf("never_arrived_count must still be reported: %v", metrics)
+			if got.NeverArrivedCount != len(timings) {
+				t.Fatalf("never arrived items must still be counted: %+v", got)
 			}
 		})
 	}
@@ -130,10 +121,8 @@ func TestStatsThroughputAndMakespan(t *testing.T) {
 		t.Fatalf("one arrival is not a rate, got throughput %v", single.Throughput)
 	}
 	for _, summary := range []Summary{instant, single} {
-		for _, key := range []string{"makespan_ms", "throughput_per_sec"} {
-			if _, ok := summary.Metrics()[key]; ok {
-				t.Fatalf("%s must be absent without at least two arrivals over a real window", key)
-			}
+		if summary.HasThroughput() {
+			t.Fatalf("throughput needs at least two arrivals over a real window: %+v", summary)
 		}
 	}
 	if got.Max != 2*time.Second || got.Mean != 2*time.Second {

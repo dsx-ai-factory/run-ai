@@ -12857,6 +12857,17 @@
         "maxItems": 1000,
         "nullable": true
       },
+      "GpuComputeMode": {
+        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.",
+        "type": "string",
+        "minLength": 1,
+        "enum": [
+          "time-slicing",
+          "sm-sharing"
+        ],
+        "nullable": true,
+        "x-gorm-ignore": true
+      },
       "GpuDevicesRequest": {
         "description": "Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.",
         "type": "integer",
@@ -12873,6 +12884,25 @@
         "example": "10M",
         "nullable": true
       },
+      "GpuMemoryPortionLimit": {
+        "description": "Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.",
+        "type": "number",
+        "format": "double",
+        "example": 0.5,
+        "nullable": true,
+        "minimum": 0,
+        "x-gorm-ignore": true
+      },
+      "GpuMemoryPortionRequest": {
+        "description": "GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.",
+        "type": "number",
+        "format": "double",
+        "example": 0.5,
+        "nullable": true,
+        "minimum": 0,
+        "maximum": 1,
+        "x-gorm-ignore": true
+      },
       "GpuMemoryRequest": {
         "description": "Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.",
         "type": "string",
@@ -12882,20 +12912,22 @@
         "nullable": true
       },
       "GpuPortionLimit": {
-        "description": "Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.",
+        "description": "Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.",
         "type": "number",
         "format": "double",
         "example": 0.5,
         "nullable": true,
-        "minimum": 0
+        "minimum": 0,
+        "deprecated": true
       },
       "GpuPortionRequest": {
-        "description": "Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.",
+        "description": "Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.",
         "type": "number",
         "format": "double",
         "example": 0.5,
         "nullable": true,
-        "minimum": 0
+        "minimum": 0,
+        "deprecated": true
       },
       "LargeShmRequest": {
         "description": "A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM.",
@@ -14682,11 +14714,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -15131,11 +15172,20 @@
               "extendedResources": {
                 "$ref": "#/components/schemas/ExtendedResources"
               },
+              "gpuComputeMode": {
+                "$ref": "#/components/schemas/GpuComputeMode"
+              },
               "gpuDevicesRequest": {
                 "$ref": "#/components/schemas/GpuDevicesRequest"
               },
               "gpuMemoryLimit": {
                 "$ref": "#/components/schemas/GpuMemoryLimit"
+              },
+              "gpuMemoryPortionLimit": {
+                "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+              },
+              "gpuMemoryPortionRequest": {
+                "$ref": "#/components/schemas/GpuMemoryPortionRequest"
               },
               "gpuMemoryRequest": {
                 "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -15865,11 +15915,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -16149,11 +16208,20 @@
               "extendedResources": {
                 "$ref": "#/components/schemas/ExtendedResources"
               },
+              "gpuComputeMode": {
+                "$ref": "#/components/schemas/GpuComputeMode"
+              },
               "gpuDevicesRequest": {
                 "$ref": "#/components/schemas/GpuDevicesRequest"
               },
               "gpuMemoryLimit": {
                 "$ref": "#/components/schemas/GpuMemoryLimit"
+              },
+              "gpuMemoryPortionLimit": {
+                "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+              },
+              "gpuMemoryPortionRequest": {
+                "$ref": "#/components/schemas/GpuMemoryPortionRequest"
               },
               "gpuMemoryRequest": {
                 "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -16488,11 +16556,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -16747,11 +16824,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -17321,11 +17407,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -17559,11 +17654,20 @@
                       "extendedResources": {
                         "$ref": "#/components/schemas/ExtendedResources"
                       },
+                      "gpuComputeMode": {
+                        "$ref": "#/components/schemas/GpuComputeMode"
+                      },
                       "gpuDevicesRequest": {
                         "$ref": "#/components/schemas/GpuDevicesRequest"
                       },
                       "gpuMemoryLimit": {
                         "$ref": "#/components/schemas/GpuMemoryLimit"
+                      },
+                      "gpuMemoryPortionLimit": {
+                        "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                      },
+                      "gpuMemoryPortionRequest": {
+                        "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                       },
                       "gpuMemoryRequest": {
                         "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -18193,11 +18297,20 @@
               "extendedResources": {
                 "$ref": "#/components/schemas/ExtendedResources"
               },
+              "gpuComputeMode": {
+                "$ref": "#/components/schemas/GpuComputeMode"
+              },
               "gpuDevicesRequest": {
                 "$ref": "#/components/schemas/GpuDevicesRequest"
               },
               "gpuMemoryLimit": {
                 "$ref": "#/components/schemas/GpuMemoryLimit"
+              },
+              "gpuMemoryPortionLimit": {
+                "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+              },
+              "gpuMemoryPortionRequest": {
+                "$ref": "#/components/schemas/GpuMemoryPortionRequest"
               },
               "gpuMemoryRequest": {
                 "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -18537,11 +18650,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -18970,11 +19092,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -19297,11 +19428,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -19679,11 +19819,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -19970,11 +20119,20 @@
               "extendedResources": {
                 "$ref": "#/components/schemas/ExtendedResources"
               },
+              "gpuComputeMode": {
+                "$ref": "#/components/schemas/GpuComputeMode"
+              },
               "gpuDevicesRequest": {
                 "$ref": "#/components/schemas/GpuDevicesRequest"
               },
               "gpuMemoryLimit": {
                 "$ref": "#/components/schemas/GpuMemoryLimit"
+              },
+              "gpuMemoryPortionLimit": {
+                "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+              },
+              "gpuMemoryPortionRequest": {
+                "$ref": "#/components/schemas/GpuMemoryPortionRequest"
               },
               "gpuMemoryRequest": {
                 "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -20315,11 +20473,20 @@
           "gpuMemoryRequest": {
             "$ref": "#/components/schemas/GpuMemoryRequest"
           },
+          "gpuMemoryPortionLimit": {
+            "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+          },
           "gpuPortionLimit": {
             "$ref": "#/components/schemas/GpuPortionLimit"
           },
+          "gpuMemoryPortionRequest": {
+            "$ref": "#/components/schemas/GpuMemoryPortionRequest"
+          },
           "gpuPortionRequest": {
             "$ref": "#/components/schemas/GpuPortionRequest"
+          },
+          "gpuComputeMode": {
+            "$ref": "#/components/schemas/GpuComputeMode"
           },
           "gpuRequestType": {
             "$ref": "#/components/schemas/GpuRequestType"
@@ -21324,6 +21491,45 @@
         "nullable": true,
         "type": "object"
       },
+      "GpuComputeModeOptions": {
+        "properties": {
+          "options": {
+            "description": "Limit the permitted values for gpuComputeMode to a given set of values.",
+            "type": "array",
+            "items": {
+              "required": [
+                "value"
+              ],
+              "properties": {
+                "value": {
+                  "$ref": "#/components/schemas/GpuComputeMode"
+                },
+                "displayed": {
+                  "description": "Textual description of the value",
+                  "type": "string",
+                  "nullable": true,
+                  "pattern": ".*"
+                }
+              }
+            },
+            "nullable": true
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "GpuComputeModeRules": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/StringRulesCommon"
+          },
+          {
+            "$ref": "#/components/schemas/GpuComputeModeOptions"
+          }
+        ],
+        "nullable": true,
+        "type": "object"
+      },
       "GpuRequestOptions": {
         "properties": {
           "options": {
@@ -21410,11 +21616,30 @@
           "gpuMemoryRequest": {
             "$ref": "#/components/schemas/QuantityRules"
           },
+          "gpuMemoryPortionLimit": {
+            "$ref": "#/components/schemas/NumberRules"
+          },
           "gpuPortionLimit": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NumberRules"
+              }
+            ],
+            "deprecated": true
+          },
+          "gpuMemoryPortionRequest": {
             "$ref": "#/components/schemas/NumberRules"
           },
           "gpuPortionRequest": {
-            "$ref": "#/components/schemas/NumberRules"
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/NumberRules"
+              }
+            ],
+            "deprecated": true
+          },
+          "gpuComputeMode": {
+            "$ref": "#/components/schemas/GpuComputeModeRules"
           },
           "gpuRequestType": {
             "$ref": "#/components/schemas/GpuRequestRules"

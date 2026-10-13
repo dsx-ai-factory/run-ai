@@ -128,7 +128,9 @@ var newGenMetrics = []string{
 	"runai_allocated_gpu_count_per_gpu",
 	"runai_allocated_gpu_count_per_node",
 	"runai_allocated_gpu_count_per_nodepool",
+	"runai_allocated_gpu_count_per_nodepool:hourly",
 	"runai_allocated_gpu_count_per_cluster",
+	"runai_allocated_gpu_count_per_cluster:hourly",
 	"runai_free_gpu_count_per_node",
 
 	"runai_gpu_allocation_percentage_per_node",
@@ -136,8 +138,11 @@ var newGenMetrics = []string{
 	"runai_gpu_allocation_percentage_per_cluster",
 
 	"runai_deserved_gpu_count_per_queue",
+	"runai_deserved_gpu_count_per_queue:hourly",
 	"runai_deserved_gpu_count_per_project",
+	"runai_deserved_gpu_count_per_project:hourly",
 	"runai_deserved_gpu_count_per_department",
+	"runai_deserved_gpu_count_per_department:hourly",
 
 	"runai_gpu_utilization_per_pod_per_gpu",
 	"runai_gpu_utilization_per_workload",

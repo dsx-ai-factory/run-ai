@@ -39,6 +39,7 @@ pkg/api/model_error.go
 pkg/api/model_external_access.go
 pkg/api/model_get_yaml_submission.go
 pkg/api/model_get_yaml_submission_value.go
+pkg/api/model_gpu_compute_mode.go
 pkg/api/model_gpu_request_type.go
 pkg/api/model_gvk.go
 pkg/api/model_image_pull_policy.go

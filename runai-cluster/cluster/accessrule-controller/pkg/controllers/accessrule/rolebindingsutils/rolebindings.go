@@ -108,13 +108,12 @@ func subjectNameForAccessRule(accessRule *v1alpha1.AccessRule) string {
 }
 
 func GetSubjectKind(subjectType v1alpha1.AccessRuleSubjectType) string {
-	if subjectType == v1alpha1.UserSubject ||
-		subjectType == v1alpha1.AppSubject ||
-		subjectType == v1alpha1.ServiceAccountSubject {
+	switch subjectType {
+	case v1alpha1.UserSubject, v1alpha1.ServiceAccountSubject:
 		return UserKind
+	default:
+		return GroupKind
 	}
-	// group and all-authenticated-users both bind as a Kubernetes Group
-	return GroupKind
 }
 
 func GetClusterRoleBindingName(roleName string) string {

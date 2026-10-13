@@ -1,24 +1,24 @@
 module github.com/dsx-ai-factory/run-ai/runai-mcp-server
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/MicahParks/keyfunc/v3 v3.8.2
-	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.0
-	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.5
+	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
+	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.6
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.20
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.1
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.6
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.7
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5
-	github.com/go-chi/chi/v5 v5.3.2
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.6
+	github.com/go-chi/chi/v5 v5.4.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/google/jsonschema-go v0.4.3
 	github.com/google/uuid v1.6.0
@@ -37,9 +37,9 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.2 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.28 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
@@ -59,7 +59,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.72.0 // indirect
+	github.com/prometheus/common v0.72.1 // indirect
 	github.com/prometheus/procfs v0.22.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
@@ -78,9 +78,9 @@ require (
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/oauth2 v0.37.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/time v0.16.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )

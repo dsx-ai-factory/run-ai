@@ -28,7 +28,7 @@ import (
 func getExistingClients() []idmopenapi.Client {
 	return []idmopenapi.Client{
 		*idmopenapi.NewClient(AgentClientName+NAME, "agentClientName", "agentSecret"),
-		*idmopenapi.NewClient(InstallerClientName, "installerClientName", "installerSecret"),
+		*idmopenapi.NewClient(AgentClientName+NAME+"-2", "agentClientName2", "agentSecret2"),
 	}
 }
 

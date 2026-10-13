@@ -11,7 +11,7 @@ export const rolesMock = [
     permissions: [
       { resourceType: "users", actions: ["create", "read", "update", "delete"] },
       { resourceType: "groups", actions: ["create", "read", "update", "delete"] },
-      { resourceType: "apps", actions: ["create", "read", "update", "delete"] },
+      { resourceType: "service-account", actions: ["create", "read", "update", "delete"] },
       { resourceType: "access_rules", actions: ["create", "read", "update", "delete"] },
       { resourceType: "roles", actions: ["read"] },
       { resourceType: "department", actions: ["create", "read", "update", "delete"] },
@@ -36,7 +36,7 @@ export const rolesMock = [
     assignments: [
       {
         assignedTo: "424ab2d5-baaa-41ae-8b59-5fa2a159540a",
-        type: "app",
+        type: "service-account",
         scopeId: "1",
         assignedBy: "",
         lastUpdated: "2023-05-09T11:55:09.150455Z",
@@ -57,7 +57,7 @@ export const rolesMock = [
     permissions: [
       { resourceType: "users", actions: ["create", "read", "update", "delete"] },
       { resourceType: "groups", actions: ["create", "read", "update", "delete"] },
-      { resourceType: "apps", actions: ["create", "read", "update", "delete"] },
+      { resourceType: "service-account", actions: ["create", "read", "update", "delete"] },
       { resourceType: "access_rules", actions: ["create", "read", "update", "delete"] },
       { resourceType: "roles", actions: ["read"] },
       { resourceType: "department", actions: ["read"] },
@@ -164,7 +164,7 @@ export const permissionsMockWide = [
   { resourceType: "workspaces", actions: ["create", "read", "update", "delete"] },
   { resourceType: "access_rules", actions: ["create", "read", "update", "delete"] },
   { resourceType: "environments", actions: ["create", "read", "update", "delete"] },
-  { resourceType: "apps", actions: ["create", "read", "update", "delete"] },
+  { resourceType: "service-account", actions: ["create", "read", "update", "delete"] },
   { resourceType: "inferences", actions: ["create", "read", "update", "delete"] },
   { resourceType: "cluster", actions: ["create", "read", "update", "delete"] },
   { resourceType: "project", actions: ["create", "read", "update", "delete"] },

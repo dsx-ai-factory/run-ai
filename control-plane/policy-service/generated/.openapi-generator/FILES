@@ -178,6 +178,10 @@ pkg/api/model_git_rules.go
 pkg/api/model_git_secret_ref.go
 pkg/api/model_gits_defaults.go
 pkg/api/model_gits_rules.go
+pkg/api/model_gpu_compute_mode.go
+pkg/api/model_gpu_compute_mode_options.go
+pkg/api/model_gpu_compute_mode_options_options_inner.go
+pkg/api/model_gpu_compute_mode_rules.go
 pkg/api/model_gpu_request_options.go
 pkg/api/model_gpu_request_options_options_inner.go
 pkg/api/model_gpu_request_rules.go

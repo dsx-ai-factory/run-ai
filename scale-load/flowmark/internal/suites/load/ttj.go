@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"slices"
 	"strings"
 	"sync"
@@ -25,15 +24,25 @@ import (
 
 const (
 	suiteName          = "load-ttj"
-	workspaceType      = "Workspace"
-	trainingType       = "Training"
+	projectPrefix      = "flowmark-load"
 	runLabel           = "flowmark/run"
 	progressInterval   = 30 * time.Second
-	cleanupGrace       = time.Minute
 	timestampTolerance = time.Second
+	rateShortfall      = 0.10
 )
 
-type Suite struct{}
+type sessionOpener func(ctx context.Context, target core.Target, limits client.Limits, cluster, projectPrefix string, setupTimeout time.Duration) (*submit.Session, error)
+
+type Suite struct {
+	openSession sessionOpener
+}
+
+func (s Suite) session() sessionOpener {
+	if s.openSession != nil {
+		return s.openSession
+	}
+	return submit.OpenSession
+}
 
 func (Suite) Name() string {
 	return suiteName
@@ -43,48 +52,36 @@ func (Suite) Category() core.Category {
 	return core.CategoryLoad
 }
 
-func (Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario) (section core.Section, err error) {
+func (Suite) Knobs() []string {
+	return knownKnobs
+}
+
+func (Suite) Validate(scenario core.Scenario) error {
+	_, err := parseOptions(scenario)
+	return err
+}
+
+func (s Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario) (section core.Section, err error) {
 	opts, err := parseOptions(scenario)
 	if err != nil {
 		return core.Section{}, err
 	}
 
-	setupCtx, cancelSetup := context.WithTimeout(ctx, opts.setupTimeout)
-	defer cancelSetup()
-	clients, err := client.NewWithLimits(ctx, target, opts.limits)
+	session, err := s.session()(ctx, target, opts.limits, opts.cluster, projectPrefix, opts.setupTimeout)
 	if err != nil {
 		return core.Section{}, err
 	}
-	if !clients.TokenExpiry.IsZero() {
-		log.Printf("%s: control plane token expires in %s; longer runs will fail with 401", suiteName, time.Until(clients.TokenExpiry).Round(time.Minute))
-	}
-	clusterID, err := submit.ClusterID(setupCtx, clients, opts.cluster)
-	if err != nil {
-		return core.Section{}, err
-	}
-	runID, err := core.NewRunID()
-	if err != nil {
-		return core.Section{}, err
-	}
-
-	projectName := "flowmark-load-" + runID
+	clients, project, runID := session.Clients, session.Project, session.RunID
 	defer func() {
-		log.Printf("%s: cleaning up project %q", suiteName, projectName)
-		cleanupErr := cleanupProject(clients, clusterID, projectName, opts.setupTimeout)
-		if cleanupErr == nil {
-			return
+		log.Printf("%s: cleaning up project %q", suiteName, project.Name)
+		if cleanupErr := session.Close(); cleanupErr != nil {
+			if err != nil {
+				err = errors.Join(err, cleanupErr)
+			} else {
+				section.Fail("cleanup: " + cleanupErr.Error())
+			}
 		}
-		if err != nil {
-			err = errors.Join(err, cleanupErr)
-			return
-		}
-		section.Failed = true
-		section.Error = joinMessages(section.Error, "cleanup: "+cleanupErr.Error())
 	}()
-	project, err := submit.Project(setupCtx, clients, clusterID, projectName, opts.setupTimeout)
-	if err != nil {
-		return core.Section{}, err
-	}
 	log.Printf("%s: project %q ready, namespace %s", suiteName, project.Name, project.Namespace)
 
 	watchers, err := measure.OpenArrivals(ctx, clients.Kube, project.Namespace)
@@ -99,22 +96,22 @@ func (Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario
 
 	filled := watchers.Fill(submissions, opts.timeout)
 	interrupted := ctx.Err()
+	watchErr := watchers.Err()
 	spans := measure.CollectSpans(filled)
 	log.Printf("%s: %s", suiteName, describe(spans, pacing))
-	log.Printf("%s: measurement %s", suiteName, describeMeasurement(watchers.Reconnects(), measure.OutOfOrder(filled, timestampTolerance)))
+	log.Printf("%s: measurement %s", suiteName, describeMeasurement(watchers.Reconnects(), watchers.Interruptions(), measure.OutOfOrder(filled, timestampTolerance)))
 
 	deleteErr := deleteWorkloads(ctx, clients, project, opts)
-	section = buildSection(spans, pacing, filled, opts, watchers.Reconnects(), interrupted)
+	section = buildSection(spans, pacing, filled, opts, watchers.Interruptions(), interrupted, watchErr)
 	if deleteErr != nil {
-		section.Failed = true
-		section.Error = joinMessages(section.Error, deleteErr.Error())
+		section.Fail(deleteErr.Error())
 	}
 	return section, nil
 }
 
 func submitWorkloads(ctx context.Context, clients *client.Clients, project submit.ProjectRef, watchers *measure.Arrivals, opts options, runID string) ([]measure.Submission, submit.Pacing) {
 	create := submit.Workspace
-	if opts.workloadType == trainingType {
+	if opts.workloadType == submit.TrainingType {
 		create = submit.Training
 	}
 	var mu sync.Mutex
@@ -133,6 +130,9 @@ func submitWorkloads(ctx context.Context, clients *client.Clients, project submi
 
 		record := measure.Submission{Name: name, RequestedAt: time.Now()}
 		_, err := create(createCtx, clients, submit.WorkloadSpec{Name: name, Project: project, Image: opts.image, Labels: map[string]string{runLabel: runID}})
+		if err != nil && ctx.Err() != nil {
+			return
+		}
 		if err != nil {
 			record.Err = err
 			failed.Add(1)
@@ -186,13 +186,16 @@ func describe(s measure.Spans, pacing submit.Pacing) string {
 	return text
 }
 
-func describeMeasurement(interruptions int, outOfOrder []string) string {
-	if interruptions == 0 && len(outOfOrder) == 0 {
+func describeMeasurement(reopened, interruptions int, outOfOrder []string) string {
+	if reopened == 0 && len(outOfOrder) == 0 {
 		return "clean: the cluster watch stayed open and every workload's events were seen in order"
 	}
 	var parts []string
-	if interruptions > 0 {
+	switch {
+	case interruptions > 0:
 		parts = append(parts, fmt.Sprintf("interrupted %d times", interruptions))
+	case reopened > 0:
+		parts = append(parts, fmt.Sprintf("the cluster watch was reopened %d times and resumed without losing events", reopened))
 	}
 	if len(outOfOrder) > 0 {
 		parts = append(parts, fmt.Sprintf("timestamps out of order for %d workloads (first: %s)", len(outOfOrder), outOfOrder[0]))
@@ -201,38 +204,21 @@ func describeMeasurement(interruptions int, outOfOrder []string) string {
 }
 
 func deleteWorkloads(ctx context.Context, clients *client.Clients, project submit.ProjectRef, opts options) error {
-	deleteCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), opts.setupTimeout)
-	defer cancel()
-	ids, err := submit.ProjectWorkloadIDs(deleteCtx, clients, project.ID, opts.workloadType)
+	listCtx, cancelList := context.WithTimeout(context.WithoutCancel(ctx), opts.setupTimeout)
+	defer cancelList()
+	ids, err := submit.ProjectWorkloadIDs(listCtx, clients, project.ID, opts.workloadType)
 	if err != nil {
 		return err
 	}
-	var errs []error
-	for _, id := range ids {
-		var response *http.Response
-		if opts.workloadType == trainingType {
-			_, response, err = clients.Workloads.TrainingsAPI.DeleteTraining(deleteCtx, id).Execute()
-		} else {
-			_, response, err = clients.Workloads.WorkspacesAPI.DeleteWorkspace(deleteCtx, id).Execute()
-		}
-		if err != nil && (response == nil || response.StatusCode != http.StatusNotFound) {
-			errs = append(errs, fmt.Errorf("deleting %s %s: %w", strings.ToLower(opts.workloadType), id, err))
-		}
-	}
-	return errors.Join(errs...)
-}
-
-func cleanupProject(clients *client.Clients, clusterID, name string, timeout time.Duration) error {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout+cleanupGrace)
+	deleteCtx, cancel := context.WithTimeout(context.WithoutCancel(ctx), deleteBudget(len(ids), opts))
 	defer cancel()
-	return submit.CleanupProject(ctx, clients, clusterID, name, timeout)
+	_, err = submit.DeleteWorkloads(deleteCtx, clients, opts.workloadType, ids, opts.users)
+	return err
 }
 
-func joinMessages(first, second string) string {
-	if first == "" {
-		return second
-	}
-	return first + "; " + second
+func deleteBudget(count int, opts options) time.Duration {
+	perRequest := time.Second / time.Duration(opts.limits.ControlPlaneRequestsPerSecond)
+	return opts.setupTimeout + time.Duration(count)*perRequest
 }
 
 const (
@@ -291,14 +277,14 @@ func parseOptions(scenario core.Scenario) (options, error) {
 	if opts.rate < 1 || opts.rate > maxRatePerSecond {
 		return options{}, fmt.Errorf("knob \"rate\" must be between 1 and %d submissions per second, got %d", maxRatePerSecond, opts.rate)
 	}
-	if opts.duration, err = scenario.Duration("duration", 5*time.Minute); err != nil {
+	if opts.duration, err = scenario.Duration("duration", 3*time.Minute); err != nil {
 		return options{}, err
 	}
-	if opts.workloadType, err = scenario.String("workloadType", workspaceType); err != nil {
+	if opts.workloadType, err = scenario.String("workloadType", submit.WorkspaceType); err != nil {
 		return options{}, err
 	}
-	if opts.workloadType != workspaceType && opts.workloadType != trainingType {
-		return options{}, fmt.Errorf("knob \"workloadType\" must be %s or %s, got %q", workspaceType, trainingType, opts.workloadType)
+	if opts.workloadType != submit.WorkspaceType && opts.workloadType != submit.TrainingType {
+		return options{}, fmt.Errorf("knob \"workloadType\" must be %s or %s, got %q", submit.WorkspaceType, submit.TrainingType, opts.workloadType)
 	}
 	if opts.image, err = scenario.String("image", defaultImage); err != nil {
 		return options{}, err
@@ -326,11 +312,7 @@ func parseOptions(scenario core.Scenario) (options, error) {
 	if opts.cluster, err = scenario.String("cluster", ""); err != nil {
 		return options{}, err
 	}
-	slo, err := scenario.Map("slo")
-	if err != nil {
-		return options{}, err
-	}
-	if opts.slo, err = wholeNumbers("slo", slo); err != nil {
+	if opts.slo, err = scenario.IntMap("slo"); err != nil {
 		return options{}, err
 	}
 	for key := range opts.slo {
@@ -342,38 +324,12 @@ func parseOptions(scenario core.Scenario) (options, error) {
 	return opts, nil
 }
 
-func wholeNumbers(knob string, raw map[string]any) (map[string]int, error) {
-	if raw == nil {
-		return nil, nil
-	}
-	values := make(map[string]int, len(raw))
-	for key, value := range raw {
-		number, ok := value.(int)
-		if !ok {
-			return nil, fmt.Errorf("knob %q entry %q must be a whole number of milliseconds, got %T", knob, key, value)
-		}
-		values[key] = number
-	}
-	return values, nil
-}
-
-func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.Submission, opts options, interruptions int, interrupted error) core.Section {
+func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.Submission, opts options, interruptions int, interrupted, watchErr error) core.Section {
 	ttj := measure.Stats(s.TTJ)
 	api := measure.Stats(s.ApiAccepted)
 	metrics := map[string]any{
-		"flow":                           strings.ToLower(opts.workloadType) + "_to_pod",
-		"workload_type":                  opts.workloadType,
-		"users":                          opts.users,
-		"target_rate_per_sec":            opts.rate,
-		"actual_rate_per_sec":            pacing.Rate(),
-		"duration_ms":                    opts.duration.Milliseconds(),
-		"image":                          opts.image,
-		"kube_requests_per_sec":          opts.limits.KubeRequestsPerSecond,
-		"control_plane_requests_per_sec": opts.limits.ControlPlaneRequestsPerSecond,
-		"submitted":                      pacing.Submitted,
-		"failed_count":                   api.FailedCount,
-		"never_arrived_count":            ttj.NeverArrivedCount,
-		"success_rate":                   measure.SuccessRate(submissions),
+		"workload_type": opts.workloadType,
+		"failed_count":  api.FailedCount,
 	}
 	for name, timings := range map[string][]measure.Timing{"api_accepted": s.ApiAccepted, "cluster_synced": s.ClusterSynced, "pod_created": s.PodCreated, "ttj": s.TTJ} {
 		summary := measure.Stats(timings)
@@ -386,33 +342,35 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 		metrics[name+"_mean_ms"] = summary.Mean.Milliseconds()
 		metrics[name+"_max_ms"] = summary.Max.Milliseconds()
 	}
-	if opts.slo != nil {
-		metrics["slo"] = opts.slo
-		for key, value := range opts.slo {
-			metrics["slo_"+key] = value
-		}
-	}
 
 	var problems []string
-	if ttj.NeverArrivedCount > 0 {
-		if interrupted != nil {
-			problems = append(problems, fmt.Sprintf("%d workloads had not reached the cluster when the run was interrupted: %v", ttj.NeverArrivedCount, interrupted))
-		} else {
-			problems = append(problems, fmt.Sprintf("%d workloads never reached the cluster within %s", ttj.NeverArrivedCount, opts.timeout))
+	if achieved := pacing.Rate(); pacing.Submitted >= 2 && achieved < float64(opts.rate)*(1-rateShortfall) {
+		problems = append(problems, fmt.Sprintf("the pacer kept only %.2f/s of the %d/s target: the environment could not absorb the load", achieved, opts.rate))
+	}
+	switch {
+	case interrupted != nil:
+		message := fmt.Sprintf("the run was interrupted after %d submissions (%v)", pacing.Submitted, interrupted)
+		if ttj.NeverArrivedCount > 0 {
+			message += fmt.Sprintf("; %d workloads had not reached the cluster", ttj.NeverArrivedCount)
 		}
+		problems = append(problems, message)
+	case watchErr != nil:
+		problems = append(problems, fmt.Sprintf("the cluster watch died, %d workloads could not be followed: %v", ttj.NeverArrivedCount, watchErr))
+	case ttj.NeverArrivedCount > 0:
+		problems = append(problems, fmt.Sprintf("%d workloads never reached the cluster within %s", ttj.NeverArrivedCount, opts.timeout))
 	}
 	if outOfOrder := measure.OutOfOrder(submissions, timestampTolerance); len(outOfOrder) > 0 {
 		problems = append(problems, fmt.Sprintf("timestamps out of order for %d workloads (first: %s): "+
 			"a WorkloadRunner or pod was seen more than %s before the step that precedes it", len(outOfOrder), outOfOrder[0], timestampTolerance))
 	}
 	if interruptions > 0 {
-		problems = append(problems, fmt.Sprintf("the measurement was interrupted %d times: the cluster watch closed and was reopened; latencies of workloads in flight during the gaps are inflated", interruptions))
+		problems = append(problems, fmt.Sprintf("the measurement was interrupted %d times: the cluster watch was reopened without its resume point; "+
+			"latencies of workloads in flight during the gaps are inflated", interruptions))
 	}
 
-	section := core.Section{Category: core.CategoryLoad, Metrics: metrics}
+	section := core.Section{Metrics: metrics, SLO: opts.slo}
 	if len(problems) > 0 {
-		section.Failed = true
-		section.Error = strings.Join(problems, "; ")
+		section.Fail(strings.Join(problems, "; "))
 	}
 	return section
 }

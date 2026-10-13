@@ -21,7 +21,6 @@ import (
 	org_cache "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/cache"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
@@ -581,13 +580,15 @@ func (s *SyncSlice[T]) GetAll() []T {
 	return append([]T(nil), s.items...)
 }
 
-// shouldMapServiceAccountToApp returns true if service-account should be mapped to app for this cluster
-func shouldMapServiceAccountToApp(ctx context.Context, clusterId string) bool {
-	if clusterId == "" {
-		return false
-	}
+// deprecatedSubjectTypeApp stays in the API enums so the spec keeps accepting it (removing an enum value is a breaking
+// API change), but it is no longer a supported subject type.
+const deprecatedSubjectTypeApp = "app"
 
-	capabilitiesChecker := checker.NewClusterCapabilitiesChecker(clusterId)
-	supported, _ := capabilitiesChecker.ValidateClusterCapability(ctx, checker.MinVersionOfServiceAccountInGetAccessRulesApi)
-	return !supported
+func isDeprecatedSubjectType[T ~string](subjectType T) bool {
+	return string(subjectType) == deprecatedSubjectTypeApp
+}
+
+func deprecatedSubjectTypeError() *api.Error {
+	return api.NewError(http.StatusUnsupportedMediaType,
+		fmt.Sprintf("subjectType %q is no longer supported: use %q", deprecatedSubjectTypeApp, api.SUBJECTTYPE_SERVICE_ACCOUNT), nil)
 }

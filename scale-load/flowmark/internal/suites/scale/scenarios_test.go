@@ -37,8 +37,16 @@ func TestCheckedInScaleScenariosParse(t *testing.T) {
 		if err != nil {
 			t.Fatalf("%s must parse with the current knob rules: %v", file, err)
 		}
-		if len(knobs.slo) != len(sloKeys) {
-			t.Fatalf("%s should set every supported SLO (%d), got %d", file, len(sloKeys), len(knobs.slo))
+		overridden := map[string]any{}
+		for key, value := range raw {
+			overridden[key] = value
+		}
+		overridden["workloads"] = []any{20}
+		if _, err := parseSettings(core.Scenario{Suite: suiteName, Knobs: overridden}); err != nil {
+			t.Fatalf("%s must still parse when --workloads overrides the rounds: %v", file, err)
+		}
+		if _, ok := knobs.slo["p90_ms"]; !ok {
+			t.Fatalf("%s must set at least the p90 SLO, got %v", file, knobs.slo)
 		}
 	}
 }

@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**CreateAccessRule**](AccessRulesApi.md#CreateAccessRule) | **Post** /api/v1/authorization/access-rules | Create an access rule. Bind a predefined role to a subject (user, group or app) in some scope.
+[**CreateAccessRule**](AccessRulesApi.md#CreateAccessRule) | **Post** /api/v1/authorization/access-rules | Create an access rule. Bind a predefined role to a subject (user, group or service account) in some scope.
 [**DeleteAccessRule**](AccessRulesApi.md#DeleteAccessRule) | **Delete** /api/v1/authorization/access-rules/{accessRuleId} | Delete access rule. This operation will delete the subject permissions that assigned to it by this access rule.
 [**GetAccessRule**](AccessRulesApi.md#GetAccessRule) | **Get** /api/v1/authorization/access-rules/{accessRuleId} | Get access rule.
 [**GetAccessRules**](AccessRulesApi.md#GetAccessRules) | **Get** /api/v1/authorization/access-rules | List access rules.
@@ -17,7 +17,7 @@ Method | HTTP request | Description
 
 > AccessRule CreateAccessRule(ctx).AccessRuleCreationFields(accessRuleCreationFields).Execute()
 
-Create an access rule. Bind a predefined role to a subject (user, group or app) in some scope.
+Create an access rule. Bind a predefined role to a subject (user, group or service account) in some scope.
 
 ### Example
 

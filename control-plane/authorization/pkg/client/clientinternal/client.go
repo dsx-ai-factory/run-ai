@@ -144,12 +144,6 @@ func (a *AuthorizationClient) SetServiceAccountPermissions(ctx context.Context, 
 	return nil
 }
 
-// Deprecated: use SetServiceAccountPermissions. Kept until consumers move to the new method; it also creates a
-// service-account rule.
-func (a *AuthorizationClient) SetAppPermissions(ctx context.Context, tenantId, clientId string, scope authorization_api.InternalCreateAccessRuleRequestScope, role authorization_api.AllowedInternalCreateRoles) error {
-	return a.SetServiceAccountPermissions(ctx, tenantId, clientId, scope, role)
-}
-
 func (a *AuthorizationClient) CalculatePermittedScopes(ctx context.Context, request authorization_api.GetPermittedScopesRequest) (*authorization_api.PermittedScopesActions, error) {
 	permittedScopes, response, err := a.PermissionsAPI.GetPermittedScopes(ctx).GetPermittedScopesRequest(request).Execute()
 	if err != nil {

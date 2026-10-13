@@ -42,10 +42,11 @@ pull in).
   2. `docker buildx build --platform linux/amd64 --provenance=false --load --build-arg TARGETARCH=amd64 -t runai-local/cluster-migrator:0.0.0 .`
      Image ref: `runai-local/cluster-migrator:0.0.0` (tag `0.0.0` — the CP chart
      appVersion; any other tag breaks the local deploy).
-- Runtime behavior: idempotent. Migration phases are gated by control/version
-  tables (`ClustersMigrationControl`, `NodepoolSystemSettingsMigrationControl`),
-  auto-migrated into the target schema at startup. Re-running after success is a
-  no-op; force a re-run by bumping `DB_MIGRATION_VERSION`.
+- Runtime behavior: idempotent. The single migration (node-pool system
+  settings) is gated by a control table
+  (`NodepoolSystemSettingsMigrationControl`), auto-migrated into the target
+  schema at startup. Re-running after success is a no-op; force a re-run by
+  bumping `DB_MIGRATION_VERSION`.
 - Runs in the install/upgrade flow as the `runai-backend-cluster-migrator` Job.
 
 ## local-dev.sh iteration

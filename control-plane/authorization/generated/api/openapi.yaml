@@ -1126,8 +1126,8 @@ paths:
         resource-type: access_rules
         action: read
     post:
-      description: "Use to bind a predefined role to a subject (user, group or application)\
-        \ in a scope."
+      description: "Use to bind a predefined role to a subject (user, group or service\
+        \ account) in a scope."
       operationId: create_access_rule
       requestBody:
         content:
@@ -4046,7 +4046,7 @@ components:
       properties:
         subjectId:
           description: "The unique identifier of the subject (e.g., user, group, or\
-            \ app)."
+            \ service account)."
           example: user@run.ai
           type: string
         roleId:
@@ -4079,7 +4079,7 @@ components:
         Subject type enum for access rule responses. Extends SubjectType with the built-in
         all-authenticated-users subject, which applies to every authenticated user and service account.
 
-        Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
+        Note: The 'app' subject type is DEPRECATED and is no longer returned. Please use 'service-account' instead for service accounts.
       enum:
       - user
       - app
@@ -4214,7 +4214,8 @@ components:
       description: |
         Subject type enum for access rules.
 
-        Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
+        Note: The 'app' subject type is DEPRECATED and no longer supported. Please use 'service-account' instead for service accounts.
+        Requests that create an access rule with 'app' are rejected with 415 Unsupported Media Type.
       enum:
       - user
       - app
@@ -5431,14 +5432,14 @@ components:
       properties:
         subjectId:
           description: "The unique identifier of the subject e.g., user, group, or\
-            \ app)."
+            \ service account)."
           example: user@run.ai
           type: string
         subjectType:
           allOf:
           - $ref: '#/components/schemas/SubjectType'
           - description: "The subject assigned to the access rule. Valid values: user,\
-              \ group, app."
+              \ group, service-account."
       required:
       - subjectId
       - subjectType

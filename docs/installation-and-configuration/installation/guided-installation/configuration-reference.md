@@ -22,7 +22,7 @@ Fields marked **Required** must be specified. All other fields are optional.
 
 **Prerequisites and Features**
 
-- [Prerequisite Configuration](#prerequisite-configuration) - Infrastructure components the installer can install before NVIDIA Run:ai: GPU Operator, Prometheus, and Network Operator, each independently set to install or skip.
+- [Prerequisite Configuration](#prerequisite-configuration) - Infrastructure components the installer can set up before NVIDIA Run:ai: GPU Operator, Prometheus, and Network Operator, each independently set to install or skip.
 - [Feature Configuration](#feature-configuration) - Components that extend NVIDIA Run:ai for specific workload types: Knative for standard inference, LWS for distributed inference, Kubeflow and MPI Operator for distributed training, plus NIM Operator, Grove, and Dynamo.
 - [Common Prerequisite and Feature Fields](#common-prerequisite-and-feature-fields) - Fields shared by every prerequisite and feature, such as `mode`, `version`, and `customHelmValues`.
 
@@ -237,7 +237,7 @@ cluster:
 
 ### Prerequisite Configuration
 
-Configures the infrastructure components that the installer can install before deploying NVIDIA Run:ai. Each of `gpuOperator`, `prometheus`, and `networkOperator` accepts the same set of fields - see [Common Prerequisite and Feature Fields](#common-prerequisite-and-feature-fields), below. For what each component does and when you need it, see [Prerequisites](prerequisites-and-features.md#prerequisites) in Prerequisites and Features.
+Configures the infrastructure components that the installer can set up before deploying NVIDIA Run:ai. Each of `gpuOperator`, `prometheus`, and `networkOperator` accepts the same set of fields - see [Common Prerequisite and Feature Fields](#common-prerequisite-and-feature-fields), below. For what each component does and when you need it, see [Prerequisites](prerequisites-and-features.md#prerequisites) in Prerequisites and Features.
 
 ```yaml
 prerequisites:
