@@ -411,11 +411,21 @@ func (c *K8SObjectTrackerClient) GetConfigMapsOfCluster(ctx context.Context, clu
 func (c *K8SObjectTrackerClient) GetDeviceClassesOfCluster(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *openapi.Error) {
 	resp, r, err := c.ListDeviceClasses(ctx, clusterId)
 	if r != nil {
-		if r.StatusCode == http.StatusOK {
+		// Treat as success only when the SDK itself reported no error AND
+		// handed us a decoded response. A 200 with a JSON-decode failure
+		// comes back as (nil-or-partial, http.Response{200}, err); without
+		// this guard the caller gets a nil resp and panics on resp.Items.
+		if err == nil && resp != nil && r.StatusCode == http.StatusOK {
 			return resp, nil
 		}
 
-		data, _ := io.ReadAll(r.Body)
+		// Surface read failures in the log rather than swallowing them —
+		// an empty "data" otherwise makes the error path indistinguishable
+		// from a non-200 with an empty body.
+		data, readErr := io.ReadAll(r.Body)
+		if readErr != nil {
+			data = []byte(fmt.Sprintf("<failed to read body: %v>", readErr))
+		}
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to get device classes of cluster %s: %s", clusterId, data)
 
 		return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to get device classes of cluster %s", clusterId))
