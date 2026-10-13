@@ -26,8 +26,6 @@ import { accessRuleUtil } from "@/utils/rbac.util/access-rule.util";
 const subjectTypeOptionsMap: Map<string, string> = new Map(
   subjectTypeOptionsWithSSO.map((option: ISelectOption) => [option.value as string, option.label as string]),
 );
-// Map deprecated "app" to "Service account" for backward compatibility
-subjectTypeOptionsMap.set("app", "Service account");
 
 export interface IAccessRuleStatusResponseTable extends AccessRuleStatusResponse {
   explanation?: string;

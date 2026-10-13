@@ -32,8 +32,6 @@ import { getFieldContent } from "@/utils/table-format.util";
 const subjectTypeOptionsMap: Map<string, string> = new Map(
   subjectTypeOptionsWithSSO.map((option) => [option.value as string, option.label as string]),
 );
-// Map deprecated "app" to "Service account" for backward compatibility
-subjectTypeOptionsMap.set("app", "Service account");
 
 export default defineComponent({
   emits: ["custom-cell-event"],
