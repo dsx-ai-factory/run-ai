@@ -35,7 +35,7 @@ func NewResourceClaimTemplatesAPIService() *ResourceClaimTemplatesAPIService {
 }
 
 // ListRcts - List resource claim templates.
-func (s *ResourceClaimTemplatesAPIService) ListRcts(ctx context.Context, offset int32, limit int32, statusInfo bool) (ImplResponse, error) {
+func (s *ResourceClaimTemplatesAPIService) ListRcts(ctx context.Context, offset int32, limit int32, sortOrder string, sortBy string, filterBy []string, includeAncestors bool, includeDescendants bool, statusInfo bool) (ImplResponse, error) {
 	// TODO - update ListRcts with the required logic for this service method.
 	// Add api_resource_claim_templates_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

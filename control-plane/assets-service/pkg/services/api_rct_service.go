@@ -33,6 +33,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
@@ -132,28 +133,50 @@ func (s *RctApiService) CreateRct(ctx context.Context, request api.RctCreationRe
 }
 
 // ListRcts - List resource claim templates.
-func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32, statusInfo bool) (api.ImplResponse, error) {
+func (s *RctApiService) ListRcts(ctx context.Context, offset int32, limit int32, sortOrder string, sortBy string,
+	filterBy []string, includeAncestors bool, includeDescendants bool, statusInfo bool,
+) (api.ImplResponse, error) {
 	assetKind := api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE
 
-	// WAIT_FOR_OFER this API does not work with the "classic" queryParams so just initial it to empty
-	// when we work with the "standard" filter this needs to be refactored
-	queryParams, queryError := query_types.NewQueryParams("", "", "", false, 0, "", "", nil)
-	if queryError != nil {
-		return NewErrorResponse(queryError), nil
+	// Parse the generic filterBy predicates (name, description, created*/updated*
+	// and the scope anchors clusterId/departmentId/projectId). The scope anchors
+	// are extracted and translated into scope-hierarchy SQL by the DAO; the rest
+	// are applied verbatim as simple column predicates.
+	filters, parseErr := queryapi.NewParser(dao.RctFilterFieldsToColumn()).Filters(filterBy)
+	if parseErr != nil {
+		return NewErrorResponse(api.NewValidationError(parseErr.Error())), nil
 	}
 
-	permittedScopes, authError := query_types.ApplyRbacRules(ctx, queryParams)
+	sortColumn, sortErr := queryapi.NewParser(dao.RctSortFieldsToColumn()).GetMapping(sortBy)
+	if sortErr != nil {
+		return NewErrorResponse(api.NewValidationError(sortErr.Error())), nil
+	}
+
+	// RBAC and scope filtering are handled independently and AND-ed together:
+	// ApplyRbacRules loads the full set of org units the caller may see (no scope
+	// anchor is passed here), and the DAO intersects that with the requested
+	// scope subtree. This way the RBAC rules stay identical to every other asset
+	// list while the scope anchor only narrows the results.
+	rbacQueryParams := &query_types.QueryParams{}
+	permittedScopes, authError := query_types.ApplyRbacRules(ctx, rbacQueryParams)
 	if authError != nil {
 		return NewErrorResponse(authError), nil
 	}
 
-	// WAIT_FOR_OFER currently the code does not support filtering by scope, so the
-	// list will filter the result by the entire scope the user is allowed to see.
-	// once we support filtering, we need to filter by scope as well.
 	// When statusInfo is requested we also surface soft-deleted rows so the UI
 	// can render DELETING / DELETION_FAILED for RCTs mid-tombstone (mirrors
 	// the credentials / PVC behavior).
-	result, actionError := dao.ListRcts(ctx, offset, limit, dao.RctOptions{IncludeDeleted: statusInfo})
+	result, actionError := dao.ListRcts(ctx, dao.RctListParams{
+		Offset:             offset,
+		Limit:              limit,
+		RbacQueryParams:    rbacQueryParams,
+		Filters:            filters,
+		IncludeAncestors:   includeAncestors,
+		IncludeDescendants: includeDescendants,
+		SortColumn:         sortColumn,
+		SortOrder:          sortOrder,
+		Options:            dao.RctOptions{IncludeDeleted: statusInfo},
+	})
 	if actionError != nil {
 		return NewErrorResponse(actionError), nil
 	}

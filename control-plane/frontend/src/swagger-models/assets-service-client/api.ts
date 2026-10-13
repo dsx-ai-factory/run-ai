@@ -23949,11 +23949,16 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
+         * @param {'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'} [sortBy] Sort results by parameter.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+         * @param {boolean} [includeAncestors] When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor\&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+         * @param {boolean} [includeDescendants] Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
          * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listRcts: async (offset?: number, limit?: number, statusInfo?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        listRcts: async (offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy', filterBy?: Array<string>, includeAncestors?: boolean, includeDescendants?: boolean, statusInfo?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             const localVarPath = `/api/v1/k8s-objects/resource-claim-templates`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
@@ -23976,6 +23981,26 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
+            }
+
+            if (sortOrder !== undefined) {
+                localVarQueryParameter['sortOrder'] = sortOrder;
+            }
+
+            if (sortBy !== undefined) {
+                localVarQueryParameter['sortBy'] = sortBy;
+            }
+
+            if (filterBy) {
+                localVarQueryParameter['filterBy'] = filterBy.join(COLLECTION_FORMATS.csv);
+            }
+
+            if (includeAncestors !== undefined) {
+                localVarQueryParameter['includeAncestors'] = includeAncestors;
+            }
+
+            if (includeDescendants !== undefined) {
+                localVarQueryParameter['includeDescendants'] = includeDescendants;
             }
 
             if (statusInfo !== undefined) {
@@ -24084,12 +24109,17 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
+         * @param {'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'} [sortBy] Sort results by parameter.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+         * @param {boolean} [includeAncestors] When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor\&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+         * @param {boolean} [includeDescendants] Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
          * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RctListResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.listRcts(offset, limit, statusInfo, options);
+        async listRcts(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy', filterBy?: Array<string>, includeAncestors?: boolean, includeDescendants?: boolean, statusInfo?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RctListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRcts(offset, limit, sortOrder, sortBy, filterBy, includeAncestors, includeDescendants, statusInfo, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -24150,12 +24180,17 @@ export const ResourceClaimTemplatesApiFactory = function (configuration?: Config
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
+         * @param {'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'} [sortBy] Sort results by parameter.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+         * @param {boolean} [includeAncestors] When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor\&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+         * @param {boolean} [includeDescendants] Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
          * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: any): AxiosPromise<RctListResponse> {
-            return localVarFp.listRcts(offset, limit, statusInfo, options).then((request) => request(axios, basePath));
+        listRcts(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy', filterBy?: Array<string>, includeAncestors?: boolean, includeDescendants?: boolean, statusInfo?: boolean, options?: any): AxiosPromise<RctListResponse> {
+            return localVarFp.listRcts(offset, limit, sortOrder, sortBy, filterBy, includeAncestors, includeDescendants, statusInfo, options).then((request) => request(axios, basePath));
         },
         /**
          * Use to update the details of a resource claim template by id.
@@ -24220,13 +24255,18 @@ export class ResourceClaimTemplatesApi extends BaseAPI {
      * @summary List resource claim templates.
      * @param {number} [offset] The offset of the first item returned in the collection.
      * @param {number} [limit] The maximum number of entries to return.
+     * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
+     * @param {'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'} [sortBy] Sort results by parameter.
+     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+     * @param {boolean} [includeAncestors] When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor\&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+     * @param {boolean} [includeDescendants] Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
      * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof ResourceClaimTemplatesApi
      */
-    public listRcts(offset?: number, limit?: number, statusInfo?: boolean, options?: AxiosRequestConfig) {
-        return ResourceClaimTemplatesApiFp(this.configuration).listRcts(offset, limit, statusInfo, options).then((request) => request(this.axios, this.basePath));
+    public listRcts(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy', filterBy?: Array<string>, includeAncestors?: boolean, includeDescendants?: boolean, statusInfo?: boolean, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).listRcts(offset, limit, sortOrder, sortBy, filterBy, includeAncestors, includeDescendants, statusInfo, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

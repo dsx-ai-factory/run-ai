@@ -37,6 +37,17 @@ var ClusterAndBelow = datastructs.NewSet[api.AssetKind]([]api.AssetKind{
 	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
 }...)
 
+// KindsSupportingFiltering lists the asset kinds whose list APIs use the
+// new scope-hierarchy filtering (the queryapi filterBy + includeAncestors /
+// includeDescendants flags). Only these kinds need the department denormalized
+// onto project-scoped rows. Scoping the denormalization to them keeps the
+// creation behavior of every other kind unchanged and means no backfill
+// migration is required: these kinds are new, so there are no legacy
+// project-scoped rows with a missing department_id.
+var KindsSupportingFiltering = datastructs.NewSet[api.AssetKind]([]api.AssetKind{
+	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
+}...)
+
 func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreationRequest, kind api.AssetKind) *api.Error {
 	if meta == nil {
 		return api.NewValidationError("request meta is not provided")
@@ -77,6 +88,15 @@ func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreation
 		}
 
 		meta.ClusterId = resp.ClusterUuid.Get()
+
+		// Denormalize the department onto project-scoped rows (as workloads and
+		// policies already do) so scope-hierarchy filtering by department can be
+		// a plain column predicate. Only kinds that actually use the new
+		// filtering need this; gating it here leaves every other kind's creation
+		// behavior (and existing rows) untouched.
+		if meta.Scope == api.SCOPE_PROJECT && KindsSupportingFiltering.Has(kind) {
+			meta.DepartmentId = resp.DepartmentId.Get()
+		}
 	}
 
 	if meta.ClusterId != nil {

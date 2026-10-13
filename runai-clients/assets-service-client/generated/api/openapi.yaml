@@ -1082,6 +1082,83 @@ paths:
           minimum: 1
           type: integer
         style: form
+      - description: Sort results in descending or ascending order.
+        explode: true
+        in: query
+        name: sortOrder
+        required: false
+        schema:
+          default: asc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Sort results by parameter.
+        explode: true
+        in: query
+        name: sortBy
+        required: false
+        schema:
+          enum:
+          - name
+          - clusterId
+          - departmentId
+          - projectId
+          - description
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+          type: string
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
+          \ `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^`\
+          \ Starts with and `=$` Ends with. Dates are in ISO 8601 timestamp format\
+          \ and available for operators `==`, `!=`, `<=` and `>=`. At most one scope\
+          \ anchor (clusterId, departmentId or projectId) may be provided. The anchor\
+          \ is combined with includeAncestors / includeDescendants to determine which\
+          \ scopes of the hierarchy are returned."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name=@gpu
+          - clusterId==11111111-1111-1111-1111-111111111111
+          items:
+            pattern: ^(name|clusterId|departmentId|projectId|description|createdAt|createdBy|updatedAt|updatedBy)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      - description: "When a scope anchor (clusterId, departmentId or projectId) is\
+          \ provided, set includeAncestors=true to also include resource claim templates\
+          \ from the anchor's ancestor scopes (for example, for a project: its parent\
+          \ department and cluster, as well as tenant and system scoped templates).\
+          \ Defaults to true to preserve the backward-compatible scope-usability behavior."
+        explode: true
+        in: query
+        name: includeAncestors
+        required: false
+        schema:
+          default: true
+          type: boolean
+        style: form
+      - description: "Indicates whether to include assets from all descendant scopes\
+          \ under the specified scope. When set to true, and a specific scope identifier\
+          \ (for example, clusterId) is provided, the query also returns assets from\
+          \ all nested scopes within it (for example, departments and projects). \
+          \ Mutually exclusive with scope."
+        explode: true
+        in: query
+        name: includeDescendants
+        required: false
+        schema:
+          type: boolean
+        style: form
       - description: Whether the query should include asset status information as
           part of the response.
         explode: true
@@ -12635,6 +12712,75 @@ components:
         maximum: 500
         minimum: 1
         type: integer
+      style: form
+    SortOrder:
+      description: Sort results in descending or ascending order.
+      explode: true
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: asc
+        enum:
+        - asc
+        - desc
+        type: string
+      style: form
+    RctsSort:
+      description: Sort results by parameter.
+      explode: true
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        enum:
+        - name
+        - clusterId
+        - departmentId
+        - projectId
+        - description
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+        type: string
+      style: form
+    RctsFilter:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
+        \ `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts\
+        \ with and `=$` Ends with. Dates are in ISO 8601 timestamp format and available\
+        \ for operators `==`, `!=`, `<=` and `>=`. At most one scope anchor (clusterId,\
+        \ departmentId or projectId) may be provided. The anchor is combined with\
+        \ includeAncestors / includeDescendants to determine which scopes of the hierarchy\
+        \ are returned."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - name=@gpu
+        - clusterId==11111111-1111-1111-1111-111111111111
+        items:
+          pattern: ^(name|clusterId|departmentId|projectId|description|createdAt|createdBy|updatedAt|updatedBy)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        maxItems: 10
+        type: array
+      style: form
+    IncludeAncestors:
+      description: "When a scope anchor (clusterId, departmentId or projectId) is\
+        \ provided, set includeAncestors=true to also include resource claim templates\
+        \ from the anchor's ancestor scopes (for example, for a project: its parent\
+        \ department and cluster, as well as tenant and system scoped templates).\
+        \ Defaults to true to preserve the backward-compatible scope-usability behavior."
+      explode: true
+      in: query
+      name: includeAncestors
+      required: false
+      schema:
+        default: true
+        type: boolean
       style: form
     IncludeStatus:
       description: Whether the query should include asset status information as part

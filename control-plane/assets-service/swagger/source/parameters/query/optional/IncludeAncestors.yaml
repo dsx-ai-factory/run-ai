@@ -1,0 +1,12 @@
+name: includeAncestors
+in: query
+required: false
+description: >-
+  When a scope anchor (clusterId, departmentId or projectId) is provided,
+  set includeAncestors=true to also include resource claim templates from the
+  anchor's ancestor scopes (for example, for a project: its parent department
+  and cluster, as well as tenant and system scoped templates). Defaults to true
+  to preserve the backward-compatible scope-usability behavior.
+schema:
+  type: boolean
+  default: true

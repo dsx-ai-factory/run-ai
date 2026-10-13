@@ -208,14 +208,11 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("create two assets -> list by name", func() {
 		DescribeTable("only the requested asset is listed", func(testData AssetTest) {
-			if testData.filteringStyle != FilterStyleQueryString {
-				return
-			}
 			meta1, spec1, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 			testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 
 			//  list assets by name providing the name of the first asset
-			listByNameHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?name=%s", testData.url, meta1.Name), nil)
+			listByNameHttpReq, err := http.NewRequest("GET", testData.listByNameURL(meta1.Name), nil)
 			Expect(err).To(BeNil())
 			listByNameHttpReq.Header = *headerForAdmin(randoms)
 
@@ -281,9 +278,6 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 
 	Context("create system, tenant, cluster department and project scoped assets -> list by department id and project id", func() {
 		DescribeTable("only the relevant assets are listed", func(testData AssetTest) {
-			if testData.filteringStyle != FilterStyleQueryString {
-				return
-			}
 			var specSystem []byte
 			var specTenant []byte
 			var specCluster []byte
@@ -302,15 +296,15 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 			}
 			_, specProject, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
 
-			//  list by project id
-			listProjectHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?%s", testData.url, randoms.ProjectIdParam()), nil)
+			//  list by project id (anchor + ancestors)
+			listProjectHttpReq, err := http.NewRequest("GET", testData.listByScopeAnchorURL("projectId", randoms.ProjectIdStr, true, false), nil)
 			Expect(err).To(BeNil())
 			listProjectHttpReq.Header = *headerForAdmin(randoms)
 			testData.factory.validateListContent(listProjectHttpReq, nil, specSystem, specTenant, specCluster, specDept, specProject)
 
 			if testData.canRunOnScope(departmentScope) {
-				//  list by department if
-				listDepartmentHttpReq, err := http.NewRequest("GET", fmt.Sprintf("%s?departmentId=%s", testData.url, randoms.DepartmentId), nil)
+				//  list by department id (anchor + ancestors)
+				listDepartmentHttpReq, err := http.NewRequest("GET", testData.listByScopeAnchorURL("departmentId", randoms.DepartmentId, true, false), nil)
 				Expect(err).To(BeNil())
 				listDepartmentHttpReq.Header = *headerForAdmin(randoms)
 				testData.factory.validateListContent(listDepartmentHttpReq, nil, specSystem, specTenant, specCluster, specDept)
@@ -346,6 +340,133 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 		}, entries)
 	})
 
+	Context("filter by scope hierarchy using the filterBy API", func() {
+		DescribeTable("scope anchors honor includeAncestors and includeDescendants", func(testData AssetTest) {
+			if !testData.supportingFiltering {
+				return
+			}
+
+			// Build a subtree under the primary cluster: cluster C > department D
+			// > { project P1, project P2 }. differentProject clones randoms with
+			// only a different project id, so P2 sits under the same department
+			// and cluster as P1. An asset in a wholly separate cluster proves the
+			// anchor isolates a single subtree.
+			_, clusterSpec, _ := testData.factory.createClusterBasedAsset(randoms, headerForAdmin(randoms))
+			_, deptSpec, _ := testData.factory.createDepartmentBasedAsset(randoms, headerForAdmin(randoms))
+			_, projectSpec, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
+			_, anotherProjectSpec, _ := testData.factory.createProjectBasedAsset(differentProject, headerForAdmin(randoms))
+			// Unrelated cluster/department/project subtree: must never surface in
+			// any result anchored on the primary cluster's subtree.
+			testData.factory.createClusterBasedAsset(differentCluster, headerForAdmin(differentCluster))
+
+			listScope := func(field, id string, includeAncestors, includeDescendants bool) *http.Request {
+				req, err := http.NewRequest("GET", testData.listByScopeAnchorURL(field, id, includeAncestors, includeDescendants), nil)
+				Expect(err).To(BeNil())
+				req.Header = *headerForAdmin(randoms)
+				return req
+			}
+
+			// cluster anchor, ancestors-only (the default): nothing exists above
+			// the cluster for this kind, so only the cluster asset comes back.
+			testData.factory.validateListContent(listScope("clusterId", randoms.ClusterId, true, false), nil, clusterSpec)
+			// cluster anchor, exact (no ancestors): only the cluster asset.
+			testData.factory.validateListContent(listScope("clusterId", randoms.ClusterId, false, false), nil, clusterSpec)
+			// cluster anchor + descendants: the entire subtree under the cluster.
+			testData.factory.validateListContent(listScope("clusterId", randoms.ClusterId, true, true), nil,
+				clusterSpec, deptSpec, projectSpec, anotherProjectSpec)
+			// cluster anchor, descendants without ancestors: proves the two flags
+			// are independent (the legacy ?scope= + includeDescendants pairing was
+			// mutually exclusive, so this combination was previously unreachable).
+			testData.factory.validateListContent(listScope("clusterId", randoms.ClusterId, false, true), nil,
+				clusterSpec, deptSpec, projectSpec, anotherProjectSpec)
+
+			// department anchor, ancestors (the default): department + cluster.
+			testData.factory.validateListContent(listScope("departmentId", randoms.DepartmentId, true, false), nil,
+				deptSpec, clusterSpec)
+			// department anchor, exact: only the department asset.
+			testData.factory.validateListContent(listScope("departmentId", randoms.DepartmentId, false, false), nil, deptSpec)
+			// department anchor + descendants (no ancestors): department + its
+			// projects. Legacy ?departmentId=&includeDescendants= returned no
+			// descendants at all, so this is both a new combination and new behavior.
+			testData.factory.validateListContent(listScope("departmentId", randoms.DepartmentId, false, true), nil,
+				deptSpec, projectSpec, anotherProjectSpec)
+			// department anchor + ancestors + descendants: the only anchor where
+			// both sides are non-empty for this kind (cluster's ancestors are the
+			// tenant/system scopes, which this kind does not support). Walks up to
+			// the cluster and down to both projects at once.
+			testData.factory.validateListContent(listScope("departmentId", randoms.DepartmentId, true, true), nil,
+				deptSpec, clusterSpec, projectSpec, anotherProjectSpec)
+
+			// project anchor, ancestors (the default): project + department + cluster.
+			testData.factory.validateListContent(listScope("projectId", randoms.ProjectIdStr, true, false), nil,
+				projectSpec, deptSpec, clusterSpec)
+			// project anchor, exact: only the project asset.
+			testData.factory.validateListContent(listScope("projectId", randoms.ProjectIdStr, false, false), nil, projectSpec)
+		}, entries)
+
+		DescribeTable("rejects malformed scope filters", func(testData AssetTest) {
+			if !testData.supportingFiltering {
+				return
+			}
+
+			expectBadRequest := func(rawQuery, wantSubstring string) {
+				req, err := http.NewRequest("GET", testData.url+rawQuery, nil)
+				Expect(err).To(BeNil())
+				req.Header = *headerForAdmin(randoms)
+				resp := httptest.NewRecorder()
+				router.ServeHTTP(resp, req)
+				Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+				Expect(resp.Body.String()).To(ContainSubstring(wantSubstring))
+			}
+
+			// A scope anchor identifies a single node, so only "==" is allowed.
+			expectBadRequest(fmt.Sprintf("?filterBy=clusterId!=%s", randoms.ClusterId),
+				"must use the '==' operator")
+			// A single node means a single value: queryapi's "a||b" is rejected.
+			expectBadRequest(fmt.Sprintf("?filterBy=clusterId==%s||%s", randoms.ClusterId, differentCluster.ClusterId),
+				"must specify exactly one value")
+			// At most one scope anchor may be combined into a single query.
+			expectBadRequest(fmt.Sprintf("?filterBy=clusterId==%s,departmentId==%s", randoms.ClusterId, randoms.DepartmentId),
+				"only one of clusterId, departmentId or projectId")
+		}, entries)
+
+		DescribeTable("sortBy orders the list and sortOrder reverses it", func(testData AssetTest) {
+			if !testData.supportingFiltering {
+				return
+			}
+
+			metaA, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
+			metaB, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
+			metaC, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
+
+			listNames := func(sortOrder string) []string {
+				req, err := http.NewRequest("GET", fmt.Sprintf("%s?sortBy=name&sortOrder=%s", testData.url, sortOrder), nil)
+				Expect(err).To(BeNil())
+				req.Header = *headerForAdmin(randoms)
+				resp := httptest.NewRecorder()
+				router.ServeHTTP(resp, req)
+				Expect(resp.Code).To(Equal(http.StatusOK), resp.Body.String())
+
+				names := []string{}
+				for _, m := range testData.factory.unmarshalList(resp.Body.Bytes()) {
+					names = append(names, m.Name)
+				}
+				return names
+			}
+
+			asc := listNames("asc")
+			desc := listNames("desc")
+			Expect(asc).To(ConsistOf(metaA.Name, metaB.Name, metaC.Name))
+
+			// names are distinct, so descending is the exact reverse of ascending.
+			reversed := make([]string, len(asc))
+			for i := range asc {
+				reversed[i] = asc[len(asc)-1-i]
+			}
+			Expect(desc).To(Equal(reversed))
+		}, entries)
+	})
+
 	Context("create an asset -> get it by its id", func() {
 		DescribeTable("asset content should change", func(testData AssetTest) {
 			meta1, spec1, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
@@ -359,6 +480,34 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 			Expect(getHttpResp.Code).To(Equal(http.StatusOK))
 
 			Expect(getHttpResp.Body.String()).To(Equal(string(spec1)))
+		}, entries)
+	})
+
+	Context("create a project scoped asset -> departmentId is denormalized onto the row", func() {
+		DescribeTable("project-scoped assets carry the department resolved from the project's ancestors", func(testData AssetTest) {
+			if !testData.canRunOnScope(api.SCOPE_PROJECT) {
+				return
+			}
+
+			meta, _, _ := testData.factory.createProjectBasedAsset(randoms, headerForAdmin(randoms))
+
+			Expect(meta.Scope).To(Equal(api.SCOPE_PROJECT))
+			Expect(meta.ProjectId).ToNot(BeNil())
+
+			// clusterId is always completed from the project's ancestors.
+			Expect(meta.ClusterId).ToNot(BeNil())
+			Expect(*meta.ClusterId).To(Equal(randoms.ClusterId))
+
+			// departmentId is forbidden in a project-scoped creation request. It
+			// is only resolved from the project's ancestors and denormalized for
+			// kinds that use the new scope-hierarchy filtering; every other kind
+			// leaves it unset so its creation behavior is unchanged.
+			if KindsSupportingFiltering.Has(testData.kind) {
+				Expect(meta.DepartmentId).ToNot(BeNil(), "project-scoped asset should carry the resolved departmentId")
+				Expect(*meta.DepartmentId).To(Equal(randoms.DepartmentId))
+			} else {
+				Expect(meta.DepartmentId).To(BeNil(), "project-scoped asset must not denormalize departmentId for kinds without scope filtering")
+			}
 		}, entries)
 	})
 

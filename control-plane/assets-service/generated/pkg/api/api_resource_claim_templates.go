@@ -260,6 +260,61 @@ func (c *ResourceClaimTemplatesAPIController) ListRcts(w http.ResponseWriter, r 
 		var param int32 = 50
 		limitParam = param
 	}
+	var sortOrderParam string
+	if query.Has("sortOrder") {
+		param := query.Get("sortOrder")
+
+		sortOrderParam = param
+	} else {
+		param := "asc"
+		sortOrderParam = param
+	}
+	var sortByParam string
+	if query.Has("sortBy") {
+		param := query.Get("sortBy")
+
+		sortByParam = param
+	} else {
+	}
+	var filterByParam []string
+	if query.Has("filterBy") {
+		filterByParam = strings.Split(query.Get("filterBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(filterByParam) == 1 && filterByParam[0] == "" {
+			filterByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	var includeAncestorsParam bool
+	if query.Has("includeAncestors") {
+		param, err := parseBoolParameter(
+			query.Get("includeAncestors"),
+			WithParse[bool](parseBool),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "includeAncestors", Err: err}, nil, nil)
+			return
+		}
+
+		includeAncestorsParam = param
+	} else {
+		var param bool = true
+		includeAncestorsParam = param
+	}
+	var includeDescendantsParam bool
+	if query.Has("includeDescendants") {
+		param, err := parseBoolParameter(
+			query.Get("includeDescendants"),
+			WithParse[bool](parseBool),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "includeDescendants", Err: err}, nil, nil)
+			return
+		}
+
+		includeDescendantsParam = param
+	} else {
+	}
 	var statusInfoParam bool
 	if query.Has("statusInfo") {
 		param, err := parseBoolParameter(
@@ -274,7 +329,7 @@ func (c *ResourceClaimTemplatesAPIController) ListRcts(w http.ResponseWriter, r 
 		statusInfoParam = param
 	} else {
 	}
-	result, err := c.service.ListRcts(r.Context(), offsetParam, limitParam, statusInfoParam)
+	result, err := c.service.ListRcts(r.Context(), offsetParam, limitParam, sortOrderParam, sortByParam, filterByParam, includeAncestorsParam, includeDescendantsParam, statusInfoParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

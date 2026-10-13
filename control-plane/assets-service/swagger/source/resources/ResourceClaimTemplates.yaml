@@ -12,6 +12,11 @@ get:
   parameters:
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
+    - $ref: "../parameters/query/optional/RctsSort.yaml"
+    - $ref: "../parameters/query/optional/RctsFilter.yaml"
+    - $ref: "../parameters/query/optional/IncludeAncestors.yaml"
+    - $ref: "../parameters/query/optional/includeDescendants.yaml"
     - $ref: "../parameters/query/optional/IncludeStatus.yaml"
   responses:
     200:

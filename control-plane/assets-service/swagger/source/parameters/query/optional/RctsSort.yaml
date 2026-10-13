@@ -1,0 +1,7 @@
+name: sortBy
+in: query
+required: false
+description: Sort results by parameter.
+schema:
+  type: string
+  enum: [name, clusterId, departmentId, projectId, description, createdAt, createdBy, updatedAt, updatedBy]

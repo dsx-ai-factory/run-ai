@@ -18,7 +18,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbtables"
+	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/query_types"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
+	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
 )
@@ -54,11 +57,61 @@ type RctOptions struct {
 	IncludeDeleted bool
 }
 
+// RctListParams bundles the parsed inputs of the RCT list query. Filters holds
+// the generic filterBy predicates already parsed by queryapi (including the
+// scope anchors, which ListRcts extracts and turns into scope-hierarchy SQL).
+// RbacQueryParams carries the RBAC allow-lists (via query_types.ApplyRbacRules) and
+// is applied by GetAssetMeta independently of the scope anchor.
+type RctListParams struct {
+	Offset             int32
+	Limit              int32
+	RbacQueryParams    *query_types.QueryParams
+	Filters            []queryapi.Filter
+	IncludeAncestors   bool
+	IncludeDescendants bool
+	SortColumn         string
+	SortOrder          string
+	Options            RctOptions
+}
+
+// RctFilterFieldsToColumn maps the API filterBy/sortBy field names to their
+// assets_metadata columns. Columns are table-qualified because the RCT query
+// joins assets_spec and the supported-workload-types table, so bare column
+// names such as "name" or "created_at" could be ambiguous. The scope anchors
+// (clusterId/departmentId/projectId) are listed here so the parser accepts and
+// validates them; ListRcts then pulls them out of the parsed slice and applies
+// scope-hierarchy SQL instead of a plain column predicate.
+func RctFilterFieldsToColumn() queryapi.APIFieldsMapping {
+	return queryapi.APIFieldsMapping{
+		"name":         queryapi.NewFieldMapping(rctMetaColumn(dbtables.AssetMetaColumnName)),
+		"description":  queryapi.NewFieldMapping(rctMetaColumn("description")),
+		"clusterId":    queryapi.NewFieldMapping(scopeColumnCluster, queryapi.UUIDValidator{}),
+		"departmentId": queryapi.NewFieldMapping(scopeColumnDepartment),
+		"projectId":    queryapi.NewFieldMapping(scopeColumnProject),
+		"createdAt":    queryapi.NewFieldMapping(rctMetaColumn("created_at"), queryapi.DateValidator{}),
+		"createdBy":    queryapi.NewFieldMapping(rctMetaColumn("created_by")),
+		"updatedAt":    queryapi.NewFieldMapping(rctMetaColumn("updated_at"), queryapi.DateValidator{}),
+		"updatedBy":    queryapi.NewFieldMapping(rctMetaColumn("updated_by")),
+	}
+}
+
+// RctSortFieldsToColumn reuses the filter mapping; every filterable column is
+// also sortable.
+func RctSortFieldsToColumn() queryapi.APIFieldsMapping {
+	return RctFilterFieldsToColumn()
+}
+
+func rctMetaColumn(column string) string {
+	return fmt.Sprintf("%s.%s", dbtables.TableNameAssetsMeta, column)
+}
+
 // ListRcts returns a paginated list of resource claim template assets. The
 // offset/limit contract matches the swagger: fetch limit+1 rows so we can set
 // RctListResponse.Next when the next page exists (i.e. when the returned page
-// is full).
-func ListRcts(ctx context.Context, offset, limit int32, options RctOptions) (*api.RctListResponse, *api.Error) {
+// is full). Scope filtering (the clusterId/departmentId/projectId anchor plus
+// includeAncestors/includeDescendants) and RBAC are applied as independent,
+// AND-ed WHERE blocks; the generic filterBy predicates are applied verbatim.
+func ListRcts(ctx context.Context, params RctListParams) (*api.RctListResponse, *api.Error) {
 	combinedList := make([]dbmodel.AssetSpecCombinedRec, 0)
 	query := dbmodel.AssetMetaRec{
 		AssetMeta: dbmodel.AssetMeta{
@@ -66,21 +119,41 @@ func ListRcts(ctx context.Context, offset, limit int32, options RctOptions) (*ap
 		},
 	}
 
-	result, err := GetAssetMeta(ctx, runaidb.DB().WithContext(ctx), query, nil, assetsSpecJoin())
+	remainingFilters, anchor, scopeErr := extractScopeAnchor(ctx, params.Filters, params.IncludeAncestors)
+	if scopeErr != nil {
+		return nil, scopeErr
+	}
+
+	result, err := GetAssetMeta(ctx, runaidb.DB().WithContext(ctx), query, params.RbacQueryParams, assetsSpecJoin())
 	if err != nil {
 		return nil, err
 	}
 	applyAssetsSpecTenantFilter(ctx, result)
 
-	if options.IncludeDeleted {
+	if anchor != nil {
+		scopeQuery, scopeBuildErr := buildScopeQuery(anchor, params.IncludeAncestors, params.IncludeDescendants)
+		if scopeBuildErr != nil {
+			return nil, scopeBuildErr
+		}
+		result.Where(fmt.Sprintf("(%s)", scopeQuery.Query), scopeQuery.Params...)
+	}
+
+	result = result.WithEnricher(querydbenrich.Filters(remainingFilters))
+
+	if params.Options.IncludeDeleted {
 		result = result.Unscoped()
 	}
 
+	if params.SortColumn != "" {
+		result = result.Order(querydbenrich.FormatSortClause(params.SortColumn, params.SortOrder))
+	}
+	// Stable tiebreaker so pagination is deterministic even when the sort column has ties.
+	result = result.Order(fmt.Sprintf("%s desc", rctMetaColumn(dbtables.AssetMetaColumnId)))
+
 	// Fetch limit+1 so we can detect "is there a next page" without a count query.
-	fetchLimit := int(limit) + 1
+	fetchLimit := int(params.Limit) + 1
 	_, scanErr := result.
-		Order(&query.AssetMeta.Id).
-		Offset(int(offset)).
+		Offset(int(params.Offset)).
 		Limit(fetchLimit).
 		Scan(&combinedList)
 	if scanErr != nil {
@@ -93,9 +166,9 @@ func ListRcts(ctx context.Context, offset, limit int32, options RctOptions) (*ap
 
 	// If we got more than limit rows, there is a next page: trim the extra row
 	// and set the next offset. Otherwise leave Next as its zero value (no more pages).
-	if int32(len(combinedList)) > limit {
-		combinedList = combinedList[:limit]
-		response.Next = offset + limit
+	if int32(len(combinedList)) > params.Limit {
+		combinedList = combinedList[:params.Limit]
+		response.Next = params.Offset + params.Limit
 	}
 
 	for _, row := range combinedList {

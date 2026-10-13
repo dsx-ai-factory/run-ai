@@ -7,6 +7,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 
@@ -106,6 +107,13 @@ type AssetTest struct {
 	filteringStyle     AssetFilterStyle // how the list endpoint accepts filters (default: query-string)
 	supportOffsetLimit bool             // list endpoint accepts ?offset= and ?limit=
 
+	// supportingFiltering marks kinds whose list endpoint exposes the new
+	// queryapi filterBy surface (filterBy=<field><op><value> plus the
+	// includeAncestors / includeDescendants flags). Generic list-parameter
+	// tests use it to pick the filterBy URL over the legacy query-string one,
+	// and to gate the scope-hierarchy test that only the new surface supports.
+	supportingFiltering bool
+
 	renameNotAllowedDuringSync bool
 
 	cannotAppearInWorkload     bool // asset cannot be part of workload submission directly
@@ -147,6 +155,53 @@ func (a *AssetTest) supportsClusterMockVersion(v string) bool {
 		return false
 	}
 	return !actual.LessThan(min)
+}
+
+// scopeAnchorField maps an api.Scope to the filterBy / query-string field that
+// anchors a list on that scope.
+var scopeAnchorField = map[api.Scope]string{
+	api.SCOPE_PROJECT:    "projectId",
+	api.SCOPE_DEPARTMENT: "departmentId",
+	api.SCOPE_CLUSTER:    "clusterId",
+}
+
+// listByNameURL builds a list URL filtering by exact asset name. Kinds on the
+// new filterBy surface use filterBy=name==<name>; legacy kinds use ?name=.
+func (a *AssetTest) listByNameURL(name string) string {
+	if a.supportingFiltering {
+		return fmt.Sprintf("%s?filterBy=name==%s", a.url, name)
+	}
+	return fmt.Sprintf("%s?name=%s", a.url, name)
+}
+
+// listByScopeAnchorURL builds a list URL anchored on a single scope node
+// (field is projectId / departmentId / clusterId). Kinds on the new filterBy
+// surface emit filterBy=<field>==<id> together with the includeAncestors /
+// includeDescendants flags; legacy kinds emit the equivalent query-string:
+// the bare ?<field>=<id> already pins the node and walks ancestors, &scope=
+// pins the node exactly (no ancestors), and &includeDescendants=true walks down.
+func (a *AssetTest) listByScopeAnchorURL(field, id string, includeAncestors, includeDescendants bool) string {
+	if a.supportingFiltering {
+		return fmt.Sprintf("%s?filterBy=%s==%s&includeAncestors=%t&includeDescendants=%t",
+			a.url, field, id, includeAncestors, includeDescendants)
+	}
+
+	url := fmt.Sprintf("%s?%s=%s", a.url, field, id)
+	if !includeAncestors {
+		url += fmt.Sprintf("&scope=%s", scopeFieldToLegacyScope[field])
+	}
+	if includeDescendants {
+		url += "&includeDescendants=true"
+	}
+	return url
+}
+
+// scopeFieldToLegacyScope maps a scope-anchor field to the query-string ?scope=
+// value used to pin that node exactly on legacy list endpoints.
+var scopeFieldToLegacyScope = map[string]api.Scope{
+	"projectId":    api.SCOPE_PROJECT,
+	"departmentId": api.SCOPE_DEPARTMENT,
+	"clusterId":    api.SCOPE_CLUSTER,
 }
 
 func (a *AssetTest) canRunOnlyOnScope(scope api.Scope) bool {
@@ -307,11 +362,10 @@ func NewAssetKindTable(router chi.Router) []ginkgo.TableEntry {
 
 		// Resource claim templates: newest asset kind, backed by the generic
 		// assets_spec table (not a dedicated per-kind spec table). Lives under
-		// /api/v1/k8s-objects/* with a lightweight list contract (offset/limit
-		// today; custom-filter API to follow). Requires cluster >= 3.1. No
-		// workload integration yet, no cluster status/sync yet — those layers
-		// ship in follow-up PRs. Cross-cutting CRUD/RBAC/tenancy tests still
-		// apply.
+		// /api/v1/k8s-objects/* and exposes the new queryapi filterBy surface
+		// (filterBy=<field><op><value> plus includeAncestors/includeDescendants)
+		// rather than the legacy query-string filters. Requires cluster >= 3.1.
+		// Cross-cutting CRUD/RBAC/tenancy tests still apply.
 		ginkgo.Entry(string(api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE), AssetTest{
 			kind:                   api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
 			factory:                NewRctTestFactory(router),
@@ -319,7 +373,8 @@ func NewAssetKindTable(router chi.Router) []ginkgo.TableEntry {
 			customAuthorization:    true, // x-no-authorization on list/create, x-authorize on by-id
 			cannotAppearInWorkload: true, // RCT not yet wired into workload create
 			supportsCleanup:        true,
-			filteringStyle:         FilterStyleCustom, // query-string filters not exposed on this endpoint
+			filteringStyle:         FilterStyleCustom, // legacy query-string filters not exposed on this endpoint
+			supportingFiltering:    true,              // exposes the new filterBy surface instead
 			supportOffsetLimit:     true,
 			minClusterVersion:      "3.1.0", // matches checker.MinVersionResourceClaimTemplates
 			allowedScopes:          &clusterDownScopes,
