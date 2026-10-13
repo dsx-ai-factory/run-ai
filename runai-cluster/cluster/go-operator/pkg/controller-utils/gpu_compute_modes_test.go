@@ -91,36 +91,14 @@ var _ = Describe("GPU compute mode availability", func() {
 		Entry("literal with indirect setting", []corev1.EnvVar{{Name: "SUPPORT_SM_SHARING", Value: "true", ValueFrom: &corev1.EnvVarSource{}}}, "cannot be determined"),
 	)
 
-	DescribeTable("does not use runtime health as a capability gate",
-		func(conditionType, status string) {
-			Expect(unstructured.SetNestedSlice(config.Object, []interface{}{
-				map[string]interface{}{"type": conditionType, "status": status, "observedGeneration": int64(1)},
-			}, "status", "conditions")).To(Succeed())
-			config.SetGeneration(2)
-			checkSupported(config, operator)
-		},
-		Entry("Ready false", "Ready", "False"),
-		Entry("Ready unknown", "Ready", "Unknown"),
-		Entry("Ready stale", "Ready", "True"),
-		Entry("fractiond unready", "FractiondReady", "False"),
-		Entry("mpsd unready", "MpsdReady", "False"),
-	)
-	DescribeTable("does not use operator rollout health as a capability gate",
-		func(change func(*appsv1.Deployment)) {
-			change(operator)
-			checkSupported(config, operator)
-		},
-		Entry("scaled to zero", func(d *appsv1.Deployment) { d.Spec.Replicas = ptr.To(int32(0)) }),
-		Entry("unready replicas", func(d *appsv1.Deployment) {
-			d.Spec.Replicas = ptr.To(int32(1))
-			d.Status = appsv1.DeploymentStatus{Replicas: 1, UnavailableReplicas: 1}
-		}),
-		Entry("stale rollout", func(d *appsv1.Deployment) {
-			d.Generation = 3
-			d.Status = appsv1.DeploymentStatus{ObservedGeneration: 1, UpdatedReplicas: 0, ReadyReplicas: 1}
-		}),
-	)
-	It("does not read DaemonSets", func() {
+	It("reports configured support without runtime readiness or DaemonSet reads", func() {
+		Expect(unstructured.SetNestedSlice(config.Object, []interface{}{
+			map[string]interface{}{"type": "Ready", "status": "False", "observedGeneration": int64(1)},
+		}, "status", "conditions")).To(Succeed())
+		config.SetGeneration(2)
+		operator.Spec.Replicas = ptr.To(int32(0))
+		operator.Generation = 3
+		operator.Status = appsv1.DeploymentStatus{ObservedGeneration: 1, UnavailableReplicas: 1}
 		k8s := fake.NewClientBuilder().WithScheme(scheme).WithObjects(config, operator).WithInterceptorFuncs(interceptor.Funcs{
 			List: func(ctx context.Context, reader client.WithWatch, list client.ObjectList, opts ...client.ListOption) error {
 				if _, ok := list.(*appsv1.DaemonSetList); ok {

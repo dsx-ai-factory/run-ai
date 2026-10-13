@@ -704,6 +704,7 @@ var _ = Describe("compute asset specific tests", func() {
 			origAsset.Spec = &api.ComputeAssetSpec{
 				GpuDevicesRequest: convutils.Ref(int32(1)),
 				GpuRequestType:    convutils.Ref(api.GPUREQUESTTYPE_MEMORY),
+				GpuComputeMode:    convutils.Ref(api.GPUCOMPUTEMODE_TIME_SLICING),
 				GpuMemoryRequest:  convutils.Ref("2G"),
 				GpuMemoryLimit:    convutils.Ref("4G"),
 				CpuCoreRequest:    convutils.Ref(2.5),
@@ -732,6 +733,7 @@ var _ = Describe("compute asset specific tests", func() {
 				Spec: &api.ComputeAssetSpec{
 					GpuDevicesRequest:       convutils.Ref(int32(1)),
 					GpuRequestType:          convutils.Ref(api.GPUREQUESTTYPE_PORTION),
+					GpuComputeMode:          convutils.Ref(api.GPUCOMPUTEMODE_SM_SHARING),
 					GpuMemoryPortionRequest: convutils.Ref(0.2),
 					GpuMemoryPortionLimit:   convutils.Ref(0.4),
 					CpuCoreRequest:          convutils.Ref(5.0),

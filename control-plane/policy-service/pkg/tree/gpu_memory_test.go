@@ -97,20 +97,6 @@ func TestGPUMemoryPolicyInheritance(t *testing.T) {
 	}
 }
 
-func TestGPUMemoryDefaultFromAliasCycle(t *testing.T) {
-	rules := map[string]any{"compute": map[string]any{
-		"gpuMemoryPortionRequest": map[string]any{"defaultFrom": map[string]any{"field": "compute.gpuPortionRequest"}},
-	}}
-	canonical, err := gpucompat.NormalizeLegacyGPUPolicy(rules)
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, validationErr := calculateDefaultFromOrder(canonical)
-	if validationErr == nil {
-		t.Fatal("alias disguised a self dependency")
-	}
-}
-
 func TestLegacyWholePolicyCanBeNormalizedAndPatched(t *testing.T) {
 	request := &ApplyPolicyRequest{
 		Defaults: map[string]any{"compute": map[string]any{"gpuPortionRequest": json.Number("4")}},

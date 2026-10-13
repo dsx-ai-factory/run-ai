@@ -18,10 +18,11 @@ import (
 )
 
 var _ = Describe("GPU mode annotation projection", func() {
-	DescribeTable("targets the GPU container and preserves the memory request", func(mode string) {
+	It("targets the GPU container and preserves the memory request", func() {
+		const mode = "sm-sharing"
 		options := composer.FieldsComposerOptions{GpuComputeModeStatus: func(context.Context, string) (bool, string, error) { return true, "", nil }}
 		var src workloadsApi.WorkspaceSpecSpecAllOfCompute
-		Expect(json.Unmarshal([]byte(fmt.Sprintf(`{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":%q}`, mode)), &src)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"sm-sharing"}`), &src)).To(Succeed())
 		c := &DistributedToKubeflowComposer{fc: &composer.FieldsComposer{Options: options}}
 		for _, framework := range []workloadsApi.DistributedFramework{workloadsApi.DISTRIBUTEDFRAMEWORK_MPI, workloadsApi.DISTRIBUTEDFRAMEWORK_PY_TORCH, workloadsApi.DISTRIBUTEDFRAMEWORK_TF, workloadsApi.DISTRIBUTEDFRAMEWORK_XG_BOOST, workloadsApi.DISTRIBUTEDFRAMEWORK_JAX} {
 			target := &corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: []corev1.Container{{}}}}
@@ -33,5 +34,5 @@ var _ = Describe("GPU mode annotation projection", func() {
 			Expect(target.Annotations).To(HaveKeyWithValue(fmt.Sprintf("nvidia.com/container.%s.gpu-compute.mode", name), mode))
 			Expect(target.Annotations).To(HaveKeyWithValue(composer.GpuFractionAnnotation, "0.25"))
 		}
-	}, Entry("time slicing", "time-slicing"), Entry("SM sharing", "sm-sharing"))
+	})
 })

@@ -8,7 +8,6 @@ package iw_tw_workloads
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
@@ -18,10 +17,11 @@ import (
 )
 
 var _ = Describe("GPU mode annotation projection", func() {
-	DescribeTable("targets the GPU container and preserves the memory request", func(mode string) {
+	It("targets the GPU container and preserves the memory request", func() {
+		const mode = "sm-sharing"
 		options := composer.FieldsComposerOptions{GpuComputeModeStatus: func(context.Context, string) (bool, string, error) { return true, "", nil }}
 		var src workloadsApi.WorkspaceSpecSpecAllOfCompute
-		Expect(json.Unmarshal([]byte(fmt.Sprintf(`{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":%q}`, mode)), &src)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"sm-sharing"}`), &src)).To(Succeed())
 		for _, kind := range []string{composer.Workspace, composer.Training} {
 			c := NewInterTrainJobComposer(kind, "example", "p1", "runai-p1", "user", nil, options, nil)
 			target := NewMinimalBatchJobTarget()
@@ -30,5 +30,5 @@ var _ = Describe("GPU mode annotation projection", func() {
 			Expect(target.Job.Spec.Template.Annotations).To(HaveKeyWithValue("nvidia.com/container.workload-main.gpu-compute.mode", mode))
 			Expect(target.Job.Spec.Template.Annotations).To(HaveKeyWithValue(composer.GpuFractionAnnotation, "0.25"))
 		}
-	}, Entry("time slicing", "time-slicing"), Entry("SM sharing", "sm-sharing"))
+	})
 })

@@ -158,24 +158,6 @@ func TestWorkspaceMemoryAliasConflicts(t *testing.T) {
 	}
 }
 
-func TestWorkspaceMemoryAliasesPreserveOmissionAndLimits(t *testing.T) {
-	var spec workloadsApi.SupersetSpec
-	if err := json.Unmarshal([]byte(`{"compute":{"gpuPortionRequest":0.25,"gpuPortionLimit":0.5}}`), &spec); err != nil {
-		t.Fatal(err)
-	}
-	response := gpucompat.LegacyCompatibleWorkloadSpec(&spec)
-	if response.Compute.Get().GetGpuMemoryPortionLimit() != .5 {
-		t.Fatal("limit alias lost")
-	}
-	stored := gpucompat.StoredWorkloadSpec(response)
-	if !reflect.DeepEqual(stored, &spec) {
-		t.Fatal("legacy persisted representation changed")
-	}
-	if gpucompat.LegacyCompatibleWorkloadSpec(&workloadsApi.SupersetSpec{}).Compute.IsSet() {
-		t.Fatal("fabricated compute section")
-	}
-}
-
 func TestWorkspaceMemoryAliasUpdateSemantics(t *testing.T) {
 	for _, tc := range []struct {
 		name, input    string

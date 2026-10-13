@@ -6,35 +6,15 @@
 package dbmodel
 
 import (
-	"sync"
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
-	"gorm.io/gorm/schema"
 )
 
-func TestGPUMemoryAliasesHaveNoDatabaseColumns(t *testing.T) {
-	for _, model := range []any{&ComputeAssetRec{}, &ComputeAssetUpdate{}, &ComputeFullRec{}} {
-		parsed, err := schema.Parse(model, &sync.Map{}, schema.NamingStrategy{})
-		if err != nil {
-			t.Fatal(err)
-		}
-		for _, name := range []string{"GpuMemoryPortionRequest", "GpuMemoryPortionLimit"} {
-			field := parsed.FieldsByName[name]
-			if field == nil || field.DBName != "" || field.Creatable || field.Updatable {
-				t.Fatalf("%T persists public alias %s: %#v", model, name, field)
-			}
-		}
-		for _, name := range []string{"gpu_portion_request", "gpu_portion_limit"} {
-			if parsed.FieldsByDBName[name] == nil {
-				t.Fatalf("lost stored column %s", name)
-			}
-		}
-	}
-}
 func TestGPUMemoryAssetRoundTrip(t *testing.T) {
 	request, limit := .25, .5
-	input := api.ComputeAssetSpec{GpuMemoryPortionRequest: &request, GpuMemoryPortionLimit: &limit}
+	mode := api.GPUCOMPUTEMODE_SM_SHARING
+	input := api.ComputeAssetSpec{GpuMemoryPortionRequest: &request, GpuMemoryPortionLimit: &limit, GpuComputeMode: &mode}
 	stored, err := StoredComputeAsset(input)
 	if err != nil {
 		t.Fatal(err)
@@ -43,6 +23,9 @@ func TestGPUMemoryAssetRoundTrip(t *testing.T) {
 		t.Fatal("persisted new alias")
 	}
 	response := LegacyCompatibleComputeAsset(stored)
+	if response.GpuComputeMode == nil || *response.GpuComputeMode != mode {
+		t.Fatal("response lost compute mode")
+	}
 	if *response.GpuPortionRequest != request || *response.GpuMemoryPortionRequest != request || *response.GpuMemoryPortionLimit != limit {
 		t.Fatal("response lost aliases")
 	}

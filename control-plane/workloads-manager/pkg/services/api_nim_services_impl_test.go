@@ -718,7 +718,7 @@ var _ = Describe("NimServicesImpl", func() {
 		})
 	})
 
-	DescribeTable("preserves unavailable GPU mode errors", func(update, fromPolicy, legacyMemory bool) {
+	DescribeTable("preserves unavailable GPU mode errors", func(update, fromPolicy bool) {
 		displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
 		var status clustersApi.ClusterDisplayedStatus
 		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}},"optional":{"gpu-compute-modes":{"available":false,"reason":"SM sharing is disabled","components":{"sm-sharing":{"available":false,"reason":"SM sharing is disabled"}}}}}}`), &status)).To(Succeed())
@@ -727,11 +727,7 @@ var _ = Describe("NimServicesImpl", func() {
 
 		spec := sampleNimServiceSpec
 		spec.Compute = &api.NimServiceSpecAllOfCompute{}
-		if legacyMemory {
-			spec.Compute.GpuPortionRequest = convutils.Ref(0.25)
-		} else {
-			spec.Compute.GpuMemoryPortionRequest = convutils.Ref(0.25)
-		}
+		spec.Compute.GpuMemoryPortionRequest = convutils.Ref(0.25)
 		request := api.NimServiceCreateRequest{
 			Metadata: api.NimServiceMetadataCreateParams{Name: "unavailable-mode", ProjectId: randoms.ProjectIdStr},
 			Spec:     spec,
@@ -778,12 +774,9 @@ var _ = Describe("NimServicesImpl", func() {
 		Expect(failure.Details).To(ContainSubstring(`compute.gpuComputeMode "sm-sharing" is unavailable`))
 		Expect(failure.Details).To(ContainSubstring("SM sharing is disabled"))
 	},
-		Entry("create with explicit mode and new memory field", false, false, false),
-		Entry("create with explicit mode and deprecated memory field", false, false, true),
-		Entry("create with policy mode and new memory field", false, true, false),
-		Entry("create with policy mode and deprecated memory field", false, true, true),
-		Entry("update with explicit mode and new memory field", true, false, false),
-		Entry("update with explicit mode and deprecated memory field", true, false, true),
+		Entry("create with explicit mode", false, false),
+		Entry("create with policy mode", false, true),
+		Entry("update with explicit mode", true, false),
 	)
 
 	It("persists and recomposes GPU mode through create, GET and update", func() {

@@ -4,17 +4,17 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { legacyComputeForEditor, legacyPolicyForEditor } from "./gpu-memory-compat.util";
+import { legacyComputeForForm, legacyPolicyForForm } from "./gpu-memory-compat.util";
 
-describe("GPU memory aliases in existing editors", () => {
+describe("GPU memory aliases in existing forms", () => {
   it("preserves whole GPU requests and policy locks without inventing device requests", () => {
     const compute = { gpuPortionRequest: 4, gpuComputeMode: "time-slicing" };
-    expect(legacyComputeForEditor(compute)).toEqual(compute);
+    expect(legacyComputeForForm(compute)).toEqual(compute);
     const policy = {
       defaults: { compute },
       rules: { compute: { gpuPortionRequest: { canEdit: false }, gpuMemoryPortionRequest: { canEdit: false } } },
     };
-    expect(legacyPolicyForEditor(policy)).toEqual({
+    expect(legacyPolicyForForm(policy)).toEqual({
       defaults: { compute },
       rules: { compute: { gpuPortionRequest: { canEdit: false } } },
     });
@@ -28,7 +28,7 @@ describe("GPU memory aliases in existing editors", () => {
       gpuMemoryPortionLimit: 0.5,
       cpuCoreRequest: 2,
     };
-    const edited = legacyComputeForEditor(response);
+    const edited = legacyComputeForForm(response);
     edited.gpuPortionRequest = 0.75;
     delete (edited as Partial<typeof edited>).gpuPortionLimit;
     expect(JSON.parse(JSON.stringify(edited))).toEqual({ gpuPortionRequest: 0.75, cpuCoreRequest: 2 });
@@ -37,7 +37,7 @@ describe("GPU memory aliases in existing editors", () => {
   });
 
   it.each([0, null, 0.25])("preserves a new-only response value %s", (value) => {
-    expect(legacyComputeForEditor({ gpuMemoryPortionRequest: value })).toEqual({ gpuPortionRequest: value });
+    expect(legacyComputeForForm({ gpuMemoryPortionRequest: value })).toEqual({ gpuPortionRequest: value });
   });
 
   it("keeps only the edited policy rule and preserves metadata with similarly named keys", () => {
@@ -55,7 +55,7 @@ describe("GPU memory aliases in existing editors", () => {
       },
       effective: { defaults: { leader: { compute: { gpuPortionRequest: 0.25, gpuMemoryPortionRequest: 0.25 } } } },
     };
-    const edited = legacyPolicyForEditor(response);
+    const edited = legacyPolicyForForm(response);
     edited.policy.rules.worker.compute.gpuPortionRequest = { canEdit: true };
     expect(edited.policy.rules.worker.compute).toEqual({ gpuPortionRequest: { canEdit: true } });
     expect(edited.effective.defaults.leader.compute).toEqual({ gpuPortionRequest: 0.25 });

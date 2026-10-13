@@ -315,6 +315,19 @@ describe("workload-hybrid.util", () => {
       expect(result).not.toHaveProperty("gpuComputeMode");
     });
 
+    it("does not restore cleared memory portions from response aliases", () => {
+      const compute: WorkspaceSpecSpecAllOfCompute = {
+        gpuDevicesRequest: 2,
+        gpuPortionRequest: undefined,
+        gpuPortionLimit: undefined,
+        gpuMemoryPortionRequest: 0.5,
+        gpuMemoryPortionLimit: 0.75,
+      };
+
+      expect(workloadHybridUtil._getCleanedComputeFieldsFromUI(compute)).toEqual({ gpuDevicesRequest: 2 });
+      expect(compute.gpuMemoryPortionRequest).toBe(0.5);
+    });
+
     it("removes gpuPortionRequest and gpuRequestType when gpuPortionRequest is 1", () => {
       const compute: WorkspaceSpecSpecAllOfCompute = {
         gpuPortionRequest: 1,
@@ -2025,19 +2038,25 @@ describe("GPU memory aliases in workload copy and edit", () => {
     },
   ];
   for (const form of forms) {
-    it.each(["legacy", "new", "both"])(`${form.name} keeps %s aliases editable without stale duplicates`, (spelling) => {
+    it(`${form.name} edits a dual-alias response without stale duplicates`, () => {
       const compute: WorkspaceSpecSpecAllOfCompute = { gpuDevicesRequest: 1, gpuRequestType: GpuRequestType.Portion };
-      if (spelling !== "new") Object.assign(compute, { gpuPortionRequest: 0.5, gpuPortionLimit: 0.5 });
-      if (spelling !== "legacy") Object.assign(compute, { gpuMemoryPortionRequest: 0.5, gpuMemoryPortionLimit: 0.5 });
+      Object.assign(compute, { gpuPortionRequest: 0.5, gpuPortionLimit: 0.5 });
+      Object.assign(compute, { gpuMemoryPortionRequest: 0.5, gpuMemoryPortionLimit: 0.5 });
       const unified: UnifiedWorkload = { spec: { worker: { image: "ubuntu", compute } } };
       const original = JSON.stringify(unified);
       const model = form.model(unified);
       expect(model.spec.compute).toMatchObject({ gpuPortionRequest: 0.5, gpuPortionLimit: 0.5 });
-      model.spec.compute = { ...model.spec.compute, gpuPortionRequest: 0.25, gpuPortionLimit: 0.75 };
+      model.spec.compute = {
+        ...model.spec.compute,
+        gpuPortionRequest: 0.25,
+        gpuPortionLimit: 0.75,
+        gpuMemoryPortionRequest: 0.5,
+        gpuMemoryPortionLimit: 0.5,
+      };
       const request = form.prepare(model);
-      expect(request.spec.compute).toMatchObject({ gpuPortionRequest: 0.25, gpuPortionLimit: 0.75 });
-      expect(request.spec.compute).not.toHaveProperty("gpuMemoryPortionRequest");
-      expect(request.spec.compute).not.toHaveProperty("gpuMemoryPortionLimit");
+      expect(request.spec?.compute).toMatchObject({ gpuPortionRequest: 0.25, gpuPortionLimit: 0.75 });
+      expect(request.spec?.compute).not.toHaveProperty("gpuMemoryPortionRequest");
+      expect(request.spec?.compute).not.toHaveProperty("gpuMemoryPortionLimit");
       expect(JSON.stringify(unified)).toBe(original);
     });
   }

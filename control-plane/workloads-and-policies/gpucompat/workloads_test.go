@@ -13,6 +13,9 @@ import (
 )
 
 func TestNullableResponseMemoryAliases(t *testing.T) {
+	if LegacyCompatibleWorkloadSpec(&workloadsApi.SupersetSpec{}).Compute.IsSet() {
+		t.Fatal("fabricated compute section")
+	}
 	for _, key := range []string{"gpuPortionRequest", "gpuMemoryPortionRequest", "gpuPortionLimit", "gpuMemoryPortionLimit"} {
 		t.Run(key, func(t *testing.T) {
 			var spec workloadsApi.SupersetSpec

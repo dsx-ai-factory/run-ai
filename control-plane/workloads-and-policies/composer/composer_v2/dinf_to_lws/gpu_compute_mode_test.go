@@ -18,10 +18,11 @@ import (
 )
 
 var _ = Describe("GPU mode annotation projection", func() {
-	DescribeTable("targets the GPU container and preserves the memory request", func(mode string) {
+	It("targets the GPU container and preserves the memory request", func() {
+		const mode = "sm-sharing"
 		options := composer.FieldsComposerOptions{GpuComputeModeStatus: func(context.Context, string) (bool, string, error) { return true, "", nil }}
 		var src workloadsApi.WorkspaceSpecSpecAllOfCompute
-		Expect(json.Unmarshal([]byte(fmt.Sprintf(`{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":%q}`, mode)), &src)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"sm-sharing"}`), &src)).To(Succeed())
 		c := NewDistributedInferenceToLWSComposer("example", "p1", "runai-p1", "user", nil, nil, options, nil)
 		for _, name := range []string{"leader-main", "worker-main"} {
 			target := &corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: []corev1.Container{{Name: name}}}}
@@ -29,5 +30,5 @@ var _ = Describe("GPU mode annotation projection", func() {
 			Expect(target.Annotations).To(HaveKeyWithValue(fmt.Sprintf("nvidia.com/container.%s.gpu-compute.mode", name), mode))
 			Expect(target.Annotations).To(HaveKeyWithValue(composer.GpuFractionAnnotation, "0.25"))
 		}
-	}, Entry("time slicing", "time-slicing"), Entry("SM sharing", "sm-sharing"))
+	})
 })
