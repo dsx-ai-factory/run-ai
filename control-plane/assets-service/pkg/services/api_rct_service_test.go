@@ -11,9 +11,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
+	k8sObjectsTracker "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/k8s-objects-tracker"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"
 	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/workloads-service"
 	dbTesting "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/testing"
@@ -33,6 +35,13 @@ import (
 
 const urlRct = "/api/v1/k8s-objects/resource-claim-templates"
 
+// rctDeviceClassForTests is the single DeviceClass name every test spec built
+// via validRctObjectSpec references. Shared with the k8s-objects-tracker mock
+// setup in each BeforeEach (services_crud_test.go, services_auth_test.go, this
+// file) so RCT creation passes the new validateRctDeviceClasses gate without
+// each site duplicating the string literal.
+const rctDeviceClassForTests = "gpu.nvidia.com"
+
 // validRctObjectSpec returns a minimal but valid resource.k8s.io/v1
 // ResourceClaimSpec payload used by every RCT test factory create call.
 // Keep this minimal on purpose: the framework only exercises CRUD/RBAC/
@@ -45,7 +54,7 @@ func validRctObjectSpec() map[string]any {
 				map[string]any{
 					"name": "gpu",
 					"exactly": map[string]any{
-						"deviceClassName": "gpu.nvidia.com",
+						"deviceClassName": rctDeviceClassForTests,
 						"count":           1,
 						"allocationMode":  "ExactCount",
 					},
@@ -231,6 +240,15 @@ var _ = Describe("Rct API tests", func() {
 				EffectiveUpdatedAt: time.Now(),
 			},
 		})
+
+		// Seed the DeviceClass referenced by validRctObjectSpec. Every test
+		// in this suite POSTs through postRctWithObjectSpec / the factory,
+		// which both consult the tracker as part of validateRctDeviceClasses.
+		// Tests that specifically exercise the validator (missing names,
+		// mixed Exactly/FirstAvailable, tracker outage) override this mock
+		// locally so this seed is a safe non-interfering default.
+		k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+			WithDeviceClass(randoms.ClusterId, rctDeviceClassForTests))
 	})
 
 	// postRctWithObjectSpec builds and sends a minimal cluster-scoped RCT
@@ -385,6 +403,129 @@ var _ = Describe("Rct API tests", func() {
 			Expect(recorder.Code).To(Equal(http.StatusNotFound), recorder.Body.String())
 			Expect(recorder.Body.String()).To(ContainSubstring("resource claim template with id"))
 			Expect(recorder.Body.String()).To(ContainSubstring("not found"))
+		})
+	})
+
+	// specWithDeviceClasses builds an ObjectSpec with (a) one Exactly request
+	// per name in exactlyNames and (b) one FirstAvailable request whose
+	// subrequests cover every name in firstAvailableNames. Keeping both
+	// branches populated in a single spec is the point: validateRctDeviceClasses
+	// has to walk both and the test needs to prove it.
+	specWithDeviceClasses := func(exactlyNames []string, firstAvailableNames []string) map[string]any {
+		requests := make([]any, 0, len(exactlyNames)+1)
+		for i, name := range exactlyNames {
+			requests = append(requests, map[string]any{
+				"name": fmt.Sprintf("ex%d", i),
+				"exactly": map[string]any{
+					"deviceClassName": name,
+					"count":           1,
+					"allocationMode":  "ExactCount",
+				},
+			})
+		}
+		if len(firstAvailableNames) > 0 {
+			subs := make([]any, 0, len(firstAvailableNames))
+			for i, name := range firstAvailableNames {
+				subs = append(subs, map[string]any{
+					"name":            fmt.Sprintf("fa%d", i),
+					"deviceClassName": name,
+					"count":           1,
+					"allocationMode":  "ExactCount",
+				})
+			}
+			requests = append(requests, map[string]any{
+				"name":           "fa-req",
+				"firstAvailable": subs,
+			})
+		}
+		return map[string]any{"devices": map[string]any{"requests": requests}}
+	}
+
+	Context("DeviceClass existence validation (validateRctDeviceClasses)", func() {
+		// These tests re-install the tracker mock locally so they control
+		// exactly which DeviceClass names are known on the cluster. The
+		// BeforeEach seed is overwritten by each SetMock below.
+
+		It("accepts an Exactly request whose deviceClassName is known on the cluster", func() {
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+				WithDeviceClass(randoms.ClusterId, "gpu.nvidia.com"))
+
+			resp := postRctWithObjectSpec(specWithDeviceClasses(
+				[]string{"gpu.nvidia.com"}, nil))
+			Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+		})
+
+		It("rejects an Exactly request whose deviceClassName is unknown on the cluster", func() {
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+				WithDeviceClass(randoms.ClusterId, "gpu.nvidia.com"))
+
+			resp := postRctWithObjectSpec(specWithDeviceClasses(
+				[]string{"compute-domain.nvidia.com"}, nil))
+			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+			Expect(resp.Body.String()).To(ContainSubstring("device class(es) not found"))
+			Expect(resp.Body.String()).To(ContainSubstring("compute-domain.nvidia.com"))
+			Expect(resp.Body.String()).To(ContainSubstring(randoms.ClusterId))
+			// The seeded class should not appear in the "missing" list.
+			Expect(resp.Body.String()).NotTo(ContainSubstring("gpu.nvidia.com"))
+		})
+
+		It("accepts a spec with both Exactly and FirstAvailable when every referenced class is known", func() {
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+				WithDeviceClass(randoms.ClusterId, "gpu.nvidia.com").
+				WithDeviceClass(randoms.ClusterId, "mig.nvidia.com").
+				WithDeviceClass(randoms.ClusterId, "vfio.gpu.nvidia.com"))
+
+			resp := postRctWithObjectSpec(specWithDeviceClasses(
+				[]string{"gpu.nvidia.com"},
+				[]string{"mig.nvidia.com", "vfio.gpu.nvidia.com"}))
+			Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+		})
+
+		It("rejects only the unknown names across both branches (sorted) and preserves the known ones", func() {
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+				WithDeviceClass(randoms.ClusterId, "gpu.nvidia.com").
+				WithDeviceClass(randoms.ClusterId, "mig.nvidia.com"))
+
+			// Exactly uses one known (gpu) and one unknown (zzz-unknown.nvidia.com).
+			// FirstAvailable uses one known (mig) and one unknown (aaa-missing.nvidia.com).
+			// Deduplication plus sorted output means the message lists
+			// "aaa-missing.nvidia.com, zzz-unknown.nvidia.com" and nothing else.
+			resp := postRctWithObjectSpec(specWithDeviceClasses(
+				[]string{"gpu.nvidia.com", "zzz-unknown.nvidia.com"},
+				[]string{"mig.nvidia.com", "aaa-missing.nvidia.com"}))
+			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+			Expect(resp.Body.String()).To(ContainSubstring(
+				"aaa-missing.nvidia.com, zzz-unknown.nvidia.com"))
+			// Known names must not be reported as missing.
+			Expect(resp.Body.String()).NotTo(ContainSubstring(`"gpu.nvidia.com,`))
+			Expect(resp.Body.String()).NotTo(ContainSubstring(`"mig.nvidia.com,`))
+		})
+
+		It("deduplicates: the same deviceClassName in both Exactly and FirstAvailable is reported once", func() {
+			// Tracker knows nothing — both references to the same name
+			// should produce exactly one entry in the error list, not two.
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient())
+
+			resp := postRctWithObjectSpec(specWithDeviceClasses(
+				[]string{"gpu.nvidia.com"},
+				[]string{"gpu.nvidia.com"}))
+			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+			// Count occurrences of the name in the body. Exact-match: one hit.
+			body := resp.Body.String()
+			occurrences := strings.Count(body, "gpu.nvidia.com")
+			Expect(occurrences).To(Equal(1), "expected the duplicate name to appear exactly once in: "+body)
+		})
+
+		It("fails open on tracker outage: request succeeds even when the tracker returns an error", func() {
+			// The validator is a usability aid, not an authoritative gate —
+			// the scheduler enforces at pod-bind time. Transient tracker
+			// outages must not block legitimate RCT edits.
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+				WithError(http.StatusServiceUnavailable, "tracker is down"))
+
+			resp := postRctWithObjectSpec(specWithDeviceClasses(
+				[]string{"would-be-rejected.nvidia.com"}, nil))
+			Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
 		})
 	})
 

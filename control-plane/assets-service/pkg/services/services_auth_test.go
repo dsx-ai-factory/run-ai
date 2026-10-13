@@ -17,6 +17,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
+	k8sObjectsTracker "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/k8s-objects-tracker"
 	dbTesting "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/testing"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/testing"
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
@@ -69,6 +70,13 @@ var _ = Describe("Test Asset Service auth logic", func() {
 			WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.UnitTestDefaultClusterVersion, false)).
 			WithCluster(differentScope.ClusterId, testing.BuildDisplayedCluster(differentScope, testing.UnitTestDefaultClusterVersion, false)))
 		checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
+
+		// RCT creation (via NewAssetKindTable's RCT entry) hits the tracker
+		// to validate deviceClassName. Seed the DeviceClass referenced by
+		// validRctObjectSpec on both clusters this suite builds assets on.
+		k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+			WithDeviceClass(randoms.ClusterId, rctDeviceClassForTests).
+			WithDeviceClass(differentScope.ClusterId, rctDeviceClassForTests))
 	})
 
 	Context("Test Get by Id authorization tests", func() {

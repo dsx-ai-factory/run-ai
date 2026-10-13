@@ -97,11 +97,19 @@ var _ = Describe("Test Asset Service CRUD logic", func() {
 		differentProject = randoms.CloneWithDifferentProject()
 		differentCluster = randoms.CloneWithDifferentCluster()
 
-		k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().WithConfigMap(randoms.ClusterId, &api.ConfigMapCreationRequest{
-			Spec: api.ConfigMapAssetSpec{
-				ConfigMap: convutils.Ref(strings.ToLower(testutils.RandString(8))),
-			},
-		}, nil))
+		// Seed the device-class that validRctObjectSpec references on both
+		// clusters that any factory may target. CreateRct / UpdateRctById now
+		// hits the tracker to verify deviceClassName existence (fail-closed
+		// when the lookup succeeds and the name is missing), so every shared
+		// CRUD table entry that goes through the RCT factory needs this.
+		k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+			WithConfigMap(randoms.ClusterId, &api.ConfigMapCreationRequest{
+				Spec: api.ConfigMapAssetSpec{
+					ConfigMap: convutils.Ref(strings.ToLower(testutils.RandString(8))),
+				},
+			}, nil).
+			WithDeviceClass(randoms.ClusterId, rctDeviceClassForTests).
+			WithDeviceClass(differentCluster.ClusterId, rctDeviceClassForTests))
 
 		checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
 			WithCluster(randoms.ClusterId, testing.BuildDisplayedCluster(randoms, testing.UnitTestDefaultClusterVersion, false)).
