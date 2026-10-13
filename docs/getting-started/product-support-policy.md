@@ -35,7 +35,7 @@ A critical bug is a severity-1 ticket under the NVIDIA Run:ai support agreement.
 
 Each version carries a 12-month total lifecycle - 9 months of full support followed by 3 months of extended support.
 
-This policy applies as of October 5th, 2026 and does not reduce a support period or deprecation commitment previously announced for an already released version or during an existing Subscription.
+This policy applies as of October 13th, 2026 and does not reduce a support period or deprecation commitment previously announced for an already released version or during an existing Subscription.
 
 ## Component Version Compatibility
 
@@ -48,7 +48,7 @@ NVIDIA Run:ai ships three components: control plane, cluster, and CLI, released 
 
 | Version | Release date | End of full support | End of extended support |
 | --- | --- | --- | --- |
-| 3.0 (latest) | October 5, 2026 | July 5, 2027 | October 5, 2027 |
+| 3.0 (latest) | October 13, 2026 | July 13, 2027 | October 13, 2027 |
 | 2.26 | July 12, 2026 | April 12, 2027 | July 12, 2027 |
 | 2.25 | May 3, 2026 | February 3, 2027 | May 3, 2027 |
 | 2.24 | January 18, 2026 | October 18, 2026 | January 18, 2027 |
