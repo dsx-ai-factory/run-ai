@@ -70,13 +70,13 @@ func TestSetTenantData_OneClientFailure_DoesNotCancelOthers(t *testing.T) {
 
 	clients := []config.Client{
 		{ClientId: AgentClientName + NAME},
-		{ClientId: InstallerClientName},
+		{ClientId: AgentClientName + NAME + "-2"},
 	}
 
 	var mu sync.Mutex
 	var otherClientCtxErr error
 
-	// setInstallerPermissions routes through request.Execute(), which calls back
+	// setAgentPermissions routes through request.Execute(), which calls back
 	// into r.ApiService, so the returned request must point at the mock itself.
 	requestForMock := authorization_api.ApiCreateInternalAccessRuleRequest{ApiService: authClientMock}
 

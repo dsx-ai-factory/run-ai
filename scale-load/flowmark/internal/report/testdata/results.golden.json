@@ -1,16 +1,5 @@
 {
   "schema": "v1",
-  "regression_detected": true,
-  "regressions": [
-    {
-      "section": "deployment-burst",
-      "metric": "p90_ms@100",
-      "value": 5754,
-      "baseline": 5000,
-      "against": "slo",
-      "message": "deployment-burst p90_ms@100: 5754 ms is over the SLO of 5000 ms"
-    }
-  ],
   "metadata": {
     "date": "2026-09-28T01:00:00Z",
     "finished_at": "2026-09-28T01:12:30Z",
@@ -19,15 +8,23 @@
     "control_plane_version": "3.1.0",
     "cluster_version": "2.26.5"
   },
+  "regression_detected": true,
+  "regressions": [
+    {
+      "section": "deployment-burst",
+      "metric": "p90_ms@100",
+      "message": "deployment-burst p90_ms@100: 5754 ms is over the SLO of 5000 ms"
+    }
+  ],
   "sections": {
     "deployment-burst": {
       "category": "scale",
       "metrics": {
-        "flow": "deployment_to_external_workload",
         "p90_ms@100": 5754,
-        "p90_ms@100_regression": true,
-        "never_arrived_count@100": 0,
-        "slo_p90_ms": 5000
+        "p90_ms@100_regression": true
+      },
+      "slo": {
+        "p90_ms": 5000
       },
       "failed": false
     },

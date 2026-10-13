@@ -242,6 +242,7 @@ pkg/api/model_git_rules.go
 pkg/api/model_git_secret_ref.go
 pkg/api/model_git_update_request.go
 pkg/api/model_gits_rules.go
+pkg/api/model_gpu_compute_mode.go
 pkg/api/model_gpu_request_type.go
 pkg/api/model_history_record.go
 pkg/api/model_history_record_meta.go

@@ -24,7 +24,7 @@ var _ MappedNullable = &AccessRuleSubjectsInner{}
 
 // AccessRuleSubjectsInner struct for AccessRuleSubjectsInner
 type AccessRuleSubjectsInner struct {
-	// The unique identifier of the subject e.g., user, group, or app).
+	// The unique identifier of the subject e.g., user, group, or service account).
 	SubjectId   string      `json:"subjectId"`
 	SubjectType SubjectType `json:"subjectType"`
 }

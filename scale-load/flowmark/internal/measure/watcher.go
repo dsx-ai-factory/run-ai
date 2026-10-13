@@ -24,8 +24,9 @@ import (
 )
 
 const (
-	maxReconnects      = 5
-	maxReconnectCycles = 10
+	maxReconnects          = 5
+	maxConsecutiveClosures = 10
+	maxBackoffSteps        = 5
 )
 
 var reconnectDelay = time.Second
@@ -62,15 +63,16 @@ type Watcher struct {
 
 	resourceVersion string
 
-	mu         sync.Mutex
-	created    map[string]time.Time
-	arrived    map[string]time.Time
-	failed     map[string]error
-	lastMark   time.Time
-	closed     error
-	reconnects int
-	changed    chan struct{}
-	done       chan struct{}
+	mu            sync.Mutex
+	created       map[string]time.Time
+	arrived       map[string]time.Time
+	failed        map[string]error
+	lastMark      time.Time
+	closed        error
+	reconnects    int
+	interruptions int
+	changed       chan struct{}
+	done          chan struct{}
 }
 
 func Watch(ctx context.Context, kube k8sclient.WithWatch, kind schema.GroupVersionKind, namespace string, nameOf func(*unstructured.Unstructured) string) (*Watcher, error) {
@@ -106,20 +108,25 @@ func (w *Watcher) open(ctx context.Context) (watch.Interface, error) {
 	return w.kube.Watch(ctx, list, options)
 }
 
-func (w *Watcher) reopen(ctx context.Context) (watch.Interface, error) {
+func (w *Watcher) reopen(ctx context.Context, closures int) (watch.Interface, error) {
 	var last error
 	for attempt := 1; attempt <= maxReconnects; attempt++ {
-		timer := time.NewTimer(reconnectDelay)
-		select {
-		case <-ctx.Done():
-			timer.Stop()
-			return nil, fmt.Errorf("%w: %w", ErrWatchClosed, ctx.Err())
-		case <-timer.C:
+		if steps := min(closures-1+attempt-1, maxBackoffSteps); steps > 0 {
+			timer := time.NewTimer(time.Duration(steps) * reconnectDelay)
+			select {
+			case <-ctx.Done():
+				timer.Stop()
+				return nil, fmt.Errorf("%w: %w", ErrWatchClosed, ctx.Err())
+			case <-timer.C:
+			}
 		}
 		events, err := w.open(ctx)
 		if err == nil {
 			w.mu.Lock()
 			w.reconnects++
+			if w.resourceVersion == "" {
+				w.interruptions++
+			}
 			w.mu.Unlock()
 			return events, nil
 		}
@@ -135,6 +142,12 @@ func (w *Watcher) Reconnects() int {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	return w.reconnects
+}
+
+func (w *Watcher) Interruptions() int {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.interruptions
 }
 
 func WatchWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
@@ -224,6 +237,7 @@ func (w *Watcher) Stop() {
 
 func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 	defer close(w.done)
+	closures := 0
 	for {
 		select {
 		case <-ctx.Done():
@@ -233,11 +247,8 @@ func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 		case event, open := <-events.ResultChan():
 			if !open {
 				events.Stop()
-				if w.Reconnects() >= maxReconnectCycles {
-					w.close(fmt.Errorf("%w: the server ended the %s watch %d times", ErrWatchClosed, w.kind.Kind, maxReconnectCycles))
-					return
-				}
-				reopened, err := w.reopen(ctx)
+				closures++
+				reopened, err := w.reopenAfterClosure(ctx, closures, nil)
 				if err != nil {
 					w.close(err)
 					return
@@ -247,32 +258,45 @@ func (w *Watcher) consume(ctx context.Context, events watch.Interface) {
 			}
 			switch event.Type {
 			case watch.Added, watch.Modified:
+				closures = 0
 				if obj := asUnstructured(event.Object); obj != nil {
 					w.resourceVersion = obj.GetResourceVersion()
 					w.recordArrival(w.nameOf(obj), time.Now())
 				}
-			case watch.Bookmark:
+			case watch.Bookmark, watch.Deleted:
+				closures = 0
 				if obj := asUnstructured(event.Object); obj != nil {
 					w.resourceVersion = obj.GetResourceVersion()
 				}
 			case watch.Error:
 				events.Stop()
+				closures++
 				if status := apierrors.FromObject(event.Object); apierrors.IsGone(status) || apierrors.IsResourceExpired(status) {
 					w.resourceVersion = ""
 				}
-				if w.Reconnects() >= maxReconnectCycles {
-					w.close(fmt.Errorf("%w: the server ended the %s watch %d times", ErrWatchClosed, w.kind.Kind, maxReconnectCycles))
-					return
-				}
-				reopened, err := w.reopen(ctx)
+				reopened, err := w.reopenAfterClosure(ctx, closures, event.Object)
 				if err != nil {
-					w.close(fmt.Errorf("%w after a watch error (%v)", err, event.Object))
+					w.close(err)
 					return
 				}
 				events = reopened
 			}
 		}
 	}
+}
+
+func (w *Watcher) reopenAfterClosure(ctx context.Context, closures int, cause runtime.Object) (watch.Interface, error) {
+	switch {
+	case closures > maxConsecutiveClosures:
+		return nil, fmt.Errorf("%w: the server ended the %s watch %d times in a row without delivering an event", ErrWatchClosed, w.kind.Kind, closures-1)
+	case w.Interruptions() >= maxConsecutiveClosures:
+		return nil, fmt.Errorf("%w: the %s watch lost its resume point %d times", ErrWatchClosed, w.kind.Kind, maxConsecutiveClosures)
+	}
+	reopened, err := w.reopen(ctx, closures)
+	if err != nil && cause != nil {
+		return nil, fmt.Errorf("%w after a watch error (%v)", err, cause)
+	}
+	return reopened, err
 }
 
 func asUnstructured(object runtime.Object) *unstructured.Unstructured {
@@ -293,6 +317,12 @@ func (w *Watcher) recordArrival(name string, at time.Time) {
 	}
 	w.mu.Unlock()
 	w.signal()
+}
+
+func (w *Watcher) Err() error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	return w.closed
 }
 
 func (w *Watcher) close(err error) {

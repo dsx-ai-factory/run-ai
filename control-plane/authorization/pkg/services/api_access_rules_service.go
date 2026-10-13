@@ -216,6 +216,9 @@ func (s *AccessRulesApiService) CreateAccessRule(ctx context.Context, accessRule
 }
 
 func (s *AccessRulesApiService) createSingleAccessRule(ctx context.Context, accessRuleCreationRequest api.AccessRuleCreationFields, tenantId uint, subjectId string) (*models.AccessRule, *api.Error) {
+	if isDeprecatedSubjectType(accessRuleCreationRequest.SubjectType) {
+		return nil, deprecatedSubjectTypeError()
+	}
 	isAllAuthenticatedUsers := accessRuleCreationRequest.SubjectType == models.AllAuthenticatedUsers
 	if !isAllAuthenticatedUsers && !accessRuleCreationRequest.SubjectType.IsValid() {
 		return nil, api.NewError(http.StatusBadRequest,
@@ -367,45 +370,7 @@ func filterByBackwardsCompatibility(filterBy []string, subjectType string) []str
 		filterBy = append(filterBy, "subjectType=="+subjectType)
 	}
 
-	// Apply subject type backward compatibility for app/service-account
-	// Transform filters to treat 'app' and 'service-account' as equivalent
-	filterBy = applySubjectTypeFilterBackwardCompatibility(filterBy)
-
 	return filterBy
-}
-
-// applySubjectTypeFilterBackwardCompatibility transforms subject type filters for backward compatibility.
-// For == operator: Uses OR syntax (field==value1||value2) to include both app and service-account
-// For != operator: Adds the complementary != filter (e.g., !=app also adds !=service-account)
-func applySubjectTypeFilterBackwardCompatibility(filterBy []string) []string {
-	result := []string{}
-	hasAppOrServiceAccountEqualFilter := false
-	hasAppOrServiceAccountNonEqualFilter := false
-
-	for _, filter := range filterBy {
-		// Handle subjectType==app or subjectType==service-account
-		switch filter {
-		case "subjectType==app", "subjectType==service-account":
-			if !hasAppOrServiceAccountEqualFilter {
-				// Use OR syntax like type==Training||Distributed
-				result = append(result, "subjectType==app||service-account")
-				hasAppOrServiceAccountEqualFilter = true
-			}
-			// Skip duplicate if already processed
-		case "subjectType!=app", "subjectType!=service-account":
-			if !hasAppOrServiceAccountNonEqualFilter {
-				// Add !=app and also !=service-account
-				result = append(result, "subjectType!=app", "subjectType!=service-account")
-				hasAppOrServiceAccountNonEqualFilter = true
-			}
-			// Skip duplicate if already processed
-		default:
-			// Keep all other filters as-is
-			result = append(result, filter)
-		}
-	}
-
-	return result
 }
 
 func (s *AccessRulesApiService) GetAccessRules(
@@ -462,14 +427,8 @@ func (s *AccessRulesApiService) GetAccessRules(
 		AccessRules:    []api.AccessRule{},
 	}
 
-	shouldMapServiceAccount := shouldMapServiceAccountToApp(ctx, clusterId)
-
 	for _, accessRule := range *accessRules {
-		rule := AccessRuleDaoToApi(&accessRule)
-		if shouldMapServiceAccount && rule.SubjectType == api.SUBJECTTYPEEXTENDED_SERVICE_ACCOUNT {
-			rule.SubjectType = api.SUBJECTTYPEEXTENDED_APP
-		}
-		accessRulesResponse.AccessRules = append(accessRulesResponse.AccessRules, rule)
+		accessRulesResponse.AccessRules = append(accessRulesResponse.AccessRules, AccessRuleDaoToApi(&accessRule))
 	}
 	return api.Response(http.StatusOK, accessRulesResponse), nil
 }
@@ -518,23 +477,6 @@ func (s *AccessRulesApiService) GetAccessRulesSync(ctx context.Context, limit in
 		return NewErrorResponse(err), nil
 	}
 
-	// Check if cluster supports service-account subject type (v2.24+)
-	supportsServiceAccount := true
-	if clusterId != "" {
-		supported, versionErr := isServiceAccountSupportedInCluster(ctx, clusterId)
-		if versionErr != nil {
-			// If version check fails, default to old behavior (app)
-			if errors.Is(versionErr, checker.ErrClusterVersionEmpty) {
-				logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to check cluster version for service-account support, defaulting to 'app'. err: %v", versionErr)
-			} else {
-				logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to check cluster version for service-account support, defaulting to 'app'. err: %v", versionErr)
-			}
-			supportsServiceAccount = false
-		} else {
-			supportsServiceAccount = supported
-		}
-	}
-
 	clusterCapabilityChecker := checker.NewClusterCapabilitiesChecker(clusterId)
 
 	newRolesSupported, capabilitiesErr := clusterCapabilityChecker.ValidateClusterCapability(ctx, checker.MinVersionPermissionSetRoles)
@@ -560,7 +502,7 @@ func (s *AccessRulesApiService) GetAccessRulesSync(ctx context.Context, limit in
 			return NewErrorResponse(err), nil
 		}
 		syncRule := AccessRuleDaoToSyncApi(&accessRule, predefinedRole)
-		syncRule = remapSyncSubjectForClusterSupport(syncRule, supportsServiceAccount, supportsAllAuthenticatedUsers)
+		syncRule = remapSyncSubjectForClusterSupport(syncRule, supportsAllAuthenticatedUsers)
 		accessRulesResponse.AccessRules = append(accessRulesResponse.AccessRules, syncRule)
 	}
 	countAccessRules := int32(len(*accessRules))
@@ -570,13 +512,9 @@ func (s *AccessRulesApiService) GetAccessRulesSync(ctx context.Context, limit in
 	return api.Response(http.StatusOK, accessRulesResponse), nil
 }
 
-// remapSyncSubjectForClusterSupport rewrites subject types a below-minimum-version cluster can't
-// parse into equivalents it understands: service-account → app, and all-authenticated-users → a
-// group bound to system:authenticated. Newer clusters receive the native types unchanged.
-func remapSyncSubjectForClusterSupport(syncRule api.AccessRuleSync, supportsServiceAccount, supportsAllAuthenticatedUsers bool) api.AccessRuleSync {
-	if !supportsServiceAccount && syncRule.SubjectType == api.SUBJECTTYPEEXTENDED_SERVICE_ACCOUNT {
-		syncRule.SubjectType = api.SUBJECTTYPEEXTENDED_APP
-	}
+// remapSyncSubjectForClusterSupport rewrites all-authenticated-users into a group bound to system:authenticated for
+// clusters below the minimum version that can parse it. Newer clusters receive the native type unchanged.
+func remapSyncSubjectForClusterSupport(syncRule api.AccessRuleSync, supportsAllAuthenticatedUsers bool) api.AccessRuleSync {
 	if !supportsAllAuthenticatedUsers && syncRule.SubjectType == api.SUBJECTTYPEEXTENDED_ALL_AUTHENTICATED_USERS {
 		syncRule.SubjectType = api.SUBJECTTYPEEXTENDED_GROUP
 		syncRule.SubjectId = authenticatedUsersK8sGroup
@@ -654,7 +592,6 @@ func (s *AccessRulesApiService) CountAccessRules(ctx context.Context, deleted bo
 	}
 
 	// Apply backward compatibility for subject type filters
-	filterBy = applySubjectTypeFilterBackwardCompatibility(filterBy)
 
 	parser := queryapi.NewParser(models.AccessRule{}.SortAndFilterFieldsToColumn())
 	filters, filterErr := parser.Filters(filterBy)
@@ -1134,22 +1071,6 @@ func shouldUsePhaseWhenCreatingAccessRule(ctx context.Context, clusterId string,
 	}
 
 	return doesClusterSupportStatuses
-}
-
-// isServiceAccountSupportedInCluster checks if the cluster version supports service-account subject type (v2.24+)
-// Returns true if cluster >= v2.24, false otherwise
-func isServiceAccountSupportedInCluster(ctx context.Context, clusterId string) (bool, error) {
-	if clusterId == "" {
-		return false, nil
-	}
-
-	clusterCapabilityChecker := checker.NewClusterCapabilitiesChecker(clusterId)
-	supportsServiceAccount, err := clusterCapabilityChecker.ValidateClusterCapability(ctx, checker.MinVersionOfServiceAccountSubjectType)
-	if err != nil {
-		return false, fmt.Errorf("failed to validate cluster %s capability for service-account support: %w", clusterId, err)
-	}
-
-	return supportsServiceAccount, nil
 }
 
 // validateCallerCanMigrateAccessRules checks that the calling subject can create AND delete

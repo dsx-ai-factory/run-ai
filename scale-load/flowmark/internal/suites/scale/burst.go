@@ -10,7 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
+	"math"
 	"slices"
 	"sort"
 	"strconv"
@@ -33,14 +33,12 @@ import (
 
 const (
 	deploymentType       = "Deployment"
-	trainingType         = "Training"
-	workspaceType        = "Workspace"
+	projectPrefix        = "flowmark-burst"
 	defaultImage         = "registry.k8s.io/pause:3.9"
 	defaultConcurrency   = 16
 	maxConcurrency       = 64
 	maxRequestsPerSecond = 1000
 	maxPodsPerWorkload   = 10
-	quiescePoll          = 2 * time.Second
 	cleanupGrace         = time.Minute
 	runLabel             = "flowmark/run"
 	roundLabel           = "flowmark/round"
@@ -51,7 +49,20 @@ var sloKeys = []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms"}
 
 var knownKnobs = []string{"workloads", "workloadType", "podsPerWorkload", "image", "submitConcurrency", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "timeout", "setupTimeout", "settle", "cluster", "slo"}
 
-type Suite struct{}
+var quiescePoll = 2 * time.Second
+
+type sessionOpener func(ctx context.Context, target core.Target, limits client.Limits, cluster, projectPrefix string, setupTimeout time.Duration) (*submit.Session, error)
+
+type Suite struct {
+	openSession sessionOpener
+}
+
+func (s Suite) session() sessionOpener {
+	if s.openSession != nil {
+		return s.openSession
+	}
+	return submit.OpenSession
+}
 
 type settings struct {
 	rounds       []int
@@ -63,6 +74,7 @@ type settings struct {
 	timeout      time.Duration
 	setupTimeout time.Duration
 	settle       time.Duration
+	poll         time.Duration
 	cluster      string
 	slo          map[string]int
 }
@@ -76,21 +88,19 @@ type item struct {
 }
 
 type workloadFlow interface {
-	name() string
 	watch(ctx context.Context, namespace string) (*measure.Watcher, error)
 	create(ctx context.Context, workload item) (string, error)
 	teardown(ctx context.Context, namespace string, labels map[string]string) (int, error)
 }
 
 type round struct {
-	index          int
-	size           int
-	timings        []measure.Timing
-	unmatched      int
-	interruptions  int
-	submitMakespan time.Duration
-	quiesce        time.Duration
-	err            error
+	index         int
+	size          int
+	timings       []measure.Timing
+	unmatched     int
+	reopened      int
+	interruptions int
+	err           error
 }
 
 const suiteName = "scale-burst"
@@ -103,51 +113,42 @@ func (Suite) Category() core.Category {
 	return core.CategoryScale
 }
 
-func (Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario) (section core.Section, err error) {
+func (Suite) Knobs() []string {
+	return knownKnobs
+}
+
+func (Suite) Validate(scenario core.Scenario) error {
+	_, err := parseSettings(scenario)
+	return err
+}
+
+func (s Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario) (section core.Section, err error) {
 	knobs, err := parseSettings(scenario)
 	if err != nil {
 		return core.Section{}, err
 	}
 
-	setupCtx, cancelSetup := context.WithTimeout(ctx, knobs.setupTimeout)
-	defer cancelSetup()
-	clients, err := client.NewWithLimits(ctx, target, knobs.limits)
+	session, err := s.session()(ctx, target, knobs.limits, knobs.cluster, projectPrefix, knobs.setupTimeout)
 	if err != nil {
 		return core.Section{}, err
 	}
-	if !clients.TokenExpiry.IsZero() {
-		log.Printf("%s: control plane token expires in %s; longer runs will fail with 401", suiteName, time.Until(clients.TokenExpiry).Round(time.Minute))
-	}
-	clusterID, err := submit.ClusterID(setupCtx, clients, knobs.cluster)
-	if err != nil {
-		return core.Section{}, err
-	}
-	id, err := core.NewRunID()
-	if err != nil {
-		return core.Section{}, err
-	}
-
-	projectName := "flowmark-burst-" + id
+	clients, project, id := session.Clients, session.Project, session.RunID
 	defer func() {
-		log.Printf("%s: cleaning up project %q", suiteName, projectName)
-		cleanupErr := cleanup(clients, clusterID, projectName, knobs.setupTimeout)
-		if cleanupErr == nil {
-			return
+		log.Printf("%s: cleaning up project %q", suiteName, project.Name)
+		if cleanupErr := session.Close(); cleanupErr != nil {
+			if err != nil {
+				err = errors.Join(err, cleanupErr)
+			} else {
+				section.Fail("cleanup: " + cleanupErr.Error())
+			}
 		}
-		if err != nil {
-			err = errors.Join(err, cleanupErr)
-			return
-		}
-		section.Failed = true
-		section.Error = joinMessages(section.Error, "cleanup: "+cleanupErr.Error())
 	}()
-	project, err := submit.Project(setupCtx, clients, clusterID, projectName, knobs.setupTimeout)
-	if err != nil {
-		return core.Section{}, err
-	}
 	log.Printf("%s: project %q ready, namespace %s", suiteName, project.Name, project.Namespace)
 
 	flow := newFlow(knobs.workloadType, clients, project, knobs.concurrency)
+	if err := warmUp(ctx, flow, clients.Kube, project.Namespace, id, knobs); err != nil {
+		return core.Section{}, err
+	}
 	var rounds []round
 	for index, size := range knobs.rounds {
 		roundNumber := index + 1
@@ -167,7 +168,7 @@ func (Suite) Run(ctx context.Context, target core.Target, scenario core.Scenario
 			}
 		}
 	}
-	return buildSection(flow.name(), rounds, knobs), nil
+	return buildSection(rounds, knobs), nil
 }
 
 func describeRound(r round) string {
@@ -188,8 +189,11 @@ func describeRound(r round) string {
 	if r.unmatched > 0 {
 		text += fmt.Sprintf(", %d unmatched arrivals", r.unmatched)
 	}
-	if r.interruptions > 0 {
+	switch {
+	case r.interruptions > 0:
 		text += fmt.Sprintf(", measurement interrupted %d times", r.interruptions)
+	case r.reopened > 0:
+		text += fmt.Sprintf(", watch reopened %d times without losing events", r.reopened)
 	}
 	if r.err != nil {
 		text += ": " + r.err.Error()
@@ -201,7 +205,41 @@ func newFlow(workloadType string, clients *client.Clients, project submit.Projec
 	if workloadType == deploymentType {
 		return &deploymentFlow{kube: clients.Kube, concurrency: concurrency}
 	}
+	return newControlPlaneFlow(workloadType, clients, project, concurrency)
+}
+
+func newControlPlaneFlow(workloadType string, clients *client.Clients, project submit.ProjectRef, concurrency int) *controlPlaneFlow {
 	return &controlPlaneFlow{workloadType: workloadType, clients: clients, project: project, concurrency: concurrency, created: map[string]string{}, deleteRequested: map[string]bool{}}
+}
+
+func validateSLOKey(key string) error {
+	stat, round, perRound := strings.Cut(key, "@")
+	if !slices.Contains(sloKeys, stat) {
+		return fmt.Errorf("slo key %q is not a latency this suite reports; use one of %s, optionally with @<round size>", key, strings.Join(sloKeys, ", "))
+	}
+	if !perRound {
+		return nil
+	}
+	if size, err := strconv.Atoi(round); err != nil || size < 1 {
+		return fmt.Errorf("slo key %q must end with a round size, e.g. %s@500", key, stat)
+	}
+	return nil
+}
+
+func applicableSLOs(slo map[string]int, rounds []int) map[string]int {
+	if slo == nil {
+		return nil
+	}
+	applicable := make(map[string]int, len(slo))
+	for key, value := range slo {
+		if _, round, perRound := strings.Cut(key, "@"); perRound {
+			if size, _ := strconv.Atoi(round); !slices.Contains(rounds, size) {
+				continue
+			}
+		}
+		applicable[key] = value
+	}
+	return applicable
 }
 
 func parseSettings(scenario core.Scenario) (settings, error) {
@@ -244,16 +282,13 @@ func parseSettings(scenario core.Scenario) (settings, error) {
 	if knobs.cluster, err = scenario.String("cluster", ""); err != nil {
 		return settings{}, err
 	}
-	slo, err := scenario.Map("slo")
-	if err != nil {
-		return settings{}, err
-	}
-	if knobs.slo, err = wholeNumbers("slo", slo); err != nil {
+	knobs.poll = quiescePoll
+	if knobs.slo, err = scenario.IntMap("slo"); err != nil {
 		return settings{}, err
 	}
 	for key := range knobs.slo {
-		if !slices.Contains(sloKeys, key) {
-			return settings{}, fmt.Errorf("slo key %q is not a latency this suite reports; use one of %s", key, strings.Join(sloKeys, ", "))
+		if err := validateSLOKey(key); err != nil {
+			return settings{}, err
 		}
 	}
 
@@ -286,30 +321,32 @@ func parseSettings(scenario core.Scenario) (settings, error) {
 		if pods < 0 || pods > maxPodsPerWorkload {
 			return settings{}, fmt.Errorf("podsPerWorkload must be between 0 and %d, got %d", maxPodsPerWorkload, pods)
 		}
-	case trainingType, workspaceType:
+	case submit.TrainingType, submit.WorkspaceType:
 		if pods != 1 {
 			return settings{}, fmt.Errorf("podsPerWorkload must be 1 for %s, got %d", knobs.workloadType, pods)
 		}
 	default:
-		return settings{}, fmt.Errorf("workloadType %q is not supported, use %s, %s or %s", knobs.workloadType, deploymentType, trainingType, workspaceType)
+		return settings{}, fmt.Errorf("workloadType %q is not supported, use %s, %s or %s", knobs.workloadType, deploymentType, submit.TrainingType, submit.WorkspaceType)
 	}
 	knobs.pods = int32(pods) //nolint:gosec
 	return knobs, nil
 }
 
-func wholeNumbers(knob string, raw map[string]any) (map[string]int, error) {
-	if raw == nil {
-		return nil, nil
+func warmUp(ctx context.Context, flow workloadFlow, kube k8sclient.Client, namespace, id string, knobs settings) error {
+	log.Printf("%s: warming up the new project with one %s workload before round 1", suiteName, knobs.workloadType)
+	probe := runRound(ctx, flow, kube, namespace, id, 0, 1, knobs)
+	summary := measure.Stats(probe.timings)
+	switch {
+	case ctx.Err() != nil:
+		return fmt.Errorf("warm-up: %w", ctx.Err())
+	case probe.err != nil:
+		return fmt.Errorf("warm-up: %w", probe.err)
+	case summary.NeverArrivedCount > 0:
+		return fmt.Errorf("warm-up: the probe workload never reached the cluster within %s", knobs.timeout)
+	case summary.FailedCount > 0:
+		log.Printf("%s: warm-up absorbed a rejected create: %v", suiteName, lastError(probe.timings, measure.Failed))
 	}
-	values := make(map[string]int, len(raw))
-	for key, value := range raw {
-		number, ok := value.(int)
-		if !ok {
-			return nil, fmt.Errorf("knob %q entry %q must be a whole number of milliseconds, got %T", knob, key, value)
-		}
-		values[key] = number
-	}
-	return values, nil
+	return nil
 }
 
 func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, namespace, id string, index, size int, knobs settings) round {
@@ -323,13 +360,12 @@ func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, nam
 
 	labels := map[string]string{runLabel: id, roundLabel: strconv.Itoa(index), roundSizeLabel: strconv.Itoa(size)}
 	var names sync.Map
-	submitStart := time.Now()
 	burst(ctx, flow, watcher, &names, namespace, id, index, size, labels, knobs)
-	result.submitMakespan = time.Since(submitStart)
 
 	timings := watcher.WaitAll(knobs.timeout)
 	result.unmatched = watcher.Unmatched()
-	result.interruptions = watcher.Reconnects()
+	result.reopened = watcher.Reconnects()
+	result.interruptions = watcher.Interruptions()
 	if ctx.Err() != nil {
 		result.timings = timings
 		result.err = fmt.Errorf("interrupted before teardown: %w", ctx.Err())
@@ -343,9 +379,7 @@ func runRound(ctx context.Context, flow workloadFlow, kube k8sclient.Client, nam
 	sort.Slice(timings, func(i, j int) bool { return timings[i].Name < timings[j].Name })
 	result.timings = timings
 
-	quiesceStart := time.Now()
-	result.err = quiesce(ctx, flow, kube, namespace, labels, knobs.setupTimeout)
-	result.quiesce = time.Since(quiesceStart)
+	result.err = quiesce(ctx, flow, kube, namespace, labels, knobs.setupTimeout, knobs.poll)
 	return result
 }
 
@@ -362,6 +396,9 @@ func burst(ctx context.Context, flow workloadFlow, watcher *measure.Watcher, nam
 				key, err := flow.create(createCtx, item{name: name, namespace: namespace, labels: labels, image: knobs.image, pods: knobs.pods})
 				cancel()
 				acceptedAt := time.Now()
+				if err != nil && ctx.Err() != nil {
+					continue
+				}
 				if err != nil {
 					watcher.MarkFailed(name, err)
 					continue
@@ -381,9 +418,9 @@ func burst(ctx context.Context, flow workloadFlow, watcher *measure.Watcher, nam
 	wg.Wait()
 }
 
-func quiesce(ctx context.Context, flow workloadFlow, kube k8sclient.Client, namespace string, labels map[string]string, timeout time.Duration) error {
+func quiesce(ctx context.Context, flow workloadFlow, kube k8sclient.Client, namespace string, labels map[string]string, timeout, poll time.Duration) error {
 	var last string
-	err := wait.PollUntilContextTimeout(ctx, quiescePoll, timeout, true, func(ctx context.Context) (bool, error) {
+	err := wait.PollUntilContextTimeout(ctx, poll, timeout, true, func(ctx context.Context) (bool, error) {
 		leftover, err := flow.teardown(ctx, namespace, labels)
 		if err != nil {
 			last = err.Error()
@@ -412,36 +449,13 @@ func settle(ctx context.Context, pause time.Duration) {
 	}
 }
 
-func buildSection(flowName string, rounds []round, knobs settings) core.Section {
-	metrics := map[string]any{
-		"flow":                           flowName,
-		"rounds":                         knobs.rounds,
-		"workload_type":                  knobs.workloadType,
-		"pods_per_workload":              knobs.pods,
-		"image":                          knobs.image,
-		"submit_concurrency":             knobs.concurrency,
-		"kube_requests_per_sec":          knobs.limits.KubeRequestsPerSecond,
-		"control_plane_requests_per_sec": knobs.limits.ControlPlaneRequestsPerSecond,
-		"settle_ms":                      knobs.settle.Milliseconds(),
-	}
-	if knobs.slo != nil {
-		metrics["slo"] = knobs.slo
-		for key, value := range knobs.slo {
-			metrics["slo_"+key] = value
-		}
-	}
+func buildSection(rounds []round, knobs settings) core.Section {
+	metrics := map[string]any{"workload_type": knobs.workloadType}
 
 	var problems []string
 	for _, r := range rounds {
 		at := fmt.Sprintf("@%d", r.size)
 		summary := measure.Stats(r.timings)
-		metrics["sample_size"+at] = summary.SampleSize
-		metrics["never_arrived_count"+at] = summary.NeverArrivedCount
-		metrics["failed_count"+at] = summary.FailedCount
-		metrics["success_rate"+at] = summary.SuccessRate
-		metrics["unmatched_arrivals"+at] = r.unmatched
-		metrics["submit_makespan_ms"+at] = r.submitMakespan.Milliseconds()
-		metrics["quiesce_ms"+at] = r.quiesce.Milliseconds()
 		if summary.SampleSize > 0 {
 			metrics["p50_ms"+at] = summary.P50.Milliseconds()
 			metrics["p90_ms"+at] = summary.P90.Milliseconds()
@@ -450,8 +464,7 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 			metrics["max_ms"+at] = summary.Max.Milliseconds()
 		}
 		if summary.HasThroughput() {
-			metrics["makespan_ms"+at] = summary.Makespan.Milliseconds()
-			metrics["throughput_per_sec"+at] = summary.Throughput
+			metrics["throughput_per_sec"+at] = math.Round(summary.Throughput*10) / 10
 		}
 		problems = append(problems, roundProblems(r, summary)...)
 	}
@@ -459,7 +472,7 @@ func buildSection(flowName string, rounds []round, knobs settings) core.Section 
 		problems = append(problems, fmt.Sprintf("run stopped after %d of %d rounds", len(rounds), len(knobs.rounds)))
 	}
 
-	section := core.Section{Category: core.CategoryScale, Metrics: metrics}
+	section := core.Section{Metrics: metrics, SLO: applicableSLOs(knobs.slo, knobs.rounds)}
 	if len(problems) > 0 {
 		section.Failed = true
 		section.Error = strings.Join(problems, "; ")
@@ -482,7 +495,7 @@ func roundProblems(r round, summary measure.Summary) []string {
 		problems = append(problems, message)
 	}
 	if r.interruptions > 0 {
-		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the measurement was interrupted %d times: the cluster watch closed and was reopened; "+
+		problems = append(problems, fmt.Sprintf("round %d (%d workloads): the measurement was interrupted %d times: the cluster watch was reopened without its resume point; "+
 			"latencies of workloads in flight during the gaps are inflated", r.index, r.size, r.interruptions))
 	}
 	if summary.FailedCount > 0 {
@@ -506,19 +519,6 @@ func lastError(timings []measure.Timing, outcome measure.Outcome) error {
 		}
 	}
 	return last
-}
-
-func cleanup(clients *client.Clients, clusterID, name string, timeout time.Duration) error {
-	ctx, cancel := context.WithTimeout(context.Background(), timeout+cleanupGrace)
-	defer cancel()
-	return submit.CleanupProject(ctx, clients, clusterID, name, timeout)
-}
-
-func joinMessages(first, second string) string {
-	if first == "" {
-		return second
-	}
-	return first + "; " + second
 }
 
 func deleteAll(ctx context.Context, concurrency int, targets []k8sclient.Object, remove func(context.Context, k8sclient.Object) error) error {
@@ -561,10 +561,6 @@ func countAllInNamespace(ctx context.Context, kube k8sclient.Client, kind schema
 type deploymentFlow struct {
 	kube        k8sclient.WithWatch
 	concurrency int
-}
-
-func (*deploymentFlow) name() string {
-	return "deployment_to_external_workload"
 }
 
 func (f *deploymentFlow) watch(ctx context.Context, namespace string) (*measure.Watcher, error) {
@@ -615,10 +611,6 @@ type controlPlaneFlow struct {
 	deleteRequested map[string]bool
 }
 
-func (f *controlPlaneFlow) name() string {
-	return strings.ToLower(f.workloadType) + "_to_workload_runner"
-}
-
 func (f *controlPlaneFlow) watch(ctx context.Context, namespace string) (*measure.Watcher, error) {
 	return measure.WatchWorkloads(ctx, f.clients.Kube, namespace)
 }
@@ -627,7 +619,7 @@ func (f *controlPlaneFlow) create(ctx context.Context, workload item) (string, e
 	spec := submit.WorkloadSpec{Name: workload.name, Project: f.project, Image: workload.image, Labels: workload.labels}
 	var ref submit.WorkloadRef
 	var err error
-	if f.workloadType == workspaceType {
+	if f.workloadType == submit.WorkspaceType {
 		ref, err = submit.Workspace(ctx, f.clients, spec)
 	} else {
 		ref, err = submit.Training(ctx, f.clients, spec)
@@ -647,9 +639,6 @@ func (f *controlPlaneFlow) teardown(ctx context.Context, namespace string, _ map
 		return 0, err
 	}
 	f.mu.Lock()
-	if f.deleteRequested == nil {
-		f.deleteRequested = map[string]bool{}
-	}
 	for _, id := range listed {
 		if _, known := f.created[id]; !known {
 			f.created[id] = ""
@@ -663,56 +652,21 @@ func (f *controlPlaneFlow) teardown(ctx context.Context, namespace string, _ map
 	}
 	f.mu.Unlock()
 
-	errs := f.deleteWorkloads(ctx, pending)
+	undeleted, err := submit.DeleteWorkloads(ctx, f.clients, f.workloadType, pending, f.concurrency)
 	f.mu.Lock()
+	for _, id := range pending {
+		if !slices.Contains(undeleted, id) {
+			f.deleteRequested[id] = true
+		}
+	}
 	remaining := len(f.created) - len(f.deleteRequested)
 	f.mu.Unlock()
-	if len(errs) > 0 {
-		return remaining, errors.Join(errs...)
+	if err != nil {
+		return remaining, err
 	}
 	runners, err := countAllInNamespace(ctx, f.clients.Kube, measure.WorkloadRunnerKind, namespace)
 	if err != nil {
 		return remaining, err
 	}
 	return remaining + runners, nil
-}
-
-func (f *controlPlaneFlow) deleteWorkloads(ctx context.Context, ids []string) []error {
-	var errs []error
-	var errsMu sync.Mutex
-	jobs := make(chan string)
-	var wg sync.WaitGroup
-	for range f.concurrency {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			for id := range jobs {
-				response, err := f.delete(ctx, id)
-				if err != nil && (response == nil || response.StatusCode != http.StatusNotFound) {
-					errsMu.Lock()
-					errs = append(errs, fmt.Errorf("deleting %s %s: %w", strings.ToLower(f.workloadType), id, err))
-					errsMu.Unlock()
-					continue
-				}
-				f.mu.Lock()
-				f.deleteRequested[id] = true
-				f.mu.Unlock()
-			}
-		}()
-	}
-	for _, id := range ids {
-		jobs <- id
-	}
-	close(jobs)
-	wg.Wait()
-	return errs
-}
-
-func (f *controlPlaneFlow) delete(ctx context.Context, id string) (*http.Response, error) {
-	if f.workloadType == workspaceType {
-		_, response, err := f.clients.Workloads.WorkspacesAPI.DeleteWorkspace(ctx, id).Execute()
-		return response, err
-	}
-	_, response, err := f.clients.Workloads.TrainingsAPI.DeleteTraining(ctx, id).Execute()
-	return response, err
 }

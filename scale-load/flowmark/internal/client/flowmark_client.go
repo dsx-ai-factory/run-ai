@@ -168,10 +168,6 @@ func credentials(ctx context.Context, target core.Target, base *url.URL) (oauth2
 	return newTokenSource(ctx, loginClient, base.JoinPath(loginPath).String(), target.Username, target.Password), nil
 }
 
-func Kube(path string) (k8sclient.WithWatch, error) {
-	return kubeWithLimit(path, DefaultLimits.KubeRequestsPerSecond)
-}
-
 func kubeWithLimit(path string, requestsPerSecond int) (k8sclient.WithWatch, error) {
 	if path == "" {
 		return nil, errors.New("kubeconfig path is empty (set --kubeconfig)")

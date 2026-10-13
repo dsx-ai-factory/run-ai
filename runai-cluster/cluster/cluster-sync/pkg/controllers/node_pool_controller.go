@@ -41,6 +41,9 @@ func AddNodePoolHandlerToCache(backendClient *backendclient.BackendClient, cache
 			if oldNp.Spec.PreferredNetworkTopologyName != newNp.Spec.PreferredNetworkTopologyName {
 				go nodeHandler.SyncNodesForNodepool(newNp.Name)
 			}
+			if handlers.IsNumaEnabled(oldNp) != handlers.IsNumaEnabled(newNp) {
+				go nodeHandler.SyncNumaNodesForNodepool(newNp.Name)
+			}
 			if !filterNodePoolsUpdate(oldNp, newNp) {
 				return
 			}

@@ -17,10 +17,16 @@ properties:
     $ref: ./GpuMemoryLimit.yaml
   gpuMemoryRequest:
     $ref: ./GpuMemoryRequest.yaml
+  gpuMemoryPortionLimit:
+    $ref: ./GpuMemoryPortionLimit.yaml
   gpuPortionLimit:
     $ref: ./GpuPortionLimit.yaml
+  gpuMemoryPortionRequest:
+    $ref: ./GpuMemoryPortionRequest.yaml
   gpuPortionRequest:
     $ref: ./GpuPortionRequest.yaml
+  gpuComputeMode:
+    $ref: ./GpuComputeMode.yaml
   gpuRequestType:
     $ref: ./GpuRequestType.yaml
   largeShmRequest:

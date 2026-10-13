@@ -1,12 +1,12 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/toggles
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/Unleash/unleash-client-go/v3 v3.9.2
-	github.com/aws/smithy-go v1.28.4
+	github.com/aws/smithy-go v1.28.5
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.8
 	github.com/stretchr/testify v1.12.1
 )
 

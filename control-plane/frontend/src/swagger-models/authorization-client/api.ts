@@ -31,7 +31,7 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
  */
 export interface AccessRule {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRule
      */
@@ -154,7 +154,7 @@ export interface AccessRuleAllOf1 {
  */
 export interface AccessRuleById {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleById
      */
@@ -285,7 +285,7 @@ export type AccessRuleClusterPhase = typeof AccessRuleClusterPhase[keyof typeof 
  */
 export interface AccessRuleCreationFields {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleCreationFields
      */
@@ -341,7 +341,7 @@ export interface AccessRuleCreationFieldsAllOf {
  */
 export interface AccessRuleCreationFieldsInternal {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleCreationFieldsInternal
      */
@@ -588,7 +588,7 @@ export interface AccessRuleStatusResponse {
  */
 export interface AccessRuleSubjectsInner {
     /**
-     * The unique identifier of the subject e.g., user, group, or app).
+     * The unique identifier of the subject e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleSubjectsInner
      */
@@ -607,7 +607,7 @@ export interface AccessRuleSubjectsInner {
  */
 export interface AccessRuleSync {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleSync
      */
@@ -1433,7 +1433,7 @@ export interface KubernetesPermissions {
  */
 export interface MeAccessRule {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof MeAccessRule
      */
@@ -2294,7 +2294,7 @@ export type ScopeType = typeof ScopeType[keyof typeof ScopeType];
 
 
 /**
- * Subject type enum for access rules.  Note: The \'app\' subject type is DEPRECATED. Please use \'service-account\' instead for service accounts. 
+ * Subject type enum for access rules.  Note: The \'app\' subject type is DEPRECATED and no longer supported. Please use \'service-account\' instead for service accounts. Requests that create an access rule with \'app\' are rejected with 415 Unsupported Media Type. 
  * @export
  * @enum {string}
  */
@@ -2310,7 +2310,7 @@ export type SubjectType = typeof SubjectType[keyof typeof SubjectType];
 
 
 /**
- * Subject type enum for access rule responses. Extends SubjectType with the built-in all-authenticated-users subject, which applies to every authenticated user and service account.  Note: The \'app\' subject type is DEPRECATED. Please use \'service-account\' instead for service accounts. 
+ * Subject type enum for access rule responses. Extends SubjectType with the built-in all-authenticated-users subject, which applies to every authenticated user and service account.  Note: The \'app\' subject type is DEPRECATED and is no longer returned. Please use \'service-account\' instead for service accounts. 
  * @export
  * @enum {string}
  */
@@ -2554,7 +2554,7 @@ export const AccessRulesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * Use to bind a predefined role to a subject (user, group or application) in a scope.
+         * Use to bind a predefined role to a subject (user, group or service account) in a scope.
          * @summary Create an access rule.
          * @param {AccessRuleCreationFields} accessRuleCreationFields The access rule to create.
          * @param {*} [options] Override http request option.
@@ -3004,7 +3004,7 @@ export const AccessRulesApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Use to bind a predefined role to a subject (user, group or application) in a scope.
+         * Use to bind a predefined role to a subject (user, group or service account) in a scope.
          * @summary Create an access rule.
          * @param {AccessRuleCreationFields} accessRuleCreationFields The access rule to create.
          * @param {*} [options] Override http request option.
@@ -3161,7 +3161,7 @@ export const AccessRulesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.countAccessRules(includeDeleted, filterBy, search, options).then((request) => request(axios, basePath));
         },
         /**
-         * Use to bind a predefined role to a subject (user, group or application) in a scope.
+         * Use to bind a predefined role to a subject (user, group or service account) in a scope.
          * @summary Create an access rule.
          * @param {AccessRuleCreationFields} accessRuleCreationFields The access rule to create.
          * @param {*} [options] Override http request option.
@@ -3318,7 +3318,7 @@ export class AccessRulesApi extends BaseAPI {
     }
 
     /**
-     * Use to bind a predefined role to a subject (user, group or application) in a scope.
+     * Use to bind a predefined role to a subject (user, group or service account) in a scope.
      * @summary Create an access rule.
      * @param {AccessRuleCreationFields} accessRuleCreationFields The access rule to create.
      * @param {*} [options] Override http request option.

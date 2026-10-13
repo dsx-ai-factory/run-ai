@@ -43,10 +43,11 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 		t.Fatalf("client.New: %v", err)
 	}
 
-	clusterID, err := ClusterID(ctx, clients, os.Getenv("FLOWMARK_CLUSTER"))
+	cluster, err := clients.Cluster(ctx, os.Getenv("FLOWMARK_CLUSTER"))
 	if err != nil {
-		t.Fatalf("ClusterID: %v", err)
+		t.Fatalf("Cluster: %v", err)
 	}
+	clusterID := cluster.Uuid
 
 	scenario := core.Scenario{Knobs: map[string]any{"project_ready_timeout": "3m"}}
 	timeout, err := scenario.Duration("project_ready_timeout", 2*time.Minute)

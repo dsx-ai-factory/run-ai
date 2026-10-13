@@ -1,9 +1,9 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx
 
-go 1.27.1
+go 1.27.2
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16
 	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
 )

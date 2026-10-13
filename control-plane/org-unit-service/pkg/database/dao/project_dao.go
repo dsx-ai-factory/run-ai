@@ -534,7 +534,7 @@ func UpdateProjectTx(ctx context.Context, tx orm.DB, project *models.Project, cl
 		TenantId:     project.TenantId,
 		Name:         project.Name,
 	}
-	omit := append(orgUnitNodeTypeOmitFields(),
+	omit := append(append(orgUnitNodeTypeOmitFields(), resourcesStatusOmitFields()...),
 		"deleted_at", "deleted_by", "deletion_request", "deletion_type", "force_delete",
 		"status_last_updated_time", "status_namespace", "conditions", "quota_status_id",
 	)

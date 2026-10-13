@@ -31,7 +31,10 @@ means every scenario passed and the results were written; 1 means something
 failed, and the last line says what.
 
 Without make: `make build`, then `./bin/flowmark --help` lists every flag.
-`--only` and `--workloads` are what `SCENARIO` and `WORKLOADS` set.
+`--only` and `--workloads` are what `SCENARIO` and `WORKLOADS` set;
+`--workloads` reaches only the scenarios whose suite has that knob, so
+`make run WORKLOADS=20` leaves the load scenarios untouched. Every selected
+scenario file is checked before the first one starts.
 `--regression-window` (7) and `--regression-threshold` (0.15) tune the
 regression check described under Results.
 
@@ -57,7 +60,7 @@ Knobs of the `scale-burst` suite:
 
 | knob | default | meaning |
 |---|---|---|
-| `workloads` | `[100, 250, 500]` | round sizes; each round creates that many workloads |
+| `workloads` | `[100, 250, 500]` | round sizes; each round creates that many workloads. Before round 1 one workload is created and removed to warm up the new project; it is not measured |
 | `workloadType` | `Deployment` | `Deployment`, `Training` or `Workspace` |
 | `podsPerWorkload` | 1 | replicas per Deployment; must be 1 for `Training` and `Workspace` |
 | `image` | `registry.k8s.io/pause:3.9` | container image; point it at a mirror on air-gapped clusters |
@@ -67,7 +70,7 @@ Knobs of the `scale-burst` suite:
 | `timeout` | `15m` | how long a round waits for all workloads to arrive |
 | `setupTimeout` | `5m` | project creation, quiesce between rounds, cleanup |
 | `settle` | `90s` | quiet time between rounds |
-| `slo` | none | upper bounds on `p50_ms`, `p90_ms`, `p99_ms`, `mean_ms` or `max_ms`, e.g. `p90_ms: 5000`; a round above one is reported as a regression, the run still passes |
+| `slo` | none | upper bounds on `p50_ms`, `p90_ms`, `p99_ms`, `mean_ms` or `max_ms`, e.g. `p90_ms: 5000`; add `@<round size>` for one round, e.g. `p90_ms@500: 60000`, otherwise the plain key covers every round; per-round keys for rounds that are not in the run, for example after `--workloads 20`, are ignored and left out of the report; a round above its limit is reported as a regression, the run still passes |
 | `cluster` | single cluster | cluster name when the control plane has several |
 
 Each run creates its own project, runs the rounds, deletes everything, and
@@ -80,7 +83,7 @@ Knobs of the `load-ttj` suite:
 |---|---|---|
 | `users` | 10 | parallel submitters; the most requests in flight at once |
 | `rate` | 2 | target submissions per second; may not exceed `controlPlaneRequestsPerSecond` |
-| `duration` | `5m` | how long submissions keep coming |
+| `duration` | `3m` | how long submissions keep coming |
 | `workloadType` | `Workspace` | `Workspace` or `Training`, both submitted through the control plane |
 | `image` | `registry.k8s.io/pause:3.9` | container image of every workload |
 | `timeout` | `10m` | how long to wait for arrivals after the last submission |
@@ -92,9 +95,9 @@ Each accepted Workspace is timed in three legs on one clock: `api_accepted`
 from the request to the 200, `cluster_synced` from the 200 to its
 WorkloadRunner on the cluster, `pod_created` from the WorkloadRunner to its
 first pod. `ttj`, the time to job, runs from the 200 to the first pod. A
-rejected submission lowers `success_rate` and enters no latency. The pacer
-never fires missed ticks later, so `actual_rate_per_sec` next to
-`target_rate_per_sec` shows whether the environment kept up with the load.
+rejected submission counts in `failed_count` and enters no latency. The pacer
+never fires missed ticks later; when the achieved rate ends more than 10%
+under the target, the section fails and says so.
 
 ## Results
 
@@ -102,26 +105,31 @@ Every run writes `reports/results-<timestamp>.json` and adds it to
 `reports/manifest.json`, the ordered list of runs. The file holds run
 metadata (start time, provider, cluster type, versions) and one
 section per scenario. A `scale-burst` section has `p50_ms@N`, `p90_ms@N`,
-`p99_ms@N`, `throughput_per_sec@N`, `never_arrived_count@N`, `failed_count@N` and
-the knobs used, `N` being the round size; `makespan_ms@N` runs from the first
-create response to the last arrival and `throughput_per_sec@N` is the number
-of arrived workloads divided by it. A `load-ttj` section has `<span>_p50_ms`,
+`p99_ms@N`, `mean_ms@N`, `max_ms@N` and `throughput_per_sec@N`, `N` being the
+round size; `throughput_per_sec@N` is the number
+of arrived workloads divided by the time from the first create response to
+the last arrival. A `load-ttj` section has `<span>_p50_ms`,
 `<span>_p90_ms` and `<span>_p99_ms` for `api_accepted`, `cluster_synced`,
-`pod_created` and `ttj`, plus `submitted`, `success_rate`,
-`target_rate_per_sec` and `actual_rate_per_sec`. Workloads that never arrived
-are counted in `never_arrived_count` and never as zero latency. The health of
+`pod_created` and `ttj`, plus `failed_count`, the creates the control plane
+rejected; the accepted ones are still timed. A workload that never reached
+the cluster fails the section, is counted in `error` and never enters a
+latency as zero. The health of
 the measurement itself is not a metric: when the cluster watch had to be
-reopened, or a WorkloadRunner or pod was seen more than a second before the
-step that precedes it, the section fails and `error` explains why, and the
-log carries the same line.
+reopened without a resume point, so events in the gap may have been missed,
+or a WorkloadRunner or pod was seen more than a second before the step that
+precedes it, the section fails and `error` explains why, and the log carries
+the same line. A watch the API server closes routinely is resumed from the
+last seen resourceVersion and is only logged.
 
 The results are then judged in two ways. Against history: every p90 is
-compared with the median of the same metric in the last 7 runs of the same
+compared with the median of its last 7 values in earlier runs of the same
 `cluster_type` found in the output directory, and more than 15% above that
-median is a regression; with fewer than 7 such runs the comparison is skipped.
-Against the SLO: every latency metric that has an `slo_` value from the
-scenario file, p90 or not, is a regression when above it, regardless of
-history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest
+median is a regression. Runs where the scenario did not run or its section
+failed do not count, an earlier file that cannot be read is skipped and named
+in the log, and with fewer than 7 values the comparison is skipped.
+Against the SLO: the limits from the scenario file are copied into the
+section's `slo` block, and every latency metric with a limit there, p90 or
+not, is a regression when above it, regardless of history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest
 workload of the night, so one unlucky pod makes it fire. A flagged metric gets
 a sibling `<metric>_regression: true`, `regression_detected` at the top of the
 file becomes true, and `regressions` lists every finding with a ready-made

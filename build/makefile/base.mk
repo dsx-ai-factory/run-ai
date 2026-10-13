@@ -68,7 +68,6 @@ SHARED_PACKAGES_PATH=../../runai-clients
 SHARED_PACKAGES_PATH_ABS=runai-clients
 DOCKER_SOCK_PATH=/var/run/docker.sock
 
-
 ################### OS DEPENDENCY ##########################
 # Build the project
 UNAME_S := $(shell uname -s)
@@ -80,11 +79,9 @@ else
 ARCH?=arm64
 endif
 
-
 ifeq ($(UNAME_S),Linux)
 ECHO_COMMAND=echo -e
 OS?=linux
-
 
 else ifeq ($(UNAME_S),Darwin)
 ECHO_COMMAND=echo
@@ -124,10 +121,3 @@ docker-push-generic:
 	docker push ${DOCKER_IMAGE_NAME}
 .PHONY: push
 
-# Regenerate this component's NOTICE from its resolved dependency graph.
-# Requires go-licenses for Go components: go install github.com/google/go-licenses@latest
-BASE_MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-
-notice:
-	@python3 ${BASE_MAKEFILE_DIR}../scripts/generate-notice.py ${CURDIR}
-.PHONY: notice

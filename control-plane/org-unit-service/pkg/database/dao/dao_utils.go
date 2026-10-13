@@ -55,6 +55,21 @@ func orgUnitNodeTypeOmitFields() []string {
 	}
 }
 
+// Resources status columns are owned by the cluster status sync; org unit updates must not write them,
+// or a sync that lands mid-update is overwritten with the values read before it.
+func resourcesStatusOmitFields() []string {
+	columns := []string{
+		"allocated_gpu", "allocated_cpu", "allocated_memory",
+		"allocated_non_preemptible_gpu", "allocated_non_preemptible_cpu", "allocated_non_preemptible_memory",
+		"requested_gpu", "requested_cpu", "requested_memory",
+	}
+	fields := make([]string, 0, len(columns))
+	for _, column := range columns {
+		fields = append(fields, fmt.Sprintf("%s.%s.%s", OrgUnitData, Resources, column))
+	}
+	return fields
+}
+
 func IsEligibleForCachedData(permittedScopes *openapi.PermittedScopes, tenantId string, clusterId string) bool {
 	if permittedScopes == nil || (permittedScopes.System != nil && *permittedScopes.System) {
 		return true

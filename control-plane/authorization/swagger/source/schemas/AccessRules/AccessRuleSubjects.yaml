@@ -10,9 +10,9 @@ items:
   properties:
     subjectId:
       type: string
-      description: The unique identifier of the subject e.g., user, group, or app).
+      description: The unique identifier of the subject e.g., user, group, or service account).
       example: "user@run.ai"
     subjectType:
       allOf:
         - $ref: './SubjectType.yaml'
-        - description: "The subject assigned to the access rule. Valid values: user, group, app."
+        - description: "The subject assigned to the access rule. Valid values: user, group, service-account."

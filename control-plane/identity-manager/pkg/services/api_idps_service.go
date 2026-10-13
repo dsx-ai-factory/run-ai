@@ -364,10 +364,10 @@ func (s *IdpsApiService) createIdp(ctx context.Context, realm string, idpRequest
 		return nil, err
 	}
 	config, err := s.getIdpConfig(ctx, realm, idpRequest)
-	config[utils.Scopes] = (*idpRequest.Config)[utils.Scopes]
 	if err != nil {
 		return nil, err
 	}
+	config[utils.Scopes] = (*idpRequest.Config)[utils.Scopes]
 	idpRep := rep.GetRepresentation(ctx, idpRequest, &config)
 	_, err = s.iamIdps.CreateIdp(ctx, realm, *idpRep)
 	if err == nil {

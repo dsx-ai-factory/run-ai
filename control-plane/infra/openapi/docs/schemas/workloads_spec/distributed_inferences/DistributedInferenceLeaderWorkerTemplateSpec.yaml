@@ -22,10 +22,16 @@ properties:
         $ref: ../compute/CpuMemoryRequest.yaml
       extendedResources:
         $ref: ../compute/ExtendedResources.yaml
+      gpuComputeMode:
+        $ref: ../compute/GpuComputeMode.yaml
       gpuDevicesRequest:
         $ref: ../compute/GpuDevicesRequest.yaml
       gpuMemoryLimit:
         $ref: ../compute/GpuMemoryLimit.yaml
+      gpuMemoryPortionLimit:
+        $ref: ../compute/GpuMemoryPortionLimit.yaml
+      gpuMemoryPortionRequest:
+        $ref: ../compute/GpuMemoryPortionRequest.yaml
       gpuMemoryRequest:
         $ref: ../compute/GpuMemoryRequest.yaml
       gpuPortionLimit:

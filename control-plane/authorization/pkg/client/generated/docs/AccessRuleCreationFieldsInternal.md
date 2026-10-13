@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**SubjectId** | **string** | The unique identifier of the subject (e.g., user, group, or app). | 
+**SubjectId** | **string** | The unique identifier of the subject (e.g., user, group, or service account). | 
 **RoleId** | **int32** | The numeric ID of the assigned role. | 
 **ScopeId** | **string** | The unique identifier of the scope. | 
 **ScopeType** | [**ScopeType**](ScopeType.md) |  | 

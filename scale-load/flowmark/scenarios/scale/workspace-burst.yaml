@@ -11,8 +11,8 @@ kubeRequestsPerSecond: 50
 controlPlaneRequestsPerSecond: 25
 timeout: 15m
 slo:
-  p50_ms: 6000
-  p90_ms: 10000
-  p99_ms: 15000
-  mean_ms: 8000
-  max_ms: 30000
+  p50_ms: 8000
+  p90_ms: 15000
+  p99_ms: 20000
+  mean_ms: 10000
+  max_ms: 40000

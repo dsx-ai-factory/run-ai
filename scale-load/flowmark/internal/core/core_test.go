@@ -173,3 +173,28 @@ func TestScenarioUnknownKnobs(t *testing.T) {
 		t.Fatalf("no knobs means nothing unknown, got %v", got)
 	}
 }
+
+func TestSectionFailAppendsMessages(t *testing.T) {
+	var section Section
+	section.Fail("first")
+	section.Fail("second")
+	if !section.Failed || section.Error != "first; second" {
+		t.Fatalf("messages must be joined in order: %+v", section)
+	}
+}
+
+func TestScenarioIntMap(t *testing.T) {
+	scenario := Scenario{Knobs: map[string]any{"slo": map[string]any{"p90_ms": 5000}, "bad": map[string]any{"p90_ms": "5s"}, "text": "x"}}
+	if values, err := scenario.IntMap("slo"); err != nil || values["p90_ms"] != 5000 {
+		t.Fatalf("whole numbers must be read: %v / %v", values, err)
+	}
+	if values, err := scenario.IntMap("missing"); err != nil || values != nil {
+		t.Fatalf("an absent knob is nil without an error: %v / %v", values, err)
+	}
+	if _, err := scenario.IntMap("bad"); err == nil || !strings.Contains(err.Error(), `entry "p90_ms" must be a whole number`) {
+		t.Fatalf("a non-number entry must be named: %v", err)
+	}
+	if _, err := scenario.IntMap("text"); err == nil || !strings.Contains(err.Error(), "must be a mapping") {
+		t.Fatalf("a scalar knob is not a mapping: %v", err)
+	}
+}

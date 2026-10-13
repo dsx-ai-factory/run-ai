@@ -34,16 +34,26 @@ allOf:
           $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/QuantityRules.yaml
         cpuMemoryRequest:
           $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/QuantityRules.yaml
+        gpuComputeMode:
+          $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuComputeModeRules.yaml
         gpuDevicesRequest:
           $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
         gpuMemoryLimit:
           $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/QuantityRules.yaml
+        gpuMemoryPortionLimit:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+        gpuMemoryPortionRequest:
+          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
         gpuMemoryRequest:
           $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/QuantityRules.yaml
         gpuPortionLimit:
-          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+          allOf:
+          - $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+          deprecated: true
         gpuPortionRequest:
-          $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+          allOf:
+          - $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/NumberRules.yaml
+          deprecated: true
         gpuRequestType:
           $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/compute/GpuRequestRules.yaml
       type: object

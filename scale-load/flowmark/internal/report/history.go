@@ -13,34 +13,35 @@ import (
 	"slices"
 )
 
-func LoadHistory(ctx context.Context, store Store, clusterType string, window int) ([]Document, error) {
-	if window <= 0 || clusterType == "" {
-		return nil, nil
+func LoadHistory(ctx context.Context, store Store, clusterType string, limit int) (history []Document, skipped []string, err error) {
+	if limit <= 0 || clusterType == "" {
+		return nil, nil, nil
 	}
 	current, err := store.Get(ctx, ManifestName)
 	if errors.Is(err, ErrNotFound) {
-		return nil, nil
+		return nil, nil, nil
 	}
 	if err != nil {
-		return nil, fmt.Errorf("read manifest: %w", err)
+		return nil, nil, fmt.Errorf("read manifest: %w", err)
 	}
 	manifest, err := parseManifest(current)
 	if err != nil {
-		return nil, fmt.Errorf("parse manifest: %w", err)
+		return nil, nil, fmt.Errorf("parse manifest: %w", err)
 	}
 
 	runs := slices.Clone(manifest.Runs)
 	slices.Sort(runs)
-	var history []Document
-	for i := len(runs) - 1; i >= 0 && len(history) < window; i-- {
+	for i := len(runs) - 1; i >= 0 && len(history) < limit; i-- {
 		name := runs[i]
 		data, err := store.Get(ctx, name)
 		if err != nil {
-			return nil, fmt.Errorf("read history %s: %w", name, err)
+			skipped = append(skipped, fmt.Sprintf("read history %s: %v", name, err))
+			continue
 		}
 		var document Document
 		if err := json.Unmarshal(data, &document); err != nil {
-			return nil, fmt.Errorf("parse history %s: %w", name, err)
+			skipped = append(skipped, fmt.Sprintf("parse history %s: %v", name, err))
+			continue
 		}
 		if document.Metadata.ClusterType != clusterType {
 			continue
@@ -48,5 +49,5 @@ func LoadHistory(ctx context.Context, store Store, clusterType string, window in
 		history = append(history, document)
 	}
 	slices.SortFunc(history, func(a, b Document) int { return a.Metadata.Date.Compare(b.Metadata.Date) })
-	return history, nil
+	return history, skipped, nil
 }

@@ -1468,7 +1468,7 @@ var (
 		ScopeId:     "2",
 		ScopeType:   auth_openapi.SCOPETYPE_TENANT,
 		SubjectId:   "5",
-		SubjectType: auth_openapi.SUBJECTTYPEEXTENDED_APP,
+		SubjectType: auth_openapi.SUBJECTTYPEEXTENDED_SERVICE_ACCOUNT,
 		RoleId:      2,
 		RoleName:    "l1-researcher",
 		ScopeName:   "",
