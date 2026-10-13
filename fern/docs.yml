@@ -80,3 +80,9 @@ redirects:
   - source: /index.html
     destination: /run-ai/self-hosted/documentation/home
     permanent: true
+  - source: /saas
+    destination: https://run-ai-docs.nvidia.com/saas
+    permanent: false
+  - source: /saas/:slug*
+    destination: https://run-ai-docs.nvidia.com/saas
+    permanent: false
