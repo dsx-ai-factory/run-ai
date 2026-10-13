@@ -66,8 +66,7 @@ For a control plane installation on Kubernetes, configure:
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
      - `supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
      - `telemetryService.enabled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true` to enable telemetry.
-     - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
-       - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
+     - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it as follows:
        - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
      - Third-party services - Add the image pull secret, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
      - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
@@ -85,7 +84,8 @@ For a control plane installation on Kubernetes, configure:
        telemetryService: # Support-Entitled Release only
          enabled: true
          telemetryAuth: # Optional
-           token: <SERVICE_API_KEY>
+           existingSecret: <SECRET_NAME>
+           secretKey: <KEY_NAME>
        # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
        global:
          fipsMode: only # Gov-ready
@@ -169,8 +169,7 @@ For a control plane installation on OpenShift, configure:
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer. See [Advanced Control Plane Configurations](../../../configuration/control-plane-config.md) for the full set of keys.
      - `supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
      - `telemetryService.enabled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true` to enable telemetry.
-     - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
-       - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
+     - `telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it as follows:
        - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
      - Third-party services - Add the image pull secret, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
      - `global.fipsMode` - Enables FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. Set to `only`. <Badge intent="info" minimal outlined>Gov-ready</Badge>
@@ -185,7 +184,8 @@ For a control plane installation on OpenShift, configure:
        telemetryService: # Support-Entitled Release only
          enabled: true
          telemetryAuth: # Optional
-           token: <SERVICE_API_KEY>
+           existingSecret: <SECRET_NAME>
+           secretKey: <KEY_NAME>
        # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
        global:
          fipsMode: only # Gov-ready

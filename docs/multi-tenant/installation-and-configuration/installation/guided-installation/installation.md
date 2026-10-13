@@ -58,8 +58,7 @@ At a minimum, configure:
    - `controlPlane.customHelmValues` - Merges Helm values into the control plane chart, for settings not otherwise exposed by the installer - including the control plane administrator credentials and the external metrics store connection. See [Advanced Control Plane Configurations](../../../../installation-and-configuration/configuration/control-plane-config.md) for the full set of keys.
    - `controlPlane.customHelmValues.supportEntitled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true`.
    - `controlPlane.customHelmValues.telemetryService.enabled` - For NVIDIA Run:ai Support-Entitled Release, must be set to `true` to enable telemetry.
-   - `controlPlane.customHelmValues.telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it one of two ways:
-     - `token: <SERVICE_API_KEY>` - Sets the Service API Key directly; the chart creates and manages the Kubernetes secret for you. Stored in plaintext in the configuration file, so protect it accordingly, or use `existingSecret` instead.
+   - `controlPlane.customHelmValues.telemetryService.telemetryAuth` - Optional, Support-Entitled Release only. Associates NVIDIA Run:ai's telemetry with your NCA ID - by default, telemetry is not associated with your organization. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. Provide it as follows:
      - `existingSecret: <SECRET_NAME>` / `secretKey: <KEY_NAME>` - References a secret you create yourself beforehand - the installer does not create or manage it.
    - The external metrics store connection - required for every multi-tenant control plane. The example below configures Grafana Labs; for Mimir, see the [Mimir Metrics Store](templates.md#mimir-metrics-store) template. See [Metrics Store Requirements](../../system-requirements/metrics-store-requirements/README.md) for both.
 
@@ -77,7 +76,8 @@ At a minimum, configure:
        telemetryService: # Support-Entitled Release only
          enabled: true
          telemetryAuth: # Optional
-           token: <SERVICE_API_KEY>
+           existingSecret: <SECRET_NAME>
+           secretKey: <KEY_NAME>
        metricsService:
          config:
            datasourceUrl: <METRIC_STORE_READ_URL> # example: https://prometheus-prod-13-prod-us-east-0.grafana.net/api/prom

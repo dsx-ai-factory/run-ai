@@ -98,8 +98,7 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
 * Set `supportEntitled=true` to configure the installation as Support-Entitled.
 * Set `telemetryService.enabled=true` to enable NVIDIA Run:ai's telemetry.
 * Set `global.imagePullSecrets[0].name=runai-reg-creds` to use the NGC image pull secret prepared in [Software Artifacts](#prepare-software-artifacts).
-* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](../installation/install-using-helm/preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
-  - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding the following to the `helm upgrade` command. See [Registry Credentials](../installation/install-using-helm/preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
 <Note>
@@ -119,7 +118,8 @@ helm upgrade runai-backend -n runai-backend runai/control-plane \
   --set supportEntitled=true \
   --set telemetryService.enabled=true \
   --set global.imagePullSecrets[0].name=runai-reg-creds \
-  --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
+  --set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> \
+  --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>
 ```
 
 ## Migrate from NGINX to HAProxy Kubernetes Ingress Controller

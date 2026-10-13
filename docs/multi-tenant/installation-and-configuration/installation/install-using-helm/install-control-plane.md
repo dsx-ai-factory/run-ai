@@ -136,8 +136,7 @@ In addition to the values in your `values.yaml` file, update the Helm commands a
 * Add `--set supportEntitled=true` to the `helm upgrade` command.
 * Add `--set telemetryService.enabled=true` to the `helm upgrade` command to enable telemetry.
 * Add `--set global.imagePullSecrets[0].name=runai-reg-creds` to the `helm upgrade` command to reference the secret created in [Registry Credentials](preparations.md#registry-credentials).
-* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding one of the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
-  - `--set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>` - Passes the Service API Key directly. Visible in shell history and process listings.
+* Optional: associate NVIDIA Run:ai's telemetry with your NCA ID by adding the following to the `helm upgrade` command. See [Registry Credentials](preparations.md#registry-credentials) for how to generate the NGC Service API Key. By default, telemetry is not associated with your organization.
   - `--set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>` - References a secret you create yourself beforehand - the chart does not create or manage it.
 
 ```bash
@@ -148,7 +147,8 @@ helm upgrade -i runai-backend -n runai-backend runai/control-plane \
     --set supportEntitled=true \
     --set telemetryService.enabled=true \
     --set global.imagePullSecrets[0].name=runai-reg-creds \
-    --set telemetryService.telemetryAuth.token=<SERVICE_API_KEY>
+    --set telemetryService.telemetryAuth.existingSecret=<SECRET_NAME> \
+    --set telemetryService.telemetryAuth.secretKey=<KEY_NAME>
 ```
 
 </Tab>
