@@ -60,9 +60,8 @@ func (in listEnvironmentsInput) Validate() error {
 	if in.ProjectID != nil && *in.ProjectID <= 0 {
 		return fmt.Errorf("projectId must be positive")
 	}
-	switch in.WorkloadType {
-	case "", "Workspace", "Training", "Distributed", "Inference", "DistributedInference":
-	default:
+	workloadType := assets.WorkloadType(in.WorkloadType)
+	if in.WorkloadType != "" && !workloadType.IsValid() {
 		return fmt.Errorf("workloadType must be one of: Workspace, Training, Distributed, Inference, DistributedInference")
 	}
 	if in.DistributedFramework != "" {
@@ -72,7 +71,7 @@ func (in listEnvironmentsInput) Validate() error {
 		if !assets.DistributedFramework(in.DistributedFramework).IsValid() {
 			return fmt.Errorf("distributedFramework must be one of: MPI, PyTorch, TF, XGBoost, JAX")
 		}
-		if in.WorkloadType != "" && in.WorkloadType != "Distributed" {
+		if workloadType != "" && workloadType != assets.WORKLOADTYPE_DISTRIBUTED {
 			return fmt.Errorf("distributedFramework requires workloadType=Distributed or an omitted workloadType")
 		}
 	}
@@ -146,16 +145,16 @@ func listEnvironmentsRun(ctx context.Context, client *runaiclient.Client, in lis
 	if in.DistributedFramework != "" {
 		req = req.DistributedFramework(in.DistributedFramework).IsDistributed(true)
 	}
-	switch in.WorkloadType {
-	case "Workspace":
+	switch assets.WorkloadType(in.WorkloadType) {
+	case assets.WORKLOADTYPE_WORKSPACE:
 		req = req.IsWorkspace(true)
-	case "Training":
+	case assets.WORKLOADTYPE_TRAINING:
 		req = req.IsTraining(true)
-	case "Distributed":
+	case assets.WORKLOADTYPE_DISTRIBUTED:
 		req = req.IsDistributed(true)
-	case "Inference":
+	case assets.WORKLOADTYPE_INFERENCE:
 		req = req.IsInference(true)
-	case "DistributedInference":
+	case assets.WORKLOADTYPE_DISTRIBUTED_INFERENCE:
 		req = req.IsDistributedInference(true)
 	}
 
