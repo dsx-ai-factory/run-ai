@@ -1869,20 +1869,6 @@ export interface TokenRequest {
      * 
      * @type {string}
      * @memberof TokenRequest
-     * @deprecated
-     */
-    'appID'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof TokenRequest
-     * @deprecated
-     */
-    'appSecret'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof TokenRequest
      */
     'code'?: string;
     /**
@@ -1945,8 +1931,7 @@ export const TokenRequestGrantTypeEnum = {
     RefreshToken: 'refresh_token',
     ExchangeToken: 'exchange_token',
     Password: 'password',
-    ExternalTokenExchange: 'external_token_exchange',
-    AppToken: 'app_token'
+    ExternalTokenExchange: 'external_token_exchange'
 } as const;
 
 export type TokenRequestGrantTypeEnum = typeof TokenRequestGrantTypeEnum[keyof typeof TokenRequestGrantTypeEnum];
@@ -5859,7 +5844,7 @@ export class SettingsApi extends BaseAPI {
 export const TokensApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token 
+         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token 
          * @summary get application token
          * @param {AppTokenRequest} [appTokenRequest] 
          * @param {*} [options] Override http request option.
@@ -6037,7 +6022,7 @@ export const TokensApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TokensApiAxiosParamCreator(configuration)
     return {
         /**
-         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token 
+         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token 
          * @summary get application token
          * @param {AppTokenRequest} [appTokenRequest] 
          * @param {*} [options] Override http request option.
@@ -6091,7 +6076,7 @@ export const TokensApiFactory = function (configuration?: Configuration, basePat
     const localVarFp = TokensApiFp(configuration)
     return {
         /**
-         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token 
+         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token 
          * @summary get application token
          * @param {AppTokenRequest} [appTokenRequest] 
          * @param {*} [options] Override http request option.
@@ -6142,7 +6127,7 @@ export const TokensApiFactory = function (configuration?: Configuration, basePat
  */
 export class TokensApi extends BaseAPI {
     /**
-     * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token 
+     * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token 
      * @summary get application token
      * @param {AppTokenRequest} [appTokenRequest] 
      * @param {*} [options] Override http request option.

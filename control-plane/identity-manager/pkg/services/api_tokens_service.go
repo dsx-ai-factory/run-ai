@@ -88,9 +88,6 @@ func (s *TokensApiService) GrantToken(ctx context.Context, tokenRequest api.Toke
 		return api.Response(http.StatusInternalServerError, nil), utils.Error{Code: http.StatusInternalServerError, Message: "could not identify user realm"}
 	}
 	realm := realmValue.(string)
-	if models.GrantTypeAppTokenDeprecated == grantType {
-		return s.grantAppTokenDeprecated(ctx, realm, tokenRequest)
-	}
 	if models.GrantTypeAppToken == grantType {
 		return s.grantAppToken(ctx, realm, tokenRequest)
 	}
@@ -189,20 +186,6 @@ func (s *TokensApiService) AppToken(ctx context.Context, appTokenRequest api.App
 		IdToken:     tokens.IdToken,
 	}
 	return api.Response(http.StatusOK, resp), nil
-}
-
-func (s *TokensApiService) grantAppTokenDeprecated(ctx context.Context,
-	realm string, tokenRequest api.TokenRequest,
-) (api.ImplResponse, error) {
-	appID := tokenRequest.AppID
-	if strings.HasPrefix(appID, internalClientPrefix) || strings.HasPrefix(appID, legacyClientIdPrefix) {
-		audit.AuditFromCtx(ctx).Drop()
-	} else {
-		audit.AuditFromCtx(ctx).WithSubject(appID).WithSubjectType(utils.AuditServiceAccountSubjectType)
-		audit.AuditFromCtx(ctx).WithMetadata("client_id", appID)
-	}
-	tokens, err := s.iamServices.AuthService.AuthenticateClient(ctx, realm, appID, tokenRequest.AppSecret)
-	return s.handleTokenResponse(ctx, tokens, appID, err)
 }
 
 func (s *TokensApiService) grantAppToken(ctx context.Context,
@@ -559,14 +542,6 @@ func (s *TokensApiService) validateTokenRequest(tokenRequest api.TokenRequest) e
 	case models.GrantTypeExternalTokenExchange:
 		if tokenRequest.ExternalToken == "" {
 			return s.missingFieldErr(models.TokenRequestFieldExternalToken)
-		}
-
-	case models.GrantTypeAppTokenDeprecated:
-		if tokenRequest.AppID == "" {
-			return s.missingFieldErr(models.TokenRequestFieldAppID)
-		}
-		if tokenRequest.AppSecret == "" {
-			return s.missingFieldErr(models.TokenRequestFieldAppSecret)
 		}
 	}
 

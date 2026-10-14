@@ -2968,15 +2968,6 @@
                     "grantType": "external_token_exchange",
                     "externalToken": "access token from external idp"
                   }
-                },
-                "app_token (deprecated)": {
-                  "x-internal": true,
-                  "value": {
-                    "grantType": "app_token",
-                    "appID": "appID",
-                    "appSecret": "appSecret"
-                  },
-                  "description": "Deprecated - Obtain the appID and the appSecret using applications or access keys endpoints"
                 }
               }
             }
@@ -3691,7 +3682,7 @@
         "x-test-coverage": [
           "src/test/suites/parallel/applicationsV2/applicationsAuth.test.ts"
         ],
-        "description": "Retrieve access token for an application.\nThe application token is retrieved from the authorization server.\nThis endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token\n",
+        "description": "Retrieve access token for an application.\nThe application token is retrieved from the authorization server.\nThis endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token\n",
         "operationId": "app_token",
         "requestBody": {
           "content": {
@@ -5504,16 +5495,12 @@
         }
       },
       "TokenRequestGrantTypeEnum": {
-        "x-enum-internal": [
-          "app_token"
-        ],
         "enum": [
           "client_credentials",
           "refresh_token",
           "exchange_token",
           "password",
-          "external_token_exchange",
-          "app_token"
+          "external_token_exchange"
         ]
       },
       "TokenRequest": {
@@ -5521,18 +5508,6 @@
         "properties": {
           "grantType": {
             "$ref": "#/components/schemas/TokenRequestGrantTypeEnum"
-          },
-          "appID": {
-            "deprecated": true,
-            "x-internal": true,
-            "type": "string",
-            "maxLength": 255
-          },
-          "appSecret": {
-            "deprecated": true,
-            "x-internal": true,
-            "type": "string",
-            "maxLength": 500
           },
           "code": {
             "type": "string",

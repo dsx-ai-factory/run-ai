@@ -377,27 +377,12 @@ func TestValidateTokenRequest(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), models.TokenRequestFieldRedirectUri)
 	})
-	t.Run("app_token (deprecated) missing fields", func(t *testing.T) {
-		err := testSubject.validateTokenRequest(api.TokenRequest{
-			GrantType: models.GrantTypeAppTokenDeprecated,
-		})
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), models.TokenRequestFieldAppID)
-
-		err = testSubject.validateTokenRequest(api.TokenRequest{
-			GrantType: models.GrantTypeAppTokenDeprecated,
-			AppID:     "appid",
-		})
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), models.TokenRequestFieldAppSecret)
-	})
 	t.Run("all required fields present", func(t *testing.T) {
 		cases := []api.TokenRequest{
 			{GrantType: models.GrantTypeAppToken, ClientID: "id", ClientSecret: "secret"},
 			{GrantType: models.GrantTypeUserPassword, Username: "u", Password: "p"},
 			{GrantType: models.GrantTypeRefreshToken, RefreshToken: "r"},
 			{GrantType: models.GrantTypeExchangeToken, Code: "c", RedirectUri: "uri"},
-			{GrantType: models.GrantTypeAppTokenDeprecated, AppID: "id", AppSecret: "secret"},
 		}
 		for _, req := range cases {
 			err := testSubject.validateTokenRequest(req)

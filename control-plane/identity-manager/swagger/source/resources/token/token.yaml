@@ -31,11 +31,6 @@ post:
           external_token_exchange:
             value:
               $ref: './examples/external_token.yaml'
-          app_token (deprecated):
-            x-internal: true
-            value:
-              $ref: './examples/app_token.yaml'
-            description: "Deprecated - Obtain the appID and the appSecret using applications or access keys endpoints"
   responses:
     '200':
       description: Executed successfully.

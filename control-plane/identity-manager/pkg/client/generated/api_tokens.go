@@ -30,7 +30,7 @@ type TokensAPI interface {
 
 		Retrieve access token for an application.
 	The application token is retrieved from the authorization server.
-	This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token
+	This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -103,7 +103,7 @@ AppToken get application token
 
 Retrieve access token for an application.
 The application token is retrieved from the authorization server.
-This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token
+This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiAppTokenRequest

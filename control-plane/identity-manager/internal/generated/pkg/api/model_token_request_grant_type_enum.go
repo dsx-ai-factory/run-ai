@@ -33,7 +33,6 @@ const (
 	TOKENREQUESTGRANTTYPEENUM_EXCHANGE_TOKEN          TokenRequestGrantTypeEnum = "exchange_token"
 	TOKENREQUESTGRANTTYPEENUM_PASSWORD                TokenRequestGrantTypeEnum = "password"
 	TOKENREQUESTGRANTTYPEENUM_EXTERNAL_TOKEN_EXCHANGE TokenRequestGrantTypeEnum = "external_token_exchange"
-	TOKENREQUESTGRANTTYPEENUM_APP_TOKEN               TokenRequestGrantTypeEnum = "app_token"
 )
 
 // AllowedTokenRequestGrantTypeEnumEnumValues is all the allowed values of TokenRequestGrantTypeEnum enum
@@ -43,7 +42,6 @@ var AllowedTokenRequestGrantTypeEnumEnumValues = []TokenRequestGrantTypeEnum{
 	"exchange_token",
 	"password",
 	"external_token_exchange",
-	"app_token",
 }
 
 // validTokenRequestGrantTypeEnumEnumValue provides a map of TokenRequestGrantTypeEnums for fast verification of use input
@@ -53,7 +51,6 @@ var validTokenRequestGrantTypeEnumEnumValues = map[TokenRequestGrantTypeEnum]str
 	"exchange_token":          {},
 	"password":                {},
 	"external_token_exchange": {},
-	"app_token":               {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

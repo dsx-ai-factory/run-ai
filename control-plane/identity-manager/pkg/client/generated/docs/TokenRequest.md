@@ -5,8 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **GrantType** | Pointer to [**TokenRequestGrantTypeEnum**](TokenRequestGrantTypeEnum.md) |  | [optional] 
-**AppID** | Pointer to **string** |  | [optional] 
-**AppSecret** | Pointer to **string** |  | [optional] 
 **Code** | Pointer to **string** |  | [optional] 
 **RedirectUri** | Pointer to **string** |  | [optional] 
 **RefreshToken** | Pointer to **string** |  | [optional] 
@@ -60,56 +58,6 @@ SetGrantType sets GrantType field to given value.
 `func (o *TokenRequest) HasGrantType() bool`
 
 HasGrantType returns a boolean if a field has been set.
-
-### GetAppID
-
-`func (o *TokenRequest) GetAppID() string`
-
-GetAppID returns the AppID field if non-nil, zero value otherwise.
-
-### GetAppIDOk
-
-`func (o *TokenRequest) GetAppIDOk() (*string, bool)`
-
-GetAppIDOk returns a tuple with the AppID field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAppID
-
-`func (o *TokenRequest) SetAppID(v string)`
-
-SetAppID sets AppID field to given value.
-
-### HasAppID
-
-`func (o *TokenRequest) HasAppID() bool`
-
-HasAppID returns a boolean if a field has been set.
-
-### GetAppSecret
-
-`func (o *TokenRequest) GetAppSecret() string`
-
-GetAppSecret returns the AppSecret field if non-nil, zero value otherwise.
-
-### GetAppSecretOk
-
-`func (o *TokenRequest) GetAppSecretOk() (*string, bool)`
-
-GetAppSecretOk returns a tuple with the AppSecret field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAppSecret
-
-`func (o *TokenRequest) SetAppSecret(v string)`
-
-SetAppSecret sets AppSecret field to given value.
-
-### HasAppSecret
-
-`func (o *TokenRequest) HasAppSecret() bool`
-
-HasAppSecret returns a boolean if a field has been set.
 
 ### GetCode
 
