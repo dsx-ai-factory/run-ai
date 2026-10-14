@@ -358,7 +358,11 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 				return workloadsApi.NewError(err.Code, fmt.Sprintf("compute: failed to validate gpu vendor is nvidia: %v", err.Message))
 			}
 			if src.GpuComputeMode.Get() != nil {
-				capabilities, err := checker.NewClusterCapabilitiesCheckerForVersion(nsc.clusterInfo.GetVersion())
+				version := nsc.clusterInfo.GetVersion()
+				if version == "" {
+					return workloadsApi.NewError(http.StatusBadRequest, "compute.gpuComputeMode: cluster version is unknown")
+				}
+				capabilities, err := checker.NewClusterCapabilitiesCheckerForVersion(version)
 				if err != nil {
 					return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("cluster version: %v", err))
 				}

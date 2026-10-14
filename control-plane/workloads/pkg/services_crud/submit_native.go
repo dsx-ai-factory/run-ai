@@ -27,11 +27,13 @@ import (
 // Output of the composer is captured via wc.notificationsComposer; the only
 // value returned to the caller is the workload requirements summary.
 func composeNative(ctx context.Context, wc *workloadContext) (composer.WorkloadRequirements, *workloadsApi.SubmissionErrorV2) {
-	for _, spec := range []any{wc.spec, wc.masterSpec} {
-		if spec == nil {
-			continue
+	if wc.spec != nil {
+		if err := validateNativeGpuMode(wc.spec); err != nil {
+			return composer.WorkloadRequirements{}, err
 		}
-		if err := validateNativeGpuMode(spec); err != nil {
+	}
+	if wc.masterSpec != nil {
+		if err := validateNativeGpuMode(wc.masterSpec); err != nil {
 			return composer.WorkloadRequirements{}, err
 		}
 	}
