@@ -116,11 +116,9 @@ func DetectRegressions(document Document, history []Document, config RegressionC
 		}
 		for _, metric := range withSLO(section) {
 			value, _ := number(section.Metrics[metric])
-			if slo, _ := sloFor(section, metric); value > slo {
-				found[metric] = append(found[metric], Regression{
-					Section: name, Metric: metric, Value: value, Baseline: slo, Against: AgainstSLO,
-					Message: fmt.Sprintf("%s %s: %s is over the SLO of %s", name, metric, milliseconds(value), milliseconds(slo)),
-				})
+			slo, _ := sloFor(section, metric)
+			if regression, missed := judgeAgainstSLO(name, metric, value, slo); missed {
+				found[metric] = append(found[metric], regression)
 			}
 		}
 		for metric, regressions := range found {
@@ -154,8 +152,25 @@ func judgeAgainstMedian(section, metric string, value float64, history []Documen
 	change := value/baseline - 1
 	return []Regression{{
 		Section: section, Metric: metric, Value: value, Baseline: baseline, Against: AgainstMedian, Change: change,
-		Message: fmt.Sprintf("%s %s: %s is %+.0f%% over the median of %s from the last %d runs", section, metric, milliseconds(value), change*100, milliseconds(baseline), config.Window),
+		Message: fmt.Sprintf("%s %s: %s is %+.0f%% over the median of %s from the last %d runs", section, metric, formatValue(metric, value), change*100, formatValue(metric, baseline), config.Window),
 	}}
+}
+
+func judgeAgainstSLO(section, metric string, value, slo float64) (Regression, bool) {
+	regression := Regression{Section: section, Metric: metric, Value: value, Baseline: slo, Against: AgainstSLO}
+	switch {
+	case isRate(metric) && value < slo:
+		regression.Message = fmt.Sprintf("%s %s: %s is under the SLO of %s", section, metric, formatValue(metric, value), formatValue(metric, slo))
+	case !isRate(metric) && value > slo:
+		regression.Message = fmt.Sprintf("%s %s: %s is over the SLO of %s", section, metric, formatValue(metric, value), formatValue(metric, slo))
+	default:
+		return Regression{}, false
+	}
+	return regression, true
+}
+
+func isRate(metric string) bool {
+	return strings.HasSuffix(sloName(metric), "_per_sec")
 }
 
 func kpis(metrics map[string]any) []string {
@@ -221,6 +236,13 @@ func number(value any) (float64, bool) {
 	}
 }
 
-func milliseconds(value float64) string {
-	return fmt.Sprintf("%.0f ms", value)
+func formatValue(metric string, value float64) string {
+	switch base := sloName(metric); {
+	case strings.HasSuffix(base, "_ms"):
+		return fmt.Sprintf("%.0f ms", value)
+	case strings.HasSuffix(base, "_per_sec"):
+		return fmt.Sprintf("%.1f/s", value)
+	default:
+		return fmt.Sprintf("%.0f", value)
+	}
 }

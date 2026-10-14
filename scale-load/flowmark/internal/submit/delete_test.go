@@ -100,8 +100,8 @@ func TestSummarizeCapsTheErrorList(t *testing.T) {
 }
 
 func TestDeleteWorkloadsRejectsTypesWithoutAControlPlaneAPI(t *testing.T) {
-	undeleted, err := DeleteWorkloads(context.Background(), &client.Clients{}, "Deployment", []string{"x"}, 1)
+	undeleted, err := DeleteWorkloads(context.Background(), &client.Clients{}, "StatefulSet", []string{"x"}, 1)
 	if err == nil || len(undeleted) != 1 {
-		t.Fatalf("a Deployment is not deleted through the control plane: %v / %v", undeleted, err)
+		t.Fatalf("a StatefulSet is not deleted through the control plane: %v / %v", undeleted, err)
 	}
 }

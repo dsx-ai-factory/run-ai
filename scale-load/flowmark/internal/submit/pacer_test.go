@@ -138,3 +138,42 @@ func TestPacingRateNeedsTwoSubmissions(t *testing.T) {
 		t.Fatalf("one submission is not a rate, got %.2f", got)
 	}
 }
+
+func TestPacerRampsTheRateWithTheUsersItSpawns(t *testing.T) {
+	clock := &fakeClock{now: time.Date(2026, 10, 5, 9, 0, 0, 0, time.UTC)}
+	pacer := Pacer{Rate: 10, SpawnRate: 2, Duration: 10 * time.Second, Users: 10, Now: clock.Now, Sleep: clock.Sleep}
+
+	var mu sync.Mutex
+	var sent []time.Time
+	pacing := pacer.Run(context.Background(), func(context.Context, int) {
+		mu.Lock()
+		sent = append(sent, clock.Now())
+		mu.Unlock()
+	})
+
+	if pacing.Planned != 75 || pacing.Submitted != 75 {
+		t.Fatalf("a 5 s ramp to 10/s followed by 5 s at full rate is 25+50 ticks, got planned %d submitted %d", pacing.Planned, pacing.Submitted)
+	}
+	ticksIn := func(from, to time.Duration) int {
+		count := 0
+		for tick := 0; pacer.tickAt(tick) < to; tick++ {
+			if pacer.tickAt(tick) >= from {
+				count++
+			}
+		}
+		return count
+	}
+	if first, last := ticksIn(0, time.Second), ticksIn(9*time.Second, 10*time.Second); first != 1 || last != 10 {
+		t.Fatalf("the first second must carry only the first user and the last second the full rate, got %d and %d ticks", first, last)
+	}
+	if pacer.tickAt(25) != 5*time.Second {
+		t.Fatalf("the ramp must end exactly when every user is in, tick 25 at %s", pacer.tickAt(25))
+	}
+}
+
+func TestPacerWithoutSpawnRateStartsAtFullRate(t *testing.T) {
+	pacer := Pacer{Rate: 4, Duration: 3 * time.Second, Users: 8}
+	if pacer.tickAt(0) != 0 || pacer.tickAt(1) != 250*time.Millisecond || pacer.planned() != 12 {
+		t.Fatalf("no ramp means evenly spaced ticks from the start: %s %s %d", pacer.tickAt(0), pacer.tickAt(1), pacer.planned())
+	}
+}
