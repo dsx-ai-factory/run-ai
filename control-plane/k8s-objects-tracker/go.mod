@@ -28,12 +28,12 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.10
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29
-	github.com/go-chi/chi/v5 v5.4.0
+	github.com/go-chi/chi/v5 v5.5.0
 	github.com/google/uuid v1.6.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/onsi/ginkgo/v2 v2.33.1
 	github.com/onsi/gomega v1.44.0
-	golang.org/x/exp v0.0.0-20261013213113-2ab7f3cbc5fb
+	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
 	gorm.io/gorm v1.31.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 )
