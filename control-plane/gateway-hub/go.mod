@@ -15,7 +15,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.10
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29
-	github.com/go-chi/chi/v5 v5.4.0
+	github.com/go-chi/chi/v5 v5.5.0
 	github.com/golang-jwt/jwt/v5 v5.3.1
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
@@ -98,7 +98,7 @@ require (
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
-	golang.org/x/exp v0.0.0-20261013213113-2ab7f3cbc5fb // indirect
+	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e // indirect
 	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
