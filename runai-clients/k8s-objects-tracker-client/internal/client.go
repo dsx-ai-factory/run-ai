@@ -227,6 +227,10 @@ func (c *K8SObjectTrackerClient) SyncDeviceClass(ctx context.Context, clusterId 
 		}).ClusterId(clusterId).Execute()
 }
 
+func (c *K8SObjectTrackerClient) ListDeviceClasses(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *http.Response, error) {
+	return c.ApiClient.DeviceClassesAPI.GetDeviceClasses(ctx).ClusterId(clusterId).Execute()
+}
+
 func (c *K8SObjectTrackerClient) CreateResourceClaimTemplate(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error) {
 	return c.ApiClient.ResourceClaimTemplatesAPI.CreateResourceClaimTemplate(ctx).ClusterId(clusterId).ResourceClaimTemplate(rct).Execute()
 }
@@ -399,6 +403,36 @@ func (c *K8SObjectTrackerClient) GetConfigMapsOfCluster(ctx context.Context, clu
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to request config-maps of cluster %s: %v", clusterId, err)
 	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to request config-maps of cluster %s", clusterId))
+}
+
+// GetDeviceClassesOfCluster queries the k8s tracker for the device classes of the cluster.
+// Used by validators (e.g. the resource-claim-template path in assets-service) that need to
+// verify a referenced deviceClassName exists in the target cluster.
+func (c *K8SObjectTrackerClient) GetDeviceClassesOfCluster(ctx context.Context, clusterId string) (*openapi.DeviceClasses, *openapi.Error) {
+	resp, r, err := c.ListDeviceClasses(ctx, clusterId)
+	if r != nil {
+		// Treat as success only when the SDK itself reported no error AND
+		// handed us a decoded response. A 200 with a JSON-decode failure
+		// comes back as (nil-or-partial, http.Response{200}, err); without
+		// this guard the caller gets a nil resp and panics on resp.Items.
+		if err == nil && resp != nil && r.StatusCode == http.StatusOK {
+			return resp, nil
+		}
+
+		// Surface read failures in the log rather than swallowing them —
+		// an empty "data" otherwise makes the error path indistinguishable
+		// from a non-200 with an empty body.
+		data, readErr := io.ReadAll(r.Body)
+		if readErr != nil {
+			data = []byte(fmt.Sprintf("<failed to read body: %v>", readErr))
+		}
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to get device classes of cluster %s: %s", clusterId, data)
+
+		return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to get device classes of cluster %s", clusterId))
+	}
+
+	logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to request device classes of cluster %s: %v", clusterId, err)
+	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to request device classes of cluster %s", clusterId))
 }
 
 func (c *K8SObjectTrackerClient) GetClusterResourcesStatus(ctx context.Context, resourceType *openapi.ClusterResourceType, scopeType *string,

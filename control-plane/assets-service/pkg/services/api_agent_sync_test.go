@@ -90,6 +90,13 @@ var _ = Describe("AgentSync", func() {
 				WithCluster(anotherNewCluster.ClusterId, testing.BuildDisplayedCluster(anotherNewCluster, testing.UnitTestDefaultClusterVersion, false)).
 				WithCluster(anotherOldCluster.ClusterId, testing.BuildDisplayedCluster(anotherOldCluster, clusterNotSupportingAgentSync, false)))
 			checker.InitClusterCapabilitiesChecker("", DefaultCheckerClusterConfig, "")
+
+			// Register the device classes that our tests use to the tracker mock otherwise they'll fail for
+			// unknown device class.
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient().
+				WithDeviceClass(randoms.ClusterId, rctDeviceClassForTests).
+				WithDeviceClass(anotherNewCluster.ClusterId, rctDeviceClassForTests).
+				WithDeviceClass(anotherOldCluster.ClusterId, rctDeviceClassForTests))
 		})
 
 		Context("sync handles all kind of credential assets", func() {

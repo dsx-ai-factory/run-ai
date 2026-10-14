@@ -68,7 +68,6 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20260329235847-c657396bd619 // indirect
 	github.com/PaesslerAG/gval v1.0.0 // indirect
 	github.com/PaesslerAG/jsonpath v0.1.1 // indirect
 	github.com/Rican7/retry v0.3.1 // indirect
@@ -79,7 +78,6 @@ require (
 	github.com/aws/smithy-go v1.28.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
-	github.com/blendle/zapdriver v1.3.1 // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -97,7 +95,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
@@ -140,7 +137,6 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
-	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
 	github.com/jackc/pgx/v5 v5.11.0 // indirect
@@ -150,7 +146,6 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
 	github.com/klauspost/compress v1.20.1 // indirect
-	github.com/kubeflow/training-operator v1.9.3 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lib/pq v1.11.2 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
@@ -180,7 +175,6 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.1 // indirect
-	github.com/openshift/api v0.0.0-20260605005319-1194f4c62539 // indirect
 	github.com/paulmach/orb v0.13.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.31 // indirect
@@ -202,7 +196,6 @@ require (
 	github.com/sony/gobreaker v0.5.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
@@ -262,8 +255,6 @@ require (
 	k8s.io/controller-manager v0.35.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a // indirect
-	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a // indirect
-	sigs.k8s.io/gateway-api v1.5.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect

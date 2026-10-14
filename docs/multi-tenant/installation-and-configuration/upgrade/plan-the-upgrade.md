@@ -75,7 +75,7 @@ Before upgrading, identify any workloads or node pools relying on GPU memory swa
 
 ### Dynamic Resource Allocation (DRA) Driver
 
-A fresh GPU Operator installation installs the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/index.html) automatically, but upgrading an existing GPU Operator deployment does not. If your cluster requires the DRA driver (for example, Multi-Node NVLink deployments such as GB200), install it manually after upgrading the GPU Operator. See [Install](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/latest/dra-intro-install.html#) in the NVIDIA GPU Operator documentation.
+Upgrading the GPU Operator does not install or change the [NVIDIA DRA driver](https://docs.nvidia.com/datacenter/cloud-native/gpu-operator/26.7/dra-intro-install.html), and does not change the GPU Operator mode. If your cluster uses a separately installed DRA driver (for example, Multi-Node NVLink deployments such as GB200), keep it when upgrading. Refer to the [Support Matrix](../support-matrix.md) for the supported DRA driver versions. `GPUCluster` mode, in which GPU Operator 26.7 deploys the DRA driver itself, is supported for new installations only.
 
 ## Upgrade Workflow
 

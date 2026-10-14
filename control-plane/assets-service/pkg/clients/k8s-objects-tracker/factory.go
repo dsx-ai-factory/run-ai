@@ -21,6 +21,7 @@ type ClientInterface interface {
 	GetSecretsOfCluster(ctx context.Context, clusterId string) (*k8sObjectsApi.SecretListResponse, *k8sObjectsApi.Error)
 	GetPvcsOfCluster(ctx context.Context, clusterId string) (*k8sObjectsApi.PVCListResponse, *k8sObjectsApi.Error)
 	GetConfigMapsOfCluster(ctx context.Context, clusterId string) (*k8sObjectsApi.ConfigMapsListResponse, *k8sObjectsApi.Error)
+	GetDeviceClassesOfCluster(ctx context.Context, clusterId string) (*k8sObjectsApi.DeviceClasses, *k8sObjectsApi.Error)
 	GetClusterResourcesStatus(ctx context.Context, resourceType *k8sObjectsApi.ClusterResourceType, scopeType *string,
 		scopeId *string, secretType *k8sObjectsApi.SecretType) (*k8sObjectsApi.ClusterObjectsStatus, *k8sObjectsApi.Error)
 

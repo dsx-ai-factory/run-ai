@@ -125,7 +125,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/xyproto/jpath v0.7.0
-	golang.org/x/exp v0.0.0-20261011100332-faecfb24eb49
+	golang.org/x/exp v0.0.0-20261013213113-2ab7f3cbc5fb
 	gorm.io/datatypes v1.2.7
 	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2

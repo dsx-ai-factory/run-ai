@@ -147,23 +147,31 @@ var _ = Describe("validateK8sObjectSpec (via RCT schema + ResourceClaimSpec)", f
 		}
 	}
 
-	It("accepts a minimal valid ResourceClaimSpec", func() {
-		err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
+	It("accepts a minimal valid ResourceClaimSpec and returns the decoded value", func() {
+		spec, err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 			validSpec(), rctObjectSpecSchema, pathPrefix, kindLabel)
 		Expect(err).To(BeNil())
+		// The typed decode is the contract that lets callers mine the spec
+		// (e.g. extract DeviceClass names) without re-parsing. Guard it.
+		Expect(spec).NotTo(BeNil())
+		Expect(spec.Devices.Requests).To(HaveLen(1))
+		Expect(spec.Devices.Requests[0].Exactly).NotTo(BeNil())
+		Expect(spec.Devices.Requests[0].Exactly.DeviceClassName).To(Equal("gpu.nvidia.com"))
 	})
 
 	It("rejects an empty objectSpec (short-circuit before schema)", func() {
-		err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
+		spec, err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 			map[string]any{}, rctObjectSpecSchema, pathPrefix, kindLabel)
+		Expect(spec).To(BeNil())
 		Expect(err).NotTo(BeNil())
 		Expect(int(err.Code)).To(Equal(http.StatusBadRequest))
 		Expect(err.Message).To(Equal("spec.objectSpec is required"))
 	})
 
 	It("returns 503 when the schema is nil (validator not initialized)", func() {
-		err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
+		spec, err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 			validSpec(), nil, pathPrefix, kindLabel)
+		Expect(spec).To(BeNil())
 		Expect(err).NotTo(BeNil())
 		Expect(int(err.Code)).To(Equal(http.StatusServiceUnavailable))
 		Expect(err.Message).To(ContainSubstring("schema-based validator is not initialized"))
@@ -174,12 +182,13 @@ var _ = Describe("validateK8sObjectSpec (via RCT schema + ResourceClaimSpec)", f
 		// so layer 1 accepts unknown fields. Layer 2 (DisallowUnknownFields
 		// against resourcev1.ResourceClaimSpec) is what catches this — the
 		// regression that motivated the two-layer design in the first place.
-		err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
+		spec, err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 			map[string]any{
 				"devics":  map[string]any{},
 				"devices": map[string]any{"requests": []any{}},
 			},
 			rctObjectSpecSchema, pathPrefix, kindLabel)
+		Expect(spec).To(BeNil())
 		Expect(err).NotTo(BeNil())
 		Expect(int(err.Code)).To(Equal(http.StatusBadRequest))
 		// Direct function-call assertions don't go through JSON encoding, so
@@ -188,7 +197,7 @@ var _ = Describe("validateK8sObjectSpec (via RCT schema + ResourceClaimSpec)", f
 	})
 
 	It("rejects an unknown nested field inside devices.requests[] via layer 2", func() {
-		err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
+		spec, err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 			map[string]any{
 				"devices": map[string]any{
 					"requests": []any{
@@ -201,17 +210,19 @@ var _ = Describe("validateK8sObjectSpec (via RCT schema + ResourceClaimSpec)", f
 				},
 			},
 			rctObjectSpecSchema, pathPrefix, kindLabel)
+		Expect(spec).To(BeNil())
 		Expect(err).NotTo(BeNil())
 		Expect(int(err.Code)).To(Equal(http.StatusBadRequest))
 		Expect(err.Message).To(ContainSubstring(`unknown field "unexpectedNestedKey"`))
 	})
 
 	It("rejects a shape mismatch (devices.requests as string) via layer 1", func() {
-		err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
+		spec, err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 			map[string]any{
 				"devices": map[string]any{"requests": "not-an-array"},
 			},
 			rctObjectSpecSchema, pathPrefix, kindLabel)
+		Expect(spec).To(BeNil())
 		Expect(err).NotTo(BeNil())
 		Expect(int(err.Code)).To(Equal(http.StatusBadRequest))
 		Expect(err.Message).To(ContainSubstring(kindLabel))
@@ -220,8 +231,9 @@ var _ = Describe("validateK8sObjectSpec (via RCT schema + ResourceClaimSpec)", f
 	It("echoes the caller-supplied pathPrefix and kindLabel in error messages", func() {
 		// Sanity check on the parameterisation: a future asset kind using a
 		// different pathPrefix / kindLabel should see them in its errors.
-		err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
+		spec, err := validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 			map[string]any{}, rctObjectSpecSchema, "custom.path", "Custom Schema Label")
+		Expect(spec).To(BeNil())
 		Expect(err).NotTo(BeNil())
 		Expect(err.Message).To(Equal("custom.path is required"))
 	})

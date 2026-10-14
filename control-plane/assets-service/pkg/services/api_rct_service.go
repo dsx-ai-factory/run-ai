@@ -12,11 +12,14 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"sort"
+	"strings"
 
 	jsschema "github.com/santhosh-tekuri/jsonschema/v6"
 	resourcev1 "k8s.io/api/resource/v1"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
+	k8sObjectsTracker "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/k8s-objects-tracker"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/projects"
@@ -29,6 +32,7 @@ import (
 	backend "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
@@ -91,8 +95,16 @@ func (s *RctApiService) CreateRct(ctx context.Context, request api.RctCreationRe
 		return NewErrorResponse(metaErr), nil
 	}
 
-	if specErr := validateRctObjectSpec(request.Spec.ObjectSpec); specErr != nil {
+	// validate the spec and return it for more specific validations.
+	spec, specErr := validateRctObjectSpec(request.Spec.ObjectSpec)
+	if specErr != nil {
 		return NewErrorResponse(specErr), nil
+	}
+
+	// the specific validation for resource claim template is making sure the device class exist
+	// in the cluster (this is known to the object tracker).
+	if dcErr := validateRctDeviceClasses(ctx, spec, request.Meta.ClusterId); dcErr != nil {
+		return NewErrorResponse(dcErr), nil
 	}
 
 	nameValidationQuery, err := scope.GetNameValidationQuery(
@@ -220,7 +232,8 @@ func (s *RctApiService) UpdateRctById(ctx context.Context, id string, request ap
 		return NewErrorResponse(metaErr), nil
 	}
 
-	if specErr := validateRctObjectSpec(request.Spec.ObjectSpec); specErr != nil {
+	spec, specErr := validateRctObjectSpec(request.Spec.ObjectSpec)
+	if specErr != nil {
 		return NewErrorResponse(specErr), nil
 	}
 
@@ -236,6 +249,11 @@ func (s *RctApiService) UpdateRctById(ctx context.Context, id string, request ap
 	rbacErr := auth.ValidateAccessByActionAndAssetKind(ctx, ScopeInfoOfDbMeta(assetMeta), string(assetKind), backend.ACTION_UPDATE, convutils.Deref(assetMeta.Private, false))
 	if rbacErr != nil {
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
+	}
+
+	// for update, we also need to validate the device classes. we do it after rbac validation.
+	if dcErr := validateRctDeviceClasses(ctx, spec, assetMeta.ClusterId); dcErr != nil {
+		return NewErrorResponse(dcErr), nil
 	}
 
 	nameValidationQuery, err := scope.GetNameValidationQuery(
@@ -303,15 +321,94 @@ func requireRctKind(assetMeta *dbmodel.AssetMeta, id string) *api.Error {
 }
 
 // validateRctObjectSpec is a thin adapter over the generic
-// validateK8sObjectSpec, specialised to the K8s ResourceClaimSpec type.
-// Kept here (rather than inlined at each callsite) so future RCT-only
-// validation can slot in alongside the generic call without changing the
-// callers, and so the RCT-specific schema label lives with the RCT service.
-func validateRctObjectSpec(objectSpec map[string]any) *api.Error {
+// validateK8sObjectSpec, for K8s ResourceClaimSpec type.
+// Returns the typed spec on success so callers can run RCT-specific checks
+func validateRctObjectSpec(objectSpec map[string]any) (*resourcev1.ResourceClaimSpec, *api.Error) {
 	return validateK8sObjectSpec[resourcev1.ResourceClaimSpec](
 		objectSpec, rctObjectSpecSchema,
 		"spec.objectSpec", rctObjectTypeName,
 	)
+}
+
+// collectDeviceClassNames returns the de-duplicated set of DeviceClass names
+// referenced anywhere in an RCT spec. The DRA v1 ResourceClaimSpec has two
+// equivalent branches per request:
+//
+//   - spec.devices.requests[*].exactly.deviceClassName — the common case
+//   - spec.devices.requests[*].firstAvailable[*].deviceClassName — a prioritised
+//     list of fallback device-class selections the scheduler tries in order
+//
+// Both are user-authored and both can reference an unknown class, so both are
+// walked. Empty names (rejected earlier by schema validation) are skipped
+// defensively so this helper is safe on partially-validated specs.
+func collectDeviceClassNames(spec *resourcev1.ResourceClaimSpec) datastructs.Set[string] {
+	seen := datastructs.NewSet[string]()
+	if spec == nil {
+		return seen
+	}
+	for _, req := range spec.Devices.Requests {
+		if req.Exactly != nil && req.Exactly.DeviceClassName != "" {
+			seen.Add(req.Exactly.DeviceClassName)
+		}
+		for _, sub := range req.FirstAvailable {
+			if sub.DeviceClassName != "" {
+				seen.Add(sub.DeviceClassName)
+			}
+		}
+	}
+	return seen
+}
+
+// validateRctDeviceClasses verifies that every DeviceClass name referenced by
+// an RCT spec exists in the target cluster's inventory per the k8s-objects
+// tracker.
+//
+// clusterId is a pointer because that's how it's carried on both the create
+// request (populated by ValidateAssetCreateRequestMeta — see helper.go) and
+// on the asset-meta row read for updates. A nil / empty pointer short-circuits
+// to no-op; RCT is cluster/dept/project-scoped (ClusterAndBelow in helper.go)
+// so in practice we always have one.
+func validateRctDeviceClasses(ctx context.Context, spec *resourcev1.ResourceClaimSpec, clusterId *string) *api.Error {
+	referenced := collectDeviceClassNames(spec)
+	if len(referenced) == 0 {
+		return nil
+	}
+	if clusterId == nil || *clusterId == "" {
+		return nil
+	}
+
+	resp, trackerErr := k8sObjectsTracker.Get().GetDeviceClassesOfCluster(ctx, *clusterId)
+	if trackerErr != nil {
+		// in case of tracker cannot return the list of device class, just log error and avoid
+		// the check. in such case, if the spec has unknown device classes, the agent will fail to
+		// apply the RCT and report back the problems as sync issues.
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf(
+			"rct: skipping device-class validation for cluster %s (%d device class(es) referenced): %v",
+			*clusterId, len(referenced), trackerErr)
+		return nil
+	}
+
+	known := datastructs.NewSet[string]()
+	if resp != nil {
+		for _, dc := range resp.Items {
+			known.Add(dc.DeviceClassName)
+		}
+	}
+
+	missing := make([]string, 0)
+	for _, name := range referenced.Keys() {
+		if !known.Has(name) {
+			missing = append(missing, name)
+		}
+	}
+	if len(missing) == 0 {
+		return nil
+	}
+	// Stable order for predictable error messages / test assertions.
+	sort.Strings(missing)
+	return api.NewError(http.StatusBadRequest,
+		fmt.Sprintf("device class(es) not found in cluster %s: %s", *clusterId, strings.Join(missing, ", ")),
+		nil)
 }
 
 func initRctObjectSpecValidator() {

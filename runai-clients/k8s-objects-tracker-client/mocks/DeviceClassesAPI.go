@@ -51,6 +51,240 @@ func (_m *DeviceClassesAPI) EXPECT() *DeviceClassesAPI_Expecter {
 	return &DeviceClassesAPI_Expecter{mock: &_m.Mock}
 }
 
+// CreateDeviceClass provides a mock function for the type DeviceClassesAPI
+func (_mock *DeviceClassesAPI) CreateDeviceClass(ctx context.Context) openapi.ApiCreateDeviceClassRequest {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateDeviceClass")
+	}
+
+	var r0 openapi.ApiCreateDeviceClassRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context) openapi.ApiCreateDeviceClassRequest); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiCreateDeviceClassRequest)
+	}
+	return r0
+}
+
+// DeviceClassesAPI_CreateDeviceClass_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateDeviceClass'
+type DeviceClassesAPI_CreateDeviceClass_Call struct {
+	*mock.Call
+}
+
+// CreateDeviceClass is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *DeviceClassesAPI_Expecter) CreateDeviceClass(ctx any) *DeviceClassesAPI_CreateDeviceClass_Call {
+	return &DeviceClassesAPI_CreateDeviceClass_Call{Call: _e.mock.On("CreateDeviceClass", ctx)}
+}
+
+func (_c *DeviceClassesAPI_CreateDeviceClass_Call) Run(run func(ctx context.Context)) *DeviceClassesAPI_CreateDeviceClass_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *DeviceClassesAPI_CreateDeviceClass_Call) Return(apiCreateDeviceClassRequest openapi.ApiCreateDeviceClassRequest) *DeviceClassesAPI_CreateDeviceClass_Call {
+	_c.Call.Return(apiCreateDeviceClassRequest)
+	return _c
+}
+
+func (_c *DeviceClassesAPI_CreateDeviceClass_Call) RunAndReturn(run func(ctx context.Context) openapi.ApiCreateDeviceClassRequest) *DeviceClassesAPI_CreateDeviceClass_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// CreateDeviceClassExecute provides a mock function for the type DeviceClassesAPI
+func (_mock *DeviceClassesAPI) CreateDeviceClassExecute(r openapi.ApiCreateDeviceClassRequest) (*openapi.DeviceClass, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateDeviceClassExecute")
+	}
+
+	var r0 *openapi.DeviceClass
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiCreateDeviceClassRequest) (*openapi.DeviceClass, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiCreateDeviceClassRequest) *openapi.DeviceClass); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.DeviceClass)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiCreateDeviceClassRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiCreateDeviceClassRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// DeviceClassesAPI_CreateDeviceClassExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateDeviceClassExecute'
+type DeviceClassesAPI_CreateDeviceClassExecute_Call struct {
+	*mock.Call
+}
+
+// CreateDeviceClassExecute is a helper method to define mock.On call
+//   - r openapi.ApiCreateDeviceClassRequest
+func (_e *DeviceClassesAPI_Expecter) CreateDeviceClassExecute(r any) *DeviceClassesAPI_CreateDeviceClassExecute_Call {
+	return &DeviceClassesAPI_CreateDeviceClassExecute_Call{Call: _e.mock.On("CreateDeviceClassExecute", r)}
+}
+
+func (_c *DeviceClassesAPI_CreateDeviceClassExecute_Call) Run(run func(r openapi.ApiCreateDeviceClassRequest)) *DeviceClassesAPI_CreateDeviceClassExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiCreateDeviceClassRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiCreateDeviceClassRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *DeviceClassesAPI_CreateDeviceClassExecute_Call) Return(deviceClass *openapi.DeviceClass, response *http.Response, err error) *DeviceClassesAPI_CreateDeviceClassExecute_Call {
+	_c.Call.Return(deviceClass, response, err)
+	return _c
+}
+
+func (_c *DeviceClassesAPI_CreateDeviceClassExecute_Call) RunAndReturn(run func(r openapi.ApiCreateDeviceClassRequest) (*openapi.DeviceClass, *http.Response, error)) *DeviceClassesAPI_CreateDeviceClassExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteDeviceClass provides a mock function for the type DeviceClassesAPI
+func (_mock *DeviceClassesAPI) DeleteDeviceClass(ctx context.Context) openapi.ApiDeleteDeviceClassRequest {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteDeviceClass")
+	}
+
+	var r0 openapi.ApiDeleteDeviceClassRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context) openapi.ApiDeleteDeviceClassRequest); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiDeleteDeviceClassRequest)
+	}
+	return r0
+}
+
+// DeviceClassesAPI_DeleteDeviceClass_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteDeviceClass'
+type DeviceClassesAPI_DeleteDeviceClass_Call struct {
+	*mock.Call
+}
+
+// DeleteDeviceClass is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *DeviceClassesAPI_Expecter) DeleteDeviceClass(ctx any) *DeviceClassesAPI_DeleteDeviceClass_Call {
+	return &DeviceClassesAPI_DeleteDeviceClass_Call{Call: _e.mock.On("DeleteDeviceClass", ctx)}
+}
+
+func (_c *DeviceClassesAPI_DeleteDeviceClass_Call) Run(run func(ctx context.Context)) *DeviceClassesAPI_DeleteDeviceClass_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *DeviceClassesAPI_DeleteDeviceClass_Call) Return(apiDeleteDeviceClassRequest openapi.ApiDeleteDeviceClassRequest) *DeviceClassesAPI_DeleteDeviceClass_Call {
+	_c.Call.Return(apiDeleteDeviceClassRequest)
+	return _c
+}
+
+func (_c *DeviceClassesAPI_DeleteDeviceClass_Call) RunAndReturn(run func(ctx context.Context) openapi.ApiDeleteDeviceClassRequest) *DeviceClassesAPI_DeleteDeviceClass_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteDeviceClassExecute provides a mock function for the type DeviceClassesAPI
+func (_mock *DeviceClassesAPI) DeleteDeviceClassExecute(r openapi.ApiDeleteDeviceClassRequest) (*http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteDeviceClassExecute")
+	}
+
+	var r0 *http.Response
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiDeleteDeviceClassRequest) (*http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiDeleteDeviceClassRequest) *http.Response); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiDeleteDeviceClassRequest) error); ok {
+		r1 = returnFunc(r)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// DeviceClassesAPI_DeleteDeviceClassExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteDeviceClassExecute'
+type DeviceClassesAPI_DeleteDeviceClassExecute_Call struct {
+	*mock.Call
+}
+
+// DeleteDeviceClassExecute is a helper method to define mock.On call
+//   - r openapi.ApiDeleteDeviceClassRequest
+func (_e *DeviceClassesAPI_Expecter) DeleteDeviceClassExecute(r any) *DeviceClassesAPI_DeleteDeviceClassExecute_Call {
+	return &DeviceClassesAPI_DeleteDeviceClassExecute_Call{Call: _e.mock.On("DeleteDeviceClassExecute", r)}
+}
+
+func (_c *DeviceClassesAPI_DeleteDeviceClassExecute_Call) Run(run func(r openapi.ApiDeleteDeviceClassRequest)) *DeviceClassesAPI_DeleteDeviceClassExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiDeleteDeviceClassRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiDeleteDeviceClassRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *DeviceClassesAPI_DeleteDeviceClassExecute_Call) Return(response *http.Response, err error) *DeviceClassesAPI_DeleteDeviceClassExecute_Call {
+	_c.Call.Return(response, err)
+	return _c
+}
+
+func (_c *DeviceClassesAPI_DeleteDeviceClassExecute_Call) RunAndReturn(run func(r openapi.ApiDeleteDeviceClassRequest) (*http.Response, error)) *DeviceClassesAPI_DeleteDeviceClassExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetDeviceClasses provides a mock function for the type DeviceClassesAPI
 func (_mock *DeviceClassesAPI) GetDeviceClasses(ctx context.Context) openapi.ApiGetDeviceClassesRequest {
 	ret := _mock.Called(ctx)
@@ -289,6 +523,127 @@ func (_c *DeviceClassesAPI_SyncDeviceClassExecute_Call) Return(deviceClasses *op
 }
 
 func (_c *DeviceClassesAPI_SyncDeviceClassExecute_Call) RunAndReturn(run func(r openapi.ApiSyncDeviceClassRequest) (*openapi.DeviceClasses, *http.Response, error)) *DeviceClassesAPI_SyncDeviceClassExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateDeviceClass provides a mock function for the type DeviceClassesAPI
+func (_mock *DeviceClassesAPI) UpdateDeviceClass(ctx context.Context) openapi.ApiUpdateDeviceClassRequest {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateDeviceClass")
+	}
+
+	var r0 openapi.ApiUpdateDeviceClassRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context) openapi.ApiUpdateDeviceClassRequest); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiUpdateDeviceClassRequest)
+	}
+	return r0
+}
+
+// DeviceClassesAPI_UpdateDeviceClass_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateDeviceClass'
+type DeviceClassesAPI_UpdateDeviceClass_Call struct {
+	*mock.Call
+}
+
+// UpdateDeviceClass is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *DeviceClassesAPI_Expecter) UpdateDeviceClass(ctx any) *DeviceClassesAPI_UpdateDeviceClass_Call {
+	return &DeviceClassesAPI_UpdateDeviceClass_Call{Call: _e.mock.On("UpdateDeviceClass", ctx)}
+}
+
+func (_c *DeviceClassesAPI_UpdateDeviceClass_Call) Run(run func(ctx context.Context)) *DeviceClassesAPI_UpdateDeviceClass_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *DeviceClassesAPI_UpdateDeviceClass_Call) Return(apiUpdateDeviceClassRequest openapi.ApiUpdateDeviceClassRequest) *DeviceClassesAPI_UpdateDeviceClass_Call {
+	_c.Call.Return(apiUpdateDeviceClassRequest)
+	return _c
+}
+
+func (_c *DeviceClassesAPI_UpdateDeviceClass_Call) RunAndReturn(run func(ctx context.Context) openapi.ApiUpdateDeviceClassRequest) *DeviceClassesAPI_UpdateDeviceClass_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateDeviceClassExecute provides a mock function for the type DeviceClassesAPI
+func (_mock *DeviceClassesAPI) UpdateDeviceClassExecute(r openapi.ApiUpdateDeviceClassRequest) (*openapi.DeviceClass, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateDeviceClassExecute")
+	}
+
+	var r0 *openapi.DeviceClass
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiUpdateDeviceClassRequest) (*openapi.DeviceClass, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiUpdateDeviceClassRequest) *openapi.DeviceClass); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.DeviceClass)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiUpdateDeviceClassRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiUpdateDeviceClassRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// DeviceClassesAPI_UpdateDeviceClassExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateDeviceClassExecute'
+type DeviceClassesAPI_UpdateDeviceClassExecute_Call struct {
+	*mock.Call
+}
+
+// UpdateDeviceClassExecute is a helper method to define mock.On call
+//   - r openapi.ApiUpdateDeviceClassRequest
+func (_e *DeviceClassesAPI_Expecter) UpdateDeviceClassExecute(r any) *DeviceClassesAPI_UpdateDeviceClassExecute_Call {
+	return &DeviceClassesAPI_UpdateDeviceClassExecute_Call{Call: _e.mock.On("UpdateDeviceClassExecute", r)}
+}
+
+func (_c *DeviceClassesAPI_UpdateDeviceClassExecute_Call) Run(run func(r openapi.ApiUpdateDeviceClassRequest)) *DeviceClassesAPI_UpdateDeviceClassExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiUpdateDeviceClassRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiUpdateDeviceClassRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *DeviceClassesAPI_UpdateDeviceClassExecute_Call) Return(deviceClass *openapi.DeviceClass, response *http.Response, err error) *DeviceClassesAPI_UpdateDeviceClassExecute_Call {
+	_c.Call.Return(deviceClass, response, err)
+	return _c
+}
+
+func (_c *DeviceClassesAPI_UpdateDeviceClassExecute_Call) RunAndReturn(run func(r openapi.ApiUpdateDeviceClassRequest) (*openapi.DeviceClass, *http.Response, error)) *DeviceClassesAPI_UpdateDeviceClassExecute_Call {
 	_c.Call.Return(run)
 	return _c
 }
