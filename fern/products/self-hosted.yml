@@ -683,6 +683,7 @@ navigation:
         contents:
         - datavolumes
       - section: Workloads
+        summary: ../../docs/rest-api/self-hosted/tags/workloads.md
         contents:
         - events:
             summary: ../../docs/rest-api/self-hosted/tags/events.md
@@ -759,6 +760,7 @@ navigation:
         - subscriptions:
             summary: ../../docs/rest-api/self-hosted/tags/subscriptions.md
       - section: AI Applications
+        summary: ../../docs/rest-api/self-hosted/tags/ai-applications.md
         contents:
         - ai-applications
     - section: API Guides
