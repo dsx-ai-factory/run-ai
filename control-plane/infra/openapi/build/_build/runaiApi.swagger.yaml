@@ -34041,6 +34041,149 @@ components:
           description: List of user credentials to make available to the workload.
           items:
             $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentialSource'
+    WorkloadV2UpdateConfigurationPvcMetadata:
+      type: object
+      additionalProperties: false
+      description: |
+        PVC metadata forwarded to the created PVC as-is.
+        The Namespace is determined by the WorkloadRunner.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: |
+            PVC name. Must be unique across the workload's PVCs and conform to
+            Kubernetes DNS-1123 subdomain rules.
+          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+          minLength: 1
+          maxLength: 253
+          example: my-pytorch-pvc
+        labels:
+          type: object
+          description: |
+            Labels to apply to the created PVC. Map of string keys and string values.
+          additionalProperties:
+            type: string
+          example:
+            team: research
+        annotations:
+          type: object
+          description: |
+            Annotations to apply to the created PVC. Map of string keys and string
+            values. Commonly used to pass CSI driver hints.
+          additionalProperties:
+            type: string
+    WorkloadV2UpdateConfigurationPvcAccessMode:
+      type: string
+      description: |
+        Access mode for the PVC. Values follow `v1.PersistentVolumeAccessMode`.
+        - `ReadWriteOnce` mounts read/write by a single node.
+        - `ReadOnlyMany` mounts read-only by many nodes.
+        - `ReadWriteMany` mounts read/write by many nodes.
+        - `ReadWriteOncePod` mounts read/write by a single pod.
+      enum:
+        - ReadWriteOnce
+        - ReadOnlyMany
+        - ReadWriteMany
+        - ReadWriteOncePod
+      example: ReadWriteOnce
+    WorkloadV2UpdateConfigurationPvcResources:
+      type: object
+      additionalProperties: false
+      description: Resource requirements for the PVC. Only `requests.storage` is supported.
+      required:
+        - requests
+      properties:
+        requests:
+          type: object
+          additionalProperties: false
+          required:
+            - storage
+          properties:
+            storage:
+              type: string
+              description: |
+                Requested storage size as a Kubernetes quantity string
+                (e.g. `1Gi`, `500Mi`, `10Ti`).
+              pattern: ^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+              minLength: 1
+              maxLength: 63
+              example: 1Gi
+    WorkloadV2UpdateConfigurationPvcVolumeMode:
+      type: string
+      description: |
+        Volume mode for the PVC. `Filesystem` (default) presents the volume as a
+        mounted filesystem; `Block` presents it as a raw block device.
+      enum:
+        - Filesystem
+        - Block
+      example: Filesystem
+    WorkloadV2UpdateConfigurationPvcSpec:
+      type: object
+      additionalProperties: false
+      description: |
+        PersistentVolumeClaim spec. Subset of `v1.PersistentVolumeClaimSpec`.
+      required:
+        - accessModes
+        - resources
+      properties:
+        accessModes:
+          type: array
+          description: Access modes the volume should support. At least one is required.
+          minItems: 1
+          maxItems: 4
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcAccessMode'
+          example:
+            - ReadWriteOnce
+        resources:
+          $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcResources'
+        storageClassName:
+          type: string
+          description: |
+            Name of the StorageClass to use. When omitted, the cluster's default
+            StorageClass is used (if one is configured).
+          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+          minLength: 1
+          maxLength: 253
+          nullable: true
+          example: standard
+        volumeMode:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode'
+          nullable: true
+    WorkloadV2UpdateConfigurationPvc:
+      type: object
+      additionalProperties: false
+      description: |
+        PersistentVolumeClaim entry to be created and reconciled under the
+        WorkloadRunner on the cluster. Maps onto a Kubernetes `v1.PersistentVolumeClaim`
+        with a curated subset of fields exposed at the API layer.
+      required:
+        - metadata
+        - spec
+      properties:
+        metadata:
+          $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcMetadata'
+        spec:
+          $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcSpec'
+    WorkloadV2UpdateConfigurationPvcsConfig:
+      type: object
+      additionalProperties: false
+      nullable: true
+      description: Configuration applied to PVCs that are created and reconciled alongside the workload.
+      example:
+        cleanupOnCompletion: true
+      properties:
+        cleanupOnCompletion:
+          description: |
+            Delete the workload-owned PVCs when the workload reaches a terminal state.
+            When unset, the cluster default behavior applies.
+          type: boolean
+          nullable: true
     WorkloadV2Configuration:
       type: object
       description: Specifies the features configuration to apply to a workload.
@@ -34055,6 +34198,17 @@ components:
           $ref: '#/components/schemas/NetworkingConfiguration'
         userCredentials:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials'
+        pvcs:
+          type: array
+          nullable: true
+          maxItems: 1000
+          description: PVCs to create and reconcile alongside the workload.
+          items:
+            $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvc'
+        pvcsConfig:
+          nullable: true
+          description: Configuration applied to PVCs that are created and reconciled alongside the workload.
+          $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig'
     WorkloadV2MetadataCreateParams:
       type: object
       properties:
