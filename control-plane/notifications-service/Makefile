@@ -52,7 +52,7 @@ test: build test-go integration-tests ## Run unit and integration tests
 lint: lint-go ## Run linter.
 .PHONY: lint
 
-validate: ## Run validate.
+validate: validate-mockery ## Run validate.
 	# no-op
 .PHONY: validate
 

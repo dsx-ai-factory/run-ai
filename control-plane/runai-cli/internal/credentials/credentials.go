@@ -8,8 +8,8 @@ package credentials
 import "encoding/json"
 
 const (
-	InteractiveAppName   = "Client ID"
-	InteractiveAppSecret = "Client Secret"
+	InteractiveClientID     = "Client ID"
+	InteractiveClientSecret = "Client Secret"
 )
 
 type AccessKeyAuth struct {
