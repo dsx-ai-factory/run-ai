@@ -28,10 +28,11 @@ func TestNewSink_HistoryDisabled_ReturnsNoOpHistory(t *testing.T) {
 	require.NoError(t, s.Sink(&events.Event{UID: "uid-1"}))
 }
 
-func TestNewSink_PostgresUnreachable_ReturnsError(t *testing.T) {
+func TestNewSink_PostgresInvalidConfig_ReturnsError(t *testing.T) {
 	sc := &sinks.SinkConfig{Postgres: &sinks.PostgresSinkConfig{
-		Host:     "127.0.0.1",
-		Port:     "1",
+		Host: "127.0.0.1",
+		// Non-numeric port fails in DSN parsing, so no connection is attempted.
+		Port:     "not-a-port",
 		Database: "notifications",
 		Schema:   "public",
 		Table:    "events",
