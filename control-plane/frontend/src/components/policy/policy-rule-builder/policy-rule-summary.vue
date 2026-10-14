@@ -12,6 +12,16 @@
       </div>
     </div>
     <div class="row items-center no-wrap">
+      <runai-tooltip
+        v-if="inactiveTooltip"
+        aid="inactive-rule-warning"
+        icon="ph ph-warning-circle"
+        color="warning"
+        class="inactive-rule-warning"
+        :tooltip-text="inactiveTooltip"
+        :aria-label="inactiveTooltip"
+        width="450px"
+      />
       <runai-btn
         flat
         round
@@ -38,11 +48,13 @@
 
 <script setup lang="ts">
 import { RunaiBtn } from "@/components/common/runai-btn";
+import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import type { IRuleDraft } from "@/models/gvk-policy.model";
 
 export interface Props {
   rule: IRuleDraft;
   index: number;
+  inactiveTooltip?: string;
 }
 
 defineProps<Props>();
@@ -54,6 +66,10 @@ const emit = defineEmits<{
 </script>
 
 <style lang="scss" scoped>
+.inactive-rule-warning :deep(.q-icon) {
+  color: var(--icon-warning);
+  font-size: 20px;
+}
 .policy-rule-summary {
   border: 1px solid var(--border-subtle);
   border-radius: var(--b-border-radius-radius-xs);

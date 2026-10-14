@@ -24,19 +24,22 @@
 import { computed } from "vue";
 import { RunaiTable } from "@/components/common/runai-table";
 import { gvkPolicyUtil } from "@/utils/gvk-policy.util";
-import { EEnforcementType, type IEnforcementDraft } from "@/models/gvk-policy.model";
+import { EEnforcementType, type IEnforcementDraft, type IGvkPolicyViewRule } from "@/models/gvk-policy.model";
 import { ENFORCEMENT_META } from "./policy-rule-builder.constant";
 import { gvkPreviewPolicyColumns } from "@/table-models/policy.table-model";
 import { ECustomCell, type ITableColumn } from "@/models/table.model";
-import type { EffectiveRulesEffectiveRulesInner, SourceOfRule } from "@/swagger-models/policy-service-client";
+import type { SourceOfRule } from "@/swagger-models/policy-service-client";
+import type { OrgUnit } from "@/swagger-models/org-unit-service-client";
 
 export interface Props {
-  // Effective (merged) rules from /policies/effective; each carries its sourceOfRule.
-  rules: EffectiveRulesEffectiveRulesInner[];
+  // Effective rules plus saved local rules blocked by an inherited rule.
+  rules: IGvkPolicyViewRule[];
+  orgUnits?: OrgUnit[];
+  tenantName?: string;
   // sticky-header needs a max-height to scroll within.
   maxHeight?: string;
 }
-const props = withDefaults(defineProps<Props>(), { maxHeight: "600px" });
+const props = withDefaults(defineProps<Props>(), { maxHeight: "600px", orgUnits: () => [], tenantName: "" });
 
 interface IGvkRuleRow {
   field: string;
@@ -45,6 +48,7 @@ interface IGvkRuleRow {
   rule: string;
   allowOverride: boolean;
   sourceOfRule: SourceOfRule | null;
+  inactiveTooltip: string;
 }
 
 const sourceColumn: ITableColumn = {
@@ -121,6 +125,7 @@ const rows = computed<IGvkRuleRow[]>(() =>
       rule: enforcementsToHtml(draft.enforcements),
       allowOverride: rule.allowOverride ?? false,
       sourceOfRule: rule.sourceOfRule,
+      inactiveTooltip: gvkPolicyUtil.inactiveRuleTooltip(rule.blockedBy, props.orgUnits, props.tenantName),
     };
   }),
 );
@@ -132,12 +137,35 @@ const columns = computed<ITableColumn[]>(() => {
     : gvkPreviewPolicyColumns.filter((col) => col.name !== "itemSelector");
   const overrideColumn = baseColumns.find((column) => column.name === "allowOverride");
   const ruleColumns = baseColumns.filter((column) => column.name !== "allowOverride");
-  return overrideColumn ? [...ruleColumns, sourceColumn, overrideColumn] : [...ruleColumns, sourceColumn];
+  const result = overrideColumn ? [...ruleColumns, sourceColumn, overrideColumn] : [...ruleColumns, sourceColumn];
+  if (rows.value.some((row) => row.inactiveTooltip)) {
+    result.push({
+      name: "inactiveWarning",
+      label: "",
+      field: () => "",
+      align: "right",
+      style: "width: 48px",
+      display: true,
+      cellIcon: (row: IGvkRuleRow) =>
+        row.inactiveTooltip
+          ? {
+              name: "ph ph-warning-circle",
+              color: "warning",
+              size: "20px",
+              tooltip: row.inactiveTooltip,
+            }
+          : undefined,
+    });
+  }
+  return result;
 });
 </script>
 
 <style lang="scss" scoped>
 .gvk-policy-view {
+  :deep([aid="inactiveWarning"] .q-icon) {
+    color: var(--icon-warning);
+  }
   :deep(.html-col) {
     white-space: normal;
     word-break: break-word;

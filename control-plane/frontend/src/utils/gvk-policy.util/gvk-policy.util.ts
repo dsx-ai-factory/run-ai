@@ -5,6 +5,7 @@
 
 import type {
   EffectiveRulesEffectiveRulesInner,
+  GetGvkPolicyResp,
   GVK,
   MappingFieldType,
   Policy,
@@ -13,7 +14,13 @@ import type {
   SourceOfRule,
   WorkloadTypeAndScope,
 } from "@/swagger-models/policy-service-client";
-import { EEnforcementType, type IEnforcementDraft, type IFieldInfo, type IRuleDraft } from "@/models/gvk-policy.model";
+import {
+  EEnforcementType,
+  type IEnforcementDraft,
+  type IFieldInfo,
+  type IRuleDraft,
+  type IGvkPolicyViewRule,
+} from "@/models/gvk-policy.model";
 import { ScopeType } from "@/swagger-models/policy-service-client";
 import { resourceUtil } from "@/utils/resource.util";
 import { errorMessages } from "@/common/error-message.constant";
@@ -550,6 +557,52 @@ function lockedParentRuleForDraft(
   return rules.find((rule) => ruleDraftIdentityKey(apiRuleToDraft(rule)) === draftKey);
 }
 
+function lockedParentRules(
+  rules: EffectiveRulesEffectiveRulesInner[],
+  scope: ScopeType,
+): EffectiveRulesEffectiveRulesInner[] {
+  const scopeOrder: ScopeType[] = [ScopeType.Project, ScopeType.Department, ScopeType.Cluster, ScopeType.Tenant];
+  const rank = scopeOrder.indexOf(scope);
+  if (rank < 0) return [];
+  return rules.filter((rule) => {
+    const source = rule.sourceOfRule;
+    return source && !source.isFallback && rule.allowOverride === false && scopeOrder.indexOf(source.scope) > rank;
+  });
+}
+
+function policyViewRules(
+  policy: GetGvkPolicyResp | null,
+  effectiveRules: EffectiveRulesEffectiveRulesInner[],
+): IGvkPolicyViewRule[] {
+  if (!policy) return effectiveRules;
+  const lockedRules = lockedParentRules(effectiveRules, policy.scope);
+  const inactiveRules: IGvkPolicyViewRule[] = [];
+  for (const rule of policy.rules ?? []) {
+    const blocker = lockedParentRuleForDraft(apiRuleToDraft(rule), lockedRules);
+    if (!blocker?.sourceOfRule) continue;
+    inactiveRules.push({
+      ...rule,
+      sourceOfRule: {
+        scope: policy.scope,
+        clusterId: policy.clusterId,
+        departmentId: policy.departmentId,
+        projectId: policy.projectId == null ? undefined : Number(policy.projectId),
+      },
+      blockedBy: blocker.sourceOfRule,
+    });
+  }
+  // Effective rules contain only the winners; retain blocked local rules as separate, marked rows.
+  return [...effectiveRules, ...inactiveRules];
+}
+
+function inactiveRuleTooltip(source: SourceOfRule | null | undefined, orgUnits: OrgUnit[], tenantName = ""): string {
+  if (!source) return "";
+  const scopeName = ruleSourceDisplayName(source, orgUnits, tenantName);
+  const location =
+    tenantName && source.scope !== ScopeType.Tenant ? `organization ${tenantName} / ${scopeName}` : scopeName;
+  return `This rule is inactive because there is a policy rule for the same target in place in ${location} that prevents lower scopes from overriding it.`;
+}
+
 // Preselect a selector param that has exactly one option (fills blanks only) so the user needn't pick the sole value; the field stays visible so the scope it sets is still shown.
 function fillSingleOptionSelectorParams(fieldInfo: IFieldInfo, current: Record<string, string>): Record<string, string> {
   const filled: Record<string, string> = { ...current };
@@ -656,6 +709,9 @@ export const gvkPolicyUtil = {
   ruleIdentityKey,
   ruleDraftIdentityKey,
   lockedParentRuleForDraft,
+  lockedParentRules,
+  policyViewRules,
+  inactiveRuleTooltip,
   fillSingleOptionSelectorParams,
   ruleSourceLabel,
   ruleSourceDisplayName,

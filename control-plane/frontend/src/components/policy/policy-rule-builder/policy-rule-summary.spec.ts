@@ -9,6 +9,7 @@ import { describe, it, expect } from "vitest";
 import PolicyRuleSummary from "./policy-rule-summary.vue";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { gvkPolicyUtil } from "@/utils/gvk-policy.util";
+import { RunaiTooltip } from "@/components/common/runai-tooltip";
 
 function mountSummary() {
   const rule = gvkPolicyUtil.createEmptyRuleDraft();
@@ -21,6 +22,18 @@ function mountSummary() {
 }
 
 describe("policy-rule-summary.vue", () => {
+  it("shows the outlined warning only when the rule is inactive", async () => {
+    const wrapper = mountSummary();
+    expect(wrapper.findComponent(RunaiTooltip).exists()).toBe(false);
+    await wrapper.setProps({ inactiveTooltip: "This rule is inactive" });
+    expect(wrapper.findComponent(RunaiTooltip).props()).toMatchObject({
+      icon: "ph ph-warning-circle",
+      color: "warning",
+      tooltipText: "This rule is inactive",
+    });
+    await wrapper.setProps({ inactiveTooltip: "" });
+    expect(wrapper.findComponent(RunaiTooltip).exists()).toBe(false);
+  });
   it("renders the edit/delete icons as Phosphor glyphs", () => {
     const html = mountSummary().html();
     expect(html).toContain("ph-bold ph-pencil-simple");

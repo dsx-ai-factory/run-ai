@@ -22,7 +22,7 @@
     </runai-expansion-item>
 
     <runai-expansion-item v-if="isGvk" label="Rules" default-opened :subheader="gvkRules.length + ' rules'">
-      <gvk-policy-view :rules="gvkRules" />
+      <gvk-policy-view :rules="gvkRules" :org-units="authStore.orgUnits" :tenant-name="authStore.tenant.name" />
     </runai-expansion-item>
 
     <template v-else-if="policy">
@@ -73,6 +73,8 @@ import {
   type IPolicyViewProperty,
 } from "@/utils/policy.util/policy-view.util";
 import { useAuthStore } from "@/stores/auth.store";
+import { gvkPolicyUtil } from "@/utils/gvk-policy.util";
+import type { IGvkPolicyViewRule } from "@/models/gvk-policy.model";
 
 // Private types
 export interface ITableData {
@@ -105,8 +107,8 @@ export default defineComponent({
     isGvk(): boolean {
       return policyUtil.isGvkPolicyId(this.policyId);
     },
-    gvkRules(): EffectiveRulesEffectiveRulesInner[] {
-      return this.gvkEffectiveRules;
+    gvkRules(): IGvkPolicyViewRule[] {
+      return gvkPolicyUtil.policyViewRules(this.gvkPolicy, this.gvkEffectiveRules);
     },
     scopeName(): string {
       if (this.isGvk) {
