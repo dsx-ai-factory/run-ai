@@ -38,7 +38,7 @@ func BuildKubeflowMPIJobV1() models.Karta {
 					StatusDefinition:  buildKubeflowJobStatusDefinition(),
 					SuspendDefinition: buildKubeflowSuspendDefinition(),
 				},
-				ChildComponents: buildKubeflowMPIJobChildComponents(".metadata.labels[\"mpi-job-role\"]"),
+				ChildComponents: buildKubeflowMPIJobChildComponents(".metadata.labels[\"training.kubeflow.org/replica-type\"]"),
 			},
 			Instructions: buildKubeflowMPIJobInstructions(),
 		},

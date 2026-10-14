@@ -24,8 +24,8 @@ var _ = Describe("MPI Karta pod selectors", func() {
 		workerSpecKey = "Worker"
 	)
 
-	DescribeTable("identifies launcher and worker pods using the operator's role label",
-		func(build func() models.Karta, roleLabel string) {
+	DescribeTable("identifies launcher and worker pods using labels emitted by each operator",
+		func(build func() models.Karta, roleLabel, unrelatedRoleLabel string) {
 			children := build().Spec.StructureDefinition.ChildComponents
 			Expect(children).To(HaveLen(2))
 
@@ -56,7 +56,8 @@ var _ = Describe("MPI Karta pod selectors", func() {
 					{name: "worker-1", labels: map[string]string{roleLabel: workerRole}, role: workerRole},
 					{name: "missing-role"},
 					{name: "unknown-role", labels: map[string]string{roleLabel: "unknown"}},
-					{name: "training-worker", labels: map[string]string{"training.kubeflow.org/replica-type": workerRole}},
+					{name: "unrelated-role", labels: map[string]string{unrelatedRoleLabel: workerRole}},
+					{name: "launcher-with-master-role", labels: map[string]string{roleLabel: launcherRole, unrelatedRoleLabel: "master"}, role: launcherRole},
 				} {
 					data, err := json.Marshal(&corev1.Pod{
 						ObjectMeta: metav1.ObjectMeta{Name: pod.name, Labels: pod.labels},
@@ -70,7 +71,7 @@ var _ = Describe("MPI Karta pod selectors", func() {
 				}
 			}
 		},
-		Entry("MPI v1", BuildKubeflowMPIJobV1, "mpi-job-role"),
-		Entry("MPI v2beta1", BuildKubeflowMPIJobV2beta1, "training.kubeflow.org/job-role"),
+		Entry("Training Operator MPI v1", BuildKubeflowMPIJobV1, "training.kubeflow.org/replica-type", "training.kubeflow.org/job-role"),
+		Entry("standalone MPI Operator v2beta1", BuildKubeflowMPIJobV2beta1, "training.kubeflow.org/job-role", "training.kubeflow.org/replica-type"),
 	)
 })
