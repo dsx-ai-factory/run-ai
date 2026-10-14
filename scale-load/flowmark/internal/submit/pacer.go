@@ -48,7 +48,9 @@ func (p Pacer) Run(ctx context.Context, submit func(ctx context.Context, index i
 
 	jobs := make(chan int)
 	var workers sync.WaitGroup
-	for range max(p.Users, 1) {
+	users := max(p.Users, 1)
+	started := 0
+	startWorker := func() {
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
@@ -56,12 +58,16 @@ func (p Pacer) Run(ctx context.Context, submit func(ctx context.Context, index i
 				submit(ctx, index)
 			}
 		}()
+		started++
 	}
 
 	pacing := Pacing{Planned: p.planned()}
 	start := now()
 	for tick := 0; ctx.Err() == nil && p.tickAt(tick) < p.Duration; {
 		due := start.Add(p.tickAt(tick))
+		for started < users && p.workerStartsAt(started) <= p.tickAt(tick) {
+			startWorker()
+		}
 		if wait := due.Sub(now()); wait > 0 {
 			if err := sleep(ctx, wait); err != nil {
 				break
@@ -90,6 +96,13 @@ func (p Pacer) rampSeconds() float64 {
 		return 0
 	}
 	return float64(max(p.Users, 1)) / float64(p.SpawnRate)
+}
+
+func (p Pacer) workerStartsAt(worker int) time.Duration {
+	if p.SpawnRate <= 0 {
+		return 0
+	}
+	return time.Duration(float64(worker) / float64(p.SpawnRate) * float64(time.Second))
 }
 
 func (p Pacer) tickAt(tick int) time.Duration {

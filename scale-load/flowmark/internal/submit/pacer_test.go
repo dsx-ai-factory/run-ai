@@ -177,3 +177,36 @@ func TestPacerWithoutSpawnRateStartsAtFullRate(t *testing.T) {
 		t.Fatalf("no ramp means evenly spaced ticks from the start: %s %s %d", pacer.tickAt(0), pacer.tickAt(1), pacer.planned())
 	}
 }
+
+func TestPacerStartsWorkersOnTheSpawnSchedule(t *testing.T) {
+	pacer := Pacer{Users: 10, SpawnRate: 2}
+	if pacer.workerStartsAt(0) != 0 || pacer.workerStartsAt(1) != 500*time.Millisecond || pacer.workerStartsAt(6) != 3*time.Second {
+		t.Fatalf("2 users per second means one new worker every 500 ms: %s %s %s", pacer.workerStartsAt(0), pacer.workerStartsAt(1), pacer.workerStartsAt(6))
+	}
+	if (Pacer{Users: 10}).workerStartsAt(9) != 0 {
+		t.Fatal("without a spawn rate every worker starts at once")
+	}
+}
+
+func TestPacerNeverHasMoreRequestsInFlightThanSpawnedUsers(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 1300*time.Millisecond)
+	defer cancel()
+	pacer := Pacer{Rate: 100, SpawnRate: 2, Duration: 1200 * time.Millisecond, Users: 10}
+
+	var mu sync.Mutex
+	var inFlight, peak int
+	pacer.Run(ctx, func(ctx context.Context, _ int) {
+		mu.Lock()
+		inFlight++
+		peak = max(peak, inFlight)
+		mu.Unlock()
+		<-ctx.Done()
+		mu.Lock()
+		inFlight--
+		mu.Unlock()
+	})
+
+	if peak > 3 {
+		t.Fatalf("within 1.2 s at 2 users per second only 3 workers may exist, yet %d requests were in flight at once", peak)
+	}
+}
