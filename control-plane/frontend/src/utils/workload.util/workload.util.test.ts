@@ -972,6 +972,34 @@ describe("workload.util", () => {
       );
     });
 
+    it("should keep the added ServingPort connection when clusterDomain is provided", () => {
+      const connections: Connection[] = [
+        {
+          name: "ChatbotUI",
+          toolType: "chatbot-ui",
+          connectionType: "ExternalUrl",
+          url: "https://cluster.example.com/p100/i100",
+        },
+      ];
+      const clusterDomain = "https://example.com";
+      const result = workloadUtil._getWorkloadConnectionsForInference(
+        connectionsMocks.inference,
+        connections,
+        clusterDomain,
+      );
+
+      expect(result).toHaveLength(2);
+      expect(result[0].url).toBe(
+        `${clusterDomain}/${connectionsMocks.inference.projectName}/${connectionsMocks.inference.name}`,
+      );
+      expect(result[1]).toMatchObject({
+        url: servingPortUrl,
+        name: "Serving Endpoint",
+        toolType: "custom",
+        connectionType: InternalConnectionType.ServingPort,
+      });
+    });
+
     it("should not add new connections if workload.urls has fewer or equal items as connections", () => {
       const currWorkload = {
         ...connectionsMocks.inference,

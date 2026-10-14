@@ -1010,7 +1010,7 @@ function _getWorkloadConnectionsForInference(
   }
 
   if (clusterDomain) {
-    currConnections = connections.map((c: Connection) => {
+    currConnections = currConnections.map((c: Connection) => {
       if (c.connectionType !== InternalConnectionType.ExternalUrl) return c;
       const workloadName = workload.name;
       const projectName = workload.projectName;
