@@ -501,14 +501,13 @@ controlPlane:
     keycloakx.imagePullSecrets[0].name: runai-reg-creds
     keycloakx.imagePullSecrets[1].name: <dhi-secret-name>
     keycloakx.securityContext.runAsUser: 65532
-    keycloakx.command:
-      - /bin/sh
-      - -c
-      - |
-        KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)" \
-        KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)" \
-        exec /opt/keycloak/bin/kc.sh start \
-          --features=token-exchange,admin-fine-grained-authz:v1,fips
+    keycloakx.command[0]: /bin/sh
+    keycloakx.command[1]: -c
+    keycloakx.command[2]: >-
+      KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)"
+      KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)"
+      exec /opt/keycloak/bin/kc.sh start
+      --features=token-exchange\,admin-fine-grained-authz:v1\,fips
     traefik.image.registry: docker.io
     traefik.image.repository: <organization>/dhi-traefik
     traefik.image.tag: <fips-ready-tag>
