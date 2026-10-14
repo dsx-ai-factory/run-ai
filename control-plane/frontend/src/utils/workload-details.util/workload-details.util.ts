@@ -274,10 +274,17 @@ function getEnrichedConnections(
   const specPorts = ((workloadSpec as { ports?: SpecPortLike[] | null } | undefined)?.ports ?? []) as SpecPortLike[];
   const servingPort = (workloadSpec as WorkloadSpecWithServingPort)?.servingPort;
 
+  // Clusters may report the ServingPort connection without a URL; fall back to the
+  // workload URL that no other connection claims (same as the workloads grid does).
+  const claimedUrls = new Set(allEnvConnections.map((conn) => conn.url).filter(Boolean));
+  const servingUrl = workloadDetailed.urls?.find((url) => !claimedUrls.has(url));
+  const withServingUrl = (conn: ConnectionWithAccess): ConnectionWithAccess =>
+    conn.connectionType === InternalConnectionType.ServingPort && !conn.url ? { ...conn, url: servingUrl } : conn;
+
   // When the spec declares no networking entries at all, fall back to the runtime list
   // (covers completed workloads with no spec, externally-wired connections, etc.).
   if (!exposedUrls.length && !specPorts.length && !servingPort) {
-    return [...allEnvConnections, ...externalConnections];
+    return [...allEnvConnections.map(withServingUrl), ...externalConnections];
   }
 
   // Build the list from the SPEC so switching Master / Worker reflects each spec. Each spec
@@ -340,7 +347,7 @@ function getEnrichedConnections(
     const matching = allEnvConnections.find((conn) => conn.containerPort === servingPort.container);
     if (matching) {
       result.push({
-        ...matching,
+        ...withServingUrl(matching),
         exposedUrlAuthorizationType: servingPort.authorizationType,
         exposedUrlAuthorizedUsers: servingPort.authorizedUsers,
         exposedUrlAuthorizedGroups: servingPort.authorizedGroups,
@@ -351,6 +358,7 @@ function getEnrichedConnections(
         toolType: "custom",
         connectionType: "ServingPort",
         containerPort: servingPort.container ?? undefined,
+        url: servingUrl,
         authorizationType: servingPort.authorizationType ?? undefined,
         authorizedUsers: servingPort.authorizedUsers ?? undefined,
         authorizedGroups: servingPort.authorizedGroups ?? undefined,

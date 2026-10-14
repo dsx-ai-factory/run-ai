@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { workloadDetailsUtil } from "@/utils/workload-details.util/workload-details.util";
+import { workloadDetailsUtil, type WorkloadSpec } from "@/utils/workload-details.util/workload-details.util";
 import type { WorkloadDetailed } from "@/swagger-models/workloads-client";
 import { formatK8sResourceMemory } from "@/utils/format.util/format.util";
 
@@ -50,5 +50,65 @@ describe("workloadDetailsUtil.parseComputeDetails", () => {
     expect(content.some((line) => line.startsWith("CPU compute allocation"))).toBe(true);
     expect(content.some((line) => line.startsWith("GPU memory allocation"))).toBe(false);
     expect(content.some((line) => line.startsWith("CPU memory allocation"))).toBe(false);
+  });
+});
+
+describe("workloadDetailsUtil.parseNetworkDetails", () => {
+  const servingUrl = "https://i100-runai-p100.inference.example.com";
+  const servingPortSpec = { servingPort: { container: 8000, authorizationType: "public" } } as unknown as WorkloadSpec;
+
+  it("falls back to the workload URL when the ServingPort connection has no URL", () => {
+    const workloadDetailed = {
+      urls: [servingUrl],
+      environments: [
+        {
+          connections: [{ name: "ServingPort", toolType: "custom", connectionType: "ServingPort", containerPort: 8000 }],
+        },
+      ],
+    } as unknown as WorkloadDetailed;
+
+    const content = workloadDetailsUtil.parseNetworkDetails(workloadDetailed, servingPortSpec)[0]?.content ?? [];
+
+    expect(content).toContain(`URL: ${servingUrl}`);
+  });
+
+  it("falls back to the workload URL when no spec networking is available", () => {
+    const workloadDetailed = {
+      urls: [servingUrl],
+      environments: [
+        {
+          connections: [{ name: "ServingPort", toolType: "custom", connectionType: "ServingPort", containerPort: 8000 }],
+        },
+      ],
+    } as unknown as WorkloadDetailed;
+
+    const content = workloadDetailsUtil.parseNetworkDetails(workloadDetailed)[0]?.content ?? [];
+
+    expect(content).toContain(`URL: ${servingUrl}`);
+  });
+
+  it("keeps the URL reported on the ServingPort connection", () => {
+    const reportedUrl = "https://reported.example.com";
+    const workloadDetailed = {
+      urls: [servingUrl],
+      environments: [
+        {
+          connections: [
+            {
+              name: "ServingPort",
+              toolType: "custom",
+              connectionType: "ServingPort",
+              containerPort: 8000,
+              url: reportedUrl,
+            },
+          ],
+        },
+      ],
+    } as unknown as WorkloadDetailed;
+
+    const content = workloadDetailsUtil.parseNetworkDetails(workloadDetailed, servingPortSpec)[0]?.content ?? [];
+
+    expect(content).toContain(`URL: ${reportedUrl}`);
+    expect(content).not.toContain(`URL: ${servingUrl}`);
   });
 });
