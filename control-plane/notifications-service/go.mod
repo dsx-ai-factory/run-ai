@@ -106,7 +106,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.8
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 	github.com/emersion/go-smtp v0.25.0
-	github.com/go-chi/chi/v5 v5.4.0
+	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-openapi/loads v0.25.3
 	github.com/go-openapi/runtime v0.33.3
 	github.com/go-playground/validator/v10 v10.30.5
@@ -125,7 +125,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/xyproto/jpath v0.7.0
-	golang.org/x/exp v0.0.0-20261013213113-2ab7f3cbc5fb
+	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
 	gorm.io/datatypes v1.2.7
 	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2
