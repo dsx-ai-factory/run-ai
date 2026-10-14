@@ -88,8 +88,7 @@ func (l *LWSInstallStep) Execute(ctx context.Context, runaiData *model.RunAIInst
 		"lws",
 		"lws",
 		"lws-system",
-		true,
-		[]string{},
+		true, helmclient.Values{Overrides: []string{}},
 	)
 	if err != nil {
 		logging.Errorf("[Prereq] Failed to install LWS: %v", err)

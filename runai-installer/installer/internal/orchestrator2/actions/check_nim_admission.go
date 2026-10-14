@@ -31,6 +31,6 @@ func (a CheckNIMAdmissionWebhook) Execute(_ context.Context, _ orchestrator2.Dep
 	return orchestrator2.ActionResult{
 		Status:      orchestrator2.StatusWarn,
 		Reason:      "NIM Operator admission controller is enabled; its webhook requires cert-manager for TLS certificates",
-		Remediation: "install cert-manager, or disable the admission controller via features.nimOperator.customHelmValues with operator.admissionController.enabled=false",
+		Remediation: "install cert-manager, or disable the admission controller via features.nimOperator.customHelmValues with nested operator: {admissionController: {enabled: false}}",
 	}, nil
 }

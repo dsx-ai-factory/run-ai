@@ -12,17 +12,19 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/artifacts"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/airgap"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 type HelmInstallLocal struct {
-	ChartPath   string
-	WorkingDir  string
-	ChartPrefix string
-	LockChart   string
-	ReleaseName string
-	Namespace   string
-	Values      []string
-	ValueFiles  []string
+	ChartPath    string
+	WorkingDir   string
+	ChartPrefix  string
+	LockChart    string
+	ReleaseName  string
+	Namespace    string
+	Values       []string
+	CustomValues map[string]any
+	ValueFiles   []string
 }
 
 func (a HelmInstallLocal) chartPath() string {
@@ -58,7 +60,7 @@ func (a HelmInstallLocal) Args() map[string]any {
 
 func (a HelmInstallLocal) Describe() string {
 	base := fmt.Sprintf("helm upgrade --install %s %s --namespace %s", a.ReleaseName, a.chartPath(), a.Namespace)
-	return describeHelmCommand(base, a.Values, a.ValueFiles)
+	return describeHelmCommand(base, a.Values, a.ValueFiles, a.CustomValues)
 }
 
 func (a HelmInstallLocal) Execute(ctx context.Context, deps orchestrator2.Deps) (orchestrator2.ActionResult, error) {
@@ -66,5 +68,5 @@ func (a HelmInstallLocal) Execute(ctx context.Context, deps orchestrator2.Deps) 
 	if err != nil {
 		return orchestrator2.ActionResult{}, err
 	}
-	return orchestrator2.ActionResult{}, deps.HelmInstaller.InstallOrUpgradeFromLocalChart(ctx, chartPath, a.ReleaseName, a.Namespace, a.Values, a.ValueFiles)
+	return orchestrator2.ActionResult{}, deps.HelmInstaller.InstallOrUpgradeFromLocalChart(ctx, chartPath, a.ReleaseName, a.Namespace, helmclient.Values{Overrides: a.Values, Custom: a.CustomValues}, a.ValueFiles)
 }

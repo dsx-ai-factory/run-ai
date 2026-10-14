@@ -211,7 +211,7 @@ func TestPreflight_NIMAdmissionWebhook_NoWarnWhenDisabled(t *testing.T) {
 	_, _, evs := runFeaturesInstall(t, func(c *installconfig.Config) {
 		c.Features = &installconfig.Features{NIMOperator: &installconfig.Dependency{
 			Mode:             "install",
-			CustomHelmValues: map[string]any{"operator.admissionController.enabled": false},
+			CustomHelmValues: map[string]any{"operator": map[string]any{"admissionController": map[string]any{"enabled": false}}},
 		}}
 	})
 

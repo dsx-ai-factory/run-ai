@@ -8,99 +8,95 @@ package installconfig_test
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/installconfig"
-	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/actions"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 	"github.com/stretchr/testify/require"
-	"helm.sh/helm/v3/pkg/cli/values"
 )
 
-func TestCustomHelmValues_ParsedByHelm(t *testing.T) {
-	cases := []struct {
-		name string
-		yaml string
-	}{
-		{
-			name: "nested",
-			yaml: `global: {fipsMode: only}
-telemetryService: {enabled: true}
-replicas: 3`,
-		},
-		{
-			name: "dotted",
-			yaml: `global.fipsMode: only
-telemetryService.enabled: true
-replicas: 3`,
-		},
-		{
-			name: "mixed with explicit override",
-			yaml: `global: {fipsMode: disabled}
-global.fipsMode: only
-telemetryService: {enabled: true}
-replicas: 3
-empty: {}`,
-		},
-	}
-
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			path := filepath.Join(t.TempDir(), "config.yaml")
-			// YAML aliases exercise the same user input for all three consumers.
-			configYAML := "controlPlane:\n  enabled: true\n  customHelmValues: &custom\n"
-			for _, line := range strings.Split(tc.yaml, "\n") {
-				configYAML += "    " + line + "\n"
-			}
-			configYAML += "cluster:\n  enabled: true\n  customHelmValues: *custom\nfeatures:\n  nimOperator:\n    mode: install\n    customHelmValues: *custom\n"
-			require.NoError(t, os.WriteFile(path, []byte(configYAML), 0o600))
-
-			cfg, err := installconfig.Load(path)
-			require.NoError(t, err)
-			spec := cfg.ToSpec(installconfig.RunOptions{})
-
-			for _, custom := range []map[string]string{
-				spec.ControlPlane.CustomHelmValues,
-				spec.Cluster.CustomHelmValues,
-				spec.Features.NIMOperator.CustomHelmValues,
-			} {
-				opts := values.Options{Values: actions.MergeValues([]string{"global.domain=runai.example.com"}, custom)}
-				parsed, err := opts.MergeValues(nil)
-				require.NoError(t, err)
-				require.Equal(t, map[string]any{
-					"global":           map[string]any{"domain": "runai.example.com", "fipsMode": "only"},
-					"telemetryService": map[string]any{"enabled": true},
-					"replicas":         int64(3),
-				}, parsed)
-			}
-		})
-	}
-}
-
-func TestCustomHelmValues_LiteralNestedKeys(t *testing.T) {
+func TestCustomHelmValues_NativeYAML(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.yaml")
 	require.NoError(t, os.WriteFile(path, []byte(`controlPlane:
   enabled: true
-  customHelmValues:
+  customHelmValues: &custom
+    global:
+      fipsMode: only
+    telemetryService:
+      enabled: true
+    replicas: 3
+    ratio: 1.5
+    quotedBoolean: "true"
+    quotedNumber: "123"
+    affinity: null
+    emptyList: []
+    tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
     assetsService:
       podAnnotations:
-        runai.example/nested: nested
-        "a,b=c[d\\e": literal
-    assetsService.podAnnotations.runai\.example/dotted: dotted
+        runai.example/nested: "true"
+        'a,b=c[d\e': literal
+    keycloakx:
+      command:
+        - /bin/sh
+        - -c
+        - |
+          KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)" \
+          KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)" \
+          exec /opt/keycloak/bin/kc.sh start \
+            --features=token-exchange,admin-fine-grained-authz:v1,fips
+cluster:
+  enabled: true
+  customHelmValues: *custom
+features:
+  nimOperator:
+    mode: install
+    customHelmValues: *custom
 `), 0o600))
 
 	cfg, err := installconfig.Load(path)
 	require.NoError(t, err)
-	opts := values.Options{Values: actions.MapToValues(cfg.ToSpec(installconfig.RunOptions{}).ControlPlane.CustomHelmValues)}
-	parsed, err := opts.MergeValues(nil)
-	require.NoError(t, err)
-	require.Equal(t, map[string]any{
-		"assetsService": map[string]any{
-			"podAnnotations": map[string]any{
-				"runai.example/nested": "nested",
-				"runai.example/dotted": "dotted",
-				`a,b=c[d\e`:            "literal",
-			},
-		},
-	}, parsed)
+	spec := cfg.ToSpec(installconfig.RunOptions{})
+	script := `KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)" \
+KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)" \
+exec /opt/keycloak/bin/kc.sh start \
+  --features=token-exchange,admin-fine-grained-authz:v1,fips
+`
+	for name, custom := range map[string]map[string]any{
+		"control plane": spec.ControlPlane.CustomHelmValues,
+		"cluster":       spec.Cluster.CustomHelmValues,
+		"feature":       spec.Features.NIMOperator.CustomHelmValues,
+	} {
+		t.Run(name, func(t *testing.T) {
+			input := helmclient.Values{Overrides: []string{"global.domain=runai.example.com", "global.fipsMode=disabled", "emptyList[0]=default"}, Custom: custom}
+			parsed, err := input.Merge(nil)
+			require.NoError(t, err)
+			require.Equal(t, map[string]any{
+				"global":           map[string]any{"domain": "runai.example.com", "fipsMode": "only"},
+				"telemetryService": map[string]any{"enabled": true},
+				"replicas":         3,
+				"ratio":            1.5,
+				"quotedBoolean":    "true",
+				"quotedNumber":     "123",
+				"affinity":         nil,
+				"emptyList":        []any{},
+				"tolerations":      []any{map[string]any{"key": "nvidia.com/gpu", "operator": "Exists"}},
+				"assetsService":    map[string]any{"podAnnotations": map[string]any{"runai.example/nested": "true", `a,b=c[d\e`: "literal"}},
+				"keycloakx":        map[string]any{"command": []any{"/bin/sh", "-c", script}},
+			}, parsed)
+			require.NotContains(t, custom["global"], "domain", "merging defaults must not mutate the config")
+		})
+	}
+}
+
+func TestCustomHelmValues_RejectsOverrideSyntax(t *testing.T) {
+	for _, key := range []string{"global.domain", "keycloakx.command[0]", `global\.domain`} {
+		t.Run(key, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), "config.yaml")
+			require.NoError(t, os.WriteFile(path, []byte("controlPlane:\n  customHelmValues:\n    "+key+": value\n"), 0o600))
+			_, err := installconfig.Load(path)
+			require.ErrorContains(t, err, "use nested YAML maps and lists instead")
+		})
+	}
 }

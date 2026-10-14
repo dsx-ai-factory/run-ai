@@ -6,11 +6,6 @@
 package installconfig
 
 import (
-	"fmt"
-	"maps"
-	"slices"
-	"strings"
-
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/artifacts"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 )
@@ -73,7 +68,7 @@ func (c *Config) ToSpec(opts RunOptions) *spec.Spec {
 			Domain:           c.ControlPlane.Domain,
 			Version:          c.ControlPlane.Version,
 			TLS:              toSpecTLS(c.ControlPlane.TLS),
-			CustomHelmValues: toStringMap(c.ControlPlane.CustomHelmValues),
+			CustomHelmValues: c.ControlPlane.CustomHelmValues,
 		}
 	}
 
@@ -90,7 +85,7 @@ func (c *Config) ToSpec(opts RunOptions) *spec.Spec {
 			BootstrapToken:          c.Cluster.bootstrapToken,
 			ClientSecret:            c.Cluster.clientSecret,
 			ControlPlaneCredentials: toSpecControlPlaneCredentials(c.Cluster.ControlPlaneCredentials),
-			CustomHelmValues:        toStringMap(c.Cluster.CustomHelmValues),
+			CustomHelmValues:        c.Cluster.CustomHelmValues,
 		}
 	}
 
@@ -220,7 +215,7 @@ func toSpecDependency(d *Dependency, defaultOn bool) *spec.Dependency {
 	out := &spec.Dependency{
 		Mode:             mode,
 		Version:          d.Version,
-		CustomHelmValues: toStringMap(d.CustomHelmValues),
+		CustomHelmValues: d.CustomHelmValues,
 	}
 	if d.OpenShift != nil {
 		out.OpenShiftInstallPlanApproval = d.OpenShift.InstallPlanApproval
@@ -291,39 +286,3 @@ func toSpecTLS(t *TLS) *spec.TLS {
 	}
 	return &spec.TLS{CertPath: t.CertPath, KeyPath: t.KeyPath, CAChainPath: t.CAChainPath}
 }
-
-func toStringMap(m map[string]any) map[string]string {
-	if len(m) == 0 {
-		return nil
-	}
-	out := make(map[string]string, len(m))
-	flattenHelmMap(out, "", m)
-
-	return out
-}
-
-// Nested keys are literal YAML keys; top-level keys retain Helm's dotted-path
-// syntax for existing configs. Explicit dotted paths override nested equivalents.
-func flattenHelmMap(out map[string]string, prefix string, m map[string]any) {
-	for _, k := range slices.Sorted(maps.Keys(m)) {
-		key := k
-		if prefix != "" {
-			key = prefix + "." + helmKeyEscaper.Replace(k)
-		}
-
-		if nested, ok := m[k].(map[string]any); ok {
-			flattenHelmMap(out, key, nested)
-			continue
-		}
-
-		out[key] = fmt.Sprintf("%v", m[k])
-	}
-}
-
-var helmKeyEscaper = strings.NewReplacer(
-	`\`, `\\`,
-	`.`, `\.`,
-	`,`, `\,`,
-	`=`, `\=`,
-	`[`, `\[`,
-)

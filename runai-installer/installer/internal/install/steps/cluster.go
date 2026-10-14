@@ -17,6 +17,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 	pkgvalidation "github.com/dsx-ai-factory/run-ai/runai-installer/installer/pkg/validation"
 )
 
@@ -278,7 +279,7 @@ func (i *InstallClusterChart) Execute(ctx context.Context, runaiData *model.RunA
 	}
 	logging.Infof("[RunAI] Installing cluster chart version %s from %s...", version, repo)
 	err := i.helmInstaller.InstallOrUpgradeRelease(ctx, repo,
-		version, step.ClusterReleaseName, step.ClusterChartName, step.ClusterNamespace, false, values)
+		version, step.ClusterReleaseName, step.ClusterChartName, step.ClusterNamespace, false, helmclient.Values{Overrides: values})
 	if err != nil {
 		logging.Errorf("[RunAI] Failed to install cluster chart: %v", err)
 		i.SetStatus(model.Failed, err)

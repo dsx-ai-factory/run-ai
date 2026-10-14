@@ -46,7 +46,8 @@ prerequisites:
     mode: install
     version: 24.9.1
     customHelmValues:
-      driver.enabled: false
+      driver:
+        enabled: false
   ingress:
     mode: install
     class: nginx

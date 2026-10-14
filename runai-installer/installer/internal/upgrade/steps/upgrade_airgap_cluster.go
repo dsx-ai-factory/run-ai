@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/upgrade"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 type UpgradeAirgapClusterChart struct {
@@ -59,8 +60,7 @@ func (s *UpgradeAirgapClusterChart) Execute(ctx context.Context, _ *model.RunAII
 
 	logging.Infof("[Upgrade] Upgrading cluster chart from local path %s", chartPath)
 	err = s.helmInstaller.InstallOrUpgradeFromLocalChart(ctx,
-		chartPath, step.ClusterReleaseName, step.ClusterNamespace,
-		values, []string{valuesPath})
+		chartPath, step.ClusterReleaseName, step.ClusterNamespace, helmclient.Values{Overrides: values}, []string{valuesPath})
 	if err != nil {
 		logging.Errorf("[Upgrade] Failed to upgrade cluster chart: %v", err)
 		s.SetStatus(model.Failed, err)

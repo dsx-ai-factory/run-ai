@@ -20,16 +20,21 @@ import (
 )
 
 type HelmCall struct {
-	RepoUrl     string
-	Version     string
-	ReleaseName string
-	ChartName   string
-	Namespace   string
-	IsOci       bool
-	Values      []string
-	ValueFiles  []string
-	KubeVersion string
-	Auth        step.ChartAuth
+	RepoUrl      string
+	Version      string
+	ReleaseName  string
+	ChartName    string
+	Namespace    string
+	IsOci        bool
+	Values       []string
+	CustomValues map[string]any
+	ValueFiles   []string
+	KubeVersion  string
+	Auth         step.ChartAuth
+}
+
+func (c HelmCall) ResolvedValues() (map[string]any, error) {
+	return (helmclient.Values{Overrides: c.Values, Custom: c.CustomValues}).Merge(nil)
 }
 
 // FakeHelmInstaller records every helm invocation made by the orchestrator
@@ -73,21 +78,22 @@ func NewFakeHelmWithReleases(entries ...ReleaseEntry) *FakeHelmInstaller {
 	return &FakeHelmInstaller{Releases: releases}
 }
 
-func (f *FakeHelmInstaller) InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, namespace string, isOci bool, values []string) error {
+func (f *FakeHelmInstaller) InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, namespace string, isOci bool, values helmclient.Values) error {
 	return f.InstallOrUpgradeReleaseWithAuth(ctx, repoUrl, version, releaseName, chartName, namespace, isOci, values, step.ChartAuth{})
 }
 
-func (f *FakeHelmInstaller) InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, namespace string, isOci bool, values []string, auth step.ChartAuth) error {
+func (f *FakeHelmInstaller) InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, namespace string, isOci bool, values helmclient.Values, auth step.ChartAuth) error {
 	f.mu.Lock()
 	f.Calls = append(f.Calls, HelmCall{
-		RepoUrl:     repoUrl,
-		Version:     version,
-		ReleaseName: releaseName,
-		ChartName:   chartName,
-		Namespace:   namespace,
-		IsOci:       isOci,
-		Values:      append([]string{}, values...),
-		Auth:        auth,
+		RepoUrl:      repoUrl,
+		Version:      version,
+		ReleaseName:  releaseName,
+		ChartName:    chartName,
+		Namespace:    namespace,
+		IsOci:        isOci,
+		Values:       append([]string{}, values.Overrides...),
+		CustomValues: values.Custom,
+		Auth:         auth,
 	})
 	block := f.Block[releaseName]
 	if f.BlockAttempts[releaseName] > 0 {
@@ -114,17 +120,18 @@ func (f *FakeHelmInstaller) InstallOrUpgradeReleaseWithAuth(ctx context.Context,
 	return nil
 }
 
-func (f *FakeHelmInstaller) InstallOrUpgradeReleaseWithKubeVersion(ctx context.Context, repoUrl, version, releaseName, chartName, namespace string, isOci bool, values []string, kubeVersion string) error {
+func (f *FakeHelmInstaller) InstallOrUpgradeReleaseWithKubeVersion(ctx context.Context, repoUrl, version, releaseName, chartName, namespace string, isOci bool, values helmclient.Values, kubeVersion string) error {
 	f.mu.Lock()
 	f.Calls = append(f.Calls, HelmCall{
-		RepoUrl:     repoUrl,
-		Version:     version,
-		ReleaseName: releaseName,
-		ChartName:   chartName,
-		Namespace:   namespace,
-		IsOci:       isOci,
-		Values:      append([]string{}, values...),
-		KubeVersion: kubeVersion,
+		RepoUrl:      repoUrl,
+		Version:      version,
+		ReleaseName:  releaseName,
+		ChartName:    chartName,
+		Namespace:    namespace,
+		IsOci:        isOci,
+		Values:       append([]string{}, values.Overrides...),
+		CustomValues: values.Custom,
+		KubeVersion:  kubeVersion,
 	})
 	installErr, hasErr := f.InstallErrors[releaseName]
 	f.mu.Unlock()
@@ -142,15 +149,16 @@ func (f *FakeHelmInstaller) InstallOrUpgradeReleaseWithKubeVersion(ctx context.C
 	return nil
 }
 
-func (f *FakeHelmInstaller) InstallOrUpgradeFromLocalChart(_ context.Context, chartPath, releaseName, namespace string, values []string, valueFiles []string) error {
+func (f *FakeHelmInstaller) InstallOrUpgradeFromLocalChart(_ context.Context, chartPath, releaseName, namespace string, values helmclient.Values, valueFiles []string) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 	f.Calls = append(f.Calls, HelmCall{
-		ReleaseName: releaseName,
-		ChartName:   chartPath,
-		Namespace:   namespace,
-		Values:      append([]string{}, values...),
-		ValueFiles:  append([]string{}, valueFiles...),
+		ReleaseName:  releaseName,
+		ChartName:    chartPath,
+		Namespace:    namespace,
+		Values:       append([]string{}, values.Overrides...),
+		CustomValues: values.Custom,
+		ValueFiles:   append([]string{}, valueFiles...),
 	})
 	if f.Releases == nil {
 		f.Releases = make(map[string]string)

@@ -14,6 +14,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 const (
@@ -77,7 +78,7 @@ func (r *InstallCPChart) Execute(ctx context.Context, runaiData *model.RunAIInst
 	logging.Infof("[RunAI] Installing Control Plane chart version %s from %s...", version, repo)
 	err := r.helmInstaller.InstallOrUpgradeRelease(ctx,
 		repo,
-		version, step.CPReleaseName, step.CPChartName, step.CPNamespace, false, values)
+		version, step.CPReleaseName, step.CPChartName, step.CPNamespace, false, helmclient.Values{Overrides: values})
 	if err != nil {
 		logging.Errorf("[RunAI] Failed to install Control Plane chart: %v", err)
 		r.SetStatus(model.Failed, err)

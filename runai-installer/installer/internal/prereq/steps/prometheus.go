@@ -60,7 +60,7 @@ func (p *PrometheusInstallStep) Execute(ctx context.Context, runaiData *model.Ru
 	p.SetStatus(model.Installing, nil)
 	err := helmclient.InstallOrUpgradeRelease(context.Background(),
 		"oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack",
-		p.version, "kube-prometheus-stack", "kube-prometheus-stack", "monitoring", true, []string{"grafana.enabled=false", "prometheus.prometheusSpec.scrapeConfigs[0].jobLabel=runai-cluster"})
+		p.version, "kube-prometheus-stack", "kube-prometheus-stack", "monitoring", true, helmclient.Values{Overrides: []string{"grafana.enabled=false", "prometheus.prometheusSpec.scrapeConfigs[0].jobLabel=runai-cluster"}})
 	if err != nil {
 		logging.Errorf("[Prereq] Failed to install Prometheus: %v", err)
 		p.SetStatus(model.Failed, err)

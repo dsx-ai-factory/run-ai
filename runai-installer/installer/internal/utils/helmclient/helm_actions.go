@@ -13,38 +13,38 @@ import (
 	"strings"
 	"time"
 
-	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/release"
-
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/cli"
+	"helm.sh/helm/v3/pkg/release"
 	"helm.sh/helm/v3/pkg/storage/driver"
 )
 
-func InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string) error {
+func InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values Values) error {
 	return installOrUpgrade(ctx, repoUrl, version, releaseName, chartName, targetNamespace, isOci, values, nil, ChartAuth{})
 }
 
-func InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string, auth ChartAuth) error {
+func InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values Values, auth ChartAuth) error {
 	return installOrUpgrade(ctx, repoUrl, version, releaseName, chartName, targetNamespace, isOci, values, nil, auth)
 }
 
-func InstallOrUpgradeReleaseWithKubeVersion(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string, kubeVersion *chartutil.KubeVersion) error {
+func InstallOrUpgradeReleaseWithKubeVersion(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values Values, kubeVersion *chartutil.KubeVersion) error {
 	return installOrUpgrade(ctx, repoUrl, version, releaseName, chartName, targetNamespace, isOci, values, kubeVersion, ChartAuth{})
 }
 
-func installOrUpgrade(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string, kubeVersion *chartutil.KubeVersion, auth ChartAuth) error {
+func installOrUpgrade(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values Values, kubeVersion *chartutil.KubeVersion, auth ChartAuth) error {
 	logging.Infof("[Helm] Starting install/upgrade for release '%s' (chart: %s, version: %s) in namespace '%s'", releaseName, chartName, version, targetNamespace)
 	logging.Infof("[Helm] Chart repository: %s (OCI: %v, authenticated: %v)", repoUrl, isOci, !auth.IsZero())
-	if len(values) > 0 {
+	if len(values.Overrides) > 0 {
 		logging.Infof("[Helm] Custom values: %v", values)
 	}
 
 	chartData := helmChartData{
 		repoUrl:        repoUrl,
 		chartVersion:   version,
-		valuesOverride: values,
+		valuesOverride: values.Overrides,
+		customValues:   values.Custom,
 		auth:           auth,
 	}
 	client, err := newClient(&chartData, releaseName, chartName, targetNamespace, kubeVersion, isOci)
@@ -119,11 +119,12 @@ func createActionConfig(targetNamespace string, kubeVersion *chartutil.KubeVersi
 	return actionConfig, settings, err
 }
 
-func InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName, targetNamespace string, setValues []string, valueFiles []string) error {
+func InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName, targetNamespace string, setValues Values, valueFiles []string) error {
 	logging.Infof("[Helm] Starting local chart install/upgrade for release '%s' from %s in namespace '%s'", releaseName, chartPath, targetNamespace)
 
 	chartData := helmChartData{
-		valuesOverride: setValues,
+		valuesOverride: setValues.Overrides,
+		customValues:   setValues.Custom,
 		valueFiles:     valueFiles,
 	}
 	client, err := newClient(&chartData, releaseName, chartPath, targetNamespace, nil, false)

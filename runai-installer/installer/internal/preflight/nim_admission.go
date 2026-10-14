@@ -12,8 +12,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/steps"
 )
 
-const nimAdmissionControllerValue = "operator.admissionController.enabled"
-
 func init() { builders = append(builders, nimAdmissionBuilder) }
 
 // nimAdmissionBuilder warns when the NIM Operator is installed with its
@@ -25,7 +23,7 @@ func nimAdmissionBuilder(s *spec.Spec, _ orchestrator2.Deps) orchestrator2.Step 
 	if f == nil || f.Skip || !f.NIMOperator.IsInstall() {
 		return nil
 	}
-	if f.NIMOperator.CustomHelmValues[nimAdmissionControllerValue] == "false" {
+	if enabled, ok := spec.HelmValue(f.NIMOperator.CustomHelmValues, "operator", "admissionController", "enabled"); ok && enabled == false {
 		return nil
 	}
 	return steps.NewActionStepTitled("preflight-nim-admission-webhook", "NIM admission webhook", actions.CheckNIMAdmissionWebhook{})

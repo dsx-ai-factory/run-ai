@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/upgrade"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 type UpgradeAirgapCPChart struct {
@@ -49,8 +50,7 @@ func (s *UpgradeAirgapCPChart) Execute(ctx context.Context, _ *model.RunAIInstal
 
 	logging.Infof("[Upgrade] Upgrading CP chart from local path %s", chartPath)
 	err = s.helmInstaller.InstallOrUpgradeFromLocalChart(ctx,
-		chartPath, step.CPReleaseName, step.CPNamespace,
-		values, []string{valuesPath})
+		chartPath, step.CPReleaseName, step.CPNamespace, helmclient.Values{Overrides: values}, []string{valuesPath})
 	if err != nil {
 		logging.Errorf("[Upgrade] Failed to upgrade CP chart: %v", err)
 		s.SetStatus(model.Failed, err)

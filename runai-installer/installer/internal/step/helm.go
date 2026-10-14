@@ -60,7 +60,7 @@ func (a ChartAuth) IsZero() bool { return a.Username == "" && a.Password == "" }
 
 // AuthenticatedHelmInstaller adds authenticated chart pulls.
 type AuthenticatedHelmInstaller interface {
-	InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string, auth ChartAuth) error
+	InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values helmclient.Values, auth ChartAuth) error
 }
 
 // NGCChartRepo returns the NGC ChartMuseum root for env. Only prod has a
@@ -112,8 +112,8 @@ func ClusterChartRepo(env config.RunaiEnvType) string {
 
 // HelmInstaller abstracts the Helm install/upgrade operation for dependency injection.
 type HelmInstaller interface {
-	InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string) error
-	InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName, targetNamespace string, values []string, valueFiles []string) error
+	InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values helmclient.Values) error
+	InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName, targetNamespace string, values helmclient.Values, valueFiles []string) error
 	ReleaseStatus(releaseName, targetNamespace string) (exists bool, version string, err error)
 }
 
@@ -123,22 +123,22 @@ func NewHelmInstaller() HelmInstaller {
 	return &HelmInstallerImpl{}
 }
 
-func (h *HelmInstallerImpl) InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string) error {
+func (h *HelmInstallerImpl) InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values helmclient.Values) error {
 	return helmclient.InstallOrUpgradeRelease(ctx, repoUrl, version, releaseName, chartName, targetNamespace, isOci, values)
 }
 
-func (h *HelmInstallerImpl) InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string, auth ChartAuth) error {
+func (h *HelmInstallerImpl) InstallOrUpgradeReleaseWithAuth(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values helmclient.Values, auth ChartAuth) error {
 	return helmclient.InstallOrUpgradeReleaseWithAuth(ctx, repoUrl, version, releaseName, chartName, targetNamespace, isOci, values, helmclient.ChartAuth(auth))
 }
 
-func (h *HelmInstallerImpl) InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName, targetNamespace string, values []string, valueFiles []string) error {
+func (h *HelmInstallerImpl) InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName, targetNamespace string, values helmclient.Values, valueFiles []string) error {
 	return helmclient.InstallOrUpgradeFromLocalChart(ctx, chartPath, releaseName, targetNamespace, values, valueFiles)
 }
 
 // InstallOrUpgradeReleaseWithKubeVersion renders the chart against a pinned
 // Kubernetes version (e.g. "1.28.15") instead of the live cluster version. The
 // major/minor are derived from the version string.
-func (h *HelmInstallerImpl) InstallOrUpgradeReleaseWithKubeVersion(ctx context.Context, repoURL, version, releaseName, chartName, targetNamespace string, isOCI bool, values []string, kubeVersion string) error {
+func (h *HelmInstallerImpl) InstallOrUpgradeReleaseWithKubeVersion(ctx context.Context, repoURL, version, releaseName, chartName, targetNamespace string, isOCI bool, values helmclient.Values, kubeVersion string) error {
 	return helmclient.InstallOrUpgradeReleaseWithKubeVersion(ctx, repoURL, version, releaseName, chartName, targetNamespace, isOCI, values, parseKubeVersion(kubeVersion))
 }
 
