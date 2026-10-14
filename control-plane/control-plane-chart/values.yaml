@@ -609,7 +609,6 @@ identityManager:
     - Path(`/api/v2/token`)
     - Path(`/.well-known/openid-configuration`)
     - Path(`/.well-known/oauth-authorization-server`)
-    - Path(`/v1/k8s/auth/oauth/apptoken`)
     - Path(`/api/v1/login`)
   exposedRulesUnauthenticatedWithHostname:
     - Path(`/api/v1/config`)

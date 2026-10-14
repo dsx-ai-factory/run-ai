@@ -183,50 +183,6 @@ export interface AccessKeysAdministration {
 /**
  * 
  * @export
- * @interface AppTokenRequest
- */
-export interface AppTokenRequest {
-    /**
-     * 
-     * @type {string}
-     * @memberof AppTokenRequest
-     */
-    'id': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AppTokenRequest
-     */
-    'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AppTokenRequest
-     */
-    'secret': string;
-}
-/**
- * 
- * @export
- * @interface AppTokenResponse
- */
-export interface AppTokenResponse {
-    /**
-     * 
-     * @type {string}
-     * @memberof AppTokenResponse
-     */
-    'access_token': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof AppTokenResponse
-     */
-    'id_token': string;
-}
-/**
- * 
- * @export
  * @interface AuthConfiguration
  */
 export interface AuthConfiguration {
@@ -5844,45 +5800,6 @@ export class SettingsApi extends BaseAPI {
 export const TokensApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token 
-         * @summary get application token
-         * @param {AppTokenRequest} [appTokenRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        appToken: async (appTokenRequest?: AppTokenRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/v1/k8s/auth/oauth/apptoken`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            localVarHeaderParameter['Content-Type'] = 'application/json';
-
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-            localVarRequestOptions.data = serializeDataIfNeeded(appTokenRequest, localVarRequestOptions, configuration)
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Create tokens using the `grant_type` parameter. This endpoint is deprecated. Use `/api/v2/token` instead. 
          * @summary Create an access token v1
          * @param {TokenRequest} [tokenRequest] 
@@ -6022,18 +5939,6 @@ export const TokensApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = TokensApiAxiosParamCreator(configuration)
     return {
         /**
-         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token 
-         * @summary get application token
-         * @param {AppTokenRequest} [appTokenRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async appToken(appTokenRequest?: AppTokenRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AppTokenResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.appToken(appTokenRequest, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
          * Create tokens using the `grant_type` parameter. This endpoint is deprecated. Use `/api/v2/token` instead. 
          * @summary Create an access token v1
          * @param {TokenRequest} [tokenRequest] 
@@ -6076,17 +5981,6 @@ export const TokensApiFactory = function (configuration?: Configuration, basePat
     const localVarFp = TokensApiFp(configuration)
     return {
         /**
-         * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token 
-         * @summary get application token
-         * @param {AppTokenRequest} [appTokenRequest] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        appToken(appTokenRequest?: AppTokenRequest, options?: any): AxiosPromise<AppTokenResponse> {
-            return localVarFp.appToken(appTokenRequest, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Create tokens using the `grant_type` parameter. This endpoint is deprecated. Use `/api/v2/token` instead. 
          * @summary Create an access token v1
          * @param {TokenRequest} [tokenRequest] 
@@ -6126,19 +6020,6 @@ export const TokensApiFactory = function (configuration?: Configuration, basePat
  * @extends {BaseAPI}
  */
 export class TokensApi extends BaseAPI {
-    /**
-     * Retrieve access token for an application. The application token is retrieved from the authorization server. This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token 
-     * @summary get application token
-     * @param {AppTokenRequest} [appTokenRequest] 
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof TokensApi
-     */
-    public appToken(appTokenRequest?: AppTokenRequest, options?: AxiosRequestConfig) {
-        return TokensApiFp(this.configuration).appToken(appTokenRequest, options).then((request) => request(this.axios, this.basePath));
-    }
-
     /**
      * Create tokens using the `grant_type` parameter. This endpoint is deprecated. Use `/api/v2/token` instead. 
      * @summary Create an access token v1

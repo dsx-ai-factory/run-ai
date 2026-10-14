@@ -29,7 +29,6 @@ import (
 )
 
 const (
-	legacyClientIdPrefix = "runai_agent_"
 	internalClientPrefix = "runai-internal."
 )
 
@@ -157,35 +156,6 @@ func (s *TokensApiService) GrantTokenV2(
 	}
 
 	return s.convertToOAuth2Error(result, err)
-}
-
-// Deprecated
-func (s *TokensApiService) AppToken(ctx context.Context, appTokenRequest api.AppTokenRequest) (api.ImplResponse, error) {
-	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("AppToken was called with appTokenRequest: %v", appTokenRequest)
-	audit.AuditFromCtx(ctx).Drop()
-	realm := utils.GetStringFromCtx(ctx, utils.AuthRealmKey)
-	if realm == "app" || realm == "test" || realm == "staging" {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("AppToken: realm is %s, getting realm name by client id", realm)
-		if strings.HasPrefix(appTokenRequest.Name, legacyClientIdPrefix) {
-			realm = strings.TrimPrefix(appTokenRequest.Name, legacyClientIdPrefix)
-		} else {
-			return api.Response(http.StatusBadRequest, nil), utils.Error{Code: http.StatusBadRequest, Message: "realm is not allowed to get app token"}
-		}
-	}
-	tokens, err := s.iamServices.AuthService.AuthenticateClient(ctx, realm, appTokenRequest.Name, appTokenRequest.Secret)
-	if err != nil {
-		msg := fmt.Sprintf("failed to authenticate app %s, in realm %s. err: %s", appTokenRequest.Name, realm, err.Error())
-		utils.LogHandler(ctx, msg, err)
-		if errors.Is(err, iamError.ErrInvalidInput) {
-			return api.Response(http.StatusBadRequest, nil), utils.Error{Code: http.StatusBadRequest, Message: "failed to authenticate app"}
-		}
-		return api.Response(http.StatusInternalServerError, nil), utils.Error{Code: http.StatusInternalServerError, Message: err.Error()}
-	}
-	resp := api.AppTokenResponse{
-		AccessToken: tokens.AccessToken,
-		IdToken:     tokens.IdToken,
-	}
-	return api.Response(http.StatusOK, resp), nil
 }
 
 func (s *TokensApiService) grantAppToken(ctx context.Context,

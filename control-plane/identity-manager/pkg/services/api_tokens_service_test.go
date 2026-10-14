@@ -47,50 +47,6 @@ func initTokenServiceTests(t *testing.T) (iamServicesContainerMock *iamMock.Mock
 	return mockIamServicesContainer, clientCacheMock, testSubject, ctx
 }
 
-func TestAppToken_HappyFlow(t *testing.T) {
-	iamMock, _, testSubject, ctx := initTokenServiceTests(t)
-	client := mockUtils.GetBasicClientArray()[0]
-	tokens := getTokens()
-	iamMock.MockAuthService.On("AuthenticateClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tokens, nil)
-	req := api.AppTokenRequest{
-		Name:   *client.ClientID,
-		Secret: *client.Secret,
-		Id:     "id",
-	}
-	resp, err := testSubject.AppToken(ctx, req)
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, tokens.AccessToken, resp.Body.(api.AppTokenResponse).AccessToken)
-	assert.Nil(t, err)
-}
-
-func TestAppToken_AuthenticateAppError(t *testing.T) {
-	iamMock, _, testSubject, ctx := initTokenServiceTests(t)
-	client := mockUtils.GetBasicClientArray()[0]
-	iamMock.MockAuthService.On("AuthenticateClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, assert.AnError)
-	req := api.AppTokenRequest{
-		Name:   *client.ClientID,
-		Secret: *client.Secret,
-		Id:     "id",
-	}
-	resp, err := testSubject.AppToken(ctx, req)
-	assert.Equal(t, http.StatusInternalServerError, resp.Code)
-	assert.NotNil(t, err)
-}
-
-func TestAppToken_400InvalidClient(t *testing.T) {
-	iamMock, _, testSubject, ctx := initTokenServiceTests(t)
-	client := mockUtils.GetBasicClientArray()[0]
-	iamMock.MockAuthService.On("AuthenticateClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, iamError.ErrInvalidInput)
-	req := api.AppTokenRequest{
-		Name:   *client.ClientID,
-		Secret: *client.Secret,
-		Id:     "id",
-	}
-	resp, err := testSubject.AppToken(ctx, req)
-	assert.Equal(t, http.StatusBadRequest, resp.Code)
-	assert.NotNil(t, err)
-}
-
 func TestGetClientIDForRequest_NonEmptyClientId(t *testing.T) {
 	_, _, testSubject, _ := initTokenServiceTests(t)
 	client := mockUtils.GetBasicClientArray()[0]

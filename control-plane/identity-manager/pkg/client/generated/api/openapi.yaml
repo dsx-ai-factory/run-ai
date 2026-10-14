@@ -4938,61 +4938,6 @@ paths:
       x-service: identity-manager
       x-test-coverage: not-applicable
       x-no-authorization: true
-  /v1/k8s/auth/oauth/apptoken:
-    post:
-      deprecated: true
-      description: |
-        Retrieve access token for an application.
-        The application token is retrieved from the authorization server.
-        This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to client_credentials instead, with clientID and clientSecret set accordingly to get an application token
-      operationId: app_token
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AppTokenRequest'
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AppTokenResponse'
-          description: Executed successfully.
-        "400":
-          content:
-            application/json:
-              example:
-                code: 400
-                message: Required parameter is missing
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request.
-        "500":
-          content:
-            application/json:
-              example:
-                code: 500
-                message: Something went wrong.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-        "503":
-          content:
-            application/json:
-              example:
-                code: 503
-                message: Please try again in few minutes.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: get application token
-      tags:
-      - Tokens
-      x-no-authorization: true
-      x-service: identity-manager
-      x-test-coverage:
-      - src/test/suites/parallel/applicationsV2/applicationsAuth.test.ts
-    x-internal: true
   /internal/realms/{realm}:
     delete:
       operationId: delete_realm
@@ -7273,39 +7218,6 @@ components:
           type: boolean
         reconcilerType:
           $ref: '#/components/schemas/reconcilerType'
-      type: object
-    AppTokenRequest:
-      example:
-        name: name
-        id: id
-        secret: secret
-      properties:
-        id:
-          maxLength: 64
-          type: string
-        name:
-          maxLength: 255
-          type: string
-        secret:
-          maxLength: 500
-          type: string
-      required:
-      - id
-      - name
-      - secret
-      type: object
-    AppTokenResponse:
-      example:
-        access_token: access_token
-        id_token: id_token
-      properties:
-        access_token:
-          type: string
-        id_token:
-          type: string
-      required:
-      - access_token
-      - id_token
       type: object
     ConfigSamlResponse:
       example:
