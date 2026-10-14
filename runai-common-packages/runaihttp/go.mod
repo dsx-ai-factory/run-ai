@@ -6,7 +6,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.18
-	github.com/go-chi/chi/v5 v5.4.0
+	github.com/go-chi/chi/v5 v5.5.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/stretchr/testify v1.12.1
 )
