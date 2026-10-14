@@ -24,15 +24,15 @@ func (s *EventsService) GetWorkloadActionsHistory(ctx context.Context, workloadI
 		return NewErrorResponse(api.NewValidationError("offset and limit must not be negative")), nil
 	}
 	limit = setDefaultLimit(limit)
-	records, dbErr := dao.DbGetWorkloadActions(ctx, id, offset, limit)
+	records, hasNext, dbErr := dao.DbGetWorkloadActions(ctx, id, offset, limit)
 	if dbErr != nil {
 		return NewErrorResponse(dbErr), nil
 	}
-	response := buildWorkloadActionsResponse(records, offset, limit)
+	response := buildWorkloadActionsResponse(records, offset, hasNext)
 	return api.Response(http.StatusOK, response), nil
 }
 
-func buildWorkloadActionsResponse(records []models.WorkloadActionHistory, offset, limit int32) api.GetWorkloadActionsResponse {
+func buildWorkloadActionsResponse(records []models.WorkloadActionHistory, offset int32, hasNext bool) api.GetWorkloadActionsResponse {
 	response := api.GetWorkloadActionsResponse{Actions: []api.WorkloadActionRecord{}}
 	for _, record := range records {
 		response.Actions = append(response.Actions, api.WorkloadActionRecord{
@@ -45,8 +45,8 @@ func buildWorkloadActionsResponse(records []models.WorkloadActionHistory, offset
 			AcceptedAt:   record.AcceptedAt,
 		})
 	}
-	if int32(len(records)) == limit {
-		response.Next = offset + limit
+	if hasNext {
+		response.Next = offset + int32(len(records))
 	}
 	return response
 }

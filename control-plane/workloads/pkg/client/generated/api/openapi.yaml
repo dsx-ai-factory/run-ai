@@ -14571,10 +14571,32 @@ components:
           id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
           subjectType: user
           acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
       properties:
         actions:
           items:
             $ref: '#/components/schemas/WorkloadActionRecord'
+          maxItems: 500
           type: array
         next:
           example: 50

@@ -35,14 +35,14 @@ func DbInsertWorkloadActions(ctx context.Context, records []models.WorkloadActio
 	return nil
 }
 
-func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, limit int32) ([]models.WorkloadActionHistory, *api.Error) {
+func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, limit int32) ([]models.WorkloadActionHistory, bool, *api.Error) {
 	records := []models.WorkloadActionHistory{}
 	tenantID, apiErr := services_utils.ParseTenantId(ctx)
 	if apiErr != nil {
-		return records, apiErr
+		return records, false, apiErr
 	}
 	if offset < 0 || limit < 0 {
-		return records, api.NewValidationError("offset and limit must not be negative")
+		return records, false, api.NewValidationError("offset and limit must not be negative")
 	}
 	if limit == 0 {
 		limit = defaultWorkloadActionsLimit
@@ -54,12 +54,16 @@ func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, lim
 		Where("tenant_id = ? AND workload_id = ?", tenantID, workloadID).
 		Order("accepted_at DESC, id DESC").
 		Offset(int(offset)).
-		Limit(int(limit)).
+		Limit(int(limit + 1)).
 		Find(&records)
 	if err != nil {
-		return records, api.NewError(http.StatusInternalServerError, "Failed to list workload actions", err)
+		return records, false, api.NewError(http.StatusInternalServerError, "Failed to list workload actions", err)
 	}
-	return records, nil
+	hasNext := len(records) > int(limit)
+	if hasNext {
+		records = records[:limit]
+	}
+	return records, hasNext, nil
 }
 
 func DbDeleteWorkloadActionHistoryOfTenantId(ctx context.Context, tenantID string) *api.Error {

@@ -67,6 +67,12 @@ var _ = Describe("Workload action history", func() {
 		Expect(second.Actions[0].WorkloadName).To(Equal("deleted-workspace"))
 	})
 
+	It("omits next when the final page exactly matches the limit", func() {
+		response := getWorkloadActionsHistory(service, ctx, workloadID, 1, 2)
+		Expect(response.Next).To(BeZero())
+		Expect(response.Actions).To(HaveLen(2))
+	})
+
 	It("isolates history by tenant and workload", func() {
 		requests := []struct {
 			ctx context.Context
@@ -81,7 +87,7 @@ var _ = Describe("Workload action history", func() {
 	})
 
 	It("requires tenant context for DAO reads", func() {
-		_, apiErr := dao.DbGetWorkloadActions(context.Background(), workloadID, 0, 0)
+		_, _, apiErr := dao.DbGetWorkloadActions(context.Background(), workloadID, 0, 0)
 		Expect(apiErr).NotTo(BeNil())
 		Expect(apiErr.Code).To(Equal(int32(http.StatusBadRequest)))
 
@@ -247,7 +253,7 @@ func getWorkloadActionsHistory(service api.EventsAPIServicer, ctx context.Contex
 
 func storedWorkloadActions(ctx context.Context, workloadID uuid.UUID, limit int32) []models.WorkloadActionHistory {
 	GinkgoHelper()
-	records, apiErr := dao.DbGetWorkloadActions(ctx, workloadID, 0, limit)
+	records, _, apiErr := dao.DbGetWorkloadActions(ctx, workloadID, 0, limit)
 	Expect(apiErr).To(BeNil())
 	return records
 }

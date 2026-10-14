@@ -6298,6 +6298,7 @@ components:
       properties:
         actions:
           type: array
+          maxItems: 500
           items:
             $ref: '#/components/schemas/WorkloadActionRecord'
         next:

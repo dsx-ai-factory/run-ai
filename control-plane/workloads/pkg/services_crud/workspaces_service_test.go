@@ -189,7 +189,7 @@ var _ = Describe("workspaces service validations", func() {
 		created := response.Body.(workloadsApi.SupersetWorkload)
 		Expect(created.WorkloadId).To(Equal(id))
 		Expect(created.Name).To(Equal("manager-workspace"))
-		rows, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(id), 0, 0)
+		rows, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(id), 0, 0)
 		Expect(apiErr).To(BeNil())
 		Expect(rows).To(HaveLen(1))
 		Expect(rows[0].Action).To(Equal("create"))
@@ -229,7 +229,7 @@ var _ = Describe("workspaces service validations", func() {
 
 			createPayload := createResponse.Body.(workloadsApi.SupersetWorkload)
 			Expect(createPayload.WorkloadId).NotTo(BeNil())
-			actions, actionErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(createPayload.WorkloadId), 0, 0)
+			actions, _, actionErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(createPayload.WorkloadId), 0, 0)
 			Expect(actionErr).To(BeNil())
 			Expect(actions).To(HaveLen(1))
 			Expect(actions[0].Action).To(Equal("create"))

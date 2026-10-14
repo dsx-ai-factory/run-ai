@@ -55,6 +55,9 @@ func AssertGetWorkloadActionsResponseRequired(obj GetWorkloadActionsResponse) er
 // AssertGetWorkloadActionsResponseConstraints checks if the values respects the defined constraints
 func AssertGetWorkloadActionsResponseConstraints(obj GetWorkloadActionsResponse) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.Actions, "Actions", 500); maxItemsErr != nil {
+		return &ParsingError{Param: "Actions", Err: maxItemsErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

@@ -3,6 +3,7 @@ required: [actions]
 properties:
   actions:
     type: array
+    maxItems: 500
     items:
       $ref: './WorkloadActionRecord.yaml'
   next:
