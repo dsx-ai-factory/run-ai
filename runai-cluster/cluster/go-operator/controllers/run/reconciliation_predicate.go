@@ -28,8 +28,9 @@ func (*reconciliationPredicate) Update(e event.UpdateEvent) bool {
 
 		specChanged := o.GetGeneration() != n.GetGeneration()
 		missingFinalizer := !cutils.HasFinalizer(n, runaiv1.Finalizer)
+		deletionStarted := o.GetDeletionTimestamp().IsZero() && !n.GetDeletionTimestamp().IsZero()
 
-		return specChanged || missingFinalizer
+		return specChanged || missingFinalizer || deletionStarted
 	}
 	if isOwnedByDefaultRunaiConfig(e.ObjectNew) {
 		return true
