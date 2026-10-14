@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"math"
 	"slices"
 	"sort"
 	"strconv"
@@ -440,7 +439,7 @@ func buildSection(rounds []round, knobs settings) core.Section {
 			metrics["p99_ms"+at] = summary.P99.Milliseconds()
 		}
 		if summary.HasThroughput() {
-			metrics["throughput_per_sec"+at] = math.Round(summary.Throughput*10) / 10
+			metrics["throughput_per_sec"+at] = summary.Throughput
 		}
 		problems = append(problems, roundProblems(r, summary)...)
 	}

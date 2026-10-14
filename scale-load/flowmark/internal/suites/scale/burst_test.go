@@ -419,7 +419,7 @@ func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 		t.Fatalf("per-round metrics wrong: %v", section.Metrics)
 	}
 	if section.Metrics["throughput_per_sec@3"] != 0.5 {
-		t.Fatalf("3 arrivals whose last one lands 6 s after the first create is 0.5 per second, written with one decimal: %v", section.Metrics["throughput_per_sec@3"])
+		t.Fatalf("3 arrivals whose last one lands 6 s after the first create is 0.5 per second: %v", section.Metrics["throughput_per_sec@3"])
 	}
 }
 

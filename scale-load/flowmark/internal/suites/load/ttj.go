@@ -358,7 +358,8 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 
 	var problems []string
 	if required := int(math.Ceil(float64(pacing.Planned) * (1 - rateShortfall))); pacing.Planned > 0 && pacing.Submitted < required {
-		problems = append(problems, fmt.Sprintf("the pacer kept only %d of the %d planned submissions (%.2f/s against the %d/s target): the environment could not absorb the load", pacing.Submitted, pacing.Planned, pacing.Rate(), opts.rate))
+		problems = append(problems, fmt.Sprintf("the pacer kept only %d of the %d planned submissions (%.2f/s against the %d/s target): "+
+			"the environment could not absorb the load", pacing.Submitted, pacing.Planned, pacing.Rate(), opts.rate))
 	}
 	switch {
 	case interrupted != nil:
