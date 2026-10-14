@@ -62,7 +62,7 @@ type PostgresSink struct {
 	eventDao EventDaoer
 }
 
-func NewPostgresSink(sinkId string, sc *PostgresSinkConfig) *PostgresSink {
+func NewPostgresSink(sinkId string, sc *PostgresSinkConfig) (*PostgresSink, error) {
 	eventDao, err := pgsink.NewEventDao(&postgres.DataBaseConfig{
 		Host:                  sc.Host,
 		Port:                  sc.Port,
@@ -77,10 +77,10 @@ func NewPostgresSink(sinkId string, sc *PostgresSinkConfig) *PostgresSink {
 		ConnectionMaxIdleTime: sc.ConnectionMaxIdleTime,
 	}, sc.Table)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("%s sink %s failed to create event dao: %w", PostgresSinkType, sinkId, err)
 	}
 
-	return &PostgresSink{typ: PostgresSinkType, sinkId: sinkId, eventDao: eventDao}
+	return &PostgresSink{typ: PostgresSinkType, sinkId: sinkId, eventDao: eventDao}, nil
 }
 
 func (ps *PostgresSink) Type() string {

@@ -42,7 +42,12 @@ func newSink(sinkId string, sc *sinks.SinkConfig) (sinks.Sinker, error) {
 	case sc.Slack != nil:
 		return sinks.NewSlackSink(sc.Slack), nil
 	case sc.Postgres != nil:
-		return sinks.NewPostgresSink(sinkId, sc.Postgres), nil
+		s, err := sinks.NewPostgresSink(sinkId, sc.Postgres)
+		if err != nil {
+			// Returning the typed nil directly would yield a non-nil Sinker that panics on first use.
+			return nil, err
+		}
+		return s, nil
 	case sc.History != nil:
 		return sinks.NewHistorySink(sinkId, sc.History)
 	}
