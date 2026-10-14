@@ -61,19 +61,6 @@
       "enabled": false
     },
     {
-      "description": "kai-resource-management subchart: no bumps. The chart declares a version range, so every build already takes the newest patch of that minor and there is no pin to move. Left enabled, Renovate would rewrite the range back to an exact version on every KRM release.",
-      "matchManagers": [
-        "helmv3"
-      ],
-      "matchFileNames": [
-        "runai-cluster/cluster/runai-chart/Chart.yaml"
-      ],
-      "matchDepNames": [
-        "kai-resource-management"
-      ],
-      "enabled": false
-    },
-    {
       "matchManagers": [
         "dockerfile"
       ],
