@@ -863,7 +863,7 @@ func (dkc *DistributedToKubeflowComposer) processComputeFields(ctx context.Conte
 			// GPU memory/portion limit is written either as the legacy env var (< 3.0
 			// clusters) or as the per-container CUDA/KAI annotations (>= 3.0). The
 			// two pairs are mutually exclusive at the compose helper level.
-			dkc.fc.ComposeGpuComputeMode(ctx, composer.EnumToString(src.GpuComputeMode.Get()), sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
+			dkc.fc.ComposeGpuComputeMode(composer.EnumToString(src.GpuComputeMode.Get()), sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
 			dkc.fc.ComposeMemoryLimitEnv(sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			dkc.fc.ComposePortionLimitEnv(sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuPortionLimitEnvVar),
 			dkc.fc.ComposeMemoryLimitAnnotation(sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),

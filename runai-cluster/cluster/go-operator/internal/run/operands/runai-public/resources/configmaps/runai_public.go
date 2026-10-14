@@ -387,7 +387,6 @@ func getMissingMetricsErrorStr(nvidiaExporterVerificationErr error, missingMetri
 func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig, discoveryClient discovery.DiscoveryInterface) map[string]runv1.PublicStatus {
 	components := map[string]runv1.PublicStatus{}
 
-	components["gpu-compute-modes"] = controller_utils.CheckGpuComputeModes(ctx, kbClient)
 	components["knative"] = knative.GetKnativeStatus(ctx, kbClient)
 	components["lws"] = getLWSStatus(ctx, kbClient, runaiConfig)
 	components[runv1.RunaiPublicMPI] = getMpiStatus(ctx, kbClient, discoveryClient)

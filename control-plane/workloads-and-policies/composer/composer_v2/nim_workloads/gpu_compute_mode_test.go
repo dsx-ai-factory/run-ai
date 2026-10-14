@@ -18,9 +18,10 @@ import (
 )
 
 var _ = Describe("NIM compute mode", func() {
-	It("uses the NIM operator container name and runtime report", func() {
+	It("uses the NIM operator container name on a supported cluster", func() {
 		cluster := &clustersApi.DisplayedCluster{}
-		Expect(json.Unmarshal([]byte(`{"status":{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}},"optional":{"gpu-compute-modes":{"available":true,"components":{"sm-sharing":{"available":true}}}}}}}`), cluster)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"status":{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}},"optional":{}}}}`), cluster)).To(Succeed())
+		cluster.SetVersion("3.0.14")
 		c := NewNimServiceComposer("model-service", "user", cluster, "p1", composer.OptionsForNimService())
 		var src api.NimServiceSpecAllOfCompute
 		Expect(json.Unmarshal([]byte(`{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"sm-sharing"}`), &src)).To(Succeed())

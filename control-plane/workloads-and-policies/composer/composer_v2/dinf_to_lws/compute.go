@@ -54,7 +54,7 @@ func (dinfComposer *DistributedInferenceToLWSComposer) processComputeFields(
 			// GPU memory/portion limit is written either as the legacy env var (< 3.0
 			// clusters) or as the per-container CUDA/KAI annotations (>= 3.0). The
 			// two pairs are mutually exclusive at the compose helper level.
-			dinfComposer.fc.ComposeGpuComputeMode(ctx, composer.EnumToString(src.GpuComputeMode.Get()), &sizingInfo, container.Name, &target.Annotations, composer.StringToMapString),
+			dinfComposer.fc.ComposeGpuComputeMode(composer.EnumToString(src.GpuComputeMode.Get()), &sizingInfo, container.Name, &target.Annotations, composer.StringToMapString),
 			dinfComposer.fc.ComposeMemoryLimitEnv(&sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			dinfComposer.fc.ComposePortionLimitEnv(&sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuPortionLimitEnvVar),
 			dinfComposer.fc.ComposeMemoryLimitAnnotation(&sizingInfo, container.Name, &target.Annotations, composer.StringToMapString),

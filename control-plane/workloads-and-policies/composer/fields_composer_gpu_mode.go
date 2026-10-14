@@ -6,15 +6,15 @@
 package composer
 
 import (
-	"context"
 	"fmt"
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpumode"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 )
 
-func (fc *FieldsComposer) ComposeGpuComputeMode(ctx context.Context, src *string, sizing *GpuSizingInfo,
+func (fc *FieldsComposer) ComposeGpuComputeMode(src *string, sizing *GpuSizingInfo,
 	containerName string, target any, setter FnStringSetter,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
@@ -30,16 +30,8 @@ func (fc *FieldsComposer) ComposeGpuComputeMode(ctx context.Context, src *string
 			if !hasGPU {
 				return nil
 			}
-			available, reason := false, "GPU compute mode availability has not been reported"
-			if fc.Options.GpuComputeModeStatus != nil {
-				var err error
-				available, reason, err = fc.Options.GpuComputeModeStatus(ctx, *src)
-				if err != nil {
-					return workloadsApi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to check compute.gpuComputeMode availability: %v", err))
-				}
-			}
-			if !available {
-				return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("compute.gpuComputeMode %q is unavailable on the selected cluster: %s", *src, reason))
+			if !fc.Options.GpuComputeModeSupported {
+				return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("compute.gpuComputeMode requires cluster version %s or later", checker.MinVersionForSupporting(checker.MinVersionGpuComputeMode)))
 			}
 		}
 		if len(containerName) > maxContainerNameLenForAnnotationKey(gpumode.AnnotationFormat) {

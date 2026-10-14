@@ -12,14 +12,8 @@ type DistributedFrameworkStatus struct {
 	Suspendable bool
 }
 
-type GpuComputeModeStatus struct {
-	Available bool
-	Reason    string
-}
-
 // ClusterConfiguration holds the configuration of a cluster
 type ClusterConfiguration struct {
-	GpuComputeModes             map[string]GpuComputeModeStatus                                      // runtime-reported modes; absence does not imply support
 	WorkloadOwnershipProtection bool                                                                 // the value of the workload ownership protection
 	KnativeAvailable            bool                                                                 // the value of the knative availability status
 	KnativeScaleToZeroAvailable bool                                                                 // the value of the knative scale to zero config availability status

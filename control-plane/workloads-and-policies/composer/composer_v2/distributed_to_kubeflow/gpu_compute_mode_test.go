@@ -20,7 +20,7 @@ import (
 var _ = Describe("GPU mode annotation projection", func() {
 	It("targets the GPU container and preserves the memory request", func() {
 		const mode = "sm-sharing"
-		options := composer.FieldsComposerOptions{GpuComputeModeStatus: func(context.Context, string) (bool, string, error) { return true, "", nil }}
+		options := composer.FieldsComposerOptions{GpuComputeModeSupported: true}
 		var src workloadsApi.WorkspaceSpecSpecAllOfCompute
 		Expect(json.Unmarshal([]byte(`{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"sm-sharing"}`), &src)).To(Succeed())
 		c := &DistributedToKubeflowComposer{fc: &composer.FieldsComposer{Options: options}}

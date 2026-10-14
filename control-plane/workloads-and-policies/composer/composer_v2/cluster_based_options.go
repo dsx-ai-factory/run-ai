@@ -16,8 +16,6 @@ import (
 // Min supported cluster version is 2.22, so capabilities introduced at <= 2.21 are
 // always supported and no longer appear here. See checker.clusterVersionToCapabilityMap.
 func SetClusterDependentOptions(ctx context.Context, options *composer.FieldsComposerOptions, validator *checker.ClusterCapabilitiesChecker) error {
-	options.GpuComputeModeStatus = validator.GpuComputeModeStatus
-
 	capabilitiesToOption := map[int]*bool{
 		checker.MinVersionOfFlexiblePriorityClasses:     &options.FlexiblePriorityClassesSupported,
 		checker.MinVersionOfPreemptibility:              &options.PreemptibilitySupported,
@@ -29,6 +27,7 @@ func SetClusterDependentOptions(ctx context.Context, options *composer.FieldsCom
 		checker.MinVersionWorkloadV2NetworkingEndpoints: &options.WorkloadV2NetworkingSupported,
 		checker.MinVersionWorkloadV2ServiceSpecLabels:   &options.WorkloadV2ServiceSpecLabelsSupported,
 		checker.MinVersionGpuMemoryLimitAnnotations:     &options.GpuMemoryLimitAnnotationsSupported,
+		checker.MinVersionGpuComputeMode:                &options.GpuComputeModeSupported,
 		checker.MinVersionOAuth2ProxyTemplates:          &options.OAuth2ProxyTemplatesSupported,
 	}
 

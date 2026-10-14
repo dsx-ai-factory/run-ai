@@ -718,10 +718,10 @@ var _ = Describe("NimServicesImpl", func() {
 		})
 	})
 
-	DescribeTable("preserves unavailable GPU mode errors", func(update, fromPolicy bool) {
-		displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
+	DescribeTable("preserves unsupported cluster version errors for GPU mode", func(update, fromPolicy bool) {
+		displayed := clusterInfoOf(randoms, "3.0.13")
 		var status clustersApi.ClusterDisplayedStatus
-		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}},"optional":{"gpu-compute-modes":{"available":false,"reason":"SM sharing is disabled","components":{"sm-sharing":{"available":false,"reason":"SM sharing is disabled"}}}}}}`), &status)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
 		displayed.Status.Set(&status)
 		clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
 
@@ -771,8 +771,7 @@ var _ = Describe("NimServicesImpl", func() {
 		}
 		Expect(failure.Code).To(Equal(int32(http.StatusBadRequest)))
 		Expect(failure.Message).To(Equal("failed to compose NIMService spec"))
-		Expect(failure.Details).To(ContainSubstring(`compute.gpuComputeMode "sm-sharing" is unavailable`))
-		Expect(failure.Details).To(ContainSubstring("SM sharing is disabled"))
+		Expect(failure.Details).To(ContainSubstring("compute.gpuComputeMode requires cluster version 3.0.14 or later"))
 	},
 		Entry("create with explicit mode", false, false),
 		Entry("create with policy mode", false, true),
@@ -782,7 +781,7 @@ var _ = Describe("NimServicesImpl", func() {
 	It("persists and recomposes GPU mode through create, GET and update", func() {
 		displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
 		var status clustersApi.ClusterDisplayedStatus
-		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}},"optional":{"gpu-compute-modes":{"available":true,"components":{"time-slicing":{"available":true},"sm-sharing":{"available":true}}}}}}`), &status)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
 		displayed.Status.Set(&status)
 		clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
 		spec := sampleNimServiceSpec
@@ -836,7 +835,7 @@ var _ = Describe("NimServicesImpl", func() {
 	DescribeTable("uses ordinary NIM update handling for mode and CPU fields", func(computeJSON, policyJSON, wantMode string, wantCPU *float64) {
 		displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
 		var status clustersApi.ClusterDisplayedStatus
-		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}},"optional":{"gpu-compute-modes":{"available":true,"components":{"time-slicing":{"available":true},"sm-sharing":{"available":true}}}}}}`), &status)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
 		displayed.Status.Set(&status)
 		clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
 		spec := sampleNimServiceSpec
@@ -897,7 +896,7 @@ var _ = Describe("NimServicesImpl", func() {
 	DescribeTable("persists only the resolved GPU mode alongside submitted NIM fields", func(computeJSON, modeSource, wantMode string) {
 		displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
 		var status clustersApi.ClusterDisplayedStatus
-		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}},"optional":{"gpu-compute-modes":{"available":true,"components":{"time-slicing":{"available":true},"sm-sharing":{"available":true}}}}}}`), &status)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
 		displayed.Status.Set(&status)
 		clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
 

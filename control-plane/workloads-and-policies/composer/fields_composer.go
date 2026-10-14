@@ -56,9 +56,6 @@ const (
 
 type FieldsComposerOptions struct {
 	// composer behavior
-	// Resolved lazily only for explicit GPU modes, so omitted modes need no new cluster report.
-	GpuComputeModeStatus func(context.Context, string) (available bool, reason string, err error)
-
 	IgnoreMissingValues          bool
 	NormalizeServingPortAuthType bool
 
@@ -75,6 +72,7 @@ type FieldsComposerOptions struct {
 	EmptyDirAsVolumeSupported        bool
 	FlexiblePriorityClassesSupported bool
 	GitSyncWithSshKeySupported       bool
+	GpuComputeModeSupported          bool
 	// GpuMemoryLimitAnnotationsSupported is set from checker.MinVersionGpuMemoryLimitAnnotations
 	// (cluster >= 3.0.0). When true, the composer emits the per-container CUDA/KAI GPU
 	// memory-limit annotations (nvidia.com/container.<name>.gpu-memory.limit and
@@ -102,6 +100,7 @@ func OptionsForPolicy() FieldsComposerOptions {
 		FlexiblePriorityClassesSupported:     true,
 		GitSyncWithSshKeySupported:           true,
 		GpuMemoryLimitAnnotationsSupported:   true,
+		GpuComputeModeSupported:              true,
 		LauncherCreationPolicySupported:      true,
 		NodeAffinitySupported:                true,
 		OAuth2ProxyTemplatesSupported:        true,

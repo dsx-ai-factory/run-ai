@@ -11,8 +11,6 @@ import (
 	"net/http"
 	"testing"
 
-	"gopkg.in/yaml.v2"
-
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
@@ -550,72 +548,5 @@ var _ = Describe("getGpuStackStatus", func() {
 		status := getGpuStackStatus(ctx, kbClient)
 		Expect(*status.Available).To(BeFalse())
 		Expect(status.Reason).To(ContainSubstring("dcgm-exporter service not found"))
-	})
-})
-
-var _ = Describe("GPU compute modes in runai-public", func() {
-	var kbClient client.Client
-	BeforeEach(func() {
-		config := newGpuFractioningConfigWithReadyCondition("True", "healthy")
-		config.SetLabels(map[string]string{
-			"app.kubernetes.io/name": "gpu-fractioning", "app.kubernetes.io/instance": "runai",
-		})
-		operator := &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "runai-gpu-fractioning", Namespace: "runtime", Labels: config.GetLabels(),
-			},
-			Spec: appsv1.DeploymentSpec{Template: corev1.PodTemplateSpec{Spec: corev1.PodSpec{
-				Containers: []corev1.Container{{Name: "manager", Env: []corev1.EnvVar{{Name: "SUPPORT_SM_SHARING", Value: "false"}}}},
-			}}},
-		}
-		kbClient = createKubeClientMock(config, operator)
-		kbClient.Scheme().AddKnownTypeWithName(gpuFractioningConfigGVK, &unstructured.Unstructured{})
-	})
-	It("serializes mode-specific availability without making it a required dependency", func() {
-		hybrid := kcfake.New(kbClient, kbClient, createDynamicClient())
-		object, err := NewRunaiPublic("test", hybrid, getRunaiConfig()).Object(context.Background())
-		Expect(err).NotTo(HaveOccurred())
-		public := runv1.RunaiPublic{}
-		Expect(yaml.Unmarshal([]byte(object.(*corev1.ConfigMap).Data["runai-public"]), &public)).To(Succeed())
-		Expect(public.Dependencies.Required).NotTo(HaveKey("gpu-compute-modes"))
-		modes := public.Dependencies.Optional["gpu-compute-modes"]
-		Expect(*modes.Available).To(BeTrue())
-		Expect(*modes.Components["time-slicing"].Available).To(BeTrue())
-		Expect(*modes.Components["sm-sharing"].Available).To(BeFalse())
-		Expect(modes.Components["sm-sharing"].Reason).To(ContainSubstring("disabled"))
-	})
-	It("uses the hybrid reader and refreshes capability changes on subsequent reconciles", func() {
-		ctx := context.Background()
-		uncachedDeploymentReads := 0
-		uncached := interceptor.NewClient(kbClient.(client.WithWatch), interceptor.Funcs{
-			List: func(ctx context.Context, reader client.WithWatch, list client.ObjectList, opts ...client.ListOption) error {
-				if _, ok := list.(*appsv1.DeploymentList); ok {
-					uncachedDeploymentReads++
-				}
-				return reader.List(ctx, list, opts...)
-			},
-		})
-		hybrid := kc.New(kbClient, uncached, nil)
-		runaiConfig := getRunaiConfig()
-		status := func() runv1.PublicStatus {
-			return getOptionalComponentsStatus(ctx, hybrid, &runaiConfig, createDynamicClient())["gpu-compute-modes"]
-		}
-		Expect(*status().Components["time-slicing"].Available).To(BeTrue())
-		Expect(*status().Components["sm-sharing"].Available).To(BeFalse())
-
-		operator := &appsv1.Deployment{}
-		Expect(kbClient.Get(ctx, client.ObjectKey{Namespace: "runtime", Name: "runai-gpu-fractioning"}, operator)).To(Succeed())
-		operator.Spec.Template.Spec.Containers[0].Env[0].Value = "true"
-		Expect(kbClient.Update(ctx, operator)).To(Succeed())
-		Expect(*status().Components["sm-sharing"].Available).To(BeTrue())
-
-		operator.Spec.Template.Spec.Containers[0].Env[0].Value = "false"
-		Expect(kbClient.Update(ctx, operator)).To(Succeed())
-		Expect(*status().Components["sm-sharing"].Available).To(BeFalse())
-		Expect(*status().Components["time-slicing"].Available).To(BeTrue())
-
-		Expect(kbClient.Delete(ctx, operator)).To(Succeed())
-		Expect(*status().Available).To(BeFalse())
-		Expect(uncachedDeploymentReads).To(BeZero())
 	})
 })

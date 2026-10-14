@@ -307,7 +307,7 @@ func (itc *InterTrainToJobComposer) processComputeFields(ctx context.Context, sr
 			// GPU memory/portion limit is written either as the legacy env var (< 3.0
 			// clusters) or as the per-container CUDA/KAI annotations (>= 3.0). The
 			// two pairs are mutually exclusive at the compose helper level.
-			itc.fc.ComposeGpuComputeMode(ctx, composer.EnumToString(src.GpuComputeMode.Get()), &sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
+			itc.fc.ComposeGpuComputeMode(composer.EnumToString(src.GpuComputeMode.Get()), &sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
 			itc.fc.ComposeMemoryLimitEnv(&sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			itc.fc.ComposePortionLimitEnv(&sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuPortionLimitEnvVar),
 			itc.fc.ComposeMemoryLimitAnnotation(&sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),

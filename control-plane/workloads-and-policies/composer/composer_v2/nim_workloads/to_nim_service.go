@@ -74,10 +74,6 @@ func NewNimServiceComposer(
 	projectName string,
 	options composer.FieldsComposerOptions,
 ) *NimServiceComposer {
-	options.GpuComputeModeStatus = func(_ context.Context, mode string) (bool, string, error) {
-		status := checker.GpuComputeModes(clusterInfo)[mode]
-		return status.Available, status.Reason, nil
-	}
 	result := NimServiceComposer{
 		fc: &composer.FieldsComposer{
 			WorkloadType:      composer.WorkloadType_NIM,
@@ -361,12 +357,23 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 			if err != nil {
 				return workloadsApi.NewError(err.Code, fmt.Sprintf("compute: failed to validate gpu vendor is nvidia: %v", err.Message))
 			}
+			if src.GpuComputeMode.Get() != nil {
+				capabilities, err := checker.NewClusterCapabilitiesCheckerForVersion(nsc.clusterInfo.GetVersion())
+				if err != nil {
+					return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("cluster version: %v", err))
+				}
+				supported, err := capabilities.ValidateClusterCapability(ctx, checker.MinVersionGpuComputeMode)
+				if err != nil {
+					return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("cluster capability check: %v", err))
+				}
+				nsc.fc.Options.GpuComputeModeSupported = supported
+			}
 		}
 
 		nimService := nimv1alpha1.NIMService{}
 		nimService.Name = nsc.fc.WorkloadName
 		runner.Batch(
-			nsc.fc.ComposeGpuComputeMode(ctx, composer.EnumToString(src.GpuComputeMode.Get()), gpuSizingInfo, nimService.GetContainerName(), &target.Annotations, composer.StringToMapString),
+			nsc.fc.ComposeGpuComputeMode(composer.EnumToString(src.GpuComputeMode.Get()), gpuSizingInfo, nimService.GetContainerName(), &target.Annotations, composer.StringToMapString),
 			nsc.composeMemoryLimitEnv(gpuSizingInfo, &target.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			nsc.composePortionLimitEnv(gpuSizingInfo, &target.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			nsc.composeMemoryReqAnnotation(gpuSizingInfo, &target.Annotations, composer.StringToMapString, composer.GpuMemoryAnnotation),

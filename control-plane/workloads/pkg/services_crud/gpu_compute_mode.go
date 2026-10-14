@@ -25,7 +25,7 @@ func validateNativeGpuMode(spec any) *workloadsApi.SubmissionErrorV2 {
 		}
 	})
 	if explicit {
-		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, "compute.gpuComputeMode requires workloads v2 submission and an available GPU fractioning runtime")
+		return workloadsApi.NewSubmissionErrorV2(http.StatusBadRequest, "compute.gpuComputeMode requires workloads v2 submission")
 	}
 	return nil
 }

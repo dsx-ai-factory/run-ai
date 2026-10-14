@@ -21,11 +21,10 @@ import (
 var ErrClusterVersionEmpty = errors.New("cluster version is empty")
 
 const (
-	KnativeDependency         = "knative"
-	ScaleToZeroDependency     = "enable-scale-to-zero"
-	NodeTypeDependency        = "kubernetes.podspec-nodeselector"
-	LWSDependency             = "lws"
-	GpuComputeModesDependency = "gpu-compute-modes"
+	KnativeDependency     = "knative"
+	ScaleToZeroDependency = "enable-scale-to-zero"
+	NodeTypeDependency    = "kubernetes.podspec-nodeselector"
+	LWSDependency         = "lws"
 )
 
 // clusterInfo holds the cluster information gathered from the cluster service
@@ -65,7 +64,6 @@ func setCacheClusterInfo(clusterId string, displayedCluster *clusterService.Disp
 	info := &clusterInfo{
 		Version: clusterSemverVersion,
 		Configuration: &ClusterConfiguration{
-			GpuComputeModes:             GpuComputeModes(displayedCluster),
 			WorkloadOwnershipProtection: workloadOwnershipProtection(displayedCluster),
 			KnativeAvailable:            knativeAvailable,
 			KnativeScaleToZeroAvailable: knativeScaleToZeroAvailable,

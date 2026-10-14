@@ -85,8 +85,6 @@ func TestRunaiPublic(t *testing.T) {
 	assert.NotEmpty(t, out.Dependencies.Required["gpu-stack"])
 	assert.NotEmpty(t, out.Dependencies.Required["gpu-stack"].Components)
 	assert.NotEmpty(t, out.Dependencies.Required["gpu-stack"].Components["nvidia"])
-	assert.NotEmpty(t, out.Dependencies.Optional["gpu-compute-modes"])
-	assert.Equal(t, ptr.To(false), out.Dependencies.Optional["gpu-compute-modes"].Components["sm-sharing"].Available)
 	assert.NotEmpty(t, out.Dependencies.Optional["mpi"])
 	assert.NotEmpty(t, out.Dependencies.Optional["knative"])
 	assert.NotEmpty(t, out.Dependencies.Optional["tensorflow"])
