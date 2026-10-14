@@ -53,6 +53,6 @@ func AuthValidation(configPath, configFile string, envMap map[string]string) err
 		return err
 	}
 
-	_, err = cli.RunCommand(fmt.Sprintf("login app --name=%s --secret=shhhhh --interactive=disabled --save", appIdName), envMap)
+	_, err = cli.RunCommand(fmt.Sprintf("login access-key --client-id=%s --secret=shhhhh --interactive=disabled --save", appIdName), envMap)
 	return err
 }

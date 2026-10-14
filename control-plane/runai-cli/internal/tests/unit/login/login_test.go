@@ -31,8 +31,7 @@ const (
 	AppName      = "app-lies"
 	AppSecret    = "shhhhh"
 
-	ExpectedOutputMissingAuthURL                = "Error: Authentication failed. Authentication URL is missing. parse \"\": empty url\nSet it by running 'runai config set --auth-url <auth_url>'\n"
-	ExpectedOutputMissingAuthURLWithDeprecation = "Command \"application\" is deprecated, use 'runai login access-key' instead\nError: Authentication failed. Authentication URL is missing. parse \"\": empty url\nSet it by running 'runai config set --auth-url <auth_url>'\n"
+	ExpectedOutputMissingAuthURL = "Error: Authentication failed. Authentication URL is missing. parse \"\": empty url\nSet it by running 'runai config set --auth-url <auth_url>'\n"
 )
 
 var _ = Describe("Login Test", Ordered, func() {
@@ -58,9 +57,9 @@ var _ = Describe("Login Test", Ordered, func() {
 
 	Context("Login command validation", Ordered, func() {
 		It("login fail, empty config file - missing URL", func() {
-			output, err := cli.RunCommand("login app", envMap)
+			output, err := cli.RunCommand("login access-key", envMap)
 			Expect(err).ToNot(BeNil())
-			Expect(output).To(Equal(ExpectedOutputMissingAuthURLWithDeprecation))
+			Expect(output).To(Equal(ExpectedOutputMissingAuthURL))
 		})
 
 		It("generate config file - fail", func() {
@@ -72,9 +71,9 @@ var _ = Describe("Login Test", Ordered, func() {
 		})
 
 		It("login fail, config exist, but auth URL is missing", func() {
-			output, err := cli.RunCommand("login app", envMap)
+			output, err := cli.RunCommand("login access-key", envMap)
 			Expect(err.Error()).ToNot(BeNil())
-			Expect(output).To(Equal(ExpectedOutputMissingAuthURLWithDeprecation))
+			Expect(output).To(Equal(ExpectedOutputMissingAuthURL))
 		})
 
 		It("config set", func() {
@@ -88,8 +87,8 @@ var _ = Describe("Login Test", Ordered, func() {
 			Expect(test.Cluster.Domain).To(Equal(""))
 		})
 
-		It("login via application authentication", func() {
-			output, err := cli.RunCommand(fmt.Sprintf("login app --client-id=%s --secret=%s --interactive=disabled", AppName, AppSecret), envMap)
+		It("login via access key authentication", func() {
+			output, err := cli.RunCommand(fmt.Sprintf("login access-key --client-id=%s --secret=%s --interactive=disabled", AppName, AppSecret), envMap)
 			Expect(err).To(BeNil())
 			Expect(output).To(ContainSubstring("Authentication was successful"))
 			Expect(output).To(ContainSubstring("Cluster name-cluster-1 was automatically defined successfully"))
@@ -102,8 +101,8 @@ var _ = Describe("Login Test", Ordered, func() {
 			Expect(test.Global.Update.Auto).To(BeFalse())
 		})
 
-		It("set application login credentials", func() {
-			output, err := cli.RunCommand(fmt.Sprintf("login app --client-id=%s --secret=%s --interactive=disabled --save", AppName, AppSecret), envMap)
+		It("set access key login credentials", func() {
+			output, err := cli.RunCommand(fmt.Sprintf("login access-key --client-id=%s --secret=%s --interactive=disabled --save", AppName, AppSecret), envMap)
 			Expect(err).To(BeNil())
 			Expect(output).To(ContainSubstring("Authentication was successful"))
 
@@ -115,20 +114,6 @@ var _ = Describe("Login Test", Ordered, func() {
 			Expect(test.Cluster.Name).To(Equal("name-cluster-1"))
 			Expect(test.Cluster.Uuid).To(Equal("uuid-cluster-1"))
 			Expect(test.Cluster.Domain).To(Equal("http://localhost.example.com/"))
-		})
-
-		It("set application login credentials (using deprecated --name)", func() {
-			output, err := cli.RunCommand(fmt.Sprintf("login app --name=%s --secret=%s --interactive=disabled --save", AppName, AppSecret), envMap)
-			Expect(err).To(BeNil())
-			Expect(output).To(ContainSubstring("Flag --name has been deprecated, use --client-id instead."))
-			Expect(output).To(ContainSubstring("Authentication was successful"))
-
-			instance := config.GetInstance()
-			test := instance.GetConfiguration()
-			Expect(test.Credentials.Name).To(Equal("app-lies"))
-			Expect(test.Credentials.Secret).To(Equal("shhhhh"))
-			Expect(test.Credentials.Type).To(Equal("AccessKeyIDLogin"))
-			Expect(test.Global.Update.Auto).To(BeFalse())
 		})
 
 		It("reset config - should clean the cluster config", func() {
@@ -149,7 +134,7 @@ var _ = Describe("Login Test", Ordered, func() {
 			test := instance.GetConfiguration()
 			Expect(test.Global.Update.Auto).To(BeFalse())
 
-			output, err := cli.RunCommand(fmt.Sprintf("login app --name=%s --secret=%s --interactive=disabled", AppName, AppSecret), envMap)
+			output, err := cli.RunCommand(fmt.Sprintf("login access-key --client-id=%s --secret=%s --interactive=disabled", AppName, AppSecret), envMap)
 			Expect(err).To(BeNil())
 			Expect(output).To(ContainSubstring("Authentication was successful"))
 			Expect(output).To(ContainSubstring("Cluster name-cluster-1 was automatically defined successfully"))
