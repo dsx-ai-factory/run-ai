@@ -92,6 +92,7 @@ The following Kubernetes distributions are **partner-compatible**. They are test
 | ---------------------------------------------------------------------------------------------- | ----------------------------------- | ------------------------------------------------- |
 | Crusoe Managed Kubernetes (CMK)                                                                | 2.22              | 1.33                    |
 | [Mirantis k0rdent](https://catalog.k0rdent.io/v1.7.0/apps/runai-cp/)                           | 2.22<br>2.23      | 1.32-1.33<br>1.33-1.34  |
+| [OpenNebula Kubernetes Service (OneKS)](https://docs.opennebula.io/7.4/platform_services/oneks/catalog/nvidia_runai_platform/) | 2.25              | 1.34                    |
 | [Rafay platform](https://docs.rafay.co/aiml/app_marketplace/helm_app/apps/runai/requirements/) | 2.23<br>2.24      | 1.33-1.34<br>1.33-1.35  |
 | [Spectro Cloud](https://docs.palette-ai.com/docs/reference/featured-profile-bundles/runai/)    | 2.24              | 1.34                    |
 | [vCluster](https://www.vcluster.com/docs/platform/integrations/certified-stacks/runai)         | 2.24              | 1.34                    |
