@@ -25,6 +25,43 @@ paths:
       responses:
         '200':
           description: Executed successfully.
+  /api/v1/workloads/{workloadId}/actions:
+    get:
+      summary: Get workload action history.
+      description: Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+      operationId: get_workload_actions_history
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workload_actions_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
+      tags:
+        - Events
+      parameters:
+        - $ref: '#/components/parameters/WorkloadId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadActionsResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/workloads/scrapeable-metrics:
     get:
       summary: Get workloads metrics in openmetrics format for scraping.
@@ -5463,6 +5500,34 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
 components:
   parameters:
+    WorkloadId:
+      name: workloadId
+      in: path
+      required: true
+      description: The  Universally Unique Identifier (UUID) of the workload.
+      schema:
+        type: string
+        format: uuid
+    Offset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        example: 100
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 500
     WorkloadsFilter:
       name: filterBy
       in: query
@@ -5511,26 +5576,6 @@ components:
       description: Return only deleted resources when `true`.
       schema:
         type: boolean
-    Offset:
-      name: offset
-      in: query
-      required: false
-      description: The offset of the first item returned in the collection.
-      schema:
-        type: integer
-        format: int32
-        example: 100
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of entries to return.
-      schema:
-        type: integer
-        format: int32
-        default: 50
-        minimum: 1
-        maximum: 500
     SortOrder:
       name: sortOrder
       in: query
@@ -5584,14 +5629,6 @@ components:
       schema:
         type: string
         example: test project
-    WorkloadId:
-      name: workloadId
-      in: path
-      required: true
-      description: The  Universally Unique Identifier (UUID) of the workload.
-      schema:
-        type: string
-        format: uuid
     Precise:
       name: precise
       in: query
@@ -6193,6 +6230,81 @@ components:
     workloadTypeId:
       $ref: '#/components/parameters/WorkloadTypeId'
   schemas:
+    WorkloadActionId:
+      description: A unique ID of the workload action-history record.
+      type: string
+      format: uuid
+      example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+    WorkloadId:
+      description: A unique ID of the workload.
+      type: string
+      format: uuid
+    WorkloadName:
+      description: The name of the workload.
+      type: string
+      minLength: 1
+      example: my-workload-name
+      pattern: .*
+    WorkloadActionSubject:
+      description: The authenticated subject that performed the workload action.
+      type: string
+      example: user@run.ai
+    WorkloadActionSubjectType:
+      description: The authenticated subject type, preserved as provided by the identity context. Examples include user, service-account, and app, with casing determined by the identity provider.
+      type: string
+      example: user
+    WorkloadActionType:
+      type: string
+      enum:
+        - create
+        - update
+        - delete
+        - suspend
+        - resume
+    WorkloadActionAcceptedAt:
+      description: The time when the workload action was accepted.
+      type: string
+      format: date-time
+      example: '2026-01-01T03:49:52.531Z'
+    WorkloadActionRecord:
+      type: object
+      required:
+        - id
+        - workloadId
+        - workloadName
+        - subject
+        - subjectType
+        - action
+        - acceptedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/WorkloadActionId'
+        workloadId:
+          $ref: '#/components/schemas/WorkloadId'
+        workloadName:
+          $ref: '#/components/schemas/WorkloadName'
+        subject:
+          $ref: '#/components/schemas/WorkloadActionSubject'
+        subjectType:
+          $ref: '#/components/schemas/WorkloadActionSubjectType'
+        action:
+          $ref: '#/components/schemas/WorkloadActionType'
+        acceptedAt:
+          $ref: '#/components/schemas/WorkloadActionAcceptedAt'
+    GetWorkloadActionsResponse:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/WorkloadActionRecord'
+        next:
+          type: integer
+          format: int32
+          example: 50
     Error:
       required:
         - code
@@ -8502,12 +8614,6 @@ components:
         - VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES
         - VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES
         - NVLINK_BANDWIDTH_TOTAL
-    WorkloadName:
-      description: The name of the workload.
-      type: string
-      minLength: 1
-      example: my-workload-name
-      pattern: .*
     ProjectId:
       description: The id of the project.
       type: string
@@ -10283,10 +10389,6 @@ components:
         - $ref: '#/components/schemas/SubmitWithTemplateId'
         - $ref: '#/components/schemas/SubmitWithAssetIds'
         - $ref: '#/components/schemas/WorkspaceSpec'
-    WorkloadId:
-      description: A unique ID of the workload.
-      type: string
-      format: uuid
     DepartmentId:
       description: The id of the department.
       type: string
@@ -17036,6 +17138,15 @@ components:
           example:
             code: 403
             message: You do not have sufficient permissions.
+    404NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            code: 404
+            message: Resource id not found.
     500InternalServerError:
       description: unexpected error
       content:
@@ -17065,15 +17176,6 @@ components:
             message: Resource with this name already exists
     204NoContent:
       description: No Content.
-    404NotFound:
-      description: The specified resource was not found
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            code: 404
-            message: Resource id not found.
     400SubmissionErrorV2:
       description: Bad submission request.
       content:

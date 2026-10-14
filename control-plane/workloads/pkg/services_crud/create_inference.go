@@ -59,6 +59,7 @@ func CreateInference(ctx context.Context, tenantSettingsClient clients.TenantSet
 
 	sanitizeWorkloadResponse(ctx, &createWorkloadParams.Response)
 
+	recordWorkloadCreate(ctx, &createWorkloadParams)
 	createWorkloadParams.Response.Spec = gpucompat.LegacyCompatibleWorkloadSpec(createWorkloadParams.Response.Spec)
 	if createWorkloadParams.Response.MasterSpec.Get() != nil {
 		createWorkloadParams.Response.MasterSpec.Set(gpucompat.LegacyCompatibleMasterSpec(createWorkloadParams.Response.MasterSpec.Get()))

@@ -1,0 +1,4 @@
+description: The time when the workload action was accepted.
+type: string
+format: date-time
+example: 2026-01-01T03:49:52.531Z

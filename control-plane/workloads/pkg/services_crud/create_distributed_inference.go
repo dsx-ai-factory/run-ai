@@ -69,6 +69,7 @@ func CreateDistributedInference(ctx context.Context, tenantSettingsClient client
 		return api.Response(int(createErr.Code), createErr), nil
 	}
 
+	recordWorkloadCreate(ctx, &createWorkloadParams)
 	createWorkloadParams.Response.Spec = gpucompat.LegacyCompatibleWorkloadSpec(createWorkloadParams.Response.Spec)
 	if createWorkloadParams.Response.MasterSpec.Get() != nil {
 		createWorkloadParams.Response.MasterSpec.Set(gpucompat.LegacyCompatibleMasterSpec(createWorkloadParams.Response.MasterSpec.Get()))

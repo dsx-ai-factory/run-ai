@@ -207,7 +207,9 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 			persistErr = redactSensitiveValuesFromResponse(persistErr, sensitiveRequestValues)
 			return api.Response(int(persistErr.Code), persistErr), nil
 		}
+		acceptedAt := time.Now().UTC()
 		sanitizeWorkloadResponse(ctx, response)
+		recordWorkloadResponseAction(ctx, *response, api.WORKLOADACTIONTYPE_UPDATE, acceptedAt)
 
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully updated inference spec for workload id: <%s> name: <%s> in project id: <%s>", workloadId, nativeWorkload.Name, nativeWorkload.ProjectId)
 		return api.Response(http.StatusAccepted, *response), nil
@@ -267,6 +269,7 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		updateErr = redactSensitiveValuesFromResponse(updateErr, sensitiveRequestValues)
 		return api.Response(int(updateErr.Code), updateErr), nil
 	}
+	acceptedAt := time.Now().UTC()
 
 	// Write the merged spec back so subsequent updates / make-a-copy see it (best-effort):
 	// the workload update already succeeded in workloads-manager, so a snapshot failure must
@@ -282,6 +285,7 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to write back V2 snapshot for workload %s: %v", workloadId, wbErr.Message)
 	}
 	sanitizeWorkloadResponse(ctx, &response)
+	recordWorkloadResponseAction(ctx, response, api.WORKLOADACTIONTYPE_UPDATE, acceptedAt)
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully updated inference spec via workload-runner for workload id: <%s>", workloadId)
 	return api.Response(http.StatusAccepted, response), nil

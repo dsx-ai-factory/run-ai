@@ -18,9 +18,10 @@ func TestEffectiveMemoryDefaultsPreserveLegacyValidation(t *testing.T) {
 		for _, kind := range []string{"Workspace", "Training", "Inference", "Distributed", "DistributedInference"} {
 			t.Run(fmt.Sprintf("%s/%v", kind, value), func(t *testing.T) {
 				defaults := map[string]any{"compute": map[string]any{"gpuPortionRequest": value, "gpuRequestType": "portion"}}
-				if kind == "Distributed" {
+				switch kind {
+				case "Distributed":
 					defaults = map[string]any{"worker": defaults}
-				} else if kind == "DistributedInference" {
+				case "DistributedInference":
 					defaults = map[string]any{"worker": defaults, "leader": defaults}
 				}
 				canonical, err := gpucompat.NormalizeLegacyGPUFields(defaults)

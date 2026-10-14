@@ -230,6 +230,7 @@ docs/GetEnableTemplatesV2.md
 docs/GetGpuOverProvisioning.md
 docs/GetInferenceWorkloadRevisions200Response.md
 docs/GetRevisionPods200Response.md
+docs/GetWorkloadActionsResponse.md
 docs/GetWorkloadClusterPriorities200Response.md
 docs/GetWorkloadEndpoints200Response.md
 docs/GetWorkloadEvents200Response.md
@@ -558,6 +559,8 @@ docs/UpdateSpec.md
 docs/UpdateSpecSpec.md
 docs/UpdateWorkloadsSettingByKeyRequest.md
 docs/Workload.md
+docs/WorkloadActionRecord.md
+docs/WorkloadActionType.md
 docs/WorkloadAllocatedResources.md
 docs/WorkloadBatch.md
 docs/WorkloadCategory.md
@@ -837,6 +840,7 @@ model_get_enable_templates_v2.go
 model_get_gpu_over_provisioning.go
 model_get_inference_workload_revisions_200_response.go
 model_get_revision_pods_200_response.go
+model_get_workload_actions_response.go
 model_get_workload_cluster_priorities_200_response.go
 model_get_workload_endpoints_200_response.go
 model_get_workload_events_200_response.go
@@ -1155,6 +1159,8 @@ model_update_spec.go
 model_update_spec_spec.go
 model_update_workloads_setting_by_key_request.go
 model_workload.go
+model_workload_action_record.go
+model_workload_action_type.go
 model_workload_allocated_resources.go
 model_workload_batch.go
 model_workload_category.go

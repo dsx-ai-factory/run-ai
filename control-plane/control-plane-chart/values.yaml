@@ -4881,7 +4881,7 @@ telemetryService:
     host: '{{ .Values.global.postgresql.auth.host }}'
     port: '{{ .Values.global.postgresql.auth.port }}'
     name: '{{ .Values.global.postgresql.auth.database }}'
-    schema: diagnostics # existing production data; not renamed with the service
+    schema: telemetry
     sslMode: '{{ .Values.global.postgresql.auth.dbSslMode }}'
     migrationFiles: file:///migrations
     user: '{{ .Values.global.postgresql.auth.username }}'

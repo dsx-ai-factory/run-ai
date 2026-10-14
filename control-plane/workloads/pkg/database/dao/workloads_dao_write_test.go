@@ -8,6 +8,7 @@ package dao
 import (
 	"errors"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -41,6 +42,7 @@ const (
 	wlWriteSyncDelete              = "UPDATE workloads SET deleted_at=? WHERE tenant_id = ? AND cluster_id = ? AND workloads.deleted_at IS NULL RETURNING id"
 	wlWriteSyncDeleteExcl          = "UPDATE workloads SET deleted_at=? WHERE tenant_id = ? AND cluster_id = ? AND NOT id IN (?) AND workloads.deleted_at IS NULL RETURNING id"
 	wlWriteSyncDeleteFilter        = "UPDATE workloads SET deleted_at=? WHERE tenant_id = ? AND project_id = ? AND id >= ? AND id <= ? AND NOT id IN (?) AND phase = ? AND workloads.deleted_at IS NULL RETURNING id"
+	wlWriteSyncResetSuspend        = "UPDATE workloads SET support_suspend=? WHERE tenant_id = ? AND id IN (?) AND support_suspend = ? AND (source_api IS NULL OR source_api <> ?)"
 	wlWriteClusterDelete           = "DELETE FROM workloads WHERE tenant_id = ? AND cluster_id = ?"
 	wlWriteTenantDelete            = "DELETE FROM workloads WHERE tenant_id = ?"
 )
@@ -128,10 +130,13 @@ var _ = Describe("DbDeleteWorkload", func() {
 })
 
 var _ = Describe("DbUpsertWorkload", func() {
-	It("saves the workload", func() {
+	It("saves the workload and resets a stale support_suspend when the cluster reports it as not suspendable", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectTransaction().Begin()
 		m.ExpectExec(wlWriteSave).Returns(1)
+		m.ExpectTransaction().Commit()
+		m.ExpectTransaction().Begin()
+		m.ExpectExec(wlWriteSyncResetSuspend, false, 1, wlWriteId, true, string(api.SOURCEAPI_WORKLOADS_V2)).Returns(1)
 		m.ExpectTransaction().Commit()
 
 		apiErr := (&WorkloadsDao{}).DbUpsertWorkload(testCtx(1), wlWriteWorkload())
@@ -156,6 +161,7 @@ var _ = Describe("DbUpsertWorkloadFull", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectTransaction().Begin()
 		m.ExpectExec(wlWriteSave).Returns(1)
+		m.ExpectExec(wlWriteSyncResetSuspend, false, 1, wlWriteId, true, string(api.SOURCEAPI_WORKLOADS_V2)).Returns(1)
 		m.ExpectExec(wlWriteSavepointChildren).Returns(0)
 		m.ExpectExec(wlWriteChildInsert).Returns(1)
 		m.ExpectExec(wlWriteSavepointElements).Returns(0)
@@ -192,6 +198,7 @@ var _ = Describe("DbUpsertWorkloadFull", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectTransaction().Begin()
 		m.ExpectExec(wlWriteSave).Returns(1)
+		m.ExpectExec(wlWriteSyncResetSuspend, false, 1, wlWriteId, true, string(api.SOURCEAPI_WORKLOADS_V2)).Returns(1)
 		m.ExpectExec(wlWriteSavepointChildren).Returns(0)
 		m.ExpectExec(wlWriteChildInsert).ReturnsError(errors.New("boom"))
 		m.ExpectExec(wlWriteRollbackChildren).Returns(0)
@@ -206,6 +213,7 @@ var _ = Describe("DbUpsertWorkloadFull", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectTransaction().Begin()
 		m.ExpectExec(wlWriteSave).Returns(1)
+		m.ExpectExec(wlWriteSyncResetSuspend, false, 1, wlWriteId, true, string(api.SOURCEAPI_WORKLOADS_V2)).Returns(1)
 		m.ExpectExec(wlWriteSavepointChildren).Returns(0)
 		m.ExpectExec(wlWriteSavepointElements).Returns(0)
 		m.ExpectExec(wlWriteElementsDeleteNoCluster).ReturnsError(errors.New("boom"))
@@ -221,6 +229,7 @@ var _ = Describe("DbUpsertWorkloadFull", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectTransaction().Begin()
 		m.ExpectExec(wlWriteSave).Returns(1)
+		m.ExpectExec(wlWriteSyncResetSuspend, false, 1, wlWriteId, true, string(api.SOURCEAPI_WORKLOADS_V2)).Returns(1)
 		m.ExpectExec(wlWriteSavepointChildren).Returns(0)
 		m.ExpectExec(wlWriteSavepointElements).Returns(0)
 		m.ExpectExec(wlWriteElementsDeleteAll).Returns(0)
@@ -420,6 +429,7 @@ var _ = Describe("DbSyncWorkloads", func() {
 		m.ExpectExec(wlWriteSavepointSp).Returns(0)
 		m.ExpectExec(wlWriteSave).Returns(1)
 		m.ExpectExec(wlWriteSavepointSp).Returns(0)
+		m.ExpectExec(wlWriteSyncResetSuspend, false, 1, wlWriteId, true, string(api.SOURCEAPI_WORKLOADS_V2)).Returns(1)
 		m.ExpectQuery(wlWriteSyncDeleteExcl).Returns([]wlWriteIdRow{{ID: wlWriteChildId.String()}})
 		m.ExpectTransaction().Commit()
 
@@ -430,6 +440,41 @@ var _ = Describe("DbSyncWorkloads", func() {
 		Expect(synced).To(Equal([]string{wlWriteId.String()}))
 		Expect(failed).To(BeEmpty())
 		Expect(deleted).To(Equal([]string{wlWriteChildId.String()}))
+	})
+
+	It("keeps support_suspend untouched when the cluster reports the workload as suspendable", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectTransaction().Begin()
+		m.ExpectExec(wlWriteSavepointSp).Returns(0)
+		m.ExpectExec(strings.Replace(wlWriteSave, "support_delete=?,", "support_delete=?,support_suspend=?,", 1)).Returns(1)
+		m.ExpectExec(wlWriteSavepointSp).Returns(0)
+		m.ExpectQuery(wlWriteSyncDeleteExcl).Returns([]wlWriteIdRow{})
+		m.ExpectTransaction().Commit()
+
+		workload := wlWriteWorkload()
+		workload.SupportSuspend = true
+
+		synced, failed, _, apiErr := (&WorkloadsDao{}).DbSyncWorkloads(testCtx(1), 1, "",
+			wlWriteClusterId.String(), []models.Workload{workload}, nil, nil, nil, nil)
+
+		Expect(apiErr).To(BeNil())
+		Expect(synced).To(Equal([]string{wlWriteId.String()}))
+		Expect(failed).To(BeEmpty())
+	})
+
+	It("returns an error when the support_suspend reset fails", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectTransaction().Begin()
+		m.ExpectExec(wlWriteSavepointSp).Returns(0)
+		m.ExpectExec(wlWriteSave).Returns(1)
+		m.ExpectExec(wlWriteSavepointSp).Returns(0)
+		m.ExpectExec(wlWriteSyncResetSuspend).ReturnsError(errors.New("boom"))
+		m.ExpectTransaction().Rollback()
+
+		_, _, _, apiErr := (&WorkloadsDao{}).DbSyncWorkloads(testCtx(1), 1, "",
+			wlWriteClusterId.String(), []models.Workload{wlWriteWorkload()}, nil, nil, nil, nil)
+
+		Expect(apiErr).ToNot(BeNil())
 	})
 
 	It("reports a workload as failed when its save fails", func() {

@@ -17,6 +17,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-logr/logr"
+	ctrllog "sigs.k8s.io/controller-runtime/pkg/log"
+
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/report"
@@ -29,6 +32,7 @@ import (
 func main() {
 	log.SetFlags(log.Ltime | log.Lmsgprefix)
 	log.SetPrefix("flowmark: ")
+	ctrllog.SetLogger(logr.Discard())
 	if err := run(); err != nil {
 		log.Print(err)
 		os.Exit(1)

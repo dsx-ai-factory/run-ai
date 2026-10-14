@@ -1,0 +1,3 @@
+description: The authenticated subject that performed the workload action.
+type: string
+example: user@run.ai
