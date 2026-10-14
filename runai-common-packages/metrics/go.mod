@@ -4,7 +4,7 @@ go 1.27.2
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.8
-	github.com/go-chi/chi/v5 v5.4.0
+	github.com/go-chi/chi/v5 v5.5.0
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/client_model v0.6.3
 	github.com/prometheus/common v0.72.1
