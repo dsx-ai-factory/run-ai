@@ -23,7 +23,13 @@
       <div v-if="savedEntries.length" class="saved-rules q-mb-sm">
         <template v-for="(entry, i) in savedEntries" :key="entry.draft.id">
           <div v-if="editingIndex === i && openDraft" class="rule-edit-wrap">
-            <policy-rule-summary :rule="entry.draft" :index="i" @edit="cancelRule" @delete="deleteRule(i)" />
+            <policy-rule-summary
+              :rule="entry.draft"
+              :index="i"
+              :inactive-tooltip="inactiveTooltip(entry.draft)"
+              @edit="cancelRule"
+              @delete="deleteRule(i)"
+            />
             <policy-rule-card
               :ref="setOpenCard"
               :mapping="mapping"
@@ -44,6 +50,7 @@
             v-else
             :rule="entry.draft"
             :index="i"
+            :inactive-tooltip="inactiveTooltip(entry.draft)"
             @edit="attemptEditRule(i)"
             @delete="attemptDeleteRule(i)"
           />
@@ -162,26 +169,11 @@ const allowOverrideEnabled = computed<boolean>(
   () => props.scope === ScopeType.Cluster || props.scope === ScopeType.Department,
 );
 
-function scopeRank(scope: ScopeType): number {
-  switch (scope) {
-    case ScopeType.Project:
-      return 1;
-    case ScopeType.Department:
-      return 2;
-    case ScopeType.Cluster:
-      return 3;
-    default:
-      return 0;
-  }
+const lockedRules = computed(() => gvkPolicyUtil.lockedParentRules(props.effectiveRules, props.scope));
+function inactiveTooltip(draft: IRuleDraft): string {
+  const source = gvkPolicyUtil.lockedParentRuleForDraft(draft, lockedRules.value)?.sourceOfRule;
+  return gvkPolicyUtil.inactiveRuleTooltip(source, authStore.orgUnits, authStore.tenant.name);
 }
-const lockedRules = computed<EffectiveRulesEffectiveRulesInner[]>(() => {
-  const currentRank = scopeRank(props.scope);
-  return props.effectiveRules.filter((rule) => {
-    const source = rule.sourceOfRule;
-    if (!source || source.isFallback || rule.allowOverride !== false) return false;
-    return scopeRank(source.scope) > currentRank;
-  });
-});
 const validationRevealed = ref<boolean>(false);
 
 onMounted(async () => {

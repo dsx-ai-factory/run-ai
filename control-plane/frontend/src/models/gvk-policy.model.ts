@@ -3,7 +3,16 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { GVK, MappingFieldType } from "@/swagger-models/policy-service-client";
+import type {
+  EffectiveRulesEffectiveRulesInner,
+  GVK,
+  MappingFieldType,
+  SourceOfRule,
+} from "@/swagger-models/policy-service-client";
+
+export interface IGvkPolicyViewRule extends EffectiveRulesEffectiveRulesInner {
+  blockedBy?: SourceOfRule;
+}
 
 export type { GVK, PolicyRule } from "@/swagger-models/policy-service-client";
 

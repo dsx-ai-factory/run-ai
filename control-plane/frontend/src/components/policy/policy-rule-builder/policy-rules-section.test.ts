@@ -15,6 +15,7 @@ import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import { errorMessages } from "@/common/error-message.constant";
 import { ScopeType, type PolicyRule } from "@/swagger-models/policy-service-client";
 import PolicyRuleCard from "./policy-rule-card.vue";
+import PolicyRuleSummary from "./policy-rule-summary.vue";
 
 // The section drives the real mapping composable on mount; stub it so no service calls fire.
 vi.mock("@/composables/use-policy-mapping.composable", () => ({
@@ -33,6 +34,15 @@ const pinia = createTestingPinia({ createSpy: vi.fn });
 setActivePinia(pinia);
 
 describe("policy-rules-section.vue", () => {
+  test("updates the collapsed warning when the matching parent allows override", async () => {
+    const rule = { field: "image", specSelector: "allContainers", enforcements: [{ required: true }] };
+    const parent = { ...rule, allowOverride: false, sourceOfRule: { scope: ScopeType.Cluster } };
+    const wrapper = mountComponent([Action.Update], { modelValue: [rule], effectiveRules: [parent] });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findComponent(PolicyRuleSummary).props("inactiveTooltip")).toContain("This rule is inactive");
+    await wrapper.setProps({ effectiveRules: [{ ...parent, allowOverride: true }] });
+    expect(wrapper.findComponent(PolicyRuleSummary).props("inactiveTooltip")).toBe("");
+  });
   const permissionStore = usePermissionStore(pinia);
 
   function mountComponent(
