@@ -68,11 +68,11 @@ class TestRegexPatterns(unittest.TestCase):
         pattern = RegexPatterns.VERSION
         
         # Should match version patterns
-        self.assertIsNotNone(pattern.search("2.20"))
-        self.assertIsNotNone(pattern.search("2.21.0"))
-        self.assertIsNotNone(pattern.search("v2.20"))  # Now accepts v prefix
-        self.assertIsNotNone(pattern.search("v2.21.0"))  # Now accepts v prefix
-        self.assertIsNotNone(pattern.search("2.22.1-saas.10"))
+        self.assertIsNotNone(pattern.search("2.24"))
+        self.assertIsNotNone(pattern.search("2.24.0"))
+        self.assertIsNotNone(pattern.search("v2.24"))  # Now accepts v prefix
+        self.assertIsNotNone(pattern.search("v2.24.0"))  # Now accepts v prefix
+        self.assertIsNotNone(pattern.search("2.25.1-saas.10"))
         
         # Should not match invalid patterns
         self.assertIsNone(pattern.search("abc"))
@@ -84,11 +84,11 @@ class TestRegexPatterns(unittest.TestCase):
         pattern = RegexPatterns.MASTER
         
         # Should match master versions
-        self.assertIsNotNone(pattern.search("2.22.0.master"))
-        self.assertIsNotNone(pattern.search("2.21.1.master"))
+        self.assertIsNotNone(pattern.search("2.25.0.master"))
+        self.assertIsNotNone(pattern.search("2.24.1.master"))
         
         # Should not match non-master versions
-        self.assertIsNone(pattern.search("2.22.0"))
+        self.assertIsNone(pattern.search("2.25.0"))
         self.assertIsNone(pattern.search("master"))
     
     def test_content_replacement_patterns(self):
@@ -96,7 +96,7 @@ class TestRegexPatterns(unittest.TestCase):
         # Version replacement
         version_pattern = RegexPatterns.VERSION_REPLACE
         self.assertIsNotNone(version_pattern.search("version: 2.0.0"))
-        self.assertIsNone(version_pattern.search("version: 2.22.0"))
+        self.assertIsNone(version_pattern.search("version: 2.25.0"))
 
 
 if __name__ == '__main__':

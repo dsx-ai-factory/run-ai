@@ -40,13 +40,13 @@ class BaseProcessor(ABC):
         if not self.version:
             raise ValueError(
                 "Version parameter is required. "
-                "Provide a version like '2.22.0', 'latest', or '2.21.0.master'"
+                "Provide a version like '2.25.0', 'latest', or '2.24.0.master'"
             )
         
         if not VersionManager.validate_version_format(self.version):
             raise ValueError(
                 f"Invalid version format: '{self.version}'. "
-                f"Expected formats: '2.22.0', 'latest', 'v2.21.0-saas.1', or '2.20.0.master'"
+                f"Expected formats: '2.25.0', 'latest', 'v2.24.0-saas.1', or '2.24.0.master'"
             )
         
         try:

@@ -130,19 +130,19 @@ paths:
         # Read the file first to populate cache
         self.file_processor.read_spec_file()
         content = self.file_processor._cached_content
-        result = self.file_processor._replace_version(content, "2.22.0")
-        self.assertIn('version: "2.22.0"', result)
+        result = self.file_processor._replace_version(content, "2.25.0")
+        self.assertIn('version: "2.25.0"', result)
         self.assertNotIn('version: 2.0.0', result)
     
     def test_apply_build_transformations(self):
         """Test applying all build transformations"""
-        version = "2.22.0"
+        version = "2.25.0"
         
         self.file_processor.apply_build_transformations(version)
         content = self.file_processor.read_spec_file()
         
         # Check that transformations were applied
-        self.assertIn('"2.22.0"', content)  # Version should be quoted
+        self.assertIn('"2.25.0"', content)  # Version should be quoted
     
     def test_error_handling_invalid_file(self):
         """Test error handling for invalid files"""
@@ -182,9 +182,9 @@ paths:
         self.spec_file_path.write_text(large_content, encoding='utf-8')
         
         content = self.file_processor.read_spec_file()
-        result = self.file_processor._replace_version(content, "2.23.0")
+        result = self.file_processor._replace_version(content, "2.26.0")
         
-        self.assertIn('version: "2.23.0"', result)
+        self.assertIn('version: "2.26.0"', result)
         self.assertTrue(len(result) > len(self.sample_content))
 
 

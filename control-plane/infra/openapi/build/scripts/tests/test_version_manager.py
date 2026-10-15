@@ -22,7 +22,7 @@ class TestVersionManager(unittest.TestCase):
 
     def test_validate_version_format(self):
         """Test version validation"""
-        for version in ["2.22.0", "2.21", "2.22.0.master", "latest", "v2.22.0"]:
+        for version in ["2.25.0", "2.24", "2.25.0.master", "latest", "v2.25.0"]:
             with self.subTest(version=version):
                 self.assertTrue(VersionManager.validate_version_format(version))
 

@@ -86,5 +86,5 @@ class Reporter:
         print("   • Verify source and target files exist and are readable", file=sys.stderr)
         print("   • Check OpenAPI spec is valid YAML format", file=sys.stderr)
         print("   • Ensure sufficient disk space for file operations", file=sys.stderr)
-        print("   • Validate version format (e.g., '2.22.0', 'latest')", file=sys.stderr)
+        print("   • Validate version format (e.g., '2.25.0', 'latest')", file=sys.stderr)
         print("   • Check file permissions in _build/ directory", file=sys.stderr)
