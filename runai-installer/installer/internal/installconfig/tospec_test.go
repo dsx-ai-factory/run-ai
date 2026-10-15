@@ -13,6 +13,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// The fixtures below reuse these Helm value keys; naming them keeps one
+// fixture from silently testing a different key than the others.
+const (
+	keyGlobal  = "global"
+	keyDNS     = "dns"
+	keyArgs    = "args"
+	keyName    = "name"
+	keyEnabled = "enabled"
+	valueTrue  = "true"
+)
+
 func TestToSpec_InstallMode(t *testing.T) {
 	cases := map[string]spec.InstallMode{
 		"":                         spec.InstallModeFull,
@@ -236,4 +247,167 @@ func TestToSpec_ControlPlaneCredentials(t *testing.T) {
 
 	cfg.Cluster.ControlPlaneCredentials = nil
 	assert.Nil(t, cfg.ToSpec(RunOptions{}).Cluster.ControlPlaneCredentials)
+}
+
+// Custom helm values are handed to Helm as --set arguments, which address
+// nested values with dotted paths. A nested map in the config must therefore be
+// flattened instead of being rendered as a Go map string.
+func TestToSpec_CustomHelmValuesNestedMaps(t *testing.T) {
+	cfg := &Config{
+		ControlPlane: &ControlPlane{
+			Enabled: true,
+			Domain:  "runai.example.com",
+			CustomHelmValues: map[string]any{
+				"supportEntitled": true,
+				"telemetryService": map[string]any{
+					"enabled": true,
+				},
+				keyGlobal: map[string]any{
+					"fipsMode": "only",
+					"ingress":  map[string]any{"enabled": false},
+				},
+			},
+		},
+	}
+
+	values := cfg.ToSpec(RunOptions{}).ControlPlane.CustomHelmValues
+
+	assert.Equal(t, map[string]string{
+		"supportEntitled":          "true",
+		"telemetryService.enabled": "true",
+		"global.fipsMode":          "only",
+		"global.ingress.enabled":   "false",
+	}, values)
+}
+
+func TestToSpec_CustomHelmValuesShapes(t *testing.T) {
+	cases := []struct {
+		name string
+		in   map[string]any
+		want map[string]string
+	}{
+		{
+			name: "empty block maps to no overrides",
+			in:   map[string]any{},
+			want: nil,
+		},
+		{
+			name: "already dotted keys are preserved",
+			in:   map[string]any{"clusterConfig.global.subdomainSupport": false},
+			want: map[string]string{"clusterConfig.global.subdomainSupport": "false"},
+		},
+		{
+			name: "scalars keep their config type",
+			in:   map[string]any{"replicas": 3, "ratio": 1.5, "name": "runai"},
+			want: map[string]string{"replicas": "3", "ratio": "1.5", "name": "runai"},
+		},
+		{
+			name: "lists use helm brace syntax",
+			in:   map[string]any{keyDNS: []any{"1.1.1.1", "8.8.8.8"}},
+			want: map[string]string{keyDNS: "{1.1.1.1,8.8.8.8}"},
+		},
+		{
+			name: "commas inside list elements are escaped",
+			in:   map[string]any{keyArgs: []any{"a,b", `c\d`}},
+			want: map[string]string{keyArgs: `{a\,b,c\\d}`},
+		},
+		{
+			name: "a map nested under a dotted key is still flattened",
+			in:   map[string]any{"global.foo": map[string]any{"bar": 1}},
+			want: map[string]string{"global.foo.bar": "1"},
+		},
+		{
+			name: "empty nested maps do not clear chart defaults",
+			in:   map[string]any{keyGlobal: map[string]any{}},
+			want: nil,
+		},
+		{
+			name: "braces inside list elements are escaped",
+			in:   map[string]any{keyArgs: []any{"a}b", "{c}"}},
+			want: map[string]string{keyArgs: `{a\}b,\{c\}}`},
+		},
+		{
+			name: "braces inside scalar values are escaped",
+			in:   map[string]any{"note": "a}b{c"},
+			want: map[string]string{"note": `a\}b\{c`},
+		},
+		{
+			// Helm's --set has no empty-list form: `key={}` sets a list holding
+			// one empty string, so an empty list has to emit nothing.
+			name: "empty lists do not become a one element list",
+			in:   map[string]any{keyDNS: []any{}, keyArgs: []string{}},
+			want: nil,
+		},
+		{
+			// Both spellings name global.foo. Sorted iteration makes the result
+			// independent of map order, and the key spelled out in full wins.
+			name: "a dotted key wins over the same path from a nested map",
+			in:   map[string]any{keyGlobal: map[string]any{"foo": "from-nested"}, "global.foo": "from-dotted"},
+			want: map[string]string{"global.foo": "from-dotted"},
+		},
+		{
+			// Helm splits keys on dots, so a nested key containing one has to be
+			// escaped or the chart receives nested maps instead of that key.
+			name: "dots in nested keys stay part of the key",
+			in:   map[string]any{"podAnnotations": map[string]any{"prometheus.io/scrape": valueTrue}},
+			want: map[string]string{`podAnnotations.prometheus\.io/scrape`: valueTrue},
+		},
+		{
+			name: "nested keys escape every helm key separator",
+			in:   map[string]any{"a": map[string]any{"b,c": 1, "d=e": 2, `f\g`: 3, "h[i": 4}},
+			want: map[string]string{`a.b\,c`: "1", `a.d\=e`: "2", `a.f\\g`: "3", `a.h\[i`: "4"},
+		},
+		{
+			name: "an indexed entry escapes the dots in its keys",
+			in:   map[string]any{"ports": []any{map[string]any{"prometheus.io/scrape": true}}},
+			want: map[string]string{`ports[0].prometheus\.io/scrape`: valueTrue},
+		},
+		{
+			// Helm's brace syntax carries scalars only, so an entry that is a map
+			// has to be addressed by index or the chart receives the Go map
+			// string that this change exists to remove.
+			name: "a list of maps uses indexed keys",
+			in:   map[string]any{"tolerations": []any{map[string]any{"key": "nvidia.com/gpu", "operator": "Exists"}}},
+			want: map[string]string{
+				"tolerations[0].key":      "nvidia.com/gpu",
+				"tolerations[0].operator": "Exists",
+			},
+		},
+		{
+			// The outer list needs indexes because one entry is a list, while the
+			// inner list of scalars keeps the compact brace form Helm accepts on
+			// the right hand side of an indexed key.
+			name: "a list with a nested list addresses the outer entries by index",
+			in:   map[string]any{keyArgs: []any{"plain", []any{"a", "b"}}},
+			want: map[string]string{
+				"args[0]": "plain",
+				"args[1]": "{a,b}",
+			},
+		},
+		{
+			name: "an indexed list keeps helm escaping and types",
+			in:   map[string]any{"ports": []any{map[string]any{keyName: "a,b", "number": 8080, keyEnabled: true}}},
+			want: map[string]string{
+				"ports[0].name":    `a\,b`,
+				"ports[0].number":  "8080",
+				"ports[0].enabled": valueTrue,
+			},
+		},
+		{
+			// Helm parses a bare `null` as an empty value; `%v` would have sent
+			// the literal "<nil>".
+			name: "null keeps its meaning",
+			in:   map[string]any{"affinity": nil, keyArgs: []any{nil, "x"}},
+			want: map[string]string{"affinity": "null", keyArgs: "{null,x}"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := &Config{
+				ControlPlane: &ControlPlane{Enabled: true, Domain: "runai.example.com", CustomHelmValues: tc.in},
+			}
+			assert.Equal(t, tc.want, cfg.ToSpec(RunOptions{}).ControlPlane.CustomHelmValues)
+		})
+	}
 }
