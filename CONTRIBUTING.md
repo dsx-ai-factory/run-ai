@@ -170,7 +170,7 @@ Then run whichever language-level checks apply. These mirror the corresponding j
 | You changed | Run | Mirrors |
 |---|---|---|
 | Any service | `cd <service-dir> && make build test lint validate` | `targets` job in `pr-fast.yaml` |
-| Go code | `golangci-lint run` (v2.9.0)<br>`govulncheck ./...` | `go-lint`, `govulncheck` in `pr-checks.yaml` |
+| Go code | `golangci-lint run` (v2.14.0)<br>`govulncheck ./...` | `go-lint`, `govulncheck` in `pr-checks.yaml` |
 | Python | `ruff check <files>` (0.15.15) | `py-lint` in `pr-checks.yaml` |
 | JS/TS | `npx eslint <files>` | `js-lint` in `pr-checks.yaml` |
 | Helm charts | `helm dependency update control-plane/control-plane-chart`<br>`helm lint control-plane/control-plane-chart`<br>`helm template control-plane/control-plane-chart > /dev/null` | `helm` in `pr-checks.yaml` |

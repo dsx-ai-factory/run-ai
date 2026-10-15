@@ -20,7 +20,7 @@ INTERNAL_BIN_REL_PATH?=bin-internal
 # Derive the Go runtime version from go.mod so the linter is always built
 # with a toolchain new enough for whatever go.mod currently requires.
 GO_VERSION_BASE?=$(shell awk '$$1=="go"{print $$2;exit}' go.mod)
-GOLANGCI_LINT_VERSION=v2.9.0
+GOLANGCI_LINT_VERSION=v2.14.0
 DOCKERHUB_PROXY?=
 
 # Ensure ~/.gitconfig exists before any container bind-mounts it. Docker creates a
