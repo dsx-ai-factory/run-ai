@@ -66,6 +66,7 @@ func (a *AllowGPT2Model) TransformToResponse() interface{} {
 		},
 		DisplayName: a.DisplayName(),
 		Description: a.Description(),
+		Stage:       string(a.Stage()),
 	}
 }
 
