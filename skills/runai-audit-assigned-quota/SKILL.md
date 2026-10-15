@@ -12,7 +12,7 @@ description: >-
   verdict use runai-get-cluster-health-summary.
 license: Apache-2.0 AND CC-BY-4.0
 metadata:
-  author: Run:ai
+  author: Run:ai <runai-skills@nvidia.com>
 ---
 
 # Run:ai — Audit Assigned Quota
@@ -48,7 +48,7 @@ the numbers.
   limit, overQuotaWeight}`, project/department/node-pool identity. **Primary source.**
 - `get_workloads_summary` — workload counts by phase; scope with
   `orgType="project"` + `orgName` to get a project's **pending** count (required for
-  STARVED). `counts.pending` folds Pending/Initializing/Creating/Resuming.
+  STARVED). `pending` under `counts` folds Pending/Initializing/Creating/Resuming.
   **Do NOT pass `nodePoolName` here** — pending pods aren't node-pool-assigned yet, so
   a node-pool filter drops them and `pending` reads 0 even when the project has
   workloads waiting for capacity.
@@ -69,7 +69,7 @@ deserved)` and `deficit = max(0, deserved − allocated)`. Skip cells with
 For each project with a `deficit > 0`, call
 `get_workloads_summary(orgType="project", orgName=<projectName>)` — **project-scoped,
 no `nodePoolName`** (pending pods are unscheduled, so a node-pool filter returns
-`pending = 0` and hides the starvation). Read `counts.pending`. If `pending > 0`,
+`pending = 0` and hides the starvation). Read `pending` under `counts`. If `pending > 0`,
 **inspect the pending reason** (via
 `get_workload_status` on the pending workloads) — a pending count alone is not
 starvation:

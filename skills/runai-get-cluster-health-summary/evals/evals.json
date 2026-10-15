@@ -5,12 +5,13 @@
     {
       "id": "A1-lab-cluster-verdict-per-pool",
       "prompt": "Is cluster 20000000-0000-4000-8000-0000000000c1 healthy? Give me a verdict per node pool.",
-      "expected_output": "Cluster verdict STUCK. infer-pool STUCK: 16 free GPUs (0/16/16 allocated/allocatable/total) while embed-1 (47m) and embed-2 (41m), 1 GPU each, wait with no scheduler reason (SCHEDULER_SUSPECT). edge-pool STUCK: pool phase Unschedulable and its only GPU node node-edge-01 is Unknown, so 0 of 8 GPUs are allocatable. train-pool DEGRADED: node-train-03 NotReady and node-train-04 Unknown (cordoned with runai=drain, likely maintenance) remove 16 of 32 GPUs; 12/16 allocated, 4 free; pinned-h200 pending is a node-selector problem, not a pool fault. default DEGRADED: full at 32/32 with capacity backlog (batch-7 8 GPUs 35m, svc-a 4 GPUs 22m), not stuck. cpu-pool HEALTHY with a note that CPU-only cpu-node-01 is NotReady. archive-pool phase Empty is a note, not a fault. 2 failed workloads route to runai-get-workload-health-summary. Read-only.",
+      "expected_output": "Cluster verdict STUCK. infer-pool STUCK: 16 free GPUs (0/16/16 allocated/allocatable/total) while embed-1 (47m) and embed-2 (41m), 1 GPU each, wait with no scheduler reason (SCHEDULER_SUSPECT). edge-pool STUCK: pool phase Unschedulable and its only GPU node node-edge-01 is Unknown, so 0 of 8 GPUs are allocatable. train-pool DEGRADED: node-train-03 NotReady and node-train-04 Unknown (cordoned with runai=drain, likely maintenance) remove 16 of 32 GPUs; 12/16 allocated, 4 free; pinned-h200 pending is a spec problem: its spec pins node type gpu-h200 (found with get_workload_spec; its recent events name only a GPU shortage, and its history shows the earlier node-affinity mismatch), not a pool fault. default DEGRADED: full at 32/32 with capacity backlog (batch-7 8 GPUs 35m, svc-a 4 GPUs 22m), not stuck. cpu-pool HEALTHY with a note that CPU-only cpu-node-01 is NotReady. archive-pool phase Empty is a note, not a fault. 2 failed workloads route to runai-get-workload-health-summary. Read-only.",
       "expected_skill": "runai-get-cluster-health-summary",
       "expected_script": null,
       "expected_behavior": [
         "calls list_node_pools, get_cluster_infrastructure_health, get_cluster_physical_inventory, and get_workloads_summary for the cluster",
         "samples the oldest pending workloads with list_workloads sorted by totalPendingTimeSeconds and checks them with get_workload_status",
+        "checks pinned-h200's spec with get_workload_spec and its history with get_workload_history because its request fits train-pool's free GPUs",
         "gives one verdict per pool and an overall STUCK verdict",
         "classifies infer-pool as STUCK because free GPUs are not scheduled",
         "classifies edge-pool as STUCK because no GPU node is schedulable",
@@ -36,7 +37,7 @@
     {
       "id": "A3-scheduler-stuck-or-full",
       "prompt": "Lots of jobs are pending on cluster 20000000-0000-4000-8000-0000000000c1. Is the scheduler stuck, or are we just full?",
-      "expected_output": "Both, in different pools. infer-pool is stuck: 16 GPUs are free, but embed-1 and embed-2 (1 GPU each) have waited 47 and 41 minutes with no reason reported. default is simply full: 32 of 32 GPUs allocated, and batch-7 (8 GPUs) and svc-a (4 GPUs) report not enough resources. pinned-h200 in train-pool is blocked by its node selector (gpu-type=h200), a workload problem. It states it sampled 5 of 7 pending workloads.",
+      "expected_output": "Both, in different pools. infer-pool is stuck: 16 GPUs are free, but embed-1 and embed-2 (1 GPU each) have waited 47 and 41 minutes with no reason reported. default is simply full: 32 of 32 GPUs allocated, and batch-7 (8 GPUs) and svc-a (4 GPUs) report not enough resources. pinned-h200 in train-pool is blocked by its own spec, which pins node type gpu-h200 while 4 GPUs are free, a workload problem. It states it sampled 5 of 7 pending workloads.",
       "expected_skill": "runai-get-cluster-health-summary",
       "expected_script": null,
       "expected_behavior": [
@@ -91,12 +92,13 @@
     {
       "id": "A7-allocation-and-utilization",
       "prompt": "Is cluster 20000000-0000-4000-8000-0000000000c1 saturated? Show GPU allocation and utilization per node pool.",
-      "expected_output": "44 of 88 GPUs allocated cluster-wide (64 allocatable because 24 sit on unhealthy nodes); 1-hour average GPU utilization about 39%. Per pool: default 32/32 full (about 82% utilization), train-pool 12 of 16 allocatable (about 70%), infer-pool 0 of 16 with 16 free, edge-pool 0 of 0 allocatable. Only default is saturated, and the answer says so together with its pending backlog (batch-7, 8 GPUs, and svc-a, 4 GPUs, report not enough resources). infer-pool has free GPUs but stuck pending work.",
+      "expected_output": "44 of 88 GPUs allocated cluster-wide (64 allocatable because 24 sit on unhealthy nodes); 1-hour average GPU utilization about 39% cluster-wide. Allocation per pool from the inventory: default 32/32 full, train-pool 12 of 16 allocatable (4 free), infer-pool 0 of 16 with 16 free, edge-pool 0 of 0 allocatable. Utilization per pool is not available from cluster metrics on this server, which returns the cluster-wide series for every pool; the answer gives utilization cluster-wide, names runai-get-utilization-overview for utilization per pool, and never reports the cluster-wide value as a pool's. Only default is saturated, and the answer says so together with its pending backlog (batch-7, 8 GPUs, and svc-a, 4 GPUs, report not enough resources). infer-pool has free GPUs but stuck pending work.",
       "expected_skill": "runai-get-cluster-health-summary",
       "expected_script": null,
       "expected_behavior": [
         "uses get_cluster_physical_inventory for allocation per pool",
-        "uses get_cluster_metrics for GPU utilization",
+        "uses get_cluster_metrics for cluster-wide GPU utilization",
+        "does not present cluster-wide utilization as a pool's utilization",
         "reports allocated, allocatable, and total separately",
         "identifies default as the only full pool",
         "mentions the pending backlog together with the saturation answer"
@@ -105,7 +107,7 @@
     {
       "id": "A8-train-pool-health",
       "prompt": "How healthy is train-pool on cluster 20000000-0000-4000-8000-0000000000c1?",
-      "expected_output": "train-pool is DEGRADED: 2 of 4 nodes are down (node-train-03 NotReady, node-train-04 Unknown and cordoned with runai=drain), so 16 of 32 A100 GPUs are unschedulable; 12 of the remaining 16 are allocated and 4 are free. pinned-h200 has waited 30 minutes, but its node selector gpu-type=h200 matches no node, a workload problem, not a pool fault. Two workloads (seg-train-2, tok-eval-4) failed after node-train-03 became NotReady; node correlation belongs to runai-get-workload-health-summary.",
+      "expected_output": "train-pool is DEGRADED: 2 of 4 nodes are down (node-train-03 NotReady, node-train-04 Unknown and cordoned with runai=drain), so 16 of 32 A100 GPUs are unschedulable; 12 of the remaining 16 are allocated and 4 are free. pinned-h200 has waited 30 minutes, but its spec pins node type gpu-h200, so the 4 free GPUs do not help: a workload problem, not a pool fault. Two workloads (seg-train-2, tok-eval-4) failed after node-train-03 became NotReady; node correlation belongs to runai-get-workload-health-summary.",
       "expected_skill": "runai-get-cluster-health-summary",
       "expected_script": null,
       "expected_behavior": [
@@ -242,11 +244,11 @@
     {
       "id": "C3-free-gpus-but-spec-pending",
       "prompt": "train-pool on cluster 20000000-0000-4000-8000-0000000000c1 has free GPUs but work is still pending. Is the pool broken?",
-      "expected_output": "The pending workload in train-pool, pinned-h200, is blocked by its own node selector (gpu-type=h200 matches none of the 4 nodes), a workload problem, so the free GPUs do not make the pool stuck. train-pool is DEGRADED for another reason: 2 of 4 nodes are down and 16 of 32 GPUs are unschedulable. Route pinned-h200 to runai-diagnose-pending-workload.",
+      "expected_output": "The pending workload in train-pool, pinned-h200, is blocked by its own placement: its spec pins node type gpu-h200 although train-pool has 4 free GPUs; its recent events name only a GPU shortage, but its history shows the earlier node-affinity mismatch. It is a workload problem, so the free GPUs do not make the pool stuck. train-pool is DEGRADED for another reason: 2 of 4 nodes are down and 16 of 32 GPUs are unschedulable. Route pinned-h200 to runai-diagnose-pending-workload.",
       "expected_skill": "runai-get-cluster-health-summary",
       "expected_script": null,
       "expected_behavior": [
-        "reads pinned-h200 status and finds the node-selector reason",
+        "checks pinned-h200's spec and history and finds the nodeType pin and the earlier affinity mismatch",
         "classifies pinned-h200 as SPEC, not SCHEDULER_SUSPECT",
         "reports train-pool DEGRADED for the unhealthy nodes",
         "routes the pending workload to a pending-workload diagnostic"

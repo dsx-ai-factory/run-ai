@@ -1,4 +1,7 @@
-# BENCHMARK — runai-diagnose-failed-workload
+# Local evaluation — runai-diagnose-failed-workload
+
+The certified `BENCHMARK.md` next to `SKILL.md` is generated and signed by
+NVSkills CI, so it must not be edited by hand. This file keeps the local runs.
 
 Preliminary local evaluation under the NV-BASE `external` profile. These
 results are not NVCARPS-certified.

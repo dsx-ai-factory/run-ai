@@ -80,8 +80,8 @@ the full answer. Write requests are the exception: make zero MCP calls.
 ## Prerequisites
 
 - **Run:ai MCP server, required**, with read access to node pools, node health,
-  cluster inventory, cluster metrics, workload counts, workload lists, and
-  workload status.
+  cluster inventory, cluster metrics, workload counts, workload lists,
+  workload status, workload specs, and workload history.
 - **No Kubernetes access is used.** The skill is MCP-only by design. If the MCP
   is unavailable, say so and stop; do not fall back to `kubectl` and do not
   estimate numbers.
@@ -103,9 +103,11 @@ the full answer. Write requests are the exception: make zero MCP calls.
 | `get_cluster_infrastructure_health` | NotReady/Unknown nodes, their conditions, taints, GPU counts, `gpusUnschedulable` per pool. |
 | `get_cluster_physical_inventory` | Per pool: `gpusTotal`, `gpusAllocatable` (on Ready nodes), `gpusAllocated`, `gpusFree`. |
 | `get_workloads_summary` | Cluster-wide phase counts: `pending`, `failed`, `running`. |
-| `get_cluster_metrics` | GPU utilization and allocation series for the last hour. |
+| `get_cluster_metrics` | Cluster-wide GPU utilization and allocation series for the last hour. Never pass `nodePoolName`. |
 | `list_workloads` | The oldest pending workloads, with requested pools and GPUs. |
 | `get_workload_status` | `phaseMessage`, `phaseReason`, conditions, and events for one pending workload. |
+| `get_workload_spec` | Placement of a pending workload (`nodeType`, affinity, pools) when its request fits the free GPUs. |
+| `get_workload_history` | Older events of that workload, to prove a placement mismatch the newest events no longer show. |
 
 ## Instructions — workflow
 
@@ -134,8 +136,11 @@ pass `nodePoolName`, but only to `get_cluster_infrastructure_health` and
 
 Then call `get_cluster_metrics` once with `window="last_1h"`,
 `metricTypes=["gpuUtilization","allocatedGpu","totalGpu"]`, and
-`numberOfSamples=12`. When the user asks for utilization per pool, call it
-once more for each GPU pool with `nodePoolName`. If the user asks for a metric
+`numberOfSamples=12`. Never pass `nodePoolName`: the current server returns
+cluster-wide allocation and utilization for every pool. When the user asks
+for utilization per pool, give allocation per pool from the inventory and the
+cluster-wide utilization, and name `runai-get-utilization-overview` for
+utilization per pool. If the user asks for a metric
 this list omits (for example `avgWorkloadWaitTime`), request it too. If
 `partialData` is true or a series is missing, name each missing metric as
 unavailable. Never compute or estimate a missing series, and never invent
@@ -177,9 +182,23 @@ Read every returned event with its timestamp, not only the newest:
   policy. Never report it as a current GPU or scheduler fault; if you mention
   it, call it an earlier event.
 
-When a not-enough-resources reason appears although the pool shows enough
-`gpusFree`, keep `CAPACITY` and name the possible cause from the evidence,
-never as fact:
+When a not-enough-resources reason appears although a requested pool has
+`gpusFree >= requestedGpu`, call `get_workload_spec` for that workload first.
+If its spec pins placement (`nodeType`, `nodeAffinityRequired`, or
+`podAffinity`), look for proof that the pin matches no node: an event saying a
+node selector or affinity did not match. The newest events often name only the
+GPU shortage, so when the status events do not show it, call
+`get_workload_history` for that workload with `limit=50` and read its older
+events. A retrying scheduler logs a shortage event on every retry, so if no
+mismatch event appears and the response has `next`, follow it, up to 3 pages.
+
+- A mismatch event found → class it `SPEC` and name the pin.
+- No mismatch event → keep `CAPACITY`, and name the pin as a possible cause the
+  tools cannot confirm: node labels are not exposed, and the pinned nodes may
+  simply be full.
+
+Without a pin, keep `CAPACITY` and name the possible cause from the
+evidence, never as fact:
 
 - More than one GPU node in the pool (`gpuNodes > 1`): free GPUs can be split
   across nodes, so a multi-GPU request may not fit on any one node.
@@ -299,7 +318,8 @@ Utilization: 0/8 GPUs allocated; GPU utilization 1h avg 0%.
   nodes, or an `Unschedulable` pool.
 - Show the raw numbers behind every verdict.
 - Report missing metrics as unavailable; never estimate them.
-- At most `pending_sample` status calls.
+- At most `pending_sample` status calls, plus one spec call and at most 3
+  history pages per workload whose request fits the free GPUs.
 
 ## Limitations
 
@@ -314,6 +334,9 @@ Utilization: 0/8 GPUs allocated; GPU utilization 1h avg 0%.
   `phaseUpdatedAt` of pending workloads instead.
 - The skill does not see control-plane services; it cannot prove the scheduler
   process itself is down, only that free GPUs are not being used.
+- Utilization per node pool is not available: the current server ignores
+  `nodePoolName` in `get_cluster_metrics`. Node labels are not exposed either,
+  so a `nodeType` pin is reported from the spec, not checked against nodes.
 
 ## Troubleshooting
 
@@ -325,3 +348,4 @@ Utilization: 0/8 GPUs allocated; GPU utilization 1h avg 0%.
 | MCP not connected or auth fails | Server or credentials problem. | Say so and stop. No `kubectl`, no estimates. |
 | `pending > 0` but `list_workloads` returns none | Pending bucket includes Creating/Initializing/Resuming. | Report the count and that no workload is in `Pending` phase. |
 | `list_workloads` rejects `includeDetails` | Older MCP server. | Retry without it; attribute pools from status messages or the default pool. |
+| Every pool shows the same utilization | The server ignores `nodePoolName` in `get_cluster_metrics`. | Report utilization cluster-wide only; name `runai-get-utilization-overview` for per-pool utilization. |
