@@ -36,26 +36,14 @@ class FileConstants:
 
 class VersionConstants:
     DEFAULT_API_VERSION = "2.0.0"
-    MIN_NEW_DOCS_VERSION = 220  # 2.20 minimum for new docs
     LATEST_VERSION_KEYWORD = "latest"
     MASTER_VERSION_SUFFIX = ".master"
     MASTER_VERSION_KEYWORD = "master"
     VERSION_MULTIPLIER = 100  # For converting "2.20" to 220
 
 
-class DocumentationConstants:
-    NVIDIA_DOCS_DOMAIN = "https://run-ai-docs.nvidia.com"
-    LEGACY_DOCS_DOMAIN = "https://docs.run.ai"
-
-
-
-
-
 @dataclass
 class Config:
-    NVIDIA_DOCS_DOMAIN: str = DocumentationConstants.NVIDIA_DOCS_DOMAIN
-    LEGACY_DOCS_DOMAIN: str = DocumentationConstants.LEGACY_DOCS_DOMAIN
-    MIN_NEW_DOCS_VERSION: int = VersionConstants.MIN_NEW_DOCS_VERSION
     FILE_ENCODING: str = FileConstants.DEFAULT_ENCODING
     
     @classmethod
@@ -78,7 +66,3 @@ class RegexPatterns:
     VERSION_REPLACE = re.compile(r'version: 2\.0\.0')
     LOGO = re.compile(r'url: \./runai-logo-api\.png')
     
-    @classmethod
-    def get_docs_pattern(cls, docs_domain: str) -> str:
-        docs_domain_escaped = docs_domain.replace('.', r'\.')
-        return f"{docs_domain_escaped}/self-hosted/latest/" 

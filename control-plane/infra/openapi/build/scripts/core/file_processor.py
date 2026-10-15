@@ -11,7 +11,6 @@ import shutil
 from pathlib import Path
 from typing import Optional
 from .config import Config, RegexPatterns
-from .link_replacer import LinkReplacer
 
 
 class FileProcessor:
@@ -26,7 +25,6 @@ class FileProcessor:
         self.spec_file_path = self._validate_path(Path(spec_file_path), root)
         self.spec_file_src = self._validate_path(Path(spec_file_src), root)
         self.config = config
-        self.link_replacer = LinkReplacer(config)
         self._cached_content: Optional[str] = None
 
     @classmethod
@@ -82,13 +80,10 @@ class FileProcessor:
         except Exception as e:
             raise RuntimeError(f"Failed to reset spec file: {e}") from e
     
-    def apply_build_transformations(self, version: str, docs_base_url: str,
+    def apply_build_transformations(self, version: str,
                                    version_info: Optional['VersionInfo'] = None) -> None:
         """Apply all content transformations to the spec file for local build"""
         content = self.read_spec_file()
-
-        # Apply documentation link replacements
-        content = self.link_replacer.replace_docs_links(content, docs_base_url)
 
         # Apply content transformations
         content = self._replace_version(content, version)

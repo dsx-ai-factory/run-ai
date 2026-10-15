@@ -50,7 +50,7 @@ lint: ## Run linters.
 	# no-op
 .PHONY: lint
 
-validate: openapi-build-public-spec validate-openapi-public-spec validate-tags validate-docs-links validate-openapi-spec-python validate-openapi-backwards-compatibility
+validate: openapi-build-public-spec validate-openapi-public-spec validate-tags validate-openapi-spec-python validate-openapi-backwards-compatibility
 .PHONY: validate
 
 validate-openapi-spec-python:
@@ -68,31 +68,6 @@ validate-tags:
 	${DOCKER_LINUX_COMMAND} /bin/sh -c "cat ${OPENAPI_BUILD_PATH}/_build/runaiApi.swagger.yaml | grep -i 'x-authorization' && exit 1 || exit 0"
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: validate-tags
-
-validate-docs-links:
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Validating documentation links have /latest/" ${BASE_CONSOLE}
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Checking for broken NVIDIA docs links (missing /latest/) in generated spec" ${BASE_CONSOLE}
-	@ BROKEN_LINKS_TMP=$$(mktemp); \
-	if grep -oE 'https://run-ai-docs\.nvidia\.com/self-hosted/[^)"[:space:]]+' ${SPEC_FILE_SRC} | grep -v 'self-hosted/latest' > "$$BROKEN_LINKS_TMP" 2>/dev/null; then \
-		echo ""; \
-		echo "============================================================"; \
-		echo "ERROR: Found NVIDIA docs links WITHOUT /latest/"; \
-		echo "============================================================"; \
-		echo ""; \
-		echo "Broken links found in: ${SPEC_FILE_SRC}"; \
-		echo ""; \
-		cat "$$BROKEN_LINKS_TMP" | sort -u | nl; \
-		echo ""; \
-		echo "FIX: Add /latest/ after /self-hosted/ in source files"; \
-		echo ""; \
-		rm -f "$$BROKEN_LINKS_TMP"; \
-		exit 1; \
-	else \
-		rm -f "$$BROKEN_LINKS_TMP"; \
-		exit 0; \
-	fi
-	${SUCCESS_MESSAGE_HANDLER}
-.PHONY: validate-docs-links
 
 validate-openapi-backwards-compatibility:
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Validating backwards compatibility of public openapi spec" ${BASE_CONSOLE};

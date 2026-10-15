@@ -70,7 +70,6 @@ paths:
         self.assertIsInstance(self.file_processor.spec_file_path, Path)
         self.assertIsInstance(self.file_processor.spec_file_src, Path)
         self.assertIsNotNone(self.file_processor.config)
-        self.assertIsNotNone(self.file_processor.link_replacer)
         # Cache should be None until file is read
         self.assertIsNone(self.file_processor._cached_content)
     
@@ -135,25 +134,15 @@ paths:
         self.assertIn('version: "2.22.0"', result)
         self.assertNotIn('version: 2.0.0', result)
     
-    def test_apply_docs_link_transformation(self):
-        """Test documentation link transformation"""
-        docs_base_url = "https://run-ai-docs.nvidia.com/self-hosted"
-        # Read the file first
-        content = self.file_processor.read_spec_file()
-        result = self.file_processor.link_replacer.replace_docs_links(content, docs_base_url)
-        self.assertIn(docs_base_url, result)
-    
     def test_apply_build_transformations(self):
         """Test applying all build transformations"""
         version = "2.22.0"
-        docs_base_url = "https://run-ai-docs.nvidia.com/self-hosted"
         
-        self.file_processor.apply_build_transformations(version, docs_base_url)
+        self.file_processor.apply_build_transformations(version)
         content = self.file_processor.read_spec_file()
         
         # Check that transformations were applied
         self.assertIn('"2.22.0"', content)  # Version should be quoted
-        self.assertIn(docs_base_url, content)
         # Logo should remain local for build mode
         self.assertIn('./runai-logo-api.png', content)
     

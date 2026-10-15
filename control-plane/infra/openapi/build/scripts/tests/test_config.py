@@ -25,9 +25,6 @@ class TestConfig(unittest.TestCase):
         """Test default configuration creation"""
         config = Config.get_default()
         
-        self.assertEqual(config.NVIDIA_DOCS_DOMAIN, "https://run-ai-docs.nvidia.com")
-        self.assertEqual(config.LEGACY_DOCS_DOMAIN, "https://docs.run.ai") 
-        self.assertEqual(config.MIN_NEW_DOCS_VERSION, 220)
         self.assertEqual(config.FILE_ENCODING, "utf-8")
 
 
@@ -149,15 +146,6 @@ class TestRegexPatterns(unittest.TestCase):
         logo_pattern = RegexPatterns.LOGO
         self.assertIsNotNone(logo_pattern.search("url: ./runai-logo-api.png"))
         self.assertIsNone(logo_pattern.search("url: https://example.com/logo.png"))
-    
-    def test_get_docs_pattern(self):
-        """Test documentation pattern generation"""
-        docs_domain = "https://run-ai-docs.nvidia.com"
-        pattern = RegexPatterns.get_docs_pattern(docs_domain)
-        
-        # Should escape dots properly
-        self.assertIn(r'run-ai-docs\.nvidia\.com', pattern)
-        self.assertIn('/self-hosted/latest/', pattern)
 
 
 if __name__ == '__main__':

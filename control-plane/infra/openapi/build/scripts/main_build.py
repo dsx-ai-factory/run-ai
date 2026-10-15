@@ -40,24 +40,21 @@ class BuildProcessor(BaseProcessor):
             
             # Use base class helper methods
             detected_environment = self.get_environment()
-            documentation_base_url = self.get_docs_url(detected_environment, ProcessingMode.BUILD)
             
             # Print environment detection results
-            self.reporter.print_environment_detection(detected_environment, documentation_base_url)
+            self.reporter.print_environment_detection(detected_environment)
             
             # Print transformation start
             self.reporter.print_transformation_start()
             
             self.file_processor.apply_build_transformations(
                 version=self.version,
-                docs_base_url=documentation_base_url,
                 version_info=self.version_info
             )
             
             # Print success summary using Reporter method
             self.reporter.print_build_success(
                 version=self.version,
-                docs_url=documentation_base_url,
                 output_file=self.spec_file_path
             )
             return True

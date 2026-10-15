@@ -3,8 +3,7 @@
 `openapi/build` is the control-plane component that **builds Run:ai's public
 OpenAPI documentation spec**. It merges the individual service swagger files
 into a single public spec, filters out internal endpoints/fields, and
-post-processes the result (version stamping, branding, documentation link
-rewriting) for local/CI use. It is owned by the **Sphinx** team.
+post-processes the result (version stamping, branding) for local/CI use. It is owned by the **Sphinx** team.
 
 This module does **not** build or ship a container image, and it does not
 serve docs at runtime. Its `artifact_type` is `none`: the build produces
@@ -34,9 +33,8 @@ The module is responsible for:
   the redocly bundle applies the decorators in `plugins/internal-filters.js`
   and `plugins/system-scoped-filters.js` (removing `x-internal` endpoints and
   stripping internal enum values), configured by `config/redocly.yaml`.
-- **Post-processing** links and versions via the Python pipeline in
-  `scripts/` (doc-link rewriting to `/latest/`, version stamping, branding
-  normalization).
+- **Post-processing** versions via the Python pipeline in
+  `scripts/` (version stamping, branding normalization).
 
 ## Repository layout
 
@@ -52,7 +50,7 @@ The module is responsible for:
 ├── swagger/                # rootApi.yaml / rootApiSystemScoped.yaml / rootApiTags.yaml
 ├── scripts/                # Python spec build pipeline
 │   ├── main_build.py       # process the built spec for local use
-│   ├── core/               # processors, link replacer, version manager, file processor
+│   ├── core/               # processors, version manager, file processor
 │   ├── cli/                # Node deps (openapi-merge-cli / redocly) via package.json
 │   ├── tests/               # pytest suite (run_all_tests.py)
 │   └── requirements.txt    # pytest, requests
@@ -88,7 +86,7 @@ build is run in CI (and manually) to regenerate the docs spec.
 | `make lint` | No-op (kept for the standard target contract) |
 
 The pytest suite under `scripts/tests/` covers the config loader, file
-processor, link replacer, and version manager.
+processor, and version manager.
 
 ## Validation
 
@@ -97,9 +95,8 @@ on error per `artifact-metadata.json`):
 
 | Target | Description |
 |--------|-------------|
-| `make validate` | `validate-openapi-public-spec` + `validate-tags` + `validate-docs-links` + `validate-openapi-spec-python` + `validate-openapi-backwards-compatibility` |
+| `make validate` | `validate-openapi-public-spec` + `validate-tags` + `validate-openapi-spec-python` + `validate-openapi-backwards-compatibility` |
 | `validate-tags` | Fail if the built spec still contains `x-internal` or `x-authorization` tags |
-| `validate-docs-links` | Fail if any `run-ai-docs.nvidia.com/self-hosted/...` link is missing the `/latest/` segment |
 | `validate-openapi-spec-python` | Generate a Python client from the spec via OpenAPI Generator as a smoke test |
 | `validate-openapi-backwards-compatibility` | Run `oasdiff` against the base branch to catch breaking public-API changes |
 

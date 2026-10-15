@@ -11,7 +11,6 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from .config import Config, ProcessingMode, Environment
 from .version_manager import VersionManager
-from .link_replacer import LinkReplacer
 from .file_processor import FileProcessor
 from .reporter import Reporter
 
@@ -31,7 +30,6 @@ class BaseProcessor(ABC):
         # Common utilities
         self.config = Config.get_default()
         self.version_manager = VersionManager()
-        self.link_replacer = LinkReplacer(self.config)
         self.file_processor = FileProcessor(self.spec_file_path, self.spec_file_src, self.config)
         self.reporter = Reporter(mode)
 
@@ -77,10 +75,6 @@ class BaseProcessor(ABC):
             self.env, self.version
         )
     
-    def get_docs_url(self, environment: Environment, mode: ProcessingMode) -> str:
-        """Get documentation URL for given environment and mode"""
-        return self.link_replacer.get_docs_url(self.version_info)
-
     @abstractmethod
     def run(self) -> bool:
         """Main execution method (implemented by subclasses)"""

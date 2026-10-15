@@ -45,25 +45,23 @@ class Reporter:
         
         print()
     
-    def print_environment_detection(self, detected_env: Environment, docs_url: str) -> None:
+    def print_environment_detection(self, detected_env: Environment) -> None:
         """Print environment detection results"""
         print("🌍 Environment Analysis:")
         print(f"   • Detected: {detected_env.value}")
-        print(f"   • Documentation URL: {docs_url}")
         print()
     
     def print_transformation_start(self) -> None:
         """Print transformation start message"""
         print(f"{Colors.YELLOW}⚙️  Applying transformations for local development...{Colors.NC}")
     
-    def print_transformations_applied(self, version_transform: str, docs_url: str) -> None:
+    def print_transformations_applied(self, version_transform: str) -> None:
         """Print detailed transformation results"""
         print("✨ Transformations applied:")
         print(f"   • Version: 2.0.0 → {version_transform}")
-        print(f"   • Documentation links: → {docs_url}")
         print()
     
-    def print_build_success(self, version: str, docs_url: str, output_file: Path) -> None:
+    def print_build_success(self, version: str, output_file: Path) -> None:
         """Print build success summary with enhanced details"""
         elapsed = self._get_elapsed_time()
         
@@ -71,7 +69,7 @@ class Reporter:
         print()
         
         # Enhanced transformation summary
-        self.print_transformations_applied(version, docs_url)
+        self.print_transformations_applied(version)
 
     def print_error(self, error: Exception, context: str = "") -> None:
         """Print error with context and troubleshooting"""

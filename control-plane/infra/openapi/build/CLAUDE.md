@@ -23,7 +23,7 @@ Targets come from the service `Makefile` plus shared includes
 | `get_latest_tag` | Resolve latest release tag → `LATEST_TAG` |
 | `test` | Run the pytest suite `scripts/tests/run_all_tests.py` in the python container |
 | `lint` | No-op |
-| `validate` | `validate-openapi-public-spec` + `validate-tags` + `validate-docs-links` + `validate-openapi-spec-python` + `validate-openapi-backwards-compatibility` (all `continue_on_error` per metadata) |
+| `validate` | `validate-openapi-public-spec` + `validate-tags` + `validate-openapi-spec-python` + `validate-openapi-backwards-compatibility` (all `continue_on_error` per metadata) |
 
 ## Key build notes
 
@@ -36,8 +36,7 @@ Targets come from the service `Makefile` plus shared includes
   `openapi-merge-cli`, bundles/filters with redocly (`config/redocly*.yaml` +
   `plugins/internal-filters.js`, `plugins/system-scoped-filters.js`) to strip
   `x-internal` endpoints and internal enum values, then post-processes:
-  documentation link rewriting (`core/link_replacer.py`), version stamping,
-  and branding normalization (`core/file_processor.py`).
+  version stamping, and branding normalization (`core/file_processor.py`).
 - **No external publish step.** GitBook publishing (the old `make extra`
   target, `scripts/gitbook/`, `core/gitbook_api.py`, `scripts/main_extra.py`)
   was removed (RUN-42271) — this module only produces local build artifacts
@@ -45,7 +44,7 @@ Targets come from the service `Makefile` plus shared includes
 - **Source specs:** `SPEC_FILE_SRC=../infra/openapi/specs/runai-public.yaml` and
   `SPEC_FILE_SRC_SYSTEM=../infra/openapi/specs/runai-system-scoped.yaml`.
 - **Validation gates:** no `x-internal`/`x-authorization` tags in the built spec;
-  all docs links carry `/latest/`; spec generates a Python client; `oasdiff`
+  spec generates a Python client; `oasdiff`
   backwards-compatibility check against the base branch.
 - **Python deps:** `scripts/requirements.txt` (`pytest`, `requests`); Node deps in
   `scripts/cli/package.json` (openapi-merge-cli / redocly).
