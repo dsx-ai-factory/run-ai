@@ -178,7 +178,9 @@ func UpdateDistributedInferenceSpec(ctx context.Context, workloadId string, tena
 		if persistErr != nil {
 			return api.Response(int(persistErr.Code), persistErr), nil
 		}
+		acceptedAt := time.Now().UTC()
 		sanitizeWorkloadResponse(ctx, response)
+		recordWorkloadResponseAction(ctx, *response, api.WORKLOADACTIONTYPE_UPDATE, acceptedAt)
 
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully updated distributed inference spec for workload id: <%s> name: <%s> in project id: <%s>", workloadId, nativeWorkload.Name, nativeWorkload.ProjectId)
 		return api.Response(http.StatusAccepted, *response), nil
@@ -218,6 +220,7 @@ func UpdateDistributedInferenceSpec(ctx context.Context, workloadId string, tena
 	if updateErr != nil {
 		return api.Response(int(updateErr.Code), updateErr), nil
 	}
+	acceptedAt := time.Now().UTC()
 
 	// Write the merged spec back so subsequent updates / make-a-copy see it (best-effort):
 	// the workload update already succeeded in workloads-manager, so a snapshot failure must
@@ -234,6 +237,7 @@ func UpdateDistributedInferenceSpec(ctx context.Context, workloadId string, tena
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully updated distributed inference spec via workload-runner for workload id: <%s>", workloadId)
 	sanitizeWorkloadResponse(ctx, &response)
+	recordWorkloadResponseAction(ctx, response, api.WORKLOADACTIONTYPE_UPDATE, acceptedAt)
 	return api.Response(http.StatusAccepted, response), nil
 }
 

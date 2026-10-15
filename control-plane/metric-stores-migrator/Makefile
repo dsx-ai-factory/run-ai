@@ -15,7 +15,7 @@ test: build  test-go ## Run unit-tests.
 lint: lint-go ## Run linter.
 .PHONY: lint
 
-validate: ## Run validate.
+validate: validate-mockery ## Run validate.
 	# no-op
 .PHONY: validate
 

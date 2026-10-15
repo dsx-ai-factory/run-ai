@@ -14,7 +14,6 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -198,103 +197,22 @@ func TestArrivalBeforeMarkIsZeroNotNegative(t *testing.T) {
 	}
 }
 
-func externalWorkload(name, sourceUID, ownerUID string) *unstructured.Unstructured {
-	obj := &unstructured.Unstructured{}
-	obj.SetGroupVersionKind(ExternalWorkloadKind)
-	obj.SetNamespace(testNamespace)
-	obj.SetName(name)
-	if sourceUID != "" {
-		_ = unstructured.SetNestedField(obj.Object, sourceUID, "spec", "originalWorkloadUID")
-	}
-	if ownerUID != "" {
-		obj.SetOwnerReferences([]metav1.OwnerReference{{APIVersion: "apps/v1", Kind: "Deployment", Name: "dep", UID: types.UID(ownerUID)}})
-	}
-	return obj
-}
-
-func TestExternalWorkloadSourcePrefersUIDThenOwnerThenName(t *testing.T) {
-	cases := []struct {
-		name string
-		obj  *unstructured.Unstructured
-		want string
-	}{
-		{"spec uid wins", externalWorkload("ew-deployment-dep", "uid-spec", "uid-owner"), "uid-spec"},
-		{"owner uid fallback", externalWorkload("ew-deployment-dep", "", "uid-owner"), "uid-owner"},
-		{"name fallback", externalWorkload("ew-deployment-flowmark-ew-1a2b3c4d-r100-7", "", ""), "flowmark-ew-1a2b3c4d-r100-7"},
-		{"name fallback other kind", externalWorkload("ew-tfjob-train", "", ""), "train"},
-		{"name fallback no prefix", externalWorkload("plain-name", "", ""), "plain-name"},
-	}
-	for _, tc := range cases {
-		t.Run(tc.name, func(t *testing.T) {
-			if got := externalWorkloadSource(tc.obj); got != tc.want {
-				t.Fatalf("got %q want %q", got, tc.want)
-			}
-		})
-	}
-}
-
-func TestExternalWorkloadArrivalMatchesByUIDInBothOrders(t *testing.T) {
-	for _, eventFirst := range []bool{false, true} {
-		name := "mark first"
-		if eventFirst {
-			name = "event first"
-		}
-		t.Run(name, func(t *testing.T) {
-			kube := fake.NewClientBuilder().Build()
-			w, err := WatchExternalWorkloads(context.Background(), kube, testNamespace)
-			if err != nil {
-				t.Fatal(err)
-			}
-			t.Cleanup(w.Stop)
-
-			t0 := time.Now()
-			create := func() {
-				if err := kube.Create(context.Background(), externalWorkload("ew-deployment-dep-1", "uid-1", "uid-1")); err != nil {
-					t.Fatal(err)
-				}
-			}
-			if eventFirst {
-				create()
-				waitForArrival(t, w, "uid-1")
-				w.MarkCreated("uid-1", t0)
-			} else {
-				w.MarkCreated("uid-1", t0)
-				create()
-			}
-
-			got := byName(w.WaitAll(2 * time.Second))
-			if got["uid-1"].Outcome != Arrived || got["uid-1"].Duration <= 0 {
-				t.Fatalf("event must be matched to the deployment UID, got %+v", got)
-			}
-			if _, byEWName := got["dep-1"]; byEWName {
-				t.Fatal("the item must be keyed by UID, not by the ExternalWorkload name")
-			}
-		})
-	}
-}
-
 func TestUnmatchedCountsArrivalsNobodyMarked(t *testing.T) {
-	kube := fake.NewClientBuilder().Build()
-	w, err := WatchExternalWorkloads(context.Background(), kube, testNamespace)
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(w.Stop)
+	kube, w := startWatch(t)
 
-	w.MarkCreated("uid-marked", time.Now())
-	if err := kube.Create(context.Background(), externalWorkload("ew-deployment-marked", "uid-marked", "")); err != nil {
-		t.Fatal(err)
+	w.MarkCreated("w-marked", time.Now())
+	for _, name := range []string{"w-marked", "w-orphan"} {
+		if err := kube.Create(context.Background(), runner(name)); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if err := kube.Create(context.Background(), externalWorkload("ew-deployment-orphan", "", "")); err != nil {
-		t.Fatal(err)
-	}
-	waitForArrival(t, w, "uid-marked")
-	waitForArrival(t, w, "orphan")
+	waitForArrival(t, w, "w-marked")
+	waitForArrival(t, w, "w-orphan")
 
 	if got := w.Unmatched(); got != 1 {
-		t.Fatalf("the object without a source UID must count as unmatched, got %d", got)
+		t.Fatalf("the object nobody marked must count as unmatched, got %d", got)
 	}
-	if got := byName(w.WaitAll(time.Second))["uid-marked"]; got.Outcome != Arrived {
+	if got := byName(w.WaitAll(time.Second))["w-marked"]; got.Outcome != Arrived {
 		t.Fatalf("the marked item must still arrive: %+v", got)
 	}
 }

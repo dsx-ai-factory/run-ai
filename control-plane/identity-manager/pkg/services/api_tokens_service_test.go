@@ -47,50 +47,6 @@ func initTokenServiceTests(t *testing.T) (iamServicesContainerMock *iamMock.Mock
 	return mockIamServicesContainer, clientCacheMock, testSubject, ctx
 }
 
-func TestAppToken_HappyFlow(t *testing.T) {
-	iamMock, _, testSubject, ctx := initTokenServiceTests(t)
-	client := mockUtils.GetBasicClientArray()[0]
-	tokens := getTokens()
-	iamMock.MockAuthService.On("AuthenticateClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(tokens, nil)
-	req := api.AppTokenRequest{
-		Name:   *client.ClientID,
-		Secret: *client.Secret,
-		Id:     "id",
-	}
-	resp, err := testSubject.AppToken(ctx, req)
-	assert.Equal(t, http.StatusOK, resp.Code)
-	assert.Equal(t, tokens.AccessToken, resp.Body.(api.AppTokenResponse).AccessToken)
-	assert.Nil(t, err)
-}
-
-func TestAppToken_AuthenticateAppError(t *testing.T) {
-	iamMock, _, testSubject, ctx := initTokenServiceTests(t)
-	client := mockUtils.GetBasicClientArray()[0]
-	iamMock.MockAuthService.On("AuthenticateClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, assert.AnError)
-	req := api.AppTokenRequest{
-		Name:   *client.ClientID,
-		Secret: *client.Secret,
-		Id:     "id",
-	}
-	resp, err := testSubject.AppToken(ctx, req)
-	assert.Equal(t, http.StatusInternalServerError, resp.Code)
-	assert.NotNil(t, err)
-}
-
-func TestAppToken_400InvalidClient(t *testing.T) {
-	iamMock, _, testSubject, ctx := initTokenServiceTests(t)
-	client := mockUtils.GetBasicClientArray()[0]
-	iamMock.MockAuthService.On("AuthenticateClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, iamError.ErrInvalidInput)
-	req := api.AppTokenRequest{
-		Name:   *client.ClientID,
-		Secret: *client.Secret,
-		Id:     "id",
-	}
-	resp, err := testSubject.AppToken(ctx, req)
-	assert.Equal(t, http.StatusBadRequest, resp.Code)
-	assert.NotNil(t, err)
-}
-
 func TestGetClientIDForRequest_NonEmptyClientId(t *testing.T) {
 	_, _, testSubject, _ := initTokenServiceTests(t)
 	client := mockUtils.GetBasicClientArray()[0]
@@ -377,27 +333,12 @@ func TestValidateTokenRequest(t *testing.T) {
 		assert.Error(t, err)
 		assert.Contains(t, err.Error(), models.TokenRequestFieldRedirectUri)
 	})
-	t.Run("app_token (deprecated) missing fields", func(t *testing.T) {
-		err := testSubject.validateTokenRequest(api.TokenRequest{
-			GrantType: models.GrantTypeAppTokenDeprecated,
-		})
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), models.TokenRequestFieldAppID)
-
-		err = testSubject.validateTokenRequest(api.TokenRequest{
-			GrantType: models.GrantTypeAppTokenDeprecated,
-			AppID:     "appid",
-		})
-		assert.Error(t, err)
-		assert.Contains(t, err.Error(), models.TokenRequestFieldAppSecret)
-	})
 	t.Run("all required fields present", func(t *testing.T) {
 		cases := []api.TokenRequest{
 			{GrantType: models.GrantTypeAppToken, ClientID: "id", ClientSecret: "secret"},
 			{GrantType: models.GrantTypeUserPassword, Username: "u", Password: "p"},
 			{GrantType: models.GrantTypeRefreshToken, RefreshToken: "r"},
 			{GrantType: models.GrantTypeExchangeToken, Code: "c", RedirectUri: "uri"},
-			{GrantType: models.GrantTypeAppTokenDeprecated, AppID: "id", AppSecret: "secret"},
 		}
 		for _, req := range cases {
 			err := testSubject.validateTokenRequest(req)

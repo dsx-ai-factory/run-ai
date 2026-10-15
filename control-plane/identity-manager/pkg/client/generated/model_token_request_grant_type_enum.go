@@ -28,7 +28,6 @@ const (
 	TOKENREQUESTGRANTTYPEENUM_EXCHANGE_TOKEN          TokenRequestGrantTypeEnum = "exchange_token"
 	TOKENREQUESTGRANTTYPEENUM_PASSWORD                TokenRequestGrantTypeEnum = "password"
 	TOKENREQUESTGRANTTYPEENUM_EXTERNAL_TOKEN_EXCHANGE TokenRequestGrantTypeEnum = "external_token_exchange"
-	TOKENREQUESTGRANTTYPEENUM_APP_TOKEN               TokenRequestGrantTypeEnum = "app_token"
 )
 
 // All allowed values of TokenRequestGrantTypeEnum enum
@@ -38,7 +37,6 @@ var AllowedTokenRequestGrantTypeEnumEnumValues = []TokenRequestGrantTypeEnum{
 	"exchange_token",
 	"password",
 	"external_token_exchange",
-	"app_token",
 }
 
 func (v *TokenRequestGrantTypeEnum) UnmarshalJSON(src []byte) error {

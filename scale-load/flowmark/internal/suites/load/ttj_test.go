@@ -32,13 +32,15 @@ func TestParseOptions(t *testing.T) {
 				return o.users == 3 && o.rate == 5 && o.duration == time.Minute && o.image == "busybox" && o.cluster == "c1" && o.slo["ttj_p90_ms"] == 10000 && o.slo["cluster_synced_p99_ms"] == 12000 && o.limits.ControlPlaneRequestsPerSecond == 10
 			}},
 		{name: "training workloads", knobs: map[string]any{"workloadType": "Training"}, check: func(o options) bool { return o.workloadType == "Training" }},
-		{name: "unknown workload type", knobs: map[string]any{"workloadType": "Deployment"}, wantErr: `"workloadType" must be Workspace or Training`},
+		{name: "spawn rate", knobs: map[string]any{"spawnRate": 5, "slo": map[string]any{"failed_count": 2}}, check: func(o options) bool { return o.spawnRate == 5 && o.slo["failed_count"] == 2 }},
+		{name: "spawn rate above the users cap", knobs: map[string]any{"spawnRate": 100}, wantErr: `"spawnRate" must be between 0 and 64`},
+		{name: "unknown workload type", knobs: map[string]any{"workloadType": "StatefulSet"}, wantErr: `"workloadType" must be Workspace or Training`},
 		{name: "misspelled knob", knobs: map[string]any{"rat": 2}, wantErr: `unknown knob "rat"`},
 		{name: "rate above the control plane limit", knobs: map[string]any{"rate": 30, "controlPlaneRequestsPerSecond": 25}, wantErr: "cannot exceed controlPlaneRequestsPerSecond"},
 		{name: "zero users", knobs: map[string]any{"users": 0}, wantErr: `"users" must be between 1 and 64`},
 		{name: "slo not a number", knobs: map[string]any{"slo": map[string]any{"ttj_p90_ms": "10s"}}, wantErr: "must be a whole number"},
-		{name: "slo of another suite", knobs: map[string]any{"slo": map[string]any{"p90_ms": 10000}}, wantErr: `slo key "p90_ms" is not a latency this suite reports; use <span>_<stat> with span api_accepted, cluster_synced, pod_created, ttj and stat p50_ms, p90_ms, p99_ms, mean_ms, max_ms`},
-		{name: "slo on a rate", knobs: map[string]any{"slo": map[string]any{"success_rate": 1}}, wantErr: `slo key "success_rate" is not a latency`},
+		{name: "slo of another suite", knobs: map[string]any{"slo": map[string]any{"p90_ms": 10000}}, wantErr: `slo key "p90_ms" is not a metric this suite reports; use failed_count or <span>_<stat> with span api_accepted, cluster_synced, pod_created, ttj and stat p50_ms, p90_ms, p99_ms`},
+		{name: "slo on a rate", knobs: map[string]any{"slo": map[string]any{"success_rate": 1}}, wantErr: `slo key "success_rate" is not a metric`},
 		{name: "duration not a duration", knobs: map[string]any{"duration": 5}, wantErr: "must be a duration string"},
 	}
 	for _, tc := range cases {
@@ -110,15 +112,15 @@ func TestBuildSectionFailsWhenThePacerFellBehind(t *testing.T) {
 		{Name: "w1", RequestedAt: at(0), ApiAcceptedAt: at(0.3), ClusterSyncedAt: at(2.3), PodCreatedAt: at(5.3)},
 		{Name: "w2", RequestedAt: at(30), ApiAcceptedAt: at(30.3), ClusterSyncedAt: at(32.3), PodCreatedAt: at(35.3)},
 	}
-	kept := submit.Pacing{Submitted: 121, FirstDispatch: at(0), LastDispatch: at(60)}
+	kept := submit.Pacing{Planned: 120, Submitted: 121, FirstDispatch: at(0), LastDispatch: at(60)}
 	if section := buildSection(measure.CollectSpans(arrived), kept, arrived, testOptions(), 0, nil, nil); section.Failed {
 		t.Fatalf("2.00/s against a 2/s target is on pace: %+v", section)
 	}
 
-	behind := submit.Pacing{Submitted: 61, FirstDispatch: at(0), LastDispatch: at(60)}
+	behind := submit.Pacing{Planned: 120, Submitted: 61, FirstDispatch: at(0), LastDispatch: at(60)}
 	section := buildSection(measure.CollectSpans(arrived), behind, arrived, testOptions(), 0, nil, nil)
 
-	if !section.Failed || !strings.Contains(section.Error, "kept only 1.00/s of the 2/s target") {
+	if !section.Failed || !strings.Contains(section.Error, "kept only 61 of the 120 planned submissions") {
 		t.Fatalf("a pacer more than 10%% under its target must fail the section and say so: %+v", section)
 	}
 }

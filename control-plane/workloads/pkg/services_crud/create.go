@@ -112,6 +112,7 @@ var (
 var frameworksSupportingNoMaster = datastructs.NewSet(workloadsApi.DISTRIBUTEDFRAMEWORK_PY_TORCH, workloadsApi.DISTRIBUTEDFRAMEWORK_TF, workloadsApi.DISTRIBUTEDFRAMEWORK_JAX)
 
 type createWorkloadParams struct {
+	AcceptedAt   time.Time
 	WorkloadType string
 	WorkloadId   uuid.UUID
 

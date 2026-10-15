@@ -17,7 +17,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var _ = Describe("ReadApplicationSecret", func() {
+var _ = Describe("ReadAccessKeySecret", func() {
 	var (
 		tempFile *os.File
 		err      error
@@ -42,13 +42,13 @@ var _ = Describe("ReadApplicationSecret", func() {
 			return
 		}
 
-		result, err := auth.ReadApplicationSecret(tempFile.Name())
+		result, err := auth.ReadAccessKeySecret(tempFile.Name())
 		Expect(err).NotTo(HaveOccurred())
 		Expect(result).To(Equal(secret))
 	})
 
 	It("should return an error if the file does not exist", func() {
-		_, err := auth.ReadApplicationSecret("/non/existent/file")
+		_, err := auth.ReadAccessKeySecret("/non/existent/file")
 		Expect(err).To(HaveOccurred())
 	})
 })

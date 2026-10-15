@@ -50,6 +50,6 @@ build-gradle: ## Build the Gradle (Java SPI providers + OTel agent) artifacts.
 	cp ./runai-custom-providers/build/libs/runai-custom-providers.jar bin/runai-custom-providers.jar'
 .PHONY: build-gradle
 
-validate: ## Run validate.
+validate: validate-mockery ## Run validate.
 	# no-op
 .PHONY: validate

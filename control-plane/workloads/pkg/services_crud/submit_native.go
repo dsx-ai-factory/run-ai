@@ -7,6 +7,7 @@ package services_crud
 
 import (
 	"context"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/runai_workloads"
@@ -143,6 +144,8 @@ func persistAndRespondNative(ctx context.Context, wc *workloadContext, assetsMap
 	if dbErr := dao_crud.DbUpsertWorkload(ctx, workloadsRec); dbErr != nil {
 		return ToSubmissionError(dbErr)
 	}
+
+	wc.create.createParams.AcceptedAt = time.Now().UTC()
 
 	if wc.create.notificationsComposer.Output == nil {
 		return nil

@@ -45,5 +45,6 @@ func CreateTraining(ctx context.Context, tenantSettingsClient clients.TenantSett
 		return api.Response(int(createErr.Code), createErr), nil
 	}
 
+	recordWorkloadCreate(ctx, &createWorkloadParams)
 	return api.Response(http.StatusAccepted, createWorkloadParams.Response), nil
 }

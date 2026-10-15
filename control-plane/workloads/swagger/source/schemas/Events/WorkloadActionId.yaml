@@ -1,0 +1,4 @@
+description: A unique ID of the workload action-history record.
+type: string
+format: uuid
+example: 497f6eca-6276-4993-bfeb-53cbbbba6f08

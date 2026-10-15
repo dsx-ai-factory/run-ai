@@ -144,7 +144,7 @@ test-envtest: manifests generate envtest ## Run tests.
 lint: lint-go ## Run linter.
 
 .PHONY: validate
-validate: purify-go
+validate: purify-go validate-mockery
 
 ##@ Build
 .PHONY: build

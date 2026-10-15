@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -40,8 +39,6 @@ const (
 )
 
 var WorkloadRunnerKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "WorkloadRunner"}
-
-var ExternalWorkloadKind = schema.GroupVersionKind{Group: "run.ai", Version: "v1alpha1", Kind: "ExternalWorkload"}
 
 var ErrWatchClosed = errors.New("watch closed")
 
@@ -152,31 +149,6 @@ func (w *Watcher) Interruptions() int {
 
 func WatchWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
 	return Watch(ctx, kube, WorkloadRunnerKind, namespace, (*unstructured.Unstructured).GetName)
-}
-
-func WatchExternalWorkloads(ctx context.Context, kube k8sclient.WithWatch, namespace string) (*Watcher, error) {
-	return Watch(ctx, kube, ExternalWorkloadKind, namespace, externalWorkloadSource)
-}
-
-func externalWorkloadSource(obj *unstructured.Unstructured) string {
-	if uid, _, _ := unstructured.NestedString(obj.Object, "spec", "originalWorkloadUID"); uid != "" {
-		return uid
-	}
-	if owners := obj.GetOwnerReferences(); len(owners) > 0 && owners[0].UID != "" {
-		return string(owners[0].UID)
-	}
-	return externalWorkloadSourceName(obj)
-}
-
-func externalWorkloadSourceName(obj *unstructured.Unstructured) string {
-	rest, ok := strings.CutPrefix(obj.GetName(), "ew-")
-	if !ok {
-		return obj.GetName()
-	}
-	if _, name, found := strings.Cut(rest, "-"); found {
-		return name
-	}
-	return rest
 }
 
 func (w *Watcher) MarkCreated(name string, t0 time.Time) {

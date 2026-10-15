@@ -143,7 +143,7 @@ func (fbrw *FileBased64TokenReadWriter) WriteToken(path string, token *oauth2.To
 	return nil
 }
 
-func ReadApplicationSecret(path string) (string, error) {
+func ReadAccessKeySecret(path string) (string, error) {
 	logger := config.GetInstance().GetLogger()
 	fileObj, err := os.Open(path)
 	if err != nil {

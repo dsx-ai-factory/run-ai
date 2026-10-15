@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-ARG NGINX_IMAGE=nginx:1.31.6
+ARG NGINX_IMAGE=nginx:1.31.7
 FROM ${NGINX_IMAGE} AS nginx-source
 
 FROM registry.access.redhat.com/ubi9/ubi-minimal AS fips-builder

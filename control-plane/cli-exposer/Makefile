@@ -24,7 +24,7 @@ test: test-ginkgo ## Run unit-tests.
 lint: lint-go ## Run linter.
 .PHONY: lint
 
-validate: openapi-validate ## Run validate.
+validate: openapi-validate validate-mockery ## Run validate.
 .PHONY: validate
 
 purify: purify-go ## Purify the code.

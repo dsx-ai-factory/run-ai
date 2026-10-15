@@ -67,5 +67,6 @@ func CreateDistributedInference(ctx context.Context, tenantSettingsClient client
 		return api.Response(int(createErr.Code), createErr), nil
 	}
 
+	recordWorkloadCreate(ctx, &createWorkloadParams)
 	return api.Response(http.StatusAccepted, createWorkloadParams.Response), nil
 }

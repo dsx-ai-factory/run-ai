@@ -636,82 +636,126 @@ navigation:
       layout:
       - section: Organizations
         contents:
-        - clusters
-        - departments
+        - clusters:
+            summary: ../../docs/rest-api/self-hosted/tags/clusters.md
+        - departments:
+            summary: ../../docs/rest-api/self-hosted/tags/departments.md
         - reports
-        - nodePools
-        - nodes
-        - projects
+        - nodePools:
+            summary: ../../docs/rest-api/self-hosted/tags/node-pools.md
+        - nodes:
+            summary: ../../docs/rest-api/self-hosted/tags/nodes.md
+        - projects:
+            summary: ../../docs/rest-api/self-hosted/tags/projects.md
         - logo
         - researcherCommandLineInterface
         - researcherCommandLineInterfaceDeprecated
-        - networkTopologies
+        - networkTopologies:
+            summary: ../../docs/rest-api/self-hosted/tags/network-topologies.md
       - section: Authentication and Authorization
         contents:
-        - accessKeys
-        - accessRules
-        - permissions
-        - serviceAccounts
-        - roles
-        - tokens
+        - accessKeys:
+            summary: ../../docs/rest-api/self-hosted/tags/access-keys.md
+        - accessRules:
+            summary: ../../docs/rest-api/self-hosted/tags/access-rules.md
+        - permissions:
+            summary: ../../docs/rest-api/self-hosted/tags/permissions.md
+        - serviceAccounts:
+            summary: ../../docs/rest-api/self-hosted/tags/service-accounts.md
+        - roles:
+            summary: ../../docs/rest-api/self-hosted/tags/roles.md
+        - tokens:
+            summary: ../../docs/rest-api/self-hosted/tags/tokens.md
         - users
         - idps
-        - me
-        - settings
+        - me:
+            summary: ../../docs/rest-api/self-hosted/tags/me.md
+        - settings:
+            summary: ../../docs/rest-api/self-hosted/tags/settings.md
         - orgUnit
       - section: Audit
         contents:
-        - auditLogs
+        - auditLogs:
+            summary: ../../docs/rest-api/self-hosted/tags/audit-logs.md
       - section: Datavolumes
         contents:
         - datavolumes
       - section: Workloads
+        summary: ../../docs/rest-api/self-hosted/tags/workloads.md
         contents:
-        - events
-        - pods
+        - events:
+            summary: ../../docs/rest-api/self-hosted/tags/events.md
+        - pods:
+            summary: ../../docs/rest-api/self-hosted/tags/pods.md
         - workloads
-        - workloadsV2
-        - nvidiaNim
-        - workspaces
-        - trainings
-        - inferences
-        - revisions
-        - distributed
+        - workloadsV2:
+            summary: ../../docs/rest-api/self-hosted/tags/workloads-v2.md
+        - nvidiaNim:
+            summary: ../../docs/rest-api/self-hosted/tags/nvidia-nim.md
+        - workspaces:
+            summary: ../../docs/rest-api/self-hosted/tags/workspaces.md
+        - trainings:
+            summary: ../../docs/rest-api/self-hosted/tags/trainings.md
+        - inferences:
+            summary: ../../docs/rest-api/self-hosted/tags/inferences.md
+        - revisions:
+            summary: ../../docs/rest-api/self-hosted/tags/revisions.md
+        - distributed:
+            summary: ../../docs/rest-api/self-hosted/tags/distributed.md
         - workloadsBatch
-        - workloadProperties
-        - workloadTemplates
-        - distributedInferences
+        - workloadProperties:
+            summary: ../../docs/rest-api/self-hosted/tags/workload-properties.md
+        - workloadTemplates:
+            summary: ../../docs/rest-api/self-hosted/tags/workload-templates.md
+        - distributedInferences:
+            summary: ../../docs/rest-api/self-hosted/tags/distributed-inferences.md
       - section: Workload assets
         contents:
-        - compute
-        - credentials
+        - compute:
+            summary: ../../docs/rest-api/self-hosted/tags/compute.md
+        - credentials:
+            summary: ../../docs/rest-api/self-hosted/tags/credentials.md
         - datasources
-        - environment
+        - environment:
+            summary: ../../docs/rest-api/self-hosted/tags/environment.md
         - storageClasses
         - storageClassConfiguration
-        - git
-        - hostPath
-        - nfs
-        - pvc
-        - registry
-        - s3
-        - configMap
-        - secret
-        - template
+        - git:
+            summary: ../../docs/rest-api/self-hosted/tags/git.md
+        - hostPath:
+            summary: ../../docs/rest-api/self-hosted/tags/host-path.md
+        - nfs:
+            summary: ../../docs/rest-api/self-hosted/tags/nfs.md
+        - pvc:
+            summary: ../../docs/rest-api/self-hosted/tags/pvc.md
+        - registry:
+            summary: ../../docs/rest-api/self-hosted/tags/registry.md
+        - s3:
+            summary: ../../docs/rest-api/self-hosted/tags/s3.md
+        - configMap:
+            summary: ../../docs/rest-api/self-hosted/tags/config-map.md
+        - secret:
+            summary: ../../docs/rest-api/self-hosted/tags/secret.md
+        - template:
+            summary: ../../docs/rest-api/self-hosted/tags/template.md
       - section: Policies
         contents:
-        - policy
+        - policy:
+            summary: ../../docs/rest-api/self-hosted/tags/policy.md
       - section: Notifications
         contents:
         - notificationState
         - notificationTypes
-        - notificationChannels
-        - slack
-        - email
-        - subscriptions
-      - section: AI Applications
-        contents:
-        - ai-applications
+        - notificationChannels:
+            summary: ../../docs/rest-api/self-hosted/tags/notification-channels.md
+        - slack:
+            summary: ../../docs/rest-api/self-hosted/tags/slack.md
+        - email:
+            summary: ../../docs/rest-api/self-hosted/tags/email.md
+        - subscriptions:
+            summary: ../../docs/rest-api/self-hosted/tags/subscriptions.md
+      - ai-applications:
+          summary: ../../docs/rest-api/self-hosted/tags/ai-applications.md
     - section: API Guides
       contents:
       - page: Interacting with Workloads Using the Cluster API

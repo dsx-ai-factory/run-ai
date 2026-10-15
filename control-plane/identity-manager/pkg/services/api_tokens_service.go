@@ -29,7 +29,6 @@ import (
 )
 
 const (
-	legacyClientIdPrefix = "runai_agent_"
 	internalClientPrefix = "runai-internal."
 )
 
@@ -88,9 +87,6 @@ func (s *TokensApiService) GrantToken(ctx context.Context, tokenRequest api.Toke
 		return api.Response(http.StatusInternalServerError, nil), utils.Error{Code: http.StatusInternalServerError, Message: "could not identify user realm"}
 	}
 	realm := realmValue.(string)
-	if models.GrantTypeAppTokenDeprecated == grantType {
-		return s.grantAppTokenDeprecated(ctx, realm, tokenRequest)
-	}
 	if models.GrantTypeAppToken == grantType {
 		return s.grantAppToken(ctx, realm, tokenRequest)
 	}
@@ -160,49 +156,6 @@ func (s *TokensApiService) GrantTokenV2(
 	}
 
 	return s.convertToOAuth2Error(result, err)
-}
-
-// Deprecated
-func (s *TokensApiService) AppToken(ctx context.Context, appTokenRequest api.AppTokenRequest) (api.ImplResponse, error) {
-	logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("AppToken was called with appTokenRequest: %v", appTokenRequest)
-	audit.AuditFromCtx(ctx).Drop()
-	realm := utils.GetStringFromCtx(ctx, utils.AuthRealmKey)
-	if realm == "app" || realm == "test" || realm == "staging" {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Debugf("AppToken: realm is %s, getting realm name by client id", realm)
-		if strings.HasPrefix(appTokenRequest.Name, legacyClientIdPrefix) {
-			realm = strings.TrimPrefix(appTokenRequest.Name, legacyClientIdPrefix)
-		} else {
-			return api.Response(http.StatusBadRequest, nil), utils.Error{Code: http.StatusBadRequest, Message: "realm is not allowed to get app token"}
-		}
-	}
-	tokens, err := s.iamServices.AuthService.AuthenticateClient(ctx, realm, appTokenRequest.Name, appTokenRequest.Secret)
-	if err != nil {
-		msg := fmt.Sprintf("failed to authenticate app %s, in realm %s. err: %s", appTokenRequest.Name, realm, err.Error())
-		utils.LogHandler(ctx, msg, err)
-		if errors.Is(err, iamError.ErrInvalidInput) {
-			return api.Response(http.StatusBadRequest, nil), utils.Error{Code: http.StatusBadRequest, Message: "failed to authenticate app"}
-		}
-		return api.Response(http.StatusInternalServerError, nil), utils.Error{Code: http.StatusInternalServerError, Message: err.Error()}
-	}
-	resp := api.AppTokenResponse{
-		AccessToken: tokens.AccessToken,
-		IdToken:     tokens.IdToken,
-	}
-	return api.Response(http.StatusOK, resp), nil
-}
-
-func (s *TokensApiService) grantAppTokenDeprecated(ctx context.Context,
-	realm string, tokenRequest api.TokenRequest,
-) (api.ImplResponse, error) {
-	appID := tokenRequest.AppID
-	if strings.HasPrefix(appID, internalClientPrefix) || strings.HasPrefix(appID, legacyClientIdPrefix) {
-		audit.AuditFromCtx(ctx).Drop()
-	} else {
-		audit.AuditFromCtx(ctx).WithSubject(appID).WithSubjectType(utils.AuditServiceAccountSubjectType)
-		audit.AuditFromCtx(ctx).WithMetadata("client_id", appID)
-	}
-	tokens, err := s.iamServices.AuthService.AuthenticateClient(ctx, realm, appID, tokenRequest.AppSecret)
-	return s.handleTokenResponse(ctx, tokens, appID, err)
 }
 
 func (s *TokensApiService) grantAppToken(ctx context.Context,
@@ -559,14 +512,6 @@ func (s *TokensApiService) validateTokenRequest(tokenRequest api.TokenRequest) e
 	case models.GrantTypeExternalTokenExchange:
 		if tokenRequest.ExternalToken == "" {
 			return s.missingFieldErr(models.TokenRequestFieldExternalToken)
-		}
-
-	case models.GrantTypeAppTokenDeprecated:
-		if tokenRequest.AppID == "" {
-			return s.missingFieldErr(models.TokenRequestFieldAppID)
-		}
-		if tokenRequest.AppSecret == "" {
-			return s.missingFieldErr(models.TokenRequestFieldAppSecret)
 		}
 	}
 

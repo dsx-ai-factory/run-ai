@@ -57,6 +57,7 @@ func CreateInference(ctx context.Context, tenantSettingsClient clients.TenantSet
 
 	sanitizeWorkloadResponse(ctx, &createWorkloadParams.Response)
 
+	recordWorkloadCreate(ctx, &createWorkloadParams)
 	return api.Response(http.StatusAccepted, createWorkloadParams.Response), nil
 }
 

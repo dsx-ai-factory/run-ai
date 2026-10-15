@@ -13,7 +13,7 @@ local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine
 | **Linux host: ≥ 4 CPUs, ≥ 16 GB RAM, ≥ 100 GB free disk** | Linux only. Kind nodes, ~50 services, and parallel builds all share the host directly, with no VM to size. Disk is measured where the container runtime stores data (usually `/var/lib/docker`). One full build leaves about 44 GB of caches: roughly 11 GB of Docker build cache, and 33 GB of Go module and build caches in `~/.cache`. It also needs about 8 GB of images, which are stored both in the registry and in the Kind nodes. The script warns at startup if the host is below any of these; it does not stop. On a tight host, use `--parallel 2` and `--skip-frontend`. |
 | **Podman VM ≥ 12 GB RAM** | macOS only. The full stack (NATS×3, PostgreSQL, Keycloak, ~50 services) requires at least 12 GB. With 8 GB the API server starves under QEMU overhead and the cluster never stabilises. Resize with `podman machine stop && podman machine set --memory 12288 && podman machine start`. |
 | **`GITHUB_TOKEN`** | Only needed while the repo is private — Go builds pull modules from `github.com/run-ai/*`. Not required with `--skip-build` or once the repo is public. Set it before running: `export GITHUB_TOKEN=ghp_...` |
-| **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.31.0`, node image `v1.32.5`); `kubectl` and `helm` always install the latest release. |
+| **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.33.0`, node image `v1.37.0`) and upgraded if an older version is installed; `kubectl` and `helm` always install the latest release. Kubernetes 1.37 needs a cgroup v2 host (current Docker Desktop, Podman machine, and Linux distributions all use it). |
 | **`openssl`** | For TLS cert generation. Ships with macOS and most Linux distros; not auto-installed if missing. |
 | **`make`, `git`, `curl`, `python3`** | Used directly by the script and the service Makefiles. Not auto-installed; the script stops at startup if any is missing. |
 
@@ -66,7 +66,7 @@ The script runs these phases in order. Each phase is independently skippable.
 
 ### Kind Cluster
 
-- Creates a 5-node Kind cluster (1 control-plane + 4 workers) named `runai-local`, pinned to Kubernetes `v1.32.5`.
+- Creates a 5-node Kind cluster (1 control-plane + 4 workers) named `runai-local`, pinned to Kubernetes `v1.37.0`.
 - The control-plane node maps host ports 80/443 for ingress, and is labeled `ingress-ready=true`.
 - containerd on each node is pointed at `/etc/containerd/certs.d` for registry settings. In the next phase, each node gets a `hosts.toml` there that sends `localhost:5001` pulls to the local registry container.
 
@@ -91,7 +91,7 @@ Installs `kube-prometheus-stack` into the `monitoring` namespace — a minimal i
 - Skip with `--skip-fake-gpu`. Replaced by the real NVIDIA GPU Operator when `--gpu-operator` is set — see [Real GPUs](#real-gpus---gpu-operator).
 
 ### Build — control-plane (25 Go Services + Frontend)
-For each Go service, the script compiles an `amd64` binary inside a golang Docker container (workspace-mounted, uses the Go module cache at `~/.cache/go-build-docker-*`), builds a `linux/amd64` image, and **pushes it to the local registry**. Up to `--parallel N` services build concurrently.
+For each Go service, the script compiles an `amd64` binary inside a golang Docker container (workspace-mounted, uses the Go module cache at `~/.cache/go-build-docker-*`), builds a `linux/amd64` image, and **pushes it to the local registry**. Up to `--parallel N` services build concurrently. When the module cache is empty, the script first pre-warms it with `go mod download` in every Go module, `N` modules at a time, and logs how long that took.
 
 The frontend (React → nginx) runs `npm run build` inside a Node container, then builds and pushes the nginx image.
 
@@ -108,9 +108,10 @@ The same build pattern applies to the cluster-side controllers and operators. `r
 
 ### Provision Cluster Credentials
 
+- Gets an API token for the admin user: the Keycloak master admin (password from `runai-backend-gen-keycloakx`) impersonates the user and completes a browser login (authorization code + PKCE) with the `runai-cli` or `runai-admin-ui` client.
 - Waits for the Keycloak realm to be ready, then registers the cluster with the control plane via its REST API (reusing the existing registration if one already exists for the cluster name).
-- Fetches the installer client secret for the newly registered cluster.
-- Feeds both the cluster UID and the client secret into the `runai-cluster` Helm install in the next phase (`controlPlane.clientSecret`, `cluster.uid`).
+- Mints a one-time installer bootstrap token for the cluster from `/api/v1/clusters/{uuid}/cluster-install-info`.
+- Feeds both the cluster UID and the bootstrap token into the `runai-cluster` Helm install in the next phase (`controlPlane.bootstrapToken`, `cluster.uid`).
 
 ### Deploy — runai-cluster
 

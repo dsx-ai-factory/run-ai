@@ -1,0 +1,12 @@
+type: object
+required: [actions]
+properties:
+  actions:
+    type: array
+    maxItems: 500
+    items:
+      $ref: './WorkloadActionRecord.yaml'
+  next:
+    type: integer
+    format: int32
+    example: 50

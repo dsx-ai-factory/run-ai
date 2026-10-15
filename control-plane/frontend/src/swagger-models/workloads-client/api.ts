@@ -8567,6 +8567,25 @@ export interface GetRevisionPods200Response {
 /**
  * 
  * @export
+ * @interface GetWorkloadActionsResponse
+ */
+export interface GetWorkloadActionsResponse {
+    /**
+     * 
+     * @type {Array<WorkloadActionRecord>}
+     * @memberof GetWorkloadActionsResponse
+     */
+    'actions': Array<WorkloadActionRecord>;
+    /**
+     * 
+     * @type {number}
+     * @memberof GetWorkloadActionsResponse
+     */
+    'next'?: number;
+}
+/**
+ * 
+ * @export
  * @interface GetWorkloadClusterPriorities200Response
  */
 export interface GetWorkloadClusterPriorities200Response {
@@ -22612,6 +22631,72 @@ export interface Workload {
 /**
  * 
  * @export
+ * @interface WorkloadActionRecord
+ */
+export interface WorkloadActionRecord {
+    /**
+     * A unique ID of the workload action-history record.
+     * @type {string}
+     * @memberof WorkloadActionRecord
+     */
+    'id': string;
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof WorkloadActionRecord
+     */
+    'workloadId': string;
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof WorkloadActionRecord
+     */
+    'workloadName': string;
+    /**
+     * The authenticated subject that performed the workload action.
+     * @type {string}
+     * @memberof WorkloadActionRecord
+     */
+    'subject': string;
+    /**
+     * The authenticated subject type, preserved as provided by the identity context. Examples include user, service-account, and app, with casing determined by the identity provider.
+     * @type {string}
+     * @memberof WorkloadActionRecord
+     */
+    'subjectType': string;
+    /**
+     * 
+     * @type {WorkloadActionType}
+     * @memberof WorkloadActionRecord
+     */
+    'action': WorkloadActionType;
+    /**
+     * The time when the workload action was accepted.
+     * @type {string}
+     * @memberof WorkloadActionRecord
+     */
+    'acceptedAt': string;
+}
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
+
+export const WorkloadActionType = {
+    Create: 'create',
+    Update: 'update',
+    Delete: 'delete',
+    Suspend: 'suspend',
+    Resume: 'resume'
+} as const;
+
+export type WorkloadActionType = typeof WorkloadActionType[keyof typeof WorkloadActionType];
+
+
+/**
+ * 
+ * @export
  * @interface WorkloadAllocatedResources
  */
 export interface WorkloadAllocatedResources {
@@ -28609,6 +28694,54 @@ export const EventsApiAxiosParamCreator = function (configuration?: Configuratio
             };
         },
         /**
+         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * @summary Get workload action history.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadActionsHistory: async (workloadId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workloadId' is not null or undefined
+            assertParamExists('getWorkloadActionsHistory', 'workloadId', workloadId)
+            const localVarPath = `/api/v1/workloads/{workloadId}/actions`
+                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve all the workload events using a workload id.
          * @summary Get the workload events.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -28785,6 +28918,19 @@ export const EventsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * @summary Get workload action history.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloadActionsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadActionsHistory(workloadId, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Retrieve all the workload events using a workload id.
          * @summary Get the workload events.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -28858,6 +29004,18 @@ export const EventsApiFactory = function (configuration?: Configuration, basePat
             return localVarFp.getRevisionHistory(revisionId, offset, limit, options).then((request) => request(axios, basePath));
         },
         /**
+         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * @summary Get workload action history.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: any): AxiosPromise<GetWorkloadActionsResponse> {
+            return localVarFp.getWorkloadActionsHistory(workloadId, offset, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve all the workload events using a workload id.
          * @summary Get the workload events.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -28929,6 +29087,20 @@ export class EventsApi extends BaseAPI {
      */
     public getRevisionHistory(revisionId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
         return EventsApiFp(this.configuration).getRevisionHistory(revisionId, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+     * @summary Get workload action history.
+     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof EventsApi
+     */
+    public getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return EventsApiFp(this.configuration).getWorkloadActionsHistory(workloadId, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

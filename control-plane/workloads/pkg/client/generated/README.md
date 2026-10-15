@@ -103,6 +103,7 @@ Class | Method | HTTP request | Description
 *DistributedInferencesAPI* | [**UpdateDistributedInferenceSpec**](docs/DistributedInferencesAPI.md#updatedistributedinferencespec) | **Patch** /api/v1/workloads/distributed-inferences/{workloadId} | Update distributed inference spec.
 *EventsAPI* | [**GetRevisionEvents**](docs/EventsAPI.md#getrevisionevents) | **Get** /api/v1/workloads/inferences/revisions/{revisionId}/events | Get revision events by id.
 *EventsAPI* | [**GetRevisionHistory**](docs/EventsAPI.md#getrevisionhistory) | **Get** /api/v1/workloads/inferences/revisions/{revisionId}/history | Get the revision history.
+*EventsAPI* | [**GetWorkloadActionsHistory**](docs/EventsAPI.md#getworkloadactionshistory) | **Get** /api/v1/workloads/{workloadId}/actions | Get workload action history.
 *EventsAPI* | [**GetWorkloadEvents**](docs/EventsAPI.md#getworkloadevents) | **Get** /api/v1/workloads/{workloadId}/events | Get the workload events.
 *EventsAPI* | [**GetWorkloadHistory**](docs/EventsAPI.md#getworkloadhistory) | **Get** /api/v1/workloads/{workloadId}/history | Get the workload history.
 *EventsAPI* | [**SyncEvents**](docs/EventsAPI.md#syncevents) | **Post** /api/v1/workloads/events | Sync events.
@@ -436,6 +437,7 @@ Class | Method | HTTP request | Description
  - [GetGpuOverProvisioning](docs/GetGpuOverProvisioning.md)
  - [GetInferenceWorkloadRevisions200Response](docs/GetInferenceWorkloadRevisions200Response.md)
  - [GetRevisionPods200Response](docs/GetRevisionPods200Response.md)
+ - [GetWorkloadActionsResponse](docs/GetWorkloadActionsResponse.md)
  - [GetWorkloadClusterPriorities200Response](docs/GetWorkloadClusterPriorities200Response.md)
  - [GetWorkloadEndpoints200Response](docs/GetWorkloadEndpoints200Response.md)
  - [GetWorkloadEvents200Response](docs/GetWorkloadEvents200Response.md)
@@ -754,6 +756,8 @@ Class | Method | HTTP request | Description
  - [UpdateSpecSpec](docs/UpdateSpecSpec.md)
  - [UpdateWorkloadsSettingByKeyRequest](docs/UpdateWorkloadsSettingByKeyRequest.md)
  - [Workload](docs/Workload.md)
+ - [WorkloadActionRecord](docs/WorkloadActionRecord.md)
+ - [WorkloadActionType](docs/WorkloadActionType.md)
  - [WorkloadAllocatedResources](docs/WorkloadAllocatedResources.md)
  - [WorkloadBatch](docs/WorkloadBatch.md)
  - [WorkloadCategory](docs/WorkloadCategory.md)

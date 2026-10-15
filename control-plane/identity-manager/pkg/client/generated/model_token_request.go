@@ -22,20 +22,16 @@ var _ MappedNullable = &TokenRequest{}
 
 // TokenRequest struct for TokenRequest
 type TokenRequest struct {
-	GrantType *TokenRequestGrantTypeEnum `json:"grantType,omitempty"`
-	// Deprecated
-	AppID *string `json:"appID,omitempty"`
-	// Deprecated
-	AppSecret     *string `json:"appSecret,omitempty"`
-	Code          *string `json:"code,omitempty"`
-	RedirectUri   *string `json:"redirectUri,omitempty"`
-	RefreshToken  *string `json:"refreshToken,omitempty"`
-	Username      *string `json:"username,omitempty"`
-	Password      *string `json:"password,omitempty"`
-	ClientID      *string `json:"clientID,omitempty"`
-	ClientSecret  *string `json:"clientSecret,omitempty"`
-	ExternalToken *string `json:"externalToken,omitempty"`
-	CodeVerifier  *string `json:"codeVerifier,omitempty"`
+	GrantType     *TokenRequestGrantTypeEnum `json:"grantType,omitempty"`
+	Code          *string                    `json:"code,omitempty"`
+	RedirectUri   *string                    `json:"redirectUri,omitempty"`
+	RefreshToken  *string                    `json:"refreshToken,omitempty"`
+	Username      *string                    `json:"username,omitempty"`
+	Password      *string                    `json:"password,omitempty"`
+	ClientID      *string                    `json:"clientID,omitempty"`
+	ClientSecret  *string                    `json:"clientSecret,omitempty"`
+	ExternalToken *string                    `json:"externalToken,omitempty"`
+	CodeVerifier  *string                    `json:"codeVerifier,omitempty"`
 }
 
 // NewTokenRequest instantiates a new TokenRequest object
@@ -85,76 +81,6 @@ func (o *TokenRequest) HasGrantType() bool {
 // SetGrantType gets a reference to the given TokenRequestGrantTypeEnum and assigns it to the GrantType field.
 func (o *TokenRequest) SetGrantType(v TokenRequestGrantTypeEnum) {
 	o.GrantType = &v
-}
-
-// GetAppID returns the AppID field value if set, zero value otherwise.
-// Deprecated
-func (o *TokenRequest) GetAppID() string {
-	if o == nil || IsNil(o.AppID) {
-		var ret string
-		return ret
-	}
-	return *o.AppID
-}
-
-// GetAppIDOk returns a tuple with the AppID field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// Deprecated
-func (o *TokenRequest) GetAppIDOk() (*string, bool) {
-	if o == nil || IsNil(o.AppID) {
-		return nil, false
-	}
-	return o.AppID, true
-}
-
-// HasAppID returns a boolean if a field has been set.
-func (o *TokenRequest) HasAppID() bool {
-	if o != nil && !IsNil(o.AppID) {
-		return true
-	}
-
-	return false
-}
-
-// SetAppID gets a reference to the given string and assigns it to the AppID field.
-// Deprecated
-func (o *TokenRequest) SetAppID(v string) {
-	o.AppID = &v
-}
-
-// GetAppSecret returns the AppSecret field value if set, zero value otherwise.
-// Deprecated
-func (o *TokenRequest) GetAppSecret() string {
-	if o == nil || IsNil(o.AppSecret) {
-		var ret string
-		return ret
-	}
-	return *o.AppSecret
-}
-
-// GetAppSecretOk returns a tuple with the AppSecret field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// Deprecated
-func (o *TokenRequest) GetAppSecretOk() (*string, bool) {
-	if o == nil || IsNil(o.AppSecret) {
-		return nil, false
-	}
-	return o.AppSecret, true
-}
-
-// HasAppSecret returns a boolean if a field has been set.
-func (o *TokenRequest) HasAppSecret() bool {
-	if o != nil && !IsNil(o.AppSecret) {
-		return true
-	}
-
-	return false
-}
-
-// SetAppSecret gets a reference to the given string and assigns it to the AppSecret field.
-// Deprecated
-func (o *TokenRequest) SetAppSecret(v string) {
-	o.AppSecret = &v
 }
 
 // GetCode returns the Code field value if set, zero value otherwise.
@@ -457,12 +383,6 @@ func (o TokenRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if !IsNil(o.GrantType) {
 		toSerialize["grantType"] = o.GrantType
-	}
-	if !IsNil(o.AppID) {
-		toSerialize["appID"] = o.AppID
-	}
-	if !IsNil(o.AppSecret) {
-		toSerialize["appSecret"] = o.AppSecret
 	}
 	if !IsNil(o.Code) {
 		toSerialize["code"] = o.Code
