@@ -108,7 +108,7 @@ var _ = Describe("ApiNodepoolsSettings - node pool settings from package", Order
 		_ = dao.DeleteCluster(otherCtx, otherClusterId, 2)
 	})
 
-	Context("test cpu/weights is taken from settings on nodepool create/update", func() {
+	Context("test cpu/weights is taken from settings on nodepool create and kept on update", func() {
 		var createdNodepoolIds []string
 
 		AfterAll(func() {
@@ -169,12 +169,7 @@ var _ = Describe("ApiNodepoolsSettings - node pool settings from package", Order
 			Expect(np.SchedulingCapabilities.CpuQuota).To(Equal(true))
 			Expect(np.SchedulingCapabilities.AdjustableWeights).To(Equal(false))
 
-			// on update: flip the settings; UpdateNodepool re-reads them from the settings package
 			updateMock := settingPkgMocks.NewSettingsManager(GinkgoT())
-			updateMock.On("Get", mock.Anything, tenantIdStr, string(api.NODEPOOLSETTINGSKEYENUM_CPU_RESOURCES_QUOTA)).
-				Return(&settings.CPUResourcesQuota{Enabled: false}, nil)
-			updateMock.On("Get", mock.Anything, tenantIdStr, string(api.NODEPOOLSETTINGSKEYENUM_PROJECT_MANUAL_OVER_QUOTA)).
-				Return(&settings.ProjectManualOverQuota{Enabled: true}, nil)
 			settingPkg.SetMock(updateMock)
 
 			updateReq := nodepoolUpdateFields("-ts", nil)
@@ -182,8 +177,9 @@ var _ = Describe("ApiNodepoolsSettings - node pool settings from package", Order
 			Expect(updateApiErr).To(BeNil())
 			Expect(updateResp.Code).To(Equal(http.StatusOK))
 			updatedNp := updateResp.Body.(api.Nodepool)
-			Expect(updatedNp.SchedulingCapabilities.CpuQuota).To(Equal(false))
-			Expect(updatedNp.SchedulingCapabilities.AdjustableWeights).To(Equal(true))
+			Expect(updatedNp.SchedulingCapabilities.CpuQuota).To(Equal(true))
+			Expect(updatedNp.SchedulingCapabilities.AdjustableWeights).To(Equal(false))
+			updateMock.AssertNotCalled(GinkgoT(), "Get", mock.Anything, mock.Anything, mock.Anything)
 		})
 	})
 

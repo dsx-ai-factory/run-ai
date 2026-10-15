@@ -5517,7 +5517,8 @@
         "description": "The action to apply",
         "x-internal": true,
         "enum": [
-          "CPU_QUOTAS_TO_DEFAULT"
+          "CPU_QUOTAS_TO_DEFAULT",
+          "WEIGHTS_TO_DEFAULT"
         ]
       },
       "OrgUnitsNodepoolResourcesResetRequest": {
