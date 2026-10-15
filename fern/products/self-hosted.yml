@@ -602,8 +602,12 @@ navigation:
         path: ../../docs/resources/videos/create-and-reuse-workload-templates.md
       - page: Monitor GPU Usage and Platform Health
         path: ../../docs/resources/videos/monitor-gpu-usage-and-platform-health.md
-    - page: Blogs
+    - section: Blogs
       path: ../../docs/resources/blogs.md
+      contents:
+      - page: Numa-Aware Scheduling in NVIDIA Run:ai
+        path: ../../docs/resources/blogs/numa-aware-scheduling-in-nvidia-run-ai.md
+        hidden: true
     - page: NVIDIA On-Demand Sessions
       path: ../../docs/resources/nvidia-on-demand-sessions.md
 
