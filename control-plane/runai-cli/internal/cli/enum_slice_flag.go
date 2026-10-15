@@ -38,12 +38,17 @@ func (e *EnumSliceFlag) String() string {
 }
 
 func (e *EnumSliceFlag) Set(input string) error {
-	values := strings.Split(input, ",")
-	for _, v := range values {
+	parts := strings.Split(input, ",")
+	values := make([]string, 0, len(parts))
+	for _, v := range parts {
 		trimmed := strings.TrimSpace(v)
 		if _, ok := e.allowedSet[trimmed]; !ok {
 			return fmt.Errorf("must be partial or full match of %s", e.String())
 		}
+		// Store the trimmed value that was validated: callers match these
+		// values exactly, so a stray space would make an allowed value
+		// behave like an unknown one.
+		values = append(values, trimmed)
 	}
 	*e.value = values
 	e.Changed = true
