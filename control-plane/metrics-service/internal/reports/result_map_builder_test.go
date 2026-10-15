@@ -6,9 +6,12 @@
 package reports
 
 import (
+	"math"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/internal/generated/pkg/api"
 )
@@ -279,4 +282,41 @@ func TestRoundToNearestInt_AsExpected(t *testing.T) {
 		val := roundToNearestInt(test.value)
 		assert.Equal(t, test.expected, val)
 	}
+}
+
+// Prometheus reports NaN for a metric without a value and +Inf/-Inf for
+// overflow, and a measurement can be arbitrarily large. None of those has a
+// value that survives the int conversion in round, which used to replace them
+// with an unrelated number.
+func TestFormatDecimalValue_KeepsValuesThatCannotBeRounded(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		value string
+	}{
+		{name: "NaN", value: "NaN"},
+		{name: "positive infinity", value: "+Inf"},
+		{name: "negative infinity", value: "-Inf"},
+		{name: "above the exactly representable range", value: "1e300"},
+		{name: "below the exactly representable range", value: "-1e300"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			want, err := strconv.ParseFloat(tc.value, 64)
+			require.NoError(t, err)
+
+			got := formatDecimalValue(tc.value)
+			parsed, err := strconv.ParseFloat(got, 64)
+			require.NoError(t, err, "formatDecimalValue(%q) = %q, which is not a number", tc.value, got)
+
+			if math.IsNaN(want) {
+				assert.True(t, math.IsNaN(parsed), "formatDecimalValue(%q) = %q, want NaN", tc.value, got)
+				return
+			}
+			assert.Equal(t, want, parsed, "formatDecimalValue(%q) = %q", tc.value, got)
+		})
+	}
+}
+
+func TestFormatDecimalValue_StillRoundsLargeFiniteValues(t *testing.T) {
+	assert.Equal(t, "1234567.8912", formatDecimalValue("1234567.8912345"))
+	assert.Equal(t, "-1234567.8912", formatDecimalValue("-1234567.8912345"))
 }
