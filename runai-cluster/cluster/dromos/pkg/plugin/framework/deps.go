@@ -12,5 +12,7 @@ import (
 
 type PluginDeps struct {
 	Client client.Reader
-	Logger logr.Logger
+	// APIReader bypasses the cache when resource existence affects immutable templates.
+	APIReader client.Reader
+	Logger    logr.Logger
 }
