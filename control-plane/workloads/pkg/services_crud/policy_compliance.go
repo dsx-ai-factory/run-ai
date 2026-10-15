@@ -95,7 +95,7 @@ func validateSpecAgainstPolicy(
 	defaults map[string]interface{},
 	mutatedSpec map[string]interface{},
 ) *workloadApi.SubmissionErrorV2 {
-	_, complianceErrors, err := policyCompliance.ValidateWorkloadCompliance(rules, defaults, mutatedSpec, workloadType == Distributed)
+	_, complianceErrors, err := policyCompliance.ValidateWorkloadCompliance(rules, defaults, mutatedSpec, workloadApi.WorkloadType(workloadType))
 	if err != nil {
 		return workloadApi.NewSubmissionErrorV2(http.StatusBadRequest, err.Error())
 	}

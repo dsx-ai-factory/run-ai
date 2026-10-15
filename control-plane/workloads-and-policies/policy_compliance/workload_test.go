@@ -6,6 +6,7 @@
 package policy_compliance
 
 import (
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -20,7 +21,7 @@ var _ = Describe("workload policy preparation", func() {
 		}}
 		defaults := map[string]interface{}{"compute": map[string]interface{}{"gpuPortionRequest": 0.25}}
 		values := map[string]interface{}{"compute": map[string]interface{}{"gpuMemoryPortionRequest": 0.25}}
-		normalizedDefaults, issues, err := ValidateWorkloadCompliance(rules, defaults, values, false)
+		normalizedDefaults, issues, err := ValidateWorkloadCompliance(rules, defaults, values, workloadsApi.WORKLOADTYPE_WORKSPACE)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(issues).To(BeEmpty())
 		compute := convutils.MapMe(values["compute"])
@@ -32,7 +33,7 @@ var _ = Describe("workload policy preparation", func() {
 		Expect(convutils.MapMe(rules["compute"])).To(HaveKey("gpuPortionRequest"))
 
 		compute["gpuMemoryPortionRequest"] = 0.5
-		_, issues, err = ValidateWorkloadCompliance(rules, defaults, values, false)
+		_, issues, err = ValidateWorkloadCompliance(rules, defaults, values, workloadsApi.WORKLOADTYPE_WORKSPACE)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(issues).To(HaveLen(1))
 		Expect(issues[0].WorkloadField).To(Equal("compute.gpuMemoryPortionRequest"))
@@ -40,7 +41,7 @@ var _ = Describe("workload policy preparation", func() {
 
 	DescribeTable("rejects cycles revealed by alias normalization",
 		func(rules map[string]interface{}) {
-			_, _, err := ValidateWorkloadCompliance(map[string]interface{}{"compute": rules}, nil, map[string]interface{}{}, false)
+			_, _, err := ValidateWorkloadCompliance(map[string]interface{}{"compute": rules}, nil, map[string]interface{}{}, workloadsApi.WORKLOADTYPE_WORKSPACE)
 			Expect(err).To(HaveOccurred())
 		},
 		Entry("self reference through the other alias", map[string]interface{}{
@@ -64,7 +65,7 @@ var _ = Describe("workload policy preparation", func() {
 			defaults[replica] = map[string]interface{}{"compute": map[string]interface{}{"gpuPortionRequest": portion}}
 			values[replica] = map[string]interface{}{"compute": map[string]interface{}{"gpuMemoryPortionRequest": portion, "gpuComputeMode": "time-slicing"}}
 		}
-		_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, true)
+		_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, workloadsApi.WORKLOADTYPE_DISTRIBUTED)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(issues).To(HaveLen(2))
 		Expect(issues[0].WorkloadField).To(Equal("compute.gpuComputeMode"))
@@ -73,6 +74,75 @@ var _ = Describe("workload policy preparation", func() {
 		for _, replica := range []string{"worker", "master"} {
 			Expect(convutils.MapMe(convutils.MapMe(values[replica])["compute"])).To(HaveKeyWithValue("gpuComputeMode", "time-slicing"))
 		}
+	})
+})
+
+var _ = Describe("distributed inference policy sections", func() {
+	var rules, defaults, values map[string]interface{}
+
+	BeforeEach(func() {
+		rules = map[string]interface{}{
+			"replicas": map[string]interface{}{"max": 2.0},
+		}
+		defaults = map[string]interface{}{}
+		values = map[string]interface{}{"replicas": 1.0, "workers": 1.0}
+		for replica, portion := range map[string]float64{"leader": 0.25, "worker": 0.5} {
+			rules[replica] = map[string]interface{}{"compute": map[string]interface{}{
+				"gpuPortionRequest": map[string]interface{}{"canEdit": false},
+				"cpuCoreRequest": map[string]interface{}{
+					"defaultFrom": map[string]interface{}{"field": "compute.gpuPortionRequest", "factor": 8.0},
+					"max":         4.0,
+				},
+				"cpuCoreLimit": map[string]interface{}{"defaultFrom": map[string]interface{}{"field": "compute.cpuCoreRequest", "factor": 2.0}},
+			}}
+			defaults[replica] = map[string]interface{}{"compute": map[string]interface{}{"gpuPortionRequest": portion}}
+			values[replica] = map[string]interface{}{"compute": map[string]interface{}{"gpuMemoryPortionRequest": portion}}
+		}
+	})
+
+	It("resolves each replica's dependency chain using its own values", func() {
+		_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, workloadsApi.WORKLOADTYPE_DISTRIBUTED_INFERENCE)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(issues).To(BeEmpty())
+		for replica, cpu := range map[string]float64{"leader": 2, "worker": 4} {
+			compute := convutils.MapMe(convutils.MapMe(values[replica])["compute"])
+			Expect(compute["cpuCoreRequest"]).To(BeNumerically("==", cpu), replica)
+			Expect(compute["cpuCoreLimit"]).To(BeNumerically("==", cpu*2), replica)
+		}
+	})
+
+	It("preserves workload-level rules and replica error paths", func() {
+		values["replicas"] = 3.0
+		convutils.MapMe(convutils.MapMe(values["leader"])["compute"])["cpuCoreRequest"] = 5.0
+		convutils.MapMe(convutils.MapMe(values["worker"])["compute"])["gpuMemoryPortionRequest"] = 0.25
+		_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, workloadsApi.WORKLOADTYPE_DISTRIBUTED_INFERENCE)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(issues).To(ConsistOf(
+			And(HaveField("WorkloadField", "replicas"), HaveField("PolicyField", "replicas"), HaveField("Rule", &PolicyMax)),
+			And(HaveField("WorkloadField", "leader.compute.cpuCoreRequest"), HaveField("PolicyField", "leader.compute.cpuCoreRequest"), HaveField("Rule", &PolicyMax)),
+			And(HaveField("WorkloadField", "worker.compute.gpuMemoryPortionRequest"), HaveField("PolicyField", "worker.compute.gpuMemoryPortionRequest"), HaveField("Rule", &PolicyCanEdit)),
+		))
+	})
+
+	It("reports invalid replica item keys once", func() {
+		convutils.MapMe(values["leader"])["environmentVariables"] = []interface{}{
+			map[string]interface{}{"name": "DUPLICATE", "value": "first"},
+			map[string]interface{}{"name": "DUPLICATE", "value": "second"},
+		}
+		_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, workloadsApi.WORKLOADTYPE_DISTRIBUTED_INFERENCE)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(issues).To(HaveLen(1))
+		Expect(issues[0].WorkloadField).To(Equal("leader.environmentVariables[DUPLICATE]"))
+	})
+
+	It("does not create an omitted worker section from policy defaults", func() {
+		delete(values, "worker")
+		values["workers"] = 0.0
+		_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, workloadsApi.WORKLOADTYPE_DISTRIBUTED_INFERENCE)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(issues).To(BeEmpty())
+		Expect(values).NotTo(HaveKey("worker"))
+		Expect(convutils.MapMe(convutils.MapMe(values["leader"])["compute"])["cpuCoreRequest"]).To(BeNumerically("==", 2))
 	})
 })
 
@@ -117,7 +187,7 @@ var _ = Describe("GPU mode uses ordinary optional enum policy rules", func() {
 				Expect(convutils.CopySpecs(&merged, defaults)).To(Succeed())
 				Expect(ApplyDefaults(values, merged, nil)).To(BeNil())
 				values = merged
-				_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, false)
+				_, issues, err := ValidateWorkloadCompliance(rules, defaults, values, workloadsApi.WORKLOADTYPE_WORKSPACE)
 				Expect(err).NotTo(HaveOccurred())
 				if wantIssue == "" {
 					Expect(issues).To(BeEmpty(), field.name)

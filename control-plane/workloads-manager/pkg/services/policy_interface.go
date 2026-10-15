@@ -34,7 +34,7 @@ var nonCreationMode = policiesClient.PolicyClientOptions{
 func validateMutatedSpecVsPolicy(rules map[string]interface{}, defaults map[string]interface{},
 	mutatedSpec map[string]interface{},
 ) (map[string]interface{}, *api.SubmissionErrorV2) {
-	defaults, complianceErrors, err := policyCompliance.ValidateWorkloadCompliance(rules, defaults, mutatedSpec, false)
+	defaults, complianceErrors, err := policyCompliance.ValidateWorkloadCompliance(rules, defaults, mutatedSpec, WorkloadTypeNimService)
 	if err != nil {
 		return nil, NewSubmissionError(http.StatusBadRequest, err.Error(), err)
 	}
