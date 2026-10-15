@@ -40,15 +40,13 @@ jobs:
         run: |
           mkdir -p results/flowmark
           cp scale-load/flowmark/dashboard/index.html scale-load/flowmark/dashboard/app.js scale-load/flowmark/dashboard/styles.css results/flowmark/
-          touch results/.nojekyll
-          printf '<!DOCTYPE html>\n<meta charset="utf-8">\n<meta http-equiv="refresh" content="0; url=flowmark/">\n<a href="flowmark/">FlowMark dashboard</a>\n' > results/index.html
 
       - name: Push to gh-pages
         working-directory: results
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html .nojekyll flowmark/index.html flowmark/app.js flowmark/styles.css
+          git add flowmark/index.html flowmark/app.js flowmark/styles.css
           if git diff --cached --quiet; then
             echo "dashboard unchanged"
             exit 0
