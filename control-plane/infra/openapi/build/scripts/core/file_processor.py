@@ -80,8 +80,7 @@ class FileProcessor:
         except Exception as e:
             raise RuntimeError(f"Failed to reset spec file: {e}") from e
     
-    def apply_build_transformations(self, version: str,
-                                   version_info: Optional['VersionInfo'] = None) -> None:
+    def apply_build_transformations(self, version: str) -> None:
         """Apply all content transformations to the spec file for local build"""
         content = self.read_spec_file()
 

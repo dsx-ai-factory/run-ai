@@ -17,9 +17,8 @@ Targets come from the service `Makefile` plus shared includes
 
 | Target | What it does |
 |--------|-------------|
-| `build` | `get_latest_tag` + `openapi-build-public-spec` (regenerate merged public + system-scoped specs into `_build/`), copy `_build/runaiApi.swagger.yaml` → `_build/runai-public.yaml`, then run `scripts/main_build.py` in the python container |
+| `build` | `openapi-build-public-spec` (regenerate merged public + system-scoped specs into `_build/`), copy `_build/runaiApi.swagger.yaml` → `_build/runai-public.yaml`, then run `scripts/main_build.py` in the python container |
 | `prepare-specs` | `openapi-build-public-spec` then copy public + system-scoped specs into `_build/` |
-| `get_latest_tag` | Resolve latest release tag → `LATEST_TAG` |
 | `test` | Run the pytest suite `scripts/tests/run_all_tests.py` in the python container |
 | `lint` | No-op |
 | `validate` | `validate-openapi-public-spec` + `validate-tags` + `validate-openapi-spec-python` + `validate-openapi-backwards-compatibility` (all `continue_on_error` per metadata) |
@@ -35,7 +34,7 @@ Targets come from the service `Makefile` plus shared includes
   `openapi-merge-cli`, bundles/filters with redocly (`config/redocly*.yaml` +
   `plugins/internal-filters.js`, `plugins/system-scoped-filters.js`) to strip
   `x-internal` endpoints and internal enum values, then post-processes:
-  version stamping, and branding normalization (`core/file_processor.py`).
+  and version stamping (`core/file_processor.py`).
 - **No external publish step.** GitBook publishing (the old `make extra`
   target, `scripts/gitbook/`, `core/gitbook_api.py`, `scripts/main_extra.py`)
   was removed (RUN-42271) — this module only produces local build artifacts

@@ -5,24 +5,22 @@
 Core functionality for OpenAPI spec build processing.
 
 This package provides modular components for:
-- Version management and parsing
+- Version validation
 - File processing and transformations
 - Configuration management
 """
 
-from .config import Config, Environment, ProcessingMode, Colors
-from .version_manager import VersionManager, VersionInfo
+from .config import Config, ProcessingMode, Colors
+from .version_manager import VersionManager
 from .file_processor import FileProcessor
 from .reporter import Reporter
 from .base_processor import BaseProcessor
 
 __all__ = [
     'Config',
-    'Environment',
     'ProcessingMode',
     'Colors',
     'VersionManager',
-    'VersionInfo',
     'FileProcessor',
     'Reporter',
     'BaseProcessor',

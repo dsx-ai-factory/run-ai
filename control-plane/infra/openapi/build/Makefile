@@ -25,21 +25,12 @@ SPEC_FILE_DST_SYSTEM=./_build/runai-system-scoped.yaml
 
 NODEJS_VERSION=20-alpine3.17
 VERSION?=
-ENVIRONMENT?=
-LATEST_TAG?=
 
 SCRIPTS_DIR=./scripts
 
 BACKWARD_COMPATIBILITY_SCRIPTS_PATH=${OPENAPI_CENTRAL_SCRIPTS_PATH}/backward-compatibility
 
 ##@ Basic Commands
-
-get_latest_tag: ## Fetch the latest versions from the remote repository and get the latest tag.
-	@echo "Fetching latest versions from git..."
-	git fetch --all --tags --force
-	$(eval LATEST_TAG := $(shell git tag --list --sort=-v:refname | grep -E '(^[0-9]+\.[0-9]+\.[0-9]+$$|.*-saas.*)' | grep -Ev '\bv\w*' | head -n 1))
-	@echo "Latest tag: ${LATEST_TAG}"
-.PHONY: get_latest_tag
 
 test: ## Run unit-tests.
 	@echo "Running OpenAPI build tests..."
@@ -81,7 +72,7 @@ prepare-specs: openapi-build-public-spec
 	cp ${SPEC_FILE_SRC_SYSTEM} ${SPEC_FILE_DST_SYSTEM}
 .PHONY: prepare-specs
 
-build: get_latest_tag openapi-build-public-spec
+build: openapi-build-public-spec
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Processing spec file for local use" ${BASE_CONSOLE}
 	# Validate source file exists
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Validating source file exists: ${OPENAPI_PUBLIC_SPEC_BUILD_PATH}" ${BASE_CONSOLE}
@@ -102,6 +93,6 @@ build: get_latest_tag openapi-build-public-spec
 		echo "Node.js: $$(node --version)" && \
 		echo "NPM: $$(npm --version)" && \
 		pip install -r ${SCRIPTS_DIR}/requirements.txt && \
-		python ${SCRIPTS_DIR}/main_build.py ${VERSION} ${SPEC_FILE_DST} "${LATEST_TAG}" ${ENVIRONMENT} ${SPEC_FILE_SRC}' || ${FAILURE_MESSAGE_HANDLER}
+		python ${SCRIPTS_DIR}/main_build.py ${VERSION} ${SPEC_FILE_DST} ${SPEC_FILE_SRC}' || ${FAILURE_MESSAGE_HANDLER}
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: build

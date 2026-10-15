@@ -3,7 +3,7 @@
 `openapi/build` is the control-plane component that **builds Run:ai's public
 OpenAPI documentation spec**. It merges the individual service swagger files
 into a single public spec, filters out internal endpoints/fields, and
-post-processes the result (version stamping, branding) for local/CI use.
+post-processes the result (version stamping) for local/CI use.
 
 This module does **not** build or ship a container image, and it does not
 serve docs at runtime. Its `artifact_type` is `none`: the build produces
@@ -34,7 +34,7 @@ The module is responsible for:
   and `plugins/system-scoped-filters.js` (removing `x-internal` endpoints and
   stripping internal enum values), configured by `config/redocly.yaml`.
 - **Post-processing** versions via the Python pipeline in
-  `scripts/` (version stamping, branding normalization).
+  `scripts/` (version stamping).
 
 ## Repository layout
 
@@ -70,9 +70,8 @@ makefile targets.
 
 | Target | Description |
 |--------|-------------|
-| `make build` | `get_latest_tag` + `openapi-build-public-spec` (regenerate the merged public + system-scoped specs into `_build/`), then copy `_build/runaiApi.swagger.yaml` → `_build/runai-public.yaml` and run the modular Python build script (`scripts/main_build.py`) inside the python container |
+| `make build` | `openapi-build-public-spec` (regenerate the merged public + system-scoped specs into `_build/`), then copy `_build/runaiApi.swagger.yaml` → `_build/runai-public.yaml` and run the modular Python build script (`scripts/main_build.py`) inside the python container |
 | `make prepare-specs` | `openapi-build-public-spec`, then copy the public and system-scoped specs into `_build/` |
-| `make get_latest_tag` | Fetch git tags and resolve the latest release tag (`LATEST_TAG`) used to stamp doc versions |
 
 No local image is produced, so `openapi/build` is not part of `local-dev.sh`'s
 `CP_GO_SERVICES` build loop and no `runai-local/openapi-build` tag exists. The
@@ -109,7 +108,7 @@ env-var config. Its behaviour is driven by makefile variables and files:
 |------------------|-------------|
 | `SPEC_FILE_SRC` | Source merged public spec (`../infra/openapi/specs/runai-public.yaml`) |
 | `SPEC_FILE_SRC_SYSTEM` | Source system-scoped spec (`../infra/openapi/specs/runai-system-scoped.yaml`) |
-| `VERSION` / `LATEST_TAG` / `ENVIRONMENT` | Version + environment stamped into the processed spec |
+| `VERSION` | Version stamped into the processed spec |
 | `config/merge-config*.json` | Which service swagger files are merged and in what order |
 | `config/redocly*.yaml` + `plugins/` | Bundle/filter rules (internal endpoint and enum stripping) |
 | `swagger/rootApi*.yaml` | Root API doc + `x-tagGroups` structure |

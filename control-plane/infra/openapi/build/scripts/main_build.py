@@ -17,11 +17,9 @@ from core import (
 
 class BuildProcessor(BaseProcessor):
     
-    def __init__(self, version: str, spec_file_path: str, latest_tag: str, 
-                 env: str, spec_file_src: str):
-        super().__init__(version, spec_file_path, latest_tag, env, spec_file_src, ProcessingMode.BUILD)
-        # Store parsed version info for compatibility (some methods may still reference it)
-        self.parsed_version_info = self.version_info
+    def __init__(self, version: str, spec_file_path: str,
+                 spec_file_src: str):
+        super().__init__(version, spec_file_path, spec_file_src, ProcessingMode.BUILD)
     
     def _validate_specific_inputs(self) -> None:
         """Build processor has no additional validation beyond common inputs"""
@@ -33,23 +31,14 @@ class BuildProcessor(BaseProcessor):
             self.reporter.print_header(
                 version=self.version,
                 spec_file_path=self.spec_file_path,
-                latest_tag=self.latest_tag,
-                env=self.env,
                 spec_file_src=self.spec_file_src
             )
-            
-            # Use base class helper methods
-            detected_environment = self.get_environment()
-            
-            # Print environment detection results
-            self.reporter.print_environment_detection(detected_environment)
             
             # Print transformation start
             self.reporter.print_transformation_start()
             
             self.file_processor.apply_build_transformations(
-                version=self.version,
-                version_info=self.version_info
+                version=self.version
             )
             
             # Print success summary using Reporter method
@@ -71,8 +60,6 @@ def create_argument_parser() -> argparse.ArgumentParser:
     
     parser.add_argument('version')
     parser.add_argument('spec_file_path')
-    parser.add_argument('latest_tag')
-    parser.add_argument('env')
     parser.add_argument('spec_file_src')
     
     return parser
@@ -86,8 +73,6 @@ def main() -> None:
         build_processor = BuildProcessor(
             version=parsed_args.version,
             spec_file_path=parsed_args.spec_file_path,
-            latest_tag=parsed_args.latest_tag,
-            env=parsed_args.env,
             spec_file_src=parsed_args.spec_file_src
         )
         

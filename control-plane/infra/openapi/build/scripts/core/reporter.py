@@ -10,7 +10,7 @@ Provides consistent, reusable printing functions for the build operation.
 import sys
 from datetime import datetime
 from pathlib import Path
-from .config import Colors, ProcessingMode, Environment
+from .config import Colors, ProcessingMode
 
 
 class Reporter:
@@ -20,8 +20,8 @@ class Reporter:
         self.mode = mode
         self.start_time = datetime.now()
 
-    def print_header(self, version: str, spec_file_path: Path, latest_tag: str,
-                    env: str, spec_file_src: Path) -> None:
+    def print_header(self, version: str, spec_file_path: Path,
+                    spec_file_src: Path) -> None:
         """Print operation header with all key information"""
         mode_info = {
             ProcessingMode.BUILD: ("🔨", "Build Mode: Processing OpenAPI spec for local development"),
@@ -33,8 +33,6 @@ class Reporter:
         print("=" * 80)
         print("📋 Configuration:")
         print(f"   • Version: {version}")
-        print(f"   • Latest tag: {latest_tag or '(empty - using fallback)'}")
-        print(f"   • Environment: {env}")
         print(f"   • Target spec: {spec_file_path}")
         print(f"   • Source spec: {spec_file_src}")
         
@@ -43,12 +41,6 @@ class Reporter:
             size_kb = spec_file_src.stat().st_size / 1024
             print(f"   • Source size: {size_kb:.1f} KB")
         
-        print()
-    
-    def print_environment_detection(self, detected_env: Environment) -> None:
-        """Print environment detection results"""
-        print("🌍 Environment Analysis:")
-        print(f"   • Detected: {detected_env.value}")
         print()
     
     def print_transformation_start(self) -> None:

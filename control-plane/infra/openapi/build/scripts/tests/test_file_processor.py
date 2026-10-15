@@ -143,8 +143,6 @@ paths:
         
         # Check that transformations were applied
         self.assertIn('"2.22.0"', content)  # Version should be quoted
-        # Logo should remain local for build mode
-        self.assertIn('./runai-logo-api.png', content)
     
     def test_error_handling_invalid_file(self):
         """Test error handling for invalid files"""

@@ -9,7 +9,7 @@ Provides common initialization, validation, and error handling patterns.
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from .config import Config, ProcessingMode, Environment
+from .config import Config, ProcessingMode
 from .version_manager import VersionManager
 from .file_processor import FileProcessor
 from .reporter import Reporter
@@ -18,13 +18,11 @@ from .reporter import Reporter
 class BaseProcessor(ABC):
     """Base class for spec processors with shared functionality"""
 
-    def __init__(self, version: str, spec_file_path: str, latest_tag: str,
-                 env: str, spec_file_src: str, mode: ProcessingMode):
+    def __init__(self, version: str, spec_file_path: str,
+                 spec_file_src: str, mode: ProcessingMode):
         # Common parameters
         self.version = version
         self.spec_file_path = Path(spec_file_path)
-        self.latest_tag = latest_tag
-        self.env = env
         self.spec_file_src = Path(spec_file_src)
 
         # Common utilities
@@ -32,11 +30,6 @@ class BaseProcessor(ABC):
         self.version_manager = VersionManager()
         self.file_processor = FileProcessor(self.spec_file_path, self.spec_file_src, self.config)
         self.reporter = Reporter(mode)
-
-        # Parse version info
-        self.version_info = self.version_manager.parse_version_into_components(
-            version, latest_tag
-        )
 
         # Validate inputs
         self._validate_common_inputs()
@@ -68,12 +61,6 @@ class BaseProcessor(ABC):
     def _validate_specific_inputs(self) -> None:
         """Validate processor-specific inputs (implemented by subclasses)"""
         ...
-    
-    def get_environment(self) -> Environment:
-        """Get detected environment"""
-        return self.version_manager.detect_environment_from_version_and_param(
-            self.env, self.version
-        )
     
     @abstractmethod
     def run(self) -> bool:

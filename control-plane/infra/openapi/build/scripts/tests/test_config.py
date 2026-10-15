@@ -15,7 +15,7 @@ from pathlib import Path
 # Add parent directory to path to import core modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from core.config import Config, Environment, ProcessingMode, Colors, RegexPatterns
+from core.config import Config, ProcessingMode, Colors, RegexPatterns
 
 
 class TestConfig(unittest.TestCase):
@@ -26,22 +26,6 @@ class TestConfig(unittest.TestCase):
         config = Config.get_default()
         
         self.assertEqual(config.FILE_ENCODING, "utf-8")
-
-
-class TestEnvironment(unittest.TestCase):
-    """Test cases for Environment enum"""
-    
-    def test_environment_values(self):
-        """Test all environment values"""
-        self.assertEqual(Environment.LAB.value, "lab")
-        self.assertEqual(Environment.TEST.value, "test")
-        self.assertEqual(Environment.STAGING.value, "staging")
-        self.assertEqual(Environment.SAAS.value, "saas")
-    
-    def test_environment_count(self):
-        """Test that we have the expected number of environments"""
-        environments = list(Environment)
-        self.assertEqual(len(environments), 4)
 
 
 class TestProcessingMode(unittest.TestCase):
@@ -107,45 +91,12 @@ class TestRegexPatterns(unittest.TestCase):
         self.assertIsNone(pattern.search("2.22.0"))
         self.assertIsNone(pattern.search("master"))
     
-    def test_environment_patterns(self):
-        """Test environment detection patterns"""
-        # Staging pattern
-        self.assertIsNotNone(RegexPatterns.STAGING.search("2.22.0-staging"))
-        self.assertIsNone(RegexPatterns.STAGING.search("2.22.0"))
-        
-        # SAAS pattern
-        self.assertIsNotNone(RegexPatterns.SAAS.search("2.22.0-saas.1"))
-        self.assertIsNone(RegexPatterns.SAAS.search("2.22.0"))
-        
-        # Test pattern
-        self.assertIsNotNone(RegexPatterns.TEST.search("2.22.0-test"))
-        self.assertIsNone(RegexPatterns.TEST.search("2.22.0"))
-    
-    def test_semver_pattern(self):
-        """Test semantic version pattern"""
-        pattern = RegexPatterns.SEMVER
-        
-        # Should match semantic versions
-        self.assertIsNotNone(pattern.match("2.22.0"))
-        self.assertIsNotNone(pattern.match("1.0.0"))
-        self.assertIsNotNone(pattern.match("10.5.3"))
-        
-        # Should not match partial versions
-        self.assertIsNone(pattern.match("2.22"))
-        self.assertIsNone(pattern.match("2.22.0.master"))
-        self.assertIsNone(pattern.match("v2.22.0"))
-    
     def test_content_replacement_patterns(self):
         """Test content replacement patterns"""
         # Version replacement
         version_pattern = RegexPatterns.VERSION_REPLACE
         self.assertIsNotNone(version_pattern.search("version: 2.0.0"))
         self.assertIsNone(version_pattern.search("version: 2.22.0"))
-        
-        # Logo replacement
-        logo_pattern = RegexPatterns.LOGO
-        self.assertIsNotNone(logo_pattern.search("url: ./runai-logo-api.png"))
-        self.assertIsNone(logo_pattern.search("url: https://example.com/logo.png"))
 
 
 if __name__ == '__main__':

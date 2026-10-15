@@ -22,24 +22,13 @@ class ProcessingMode(Enum):
     BUILD = "build"  # Local development
 
 
-class Environment(Enum):
-    LAB = "lab"       # Never pushes
-    TEST = "test"         
-    STAGING = "staging"   
-    SAAS = "saas"
-
-
 class FileConstants:
     DEFAULT_ENCODING = 'utf-8'
     SPEC_FILE_BACKUP_SUFFIX = '.backup'
     
 
 class VersionConstants:
-    DEFAULT_API_VERSION = "2.0.0"
     LATEST_VERSION_KEYWORD = "latest"
-    MASTER_VERSION_SUFFIX = ".master"
-    MASTER_VERSION_KEYWORD = "master"
-    VERSION_MULTIPLIER = 100  # For converting "2.20" to 220
 
 
 @dataclass
@@ -54,15 +43,8 @@ class Config:
 class RegexPatterns:
     # Version parsing
     VERSION = re.compile(r'v?(\d+\.\d+)')
-    SEMVER = re.compile(r'^\d+\.\d+\.\d+$')
-    
-    # Environment detection
     MASTER = re.compile(r'\.master')
-    STAGING = re.compile(r'-staging')
-    SAAS = re.compile(r'-saas')
-    TEST = re.compile(r'-test')
-    
+
     # Content replacement
     VERSION_REPLACE = re.compile(r'version: 2\.0\.0')
-    LOGO = re.compile(r'url: \./runai-logo-api\.png')
     
