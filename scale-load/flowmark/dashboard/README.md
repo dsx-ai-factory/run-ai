@@ -5,8 +5,8 @@ trend chart per scenario and KPI. Plain HTML, CSS and JavaScript with Chart.js
 from a CDN, no build step. The browser fetches `manifest.json` and every
 `results-*.json` it lists and draws everything client-side.
 
-Published at https://dsx-ai-factory.github.io/run-ai/ from the
-`flowmark-results` branch, which holds these three files next to the results
+Published at https://dsx-ai-factory.github.io/run-ai/flowmark/ from the
+`gh-pages` branch, which holds these three files next to the results
 the nightly workflow pushes there.
 
 ## Run it locally
@@ -17,7 +17,7 @@ python3 -m http.server 8000
 ```
 
 then open http://localhost:8000/?data=fixtures to read the real nights kept
-under `fixtures/`, or `?data=https://dsx-ai-factory.github.io/run-ai` to read
+under `fixtures/`, or `?data=https://dsx-ai-factory.github.io/run-ai/flowmark` to read
 the published results. Without `?data=` the page reads the folder it is served
 from, which is how it runs on Pages.
 
