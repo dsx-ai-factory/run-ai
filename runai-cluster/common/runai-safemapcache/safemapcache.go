@@ -30,6 +30,7 @@ type SafeMapCache[K any, V any] struct {
 	cleanupPeriod    time.Duration
 	cleanupTicker    *time.Ticker
 	expirationPeriod time.Duration
+	destroyed        chan struct{}
 }
 
 type mapValue[V any] struct {
@@ -46,6 +47,7 @@ func NewWithPeriods[K, V any](cleanupPeriod, expirationPeriod time.Duration) *Sa
 		cleanupPeriod:    cleanupPeriod,
 		cleanupTicker:    time.NewTicker(cleanupPeriod),
 		expirationPeriod: expirationPeriod,
+		destroyed:        make(chan struct{}),
 	}
 
 	mapCache.active.Store(true)
@@ -106,6 +108,8 @@ func (u *SafeMapCache[K, V]) Destroy() {
 	}
 
 	u.active.Store(false)
+	u.cleanupTicker.Stop()
+	close(u.destroyed)
 	u.cleanupFunc()
 }
 
@@ -113,13 +117,21 @@ func (u *SafeMapCache[K, V]) Active() bool {
 	return u.active.Load()
 }
 
+// cleanupRoutine stops when the cache is destroyed. time.Ticker.Stop does not
+// close the ticker's channel, so without destroyed the routine would block on a
+// channel that never fires again and leak; before, it instead kept ticking and
+// panicked on the first tick after Destroy.
 func (u *SafeMapCache[K, V]) cleanupRoutine() {
-	for _ = range u.cleanupTicker.C {
-		if !u.active.Load() {
-			panic(ErrStoreInInactive)
+	for {
+		select {
+		case <-u.cleanupTicker.C:
+			if !u.active.Load() {
+				return
+			}
+			u.cleanupFunc()
+		case <-u.destroyed:
+			return
 		}
-
-		u.cleanupFunc()
 	}
 }
 
