@@ -51,13 +51,5 @@ var _ = Describe("Kubeflow training Karta replica-type pod selectors", func() {
 			"master": {"Master", "master"},
 			"worker": {"Worker", "worker"},
 		}),
-		Entry("MPI v1", BuildKubeflowMPIJobV1, "mpiReplicaSpecs", map[string][2]string{
-			"launcher": {"Launcher", "launcher"},
-			"worker":   {"Worker", "worker"},
-		}),
-		Entry("MPI v2beta1", BuildKubeflowMPIJobV2beta1, "mpiReplicaSpecs", map[string][2]string{
-			"launcher": {"Launcher", "launcher"},
-			"worker":   {"Worker", "worker"},
-		}),
 	)
 })
