@@ -29,9 +29,8 @@ Targets come from the service `Makefile` plus shared includes
 
 - **No image is built.** There is no Dockerfile and no `runai-local/openapi-build`
   tag; this service is not in `local-dev.sh`'s `CP_GO_SERVICES` and is not
-  deployed as a workload. The deployed control plane serves public docs
-  externally (chart value `redoc.docsSite.url`); on SaaS `/api/docs` redirects
-  there.
+  deployed as a workload. The deployed control plane serves the OpenAPI yaml
+  spec download at `/api/docs` (from the frontend).
 - **Build == spec processing.** `build` merges service swagger via
   `openapi-merge-cli`, bundles/filters with redocly (`config/redocly*.yaml` +
   `plugins/internal-filters.js`, `plugins/system-scoped-filters.js`) to strip

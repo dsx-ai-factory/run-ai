@@ -2953,12 +2953,6 @@ traefik:
     interval: 30s
     scrapeTimeout: 30s
 
-# When set, /api/docs and /redoc/* paths redirect to this external URL (used in SaaS).
-# Leave empty for self-hosted (no API docs endpoint served).
-redoc:
-  docsSite:
-    url: ""
-
 # When enabled, the chart fails to render if the release namespace is not labeled
 # istio-injection=disabled. Run the following before installing/upgrading:
 #   kubectl label namespace <release-namespace> istio-injection=disabled
