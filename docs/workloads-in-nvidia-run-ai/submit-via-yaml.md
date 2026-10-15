@@ -142,7 +142,7 @@ spec:
         enabled: true
         host: api
         hostPrefix: llm-
-        hostSuffix: runailabs.com
+        hostSuffix: example.com
         ingressControllerClassName: haproxy
       extraPodSpec:
         mainContainer:
