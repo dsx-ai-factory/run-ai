@@ -1,7 +1,6 @@
 # openapi/build — Build Context
 
 **Type:** none (`artifact_type: "none"` — no image, no binary)
-**Team:** Sphinx (`artifact-metadata.json`)
 **Service name:** openapi/build
 **Artifact:** processed spec files under `_build/` (`cache_artifacts: true`, `path_to_artifacts: _build/`)
 

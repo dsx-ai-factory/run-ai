@@ -3,7 +3,7 @@
 `openapi/build` is the control-plane component that **builds Run:ai's public
 OpenAPI documentation spec**. It merges the individual service swagger files
 into a single public spec, filters out internal endpoints/fields, and
-post-processes the result (version stamping, branding) for local/CI use. It is owned by the **Sphinx** team.
+post-processes the result (version stamping, branding) for local/CI use.
 
 This module does **not** build or ship a container image, and it does not
 serve docs at runtime. Its `artifact_type` is `none`: the build produces
