@@ -115,7 +115,7 @@ env-var config. Its behaviour is driven by makefile variables and files:
 | `VERSION` / `LATEST_TAG` / `ENVIRONMENT` | Version + environment stamped into the processed spec |
 | `config/merge-config*.json` | Which service swagger files are merged and in what order |
 | `config/redocly*.yaml` + `plugins/` | Bundle/filter rules (internal endpoint and enum stripping) |
-| `swagger/rootApi*.yaml` | Root API doc + `x-tagGroups` structure |
+| `swagger/rootApi*.yaml` | Root API doc |
 
 The chart value `redoc.docsSite.url` (in the control-plane chart) points the
 deployed control plane at the external docs site; it is not consumed here.
@@ -123,5 +123,4 @@ deployed control plane at the external docs site; it is not consumed here.
 ## How to add a new service
 
 - Update `config/merge-config.json` with the new swagger file path.
-- Add `x-tagGroups` entries to `swagger/rootApi.yaml`.
 - Run `make build` to verify the merged output, then `make validate`.

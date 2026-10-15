@@ -597,22 +597,18 @@ identityManager:
   name: identity-manager
   exposedRules:
     - PathPrefix(`/api/v1/users`)
-    - PathPrefix(`/api/v1/apps`)
     - PathPrefix(`/api/v1/service-accounts`)
     - PathPrefix(`/api/v1/idps`)
     - PathPrefix(`/api/v1/me`)
     - PathPrefix(`/api/v1/security/settings`)
     - PathPrefix(`/api/v1/access-keys`)
-    - PathPrefix(`/api/v1/user-applications`)
     - PathPrefix(`/api/v1/administration/access-keys`)
-    - PathPrefix(`/api/v1/administration/user-applications`)
     - PathPrefix(`/api/v1/logout`)
   exposedRulesUnauthenticated:
     - Path(`/api/v1/token`)
     - Path(`/api/v2/token`)
     - Path(`/.well-known/openid-configuration`)
     - Path(`/.well-known/oauth-authorization-server`)
-    - Path(`/v1/k8s/auth/oauth/apptoken`)
     - Path(`/api/v1/login`)
   exposedRulesUnauthenticatedWithHostname:
     - Path(`/api/v1/config`)

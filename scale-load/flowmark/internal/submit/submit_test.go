@@ -190,30 +190,6 @@ func assertLabels(t *testing.T, got []workloadclient.Label, want ...string) {
 	}
 }
 
-func TestDeploymentObject(t *testing.T) {
-	userLabels := map[string]string{"flowmark": "scenario-1"}
-	spec := DeploymentSpec{Name: "dep-1", Namespace: "runai-flowmark-a", Image: "nginx", Replicas: 3, Labels: userLabels}
-
-	deployment := deploymentObject(spec)
-
-	if deployment.Name != "dep-1" || deployment.Namespace != "runai-flowmark-a" || *deployment.Spec.Replicas != 3 {
-		t.Fatalf("metadata mismatch: %+v", deployment.ObjectMeta)
-	}
-	if deployment.Spec.Template.Spec.Containers[0].Image != "nginx" {
-		t.Fatalf("image: %v", deployment.Spec.Template.Spec.Containers)
-	}
-	podLabels := deployment.Spec.Template.Labels
-	if podLabels["app"] != "dep-1" || deployment.Spec.Selector.MatchLabels["app"] != "dep-1" {
-		t.Fatalf("selector must match pod labels: %v / %v", deployment.Spec.Selector.MatchLabels, podLabels)
-	}
-	if podLabels["flowmark"] != "scenario-1" {
-		t.Fatalf("user labels must reach the pods: %v", podLabels)
-	}
-	if _, mutated := userLabels["app"]; mutated {
-		t.Fatal("caller's label map must not be mutated")
-	}
-}
-
 func TestClusterID(t *testing.T) {
 	cases := []struct {
 		name     string

@@ -1,0 +1,154 @@
+{
+  "schema": "v1",
+  "metadata": {
+    "date": "2026-10-14T01:50:11.968056255Z",
+    "finished_at": "2026-10-14T02:21:07.467038806Z",
+    "provider": "ci",
+    "cluster_type": "vanilla-fake-gpu",
+    "control_plane_version": "0.0.0-30004964.main-a642840",
+    "cluster_version": "0.0.0-30004966.main-56cc543"
+  },
+  "regression_detected": false,
+  "sections": {
+    "deployment-burst": {
+      "category": "scale",
+      "metrics": {
+        "max_ms@100": 2025,
+        "max_ms@250": 8613,
+        "max_ms@500": 20787,
+        "mean_ms@100": 1242,
+        "mean_ms@250": 3093,
+        "mean_ms@500": 8949,
+        "p50_ms@100": 1342,
+        "p50_ms@250": 2312,
+        "p50_ms@500": 8653,
+        "p90_ms@100": 1891,
+        "p90_ms@250": 7170,
+        "p90_ms@500": 18410,
+        "p99_ms@100": 2009,
+        "p99_ms@250": 8492,
+        "p99_ms@500": 20551,
+        "throughput_per_sec@100": 39.7,
+        "throughput_per_sec@250": 25.5,
+        "throughput_per_sec@500": 18.7,
+        "workload_type": "Deployment"
+      },
+      "slo": {
+        "max_ms": 15000,
+        "max_ms@250": 60000,
+        "max_ms@500": 240000,
+        "p90_ms": 10000,
+        "p90_ms@250": 50000,
+        "p90_ms@500": 200000
+      },
+      "failed": false
+    },
+    "training-burst": {
+      "category": "scale",
+      "metrics": {
+        "max_ms@100": 9323,
+        "max_ms@250": 10530,
+        "max_ms@500": 10028,
+        "mean_ms@100": 4505,
+        "mean_ms@250": 4367,
+        "mean_ms@500": 4200,
+        "p50_ms@100": 4494,
+        "p50_ms@250": 4089,
+        "p50_ms@500": 3996,
+        "p90_ms@100": 7582,
+        "p90_ms@250": 8497,
+        "p90_ms@500": 8172,
+        "p99_ms@100": 8942,
+        "p99_ms@250": 10483,
+        "p99_ms@500": 9734,
+        "throughput_per_sec@100": 5.8,
+        "throughput_per_sec@250": 5.4,
+        "throughput_per_sec@500": 5.3,
+        "workload_type": "Training"
+      },
+      "slo": {
+        "max_ms": 15000,
+        "max_ms@250": 60000,
+        "max_ms@500": 240000,
+        "p90_ms": 10000,
+        "p90_ms@250": 50000,
+        "p90_ms@500": 200000
+      },
+      "failed": false
+    },
+    "workspace-burst": {
+      "category": "scale",
+      "metrics": {
+        "max_ms@100": 10036,
+        "max_ms@250": 10726,
+        "max_ms@500": 11722,
+        "mean_ms@100": 4867,
+        "mean_ms@250": 4504,
+        "mean_ms@500": 4506,
+        "p50_ms@100": 4302,
+        "p50_ms@250": 4290,
+        "p50_ms@500": 4107,
+        "p90_ms@100": 8758,
+        "p90_ms@250": 8465,
+        "p90_ms@500": 8737,
+        "p99_ms@100": 9938,
+        "p99_ms@250": 9809,
+        "p99_ms@500": 11188,
+        "throughput_per_sec@100": 5.8,
+        "throughput_per_sec@250": 6,
+        "throughput_per_sec@500": 5.3,
+        "workload_type": "Workspace"
+      },
+      "slo": {
+        "max_ms": 15000,
+        "max_ms@250": 60000,
+        "max_ms@500": 240000,
+        "p90_ms": 10000,
+        "p90_ms@250": 50000,
+        "p90_ms@500": 200000
+      },
+      "failed": false
+    },
+    "workspace-ttj": {
+      "category": "load",
+      "metrics": {
+        "api_accepted_max_ms": 197,
+        "api_accepted_mean_ms": 138,
+        "api_accepted_p50_ms": 136,
+        "api_accepted_p90_ms": 147,
+        "api_accepted_p99_ms": 184,
+        "cluster_synced_max_ms": 9750,
+        "cluster_synced_mean_ms": 5033,
+        "cluster_synced_p50_ms": 4761,
+        "cluster_synced_p90_ms": 8815,
+        "cluster_synced_p99_ms": 9745,
+        "failed_count": 0,
+        "pod_created_max_ms": 1370,
+        "pod_created_mean_ms": 402,
+        "pod_created_p50_ms": 324,
+        "pod_created_p90_ms": 797,
+        "pod_created_p99_ms": 1102,
+        "ttj_max_ms": 9891,
+        "ttj_mean_ms": 5436,
+        "ttj_p50_ms": 4937,
+        "ttj_p90_ms": 9380,
+        "ttj_p99_ms": 9873,
+        "workload_type": "Workspace"
+      },
+      "slo": {
+        "api_accepted_max_ms": 2000,
+        "api_accepted_mean_ms": 500,
+        "api_accepted_p90_ms": 750,
+        "cluster_synced_max_ms": 15000,
+        "cluster_synced_mean_ms": 7000,
+        "cluster_synced_p90_ms": 10000,
+        "pod_created_max_ms": 10000,
+        "pod_created_mean_ms": 2000,
+        "pod_created_p90_ms": 4000,
+        "ttj_max_ms": 20000,
+        "ttj_mean_ms": 8000
+      },
+      "failed": false
+    }
+  }
+}

@@ -1663,6 +1663,7 @@
             "example": "standard"
           },
           "volumeMode": {
+            "type": "string",
             "allOf": [
               {
                 "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode"
@@ -1728,7 +1729,6 @@
             "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials"
           },
           "pvcs": {
-            "x-internal": true,
             "type": "array",
             "nullable": true,
             "maxItems": 1000,
@@ -1738,7 +1738,6 @@
             }
           },
           "pvcsConfig": {
-            "x-internal": true,
             "nullable": true,
             "description": "Configuration applied to PVCs that are created and reconciled alongside the workload.",
             "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig"

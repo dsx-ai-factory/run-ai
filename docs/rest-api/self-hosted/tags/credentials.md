@@ -1,0 +1,1 @@
+Credentials are used to unlock protected resources such as applications, containers, and other assets. For more information, see [Credentials](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/assets/credentials).

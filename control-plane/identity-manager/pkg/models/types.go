@@ -7,7 +7,6 @@ package models
 
 const (
 	GrantTypeRefreshToken          = "refresh_token"
-	GrantTypeAppTokenDeprecated    = "app_token"
 	GrantTypeAppToken              = "client_credentials"
 	GrantTypeExchangeToken         = "exchange_token"
 	GrantTypeAuthorizationCode     = "authorization_code"
@@ -30,8 +29,6 @@ const (
 	TokenRequestFieldRefreshToken  = "refreshToken"
 	TokenRequestFieldCode          = "code"
 	TokenRequestFieldRedirectUri   = "redirectUri"
-	TokenRequestFieldAppID         = "appId"
-	TokenRequestFieldAppSecret     = "appSecret"
 	TokenRequestFieldExternalToken = "externalToken"
 	TokenRequestFieldCodeVerifier  = "codeVerifier"
 )

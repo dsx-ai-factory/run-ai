@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<!--
+  SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+  SPDX-License-Identifier: Apache-2.0
+-->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlowMark — Scale &amp; Load Nightly</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js" integrity="sha512-CQBWl4fJHWbryGE+Pc7UAxWMUMNMWzWxF4SQo9CgkJIN1kx6djDQZjh3Y8SZ1d+6I+1zze6Z7kHXO7q3UyZAWw==" crossorigin="anonymous"></script>
+</head>
+<body>
+<header class="page-header">
+  <div>
+    <h1>FlowMark — Scale &amp; Load Nightly</h1>
+    <div class="subtitle" id="subtitle">loading…</div>
+  </div>
+  <label class="cluster-pick">cluster type
+    <select id="cluster-type"></select>
+  </label>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="runs">Test Runs</button>
+  <button class="tab" data-tab="metrics">Metrics</button>
+</nav>
+
+<main>
+  <section class="tab-content" data-content="runs">
+    <div id="runs"></div>
+  </section>
+
+  <section class="tab-content hidden" data-content="metrics">
+    <div class="metrics-controls">
+      <div class="subtabs" id="subtabs"></div>
+      <input class="filter" id="filter" type="search" placeholder="filter charts, e.g. ttj or @500" autocomplete="off">
+    </div>
+    <div class="charts" id="charts"></div>
+  </section>
+
+  <p class="notice hidden" id="notice"></p>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

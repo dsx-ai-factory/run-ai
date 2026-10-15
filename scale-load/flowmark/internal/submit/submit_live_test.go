@@ -14,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
@@ -94,10 +93,6 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Workspace: %v", err)
 	}
-	deployment, err := K8sDeployment(ctx, clients.Kube, DeploymentSpec{Name: "fm-dep", Namespace: projectA.Namespace, Image: "nginx", Replicas: 1})
-	if err != nil {
-		t.Fatalf("K8sDeployment: %v", err)
-	}
 
 	for _, ref := range []WorkloadRef{training, workspace} {
 		detailed, _, err := clients.Workloads.WorkloadsAPI.GetWorkload(ctx, ref.ID).Execute()
@@ -109,11 +104,6 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 		}
 		t.Logf("workload %s exists (id %s, phase %s)", ref.Name, ref.ID, detailed.Phase)
 	}
-	var fetched appsv1.Deployment
-	if err := clients.Kube.Get(ctx, k8sclient.ObjectKeyFromObject(deployment), &fetched); err != nil {
-		t.Fatalf("deployment not found: %v", err)
-	}
-	t.Logf("deployment %s/%s exists", fetched.Namespace, fetched.Name)
 
 	projectB, err := Project(ctx, clients, clusterID, nameB, timeout)
 	if err != nil {

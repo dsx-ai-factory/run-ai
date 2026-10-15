@@ -13,8 +13,6 @@
 
 * `EXTERNAL_TOKEN_EXCHANGE` (value: `"external_token_exchange"`)
 
-* `APP_TOKEN` (value: `"app_token"`)
-
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -171,16 +171,11 @@ paths:
     $ref: './resources/realm/settings.yaml'
   /internal/realms/{realm}/reconcile:
     $ref: './resources/internal_realms_reconcile.yaml'
-  # Deprecated - start
-  /v1/k8s/auth/oauth/apptoken:
-    x-internal: true
-    $ref: './resources/token/appToken.yaml'
   /internal/realms/{realm}:
     $ref: './resources/internal_realms.yaml'
 security:
 - bearerAuth: []
 
-# Deprecated - end
 components:
   parameters:
     $ref: "./parameters/_index.yaml"

@@ -87,7 +87,7 @@ Run the changed service's own Makefile targets before opening the PR: this mirro
 
 ```bash
 cd control-plane/assets-service   # whichever service(s) you touched
-make build test lint
+make build test lint validate
 ```
 
 ### Step 5: Sign Off Your Commits
@@ -205,7 +205,7 @@ Start with an issue describing the extension point you intend to use, so maintai
 ## Code Review
 
 - Branch protection requires **at least one approval** and a green `Validate Successful Run` check before merge.
-- `CODEOWNERS` files at the root and under `.github/` and `docs/` automatically request review from the right team for each affected path.
+- A `CODEOWNERS` file at the root automatically requests review from the right team for each affected path.
 - For non-trivial changes, expect more than one reviewer to weigh in: this is a team norm, not a tool gate. Be patient and responsive.
 
 ---
