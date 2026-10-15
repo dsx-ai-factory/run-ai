@@ -323,12 +323,13 @@ func ApiResourcesToModel(
 		if err != nil {
 			return nil, err
 		}
+		gpuDeserved := ptr.To(ptr.Deref(resources.Gpu.Deserved, 0))
 		modelResources[i] = models.Resources{
 			NodePoolId:         nodePoolId,
 			NodePoolName:       resources.NodePool.Name,
-			GpuDeserved:        ptr.To(resources.Gpu.Deserved),
+			GpuDeserved:        gpuDeserved,
 			GpuLimit:           resources.Gpu.Limit,
-			GpuOverQuotaWeight: calcOverQuotaWeight(adjustableWeightsFlag, isDepartment, ptr.To(resources.Gpu.Deserved), resources.Gpu.OverQuotaWeight),
+			GpuOverQuotaWeight: calcOverQuotaWeight(adjustableWeightsFlag, isDepartment, gpuDeserved, resources.Gpu.OverQuotaWeight),
 			Rank:               rank,
 		}
 		resourcesId, found := originalResourcesNodePoolToId[nodePoolId]
@@ -786,7 +787,7 @@ func ConvertNodePoolResourcesPatchRequest(npr api.NodePoolResourcesPatchRequest)
 	if npr.Resources != nil {
 		if npr.Resources.Gpu != nil {
 			result.Gpu = api.ResourcesNullableGpu{
-				Deserved:        ptr.Deref(npr.Resources.Gpu.Deserved, 0),
+				Deserved:        npr.Resources.Gpu.Deserved,
 				Limit:           npr.Resources.Gpu.Limit,
 				OverQuotaWeight: npr.Resources.Gpu.OverQuotaWeight,
 			}

@@ -363,7 +363,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			// add another department without quota, with non-default rank
 			// in nodepool2 - with quota, no rank
 			creationReq = getDepartmentCreateRequest("sum-dep-noquota", clusterId)
-			creationReq.Resources[0].Gpu.Deserved = 0
+			creationReq.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			creationReq.Resources[0].Gpu.Limit = nil
 			creationReq.Resources[0].Gpu.OverQuotaWeight = nil
 			creationReq.Resources[0].Cpu = &api.ResourcesCpu{
@@ -383,7 +383,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			// add another department with both cpu quota and non-default rank
 			// in nodepool2 - no quota, with non-default rank
 			creationReq = getDepartmentCreateRequest("sum-dep-both", clusterId)
-			creationReq.Resources[0].Gpu.Deserved = 0
+			creationReq.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			creationReq.Resources[0].Gpu.Limit = nil
 			creationReq.Resources[0].Gpu.OverQuotaWeight = nil
 			creationReq.Resources[0].Cpu = &api.ResourcesCpu{
@@ -404,7 +404,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			pNames := []string{fmt.Sprint("sum-proj-quota-", uuid.New()), fmt.Sprint("sum-proj-quota-", uuid.New())}
 			for i, pName := range pNames {
 				projReq := getProjectCreateRequest(pName, pName, depRankNoQuota_np2QuotaNoRank.Id, clusterId)
-				projReq.Resources[0].Gpu.Deserved = 0
+				projReq.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 				projReq.Resources[0].Gpu.Limit = nil
 				projReq.Resources[0].Gpu.OverQuotaWeight = nil
 				projReq.Resources[0].Memory = &api.ResourcesMemory{
@@ -428,7 +428,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			// in nodepool2 - no quota, no rank
 			pNoQuotaName := fmt.Sprint("sum-proj-noquota-", uuid.New())
 			projNoQuotaReq := getProjectCreateRequest(pNoQuotaName, pNoQuotaName, depQuotaNoRank_np2NoQuotaNoRank.Id, clusterId)
-			projNoQuotaReq.Resources[0].Gpu.Deserved = 0
+			projNoQuotaReq.Resources[0].Gpu.Deserved = ptr.To(float64(0))
 			projNoQuotaReq.Resources[0].Gpu.Limit = nil
 			projNoQuotaReq.Resources[0].Gpu.OverQuotaWeight = nil
 			projNoQuotaReq.Resources[0].Rank = ptr.To("Low") // set non-default rank
@@ -1224,6 +1224,101 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				Expect(resP.Body.(api.Error).Message).To(ContainSubstring("quota is not enabled on nodepool id <2>"))
 			})
 
+			It("create department/project fails when quota is enabled and gpu deserved is omitted", func() {
+				def := CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default")
+				def.Gpu.Deserved = nil
+				pool2 := CreateNodePoolApiResourcesNoQuota("2", "pool2")
+				expectedMessage := fmt.Sprintf("quota is enabled on nodepool id <%s>. Gpu deserved is required", fmt.Sprint(defaultNodePoolId))
+
+				req := getDepartmentCreateRequest(createDepartmentName(), clusterId2)
+				req.Resources = []api.ResourcesNullable{def, pool2}
+				res, err := departmentApiService2.CreateDepartment(ctx, req)
+				Expect(err).To(BeNil())
+				Expect(res.Code).To(Equal(http.StatusBadRequest))
+				Expect(res.Body.(api.Error).Message).To(ContainSubstring(expectedMessage))
+
+				reqP := getProjectCreateRequest(createProjectName(), "", defaultDepId, clusterId2)
+				reqP.Resources = []api.ResourcesNullable{def, pool2}
+				resP, err := projectApiService2.CreateProject(ctx, reqP)
+				Expect(err).To(BeNil())
+				Expect(resP.Code).To(Equal(http.StatusBadRequest))
+				Expect(resP.Body.(api.Error).Message).To(ContainSubstring(expectedMessage))
+			})
+
+			It("create project accepts an omitted gpu on a node pool with quota disabled", func() {
+				def := CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default")
+				pool2 := CreateNodePoolApiResourcesNoQuota("2", "pool2")
+				pool2.Gpu = api.ResourcesNullableGpu{}
+
+				reqP := getProjectCreateRequest(createProjectName(), "", defaultDepId, clusterId2)
+				reqP.Resources = []api.ResourcesNullable{def, pool2}
+				resP, err := projectApiService2.CreateProject(ctx, reqP)
+				Expect(err).To(BeNil())
+				Expect(resP.Code).To(Equal(http.StatusCreated), fmt.Sprintf("got body: %+v", resP.Body))
+				proj := resP.Body.(api.Project)
+				projIds = append(projIds, proj.Id)
+				for _, resources := range proj.Resources {
+					if resources.NodePool.Id == "2" {
+						Expect(resources.Gpu.Deserved).To(Equal(float64(0)))
+					}
+				}
+			})
+
+			It("put and patch project resources fail when quota is enabled and gpu deserved is omitted", func() {
+				reqP := getProjectCreateRequest(createProjectName(), "", defaultDepId, clusterId2)
+				reqP.Resources = []api.ResourcesNullable{
+					CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default"),
+					CreateNodePoolApiResourcesNoQuota("2", "pool2"),
+				}
+				resP, err := projectApiService2.CreateProject(ctx, reqP)
+				Expect(err).To(BeNil())
+				Expect(resP.Code).To(Equal(http.StatusCreated))
+				proj := resP.Body.(api.Project)
+				projIds = append(projIds, proj.Id)
+
+				noDeserved := CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default")
+				noDeserved.Gpu.Deserved = nil
+				expectedMessage := fmt.Sprintf("quota is enabled on nodepool id <%s>. Gpu deserved is required", fmt.Sprint(defaultNodePoolId))
+
+				patchRes, err := projectApiService2.PatchProjectResources(ctx, proj.Id, []api.ResourcesNullable{noDeserved})
+				Expect(err).To(BeNil())
+				Expect(patchRes.Code).To(Equal(http.StatusBadRequest))
+				Expect(patchRes.Body.(api.Error).Message).To(ContainSubstring(expectedMessage))
+
+				putRes, err := projectApiService2.UpdateProjectResources(ctx, proj.Id, []api.ResourcesNullable{noDeserved, CreateNodePoolApiResourcesNoQuota("2", "pool2")})
+				Expect(err).To(BeNil())
+				Expect(putRes.Code).To(Equal(http.StatusBadRequest))
+				Expect(putRes.Body.(api.Error).Details).To(ContainSubstring(expectedMessage))
+			})
+
+			It("batch patch keeps the stored gpu deserved when it is omitted", func() {
+				reqP := getProjectCreateRequest(createProjectName(), "", defaultDepId, clusterId2)
+				reqP.Resources = []api.ResourcesNullable{
+					CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default"),
+					CreateNodePoolApiResourcesNoQuota("2", "pool2"),
+				}
+				resP, err := projectApiService2.CreateProject(ctx, reqP)
+				Expect(err).To(BeNil())
+				Expect(resP.Code).To(Equal(http.StatusCreated))
+				proj := resP.Body.(api.Project)
+				projIds = append(projIds, proj.Id)
+
+				batchRes, err := projectApiService2.BatchPatchProjectNodePoolResources(ctx, api.BatchPatchNodePoolResourcesRequest{
+					PatchRequests: []api.NodePoolResourcesPatchRequest{{
+						OrgUnitId:  proj.Id,
+						NodePoolId: fmt.Sprint(defaultNodePoolId),
+						Rank:       ptr.To("High"),
+					}},
+				})
+				Expect(err).To(BeNil())
+				Expect(batchRes.Code).To(Equal(http.StatusOK), fmt.Sprintf("got body: %+v", batchRes.Body))
+				body := batchRes.Body.(api.BatchPatchProjectResourcesResponse)
+				Expect(body.TotalFailed).To(Equal(int32(0)), fmt.Sprintf("failed: %+v", body.Failed))
+				Expect(body.Succeeded).To(HaveLen(1))
+				Expect(body.Succeeded[0].Resources.Gpu.Deserved).ToNot(BeNil())
+				Expect(*body.Succeeded[0].Resources.Gpu.Deserved).To(Equal(FullResourcesDeservedGpu))
+			})
+
 			It("create department/project fails when ranks are disabled on pool2 but non-default priority provided", func() {
 				def := CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default")
 				pool2 := CreateNodePoolApiResourcesNoQuota("2", "pool2")
@@ -1266,7 +1361,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				for i := range depUpd.Resources {
 					if depUpd.Resources[i].NodePool.Name == "pool2" {
 						// attempt to set GPU quota on a nodepool with quota disabled
-						depUpd.Resources[i].Gpu.Deserved = float64(1)
+						depUpd.Resources[i].Gpu.Deserved = ptr.To(float64(float64(1)))
 					}
 				}
 				depUpdRes, err := departmentApiService2.UpdateDepartment(ctx, dep.Id, depUpd)
@@ -1299,7 +1394,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				projUpd := getProjectUpdateRequest(proj)
 				for i := range projUpd.Resources {
 					if projUpd.Resources[i].NodePool.Name == "pool2" {
-						projUpd.Resources[i].Gpu.Deserved = float64(1)
+						projUpd.Resources[i].Gpu.Deserved = ptr.To(float64(float64(1)))
 					}
 				}
 				projUpdRes, err := projectApiService2.UpdateProject(ctx, proj.Id, projUpd)
@@ -1607,7 +1702,7 @@ func CreateNodePoolApiResourcesNoQuota(nodePoolId string, nodePoolName string) a
 		NodePool: &nodePool,
 		Gpu: api.ResourcesNullableGpu{
 			Limit:           nil,
-			Deserved:        0,
+			Deserved:        ptr.To(float64(0)),
 			OverQuotaWeight: nil,
 		},
 		Cpu: &api.ResourcesCpu{

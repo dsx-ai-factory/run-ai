@@ -257,7 +257,7 @@ func ValidateNodePoolResourcesPatchRequest(ctx context.Context, npr api.NodePool
 
 	resourcesNullable := ConvertNodePoolResourcesPatchRequest(npr)
 
-	_, err := validateNodePoolResources(resourcesNullable, nodePoolsMetadata)
+	_, err := validateNodePoolResources(resourcesNullable, nodePoolsMetadata, false)
 	return err
 }
 
@@ -287,7 +287,8 @@ func ValidateNodePools(ctx context.Context, resources []api.ResourcesNullable) e
 	return nil
 }
 
-func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePoolsMetadata map[string]apiClusters.NodepoolMinimal) ([][]*float64, error) {
+// requireGpuDeserved is false for the batch patch, where an omitted gpu deserved keeps the stored value.
+func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePoolsMetadata map[string]apiClusters.NodepoolMinimal, requireGpuDeserved bool) ([][]*float64, error) {
 	deservedLimitPairs := [][]*float64{}
 
 	npSchedulingCapabilities, nodepoolId, err := getSchedulingCapabilitiesPerNodePool(nodePoolsMetadata, nodePoolResources.NodePool)
@@ -299,11 +300,16 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 	quotaFlag := npSchedulingCapabilities.Quota
 	ranksFlag := npSchedulingCapabilities.Ranks
 
-	if !quotaFlag && (nodePoolResources.Gpu.Deserved > 0 || (nodePoolResources.Gpu.Limit != nil && *nodePoolResources.Gpu.Limit != -1)) {
+	if quotaFlag && requireGpuDeserved && nodePoolResources.Gpu.Deserved == nil {
+		return nil, fmt.Errorf("quota is enabled on nodepool id <%s>. Gpu deserved is required", nodepoolId)
+	}
+
+	gpuDeserved := ptr.Deref(nodePoolResources.Gpu.Deserved, 0)
+	if !quotaFlag && (gpuDeserved > 0 || (nodePoolResources.Gpu.Limit != nil && *nodePoolResources.Gpu.Limit != -1)) {
 		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. Deserved should be 0 and limit should be -1", nodepoolId)
 	}
 
-	if !adjustableWeightsFlag && nodePoolResources.Gpu.OverQuotaWeight != nil && !IsValidNonAdjustableOverQuotaWeight(*nodePoolResources.Gpu.OverQuotaWeight, &nodePoolResources.Gpu.Deserved) {
+	if !adjustableWeightsFlag && nodePoolResources.Gpu.OverQuotaWeight != nil && !IsValidNonAdjustableOverQuotaWeight(*nodePoolResources.Gpu.OverQuotaWeight, &gpuDeserved) {
 		return nil, errors.New("over quota feature is off. OverQuotaWeight should be deserved or empty")
 	}
 
@@ -315,7 +321,7 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 		return nil, fmt.Errorf("ranks is not enabled on nodepool id <%s>. Rank should be empty", nodepoolId)
 	}
 
-	deservedLimitPairs = append(deservedLimitPairs, []*float64{ptr.To(nodePoolResources.Gpu.Deserved), nodePoolResources.Gpu.Limit})
+	deservedLimitPairs = append(deservedLimitPairs, []*float64{ptr.To(gpuDeserved), nodePoolResources.Gpu.Limit})
 
 	if cpuQuotaFlag {
 		if nodePoolResources.Cpu != nil {
@@ -341,7 +347,7 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 func ValidateResources(ctx context.Context, resources []api.ResourcesNullable, nodePoolsMetadata map[string]apiClusters.NodepoolMinimal) error {
 	deservedLimitPairs := [][]*float64{}
 	for i, nodePoolResources := range resources {
-		npDeservedLimitPairs, err := validateNodePoolResources(nodePoolResources, nodePoolsMetadata)
+		npDeservedLimitPairs, err := validateNodePoolResources(nodePoolResources, nodePoolsMetadata, true)
 		if err != nil {
 			return fmt.Errorf("%s in index %d", err.Error(), i)
 		}
