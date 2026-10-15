@@ -647,8 +647,7 @@ navigation:
             summary: ../../docs/rest-api/self-hosted/tags/nodes.md
         - projects:
             summary: ../../docs/rest-api/self-hosted/tags/projects.md
-        - logo:
-            summary: ../../docs/rest-api/self-hosted/tags/logo.md
+        - logo
         - researcherCommandLineInterface
         - researcherCommandLineInterfaceDeprecated
         - networkTopologies:
@@ -673,8 +672,7 @@ navigation:
             summary: ../../docs/rest-api/self-hosted/tags/me.md
         - settings:
             summary: ../../docs/rest-api/self-hosted/tags/settings.md
-        - orgUnit:
-            summary: ../../docs/rest-api/self-hosted/tags/org-unit.md
+        - orgUnit
       - section: Audit
         contents:
         - auditLogs:
@@ -717,8 +715,7 @@ navigation:
             summary: ../../docs/rest-api/self-hosted/tags/compute.md
         - credentials:
             summary: ../../docs/rest-api/self-hosted/tags/credentials.md
-        - datasources:
-            summary: ../../docs/rest-api/self-hosted/tags/datasources.md
+        - datasources
         - environment:
             summary: ../../docs/rest-api/self-hosted/tags/environment.md
         - storageClasses
@@ -747,10 +744,8 @@ navigation:
             summary: ../../docs/rest-api/self-hosted/tags/policy.md
       - section: Notifications
         contents:
-        - notificationState:
-            summary: ../../docs/rest-api/self-hosted/tags/notification-state.md
-        - notificationTypes:
-            summary: ../../docs/rest-api/self-hosted/tags/notification-types.md
+        - notificationState
+        - notificationTypes
         - notificationChannels:
             summary: ../../docs/rest-api/self-hosted/tags/notification-channels.md
         - slack:
