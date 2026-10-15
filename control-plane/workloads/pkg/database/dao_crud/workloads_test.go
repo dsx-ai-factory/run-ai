@@ -494,7 +494,7 @@ var _ = Describe("DbSyncWorkloads", func() {
 	})
 })
 
-var _ = DescribeTable("GPU memory storage boundary", func(snapshot bool) {
+var _ = DescribeTable("GPU memory DB boundary", func(snapshot bool) {
 	m := setupDaoMock(GinkgoT())
 	var spec, storedSpec workloadsApi.SupersetSpec
 	var master, storedMaster workloadsApi.MasterSpec

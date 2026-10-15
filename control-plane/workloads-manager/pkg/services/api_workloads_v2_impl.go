@@ -283,7 +283,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		}
 	}
 	if requestPath == NimServicesAPIPath {
-		stored, err := gpucompat.ProjectGPUFieldsForStorage(requestBodyMap)
+		stored, err := gpucompat.LegacyGPUFields(requestBodyMap)
 		if err != nil {
 			return nil, SingleError(NewSubmissionError(http.StatusBadRequest, err.Error(), err))
 		}

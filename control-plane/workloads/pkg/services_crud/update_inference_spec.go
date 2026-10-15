@@ -309,7 +309,7 @@ func composeInferenceUpdateNative(
 		nil,
 		options)
 
-	composerErr := jobSpecComposer.Compose(ctx, gpucompat.StoredWorkloadSpec(workload.Spec), &jobs.JobSpec{})()
+	composerErr := jobSpecComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(workload.Spec), &jobs.JobSpec{})()
 	if composerErr != nil {
 		return composer.WorkloadRequirements{}, NewSubmissionErrorWithDetails(composerErr.Code, composerErr.Message, composerErr.Details)
 	}

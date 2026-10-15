@@ -26,8 +26,8 @@ func DbUpsertWorkloadV2Snapshot(ctx context.Context, snapshot *models_crud.Workl
 	dbErr := api.NewError(http.StatusServiceUnavailable, fmt.Sprintf("Failed to upsert V2 workload snapshot %s", snapshot.ID), nil)
 
 	stored := *snapshot
-	stored.Spec = gpucompat.StoredWorkloadSpec(snapshot.Spec)
-	stored.MasterSpec = gpucompat.StoredMasterSpec(snapshot.MasterSpec)
+	stored.Spec = gpucompat.LegacyWorkloadSpec(snapshot.Spec)
+	stored.MasterSpec = gpucompat.LegacyMasterSpec(snapshot.MasterSpec)
 
 	_, err := runaidb.DB().WithContext(ctx).Table(models_crud.WorkloadV2SnapshotsTableName).Save(&stored)
 	if err != nil {

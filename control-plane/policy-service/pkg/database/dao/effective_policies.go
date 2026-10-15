@@ -43,7 +43,7 @@ func UpsertEffectivePolicy(ctx context.Context, tx orm.DB, effectivePolicy *dbmo
 
 	effectivePolicy.DefaultsV2 = database.CleanMap(effectivePolicy.DefaultsV2)
 	effectivePolicy.RulesV2 = database.CleanMap(effectivePolicy.RulesV2)
-	stored, projectionErr := effectivePolicy.ForStorage()
+	stored, projectionErr := effectivePolicy.ForDB()
 	if projectionErr != nil {
 		return database.Error(database.UPSERT, database.EffectivePolicy).WithDetails(projectionErr)
 	}

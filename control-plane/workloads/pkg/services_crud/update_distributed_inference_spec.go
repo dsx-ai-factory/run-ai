@@ -270,7 +270,7 @@ func composeDistributedInferenceUpdateNative(
 		nil,
 		options)
 
-	composerErr := dInfComposer.Compose(ctx, gpucompat.StoredWorkloadSpec(workload.Spec), &dinfwv1.DistributedInferenceWorkload{})
+	composerErr := dInfComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(workload.Spec), &dinfwv1.DistributedInferenceWorkload{})
 	if composerErr != nil {
 		return composer.WorkloadRequirements{}, NewSubmissionErrorWithDetails(composerErr.Code, composerErr.Message, composerErr.Details)
 	}

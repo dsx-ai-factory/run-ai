@@ -62,8 +62,7 @@ func UpsertPolicyCompliance(ctx context.Context, assetId string, whichPolicy Pol
 		WorkloadType: whichPolicy.WorkloadAndReplicaType(),
 	}).Assign(record, map[string]interface{}{
 		// Struct assignment skips false values when a cached result becomes noncompliant.
-		"Aligned":      record.Aligned,
-		"ImposedAsset": record.ImposedAsset,
+		"Aligned": record.Aligned,
 	}).FirstOrCreate(&record)
 	if err != nil {
 		return database.Error(database.UPSERT, ComplianceAsAssetKind).WithDetails(err)

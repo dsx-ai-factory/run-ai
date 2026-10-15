@@ -40,12 +40,12 @@ func TestGPUMemoryPolicyPatchAndReset(t *testing.T) {
 			if got := existing.Policy.DefaultsV2["compute"].(map[string]any); len(got) != 1 || got["gpuMemoryPortionRequest"] != json.Number("0.5") {
 				t.Fatalf("stale alias after patch: %#v", got)
 			}
-			stored, err := existing.Policy.ForStorage()
+			stored, err := existing.Policy.ForDB()
 			if err != nil {
 				t.Fatal(err)
 			}
 			if stored.DefaultsV2["compute"].(map[string]any)["gpuPortionRequest"] != json.Number("0.5") {
-				t.Fatal("storage key changed")
+				t.Fatal("DB key changed")
 			}
 			if err := applyRequestedChangesOnGivenPolicy(existing, &ApplyPolicyRequest{FieldsToReset: []string{"compute." + old}}); err != nil {
 				t.Fatal(err)
@@ -112,7 +112,7 @@ func TestLegacyWholePolicyCanBeNormalizedAndPatched(t *testing.T) {
 	if err := applyRequestedChangesOnGivenPolicy(existing, request); err != nil {
 		t.Fatal("legacy request rejected after normalization", err)
 	}
-	stored, err := existing.Policy.ForStorage()
+	stored, err := existing.Policy.ForDB()
 	if err != nil {
 		t.Fatal(err)
 	}

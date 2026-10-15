@@ -72,21 +72,20 @@ func CanonicalGPUFieldPath(path string) string {
 	return strings.Join(parts, ".")
 }
 
-// ProjectGPUFieldsForStorage keeps the persisted memory representation independent
-// of public deprecation. Removing legacy API aliases does not require a DB migration.
-func ProjectGPUFieldsForStorage(source map[string]any) (map[string]any, error) {
+// LegacyGPUFields uses the legacy names required by existing DB records and composers.
+func LegacyGPUFields(source map[string]any) (map[string]any, error) {
 	result, err := NormalizeLegacyGPUFields(source)
 	if err != nil {
 		return nil, err
 	}
-	if err := projectGPUFieldsForStorage(result); err != nil {
+	if err := useLegacyGPUFields(result); err != nil {
 		return nil, err
 	}
 	return result, nil
 }
 
-// projectGPUFieldsForStorage operates on the caller's already normalized copy.
-func projectGPUFieldsForStorage(result map[string]any) error {
+// useLegacyGPUFields operates on the caller's already normalized copy.
+func useLegacyGPUFields(result map[string]any) error {
 	return visitCompute(result, "", func(compute map[string]any, _ string) error {
 		for _, alias := range memoryAliases {
 			if value, exists := compute[alias[1]]; exists {
@@ -98,17 +97,17 @@ func projectGPUFieldsForStorage(result map[string]any) error {
 	})
 }
 
-// ProjectGPUPolicyForStorage translates policy references as well as field names.
-// Ordinary spec storage must leave user-supplied maps and strings untouched.
-func ProjectGPUPolicyForStorage(source map[string]any) (map[string]any, error) {
+// LegacyGPUPolicy translates policy references as well as field names.
+// Ordinary spec conversion must leave user-supplied maps and strings untouched.
+func LegacyGPUPolicy(source map[string]any) (map[string]any, error) {
 	result, err := NormalizeLegacyGPUPolicy(source)
 	if err != nil {
 		return nil, err
 	}
-	if err := projectGPUFieldsForStorage(result); err != nil {
+	if err := useLegacyGPUFields(result); err != nil {
 		return nil, err
 	}
-	storageReferences(result)
+	useLegacyGPUReferences(result)
 	return result, nil
 }
 
@@ -156,8 +155,8 @@ func normalizeReferences(node map[string]any) {
 	mapReferences(node, CanonicalGPUFieldPath)
 }
 
-func storageReferences(node map[string]any) {
-	mapReferences(node, StoredGPUFieldPath)
+func useLegacyGPUReferences(node map[string]any) {
+	mapReferences(node, LegacyGPUFieldPath)
 }
 
 func mapReferences(node map[string]any, transform func(string) string) {
@@ -245,8 +244,8 @@ func clone(value any) any {
 	}
 }
 
-// StoredGPUFieldPath maps the public name to the stable persisted name.
-func StoredGPUFieldPath(path string) string {
+// LegacyGPUFieldPath maps the canonical name to its deprecated alias.
+func LegacyGPUFieldPath(path string) string {
 	parts := strings.Split(path, ".")
 	if len(parts) >= 2 && parts[len(parts)-2] == computeSection {
 		for _, alias := range memoryAliases {
@@ -258,7 +257,7 @@ func StoredGPUFieldPath(path string) string {
 	return strings.Join(parts, ".")
 }
 
-func StoredGPUDefaultFromOrder(source map[string][]string) map[string][]string {
+func LegacyGPUDefaultFromOrder(source map[string][]string) map[string][]string {
 	if source == nil {
 		return nil
 	}
@@ -269,9 +268,9 @@ func StoredGPUDefaultFromOrder(source map[string][]string) map[string][]string {
 			values = make([]string, len(dependencies))
 		}
 		for i, dependency := range dependencies {
-			values[i] = StoredGPUFieldPath(dependency)
+			values[i] = LegacyGPUFieldPath(dependency)
 		}
-		result[StoredGPUFieldPath(field)] = values
+		result[LegacyGPUFieldPath(field)] = values
 	}
 	return result
 }
@@ -317,7 +316,7 @@ func projectResponseFields(node map[string]any) {
 func LegacyCompatibleGPUPolicy(source map[string]any) map[string]any {
 	result := LegacyCompatibleGPUFields(source)
 	// Old clients still resolve references against the deprecated response fields.
-	storageReferences(result)
+	useLegacyGPUReferences(result)
 	return result
 }
 

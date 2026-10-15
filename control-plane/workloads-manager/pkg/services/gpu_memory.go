@@ -11,11 +11,11 @@ func legacyCompatibleNimSpec(source api.NimServiceSpec) api.NimServiceSpec {
 	return projectNimGPUMemory(source, true)
 }
 
-func storedNimSpec(source api.NimServiceSpec) api.NimServiceSpec {
+func nimSpecForDB(source api.NimServiceSpec) api.NimServiceSpec {
 	return projectNimGPUMemory(source, false)
 }
 
-// Project validated fields on a copy so response aliases do not leak into storage.
+// Project validated fields on a copy so response aliases do not leak into the DB.
 func projectNimGPUMemory(source api.NimServiceSpec, response bool) api.NimServiceSpec {
 	if source.Compute == nil {
 		return source

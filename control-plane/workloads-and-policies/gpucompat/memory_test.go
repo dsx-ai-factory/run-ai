@@ -55,18 +55,18 @@ func TestNormalizeLegacyGPUFields(t *testing.T) {
 	}
 }
 
-func TestMemoryStorageAndResponseRoundTrip(t *testing.T) {
+func TestMemoryDBAndResponseRoundTrip(t *testing.T) {
 	source := map[string]any{"compute": map[string]any{"gpuPortionRequest": .25, "gpuPortionLimit": .5}}
 	canonical, err := NormalizeLegacyGPUFields(source)
 	if err != nil {
 		t.Fatal(err)
 	}
-	stored, err := ProjectGPUFieldsForStorage(canonical)
+	stored, err := LegacyGPUFields(canonical)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if !reflect.DeepEqual(stored, source) {
-		t.Fatalf("storage changed: %#v", stored)
+		t.Fatalf("DB representation changed: %#v", stored)
 	}
 	response := LegacyCompatibleGPUFields(stored)
 	fields := response["compute"].(map[string]any)
@@ -133,7 +133,7 @@ func TestPolicyAliasesAndDerivedReferences(t *testing.T) {
 	if fields["cpuCoreRequest"].(map[string]any)["defaultFrom"].(map[string]any)["field"] != "compute.gpuMemoryPortionRequest" {
 		t.Fatal("lost dependency")
 	}
-	stored, err := ProjectGPUPolicyForStorage(canonical)
+	stored, err := LegacyGPUPolicy(canonical)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -205,7 +205,7 @@ func TestLegacyWholeRequestResponseRoundTrip(t *testing.T) {
 			if err := ValidateMemoryRequestInput(response); err != nil {
 				t.Fatal("response cannot be resubmitted", err)
 			}
-			resubmitted, err := ProjectGPUFieldsForStorage(response)
+			resubmitted, err := LegacyGPUFields(response)
 			if err != nil || !reflect.DeepEqual(resubmitted, stored) {
 				t.Fatalf("round trip changed: %#v, %v", resubmitted, err)
 			}
@@ -229,7 +229,7 @@ func TestLegacyWholePolicyResponseRoundTrip(t *testing.T) {
 	if err := ValidateMemoryRequestInput(response["defaults"].(map[string]any)); err != nil {
 		t.Fatal(err)
 	}
-	stored, err := ProjectGPUPolicyForStorage(response)
+	stored, err := LegacyGPUPolicy(response)
 	if err != nil || !reflect.DeepEqual(stored, policy) {
 		t.Fatalf("policy changed on resubmit: %#v, %v", stored, err)
 	}

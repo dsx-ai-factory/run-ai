@@ -59,7 +59,7 @@ func composeDistributedInferenceNative(ctx context.Context, wc *workloadContext)
 
 	dInfComposer.WithStorageClassConfiguration(wc.storageClassConfigs)
 
-	if composerErr := dInfComposer.Compose(ctx, gpucompat.StoredWorkloadSpec(wc.spec), &dinfwv1.DistributedInferenceWorkload{}); composerErr != nil {
+	if composerErr := dInfComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(wc.spec), &dinfwv1.DistributedInferenceWorkload{}); composerErr != nil {
 		return composer.WorkloadRequirements{}, workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
 	}
 
@@ -89,10 +89,10 @@ func composeDistributedNative(ctx context.Context, wc *workloadContext) (compose
 	distributedComposer.WithStorageClassConfiguration(wc.storageClassConfigs)
 
 	distributedWorkload := workloadsApi.SupersetWorkload{
-		Spec: gpucompat.StoredWorkloadSpec(wc.spec),
+		Spec: gpucompat.LegacyWorkloadSpec(wc.spec),
 	}
 	if wc.masterSpec != nil {
-		distributedWorkload.MasterSpec = *workloadsApi.NewNullableMasterSpec(gpucompat.StoredMasterSpec(wc.masterSpec))
+		distributedWorkload.MasterSpec = *workloadsApi.NewNullableMasterSpec(gpucompat.LegacyMasterSpec(wc.masterSpec))
 	}
 
 	if composerErr := distributedComposer.Compose(ctx, &distributedWorkload, &jobs.JobWorkload{}); composerErr != nil {
@@ -113,7 +113,7 @@ func composeInferenceNative(ctx context.Context, wc *workloadContext) (composer.
 
 	jobSpecComposer.WithStorageClassConfiguration(wc.storageClassConfigs)
 
-	composerErr := jobSpecComposer.Compose(ctx, gpucompat.StoredWorkloadSpec(wc.spec), &jobs.JobSpec{})()
+	composerErr := jobSpecComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(wc.spec), &jobs.JobSpec{})()
 	if composerErr == nil {
 		composerErr = wc.create.notificationsComposer.Compose(ctx, nil, wc.create.complimentaryAssetInfo, wc.spec)()
 	}
@@ -135,7 +135,7 @@ func composeInteractiveTrainingNative(ctx context.Context, wc *workloadContext) 
 
 	jobSpecComposer.WithStorageClassConfiguration(wc.storageClassConfigs)
 
-	if composerErr := jobSpecComposer.Compose(ctx, gpucompat.StoredWorkloadSpec(wc.spec), &jobs.JobSpec{})(); composerErr != nil {
+	if composerErr := jobSpecComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(wc.spec), &jobs.JobSpec{})(); composerErr != nil {
 		return composer.WorkloadRequirements{}, workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
 	}
 

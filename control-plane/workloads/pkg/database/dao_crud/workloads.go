@@ -41,8 +41,8 @@ func DbUpsertWorkload(ctx context.Context, workload *models_crud.Workload) *api.
 	dbErr := api.NewError(http.StatusServiceUnavailable, fmt.Sprintf("Failed to upsert workload %s", workload.Name), nil)
 
 	stored := *workload
-	stored.Spec = gpucompat.StoredWorkloadSpec(workload.Spec)
-	stored.MasterSpec = gpucompat.StoredMasterSpec(workload.MasterSpec)
+	stored.Spec = gpucompat.LegacyWorkloadSpec(workload.Spec)
+	stored.MasterSpec = gpucompat.LegacyMasterSpec(workload.MasterSpec)
 
 	_, err := runaidb.DB().WithContext(ctx).Table(models_crud.WorkloadsTableName).Save(&stored)
 	if err != nil {

@@ -47,7 +47,7 @@ func AddPolicy(ctx context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Erro
 	policy.DefaultsV2 = database.CleanMap(policy.DefaultsV2)
 	policy.RulesV2 = database.CleanMap(policy.RulesV2)
 
-	stored, projectionErr := policy.ForStorage()
+	stored, projectionErr := policy.ForDB()
 	if projectionErr != nil {
 		return database.Error(database.CREATE, database.Policies).WithDetails(projectionErr)
 	}
@@ -68,7 +68,7 @@ func UpdatePolicySpec(_ context.Context, tx orm.DB, policy *dbmodel.Policy) *api
 	policy.DefaultsV2 = database.CleanMap(policy.DefaultsV2)
 	policy.RulesV2 = database.CleanMap(policy.RulesV2)
 
-	stored, projectionErr := policy.ForStorage()
+	stored, projectionErr := policy.ForDB()
 	if projectionErr != nil {
 		return database.Error(database.UPDATE, database.Policies).WithDetails(projectionErr)
 	}

@@ -11,8 +11,6 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
-
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
@@ -120,42 +118,8 @@ func CalculateEffectiveOfGvkPolicy(ctx context.Context, tx orm.DB,
 	return ht.calculateEffectivePolicy(withEffective, tx, appliedPolicyId, 0, nil, nil, nil, nil)
 }
 
-// calculateEffectivePolicy normalizes sources once before calculating inheritance.
-func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB,
-	appliedPolicyId string, idxToCalculate int,
-	imposedAssets map[string]interface{}, masterImposedAssets map[string]interface{},
-	imposedAssetsRules map[string]interface{}, masterImposedAssetsRules map[string]interface{}) (
-	*dbmodel.EffectivePolicy, *api.Error,
-) {
-	effectiveContext := ctx.Value(EffectiveContextKey).(*EffectiveContext)
-
-	if !effectiveContext.GvkWorkload {
-		for _, policy := range effectiveContext.PolicyById {
-			if err := policy.NormalizeGPUMemory(); err != nil {
-				return nil, api.NewValidationError(err.Error())
-			}
-		}
-		for _, source := range []*map[string]interface{}{&imposedAssets, &masterImposedAssets} {
-			normalized, err := gpucompat.NormalizeLegacyGPUFields(*source)
-			if err != nil {
-				return nil, api.NewValidationError(err.Error())
-			}
-			*source = normalized
-		}
-		for _, source := range []*map[string]interface{}{&imposedAssetsRules, &masterImposedAssetsRules} {
-			normalized, err := gpucompat.NormalizeLegacyGPUPolicy(*source)
-			if err != nil {
-				return nil, api.NewValidationError(err.Error())
-			}
-			*source = normalized
-		}
-	}
-
-	return ht.calculateEffectivePolicyAt(ctx, tx, appliedPolicyId, idxToCalculate,
-		imposedAssets, masterImposedAssets, imposedAssetsRules, masterImposedAssetsRules)
-}
-
-// calculateEffectivePolicyAt recalculates missing parent policies using the normalized context.
+// calculateEffectivePolicyAt calculates the effective policy of the node at idxToCalculate.
+// Missing parent policies are calculated recursively before merging their rules and defaults.
 func (ht *HierarchyTree) calculateEffectivePolicyAt(ctx context.Context, tx orm.DB,
 	appliedPolicyId string, idxToCalculate int,
 	imposedAssets map[string]interface{}, masterImposedAssets map[string]interface{},
@@ -411,6 +375,9 @@ func calculateDefaultFromOrder(rules map[string]interface{}) (*api.DefaultFromOr
 	var err error
 
 	masterRules := rules[masterSection]
+	if masterRules == nil {
+		masterRules = rules[leaderSection]
+	}
 	workerRules := rules[workerSection]
 
 	if masterRules != nil || workerRules != nil {

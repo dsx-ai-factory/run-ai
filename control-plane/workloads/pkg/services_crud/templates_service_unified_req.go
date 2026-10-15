@@ -332,7 +332,7 @@ func (ur *UnifiedRequest) ToDbRecord() (*models_crud.Template, *api.Error) {
 	}
 
 	for _, spec := range []*dbmodels.JsonBMap{&result.Spec, &result.MasterSpec, &result.CombinedSpec, &result.CombinedMasterSpec} {
-		stored, err := gpucompat.ProjectGPUFieldsForStorage(*spec)
+		stored, err := gpucompat.LegacyGPUFields(*spec)
 		if err != nil {
 			return nil, api.NewValidationError(err.Error())
 		}

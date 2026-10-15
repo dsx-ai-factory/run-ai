@@ -56,7 +56,7 @@ func createComputeAssetInTransaction(ctx context.Context, tx orm.DB, request api
 		AssetId: id,
 	}
 	if request.Spec != nil {
-		stored, err := dbmodel.StoredComputeAsset(*request.Spec)
+		stored, err := dbmodel.ComputeAssetForDB(*request.Spec)
 		if err != nil {
 			return nil, api.NewValidationError(err.Error())
 		}
@@ -175,7 +175,7 @@ func updateComputeAssetInTransaction(ctx context.Context, tx orm.DB, id string,
 	}
 
 	if request.Spec != nil {
-		stored, err := dbmodel.StoredComputeAsset(*request.Spec)
+		stored, err := dbmodel.ComputeAssetForDB(*request.Spec)
 		if err != nil {
 			return nil, assetMeta, api.NewValidationError(err.Error())
 		}

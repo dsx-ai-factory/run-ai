@@ -53,7 +53,7 @@ func TestGPUMemoryNimPolicyAndUpdate(t *testing.T) {
 	if merged.Compute.GpuMemoryPortionRequest == nil || *merged.Compute.GpuMemoryPortionRequest != .75 || merged.Compute.GpuPortionLimit != nil || merged.Compute.GpuMemoryPortionLimit != nil {
 		t.Fatal("compute section replacement changed")
 	}
-	stored := storedNimSpec(merged)
+	stored := nimSpecForDB(merged)
 	response := legacyCompatibleNimSpec(stored)
 	values, jsonErr := gojsonq.LoadJson(response)
 	if jsonErr != nil {
@@ -61,7 +61,7 @@ func TestGPUMemoryNimPolicyAndUpdate(t *testing.T) {
 	}
 	fields := values["compute"].(map[string]any)
 	if fields["gpuPortionRequest"] != fields["gpuMemoryPortionRequest"] || stored.Compute.GpuMemoryPortionRequest != nil {
-		t.Fatal("round trip lost storage/response contract")
+		t.Fatal("round trip lost DB/response contract")
 	}
 }
 
@@ -89,7 +89,7 @@ func TestNimLegacyWholeGPURoundTrip(t *testing.T) {
 			if jsonErr := json.Unmarshal(payload, &full); jsonErr != nil {
 				t.Fatal(jsonErr)
 			}
-			response := legacyCompatibleNimSpec(storedNimSpec(full))
+			response := legacyCompatibleNimSpec(nimSpecForDB(full))
 			if response.Compute.GpuMemoryPortionRequest != nil || response.Compute.GpuPortionRequest == nil || *response.Compute.GpuPortionRequest != 4 || response.Compute.GpuDevicesRequest != nil {
 				t.Fatal("whole GPU response changed")
 			}

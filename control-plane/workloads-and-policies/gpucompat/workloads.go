@@ -37,8 +37,8 @@ func NormalizeLegacyWorkloadCompute(source *workloadsApi.WorkspaceSpecSpecAllOfC
 	return &result, nil
 }
 
-// StoredWorkloadSpec projects already validated values onto the existing JSON keys.
-func StoredWorkloadSpec(source *workloadsApi.SupersetSpec) *workloadsApi.SupersetSpec {
+// LegacyWorkloadSpec uses legacy JSON keys for existing DB records and composers.
+func LegacyWorkloadSpec(source *workloadsApi.SupersetSpec) *workloadsApi.SupersetSpec {
 	return projectWorkloadSpec(source, false)
 }
 
@@ -46,7 +46,7 @@ func LegacyCompatibleWorkloadSpec(source *workloadsApi.SupersetSpec) *workloadsA
 	return projectWorkloadSpec(source, true)
 }
 
-func StoredMasterSpec(source *workloadsApi.MasterSpec) *workloadsApi.MasterSpec {
+func LegacyMasterSpec(source *workloadsApi.MasterSpec) *workloadsApi.MasterSpec {
 	return projectMasterSpec(source, false)
 }
 

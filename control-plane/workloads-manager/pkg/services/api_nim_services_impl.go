@@ -131,7 +131,7 @@ func (nsi *NimServicesImpl) CreateNimService(ctx context.Context, request api.Ni
 		}
 	}
 
-	// Persist the selected mode without changing NIM's original-request storage for other defaults.
+	// Persist the selected mode without changing NIM's original request in the DB for other defaults.
 	if request.Spec.Compute != nil && request.Spec.Compute.GpuComputeMode != nil {
 		compute := api.NimServiceSpecAllOfCompute{}
 		if submittedSpec.Compute != nil {
@@ -593,7 +593,7 @@ func removableFieldsToStrings(fields []api.NimServiceRemovableFields) []string {
 func (nsi *NimServicesImpl) updateContextWithMergedSpec(ctx context.Context, metadata *api.NimServiceMetadataCreateParams, mergedSpec api.NimServiceSpec) (context.Context, error) {
 	createRequest := api.NimServiceCreateRequest{
 		Metadata: *metadata,
-		Spec:     storedNimSpec(mergedSpec),
+		Spec:     nimSpecForDB(mergedSpec),
 	}
 	body, err := json.Marshal(createRequest)
 	if err != nil {

@@ -37,46 +37,46 @@ func (p *PolicyWithOptionalEffective) NormalizeGPUMemory() error {
 	return nil
 }
 
-func (p Policy) ForStorage() (*Policy, error) {
+func (p Policy) ForDB() (*Policy, error) {
 	if p.GvkWorkload {
 		return &p, nil
 	}
 	var err error
-	p.DefaultsV2, err = gpucompat.ProjectGPUFieldsForStorage(p.DefaultsV2)
+	p.DefaultsV2, err = gpucompat.LegacyGPUFields(p.DefaultsV2)
 	if err != nil {
 		return nil, fmt.Errorf("store policy defaults: %w", err)
 	}
-	p.RulesV2, err = gpucompat.ProjectGPUPolicyForStorage(p.RulesV2)
+	p.RulesV2, err = gpucompat.LegacyGPUPolicy(p.RulesV2)
 	if err != nil {
 		return nil, fmt.Errorf("store policy rules: %w", err)
 	}
 	return &p, nil
 }
 
-func (p EffectivePolicy) ForStorage() (*EffectivePolicy, error) {
+func (p EffectivePolicy) ForDB() (*EffectivePolicy, error) {
 	// GVK rules have an array wrapper and no native defaults or dependency order.
 	if _, gvk := p.RulesV2[GvkRulesJsonKey]; gvk {
 		return &p, nil
 	}
 	var err error
-	p.DefaultsV2, err = gpucompat.ProjectGPUFieldsForStorage(p.DefaultsV2)
+	p.DefaultsV2, err = gpucompat.LegacyGPUFields(p.DefaultsV2)
 	if err != nil {
 		return nil, fmt.Errorf("store effective defaults: %w", err)
 	}
-	p.RulesV2, err = gpucompat.ProjectGPUPolicyForStorage(p.RulesV2)
+	p.RulesV2, err = gpucompat.LegacyGPUPolicy(p.RulesV2)
 	if err != nil {
 		return nil, fmt.Errorf("store effective rules: %w", err)
 	}
-	p.DefaultFromOrder = StoredDefaultFromOrder(p.DefaultFromOrder)
+	p.DefaultFromOrder = defaultFromOrderForDB(p.DefaultFromOrder)
 	return &p, nil
 }
 
-func StoredDefaultFromOrder(src *api.DefaultFromOrder) *api.DefaultFromOrder {
+func defaultFromOrderForDB(src *api.DefaultFromOrder) *api.DefaultFromOrder {
 	if src == nil {
 		return nil
 	}
 	return &api.DefaultFromOrder{
-		Worker: gpucompat.StoredGPUDefaultFromOrder(src.Worker),
-		Master: gpucompat.StoredGPUDefaultFromOrder(src.Master),
+		Worker: gpucompat.LegacyGPUDefaultFromOrder(src.Worker),
+		Master: gpucompat.LegacyGPUDefaultFromOrder(src.Master),
 	}
 }

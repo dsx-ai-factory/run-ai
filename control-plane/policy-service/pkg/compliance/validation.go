@@ -179,11 +179,11 @@ func validateRulesConsistency(policyRules map[string]interface{}, complianceErro
 func ValidateEffectivePolicy(ctx context.Context, workloadType string, _ map[string]interface{}, policyDefaults map[string]interface{}) *workloadsApi.Error {
 	options := composer.OptionsForPolicy()
 
-	storedDefaults, err := gpucompat.ProjectGPUFieldsForStorage(policyDefaults)
+	legacyDefaults, err := gpucompat.LegacyGPUFields(policyDefaults)
 	if err != nil {
 		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
 	}
-	rearrangedPolicy := utils.MapMe(FlattenInstances(storedDefaults))
+	rearrangedPolicy := utils.MapMe(FlattenInstances(legacyDefaults))
 
 	switch workloadType {
 	case workloadTypeDistributedInference:

@@ -24,8 +24,8 @@ func NormalizeLegacyComputeAsset(source api.ComputeAssetSpec) (api.ComputeAssetS
 	return source, nil
 }
 
-// StoredComputeAsset uses the existing columns; aliases are API-only fields.
-func StoredComputeAsset(source api.ComputeAssetSpec) (api.ComputeAssetSpec, error) {
+// ComputeAssetForDB uses the existing columns; aliases are API-only fields.
+func ComputeAssetForDB(source api.ComputeAssetSpec) (api.ComputeAssetSpec, error) {
 	source, err := NormalizeLegacyComputeAsset(source)
 	if err != nil {
 		return api.ComputeAssetSpec{}, err

@@ -15,7 +15,7 @@ func TestGPUMemoryAssetRoundTrip(t *testing.T) {
 	request, limit := .25, .5
 	mode := api.GPUCOMPUTEMODE_SM_SHARING
 	input := api.ComputeAssetSpec{GpuMemoryPortionRequest: &request, GpuMemoryPortionLimit: &limit, GpuComputeMode: &mode}
-	stored, err := StoredComputeAsset(input)
+	stored, err := ComputeAssetForDB(input)
 	if err != nil {
 		t.Fatal(err)
 	}

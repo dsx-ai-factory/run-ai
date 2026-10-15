@@ -51,17 +51,16 @@ var _ = Describe("GPU compute mode asset compliance", func() {
 					defaults = map[string]interface{}{strings.ToLower(replica): defaults}
 				}
 				meta := api.AssetMeta{Id: uuid.NewString(), Name: "mode-compliance", Kind: api.ASSETKIND_COMPUTE}
-				compliance := &api.ComplianceInfo{Compliance: true, Imposed: true}
+				compliance := &api.ComplianceInfo{Compliance: true}
 				policyInfo := dao.PolicyInfo{TenantId: 1, ProjectId: 1, WorkloadType: auth.WorkloadTypeWorkspace, ReplicaType: replica, PolicyTime: time.Now()}
 				info := assetChanInfo{
 					patchingPtrs: response_patching.ResponsePatchingPtrs{Meta: &meta, Spec: &spec, ComplianceInfo: &compliance},
 					rules:        rules, defaults: defaults, replicaType: replica,
 					defaultFromOrder: policyApi.DefaultFromOrder{Worker: &orderMap, Master: &orderMap},
-					workloadType:     auth.WorkloadTypeWorkspace, policyInfo: policyInfo, isImposed: true,
+					workloadType:     auth.WorkloadTypeWorkspace, policyInfo: policyInfo,
 				}
 				validateComplianceOfAsset(context.Background(), info)
 				Expect(compliance.Compliance).To(Equal(wantRule == ""))
-				Expect(compliance.Imposed).To(Equal(wantRule == ""))
 				if wantRule != "" {
 					Expect(compliance.Reason).To(HaveLen(1))
 					Expect(compliance.Reason[0].Field).To(Equal(convutils.Ref("compute.gpuComputeMode")))
@@ -89,25 +88,29 @@ var _ = Describe("GPU compute mode asset compliance", func() {
 		)
 	}
 
-	It("replaces cached compliance when memory aliases conflict", func() {
-		spec := map[string]interface{}{"gpuPortionRequest": 0.25, "gpuMemoryPortionRequest": 0.5}
-		meta := api.AssetMeta{Id: uuid.NewString(), Name: "conflicting-memory", Kind: api.ASSETKIND_COMPUTE}
-		compliance := &api.ComplianceInfo{Compliance: true, Imposed: true}
+	It("replaces cached compliance when a compute mode violates policy", func() {
+		spec := map[string]interface{}{"gpuMemoryPortionRequest": 0.25, "gpuComputeMode": "time-slicing"}
+		meta := api.AssetMeta{Id: uuid.NewString(), Name: "noncompliant-mode", Kind: api.ASSETKIND_COMPUTE}
+		compliance := &api.ComplianceInfo{Compliance: true}
 		policyInfo := dao.PolicyInfo{TenantId: 1, ProjectId: 1, WorkloadType: auth.WorkloadTypeWorkspace, PolicyTime: time.Now()}
 		Expect(dao.UpsertPolicyCompliance(context.Background(), meta.Id, policyInfo, *compliance)).To(BeNil())
+		rules := map[string]interface{}{"compute": map[string]interface{}{
+			"gpuComputeMode": map[string]interface{}{"options": []interface{}{map[string]interface{}{"value": "sm-sharing"}}},
+		}}
+		order := map[string][]string{}
 		validateComplianceOfAsset(context.Background(), assetChanInfo{
 			patchingPtrs: response_patching.ResponsePatchingPtrs{Meta: &meta, Spec: &spec, ComplianceInfo: &compliance},
-			workloadType: auth.WorkloadTypeWorkspace, policyInfo: policyInfo, isImposed: true,
+			workloadType: auth.WorkloadTypeWorkspace, policyInfo: policyInfo,
+			rules: rules, defaultFromOrder: policyApi.DefaultFromOrder{Worker: &order},
 		})
 		Expect(compliance.Compliance).To(BeFalse())
-		Expect(compliance.Imposed).To(BeFalse())
 		Expect(compliance.Reason).To(HaveLen(1))
-		Expect(compliance.Reason[0].Details).To(ContainSubstring("conflict"))
+		Expect(compliance.Reason[0].Field).To(Equal(convutils.Ref("compute.gpuComputeMode")))
+		Expect(string(*compliance.Reason[0].Rule)).To(Equal("options"))
 		saved, dbErr := dao.ListPolicyComplianceOfAssets(context.Background(), []string{meta.Id}, policyInfo)
 		Expect(dbErr).To(BeNil())
 		Expect(saved).To(HaveLen(1))
 		Expect(saved[0].Aligned).To(BeFalse())
-		Expect(saved[0].ImposedAsset).To(BeFalse())
 		Expect(saved[0].Reason).To(Equal(compliance.Reason))
 	})
 })

@@ -423,21 +423,3 @@ func IsPolicyChangedDuringCalculation(ctx context.Context, appliedPolicyId strin
 
 	return false
 }
-
-func normalizeGPUPolicyRequest(request *ApplyPolicyRequest) *api.Error {
-	var err error
-	request.Defaults, err = gpucompat.NormalizeLegacyGPUFields(request.Defaults)
-	if err != nil {
-		return api.NewValidationError(err.Error())
-	}
-	request.Rules, err = gpucompat.NormalizeLegacyGPUPolicy(request.Rules)
-	if err != nil {
-		return api.NewValidationError(err.Error())
-	}
-	fields := make([]string, len(request.FieldsToReset))
-	for i, field := range request.FieldsToReset {
-		fields[i] = gpucompat.CanonicalGPUFieldPath(field)
-	}
-	request.FieldsToReset = fields
-	return nil
-}

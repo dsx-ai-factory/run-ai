@@ -93,12 +93,12 @@ func assertWorkspaceMemoryAliasRoundTrip(t *testing.T, spec *workloadsApi.Supers
 	}
 	params := createWorkloadParams{Response: workloadsApi.SupersetWorkload{Spec: spec}}
 	record := NewWorkloadFromWorkloadParams(&params, nil)
-	stored, marshalErr := json.Marshal(gpucompat.StoredWorkloadSpec(record.Spec))
+	stored, marshalErr := json.Marshal(gpucompat.LegacyWorkloadSpec(record.Spec))
 	if marshalErr != nil {
 		t.Fatal(marshalErr)
 	}
 	if strings.Contains(string(stored), "gpuMemoryPortion") || !strings.Contains(string(stored), "gpuPortionRequest") {
-		t.Fatalf("storage format changed: %s", stored)
+		t.Fatalf("DB format changed: %s", stored)
 	}
 	response := WorkloadFromDbRecord(record, workloadsApi.PHASE_CREATING)
 	returned := response.Spec.Compute.Get()
