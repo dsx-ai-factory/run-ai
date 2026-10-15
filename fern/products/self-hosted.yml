@@ -754,10 +754,8 @@ navigation:
             summary: ../../docs/rest-api/self-hosted/tags/email.md
         - subscriptions:
             summary: ../../docs/rest-api/self-hosted/tags/subscriptions.md
-      - section: AI Applications
-        summary: ../../docs/rest-api/self-hosted/tags/ai-applications.md
-        contents:
-        - ai-applications
+      - ai-applications:
+          summary: ../../docs/rest-api/self-hosted/tags/ai-applications.md
     - section: API Guides
       contents:
       - page: Interacting with Workloads Using the Cluster API
