@@ -108,8 +108,7 @@ func (g *GpuOperatorInstallStep) installRealGpuOperator() error {
 		"gpu-operator",
 		"gpu-operator",
 		"gpu-operator",
-		false,
-		[]string{})
+		false, helmclient.Values{Overrides: []string{}})
 	if err != nil {
 		fullErr := fmt.Errorf("failed to install real NVIDIA GPU operator with helm: %v", err)
 		logging.Errorf("[Prereq] %v", fullErr)
@@ -196,7 +195,7 @@ func (g *GpuOperatorInstallStep) installFakeGpuOperatorHelm() error {
 	logging.Infof("[Prereq] Installing fake GPU operator from ghcr.io...")
 	err := helmclient.InstallOrUpgradeRelease(context.Background(),
 		"oci://ghcr.io/run-ai/fake-gpu-operator/fake-gpu-operator",
-		"0.0.62", "gpu-operator", "gpu-operator", "gpu-operator", true, []string{"topology.nodePools.default.gpuCount=8"})
+		"0.0.62", "gpu-operator", "gpu-operator", "gpu-operator", true, helmclient.Values{Overrides: []string{"topology.nodePools.default.gpuCount=8"}})
 	if err != nil {
 		logging.Errorf("[Prereq] Failed to install fake GPU operator: %v", err)
 		return fmt.Errorf("failed to install fake GPU operator with helm: %v", err)

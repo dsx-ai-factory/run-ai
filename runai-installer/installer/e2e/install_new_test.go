@@ -107,7 +107,7 @@ func connectedFullInstallConfig() installconfig.Config {
 			// disable the admission controller to keep the install self-contained.
 			NIMOperator: &installconfig.Dependency{
 				Mode:             "install",
-				CustomHelmValues: map[string]any{"operator.admissionController.enabled": false},
+				CustomHelmValues: map[string]any{"operator": map[string]any{"admissionController": map[string]any{"enabled": false}}},
 			},
 			Grove: &installconfig.Dependency{Mode: "install"},
 		},

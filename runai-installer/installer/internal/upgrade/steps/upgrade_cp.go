@@ -12,6 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 const (
@@ -54,7 +55,7 @@ func (s *UpgradeCPChart) Execute(ctx context.Context, runaiData *model.RunAIInst
 	}
 	logging.Infof("[Upgrade] Upgrading CP chart to version %s from %s", version, repo)
 	err := s.helmInstaller.InstallOrUpgradeRelease(ctx,
-		repo, version, step.CPReleaseName, step.CPChartName, step.CPNamespace, false, values)
+		repo, version, step.CPReleaseName, step.CPChartName, step.CPNamespace, false, helmclient.Values{Overrides: values})
 	if err != nil {
 		s.SetStatus(model.Failed, err)
 		return err

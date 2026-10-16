@@ -47,6 +47,7 @@ type helmChartData struct {
 	repoUrl        string
 	chartVersion   string
 	valuesOverride []string
+	customValues   map[string]any
 	valueFiles     []string
 	auth           ChartAuth
 }
@@ -225,7 +226,11 @@ func (helmClient *helmClient) handleValues() (map[string]interface{}, error) {
 		Values:     helmClient.data.valuesOverride,
 		ValueFiles: helmClient.data.valueFiles,
 	}
-	return valueOpts.MergeValues(helmClient.providers)
+	base, err := valueOpts.MergeValues(helmClient.providers)
+	if err != nil {
+		return nil, err
+	}
+	return mergeYAMLValues(base, helmClient.data.customValues), nil
 }
 
 func (helmClient *helmClient) getChartPath() string {

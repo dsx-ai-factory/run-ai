@@ -13,19 +13,20 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/config"
 	configinputs "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/inputs"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 type fakeHelmInstaller struct {
 	values []string
 }
 
-func (f *fakeHelmInstaller) InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values []string) error {
-	f.values = append([]string{}, values...)
+func (f *fakeHelmInstaller) InstallOrUpgradeRelease(ctx context.Context, repoUrl, version, releaseName, chartName, targetNamespace string, isOci bool, values helmclient.Values) error {
+	f.values = append([]string{}, values.Overrides...)
 	return nil
 }
 
-func (f *fakeHelmInstaller) InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName, targetNamespace string, values []string, valueFiles []string) error {
-	f.values = append([]string{}, values...)
+func (f *fakeHelmInstaller) InstallOrUpgradeFromLocalChart(ctx context.Context, chartPath, releaseName, targetNamespace string, values helmclient.Values, valueFiles []string) error {
+	f.values = append([]string{}, values.Overrides...)
 	return nil
 }
 

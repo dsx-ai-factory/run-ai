@@ -15,6 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/airgap"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 type InstallClusterChartLocal struct {
@@ -36,6 +37,7 @@ type InstallClusterChartLocal struct {
 	HostRouting     bool
 	ValueFiles      []string
 	ExtraValues     []string
+	CustomValues    map[string]any
 }
 
 func (a InstallClusterChartLocal) chartPath() string {
@@ -81,7 +83,7 @@ func (a InstallClusterChartLocal) Args() map[string]any {
 
 func (a InstallClusterChartLocal) Describe() string {
 	base := fmt.Sprintf("helm upgrade --install %s %s --namespace %s", a.ReleaseName, a.chartPath(), a.Namespace)
-	cmd := describeHelmCommand(base, a.ExtraValues, a.ValueFiles)
+	cmd := describeHelmCommand(base, a.ExtraValues, a.ValueFiles, a.CustomValues)
 	if a.UsesSuppliedCredentials() {
 		return cmd
 	}
@@ -122,5 +124,5 @@ func (a InstallClusterChartLocal) Execute(ctx context.Context, deps orchestrator
 	values = append(values, spec.SubdomainSupportHelmKey+"="+strconv.FormatBool(a.HostRouting))
 	values = mergeValueStrings(values, a.ExtraValues)
 
-	return orchestrator2.ActionResult{}, deps.HelmInstaller.InstallOrUpgradeFromLocalChart(ctx, chartPath, a.ReleaseName, a.Namespace, values, a.ValueFiles)
+	return orchestrator2.ActionResult{}, deps.HelmInstaller.InstallOrUpgradeFromLocalChart(ctx, chartPath, a.ReleaseName, a.Namespace, helmclient.Values{Overrides: values, Custom: a.CustomValues}, a.ValueFiles)
 }

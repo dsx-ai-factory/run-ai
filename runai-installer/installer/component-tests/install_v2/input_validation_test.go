@@ -271,7 +271,7 @@ func TestInputValidation_Failures(t *testing.T) {
 			setup: func(t *testing.T, cfg *installconfig.Config, _ *installconfig.RunOptions) {
 				cfg.Features = &installconfig.Features{Kubeflow: &installconfig.Dependency{
 					Mode:             "install",
-					CustomHelmValues: map[string]any{"image.tag": "v1.8.1"},
+					CustomHelmValues: map[string]any{"image": map[string]any{"tag": "v1.8.1"}},
 				}}
 			},
 			wantSub: "features.kubeflow.customHelmValues",
@@ -281,7 +281,7 @@ func TestInputValidation_Failures(t *testing.T) {
 			setup: func(t *testing.T, cfg *installconfig.Config, _ *installconfig.RunOptions) {
 				cfg.Features = &installconfig.Features{MPIOperator: &installconfig.Dependency{
 					Mode:             "install",
-					CustomHelmValues: map[string]any{"image.tag": "v0.6.0"},
+					CustomHelmValues: map[string]any{"image": map[string]any{"tag": "v0.6.0"}},
 				}}
 			},
 			wantSub: "features.mpiOperator.customHelmValues",
@@ -387,7 +387,7 @@ func TestInputValidation_Failures(t *testing.T) {
 				cfg.Prerequisites = &installconfig.Prerequisites{GPUOperator: &installconfig.Dependency{
 					Mode:             "install",
 					Type:             "real",
-					CustomHelmValues: map[string]any{"driver.enabled": true},
+					CustomHelmValues: map[string]any{"driver": map[string]any{"enabled": true}},
 				}}
 			},
 			wantSub: "custom Helm values are not supported on OpenShift",
@@ -422,7 +422,7 @@ func TestInputValidation_Failures(t *testing.T) {
 				cfg.ExternalConnection = nil
 				cfg.Prerequisites = &installconfig.Prerequisites{NetworkOperator: &installconfig.Dependency{
 					Mode:             "install",
-					CustomHelmValues: map[string]any{"sriov.enabled": true},
+					CustomHelmValues: map[string]any{"sriov": map[string]any{"enabled": true}},
 				}}
 			},
 			wantSub: "custom Helm values are not supported on OpenShift",
@@ -532,7 +532,7 @@ func TestInputValidation_Failures(t *testing.T) {
 			name: "workload routing host contradicted by subdomainSupport override",
 			setup: func(t *testing.T, cfg *installconfig.Config, _ *installconfig.RunOptions) {
 				cfg.Cluster.WorkloadRouting = "host"
-				cfg.Cluster.CustomHelmValues = map[string]any{"clusterConfig.global.subdomainSupport": false}
+				cfg.Cluster.CustomHelmValues = map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": false}}}
 			},
 			wantSub: "they must agree",
 		},
@@ -540,7 +540,7 @@ func TestInputValidation_Failures(t *testing.T) {
 			name: "workload routing path contradicted by subdomainSupport override",
 			setup: func(t *testing.T, cfg *installconfig.Config, _ *installconfig.RunOptions) {
 				cfg.Cluster.WorkloadRouting = "path"
-				cfg.Cluster.CustomHelmValues = map[string]any{"clusterConfig.global.subdomainSupport": true}
+				cfg.Cluster.CustomHelmValues = map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": true}}}
 			},
 			wantSub: "they must agree",
 		},

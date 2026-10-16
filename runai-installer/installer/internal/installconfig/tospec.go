@@ -6,8 +6,6 @@
 package installconfig
 
 import (
-	"fmt"
-
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/artifacts"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 )
@@ -70,7 +68,7 @@ func (c *Config) ToSpec(opts RunOptions) *spec.Spec {
 			Domain:           c.ControlPlane.Domain,
 			Version:          c.ControlPlane.Version,
 			TLS:              toSpecTLS(c.ControlPlane.TLS),
-			CustomHelmValues: toStringMap(c.ControlPlane.CustomHelmValues),
+			CustomHelmValues: c.ControlPlane.CustomHelmValues,
 		}
 	}
 
@@ -87,7 +85,7 @@ func (c *Config) ToSpec(opts RunOptions) *spec.Spec {
 			BootstrapToken:          c.Cluster.bootstrapToken,
 			ClientSecret:            c.Cluster.clientSecret,
 			ControlPlaneCredentials: toSpecControlPlaneCredentials(c.Cluster.ControlPlaneCredentials),
-			CustomHelmValues:        toStringMap(c.Cluster.CustomHelmValues),
+			CustomHelmValues:        c.Cluster.CustomHelmValues,
 		}
 	}
 
@@ -217,7 +215,7 @@ func toSpecDependency(d *Dependency, defaultOn bool) *spec.Dependency {
 	out := &spec.Dependency{
 		Mode:             mode,
 		Version:          d.Version,
-		CustomHelmValues: toStringMap(d.CustomHelmValues),
+		CustomHelmValues: d.CustomHelmValues,
 	}
 	if d.OpenShift != nil {
 		out.OpenShiftInstallPlanApproval = d.OpenShift.InstallPlanApproval
@@ -287,15 +285,4 @@ func toSpecTLS(t *TLS) *spec.TLS {
 		return nil
 	}
 	return &spec.TLS{CertPath: t.CertPath, KeyPath: t.KeyPath, CAChainPath: t.CAChainPath}
-}
-
-func toStringMap(m map[string]any) map[string]string {
-	if len(m) == 0 {
-		return nil
-	}
-	out := make(map[string]string, len(m))
-	for k, v := range m {
-		out[k] = fmt.Sprintf("%v", v)
-	}
-	return out
 }

@@ -119,12 +119,12 @@ type TLS struct {
 }
 
 type ControlPlane struct {
-	Enabled          bool           `yaml:"enabled"`
-	Version          string         `yaml:"version,omitempty"`
-	MultiTenant      bool           `yaml:"multiTenant,omitempty"`
-	Domain           string         `yaml:"domain"`
-	TLS              *TLS           `yaml:"tls,omitempty"`
-	CustomHelmValues map[string]any `yaml:"customHelmValues,omitempty"`
+	Enabled          bool       `yaml:"enabled"`
+	Version          string     `yaml:"version,omitempty"`
+	MultiTenant      bool       `yaml:"multiTenant,omitempty"`
+	Domain           string     `yaml:"domain"`
+	TLS              *TLS       `yaml:"tls,omitempty"`
+	CustomHelmValues HelmValues `yaml:"customHelmValues,omitempty"`
 }
 
 type Cluster struct {
@@ -143,7 +143,7 @@ type Cluster struct {
 	BootstrapTokenPath      string                   `yaml:"bootstrapTokenPath,omitempty"`
 	ClientSecretPath        string                   `yaml:"clientSecretPath,omitempty"`
 	ControlPlaneCredentials *ControlPlaneCredentials `yaml:"controlPlaneCredentials,omitempty"`
-	CustomHelmValues        map[string]any           `yaml:"customHelmValues,omitempty"`
+	CustomHelmValues        HelmValues               `yaml:"customHelmValues,omitempty"`
 	bootstrapToken          string
 	clientSecret            string
 }
@@ -168,7 +168,7 @@ type Dependency struct {
 	Version          string               `yaml:"version,omitempty"`
 	Class            string               `yaml:"class,omitempty"`
 	Type             string               `yaml:"type,omitempty"` // gpuOperator: real | fake
-	CustomHelmValues map[string]any       `yaml:"customHelmValues,omitempty"`
+	CustomHelmValues HelmValues           `yaml:"customHelmValues,omitempty"`
 	OpenShift        *DependencyOpenShift `yaml:"openshift,omitempty"`
 }
 

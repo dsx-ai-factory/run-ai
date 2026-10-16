@@ -66,7 +66,7 @@ func TestToSpec_MapsAllFields(t *testing.T) {
 			Domain:           "runai.example.com",
 			Version:          "2.26.0",
 			TLS:              &TLS{CertPath: "/cp.crt", KeyPath: "/cp.key", CAChainPath: "/ca.crt"},
-			CustomHelmValues: map[string]any{"global.foo": "bar", "replicas": 3},
+			CustomHelmValues: map[string]any{"global": map[string]any{"foo": "bar"}, "replicas": 3},
 		},
 		Cluster: &Cluster{
 			Enabled:         true,
@@ -100,8 +100,8 @@ func TestToSpec_MapsAllFields(t *testing.T) {
 	require.NotNil(t, s.ControlPlane.TLS)
 	assert.Equal(t, "/cp.crt", s.ControlPlane.TLS.CertPath)
 	assert.Equal(t, "/ca.crt", s.ControlPlane.TLS.CAChainPath)
-	assert.Equal(t, "bar", s.ControlPlane.CustomHelmValues["global.foo"])
-	assert.Equal(t, "3", s.ControlPlane.CustomHelmValues["replicas"])
+	assert.Equal(t, "bar", s.ControlPlane.CustomHelmValues["global"].(map[string]any)["foo"])
+	assert.Equal(t, 3, s.ControlPlane.CustomHelmValues["replicas"])
 
 	require.NotNil(t, s.Cluster)
 	assert.Equal(t, "cluster.example.com", s.Cluster.Domain)

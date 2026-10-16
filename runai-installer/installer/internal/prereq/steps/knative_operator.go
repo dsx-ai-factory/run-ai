@@ -11,6 +11,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 	k8s "github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/k8sclient"
 )
 
@@ -66,7 +67,7 @@ func (k *KnativeOperatorInstallStep) Execute(ctx context.Context, runaiData *mod
 	logging.Infof("[Prereq] Installing Knative Operator from repo: %s, version: %s", repo, k.version)
 	err := k.helmInstaller.InstallOrUpgradeRelease(ctx,
 		repo,
-		k.version, "knative-operator", "knative-operator", "knative-operator", false, []string{})
+		k.version, "knative-operator", "knative-operator", "knative-operator", false, helmclient.Values{Overrides: []string{}})
 	if err != nil {
 		logging.Errorf("[Prereq - %s] %v", KnativeOperatorStepName, err)
 		k.SetStatus(model.Failed, err)

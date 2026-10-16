@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 type InstallClusterChart struct {
@@ -33,6 +34,7 @@ type InstallClusterChart struct {
 	Auth            step.ChartAuth
 	HostRouting     bool
 	ExtraValues     []string
+	CustomValues    map[string]any
 }
 
 func (a InstallClusterChart) Kind() string { return "runai.install_cluster_chart" }
@@ -60,7 +62,7 @@ func (a InstallClusterChart) Args() map[string]any {
 
 func (a InstallClusterChart) Describe() string {
 	base := fmt.Sprintf("helm upgrade --install %s %s --version %s --namespace %s", a.ReleaseName, a.ChartName, a.Version, a.Namespace)
-	cmd := describeHelmCommand(base, a.ExtraValues, nil)
+	cmd := describeHelmCommand(base, a.ExtraValues, nil, a.CustomValues)
 	if a.UsesSuppliedCredentials() {
 		return cmd
 	}
@@ -97,5 +99,5 @@ func (a InstallClusterChart) Execute(ctx context.Context, deps orchestrator2.Dep
 	values = append(values, spec.SubdomainSupportHelmKey+"="+strconv.FormatBool(a.HostRouting))
 	values = mergeValueStrings(values, a.ExtraValues)
 
-	return orchestrator2.ActionResult{}, installChart(ctx, deps.HelmInstaller, a.Repo, a.Version, a.ReleaseName, a.ChartName, a.Namespace, a.IsOCI, values, a.Auth)
+	return orchestrator2.ActionResult{}, installChart(ctx, deps.HelmInstaller, a.Repo, a.Version, a.ReleaseName, a.ChartName, a.Namespace, a.IsOCI, helmclient.Values{Overrides: values, Custom: a.CustomValues}, a.Auth)
 }

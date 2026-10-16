@@ -104,9 +104,7 @@ func (n *NetworkOperatorInstallStep) installRealNetworkOperator() error {
 		"network-operator",
 		"network-operator",
 		"nvidia-network-operator",
-		false,
-		[]string{},
-		kubeVersion,
+		false, helmclient.Values{Overrides: []string{}}, kubeVersion,
 	)
 	if err != nil {
 		fullErr := fmt.Errorf("failed to install NVIDIA Network Operator with helm: %v", err)
