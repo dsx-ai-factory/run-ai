@@ -6,11 +6,13 @@
 package metrics
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestToolLabel_KnownTool(t *testing.T) {
@@ -57,4 +59,24 @@ func TestNormalizeLabel_TwoLongStringsAreDistinct(t *testing.T) {
 	a := strings.Repeat("a", maxLabelLen+1)
 	b := strings.Repeat("b", maxLabelLen+1)
 	assert.NotEqual(t, normalizeLabel(a), normalizeLabel(b))
+}
+
+// This method name hashes to 0x0eb6abe8, so its hexadecimal form is only seven
+// characters and slicing it to eight used to panic.
+func TestNormalizeLabel_HashWithLeadingZero(t *testing.T) {
+	s := "tools/call/" + strings.Repeat("a", 54) + "620"
+	require.Greater(t, len(s), maxLabelLen)
+	require.Less(t, fnv1a(s), uint32(0x10000000), "the test input must hash below 0x10000000")
+
+	got := normalizeLabel(s)
+	assert.Len(t, got, 57) // 48 prefix + 1 tilde + 8 hex chars
+	assert.Equal(t, "0eb6abe8", strings.TrimPrefix(got[48:], "~"))
+}
+
+func TestNormalizeLabel_AlwaysProducesAFixedWidthHash(t *testing.T) {
+	for i := 0; i < 1000; i++ {
+		s := strings.Repeat("a", 54) + fmt.Sprint(i) + strings.Repeat("b", 20)
+		got := normalizeLabel(s)
+		assert.Len(t, got, 57, "input %q", s)
+	}
 }
