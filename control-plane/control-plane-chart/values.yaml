@@ -3139,6 +3139,7 @@ workloads:
   name: workloads
   exposedRules:
     - PathPrefix(`/api/v1/workloads`)
+    - PathPrefix(`/api/v1/workloads-slim`)
     - PathPrefix(`/api/v1/workload-types`)
     - PathPrefix(`/api/v1/workload-categories`)
     - PathPrefix(`/api/v1/workload-priorities`)

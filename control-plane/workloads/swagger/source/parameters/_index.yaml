@@ -26,6 +26,8 @@ WorkloadMetricTypes:
   $ref: "./query/WorkloadMetricTypes.yaml"
 WorkloadsFilter:
   $ref: "./query/WorkloadsFilter.yaml"
+WorkloadsSlimFilter:
+  $ref: "./query/WorkloadsSlimFilter.yaml"
 WorkloadsSort:
   $ref: "./query/WorkloadsSort.yaml"
 Precise:

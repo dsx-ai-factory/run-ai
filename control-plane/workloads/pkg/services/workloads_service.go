@@ -416,7 +416,8 @@ func (s *WorkloadsService) InternalEnrichOrgUnitRanking(ctx context.Context, int
 }
 
 // GetWorkloads - List workloads. [Experimental]
-func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offset int32, limit int32, sortOrder string, sortBy string, filterBy []string, search string) (api.ImplResponse, error) {
+func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offset int32, limit int32, sortOrder string, sortBy string,
+	filterBy []string, search string) (api.ImplResponse, error) {
 	tenantId, apiErr := services_utils.ParseTenantId(ctx)
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
@@ -454,6 +455,52 @@ func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offse
 	response := api.GetWorkloads200Response{
 		Workloads: apiWorkloads,
 	}
+	if recordsCount == limit {
+		response.Next = recordsCount + offset
+	}
+
+	return api.Response(http.StatusOK, response), nil
+}
+
+// GetWorkloadsSlim - List workloads, slim. Serves GET /api/v1/workloads-slim from the workloads table, sorted by id.
+func (s *WorkloadsService) GetWorkloadsSlim(ctx context.Context, offset int32, limit int32, sortOrder string, filterBy []string) (api.ImplResponse, error) {
+	tenantId, apiErr := services_utils.ParseTenantId(ctx)
+	if apiErr != nil {
+		return NewErrorResponse(apiErr), nil
+	}
+
+	limit = setDefaultLimit(limit)
+
+	permittedScopes, err := authorization_client.ParsePermittedScopes(ctx)
+	if err != nil {
+		permittedScopes = nil
+	}
+
+	filters, filterErr := queryapi.NewParser(models.WorkloadSlim{}.FilterFieldsToColumn()).Filters(filterBy)
+	if filterErr != nil {
+		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
+	}
+
+	workloads, dbErr := s.WorkloadsDao.DbGetWorkloadsSlim(ctx, tenantId, permittedScopes, offset, limit, sortOrder, filters)
+	if dbErr != nil {
+		return NewErrorResponse(dbErr), nil
+	}
+
+	response := api.GetWorkloadsSlimResponse{
+		Workloads: make([]api.WorkloadSlim, 0, len(*workloads)),
+	}
+	for _, workload := range *workloads {
+		response.Workloads = append(response.Workloads, api.WorkloadSlim{
+			Id:                   workload.ID.String(),
+			Name:                 workload.Name,
+			Type:                 workload.Type,
+			ProjectName:          workload.ProjectName,
+			ClusterId:            workload.ClusterID.String(),
+			DistributedFramework: workload.DistributedFramework,
+		})
+	}
+
+	recordsCount := int32(len(response.Workloads))
 	if recordsCount == limit {
 		response.Next = recordsCount + offset
 	}
