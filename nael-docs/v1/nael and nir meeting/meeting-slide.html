@@ -1,0 +1,563 @@
+<!--
+  Run:ai + NVIDIA brand-style slide template
+  ==========================================
+  Self-contained HTML deck — no framework, no build step. Drop it into a
+  new conversation with Claude and ask:
+      "fill this slide template with a deck about <topic>"
+  Claude can clone the example slides below into as many as you need.
+
+  Conventions used in this template:
+    - Each slide is a <div class="slide">; first one has class "active".
+    - Slide pattern: <h3>EYEBROW</h3> <h2>Title</h2> body...
+    - Section dividers: extra class "part-divider" with a faded big number.
+    - Title slide: extra class "title-slide" with centered content.
+    - Code blocks support inline color via <span style="color:var(--nvidia-green);">.
+    - Use class="flow-node|flow-arrow|flow-desc" inside <pre> for ASCII flows.
+
+  Navigation: ← → or Space to move, Home/End for first/last, swipe on touch.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nael and Nir meeting | Adaptive routing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #1a1a2e;
+    --bg-slide: #16213e;
+    --bg-card: #0f3460;
+    --accent: #76b900;
+    --accent-dim: #5a8f00;
+    --text: #e8e8e8;
+    --text-dim: #a0a0b0;
+    --text-bright: #ffffff;
+    --code-bg: #0d1117;
+    --border: #2a3a5e;
+    --nvidia-green: #76b900;
+    --runai-purple: #7b61ff;
+    --accent-strong: #76b900;
+  }
+
+  body.light {
+    --bg: #fafbfc;
+    --bg-slide: #ffffff;
+    --bg-card: #f2f4f8;
+    --text: #1a1a2e;
+    --text-dim: #5a6072;
+    --text-bright: #0a0a1a;
+    --code-bg: #f4f6fa;
+    --border: #d8dde6;
+    --accent-strong: #4d7a00;
+  }
+  body.light h3,
+  body.light th,
+  body.light code,
+  body.light .flow-node,
+  body.light .col h4,
+  body.light .status-ok,
+  body.light ul li::before,
+  body.light ol li::before { color: var(--accent-strong); }
+  body.light h1 .accent { color: var(--accent-strong); }
+  body.light ol li::before { background: rgba(77, 122, 0, 0.12); }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .slide {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 60px 80px;
+    position: relative;
+  }
+
+  .slide.active { display: flex; }
+  .slide-content { max-width: 1100px; width: 100%; }
+
+  /* Header bar */
+  .top-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--nvidia-green), var(--runai-purple));
+    z-index: 100;
+  }
+
+  .slide-number {
+    position: fixed; bottom: 24px; right: 40px;
+    font-size: 14px; color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace; z-index: 100;
+  }
+
+  .logo-bar {
+    position: fixed; bottom: 24px; left: 40px;
+    font-size: 13px; color: var(--text-dim);
+    letter-spacing: 1px; text-transform: uppercase; z-index: 100;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 48px; font-weight: 700;
+    color: var(--text-bright); margin-bottom: 16px; line-height: 1.15;
+  }
+  h1 .accent { color: var(--nvidia-green); }
+  h1 .purple { color: var(--runai-purple); }
+
+  h2 {
+    font-size: 36px; font-weight: 600;
+    color: var(--text-bright); margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 15px; font-weight: 500;
+    color: var(--nvidia-green); text-transform: uppercase;
+    letter-spacing: 2px; margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 22px; color: var(--text-dim); font-weight: 300;
+    margin-bottom: 40px; line-height: 1.5;
+  }
+
+  p, li { font-size: 20px; line-height: 1.7; color: var(--text); }
+
+  .quote {
+    font-size: 20px; color: var(--text);
+    background: var(--bg-card);
+    border-left: 4px solid var(--nvidia-green);
+    padding: 20px 28px; border-radius: 0 8px 8px 0;
+    margin: 24px 0; line-height: 1.6; font-style: italic;
+  }
+
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 8px 0 8px 28px; position: relative; }
+  ul li::before {
+    content: '▸'; position: absolute; left: 0;
+    color: var(--nvidia-green); font-weight: 700;
+  }
+
+  ol { padding-left: 24px; counter-reset: ol-counter; list-style: none; }
+  ol li {
+    padding: 8px 0 8px 36px; position: relative; counter-increment: ol-counter;
+  }
+  ol li::before {
+    content: counter(ol-counter);
+    position: absolute; left: 0; top: 8px;
+    color: var(--nvidia-green); font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(118, 185, 0, 0.1);
+    width: 26px; height: 26px; line-height: 26px;
+    text-align: center; border-radius: 4px; font-size: 14px;
+  }
+
+  strong { color: var(--text-bright); font-weight: 600; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg); padding: 2px 8px; border-radius: 4px;
+    font-size: 0.85em; color: var(--nvidia-green);
+  }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 18px; }
+  th {
+    background: var(--bg-card); color: var(--nvidia-green);
+    text-align: left; padding: 14px 20px; font-weight: 600;
+    text-transform: uppercase; font-size: 13px; letter-spacing: 1px;
+    border-bottom: 2px solid var(--nvidia-green);
+  }
+  td { padding: 12px 20px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:hover td { background: rgba(118, 185, 0, 0.05); }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 24px; margin: 20px 0;
+    overflow-x: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: 15px; line-height: 1.6; color: var(--text);
+  }
+  .flow-node { color: var(--nvidia-green); font-weight: 500; }
+  .flow-arrow { color: var(--text-dim); }
+  .flow-desc { color: var(--text-dim); font-style: italic; }
+
+  /* Two-column layout */
+  .columns {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 20px 0;
+  }
+  .col {
+    background: var(--bg-card); border-radius: 12px;
+    padding: 28px; border: 1px solid var(--border);
+  }
+  .col h4 {
+    font-size: 18px; color: var(--nvidia-green);
+    margin-bottom: 16px; font-weight: 600;
+  }
+  .col pre {
+    margin: 12px 0 0 0; font-size: 16px; border: none; background: var(--code-bg);
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-green { background: rgba(118, 185, 0, 0.2); color: var(--nvidia-green); }
+  .badge-purple { background: rgba(123, 97, 255, 0.2); color: var(--runai-purple); }
+
+  /* Keyboard hint */
+  .keyboard-hint {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%); font-size: 12px;
+    color: var(--text-dim); opacity: 0.5; z-index: 100;
+  }
+  kbd {
+    background: var(--border); padding: 2px 8px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+
+  /* Status indicators */
+  .status-ok { color: var(--nvidia-green); }
+  .status-redirect { color: #f0a030; }
+  .status-denied { color: #e04040; }
+
+  /* Title slide special */
+  .title-slide h1 { font-size: 56px; margin-bottom: 8px; }
+  .title-slide .subtitle { font-size: 24px; }
+
+  /* Section divider */
+  .part-divider { text-align: center; }
+  .part-divider h2 { font-size: 44px; margin-bottom: 16px; }
+  .part-divider .subtitle { font-size: 20px; }
+  .part-number {
+    font-size: 100px; font-weight: 700;
+    color: var(--nvidia-green); opacity: 0.2;
+    line-height: 1; margin-bottom: 10px;
+  }
+
+  /* Top-right control cluster (slide ⇄ document, dark ⇄ light) */
+  .controls {
+    position: fixed; top: 16px; right: 16px; z-index: 200;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .ctrl-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 14px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+    cursor: pointer; user-select: none;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .ctrl-btn:hover { border-color: var(--nvidia-green); color: var(--text-bright); }
+  .ctrl-btn svg { width: 14px; height: 14px; }
+  .ctrl-btn.icon-only { padding: 8px; width: 34px; height: 34px; justify-content: center; }
+  .view-toggle .label-doc { display: inline; }
+  .view-toggle .label-slide { display: none; }
+  body.doc-mode .view-toggle .label-doc { display: none; }
+  body.doc-mode .view-toggle .label-slide { display: inline; }
+  .theme-toggle .icon-moon { display: none; }
+  .theme-toggle .icon-sun { display: inline; }
+  body.light .theme-toggle .icon-moon { display: inline; }
+  body.light .theme-toggle .icon-sun { display: none; }
+
+  /* Document (one-page) mode */
+  body.doc-mode { overflow: auto; height: auto; }
+  body.doc-mode .slide {
+    display: flex !important;
+    height: auto; min-height: auto;
+    padding: 56px 80px;
+    border-bottom: 1px solid var(--border);
+    page-break-after: always;
+    break-after: page;
+  }
+  body.doc-mode .slide:last-of-type { border-bottom: none; }
+  body.doc-mode .slide-number,
+  body.doc-mode .logo-bar,
+  body.doc-mode .keyboard-hint { display: none; }
+  body.doc-mode .top-bar { position: absolute; }
+
+  /* Print: always render as single document */
+  @media print {
+    body { overflow: visible; height: auto; background: #fff; color: #000; }
+    .controls, .slide-number, .logo-bar, .keyboard-hint { display: none !important; }
+    .slide {
+      display: flex !important;
+      height: auto; min-height: auto;
+      padding: 40px 60px;
+      page-break-after: always;
+      break-after: page;
+    }
+    .slide:last-of-type { page-break-after: auto; break-after: auto; }
+    .top-bar { position: absolute; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+<div class="logo-bar">RUN:AI · NVIDIA</div>
+<div class="slide-number" id="slideNum"></div>
+
+
+<div class="controls">
+  <button class="ctrl-btn view-toggle" id="viewToggle" title="Toggle slide / one-page view (press V)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+    </svg>
+    <span class="label-doc">One page</span>
+    <span class="label-slide">Slides</span>
+  </button>
+  <button class="ctrl-btn icon-only theme-toggle" id="themeToggle" title="Toggle dark / light theme (press T)" aria-label="Toggle theme">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+    </svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"></path>
+    </svg>
+  </button>
+</div>
+
+<div class="slide active" aria-label="Adaptive routing meeting comparison">
+  <div class="slide-content" style="zoom:min(1, calc((100vh - 130px) / 720px));flex-shrink:0;">
+    <h3 style="margin-bottom:12px;">Nael and Nir meeting · 5 October 2026</h3>
+    <h2>Adaptive weights and profile selection</h2>
+    <p class="subtitle" style="font-size:20px;margin-bottom:22px;">What I learned from Nir, and the direction I want to explore</p>
+
+    <div class="columns" style="margin:0;gap:44px;">
+      <section style="border-top:3px solid var(--nvidia-green);padding-top:16px;">
+        <h4 style="font-size:25px;color:var(--text-bright);margin-bottom:6px;">Nir: adapt the weights</h4>
+        <p style="font-size:15px;color:var(--text-dim);">Implemented in an experimental branch <a href="https://github.com/nirrozenbaum/gateway-api-inference-extension/tree/6c0f8d8496b56d68c30369520f3c4477adf8cd42" style="color:var(--accent-strong);">[1]</a></p>
+        <pre style="font-size:16px;line-height:1.65;padding:16px 20px;margin:15px 0;" aria-label="Nir flow">✅ EXISTS · Pool metrics
+         │ measure imbalance / pressure
+         ▼
+🆕 NEW · Background adaptation
+         │ periodically update weights
+         ▼
+✅ EXISTS · Scheduler chooses a pod</pre>
+        <p style="font-size:19px;line-height:1.5;"><strong>What I take from this:</strong> reuse pool signals to tune the balance between cache reuse and load spreading.</p>
+      </section>
+      <section style="border-top:3px solid var(--runai-purple);padding-top:16px;">
+        <h4 style="font-size:25px;color:var(--text-bright);margin-bottom:6px;">My proposal: select the profile</h4>
+        <p style="font-size:15px;color:var(--text-dim);">Proposed; not implemented <a href="https://github.com/dsx-ai-factory/run-ai/pull/1701" style="color:var(--accent-strong);">[2]</a></p>
+        <pre style="font-size:16px;line-height:1.65;padding:16px 20px;margin:15px 0;" aria-label="Nael flow">✅ EXISTS · Request candidate metrics
+         │ calculate mean waiting queue
+         ▼
+🆕 NEW · Per-request profile selection
+         │ choose a fixed-weight profile
+         ▼
+✅ EXISTS · Profile chooses a pod</pre>
+        <p style="font-size:19px;line-height:1.5;"><strong>My different direction:</strong> choose a named profile for each request. The weights inside each profile stay fixed.</p>
+      </section>
+    </div>
+
+    <p style="font-size:13px;line-height:1.4;color:var(--text-dim);margin-top:12px;">✅ EXISTS: baseline machinery · 🆕 NEW: addition in each design · 🔜 PLANNED: later work</p>
+    <div class="quote" style="margin:17px 0 10px;padding:14px 22px;font-style:normal;font-size:20px;line-height:1.45;">
+      <strong>Meeting question:</strong> When would per-request profile selection add value beyond background weight tuning?
+    </div>
+    <p style="font-size:14px;line-height:1.5;color:var(--text-dim);">Shared goal: balance cache reuse and load distribution. The approaches have not been benchmarked against each other.</p>
+  </div>
+</div>
+
+<div class="slide" aria-label="Worked examples for both approaches">
+<div class="slide-content" style="zoom:min(1, calc((100vh - 130px) / 800px));flex-shrink:0;">
+<h3 style="margin-bottom:12px;">Nael and Nir meeting · Worked examples</h3>
+<h2>Weight changes and profile choices</h2>
+<p class="subtitle" style="font-size:20px;margin-bottom:24px;">Illustrative calculations for each approach</p>
+<div class="columns" style="margin:0;gap:44px;">
+<section style="border-top:3px solid var(--nvidia-green);padding-top:18px;">
+<h4 style="font-size:25px;color:var(--text-bright);margin-bottom:8px;">Nir: change the weight budget</h4>
+<p style="font-size:19px;line-height:1.5;">A stronger imbalance signal gives distribution scorers more weight.</p>
+<table aria-label="Nir examples">
+<tr><th>Smoothed signal</th><th>Distribution</th><th>Affinity</th></tr>
+<tr><td>Balanced · I = 0</td><td><strong>22%</strong></td><td>78%</td></tr>
+<tr><td>High · I = 0.9</td><td><strong>89%</strong></td><td>11%</td></tr>
+</table>
+<pre style="font-size:16px;line-height:1.7;padding:18px;margin:14px 0;">g = 1 / (1 + exp(-6 × (I - 0.6)))
+Distribution = 0.2 + 0.8 × g
+Affinity = 1 - Distribution</pre>
+<p style="font-size:17px;line-height:1.55;"><strong>What changes:</strong> weights within the configured profiles, during background updates.</p>
+<p style="font-size:14px;line-height:1.5;color:var(--text-dim);margin-top:12px;">Default parameters after an update; rounded budgets. Pressure has no weight effect with these defaults. <a href="https://github.com/nirrozenbaum/gateway-api-inference-extension/blob/6c0f8d8496b56d68c30369520f3c4477adf8cd42/pkg/epp/scheduling/adaptive_configurator.go" style="color:var(--accent-strong);">Source</a></p>
+</section>
+<section style="border-top:3px solid var(--runai-purple);padding-top:18px;">
+<h4 style="font-size:25px;color:var(--text-bright);margin-bottom:8px;">My proposal: choose a profile</h4>
+<p style="font-size:19px;line-height:1.5;">The mean queue of this request’s candidates selects a predefined profile.</p>
+<table aria-label="Nael examples">
+<tr><th>Queues</th><th>Mean</th><th>Profile</th></tr>
+<tr><td>0, 2, 4</td><td><strong>2</strong></td><td>cache-oriented</td></tr>
+<tr><td>10, 20, 30</td><td><strong>20</strong></td><td>load-oriented</td></tr>
+</table>
+<pre style="font-size:16px;line-height:1.7;padding:18px;margin:14px 0;">Mean queue = sum(queues) / count
+Below 5: cache-oriented
+20 or above: load-oriented</pre>
+<p style="font-size:17px;line-height:1.55;"><strong>What changes:</strong> the selected profile for this request. Each profile’s weights stay fixed.</p>
+<p style="font-size:14px;line-height:1.5;color:var(--text-dim);margin-top:12px;">All candidate metrics are fresh. Otherwise, or when neither rule matches, use balanced. <a href="https://github.com/dsx-ai-factory/run-ai/pull/1701" style="color:var(--accent-strong);">Proposal</a></p>
+</section>
+</div>
+<div class="quote" style="margin:24px 0 10px;padding:15px 22px;font-style:normal;font-size:20px;line-height:1.45;"><strong>Different outputs:</strong> Nir computes new weights; my proposal selects a named profile.</div>
+<p style="font-size:14px;line-height:1.5;color:var(--text-dim);">Separate illustrative inputs, not a benchmark on the same workload. Neither example establishes a performance advantage.</p>
+</div>
+</div>
+
+<div class="slide" aria-label="Proposed coexistence of profile selection and adaptive weights">
+<div class="slide-content" style="zoom:min(1, calc((100vh - 130px) / 830px));flex-shrink:0;">
+<h3 style="margin-bottom:12px;">Nael and Nir meeting · Proposed combination</h3>
+<h2>Profile selection with bounded weight adaptation</h2>
+<p class="subtitle" style="font-size:20px;margin-bottom:18px;">My handler chooses the policy; Nir’s controller tunes it within agreed limits.</p>
+<pre style="font-size:16px;line-height:1.4;padding:16px 22px;margin:14px 0;" aria-label="Combined request and background flows">REQUEST PATH                              BACKGROUND LOOP
+✅ EXISTS · Request + candidate metrics    ✅ EXISTS · Pool metrics
+       │ calculate mean queue                    │ measure imbalance / pressure
+       ▼                                         ▼
+🆕 NEW · My profile selector               🆕 NEW · Nir’s weight controller
+       │ select one profile                      │ publish bounded weights
+       ▼                                         ▼
+✅ EXISTS · Execute selected profile ◄── 🔜 PLANNED · Per-profile weight snapshots
+       │ filter, score, pick             read one consistent version
+       ▼
+✅ EXISTS · Selected pod</pre>
+<p style="font-size:13px;line-height:1.4;color:var(--text-dim);">✅ EXISTS: baseline · 🆕 NEW: each design’s addition · 🔜 PLANNED: integration work. This combination is not implemented or benchmarked.</p>
+<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);">
+<p style="font-size:20px;line-height:1.5;"><strong>Example:</strong> queues <code>10, 20, 30</code> give mean <strong>20</strong>, so my handler selects <strong>load-oriented</strong>.</p>
+<p style="font-size:19px;line-height:1.5;margin-top:6px;">If bounded tuning assigns <strong>90% distribution / 10% affinity</strong>, weights become<br><strong>prefix 0.10 · KV 0.18 · queue 0.72</strong>, preserving the original KV:queue ratio of 1:4.</p>
+<p style="font-size:13px;line-height:1.4;color:var(--text-dim);margin-top:4px;">Illustrative budget, not calculated from these queues alone. Nir’s controller also needs pool-level signals.</p>
+</div>
+<div class="columns" style="margin:20px 0 0;gap:40px;">
+<section>
+<h4 style="font-size:19px;color:var(--text-bright);margin-bottom:6px;">Preserve each profile’s purpose</h4>
+<p style="font-size:17px;line-height:1.5;">Add different tuning bounds per profile. A shared category budget would make our cache-oriented and balanced profiles identical.</p>
+</section>
+<section>
+<h4 style="font-size:19px;color:var(--text-bright);margin-bottom:6px;">Keep each request consistent</h4>
+<p style="font-size:17px;line-height:1.5;">Freeze the profile choice and use one weight snapshot for scoring. Define stale-data fallback before integration.</p>
+</section>
+</div>
+<div class="quote" style="margin:20px 0 10px;padding:13px 22px;font-style:normal;font-size:19px;line-height:1.45;"><strong>Design change:</strong> my profiles would hold baseline weights and tuning limits, instead of permanently fixed weights.</div>
+<p style="font-size:13px;line-height:1.5;color:var(--text-dim);">Meeting decision: test each approach alone before testing the combination. Sources: <a href="https://github.com/nirrozenbaum/gateway-api-inference-extension/blob/6c0f8d8496b56d68c30369520f3c4477adf8cd42/pkg/epp/scheduling/adaptive_configurator.go" style="color:var(--accent-strong);">Nir’s configurator</a> · <a href="https://github.com/dsx-ai-factory/run-ai/pull/1701" style="color:var(--accent-strong);">My proposal</a></p>
+</div>
+</div>
+
+<div class="slide" aria-label="Detailed combined example">
+<div class="slide-content" style="zoom:min(1, calc((100vh - 130px) / 760px));flex-shrink:0;">
+<h3 style="margin-bottom:10px;">Nael and Nir meeting · Expanded example</h3>
+<h2>How the combined example produces the weights</h2>
+<p style="font-size:17px;line-height:1.5;color:var(--text-dim);margin-bottom:12px;">Proposed integration: the profile supplies scorer proportions; background tuning supplies category budgets.</p>
+<svg style="width:100%;height:560px;display:block;" id="combined-example-diagram" width="1100.730712890625" xmlns="http://www.w3.org/2000/svg" class="flowchart" height="792.5999755859375" viewBox="0 0 1100.730712890625 792.5999755859375" role="graphics-document document" aria-roledescription="flowchart-v2"><style>#combined-example-diagram{font-family:Inter,Arial,sans-serif;font-size:22px;fill:#e8e8e8;}@keyframes edge-animation-frame{from{stroke-dashoffset:0;}}@keyframes dash{to{stroke-dashoffset:0;}}#combined-example-diagram .edge-animation-slow{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 50s linear infinite;stroke-linecap:round;}#combined-example-diagram .edge-animation-fast{stroke-dasharray:9,5!important;stroke-dashoffset:900;animation:dash 20s linear infinite;stroke-linecap:round;}#combined-example-diagram .error-icon{fill:hsl(43.5, 47.619047619%, 21.4705882353%);}#combined-example-diagram .error-text{fill:rgb(174.1785714286, 188.5178571429, 226.3214285714);stroke:rgb(174.1785714286, 188.5178571429, 226.3214285714);}#combined-example-diagram .edge-thickness-normal{stroke-width:1px;}#combined-example-diagram .edge-thickness-thick{stroke-width:3.5px;}#combined-example-diagram .edge-pattern-solid{stroke-dasharray:0;}#combined-example-diagram .edge-thickness-invisible{stroke-width:0;fill:none;}#combined-example-diagram .edge-pattern-dashed{stroke-dasharray:3;}#combined-example-diagram .edge-pattern-dotted{stroke-dasharray:2;}#combined-example-diagram .marker{fill:#a0a0b0;stroke:#a0a0b0;}#combined-example-diagram .marker.cross{stroke:#a0a0b0;}#combined-example-diagram svg{font-family:Inter,Arial,sans-serif;font-size:22px;}#combined-example-diagram p{margin:0;}#combined-example-diagram .label{font-family:Inter,Arial,sans-serif;color:#e8e8e8;}#combined-example-diagram .cluster-label text{fill:rgb(174.1785714286, 188.5178571429, 226.3214285714);}#combined-example-diagram .cluster-label span{color:rgb(174.1785714286, 188.5178571429, 226.3214285714);}#combined-example-diagram .cluster-label span p{background-color:transparent;}#combined-example-diagram .label text,#combined-example-diagram span{fill:#e8e8e8;color:#e8e8e8;}#combined-example-diagram .node rect,#combined-example-diagram .node circle,#combined-example-diagram .node ellipse,#combined-example-diagram .node polygon,#combined-example-diagram .node path{fill:#16213e;stroke:#76b900;stroke-width:1px;}#combined-example-diagram .rough-node .label text,#combined-example-diagram .node .label text,#combined-example-diagram .image-shape .label,#combined-example-diagram .icon-shape .label{text-anchor:middle;}#combined-example-diagram .node .katex path{fill:#000;stroke:#000;stroke-width:1px;}#combined-example-diagram .rough-node .label,#combined-example-diagram .node .label,#combined-example-diagram .image-shape .label,#combined-example-diagram .icon-shape .label{text-align:center;}#combined-example-diagram .node.clickable{cursor:pointer;}#combined-example-diagram .root .anchor path{fill:#a0a0b0!important;stroke-width:0;stroke:#a0a0b0;}#combined-example-diagram .arrowheadPath{fill:#e5e5d1;}#combined-example-diagram .edgePaths .path{stroke:#a0a0b0;stroke-width:1px;}#combined-example-diagram .flowchart-link{stroke:#a0a0b0;fill:none;}#combined-example-diagram .edgeLabel{background-color:#1a1a2e;text-align:center;}#combined-example-diagram .edgeLabel p{background-color:#1a1a2e;}#combined-example-diagram .edgeLabel rect{opacity:0.5;background-color:#1a1a2e;fill:#1a1a2e;}#combined-example-diagram .labelBkg{background-color:rgba(26, 26, 46, 0.5);}#combined-example-diagram .cluster rect{fill:hsl(43.5, 47.619047619%, 21.4705882353%);stroke:hsl(43.5, 7.619047619%, 11.4705882353%);stroke-width:1px;}#combined-example-diagram .cluster text{fill:rgb(174.1785714286, 188.5178571429, 226.3214285714);}#combined-example-diagram .cluster span{color:rgb(174.1785714286, 188.5178571429, 226.3214285714);}#combined-example-diagram .node .collapsed-indicator{fill:hsl(43.5, 7.619047619%, 11.4705882353%);stroke:none;opacity:0.6;}#combined-example-diagram .node .collapsed-separator{stroke:hsl(43.5, 7.619047619%, 11.4705882353%);stroke-width:0.75px;}#combined-example-diagram div.mermaidTooltip{position:absolute;text-align:center;max-width:200px;padding:2px;font-family:Inter,Arial,sans-serif;font-size:12px;background:hsl(43.5, 47.619047619%, 21.4705882353%);border:1px solid hsl(43.5, 7.619047619%, 11.4705882353%);border-radius:2px;pointer-events:none;z-index:100;}#combined-example-diagram .flowchartTitleText{text-anchor:middle;font-size:18px;fill:#e8e8e8;}#combined-example-diagram rect.text{fill:none;stroke-width:0;}#combined-example-diagram .icon-shape,#combined-example-diagram .image-shape{background-color:#1a1a2e;text-align:center;}#combined-example-diagram .icon-shape p,#combined-example-diagram .image-shape p{background-color:#1a1a2e;padding:2px;}#combined-example-diagram .icon-shape .label rect,#combined-example-diagram .image-shape .label rect{opacity:0.5;background-color:#1a1a2e;fill:#1a1a2e;}#combined-example-diagram .label-icon{display:inline-block;height:1em;overflow:visible;vertical-align:-0.125em;}#combined-example-diagram .node .label-icon path{fill:currentColor;stroke:revert;stroke-width:revert;}#combined-example-diagram .node .neo-node{stroke:#76b900;}#combined-example-diagram [data-look="neo"].node rect,#combined-example-diagram [data-look="neo"].cluster rect,#combined-example-diagram [data-look="neo"].node polygon{stroke:url(#combined-example-diagram-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#combined-example-diagram [data-look="neo"].swimlane.cluster rect{filter:none;}#combined-example-diagram [data-look="neo"].node path{stroke:url(#combined-example-diagram-gradient);stroke-width:1px;}#combined-example-diagram [data-look="neo"].node .outer-path{filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#combined-example-diagram [data-look="neo"].node .neo-line path{stroke:#76b900;filter:none;}#combined-example-diagram [data-look="neo"].node circle{stroke:url(#combined-example-diagram-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#combined-example-diagram [data-look="neo"].node circle .state-start{fill:#000000;}#combined-example-diagram [data-look="neo"].icon-shape .icon{fill:url(#combined-example-diagram-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#combined-example-diagram [data-look="neo"].icon-shape .icon-neo path{stroke:url(#combined-example-diagram-gradient);filter:drop-shadow( 1px 2px 2px rgba(185,185,185,1));}#combined-example-diagram :root{--mermaid-font-family:"trebuchet ms",verdana,arial,sans-serif;}</style><g><marker id="combined-example-diagram_flowchart-v2-pointEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 0 L 10 5 L 0 10 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="combined-example-diagram_flowchart-v2-pointStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="4.5" refY="5" markerUnits="userSpaceOnUse" markerWidth="8" markerHeight="8" orient="auto"><path d="M 0 5 L 10 10 L 10 0 z" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></path></marker><marker id="combined-example-diagram_flowchart-v2-pointEnd-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="11.5" refY="7" markerUnits="userSpaceOnUse" markerWidth="10.5" markerHeight="14" orient="auto"><path d="M 0 0 L 11.5 7 L 0 14 z" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></path></marker><marker id="combined-example-diagram_flowchart-v2-pointStart-margin" class="marker flowchart-v2" viewBox="0 0 11.5 14" refX="1" refY="7" markerUnits="userSpaceOnUse" markerWidth="11.5" markerHeight="14" orient="auto"><polygon points="0,7 11.5,14 11.5,0" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></polygon></marker><marker id="combined-example-diagram_flowchart-v2-circleEnd" class="marker flowchart-v2" viewBox="0 0 10 10" refX="11" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="combined-example-diagram_flowchart-v2-circleStart" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-1" refY="5" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 1; stroke-dasharray: 1, 0;"></circle></marker><marker id="combined-example-diagram_flowchart-v2-circleEnd-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refY="5" refX="12.25" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></circle></marker><marker id="combined-example-diagram_flowchart-v2-circleStart-margin" class="marker flowchart-v2" viewBox="0 0 10 10" refX="-2" refY="5" markerUnits="userSpaceOnUse" markerWidth="14" markerHeight="14" orient="auto"><circle cx="5" cy="5" r="5" class="arrowMarkerPath" style="stroke-width: 0; stroke-dasharray: 1, 0;"></circle></marker><marker id="combined-example-diagram_flowchart-v2-crossEnd" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="12" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="combined-example-diagram_flowchart-v2-crossStart" class="marker cross flowchart-v2" viewBox="0 0 11 11" refX="-1" refY="5.2" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" orient="auto"><path d="M 1,1 l 9,9 M 10,1 l -9,9" class="arrowMarkerPath" style="stroke-width: 2; stroke-dasharray: 1, 0;"></path></marker><marker id="combined-example-diagram_flowchart-v2-crossEnd-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="17.7" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5;"></path></marker><marker id="combined-example-diagram_flowchart-v2-crossStart-margin" class="marker cross flowchart-v2" viewBox="0 0 15 15" refX="-3.5" refY="7.5" markerUnits="userSpaceOnUse" markerWidth="12" markerHeight="12" orient="auto"><path d="M 1,1 L 14,14 M 1,14 L 14,1" class="arrowMarkerPath" style="stroke-width: 2.5; stroke-dasharray: 1, 0;"></path></marker><g class="root"><g class="clusters"></g><g class="edgePaths"><path d="M191.324,98L191.324,101.917C191.324,105.833,191.324,113.667,191.324,123.583C191.324,133.5,191.324,145.5,191.324,151.5L191.324,157.5" id="combined-example-diagram-L_Q_H_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_Q_H_0" data-points="W3sieCI6MTkxLjMyNDIxODc1LCJ5Ijo5OH0seyJ4IjoxOTEuMzI0MjE4NzUsInkiOjEyMS41fSx7IngiOjE5MS4zMjQyMTg3NSwieSI6MTYxLjV9XQ==" data-look="classic" marker-end="url(#combined-example-diagram_flowchart-v2-pointEnd)"></path><path d="M191.324,251.5L191.324,258.167C191.324,264.833,191.324,278.167,193.121,288.163C194.917,298.16,198.51,304.82,200.307,308.15L202.104,311.48" id="combined-example-diagram-L_H_P_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_H_P_0" data-points="W3sieCI6MTkxLjMyNDIxODc1LCJ5IjoyNTEuNX0seyJ4IjoxOTEuMzI0MjE4NzUsInkiOjI5MS41fSx7IngiOjIwNC4wMDI5MDgzMDI5MTk3LCJ5IjozMTV9XQ==" data-look="classic" marker-end="url(#combined-example-diagram_flowchart-v2-pointEnd)"></path><path d="M228.281,405L228.281,412.95C228.281,420.9,228.281,436.8,239.613,452.329C250.944,467.859,273.607,483.017,284.938,490.597L296.27,498.176" id="combined-example-diagram-L_P_A_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P_A_0" data-points="W3sieCI6MjI4LjI4MTI1LCJ5Ijo0MDV9LHsieCI6MjI4LjI4MTI1LCJ5Ijo0NTIuNjk5OTk2OTQ4MjQyMn0seyJ4IjoyOTkuNTk0NTE5NDI0NTg0MiwieSI6NTAwLjM5OTk5Mzg5NjQ4NDR9XQ==" data-look="classic" marker-end="url(#combined-example-diagram_flowchart-v2-pointEnd)"></path><path d="M448.563,403.26L490.52,411.5C532.478,419.74,616.393,436.22,671.431,452.075C726.468,467.929,752.626,483.158,765.706,490.773L778.785,498.387" id="combined-example-diagram-L_P_D_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_P_D_0" data-points="W3sieCI6NDQ4LjU2MjUsInkiOjQwMy4yNjAzMzQxOTc4NTMyNH0seyJ4Ijo3MDAuMzA4ODM3ODkwNjI1LCJ5Ijo0NTIuNjk5OTk2OTQ4MjQyMn0seyJ4Ijo3ODIuMjQyMDIwODkzMTA3MywieSI6NTAwLjM5OTk5Mzg5NjQ4NDR9XQ==" data-look="classic" marker-end="url(#combined-example-diagram_flowchart-v2-pointEnd)"></path><path d="M644.978,268L638.909,271.917C632.841,275.833,620.704,283.667,614.635,299C608.567,314.333,608.567,337.167,608.567,364.033C608.567,390.9,608.567,421.8,593.362,444.9C578.158,468.001,547.749,483.301,532.544,490.952L517.339,498.602" id="combined-example-diagram-L_T_A_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_A_0" data-points="W3sieCI6NjQ0Ljk3NzYxMDg2ODU2NjIsInkiOjI2OH0seyJ4Ijo2MDguNTY2NjUwMzkwNjI1LCJ5IjoyOTEuNX0seyJ4Ijo2MDguNTY2NjUwMzkwNjI1LCJ5IjozNjB9LHsieCI6NjA4LjU2NjY1MDM5MDYyNSwieSI6NDUyLjY5OTk5Njk0ODI0MjJ9LHsieCI6NTEzLjc2NjI0ODE1NzQwMTgsInkiOjUwMC4zOTk5OTM4OTY0ODQ0fV0=" data-look="classic" marker-end="url(#combined-example-diagram_flowchart-v2-pointEnd)"></path><path d="M873.022,268L881.477,271.917C889.932,275.833,906.841,283.667,915.296,299C923.75,314.333,923.75,337.167,923.75,364.033C923.75,390.9,923.75,421.8,921.347,444.567C918.943,467.333,914.136,481.967,911.733,489.283L909.33,496.6" id="combined-example-diagram-L_T_D_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_T_D_0" data-points="W3sieCI6ODczLjAyMjIxMTA1MjM4OTcsInkiOjI2OH0seyJ4Ijo5MjMuNzUwMjQ0MTQwNjI1LCJ5IjoyOTEuNX0seyJ4Ijo5MjMuNzUwMjQ0MTQwNjI1LCJ5IjozNjB9LHsieCI6OTIzLjc1MDI0NDE0MDYyNSwieSI6NDUyLjY5OTk5Njk0ODI0MjJ9LHsieCI6OTA4LjA4MTI3NzkyOTc5MTcsInkiOjUwMC4zOTk5OTM4OTY0ODQ0fV0=" data-look="classic" marker-end="url(#combined-example-diagram_flowchart-v2-pointEnd)"></path><path d="M391.539,623.4L391.539,629.333C391.539,635.267,391.539,647.133,407.361,658.774C423.182,670.414,454.825,681.828,470.646,687.536L486.468,693.243" id="combined-example-diagram-L_A_W_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_A_W_0" data-points="W3sieCI6MzkxLjUzOTMwNjY0MDYyNSwieSI6NjIzLjM5OTk5Mzg5NjQ4NDR9LHsieCI6MzkxLjUzOTMwNjY0MDYyNSwieSI6NjU4Ljk5OTk5NDI3Nzk1NDF9LHsieCI6NDkwLjIzMDU0ODcwMTI3NTI3LCJ5Ijo2OTQuNTk5OTk0NjU5NDIzOH1d" data-look="classic" marker-end="url(#combined-example-diagram_flowchart-v2-pointEnd)"></path><path d="M887.879,623.4L887.879,629.333C887.879,635.267,887.879,647.133,868.429,658.811C848.979,670.489,810.079,681.978,790.629,687.722L771.18,693.467" id="combined-example-diagram-L_D_W_0" class="edge-thickness-normal edge-pattern-solid edge-thickness-normal edge-pattern-solid flowchart-link" style=";" data-edge="true" data-et="edge" data-id="L_D_W_0" data-points="W3sieCI6ODg3Ljg3OTE1MDM5MDYyNSwieSI6NjIzLjM5OTk5Mzg5NjQ4NDR9LHsieCI6ODg3Ljg3OTE1MDM5MDYyNSwieSI6NjU4Ljk5OTk5NDI3Nzk1NDF9LHsieCI6NzY3LjM0MzM2MzM3OTE4OSwieSI6Njk0LjU5OTk5NDY1OTQyMzh9XQ==" data-look="classic" marker-end="url(#combined-example-diagram_flowchart-v2-pointEnd)"></path><path d="M519.62,268L505.568,271.917C491.516,275.833,463.412,283.667,437.523,291.5C411.634,299.333,387.959,307.167,376.122,311.083L364.285,315" id="combined-example-diagram-L_T_P_0" class="edge-thickness-invisible edge-pattern-solid" style=";" data-edge="true" data-et="edge" data-id="L_T_P_0" data-points="W3sieCI6NTE5LjYyMDMxMTA2Mzg3ODcsInkiOjI2OH0seyJ4Ijo0MzUuMzA4NTkzNzUsInkiOjI5MS41fSx7IngiOjM2NC4yODQ2MTQ1MDcyOTkyNCwieSI6MzE1fV0=" data-look="classic"></path></g><g class="edgeLabels"><g class="edgeLabel" transform="translate(191.32421875, 121.5)"><g class="label" data-id="L_Q_H_0" transform="translate(0, -14.5)"><g><rect class="background" style="" x="-78.4375" y="0" width="156.875" height="29"></rect><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Calculate</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> mean</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(191.32421875, 291.5)"><g class="label" data-id="L_H_P_0" transform="translate(0, -14.5)"><g><rect class="background" style="" x="-53.9140625" y="0" width="107.828125" height="29"></rect><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Mean</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> ≥</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> 20</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(228.28125, 452.6999969482422)"><g class="label" data-id="L_P_A_0" transform="translate(0, -26.600000381469727)"><g><rect class="background" style="" x="-83.953125" y="0" width="167.90625" height="53.20000076293945"></rect><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Prefix</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> belongs</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> to</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">affinity</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(620.95058, 437.11508)"><g class="label" data-id="L_P_D_0" transform="translate(0, -38.69999694824219)"><g><rect class="background" style="" x="-71.7421875" y="0" width="143.484375" height="77.39999389648438"></rect><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">KV</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> and</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> queue</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">belong</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> to</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="2.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">distribution</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(608.566650390625, 360)"><g class="label" data-id="L_T_A_0" transform="translate(0.01611328125, -14.5)"><g><rect class="background" style="" x="-66.2509765625" y="0" width="132.4697265625" height="29"></rect><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Allocate</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> 10%</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(923.750244140625, 360)"><g class="label" data-id="L_T_D_0" transform="translate(0.01611328125, -14.5)"><g><rect class="background" style="" x="-66.2509765625" y="0" width="132.4697265625" height="29"></rect><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Allocate</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> 90%</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(391.539306640625, 658.9999942779541)"><g class="label" data-id="L_A_W_0" transform="translate(0, -14.5)"><g><rect class="background" style="" x="-86.3828125" y="0" width="172.765625" height="29"></rect><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Use</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> prefix</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> weight</tspan></tspan></text></g></g></g><g class="edgeLabel" transform="translate(887.879150390625, 658.9999942779541)"><g class="label" data-id="L_D_W_0" transform="translate(0, -26.600000381469727)"><g><rect class="background" style="" x="-94.359375" y="0" width="188.71875" height="53.20000076293945"></rect><text y="-10.1" text-anchor="middle" style=""><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">Use</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> KV</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> and</tspan><tspan font-style="normal" class="text-inner-tspan" font-weight="normal"> queue</tspan></tspan><tspan class="text-outer-tspan row" x="0" y="1em" dy="1.1em" text-anchor="middle"><tspan font-style="normal" class="text-inner-tspan" font-weight="normal">weights</tspan></tspan></text></g></g></g><g class="edgeLabel"><g class="label" data-id="L_T_P_0" transform="translate(0, 0)"><text y="-10.1" text-anchor="middle"><tspan class="text-outer-tspan row" x="0" y="-0.1em" dy="1.1em" text-anchor="middle"></tspan></text></g></g><g><rect class="background" style="stroke: none"></rect></g></g><g class="nodes"><g class="node default" id="combined-example-diagram-flowchart-Q-0" data-look="classic" transform="translate(191.32421875, 53)"><rect class="basic label-container" style="" x="-176.75" y="-45" width="353.5" height="90"></rect><g class="label" style="" transform="translate(-152.75, -33)"><rect></rect><foreignObject width="305.5" height="66"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 600px; text-align: center;"><span class="nodeLabel"><p>✅ EXISTS · Candidate queues<br>10, 20, 30</p></span></div></foreignObject></g></g><g class="node default" id="combined-example-diagram-flowchart-H-1" data-look="classic" transform="translate(191.32421875, 206.5)"><rect class="basic label-container" style="" x="-136.1484375" y="-45" width="272.296875" height="90"></rect><g class="label" style="" transform="translate(-112.1484375, -33)"><rect></rect><foreignObject width="224.296875" height="66"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 600px; text-align: center;"><span class="nodeLabel"><p>🆕 NEW · Your handler<br>(10 + 20 + 30) ÷ 3 = 20</p></span></div></foreignObject></g></g><g class="node default" id="combined-example-diagram-flowchart-P-2" data-look="classic" transform="translate(228.28125, 360)"><rect class="basic label-container" style="" x="-220.28125" y="-45" width="440.5625" height="90"></rect><g class="label" style="" transform="translate(-196.28125, -33)"><rect></rect><foreignObject width="392.5625" height="66"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 600px; text-align: center;"><span class="nodeLabel"><p>🆕 NEW · Select load-oriented<br>Original weights: prefix 1, KV 1, queue 4</p></span></div></foreignObject></g></g><g class="node default" id="combined-example-diagram-flowchart-T-3" data-look="classic" transform="translate(740.265869140625, 206.5)"><rect class="basic label-container" style="" x="-237.90625" y="-61.5" width="475.8125" height="123"></rect><g class="label" style="" transform="translate(-213.90625, -49.5)"><rect></rect><foreignObject width="427.8125" height="99"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 600px; text-align: center;"><span class="nodeLabel"><p>🔜 PLANNED · Bounded background tuning<br>Example budget:<br>10% affinity · 90% distribution</p></span></div></foreignObject></g></g><g class="node default" id="combined-example-diagram-flowchart-A-4" data-look="classic" transform="translate(391.539306640625, 561.8999938964844)"><rect class="basic label-container" style="" x="-182.03125" y="-61.5" width="364.0625" height="123"></rect><g class="label" style="" transform="translate(-158.03125, -49.5)"><rect></rect><foreignObject width="316.0625" height="99"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 600px; text-align: center;"><span class="nodeLabel"><p>🔜 PLANNED · Affinity allocation<br>Prefix is the only affinity scorer<br>Prefix = 0.10</p></span></div></foreignObject></g></g><g class="node default" id="combined-example-diagram-flowchart-D-5" data-look="classic" transform="translate(887.879150390625, 561.8999938964844)"><rect class="basic label-container" style="" x="-204.8515625" y="-61.5" width="409.703125" height="123"></rect><g class="label" style="" transform="translate(-180.8515625, -49.5)"><rect></rect><foreignObject width="361.703125" height="99"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 600px; text-align: center;"><span class="nodeLabel"><p>🔜 PLANNED · Distribution allocation<br>KV and queue share 0.90<br>Preserve their 1:4 ratio</p></span></div></foreignObject></g></g><g class="node default" id="combined-example-diagram-flowchart-W-6" data-look="classic" transform="translate(614.980712890625, 739.5999946594238)"><rect class="basic label-container" style="" x="-192.765625" y="-45" width="385.53125" height="90"></rect><g class="label" style="" transform="translate(-168.765625, -33)"><rect></rect><foreignObject width="337.53125" height="66"><div xmlns="http://www.w3.org/1999/xhtml" style="display: table-cell; white-space: nowrap; line-height: 1.5; max-width: 600px; text-align: center;"><span class="nodeLabel"><p>🔜 PLANNED · Final weights<br>Prefix 0.10 · KV 0.18 · Queue 0.72</p></span></div></foreignObject></g></g></g></g></g><defs><filter id="combined-example-diagram-drop-shadow" height="130%" width="130%"><feDropShadow dx="4" dy="4" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"></feDropShadow></filter></defs><defs><filter id="combined-example-diagram-drop-shadow-small" height="150%" width="150%"><feDropShadow dx="2" dy="2" stdDeviation="0" flood-opacity="0.06" flood-color="#000000"></feDropShadow></filter></defs><linearGradient id="combined-example-diagram-gradient" gradientUnits="objectBoundingBox" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#76b900" stop-opacity="1"></stop><stop offset="100%" stop-color="hsl(103.5, 7.619047619%, 6.4705882353%)" stop-opacity="1"></stop></linearGradient></svg>
+<p style="font-size:17px;line-height:1.5;margin-top:10px;"><strong>The 90/10 budget is an assumption here.</strong> Mean queue 20 selects the profile; it does not determine that budget.</p>
+<p style="font-size:14px;line-height:1.5;color:var(--text-dim);margin-top:8px;">✅ EXISTS: baseline · 🆕 NEW: proposed handler · 🔜 PLANNED: combined integration, not implemented</p>
+<template id="combined-example-mermaid-source">flowchart TD
+    Q["✅ EXISTS · Candidate queues&lt;br/&gt;10, 20, 30"]
+    H["🆕 NEW · Your handler&lt;br/&gt;(10 + 20 + 30) ÷ 3 = 20"]
+    P["🆕 NEW · Select load-oriented&lt;br/&gt;Original weights: prefix 1, KV 1, queue 4"]
+    T["🔜 PLANNED · Bounded background tuning&lt;br/&gt;Example budget:&lt;br/&gt;10% affinity · 90% distribution"]
+    A["🔜 PLANNED · Affinity allocation&lt;br/&gt;Prefix is the only affinity scorer&lt;br/&gt;Prefix = 0.10"]
+    D["🔜 PLANNED · Distribution allocation&lt;br/&gt;KV and queue share 0.90&lt;br/&gt;Preserve their 1:4 ratio"]
+    W["🔜 PLANNED · Final weights&lt;br/&gt;Prefix 0.10 · KV 0.18 · Queue 0.72"]
+    Q --&gt;|"Calculate mean"| H
+    H --&gt;|"Mean ≥ 20"| P
+    P --&gt;|"Prefix belongs to affinity"| A
+    P --&gt;|"KV and queue belong to distribution"| D
+    T --&gt;|"Allocate 10%"| A
+    T --&gt;|"Allocate 90%"| D
+    A --&gt;|"Use prefix weight"| W
+    D --&gt;|"Use KV and queue weights"| W</template>
+</div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const slideNum = document.getElementById('slideNum');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    slideNum.textContent = `${current + 1} / ${slides.length}`;
+  }
+
+  const viewToggle = document.getElementById('viewToggle');
+  function setDocMode(on) {
+    document.body.classList.toggle('doc-mode', on);
+    viewToggle.setAttribute('aria-pressed', String(on));
+    if (on) {
+      slides.forEach(s => s.classList.add('active'));
+    } else {
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      window.scrollTo(0, 0);
+    }
+  }
+  viewToggle.addEventListener('click', () => {
+    setDocMode(!document.body.classList.contains('doc-mode'));
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  const THEME_KEY = 'runai-slides-theme';
+  function setTheme(light) {
+    document.body.classList.toggle('light', light);
+    themeToggle.setAttribute('aria-pressed', String(light));
+    try { localStorage.setItem(THEME_KEY, light ? 'light' : 'dark'); } catch (_) {}
+  }
+  themeToggle.addEventListener('click', () => {
+    setTheme(!document.body.classList.contains('light'));
+  });
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light') setTheme(true);
+  } catch (_) {}
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, textarea, [contenteditable="true"]')) return;
+    if (e.key === 'v' || e.key === 'V') {
+      e.preventDefault();
+      setDocMode(!document.body.classList.contains('doc-mode'));
+      return;
+    }
+    if (e.key === 't' || e.key === 'T') {
+      e.preventDefault();
+      setTheme(!document.body.classList.contains('light'));
+      return;
+    }
+    if (document.body.classList.contains('doc-mode')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      showSlide(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      showSlide(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      showSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      showSlide(slides.length - 1);
+    }
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    if (document.body.classList.contains('doc-mode')) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? showSlide(current + 1) : showSlide(current - 1);
+    }
+  });
+
+  showSlide(0);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Adaptive Profile Handler v2 | One plugin, existing data layer</title><meta name="description" content="One adaptive plugin uses existing data-layer metrics to prepare request load and select a scheduling profile."><style>
+:root {
+  color-scheme: dark;
+  /* Palette from the runai-nvidia-slides template. */
+  --nvidia-green: #76b900;
+  --runai-purple: #7b61ff;
+  --ink: #e8e8e8;
+  --muted: #a0a0b0;
+  --accent: #76b900;
+  --line: #2a3a5e;
+  --paper: #1a1a2e;
+  --canvas: #1a1a2e;
+  --surface: #0f3460;
+  --surface-alt: #16213e;
+  --highlight: #0f3460;
+  --code: #0d1117;
+  --code-ink: #e8e8e8;
+  --arrow: #a0a0b0;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:28px}
+body{margin:0;background:var(--canvas);color:var(--ink);font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-size:16px;line-height:1.7}
+a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}button{font:inherit;cursor:pointer}
+.skip{position:fixed;top:-70px;left:20px;background:var(--paper);padding:10px;z-index:10}.skip:focus{top:10px}
+.layout{display:grid;grid-template-columns:270px minmax(0,1000px);max-width:1350px;margin:auto;min-height:100vh}
+.sidebar{padding:36px 24px;position:sticky;top:0;height:100vh;overflow:auto;border-right:1px solid var(--line)}
+.brand{font-size:15px;font-weight:750;letter-spacing:.02em;margin-bottom:4px;color:var(--ink)}
+.brand:before{content:"";display:inline-block;width:9px;height:16px;background:var(--nvidia-green);vertical-align:-3px;margin-right:9px}
+.subbrand{font-size:12px;color:var(--muted);margin-bottom:25px}
+.nav-label{text-transform:uppercase;font-size:11px;letter-spacing:.12em;color:var(--muted);font-weight:700;margin:25px 0 10px}
+.sidebar nav a{display:block;padding:7px 10px;border-left:2px solid transparent;font-size:13px;line-height:1.5;color:var(--muted);border-radius:0 4px 4px 0}
+.sidebar nav a:hover,.sidebar nav a.active{color:var(--accent);background:var(--highlight);text-decoration:none;border-left-color:var(--nvidia-green)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}
+.tools button,.tools a{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:4px;padding:6px 11px;font-size:12px;line-height:1.5}
+.tools button{background:var(--nvidia-green);color:#0d1117;border-color:var(--nvidia-green);font-weight:700}
+.tools a:hover{border-color:var(--nvidia-green);text-decoration:none}
+.main{background:var(--paper);padding:47px 58px 70px;min-width:0;border-top:4px solid transparent;border-image:linear-gradient(90deg,var(--nvidia-green),var(--runai-purple)) 1}
+.eyebrow{display:flex;align-items:center;gap:10px;text-transform:uppercase;font-size:11px;font-weight:700;letter-spacing:.12em;color:var(--muted)}
+.badge{background:rgba(123,97,255,.2);color:#e8e8e8;border:1px solid var(--runai-purple);border-radius:4px;padding:2px 9px;letter-spacing:.05em}
+h1{font-size:clamp(30px,3.4vw,44px);line-height:1.17;letter-spacing:-.035em;margin:17px 0 24px;max-width:730px}
+h2{font-size:25px;line-height:1.35;letter-spacing:-.02em;border-top:1px solid var(--line);padding-top:32px;margin:46px 0 20px}
+h3{font-size:18px;line-height:1.4;margin:30px 0 13px}
+p{margin:14px 0}li{margin:7px 0}ul,ol{padding-left:25px}strong{font-weight:680}
+article>p:nth-of-type(-n+2){font-size:13px;color:var(--muted)}
+p code,li code,td code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.87em;background:var(--surface);color:var(--code-ink);padding:2px 5px;border-radius:4px;overflow-wrap:anywhere}
+.table-wrap{overflow-x:auto;margin:20px 0 26px;border:1px solid var(--line);border-radius:7px}
+table{border-collapse:collapse;width:100%;font-size:13px;line-height:1.6;text-align:left}
+th{background:var(--surface);font-size:12px;font-weight:700;color:var(--accent)}
+th,td{padding:12px 14px;vertical-align:top;border-bottom:1px solid var(--line)}
+th{border-bottom:2px solid var(--nvidia-green)}
+tr:last-child td{border-bottom:0}tbody tr:nth-child(even){background:var(--surface-alt)}td{overflow-wrap:anywhere}th:first-child{min-width:120px}
+.code-block{border-radius:7px;overflow:hidden;margin:22px 0;background:var(--code);color:var(--code-ink);border:1px solid var(--line)}
+.code-top{padding:8px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.06em;color:var(--accent);text-transform:uppercase;background:var(--surface-alt)}
+.copy{border:1px solid var(--line);color:var(--code-ink);background:transparent;border-radius:4px;padding:3px 9px;font-size:11px;letter-spacing:0}.copy:hover{background:var(--highlight);border-color:var(--nvidia-green)}
+pre{padding:18px 20px;margin:0;overflow-x:auto;line-height:1.65;font-size:12px;tab-size:2}pre code{font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace}
+.diagram{margin:24px 0;padding:18px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface-alt);overflow-x:auto;text-align:center}
+.diagram svg{width:100%;max-width:660px;height:auto;max-height:950px;display:block;margin:auto}
+.diagram svg .node path{fill:var(--surface);stroke:var(--arrow)}
+.diagram svg .node path[fill="#e0f2fe"]{fill:var(--highlight);stroke:var(--nvidia-green);stroke-width:2}
+.diagram svg .node text{fill:var(--ink)}.diagram svg .edge text{fill:var(--muted)}
+.diagram svg .edge path{stroke:var(--arrow)}.diagram svg .edge polygon{stroke:var(--arrow);fill:var(--arrow)}
+.footer{margin-top:44px;border-top:1px solid var(--line);padding-top:18px;color:var(--muted);font-size:12px}
+:focus-visible{outline:3px solid var(--nvidia-green);outline-offset:3px}
+.foundations-flow{margin:24px 0 30px;padding:26px;background:var(--surface-alt);border:1px solid var(--line);border-radius:10px;font-size:16px;line-height:1.5}
+.foundation-input{text-align:center;font-size:15px;color:var(--muted);font-weight:650}
+.foundation-card{background:var(--surface-alt);border:1px solid var(--line);border-left:4px solid var(--nvidia-green);border-radius:7px;padding:20px 24px}
+.foundation-label{display:flex;align-items:center;gap:9px;text-transform:uppercase;letter-spacing:.09em;font-size:12px;font-weight:750;color:var(--accent)}
+.foundation-number{display:grid;place-items:center;border:1px solid var(--runai-purple);border-radius:50%;width:24px;height:24px;letter-spacing:0;background:var(--highlight)}
+.foundation-dot{margin-left:auto;color:var(--accent);font-size:16px;line-height:1}
+.foundation-card h3{margin:9px 0 8px;font-size:22px;letter-spacing:-.02em;line-height:1.3}
+.foundation-card p{margin:8px 0 0;font-size:15px}.foundation-card code{font-size:14px;font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--code-ink);overflow-wrap:anywhere}
+.foundation-arrow{height:46px;display:flex;align-items:center;justify-content:center;gap:12px;color:var(--muted);font-size:12px}
+.foundation-arrow:before{content:"";width:1px;height:24px;background:var(--arrow)}
+.foundation-arrow:after{content:"";width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:6px solid var(--arrow);margin-left:-18px;align-self:center;transform:translateY(12px)}
+.foundation-arrow span{order:2;background:var(--surface-alt);padding-left:5px}
+.foundation-plugins{list-style:none;padding:0;margin:18px 0 0;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.foundation-plugins li{display:grid;grid-template-columns:66px minmax(0,1fr);gap:16px;padding:16px;margin:0;background:var(--surface);border-bottom:1px solid var(--line)}
+.foundation-plugins li:last-child{border-bottom:0}.foundation-role{color:var(--accent);font-size:13px;font-weight:750;padding-top:2px}
+.foundation-plugins strong{font-size:16px;display:block;line-height:1.4}.foundation-plugins code{display:block;margin-top:5px;font-size:13px;background:var(--code)}
+.foundation-plugins p{font-size:14px;margin-top:5px;color:var(--muted)}.foundation-profile-description{color:var(--muted)}
+@media(max-width:1000px){.layout{grid-template-columns:220px minmax(0,1fr)}.main{padding:35px 30px}.sidebar{padding:28px 14px}}
+@media(max-width:720px){.layout{display:block}.sidebar{position:static;height:auto;padding:20px;border-right:0;border-bottom:1px solid var(--line)}.sidebar nav,.nav-label{display:none}.subbrand{margin-bottom:10px}.tools{margin:10px 0 0}.main{padding:25px 18px}h2{font-size:22px}table{font-size:12px}th,td{padding:10px}pre{font-size:11px}.diagram{padding:8px 0}.foundations-flow{padding:12px 10px}.foundation-card{padding:16px 14px}.foundation-card h3{font-size:20px}.foundation-plugins li{grid-template-columns:1fr;gap:5px;padding:13px}.foundation-plugins strong{font-size:16px}.foundation-card p{font-size:14px}.foundation-role{font-size:12px}.foundation-arrow{height:40px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{
+ :root{color-scheme:light;--ink:#1a1a2e;--muted:#5a6072;--accent:#4d7a00;--line:#d8dde6;--paper:#fff;--canvas:#fafbfc;--surface:#f2f4f8;--surface-alt:#fff;--highlight:#f2f4f8;--code:#f4f6fa;--code-ink:#1a1a2e;--arrow:#5a6072}
+ body{font-size:10pt}.layout{display:block;max-width:none}.sidebar,.eyebrow,.copy,.skip{display:none}.main{padding:0;border:0}.code-block{break-inside:avoid}pre{white-space:pre-wrap;font-size:8pt;overflow:visible}.table-wrap{overflow:visible}table{font-size:8pt}tr{break-inside:avoid}h2,h3{break-after:avoid}h2{margin-top:24px;padding-top:18px}.diagram{break-inside:avoid}.diagram svg{max-height:650px}a{color:inherit}h1{font-size:28pt}.footer{font-size:8pt}.foundations-flow{padding:12px;break-inside:auto}.foundation-card{break-inside:avoid;padding:12px}.foundation-card h3{font-size:15pt}.foundation-plugins li{padding:10px}.foundation-arrow{height:28px}
+}
+
+.sidebar{background:var(--surface-alt)}
+.brand:before{background:linear-gradient(180deg,var(--nvidia-green),var(--runai-purple))}
+h1,h2,h3,strong{color:#fff}
+.sidebar nav a:hover,.sidebar nav a.active{background:rgba(118,185,0,.1)}
+.foundation-profile{border-left-color:var(--runai-purple)}
+.foundation-profile .foundation-label{color:var(--ink)}
+.foundation-profile .foundation-number{background:rgba(123,97,255,.2);border-color:var(--runai-purple)}
+.foundation-number{background:rgba(118,185,0,.1);border-color:var(--nvidia-green)}
+.foundation-profile .foundation-dot{color:var(--runai-purple)}
+.diagram svg .node path[fill="#e0f2fe"]{fill:var(--surface-alt);stroke:var(--runai-purple)}
+@media print{h1,h2,h3,strong{color:var(--ink)}.main{border-image:none}}
+</style></head><body><a class="skip" href="#content">Skip to document</a><div class="layout"><aside class="sidebar"><div class="brand">llm-d Router</div><div class="subbrand">Architecture proposal v2</div><div class="tools"><button type="button" id="print">Print / PDF</button></div><div class="nav-label">Contents</div><nav aria-label="Table of contents"><a href="#1-foundations-plugin-profile-and-handler">1. Foundations: plugin, profile, and handler</a><a href="#proposal-overview">Proposal overview</a><a href="#2-problem-and-scope">2. Problem and scope</a><a href="#3-proposed-flow">3. Proposed flow</a><a href="#4-existing-handler-context">4. Existing handler context</a><a href="#5-why-not-use-one-combined-profile">5. Why not use one combined profile?</a><a href="#6-proposed-selection-contract">6. Proposed selection contract</a><a href="#7-preparing-load-signals">7. Reusing the data layer</a><a href="#8-complete-proposed-yaml-example">8. Complete proposed YAML example</a><a href="#9-crds-configuration-files-and-deployment">9. CRDs, configuration files, and deployment</a><a href="#10-alternatives-and-tradeoffs">10. Alternatives and tradeoffs</a><a href="#11-decisions-before-implementation">11. Decisions before implementation</a><a href="#verification-status">Verification status</a></nav></aside><main class="main" id="content"><div class="eyebrow">Scheduling <span class="badge">Draft proposal v2</span></div><article><h1 id="proposal-adaptive-profile-handler">Adaptive Profile Handler v2</h1>
+<p>Status: Draft for discussion. One proposed plugin prepares request load and selects the profile. The adaptive plugin is not implemented.</p>
+<p>Review basis: Local code at commit <code>8a2f37d3</code>, inspected on 2026-09-29.</p>
+<h2 id="1-foundations-plugin-profile-and-handler">1. Foundations: plugin, profile, and handler</h2>
+<figure class="foundations-flow" aria-label="How a handler, profile, and plugins work together">
+  <div class="foundation-input">Incoming request</div>
+  <div class="foundation-arrow" aria-hidden="true"><span>Start scheduling</span></div>
+  <section class="foundation-card foundation-handler" aria-labelledby="foundation-handler-title">
+    <div class="foundation-label"><span class="foundation-number">1</span> Handler <span class="foundation-dot" role="img" aria-label="Existing component">&#8226;</span></div>
+    <h3 id="foundation-handler-title">Choose which profile runs</h3>
+    <code>single-profile-handler</code>
+    <p>Selects the only configured profile: <strong>balanced</strong>.</p>
+  </section>
+  <div class="foundation-arrow" aria-hidden="true"><span>Run balanced</span></div>
+  <section class="foundation-card foundation-profile" aria-labelledby="foundation-profile-title">
+    <div class="foundation-label"><span class="foundation-number">2</span> Profile <span class="foundation-dot" role="img" aria-label="Existing component">&#8226;</span></div>
+    <h3 id="foundation-profile-title">balanced</h3>
+    <p class="foundation-profile-description">Groups the plugins that choose a pod.</p>
+    <ol class="foundation-plugins" aria-label="Plugins run in this order">
+      <li><div class="foundation-role">Filter</div><div><strong>Keep eligible pods</strong><code>decode-filter</code></div></li>
+      <li><div class="foundation-role">Score</div><div><strong>Compare the remaining pods</strong><p>Prefix reuse + KV usage + queue depth.<br/>Combine scores using the profile's weights.</p></div></li>
+      <li><div class="foundation-role">Pick</div><div><strong>Choose the highest combined score</strong><code>max-score-picker</code></div></li>
+    </ol>
+  </section>
+  <div class="foundation-arrow" aria-hidden="true"><span>Selected pod</span></div>
+  <section class="foundation-card foundation-result" aria-labelledby="foundation-result-title">
+    <div class="foundation-label"><span class="foundation-number">3</span> Result <span class="foundation-dot" role="img" aria-label="Existing component">&#8226;</span></div>
+    <h3 id="foundation-result-title">Return the scheduling result</h3>
+    <p>The handler marks <strong>balanced</strong> as the primary profile.</p>
+  </section>
+</figure>
+
+
+<p>The handler selects a profile. The profile groups the plugins that filter, score, and pick a pod. The handler then returns the scheduling result. A small dot marks existing components. The scheduler invokes these steps; request parsing, admission, and data preparation are omitted.</p>
+<h3 id="yaml-example-handler-profile-and-plugins">YAML example: handler, profile, and plugins</h3>
+<p>This configuration uses existing plugin types. It assumes workers eligible for the decode filter, supported backend metrics, and pool/discovery configuration in the deployment. Omitted producers and data-layer components are supplied through the default-injection mechanism. This example has not been tested against a cluster as part of this document.</p>
+<div class="code-block"><div class="code-top"><span>YAML</span><button type="button" class="copy" data-copy="code-1" aria-label="Copy yaml example">Copy</button></div><pre><code id="code-1" class="language-yaml">apiVersion: llm-d.ai/v1
+kind: EndpointPickerConfig
+
+plugins:
+  # Handler plugin: chooses which profile runs.
+  - type: single-profile-handler
+
+  # Filter plugin: keeps eligible pods.
+  - type: decode-filter
+
+  # Three separate scorer plugins.
+  - type: prefix-cache-scorer
+  - type: kv-cache-utilization-scorer
+  - type: queue-scorer
+
+  # Picker plugin: selects from the combined scores.
+  - type: max-score-picker
+
+schedulingProfiles:
+  - name: balanced
+    # References five scheduling plugins; the handler is configured above.
+    plugins:
+      - pluginRef: decode-filter
+      - pluginRef: prefix-cache-scorer
+        weight: 2
+      - pluginRef: kv-cache-utilization-scorer
+        weight: 1
+      - pluginRef: queue-scorer
+        weight: 1
+      - pluginRef: max-score-picker</code></pre></div>
+<p>This example explicitly configures six plugin instances: one handler, one filter, three scorers, and one picker. The balanced profile references the five scheduling plugins. The handler is configured separately and selects balanced because it is the only profile.</p>
+<h3 id="responsibilities">Responsibilities</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Concept</th><th>Responsibility</th><th>Example</th></tr></thead><tbody><tr><td>Plugin</td><td>Implements one or more extension points. A plugin can filter endpoints, score them, pick a result, prepare data, or handle profiles.</td><td>queue-scorer computes a score from each candidate&#39;s waiting queue.</td></tr><tr><td>Scheduling profile</td><td>A named configuration of filter, scorer, and picker plugins, with weights for scorers. It defines how to choose endpoints when that profile runs.</td><td>balanced combines prefix reuse, KV utilization, and queue depth.</td></tr><tr><td>ProfileHandler</td><td>A plugin that chooses which profiles the scheduler runs and processes their results.</td><td>single-profile-handler always runs the sole configured profile and marks it as primary.</td></tr></tbody></table></div><p>Here, &quot;handler&quot; means <code>ProfileHandler</code>. The EPP also has request-handling components that parse and process traffic; those have separate responsibilities. A ProfileHandler is itself a plugin, configured under the top-level <code>plugins</code> list. It is not part of a profile&#39;s filter/scorer/picker list.</p>
+<h3 id="real-world-analogy-choosing-a-hotel">Real-world analogy: choosing a hotel</h3>
+<p>Consider a travel service choosing a hotel for each trip.</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Hotel analogy comparison"><table><thead><tr><th>Router concept</th><th>Travel-service equivalent</th><th>Concrete example</th></tr></thead><tbody><tr><td>Plugin</td><td>A reusable tool that performs one task.</td><td>A budget filter excludes expensive hotels; location and comfort scorers rate the remaining hotels; a picker selects the highest combined score.</td></tr><tr><td>Profile</td><td>A named selection policy that groups tools and sets their priorities.</td><td>A business-trip profile gives location weight 4 and comfort weight 1. A family-trip profile uses the same tools with location weight 1 and comfort weight 4.</td></tr><tr><td>Handler</td><td>The planner that chooses which selection policy to use.</td><td>For a work trip, choose business-trip. For a family holiday, choose family-trip.</td></tr></tbody></table></div><p>For a work trip, the handler selects the business-trip profile. Its filter removes hotels over budget, its scorers rate the eligible hotels, and its picker selects a hotel using the weighted scores. The budget remains a hard constraint; the weights express preferences among eligible hotels.</p>
+<p>The same plugins can serve both profiles. Changing the selected profile changes how their results are combined. The planner&#39;s choice between trip policies illustrates the proposed adaptive handler; the existing single-profile-handler example always uses its sole configured profile.</p>
+<h3 id="plugin-roles-inside-a-profile">Plugin roles inside a profile</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Role</th><th>Responsibility</th><th>Plugin in the example</th></tr></thead><tbody><tr><td>Filter</td><td>Removes ineligible candidates before scoring.</td><td>decode-filter</td></tr><tr><td>Scorer</td><td>Assigns each candidate a score between 0 and 1, where higher is preferred. The scheduler applies its configured weight.</td><td>prefix-cache-scorer, kv-cache-utilization-scorer, queue-scorer</td></tr><tr><td>Picker</td><td>Chooses endpoints from the combined scores.</td><td>max-score-picker</td></tr></tbody></table></div><div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Scorer</th><th>Meaning</th></tr></thead><tbody><tr><td>prefix-cache-scorer</td><td>Matches the request&#39;s prefix against an endpoint&#39;s cache</td></tr><tr><td>kv-cache-utilization-scorer</td><td>Favors endpoints with lower KV-cache utilization</td></tr><tr><td>queue-scorer</td><td>Favors endpoints with shorter waiting queues</td></tr></tbody></table></div><p>A DataProducer is another plugin role: it prepares data before scheduling. It is relevant to the proposal&#39;s load signal, but it does not belong in a scheduling profile&#39;s plugin list.</p>
+<h3 id="connecting-the-yaml-to-the-runtime-behavior">Connecting the YAML to the runtime behavior</h3>
+<ul>
+<li><code>plugins</code> creates the plugin instances. <code>type</code> identifies the implementation; an optional <code>name</code> identifies an instance. If <code>name</code> is omitted, it defaults to <code>type</code>.</li>
+<li><code>schedulingProfiles</code> defines the <code>balanced</code> profile. Each <code>pluginRef</code> points to an instance from <code>plugins</code>. Each <code>weight</code> belongs to that scorer reference within the profile.</li>
+<li><code>single-profile-handler</code> needs no profile-name parameter: it selects the sole configured profile. The example declares it explicitly, although the default-injection mechanism can supply it.</li>
+<li>The profile runs its filters, scorers, and picker in their respective stages. Weights remain fixed while scores respond to request and endpoint data.</li>
+</ul>
+<p>For an illustrative request, assume two eligible endpoints receive these normalized scores:</p>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Endpoint</th><th>Prefix score, weight 2</th><th>KV-utilization score, weight 1</th><th>Queue score, weight 1</th><th>Weighted total</th></tr></thead><tbody><tr><td>A</td><td>1.0</td><td>0.2</td><td>0.0</td><td>2.2</td></tr><tr><td>B</td><td>0.0</td><td>0.8</td><td>1.0</td><td>1.8</td></tr></tbody></table></div><p>The handler selects <code>balanced</code>; the scorers supply the values; the scheduler adds the weighted contributions; and <code>max-score-picker</code> selects A. These values illustrate the calculation and are not benchmark results.</p>
+<h2 id="proposal-overview">Proposal overview</h2>
+<ul><li>Users configure one <code>adaptive-profile-handler</code> instance, predefined profiles, and ordered selection rules. The EPP selects a profile per request without a profile-selection header.</li><li>The same instance implements <code>DataProducer.Produce</code> and <code>ProfileHandler.Pick</code> / <code>ProcessResults</code>. It reads existing data-layer metrics and keeps its summary and decision on the request.</li><li>The MVP supports mean waiting-queue depth over request candidates. The design uses existing extension points and plugin parameters, with no new CRD. Performance improvement remains a hypothesis to measure.</li></ul>
+<h2 id="2-problem-and-scope">2. Problem and scope</h2>
+<p>Users may favor prefix reuse under low load, request distribution under high load, and a balanced policy between those conditions. Rules select among profiles with fixed scorer weights.</p><ul><li>A homogeneous pool of workers capable of serving the complete request.</li><li>Profiles with the same endpoint eligibility requirements and inference stage; only scorer weights differ.</li><li>One configured adaptive plugin, one supported metric (<code>waitingQueueSize</code>), and one aggregation (<code>mean</code>).</li><li>Per-request selection with a mandatory default profile and fixed, ordered rules.</li></ul><p>Configuration hot reload, automatic weight adjustment, arbitrary metric expressions, shared active-profile state, hysteresis, and composition of multiple profile handlers are outside the MVP. Concurrent requests can select different profiles.</p>
+<h2 id="3-proposed-flow">3. Proposed flow</h2>
+<figure class="foundations-flow" aria-label="One adaptive plugin runs in two existing extension points">
+<div class="foundation-input">Incoming request</div>
+<div class="foundation-arrow" aria-hidden="true"><span>Locate and screen candidates</span></div>
+<section class="foundation-card" aria-labelledby="v2-data-title">
+<div class="foundation-label">Data layer <span class="foundation-dot" role="img" aria-label="Existing component">&#8226;</span></div>
+<h3 id="v2-data-title">Metrics on the request candidates</h3>
+<p>Existing endpoint snapshots contain <code>WaitingQueueSize</code> and <code>UpdateTime</code>.</p>
+</section>
+<div class="foundation-arrow" aria-hidden="true"><span>Director passes candidates to Produce</span></div>
+<section class="foundation-card foundation-handler" aria-labelledby="v2-plugin-title">
+<div class="foundation-label">One plugin instance <span class="badge">NEW</span></div>
+<h3 id="v2-plugin-title">adaptive-profile-handler</h3>
+<ol class="foundation-plugins">
+<li><div class="foundation-role">Produce</div><div><strong>Prepare the mean queue depth</strong><p>Read candidate metrics and save one immutable summary on this request.</p></div></li>
+<li><div class="foundation-role">Pick</div><div><strong>Select one profile</strong><p>After admission, the scheduler calls Pick. Read the summary, evaluate rules, and store the choice on the request.</p></div></li>
+</ol>
+</section>
+<div class="foundation-arrow" aria-hidden="true"><span>Run the selected profile</span></div>
+<section class="foundation-card foundation-profile" aria-labelledby="v2-profile-title">
+<div class="foundation-label">Scheduling profile <span class="foundation-dot" role="img" aria-label="Existing mechanism">&#8226;</span></div>
+<h3 id="v2-profile-title">balanced / cache-oriented / load-oriented</h3>
+<p>The profile runs its filters, scorers, and picker to select a serving pod.</p>
+</section>
+<div class="foundation-arrow" aria-hidden="true"><span>Pass profile result to ProcessResults</span></div>
+<section class="foundation-card foundation-result" aria-labelledby="v2-result-title">
+<div class="foundation-label">Same adaptive instance <span class="badge">NEW</span></div>
+<h3 id="v2-result-title">Return the scheduling result</h3>
+<p>Mark the selected profile as primary, or return a scheduling error.</p>
+</section>
+</figure><p>A small dot marks existing data or framework mechanisms; NEW marks proposed behavior. Produce, Pick, and ProcessResults belong to the same plugin instance. The request-control director and scheduler invoke them at their existing stages.</p><p>Other producers and admission retain their existing responsibilities. Each request owns its summary and decision; the shared plugin instance holds configuration.</p>
+<h2 id="4-existing-handler-context">4. Existing handler context</h2>
+<p>The existing <code>header-profile-handler</code> selects a configured profile using a request header, named <code>EPP-Profile</code> by default, with a configured default when the header is absent. A caller or upstream component supplies the choice. The proposed adaptive handler makes that choice inside the EPP using load signals and configured rules.</p>
+<p>The existing <code>disagg-profile-handler</code> demonstrates internal decisions without a client profile header: it determines which inference stages to schedule. The proposed adaptive handler selects a scheduling policy for the same serving task. The loader allows only one ProfileHandler, so combining adaptive selection with disaggregation requires separate design and is outside this proposal&#39;s scope.</p>
+<h2 id="5-why-not-use-one-combined-profile">5. Why not use one combined profile?</h2>
+<p>A combined profile is a useful baseline and is already supported. A repository configuration combines prefix-cache matching, KV-cache utilization, and waiting-queue depth.</p>
+<p>The scheduler adds weighted scores. A combined profile responds to changing signals, but its weights do not change automatically. Including every plugin does not guarantee improvement: filters can reduce the candidate set, signals can overlap, and each profile allows one picker.</p>
+<p>The queue scorer normalizes scores relative to candidates with recorded metrics. It skips endpoints whose metrics have never been updated; when all recorded queue depths are equal, each scored endpoint receives 1. Queue depths of <code>0, 10</code> and <code>100, 110</code> produce the same relative scores. An absolute load signal could trigger a different policy, although mean queue depth is not a model of capacity or waiting time.</p>
+<h2 id="6-proposed-selection-contract">6. Proposed selection contract</h2>
+<p>All adaptive plugin parameters below are proposed. The MVP accepts only the listed metric and aggregation.</p><div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Field</th><th>Proposed meaning</th></tr></thead><tbody><tr><td>defaultProfile</td><td>Required profile when no rule matches or the summary is unavailable</td></tr><tr><td>maxMetricAge</td><td>Positive duration limiting the age of every candidate metric; 1s in the example</td></tr><tr><td>rules</td><td>Ordered list; the first match wins</td></tr><tr><td>rules[].name</td><td>Unique rule identifier for diagnostics</td></tr><tr><td>rules[].when.metric</td><td><code>waitingQueueSize</code>, mapped to the existing <code>Metrics.WaitingQueueSize</code> field</td></tr><tr><td>rules[].when.aggregation</td><td><code>mean</code>, computed over the candidate population defined in section 7</td></tr><tr><td>rules[].when.operator</td><td><code>gte</code> or <code>lt</code></td></tr><tr><td>rules[].when.value</td><td>Finite, non-negative threshold in queued requests per candidate</td></tr><tr><td>rules[].profile</td><td>Profile name defined in schedulingProfiles</td></tr></tbody></table></div><ul><li>Validate profile references, rule names, metric, aggregation, operator, thresholds, and duration at startup. Unknown fields are errors.</li><li>At the first Pick, read the summary once. Use the first matching rule, or defaultProfile when no rule matches or the summary is absent or invalid. Store the choice on the request.</li><li>Keep that choice for the request. A late summary cannot change it. After the selected profile has run, subsequent Pick calls return no profiles.</li><li>ProcessResults requires exactly one result for the stored choice and sets PrimaryProfileName to that profile. A missing, nil, or unexpected result is a scheduling error. There is no retry through an alternative profile.</li><li>The default profile remains subject to admission, endpoint availability, and its filters.</li></ul><p>Record the selected profile, matched rule or default reason, and summary validity once per request. Count selections and fallbacks with configured profile and rule names and a fixed set of reason labels. Report an absent summary as absent; absence alone does not reveal whether Produce failed, timed out, or was skipped.</p>
+<h2 id="7-preparing-load-signals">7. Reusing the data layer</h2>
+<p>The data layer already stores endpoint metrics, and the pool metrics logger already computes averages. The adaptive plugin reuses the endpoint snapshots and the arithmetic meaning of a mean. Its calculation is scoped to the request candidates.</p><div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Existing data or calculation</th><th>Scope</th><th>Use in this proposal</th></tr></thead><tbody><tr><td>WaitingQueueSize and UpdateTime</td><td>Each endpoint snapshot</td><td>Inputs read directly by Produce</td></tr><tr><td>Mean queue, KV-cache utilization, and running requests</td><td>Pool pods with fresh metrics; periodically exported to Prometheus</td><td>Related calculations; the local handler has no direct summary accessor</td></tr><tr><td>Multicluster queue and KV-cache attributes</td><td>Aggregate metrics scraped from a remote pool onto a cluster endpoint</td><td>Available for multicluster routing; outside the local-pod MVP</td></tr><tr><td>Utilization saturation detector</td><td>Mean of each endpoint&#x27;s maximum normalized queue or KV utilization</td><td>Related policy with different units and stale-data behavior</td></tr></tbody></table></div><p>A pool with queues 0, 0, 30 has mean 10. If screening leaves only the first two pods for a request, its candidate mean is 0. Pool-wide averages can therefore select a different policy. The existing logger also excludes stale pods and rounds its averages; the MVP uses the unrounded candidate mean and the full-coverage rule below.</p><h3 id="candidate-summary">Candidate summary</h3><ul><li>Produce receives candidate snapshots after discovery and screening, before profile filters.</li><li>Compute the arithmetic mean of WaitingQueueSize once for this request. The value is valid only when the population is nonempty and every candidate has recorded, fresh metrics.</li><li>Missing metrics, timestamps older than maxMetricAge, future timestamps, and negative queue values make the summary unavailable. Missing data must not be treated as queue depth zero.</li><li>Retain candidate count, metric update times, and validity reason in the immutable summary. Pick rechecks freshness at selection time so a delayed request cannot use an expired summary.</li><li>Use existing snapshots in memory. The plugin performs no metric scraping or network calls during Produce or Pick.</li></ul><p>All profile alternatives must have the same eligibility requirements, and summarized candidates must satisfy those requirements. Different eligibility groups require a separate population contract. Full coverage can cause fallback during pod startup; partial coverage is outside the MVP.</p><h3 id="one-instance-two-hooks">One instance, two extension points</h3><p>The loader discovers ProfileHandler implementations, while request control independently discovers DataProducer implementations. The proposed instance implements both interfaces. Produce prepares its request-local summary before the scheduler calls Pick, using the existing attribute store.</p><p>Declare WaitingQueueSizeKey from the core metrics extractor as a required data dependency, following queue-scorer. ScopedEndpoint.GetMetrics() exposes UpdateTime for freshness checks. Declare the typed summary in Produces() and its consumption in Consumes(), with the same instance-scoped DataKey. The dependency graph skips edges from a plugin to itself; execution-stage order supplies the Produce-before-Pick ordering. Namespace summary and decision keys by the configured instance name.</p><p>The director logs producer errors and continues request processing. A failure stops later producers, so the adaptive Produce hook can be skipped. The default producer timeout is 400 ms and can be overridden by a timeout-aware producer. Cancellation does not wait for the producer goroutine to stop or roll back request attributes.</p><p>Produce computes the summary locally, checks cancellation before publication, and writes one complete immutable value. Pick accepts the complete, valid value visible at its first call; otherwise it selects the default. A published value alone does not prove that the executor reported success. The stored decision prevents later writes from changing the selected profile.</p>
+<h2 id="8-complete-proposed-yaml-example">8. Complete proposed YAML example</h2>
+<p><strong>This configuration cannot run on the existing implementation.</strong> <code>adaptive-profile-handler</code> and all its parameters are proposed. The plugin implements both preparation and selection. The existing loader rejects unregistered plugin types.</p>
+<p>The example configures one adaptive instance and three profiles. The existing metrics infrastructure is supplied through the default-injection mechanism. The proposed selector <code>waitingQueueSize</code> maps to <code>WaitingQueueSize</code>; <code>aggregation: mean</code> describes the calculation performed by the plugin. Weights, thresholds, and <code>maxMetricAge</code> are illustrative. Pool and deployment assumptions match the foundations example.</p>
+<div class="code-block"><div class="code-top"><span>YAML</span><button type="button" class="copy" data-copy="code-3" aria-label="Copy yaml example">Copy</button></div><pre><code id="code-3" class="language-yaml">apiVersion: llm-d.ai/v1
+kind: EndpointPickerConfig
+plugins:
+  - type: adaptive-profile-handler
+    name: adaptive
+    parameters:
+      defaultProfile: balanced
+      maxMetricAge: 1s
+      rules:
+        - name: high-queue
+          when:
+            metric: waitingQueueSize
+            aggregation: mean
+            operator: gte
+            value: 20
+          profile: load-oriented
+        - name: low-queue
+          when:
+            metric: waitingQueueSize
+            aggregation: mean
+            operator: lt
+            value: 5
+          profile: cache-oriented
+  - type: decode-filter
+  - type: prefix-cache-scorer
+  - type: kv-cache-utilization-scorer
+  - type: queue-scorer
+  - type: max-score-picker
+schedulingProfiles:
+  - name: balanced
+    plugins:
+      - pluginRef: decode-filter
+      - pluginRef: prefix-cache-scorer
+        weight: 2
+      - pluginRef: kv-cache-utilization-scorer
+        weight: 1
+      - pluginRef: queue-scorer
+        weight: 1
+      - pluginRef: max-score-picker
+  - name: cache-oriented
+    plugins:
+      - pluginRef: decode-filter
+      - pluginRef: prefix-cache-scorer
+        weight: 4
+      - pluginRef: kv-cache-utilization-scorer
+        weight: 1
+      - pluginRef: queue-scorer
+        weight: 1
+      - pluginRef: max-score-picker
+  - name: load-oriented
+    plugins:
+      - pluginRef: decode-filter
+      - pluginRef: prefix-cache-scorer
+        weight: 1
+      - pluginRef: kv-cache-utilization-scorer
+        weight: 1
+      - pluginRef: queue-scorer
+        weight: 4
+      - pluginRef: max-score-picker</code></pre></div><p>All profiles reference the same scorer instances. A weight belongs to the reference within a profile; the loader creates a weighted scorer for each reference. The same pluginRef can therefore have different weights in different profiles.</p>
+<h3 id="expected-scenarios-for-the-example">Expected scenarios for the example</h3>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Candidate data</th><th>Mean waiting queue</th><th>Selection</th><th>Reason</th></tr></thead><tbody><tr><td>Queues 0, 2, 4; all fresh</td><td>2</td><td>cache-oriented</td><td>low-queue</td></tr><tr><td>Queues 4, 5, 6; all fresh</td><td>5</td><td>balanced</td><td>No rule matches</td></tr><tr><td>Queues 10, 20, 30; all fresh</td><td>20</td><td>load-oriented</td><td>high-queue</td></tr><tr><td>Queues 0, 0, 30; all fresh</td><td>10</td><td>balanced</td><td>The mean does not describe variation</td></tr><tr><td>One endpoint has no metric</td><td>Unavailable</td><td>balanced</td><td>Missing-data fallback</td></tr><tr><td>One metric is older than one second</td><td>Unavailable</td><td>balanced</td><td>Stale-data fallback</td></tr><tr><td>Fresh during Produce, expired by Pick</td><td>Unavailable</td><td>balanced</td><td>Freshness recheck fallback</td></tr><tr><td>No complete summary at first Pick</td><td>Unavailable</td><td>balanced</td><td>Absent-summary fallback</td></tr><tr><td>Summary arrives after the decision</td><td>Ignored</td><td>Stored selection unchanged</td><td>No re-selection for this request</td></tr><tr><td>Selected profile finds no endpoint</td><td>Selection unchanged</td><td>Scheduling error</td><td>No retry through an alternative profile</td></tr></tbody></table></div><p>The <code>0, 0, 30</code> scenario illustrates a limitation of the mean. Choosing a percentile, maximum load, or predicted waiting time is a separate policy decision with different semantics.</p>
+<p>Stateless selection has no hysteresis: metric fluctuations around 5 or 20 can switch the chosen profile between consecutive requests. The balanced interval provides a default region between the two thresholds. Holding a profile across requests would require an explicit state scope and transition policy outside the first version.</p>
+<h2 id="9-crds-configuration-files-and-deployment">9. CRDs, configuration files, and deployment</h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Configuration item</th><th>Location</th></tr></thead><tbody><tr><td>Profiles and weights</td><td>schedulingProfiles in EndpointPickerConfig</td></tr><tr><td>Plugin types and instances</td><td>plugins in EndpointPickerConfig</td></tr><tr><td>Selection rules</td><td>parameters of the proposed adaptive-profile-handler</td></tr><tr><td>Freshness and mean-queue rules</td><td>parameters of the same adaptive-profile-handler instance</td></tr><tr><td>Pool and endpoint discovery</td><td>Existing deployment and InferencePool mechanisms</td></tr><tr><td>EPP configuration delivery</td><td>File through --config-file, or text through --config-text</td></tr></tbody></table></div><p>In the inspected path, <code>EndpointPickerConfig</code> is process configuration. Its <code>apiVersion</code> and <code>kind</code> fields do not require creating a Kubernetes custom resource. <code>PluginSpec.Parameters</code> contains raw JSON decoded by the plugin factory. The proposed schema can therefore live in plugin parameters without adding a CRD. Implementation requires one plugin type implementing DataProducer and ProfileHandler, runner registration, dependency declarations, and parameter validation. The design uses existing hook signatures and the request attribute store.</p>
+<p>Example ConfigMap wrapper containing a baseline made from existing components:</p>
+<div class="code-block"><div class="code-top"><span>YAML</span><button type="button" class="copy" data-copy="code-4" aria-label="Copy yaml example">Copy</button></div><pre><code id="code-4" class="language-yaml">apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: epp-config
+data:
+  epp-config.yaml: |
+    apiVersion: llm-d.ai/v1
+    kind: EndpointPickerConfig
+    plugins:
+      - type: single-profile-handler
+      - type: decode-filter
+      - type: queue-scorer
+      - type: max-score-picker
+    schedulingProfiles:
+      - name: balanced
+        plugins:
+          - pluginRef: decode-filter
+          - pluginRef: queue-scorer
+            weight: 1
+          - pluginRef: max-score-picker</code></pre></div><p>The ConfigMap must be in the EPP&#39;s namespace. In the inspected deployment, it is mounted at <code>/etc/epp</code>, and the EPP reads <code>/etc/epp/epp-config.yaml</code>. Once the proposal is implemented, the key can contain the adaptive configuration. This wrapper distributes configuration; it is not a complete Deployment.</p>
+<p>Configuration is read at startup and retained in memory. Selection among loaded profiles requires no restart. Changing rules, weights, or the plugin list requires a restart in the existing path. Updating a ConfigMap alone does not guarantee reload or restart. Hot reload is a separate extension.</p>
+<h2 id="10-alternatives-and-tradeoffs">10. Alternatives and tradeoffs</h2>
+<div class="table-wrap" tabindex="0" role="region" aria-label="Scrollable comparison table"><table><thead><tr><th>Alternative</th><th>Benefit</th><th>Cost or limitation</th></tr></thead><tbody><tr><td>Fixed combined profile</td><td>Supported, small configuration, measurable baseline</td><td>Weights do not change with operating conditions</td></tr><tr><td>Header-based profile selection</td><td>Existing <code>header-profile-handler</code> selects among configured profiles</td><td>A caller or upstream component must supply the choice; the handler does not evaluate load rules</td></tr><tr><td>Rule-based profile selection</td><td>Explicit rules and profiles users understand</td><td>Threshold tuning, profile maintenance, and sensitivity to metrics</td></tr><tr><td>Scorer with a continuous policy</td><td>Can account for costs per request and endpoint</td><td>Requires a scoring model, calibration, and explainable results</td></tr></tbody></table></div><p>This draft recommends rule-based profile selection because it matches the requirement for user-controlled, predefined alternatives. If improvement requires continuous decisions for each endpoint, a custom scorer should also be evaluated.</p>
+<h2 id="11-decisions-before-implementation">11. Decisions before implementation</h2>
+<ul><li>Choose a serving workload and profile alternatives with shared endpoint eligibility.</li><li>Choose the workload metric used to measure improvement, then calibrate queue thresholds and scorer weights.</li><li>Confirm the candidate population, full-coverage policy, and maxMetricAge for the deployment.</li></ul><p>If you do one thing: choose a workload where a fixed profile performs inadequately and measure whether mean-queue rules improve its results. Nontrivial implementation work requires a linked issue under the project contribution rules.</p>
+<h2 id="verification-status">Verification status</h2>
+<p>This draft is based on inspection of the existing data layer, pool-average calculations, extension-point registration, dependency graph, and request attribute store. Document checks cover the three YAML examples, nested ConfigMap configuration, profile references, and illustrated rule selections.</p><p>The adaptive plugin and its schema are proposed and have not been executed in the EPP. Valid YAML syntax and existing interface support do not establish runtime correctness or performance benefit.</p>
+</article><footer class="footer">Standalone HTML edition. Diagrams, styling, and controls are embedded.</footer></main></div><script>
+document.getElementById('print').addEventListener('click',()=>window.print());
+document.querySelectorAll('[data-copy]').forEach(button=>button.addEventListener('click',async()=>{const text=document.getElementById(button.dataset.copy).textContent;try{await navigator.clipboard.writeText(text);button.textContent='Copied';}catch{const range=document.createRange();range.selectNodeContents(document.getElementById(button.dataset.copy));const selection=window.getSelection();selection.removeAllRanges();selection.addRange(range);button.textContent='Select + copy';}setTimeout(()=>button.textContent='Copy',2000);}));
+const navLinks=[...document.querySelectorAll('nav a')];
+const observer=new IntersectionObserver(entries=>{for(const entry of entries){if(entry.isIntersecting){navLinks.forEach(link=>{const active=link.hash==='#'+entry.target.id;link.classList.toggle('active',active);if(active)link.setAttribute('aria-current','location');else link.removeAttribute('aria-current');});}}},{rootMargin:'-10% 0px -65% 0px'});
+document.querySelectorAll('h2').forEach(heading=>observer.observe(heading));
+</script></body></html>

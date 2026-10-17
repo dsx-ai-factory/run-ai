@@ -1,0 +1,927 @@
+<!--
+  Run:ai + NVIDIA brand-style slide template
+  ==========================================
+  Self-contained HTML deck — no framework, no build step.
+
+  Conventions used in this deck:
+    - Each slide is a <div class="slide">; first one has class "active".
+    - Slide pattern: <h3>EYEBROW</h3> <h2>Title</h2> body...
+    - Section dividers: extra class "part-divider" with a faded big number.
+    - Title slide: extra class "title-slide" with centered content.
+    - Code blocks support inline color via <span style="color:var(--nvidia-green);">.
+    - Use class="flow-node|flow-arrow|flow-desc" inside <pre> for ASCII flows.
+
+  Navigation: ← → or Space to move, Home/End for first/last, swipe on touch.
+  Press V for one-page view, T for light/dark.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EPP: Predefined profiles instead of computed weights</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #1a1a2e;
+    --bg-slide: #16213e;
+    --bg-card: #0f3460;
+    --accent: #76b900;
+    --accent-dim: #5a8f00;
+    --text: #e8e8e8;
+    --text-dim: #a0a0b0;
+    --text-bright: #ffffff;
+    --code-bg: #0d1117;
+    --border: #2a3a5e;
+    --nvidia-green: #76b900;
+    --runai-purple: #7b61ff;
+    --accent-strong: #76b900;
+  }
+
+  body.light {
+    --bg: #fafbfc;
+    --bg-slide: #ffffff;
+    --bg-card: #f2f4f8;
+    --text: #1a1a2e;
+    --text-dim: #5a6072;
+    --text-bright: #0a0a1a;
+    --code-bg: #f4f6fa;
+    --border: #d8dde6;
+    --accent-strong: #4d7a00;
+  }
+  body.light h3,
+  body.light th,
+  body.light code,
+  body.light .flow-node,
+  body.light .col h4,
+  body.light .status-ok,
+  body.light ul li::before,
+  body.light ol li::before { color: var(--accent-strong); }
+  body.light h1 .accent { color: var(--accent-strong); }
+  body.light ol li::before { background: rgba(77, 122, 0, 0.12); }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  .slide {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 60px 80px;
+    position: relative;
+  }
+
+  .slide.active { display: flex; }
+  .slide-content { max-width: 1100px; width: 100%; }
+
+  /* Header bar */
+  .top-bar {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--nvidia-green), var(--runai-purple));
+    z-index: 100;
+  }
+
+  .slide-number {
+    position: fixed; bottom: 24px; right: 40px;
+    font-size: 14px; color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace; z-index: 100;
+  }
+
+  .logo-bar {
+    position: fixed; bottom: 24px; left: 40px;
+    font-size: 13px; color: var(--text-dim);
+    letter-spacing: 1px; text-transform: uppercase; z-index: 100;
+  }
+
+  /* Typography */
+  h1 {
+    font-size: 48px; font-weight: 700;
+    color: var(--text-bright); margin-bottom: 16px; line-height: 1.15;
+  }
+  h1 .accent { color: var(--nvidia-green); }
+  h1 .purple { color: var(--runai-purple); }
+
+  h2 {
+    font-size: 36px; font-weight: 600;
+    color: var(--text-bright); margin-bottom: 12px;
+  }
+
+  h3 {
+    font-size: 15px; font-weight: 500;
+    color: var(--nvidia-green); text-transform: uppercase;
+    letter-spacing: 2px; margin-bottom: 20px;
+  }
+
+  .subtitle {
+    font-size: 22px; color: var(--text-dim); font-weight: 300;
+    margin-bottom: 40px; line-height: 1.5;
+  }
+
+  p, li { font-size: 20px; line-height: 1.7; color: var(--text); }
+
+  .quote {
+    font-size: 20px; color: var(--text);
+    background: var(--bg-card);
+    border-left: 4px solid var(--nvidia-green);
+    padding: 20px 28px; border-radius: 0 8px 8px 0;
+    margin: 24px 0; line-height: 1.6; font-style: italic;
+  }
+
+  ul { list-style: none; padding: 0; }
+  ul li { padding: 8px 0 8px 28px; position: relative; }
+  ul li::before {
+    content: '▸'; position: absolute; left: 0;
+    color: var(--nvidia-green); font-weight: 700;
+  }
+
+  ol { padding-left: 24px; counter-reset: ol-counter; list-style: none; }
+  ol li {
+    padding: 8px 0 8px 36px; position: relative; counter-increment: ol-counter;
+  }
+  ol li::before {
+    content: counter(ol-counter);
+    position: absolute; left: 0; top: 8px;
+    color: var(--nvidia-green); font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(118, 185, 0, 0.1);
+    width: 26px; height: 26px; line-height: 26px;
+    text-align: center; border-radius: 4px; font-size: 14px;
+  }
+
+  strong { color: var(--text-bright); font-weight: 600; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--code-bg); padding: 2px 8px; border-radius: 4px;
+    font-size: 0.85em; color: var(--nvidia-green);
+  }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 18px; }
+  th {
+    background: var(--bg-card); color: var(--nvidia-green);
+    text-align: left; padding: 14px 20px; font-weight: 600;
+    text-transform: uppercase; font-size: 13px; letter-spacing: 1px;
+    border-bottom: 2px solid var(--nvidia-green);
+  }
+  td { padding: 12px 20px; border-bottom: 1px solid var(--border); color: var(--text); }
+  tr:hover td { background: rgba(118, 185, 0, 0.05); }
+
+  /* Code blocks */
+  pre {
+    background: var(--code-bg); border: 1px solid var(--border);
+    border-radius: 8px; padding: 24px; margin: 20px 0;
+    overflow-x: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: 15px; line-height: 1.6; color: var(--text);
+  }
+  .flow-node { color: var(--nvidia-green); font-weight: 500; }
+  .flow-arrow { color: var(--text-dim); }
+  .flow-desc { color: var(--text-dim); font-style: italic; }
+
+  /* Two-column layout */
+  .columns {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin: 20px 0;
+  }
+  .col {
+    background: var(--bg-card); border-radius: 12px;
+    padding: 28px; border: 1px solid var(--border);
+  }
+  .col h4 {
+    font-size: 18px; color: var(--nvidia-green);
+    margin-bottom: 16px; font-weight: 600;
+  }
+  .col pre {
+    margin: 12px 0 0 0; font-size: 16px; border: none; background: var(--code-bg);
+  }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 4px 12px; border-radius: 20px;
+    font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .badge-green { background: rgba(118, 185, 0, 0.2); color: var(--nvidia-green); }
+  .badge-purple { background: rgba(123, 97, 255, 0.2); color: var(--runai-purple); }
+
+  /* Keyboard hint */
+  .keyboard-hint {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%); font-size: 12px;
+    color: var(--text-dim); opacity: 0.5; z-index: 100;
+  }
+  kbd {
+    background: var(--border); padding: 2px 8px; border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+
+  /* Status indicators */
+  .status-ok { color: var(--nvidia-green); }
+  .status-redirect { color: #f0a030; }
+  .status-denied { color: #e04040; }
+
+  /* Title slide special */
+  .title-slide h1 { font-size: 56px; margin-bottom: 8px; }
+  .title-slide .subtitle { font-size: 24px; }
+
+  /* Section divider */
+  .part-divider { text-align: center; }
+  .part-divider h2 { font-size: 44px; margin-bottom: 16px; }
+  .part-divider .subtitle { font-size: 20px; }
+  .part-number {
+    font-size: 100px; font-weight: 700;
+    color: var(--nvidia-green); opacity: 0.2;
+    line-height: 1; margin-bottom: 10px;
+  }
+
+  /* Top-right control cluster (slide ⇄ document, dark ⇄ light) */
+  .controls {
+    position: fixed; top: 16px; right: 16px; z-index: 200;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .ctrl-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-card); color: var(--text);
+    border: 1px solid var(--border); border-radius: 999px;
+    padding: 8px 14px; font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+    cursor: pointer; user-select: none;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+  }
+  .ctrl-btn:hover { border-color: var(--nvidia-green); color: var(--text-bright); }
+  .ctrl-btn svg { width: 14px; height: 14px; }
+  .ctrl-btn.icon-only { padding: 8px; width: 34px; height: 34px; justify-content: center; }
+  .view-toggle .label-doc { display: inline; }
+  .view-toggle .label-slide { display: none; }
+  body.doc-mode .view-toggle .label-doc { display: none; }
+  body.doc-mode .view-toggle .label-slide { display: inline; }
+  .theme-toggle .icon-moon { display: none; }
+  .theme-toggle .icon-sun { display: inline; }
+  body.light .theme-toggle .icon-moon { display: inline; }
+  body.light .theme-toggle .icon-sun { display: none; }
+
+  /* Document (one-page) mode */
+  body.doc-mode { overflow: auto; height: auto; }
+  body.doc-mode .slide {
+    display: flex !important;
+    height: auto; min-height: auto;
+    padding: 56px 80px;
+    border-bottom: 1px solid var(--border);
+    page-break-after: always;
+    break-after: page;
+  }
+  body.doc-mode .slide:last-of-type { border-bottom: none; }
+  body.doc-mode .slide-number,
+  body.doc-mode .logo-bar,
+  body.doc-mode .keyboard-hint { display: none; }
+  body.doc-mode .top-bar { position: absolute; }
+
+  /* Print: always render as single document */
+  @media print {
+    body { overflow: visible; height: auto; background: #fff; color: #000; }
+    .controls, .slide-number, .logo-bar, .keyboard-hint { display: none !important; }
+    .slide {
+      display: flex !important;
+      height: auto; min-height: auto;
+      padding: 40px 60px;
+      page-break-after: always;
+      break-after: page;
+    }
+    .slide:last-of-type { page-break-after: auto; break-after: auto; }
+    .top-bar { position: absolute; }
+  }
+</style>
+</head>
+<body>
+
+<div class="top-bar"></div>
+<div class="logo-bar">RUN:AI · NVIDIA</div>
+<div class="slide-number" id="slideNum"></div>
+<div class="keyboard-hint"><kbd>←</kbd> <kbd>→</kbd> or <kbd>Space</kbd> to navigate</div>
+
+<div class="controls">
+  <button class="ctrl-btn view-toggle" id="viewToggle" title="Toggle slide / one-page view (press V)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+      <line x1="3" y1="10" x2="21" y2="10"></line>
+    </svg>
+    <span class="label-doc">One page</span>
+    <span class="label-slide">Slides</span>
+  </button>
+  <button class="ctrl-btn icon-only theme-toggle" id="themeToggle" title="Toggle dark / light theme (press T)" aria-label="Toggle theme">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="4"></circle>
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+    </svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"></path>
+    </svg>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 1: TITLE -->
+<div class="slide active title-slide">
+  <div class="slide-content" style="text-align:center;">
+    <h1>Adaptive routing in the <span class="accent">EPP</span>:<br><span class="purple">predefined profiles</span> instead of computed weights</h1>
+    <p class="subtitle">Rule-based scheduling-profile selection.<br>Draft for review before opening an upstream issue.</p>
+    <div style="margin-top:40px;">
+      <span class="badge badge-green">Draft proposal</span>&nbsp;&nbsp;
+      <span class="badge badge-purple">Not implemented</span>&nbsp;&nbsp;
+      <span class="badge badge-green">Numbers illustrative</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 2: AGENDA -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Agenda</h3>
+    <h2>Two parts</h2>
+    <ol style="margin-top:16px;">
+      <li><strong>Where we are today.</strong> How the EPP picks a pod, and what the adaptive-routing work already does.</li>
+      <li><strong>A proposal.</strong> Today's flow on one request, then the three steps we add and what they buy you.</li>
+    </ol>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 3: PART 1 -->
+<div class="slide">
+  <div class="slide-content part-divider">
+    <div class="part-number">1</div>
+    <h2>Where we are today</h2>
+    <p class="subtitle">One profile, fixed weights, and background weight tuning in progress</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 4: EPP TODAY -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Today · ✅ exists</h3>
+    <h2>The EPP runs one profile with fixed scorer weights</h2>
+    <pre style="font-size:15px; line-height:1.7;">
+<span class="flow-node">Incoming request</span>
+<span class="flow-arrow">        │</span>
+<span class="flow-arrow">        ▼</span>
+<span class="flow-node">✅ ProfileHandler</span>        <span class="flow-desc">single-profile-handler: always the one configured profile</span>
+<span class="flow-arrow">        │  run "balanced"</span>
+<span class="flow-arrow">        ▼</span>
+<span class="flow-node">✅ Profile "balanced"</span>    <span class="flow-desc">queue ×2 · KV ×2 · prefix ×3 → max-score picker   (default-plugins.yaml, llm-d Router main)</span>
+<span class="flow-arrow">        │</span>
+<span class="flow-arrow">        ▼</span>
+<span class="flow-node">Selected pod</span>             <span class="flow-desc">score(p) = Σ w[j] × s[j,p]</span></pre>
+    <ul>
+      <li>Scores react to live metrics every request. <strong>Weights never change.</strong></li>
+      <li>Under a hotspot, the prefix scorer keeps pulling traffic to the hot pod with the same weight as when the pool was idle.</li>
+      <li>Other handlers exist on <code>main</code>: <code>headerprofile</code> (caller chooses), <code>disagg</code> (prefill/decode), <code>dataparallel</code>. The loader allows one handler.</li>
+      <li>The EPP code now lives in <code>llm-d/llm-d-router</code>; GAIE keeps only the InferencePool API.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 5: NIR'S WORK -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Today · adaptive routing, in progress</h3>
+    <h2>Background detectors retune the weights</h2>
+    <pre style="font-size:15px; line-height:1.7;">
+<span class="flow-node">✅ Endpoint metrics store</span>  <span class="flow-arrow">──►</span>  <span class="flow-node">🆕 Imbalance detector</span>   <span class="flow-desc">CVn of KV usage and assigned requests, pool-wide</span>
+<span class="flow-arrow">                           ──►</span>  <span class="flow-node">🆕 Pressure detector</span>    <span class="flow-desc">Σ waiting / Σ (waiting + running)</span>
+<span class="flow-arrow">                                        │  smoothed 0.1 × prev + 0.9 × new</span>
+<span class="flow-arrow">                                        ▼</span>
+<span class="flow-node">                                 🆕 Adaptive configurator</span>  <span class="flow-desc">sigmoid(imbalance) → distribution budget D, affinity A = 1 − D</span>
+<span class="flow-arrow">                                        │  rewrites scorer weights inside every profile, each cycle</span>
+<span class="flow-arrow">                                        ▼</span>
+<span class="flow-node">                                 ✅ Scheduler</span>              <span class="flow-desc">requests use the current weights; zero per-request work</span></pre>
+    <ul>
+      <li>Merged prerequisites: <strong>#2119</strong> scorer categories (affinity / distribution), <strong>#2207</strong> float weights.</li>
+      <li>Experimental branch <code>adaptive-with-pressure</code>; hotspot benchmark reported on 8 × A100.</li>
+      <li>Output is a <strong>continuous, derived weight vector</strong>. #1992 also lists an alternative: select among groups of scorers instead of adjusting each weight.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 6: PART 2 -->
+<div class="slide">
+  <div class="slide-content part-divider">
+    <div class="part-number">2</div>
+    <h2>A proposal</h2>
+    <p class="subtitle">Today's flow in two slides, then the three steps we add</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 6a0: OVERVIEW -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Today's flow · ✅ all existing</h3>
+    <h2>One request through llm-d-router main, in 11 steps</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 40px; margin-top:8px;">
+      <div><pre style="margin:0; background:var(--bg-card); font-family:inherit;"><div style="color:var(--text); font-size:16px; line-height:1.65;"> 1. <span class="status-ok">✅</span> Client sends the request</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 2. <span class="status-ok">✅</span> Gateway holds it, asks the EPP</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 3. <span class="status-ok">✅</span> EPP parses the body</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 4. <span class="status-ok">✅</span> Candidates + per-pod snapshots</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 5. <span class="status-ok">✅</span> Prefix lookup</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 6. <span class="status-ok">✅</span> Admission</div></pre></div>
+      <div><pre style="margin:0; background:var(--bg-card); font-family:inherit;"><div style="color:var(--text); font-size:16px; line-height:1.65;"> 7. <span class="status-ok">✅</span> Run the one fixed profile</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 8. <span class="status-ok">✅</span> EPP answers the Gateway</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 9. <span class="status-ok">✅</span> Gateway forwards the request</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;">10. <span class="status-ok">✅</span> vLLM serves it</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;">11. <span class="status-ok">✅</span> Prefix index updated</div></pre></div>
+    </div>
+    <p style="color:var(--text-dim); font-size:15px; margin-top:10px;">No profile decision anywhere: step 7 always runs <code>default</code> with fixed weights queue 2 · KV 2 · prefix 3. Example request: queues 0 / 2 / 8, prefix cached on pod-3.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 6c: WHAT WENT WRONG -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Today's flow · one request, worked out</h3>
+    <h2>Why the busiest pod gets the request today</h2>
+    <div class="columns" style="gap:24px; margin:8px 0 10px;">
+      <div class="col" style="padding:16px 20px;">
+        <h4>1 · The pods right now</h4>
+        <table style="font-size:15px; margin:4px 0 0;">
+          <tr><th>Pod</th><th>Waiting</th><th>Running</th><th style="white-space:nowrap;">KV used</th><th style="white-space:nowrap;">Has the prefix?</th></tr>
+          <tr><td style="white-space:nowrap;">pod-1</td><td>0</td><td>10</td><td>40%</td><td>no</td></tr>
+          <tr><td style="white-space:nowrap;">pod-2</td><td>2</td><td>11</td><td>44%</td><td>no</td></tr>
+          <tr><td style="white-space:nowrap;"><strong>pod-3</strong></td><td><strong>8</strong></td><td><strong>30</strong></td><td><strong>80%</strong></td><td class="status-ok">yes, 98%</td></tr>
+        </table>
+      </div>
+      <div class="col" style="padding:16px 20px; border-color: var(--nvidia-green);">
+        <h4>2 · The profile that always runs</h4>
+        <p style="font-size:16px; margin:0;"><code>default</code>, the only profile. Fixed weights:</p>
+        <pre style="font-size:15px; margin:8px 0 0; padding:10px 14px;">queue-scorer            weight 2
+kv-cache-utilization    weight 2
+prefix-cache-scorer     weight 3</pre>
+        <p style="color:var(--text-dim); font-size:14px; margin:8px 0 0;">Set in the chart's default config. Nothing in the flow changes them.</p>
+      </div>
+    </div>
+    <h4 style="font-size:18px; color:var(--nvidia-green); margin:0 0 4px;">3 · Scores for this request (each scorer 0..1, × weight)</h4>
+    <pre style="font-size:13.5px; line-height:1.5; margin:0 0 10px;">            queue ×2        KV ×2           prefix ×3       total
+pod-1       1.00 → 2.00     0.60 → 1.20     0.00 → 0.00     3.20
+pod-2       0.75 → 1.50     0.56 → 1.12     0.00 → 0.00     2.62
+pod-3       0.00 → 0.00     0.20 → 0.40     0.98 → 2.94     <span class="status-denied">3.34  ◄ chosen</span></pre>
+    <p style="font-size:16px;"><strong>Result:</strong> the request joins 8 others on pod-3. The prefix bonus alone (2.94) beats "empty queue + half-free KV" (3.20) by 0.14. Then the index records pod-3 again, so the next request scores it even higher. <span style="color:var(--text-dim);">No step asks "is the load uneven?"; each scorer only sees its own column.</span></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 6b0: OVERVIEW -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>The proposal · three steps added</h3>
+    <h2>Same flow, steps 6, 8 and 10 are new</h2>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 40px; margin-top:8px;">
+      <div><pre style="margin:0; background:var(--bg-card); font-family:inherit;"><div style="color:var(--text); font-size:16px; line-height:1.65;"> 1. <span class="status-ok">✅</span> Client sends the request</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 2. <span class="status-ok">✅</span> Gateway holds it, asks the EPP</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 3. <span class="status-ok">✅</span> EPP parses the body</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 4. <span class="status-ok">✅</span> Candidates + per-pod snapshots</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 5. <span class="status-ok">✅</span> Prefix lookup</div>
+<div style="color:var(--runai-purple); font-weight:600; font-size:16px; line-height:1.65;"> 6. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Produce</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;"> 7. <span class="status-ok">✅</span> Admission</div></pre></div>
+      <div><pre style="margin:0; background:var(--bg-card); font-family:inherit;"><div style="color:var(--runai-purple); font-weight:600; font-size:16px; line-height:1.65;"> 8. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Pick</div>
+<div style="color:var(--nvidia-green); font-weight:600; font-size:16px; line-height:1.65;"> 9. <span class="status-ok">✅</span> Run the chosen profile   ← the profile itself</div>
+<div style="color:var(--runai-purple); font-weight:600; font-size:16px; line-height:1.65;">10. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: log line</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;">11. <span class="status-ok">✅</span> EPP answers the Gateway</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;">12. <span class="status-ok">✅</span> Gateway forwards the request</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;">13. <span class="status-ok">✅</span> vLLM serves it</div>
+<div style="color:var(--text); font-size:16px; line-height:1.65;">14. <span class="status-ok">✅</span> Prefix index updated</div></pre></div>
+    </div>
+    <p style="font-size:15px; margin-top:10px;"><span style="color:var(--runai-purple); font-weight:600;">Purple 6 · 8 · 10</span> = our profile handler <code>adaptive-profile-handler</code>, the plugin that decides. <span style="color:var(--nvidia-green); font-weight:600;">Green 9</span> = the profile: a YAML list of filters, weighted scorers and a picker, runs unchanged. <span style="color:var(--text-dim);">Everything else is existing plumbing: EPP request handling, Gateway, vLLM.</span></p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 7b.06: STEP 6 -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>The proposal · step 6 of 14 · <span style="color:var(--runai-purple); font-weight:600;">🆕 new step</span></h3>
+    <h2>Our profile handler <code>adaptive-profile-handler</code>: Produce</h2>
+    <p style="font-size:16px; margin-bottom:12px;">Our profile handler, a new <code>ProfileHandler</code> plugin type named <code>adaptive-profile-handler</code> (one instance per EPP, takes the single handler seat instead of <code>single-profile-handler</code>; the same instance also implements <code>DataProducer</code>, which is why it runs here), walks the same three pods once and writes two numbers on the request: how <strong>uneven</strong> the queues are (<code>cv</code> = σ / mean, capped at 1, 0 when the mean is below a small gate) and how <strong>much</strong> is waiting overall (<code>P</code> = waiting / (waiting + running)). If any pod's numbers are missing or older than <code>maxMetricAge</code>, it marks the summary invalid instead. No decision yet.</p>
+    <div style="display:grid; grid-template-columns: 330px 1fr; gap:20px; align-items:start;">
+      <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:12px 14px;">
+        <div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Flow</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   1. <span class="status-ok">✅</span> Client sends the request</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   2. <span class="status-ok">✅</span> Gateway holds it, asks the EPP</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   3. <span class="status-ok">✅</span> EPP parses the body</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   4. <span class="status-ok">✅</span> Candidates + per-pod snapshots</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   5. <span class="status-ok">✅</span> Prefix lookup</div>
+<div style="color:var(--nvidia-green); font-weight:600; font-size:13.5px; line-height:1.5; white-space:nowrap;">▶  6. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Produce</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">   7. <span class="status-ok">✅</span> Admission</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">   8. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Pick</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">   9. <span class="status-ok">✅</span> Run the chosen profile</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">  10. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: log line</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  11. <span class="status-ok">✅</span> EPP answers the Gateway</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  12. <span class="status-ok">✅</span> Gateway forwards the request</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  13. <span class="status-ok">✅</span> vLLM serves it</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  14. <span class="status-ok">✅</span> Prefix index updated</div>
+      </div>
+      <div style="display:grid; gap:12px;">
+        <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px;">
+<div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Request before this step</div>
+<pre style="margin:0; padding:0; border:none; background:none; font-size:12px; line-height:1.45;"><span style="color:var(--text-dim);">… 6 earlier lines</span>
+body       (the JSON above, raw)
+model      Qwen/Qwen3-8B
+prompt     &quot;&lt;1024-token prefix&gt; User: …&quot;  (~1040 tokens)
+candidates pod-1  waiting 0  running 10  KV 0.40  updated 30 ms ago
+           pod-2  waiting 2  running 11  KV 0.44  updated 30 ms ago
+           pod-3  waiting 8  running 30  KV 0.80  updated 30 ms ago
+           (pod-4 excluded: not ready)
+prefix     pod-1 0% · pod-2 0% · pod-3 98% hit   ← pod-3 served this prefix before</pre></div>
+        <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px;">
+<div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Request after this step</div>
+<pre style="margin:0; padding:0; border:none; background:none; font-size:12px; line-height:1.45;"><span style="color:var(--text-dim);">… 7 earlier lines</span>
+model      Qwen/Qwen3-8B
+prompt     &quot;&lt;1024-token prefix&gt; User: …&quot;  (~1040 tokens)
+candidates pod-1  waiting 0  running 10  KV 0.40  updated 30 ms ago
+           pod-2  waiting 2  running 11  KV 0.44  updated 30 ms ago
+           pod-3  waiting 8  running 30  KV 0.80  updated 30 ms ago
+           (pod-4 excluded: not ready)
+prefix     pod-1 0% · pod-2 0% · pod-3 98% hit   ← pod-3 served this prefix before
+<span style="color:var(--nvidia-green);">adaptive   mean 3.3 · cv 1.00 (capped) · P 0.16 · count 3 · valid · expiresAt +1 s</span></pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 7b.08: STEP 8 -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>The proposal · step 8 of 14 · <span style="color:var(--runai-purple); font-weight:600;">🆕 new step</span></h3>
+    <h2>Our profile handler <code>adaptive-profile-handler</code>: Pick</h2>
+    <p style="font-size:16px; margin-bottom:12px;">The scheduler asks for a profile. Our profile handler (its <code>Pick</code> hook) first asks: "which profile did I choose last time, and is the signal still inside that profile's stay band (above its exit threshold)?" If yes, keep it. If no, take the first rule whose enter threshold holds: very uneven → <code>load-oriented</code>, almost nothing waiting → <code>cache-oriented</code>; otherwise the default. It stores the choice in a field on the profile handler instance (in the EPP process, guarded by a mutex), so the next request's Pick starts from it. A restart resets it.</p>
+    <div style="display:grid; grid-template-columns: 330px 1fr; gap:20px; align-items:start;">
+      <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:12px 14px;">
+        <div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Flow</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   1. <span class="status-ok">✅</span> Client sends the request</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   2. <span class="status-ok">✅</span> Gateway holds it, asks the EPP</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   3. <span class="status-ok">✅</span> EPP parses the body</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   4. <span class="status-ok">✅</span> Candidates + per-pod snapshots</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   5. <span class="status-ok">✅</span> Prefix lookup</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">   6. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Produce</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   7. <span class="status-ok">✅</span> Admission</div>
+<div style="color:var(--nvidia-green); font-weight:600; font-size:13.5px; line-height:1.5; white-space:nowrap;">▶  8. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Pick</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">   9. <span class="status-ok">✅</span> Run the chosen profile</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">  10. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: log line</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  11. <span class="status-ok">✅</span> EPP answers the Gateway</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  12. <span class="status-ok">✅</span> Gateway forwards the request</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  13. <span class="status-ok">✅</span> vLLM serves it</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  14. <span class="status-ok">✅</span> Prefix index updated</div>
+      </div>
+      <div style="display:grid; gap:12px;">
+        <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px;">
+<div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Request before this step</div>
+<pre style="margin:0; padding:0; border:none; background:none; font-size:12px; line-height:1.45;"><span style="color:var(--text-dim);">… 8 earlier lines</span>
+prompt     &quot;&lt;1024-token prefix&gt; User: …&quot;  (~1040 tokens)
+candidates pod-1  waiting 0  running 10  KV 0.40  updated 30 ms ago
+           pod-2  waiting 2  running 11  KV 0.44  updated 30 ms ago
+           pod-3  waiting 8  running 30  KV 0.80  updated 30 ms ago
+           (pod-4 excluded: not ready)
+prefix     pod-1 0% · pod-2 0% · pod-3 98% hit   ← pod-3 served this prefix before
+adaptive   mean 3.3 · cv 1.00 (capped) · P 0.16 · count 3 · valid · expiresAt +1 s
+admitted   true (waited 0 ms)</pre></div>
+        <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px;">
+<div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Request after this step</div>
+<pre style="margin:0; padding:0; border:none; background:none; font-size:12px; line-height:1.45;"><span style="color:var(--text-dim);">… 11 earlier lines</span>
+           pod-3  waiting 8  running 30  KV 0.80  updated 30 ms ago
+           (pod-4 excluded: not ready)
+prefix     pod-1 0% · pod-2 0% · pod-3 98% hit   ← pod-3 served this prefix before
+adaptive   mean 3.3 · cv 1.00 (capped) · P 0.16 · count 3 · valid · expiresAt +1 s
+admitted   true (waited 0 ms)
+<span style="color:var(--nvidia-green);">regime     last = balanced · cv 1.00 ≥ enter 0.5 → rule &quot;hotspot&quot;</span>
+<span style="color:var(--nvidia-green);">profile    load-oriented  (prefix 1 · KV 1 · queue 4)</span>
+<span style="color:var(--nvidia-green);">plugin     remembers: last = load-oriented   ← shared across requests</span></pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 7b.09: STEP 9 -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>The proposal · step 9 of 14 · <span class="status-ok">✅ exists today</span></h3>
+    <h2>Run the chosen profile</h2>
+    <p style="font-size:16px; margin-bottom:12px;">Exactly as any profile runs today: filters, scorers with that profile's fixed weights, picker. Only the weights differ from the old flow.</p>
+    <div style="display:grid; grid-template-columns: 330px 1fr; gap:20px; align-items:start;">
+      <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:12px 14px;">
+        <div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Flow</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   1. <span class="status-ok">✅</span> Client sends the request</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   2. <span class="status-ok">✅</span> Gateway holds it, asks the EPP</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   3. <span class="status-ok">✅</span> EPP parses the body</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   4. <span class="status-ok">✅</span> Candidates + per-pod snapshots</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   5. <span class="status-ok">✅</span> Prefix lookup</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">   6. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Produce</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   7. <span class="status-ok">✅</span> Admission</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">   8. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Pick</div>
+<div style="color:var(--nvidia-green); font-weight:600; font-size:13.5px; line-height:1.5; white-space:nowrap;">▶  9. <span class="status-ok">✅</span> Run the chosen profile</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">  10. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: log line</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  11. <span class="status-ok">✅</span> EPP answers the Gateway</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  12. <span class="status-ok">✅</span> Gateway forwards the request</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  13. <span class="status-ok">✅</span> vLLM serves it</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  14. <span class="status-ok">✅</span> Prefix index updated</div>
+      </div>
+      <div style="display:grid; gap:12px;">
+        <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px;">
+<div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Request before this step</div>
+<pre style="margin:0; padding:0; border:none; background:none; font-size:12px; line-height:1.45;"><span style="color:var(--text-dim);">… 11 earlier lines</span>
+           pod-3  waiting 8  running 30  KV 0.80  updated 30 ms ago
+           (pod-4 excluded: not ready)
+prefix     pod-1 0% · pod-2 0% · pod-3 98% hit   ← pod-3 served this prefix before
+adaptive   mean 3.3 · cv 1.00 (capped) · P 0.16 · count 3 · valid · expiresAt +1 s
+admitted   true (waited 0 ms)
+regime     last = balanced · cv 1.00 ≥ enter 0.5 → rule &quot;hotspot&quot;
+profile    load-oriented  (prefix 1 · KV 1 · queue 4)
+plugin     remembers: last = load-oriented   ← shared across requests</pre></div>
+        <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px;">
+<div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Request after this step</div>
+<pre style="margin:0; padding:0; border:none; background:none; font-size:12px; line-height:1.45;"><span style="color:var(--text-dim);">… 13 earlier lines</span>
+prefix     pod-1 0% · pod-2 0% · pod-3 98% hit   ← pod-3 served this prefix before
+adaptive   mean 3.3 · cv 1.00 (capped) · P 0.16 · count 3 · valid · expiresAt +1 s
+admitted   true (waited 0 ms)
+regime     last = balanced · cv 1.00 ≥ enter 0.5 → rule &quot;hotspot&quot;
+profile    load-oriented  (prefix 1 · KV 1 · queue 4)
+plugin     remembers: last = load-oriented   ← shared across requests
+<span style="color:var(--nvidia-green);">scores     pod-1 4.60 · pod-2 3.56 · pod-3 1.18   (prefix·1 + KV·1 + queue·4)</span>
+<span style="color:var(--nvidia-green);">result     pod-1   ← the empty pod wins</span></pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 7b.10: STEP 10 -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>The proposal · step 10 of 14 · <span style="color:var(--runai-purple); font-weight:600;">🆕 new step</span></h3>
+    <h2>Our profile handler <code>adaptive-profile-handler</code>: log line</h2>
+    <p style="font-size:16px; margin-bottom:12px;">ProcessResults marks the chosen profile as primary and explains the decision in two places: one JSON line on the EPP pod's stdout (<code>kubectl logs</code>), and one Prometheus counter on the EPP's <code>/metrics</code>. Nothing is stored on the request.</p>
+    <div style="display:grid; grid-template-columns: 330px 1fr; gap:20px; align-items:start;">
+      <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:12px 14px;">
+        <div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Flow</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   1. <span class="status-ok">✅</span> Client sends the request</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   2. <span class="status-ok">✅</span> Gateway holds it, asks the EPP</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   3. <span class="status-ok">✅</span> EPP parses the body</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   4. <span class="status-ok">✅</span> Candidates + per-pod snapshots</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   5. <span class="status-ok">✅</span> Prefix lookup</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">   6. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Produce</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   7. <span class="status-ok">✅</span> Admission</div>
+<div style="color:var(--runai-purple); font-size:13.5px; line-height:1.5; white-space:nowrap;">   8. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: Pick</div>
+<div style="color:var(--text); font-size:13.5px; line-height:1.5; white-space:nowrap;">   9. <span class="status-ok">✅</span> Run the chosen profile</div>
+<div style="color:var(--nvidia-green); font-weight:600; font-size:13.5px; line-height:1.5; white-space:nowrap;">▶ 10. <span style="color:var(--runai-purple); font-weight:600;">🆕</span> Our profile handler: log line</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  11. <span class="status-ok">✅</span> EPP answers the Gateway</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  12. <span class="status-ok">✅</span> Gateway forwards the request</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  13. <span class="status-ok">✅</span> vLLM serves it</div>
+<div style="color:var(--text-dim); opacity:.55; font-size:13.5px; line-height:1.5; white-space:nowrap;">  14. <span class="status-ok">✅</span> Prefix index updated</div>
+      </div>
+      <div style="display:grid; gap:12px;">
+        <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px;">
+<div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Request before this step</div>
+<pre style="margin:0; padding:0; border:none; background:none; font-size:12px; line-height:1.45;"><span style="color:var(--text-dim);">… 13 earlier lines</span>
+prefix     pod-1 0% · pod-2 0% · pod-3 98% hit   ← pod-3 served this prefix before
+adaptive   mean 3.3 · cv 1.00 (capped) · P 0.16 · count 3 · valid · expiresAt +1 s
+admitted   true (waited 0 ms)
+regime     last = balanced · cv 1.00 ≥ enter 0.5 → rule &quot;hotspot&quot;
+profile    load-oriented  (prefix 1 · KV 1 · queue 4)
+plugin     remembers: last = load-oriented   ← shared across requests
+scores     pod-1 4.60 · pod-2 3.56 · pod-3 1.18   (prefix·1 + KV·1 + queue·4)
+result     pod-1   ← the empty pod wins</pre></div>
+        <div style="background:var(--code-bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px;">
+<div style="font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--text-dim); margin-bottom:6px;">Request after this step</div>
+<pre style="margin:0; padding:0; border:none; background:none; font-size:12px; line-height:1.45;"><span style="color:var(--text-dim);">… 15 earlier lines</span>
+admitted   true (waited 0 ms)
+regime     last = balanced · cv 1.00 ≥ enter 0.5 → rule &quot;hotspot&quot;
+profile    load-oriented  (prefix 1 · KV 1 · queue 4)
+plugin     remembers: last = load-oriented   ← shared across requests
+scores     pod-1 4.60 · pod-2 3.56 · pod-3 1.18   (prefix·1 + KV·1 + queue·4)
+result     pod-1   ← the empty pod wins
+<span style="color:var(--nvidia-green);">log        r-7f3a rule=hotspot event=entered cv=1.00 P=0.16 profile=load-oriented pod=pod-1</span>
+<span style="color:var(--nvidia-green);">metric     adaptive_profile_selections_total{profile=load-oriented,rule=hotspot,reason=entered} +1</span></pre></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 7b.99: SIDE BY SIDE -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>The proposal · same request, both flows</h3>
+    <h2>What changed for request r-7f3a</h2>
+    <table>
+      <tr><th></th><th>Today</th><th>With the proposal</th></tr>
+      <tr><td>Signals computed</td><td>none beyond the raw metrics</td><td><code>cv 1.00</code>, <code>P 0.16</code> (step 6)</td></tr>
+      <tr><td>Profile decision</td><td>none, always <code>default</code></td><td>rule <code>hotspot</code> → <code>load-oriented</code>, remembered (step 8)</td></tr>
+      <tr><td>Weights used</td><td>queue 2 · KV 2 · prefix 3</td><td>prefix 1 · KV 1 · queue 4</td></tr>
+      <tr><td>Pod chosen</td><td class="status-denied">pod-3, 8 already waiting</td><td class="status-ok">pod-1, empty</td></tr>
+      <tr><td>Prefix index after</td><td>{pod-3}</td><td>{pod-3, pod-1}: the prefix spreads</td></tr>
+      <tr><td>Explanation available</td><td>scores only</td><td>one log line + one counter (step 10)</td></tr>
+    </table>
+    <p style="color:var(--text-dim); font-size:15px;">Steps 1–5, 7, 9, 11–14 are byte-identical in both flows. The metrics are the same; only two numbers, one decision and one log line are new.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 9b: WHAT IT BUYS YOU -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>The proposal · why these three steps</h3>
+    <h2>What the three steps buy you</h2>
+    <div class="columns" style="gap:24px; margin:6px 0 10px;">
+      <div class="col" style="border-color: var(--nvidia-green); padding:16px 20px;">
+        <h4>1 · Stable, not twitchy</h4>
+        <pre style="font-size:13px; line-height:1.45; margin:0 0 8px; padding:10px 12px;">cv  0 ────────┼──────────────┼────────► 1
+           exit 0.35      enter 0.5
+  balanced  │  stay as you are  │  load-oriented
+
+same noise  0.48 0.52 0.47 0.55 0.40 0.30
+without memory   4 flips in 6 requests
+with memory      1 in, 1 out</pre>
+        <p style="font-size:15px; margin:0;">Sticky to the <strong>profile</strong> until the signal leaves its band. Sticky to the <strong>pod</strong> only as long as the profile lets the prefix win.</p>
+      </div>
+      <div class="col" style="padding:16px 20px;">
+        <h4>2 · Explainable</h4>
+        <p style="font-size:15px; margin:0 0 10px;">One log line and one counter per request: <code>rule=hotspot entered cv=1.00 → load-oriented → pod-1</code>. Not a derived weight vector.</p>
+        <h4>3 · Operator-controlled</h4>
+        <p style="font-size:15px; margin:0 0 10px;">Humans write the three profiles; the system only chooses among them. Bounded by construction.</p>
+        <h4>4 · Portable</h4>
+        <p style="font-size:15px; margin:0 0 10px;">Thresholds are ratios in 0..1. One YAML for an 8B model on one GPU and a 70B on eight.</p>
+        <h4>5 · Cheap</h4>
+        <p style="font-size:15px; margin:0;">Same metrics, one extra pass per request, no new CRD, no new scraping.</p>
+      </div>
+    </div>
+    <p style="color:var(--text-dim); font-size:15px;">Number 1 is the one the background configurator does not have: it smooths the signal but has no memory of the decision.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 10: CONFIG + KEY POINT 3 -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Proposal · configuration</h3>
+    <h2>What the operator writes</h2>
+    <div class="columns">
+      <div class="col">
+        <pre style="font-size:14px;">- type: adaptive-profile-handler
+  parameters:
+    defaultProfile: balanced
+    maxMetricAge: 1s
+    minMeanQueue: 3        # gate for cv
+    smoothing: 0.1         # α, 0 disables
+    rules:
+    - name: hotspot
+      when: { <span style="color:var(--nvidia-green);">signal: imbalance</span>, operator: gte,
+              <span style="color:var(--nvidia-green);">enter: 0.5, exit: 0.35</span> }
+      profile: load-oriented
+    - name: idle
+      when: { <span style="color:var(--nvidia-green);">signal: pressure</span>, operator: lt,
+              <span style="color:var(--nvidia-green);">enter: 0.2, exit: 0.3</span> }
+      profile: cache-oriented</pre>
+      </div>
+      <div class="col" style="border-color: var(--nvidia-green);">
+        <h4>Key point · thresholds are ratios, not counts</h4>
+        <table style="font-size:15px; margin:8px 0;">
+          <tr><th>Pool</th><th>20 waiting is…</th><th>P</th></tr>
+          <tr><td>8B · 1 × A100 (~256 slots)</td><td>~8%, idle</td><td>0.07</td></tr>
+          <tr><td>70B · 8 × A100 (~32 slots)</td><td>~60%, busy</td><td>0.38</td></tr>
+        </table>
+        <p style="font-size:16px; color:var(--text-dim);">"20 waiting requests" means nothing without capacity. <code>P</code> and <code>cv</code> carry the capacity inside the ratio, so <strong>one YAML works on every model and GPU</strong>. The only count left is the gate "is there anything worth redistributing".</p>
+      </div>
+    </div>
+    <p style="color:var(--text-dim); font-size:15px;">Profiles unchanged: cache 4/1/1 · balanced 2/1/1 · load 1/1/4. The only new plugin type is <code>adaptive-profile-handler</code>; it takes the single <code>ProfileHandler</code> seat that <code>single-profile-handler</code> fills by default today. Startup validation: exit &lt; enter for gte, exit &gt; enter for lt.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 11: WORKED EXAMPLES -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Proposal · worked examples</h3>
+    <h2>Five pools through the rules</h2>
+    <table style="font-size:15px;">
+      <tr><th>waiting</th><th>running</th><th>cv</th><th>P</th><th>Rule</th><th>Profile</th><th>Why this profile</th></tr>
+      <tr><td style="white-space:nowrap;"><code>0, 0, 0</code></td><td style="white-space:nowrap;"><code>5, 5, 5</code></td><td>0.00</td><td>0.00</td><td>idle</td><td class="status-ok">cache-oriented</td><td style="font-size:14px;">Nothing waits anywhere (P 0 &lt; 0.2) → <code>idle</code>. Spread would gain nothing; keep the cache.</td></tr>
+      <tr><td style="white-space:nowrap;"><code>0, 2, 4</code></td><td style="white-space:nowrap;"><code>10, 10, 10</code></td><td>0 (gated, mean 2)</td><td>0.17</td><td>idle</td><td class="status-ok">cache-oriented</td><td style="font-size:14px;">Queues look uneven, but mean 2 is below the gate of 3 so cv is forced to 0: too little work to redistribute. P 0.17 &lt; 0.2 → <code>idle</code>.</td></tr>
+      <tr><td style="white-space:nowrap;"><code>18, 20, 22</code></td><td style="white-space:nowrap;"><code>30, 30, 30</code></td><td>0.10</td><td>0.40</td><td>none</td><td class="status-ok">balanced</td><td style="font-size:14px;">Busy (P 0.40) but even (cv 0.10): no rule matches. Spreading cannot help when every queue is the same → default.</td></tr>
+      <tr><td style="white-space:nowrap;"><code>0, 0, 30</code></td><td style="white-space:nowrap;"><code>10, 10, 10</code></td><td>1.00</td><td>0.50</td><td>hotspot</td><td class="status-ok">load-oriented</td><td style="font-size:14px;">One pod carries everything: cv 1.0 ≥ 0.5 → <code>hotspot</code>. Checked before <code>idle</code>, so order decides.</td></tr>
+      <tr><td style="white-space:nowrap;"><code>5, 20, 35</code></td><td style="white-space:nowrap;"><code>30, 30, 30</code></td><td>0.75</td><td>0.40</td><td>hotspot</td><td class="status-ok">load-oriented</td><td style="font-size:14px;">Same mean as row 3, but spread is large (cv 0.75 ≥ 0.5) → <code>hotspot</code>. Load, not just volume, triggers it.</td></tr>
+      <tr><td style="white-space:nowrap;"><code>0, ?, 30</code></td><td style="white-space:nowrap;"><code>10, ?, 10</code></td><td>—</td><td>—</td><td>invalid summary</td><td class="status-redirect">balanced (default)</td><td style="font-size:14px;">One pod has no fresh metric → whole summary invalid → default. Never guess a missing queue as 0.</td></tr>
+    </table>
+    <p style="color:var(--text-dim); font-size:15px;">Rules are checked in order: hotspot, then idle, then default. Rows 3 and 5 share mean 20; rows 1 and 4 share "mean ≤ 10". The mean cannot tell them apart; cv and P can.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 13: RELATION TO NIR -->
+<div class="slide">
+  <div class="slide-content">
+    <h3>Proposal · relation to the configurator</h3>
+    <h2>Same measurements, discrete instead of continuous</h2>
+    <table>
+      <tr><th></th><th>Background configurator</th><th>This proposal</th></tr>
+      <tr><td>Imbalance signal</td><td>CVn of KV + assigned, pool-wide</td><td>cv of waiting queue, candidate-scoped (KV optional)</td></tr>
+      <tr><td>Pressure signal</td><td><code>Σ waiting / Σ (waiting + running)</code></td><td>identical</td></tr>
+      <tr><td>Smoothing</td><td>0.1 × prev + 0.9 × new</td><td>same, optional</td></tr>
+      <tr><td>Stability</td><td>sigmoid (k = 6, s0 = 0.6)</td><td>enter / exit bounds</td></tr>
+      <tr><td>Output</td><td>continuous weights, derived</td><td>one of N operator-written profiles</td></tr>
+      <tr><td>Explainability</td><td>"weights were 0.11 / 0.44 / 0.44"</td><td>"rule hotspot entered at cv 0.52"</td></tr>
+      <tr><td>Where it runs</td><td>background, zero per-request work</td><td>one O(N) pass per request</td></tr>
+    </table>
+    <div class="quote" style="margin-top:4px;">A complement, not a competitor: the same detectors could feed these rules if selection moves into the configurator.</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 18: END -->
+<div class="slide">
+  <div class="slide-content part-divider">
+    <h2>Thanks</h2>
+    <p class="subtitle" style="margin-top:20px;">Operators write the policies; a rule picks one; the log says why.</p>
+    <p style="color:var(--text-dim); font-size:15px; margin-top:32px;">Issue draft: <code>nael-docs/v2/epp-upstream_issue-template.md</code> · Background: <code>nael-docs/v1/</code></p>
+  </div>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const slideNum = document.getElementById('slideNum');
+  let current = 0;
+
+  function showSlide(n) {
+    slides[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    slideNum.textContent = `${current + 1} / ${slides.length}`;
+  }
+
+  const viewToggle = document.getElementById('viewToggle');
+  function setDocMode(on) {
+    document.body.classList.toggle('doc-mode', on);
+    viewToggle.setAttribute('aria-pressed', String(on));
+    if (on) {
+      slides.forEach(s => s.classList.add('active'));
+    } else {
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      window.scrollTo(0, 0);
+    }
+  }
+  viewToggle.addEventListener('click', () => {
+    setDocMode(!document.body.classList.contains('doc-mode'));
+  });
+
+  const themeToggle = document.getElementById('themeToggle');
+  const THEME_KEY = 'runai-slides-theme';
+  function setTheme(light) {
+    document.body.classList.toggle('light', light);
+    themeToggle.setAttribute('aria-pressed', String(light));
+    try { localStorage.setItem(THEME_KEY, light ? 'light' : 'dark'); } catch (_) {}
+  }
+  themeToggle.addEventListener('click', () => {
+    setTheme(!document.body.classList.contains('light'));
+  });
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved === 'light') setTheme(true);
+  } catch (_) {}
+
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, textarea, [contenteditable="true"]')) return;
+    if (e.key === 'v' || e.key === 'V') {
+      e.preventDefault();
+      setDocMode(!document.body.classList.contains('doc-mode'));
+      return;
+    }
+    if (e.key === 't' || e.key === 'T') {
+      e.preventDefault();
+      setTheme(!document.body.classList.contains('light'));
+      return;
+    }
+    if (document.body.classList.contains('doc-mode')) return;
+    if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      showSlide(current + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      showSlide(current - 1);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      showSlide(0);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      showSlide(slides.length - 1);
+    }
+  });
+
+  let touchStartX = 0;
+  document.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  document.addEventListener('touchend', (e) => {
+    if (document.body.classList.contains('doc-mode')) return;
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (Math.abs(diff) > 50) {
+      diff > 0 ? showSlide(current + 1) : showSlide(current - 1);
+    }
+  });
+
+  showSlide(0);
+</script>
+
+</body>
+</html>

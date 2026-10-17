@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<!--
+  Generated page. Source of truth is the three Markdown files next to it:
+    000_create-cluster_env-in-a-click.md · 001_setup_real-gpu-epp.md · 002_run_hotspot-benchmark.md
+  Their text is embedded below and rendered client-side. After editing a .md,
+  regenerate this file (the embed blocks must match the files).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EPP Real-GPU Lab</title>
+<meta name="description" content="Setup and run guides for benchmarking the llm-d Router EPP on real GPUs with a real model: default profile versus a discrete adaptive profile handler, Gateway mode with kgateway.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.7/marked.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  :root {
+    --bg:#1a1a2e; --bg-slide:#16213e; --bg-card:#0f3460; --text:#e8e8e8; --text-dim:#a0a0b0; --text-bright:#fff;
+    --code-bg:#0d1117; --border:#2a3a5e; --nvidia-green:#76b900; --runai-purple:#7b61ff; --accent-strong:#76b900;
+  }
+  :root:not([data-theme="light"]) { color-scheme: dark; }
+  :root[data-theme="light"], body.light {
+    --bg:#fafbfc; --bg-slide:#fff; --bg-card:#f2f4f8; --text:#1a1a2e; --text-dim:#5a6072; --text-bright:#0a0a1a;
+    --code-bg:#f4f6fa; --border:#d8dde6; --accent-strong:#4d7a00;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Inter',-apple-system,sans-serif; background:var(--bg); color:var(--text); line-height:1.55; font-size:15px; }
+  body::before { content:""; position:fixed; top:0; left:0; right:0; height:4px; z-index:50; background:linear-gradient(90deg,var(--nvidia-green),var(--runai-purple)); }
+  .wrap { max-width:1120px; margin:0 auto; padding:40px 16px 80px; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:18px; }
+  .eyebrow { font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--nvidia-green); }
+  body.light .eyebrow { color:var(--accent-strong); }
+  .btn { background:var(--bg-card); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px 12px; font-size:13px; cursor:pointer; font-family:inherit; }
+  .btn:hover { border-color:var(--nvidia-green); }
+  h1.page { font-size:32px; font-weight:700; color:var(--text-bright); line-height:1.15; margin-bottom:8px; }
+  h1.page .accent { color:var(--nvidia-green); } body.light h1.page .accent { color:var(--accent-strong); }
+  h1.page .purple { color:var(--runai-purple); }
+  .sub { color:var(--text-dim); font-size:16px; max-width:860px; margin-bottom:22px; }
+  .tabs { display:flex; gap:6px; border-bottom:1px solid var(--border); margin-bottom:24px; flex-wrap:wrap; position:sticky; top:4px; background:var(--bg); z-index:10; padding-top:6px; }
+  .tab { background:transparent; color:var(--text-dim); border:none; border-bottom:3px solid transparent; padding:10px 16px; font:inherit; font-size:15px; font-weight:500; cursor:pointer; }
+  .tab:hover { color:var(--text-bright); }
+  .tab[aria-selected="true"] { color:var(--text-bright); border-bottom-color:var(--nvidia-green); }
+  .panel { display:none; } .panel.active { display:block; }
+  /* rendered markdown */
+  .md h1 { font-size:28px; color:var(--text-bright); margin:8px 0 16px; line-height:1.2; }
+  .md h2 { font-size:21px; color:var(--text-bright); margin:38px 0 12px; }
+  .md h3 { font-size:17px; color:var(--text-bright); margin:26px 0 8px; }
+  .md p, .md li { margin:6px 0; } .md ul, .md ol { margin:8px 0 8px 22px; }
+  .md strong { color:var(--text-bright); }
+  .md code { font-family:'JetBrains Mono',monospace; font-size:.92em; background:var(--code-bg); padding:1px 5px; border-radius:4px; }
+  .md pre { font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.5; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; overflow-x:auto; margin:10px 0 16px; }
+  .md pre code { background:none; padding:0; font-size:inherit; }
+  .md table { border-collapse:collapse; width:100%; font-size:13.5px; margin:10px 0 18px; display:block; overflow-x:auto; }
+  .md th, .md td { text-align:left; vertical-align:top; padding:9px 11px; border-bottom:1px solid var(--border); }
+  .md th { background:var(--bg-card); color:var(--text-bright); font-weight:600; font-size:13px; white-space:nowrap; }
+  .md blockquote { border-left:4px solid var(--nvidia-green); background:var(--bg-slide); padding:10px 16px; border-radius:0 8px 8px 0; margin:10px 0; }
+  .md a { color:var(--runai-purple); }
+  .md hr { border:none; border-top:1px solid var(--border); margin:24px 0; }
+  .card { background:var(--bg-slide); border:1px solid var(--border); border-radius:12px; padding:18px 20px; margin:14px 0; }
+  .card pre { font-family:'JetBrains Mono',monospace; font-size:12.5px; line-height:1.5; background:var(--code-bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; overflow-x:auto; margin-top:8px; }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:12px; }
+  @media (max-width:760px) { .grid { grid-template-columns:1fr; } }
+  .mode { background:var(--bg-card); border:1px solid var(--border); border-radius:10px; padding:12px 14px; }
+  .mode h4 { color:var(--nvidia-green); font-size:15px; margin-bottom:6px; } body.light .mode h4 { color:var(--accent-strong); }
+  .mode.pl h4 { color:var(--text-dim); }
+  .mini { color:var(--text-dim); font-size:13.5px; }
+  .fallback { white-space:pre-wrap; font-family:'JetBrains Mono',monospace; font-size:12.5px; }
+  footer { margin-top:48px; color:var(--text-dim); font-size:12px; font-family:'JetBrains Mono',monospace; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+  @media print { .btn, .tabs { display:none; } .panel { display:block !important; page-break-before:always; } body { background:#fff; color:#000; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <div class="eyebrow">EPP upstream work · real-GPU lab</div>
+    <button class="btn" id="themeToggle" type="button">Light mode</button>
+  </div>
+  <h1 class="page">Benchmarking EPP routing modes on <span class="accent">real GPUs</span>, <span class="purple">real model</span></h1>
+  <p class="sub">Three guides. <strong>000 Create cluster</strong> provisions one EKS node with 4 real GPUs through env-in-a-click. <strong>001 Setup</strong> stands the environment up once on llm-d Router <code>main</code> in Gateway mode. <strong>002 Run</strong> puts the hotspot workload on top of it and compares the default profile with our adaptive handler, one set of numbers.</p>
+
+  <div class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="overview" type="button">Overview</button><button class="tab" role="tab" data-tab="create" type="button">000 · Create cluster</button><button class="tab" role="tab" data-tab="setup" type="button">001 · Setup</button><button class="tab" role="tab" data-tab="run" type="button">002 · Run</button>
+  </div>
+
+  <section class="panel" id="panel-overview" role="tabpanel">
+    <div class="card">
+<pre>  doc 001 (once)                                   doc 002 (per run)
+  ────────────────────────────────                 ─────────────────────────────────────────
+  4 GPUs → 4 vLLM pods, real model                 hypothesis written first (H1–H4)
+  kgateway + llm-d-router-gateway chart            GuideLLM: shared 1024-token prefix,
+  EPP: release v0.11.0 (A) / our build (C)           concurrency sweep 8 … 96, 3 repetitions
+  Prometheus: EPP + vLLM                           switch A ↔ C → settle 60 s → sweep → export</pre>
+      <p class="mini" style="margin-top:8px;">Setup is shared; only the EPP image and plugins config change between runs.</p>
+    </div>
+    <div class="grid">
+      <div class="mode"><h4>A · default profile</h4><p class="mini">llm-d Router <code>main</code>, release image, one profile: queue 2 · KV 2 · prefix 3. The baseline everyone runs.</p><p class="mini"><strong>✅ runs today</strong></p></div>
+      <div class="mode pl"><h4>C · discrete</h4><p class="mini">Predefined profiles, rules on cv and P with enter/exit bounds.</p><p class="mini"><strong>🔜 needs the prototype</strong></p></div>
+    </div>
+    <div class="card">
+      <p><strong>What "better" will mean here:</strong> on a shared-prefix hotspot workload, C lowers TTFT p99 and raises tokens/s per GPU versus the default profile, keeps the prefix-cache hit rate close to it, and switches profile only a few times per minute. If the numbers do not say that, the result is the result.</p>
+      <p class="mini" style="margin-top:8px;">Status: guides written 2026-10-12 against <code>llm-d/llm-d-router</code> <code>main</code> (<code>c0795deb0</code>, release v0.11.0); not yet executed end to end. Items marked <em>check</em> are versions or flag names to confirm at run time.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-create" role="tabpanel"><div class="md" data-src="md-create"></div></section>
+  <section class="panel" id="panel-setup" role="tabpanel"><div class="md" data-src="md-setup"></div></section>
+<section class="panel" id="panel-run" role="tabpanel"><div class="md" data-src="md-run"></div></section>
+
+  <footer>
+    <span>RUN:AI · NVIDIA · lab guides, 12 October 2026</span>
+    <span>Sources: 000_create-cluster_env-in-a-click.md · 001_setup_real-gpu-epp.md · 002_run_hotspot-benchmark.md · proposal: epp-upstream_issue-template.md</span>
+  </footer>
+</div>
+
+<script type="text/markdown" id="md-create" data-file="000_create-cluster_env-in-a-click.md">
+# 000 · Create the benchmark cluster with env-in-a-click
+
+## TL;DR (the whole thing in 3 lines)
+
+- One EKS cluster, one node with 4 real GPUs, no Run:AI installed. That is all docs 001 and 002 need.
+- Six wizard steps, about 3 minutes of clicking, then 30–45 minutes of provisioning.
+- Name: `nasbi-run-43533` · team: `viper` · ticket: RUN-43533.
+
+URL: https://argocd-infra-main-02.runailabs.com/env-in-a-click
+The page loads slowly (SSO redirects). Wait until the form appears inside the page.
+
+```text
+ Step 1 General ─► Step 2 Kubernetes ─► Step 3 Run:AI ─► Step 4 GPU ─► Step 5 Tools ─► Step 6 Summary ─► ArgoCD "Create"
+```
+
+## Step 1 · General Settings
+
+| Field | Value | Note |
+|---|---|---|
+| Environment Name | `nasbi-run-43533` | `<whoami>-<ticket lowercased>`; becomes the cluster and ArgoCD app name |
+| Team Name | `viper` | dropdown |
+
+→ Continue
+
+## Step 2 · Kubernetes Settings
+
+| Field | Value | Note |
+|---|---|---|
+| Distribution | **EKS** | options are at the top of the step; scroll up if hidden |
+| Region | `us-east-1` (default) | g5 instances available there |
+| Disk | 100 GB (default) | enough for the model cache |
+| Worker nodes | if a GPU node type is selectable here: **1 × g5.12xlarge** (4 × A10G 24 GB). If only CPU workers appear, leave default; the GPU node comes from step 4 | |
+
+→ Continue
+
+## Step 3 · Run:AI Settings
+
+| Field | Value | Note |
+|---|---|---|
+| Installation type | **None** | we benchmark the EPP only |
+| Version fields | ignore | greyed out with None |
+
+→ Continue
+
+If **None** cannot be combined with real GPUs, choose **Self-Hosted** with defaults and note it; the benchmark still works, Run:AI just sits beside it.
+
+## Step 4 · GPU Settings
+
+| Field | Value | Note |
+|---|---|---|
+| GPU type | **Real** | not Fake |
+| GPUs per node | **4** | |
+| GPU card / instance, if offered | **A10G** (g5.12xlarge) or **A100 40 GB** (p4d) | A10G is cheaper and fits Qwen3-8B in bf16 |
+| Memory / other fields | leave default | the Fake-GPU fields (Tesla-V100, 12000 MB) do not apply to Real |
+
+→ Continue
+
+## Step 5 · Third-Party Tools
+
+| Tool | Setting |
+|---|---|
+| Ingress Controller (nginx) | leave **on** (default, harmless) |
+| KWOK, Kubeflow, Training / MPI / NIM / Ray operators, NFS, Knative, Harbor, ArgoCD | all **off** |
+
+→ Continue
+
+## Step 6 · Summary & Deploy
+
+1. Check: name `nasbi-run-43533`, team viper, EKS us-east-1, Run:AI None, GPU Real × 4, no extra tools.
+2. Click **Deploy Environment** (the button, not the description text).
+3. ArgoCD opens a "Create application" dialog on the main page: click the blue **Create**.
+
+## After deploy
+
+- ArgoCD shows the app `nasbi-run-43533`. Wait for **Healthy / Synced**, typically 30–45 minutes for EKS with a GPU node.
+- If it stalls on the GPU node, it is usually instance capacity in the region; retry in `us-east-2` or `us-west-2`.
+
+## Hand-off checklist (what happens next, from doc 001)
+
+```text
+1. Connect:  kc add --session   (cluster nasbi-run-43533)
+2. Verify:   kubectl get nodes -o custom-columns=NAME:.metadata.name,GPU:.status.allocatable.nvidia\.com/gpu
+             expect one node with 4; read the card type from the node labels
+3. Run 001:  CRDs → kgateway → 4 × vLLM (Qwen3-8B) → EPP v0.11.0 → Prometheus → smoke test
+4. Run 002:  run A, 3 sweeps, export GuideLLM JSON + PromQL
+```
+
+## 🔧 If you only do one thing
+
+Get Run:AI = **None** and GPU = **Real × 4** right. Everything else is a default.
+
+## 🧠 Remember it as
+
+One EKS node, four real GPUs, nothing else installed.
+
+</script>
+<script type="text/markdown" id="md-setup" data-file="001_setup_real-gpu-epp.md">
+# 001 · Setup: real GPUs, real model, llm-d Router EPP from `main`, Gateway mode
+
+## TL;DR (the whole thing in 3 lines)
+
+- One Kubernetes cluster with **4 GPUs**, **4 vLLM pods** serving one real model with prefix caching on, **kgateway** as the Inference Gateway, and the **llm-d Router EPP** from the released `main` image behind it.
+- Prometheus scrapes the EPP and the vLLM pods. That is where the numbers come from.
+- Everything copies manifests and chart values that exist in `llm-d/llm-d-router` today; only GPU count, model, and (for run C) the EPP image change.
+
+Status: setup guide, written 2026-10-12 against `llm-d/llm-d-router` `main` (`c0795deb0`, release `v0.11.0`). Not yet executed end to end. Items marked **check** must be confirmed at run time.
+
+## Why llm-d Router and not GAIE
+
+The Endpoint Picker code moved. `kubernetes-sigs/gateway-api-inference-extension` `main` now holds only the `InferencePool` CRD and a lightweight conformance EPP. The real EPP, the plugin framework, the scorers and the profile handlers live in `llm-d/llm-d-router` (renamed from `llm-d-inference-scheduler`). A benchmark that upstream will accept has to run there.
+
+## What you end up with
+
+```text
+ ┌──────────────────────────────┐
+ │ 📈 GuideLLM (doc 002)        │   pod inside the cluster
+ └──────────────┬───────────────┘
+                │ HTTP POST /v1/completions
+ ╔══════════════▼═══════════════════════════════════════════════════════════╗
+ ║ Kubernetes cluster · namespace epp-lab                                    ║
+ ║                                                                           ║
+ ║  ┌──────────────────┐  ext-proc gRPC   ┌───────────────────────────────┐  ║
+ ║  │ ✅ Gateway        │────────────────►│ ✅ EPP  (run A)                │  ║
+ ║  │ kgateway          │◄────────────────│  ghcr.io/llm-d/               │  ║
+ ║  │ class: kgateway   │  chosen pod IP  │  llm-d-router-endpoint-picker │  ║
+ ║  │ + HTTPRoute       │                 │  :v0.11.0                      │  ║
+ ║  └────────┬─────────┘                  │ 🆕 EPP  (run C) our build      │  ║
+ ║           │ forward request            └───────────────┬───────────────┘  ║
+ ║           ▼                                            │ scrape /metrics   ║
+ ║  ┌─────────────────────────────────────────────────────▼────────────────┐ ║
+ ║  │ ✅ InferencePool "vllm-model" · 4 × vLLM pods · 1 GPU each            │ ║
+ ║  │   real model, --enable-prefix-caching, --max-num-seq 256             │ ║
+ ║  │   vllm:num_requests_waiting / running / gpu_cache_usage_perc         │ ║
+ ║  └──────────────────────────────────────────────────────────────────────┘ ║
+ ║  ┌───────────────────────┐                                                ║
+ ║  │ 📊 Prometheus         │  EPP ServiceMonitor + vLLM PodMonitor           ║
+ ║  └───────────────────────┘                                                ║
+ ╚═══════════════════════════════════════════════════════════════════════════╝
+```
+
+✅ = exists today (released image, chart, manifests) · 🆕 = the only custom piece, our EPP build for run C.
+
+## Prerequisites
+
+| Need | Minimum | Notes |
+|---|---|---|
+| Kubernetes cluster | 1.30+, one node with **4 GPUs** | GPU Operator or device plugin installed; `nvidia.com/gpu` allocatable. 8 GPUs lets you match the repo's 8-replica manifest later. |
+| GPU type | A100 40 GB / H100 / L40S | 8B model in bf16 with room for KV cache. L4 (24 GB): use a 3B model or fp8. |
+| Model | `Qwen/Qwen3-8B` (no gate) | The repo manifest uses `Qwen/Qwen3-32B`; that needs 80 GB per pod. |
+| Container registry | reachable from the cluster | Only for run C's image. Run A uses the public release image. |
+| Local tools | `kubectl`, `helm`, `docker`, `git`, `jq` | Present on this machine. |
+| Cluster access | `kc add --session` | Per the personal rules. |
+
+## Sizing
+
+| GPUs | Pods | Model | Why |
+|---|---|---|---|
+| **4** (minimum) | 4 | 8B bf16 | 1 hot pod vs 3 cold is visible; CV over 4 queues is meaningful |
+| 8 | 8 | 8B bf16 | Repo manifest shape, closer to the reported numbers |
+| 8 × 80 GB | 8 | 32B | Repo manifest as-is |
+
+## Steps
+
+### 0. Namespace, variables
+
+```bash
+export NS=epp-lab
+export MODEL=Qwen/Qwen3-8B
+export POOL=vllm-model                         # InferencePool name and pod label
+export EPP_RELEASE=v0.11.0                     # run A image tag, verified pullable
+export REGISTRY=<your-registry>/epp-lab        # run C image only
+
+kubectl create namespace $NS
+kubectl config set-context --current --namespace=$NS
+# only if the model is gated:
+kubectl create secret generic hf-token --from-literal=token=<your-hf-token>
+```
+
+### 1. CRDs: Gateway API + Inference Extension
+
+```bash
+git clone https://github.com/llm-d/llm-d-router.git && cd llm-d-router
+git checkout c0795deb0                         # main at writing time; or: git checkout v0.11.0
+kubectl apply -k deploy/components/crds-gateway-api
+kubectl apply -k deploy/components/crds-gie
+```
+
+The two kustomizations pin the Gateway API and InferencePool CRD versions the router was built against (GIE `v1.6.2`).
+
+### 2. Gateway provider: kgateway
+
+```bash
+KGTW_VERSION=v2.4.6                            # check: latest non-prerelease at writing time
+helm upgrade -i --create-namespace -n kgateway-system --version $KGTW_VERSION \
+  kgateway-crds oci://cr.kgateway.dev/kgateway-dev/charts/kgateway-crds
+helm upgrade -i -n kgateway-system --version $KGTW_VERSION \
+  kgateway oci://cr.kgateway.dev/kgateway-dev/charts/kgateway \
+  --set inferenceExtension.enabled=true        # check: key name in the v2.4.x chart; may be on by default
+```
+
+Gateway resource (what the router's own `kubernetes-kgateway` dev overlay creates):
+
+```yaml
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: inference-gateway
+  namespace: epp-lab
+spec:
+  gatewayClassName: kgateway
+  listeners:
+  - name: default
+    port: 80
+    protocol: HTTP
+```
+
+```bash
+kubectl apply -f gateway.yaml
+kubectl wait gateway/inference-gateway --for=condition=Programmed --timeout=120s
+```
+
+Istio is the router's default dev provider (`deploy/environments/dev/base-kind-istio`); kgateway is the documented alternative overlay. Either works with the same chart.
+
+### 3. vLLM pods (real model)
+
+Adapted from `config/manifests/vllm/gpu-prefix-cache-deployment.yaml` on `main`: 4 replicas instead of 8, 8B model instead of 32B, `max-num-seq` lowered so queues form, label kept so the pool selects the pods.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-model
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: vllm-model
+  template:
+    metadata:
+      labels:
+        app: vllm-model
+        llm-d.ai/engine-type: vllm
+    spec:
+      containers:
+      - name: vllm
+        image: vllm/vllm-openai:v0.21.0          # as in the repo manifest
+        command: ["python3", "-m", "vllm.entrypoints.openai.api_server"]
+        args:
+        - --model
+        - Qwen/Qwen3-8B                          # $MODEL
+        - --enable-prefix-caching
+        - --tensor-parallel-size
+        - "1"
+        - --port
+        - "8000"
+        - --max-num-seq
+        - "256"                                  # repo: 1024; lower so queues form under the sweep
+        - --max-model-len
+        - "16000"
+        env:
+        - { name: VLLM_USE_V1, value: "1" }
+        - { name: PORT, value: "8000" }
+        # only if gated:
+        # - name: HUGGING_FACE_HUB_TOKEN
+        #   valueFrom: { secretKeyRef: { name: hf-token, key: token } }
+        ports:
+        - { containerPort: 8000, name: http, protocol: TCP }
+        readinessProbe:
+          httpGet: { path: /health, port: http }
+          periodSeconds: 2
+        startupProbe:
+          httpGet: { path: /health, port: http }
+          failureThreshold: 600
+          periodSeconds: 2
+        lifecycle:
+          preStop: { sleep: { seconds: 30 } }
+        resources:
+          limits: { nvidia.com/gpu: 1 }
+          requests: { nvidia.com/gpu: 1 }
+        volumeMounts:
+        - { mountPath: /dev/shm, name: shm }
+        - { mountPath: /root/.cache/huggingface, name: hf-cache }
+      terminationGracePeriodSeconds: 130
+      volumes:
+      - name: shm
+        emptyDir: { medium: Memory }
+      - name: hf-cache
+        emptyDir: {}                              # PVC if you will redeploy often
+```
+
+```bash
+kubectl apply -f vllm-model.yaml
+kubectl rollout status deploy/vllm-model --timeout=25m   # pull + model download
+```
+
+| Flag | Effect on the experiment |
+|---|---|
+| `--enable-prefix-caching` | Without it the prefix scorer never sees a hit, no hotspot forms, nothing to test. |
+| `--max-num-seq 256` | Requests above this per pod queue. Lower = pressure appears at lower load. |
+| 1 GPU × 4 pods | Four independent queues, so imbalance is a real quantity. |
+
+### 4. EPP + InferencePool: the `llm-d-router-gateway` chart
+
+Run A uses the released image. No build.
+
+```bash
+helm install $POOL ./config/charts/llm-d-router-gateway \
+  --set router.modelServers.matchLabels.app=$POOL \
+  --set router.epp.image.registry=ghcr.io/llm-d \
+  --set router.epp.image.repository=llm-d-router-endpoint-picker \
+  --set router.epp.image.tag=$EPP_RELEASE \
+  --set router.epp.resources.requests.cpu=2 \
+  --set router.epp.resources.requests.memory=2Gi \
+  --set provider.name=none \
+  --set httpRoute.create=true \
+  --set httpRoute.inferenceGatewayName=inference-gateway \
+  --set router.monitoring.prometheus.enabled=true    # check: value path in routerlib (monitoring.prometheus.enabled)
+kubectl rollout status deploy/$POOL-epp              # check: deployment name from the chart NOTES
+```
+
+`provider.name=none` is the right value for kgateway (the chart's `istio` and `gke` providers add provider-specific objects). `httpRoute.create=true` creates the HTTPRoute from `inference-gateway` to the InferencePool. The chart's default CPU request is 8 cores, hence the override.
+
+**What the default EPP config is** (from `routerlib/templates/_config.yaml`, this is run A):
+
+```yaml
+schedulingProfiles:
+- name: default
+  plugins:
+  - pluginRef: queue-scorer
+    weight: 2
+  - pluginRef: kv-cache-utilization-scorer
+    weight: 2
+  - pluginRef: prefix-cache-scorer
+    weight: 3
+```
+
+One profile, fixed weights, `single-profile-handler` injected by default. This is the baseline the whole experiment compares against.
+
+### 5. Run C image (our prototype, later)
+
+```bash
+git checkout -b adaptive-profile-handler            # on top of main
+# add pkg/epp/framework/plugins/scheduling/profilehandler/adaptive/ and register it
+IMAGE_REGISTRY=$REGISTRY make image-build-epp image-push-epp
+helm upgrade $POOL ./config/charts/llm-d-router-gateway --reuse-values \
+  --set router.epp.image.registry=$REGISTRY \
+  --set router.epp.image.tag=adaptive-<sha> \
+  --set router.epp.pluginsConfigFile=adaptive-profiles.yaml \
+  --set-file router.epp.pluginsCustomConfig.adaptive-profiles\\.yaml=adaptive-profiles.yaml
+```
+
+`adaptive-profiles.yaml` is the configuration from the issue draft, with the three profiles built as variations of the default weights above.
+
+### 6. Prometheus
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm upgrade -i kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  -n monitoring --create-namespace \
+  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
+  --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false
+```
+
+The chart's ServiceMonitor (step 4) covers the EPP. For the vLLM pods, the router's `deploy/components/monitoring/vllm-sim-pod-monitor.yaml` is the pattern; ours points at the `http` port:
+
+```yaml
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: vllm-model
+  namespace: epp-lab
+spec:
+  selector:
+    matchLabels: { app: vllm-model }
+  podMetricsEndpoints:
+  - port: http
+    path: /metrics
+    interval: 5s
+```
+
+### 7. Smoke test
+
+```bash
+IP=$(kubectl get gateway/inference-gateway -o jsonpath='{.status.addresses[0].value}')
+curl -s ${IP}:80/v1/completions -H 'Content-Type: application/json' -d "{
+  \"model\": \"$MODEL\", \"prompt\": \"Write as if you were a critic: San Francisco\", \"max_tokens\": 32
+}" | jq .
+kubectl logs deploy/$POOL-epp --tail=30 | grep -i -E 'scor|profile|selected|endpoint'
+```
+
+## Verify before moving to doc 002
+
+| Check | Command | Expect |
+|---|---|---|
+| 4 vLLM pods ready | `kubectl get pods -l app=vllm-model -o wide` | 4 × `1/1 Running`, one GPU each |
+| InferencePool accepted | `kubectl get inferencepool $POOL -o yaml \| yq .status` | `Accepted=True`, `ResolvedRefs=True` |
+| HTTPRoute attached | `kubectl get httproute -o yaml \| yq '.items[].status'` | parent `inference-gateway`, `Accepted=True` |
+| Gateway programmed | `kubectl get gateway inference-gateway` | `PROGRAMMED=True`, address set |
+| EPP sees 4 endpoints | EPP `/metrics` → `inference_pool_ready_pods` (**check** name on main) or logs | 4 |
+| Prometheus targets | UI → Status → Targets | EPP ServiceMonitor and vLLM PodMonitor `UP` |
+| Prefix caching live | two identical prompts, then `curl <pod-ip>:8000/metrics \| grep prefix_cache` | hit counter increases (**check** exact vLLM metric names for v0.21.0) |
+
+## Switching EPP behavior (used by doc 002)
+
+| Run | What changes | How |
+|---|---|---|
+| **A · static** | default profile, release image | step 4 as written |
+| **C · discrete (ours)** | our image + `adaptive-profiles.yaml` | step 5 |
+
+## Teardown
+
+```bash
+helm uninstall $POOL
+kubectl delete -f vllm-model.yaml -f gateway.yaml
+helm uninstall kgateway kgateway-crds -n kgateway-system
+helm uninstall kube-prometheus-stack -n monitoring
+kubectl delete -k deploy/components/crds-gie; kubectl delete -k deploy/components/crds-gateway-api
+kubectl delete namespace $NS
+```
+
+## Code references
+
+All paths are in `llm-d/llm-d-router` at `main` (`c0795deb0`, 2026-10-08) unless noted.
+
+| Ref | Location | Used for |
+|---|---|---|
+| 1 | `deploy/components/crds-gateway-api/`, `deploy/components/crds-gie/` | CRD install (step 1) |
+| 2 | `deploy/environments/dev/kubernetes-kgateway/patch-gateways.yaml` | Gateway with `gatewayClassName: kgateway` (step 2) |
+| 3 | `config/manifests/vllm/gpu-prefix-cache-deployment.yaml` | Base for the vLLM deployment (step 3) |
+| 4 | `config/charts/llm-d-router-gateway/values.yaml`, `config/charts/routerlib/values.yaml` | `router.epp.image.*`, `router.epp.env`, `pluginsConfigFile`, `pluginsCustomConfig`, `httpRoute.*`, `provider.*` |
+| 5 | `config/charts/routerlib/templates/_config.yaml` | The default profile: queue 2 · KV 2 · prefix 3 |
+| 6 | `deploy/components/monitoring/epp-service-monitor.yaml`, `vllm-sim-pod-monitor.yaml` | Monitoring patterns (step 6) |
+| 7 | `Makefile:455-491` | `image-build-epp`, `image-push-epp`; `IMAGE_REGISTRY`, `EPP_IMAGE_NAME` |
+| 8 | `pkg/epp/framework/plugins/scheduling/profilehandler/{single,headerprofile,disagg,dataparallel}` | Where our `adaptive` handler goes |
+| 9 | `pkg/epp/framework/interface/datalayer/metrics.go:35-46` | `RunningRequestsSize`, `WaitingQueueSize`, `KVCacheUsagePercent`, `UpdateTime` |
+| 10 | `ghcr.io/llm-d/llm-d-router-endpoint-picker:v0.11.0` | Run A image, manifest verified pullable on 2026-10-12 |
+
+## 🔧 If you only do one thing
+
+Get step 7's curl to return a completion through kgateway with the `v0.11.0` EPP. Everything else is tuning.
+
+## 🧠 Remember it as
+
+Four real GPUs, four real queues, the EPP everyone already runs, one Prometheus watching all five.
+
+</script>
+<script type="text/markdown" id="md-run" data-file="002_run_hotspot-benchmark.md">
+# 002 · Run: the hotspot benchmark, baseline vs our handler, one set of numbers
+
+## TL;DR (the whole thing in 3 lines)
+
+- One workload that **creates a hotspot on purpose**: every request shares a long prefix, so the prefix scorer (weight 3 in the default profile) pulls them all to one pod.
+- Two runs with only the EPP changed: **A · default profile on `main`** and **C · our adaptive profile handler**. Same pods, same model, same load, same seed.
+- The claim to prove: C **lowers TTFT p99 and raises served tokens/s per GPU** on this workload, while keeping the prefix-cache hit rate close to A. If the numbers do not say that, there is nothing to submit.
+
+Status: run plan, written 2026-10-12. Run A can be executed today. Run C needs the prototype.
+
+## The hypothesis, written down before running anything
+
+| | Statement |
+|---|---|
+| **H1 · latency** | At concurrency ≥ 32 on the shared-prefix workload, C has lower TTFT p99 than A. |
+| **H2 · efficiency** | At the same concurrency, C serves more output tokens/s per GPU than A (the three cold GPUs do work). |
+| **H3 · cost of H1/H2** | C's prefix-cache hit rate stays within 20 points of A at the concurrency where A is not yet hot (8), and is allowed to drop where A is saturated. |
+| **H4 · stability** | C switches profile fewer than 3 times per minute at steady load (hysteresis works). |
+| Kill criterion | If H1 and H2 both fail at every concurrency, the discrete handler adds nothing over the default profile on this workload. |
+
+## The runs
+
+```text
+                 ┌────────────────────────────────────────────────────────────┐
+  same setup     │  4 × vLLM pods · 1 model · prefix caching on (doc 001)      │
+  (doc 001)      └────────────────────────────┬───────────────────────────────┘
+                                              │
+                          ┌───────────────────┴───────────────────┐
+                          ▼                                       ▼
+            ┌──────────────────────────┐            ┌──────────────────────────┐
+            │ A · default profile       │            │ C · adaptive handler      │
+            │ queue 2 · KV 2 · prefix 3 │            │ cache / balanced / load   │
+            │ release image v0.11.0     │            │ rules on cv and P,        │
+            │ ✅ runs today             │            │ enter/exit bounds         │
+            └──────────────┬───────────┘            │ 🔜 needs prototype        │
+                           │                        └──────────────┬───────────┘
+                           └────────────────┬───────────────────────┘
+                                            ▼
+                  same hotspot workload · same concurrency sweep · 3 repetitions each
+                                            ▼
+                  TTFT p50 / p99 · tokens/s per GPU · queue spread · hit rate · switches (C)
+```
+
+
+## 1. The workload
+
+**Goal:** make the prefix scorer concentrate traffic. All requests carry the same 1024-token prefix. Under the default profile the EPP keeps sending them to the pod that already holds the prefix; its queue grows while three pods idle. That is the hotspot.
+
+GuideLLM is the load tool. Deploy it as a long-running pod and `exec` in.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: guidellm
+  namespace: epp-lab
+spec:
+  containers:
+  - name: guidellm
+    image: ghcr.io/vllm-project/guidellm:v0.8.1      # check: latest release at writing time
+    command: ["/bin/bash", "-c", "sleep infinity"]
+    resources:
+      requests: { cpu: "2", memory: 4Gi }
+    volumeMounts:
+    - { mountPath: /data, name: results }
+  volumes:
+  - name: results
+    persistentVolumeClaim: { claimName: guidellm-results }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: guidellm-results
+  namespace: epp-lab
+spec:
+  accessModes: [ReadWriteOnce]
+  resources: { requests: { storage: 5Gi } }
+```
+
+```bash
+kubectl apply -f guidellm.yaml
+kubectl exec -it guidellm -- bash
+```
+
+One sweep:
+
+```bash
+GATEWAY=http://$(kubectl get gateway/inference-gateway -o jsonpath='{.status.addresses[0].value}'):80
+MODEL=Qwen/Qwen3-8B
+
+guidellm benchmark \
+  --target "$GATEWAY" \
+  --model "$MODEL" \
+  --processor "$MODEL" \
+  --rate-type concurrent \
+  --rate 8,16,32,64,96 \
+  --max-seconds 120 \
+  --data "prefix_tokens=1024,prompt_tokens=128,output_tokens=128" \
+  --output-path /data/run-A-rep1.json
+```
+
+| Argument | Why this value |
+|---|---|
+| `--rate-type concurrent --rate 8,…,96` | Concurrency sweep. With `max-num-seq 256` per pod the only way a queue forms below 96 is a hotspot, which is the point. |
+| `prefix_tokens=1024` | The shared prefix. Long enough that a cache hit is worth a lot to the prefix scorer. Documented in GuideLLM `docs/en/guides/datasets.md` (synthetic data). |
+| `prompt_tokens=128, output_tokens=128` | Short unique tail and short generation, so the experiment is about routing, not decode time. |
+| `--max-seconds 120` | Long enough to reach steady state at each level. |
+
+Run each sweep **3 times** per run type and report the median. Name files `run-<A|C>-rep<n>.json`.
+
+## 2. Switching between A and C
+
+| | Command (from the `llm-d-router` checkout, doc 001) |
+|---|---|
+| **A** | `helm upgrade $POOL ./config/charts/llm-d-router-gateway --reuse-values --set router.epp.image.registry=ghcr.io/llm-d --set router.epp.image.tag=v0.11.0 --set router.epp.pluginsConfigFile=default-plugins.yaml` |
+| **C** | doc 001 step 5: our image + `--set router.epp.pluginsConfigFile=adaptive-profiles.yaml` |
+
+After every switch: `kubectl rollout status deploy/$POOL-epp`, then **wait 60 s** so the EPP has scraped every pod a few times and the vLLM prefix caches start from a comparable state, then start the sweep.
+
+Cache policy: do **not** restart the vLLM pods between repetitions. Warm caches are the realistic case. Write this in the results log.
+
+## 3. What to record
+
+### From GuideLLM (per run file)
+
+| Metric | Where | Shows |
+|---|---|---|
+| TTFT p50 / p99 per concurrency | `benchmarks[].metrics.time_to_first_token_ms` | H1 |
+| Output tokens/s per concurrency | `benchmarks[].metrics.output_tokens_per_second` | H2 (divide by 4 for per GPU) |
+| Request latency p99 | `benchmarks[].metrics.request_latency` | Tail behavior |
+| Errors / timeouts | error totals | Must be 0 for a run to count |
+
+### From Prometheus (PromQL over each run's window)
+
+| Name | Query | Shows |
+|---|---|---|
+| Queue per pod | `vllm:num_requests_waiting{namespace="epp-lab"}` | The hotspot: one line up, three flat |
+| **Queue spread** | `max(vllm:num_requests_waiting{namespace="epp-lab"}) - min(vllm:num_requests_waiting{namespace="epp-lab"})` | Large in A, small in C |
+| KV usage per pod | `vllm:gpu_cache_usage_perc{namespace="epp-lab"}` | Whether the hot pod is also memory-hot |
+| Prefix hit rate per pod (vLLM side) | `rate(vllm:prefix_cache_hits_total[30s]) / rate(vllm:prefix_cache_queries_total[30s])` | H3. **check** names for vLLM v0.21.0 |
+| Prefix prediction (EPP side) | `llm_d_router_endpoint_picker_prefix_predicted_cached_tokens`, `…_prefix_prompt_tokens` | What the EPP believed about cache reuse when it chose |
+| Pool averages (EPP) | `inference_pool_average_queue_size`, `inference_pool_average_kv_cache_utilization` | Sanity. **check** these names still exist on `main` |
+| Our decisions (C) | `adaptive_profile_selections_total{profile,rule,reason}` 🔜 | H4: selections and regime switches |
+
+Export each query for the run window:
+
+```bash
+PROM=http://localhost:9090   # kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090
+START=<unix>; END=<unix>
+curl -sG "$PROM/api/v1/query_range" \
+  --data-urlencode 'query=max(vllm:num_requests_waiting{namespace="epp-lab"}) - min(vllm:num_requests_waiting{namespace="epp-lab"})' \
+  --data-urlencode "start=$START" --data-urlencode "end=$END" --data-urlencode "step=5" \
+  > spread-run-A-rep1.json
+```
+
+## 4. How to present the result
+
+One table, medians of 3 repetitions:
+
+| Concurrency | A TTFT p99 | C TTFT p99 | Δ | A tok/s per GPU | C tok/s per GPU | Δ | A hit rate | C hit rate | A spread | C spread | C switches/min |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 8 | | | | | | | | | | | |
+| 16 | | | | | | | | | | | |
+| 32 | | | | | | | | | | | |
+| 64 | | | | | | | | | | | |
+| 96 | | | | | | | | | | | |
+
+Three charts, A and C overlaid:
+
+1. **Queue per pod over time at concurrency 64.** The picture: A shows one line climbing, C shows four lines close together.
+2. **TTFT p99 and tokens/s per GPU vs concurrency.** H1 and H2 on one page.
+3. **Prefix hit rate vs concurrency.** H3, the honest counterweight: what distribution costs.
+
+Say exactly what the table supports: *on a shared-prefix hotspot workload with 4 pods, the adaptive handler reduced TTFT p99 by X% and increased tokens/s per GPU by Y% at concurrency ≥ 32, at the cost of Z points of prefix hit rate, with N profile switches per minute.* If X or Y is not positive, say that.
+
+## 5. Pitfalls that invalidate a run
+
+| Pitfall | Symptom | Fix |
+|---|---|---|
+| Prefix caching off or prefix too short | No hotspot in A; A and C look identical | Check vLLM prefix-hit counters increase; `prefix_tokens ≥ 1024` |
+| `max-num-seq` too high for the load | Queues stay 0, pressure stays 0 | Lower to 64 or raise concurrency |
+| Changing two things at once | Cannot attribute the difference | Only image + plugins config differ between A and C |
+| One repetition | Jitter dominates | 3 repetitions, median, show spread |
+| EPP or caches still warming | First 30 s of a run look different | 60 s settle time after every switch |
+| Model download during a run | TTFT spikes unrelated to routing | `rollout status` first; HF cache on a PVC |
+| C tuned on the same data it is judged on | Thresholds overfit | Pick `enter/exit` and the gate from a **different** run (concurrency 48), then freeze them |
+
+## 6. Results log
+
+One directory per campaign: `nael-docs/v2/results/<YYYY-MM-DD>-hotspot/` with the GuideLLM JSONs, the PromQL exports, and a `README.md` holding the table from section 4 plus:
+
+```text
+Date · cluster · GPU type × count · model · vLLM version · EPP image (v0.11.0 / adaptive-<sha>)
+Run A plugins config (default-plugins.yaml, weights) · Run C plugins config (full YAML)
+Exact guidellm command · repetitions · cache policy (warm) · settle time
+```
+
+## Code references
+
+| Ref | Location | Used for |
+|---|---|---|
+| 1 | `llm-d-router` `config/charts/routerlib/templates/_config.yaml` | Run A profile: queue 2 · KV 2 · prefix 3 |
+| 2 | `llm-d-router` `pkg/epp/metrics/metrics.go` | EPP `llm_d_router_endpoint_picker_prefix_*` metric names |
+| 3 | `llm-d-router` `config/manifests/benchmark/benchmark.yaml` | Alternative load tool (ShareGPT sweep); no shared-prefix knob, not used |
+| 4 | GuideLLM `docs/en/guides/datasets.md` | `prefix_tokens` synthetic data option |
+| 5 | `nael-docs/v2/epp-upstream_issue-template.md` | Run C plugins config and `adaptive_profile_selections_total` |
+
+## 🔧 If you only do one thing
+
+Run A once at concurrency 64 and watch `vllm:num_requests_waiting` per pod. If one pod's queue does not climb while the others stay flat, fix the workload before anything else.
+
+## 🧠 Remember it as
+
+Write the hypothesis first, make the hotspot on purpose, change one switch, watch four queues.
+
+</script>
+
+<script>
+(function () {
+  // render markdown
+  var ok = typeof marked !== 'undefined';
+  document.querySelectorAll('.md[data-src]').forEach(function (el) {
+    var src = document.getElementById(el.getAttribute('data-src'));
+    var text = src ? src.textContent.replace(/^\n/, '') : '';
+    if (ok) { el.innerHTML = marked.parse(text, { gfm: true, breaks: false }); }
+    else { var pre = document.createElement('pre'); pre.className = 'fallback'; pre.textContent = text; el.appendChild(pre); }
+  });
+  // tabs
+  var tabs = document.querySelectorAll('.tab'), panels = document.querySelectorAll('.panel');
+  function select(name) {
+    tabs.forEach(function (t) { t.setAttribute('aria-selected', String(t.dataset.tab === name)); });
+    panels.forEach(function (p) { p.classList.toggle('active', p.id === 'panel-' + name); });
+    try { history.replaceState(null, '', '#' + name); } catch (e) {}
+    window.scrollTo(0, 0);
+  }
+  tabs.forEach(function (t) { t.addEventListener('click', function () { select(t.dataset.tab); }); });
+  var initial = (location.hash || '#overview').slice(1);
+  if (!document.getElementById('panel-' + initial)) initial = 'overview';
+  select(initial);
+  // theme
+  var btn = document.getElementById('themeToggle'), key = 'epp-lab-theme';
+  function apply(light) { document.body.classList.toggle('light', light); btn.textContent = light ? 'Dark mode' : 'Light mode'; }
+  var saved = null; try { saved = localStorage.getItem(key); } catch (e) {}
+  apply(saved === 'light');
+  btn.addEventListener('click', function () {
+    var light = !document.body.classList.contains('light'); apply(light);
+    try { localStorage.setItem(key, light ? 'light' : 'dark'); } catch (e) {}
+  });
+})();
+</script>
+</body>
+</html>
