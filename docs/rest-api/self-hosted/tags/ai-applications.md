@@ -1,0 +1,1 @@
+AI applications represent a high-level logical grouping of all Kubernetes resources (workloads, services, ConfigMaps, etc.) that together deliver a functional AI solution, such as a Retrieval-Augmented Generation (RAG) system or an image classification service.

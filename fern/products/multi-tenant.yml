@@ -201,19 +201,29 @@ navigation:
         - section: Organizations
           contents:
           - tenant
-          - clusters
+          - clusters:
+              summary: ../../docs/rest-api/multi-tenant/tags/clusters.md
         - section: Authentication and Authorization
           contents:
           - idps
           - users
-          - serviceAccounts
-          - accessKeys
-          - tokens
-          - settings
-          - roles
-          - permissions
-          - accessRules
-          - me
+          - serviceAccounts:
+              summary: ../../docs/rest-api/multi-tenant/tags/service-accounts.md
+          - accessKeys:
+              summary: ../../docs/rest-api/multi-tenant/tags/access-keys.md
+          - tokens:
+              summary: ../../docs/rest-api/multi-tenant/tags/tokens.md
+          - settings:
+              summary: ../../docs/rest-api/multi-tenant/tags/settings.md
+          - roles:
+              summary: ../../docs/rest-api/multi-tenant/tags/roles.md
+          - permissions:
+              summary: ../../docs/rest-api/multi-tenant/tags/permissions.md
+          - accessRules:
+              summary: ../../docs/rest-api/multi-tenant/tags/access-rules.md
+          - me:
+              summary: ../../docs/rest-api/multi-tenant/tags/me.md
         - section: Audit
           contents:
-          - auditLogs
+          - auditLogs:
+              summary: ../../docs/rest-api/multi-tenant/tags/audit-logs.md
