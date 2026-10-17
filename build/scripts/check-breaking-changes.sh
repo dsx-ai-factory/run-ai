@@ -5,7 +5,8 @@
 
 # check-breaking-changes.sh
 # Compares the current package against its latest prod tag using apidiff.
-# Exit 0: no breaking changes — the bump targets select a patch bump
+# Exit 0: no breaking changes — the bump targets select a patch bump.
+#         An added symbol, including a new interface method, is compatible.
 # Exit 1: breaking changes found — the bump targets select a minor bump
 #
 # Usage: check-breaking-changes.sh <TAG_FORMAT> <PKG_DIR> [LATEST_TAG]
@@ -27,6 +28,12 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 # consumers. Regenerating them (e.g. the mockery v2 -> v3 migration) rewrites
 # every exported mock symbol, which would otherwise dominate the report.
 IGNORED_CHANGES_REGEX='^- (\./([^ ]*/)?mocks\.|package [^ ]*/mocks:)'
+
+# apidiff reports a new interface method as incompatible, because a type
+# defined outside the module would no longer implement the interface. These
+# modules are consumed by callers, so any ": added" change is a compatible
+# extension and selects a patch bump.
+ADDITION_CHANGE_REGEX=': added$'
 
 # ── helpers ──────────────────────────────────────────────────────────────────
 
@@ -145,8 +152,16 @@ rm -f "${OLD_PKG_DIR}/go.sum"
 result=$(apidiff -m "$OLD_API" "$NEW_API" 2>"$APIDIFF_STDERR") \
     || die "apidiff failed: $(cat "$APIDIFF_STDERR")"
 
-BREAKING_CHANGES=$(printf '%s\n' "$result" | report_section Incompatible | filter_ignored)
+INCOMPATIBLE_CHANGES=$(printf '%s\n' "$result" | report_section Incompatible | filter_ignored)
 COMPAT_CHANGES=$(printf '%s\n' "$result" | report_section Compatible | filter_ignored)
+
+# Additions are compatible even when apidiff files them under incompatible
+# (new interface methods). Removals and signature changes stay breaking.
+ADDITIONS=$(printf '%s\n' "$INCOMPATIBLE_CHANGES" | grep -E "$ADDITION_CHANGE_REGEX" || true)
+BREAKING_CHANGES=$(printf '%s\n' "$INCOMPATIBLE_CHANGES" | grep -v -E "$ADDITION_CHANGE_REGEX" || true)
+if [ -n "$ADDITIONS" ]; then
+    COMPAT_CHANGES=$(printf '%s\n%s\n' "$COMPAT_CHANGES" "$ADDITIONS" | sed '/^$/d')
+fi
 
 BREAKING=false
 [ -n "$BREAKING_CHANGES" ] && BREAKING=true
