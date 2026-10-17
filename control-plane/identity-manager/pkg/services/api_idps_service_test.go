@@ -7,6 +7,7 @@ package services
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"net/http"
@@ -18,8 +19,11 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 
+	"github.com/Nerzal/gocloak/v13"
+
 	internalCache "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/cache"
 	internalCacheMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/cache/mocks"
+	iamError "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/errors"
 	iamMock "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/mocks"
 	iamModels "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	authMock "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/business/authorization/mocks"
@@ -37,11 +41,21 @@ import (
 )
 
 const (
-	URL      = "https://example.com/"
-	XML_FILE = "aGVsbG8gd29ybGQ="
-	XML_URL  = "https://example.com/auth/realms/workAI/protocol/saml/descriptor"
-	realm    = "test-realm"
-	idpAlias = "idpAlias"
+	URL              = "https://example.com/"
+	NON_SAML_XML     = "hello world"
+	INVALID_XML_FILE = "not!valid!base64"
+	XML_URL          = "https://example.com/auth/realms/workAI/protocol/saml/descriptor"
+	realm            = "test-realm"
+	idpAlias         = "idpAlias"
+)
+
+// The upload path parses the metadata before handing it to Keycloak, so the
+// happy-flow fixture has to be a real SAML descriptor.
+const SAML_XML = `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com"/>`
+
+var (
+	XML_FILE          = base64.StdEncoding.EncodeToString([]byte(SAML_XML))
+	NON_SAML_XML_FILE = base64.StdEncoding.EncodeToString([]byte(NON_SAML_XML))
 )
 
 type IdpsApiServiceMocks struct {
@@ -352,6 +366,59 @@ func TestCreateIdp_ConfigFileError(t *testing.T) {
 	assert.Equal(t, http.StatusInternalServerError, response.Code)
 }
 
+func TestCreateIdp_InvalidBase64MetadataFile(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+
+	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, INVALID_XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
+	assert.Equal(t, http.StatusBadRequest, err.(utils.Error).Code)
+}
+
+func TestCreateIdp_NonSamlMetadataFile(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+
+	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, NON_SAML_XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
+	assert.Equal(t, http.StatusBadRequest, err.(utils.Error).Code)
+}
+
+func TestCreateIdp_MetadataRejectedByKeycloak(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil, iamError.HandleKeyCloakError(&gocloak.APIError{Code: http.StatusBadRequest, Message: "400 Bad Request"}))
+
+	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
+	assert.Equal(t, http.StatusBadRequest, err.(utils.Error).Code)
+}
+
+func TestCreateIdp_KeycloakServerError(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil, iamError.HandleKeyCloakError(&gocloak.APIError{Code: http.StatusInternalServerError, Message: "500 Internal Server Error"}))
+
+	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusInternalServerError, response.Code)
+}
+
 func TestDeleteIdp_HappyFlow(t *testing.T) {
 	assert.Nil(t, nil)
 	MocksList, testSubject, ctx := initIdpServiceTests(t)
@@ -615,7 +682,7 @@ func TestUpdateIdp_HappyFlow(t *testing.T) {
 		defer wg.Done()
 	}).Return(nil)
 
-	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, "file"), "")
+	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
 	wg.Wait()
 	assert.Equal(t, http.StatusOK, res.Code)
 	assert.Nil(t, err)
@@ -770,9 +837,66 @@ func TestUpdateIdp_Config_Error(t *testing.T) {
 	authMock := MocksList.AuthManagerMock
 	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
 	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error"))
-	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, "file"), "")
+	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
 	assert.Equal(t, http.StatusInternalServerError, res.Code)
 	assert.NotNil(t, err)
+}
+
+func TestUpdateIdp_InvalidBase64MetadataFile(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
+
+	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, INVALID_XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, res.Code)
+	assert.Equal(t, http.StatusBadRequest, err.(utils.Error).Code)
+}
+
+func TestUpdateIdp_MetadataRejectedByKeycloak(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil, iamError.HandleKeyCloakError(&gocloak.APIError{Code: http.StatusBadRequest, Message: "400 Bad Request"}))
+
+	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, res.Code)
+	assert.Equal(t, http.StatusBadRequest, err.(utils.Error).Code)
+}
+
+func TestUpdateIdp_IdpNotFound(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
+	iamMock.MockIdpService.On("UpdateIdp", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(fmt.Errorf("failed to get idp: %w", iamError.HandleKeyCloakError(&gocloak.APIError{Code: http.StatusNotFound, Message: "404 Not Found"})))
+
+	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusNotFound, res.Code)
+	assert.Equal(t, http.StatusNotFound, err.(utils.Error).Code)
+}
+
+func TestUpdateIdp_KeycloakServerError(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil, iamError.HandleKeyCloakError(&gocloak.APIError{Code: http.StatusInternalServerError, Message: "500 Internal Server Error"}))
+
+	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusInternalServerError, res.Code)
 }
 
 func TestUpdateIdp_Update_Error(t *testing.T) {
@@ -782,7 +906,7 @@ func TestUpdateIdp_Update_Error(t *testing.T) {
 	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
 	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
 	iamMock.MockIdpService.On("UpdateIdp", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
-	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, "file"), "")
+	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
 	assert.Equal(t, http.StatusInternalServerError, res.Code)
 	assert.NotNil(t, err)
 }
@@ -791,7 +915,7 @@ func TestGetIdpFileResourceAsString_HappyFlow(t *testing.T) {
 	_, testSubject, _ := initIdpServiceTests(t)
 	idpRequest := getIdpMetadataModel(idpAlias, XML_FILE, utils.File, models.SAML, nil, nil)
 	res, err := testSubject.getIdpResourceAsString(context.Background(), idpRequest)
-	assert.Equal(t, "hello world", res)
+	assert.Equal(t, SAML_XML, res)
 	assert.Nil(t, err)
 }
 

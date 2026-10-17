@@ -107,10 +107,35 @@ func IsInternalServerError(err error) bool {
 }
 
 func getErrorStatusCode(err error) int {
-	if errorHandler, ok := err.(Error); ok {
+	var errorHandler Error
+	if errors.As(err, &errorHandler) {
 		return errorHandler.Code
 	}
 	return http.StatusInternalServerError
+}
+
+func GetHttpStatusCodeAndMessage(err error) (int, string) {
+	if err == nil {
+		return http.StatusOK, "ok"
+	}
+
+	if IsBadRequest(err) {
+		return http.StatusBadRequest, "bad request"
+	}
+	if IsConflict(err) {
+		return http.StatusConflict, "already exists"
+	}
+	if IsNotFound(err) {
+		return http.StatusNotFound, "not found"
+	}
+	if IsUnauthorized(err) {
+		return http.StatusUnauthorized, "unauthorized"
+	}
+	if IsForbidden(err) {
+		return http.StatusForbidden, "forbidden"
+	}
+
+	return http.StatusInternalServerError, "internal server error"
 }
 
 func parseSettingPkgError(err error) error {

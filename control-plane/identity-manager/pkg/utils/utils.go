@@ -12,6 +12,7 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"io"
 	"math/big"
@@ -24,6 +25,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/crewjam/saml"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/google/uuid"
@@ -255,6 +257,37 @@ func DecodeBase64String(encodedBase64 string) (*[]byte, error) {
 
 func ByteArrayToReader(data []byte) io.Reader {
 	return bytes.NewReader(data)
+}
+
+func ValidateSamlMetadata(metadata []byte) error {
+	// 1. Attempt to parse as a standard single EntityDescriptor
+	var entity saml.EntityDescriptor
+	entityErr := xml.Unmarshal(metadata, &entity)
+	if entityErr == nil {
+		if entity.EntityID == "" {
+			return fmt.Errorf("SAML structural validation error: missing mandatory 'entityID' attribute")
+		}
+		return nil
+	}
+
+	// 2. Fallback: Parse as an EntitiesDescriptor aggregate
+	var entities saml.EntitiesDescriptor
+	if err := xml.Unmarshal(metadata, &entities); err != nil {
+		// Report the single-descriptor failure as it's the most common format
+		return fmt.Errorf("invalid XML formatting or layout schema: %w", entityErr)
+	}
+
+	// 3. Ensure the aggregate actually contains descriptors to read
+	if len(entities.EntityDescriptors) == 0 {
+		return fmt.Errorf("SAML structural validation error: EntitiesDescriptor aggregate contains no child EntityDescriptor blocks")
+	}
+
+	// 4. Validate the first child element
+	if entities.EntityDescriptors[0].EntityID == "" {
+		return fmt.Errorf("SAML structural validation error: the first entity descriptor in the aggregate is missing a mandatory 'entityID'")
+	}
+
+	return nil
 }
 
 func DecodeBase64ToReader(encodedBase64 string) (io.Reader, error) {
