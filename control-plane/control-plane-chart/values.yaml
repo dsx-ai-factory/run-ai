@@ -3317,6 +3317,7 @@ workloads:
     # (CHART_RETENTION_MINUTES). Charts referenced by an already-deployed application
     # are removed regardless; this bounds abandoned/unclaimed uploads. Default 24h.
     chartRetentionMinutes: 1440
+    chartInspectionCacheTTLSeconds: 600
     server:
       writeTimeout: 2m
       readTimeout: 2m
