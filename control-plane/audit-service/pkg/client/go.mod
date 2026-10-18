@@ -5,12 +5,12 @@ go 1.27.2
 require (
 	github.com/Rican7/retry v0.3.1
 	github.com/aws/smithy-go v1.28.5
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 )
@@ -21,7 +21,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.6 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
@@ -66,7 +66,7 @@ require (
 	github.com/xdg-go/scram v1.2.0 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/log v1.47.0 // indirect
 	go.opentelemetry.io/otel/metric v1.47.0 // indirect
