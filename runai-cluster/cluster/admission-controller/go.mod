@@ -5,8 +5,8 @@ go 1.27.2
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261015150047-f2a1b8416f86
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261015150047-f2a1b8416f86
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261016201000-3c8f35ec0e77
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261016201000-3c8f35ec0e77
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.2
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
@@ -40,7 +40,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.6 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-openapi/jsonpointer v1.0.2 // indirect
 	github.com/go-openapi/jsonreference v1.0.3 // indirect
