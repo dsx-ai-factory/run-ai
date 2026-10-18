@@ -2,10 +2,10 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/fips
 
 go 1.27.2
 
-require github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16
+require github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-playground/locales v0.14.2 // indirect
