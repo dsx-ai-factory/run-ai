@@ -28,7 +28,7 @@ MOCKERY_VERSION=v3.8.1
 # Must be new enough to decode the Go release's export data: v2.9.0 fails
 # every package on Go 1.27 with "export data version 4 ... (typecheck)".
 # renovate: datasource=go depName=github.com/golangci/golangci-lint/v2
-GOLANGCI_LINT_VERSION=v2.14.0
+GOLANGCI_LINT_VERSION=v2.15.0
 GOPRIVATE=github.com/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.

@@ -593,15 +593,10 @@ Set `ingress.enabled: false` under `customHelmValues` for both the cluster and c
 ```yaml
 cluster:
   customHelmValues:
-    clusterConfig:
-      global:
-        ingress:
-          enabled: false
+    clusterConfig.global.ingress.enabled: false
 controlPlane:
   customHelmValues:
-    global:
-      ingress:
-        enabled: false
+    global.ingress.enabled: false
 ```
 
 Re-run `runai-installer install` with the updated `config.yaml` to apply the change. See [`cluster`](../../installation/guided-installation/configuration-reference.md#cluster-configuration) / [`controlPlane`](../../installation/guided-installation/configuration-reference.md#control-plane-configuration).

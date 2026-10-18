@@ -33,11 +33,11 @@ var icd = &controlplanedetailsdownloader.InstallationConfigurationData{
 					cpclusterclient.ClusterControlPlaneConfig{
 						MetricsRemoteWrites: []cpclusterclient.ClusterControlPlaneConfigMetricsRemoteWrite{
 							{
-								Url:   ptr.To("https://aaa.runailabs.com/api/v1/receive"),
+								Url:   ptr.To("https://aaa.example.com/api/v1/receive"),
 								Label: ptr.To(string(rwlc.ClusterMetricsRemoteWriteLabel)),
 							},
 							{
-								Url:   ptr.To("https://app.runailabs.com/api/v1/receive"),
+								Url:   ptr.To("https://app.example.com/api/v1/receive"),
 								Label: ptr.To(rwlc.ApplicationMetricsRemoteWriteLabel),
 							},
 						},
@@ -53,7 +53,7 @@ func TestPrometheusUpgradeClientRemoteWrite(t *testing.T) {
 		CommonPrometheusFields: monitoringv1.CommonPrometheusFields{
 			RemoteWrite: []monitoringv1.RemoteWriteSpec{
 				{
-					URL: "https://aaa.runailabs.com/api/v1/receive",
+					URL: "https://aaa.example.com/api/v1/receive",
 					BasicAuth: &monitoringv1.BasicAuth{
 						Password: coreV1.SecretKeySelector{
 							Key: "remoteWritePassword",

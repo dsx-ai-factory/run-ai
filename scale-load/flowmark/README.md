@@ -102,6 +102,13 @@ rejected submission counts in `failed_count` and enters no latency. The pacer
 never fires missed ticks later; when fewer than 90% of the planned
 submissions were made, the section fails and says so.
 
+## Dashboard
+
+The nightly results are shown at https://dsx-ai-factory.github.io/run-ai/flowmark/: a
+table of runs and a trend chart per scenario and KPI, with the SLO line, the
+flagged nights and the control plane build of every point. The page lives in
+`dashboard/` and is described in [dashboard/README.md](dashboard/README.md).
+
 ## Results
 
 Every run writes `reports/results-<timestamp>.json` and adds it to

@@ -11171,6 +11171,7 @@ Components:
   github.com/gabriel-vasile/mimetype v1.4.12
   github.com/gabriel-vasile/mimetype v1.4.13
   github.com/gabriel-vasile/mimetype v1.4.15
+  github.com/gabriel-vasile/mimetype v1.4.16
   github.com/gabriel-vasile/mimetype v1.4.8
 
 MIT License
@@ -12804,7 +12805,7 @@ Copyright Klaus Post - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/klauspost/cpuid/v2 v2.2.10
-  github.com/klauspost/cpuid/v2 v2.4.0
+  github.com/klauspost/cpuid/v2 v2.4.1
 
 The MIT License (MIT)
 
@@ -16259,7 +16260,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 Copyright Philip Hofer - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/philhofer/fwd v1.2.0
+  github.com/philhofer/fwd v1.2.1
 
 Copyright (c) 2014-2015, Philip Hofer
 

@@ -15,6 +15,7 @@ import (
 	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/topology"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
@@ -827,6 +828,11 @@ func (dkc *DistributedToKubeflowComposer) processComputeFields(ctx context.Conte
 		if src == nil {
 			return nil
 		}
+		canonical, err := gpucompat.NormalizeLegacyWorkloadCompute(src)
+		if err != nil {
+			return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+		}
+		src = canonical
 
 		podMeta := &replicaSpec.ObjectMeta
 		podSpec := &replicaSpec.Spec
@@ -841,7 +847,7 @@ func (dkc *DistributedToKubeflowComposer) processComputeFields(ctx context.Conte
 			dkc.fc.ComposeCpuMemoryLimit(src.CpuMemoryLimit.Get(), src.CpuMemoryRequest.Get(), &container.Resources.Limits, composer.StringToK8sResourceList, composer.ResourceMemory),
 
 			dkc.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(), src.GpuRequestType.Get(),
-				src.GpuPortionRequest.Get(), src.GpuPortionLimit.Get(),
+				src.GpuMemoryPortionRequest.Get(), src.GpuMemoryPortionLimit.Get(),
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), composer.WholeGpusToK8sResources,
 				&container.Resources, nil, sizingInfo),
 
@@ -857,6 +863,7 @@ func (dkc *DistributedToKubeflowComposer) processComputeFields(ctx context.Conte
 			// GPU memory/portion limit is written either as the legacy env var (< 3.0
 			// clusters) or as the per-container CUDA/KAI annotations (>= 3.0). The
 			// two pairs are mutually exclusive at the compose helper level.
+			dkc.fc.ComposeGpuComputeMode(composer.EnumToString(src.GpuComputeMode.Get()), sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
 			dkc.fc.ComposeMemoryLimitEnv(sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			dkc.fc.ComposePortionLimitEnv(sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuPortionLimitEnvVar),
 			dkc.fc.ComposeMemoryLimitAnnotation(sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
@@ -1394,6 +1401,8 @@ func clearMpiMasterGpuFields(compute *workloadsApi.WorkspaceSpecSpecAllOfCompute
 	compute.GpuRequestType.Unset()
 	compute.GpuPortionRequest.Unset()
 	compute.GpuPortionLimit.Unset()
+	compute.GpuMemoryPortionRequest.Unset()
+	compute.GpuMemoryPortionLimit.Unset()
 	compute.GpuMemoryRequest.Unset()
 	compute.GpuMemoryLimit.Unset()
 }
@@ -1413,6 +1422,12 @@ func computeHasGpu(compute *workloadsApi.WorkspaceSpecSpecAllOfCompute) bool {
 		return true
 	}
 	if portionLimit := compute.GpuPortionLimit.Get(); portionLimit != nil && *portionLimit > 0 {
+		return true
+	}
+	if portion := compute.GpuMemoryPortionRequest.Get(); portion != nil && *portion > 0 {
+		return true
+	}
+	if limit := compute.GpuMemoryPortionLimit.Get(); limit != nil && *limit > 0 {
 		return true
 	}
 	return false

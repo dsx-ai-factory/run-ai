@@ -15,10 +15,6 @@ info:
 
     To get your access token, follow the instructions in [Request a token](/run-ai/self-hosted/reference/rest-api/getting-started/how-to-authenticate-to-the-api#request-an-api-token).
   title: NVIDIA Run:ai
-  x-logo:
-    url: ./runai-logo-api.png
-    altText: NVIDIA Run:ai
-    href: https://run.ai
   license:
     name: NVIDIA Run:ai
     url: https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/
@@ -27,125 +23,64 @@ servers:
 security:
   - bearerAuth: []
 tags:
-  - name: Organizations
-  - name: Authentication and Authorization
-  - name: Audit
-  - name: Datavolumes
-  - name: Workloads
-  - name: Workload assets
-  - name: Policies
-  - name: Notifications
-  - name: AI Applications
   - name: Clusters
-    x-parent: Organizations
   - name: Departments
-    x-parent: Organizations
   - name: Reports
-    x-parent: Organizations
   - name: NodePools
-    x-parent: Organizations
   - name: Nodes
-    x-parent: Organizations
   - name: Projects
-    x-parent: Organizations
   - name: Logo
-    x-parent: Organizations
   - name: Researcher Command Line Interface
-    x-parent: Organizations
   - name: Researcher Command Line Interface Deprecated
-    x-parent: Organizations
   - name: Network Topologies
-    x-parent: Organizations
   - name: Access Keys
-    x-parent: Authentication and Authorization
   - name: Access rules
-    x-parent: Authentication and Authorization
   - name: Service Accounts
-    x-parent: Authentication and Authorization
   - name: Roles
-    x-parent: Authentication and Authorization
   - name: Tokens
-    x-parent: Authentication and Authorization
   - name: Users
-    x-parent: Authentication and Authorization
   - name: Idps
-    x-parent: Authentication and Authorization
   - name: Me
-    x-parent: Authentication and Authorization
   - name: Events
-    x-parent: Workloads
   - name: Pods
-    x-parent: Workloads
+  - name: Workloads
   - name: Workloads V2
-    x-parent: Workloads
   - name: NVIDIA NIM
-    x-parent: Workloads
   - name: Workspaces
-    x-parent: Workloads
   - name: Trainings
-    x-parent: Workloads
   - name: Inferences
-    x-parent: Workloads
   - name: Revisions
-    x-parent: Workloads
   - name: Distributed
-    x-parent: Workloads
   - name: Workloads batch
-    x-parent: Workloads
   - name: Workload properties
-    x-parent: Workloads
   - name: Workload templates
-    x-parent: Workloads
   - name: Distributed Inferences
-    x-parent: Workloads
   - name: Permissions
-    x-parent: Authentication and Authorization
   - name: Settings
-    x-parent: Organizations
   - name: Org unit
-    x-parent: Authentication and Authorization
   - name: AuditLogs
-    x-parent: Audit
+  - name: Datavolumes
   - name: Compute
-    x-parent: Workload assets
   - name: Credentials
-    x-parent: Workload assets
   - name: Datasources
-    x-parent: Workload assets
   - name: Environment
-    x-parent: Workload assets
   - name: Git
-    x-parent: Workload assets
   - name: HostPath
-    x-parent: Workload assets
   - name: NFS
-    x-parent: Workload assets
   - name: PVC
-    x-parent: Workload assets
   - name: Registry
-    x-parent: Workload assets
   - name: S3
-    x-parent: Workload assets
   - name: ConfigMap
-    x-parent: Workload assets
   - name: Secret
-    x-parent: Workload assets
   - name: Template
-    x-parent: Workload assets
   - name: Policy
-    x-parent: Policies
   - name: Notification State
-    x-parent: Notifications
   - name: Notification Types
-    x-parent: Notifications
   - name: NotificationChannels
-    x-parent: Notifications
   - name: Slack
-    x-parent: Notifications
   - name: Email
-    x-parent: Notifications
   - name: Subscriptions
-    x-parent: Notifications
+  - name: AI Applications
   - name: Synchronization
     description: Internal interface for synchronizing assets between the clusters and the control plane.
 paths:
@@ -17874,14 +17809,13 @@ components:
       maxItems: 1000
       nullable: true
     GpuComputeMode:
-      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
       type: string
       minLength: 1
       enum:
         - time-slicing
         - sm-sharing
       nullable: true
-      x-gorm-ignore: true
     GpuDevicesRequest:
       description: Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
       type: integer
@@ -30167,6 +30101,30 @@ components:
           description: The hierarchy level of this pod's associated workload structure element. Level 1 represents the top of the hierarchy, with levels 2 and 3 representing progressively nested elements.
           minimum: 1
           maximum: 3
+    PodResourceClaim:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Pod-local name of the claim entry (DNS_LABEL). Mirrors `pod.spec.resourceClaims[].name` and the key used by `pod.status.resourceClaimStatuses[].name` to publish the bound claim.
+          example: gpu-1
+        resourceClaimTemplateName:
+          type: string
+          nullable: true
+          description: Name of the referenced `ResourceClaimTemplate` in the pod's namespace, when the claim entry was created from a template. Mutually exclusive with `resourceClaimName`. Mirrors `pod.spec.resourceClaims[].resourceClaimTemplateName`.
+          example: single-gpu
+        resourceClaimName:
+          type: string
+          nullable: true
+          description: Name of a standalone `ResourceClaim` that the pod references directly, when the claim entry is not created from a template. Mutually exclusive with `resourceClaimTemplateName`. Mirrors `pod.spec.resourceClaims[].resourceClaimName`.
+          example: shared-infiniband
+        allocatedResourceClaimName:
+          type: string
+          nullable: true
+          description: Name of the actual `ResourceClaim` bound to the pod for this entry. For a template-generated entry this is populated from `pod.status.resourceClaimStatuses[].resourceClaimName` once Kubernetes publishes it, and is null until then. For a standalone entry it equals `resourceClaimName` and is populated immediately. This is the field the forward-view API surfaces as the "actual" bound claim.
+          example: dra-gpu-test-gpu-1-mk4s8
     PodSyncFields:
       type: object
       required:
@@ -30252,6 +30210,12 @@ components:
           items:
             $ref: '#/components/schemas/PodElement'
           description: The workload structure elements this pod belongs to, ordered by hierarchy level.
+        resourceClaims:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/PodResourceClaim'
+          description: Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here.
     Workloads:
       type: array
       items:
@@ -37840,82 +37804,3 @@ components:
       value:
         msg: System maintenance scheduled for this weekend
         enableDismiss: true
-x-tagGroups:
-  - name: Organizations
-    tags:
-      - Settings
-      - Clusters
-      - Departments
-      - Reports
-      - NodePools
-      - Nodes
-      - Projects
-      - Logo
-      - Researcher Command Line Interface
-      - Researcher Command Line Interface Deprecated
-      - Network Topologies
-  - name: Authentication and Authorization
-    tags:
-      - Access Keys
-      - Access rules
-      - Permissions
-      - Service Accounts
-      - Roles
-      - Tokens
-      - Users
-      - Idps
-      - Me
-      - Org unit
-  - name: Audit
-    tags:
-      - AuditLogs
-  - name: Datavolumes
-    tags:
-      - Datavolumes
-  - name: Workloads
-    tags:
-      - Events
-      - Pods
-      - Workloads
-      - Workloads V2
-      - NVIDIA NIM
-      - Workspaces
-      - Trainings
-      - Inferences
-      - Revisions
-      - Distributed
-      - Workloads batch
-      - Workload properties
-      - Workload templates
-      - Distributed Inferences
-  - name: Workload assets
-    tags:
-      - Compute
-      - Credentials
-      - Datasources
-      - Environment
-      - Storage Classes
-      - Storage Class Configuration
-      - Git
-      - HostPath
-      - NFS
-      - PVC
-      - Registry
-      - S3
-      - ConfigMap
-      - Secret
-      - Template
-  - name: Policies
-    tags:
-      - Policy
-  - name: Notifications
-    tags:
-      - Notification State
-      - Notification Types
-      - NotificationChannels
-      - Slack
-      - Email
-      - Subscriptions
-  - name: AI Applications
-    tags:
-      - AI Applications

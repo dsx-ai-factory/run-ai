@@ -336,7 +336,7 @@ var _ = Describe("compute asset specific tests", func() {
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
-			Expect(createHttpResp.Body.String()).To(ContainSubstring("gpuPortionRequest/gpuPortionLimit should not be provided when GPU request type is 'memory'"))
+			Expect(createHttpResp.Body.String()).To(ContainSubstring("gpuMemoryPortionRequest/gpuMemoryPortionLimit (deprecated aliases: gpuPortionRequest/gpuPortionLimit) should not be provided when GPU request type is 'memory'"))
 		})
 
 		It("create compute with gpu portion range issue", func() {
@@ -373,7 +373,7 @@ var _ = Describe("compute asset specific tests", func() {
 
 			Expect(respJsonErr).To(BeNil())
 			Expect(createHttpResp.Code).To(Equal(http.StatusBadRequest))
-			Expect(createHttpResp.Body.String()).To(ContainSubstring("gpuPortionRequest is mandatory when GPU request of type 'portion'"))
+			Expect(createHttpResp.Body.String()).To(ContainSubstring("gpuMemoryPortionRequest (deprecated alias: gpuPortionRequest) is mandatory when GPU request of type 'portion'"))
 		})
 
 		It("create compute with gpu memory w/o the memory", func() {
@@ -588,7 +588,7 @@ var _ = Describe("compute asset specific tests", func() {
 			}, false)
 			Expect(err).NotTo(BeNil())
 			Expect(err.Code).To(Equal(int32(http.StatusBadRequest)))
-			Expect(err.Message).To(ContainSubstring("gpuPortionRequest/gpuPortionLimit can be provided only when gpuDevices is 1"))
+			Expect(err.Message).To(ContainSubstring("gpuMemoryPortionRequest/gpuMemoryPortionLimit (deprecated aliases: gpuPortionRequest/gpuPortionLimit) can be provided only when gpuDevices is 1"))
 		})
 	})
 
@@ -704,6 +704,7 @@ var _ = Describe("compute asset specific tests", func() {
 			origAsset.Spec = &api.ComputeAssetSpec{
 				GpuDevicesRequest: convutils.Ref(int32(1)),
 				GpuRequestType:    convutils.Ref(api.GPUREQUESTTYPE_MEMORY),
+				GpuComputeMode:    convutils.Ref(api.GPUCOMPUTEMODE_TIME_SLICING),
 				GpuMemoryRequest:  convutils.Ref("2G"),
 				GpuMemoryLimit:    convutils.Ref("4G"),
 				CpuCoreRequest:    convutils.Ref(2.5),
@@ -730,14 +731,15 @@ var _ = Describe("compute asset specific tests", func() {
 					Name: origAsset.Meta.Name,
 				},
 				Spec: &api.ComputeAssetSpec{
-					GpuDevicesRequest: convutils.Ref(int32(1)),
-					GpuRequestType:    convutils.Ref(api.GPUREQUESTTYPE_PORTION),
-					GpuPortionRequest: convutils.Ref(0.2),
-					GpuPortionLimit:   convutils.Ref(0.4),
-					CpuCoreRequest:    convutils.Ref(5.0),
-					CpuCoreLimit:      convutils.Ref(7.5),
-					CpuMemoryRequest:  convutils.Ref("20G"),
-					CpuMemoryLimit:    convutils.Ref("40G"),
+					GpuDevicesRequest:       convutils.Ref(int32(1)),
+					GpuRequestType:          convutils.Ref(api.GPUREQUESTTYPE_PORTION),
+					GpuComputeMode:          convutils.Ref(api.GPUCOMPUTEMODE_SM_SHARING),
+					GpuMemoryPortionRequest: convutils.Ref(0.2),
+					GpuMemoryPortionLimit:   convutils.Ref(0.4),
+					CpuCoreRequest:          convutils.Ref(5.0),
+					CpuCoreLimit:            convutils.Ref(7.5),
+					CpuMemoryRequest:        convutils.Ref("20G"),
+					CpuMemoryLimit:          convutils.Ref("40G"),
 					ExtendedResources: &[]api.ExtendedResource{
 						{
 							Resource: convutils.Ref("updated/res"),
@@ -752,7 +754,10 @@ var _ = Describe("compute asset specific tests", func() {
 			//
 			//  validate that the update changed the fields correctly
 			//
-			validateAssetSpec(randoms, router, url, createdAsset.Meta.Id, &updateRequest.Spec)
+			expectedSpec := *updateRequest.Spec
+			expectedSpec.GpuPortionRequest = convutils.Ref(0.2)
+			expectedSpec.GpuPortionLimit = convutils.Ref(0.4)
+			validateAssetSpec(randoms, router, url, createdAsset.Meta.Id, &expectedSpec)
 		})
 	})
 

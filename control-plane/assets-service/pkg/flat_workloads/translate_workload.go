@@ -194,7 +194,7 @@ func TranslateToFlatWorkload(ctx context.Context, workloadType string, workloadA
 
 			if requestTypePortion && workloadAsset.AssetsCompute.GpuPortionRequest == nil {
 				if workloadAsset.AssetsCompute.GpuDevicesRequest == nil {
-					return nil, nil, api.NewError(http.StatusBadRequest, "gpuPortionRequest must be provided for fractional workload of type 'portion'", nil)
+					return nil, nil, api.NewError(http.StatusBadRequest, "gpuMemoryPortionRequest (deprecated alias: gpuPortionRequest) must be provided for fractional workload of type 'portion'", nil)
 				}
 				if *workloadAsset.AssetsCompute.GpuDevicesRequest != 0 && *workloadAsset.AssetsCompute.GpuDevicesRequest != 1 {
 					return nil, nil, api.NewError(http.StatusBadRequest, "gpuDeviceRequest can be 0 or 1 for workload of type 'portion'", nil)

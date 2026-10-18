@@ -17,6 +17,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/plugins"
@@ -280,6 +282,14 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 			requestBodyMap = bodyMap
 		}
 	}
+	if requestPath == NimServicesAPIPath {
+		stored, err := gpucompat.LegacyGPUFields(requestBodyMap)
+		if err != nil {
+			return nil, SingleError(NewSubmissionError(http.StatusBadRequest, err.Error(), err))
+		}
+		requestBodyMap = stored
+	}
+
 	qRecord := models.WorkloadsQueueRecord{
 		ID: workloadId,
 

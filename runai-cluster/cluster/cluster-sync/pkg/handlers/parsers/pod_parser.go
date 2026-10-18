@@ -82,6 +82,7 @@ func (p *PodParser) ParsePodToServerScheme(pod *corev1.Pod) (*openapi.PodSyncFie
 		Task:               *openapi.NewNullableString(parsePodTask(pod)),
 		NodeAffinity:       getPodNodeAffinity(pod.Spec),
 		Elements:           parsePodElements(pod.Labels),
+		ResourceClaims:     parsePodResourceClaims(pod),
 	}, nil
 }
 
@@ -345,4 +346,53 @@ func parsePodElements(labels map[string]string) []openapi.PodElement {
 		}
 	}
 	return elements
+}
+
+// parsePodResourceClaims projects the pod's DRA usage into the server-side
+// shape, verbatim. One entry per pod.spec.resourceClaims[] member, enriched
+// with the actual bound ResourceClaim name:
+//   - template-generated entry: name from pod.status.resourceClaimStatuses[]
+//     (nil until Kubernetes publishes it);
+//   - standalone entry: equals the spec's resourceClaimName (available
+//     immediately — k8s does not populate status for standalone entries,
+//     per the "If this is unset, then generating a ResourceClaim was not
+//     necessary" contract).
+//
+// Container-level resources.claims[] references are intentionally not
+// reflected here: the design reports per-pod, not per-container.
+//
+// Returns nil for a pod with no resource claims so the field is omitted on
+// the wire for pods that do not use DRA.
+func parsePodResourceClaims(pod *corev1.Pod) []openapi.PodResourceClaim {
+	if len(pod.Spec.ResourceClaims) == 0 {
+		return nil
+	}
+
+	// Pre-index status entries by pod-local name for O(1) lookup during
+	// the spec walk.
+	allocatedByName := make(map[string]*string, len(pod.Status.ResourceClaimStatuses))
+	for _, status := range pod.Status.ResourceClaimStatuses {
+		allocatedByName[status.Name] = status.ResourceClaimName
+	}
+
+	result := make([]openapi.PodResourceClaim, 0, len(pod.Spec.ResourceClaims))
+	for _, claim := range pod.Spec.ResourceClaims {
+		var allocated *string
+		switch {
+		case claim.ResourceClaimName != nil:
+			// Standalone claim: the spec itself names the actual claim.
+			allocated = claim.ResourceClaimName
+		default:
+			// Template-generated: look up the status entry; nil until bound.
+			allocated = allocatedByName[claim.Name]
+		}
+
+		result = append(result, openapi.PodResourceClaim{
+			Name:                       claim.Name,
+			ResourceClaimTemplateName:  *openapi.NewNullableString(claim.ResourceClaimTemplateName),
+			ResourceClaimName:          *openapi.NewNullableString(claim.ResourceClaimName),
+			AllocatedResourceClaimName: *openapi.NewNullableString(allocated),
+		})
+	}
+	return result
 }

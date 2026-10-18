@@ -1,0 +1,55 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Publish FlowMark dashboard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scale-load/flowmark/dashboard/index.html
+      - scale-load/flowmark/dashboard/app.js
+      - scale-load/flowmark/dashboard/styles.css
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gh-pages
+
+jobs:
+  publish:
+    if: github.repository == 'dsx-ai-factory/run-ai'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          sparse-checkout: scale-load/flowmark/dashboard
+
+      - uses: actions/checkout@9f698171ed81b15d1823a05fc7211befd50c8ae0 # v6
+        with:
+          ref: gh-pages
+          path: results
+
+      - name: Copy the dashboard files next to the results
+        run: |
+          mkdir -p results/flowmark
+          cp scale-load/flowmark/dashboard/index.html scale-load/flowmark/dashboard/app.js scale-load/flowmark/dashboard/styles.css results/flowmark/
+
+      - name: Push to gh-pages
+        working-directory: results
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add flowmark/index.html flowmark/app.js flowmark/styles.css
+          if git diff --cached --quiet; then
+            echo "dashboard unchanged"
+            exit 0
+          fi
+          git commit -m "Publish the dashboard from ${GITHUB_SHA::7}"
+          git push

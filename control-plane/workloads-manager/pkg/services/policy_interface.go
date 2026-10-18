@@ -11,6 +11,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 
@@ -29,14 +31,13 @@ var nonCreationMode = policiesClient.PolicyClientOptions{
 	NonCreationMode: true,
 }
 
-func validateMutatedSpecVsPolicy(rules map[string]interface{}, defaults map[string]interface{}, defaultFromOrder *policyApi.DefaultFromOrder,
+func validateMutatedSpecVsPolicy(rules map[string]interface{}, defaults map[string]interface{},
 	mutatedSpec map[string]interface{},
 ) (map[string]interface{}, *api.SubmissionErrorV2) {
-	fieldsWithCantEditRule := make([]string, 0)
-	complianceErrors := make(policyCompliance.ComplianceErrors, 0)
-
-	policyCompliance.ValidateCompliance("", rules, defaults, mutatedSpec, *defaultFromOrder.Worker,
-		&fieldsWithCantEditRule, nil, &complianceErrors)
+	defaults, complianceErrors, err := policyCompliance.ValidateWorkloadCompliance(rules, defaults, mutatedSpec, WorkloadTypeNimService)
+	if err != nil {
+		return nil, NewSubmissionError(http.StatusBadRequest, err.Error(), err)
+	}
 
 	if len(complianceErrors) != 0 {
 		issues := complianceErrors.ForWorkloadsV2()
@@ -145,6 +146,18 @@ func MutateWorkload[S WorkloadV2Spec](
 	} else {
 		// Use gojsonq.LoadJson (not CopySpecs) to preserve numeric types via decoder.UseNumber()
 		inputSpecAsMap, _ = gojsonq.LoadJson(inputSpec)
+	}
+
+	if err := gpucompat.ValidateMemoryRequestInput(inputSpecAsMap); err != nil {
+		return nil, NewSubmissionError(http.StatusBadRequest, err.Error(), err)
+	}
+
+	for _, source := range []*map[string]interface{}{&inputSpecAsMap, &templateSpec, &policyDefaults} {
+		canonical, err := gpucompat.NormalizeLegacyGPUFields(*source)
+		if err != nil {
+			return nil, NewSubmissionError(http.StatusBadRequest, err.Error(), err)
+		}
+		*source = canonical
 	}
 
 	// Phase 1: Template = Spec -> Template
