@@ -10982,13 +10982,13 @@ export interface ResourceClaimTemplateWorkload {
      */
     'name': string;
     /**
-     * The type of the workload.
+     * The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
      * @type {string}
      * @memberof ResourceClaimTemplateWorkload
      */
     'type': string;
     /**
-     * The id of the project the workload belongs to.
+     * The id of the project.
      * @type {string}
      * @memberof ResourceClaimTemplateWorkload
      */

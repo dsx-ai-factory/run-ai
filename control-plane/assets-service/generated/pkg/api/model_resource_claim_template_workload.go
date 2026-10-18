@@ -34,16 +34,16 @@ type ResourceClaimTemplateWorkload struct {
 	Name string `json:"name" gorm:"not null;" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The type of the workload.
+	// The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Type string `json:"type"`
 	Type string `json:"type" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The id of the project the workload belongs to.
+	// The id of the project.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//ProjectId string `json:"projectId"`
-	ProjectId string `json:"projectId" gorm:"not null;"`
+	//ProjectId string `json:"projectId" validate:"regexp=.*"`
+	ProjectId string `json:"projectId" gorm:"not null;" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// The pods of the workload that reference the resource claim template.
@@ -100,6 +100,9 @@ func AssertResourceClaimTemplateWorkloadConstraints(obj ResourceClaimTemplateWor
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.ProjectId, "ProjectId", "/.*/"); patternErr != nil {
+		return &ParsingError{Param: "ProjectId", Err: patternErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

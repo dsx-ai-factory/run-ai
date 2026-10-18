@@ -6,8 +6,8 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **WorkloadId** | **string** | A unique ID of the workload. | 
 **Name** | **string** | The name of the workload. | 
-**Type** | **string** | The type of the workload. | 
-**ProjectId** | **string** | The id of the project the workload belongs to. | 
+**Type** | **string** | The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones. | 
+**ProjectId** | **string** | The id of the project. | 
 **Pods** | [**[]ResourceClaimTemplateWorkloadPod**](ResourceClaimTemplateWorkloadPod.md) | The pods of the workload that reference the resource claim template. | 
 
 ## Methods

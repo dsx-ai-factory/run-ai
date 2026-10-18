@@ -28,10 +28,10 @@ type ResourceClaimTemplateWorkload struct {
 	WorkloadId string `json:"workloadId"`
 	// The name of the workload.
 	Name string `json:"name" validate:"regexp=.*"`
-	// The type of the workload.
+	// The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
 	Type string `json:"type"`
-	// The id of the project the workload belongs to.
-	ProjectId string `json:"projectId"`
+	// The id of the project.
+	ProjectId string `json:"projectId" validate:"regexp=.*"`
 	// The pods of the workload that reference the resource claim template.
 	Pods []ResourceClaimTemplateWorkloadPod `json:"pods"`
 }
