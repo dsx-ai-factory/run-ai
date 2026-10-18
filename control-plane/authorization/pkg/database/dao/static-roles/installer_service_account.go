@@ -19,7 +19,7 @@ var InstallerApp = models.Role{
 	Enabled:                 true,
 	ClusterRolePredefinedId: nil,
 	PermissionSets: &[]models.PermissionSet{
-		{Name: static_permission_sets.InstallerAppPS.Name},
+		{Name: static_permission_sets.InstallerServiceAccountPS.Name},
 		{Name: static_permission_sets.UsersMinimalRead.Name},
 	},
 }

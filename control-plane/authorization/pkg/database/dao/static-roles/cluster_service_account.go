@@ -19,6 +19,6 @@ var ClusterApp = models.Role{
 	Enabled:                 true,
 	ClusterRolePredefinedId: nil,
 	PermissionSets: &[]models.PermissionSet{
-		{Name: static_permission_sets.ClusterAppPS.Name}, {Name: static_permission_sets.UsersMinimalRead.Name},
+		{Name: static_permission_sets.ClusterServiceAccountPS.Name}, {Name: static_permission_sets.UsersMinimalRead.Name},
 	},
 }
