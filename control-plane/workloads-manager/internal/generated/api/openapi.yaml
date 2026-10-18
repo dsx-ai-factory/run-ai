@@ -5328,15 +5328,14 @@ components:
       type: string
     GpuComputeMode:
       description: GPU compute sharing mode. Policy and template defaults apply before
-        the built-in time-slicing fallback. Explicit modes require an available GPU
-        fractioning runtime on the selected cluster.
+        the built-in time-slicing fallback. Explicit modes require Run:ai cluster
+        version 3.0.14 or later.
       enum:
       - time-slicing
       - sm-sharing
       minLength: 1
       nullable: true
       type: string
-      x-gorm-ignore: true
     GpuDevicesRequest:
       description: "Requested number of GPU devices. Currently if more than one device\
         \ is requested, it is not possible to provide values for gpuMemory or gpuPortion."

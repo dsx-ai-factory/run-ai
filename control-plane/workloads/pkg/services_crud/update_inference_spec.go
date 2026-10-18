@@ -14,6 +14,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/runai_workloads"
@@ -295,6 +297,10 @@ func composeInferenceUpdateNative(
 	workload *models_crud.Workload,
 	options composer.FieldsComposerOptions,
 ) (composer.WorkloadRequirements, *workloadsApi.SubmissionErrorV2) {
+	if err := validateNativeGpuMode(workload.Spec); err != nil {
+		return composer.WorkloadRequirements{}, err
+	}
+
 	jobSpecComposer := runai_workloads.NewSupersetToJobSpecComposer(
 		Inference,
 		workload.Name,
@@ -303,7 +309,7 @@ func composeInferenceUpdateNative(
 		nil,
 		options)
 
-	composerErr := jobSpecComposer.Compose(ctx, workload.Spec, &jobs.JobSpec{})()
+	composerErr := jobSpecComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(workload.Spec), &jobs.JobSpec{})()
 	if composerErr != nil {
 		return composer.WorkloadRequirements{}, NewSubmissionErrorWithDetails(composerErr.Code, composerErr.Message, composerErr.Details)
 	}
@@ -337,6 +343,18 @@ func mergeUpdateSpecIntoFullSpec(ctx context.Context, fullSpec *workloadsApi.Sup
 	}
 
 	fullSpecAsMap, err := gojsonq.LoadJson(*fullSpec)
+	if err != nil {
+		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := gpucompat.ValidateMemoryRequestInput(updateSpecAsMap); err != nil {
+		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+	}
+	updateSpecAsMap, err = gpucompat.NormalizeLegacyGPUFields(updateSpecAsMap)
+	if err != nil {
+		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+	}
+	fullSpecAsMap, err = gpucompat.NormalizeLegacyGPUFields(fullSpecAsMap)
 	if err != nil {
 		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
 	}

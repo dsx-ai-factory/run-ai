@@ -58,7 +58,7 @@ type ComputeAssetSpec struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty"`
-	GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty" gorm:"-"`
+	GpuComputeMode *GpuComputeMode `json:"gpuComputeMode,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.

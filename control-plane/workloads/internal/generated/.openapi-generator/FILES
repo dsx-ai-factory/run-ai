@@ -385,6 +385,7 @@ pkg/api/model_pod_node_affinity_preferred.go
 pkg/api/model_pod_node_affinity_required.go
 pkg/api/model_pod_preferred_node_selector_term.go
 pkg/api/model_pod_request_resources.go
+pkg/api/model_pod_resource_claim.go
 pkg/api/model_pod_sort_filter_fields.go
 pkg/api/model_pod_sync_fields.go
 pkg/api/model_pod_toleration.go

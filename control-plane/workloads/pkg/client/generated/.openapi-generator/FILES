@@ -373,6 +373,7 @@ docs/PodNodeAffinityPreferred.md
 docs/PodNodeAffinityRequired.md
 docs/PodPreferredNodeSelectorTerm.md
 docs/PodRequestResources.md
+docs/PodResourceClaim.md
 docs/PodSortFilterFields.md
 docs/PodSyncFields.md
 docs/PodToleration.md
@@ -979,6 +980,7 @@ model_pod_node_affinity_preferred.go
 model_pod_node_affinity_required.go
 model_pod_preferred_node_selector_term.go
 model_pod_request_resources.go
+model_pod_resource_claim.go
 model_pod_sort_filter_fields.go
 model_pod_sync_fields.go
 model_pod_toleration.go

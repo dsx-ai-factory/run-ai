@@ -24,7 +24,7 @@ type GpuComputeModeOptionsOptionsInner struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Value *GpuComputeMode `json:"value"`
-	Value *GpuComputeMode `json:"value" gorm:"-"`
+	Value *GpuComputeMode `json:"value" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Textual description of the value

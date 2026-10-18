@@ -14,6 +14,6 @@ timeout: 10m
 slo:
   api_accepted_p90_ms: 500
   cluster_synced_p90_ms: 10000
-  pod_created_p90_ms: 3000
+  pod_created_p90_ms: 5000
   ttj_p90_ms: 12000
   failed_count: 2

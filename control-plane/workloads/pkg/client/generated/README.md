@@ -576,6 +576,7 @@ Class | Method | HTTP request | Description
  - [PodNodeAffinityRequired](docs/PodNodeAffinityRequired.md)
  - [PodPreferredNodeSelectorTerm](docs/PodPreferredNodeSelectorTerm.md)
  - [PodRequestResources](docs/PodRequestResources.md)
+ - [PodResourceClaim](docs/PodResourceClaim.md)
  - [PodSortFilterFields](docs/PodSortFilterFields.md)
  - [PodSyncFields](docs/PodSyncFields.md)
  - [PodToleration](docs/PodToleration.md)

@@ -8992,7 +8992,7 @@ export interface GitsRules {
     'instances'?: ItemRules | null;
 }
 /**
- * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
  * @export
  * @enum {string}
  */
@@ -12787,6 +12787,12 @@ export interface Pod {
      */
     'elements'?: Array<PodElement> | null;
     /**
+     * Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here.
+     * @type {Array<PodResourceClaim>}
+     * @memberof Pod
+     */
+    'resourceClaims'?: Array<PodResourceClaim> | null;
+    /**
      * The id of the tenant.
      * @type {number}
      * @memberof Pod
@@ -13206,6 +13212,37 @@ export interface PodRequestResources {
 /**
  * 
  * @export
+ * @interface PodResourceClaim
+ */
+export interface PodResourceClaim {
+    /**
+     * Pod-local name of the claim entry (DNS_LABEL). Mirrors `pod.spec.resourceClaims[].name` and the key used by `pod.status.resourceClaimStatuses[].name` to publish the bound claim.
+     * @type {string}
+     * @memberof PodResourceClaim
+     */
+    'name': string;
+    /**
+     * Name of the referenced `ResourceClaimTemplate` in the pod\'s namespace, when the claim entry was created from a template. Mutually exclusive with `resourceClaimName`. Mirrors `pod.spec.resourceClaims[].resourceClaimTemplateName`.
+     * @type {string}
+     * @memberof PodResourceClaim
+     */
+    'resourceClaimTemplateName'?: string | null;
+    /**
+     * Name of a standalone `ResourceClaim` that the pod references directly, when the claim entry is not created from a template. Mutually exclusive with `resourceClaimTemplateName`. Mirrors `pod.spec.resourceClaims[].resourceClaimName`.
+     * @type {string}
+     * @memberof PodResourceClaim
+     */
+    'resourceClaimName'?: string | null;
+    /**
+     * Name of the actual `ResourceClaim` bound to the pod for this entry. For a template-generated entry this is populated from `pod.status.resourceClaimStatuses[].resourceClaimName` once Kubernetes publishes it, and is null until then. For a standalone entry it equals `resourceClaimName` and is populated immediately. This is the field the forward-view API surfaces as the \"actual\" bound claim.
+     * @type {string}
+     * @memberof PodResourceClaim
+     */
+    'allocatedResourceClaimName'?: string | null;
+}
+/**
+ * 
+ * @export
  * @enum {string}
  */
 
@@ -13355,6 +13392,12 @@ export interface PodSyncFields {
      * @memberof PodSyncFields
      */
     'elements'?: Array<PodElement> | null;
+    /**
+     * Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here.
+     * @type {Array<PodResourceClaim>}
+     * @memberof PodSyncFields
+     */
+    'resourceClaims'?: Array<PodResourceClaim> | null;
 }
 /**
  * 

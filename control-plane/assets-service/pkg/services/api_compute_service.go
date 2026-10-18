@@ -305,6 +305,9 @@ func (s *ComputeApiService) UpdateComputeAssetById(ctx context.Context, id strin
 }
 
 func validateComputeSpec(computeSpec api.ComputeAssetSpec, supportMultiFraction bool) *api.Error {
+	if computeSpec.GpuComputeMode != nil && !computeSpec.GpuComputeMode.IsValid() {
+		return api.NewValidationError("compute.gpuComputeMode must be time-slicing or sm-sharing")
+	}
 	err := validateSingleComputeGpuRequest(computeSpec, supportMultiFraction)
 	if err != nil {
 		return err
@@ -345,6 +348,12 @@ func validateComputeSpec(computeSpec api.ComputeAssetSpec, supportMultiFraction 
 }
 
 func validateSingleComputeGpuRequest(computeSpec api.ComputeAssetSpec, supportMultiFraction bool) *api.Error {
+	canonical, aliasErr := dbmodel.NormalizeLegacyComputeAsset(computeSpec)
+	if aliasErr != nil {
+		return api.NewValidationError(aliasErr.Error())
+	}
+	computeSpec = canonical
+
 	//
 	//   obtain the values of the fields
 	//
@@ -365,8 +374,8 @@ func validateSingleComputeGpuRequest(computeSpec api.ComputeAssetSpec, supportMu
 		if gpuMemoryRequest != "" || gpuMemoryLimit != "" {
 			return api.NewValidationError("gpuMemoryRequest/gpuMemoryLimit can be provided only when gpuDevices is 1")
 		}
-		if computeSpec.GpuPortionRequest != nil || computeSpec.GpuPortionLimit != nil {
-			return api.NewValidationError("gpuPortionRequest/gpuPortionLimit can be provided only when gpuDevices is 1")
+		if computeSpec.GpuMemoryPortionRequest != nil || computeSpec.GpuMemoryPortionLimit != nil {
+			return api.NewValidationError("gpuMemoryPortionRequest/gpuMemoryPortionLimit (deprecated aliases: gpuPortionRequest/gpuPortionLimit) can be provided only when gpuDevices is 1")
 		}
 		return nil
 	}
@@ -381,8 +390,8 @@ func validateSingleComputeGpuRequest(computeSpec api.ComputeAssetSpec, supportMu
 	//
 	//   validate mandatory fields based on the request type
 	//
-	if gpuRequestType == GpuRequestTypePortion && computeSpec.GpuPortionRequest == nil {
-		return api.NewValidationError(fmt.Sprintf("gpuPortionRequest is mandatory when GPU request of type '%s'", gpuRequestType))
+	if gpuRequestType == GpuRequestTypePortion && computeSpec.GpuMemoryPortionRequest == nil {
+		return api.NewValidationError(fmt.Sprintf("gpuMemoryPortionRequest (deprecated alias: gpuPortionRequest) is mandatory when GPU request of type '%s'", gpuRequestType))
 	}
 	if gpuRequestType == GpuRequestTypeMemory && convutils.IsEmptyOrNull(computeSpec.GpuMemoryRequest) {
 		return api.NewValidationError(fmt.Sprintf("gpuMemoryRequest is mandatory when GPU request of type '%s'", gpuRequestType))
@@ -391,8 +400,8 @@ func validateSingleComputeGpuRequest(computeSpec api.ComputeAssetSpec, supportMu
 	//
 	//   validate forbidden fields based on the request type
 	//
-	if gpuRequestType != GpuRequestTypePortion && (computeSpec.GpuPortionRequest != nil || computeSpec.GpuPortionLimit != nil) {
-		return api.NewValidationError(fmt.Sprintf("gpuPortionRequest/gpuPortionLimit should not be provided when GPU request type is '%s'", gpuRequestType))
+	if gpuRequestType != GpuRequestTypePortion && (computeSpec.GpuMemoryPortionRequest != nil || computeSpec.GpuMemoryPortionLimit != nil) {
+		return api.NewValidationError(fmt.Sprintf("gpuMemoryPortionRequest/gpuMemoryPortionLimit (deprecated aliases: gpuPortionRequest/gpuPortionLimit) should not be provided when GPU request type is '%s'", gpuRequestType))
 	}
 	if gpuRequestType != GpuRequestTypeMemory && (!convutils.IsEmptyOrNull(computeSpec.GpuMemoryRequest) || !convutils.IsEmptyOrNull(computeSpec.GpuMemoryLimit)) {
 		return api.NewValidationError(fmt.Sprintf("gpuMemoryRequest/gpuMemoryLimit should not be provided when GPU request type is '%s'", gpuRequestType))
@@ -417,15 +426,15 @@ func validateSingleComputeGpuRequest(computeSpec api.ComputeAssetSpec, supportMu
 		}
 	}
 
-	gpuPortionRequest := convutils.Deref(computeSpec.GpuPortionRequest, 0)
+	gpuPortionRequest := convutils.Deref(computeSpec.GpuMemoryPortionRequest, 0)
 	if gpuPortionRequest < 0 || gpuPortionRequest > 1 {
-		return api.NewValidationError(fmt.Sprintf("gpuPortionRequest %f is out of range (0 to 1)", gpuPortionRequest))
+		return api.NewValidationError(fmt.Sprintf("gpuMemoryPortionRequest (deprecated alias: gpuPortionRequest) %f is out of range (0 to 1)", gpuPortionRequest))
 	}
 
-	if computeSpec.GpuPortionLimit != nil {
-		gpuPortionLimit := convutils.Deref(computeSpec.GpuPortionLimit, 0)
+	if computeSpec.GpuMemoryPortionLimit != nil {
+		gpuPortionLimit := convutils.Deref(computeSpec.GpuMemoryPortionLimit, 0)
 		if gpuPortionLimit < gpuPortionRequest || gpuPortionLimit > 1 {
-			return api.NewValidationError(fmt.Sprintf("gpuPortionLimit %f is out of range (%f to 1)", gpuPortionLimit, gpuPortionRequest))
+			return api.NewValidationError(fmt.Sprintf("gpuMemoryPortionLimit (deprecated alias: gpuPortionLimit) %f is out of range (%f to 1)", gpuPortionLimit, gpuPortionRequest))
 		}
 	}
 

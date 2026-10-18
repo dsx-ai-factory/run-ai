@@ -718,6 +718,280 @@ var _ = Describe("NimServicesImpl", func() {
 		})
 	})
 
+	DescribeTable("preserves unsupported cluster version errors for GPU mode", func(update, fromPolicy bool) {
+		displayed := clusterInfoOf(randoms, "3.0.13")
+		var status clustersApi.ClusterDisplayedStatus
+		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
+		displayed.Status.Set(&status)
+		clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
+
+		spec := sampleNimServiceSpec
+		spec.Compute = &api.NimServiceSpecAllOfCompute{}
+		spec.Compute.GpuMemoryPortionRequest = convutils.Ref(0.25)
+		request := api.NimServiceCreateRequest{
+			Metadata: api.NimServiceMetadataCreateParams{Name: "unavailable-mode", ProjectId: randoms.ProjectIdStr},
+			Spec:     spec,
+		}
+		var id string
+		var created *api.NimServiceResponse
+		if update {
+			// The existing allocation is valid without an explicitly selected mode.
+			id, created = createNimServiceForTest(router, randoms, &request)
+		}
+
+		if fromPolicy {
+			var policy policiesApi.NimServicePolicyDefaultsAndRules
+			Expect(json.Unmarshal([]byte(`{"defaults":{"compute":{"gpuComputeMode":"sm-sharing"}}}`), &policy)).To(Succeed())
+			policiesClient.SetMock(policiesClient.SimpleMockClientFactory{
+				SimpleMockClient: policiesClient.SimpleMockClient{
+					EffectiveUpdatedAt:        time.Now(),
+					EffectiveNimServicePolicy: &policy,
+				},
+			})
+		} else {
+			request.Spec.Compute.GpuComputeMode = convutils.Ref(api.GPUCOMPUTEMODE_SM_SHARING)
+		}
+
+		var failure api.Error
+		if update {
+			response := tryToUpdateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{Spec: request.Spec})
+			Expect(response.Code).To(Equal(http.StatusBadRequest), response.Body.String())
+			Expect(json.Unmarshal(response.Body.Bytes(), &failure)).To(Succeed())
+			get, err := http.NewRequest("GET", fmt.Sprintf("%s%s/%s", testHost, urlNimServices, id), nil)
+			Expect(err).To(BeNil())
+			get.Header = *headerForAdmin(randoms)
+			response = httptest.NewRecorder()
+			router.ServeHTTP(response, get)
+			Expect(response.Code).To(Equal(http.StatusOK))
+			var unchanged api.NimServiceResponse
+			Expect(json.Unmarshal(response.Body.Bytes(), &unchanged)).To(Succeed())
+			testutils.Expect(unchanged.Spec).ToEqual(created.Spec)
+		} else {
+			failure = *SubmissionErrorToApiError(failToCreateNimServiceForTest(router, randoms, &request, http.StatusBadRequest))
+		}
+		Expect(failure.Code).To(Equal(int32(http.StatusBadRequest)))
+		Expect(failure.Message).To(Equal("failed to compose NIMService spec"))
+		Expect(failure.Details).To(ContainSubstring("compute.gpuComputeMode requires cluster version 3.0.14 or later"))
+	},
+		Entry("create with explicit mode", false, false),
+		Entry("create with policy mode", false, true),
+		Entry("update with explicit mode", true, false),
+	)
+
+	It("persists and recomposes GPU mode through create, GET and update", func() {
+		displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
+		var status clustersApi.ClusterDisplayedStatus
+		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
+		displayed.Status.Set(&status)
+		clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
+		spec := sampleNimServiceSpec
+		spec.Compute = &api.NimServiceSpecAllOfCompute{
+			GpuMemoryPortionRequest: convutils.Ref(0.25),
+			GpuComputeMode:          convutils.Ref(api.GPUCOMPUTEMODE_SM_SHARING),
+		}
+		request := api.NimServiceCreateRequest{Metadata: api.NimServiceMetadataCreateParams{Name: "mode-model", UseGivenNameAsPrefix: true, ProjectId: randoms.ProjectIdStr}, Spec: spec}
+		id, created := createNimServiceForTest(router, randoms, &request)
+		Expect(created.Spec.Compute.GpuComputeMode).To(Equal(convutils.Ref(api.GPUCOMPUTEMODE_SM_SHARING)))
+		Expect(created.Metadata.Name).To(HavePrefix("mode-model-"))
+		get := func() api.NimServiceResponse {
+			req, err := http.NewRequest("GET", fmt.Sprintf("%s%s/%s", testHost, urlNimServices, id), nil)
+			Expect(err).To(BeNil())
+			req.Header = *headerForAdmin(randoms)
+			rec := httptest.NewRecorder()
+			router.ServeHTTP(rec, req)
+			Expect(rec.Code).To(Equal(http.StatusOK))
+			Expect(rec.Body.String()).NotTo(ContainSubstring(`"computeMode"`))
+			var result api.NimServiceResponse
+			Expect(json.Unmarshal(rec.Body.Bytes(), &result)).To(Succeed())
+			return result
+		}
+		loaded := get()
+		Expect(loaded.Spec.Compute.GpuComputeMode).To(Equal(convutils.Ref(api.GPUCOMPUTEMODE_SM_SHARING)))
+		updates := getUpdatesForTest(createRouterForTest(), randoms, 0, 50, emptyClusterReports)
+		var manifest map[string]interface{}
+		for _, update := range updates.Workloads {
+			if update.Id == id {
+				manifest = update.WorkloadManifest
+			}
+		}
+		Expect(manifest).NotTo(BeNil())
+		annotations := manifest["spec"].(map[string]interface{})["annotations"].(map[string]interface{})
+		Expect(annotations).To(HaveKeyWithValue("nvidia.com/container."+created.Metadata.Name+"-ctr.gpu-compute.mode", "sm-sharing"))
+		loaded.Spec.Compute.GpuComputeMode = convutils.Ref(api.GPUCOMPUTEMODE_TIME_SLICING)
+		updated := updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{Spec: loaded.Spec})
+		Expect(updated.Spec.Compute.GpuComputeMode).To(Equal(convutils.Ref(api.GPUCOMPUTEMODE_TIME_SLICING)))
+		loaded = get()
+		Expect(loaded.Spec.Compute.GpuComputeMode).To(Equal(convutils.Ref(api.GPUCOMPUTEMODE_TIME_SLICING)))
+		updates = getUpdatesForTest(createRouterForTest(), randoms, 0, 50, emptyClusterReports)
+		for _, update := range updates.Workloads {
+			if update.Id == id {
+				manifest = update.WorkloadManifest
+			}
+		}
+		annotations = manifest["spec"].(map[string]interface{})["annotations"].(map[string]interface{})
+		Expect(annotations).To(HaveKeyWithValue("nvidia.com/container."+created.Metadata.Name+"-ctr.gpu-compute.mode", "time-slicing"))
+	})
+
+	DescribeTable("uses ordinary NIM update handling for mode and CPU fields", func(computeJSON, policyJSON, wantMode string, wantCPU *float64) {
+		displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
+		var status clustersApi.ClusterDisplayedStatus
+		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
+		displayed.Status.Set(&status)
+		clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
+		spec := sampleNimServiceSpec
+		spec.Compute = &api.NimServiceSpecAllOfCompute{
+			GpuMemoryPortionRequest: convutils.Ref(0.25),
+			GpuComputeMode:          convutils.Ref(api.GPUCOMPUTEMODE_SM_SHARING),
+			CpuCoreRequest:          convutils.Ref(1.0),
+		}
+		id, created := createNimServiceForTest(router, randoms, &api.NimServiceCreateRequest{
+			Metadata: api.NimServiceMetadataCreateParams{Name: "ordinary-update", ProjectId: randoms.ProjectIdStr}, Spec: spec,
+		})
+
+		var policy policiesApi.NimServicePolicyDefaultsAndRules
+		Expect(json.Unmarshal([]byte(policyJSON), &policy)).To(Succeed())
+		policiesClient.SetMock(policiesClient.SimpleMockClientFactory{
+			SimpleMockClient: policiesClient.SimpleMockClient{EffectiveUpdatedAt: time.Now(), EffectiveNimServicePolicy: &policy},
+		})
+		request := api.NimServiceUpdateRequest{Spec: api.NimServiceSpec{Image: convutils.Ref("nvidia/nim:updated")}}
+		Expect(json.Unmarshal([]byte(computeJSON), &request.Spec.Compute)).To(Succeed())
+		updated := updateNimServiceForTest(router, randoms, id, &request)
+		Expect(updated.Spec.Image).To(Equal(request.Spec.Image))
+		Expect(updated.Spec.Compute.CpuCoreRequest).To(Equal(wantCPU))
+		if wantMode == "" {
+			Expect(updated.Spec.Compute.GpuComputeMode).To(BeNil())
+		} else {
+			Expect(updated.Spec.Compute.GpuComputeMode).To(Equal(convutils.Ref(api.GpuComputeMode(wantMode))))
+		}
+		get, err := http.NewRequest("GET", fmt.Sprintf("%s%s/%s", testHost, urlNimServices, id), nil)
+		Expect(err).ToNot(HaveOccurred())
+		get.Header = *headerForAdmin(randoms)
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, get)
+		Expect(response.Code).To(Equal(http.StatusOK))
+		var loaded api.NimServiceResponse
+		Expect(json.Unmarshal(response.Body.Bytes(), &loaded)).To(Succeed())
+		Expect(loaded.Spec).To(Equal(updated.Spec))
+
+		updates := getUpdatesForTest(createRouterForTest(), randoms, 1, 50, emptyClusterReports)
+		Expect(updates.Workloads).To(HaveLen(1))
+		Expect(updates.Workloads[0].Id).To(Equal(id))
+		nativeSpec := updates.Workloads[0].WorkloadManifest["spec"].(map[string]interface{})
+		annotations, _ := nativeSpec["annotations"].(map[string]interface{})
+		key := "nvidia.com/container." + created.Metadata.Name + "-ctr.gpu-compute.mode"
+		if wantMode == "" {
+			Expect(annotations).NotTo(HaveKey(key))
+		} else {
+			Expect(annotations).To(HaveKeyWithValue(key, wantMode))
+		}
+	},
+		Entry("replacement compute does not backfill policy defaults", `{"gpuMemoryPortionRequest":0.25}`, `{"defaults":{"compute":{"gpuComputeMode":"sm-sharing","cpuCoreRequest":8}}}`, "", (*float64)(nil)),
+		Entry("legacy memory replacement has the same default behavior", `{"gpuPortionRequest":0.25}`, `{"defaults":{"compute":{"gpuComputeMode":"sm-sharing","cpuCoreRequest":8}}}`, "", (*float64)(nil)),
+		Entry("unrelated edit preserves saved compute after policy changes", `null`, `{"defaults":{"compute":{"gpuComputeMode":"time-slicing","cpuCoreRequest":8}}}`, "sm-sharing", convutils.Ref(1.0)),
+		Entry("updates do not introduce field-specific locks", `{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"time-slicing","cpuCoreRequest":2}`, `{"defaults":{"compute":{"gpuComputeMode":"sm-sharing","cpuCoreRequest":8}},"rules":{"compute":{"gpuComputeMode":{"canEdit":false},"cpuCoreRequest":{"canEdit":false}}}}`, "time-slicing", convutils.Ref(2.0)),
+		Entry("omitted fields follow existing required-rule behavior", `{"gpuMemoryPortionRequest":0.25}`, `{"rules":{"compute":{"gpuComputeMode":{"required":true},"cpuCoreRequest":{"required":true}}}}`, "", (*float64)(nil)),
+		Entry("explicit fields follow existing blocked-rule behavior", `{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"time-slicing","cpuCoreRequest":2}`, `{"rules":{"compute":{"gpuComputeMode":{"blocked":true},"cpuCoreRequest":{"blocked":true}}}}`, "time-slicing", convutils.Ref(2.0)),
+	)
+
+	DescribeTable("persists only the resolved GPU mode alongside submitted NIM fields", func(computeJSON, modeSource, wantMode string) {
+		displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
+		var status clustersApi.ClusterDisplayedStatus
+		Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
+		displayed.Status.Set(&status)
+		clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
+
+		policyCompute := map[string]interface{}{"cpuCoreRequest": 2, "gpuMemoryPortionRequest": 0.25}
+		policyMap := map[string]interface{}{"defaults": map[string]interface{}{"compute": policyCompute, "replicas": 3}}
+		if modeSource == "policy" || modeSource == "locked-policy" {
+			policyCompute["gpuComputeMode"] = "sm-sharing"
+		}
+		if modeSource == "locked-policy" {
+			policyMap["rules"] = map[string]interface{}{"compute": map[string]interface{}{
+				"gpuComputeMode": map[string]interface{}{"canEdit": false},
+			}}
+		}
+		var policy policiesApi.NimServicePolicyDefaultsAndRules
+		Expect(convutils.CopySpecs(&policy, policyMap)).To(Succeed())
+		policiesClient.SetMock(policiesClient.SimpleMockClientFactory{
+			SimpleMockClient: policiesClient.SimpleMockClient{EffectiveUpdatedAt: time.Now(), EffectiveNimServicePolicy: &policy},
+		})
+
+		spec := sampleNimServiceSpec
+		Expect(json.Unmarshal([]byte(computeJSON), &spec.Compute)).To(Succeed())
+		var expected api.NimServiceSpec
+		Expect(convutils.CopySpecs(&expected, spec)).To(Succeed())
+		if wantMode != "" {
+			if expected.Compute == nil {
+				expected.Compute = &api.NimServiceSpecAllOfCompute{}
+			}
+			expected.Compute.GpuComputeMode = convutils.Ref(api.GpuComputeMode(wantMode))
+		}
+		if expected.Compute != nil {
+			if expected.Compute.GpuPortionRequest != nil {
+				expected.Compute.GpuMemoryPortionRequest = expected.Compute.GpuPortionRequest
+			} else {
+				expected.Compute.GpuPortionRequest = expected.Compute.GpuMemoryPortionRequest
+			}
+		}
+		request := api.NimServiceCreateRequest{
+			Metadata: api.NimServiceMetadataCreateParams{Name: "mode-persistence", ProjectId: randoms.ProjectIdStr}, Spec: spec,
+		}
+		id, created := createNimServiceForTest(router, randoms, &request)
+		expectedCPU := 2.0
+		if spec.Compute != nil && spec.Compute.CpuCoreRequest != nil {
+			expectedCPU = *spec.Compute.CpuCoreRequest
+		}
+		Expect(created.Spec.Compute.CpuCoreRequest).To(Equal(convutils.Ref(expectedCPU)))
+		Expect(created.Spec.Replicas).To(Equal(convutils.Ref(int32(3))))
+
+		updates := getUpdatesForTest(createRouterForTest(), randoms, 0, 50, emptyClusterReports)
+		var manifest map[string]interface{}
+		for _, update := range updates.Workloads {
+			if update.Id == id {
+				manifest = update.WorkloadManifest
+			}
+		}
+		Expect(manifest).NotTo(BeNil())
+		nativeSpec := manifest["spec"].(map[string]interface{})
+		Expect(nativeSpec["replicas"]).To(BeNumerically("==", 3))
+		resources := nativeSpec["resources"].(map[string]interface{})
+		Expect(resources["requests"]).To(HaveKeyWithValue("cpu", fmt.Sprintf("%g", expectedCPU)))
+		modeAnnotation := "nvidia.com/container." + created.Metadata.Name + "-ctr.gpu-compute.mode"
+		if wantMode == "" {
+			Expect(nativeSpec["annotations"]).NotTo(HaveKey(modeAnnotation))
+		} else {
+			Expect(nativeSpec["annotations"]).To(HaveKeyWithValue(modeAnnotation, wantMode))
+		}
+
+		get := func() api.NimServiceResponse {
+			req, err := http.NewRequest("GET", fmt.Sprintf("%s%s/%s", testHost, urlNimServices, id), nil)
+			Expect(err).NotTo(HaveOccurred())
+			req.Header = *headerForAdmin(randoms)
+			rec := httptest.NewRecorder()
+			router.ServeHTTP(rec, req)
+			Expect(rec.Code).To(Equal(http.StatusOK))
+			var result api.NimServiceResponse
+			Expect(json.Unmarshal(rec.Body.Bytes(), &result)).To(Succeed())
+			return result
+		}
+		Expect(get().Spec).To(Equal(expected))
+		if spec.Compute != nil {
+			expected.Replicas = convutils.Ref(int32(2))
+			updated := updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{Spec: api.NimServiceSpec{Replicas: expected.Replicas}})
+			Expect(updated.Spec).To(Equal(expected))
+			Expect(get().Spec).To(Equal(expected))
+		}
+	},
+		Entry("explicit mode with new memory name", `{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"sm-sharing"}`, "explicit", "sm-sharing"),
+		Entry("policy mode with deprecated memory name", `{"gpuPortionRequest":0.25}`, "policy", "sm-sharing"),
+		Entry("explicit mode overrides policy default", `{"gpuMemoryPortionRequest":0.25,"gpuComputeMode":"time-slicing"}`, "policy", "time-slicing"),
+		Entry("implicit mode stays omitted", `{"gpuMemoryPortionRequest":0.25}`, "implicit", ""),
+		Entry("mode is saved when compute was omitted", `null`, "policy", "sm-sharing"),
+		Entry("compute stays omitted without a configured mode", `null`, "implicit", ""),
+		Entry("explicit CPU value remains submitted", `{"gpuPortionRequest":0.25,"cpuCoreRequest":1}`, "policy", "sm-sharing"),
+		Entry("locked policy mode is saved", `{"gpuMemoryPortionRequest":0.25}`, "locked-policy", "sm-sharing"),
+	)
+
 	Context("GetNimService", func() {
 		var createdWorkloadId string
 		var workloadsRouter chi.Router

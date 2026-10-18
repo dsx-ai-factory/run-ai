@@ -10,6 +10,8 @@ import (
 	"maps"
 	"net/http"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
@@ -90,5 +92,9 @@ func CreateDistributed(ctx context.Context, tenantSettingsClient clients.TenantS
 	}
 
 	recordWorkloadCreate(ctx, &createWorkloadParams)
+	createWorkloadParams.Response.Spec = gpucompat.LegacyCompatibleWorkloadSpec(createWorkloadParams.Response.Spec)
+	if createWorkloadParams.Response.MasterSpec.Get() != nil {
+		createWorkloadParams.Response.MasterSpec.Set(gpucompat.LegacyCompatibleMasterSpec(createWorkloadParams.Response.MasterSpec.Get()))
+	}
 	return api.Response(http.StatusAccepted, createWorkloadParams.Response), nil
 }

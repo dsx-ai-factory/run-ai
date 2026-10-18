@@ -47,7 +47,11 @@ func AddPolicy(ctx context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Erro
 	policy.DefaultsV2 = database.CleanMap(policy.DefaultsV2)
 	policy.RulesV2 = database.CleanMap(policy.RulesV2)
 
-	if _, err := tx.Table(dbtables.PoliciesTable).Save(policy); err != nil {
+	stored, projectionErr := policy.ForDB()
+	if projectionErr != nil {
+		return database.Error(database.CREATE, database.Policies).WithDetails(projectionErr)
+	}
+	if _, err := tx.Table(dbtables.PoliciesTable).Save(stored); err != nil {
 		if policy.GvkWorkload && isUniqueViolation(err) {
 			return api.NewError(http.StatusConflict, "policy for similar scope and workload type already exists", nil)
 		}
@@ -56,12 +60,18 @@ func AddPolicy(ctx context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Erro
 		return dbErr
 	}
 
+	policy.BaseModel = stored.BaseModel
 	return nil
 }
 
 func UpdatePolicySpec(_ context.Context, tx orm.DB, policy *dbmodel.Policy) *api.Error {
 	policy.DefaultsV2 = database.CleanMap(policy.DefaultsV2)
 	policy.RulesV2 = database.CleanMap(policy.RulesV2)
+
+	stored, projectionErr := policy.ForDB()
+	if projectionErr != nil {
+		return database.Error(database.UPDATE, database.Policies).WithDetails(projectionErr)
+	}
 
 	updates := map[string]interface{}{
 		dbtables.DeletedAtColumn:             nil,
@@ -70,8 +80,8 @@ func UpdatePolicySpec(_ context.Context, tx orm.DB, policy *dbmodel.Policy) *api
 		dbtables.CreatedByColumn:             policy.CreatedBy,
 		dbtables.UpdatedByColumn:             policy.UpdatedBy,
 		dbtables.PoliciesColumnName:          policy.Name,
-		dbtables.PoliciesColumnDefaults:      policy.DefaultsV2,
-		dbtables.PoliciesColumnRules:         policy.RulesV2,
+		dbtables.PoliciesColumnDefaults:      stored.DefaultsV2,
+		dbtables.PoliciesColumnRules:         stored.RulesV2,
 		dbtables.PoliciesColumnImposedAssets: policy.ImposedAssets,
 		dbtables.PoliciesColumnGvkWorkload:   policy.GvkWorkload,
 	}
