@@ -21,6 +21,10 @@ type SimpleMockClient struct {
 	Workspaces  []workloadsServiceClient.Workspace
 	Trainings   []workloadsServiceClient.Training
 	Distributed []workloadsServiceClient.DistributedWorkload
+
+	ResourceClaimTemplateWorkloads         *workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse
+	ResourceClaimTemplateWorkloadsErr      *workloadsServiceClient.Error
+	ResourceClaimTemplateWorkloadsRequests []workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest
 }
 
 func (s *SimpleMockClient) CreateWorkspace(ctx context.Context, request *workloadsServiceClient.WorkspaceCreationRequest) (*workloadsServiceClient.Workspace, *workloadsServiceClient.SubmissionErrorV2) {
@@ -105,6 +109,21 @@ func (s SimpleMockClient) InternalCreateWorkload(ctx context.Context, notificati
 	return nil, nil
 }
 
+// InternalGetResourceClaimTemplateWorkloads records the request and returns the configured response or error.
+// With neither configured it returns an empty list.
+func (s *SimpleMockClient) InternalGetResourceClaimTemplateWorkloads(ctx context.Context, request *workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32) (*workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse, *workloadsServiceClient.Error) {
+	s.ResourceClaimTemplateWorkloadsRequests = append(s.ResourceClaimTemplateWorkloadsRequests, *request)
+	if s.ResourceClaimTemplateWorkloadsErr != nil {
+		return nil, s.ResourceClaimTemplateWorkloadsErr
+	}
+	if s.ResourceClaimTemplateWorkloads != nil {
+		return s.ResourceClaimTemplateWorkloads, nil
+	}
+	return &workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse{
+		Workloads: []workloadsServiceClient.ResourceClaimTemplateWorkload{},
+	}, nil
+}
+
 // SimpleMockClientFactory is the mock factory for testing
 type SimpleMockClientFactory struct {
 	*SimpleMockClient
@@ -187,4 +206,7 @@ func (s *SimpleMockClient) Clear() {
 	s.Workspaces = nil
 	s.Trainings = nil
 	s.Distributed = nil
+	s.ResourceClaimTemplateWorkloads = nil
+	s.ResourceClaimTemplateWorkloadsErr = nil
+	s.ResourceClaimTemplateWorkloadsRequests = nil
 }
