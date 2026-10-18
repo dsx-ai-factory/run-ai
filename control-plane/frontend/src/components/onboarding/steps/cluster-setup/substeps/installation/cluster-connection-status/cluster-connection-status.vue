@@ -39,8 +39,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, onMounted, onUnmounted, type PropType } from "vue";
 import { Vue3Lottie } from "vue3-lottie";
-import { NodeTelemetryType } from "@/swagger-models/cluster-service-client";
-import { clusterUtil } from "@/utils/cluster.util";
+import { ClusterState, NodeTelemetryType } from "@/swagger-models/cluster-service-client";
 import { intervalUtil } from "@/utils/interval.util";
 import { EIntervalLabels } from "@/models/interval.model";
 
@@ -112,7 +111,7 @@ export default defineComponent({
       try {
         const cluster = await clusterService.getClusterByUuid(props.clusterUuid);
 
-        if (cluster && clusterUtil.isClusterReachable(cluster.status?.state)) {
+        if (cluster && cluster.status?.state === ClusterState.Connected) {
           emit("update:is-cluster-connected", true);
 
           shouldShowLoading.value = false;
