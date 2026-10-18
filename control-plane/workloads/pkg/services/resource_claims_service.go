@@ -174,6 +174,9 @@ func resolveResourceClaimTemplates(ctx context.Context, workload models.Workload
 	return refs, nil
 }
 
+// we use this function to handle the case that multiple claims found with the same name. we want to find
+// the closest match, so we start comparing project, then department, and finally the cluster. the first
+// match is the closest.
 func closestResourceClaimTemplateAssetId(rcts []k8sObjectsApi.ResourceClaimTemplate, workload models.Workload) *string {
 	var departmentAssetId, clusterAssetId *string
 	for _, rct := range rcts {

@@ -22,15 +22,14 @@ import (
 )
 
 const (
-	// Containment instead of jsonb_array_length: pods synced without claims hold a JSON
-	// null, and jsonb_array_length raises on a scalar.
+	// Filtering rows that have resource_claims that is not empty json
 	podsWithResourceClaimsFilter = "resource_claims @> '[{}]'"
 
 	// Must match the json tag of models.PodResourceClaim.ResourceClaimTemplateName.
 	resourceClaimTemplateNameKey = "resource_claim_template_name"
 )
 
-// DbGetWorkloadPodsWithResourceClaims pages the workload's live pods that reference at
+// DbGetWorkloadPodsWithResourceClaims returns a workload's live pods that reference at
 // least one resource claim.
 func DbGetWorkloadPodsWithResourceClaims(ctx context.Context, tenantId uint, workloadId uuid.UUID, offset int32, limit int32) ([]models.Pod, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list workload pods resource claims", nil)
@@ -57,9 +56,9 @@ func DbGetWorkloadPodsWithResourceClaims(ctx context.Context, tenantId uint, wor
 	return pods, nil
 }
 
-// DbListWorkloadsReferencingResourceClaimTemplate pages the workloads in the scope whose
-// live pods reference the template by name. The pods are matched first and the workloads
-// table is only probed by id for their workloads.
+// DbListWorkloadsReferencingResourceClaimTemplate lists the workloads whose live pods reference the template by name.
+// The scope of the template is also taken into account, as well as permitted scopes the user is allowed to see.
+// The pods are matched first, and the workloads table is only probed by id for their workloads.
 func DbListWorkloadsReferencingResourceClaimTemplate(ctx context.Context, tenantId uint, templateName string,
 	scopeType api.ScopeType, scopeId string, permittedScopes *openapi.PermittedScopes, offset int32, limit int32,
 ) ([]models.Workload, *api.Error) {
@@ -145,7 +144,11 @@ func DbGetPodsReferencingResourceClaimTemplate(ctx context.Context, tenantId uin
 }
 
 func resourceClaimTemplateContainment(templateName string) (string, error) {
-	filter, err := json.Marshal([]map[string]string{{resourceClaimTemplateNameKey: templateName}})
+	filter, err := json.Marshal([]map[string]string{
+		{
+			resourceClaimTemplateNameKey: templateName},
+	},
+	)
 	if err != nil {
 		return "", fmt.Errorf("marshal resource claim template filter: %w", err)
 	}
