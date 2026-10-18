@@ -22,9 +22,10 @@ type SimpleMockClient struct {
 	Trainings   []workloadsServiceClient.Training
 	Distributed []workloadsServiceClient.DistributedWorkload
 
-	ResourceClaimTemplateWorkloads         *workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse
-	ResourceClaimTemplateWorkloadsErr      *workloadsServiceClient.Error
-	ResourceClaimTemplateWorkloadsRequests []workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest
+	// Excluded from serialization: tests snapshot this struct to compare the created workloads.
+	ResourceClaimTemplateWorkloads         *workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse         `json:"-"`
+	ResourceClaimTemplateWorkloadsErr      *workloadsServiceClient.Error                                          `json:"-"`
+	ResourceClaimTemplateWorkloadsRequests []workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest `json:"-"`
 }
 
 func (s *SimpleMockClient) CreateWorkspace(ctx context.Context, request *workloadsServiceClient.WorkspaceCreationRequest) (*workloadsServiceClient.Workspace, *workloadsServiceClient.SubmissionErrorV2) {

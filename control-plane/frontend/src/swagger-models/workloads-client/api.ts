@@ -14823,7 +14823,7 @@ export interface RequestedPods {
     'completions'?: number | null;
 }
 /**
- * 
+ * The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
  * @export
  * @interface ResourceClaimTemplateRef
  */
@@ -24393,11 +24393,11 @@ export interface WorkloadResourceClaim {
      */
     'claimName'?: string | null;
     /**
-     * The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
+     * 
      * @type {ResourceClaimTemplateRef}
      * @memberof WorkloadResourceClaim
      */
-    'template'?: ResourceClaimTemplateRef;
+    'template'?: ResourceClaimTemplateRef | null;
 }
 /**
  * 
@@ -24406,11 +24406,11 @@ export interface WorkloadResourceClaim {
  */
 export interface WorkloadResourceClaimAllOf {
     /**
-     * The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
+     * 
      * @type {ResourceClaimTemplateRef}
      * @memberof WorkloadResourceClaimAllOf
      */
-    'template'?: ResourceClaimTemplateRef;
+    'template'?: ResourceClaimTemplateRef | null;
 }
 /**
  * 
