@@ -34,7 +34,7 @@ Dependencies
 | `github.com/evanphx/json-patch/v5` | v5.9.11 | BSD-3-Clause | https://pkg.go.dev/github.com/evanphx/json-patch/v5@v5.9.11?tab=licenses |
 | `github.com/fsnotify/fsnotify` | v1.10.1 | BSD-3-Clause | https://github.com/fsnotify/fsnotify/blob/v1.10.1/LICENSE |
 | `github.com/fxamacker/cbor/v2` | v2.9.6 | MIT | https://pkg.go.dev/github.com/fxamacker/cbor/v2@v2.9.6?tab=licenses |
-| `github.com/gabriel-vasile/mimetype` | v1.4.15 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.15/LICENSE |
+| `github.com/gabriel-vasile/mimetype` | v1.4.16 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.16/LICENSE |
 | `github.com/go-logr/logr` | v1.4.4 | Apache-2.0 | https://github.com/go-logr/logr/blob/v1.4.4/LICENSE |
 | `github.com/go-openapi/jsonpointer` | v1.0.2 | Apache-2.0 | https://github.com/go-openapi/jsonpointer/blob/v1.0.2/LICENSE |
 | `github.com/go-openapi/jsonreference` | v1.0.3 | Apache-2.0 | https://github.com/go-openapi/jsonreference/blob/v1.0.3/LICENSE |
