@@ -20650,6 +20650,16 @@ components:
       - scopeId
       - scopeType
       type: object
+    ReportedWorkloadType:
+      description: "The type of the workload. Any workload type the cluster reports,\
+        \ not only the NVIDIA Run:ai native ones."
+      example: Training
+      type: string
+    ProjectId:
+      description: The id of the project.
+      example: "1"
+      pattern: .*
+      type: string
     PodResourceClaimBinding:
       example:
         claimName: bert-worker-0-gpu-1-mk4s8
@@ -20732,12 +20742,14 @@ components:
           pattern: .*
           type: string
         type:
-          description: The type of the workload.
+          description: "The type of the workload. Any workload type the cluster reports,\
+            \ not only the NVIDIA Run:ai native ones."
           example: Training
           type: string
         projectId:
-          description: The id of the project the workload belongs to.
+          description: The id of the project.
           example: "1"
+          pattern: .*
           type: string
         pods:
           description: The pods of the workload that reference the resource claim
@@ -24944,11 +24956,6 @@ components:
       - VLLM_REQUEST_DECODE_TIME_SECONDS_PERCENTILES
       - VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES
       - NVLINK_BANDWIDTH_TOTAL
-      type: string
-    ProjectId:
-      description: The id of the project.
-      example: "1"
-      pattern: .*
       type: string
     WorkloadCreationMeta:
       properties:

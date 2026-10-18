@@ -11936,6 +11936,17 @@
           }
         }
       },
+      "ReportedWorkloadType": {
+        "description": "The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.",
+        "type": "string",
+        "example": "Training"
+      },
+      "ProjectId": {
+        "description": "The id of the project.",
+        "type": "string",
+        "example": 1,
+        "pattern": ".*"
+      },
       "PodResourceClaimBinding": {
         "type": "object",
         "required": [
@@ -11998,14 +12009,10 @@
             "$ref": "#/components/schemas/WorkloadName"
           },
           "type": {
-            "type": "string",
-            "description": "The type of the workload.",
-            "example": "Training"
+            "$ref": "#/components/schemas/ReportedWorkloadType"
           },
           "projectId": {
-            "type": "string",
-            "description": "The id of the project the workload belongs to.",
-            "example": "1"
+            "$ref": "#/components/schemas/ProjectId"
           },
           "pods": {
             "type": "array",
@@ -13075,12 +13082,6 @@
           "VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES",
           "NVLINK_BANDWIDTH_TOTAL"
         ]
-      },
-      "ProjectId": {
-        "description": "The id of the project.",
-        "type": "string",
-        "example": 1,
-        "pattern": ".*"
       },
       "WorkloadCreationMeta": {
         "required": [

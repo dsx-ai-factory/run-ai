@@ -11,13 +11,9 @@ properties:
   name:
     $ref: './WorkloadName.yaml'
   type:
-    type: string
-    description: The type of the workload.
-    example: "Training"
+    $ref: './ReportedWorkloadType.yaml'
   projectId:
-    type: string
-    description: The id of the project the workload belongs to.
-    example: "1"
+    $ref: '../scopes/ProjectId.yaml'
   pods:
     type: array
     description: The pods of the workload that reference the resource claim template.
