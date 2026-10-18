@@ -57,25 +57,16 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 	var completedResets []string
 	if before.AllowCpuQuota && !after.AllowCpuQuota {
 		resetAction := openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT
-		if apiErr := s.resetNodepoolOrgUnitsResources(ctx, after, resetAction); apiErr != nil {
-			return nil, apiErr
+		err := s.orgUnitClient.NodePoolResetResources(ctx, after.ClusterId.String(), strconv.Itoa(int(after.ID)), resetAction)
+		if err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reset %s on nodepool %s. error: %v", resetAction, after.Name, err)
+			return nil, api.NewError(http.StatusServiceUnavailable,
+				fmt.Sprintf("failed to reset %s on the org units of nodepool %s", resetAction, after.Name), err)
 		}
 		completedResets = append(completedResets, string(resetAction))
 	}
 
 	return completedResets, nil
-}
-
-func (s *NodePoolsApiService) resetNodepoolOrgUnitsResources(ctx context.Context, nodepool models.Nodepool,
-	resetAction openapi.NodepoolResourcesResetAction,
-) *api.Error {
-	err := s.orgUnitClient.NodePoolResetResources(ctx, nodepool.ClusterId.String(), strconv.Itoa(int(nodepool.ID)), resetAction)
-	if err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reset %s on nodepool %s. error: %v", resetAction, nodepool.Name, err)
-		return api.NewError(http.StatusServiceUnavailable,
-			fmt.Sprintf("failed to reset %s on the org units of nodepool %s", resetAction, nodepool.Name), err)
-	}
-	return nil
 }
 
 func (s *NodePoolsApiService) validateCanTurnOffSchedulingCapability(ctx context.Context, nodepool models.Nodepool,
