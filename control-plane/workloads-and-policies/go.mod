@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/NVIDIA/k8s-nim-operator v0.0.0-20260601160319-679627a97be7
@@ -29,7 +29,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20251016112722-024bf1e7a8f1
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.15
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.7
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.5
 	github.com/ghodss/yaml v1.0.0
 	github.com/google/uuid v1.6.0
@@ -39,7 +39,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.32.0
 	github.com/onsi/gomega v1.42.1
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba
+	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
 	gorm.io/gorm v1.31.2
 	k8s.io/api v0.36.2
 	k8s.io/apimachinery v0.36.2
@@ -72,7 +72,7 @@ require (
 	github.com/antlr4-go/antlr/v4 v4.13.1 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/aws/aws-sdk-go v1.55.6 // indirect
-	github.com/aws/smithy-go v1.28.2 // indirect
+	github.com/aws/smithy-go v1.28.5 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/blendle/zapdriver v1.3.1 // indirect
@@ -84,10 +84,10 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.6 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.8 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.5 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.27 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.6 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.37.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
@@ -96,13 +96,13 @@ require (
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.0 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-chi/chi/v5 v5.3.2 // indirect
 	github.com/go-jose/go-jose/v4 v4.1.4 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-openapi/jsonpointer v1.0.1 // indirect
-	github.com/go-openapi/jsonreference v1.0.1 // indirect
+	github.com/go-openapi/jsonreference v1.0.2 // indirect
 	github.com/go-openapi/swag v0.29.2 // indirect
 	github.com/go-openapi/swag/cmdutils v0.29.2 // indirect
 	github.com/go-openapi/swag/conv v0.29.2 // indirect
@@ -132,7 +132,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.3.15 // indirect
 	github.com/googleapis/gax-go/v2 v2.22.0 // indirect
 	github.com/googleapis/google-cloud-go-testing v0.0.0-20210719221736-1c9a4c676720 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.32.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
@@ -145,7 +145,7 @@ require (
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
 	github.com/kedacore/keda/v2 v2.18.0 // indirect
-	github.com/klauspost/compress v1.20.1 // indirect
+	github.com/klauspost/compress v1.20.3 // indirect
 	github.com/kserve/kserve v0.17.1 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
@@ -168,11 +168,11 @@ require (
 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.88.0 // indirect
-	github.com/prometheus/client_golang v1.24.1 // indirect
+	github.com/prometheus/client_golang v1.25.0 // indirect
 	github.com/prometheus/client_model v0.6.3 // indirect
-	github.com/prometheus/common v0.71.0 // indirect
-	github.com/prometheus/procfs v0.21.1 // indirect
-	github.com/redis/go-redis/v9 v9.22.0 // indirect
+	github.com/prometheus/common v0.72.1 // indirect
+	github.com/prometheus/procfs v0.22.0 // indirect
+	github.com/redis/go-redis/v9 v9.23.0 // indirect
 	github.com/rs/zerolog v1.35.1 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/sirupsen/logrus v1.9.4 // indirect
@@ -187,8 +187,8 @@ require (
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.44.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.71.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0 // indirect
@@ -203,21 +203,21 @@ require (
 	go.uber.org/zap v1.28.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/net v0.59.0 // indirect
-	golang.org/x/oauth2 v0.36.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/term v0.46.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/mod v0.42.0 // indirect
+	golang.org/x/net v0.61.0 // indirect
+	golang.org/x/oauth2 v0.37.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/term v0.47.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/time v0.16.0 // indirect
-	golang.org/x/tools v0.50.0 // indirect
+	golang.org/x/tools v0.52.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.5.0 // indirect
 	google.golang.org/api v0.278.0 // indirect
 	google.golang.org/genproto v0.0.0-20260319201613-d00831a3d3e7 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20260928230214-8a89bd6388cc // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20260928230214-8a89bd6388cc // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941 // indirect
 	google.golang.org/grpc v1.84.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
@@ -274,8 +274,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcr
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller => ./../../runai-cluster/cluster/workload-controller
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common => ./../../runai-cluster/cluster/workload-common
-
-
 
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk => ./../../runai-cluster/cluster/sdk
 
