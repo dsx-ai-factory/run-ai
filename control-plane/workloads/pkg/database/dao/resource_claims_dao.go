@@ -29,9 +29,9 @@ const (
 	resourceClaimTemplateNameKey = "resource_claim_template_name"
 )
 
-// DbGetWorkloadPodsWithResourceClaims returns a workload's live pods that reference at
+// DbListWorkloadPodsWithResourceClaims lists a workload's live pods that reference at
 // least one resource claim.
-func DbGetWorkloadPodsWithResourceClaims(ctx context.Context, tenantId uint, workloadId uuid.UUID, offset int32, limit int32) ([]models.Pod, *api.Error) {
+func DbListWorkloadPodsWithResourceClaims(ctx context.Context, tenantId uint, workloadId uuid.UUID, offset int32, limit int32) ([]models.Pod, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list workload pods resource claims", nil)
 
 	query := runaidb.DB().WithContext(ctx).
@@ -112,9 +112,9 @@ func DbListWorkloadsReferencingResourceClaimTemplate(ctx context.Context, tenant
 	return workloads, nil
 }
 
-// DbGetPodsReferencingResourceClaimTemplate returns the live pods of the given workloads
+// DbListPodsReferencingResourceClaimTemplate lists the live pods of the given workloads
 // whose claims reference the template by name.
-func DbGetPodsReferencingResourceClaimTemplate(ctx context.Context, tenantId uint, templateName string, workloadIds []uuid.UUID) ([]models.Pod, *api.Error) {
+func DbListPodsReferencingResourceClaimTemplate(ctx context.Context, tenantId uint, templateName string, workloadIds []uuid.UUID) ([]models.Pod, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list pods referencing resource claim template", nil)
 
 	if len(workloadIds) == 0 {
