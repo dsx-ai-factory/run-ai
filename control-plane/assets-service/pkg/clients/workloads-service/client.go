@@ -264,7 +264,9 @@ func (c Client) InternalCreateWorkload(ctx context.Context, notification *worklo
 
 // InternalGetResourceClaimTemplateWorkloads lists the workloads in the request's scope whose pods
 // reference the resource claim template with the request's name
-func (c Client) InternalGetResourceClaimTemplateWorkloads(ctx context.Context, request *workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32) (*workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse, *workloadsServiceClient.Error) {
+func (c Client) InternalGetResourceClaimTemplateWorkloads(ctx context.Context,
+	request *workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32,
+) (*workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse, *workloadsServiceClient.Error) {
 	resp, r, err := c.apiClient.WorkloadsAPI.InternalGetResourceClaimTemplateWorkloads(ctx).
 		InternalResourceClaimTemplateWorkloadsRequest(*request).
 		Offset(offset).

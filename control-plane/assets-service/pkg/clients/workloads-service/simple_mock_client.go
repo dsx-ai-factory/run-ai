@@ -112,7 +112,9 @@ func (s SimpleMockClient) InternalCreateWorkload(ctx context.Context, notificati
 
 // InternalGetResourceClaimTemplateWorkloads records the request and returns the configured response or error.
 // With neither configured it returns an empty list.
-func (s *SimpleMockClient) InternalGetResourceClaimTemplateWorkloads(ctx context.Context, request *workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32) (*workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse, *workloadsServiceClient.Error) {
+func (s *SimpleMockClient) InternalGetResourceClaimTemplateWorkloads(ctx context.Context,
+	request *workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32,
+) (*workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse, *workloadsServiceClient.Error) {
 	s.ResourceClaimTemplateWorkloadsRequests = append(s.ResourceClaimTemplateWorkloadsRequests, *request)
 	if s.ResourceClaimTemplateWorkloadsErr != nil {
 		return nil, s.ResourceClaimTemplateWorkloadsErr
