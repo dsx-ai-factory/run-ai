@@ -34,7 +34,7 @@ Dependencies
 | `github.com/cespare/xxhash/v2` | v2.3.0 | MIT | https://pkg.go.dev/github.com/cespare/xxhash/v2@v2.3.0?tab=licenses |
 | `github.com/felixge/httpsnoop` | v1.1.0 | MIT | https://github.com/felixge/httpsnoop/blob/v1.1.0/LICENSE.txt |
 | `github.com/fsnotify/fsnotify` | v1.10.1 | BSD-3-Clause | https://github.com/fsnotify/fsnotify/blob/v1.10.1/LICENSE |
-| `github.com/gabriel-vasile/mimetype` | v1.4.15 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.15/LICENSE |
+| `github.com/gabriel-vasile/mimetype` | v1.4.16 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.16/LICENSE |
 | `github.com/go-chi/chi/v5` | v5.5.0 | MIT | https://pkg.go.dev/github.com/go-chi/chi/v5@v5.5.0?tab=licenses |
 | `github.com/go-logr/logr` | v1.4.4 | Apache-2.0 | https://github.com/go-logr/logr/blob/v1.4.4/LICENSE |
 | `github.com/go-logr/stdr` | v1.2.2 | Apache-2.0 | https://github.com/go-logr/stdr/blob/v1.2.2/LICENSE |
