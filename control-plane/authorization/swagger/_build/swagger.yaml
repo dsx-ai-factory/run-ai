@@ -2669,8 +2669,8 @@ components:
       type: string
       enum:
         - System administrator
-        - Cluster application
-        - Installer application
+        - Cluster service account
+        - Installer service account
         - Cloud operator
     InternalCreateAccessRuleRequest:
       type: object

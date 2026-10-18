@@ -85,6 +85,8 @@ func renameRoleIfLegacyNotExists(oldName, newName string) {
 
 func migrateDeprecatedRoleNames() {
 	renameRoleIfLegacyNotExists("Department administrator", "Department administrator (Legacy)")
+	renameRoleIfLegacyNotExists("Cluster application", "Cluster service account")
+	renameRoleIfLegacyNotExists("Installer application", "Installer service account")
 }
 
 func InitStaticLegacyRoles() {

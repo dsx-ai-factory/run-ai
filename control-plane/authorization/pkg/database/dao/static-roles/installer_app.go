@@ -11,8 +11,8 @@ import (
 )
 
 var InstallerApp = models.Role{
-	Name:                    "Installer application",
-	Description:             "An internal installer app used to create clusters and fetch its control-plane configuration (currently used during the installation process)",
+	Name:                    "Installer service account",
+	Description:             "An internal installer service account used to create clusters and fetch its control-plane configuration (currently used during the installation process)",
 	InternalOnly:            true,
 	ScopeType:               models.ROLE_SCOPE_SYSTEM,
 	Custom:                  false,

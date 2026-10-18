@@ -107,7 +107,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 			})
 			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusCreated))
@@ -126,7 +126,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 				Scope: &api.InternalCreateAccessRuleRequestScope{
 					Type: api.SCOPETYPE_CLUSTER,
 					Id:   TestCluster1Id,
@@ -149,7 +149,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 				Scope: &api.InternalCreateAccessRuleRequestScope{
 					Type: api.SCOPETYPE_TENANT,
 					Id:   fmt.Sprintf("%d", testing.TestTenant),
@@ -173,7 +173,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 				response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 					SubjectId:   TestUserId,
 					SubjectType: api.SUBJECTTYPE_USER,
-					RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+					RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 					Scope: &api.InternalCreateAccessRuleRequestScope{
 						Type: api.SCOPETYPE_PROJECT,
 						Id:   TestProject2Id,
@@ -194,7 +194,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
 			})
 			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusCreated))
@@ -213,7 +213,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
 				Scope: &api.InternalCreateAccessRuleRequestScope{
 					Type: api.SCOPETYPE_CLUSTER,
 					Id:   TestCluster1Id,
@@ -236,7 +236,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
 				Scope: &api.InternalCreateAccessRuleRequestScope{
 					Type: api.SCOPETYPE_TENANT,
 					Id:   fmt.Sprintf("%d", testing.TestTenant),
@@ -260,7 +260,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 				response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 					SubjectId:   TestUserId,
 					SubjectType: api.SUBJECTTYPE_USER,
-					RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+					RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 					Scope: &api.InternalCreateAccessRuleRequestScope{
 						Type: api.SCOPETYPE_PROJECT,
 						Id:   TestProject2Id,

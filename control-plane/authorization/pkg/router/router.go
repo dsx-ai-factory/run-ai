@@ -57,6 +57,7 @@ func CreateRouter() chi.Router {
 		router.Use(runaictx.ContextMiddleware)
 		router.Use(runaimetrics.HttpMiddleware)
 		router.Use(logginghttp.HttpMiddleware)
+		router.Use(deprecatedRoleNamesMiddleware)
 		// Add routes to the router for each of the controllers
 		api.AddRoutes(router,
 			HealthApiController,

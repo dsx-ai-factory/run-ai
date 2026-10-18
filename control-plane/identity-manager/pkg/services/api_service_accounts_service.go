@@ -372,7 +372,7 @@ func (s *ServiceAccountsApiService) getOrCreateInstallerClient(ctx context.Conte
 		Id:   clusterId,
 		Type: authorization_api.SCOPETYPE_CLUSTER,
 	}
-	if err := s.authzClient.SetServiceAccountPermissions(ctx, grantTenantId, clientId, scope, authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION); err != nil {
+	if err := s.authzClient.SetServiceAccountPermissions(ctx, grantTenantId, clientId, scope, authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT); err != nil {
 		return "", fmt.Errorf("failed to grant access rule for installer client %s: %w", clientId, err)
 	}
 
