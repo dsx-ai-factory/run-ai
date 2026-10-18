@@ -56,9 +56,18 @@ Workload policies allow administrators to define and enforce how AI workloads ar
   * Restrict `runAsUid` with `canEdit: false` to prevent users from overriding.
 * Require explicit user/group IDs for all workload containers.
 * Impose data source and resource usage limits through policies.
-  * Control `hostPath` volumes. A `hostPath` volume mounts a directory from the node into the workload container. Workloads can add `hostPath` volumes unless a policy restricts them. To prevent workloads from adding them, set `storage.hostPath.instances.canAdd: false`.
+  * Control `hostPath` volumes. A `hostPath` volume mounts a directory from the node into the workload container. Workloads can add `hostPath` volumes unless a policy restricts them. To prevent workloads from adding them, set `storage.hostPath.instances.canAdd: false`:
+
+    ```yaml
+    rules:
+      storage:
+        hostPath:
+          instances:
+            canAdd: false
+    ```
+
   * When a project requires `hostPath` volumes, define them in the policy and set `readOnly: true` where possible. Use `locked` to keep the defined volumes in place, and `canAdd: false` to prevent additional ones.
-  * Combine `hostPath` controls with `security.runAsNonRoot: true` and a locked `security.runAsUid` to control the user identity that accesses mounted paths.
+  * Combine `hostPath` controls with `security.runAsNonRoot: true` and a `security.runAsUid` default with `canEdit: false` to control the user identity that accesses mounted paths.
   * See [Policy YAML examples](../../../platform-management/policies/policy-yaml-examples.md) and [Policy YAML reference](../../../platform-management/policies/policy-yaml-reference.md).
 * Use policy rules to prevent users from submitting non-compliant workloads.
 * Apply policies by organizational scope for nuanced control within departments or projects.
