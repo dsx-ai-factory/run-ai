@@ -56034,11 +56034,9 @@ components:
             template:
               allOf:
                 - $ref: '#/components/schemas/ResourceClaimTemplateRef'
-              nullable: true
-              type: object
               description: >-
-                The ResourceClaimTemplate the claim was generated from. Null for
-                a standalone ResourceClaim that the pod references directly.
+                The ResourceClaimTemplate the claim was generated from. Absent
+                for a standalone ResourceClaim that the pod references directly.
     WorkloadPodResourceClaims:
       type: object
       required:

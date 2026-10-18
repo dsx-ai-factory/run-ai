@@ -24393,11 +24393,11 @@ export interface WorkloadResourceClaim {
      */
     'claimName'?: string | null;
     /**
-     * The ResourceClaimTemplate the claim was generated from. Null for a standalone ResourceClaim that the pod references directly.
+     * The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
      * @type {ResourceClaimTemplateRef}
      * @memberof WorkloadResourceClaim
      */
-    'template'?: ResourceClaimTemplateRef | null;
+    'template'?: ResourceClaimTemplateRef;
 }
 /**
  * 
@@ -24406,11 +24406,11 @@ export interface WorkloadResourceClaim {
  */
 export interface WorkloadResourceClaimAllOf {
     /**
-     * The ResourceClaimTemplate the claim was generated from. Null for a standalone ResourceClaim that the pod references directly.
+     * The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
      * @type {ResourceClaimTemplateRef}
      * @memberof WorkloadResourceClaimAllOf
      */
-    'template'?: ResourceClaimTemplateRef | null;
+    'template'?: ResourceClaimTemplateRef;
 }
 /**
  * 
