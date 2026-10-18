@@ -4,8 +4,8 @@ go 1.27.2
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.6
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.6
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.7
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.7
 	github.com/onsi/ginkgo/v2 v2.33.1
 	github.com/onsi/gomega v1.44.0
 	sigs.k8s.io/yaml v1.6.0
