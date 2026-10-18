@@ -98,7 +98,7 @@ export const allClusterColumnsMap: Record<string, ITableColumn> = {
     name: "lastConnected",
     label: "Last connected",
     field: (row: DisplayedCluster) => {
-      return clusterUtil.isClusterReachable(row.status?.state) ? "Now" : row.lastLiveness ? row.lastLiveness : "Never";
+      return row.status?.state === ClusterState.Connected ? "Now" : row.lastLiveness ? row.lastLiveness : "Never";
     },
     sortable: true,
     align: "left",
@@ -107,7 +107,7 @@ export const allClusterColumnsMap: Record<string, ITableColumn> = {
     filter: {
       type: EColumnFilterType.FreeText,
       autocompleteOptionsFn: autocompleteUtil.clusters((c) => {
-        if (clusterUtil.isClusterReachable(c.status?.state)) return "Now";
+        if (c.status?.state === ClusterState.Connected) return "Now";
         if (c.lastLiveness)
           return isDateString(c.lastLiveness) ? dateUtil.dateAndTimeFormat(new Date(c.lastLiveness)) : c.lastLiveness;
         return "Never";
