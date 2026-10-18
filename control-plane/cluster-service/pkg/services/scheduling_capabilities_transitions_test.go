@@ -114,11 +114,10 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(stored.AdjustableWeights).To(BeTrue())
 	})
 
-	It("resets the org-unit values when cpuQuota and weights turn off", func() {
+	It("resets the org-unit CPU quotas when cpuQuota turns off, and keeps weights when weights turn off", func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
-		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_WEIGHTS_TO_DEFAULT, nil)
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{CpuQuota: ptr.To(false), AdjustableWeights: ptr.To(false)})
 		Expect(response.Code).To(Equal(http.StatusOK))
@@ -138,10 +137,9 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(storedCapabilities(np.Id).CpuQuota).To(BeTrue())
 	})
 
-	It("resets the org-unit values when a PUT turns weights off", func() {
+	It("turns weights off on a PUT without any org-unit call", func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
-		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_WEIGHTS_TO_DEFAULT, nil)
 
 		fields := nodepoolUpdateFields(fmt.Sprintf("-capabilities-put-off-%d", len(createdNodepools)), nil)
 		fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(false)}
@@ -149,42 +147,29 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(err).To(BeNil())
 		Expect(response.Code).To(Equal(http.StatusOK))
 
+		orgClient.AssertNotCalled(GinkgoT(), "NodePoolResetResources", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+
 		stored := storedCapabilities(np.Id)
 		Expect(stored.AdjustableWeights).To(BeFalse())
 		Expect(stored.CpuQuota).To(BeTrue())
-	})
-
-	It("names the resets already done when a later reset fails", func() {
-		np := createNodepool(clusterId)
-		turnOnCpuQuotaAndWeights(np.Id)
-		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
-		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_WEIGHTS_TO_DEFAULT, errors.New("org-unit-service is down"))
-
-		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{CpuQuota: ptr.To(false), AdjustableWeights: ptr.To(false)})
-		Expect(response.Code).To(Equal(http.StatusServiceUnavailable))
-		Expect(response.Body.(api.Error).Message).To(ContainSubstring("Already reset: CPU_QUOTAS_TO_DEFAULT"))
-
-		stored := storedCapabilities(np.Id)
-		Expect(stored.CpuQuota).To(BeTrue())
-		Expect(stored.AdjustableWeights).To(BeTrue())
 	})
 
 	It("names the resets already done when the nodepool save fails", func() {
 		taken := createNodepool(clusterId)
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
-		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_WEIGHTS_TO_DEFAULT, nil)
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
 
 		fields := api.NodepoolUpdateFields{
 			LabelKey:               ptr.To(taken.LabelKey),
 			LabelValue:             ptr.To(taken.LabelValue),
-			SchedulingCapabilities: api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(false)},
+			SchedulingCapabilities: api.SchedulingCapabilitiesNullable{CpuQuota: ptr.To(false)},
 		}
 		response, err := nodepoolService.UpdateNodepool(ctx, np.Id, fields)
 		Expect(err).To(BeNil())
 		Expect(response.Code).To(Equal(http.StatusConflict))
-		Expect(response.Body.(api.Error).Message).To(ContainSubstring("Already reset: WEIGHTS_TO_DEFAULT"))
-		Expect(storedCapabilities(np.Id).AdjustableWeights).To(BeTrue())
+		Expect(response.Body.(api.Error).Message).To(ContainSubstring("Already reset: CPU_QUOTAS_TO_DEFAULT"))
+		Expect(storedCapabilities(np.Id).CpuQuota).To(BeTrue())
 	})
 
 	It("refuses to turn quota off while cpuQuota stays on", func() {

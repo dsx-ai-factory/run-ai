@@ -178,18 +178,6 @@ var _ = Describe("Resources DAO SQL", func() {
 			err := NodepoolResetResources(context.Background(), testTenantID, testClusterID().String(), testNodePoolID, api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
 			Expect(err).NotTo(HaveOccurred())
 		})
-		It("resets weights to default", func() {
-			mocker := setupSQLMock()
-			sqlProjects := `UPDATE resources SET gpu_over_quota_weight = 2.000000, cpu_over_quota_weight = CASE WHEN cpu_over_quota_weight IS NOT NULL THEN 2.000000 ELSE NULL END, memory_over_quota_weight = CASE WHEN memory_over_quota_weight IS NOT NULL THEN 2.000000 ELSE NULL END, updated_at=now() FROM project WHERE project.org_unit_data_id = resources.org_unit_data_id AND ((gpu_over_quota_weight IS DISTINCT FROM 2.000000 OR cpu_over_quota_weight <> 2.000000 OR memory_over_quota_weight <> 2.000000) AND resources.node_pool_id IN (?)) AND project.tenant_id = ? AND project.cluster_id = ? AND project.deleted_at is NULL and resources.deleted_at is NULL;`
-			sqlDepartments := `UPDATE resources SET gpu_over_quota_weight = 2.000000, cpu_over_quota_weight = CASE WHEN cpu_over_quota_weight IS NOT NULL THEN 2.000000 ELSE NULL END, memory_over_quota_weight = CASE WHEN memory_over_quota_weight IS NOT NULL THEN 2.000000 ELSE NULL END, updated_at=now() FROM department WHERE department.org_unit_data_id = resources.org_unit_data_id AND ((gpu_over_quota_weight IS DISTINCT FROM 2.000000 OR cpu_over_quota_weight <> 2.000000 OR memory_over_quota_weight <> 2.000000) AND resources.node_pool_id IN (?)) AND department.tenant_id = ? AND department.cluster_id = ? AND department.deleted_at is NULL and resources.deleted_at is NULL;`
-			mocker.ExpectTransaction().Begin()
-			mocker.ExpectExec(sqlProjects).Returns(1)
-			mocker.ExpectExec(sqlDepartments).Returns(1)
-			mocker.ExpectTransaction().Commit()
-
-			err := NodepoolResetResources(context.Background(), testTenantID, testClusterID().String(), testNodePoolID, api.NODEPOOLRESOURCESRESETACTION_WEIGHTS_TO_DEFAULT)
-			Expect(err).NotTo(HaveOccurred())
-		})
 		It("returns error", func() {
 			mocker := setupSQLMock()
 			sqlProjects := `UPDATE resources SET cpu_deserved = NULL, cpu_limit = NULL, cpu_over_quota_weight = NULL, memory_deserved = NULL, memory_limit = NULL, memory_over_quota_weight = NULL, updated_at=now() FROM project WHERE project.org_unit_data_id = resources.org_unit_data_id AND ((cpu_deserved IS NOT NULL OR cpu_limit IS NOT NULL OR cpu_over_quota_weight IS NOT NULL OR memory_deserved IS NOT NULL OR memory_limit IS NOT NULL OR memory_over_quota_weight IS NOT NULL) AND resources.node_pool_id IN (?)) AND project.tenant_id = ? AND project.cluster_id = ? AND project.deleted_at is NULL and resources.deleted_at is NULL;`

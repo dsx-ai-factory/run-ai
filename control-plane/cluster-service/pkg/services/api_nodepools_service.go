@@ -481,7 +481,7 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
 	}
 
-	resetsApplied, apiErr := s.applyCapabilityTransitions(ctx, nodepoolModel, *patched)
+	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, nodepoolModel, *patched)
 	if apiErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s with id %s capabilities change failed. error: %v", nodepoolModel.Name, nodepoolId, apiErr.Message)
 		return NewErrorResponse(apiErr), nil
@@ -496,7 +496,7 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 	if dbErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Patch nodepool %s with id %s request failed. error: %v", nodepoolModel.Name, nodepoolId, dbErr)
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
-			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, resetsAppliedHint(resetsApplied)), dbErr)), nil
+			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, describeCompletedResets(completedResets)), dbErr)), nil
 	}
 
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
@@ -602,7 +602,7 @@ func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId str
 		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
 	}
 
-	resetsApplied, apiErr := s.applyCapabilityTransitions(ctx, nodepoolModel, *updated)
+	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, nodepoolModel, *updated)
 	if apiErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s with id %s capabilities change failed. error: %v", nodepoolModel.Name, nodepoolId, apiErr.Message)
 		return NewErrorResponse(apiErr), nil
@@ -617,7 +617,7 @@ func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId str
 	if dbErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Update nodepool %s with id %s request failed. error: %v", nodepoolModel.Name, nodepoolId, dbErr)
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
-			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, resetsAppliedHint(resetsApplied)), dbErr)), nil
+			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, describeCompletedResets(completedResets)), dbErr)), nil
 	}
 
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
