@@ -226,8 +226,6 @@ navigation:
         path: ../../docs/platform-management/authentication/service-accounts.md
       - page: Access Rules
         path: ../../docs/platform-management/authentication/accessrules.md
-      - page: Cluster Authentication
-        path: ../../docs/platform-management/authentication/cluster-authentication.md
     - section: Manage AI Initiatives
       contents:
       - page: Adapting AI Initiatives to Your Organization

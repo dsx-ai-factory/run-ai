@@ -62,6 +62,12 @@ redirects:
   - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/time-slicing
     destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/compute-modes
     permanent: true
+  - source: /run-ai/self-hosted/documentation/platform-management/authentication/cluster-authentication
+    destination: /run-ai/self-hosted/documentation/installation-and-configuration/config/cluster-authentication
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/platform-management/authentication/permissions
+    destination: /run-ai/self-hosted/documentation/platform-management/authentication/roles/permissions
+    permanent: true
   - source: /self-hosted/v2.26/:slug*
     destination: https://run-ai-docs.nvidia.com/self-hosted
     permanent: false
