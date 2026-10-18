@@ -2,10 +2,10 @@ github.com/cespare/xxhash/v2 v2.3.0 h1:UL815xU9SqsFlibzuggzjXhog7bL6oX9BbNZnL2UF
 github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XLFGgcrjCOs=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 h1:Ov1I7x8ZUcgC9yzgtUO7bOuVHvejBEphZT8GlQ2q8Uk=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1/go.mod h1:hDzQ3k8G0AiU88ODxROMfPpkNkvrBskZ1kJvgnSY+ao=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16 h1:wv8pDba5/oZb6UXkepUCEgWDj/i36Dfe7/5/bh8g5y4=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16/go.mod h1:TWxudHexdXA6RfvUWuIuGRgfPmMZ2PpzAt4nYE1bbnw=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2 h1:JVzD27sYiITgpN3IqSJFdWtMsX1bY4unyN1AxvWw8BI=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2/go.mod h1:LrD5w0Y8LUNfoR47mdZqDFFXTSODeeM/CVZGKJ5s+wI=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17 h1:ZCzuH3k7+SA/pSzKjmjuaEteG/74rwwOUwXg+HFOWXI=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17/go.mod h1:XphvhGwcptSm5mE2Beb2mJoi5JjLiXvCTynF00VNhQk=
 github.com/dustin/go-humanize v1.1.0 h1:dbKTrvD0klcbBV/h4AWJdMuZogJACoMlvWIWZ5b2xWg=
 github.com/dustin/go-humanize v1.1.0/go.mod h1:hc1CvRkJMsgxqjmjMQF3QNRAZBwY8AXBAzKYoSX9sFI=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
