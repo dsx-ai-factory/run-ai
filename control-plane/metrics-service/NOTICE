@@ -44,7 +44,7 @@ Dependencies
 | `github.com/dustin/go-humanize` | v1.1.0 | MIT | https://github.com/dustin/go-humanize/blob/v1.1.0/LICENSE |
 | `github.com/felixge/httpsnoop` | v1.1.0 | MIT | https://github.com/felixge/httpsnoop/blob/v1.1.0/LICENSE.txt |
 | `github.com/fsnotify/fsnotify` | v1.10.1 | BSD-3-Clause | https://github.com/fsnotify/fsnotify/blob/v1.10.1/LICENSE |
-| `github.com/gabriel-vasile/mimetype` | v1.4.15 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.15/LICENSE |
+| `github.com/gabriel-vasile/mimetype` | v1.4.16 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.16/LICENSE |
 | `github.com/go-chi/chi/v5` | v5.5.0 | MIT | https://pkg.go.dev/github.com/go-chi/chi/v5@v5.5.0?tab=licenses |
 | `github.com/go-faster/city` | v1.0.1 | MIT | https://github.com/go-faster/city/blob/v1.0.1/LICENSE |
 | `github.com/go-faster/errors` | v0.8.0 | BSD-3-Clause | https://github.com/go-faster/errors/blob/v0.8.0/LICENSE |
@@ -72,7 +72,7 @@ Dependencies
 | `github.com/klauspost/compress/s2` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/s2/LICENSE |
 | `github.com/klauspost/compress/snappy` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/snappy/LICENSE |
 | `github.com/klauspost/compress/zstd/internal/xxhash` | v1.20.3 | MIT | https://github.com/klauspost/compress/blob/v1.20.3/zstd/internal/xxhash/LICENSE.txt |
-| `github.com/klauspost/cpuid/v2` | v2.4.0 | MIT | https://pkg.go.dev/github.com/klauspost/cpuid/v2@v2.4.0?tab=licenses |
+| `github.com/klauspost/cpuid/v2` | v2.4.1 | MIT | https://pkg.go.dev/github.com/klauspost/cpuid/v2@v2.4.1?tab=licenses |
 | `github.com/klauspost/crc32` | v1.3.0 | BSD-3-Clause | https://github.com/klauspost/crc32/blob/v1.3.0/LICENSE |
 | `github.com/leodido/go-urn` | v1.5.0 | MIT | https://github.com/leodido/go-urn/blob/v1.5.0/LICENSE |
 | `github.com/lib/pq` | v1.12.3 | MIT | https://github.com/lib/pq/blob/v1.12.3/LICENSE |
@@ -92,7 +92,7 @@ Dependencies
 | `github.com/oklog/ulid` | v1.3.1 | Apache-2.0 | https://github.com/oklog/ulid/blob/v1.3.1/LICENSE |
 | `github.com/paulmach/orb` | v0.13.0 | MIT | https://github.com/paulmach/orb/blob/v0.13.0/LICENSE.md |
 | `github.com/pelletier/go-toml/v2` | v2.4.3 | MIT | https://pkg.go.dev/github.com/pelletier/go-toml/v2@v2.4.3?tab=licenses |
-| `github.com/philhofer/fwd` | v1.2.0 | MIT | https://github.com/philhofer/fwd/blob/v1.2.0/LICENSE.md |
+| `github.com/philhofer/fwd` | v1.2.1 | MIT | https://github.com/philhofer/fwd/blob/v1.2.1/LICENSE.md |
 | `github.com/pierrec/lz4/v4` | v4.1.33 | BSD-3-Clause | https://pkg.go.dev/github.com/pierrec/lz4/v4@v4.1.33?tab=licenses |
 | `github.com/pkg/errors` | v0.9.1 | BSD-2-Clause | https://github.com/pkg/errors/blob/v0.9.1/LICENSE |
 | `github.com/prometheus/client_golang/internal/github.com/golang/gddo/httputil` | v1.25.0 | BSD-3-Clause | https://github.com/prometheus/client_golang/blob/v1.25.0/internal/github.com/golang/gddo/LICENSE |
