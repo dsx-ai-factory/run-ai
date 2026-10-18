@@ -1,5 +1,5 @@
 type: object
-description: The response of GET /api/v1/workloads-slim.
+description: The response of GET /api/v1/workloads/slim.
 required:
   - workloads
 properties:

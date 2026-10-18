@@ -22,7 +22,7 @@ import (
 // checks if the WorkloadSlim type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &WorkloadSlim{}
 
-// WorkloadSlim A workload as returned by GET /api/v1/workloads-slim.
+// WorkloadSlim A workload as returned by GET /api/v1/workloads/slim.
 type WorkloadSlim struct {
 	Id          string  `json:"id"`
 	Name        string  `json:"name"`

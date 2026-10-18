@@ -603,16 +603,15 @@ func (w *WorkloadsDao) DbGetWorkloads(
 	return workloads, nil
 }
 
-// DbGetWorkloadsSlim lists the active workloads from the workloads table instead of the view, sorted by id: only the
-// WorkloadSlim columns, without pod aggregates, and including workloads created after the last materialized view
-// refresh.
+// DbGetWorkloadsSlim lists the active workloads from the workloads table instead of the view, sorted by id ascending:
+// only the WorkloadSlim columns, without pod aggregates, and including workloads created after the last materialized
+// view refresh.
 func (w *WorkloadsDao) DbGetWorkloadsSlim(
 	ctx context.Context,
 	tenantId uint,
 	permittedScopes *openapi.PermittedScopes,
 	offset int32,
 	limit int32,
-	sortOrder string,
 	filterBy []queryapi.Filter,
 ) (*[]models.WorkloadSlim, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list workloads", nil)
@@ -635,7 +634,8 @@ func (w *WorkloadsDao) DbGetWorkloadsSlim(
 
 	query = query.WithEnricher(querydbenrich.Filters(filterBy))
 
-	query = query.Order(querydbenrich.FormatSortClause("id", sortOrder))
+	// a plain "id ASC" is served by the primary key index; FormatSortClause adds NULLS FIRST, which forces a full sort
+	query = query.Order("id ASC")
 
 	if offset != 0 {
 		query = query.Offset(int(offset))

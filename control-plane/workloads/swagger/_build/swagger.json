@@ -684,11 +684,11 @@
         }
       }
     },
-    "/api/v1/workloads-slim": {
+    "/api/v1/workloads/slim": {
       "get": {
         "x-internal": true,
         "summary": "List workloads, slim.",
-        "description": "Retrieve a list of active workloads with only their identity fields, sorted by id.\nWorkloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.\n",
+        "description": "Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.\nWorkloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.\n",
         "operationId": "get_workloads_slim",
         "x-service": "workloads",
         "x-test-coverage": [
@@ -707,9 +707,6 @@
           },
           {
             "$ref": "#/components/parameters/Limit"
-          },
-          {
-            "$ref": "#/components/parameters/SortOrder"
           },
           {
             "$ref": "#/components/parameters/WorkloadsSlimFilter"
@@ -12031,7 +12028,7 @@
       },
       "WorkloadSlim": {
         "type": "object",
-        "description": "A workload as returned by GET /api/v1/workloads-slim.",
+        "description": "A workload as returned by GET /api/v1/workloads/slim.",
         "required": [
           "id",
           "name",
@@ -12065,7 +12062,7 @@
       },
       "GetWorkloadsSlimResponse": {
         "type": "object",
-        "description": "The response of GET /api/v1/workloads-slim.",
+        "description": "The response of GET /api/v1/workloads/slim.",
         "required": [
           "workloads"
         ],

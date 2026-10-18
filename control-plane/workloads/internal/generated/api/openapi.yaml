@@ -924,10 +924,10 @@ paths:
       x-authorize:
         resource-type: workloads
         action: sync
-  /api/v1/workloads-slim:
+  /api/v1/workloads/slim:
     get:
       description: |
-        Retrieve a list of active workloads with only their identity fields, sorted by id.
+        Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
         Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
       operationId: get_workloads_slim
       parameters:
@@ -952,18 +952,6 @@ paths:
           maximum: 500
           minimum: 1
           type: integer
-        style: form
-      - description: Sort results in descending or ascending order.
-        explode: true
-        in: query
-        name: sortOrder
-        required: false
-        schema:
-          default: asc
-          enum:
-          - asc
-          - desc
-          type: string
         style: form
       - description: "Filter results by a parameter. Use the format field-name operator\
           \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
@@ -21999,7 +21987,7 @@ components:
       - workloads
       type: object
     WorkloadSlim:
-      description: A workload as returned by GET /api/v1/workloads-slim.
+      description: A workload as returned by GET /api/v1/workloads/slim.
       example:
         name: very-important-job
         distributedFramework: Pytorch
@@ -22034,7 +22022,7 @@ components:
       - projectName
       type: object
     GetWorkloadsSlimResponse:
-      description: The response of GET /api/v1/workloads-slim.
+      description: The response of GET /api/v1/workloads/slim.
       example:
         next: 1
         workloads:

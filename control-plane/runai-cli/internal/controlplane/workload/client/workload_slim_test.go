@@ -33,7 +33,7 @@ var _ = Describe("Workload Client slim list", func() {
 			w.Header().Set("Content-Type", "application/json")
 
 			switch r.URL.Path {
-			case "/api/v1/workloads-slim":
+			case "/api/v1/workloads/slim":
 				if slimNotFound {
 					w.WriteHeader(http.StatusNotFound)
 					return
@@ -86,7 +86,7 @@ var _ = Describe("Workload Client slim list", func() {
 		response, err := client.ListSlim(context.Background(), 10, 0, []string{"name==slim-workload-1"})
 
 		Expect(err).ToNot(HaveOccurred())
-		Expect(capturedPaths).To(Equal([]string{"/api/v1/workloads-slim"}))
+		Expect(capturedPaths).To(Equal([]string{"/api/v1/workloads/slim"}))
 		Expect(capturedQuery.Get("filterBy")).To(Equal("name==slim-workload-1"))
 		Expect(response.Workloads).To(HaveLen(1))
 		Expect(response.Workloads[0].Id).To(Equal("slim-1"))
@@ -103,7 +103,7 @@ var _ = Describe("Workload Client slim list", func() {
 		response, err := client.ListSlim(context.Background(), 10, 0, []string{"name==full-workload-1"})
 
 		Expect(err).ToNot(HaveOccurred())
-		Expect(capturedPaths).To(Equal([]string{"/api/v1/workloads-slim", "/api/v1/workloads"}))
+		Expect(capturedPaths).To(Equal([]string{"/api/v1/workloads/slim", "/api/v1/workloads"}))
 		Expect(capturedQuery.Get("filterBy")).To(Equal("name==full-workload-1"))
 		Expect(capturedQuery.Get("deleted")).To(Equal("false"))
 		Expect(response.Workloads).To(HaveLen(1))

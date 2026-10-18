@@ -1,5 +1,5 @@
 type: object
-description: A workload as returned by GET /api/v1/workloads-slim.
+description: A workload as returned by GET /api/v1/workloads/slim.
 required:
   - id
   - name

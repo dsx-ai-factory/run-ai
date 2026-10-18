@@ -445,9 +445,16 @@ func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offse
 		return NewErrorResponse(dbErr), nil
 	}
 
-	apiWorkloads := []api.Workload{}
+	clusterConfigs := map[string]*checker.ClusterConfiguration{}
+	apiWorkloads := make([]api.Workload, 0, len(*workloads))
 	for _, workload := range *workloads {
-		apiWorkloads = append(apiWorkloads, WorkloadModelToApi(ctx, workload))
+		clusterId := workload.ClusterID.String()
+		clusterConfig, found := clusterConfigs[clusterId]
+		if !found {
+			clusterConfig = getClusterConfiguration(ctx, clusterId)
+			clusterConfigs[clusterId] = clusterConfig
+		}
+		apiWorkloads = append(apiWorkloads, WorkloadModelToApi(ctx, workload, clusterConfig))
 	}
 
 	recordsCount := int32(len(apiWorkloads))
@@ -462,8 +469,9 @@ func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offse
 	return api.Response(http.StatusOK, response), nil
 }
 
-// GetWorkloadsSlim - List workloads, slim. Serves GET /api/v1/workloads-slim from the workloads table, sorted by id.
-func (s *WorkloadsService) GetWorkloadsSlim(ctx context.Context, offset int32, limit int32, sortOrder string, filterBy []string) (api.ImplResponse, error) {
+// GetWorkloadsSlim - List workloads, slim. Serves GET /api/v1/workloads/slim from the workloads table, sorted by id
+// ascending.
+func (s *WorkloadsService) GetWorkloadsSlim(ctx context.Context, offset int32, limit int32, filterBy []string) (api.ImplResponse, error) {
 	tenantId, apiErr := services_utils.ParseTenantId(ctx)
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
@@ -481,7 +489,7 @@ func (s *WorkloadsService) GetWorkloadsSlim(ctx context.Context, offset int32, l
 		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
 	}
 
-	workloads, dbErr := s.WorkloadsDao.DbGetWorkloadsSlim(ctx, tenantId, permittedScopes, offset, limit, sortOrder, filters)
+	workloads, dbErr := s.WorkloadsDao.DbGetWorkloadsSlim(ctx, tenantId, permittedScopes, offset, limit, filters)
 	if dbErr != nil {
 		return NewErrorResponse(dbErr), nil
 	}
@@ -662,7 +670,7 @@ func (s *WorkloadsService) InternalCreateWorkload(ctx context.Context, workloadC
 	}
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully created workload <%s>", workloadCreationFields.Id)
-	return api.Response(http.StatusCreated, WorkloadModelToApi(ctx, *workload)), nil
+	return api.Response(http.StatusCreated, WorkloadModelToApi(ctx, *workload, getClusterConfiguration(ctx, workload.ClusterID.String()))), nil
 }
 
 func (s *WorkloadsService) InternalCreateWorkloadHelper(ctx context.Context, workloadCreationFields api.WorkloadCreationFields) (models.Workload, *api.Error) {
@@ -1158,7 +1166,7 @@ func (s *WorkloadsService) GetWorkloadEndpoints(ctx context.Context, workloadId 
 
 	var endpoints []api.Endpoint
 	if common.WorkloadType(workload.Type).IsNative() {
-		apiWorkload := WorkloadModelToApi(ctx, *workload)
+		apiWorkload := WorkloadModelToApi(ctx, *workload, getClusterConfiguration(ctx, workload.ClusterID.String()))
 		endpoints = apiWorkload.Endpoints
 	} else {
 		endpoints = ModelEndpointToApi(workload.Endpoints)

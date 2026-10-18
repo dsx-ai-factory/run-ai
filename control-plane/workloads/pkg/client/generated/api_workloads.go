@@ -215,7 +215,7 @@ type WorkloadsAPI interface {
 	/*
 		GetWorkloadsSlim List workloads, slim.
 
-		Retrieve a list of active workloads with only their identity fields, sorted by id.
+		Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
 	Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
 
 
@@ -2630,7 +2630,6 @@ type ApiGetWorkloadsSlimRequest struct {
 	ApiService WorkloadsAPI
 	offset     *int32
 	limit      *int32
-	sortOrder  *string
 	filterBy   *[]string
 }
 
@@ -2643,12 +2642,6 @@ func (r ApiGetWorkloadsSlimRequest) Offset(offset int32) ApiGetWorkloadsSlimRequ
 // The maximum number of entries to return.
 func (r ApiGetWorkloadsSlimRequest) Limit(limit int32) ApiGetWorkloadsSlimRequest {
 	r.limit = &limit
-	return r
-}
-
-// Sort results in descending or ascending order.
-func (r ApiGetWorkloadsSlimRequest) SortOrder(sortOrder string) ApiGetWorkloadsSlimRequest {
-	r.sortOrder = &sortOrder
 	return r
 }
 
@@ -2665,7 +2658,7 @@ func (r ApiGetWorkloadsSlimRequest) Execute() (*GetWorkloadsSlimResponse, *http.
 /*
 GetWorkloadsSlim List workloads, slim.
 
-Retrieve a list of active workloads with only their identity fields, sorted by id.
+Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
 Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -2695,7 +2688,7 @@ func (a *WorkloadsAPIService) GetWorkloadsSlimExecute(r ApiGetWorkloadsSlimReque
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/workloads-slim"
+	localVarPath := localBasePath + "/api/v1/workloads/slim"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
@@ -2709,12 +2702,6 @@ func (a *WorkloadsAPIService) GetWorkloadsSlimExecute(r ApiGetWorkloadsSlimReque
 	} else {
 		var defaultValue int32 = 50
 		r.limit = &defaultValue
-	}
-	if r.sortOrder != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "sortOrder", r.sortOrder, "form", "")
-	} else {
-		var defaultValue string = "asc"
-		r.sortOrder = &defaultValue
 	}
 	if r.filterBy != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "filterBy", r.filterBy, "form", "csv")

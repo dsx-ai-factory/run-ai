@@ -81,7 +81,6 @@ func (bsc *BackendWorkloadServiceClient) ListSlim(ctx context.Context, limit, of
 	if len(filters) != 0 {
 		request = request.FilterBy(filters)
 	}
-	request = request.SortOrder(AscendingStr)
 
 	workloadList, response, err := request.Execute() //nolint:bodyclose // handle in handler
 	if response != nil && response.StatusCode == http.StatusNotFound {

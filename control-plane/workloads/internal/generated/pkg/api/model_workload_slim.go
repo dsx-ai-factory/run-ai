@@ -20,7 +20,7 @@ var dummyWorkloadSlim = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// WorkloadSlim - A workload as returned by GET /api/v1/workloads-slim.
+// WorkloadSlim - A workload as returned by GET /api/v1/workloads/slim.
 type WorkloadSlim struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////

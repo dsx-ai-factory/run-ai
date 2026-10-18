@@ -8742,7 +8742,7 @@ export interface GetWorkloadsSetting {
     'stage'?: string;
 }
 /**
- * The response of GET /api/v1/workloads-slim.
+ * The response of GET /api/v1/workloads/slim.
  * @export
  * @interface GetWorkloadsSlimResponse
  */
@@ -24213,7 +24213,7 @@ export interface WorkloadRequestResources {
     'extendedResources'?: Array<WorkloadsExtendedResource> | null;
 }
 /**
- * A workload as returned by GET /api/v1/workloads-slim.
+ * A workload as returned by GET /api/v1/workloads/slim.
  * @export
  * @interface WorkloadSlim
  */
@@ -37863,17 +37863,16 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
-         * Retrieve a list of active workloads with only their identity fields, sorted by id. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
+         * Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
          * @summary List workloads, slim.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
-         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloadsSlim: async (offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', filterBy?: Array<string>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/workloads-slim`;
+        getWorkloadsSlim: async (offset?: number, limit?: number, filterBy?: Array<string>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/workloads/slim`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;
@@ -37895,10 +37894,6 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
-            }
-
-            if (sortOrder !== undefined) {
-                localVarQueryParameter['sortOrder'] = sortOrder;
             }
 
             if (filterBy) {
@@ -38676,17 +38671,16 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Retrieve a list of active workloads with only their identity fields, sorted by id. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
+         * Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
          * @summary List workloads, slim.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
-         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getWorkloadsSlim(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', filterBy?: Array<string>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloadsSlimResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadsSlim(offset, limit, sortOrder, filterBy, options);
+        async getWorkloadsSlim(offset?: number, limit?: number, filterBy?: Array<string>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloadsSlimResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadsSlim(offset, limit, filterBy, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -39009,17 +39003,16 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
             return localVarFp.getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve a list of active workloads with only their identity fields, sorted by id. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
+         * Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
          * @summary List workloads, slim.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
-         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloadsSlim(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', filterBy?: Array<string>, options?: any): AxiosPromise<GetWorkloadsSlimResponse> {
-            return localVarFp.getWorkloadsSlim(offset, limit, sortOrder, filterBy, options).then((request) => request(axios, basePath));
+        getWorkloadsSlim(offset?: number, limit?: number, filterBy?: Array<string>, options?: any): AxiosPromise<GetWorkloadsSlimResponse> {
+            return localVarFp.getWorkloadsSlim(offset, limit, filterBy, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieves workload data by telemetry type. Optionally filter by specific workload phases.  Telemetry Types: - WORKLOADS_COUNT: Count of workloads - GPU_ALLOCATION: GPU allocation metrics - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).   For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters. - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads 
@@ -39352,18 +39345,17 @@ export class WorkloadsApi extends BaseAPI {
     }
 
     /**
-     * Retrieve a list of active workloads with only their identity fields, sorted by id. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
+     * Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
      * @summary List workloads, slim.
      * @param {number} [offset] The offset of the first item returned in the collection.
      * @param {number} [limit] The maximum number of entries to return.
-     * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
      * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkloadsApi
      */
-    public getWorkloadsSlim(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', filterBy?: Array<string>, options?: AxiosRequestConfig) {
-        return WorkloadsApiFp(this.configuration).getWorkloadsSlim(offset, limit, sortOrder, filterBy, options).then((request) => request(this.axios, this.basePath));
+    public getWorkloadsSlim(offset?: number, limit?: number, filterBy?: Array<string>, options?: AxiosRequestConfig) {
+        return WorkloadsApiFp(this.configuration).getWorkloadsSlim(offset, limit, filterBy, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

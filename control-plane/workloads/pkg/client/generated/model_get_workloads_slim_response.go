@@ -22,7 +22,7 @@ import (
 // checks if the GetWorkloadsSlimResponse type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &GetWorkloadsSlimResponse{}
 
-// GetWorkloadsSlimResponse The response of GET /api/v1/workloads-slim.
+// GetWorkloadsSlimResponse The response of GET /api/v1/workloads/slim.
 type GetWorkloadsSlimResponse struct {
 	Next      *int32         `json:"next,omitempty"`
 	Workloads []WorkloadSlim `json:"workloads"`

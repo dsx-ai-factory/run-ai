@@ -203,7 +203,7 @@ func (c *WorkloadsAPIController) Routes() Routes {
 		},
 		"GetWorkloadsSlim": Route{
 			strings.ToUpper("Get"),
-			"/api/v1/workloads-slim",
+			"/api/v1/workloads/slim",
 			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
 			BuildHandlerChain(
 				func(next http.HandlerFunc) http.HandlerFunc {
@@ -1167,15 +1167,6 @@ func (c *WorkloadsAPIController) GetWorkloadsSlim(w http.ResponseWriter, r *http
 		var param int32 = 50
 		limitParam = param
 	}
-	var sortOrderParam string
-	if query.Has("sortOrder") {
-		param := query.Get("sortOrder")
-
-		sortOrderParam = param
-	} else {
-		param := "asc"
-		sortOrderParam = param
-	}
 	var filterByParam []string
 	if query.Has("filterBy") {
 		filterByParam = strings.Split(query.Get("filterBy"), ",")
@@ -1185,7 +1176,7 @@ func (c *WorkloadsAPIController) GetWorkloadsSlim(w http.ResponseWriter, r *http
 		}
 		////////////////////////// RUNAI END /////////////////////////////////
 	}
-	result, err := c.service.GetWorkloadsSlim(r.Context(), offsetParam, limitParam, sortOrderParam, filterByParam)
+	result, err := c.service.GetWorkloadsSlim(r.Context(), offsetParam, limitParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

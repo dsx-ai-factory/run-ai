@@ -160,7 +160,7 @@ func (s *WorkloadsAPIService) SyncWorkloads(ctx context.Context, filterBy []stri
 }
 
 // GetWorkloadsSlim - List workloads, slim.
-func (s *WorkloadsAPIService) GetWorkloadsSlim(ctx context.Context, offset int32, limit int32, sortOrder string, filterBy []string) (ImplResponse, error) {
+func (s *WorkloadsAPIService) GetWorkloadsSlim(ctx context.Context, offset int32, limit int32, filterBy []string) (ImplResponse, error) {
 	// TODO - update GetWorkloadsSlim with the required logic for this service method.
 	// Add api_workloads_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

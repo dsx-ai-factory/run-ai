@@ -11,7 +11,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 )
 
-// WorkloadSlim is a workload as returned by GET /api/v1/workloads-slim.
+// WorkloadSlim is a workload as returned by GET /api/v1/workloads/slim.
 // It is read from the workloads table rather than the workloads view, so it has no pod aggregates
 // and is never stale.
 type WorkloadSlim struct {
@@ -31,7 +31,7 @@ const (
 	distributedFrameworkField = "distributedFramework"
 )
 
-// FilterFieldsToColumn returns the fields GET /api/v1/workloads-slim can be filtered by.
+// FilterFieldsToColumn returns the fields GET /api/v1/workloads/slim can be filtered by.
 func (WorkloadSlim) FilterFieldsToColumn() queryapi.APIFieldsMapping {
 	return queryapi.APIFieldsMapping{
 		typeField:                 queryapi.NewFieldMapping("type"),
