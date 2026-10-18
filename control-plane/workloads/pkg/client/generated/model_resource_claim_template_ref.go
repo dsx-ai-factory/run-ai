@@ -22,7 +22,7 @@ import (
 // checks if the ResourceClaimTemplateRef type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &ResourceClaimTemplateRef{}
 
-// ResourceClaimTemplateRef struct for ResourceClaimTemplateRef
+// ResourceClaimTemplateRef The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
 type ResourceClaimTemplateRef struct {
 	// Name of the ResourceClaimTemplate in the pod's namespace.
 	Name string `json:"name"`

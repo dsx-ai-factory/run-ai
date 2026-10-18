@@ -3,8 +3,4 @@ allOf:
   - type: object
     properties:
       template:
-        allOf:
-          - $ref: './ResourceClaimTemplateRef.yaml'
-        description: >-
-          The ResourceClaimTemplate the claim was generated from. Absent for a standalone
-          ResourceClaim that the pod references directly.
+        $ref: './ResourceClaimTemplateRef.yaml'

@@ -20,6 +20,7 @@ var dummyResourceClaimTemplateRef = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
+// ResourceClaimTemplateRef - The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
 type ResourceClaimTemplateRef struct {
 
 	// Name of the ResourceClaimTemplate in the pod's namespace.

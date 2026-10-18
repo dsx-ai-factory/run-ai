@@ -34,10 +34,9 @@ type WorkloadResourceClaim struct {
 	ClaimName *string `json:"claimName,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Template ResourceClaimTemplateRef `json:"template,omitempty"`
-	Template ResourceClaimTemplateRef `json:"template,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//Template *ResourceClaimTemplateRef `json:"template,omitempty"`
+	Template *ResourceClaimTemplateRef `json:"template,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
@@ -52,8 +51,10 @@ func AssertWorkloadResourceClaimRequired(obj WorkloadResourceClaim) error {
 		}
 	}
 
-	if err := AssertResourceClaimTemplateRefRequired(obj.Template); err != nil {
-		return err
+	if obj.Template != nil {
+		if err := AssertResourceClaimTemplateRefRequired(*obj.Template); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -75,8 +76,10 @@ func AssertWorkloadResourceClaimConstraints(obj WorkloadResourceClaim) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertResourceClaimTemplateRefConstraints(obj.Template); err != nil {
-		return err
+	if obj.Template != nil {
+		if err := AssertResourceClaimTemplateRefConstraints(*obj.Template); err != nil {
+			return err
+		}
 	}
 	return nil
 }

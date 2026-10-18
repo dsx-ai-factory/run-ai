@@ -1,3 +1,7 @@
+description: >-
+  The ResourceClaimTemplate the claim was generated from. Absent for a standalone
+  ResourceClaim that the pod references directly.
+nullable: true
 type: object
 required:
   - name

@@ -126789,6 +126789,13 @@ components:
       - CPU_MEMORY_LIMIT_BYTES
       type: string
     ResourceClaimTemplateRef:
+      description: The ResourceClaimTemplate the claim was generated from. Absent
+        for a standalone ResourceClaim that the pod references directly.
+      example:
+        managed: true
+        name: single-gpu
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      nullable: true
       properties:
         name:
           description: Name of the ResourceClaimTemplate in the pod's namespace.
@@ -126814,22 +126821,28 @@ components:
       - $ref: '#/components/schemas/PodResourceClaimBinding'
       - properties:
           template:
-            allOf:
-            - $ref: '#/components/schemas/ResourceClaimTemplateRef'
-            description: The ResourceClaimTemplate the claim was generated from. Absent
-              for a standalone ResourceClaim that the pod references directly.
+            $ref: '#/components/schemas/ResourceClaimTemplateRef'
         type: object
       example:
-        template: ""
+        template:
+          managed: true
+          name: single-gpu
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         claimName: bert-worker-0-gpu-1-mk4s8
         name: gpu-1
     WorkloadPodResourceClaims:
       example:
         resourceClaims:
-        - template: ""
+        - template:
+            managed: true
+            name: single-gpu
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           claimName: bert-worker-0-gpu-1-mk4s8
           name: gpu-1
-        - template: ""
+        - template:
+            managed: true
+            name: single-gpu
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           claimName: bert-worker-0-gpu-1-mk4s8
           name: gpu-1
         task: worker
@@ -126865,20 +126878,32 @@ components:
         next: 0
         pods:
         - resourceClaims:
-          - template: ""
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             claimName: bert-worker-0-gpu-1-mk4s8
             name: gpu-1
-          - template: ""
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             claimName: bert-worker-0-gpu-1-mk4s8
             name: gpu-1
           task: worker
           podName: bert-worker-0
           podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         - resourceClaims:
-          - template: ""
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             claimName: bert-worker-0-gpu-1-mk4s8
             name: gpu-1
-          - template: ""
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
             claimName: bert-worker-0-gpu-1-mk4s8
             name: gpu-1
           task: worker

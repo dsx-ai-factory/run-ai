@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Name** | **string** | Pod-local name of the claim entry, as listed in &#x60;pod.spec.resourceClaims[].name&#x60; and referenced by containers in &#x60;resources.claims&#x60;. | 
 **ClaimName** | Pointer to **NullableString** | Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim. | [optional] 
-**Template** | Pointer to [**ResourceClaimTemplateRef**](ResourceClaimTemplateRef.md) | The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly. | [optional] 
+**Template** | Pointer to [**NullableResourceClaimTemplateRef**](ResourceClaimTemplateRef.md) |  | [optional] 
 
 ## Methods
 
@@ -107,6 +107,16 @@ SetTemplate sets Template field to given value.
 
 HasTemplate returns a boolean if a field has been set.
 
+### SetTemplateNil
+
+`func (o *WorkloadResourceClaim) SetTemplateNil(b bool)`
+
+ SetTemplateNil sets the value for Template to be an explicit nil
+
+### UnsetTemplate
+`func (o *WorkloadResourceClaim) UnsetTemplate()`
+
+UnsetTemplate ensures that no value is present for Template, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
