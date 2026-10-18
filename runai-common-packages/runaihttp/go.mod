@@ -3,9 +3,9 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp
 go 1.27.2
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/stretchr/testify v1.12.1
@@ -39,8 +39,8 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 	gorm.io/gorm v1.31.2 // indirect
 )
