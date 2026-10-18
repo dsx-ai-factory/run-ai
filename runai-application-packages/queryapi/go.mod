@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi
 go 1.27.2
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 )
@@ -18,9 +18,9 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.6 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
