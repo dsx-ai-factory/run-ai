@@ -244,7 +244,7 @@ var _ = Describe("TensorFlow Training Test", Ordered, func() {
 				"--large-shm=true",
 				TensorFlowComputeFullName, TensorFlowComputeFullImageName), envMap)
 			Expect(err).To(BeNil())
-			Expect(output).To(HavePrefix(fmt.Sprintf(ExpectDistSuccessMsg, TensorFlowComputeFullName)))
+			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectDistSuccessMsg, TensorFlowComputeFullName)))
 
 			submitSpec, err := clients.GetSpecByDistributedName(TensorFlowComputeFullName)
 			Expect(err).To(BeNil())
@@ -443,7 +443,8 @@ var _ = Describe("TensorFlow Training Test", Ordered, func() {
 			output, err := cli.RunCommand("training tensorflow submit --help", envMap)
 			Expect(err).To(BeNil())
 
-			computeFlags := []string{CpuCoreLimit, CpuCoreRequest, CpuMemoryLimit, CpuMemoryRequest, ExtendedResource, GpuDevicesRequest, GpuMemoryLimit, GpuMemoryRequest, GpuPortionLimit, GpuPortionRequest,
+			computeFlags := []string{CpuCoreLimit, CpuCoreRequest, CpuMemoryLimit, CpuMemoryRequest, ExtendedResource, GpuDevicesRequest, GpuMemoryLimit, GpuMemoryRequest,
+				GpuMemoryPortionLimit, GpuMemoryPortionRequest, GpuComputeMode,
 				GpuRequestType, LargeShm, MasterExtendedResource}
 			for _, flag := range computeFlags {
 				Expect(output).To(ContainSubstring(flag), "Compute flag %s should be present in help output", flag)

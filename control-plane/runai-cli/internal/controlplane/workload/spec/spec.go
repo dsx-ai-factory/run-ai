@@ -1012,11 +1012,20 @@ func (gs *GeneralSpec) Clear() {
 	gs.flags.Compute.GpuDeviceRequest.Unset()
 	gs.flags.Compute.GpuPortionRequest.Unset()
 	gs.flags.Compute.GpuPortionLimit.Unset()
+	gs.flags.Compute.GpuMemoryPortionRequest.Unset()
+	gs.flags.Compute.GpuMemoryPortionLimit.Unset()
+	gs.flags.Compute.GpuComputeMode = ""
 	gs.flags.Compute.CpuCoreRequest.Unset()
 	gs.flags.Compute.CpuCoreLimit.Unset()
 	gs.flags.Compute.MasterGpuDeviceRequest.Unset()
 	gs.flags.Compute.MasterGpuPortionRequest.Unset()
 	gs.flags.Compute.MasterGpuPortionLimit.Unset()
+	gs.flags.Compute.MasterGpuMemoryPortionRequest.Unset()
+	gs.flags.Compute.MasterGpuMemoryPortionLimit.Unset()
+	gs.flags.Compute.MasterGpuComputeMode = ""
+	gs.flags.Compute.WorkerGpuMemoryPortionRequest.Unset()
+	gs.flags.Compute.WorkerGpuMemoryPortionLimit.Unset()
+	gs.flags.Compute.WorkerGpuComputeMode = ""
 	gs.flags.Compute.MasterCpuCoreRequest.Unset()
 	gs.flags.Compute.MasterCpuCoreLimit.Unset()
 	gs.flags.DistributedTraining.MinReplica = 0

@@ -7,11 +7,13 @@ package spec
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
 	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/specset"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/specset/parser"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/specset/schedulig/toleration"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/specset/storage/pvc"
@@ -96,7 +98,21 @@ func (gs *GeneralSpec) GenerateNimServiceSpec(ctx context.Context, clusterId str
 	}
 
 	compute := openapi.NewNimServiceSpecAllOfCompute()
-	computeSet := false
+	err := specset.SetGenericType[openapi.GpuComputeMode, openapi.NullableGpuComputeMode](
+		gs.flags.Compute.GpuComputeMode, openapi.NewGpuComputeModeFromValue,
+		&compute.GpuComputeMode, openapi.NewNullableGpuComputeMode)
+	if err != nil && !errors.Is(err, specset.ErrEmptyValue) {
+		return nil, err
+	}
+	computeSet := compute.GpuComputeMode.IsSet()
+	if gs.flags.Compute.GpuMemoryPortionRequest.IsSet() {
+		compute.SetGpuMemoryPortionRequest(*gs.flags.Compute.GpuMemoryPortionRequest.Get())
+		computeSet = true
+	}
+	if gs.flags.Compute.GpuMemoryPortionLimit.IsSet() {
+		compute.SetGpuMemoryPortionLimit(*gs.flags.Compute.GpuMemoryPortionLimit.Get())
+		computeSet = true
+	}
 	if gs.flags.Compute.GpuDeviceRequest.IsSet() {
 		compute.SetGpuDevicesRequest(*gs.flags.Compute.GpuDeviceRequest.Get())
 		computeSet = true

@@ -12,6 +12,7 @@ import (
 
 // Type definitions
 type Compute struct {
+	GPUComputeMode     *string            `json:"gpuComputeMode,omitempty" yaml:"gpucomputemode,omitempty"`
 	RequestedResources ComputeResources   `json:"requestedResources"`
 	AllocatedResources AllocatedResources `json:"allocatedResources"`
 	RequestedNodePools []string           `json:"requestedNodePools,omitempty"`

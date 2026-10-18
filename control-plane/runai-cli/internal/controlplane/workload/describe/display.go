@@ -95,6 +95,10 @@ func (wd *WorkloadDisplayer) DisplayGeneralAndRuntime() {
 	// For Distributed Inference, hide fields that are shown in Leader/Worker sections
 	isDistributedInference := wd.workload.DistributedInference != nil
 	isNim := wd.workload.Nim != nil
+	computeMode := wd.workload.Compute.GPUComputeMode
+	if isNim {
+		computeMode = wd.workload.Nim.GpuComputeMode
+	}
 
 	fields := []displayer.DisplayField{
 		{Name: displayer.FieldName, Value: wd.workload.General.Name},
@@ -111,6 +115,7 @@ func (wd *WorkloadDisplayer) DisplayGeneralAndRuntime() {
 		{Name: displayer.FieldCategory, Value: wd.workload.General.Category},
 		{Name: displayer.FieldPreemptibility, Value: field.CapitalizeFirst(field.StringOrEmpty(wd.workload.General.Preemptibility))},
 		{Name: wd.getCurrentNodePoolFieldName(), Value: strings.Join(wd.workload.Compute.CurrentNodePools, ", ")},
+		{Name: displayer.FieldGPUComputeMode, Value: field.StringOrEmpty(computeMode)},
 	}
 
 	if isNim {
@@ -330,6 +335,9 @@ func (wd *WorkloadDisplayer) displayRuntimeConfig(config *displayer.WorkloadRunt
 		})
 	}
 
+	if config.Compute != nil {
+		fields = append(fields, displayer.DisplayField{Name: displayer.FieldGPUComputeMode, Value: field.StringOrEmpty(config.Compute.GPUComputeMode)})
+	}
 	displayer.DisplayFieldsWithSectionHeader(fields, title, indented)
 
 	// Display nested sections

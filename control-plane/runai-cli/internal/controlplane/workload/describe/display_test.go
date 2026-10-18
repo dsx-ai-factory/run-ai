@@ -12,6 +12,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/displayer"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/nim"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
@@ -138,6 +139,34 @@ var _ = Describe("Display", func() {
 			})
 		})
 	})
+	Context("GPU compute mode", func() {
+		It("omits the mode when it is not provided", func() {
+			Expect(captureOutput(workloadDisplayer.DisplayGeneralAndRuntime)).NotTo(ContainSubstring("GPU Compute Mode"))
+			Expect(captureOutputWithError(workloadDisplayer.AsYAML)).NotTo(ContainSubstring("gpucomputemode"))
+		})
+
+		It("shows the returned mode in table, JSON and YAML output", func() {
+			workload.Compute.GPUComputeMode = ptr.To("sm-sharing")
+			Expect(captureOutput(workloadDisplayer.DisplayGeneralAndRuntime)).To(MatchRegexp(`GPU Compute Mode:\s+sm-sharing`))
+			Expect(captureOutputWithError(workloadDisplayer.AsJSON)).To(ContainSubstring(`"gpuComputeMode": "sm-sharing"`))
+			Expect(captureOutputWithError(workloadDisplayer.AsYAML)).To(ContainSubstring("gpucomputemode: sm-sharing"))
+		})
+
+		It("shows a separate master mode", func() {
+			workload.Compute.GPUComputeMode = ptr.To("time-slicing")
+			workload.MasterConfig = &displayer.WorkloadRuntimeConfig{Compute: &displayer.Compute{GPUComputeMode: ptr.To("sm-sharing")}}
+			workloadDisplayer = describe.NewWorkloadDisplayer(workload, displayer.DisplayOptions{ShowGeneral: true})
+			output := captureOutputWithError(workloadDisplayer.AsTable)
+			Expect(output).To(MatchRegexp(`GPU Compute Mode:\s+time-slicing`))
+			Expect(output).To(MatchRegexp(`(?s)Master Configuration.*GPU Compute Mode:\s+sm-sharing`))
+		})
+
+		It("shows the NIM mode through its existing configuration fields", func() {
+			workload.Nim = &nim.Fields{GpuComputeMode: ptr.To("sm-sharing")}
+			Expect(captureOutput(workloadDisplayer.DisplayGeneralAndRuntime)).To(MatchRegexp(`GPU Compute Mode:\s+sm-sharing`))
+		})
+	})
+
 	Context("network topology section", func() {
 		It("network topology is displayed when set", func() {
 			workload.NetworkTopology = &displayer.NetworkTopology{

@@ -387,7 +387,7 @@ func buildTypedSpecData[T interface {
 	typedCompute := displayer.NewComputeBuilder().RequestedNodePools(typedSpec.GetNodePools())
 	if computeSpec, found := typedSpec.GetComputeOk(); found {
 		if computeFromSpec := displayer.BuildComputeFromSpec(computeSpec); computeFromSpec != nil {
-			typedCompute.RequestedResources(computeFromSpec.RequestedResources)
+			typedCompute.Set(*computeFromSpec).RequestedNodePools(typedSpec.GetNodePools())
 		}
 	}
 	compute := typedCompute.Build()
