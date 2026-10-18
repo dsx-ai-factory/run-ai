@@ -5,9 +5,9 @@ go 1.27.2
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/aws/smithy-go v1.28.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30
 	github.com/golang-migrate/migrate/v4 v4.20.1
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/stretchr/testify v1.12.1

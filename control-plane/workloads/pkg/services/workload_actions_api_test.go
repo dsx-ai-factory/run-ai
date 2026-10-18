@@ -130,9 +130,9 @@ var _ = Describe("Workload action history", func() {
 	})
 
 	It("runs paired migrations repeatedly with all indexes and no workload foreign key", func() {
-		up, err := os.ReadFile("../database/migrations/up/03100001_workloads_action_history.up.sql")
+		up, err := os.ReadFile("../database/migrations/up/03010001_workloads_action_history.up.sql")
 		Expect(err).NotTo(HaveOccurred())
-		down, err := os.ReadFile("../database/migrations/down/03100001_workloads_action_history.down.sql")
+		down, err := os.ReadFile("../database/migrations/down/03010001_workloads_action_history.down.sql")
 		Expect(err).NotTo(HaveOccurred())
 
 		tx := runaidb.DB().Begin()

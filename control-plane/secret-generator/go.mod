@@ -3,9 +3,9 @@ module github.com/dsx-ai-factory/run-ai/control-plane/secret-generator
 go 1.27.2
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
 	github.com/google/uuid v1.6.0
 	github.com/onsi/ginkgo/v2 v2.33.1
 	github.com/onsi/gomega v1.44.0

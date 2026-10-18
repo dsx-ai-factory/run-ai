@@ -7,10 +7,8 @@ for local/CI use.
 
 This module does **not** build or ship a container image, and it does not
 serve docs at runtime. Its `artifact_type` is `none`: the build produces
-processed spec files under `_build/`. In a deployed control plane the public
-docs are served externally — on SaaS `/api/docs` redirects to the docs site
-configured via the chart value `redoc.docsSite.url`; on self-hosted no
-API-docs endpoint is served.
+processed spec files under `_build/`. In a deployed control plane the frontend
+serves the OpenAPI yaml spec download at `/api/docs`.
 
 ## Contents
 
@@ -102,9 +100,6 @@ env-var config. Its behaviour is driven by makefile variables and files:
 | `config/merge-config*.json` | Which service swagger files are merged and in what order |
 | `config/redocly*.yaml` + `plugins/` | Bundle/filter rules (internal endpoint and enum stripping) |
 | `swagger/rootApi*.yaml` | Root API doc |
-
-The chart value `redoc.docsSite.url` (in the control-plane chart) points the
-deployed control plane at the external docs site; it is not consumed here.
 
 ## How to add a new service
 
