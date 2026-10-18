@@ -15,6 +15,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -564,4 +565,102 @@ func readCSVHeaders(fileName string, exclude []string) []string {
 
 func getClusterNameFromId(id string) string {
 	return fmt.Sprintf("%s_name", id)
+}
+
+func reportCtx(tenantId, subject string) context.Context {
+	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, tenantId)
+	return context.WithValue(ctx, runaictx.CfSubjectID, subject)
+}
+
+// createReportWithCleanup creates a report through the API and deletes it when the test ends.
+func createReportWithCleanup(suite *ReportTestSuite, ctx context.Context, name string) *openapi.Report {
+	report, err := createReport(ctx, name, createMetric([]string{clusterId1}))
+	require.NoError(suite.T(), err)
+	require.NotNil(suite.T(), report)
+	suite.T().Cleanup(func() {
+		if _, err := metrics_client.GetClientInstance().DeleteReport(ctx, report.Id); err != nil {
+			suite.T().Errorf("failed to delete report %s: %v", report.Id, err)
+		}
+	})
+	return report
+}
+
+func (suite *ReportTestSuite) TestGetReport_ReturnsTheCreatedReport() {
+	ctx := reportCtx("1", "creator@example.com")
+	name := "get-fields-" + uuid.NewString()
+	created := createReportWithCleanup(suite, ctx, name)
+
+	got, statusCode, err := metrics_client.GetClientInstance().GetReport(ctx, created.Id)
+
+	require.NoError(suite.T(), err)
+	require.Equal(suite.T(), http.StatusOK, statusCode)
+	require.Equal(suite.T(), created.Id, got.Id)
+	require.Equal(suite.T(), name, got.Name)
+	require.Equal(suite.T(), "creator@example.com", got.CreatedBy)
+	require.Equal(suite.T(), int32(1), got.TenantId)
+	require.Equal(suite.T(), []openapi.Label{{Name: "clusterId", DisplayName: "ClusterId"}}, got.Labels)
+	require.False(suite.T(), got.CreatedAt.IsZero())
+	require.False(suite.T(), got.StatusUpdatedAt.Before(got.CreatedAt))
+}
+
+func (suite *ReportTestSuite) TestDeleteReport() {
+	ctx := reportCtx("1", "creator@example.com")
+	report, err := createReport(ctx, "delete-"+uuid.NewString(), createMetric([]string{clusterId1}))
+	require.NoError(suite.T(), err)
+
+	statusCode, err := metrics_client.GetClientInstance().DeleteReport(ctx, report.Id)
+	require.NoError(suite.T(), err)
+	require.Equal(suite.T(), http.StatusNoContent, statusCode)
+
+	_, statusCode, err = metrics_client.GetClientInstance().GetReport(ctx, report.Id)
+	require.Error(suite.T(), err)
+	require.Equal(suite.T(), http.StatusNotFound, statusCode)
+}
+
+func (suite *ReportTestSuite) TestBatchGetReports_OtherTenantsReportIsNotReturned() {
+	owner := reportCtx("1", "creator@example.com")
+	created := createReportWithCleanup(suite, owner, "tenant-scope-"+uuid.NewString())
+
+	response, statusCode, err := metrics_client.GetClientInstance().
+		BatchGetReportsByIds(reportCtx("3", "other@example.com"), []string{created.Id})
+
+	require.NoError(suite.T(), err)
+	require.Equal(suite.T(), http.StatusOK, statusCode)
+	require.Empty(suite.T(), response.Succeeded)
+	require.Len(suite.T(), response.Failed, 1)
+	require.Equal(suite.T(), created.Id, response.Failed[0].Id)
+	require.Equal(suite.T(), int32(http.StatusNotFound), response.Failed[0].Code)
+}
+
+func (suite *ReportTestSuite) TestListReports_SortingAndPaging() {
+	// A tenant of its own keeps the listing to exactly these reports.
+	tenantId := fmt.Sprintf("%d", random.Int31())
+	ctxFor := func(subject string) context.Context { return reportCtx(tenantId, subject) }
+
+	// Created in this order, so name, createdAt and createdBy each order them differently.
+	names := []string{"b", "a", "c"}
+	subjects := []string{"user-2", "user-3", "user-1"}
+	prefix := uuid.NewString()
+	for i, name := range names {
+		createReportWithCleanup(suite, ctxFor(subjects[i]), prefix+"-"+name)
+	}
+	listCtx := ctxFor("lister")
+	listNames := func(sortBy openapi.ReportFilterAndSortFields, sortOrder string, offset, limit int32) []string {
+		reports, statusCode, err := metrics_client.GetClientInstance().ListReports(listCtx, nil, sortBy, sortOrder, offset, limit, "")
+		require.NoError(suite.T(), err)
+		require.Equal(suite.T(), http.StatusOK, statusCode)
+		got := make([]string, 0, len(reports))
+		for _, report := range reports {
+			got = append(got, strings.TrimPrefix(report.Name, prefix+"-"))
+		}
+		return got
+	}
+
+	require.Equal(suite.T(), []string{"a", "b", "c"}, listNames(openapi.REPORTFILTERANDSORTFIELDS_NAME, "asc", 0, 100))
+	require.Equal(suite.T(), []string{"c", "b", "a"}, listNames(openapi.REPORTFILTERANDSORTFIELDS_NAME, "desc", 0, 100))
+	require.Equal(suite.T(), []string{"b", "a", "c"}, listNames(openapi.REPORTFILTERANDSORTFIELDS_CREATED_AT, "asc", 0, 100))
+	require.Equal(suite.T(), []string{"c", "b", "a"}, listNames(openapi.REPORTFILTERANDSORTFIELDS_CREATED_BY, "asc", 0, 100))
+
+	require.Equal(suite.T(), []string{"a", "b"}, listNames(openapi.REPORTFILTERANDSORTFIELDS_NAME, "asc", 0, 2))
+	require.Equal(suite.T(), []string{"c"}, listNames(openapi.REPORTFILTERANDSORTFIELDS_NAME, "asc", 2, 2))
 }
