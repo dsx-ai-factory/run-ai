@@ -27,8 +27,6 @@ const (
 	ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT   AllowedInternalCreateRoles = "Cluster service account"
 	ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT AllowedInternalCreateRoles = "Installer service account"
 	ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR            AllowedInternalCreateRoles = "Cloud operator"
-	ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION       AllowedInternalCreateRoles = "Cluster application"
-	ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION     AllowedInternalCreateRoles = "Installer application"
 )
 
 // All allowed values of AllowedInternalCreateRoles enum
@@ -37,8 +35,6 @@ var AllowedAllowedInternalCreateRolesEnumValues = []AllowedInternalCreateRoles{
 	"Cluster service account",
 	"Installer service account",
 	"Cloud operator",
-	"Cluster application",
-	"Installer application",
 }
 
 func (v *AllowedInternalCreateRoles) UnmarshalJSON(src []byte) error {

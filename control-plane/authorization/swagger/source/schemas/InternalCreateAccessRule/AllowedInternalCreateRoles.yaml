@@ -4,7 +4,3 @@ enum:
   - Cluster service account
   - Installer service account
   - Cloud operator
-  # Deprecated: renamed to the service account roles above. Still accepted by the service and mapped to the new
-  # names; no caller should use them. Remove together with the mapping in api_internal_service.go.
-  - Cluster application
-  - Installer application

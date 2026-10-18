@@ -10,7 +10,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 )
 
-var InstallerApp = models.Role{
+var InstallerServiceAccount = models.Role{
 	Name:                    "Installer service account",
 	Description:             "An internal installer service account used to create clusters and fetch its control-plane configuration (currently used during the installation process)",
 	InternalOnly:            true,

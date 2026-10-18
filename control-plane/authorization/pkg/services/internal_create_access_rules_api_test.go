@@ -119,7 +119,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_TENANT))
 			Expect(accessRule.ScopeName).To(Equal(TenantName))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterServiceAccount.Name])))
 		})
 
 		It("Post with cluster scope", func() {
@@ -142,7 +142,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_CLUSTER))
 			Expect(accessRule.ScopeId).To(Equal(TestCluster1Id))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterServiceAccount.Name])))
 		})
 
 		It("Post with tenant scope", func() {
@@ -165,7 +165,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_TENANT))
 			Expect(accessRule.ScopeId).To(Equal(fmt.Sprintf("%d", testing.TestTenant)))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterServiceAccount.Name])))
 		})
 
 		When("Post with project scope", func() {
@@ -206,25 +206,8 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_TENANT))
 			Expect(accessRule.ScopeName).To(Equal(TenantName))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerServiceAccount.Name])))
 		})
-
-		DescribeTable("Post with a deprecated role name resolves to the renamed role",
-			func(deprecatedName api.AllowedInternalCreateRoles, expectedRoleName string) {
-				response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
-					SubjectId:   TestUserId,
-					SubjectType: api.SUBJECTTYPE_USER,
-					RoleName:    deprecatedName,
-				})
-				Expect(err).To(BeNil())
-				Expect(response.Code).To(Equal(http.StatusCreated))
-
-				accessRule := HttpResponseBodyToAccessRule(response)
-				Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[expectedRoleName])))
-			},
-			Entry("Cluster application", api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION, static_roles.ClusterApp.Name),
-			Entry("Installer application", api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION, static_roles.InstallerApp.Name),
-		)
 
 		It("Post with cluster scope", func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
@@ -246,7 +229,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_CLUSTER))
 			Expect(accessRule.ScopeId).To(Equal(TestCluster1Id))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerServiceAccount.Name])))
 		})
 
 		It("Post with tenant scope", func() {
@@ -269,7 +252,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_TENANT))
 			Expect(accessRule.ScopeId).To(Equal(fmt.Sprintf("%d", testing.TestTenant)))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerServiceAccount.Name])))
 		})
 
 		When("Post with project scope", func() {

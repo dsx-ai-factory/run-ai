@@ -449,7 +449,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		})
 
 		It("Post should succeed with internal role", func() {
-			Expect(static_roles.ClusterApp.InternalOnly).To(BeTrue())
+			Expect(static_roles.ClusterServiceAccount.InternalOnly).To(BeTrue())
 			metricsScraper := int32(dao.MapStaticRoleNameToRoleId[static_roles.IntegrationMetricsCollector.Name])
 
 			body := api.AccessRuleCreationFields{

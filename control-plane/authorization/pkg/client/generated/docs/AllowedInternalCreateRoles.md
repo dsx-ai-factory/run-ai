@@ -11,10 +11,6 @@
 
 * `CLOUD_OPERATOR` (value: `"Cloud operator"`)
 
-* `CLUSTER_APPLICATION` (value: `"Cluster application"`)
-
-* `INSTALLER_APPLICATION` (value: `"Installer application"`)
-
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

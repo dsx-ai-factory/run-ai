@@ -10,7 +10,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 )
 
-var ClusterApp = models.Role{
+var ClusterServiceAccount = models.Role{
 	Name:                    "Cluster service account",
 	Description:             "An internal cluster service account used to sync the data from the cluster to the control plane and in the opposite way.",
 	InternalOnly:            true,

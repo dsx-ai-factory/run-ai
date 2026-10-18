@@ -3908,9 +3908,7 @@
           "System administrator",
           "Cluster service account",
           "Installer service account",
-          "Cloud operator",
-          "Cluster application",
-          "Installer application"
+          "Cloud operator"
         ]
       },
       "InternalCreateAccessRuleRequest": {
