@@ -89,11 +89,19 @@ Declared in [`Chart.yaml`](Chart.yaml) and vendored as tarballs under `charts/`:
 
 | Dependency | Version | Condition | Source |
 |------------|---------|-----------|--------|
-| `kai-resource-management` | `v0.0.3` | `kai-resource-management.enabled` | `oci://ghcr.io/kai-scheduler/kai-resource-management` |
+| `kai-resource-management` | `~0.18.0` | `kai-resource-management.enabled` | `oci://ghcr.io/kai-scheduler/kai-resource-management` |
 | `karta` | `0.2.6` | `karta.enabled` | `oci://ghcr.io/dsx-ai-factory/workload-map/karta` |
 | `crds` | `0.0.0` | `development.includeCRDsInReleaseManifest` | `file://charts/crds` |
 
 `helm dep up` (run by `make build`) resolves these into `charts/`.
+
+`kai-resource-management` is a **range**, not a pin: each build takes the newest
+KRM patch of that minor, resolved against the v-less OCI tag KRM publishes
+alongside its `v`-prefixed one (Helm will not match a range against `v0.18.6`).
+Because the resolved version is not recorded anywhere in this repository,
+each GitHub Release carries a `subcharts.yaml` asset naming the versions that
+build actually packaged. See
+[KAI Scheduler dependency](../../kai-scheduler/README.md).
 
 ## Building and packaging
 

@@ -17,6 +17,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -45,9 +46,14 @@ type chartDefinition struct {
 }
 
 type embeddedDependency struct {
-	Path   string
-	Digest string
+	Path    string
+	Version string
+	Digest  string
 }
+
+// A dependency may declare a version range rather than an exact version, in
+// which case only the embedded chart knows what the build resolved it to.
+var exactVersion = regexp.MustCompile(`^v?[0-9]+\.[0-9]+\.[0-9]+([-+].*)?$`)
 
 type archiveFile struct {
 	Name     string
@@ -179,6 +185,7 @@ func readChart(contents []byte) (chartDefinition, map[string][]byte, string, err
 
 func lockChartDependencies(definitions []chartDependencyDefinition, files map[string][]byte, root string) ([]lock.ChartDependency, error) {
 	embedded := map[string]embeddedDependency{}
+	byName := map[string][]string{}
 	prefix := root + "/charts/"
 	for name, contents := range files {
 		parts := strings.Split(name, "/")
@@ -192,9 +199,11 @@ func lockChartDependencies(definitions []chartDependencyDefinition, files map[st
 				return nil, fmt.Errorf("duplicate Helm dependency %s %s", definition.Name, definition.Version)
 			}
 			embedded[key] = embeddedDependency{
-				Path:   "charts/" + parts[2],
-				Digest: lock.Digest(contents),
+				Path:    "charts/" + parts[2],
+				Version: definition.Version,
+				Digest:  lock.Digest(contents),
 			}
+			byName[definition.Name] = append(byName[definition.Name], key)
 		}
 		if len(parts) == 4 && parts[0] == root && parts[1] == "charts" && parts[3] == "Chart.yaml" {
 			var definition chartDefinition
@@ -211,9 +220,11 @@ func lockChartDependencies(definitions []chartDependencyDefinition, files map[st
 				return nil, err
 			}
 			embedded[key] = embeddedDependency{
-				Path:   "charts/" + parts[2],
-				Digest: digest,
+				Path:    "charts/" + parts[2],
+				Version: definition.Version,
+				Digest:  digest,
 			}
+			byName[definition.Name] = append(byName[definition.Name], key)
 		}
 	}
 
@@ -221,6 +232,16 @@ func lockChartDependencies(definitions []chartDependencyDefinition, files map[st
 	expected := map[string]struct{}{}
 	for _, definition := range definitions {
 		key := dependencyKey(definition.Name, definition.Version)
+		// A range never equals the version it resolved to, so match on name and
+		// let the embedded chart supply the version.
+		if !exactVersion.MatchString(definition.Version) {
+			keys := byName[definition.Name]
+			if len(keys) != 1 {
+				return nil, fmt.Errorf("version range %s for %s matches %d embedded packages, want exactly one",
+					definition.Version, definition.Name, len(keys))
+			}
+			key = keys[0]
+		}
 		resolved, exists := embedded[key]
 		if !exists {
 			return nil, fmt.Errorf("missing Helm dependency package %s %s", definition.Name, definition.Version)
@@ -231,7 +252,7 @@ func lockChartDependencies(definitions []chartDependencyDefinition, files map[st
 		expected[key] = struct{}{}
 		dependencies = append(dependencies, lock.ChartDependency{
 			Name:         definition.Name,
-			Version:      definition.Version,
+			Version:      resolved.Version,
 			Repository:   definition.Repository,
 			EmbeddedPath: resolved.Path,
 			Digest:       resolved.Digest,

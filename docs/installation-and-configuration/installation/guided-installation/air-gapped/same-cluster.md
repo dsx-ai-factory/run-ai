@@ -95,8 +95,7 @@ For a same-cluster installation on Kubernetes, configure:
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
        # Gov-ready: add the external PostgreSQL, Keycloak, and NATS values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 5. Define the cluster:
@@ -117,8 +116,7 @@ For a same-cluster installation on Kubernetes, configure:
        certPath: /path/to/cluster-cert.pem
        keyPath: /path/to/cluster-key.pem
      customHelmValues:
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 6. Skip the prerequisites:
@@ -167,8 +165,7 @@ controlPlane:
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
     # Gov-ready: add the external PostgreSQL, Keycloak, and NATS values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 cluster:
   enabled: true
@@ -178,8 +175,7 @@ cluster:
     certPath: /path/to/cluster-cert.pem
     keyPath: /path/to/cluster-key.pem
   customHelmValues:
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 prerequisites:
   skip: true
@@ -248,8 +244,7 @@ For a same-cluster installation on OpenShift, configure:
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
        # Gov-ready: add the external PostgreSQL, Keycloak, and NATS values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 5. Define the cluster:
@@ -264,8 +259,7 @@ For a same-cluster installation on OpenShift, configure:
      enabled: true
      name: <CLUSTER_NAME>
      customHelmValues:
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 6. Skip the prerequisites:
@@ -301,15 +295,13 @@ controlPlane:
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
     # Gov-ready: add the external PostgreSQL, Keycloak, and NATS values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 cluster:
   enabled: true
   name: <CLUSTER_NAME>
   customHelmValues:
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 prerequisites:
   skip: true
