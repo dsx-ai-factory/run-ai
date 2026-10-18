@@ -80,7 +80,7 @@ func (s *WorkloadsService) InternalGetResourceClaimTemplateWorkloads(ctx context
 
 	permittedScopes, err := authorization_client.ParsePermittedScopes(ctx)
 	if err != nil {
-		permittedScopes = nil
+		return NewErrorResponse(api.NewError(http.StatusForbidden, "Insufficient permissions", nil)), nil
 	}
 
 	workloads, apiErr := dao.DbListWorkloadsReferencingResourceClaimTemplate(ctx, tenantId, request.Name,
