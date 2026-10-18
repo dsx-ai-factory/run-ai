@@ -29,7 +29,7 @@ type WorkloadResourceClaim struct {
 	// Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
 	ClaimName NullableString `json:"claimName,omitempty"`
 	// The ResourceClaimTemplate the claim was generated from. Null for a standalone ResourceClaim that the pod references directly.
-	Template NullableResourceClaimTemplateRef `json:"template,omitempty"`
+	Template map[string]interface{} `json:"template,omitempty"`
 }
 
 type _WorkloadResourceClaim WorkloadResourceClaim
@@ -120,46 +120,36 @@ func (o *WorkloadResourceClaim) UnsetClaimName() {
 }
 
 // GetTemplate returns the Template field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *WorkloadResourceClaim) GetTemplate() ResourceClaimTemplateRef {
-	if o == nil || IsNil(o.Template.Get()) {
-		var ret ResourceClaimTemplateRef
+func (o *WorkloadResourceClaim) GetTemplate() map[string]interface{} {
+	if o == nil {
+		var ret map[string]interface{}
 		return ret
 	}
-	return *o.Template.Get()
+	return o.Template
 }
 
 // GetTemplateOk returns a tuple with the Template field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *WorkloadResourceClaim) GetTemplateOk() (*ResourceClaimTemplateRef, bool) {
-	if o == nil {
-		return nil, false
+func (o *WorkloadResourceClaim) GetTemplateOk() (map[string]interface{}, bool) {
+	if o == nil || IsNil(o.Template) {
+		return map[string]interface{}{}, false
 	}
-	return o.Template.Get(), o.Template.IsSet()
+	return o.Template, true
 }
 
 // HasTemplate returns a boolean if a field has been set.
 func (o *WorkloadResourceClaim) HasTemplate() bool {
-	if o != nil && o.Template.IsSet() {
+	if o != nil && !IsNil(o.Template) {
 		return true
 	}
 
 	return false
 }
 
-// SetTemplate gets a reference to the given NullableResourceClaimTemplateRef and assigns it to the Template field.
-func (o *WorkloadResourceClaim) SetTemplate(v ResourceClaimTemplateRef) {
-	o.Template.Set(&v)
-}
-
-// SetTemplateNil sets the value for Template to be an explicit nil
-func (o *WorkloadResourceClaim) SetTemplateNil() {
-	o.Template.Set(nil)
-}
-
-// UnsetTemplate ensures that no value is present for Template, not even an explicit nil
-func (o *WorkloadResourceClaim) UnsetTemplate() {
-	o.Template.Unset()
+// SetTemplate gets a reference to the given map[string]interface{} and assigns it to the Template field.
+func (o *WorkloadResourceClaim) SetTemplate(v map[string]interface{}) {
+	o.Template = v
 }
 
 func (o WorkloadResourceClaim) MarshalJSON() ([]byte, error) {
@@ -176,8 +166,8 @@ func (o WorkloadResourceClaim) ToMap() (map[string]interface{}, error) {
 	if o.ClaimName.IsSet() {
 		toSerialize["claimName"] = o.ClaimName.Get()
 	}
-	if o.Template.IsSet() {
-		toSerialize["template"] = o.Template.Get()
+	if o.Template != nil {
+		toSerialize["template"] = o.Template
 	}
 	return toSerialize, nil
 }

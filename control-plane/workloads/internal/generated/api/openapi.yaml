@@ -126814,23 +126814,19 @@ components:
       - $ref: '#/components/schemas/PodResourceClaimBinding'
       - properties:
           template:
-            allOf:
-            - $ref: '#/components/schemas/ResourceClaimTemplateRef'
-            description: The ResourceClaimTemplate the claim was generated from. Null
-              for a standalone ResourceClaim that the pod references directly.
-            nullable: true
+            $ref: '#/components/schemas/WorkloadResourceClaim_allOf_template'
         type: object
       example:
-        template: ""
+        template: null
         claimName: bert-worker-0-gpu-1-mk4s8
         name: gpu-1
     WorkloadPodResourceClaims:
       example:
         resourceClaims:
-        - template: ""
+        - template: null
           claimName: bert-worker-0-gpu-1-mk4s8
           name: gpu-1
-        - template: ""
+        - template: null
           claimName: bert-worker-0-gpu-1-mk4s8
           name: gpu-1
         task: worker
@@ -126866,20 +126862,20 @@ components:
         next: 0
         pods:
         - resourceClaims:
-          - template: ""
+          - template: null
             claimName: bert-worker-0-gpu-1-mk4s8
             name: gpu-1
-          - template: ""
+          - template: null
             claimName: bert-worker-0-gpu-1-mk4s8
             name: gpu-1
           task: worker
           podName: bert-worker-0
           podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         - resourceClaims:
-          - template: ""
+          - template: null
             claimName: bert-worker-0-gpu-1-mk4s8
             name: gpu-1
-          - template: ""
+          - template: null
             claimName: bert-worker-0-gpu-1-mk4s8
             name: gpu-1
           task: worker
@@ -134798,6 +134794,11 @@ components:
           $ref: '#/components/schemas/S3sRules'
         secretVolume:
           $ref: '#/components/schemas/SecretsRules'
+      type: object
+    WorkloadResourceClaim_allOf_template:
+      description: The ResourceClaimTemplate the claim was generated from. Null for
+        a standalone ResourceClaim that the pod references directly.
+      nullable: true
       type: object
     WorkloadTypeResourceInterfacesWithVersion_inner:
       example:
