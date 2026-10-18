@@ -1,6 +1,6 @@
 # Role to ClusterRole Mapping
 
-NVIDIA Run:ai maps each predefined role to Kubernetes ClusterRoles. Users who [authenticate to the cluster](cluster-authentication.md) with their NVIDIA Run:ai identity and access it with `kubectl` receive these Kubernetes permissions in addition to the permissions that the role grants in the NVIDIA Run:ai platform. Use this page to see which ClusterRoles each role maps to and what each ClusterRole grants. For example, share it with your security team when reviewing access.
+NVIDIA Run:ai maps each predefined role to Kubernetes ClusterRoles. Users who [authenticate to the cluster](../../installation-and-configuration/configuration/cluster-authentication.md) with their NVIDIA Run:ai identity and access it with `kubectl` receive these Kubernetes permissions in addition to the permissions that the role grants in the NVIDIA Run:ai platform. Use this page to see which ClusterRoles each role maps to and what each ClusterRole grants. For example, share it with your security team when reviewing access.
 
 <Note>
 
