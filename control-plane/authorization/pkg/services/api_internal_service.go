@@ -148,7 +148,24 @@ func (i *InternalApiService) UpdateScopeAccessRules(ctx context.Context, scopeTy
 }
 
 func (i *InternalApiService) CreateInternalAccessRule(ctx context.Context, request api.InternalCreateAccessRuleRequest) (api.ImplResponse, error) {
-	return i.createInternalAccessRule(ctx, request, dao.MapStaticRoleNameToRoleId[string(request.RoleName)])
+	return i.createInternalAccessRule(ctx, request, dao.MapStaticRoleNameToRoleId[string(currentInternalRoleName(ctx, request.RoleName))])
+}
+
+// deprecatedInternalRoleNames maps the internal role names that were renamed to their current names. Clients built
+// before the rename still send the old names, which stay in the enum only so that they are accepted. Remove this map
+// together with the deprecated enum values once no supported client sends them.
+var deprecatedInternalRoleNames = map[api.AllowedInternalCreateRoles]api.AllowedInternalCreateRoles{
+	api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION:   api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
+	api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION: api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
+}
+
+func currentInternalRoleName(ctx context.Context, roleName api.AllowedInternalCreateRoles) api.AllowedInternalCreateRoles {
+	current, deprecated := deprecatedInternalRoleNames[roleName]
+	if !deprecated {
+		return roleName
+	}
+	logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Deprecated internal role name %q received, using %q", roleName, current)
+	return current
 }
 
 func (i *InternalApiService) GetScopeAccessRules(ctx context.Context, clusterId string, roles string, departmentIds string, projectIds string) (api.ImplResponse, error) {

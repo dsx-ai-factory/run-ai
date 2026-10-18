@@ -49007,6 +49007,8 @@ components:
         - Cluster service account
         - Installer service account
         - Cloud operator
+        - Cluster application
+        - Installer application
     InternalCreateAccessRuleRequest:
       type: object
       required:

@@ -209,6 +209,23 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerApp.Name])))
 		})
 
+		DescribeTable("Post with a deprecated role name resolves to the renamed role",
+			func(deprecatedName api.AllowedInternalCreateRoles, expectedRoleName string) {
+				response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
+					SubjectId:   TestUserId,
+					SubjectType: api.SUBJECTTYPE_USER,
+					RoleName:    deprecatedName,
+				})
+				Expect(err).To(BeNil())
+				Expect(response.Code).To(Equal(http.StatusCreated))
+
+				accessRule := HttpResponseBodyToAccessRule(response)
+				Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[expectedRoleName])))
+			},
+			Entry("Cluster application", api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION, static_roles.ClusterApp.Name),
+			Entry("Installer application", api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION, static_roles.InstallerApp.Name),
+		)
+
 		It("Post with cluster scope", func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,

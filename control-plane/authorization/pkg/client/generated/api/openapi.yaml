@@ -5017,6 +5017,8 @@ components:
       - Cluster service account
       - Installer service account
       - Cloud operator
+      - Cluster application
+      - Installer application
       type: string
     InternalCreateAccessRuleRequest:
       example:

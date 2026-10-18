@@ -1014,7 +1014,9 @@ export const AllowedInternalCreateRoles = {
     SystemAdministrator: 'System administrator',
     ClusterServiceAccount: 'Cluster service account',
     InstallerServiceAccount: 'Installer service account',
-    CloudOperator: 'Cloud operator'
+    CloudOperator: 'Cloud operator',
+    ClusterApplication: 'Cluster application',
+    InstallerApplication: 'Installer application'
 } as const;
 
 export type AllowedInternalCreateRoles = typeof AllowedInternalCreateRoles[keyof typeof AllowedInternalCreateRoles];
