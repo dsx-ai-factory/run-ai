@@ -101,9 +101,9 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.2
-	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.8
+	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 	github.com/emersion/go-smtp v0.25.0
 	github.com/go-chi/chi/v5 v5.5.0
