@@ -171,7 +171,7 @@ func (s *NodePoolsApiService) CreateNodepool(ctx context.Context, fields api.Nod
 	if err := setSchedulingConfigurationFieldsOnCreate(ctx, &nodepoolModel, fields, capChecker); err != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on create", err)), nil
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities, true)
 
 	nodepoolSetDefaults(&nodepoolModel)
 
@@ -481,6 +481,12 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
 	}
 
+	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, nodepoolModel, *patched)
+	if apiErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s with id %s capabilities change failed. error: %v", nodepoolModel.Name, nodepoolId, apiErr.Message)
+		return NewErrorResponse(apiErr), nil
+	}
+
 	patched.UpdatedBy = subjectId
 	if patched.Phase != api.NODEPOOLPHASE_CREATING && clusterFieldsUpdated(*patched, nodepoolModel) {
 		patched.Phase = api.NODEPOOLPHASE_UPDATING
@@ -490,7 +496,7 @@ func (s *NodePoolsApiService) PatchNodepool(ctx context.Context, nodepoolId stri
 	if dbErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Patch nodepool %s with id %s request failed. error: %v", nodepoolModel.Name, nodepoolId, dbErr)
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
-			fmt.Sprintf("Failed to update nodepool %s in cluster %s", nodepool.Name, nodepool.ClusterId), dbErr)), nil
+			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, describeCompletedResets(completedResets)), dbErr)), nil
 	}
 
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
@@ -596,6 +602,12 @@ func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId str
 		return api.Response(http.StatusBadRequest, validationErr.Error()), nil
 	}
 
+	completedResets, apiErr := s.validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx, nodepoolModel, *updated)
+	if apiErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Nodepool %s with id %s capabilities change failed. error: %v", nodepoolModel.Name, nodepoolId, apiErr.Message)
+		return NewErrorResponse(apiErr), nil
+	}
+
 	updated.UpdatedBy = subjectId
 	if updated.Phase != api.NODEPOOLPHASE_CREATING && clusterFieldsUpdated(*updated, nodepoolModel) {
 		updated.Phase = api.NODEPOOLPHASE_UPDATING
@@ -605,7 +617,7 @@ func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId str
 	if dbErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Update nodepool %s with id %s request failed. error: %v", nodepoolModel.Name, nodepoolId, dbErr)
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
-			fmt.Sprintf("Failed to update nodepool %s in cluster %s", nodepool.Name, nodepool.ClusterId), dbErr)), nil
+			fmt.Sprintf("Failed to update nodepool %s in cluster %s%s", nodepoolModel.Name, nodepoolModel.ClusterId, describeCompletedResets(completedResets)), dbErr)), nil
 	}
 
 	audit.AuditFromCtx(ctx).WithEntityName(nodepool.Name).WithEntityType(NodepoolAuditEntityType).WithEntityId(strconv.Itoa(int(nodepool.ID)))
@@ -684,7 +696,7 @@ func (s *NodePoolsApiService) createDefaultNodepool(ctx context.Context, cluster
 		CpuPlacementStrategy:       "",
 		MinGuaranteedRuntime:       nil,
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, clusterNotification.SchedulingCapabilities)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, clusterNotification.SchedulingCapabilities, true)
 	nodepoolSetDefaults(&nodepoolModel)
 
 	nodepoolModel.ClusterId = uuid.MustParse(clusterNotification.Id)
@@ -737,7 +749,7 @@ func mapUpdateFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, 
 	if err := setSchedulingConfigurationFieldsOnUpdate(ctx, result, updateFields, capChecker); err != nil {
 		return nil, api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on update", err)
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, result, updateFields.SchedulingCapabilities)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, result, updateFields.SchedulingCapabilities, false)
 
 	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, updateFields.NetworkTopologyId)
 	if ntErr != nil {
