@@ -21528,6 +21528,7 @@ Components:
   golang.org/x/net v0.56.0
   golang.org/x/net v0.58.0
   golang.org/x/net v0.59.0
+  golang.org/x/net v0.60.0
   golang.org/x/net v0.61.0
   golang.org/x/oauth2 v0.30.0
   golang.org/x/oauth2 v0.32.0
@@ -21538,7 +21539,6 @@ Components:
   golang.org/x/sync/errgroup v0.20.0
   golang.org/x/sync/errgroup v0.23.0
   golang.org/x/sync/errgroup v0.24.0
-  golang.org/x/sync/semaphore v0.23.0
   golang.org/x/sync/semaphore v0.24.0
   golang.org/x/sys v0.45.0
   golang.org/x/sys v0.48.0
@@ -21557,7 +21557,7 @@ Components:
   golang.org/x/time/rate v0.16.0
   golang.org/x/time/rate v0.9.0
   golang.org/x/tools v0.49.0
-  golang.org/x/tools v0.50.0
+  golang.org/x/tools v0.51.0
   golang.org/x/tools v0.52.0
 
 Copyright 2009 The Go Authors.
