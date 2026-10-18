@@ -21,7 +21,7 @@ vi.spyOn(cliService, "getUIWindowsCommand").mockResolvedValue("");
 
 async function factory(state: ClusterState) {
   const pinia = createTestingPinia({ createSpy: vi.fn });
-  useClusterStore(pinia).clusterList = [
+  useClusterStore(pinia).clusters = [
     { uuid: "cluster-1", name: "cluster-1", version: "2.24", domain: "https://cluster-1", state } as ClustersMinimalData,
   ];
 
