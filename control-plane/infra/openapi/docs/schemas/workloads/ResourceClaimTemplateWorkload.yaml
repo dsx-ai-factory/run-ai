@@ -1,0 +1,25 @@
+type: object
+required:
+  - workloadId
+  - name
+  - type
+  - projectId
+  - pods
+properties:
+  workloadId:
+    $ref: './WorkloadId.yaml'
+  name:
+    $ref: './WorkloadName.yaml'
+  type:
+    type: string
+    description: The type of the workload.
+    example: "Training"
+  projectId:
+    type: string
+    description: The id of the project the workload belongs to.
+    example: "1"
+  pods:
+    type: array
+    description: The pods of the workload that reference the resource claim template.
+    items:
+      $ref: './ResourceClaimTemplateWorkloadPod.yaml'

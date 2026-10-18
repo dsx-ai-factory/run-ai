@@ -1,0 +1,11 @@
+allOf:
+  - $ref: '../../../../../infra/openapi/docs/schemas/workloads/PodResourceClaimBinding.yaml'
+  - type: object
+    properties:
+      template:
+        allOf:
+          - $ref: './ResourceClaimTemplateRef.yaml'
+        nullable: true
+        description: >-
+          The ResourceClaimTemplate the claim was generated from. Null for a standalone
+          ResourceClaim that the pod references directly.

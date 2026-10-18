@@ -52,6 +52,7 @@ require (
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-multierror v1.1.1
+	github.com/itchyny/gojq v0.12.19
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/lib/pq v1.12.3
@@ -63,6 +64,7 @@ require (
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20260908205506-85c1c2202aba
 	gorm.io/gorm v1.31.2
+	k8s.io/api v0.36.2
 	k8s.io/apimachinery v0.36.2
 	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
 )
@@ -150,7 +152,6 @@ require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/itchyny/gojq v0.12.19 // indirect
 	github.com/itchyny/timefmt-go v0.1.8 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
@@ -265,7 +266,6 @@ require (
 	gorm.io/driver/mysql v1.6.0 // indirect
 	gorm.io/driver/postgres v1.6.3 // indirect
 	gorm.io/plugin/opentelemetry v0.1.16 // indirect
-	k8s.io/api v0.36.2 // indirect
 	k8s.io/apiextensions-apiserver v0.36.0 // indirect
 	k8s.io/autoscaler/vertical-pod-autoscaler v1.5.1 // indirect
 	k8s.io/client-go v1.5.2 // indirect

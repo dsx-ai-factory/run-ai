@@ -17,6 +17,9 @@ type K8SObjectTrackerMock struct {
 	// in reality the key is tenantId + clusterId + name, but we only track the names.
 	StorageClassConfig map[string]k8sObjectsTracker.StorageClassConfiguration
 	Secrets            []k8sObjectsTracker.SecretListInfo
+	// ResourceClaimTemplates is keyed by cluster id because tracker rows do not carry it.
+	ResourceClaimTemplates      map[string][]k8sObjectsTracker.ResourceClaimTemplate
+	ResourceClaimTemplatesError *k8sObjectsTracker.Error
 }
 
 func NewK8SObjectTrackerMock() K8SObjectTrackerMock {
@@ -59,5 +62,44 @@ func (s K8SObjectTrackerMock) ListSecretsByScope(ctx context.Context, scopeType 
 
 func (s K8SObjectTrackerMock) WithSecrets(secrets []k8sObjectsTracker.SecretListInfo) K8SObjectTrackerMock {
 	s.Secrets = secrets
+	return s
+}
+
+// ListResourceClaimTemplatesByName mirrors the tracker's filtering: exact name match across
+// every scope of the cluster, and a nil row origin counted as "existing".
+func (s K8SObjectTrackerMock) ListResourceClaimTemplatesByName(ctx context.Context, clusterId string, name string, origin string) (*k8sObjectsTracker.ResourceClaimTemplates, *k8sObjectsTracker.Error) {
+	if s.ResourceClaimTemplatesError != nil {
+		return nil, s.ResourceClaimTemplatesError
+	}
+
+	items := []k8sObjectsTracker.ResourceClaimTemplate{}
+	for _, rct := range s.ResourceClaimTemplates[clusterId] {
+		if rct.Name != name {
+			continue
+		}
+		if origin != "" && origin != "all" {
+			rowOrigin := string(k8sObjectsTracker.ORIGIN_EXISTING)
+			if o := rct.Origin.Get(); o != nil {
+				rowOrigin = string(*o)
+			}
+			if rowOrigin != origin {
+				continue
+			}
+		}
+		items = append(items, rct)
+	}
+	return &k8sObjectsTracker.ResourceClaimTemplates{Items: items}, nil
+}
+
+func (s K8SObjectTrackerMock) WithResourceClaimTemplates(clusterId string, rcts []k8sObjectsTracker.ResourceClaimTemplate) K8SObjectTrackerMock {
+	if s.ResourceClaimTemplates == nil {
+		s.ResourceClaimTemplates = make(map[string][]k8sObjectsTracker.ResourceClaimTemplate)
+	}
+	s.ResourceClaimTemplates[clusterId] = rcts
+	return s
+}
+
+func (s K8SObjectTrackerMock) WithResourceClaimTemplatesError(err *k8sObjectsTracker.Error) K8SObjectTrackerMock {
+	s.ResourceClaimTemplatesError = err
 	return s
 }

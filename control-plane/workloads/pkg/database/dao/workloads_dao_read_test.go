@@ -8,6 +8,7 @@ package dao
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strings"
 
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
@@ -18,6 +19,7 @@ import (
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"gorm.io/gorm"
 )
 
 const (
@@ -51,6 +53,7 @@ const (
 	wlReadChildrenWithTypesSelect = "SELECT * FROM workloads_children WHERE workload_id = ? AND child_type IN (?)"
 
 	wlReadClusterIdSelect = "SELECT cluster_id FROM workloads WHERE tenant_id = ? AND id = ? ORDER BY workloads.id LIMIT ?"
+	wlReadScopeSelect     = "SELECT cluster_id, project_id, department_id, namespace FROM workloads WHERE tenant_id = ? AND id = ? AND workloads.deleted_at IS NULL ORDER BY workloads.id LIMIT ?"
 
 	wlReadByIdsSelect               = "SELECT * FROM workloads_view WHERE tenant_id = ? AND id IN (?)"
 	wlReadByIdsExcludeDeletedSelect = "SELECT * FROM workloads_view WHERE tenant_id = ? AND id IN (?) AND deleted_at IS NULL"
@@ -73,6 +76,13 @@ type wlReadPhaseRow struct {
 
 type wlReadClusterIdRow struct {
 	ClusterID string `gorm:"column:cluster_id"`
+}
+
+type wlReadScopeRow struct {
+	ClusterID    string `gorm:"column:cluster_id"`
+	ProjectID    string `gorm:"column:project_id"`
+	DepartmentID string `gorm:"column:department_id"`
+	Namespace    string `gorm:"column:namespace"`
 }
 
 type wlReadChildRow struct {
@@ -599,6 +609,46 @@ var _ = Describe("DbGetWorkloadClusterId", func() {
 
 		Expect(apiErr).ToNot(BeNil())
 		Expect(got).To(Equal(uuid.UUID{}))
+	})
+})
+
+var _ = Describe("DbGetWorkloadScope", func() {
+	It("returns the scope columns of the workload", func() {
+		m := setupDaoMock(GinkgoT())
+		clusterId := uuid.New()
+		m.ExpectQuery(wlReadScopeSelect).Returns([]wlReadScopeRow{{
+			ClusterID: clusterId.String(), ProjectID: "p1", DepartmentID: "d1", Namespace: "runai-p1",
+		}})
+
+		got, apiErr := wlReadDao().DbGetWorkloadScope(testCtx(1), 1, uuid.New())
+
+		Expect(apiErr).To(BeNil())
+		Expect(got.ClusterID).To(Equal(clusterId))
+		Expect(got.ProjectID).To(Equal("p1"))
+		Expect(got.DepartmentID).To(Equal("d1"))
+		Expect(got.Namespace).To(Equal("runai-p1"))
+	})
+
+	It("returns not found when the workload does not exist", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectQuery(wlReadScopeSelect).ReturnsError(gorm.ErrRecordNotFound)
+
+		got, apiErr := wlReadDao().DbGetWorkloadScope(testCtx(1), 1, uuid.New())
+
+		Expect(got).To(BeNil())
+		Expect(apiErr).ToNot(BeNil())
+		Expect(apiErr.Code).To(BeEquivalentTo(http.StatusNotFound))
+	})
+
+	It("returns an internal server error when the query fails", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectQuery(wlReadScopeSelect).ReturnsError(errors.New("boom"))
+
+		got, apiErr := wlReadDao().DbGetWorkloadScope(testCtx(1), 1, uuid.New())
+
+		Expect(got).To(BeNil())
+		Expect(apiErr).ToNot(BeNil())
+		Expect(apiErr.Code).To(BeEquivalentTo(http.StatusInternalServerError))
 	})
 })
 
