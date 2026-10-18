@@ -72,7 +72,7 @@ runai training pytorch submit <workload-name> -p <project-name> -i ubuntu --mast
       --extended-resource stringArray                     Request access to a Kubernetes extended resource. Format: resource_name=quantity.
       --external-url stringArray                          Expose a URL from the workload container. Format: container=PORT,url=https://external.runai.com,authusers=user1,authgroups=group1.
       --git-sync stringArray                              Mount a Git repository into the container. Format: name=NAME,repository=REPO,path=PATH,secret=SECRET,rev=REVISION.
-      --gpu-compute-mode string                           GPU compute sharing mode: time-slicing or sm-sharing. When omitted, asset, template and policy defaults apply before the time-slicing fallback. Requires cluster version 3.0.14+.
+      --gpu-compute-mode string                           GPU compute sharing mode. Valid values: time-slicing, sm-sharing. Requires cluster version 3.0.14+.
   -g, --gpu-devices-request positiveInt                   Number of GPU devices to allocate for the workload (e.g. 1, 2).
       --gpu-memory-limit string                           Maximum GPU memory to allocate (e.g. 1G, 500M).
       --gpu-memory-portion-limit positiveFloat            Maximum GPU memory fraction allowed per device (between 0 and 1).
@@ -97,7 +97,7 @@ runai training pytorch submit <workload-name> -p <project-name> -i ubuntu --mast
       --master-datasource stringArray                     Specifies the data source asset to attach to the master pod. Format: type=hostPath|nfs|pvc|git|s3|configMap|secretVolume,name=NAME
       --master-environment-variable stringArray           Set environment variables in the master container. --master-environment-variable name=value -master-environment-variable name-b=value-b.
       --master-extended-resource stringArray              Request access to a Kubernetes extended resource. Format: resource_name=quantity.
-      --master-gpu-compute-mode string                    GPU compute sharing mode: time-slicing or sm-sharing. When omitted, asset, template and policy defaults apply before the time-slicing fallback. Requires cluster version 3.0.14+.
+      --master-gpu-compute-mode string                    GPU compute sharing mode. Valid values: time-slicing, sm-sharing. Requires cluster version 3.0.14+.
       --master-gpu-devices-request positiveInt            Number of GPU devices to allocate for the master pod (e.g., 1, 2).
       --master-gpu-memory-portion-limit positiveFloat     Maximum GPU memory fraction allowed per device for the master pod (between 0 and 1).
       --master-gpu-memory-portion-request positiveFloat   GPU memory fraction to allocate per device for the master pod (between 0 and 1, e.g. 0.5).

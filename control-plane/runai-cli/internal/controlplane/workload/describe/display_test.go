@@ -9,9 +9,11 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/displayer"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/distributedinference"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/nim"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
@@ -140,30 +142,53 @@ var _ = Describe("Display", func() {
 		})
 	})
 	Context("GPU compute mode", func() {
+		BeforeEach(func() {
+			workloadDisplayer = describe.NewWorkloadDisplayer(workload, displayer.DisplayOptions{ShowGeneral: true, ShowCompute: true})
+		})
+
 		It("omits the mode when it is not provided", func() {
-			Expect(captureOutput(workloadDisplayer.DisplayGeneralAndRuntime)).NotTo(ContainSubstring("GPU Compute Mode"))
+			Expect(captureOutputWithError(workloadDisplayer.AsTable)).NotTo(ContainSubstring("GPU Compute Mode"))
 			Expect(captureOutputWithError(workloadDisplayer.AsYAML)).NotTo(ContainSubstring("gpucomputemode"))
 		})
 
-		It("shows the returned mode in table, JSON and YAML output", func() {
+		It("shows the mode under compute resources in table output and preserves JSON and YAML output", func() {
 			workload.Compute.GPUComputeMode = ptr.To("sm-sharing")
-			Expect(captureOutput(workloadDisplayer.DisplayGeneralAndRuntime)).To(MatchRegexp(`GPU Compute Mode:\s+sm-sharing`))
+			Expect(captureOutput(workloadDisplayer.DisplayGeneralAndRuntime)).NotTo(ContainSubstring("GPU Compute Mode"))
+			Expect(captureOutputWithError(workloadDisplayer.AsTable)).To(MatchRegexp(`Compute Resources\s+GPU Compute Mode:\s+sm-sharing`))
 			Expect(captureOutputWithError(workloadDisplayer.AsJSON)).To(ContainSubstring(`"gpuComputeMode": "sm-sharing"`))
 			Expect(captureOutputWithError(workloadDisplayer.AsYAML)).To(ContainSubstring("gpucomputemode: sm-sharing"))
 		})
 
-		It("shows a separate master mode", func() {
-			workload.Compute.GPUComputeMode = ptr.To("time-slicing")
-			workload.MasterConfig = &displayer.WorkloadRuntimeConfig{Compute: &displayer.Compute{GPUComputeMode: ptr.To("sm-sharing")}}
+		It("hides the mode when compute resources are hidden", func() {
+			workload.Compute.GPUComputeMode = ptr.To("sm-sharing")
 			workloadDisplayer = describe.NewWorkloadDisplayer(workload, displayer.DisplayOptions{ShowGeneral: true})
-			output := captureOutputWithError(workloadDisplayer.AsTable)
-			Expect(output).To(MatchRegexp(`GPU Compute Mode:\s+time-slicing`))
-			Expect(output).To(MatchRegexp(`(?s)Master Configuration.*GPU Compute Mode:\s+sm-sharing`))
+			Expect(captureOutputWithError(workloadDisplayer.AsTable)).NotTo(ContainSubstring("GPU Compute Mode"))
 		})
 
-		It("shows the NIM mode through its existing configuration fields", func() {
+		It("shows separate master and worker modes under their compute resources", func() {
+			workload.Compute.GPUComputeMode = ptr.To("time-slicing")
+			workload.MasterConfig = &displayer.WorkloadRuntimeConfig{Compute: &displayer.Compute{GPUComputeMode: ptr.To("sm-sharing")}}
+			output := captureOutputWithError(workloadDisplayer.AsTable)
+			Expect(output).To(MatchRegexp(`(?m)^    Compute Resources\n    GPU Compute Mode:\s+sm-sharing`))
+			Expect(output).To(MatchRegexp(`(?m)^Compute Resources\n\n  GPU Compute Mode:\s+time-slicing`))
+			Expect(strings.Count(output, "GPU Compute Mode:")).To(Equal(2))
+		})
+
+		It("shows separate leader and worker modes under their compute resources", func() {
+			workload.DistributedInference = &distributedinference.Fields{
+				Leader: &displayer.WorkloadRuntimeConfig{Compute: &displayer.Compute{GPUComputeMode: ptr.To("time-slicing")}},
+				Worker: &displayer.WorkloadRuntimeConfig{Compute: &displayer.Compute{GPUComputeMode: ptr.To("sm-sharing")}},
+			}
+			output := captureOutputWithError(workloadDisplayer.AsTable)
+			Expect(output).To(MatchRegexp(`Leader Configuration\s+Compute Resources\n    GPU Compute Mode:\s+time-slicing`))
+			Expect(output).To(MatchRegexp(`Worker Configuration\s+Compute Resources\n    GPU Compute Mode:\s+sm-sharing`))
+			Expect(strings.Count(output, "GPU Compute Mode:")).To(Equal(2))
+		})
+
+		It("shows the NIM mode under compute resources using its existing configuration fields", func() {
 			workload.Nim = &nim.Fields{GpuComputeMode: ptr.To("sm-sharing")}
-			Expect(captureOutput(workloadDisplayer.DisplayGeneralAndRuntime)).To(MatchRegexp(`GPU Compute Mode:\s+sm-sharing`))
+			Expect(captureOutput(workloadDisplayer.DisplayGeneralAndRuntime)).NotTo(ContainSubstring("GPU Compute Mode"))
+			Expect(captureOutputWithError(workloadDisplayer.AsTable)).To(MatchRegexp(`Compute Resources\s+GPU Compute Mode:\s+sm-sharing`))
 		})
 	})
 

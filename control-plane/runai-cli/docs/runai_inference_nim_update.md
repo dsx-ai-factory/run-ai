@@ -42,7 +42,7 @@ runai inference nim update <workload-name> --min-replicas 1 --max-replicas 5 --m
       --cpu-memory-limit string                    Maximum memory allowed (e.g. 1G, 500M).
       --cpu-memory-request string                  Amount of memory to request (e.g. 1G, 500M).
   -e, --environment-variable stringArray           Set environment variables in the container. Format: --environment-variable name=value --environment-variable name-b=value-b.
-      --gpu-compute-mode string                    GPU compute sharing mode: time-slicing or sm-sharing. When omitted, asset, template and policy defaults apply before the time-slicing fallback. Requires cluster version 3.0.14+.
+      --gpu-compute-mode string                    GPU compute sharing mode. Valid values: time-slicing, sm-sharing. Requires cluster version 3.0.14+.
       --gpu-devices-request positiveInt            Number of GPU devices to allocate for the workload (e.g. 1, 2).
       --gpu-memory-limit string                    Maximum GPU memory to allocate (e.g. 1G, 500M).
       --gpu-memory-portion-limit positiveFloat     Maximum GPU memory fraction allowed per device (between 0 and 1).
