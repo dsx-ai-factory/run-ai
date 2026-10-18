@@ -171,7 +171,7 @@ func (s *NodePoolsApiService) CreateNodepool(ctx context.Context, fields api.Nod
 	if err := setSchedulingConfigurationFieldsOnCreate(ctx, &nodepoolModel, fields, capChecker); err != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on create", err)), nil
 	}
-	setSchedulingCapabilitiesOnCreate(ctx, &nodepoolModel, fields.SchedulingCapabilities)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities, true)
 
 	nodepoolSetDefaults(&nodepoolModel)
 
@@ -696,7 +696,7 @@ func (s *NodePoolsApiService) createDefaultNodepool(ctx context.Context, cluster
 		CpuPlacementStrategy:       "",
 		MinGuaranteedRuntime:       nil,
 	}
-	setSchedulingCapabilitiesOnCreate(ctx, &nodepoolModel, clusterNotification.SchedulingCapabilities)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, clusterNotification.SchedulingCapabilities, true)
 	nodepoolSetDefaults(&nodepoolModel)
 
 	nodepoolModel.ClusterId = uuid.MustParse(clusterNotification.Id)
@@ -749,7 +749,7 @@ func mapUpdateFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, 
 	if err := setSchedulingConfigurationFieldsOnUpdate(ctx, result, updateFields, capChecker); err != nil {
 		return nil, api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on update", err)
 	}
-	setSchedulingCapabilitiesOnUpdate(result, updateFields.SchedulingCapabilities)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, result, updateFields.SchedulingCapabilities, false)
 
 	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, updateFields.NetworkTopologyId)
 	if ntErr != nil {
@@ -780,7 +780,7 @@ func mapPatchFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, p
 	if err := setSchedulingConfigurationFieldsOnPatch(ctx, result, patchFields, capChecker); err != nil {
 		return nil, api.NewError(http.StatusInternalServerError, err.Error(), err)
 	}
-	setSchedulingCapabilitiesOnUpdate(result, patchFields.SchedulingCapabilities)
+	setSchedulingCapabilitiesOnPatch(result, patchFields.SchedulingCapabilities)
 
 	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, patchFields.NetworkTopologyId)
 	if ntErr != nil {

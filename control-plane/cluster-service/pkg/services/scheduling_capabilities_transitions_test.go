@@ -21,9 +21,12 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services"
+	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/settings"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	org_unit_service_client_mock "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
+	settingPkg "github.com/dsx-ai-factory/run-ai/runai-common-packages/setting"
+	settingPkgMocks "github.com/dsx-ai-factory/run-ai/runai-common-packages/setting/mocks"
 )
 
 var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
@@ -46,7 +49,17 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		_ = dao.DeleteCluster(ctx, clusterId, tenantId)
 	})
 
+	useTenantSettings := func(cpuQuota, adjustableWeights bool) {
+		settingsMock := settingPkgMocks.NewSettingsManager(GinkgoT())
+		settingsMock.On("Get", mock.Anything, tenantIdStr, string(api.NODEPOOLSETTINGSKEYENUM_CPU_RESOURCES_QUOTA)).
+			Return(&settings.CPUResourcesQuota{Enabled: cpuQuota}, nil).Maybe()
+		settingsMock.On("Get", mock.Anything, tenantIdStr, string(api.NODEPOOLSETTINGSKEYENUM_PROJECT_MANUAL_OVER_QUOTA)).
+			Return(&settings.ProjectManualOverQuota{Enabled: adjustableWeights}, nil).Maybe()
+		settingPkg.SetMock(settingsMock)
+	}
+
 	BeforeEach(func() {
+		useTenantSettings(false, false)
 		tenantSettingsClient := &bc_mocks.TenantSettingsClient{}
 		tenantSettingsClient.On("GetOPRSetting", mock.Anything).Return(true, nil)
 		orgClient = org_unit_service_client_mock.NewIOrgUnitClient(GinkgoT())
@@ -99,9 +112,10 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(stored.AdjustableWeights).To(BeTrue())
 	})
 
-	It("keeps the stored flags on a PUT without schedulingCapabilities", func() {
+	It("falls back to the defaults on a PUT without schedulingCapabilities", func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
 
 		response, err := nodepoolService.UpdateNodepool(ctx, np.Id, *nodepoolUpdateFields("-capabilities-put", nil))
 		Expect(err).To(BeNil())
@@ -110,8 +124,8 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		stored := storedCapabilities(np.Id)
 		Expect(stored.Quota).To(BeTrue())
 		Expect(stored.Ranks).To(BeTrue())
-		Expect(stored.CpuQuota).To(BeTrue())
-		Expect(stored.AdjustableWeights).To(BeTrue())
+		Expect(stored.CpuQuota).To(BeFalse())
+		Expect(stored.AdjustableWeights).To(BeFalse())
 	})
 
 	It("resets the org-unit CPU quotas when cpuQuota turns off, and keeps weights when weights turn off", func() {
@@ -142,7 +156,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		turnOnCpuQuotaAndWeights(np.Id)
 
 		fields := nodepoolUpdateFields(fmt.Sprintf("-capabilities-put-off-%d", len(createdNodepools)), nil)
-		fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(false)}
+		fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{CpuQuota: ptr.To(true), AdjustableWeights: ptr.To(false)}
 		response, err := nodepoolService.UpdateNodepool(ctx, np.Id, *fields)
 		Expect(err).To(BeNil())
 		Expect(response.Code).To(Equal(http.StatusOK))
@@ -262,45 +276,27 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 			Expect(runai_config.Set(&cluster_config.EditableNodepoolCapabilities{Enabled: true})).To(Succeed())
 		})
 
-		It("refuses a PATCH that changes a flag, without any org-unit call", func() {
+		It("ignores the flags in a PATCH", func() {
 			np := createNodepool(clusterId)
 
 			response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Ranks: ptr.To(false)})
-			Expect(response.Code).To(Equal(http.StatusBadRequest))
-			Expect(response.Body.(api.Error).Message).To(ContainSubstring("not supported yet"))
+			Expect(response.Code).To(Equal(http.StatusOK))
 			Expect(storedCapabilities(np.Id).Ranks).To(BeTrue())
 		})
 
-		It("refuses a PUT that changes a flag", func() {
+		It("ignores the flags in a PUT and takes cpuQuota and weights from the tenant settings", func() {
 			np := createNodepool(clusterId)
+			useTenantSettings(true, true)
 
 			fields := nodepoolUpdateFields(fmt.Sprintf("-capabilities-gated-%d", len(createdNodepools)), nil)
-			fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{AdjustableWeights: ptr.To(!np.SchedulingCapabilities.AdjustableWeights)}
+			fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{CpuQuota: ptr.To(false), AdjustableWeights: ptr.To(false)}
 			response, err := nodepoolService.UpdateNodepool(ctx, np.Id, *fields)
 			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusBadRequest))
-			Expect(storedCapabilities(np.Id).AdjustableWeights).To(Equal(np.SchedulingCapabilities.AdjustableWeights))
-		})
-
-		It("accepts the stored flags sent back unchanged", func() {
-			np := createNodepool(clusterId)
-			stored := np.SchedulingCapabilities
-
-			response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{
-				Quota:             ptr.To(stored.Quota),
-				Ranks:             ptr.To(stored.Ranks),
-				CpuQuota:          ptr.To(stored.CpuQuota),
-				AdjustableWeights: ptr.To(stored.AdjustableWeights),
-			})
 			Expect(response.Code).To(Equal(http.StatusOK))
-		})
 
-		It("accepts a PUT without schedulingCapabilities", func() {
-			np := createNodepool(clusterId)
-
-			response, err := nodepoolService.UpdateNodepool(ctx, np.Id, *nodepoolUpdateFields(fmt.Sprintf("-capabilities-gated-%d", len(createdNodepools)), nil))
-			Expect(err).To(BeNil())
-			Expect(response.Code).To(Equal(http.StatusOK))
+			stored := storedCapabilities(np.Id)
+			Expect(stored.CpuQuota).To(BeTrue())
+			Expect(stored.AdjustableWeights).To(BeTrue())
 		})
 	})
 })

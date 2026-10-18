@@ -15,10 +15,8 @@ import (
 	"k8s.io/utils/ptr"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
-	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
-	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
@@ -26,17 +24,13 @@ import (
 const maxBlockingOrgUnitsInMessage = 10
 
 // validateSchedulingCapabilitiesChangeAndResetOrgUnits refuses turning quota or ranks off while org units still
-// use them, and resets the org units' CPU quotas when cpuQuota is turned off. Call it before saving the node
-// pool: the returned resets are already committed and cannot be rolled back.
+// use them, and resets the org units' CPU quotas when cpuQuota is turned off.
 func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx context.Context,
 	before, after models.Nodepool,
 ) ([]string, *api.Error) {
-	if !schedulingCapabilitiesChanged(before, after) {
+	// with the flag off a PUT can still change cpuQuota and weights from the tenant settings, unchecked as before
+	if !isEditableNodepoolCapabilitiesOn() || !schedulingCapabilitiesChanged(before, after) {
 		return nil, nil
-	}
-	if !runai_config.Get[*config.EditableNodepoolCapabilities]().Enabled {
-		return nil, api.NewError(http.StatusBadRequest,
-			fmt.Sprintf("Changing the scheduling capabilities of nodepool %s is not supported yet", after.Name), nil)
 	}
 
 	if before.AllowQuota && !after.AllowQuota {
