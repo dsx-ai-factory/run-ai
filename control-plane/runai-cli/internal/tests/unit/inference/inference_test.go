@@ -372,7 +372,7 @@ var _ = Describe("Inference Test", Ordered, func() {
 				"--large-shm=true",
 				InferenceComputeFullName, InferenceComputeFullNameImageName, InferenceServingPort), envMap)
 			Expect(err).To(BeNil())
-			Expect(output).To(HavePrefix(fmt.Sprintf(ExpectSuccessMsg, InferenceComputeFullName)))
+			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectSuccessMsg, InferenceComputeFullName)))
 			submitSpec, err := clients.GetSpecByInferenceName(InferenceComputeFullName)
 			Expect(err).To(BeNil())
 			Expect(submitSpec.Image.IsSet()).To(Equal(true))

@@ -10,15 +10,15 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 )
 
-var ClusterApp = models.Role{
-	Name:                    "Cluster application",
-	Description:             "An internal cluster app used to sync the data from the cluster to the control plane and in the opposite way.",
+var ClusterServiceAccount = models.Role{
+	Name:                    "Cluster service account",
+	Description:             "An internal cluster service account used to sync the data from the cluster to the control plane and in the opposite way.",
 	InternalOnly:            true,
 	ScopeType:               models.ROLE_SCOPE_SYSTEM,
 	Custom:                  false,
 	Enabled:                 true,
 	ClusterRolePredefinedId: nil,
 	PermissionSets: &[]models.PermissionSet{
-		{Name: static_permission_sets.ClusterAppPS.Name}, {Name: static_permission_sets.UsersMinimalRead.Name},
+		{Name: static_permission_sets.ClusterServiceAccountPS.Name}, {Name: static_permission_sets.UsersMinimalRead.Name},
 	},
 }

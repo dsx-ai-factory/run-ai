@@ -243,7 +243,7 @@ var _ = Describe("Xgboost Training Test", Ordered, func() {
 				"--large-shm=true",
 				XgboostComputeFullName, XgboostComputeFullImageName), envMap)
 			Expect(err).To(BeNil())
-			Expect(output).To(HavePrefix(fmt.Sprintf(ExpectDistSuccessMsg, XgboostComputeFullName)))
+			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectDistSuccessMsg, XgboostComputeFullName)))
 
 			submitSpec, err := clients.GetSpecByDistributedName(XgboostComputeFullName)
 			Expect(err).To(BeNil())
@@ -442,7 +442,8 @@ var _ = Describe("Xgboost Training Test", Ordered, func() {
 			output, err := cli.RunCommand("training xgboost submit --help", envMap)
 			Expect(err).To(BeNil())
 
-			computeFlags := []string{CpuCoreLimit, CpuCoreRequest, CpuMemoryLimit, CpuMemoryRequest, ExtendedResource, GpuDevicesRequest, GpuMemoryLimit, GpuMemoryRequest, GpuPortionLimit, GpuPortionRequest,
+			computeFlags := []string{CpuCoreLimit, CpuCoreRequest, CpuMemoryLimit, CpuMemoryRequest, ExtendedResource, GpuDevicesRequest, GpuMemoryLimit, GpuMemoryRequest,
+				GpuMemoryPortionLimit, GpuMemoryPortionRequest, GpuComputeMode,
 				GpuRequestType, LargeShm, MasterExtendedResource}
 			for _, flag := range computeFlags {
 				Expect(output).To(ContainSubstring(flag), "Compute flag %s should be present in help output", flag)

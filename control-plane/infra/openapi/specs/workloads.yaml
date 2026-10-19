@@ -449,6 +449,43 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/workloads/slim:
+    get:
+      x-internal: true
+      summary: List workloads, slim.
+      description: |
+        Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
+        Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
+      operationId: get_workloads_slim
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workloads_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/WorkloadsSlimFilter'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadsSlimResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /internal/workloads/{workloadId}/ancestors:
     get:
       summary: Get the workload ancestors.
@@ -5629,6 +5666,21 @@ components:
       schema:
         type: string
         example: test project
+    WorkloadsSlimFilter:
+      name: filterBy
+      in: query
+      required: false
+      description: Filter results by a parameter. Use the format field-name operator value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal, `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts with and `=$` Ends with.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: ^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name==some-workload-name
+          - projectName==proj-1
+      explode: false
     Precise:
       name: precise
       in: query
@@ -8012,6 +8064,44 @@ components:
           items:
             type: string
             format: uuid
+    WorkloadSlim:
+      type: object
+      description: A workload as returned by GET /api/v1/workloads/slim.
+      required:
+        - id
+        - name
+        - projectName
+        - clusterId
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: very-important-job
+        type:
+          type: string
+        projectName:
+          type: string
+          example: proj-1
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+        distributedFramework:
+          type: string
+          example: Pytorch
+    GetWorkloadsSlimResponse:
+      type: object
+      description: The response of GET /api/v1/workloads/slim.
+      required:
+        - workloads
+      properties:
+        next:
+          type: integer
+          example: 1
+        workloads:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkloadSlim'
     ClusterIdOptional:
       description: The id of the cluster.
       type: string

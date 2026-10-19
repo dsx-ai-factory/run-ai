@@ -924,6 +924,114 @@ paths:
       x-authorize:
         resource-type: workloads
         action: sync
+  /api/v1/workloads/slim:
+    get:
+      description: |
+        Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
+        Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
+      operationId: get_workloads_slim
+      parameters:
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
+          \ `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^`\
+          \ Starts with and `=$` Ends with."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name==some-workload-name
+          - projectName==proj-1
+          items:
+            pattern: ^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadsSlimResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "List workloads, slim."
+      tags:
+      - Workloads
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workloads_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
   /internal/workloads/{workloadId}/ancestors:
     get:
       operationId: get_workload_ancestors
@@ -13594,6 +13702,25 @@ components:
         example: test project
         type: string
       style: form
+    WorkloadsSlimFilter:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
+        \ `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts\
+        \ with and `=$` Ends with."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - name==some-workload-name
+        - projectName==proj-1
+        items:
+          pattern: ^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        maxItems: 10
+        type: array
+      style: form
     Precise:
       description: "Use this if you want to count the precise amount of workloads,\
         \ uncached. Defaults to false."
@@ -21857,6 +21984,69 @@ components:
           type: array
       required:
       - projectId
+      - workloads
+      type: object
+    WorkloadSlim:
+      description: A workload as returned by GET /api/v1/workloads/slim.
+      example:
+        name: very-important-job
+        distributedFramework: Pytorch
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        type: type
+        projectName: proj-1
+      properties:
+        id:
+          format: uuid
+          type: string
+        name:
+          example: very-important-job
+          type: string
+        type:
+          type: string
+        projectName:
+          example: proj-1
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        distributedFramework:
+          example: Pytorch
+          type: string
+      required:
+      - clusterId
+      - id
+      - name
+      - projectName
+      type: object
+    GetWorkloadsSlimResponse:
+      description: The response of GET /api/v1/workloads/slim.
+      example:
+        next: 1
+        workloads:
+        - name: very-important-job
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          type: type
+          projectName: proj-1
+        - name: very-important-job
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          type: type
+          projectName: proj-1
+      properties:
+        next:
+          example: 1
+          type: integer
+        workloads:
+          items:
+            $ref: '#/components/schemas/WorkloadSlim'
+          type: array
+      required:
       - workloads
       type: object
     ClusterIdOptional:

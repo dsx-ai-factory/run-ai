@@ -28,26 +28,26 @@ type AllowedInternalCreateRoles string
 
 // List of AllowedInternalCreateRoles
 const (
-	ALLOWEDINTERNALCREATEROLES_SYSTEM_ADMINISTRATOR  AllowedInternalCreateRoles = "System administrator"
-	ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION   AllowedInternalCreateRoles = "Cluster application"
-	ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION AllowedInternalCreateRoles = "Installer application"
-	ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR        AllowedInternalCreateRoles = "Cloud operator"
+	ALLOWEDINTERNALCREATEROLES_SYSTEM_ADMINISTRATOR      AllowedInternalCreateRoles = "System administrator"
+	ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT   AllowedInternalCreateRoles = "Cluster service account"
+	ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT AllowedInternalCreateRoles = "Installer service account"
+	ALLOWEDINTERNALCREATEROLES_CLOUD_OPERATOR            AllowedInternalCreateRoles = "Cloud operator"
 )
 
 // AllowedAllowedInternalCreateRolesEnumValues is all the allowed values of AllowedInternalCreateRoles enum
 var AllowedAllowedInternalCreateRolesEnumValues = []AllowedInternalCreateRoles{
 	"System administrator",
-	"Cluster application",
-	"Installer application",
+	"Cluster service account",
+	"Installer service account",
 	"Cloud operator",
 }
 
 // validAllowedInternalCreateRolesEnumValue provides a map of AllowedInternalCreateRoless for fast verification of use input
 var validAllowedInternalCreateRolesEnumValues = map[AllowedInternalCreateRoles]struct{}{
-	"System administrator":  {},
-	"Cluster application":   {},
-	"Installer application": {},
-	"Cloud operator":        {},
+	"System administrator":      {},
+	"Cluster service account":   {},
+	"Installer service account": {},
+	"Cloud operator":            {},
 }
 
 // IsValid return true if the value is valid for the enum, false otherwise

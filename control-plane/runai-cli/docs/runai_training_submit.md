@@ -61,11 +61,12 @@ runai training standard submit <workload-name> -p <project-name> -i jupyter/scip
       --extended-resource stringArray                  Request access to a Kubernetes extended resource. Format: resource_name=quantity.
       --external-url stringArray                       Expose a URL from the workload container. Format: container=PORT,url=https://external.runai.com,authusers=user1,authgroups=group1.
       --git-sync stringArray                           Mount a Git repository into the container. Format: name=NAME,repository=REPO,path=PATH,secret=SECRET,rev=REVISION.
+      --gpu-compute-mode string                        GPU compute sharing mode. Valid values: time-slicing, sm-sharing. Requires cluster version 3.0.14+.
   -g, --gpu-devices-request positiveInt                Number of GPU devices to allocate for the workload (e.g. 1, 2).
       --gpu-memory-limit string                        Maximum GPU memory to allocate (e.g. 1G, 500M).
+      --gpu-memory-portion-limit positiveFloat         Maximum GPU memory fraction allowed per device (between 0 and 1).
+      --gpu-memory-portion-request positiveFloat       GPU memory fraction to allocate per device (between 0 and 1, e.g. 0.5).
       --gpu-memory-request string                      Amount of GPU memory to allocate (e.g. 1G, 500M).
-      --gpu-portion-limit positiveFloat                Maximum GPU fraction allowed for the workload (between 0 and 1).
-      --gpu-portion-request positiveFloat              Fraction of a GPU to allocate (between 0 and 1, e.g. 0.5).
       --gpu-request-type string                        Type of GPU request: portion, memory
   -h, --help                                           help for submit
       --host-ipc                                       Enable host IPC for the container. Default: false.

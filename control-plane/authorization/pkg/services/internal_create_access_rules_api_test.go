@@ -107,7 +107,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 			})
 			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusCreated))
@@ -119,14 +119,14 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_TENANT))
 			Expect(accessRule.ScopeName).To(Equal(TenantName))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterServiceAccount.Name])))
 		})
 
 		It("Post with cluster scope", func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 				Scope: &api.InternalCreateAccessRuleRequestScope{
 					Type: api.SCOPETYPE_CLUSTER,
 					Id:   TestCluster1Id,
@@ -142,14 +142,14 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_CLUSTER))
 			Expect(accessRule.ScopeId).To(Equal(TestCluster1Id))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterServiceAccount.Name])))
 		})
 
 		It("Post with tenant scope", func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 				Scope: &api.InternalCreateAccessRuleRequestScope{
 					Type: api.SCOPETYPE_TENANT,
 					Id:   fmt.Sprintf("%d", testing.TestTenant),
@@ -165,7 +165,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_TENANT))
 			Expect(accessRule.ScopeId).To(Equal(fmt.Sprintf("%d", testing.TestTenant)))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.ClusterServiceAccount.Name])))
 		})
 
 		When("Post with project scope", func() {
@@ -173,7 +173,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 				response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 					SubjectId:   TestUserId,
 					SubjectType: api.SUBJECTTYPE_USER,
-					RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+					RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 					Scope: &api.InternalCreateAccessRuleRequestScope{
 						Type: api.SCOPETYPE_PROJECT,
 						Id:   TestProject2Id,
@@ -194,7 +194,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
 			})
 			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusCreated))
@@ -206,14 +206,14 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_TENANT))
 			Expect(accessRule.ScopeName).To(Equal(TenantName))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerServiceAccount.Name])))
 		})
 
 		It("Post with cluster scope", func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
 				Scope: &api.InternalCreateAccessRuleRequestScope{
 					Type: api.SCOPETYPE_CLUSTER,
 					Id:   TestCluster1Id,
@@ -229,14 +229,14 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_CLUSTER))
 			Expect(accessRule.ScopeId).To(Equal(TestCluster1Id))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerServiceAccount.Name])))
 		})
 
 		It("Post with tenant scope", func() {
 			response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 				SubjectId:   TestUserId,
 				SubjectType: api.SUBJECTTYPE_USER,
-				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION,
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
 				Scope: &api.InternalCreateAccessRuleRequestScope{
 					Type: api.SCOPETYPE_TENANT,
 					Id:   fmt.Sprintf("%d", testing.TestTenant),
@@ -252,7 +252,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 			Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			Expect(accessRule.ScopeType).To(Equal(api.SCOPETYPE_TENANT))
 			Expect(accessRule.ScopeId).To(Equal(fmt.Sprintf("%d", testing.TestTenant)))
-			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerApp.Name])))
+			Expect(accessRule.RoleId).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.InstallerServiceAccount.Name])))
 		})
 
 		When("Post with project scope", func() {
@@ -260,7 +260,7 @@ var _ = Describe("Internal create access rules API tests", Ordered, func() {
 				response, err := internalApiService.CreateInternalAccessRule(userCtx, api.InternalCreateAccessRuleRequest{
 					SubjectId:   TestUserId,
 					SubjectType: api.SUBJECTTYPE_USER,
-					RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_APPLICATION,
+					RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
 					Scope: &api.InternalCreateAccessRuleRequestScope{
 						Type: api.SCOPETYPE_PROJECT,
 						Id:   TestProject2Id,

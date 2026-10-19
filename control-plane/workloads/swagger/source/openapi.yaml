@@ -51,6 +51,9 @@ paths:
   /api/v1/workloads:
     $ref: './resources/Workloads.yaml'
 
+  /api/v1/workloads/slim:
+    $ref: './resources/WorkloadsSlim.yaml'
+
   /internal/workloads/{workloadId}/ancestors:
     $ref: './resources/WorkloadAncestors.yaml'
 

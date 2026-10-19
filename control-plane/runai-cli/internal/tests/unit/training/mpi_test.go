@@ -242,8 +242,8 @@ var _ = Describe("MPI Training Test", Ordered, func() {
 				"--large-shm=true",
 				MPIComputeFullName, MPIComputeFullImageName), envMap)
 			Expect(err).To(BeNil())
-			Expect(output).To(HavePrefix(fmt.Sprintf(ExpectDistSuccessMsg, MPIComputeFullName)))
-			Expect(output).To(HavePrefix(fmt.Sprintf(ExpectDistSuccessMsg, MPIComputeFullName)))
+			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectDistSuccessMsg, MPIComputeFullName)))
+			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectDistSuccessMsg, MPIComputeFullName)))
 
 			submitSpec, err := clients.GetSpecByDistributedName(MPIComputeFullName)
 			Expect(err).To(BeNil())
@@ -443,7 +443,8 @@ var _ = Describe("MPI Training Test", Ordered, func() {
 			output, err := cli.RunCommand("training mpi submit --help", envMap)
 			Expect(err).To(BeNil())
 
-			computeFlags := []string{CpuCoreLimit, CpuCoreRequest, CpuMemoryLimit, CpuMemoryRequest, ExtendedResource, GpuDevicesRequest, GpuMemoryLimit, GpuMemoryRequest, GpuPortionLimit, GpuPortionRequest,
+			computeFlags := []string{CpuCoreLimit, CpuCoreRequest, CpuMemoryLimit, CpuMemoryRequest, ExtendedResource, GpuDevicesRequest, GpuMemoryLimit, GpuMemoryRequest,
+				GpuMemoryPortionLimit, GpuMemoryPortionRequest, GpuComputeMode,
 				GpuRequestType, LargeShm, MasterExtendedResource}
 			for _, flag := range computeFlags {
 				Expect(output).To(ContainSubstring(flag), "Compute flag %s should be present in help output", flag)

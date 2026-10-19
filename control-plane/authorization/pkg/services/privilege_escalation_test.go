@@ -262,18 +262,18 @@ var _ = Describe("Privilege escalation tests", Ordered, func() {
 
 	for _, assigner := range scopedUsers {
 		entries = append(entries,
-			Entry("No one can assign ClusterApp role", ValidateCurrentUserHasPrivilegeTestArgs{
+			Entry("No one can assign ClusterServiceAccount role", ValidateCurrentUserHasPrivilegeTestArgs{
 				SubjectId:        assigner,
-				AssignedRoleName: static_roles.ClusterApp.Name,
+				AssignedRoleName: static_roles.ClusterServiceAccount.Name,
 				ShouldAllow:      false,
 				ScopeId:          ClusterId,
 				ScopeType:        api.SCOPETYPE_CLUSTER,
 				Tenant:           testing.TestTenant,
 			}))
 		entries = append(entries,
-			Entry("No one can assign InstallerApp role", ValidateCurrentUserHasPrivilegeTestArgs{
+			Entry("No one can assign InstallerServiceAccount role", ValidateCurrentUserHasPrivilegeTestArgs{
 				SubjectId:        assigner,
-				AssignedRoleName: static_roles.InstallerApp.Name,
+				AssignedRoleName: static_roles.InstallerServiceAccount.Name,
 				ShouldAllow:      false,
 				ScopeId:          testTenant,
 				ScopeType:        api.SCOPETYPE_TENANT,

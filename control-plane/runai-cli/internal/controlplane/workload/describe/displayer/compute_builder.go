@@ -23,6 +23,11 @@ func (b *ComputeBuilder) RequestedResources(resources ComputeResources) *Compute
 	return b
 }
 
+func (b *ComputeBuilder) GPUComputeMode(mode string) *ComputeBuilder {
+	b.compute.GPUComputeMode = &mode
+	return b
+}
+
 func (b *ComputeBuilder) AllocatedResources(resources AllocatedResources) *ComputeBuilder {
 	b.compute.AllocatedResources = resources
 	return b
@@ -144,8 +149,12 @@ func BuildComputeFromSpec(spec *openapi.WorkspaceSpecSpecAllOfCompute) *Compute 
 
 	resourcesBuilder := NewComputeResourcesBuilder()
 
-	if spec.GpuPortionRequest.IsSet() {
-		gpuRequest := spec.GetGpuPortionRequest()
+	gpuPortionRequest := spec.GpuPortionRequest
+	if spec.GpuMemoryPortionRequest.Get() != nil {
+		gpuPortionRequest = spec.GpuMemoryPortionRequest
+	}
+	if gpuPortionRequest.Get() != nil {
+		gpuRequest := *gpuPortionRequest.Get()
 		if spec.GpuDevicesRequest.IsSet() {
 			gpuDevices := float64(spec.GetGpuDevicesRequest())
 			if gpuRequest > 0 && gpuRequest <= 1 {
@@ -158,8 +167,12 @@ func BuildComputeFromSpec(spec *openapi.WorkspaceSpecSpecAllOfCompute) *Compute 
 	} else if spec.GpuDevicesRequest.IsSet() {
 		resourcesBuilder.GPUComputeRequest(float64(spec.GetGpuDevicesRequest()))
 	}
-	if spec.GpuPortionLimit.IsSet() {
-		gpuLimit := spec.GetGpuPortionLimit()
+	gpuPortionLimit := spec.GpuPortionLimit
+	if spec.GpuMemoryPortionLimit.Get() != nil {
+		gpuPortionLimit = spec.GpuMemoryPortionLimit
+	}
+	if gpuPortionLimit.Get() != nil {
+		gpuLimit := *gpuPortionLimit.Get()
 		if spec.GpuDevicesRequest.IsSet() && gpuLimit > 0 && gpuLimit <= 1 {
 			gpuLimit *= float64(spec.GetGpuDevicesRequest())
 		}
@@ -190,9 +203,11 @@ func BuildComputeFromSpec(spec *openapi.WorkspaceSpecSpecAllOfCompute) *Compute 
 		resourcesBuilder.GPUMemoryLimit(spec.GetGpuMemoryLimit())
 	}
 
-	compute := NewComputeBuilder().
-		RequestedResources(resourcesBuilder.Build()).
-		Build()
+	computeBuilder := NewComputeBuilder().RequestedResources(resourcesBuilder.Build())
+	if mode, _ := spec.GetGpuComputeModeOk(); mode != nil {
+		computeBuilder.GPUComputeMode(string(*mode))
+	}
+	compute := computeBuilder.Build()
 
 	return &compute
 }

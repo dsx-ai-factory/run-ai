@@ -213,6 +213,22 @@ type WorkloadsAPI interface {
 	GetWorkloadsExecute(r ApiGetWorkloadsRequest) (*GetWorkloads200Response, *http.Response, error)
 
 	/*
+		GetWorkloadsSlim List workloads, slim.
+
+		Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
+	Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
+
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiGetWorkloadsSlimRequest
+	*/
+	GetWorkloadsSlim(ctx context.Context) ApiGetWorkloadsSlimRequest
+
+	// GetWorkloadsSlimExecute executes the request
+	//  @return GetWorkloadsSlimResponse
+	GetWorkloadsSlimExecute(r ApiGetWorkloadsSlimRequest) (*GetWorkloadsSlimResponse, *http.Response, error)
+
+	/*
 		GetWorkloadsTelemetry Get the workloads telemetry.
 
 		Retrieves workload data by telemetry type. Optionally filter by specific workload phases.
@@ -2550,6 +2566,195 @@ func (a *WorkloadsAPIService) GetWorkloadsExecute(r ApiGetWorkloadsRequest) (*Ge
 		newErr := &GenericOpenAPIError{
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetWorkloadsSlimRequest struct {
+	ctx        context.Context
+	ApiService WorkloadsAPI
+	offset     *int32
+	limit      *int32
+	filterBy   *[]string
+}
+
+// The offset of the first item returned in the collection.
+func (r ApiGetWorkloadsSlimRequest) Offset(offset int32) ApiGetWorkloadsSlimRequest {
+	r.offset = &offset
+	return r
+}
+
+// The maximum number of entries to return.
+func (r ApiGetWorkloadsSlimRequest) Limit(limit int32) ApiGetWorkloadsSlimRequest {
+	r.limit = &limit
+	return r
+}
+
+// Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
+func (r ApiGetWorkloadsSlimRequest) FilterBy(filterBy []string) ApiGetWorkloadsSlimRequest {
+	r.filterBy = &filterBy
+	return r
+}
+
+func (r ApiGetWorkloadsSlimRequest) Execute() (*GetWorkloadsSlimResponse, *http.Response, error) {
+	return r.ApiService.GetWorkloadsSlimExecute(r)
+}
+
+/*
+GetWorkloadsSlim List workloads, slim.
+
+Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
+Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiGetWorkloadsSlimRequest
+*/
+func (a *WorkloadsAPIService) GetWorkloadsSlim(ctx context.Context) ApiGetWorkloadsSlimRequest {
+	return ApiGetWorkloadsSlimRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//  @return GetWorkloadsSlimResponse
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *WorkloadsAPIService) GetWorkloadsSlimExecute(r ApiGetWorkloadsSlimRequest) (*GetWorkloadsSlimResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *GetWorkloadsSlimResponse
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsAPIService.GetWorkloadsSlim")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/workloads/slim"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue int32 = 50
+		r.limit = &defaultValue
+	}
+	if r.filterBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "filterBy", r.filterBy, "form", "csv")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 401 {
 			var v Error
