@@ -216,7 +216,9 @@ func ComputerFlagSet(flagsCompute *pflag.FlagSet, specCompute *Compute, getType 
 		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterGpuMemoryPortionRequest), consts.AttributeNameMasterGpuMemoryPortionRequest, consts.AttributeUsageMasterGpuMemoryPortionRequest)
 		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterGpuMemoryPortionLimit), consts.AttributeNameMasterGpuMemoryPortionLimit, consts.AttributeUsageMasterGpuMemoryPortionLimit)
 		flagsCompute.StringVar(&specCompute.MasterGpuComputeMode, consts.AttributeNameMasterGpuComputeMode, "", consts.AttributeUsageGpuComputeMode)
-		_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionRequest, "use --"+consts.AttributeNameMasterGpuMemoryPortionRequest+" instead")
+		_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionRequest,
+			"use --"+consts.AttributeNameMasterGpuMemoryPortionRequest+" for GPU memory fractions, or --"+
+				consts.AttributeNameMasterGpuDeviceRequest+" for whole-GPU counts")
 		_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionLimit, "use --"+consts.AttributeNameMasterGpuMemoryPortionLimit+" instead")
 		if framework == api.MPI {
 			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuMemoryPortionRequest, consts.WarningSubmitMpuWithGpu)
@@ -241,7 +243,9 @@ func GpuMemoryAndModeFlagSet(flags *pflag.FlagSet, compute *Compute) {
 	flags.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.GpuMemoryPortionLimit), consts.AttributeNameGpuMemoryPortionLimit, consts.AttributeUsageGpuMemoryPortionLimit)
 	flags.StringVar(&compute.GpuComputeMode, consts.AttributeNameGpuComputeMode, "", consts.AttributeUsageGpuComputeMode)
 	if flags.Lookup(consts.AttributeNameGpuPortionRequest) != nil {
-		_ = flags.MarkDeprecated(consts.AttributeNameGpuPortionRequest, "use --"+consts.AttributeNameGpuMemoryPortionRequest+" instead")
+		_ = flags.MarkDeprecated(consts.AttributeNameGpuPortionRequest,
+			"use --"+consts.AttributeNameGpuMemoryPortionRequest+" for GPU memory fractions, or --"+
+				consts.AttributeNameGpuDeviceRequest+" for whole-GPU counts")
 		_ = flags.MarkDeprecated(consts.AttributeNameGpuPortionLimit, "use --"+consts.AttributeNameGpuMemoryPortionLimit+" instead")
 	}
 }
