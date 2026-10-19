@@ -38,7 +38,7 @@ name: Project Triage
 #
 # The workflow fails fast with a clear message when the secret is empty.
 #
-# Revert (on for this repository, off by default for callers)
+# Revert (optional, off by default)
 #
 # With `revert: true` an issue that sits in the target status but no longer
 # meets the rule (its Priority was cleared, or its area label was removed) is
@@ -46,9 +46,12 @@ name: Project Triage
 # timestamps, so "neither the project item nor the issue changed for
 # `revert_grace_hours` hours" is the proxy for "nobody is mid-edit": without
 # it, clearing the Priority to pick another value would flip the card back
-# and forth. Closed issues are never reverted either. This repository's own
-# scheduled runs enable the revert with the 24-hour grace; the `workflow_call`
-# input stays `false` so other repositories opt in explicitly.
+# and forth. Closed issues are never reverted either.
+#
+# The revert does not distinguish an issue that lost its triage data from an
+# older Backlog issue that never had it, so enable it only after a dry-run
+# sweep (`workflow_dispatch`) has shown which items it would move: change the
+# `REVERT` fallback in the job's `env` block below.
 #
 # Reuse in other repositories
 #
@@ -163,7 +166,8 @@ jobs:
           TRIAGE_STATUS: ${{ inputs.triage_status || 'Needs Triage' }}
           TARGET_STATUS: ${{ inputs.target_status || 'Backlog' }}
           PRIORITY_FIELD: ${{ inputs.priority_field || 'Priority' }}
-          REVERT: ${{ format('{0}', inputs.revert) || 'true' }}
+          # Enable after a dry-run sweep confirms which Backlog items would be reverted.
+          REVERT: ${{ format('{0}', inputs.revert) || 'false' }}
           REVERT_GRACE_HOURS: ${{ format('{0}', inputs.revert_grace_hours) || '24' }}
           DRY_RUN: ${{ format('{0}', inputs.dry_run) || 'false' }}
         with:
@@ -286,13 +290,14 @@ jobs:
             }
 
             // 2. The items to evaluate: the one issue of an `issues` event, else the whole board.
+            // Read the two fields by name. `fieldValues` is a paginated connection, so a
+            // fixed page could silently drop a set Priority and cause a wrong revert.
             const fieldValuesSelection = `
-              fieldValues(first: 30) {
-                nodes {
-                  ... on ProjectV2ItemFieldSingleSelectValue {
-                    name field { ... on ProjectV2SingleSelectField { name } }
-                  }
-                }
+              status: fieldValueByName(name: "Status") {
+                ... on ProjectV2ItemFieldSingleSelectValue { name }
+              }
+              priority: fieldValueByName(name: $priorityField) {
+                ... on ProjectV2ItemFieldSingleSelectValue { name }
               }`;
             const issueSelection = `
               id number title url state updatedAt
@@ -302,7 +307,7 @@ jobs:
             if (context.eventName === 'issues') {
               const issueId = context.payload.issue.node_id;
               const data = await graphql(`
-                query($id: ID!) {
+                query($id: ID!, $priorityField: String!) {
                   node(id: $id) {
                     ... on Issue {
                       ${issueSelection}
@@ -315,7 +320,7 @@ jobs:
                       }
                     }
                   }
-                }`, { id: issueId });
+                }`, { id: issueId, priorityField: cfg.priorityField });
               const issue = data.node;
               for (const node of (issue && issue.projectItems.nodes) || []) {
                 const sameProject = node.project.number === cfg.number &&
@@ -330,7 +335,7 @@ jobs:
               let cursor = null;
               do {
                 const data = await graphql(`
-                  query($id: ID!, $cursor: String) {
+                  query($id: ID!, $cursor: String, $priorityField: String!) {
                     node(id: $id) {
                       ... on ProjectV2 {
                         items(first: 100, after: $cursor) {
@@ -343,7 +348,7 @@ jobs:
                         }
                       }
                     }
-                  }`, { id: project.id, cursor });
+                  }`, { id: project.id, cursor, priorityField: cfg.priorityField });
                 const page = data.node.items;
                 items.push(...page.nodes);
                 cursor = page.pageInfo.hasNextPage ? page.pageInfo.endCursor : null;
@@ -366,12 +371,9 @@ jobs:
               const issue = item.content;
               if (!issue || issue.__typename !== 'Issue') { counts.skipped++; continue; }
               const name = `${issue.repository.nameWithOwner}#${issue.number}`;
-              const value = fieldName => {
-                const v = item.fieldValues.nodes.find(n => n && n.field && n.field.name === fieldName);
-                return v && v.name ? v.name : '';
-              };
-              const status = value('Status');
-              const priority = value(cfg.priorityField);
+              const value = alias => (item[alias] && item[alias].name) || '';
+              const status = value('status');
+              const priority = value('priority');
               const areaLabels = issue.labels.nodes.map(l => l.name).filter(l => l.toLowerCase().startsWith(prefix));
               const { action, reason } = decide({
                 status,
