@@ -291,7 +291,12 @@ func updateFlags(gs *GeneralSpec) {
 		if compute.MasterGpuPortionRequest.IsSet() && *compute.MasterGpuPortionRequest.Get() > 0 || compute.MasterGpuMemoryPortionRequest.IsSet() {
 			compute.GpuPortionRequest = compute.MasterGpuPortionRequest
 			compute.GpuMemoryPortionRequest = compute.MasterGpuMemoryPortionRequest
-			compute.GpuDeviceRequest.Unset()
+			// Keep explicit device counts for fractions, without inheriting worker counts or changing legacy whole-GPU precedence.
+			hasMasterDevices := convutils.HasValue(compute.MasterGpuDeviceRequest) && *compute.MasterGpuDeviceRequest.Get() > 0
+			legacyWholeGPUs := convutils.HasValue(compute.MasterGpuPortionRequest) && *compute.MasterGpuPortionRequest.Get() > 1
+			if !hasMasterDevices || legacyWholeGPUs {
+				compute.GpuDeviceRequest.Unset()
+			}
 		}
 		if compute.MasterGpuPortionLimit.IsSet() && *compute.MasterGpuPortionLimit.Get() > 0 || compute.MasterGpuMemoryPortionLimit.IsSet() {
 			compute.GpuPortionLimit = compute.MasterGpuPortionLimit

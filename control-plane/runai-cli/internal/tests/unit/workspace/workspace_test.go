@@ -407,7 +407,7 @@ var _ = Describe("Workspace Test", Ordered, func() {
 				WorkspaceComputeFullName, WorkspaceComputeFullNameImageName), envMap)
 			Expect(err).To(BeNil())
 			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectSuccessMsg, WorkspaceComputeFullName)))
-			Expect(output).To(ContainSubstring("Flag --gpu-portion-request has been deprecated, use --gpu-memory-portion-request instead"))
+			Expect(output).To(ContainSubstring("Flag --gpu-portion-request has been deprecated, use --gpu-memory-portion-request for GPU memory fractions, or --gpu-devices-request for whole-GPU counts"))
 			submitSpec, err := clients.GetSpecByWorkspaceName(WorkspaceComputeFullName)
 			Expect(err).To(BeNil())
 			Expect(submitSpec.Image.IsSet()).To(Equal(true))
