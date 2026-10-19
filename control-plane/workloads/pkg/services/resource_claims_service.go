@@ -41,7 +41,7 @@ func (s *WorkloadsService) GetWorkloadResourceClaims(ctx context.Context, worklo
 		return NewErrorResponse(apiErr), nil
 	}
 
-	pods, apiErr := dao.DbListWorkloadPodsWithResourceClaims(ctx, tenantId, wid, offset, limit)
+	pods, apiErr := dao.DbListPodsWithResourceClaims(ctx, tenantId, []uuid.UUID{wid}, "", offset, limit)
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
@@ -93,7 +93,7 @@ func (s *WorkloadsService) InternalGetResourceClaimTemplateWorkloads(ctx context
 	for _, workload := range workloads {
 		workloadIds = append(workloadIds, workload.ID)
 	}
-	pods, apiErr := dao.DbListPodsReferencingResourceClaimTemplate(ctx, tenantId, request.Name, workloadIds)
+	pods, apiErr := dao.DbListPodsWithResourceClaims(ctx, tenantId, workloadIds, request.Name, 0, 0)
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}

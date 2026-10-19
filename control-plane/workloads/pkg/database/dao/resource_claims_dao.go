@@ -29,17 +29,30 @@ const (
 	resourceClaimTemplateNameKey = "resource_claim_template_name"
 )
 
-// DbListWorkloadPodsWithResourceClaims lists a workload's live pods that reference at
-// least one resource claim.
-func DbListWorkloadPodsWithResourceClaims(ctx context.Context, tenantId uint, workloadId uuid.UUID, offset int32, limit int32) ([]models.Pod, *api.Error) {
-	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list workload pods resource claims", nil)
+// DbListPodsWithResourceClaims lists the live pods of the given workloads that reference at least
+// one resource claim. When templateName is set, only pods with a claim generated from that template are listed.
+func DbListPodsWithResourceClaims(ctx context.Context, tenantId uint, workloadIds []uuid.UUID, templateName string,
+	offset int32, limit int32,
+) ([]models.Pod, *api.Error) {
+	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list pods with resource claims", nil)
+
+	if len(workloadIds) == 0 {
+		return []models.Pod{}, nil
+	}
 
 	query := runaidb.DB().WithContext(ctx).
 		Table(PodsTableName).
-		Select("id, name, task, resource_claims").
-		Where("tenant_id = ? AND workload_id = ?", tenantId, workloadId).
-		Where(podsWithResourceClaimsFilter).
-		Order("name, id")
+		Select("id, name, task, workload_id, resource_claims").
+		Where("tenant_id = ? AND workload_id IN ?", tenantId, workloadIds).
+		Where(podsWithResourceClaimsFilter)
+	if templateName != "" {
+		claimFilter, err := resourceClaimTemplateContainment(templateName)
+		if err != nil {
+			return nil, dbErr.WithDetails(err)
+		}
+		query = query.Where("resource_claims @> ?::jsonb", claimFilter)
+	}
+	query = query.Order("name, id")
 	if offset != 0 {
 		query = query.Offset(int(offset))
 	}
@@ -49,7 +62,8 @@ func DbListWorkloadPodsWithResourceClaims(ctx context.Context, tenantId uint, wo
 
 	pods := []models.Pod{}
 	if err := query.Find(&pods); err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to list resource claims of workload %s pods, err: %v", workloadId, err)
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to list pods with resource claims of workloads %v, template %q, err: %v",
+			workloadIds, templateName, err)
 		return nil, dbErr.WithDetails(err)
 	}
 
@@ -110,37 +124,6 @@ func DbListWorkloadsReferencingResourceClaimTemplate(ctx context.Context, tenant
 	}
 
 	return workloads, nil
-}
-
-// DbListPodsReferencingResourceClaimTemplate lists the live pods of the given workloads
-// whose claims reference the template by name.
-func DbListPodsReferencingResourceClaimTemplate(ctx context.Context, tenantId uint, templateName string, workloadIds []uuid.UUID) ([]models.Pod, *api.Error) {
-	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list pods referencing resource claim template", nil)
-
-	if len(workloadIds) == 0 {
-		return []models.Pod{}, nil
-	}
-
-	claimFilter, err := resourceClaimTemplateContainment(templateName)
-	if err != nil {
-		return nil, dbErr.WithDetails(err)
-	}
-
-	pods := []models.Pod{}
-	err = runaidb.DB().WithContext(ctx).
-		Table(PodsTableName).
-		Select("id, name, workload_id, resource_claims").
-		Where("tenant_id = ?", tenantId).
-		Where("workload_id IN ?", workloadIds).
-		Where("resource_claims @> ?::jsonb", claimFilter).
-		Order("name, id").
-		Find(&pods)
-	if err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to list pods referencing resource claim template %s, err: %v", templateName, err)
-		return nil, dbErr.WithDetails(err)
-	}
-
-	return pods, nil
 }
 
 func resourceClaimTemplateContainment(templateName string) (string, error) {
