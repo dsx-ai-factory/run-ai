@@ -15895,6 +15895,7 @@ License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/shopspring/decimal v1.4.0
   github.com/shopspring/decimal v1.5.0
+  github.com/shopspring/decimal v1.6.0
 
 The MIT License (MIT)
 
