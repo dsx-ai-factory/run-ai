@@ -28,7 +28,7 @@ name: Project Triage
 # Token
 #
 # The default GITHUB_TOKEN cannot read or write organization Projects. Set the
-# `PROJECT_TOKEN` secret to one of:
+# `GH_TOKEN` secret to one of:
 #
 #   - a fine-grained personal access token with resource owner = the
 #     organization, Organization permission "Projects: read and write", and
@@ -68,7 +68,7 @@ name: Project Triage
 #         permissions: { contents: read, issues: read }
 #         with: { project_owner: dsx-ai-factory, project_number: 7, require_area_label: true }
 #         secrets:
-#           PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+#           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 #
 # All inputs are optional; see `workflow_call.inputs` below for the defaults.
 on:
@@ -127,7 +127,7 @@ on:
         type: boolean
         default: false
     secrets:
-      PROJECT_TOKEN:
+      GH_TOKEN:
         description: "Token that can read and write the project (see the header comment)."
         required: true
 
@@ -148,7 +148,7 @@ jobs:
       - name: Evaluate project items
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
-          PROJECT_TOKEN: ${{ secrets.PROJECT_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
           # On `schedule` and `issues` runs the `inputs` context is empty, so every
           # value falls back to the `workflow_call` default. Booleans need care: an
           # absent input is null, and GitHub coerces null == false to true, so
@@ -182,10 +182,10 @@ jobs:
               revertGraceHours: Number(env.REVERT_GRACE_HOURS),
               dryRun: flag(env.DRY_RUN),
             };
-            const token = env.PROJECT_TOKEN || '';
+            const token = env.GH_TOKEN || '';
             if (!token) {
               core.setFailed(
-                'The PROJECT_TOKEN secret is empty. The default GITHUB_TOKEN cannot access ' +
+                'The GH_TOKEN secret is empty. The default GITHUB_TOKEN cannot access ' +
                 'organization Projects; see the header comment of this workflow for the token to create.');
               return;
             }
@@ -266,7 +266,7 @@ jobs:
               }
             }
             if (!project) {
-              core.setFailed(`Project ${cfg.number} of "${cfg.owner}" was not found or PROJECT_TOKEN cannot read it.`);
+              core.setFailed(`Project ${cfg.number} of "${cfg.owner}" was not found or GH_TOKEN cannot read it.`);
               return;
             }
             const fields = project.fields.nodes.filter(f => f && f.name);
