@@ -1099,6 +1099,29 @@ func (w *WorkloadsDao) DbGetWorkloadClusterId(ctx context.Context, tenantId uint
 	return workload.ClusterID, nil
 }
 
+// DbGetWorkloadScope returns only the cluster, project, department and namespace of a live
+// workload, reading the workloads table rather than workloads_view to skip its pod aggregates.
+// A deleted workload is reported as not found.
+func (w *WorkloadsDao) DbGetWorkloadScope(ctx context.Context, tenantId uint, workloadId uuid.UUID) (*models.Workload, *api.Error) {
+	dbErr := api.NewError(http.StatusInternalServerError, fmt.Sprintf("Failed to get workload %s", workloadId), nil)
+
+	workload := &models.Workload{}
+	err := runaidb.DB().WithContext(ctx).
+		Table(WorkloadsTableName).
+		Select("cluster_id, project_id, department_id, namespace").
+		Where("tenant_id = ?", tenantId).
+		Where("id = ?", workloadId).
+		First(workload)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get workload %s, err: %v", workloadId, err)
+		}
+		return nil, dbErr.WithDetails(err)
+	}
+
+	return workload, nil
+}
+
 // GetWorkloadFromDb returns the workload from the db
 func GetWorkloadsViewByIdsFromDb(ctx context.Context, workloadIds []string, excludeDeleted *bool) ([]*models.WorkloadView, *api.Error) {
 	tenantId, apiErr := services_utils.ParseTenantId(ctx)

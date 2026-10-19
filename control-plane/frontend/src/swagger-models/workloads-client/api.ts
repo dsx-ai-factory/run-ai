@@ -11428,6 +11428,31 @@ export interface InternalPodsSyncRequest {
 /**
  * 
  * @export
+ * @interface InternalResourceClaimTemplateWorkloadsRequest
+ */
+export interface InternalResourceClaimTemplateWorkloadsRequest {
+    /**
+     * The name of the ResourceClaimTemplate, as referenced by pods.
+     * @type {string}
+     * @memberof InternalResourceClaimTemplateWorkloadsRequest
+     */
+    'name': string;
+    /**
+     * 
+     * @type {ScopeType}
+     * @memberof InternalResourceClaimTemplateWorkloadsRequest
+     */
+    'scopeType': ScopeType;
+    /**
+     * The id of the cluster, department or project, depending on the scope type.
+     * @type {string}
+     * @memberof InternalResourceClaimTemplateWorkloadsRequest
+     */
+    'scopeId': string;
+}
+/**
+ * 
+ * @export
  * @interface InternalSyncPods207Response
  */
 export interface InternalSyncPods207Response {
@@ -13262,6 +13287,25 @@ export interface PodResourceClaim {
 /**
  * 
  * @export
+ * @interface PodResourceClaimBinding
+ */
+export interface PodResourceClaimBinding {
+    /**
+     * Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'name': string;
+    /**
+     * Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'claimName'?: string | null;
+}
+/**
+ * 
+ * @export
  * @enum {string}
  */
 
@@ -14796,6 +14840,112 @@ export interface RequestedPods {
      * @memberof RequestedPods
      */
     'completions'?: number | null;
+}
+/**
+ * The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
+ * @export
+ * @interface ResourceClaimTemplateRef
+ */
+export interface ResourceClaimTemplateRef {
+    /**
+     * Name of the ResourceClaimTemplate in the pod\'s namespace.
+     * @type {string}
+     * @memberof ResourceClaimTemplateRef
+     */
+    'name': string;
+    /**
+     * Whether the template is managed by NVIDIA Run:ai (created through the resource claim templates API) rather than created directly in the cluster.
+     * @type {boolean}
+     * @memberof ResourceClaimTemplateRef
+     */
+    'managed': boolean;
+    /**
+     * The id of the managed resource claim template. Null for an unmanaged template.
+     * @type {string}
+     * @memberof ResourceClaimTemplateRef
+     */
+    'id'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkload
+ */
+export interface ResourceClaimTemplateWorkload {
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'workloadId': string;
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'name': string;
+    /**
+     * The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'type': string;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'projectId': string;
+    /**
+     * The pods of the workload that reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkloadPod>}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'pods': Array<ResourceClaimTemplateWorkloadPod>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadPod
+ */
+export interface ResourceClaimTemplateWorkloadPod {
+    /**
+     * The id of the pod.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podName': string;
+    /**
+     * The pod\'s claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.
+     * @type {Array<PodResourceClaimBinding>}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'resourceClaims': Array<PodResourceClaimBinding>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadsResponse
+ */
+export interface ResourceClaimTemplateWorkloadsResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit). 
+     * @type {number}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'next'?: number;
+    /**
+     * The workloads whose pods currently reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkload>}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'workloads': Array<ResourceClaimTemplateWorkload>;
 }
 /**
  * A reference to an existing Kubernetes resource (PersistentVolumeClaim, Secret, or ConfigMap) used by a workload\'s pod template.
@@ -24037,6 +24187,37 @@ export interface WorkloadPatchFields {
 /**
  * 
  * @export
+ * @interface WorkloadPodResourceClaims
+ */
+export interface WorkloadPodResourceClaims {
+    /**
+     * The id of the pod.
+     * @type {string}
+     * @memberof WorkloadPodResourceClaims
+     */
+    'podId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadPodResourceClaims
+     */
+    'podName': string;
+    /**
+     * Identifies the function of the pod within a distributed workload (for example, leader, worker, or master).
+     * @type {string}
+     * @memberof WorkloadPodResourceClaims
+     */
+    'task'?: string | null;
+    /**
+     * The claims the pod references, in the order they appear in `pod.spec.resourceClaims`.
+     * @type {Array<WorkloadResourceClaim>}
+     * @memberof WorkloadPodResourceClaims
+     */
+    'resourceClaims': Array<WorkloadResourceClaim>;
+}
+/**
+ * 
+ * @export
  * @interface WorkloadPodsSyncRequest
  */
 export interface WorkloadPodsSyncRequest {
@@ -24211,6 +24392,63 @@ export interface WorkloadRequestResources {
      * @memberof WorkloadRequestResources
      */
     'extendedResources'?: Array<WorkloadsExtendedResource> | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkloadResourceClaim
+ */
+export interface WorkloadResourceClaim {
+    /**
+     * Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+     * @type {string}
+     * @memberof WorkloadResourceClaim
+     */
+    'name': string;
+    /**
+     * Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+     * @type {string}
+     * @memberof WorkloadResourceClaim
+     */
+    'claimName'?: string | null;
+    /**
+     * 
+     * @type {ResourceClaimTemplateRef}
+     * @memberof WorkloadResourceClaim
+     */
+    'template'?: ResourceClaimTemplateRef | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkloadResourceClaimAllOf
+ */
+export interface WorkloadResourceClaimAllOf {
+    /**
+     * 
+     * @type {ResourceClaimTemplateRef}
+     * @memberof WorkloadResourceClaimAllOf
+     */
+    'template'?: ResourceClaimTemplateRef | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkloadResourceClaimsResponse
+ */
+export interface WorkloadResourceClaimsResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more pods beyond the current page (i.e., the number of returned pods equals the limit). 
+     * @type {number}
+     * @memberof WorkloadResourceClaimsResponse
+     */
+    'next'?: number;
+    /**
+     * The pods of the workload that reference at least one claim.
+     * @type {Array<WorkloadPodResourceClaims>}
+     * @memberof WorkloadResourceClaimsResponse
+     */
+    'pods': Array<WorkloadPodResourceClaims>;
 }
 /**
  * A workload as returned by GET /api/v1/workloads/slim.
@@ -37794,6 +38032,54 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
+         * Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed. 
+         * @summary Get workload resource claims by workload id.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadResourceClaims: async (workloadId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workloadId' is not null or undefined
+            assertParamExists('getWorkloadResourceClaims', 'workloadId', workloadId)
+            const localVarPath = `/api/v1/workloads/{workloadId}/resource-claims`
+                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve a list of active workloads with details.
          * @summary List workloads.
          * @param {boolean} [deleted] Return only deleted resources when &#x60;true&#x60;.
@@ -38061,6 +38347,56 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(internalEnrichOrgUnitRankingRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template. 
+         * @summary List the workloads referencing a resource claim template (Internal API).
+         * @param {InternalResourceClaimTemplateWorkloadsRequest} internalResourceClaimTemplateWorkloadsRequest 
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        internalGetResourceClaimTemplateWorkloads: async (internalResourceClaimTemplateWorkloadsRequest: InternalResourceClaimTemplateWorkloadsRequest, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'internalResourceClaimTemplateWorkloadsRequest' is not null or undefined
+            assertParamExists('internalGetResourceClaimTemplateWorkloads', 'internalResourceClaimTemplateWorkloadsRequest', internalResourceClaimTemplateWorkloadsRequest)
+            const localVarPath = `/internal/workloads/resource-claim-templates/workloads`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(internalResourceClaimTemplateWorkloadsRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -38654,6 +38990,19 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed. 
+         * @summary Get workload resource claims by workload id.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWorkloadResourceClaims(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkloadResourceClaimsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadResourceClaims(workloadId, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Retrieve a list of active workloads with details.
          * @summary List workloads.
          * @param {boolean} [deleted] Return only deleted resources when &#x60;true&#x60;.
@@ -38721,6 +39070,19 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
          */
         async internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest: InternalEnrichOrgUnitRankingRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InternalEnrichOrgUnitRankingResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template. 
+         * @summary List the workloads referencing a resource claim template (Internal API).
+         * @param {InternalResourceClaimTemplateWorkloadsRequest} internalResourceClaimTemplateWorkloadsRequest 
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest: InternalResourceClaimTemplateWorkloadsRequest, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplateWorkloadsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest, offset, limit, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -38987,6 +39349,18 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
             return localVarFp.getWorkloadMetrics(workloadId, metricType, start, end, numberOfSamples, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed. 
+         * @summary Get workload resource claims by workload id.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadResourceClaims(workloadId: string, offset?: number, limit?: number, options?: any): AxiosPromise<WorkloadResourceClaimsResponse> {
+            return localVarFp.getWorkloadResourceClaims(workloadId, offset, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve a list of active workloads with details.
          * @summary List workloads.
          * @param {boolean} [deleted] Return only deleted resources when &#x60;true&#x60;.
@@ -39050,6 +39424,18 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
          */
         internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest: InternalEnrichOrgUnitRankingRequest, options?: any): AxiosPromise<InternalEnrichOrgUnitRankingResponse> {
             return localVarFp.internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template. 
+         * @summary List the workloads referencing a resource claim template (Internal API).
+         * @param {InternalResourceClaimTemplateWorkloadsRequest} internalResourceClaimTemplateWorkloadsRequest 
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest: InternalResourceClaimTemplateWorkloadsRequest, offset?: number, limit?: number, options?: any): AxiosPromise<ResourceClaimTemplateWorkloadsResponse> {
+            return localVarFp.internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest, offset, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -39327,6 +39713,20 @@ export class WorkloadsApi extends BaseAPI {
     }
 
     /**
+     * Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed. 
+     * @summary Get workload resource claims by workload id.
+     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkloadsApi
+     */
+    public getWorkloadResourceClaims(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return WorkloadsApiFp(this.configuration).getWorkloadResourceClaims(workloadId, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrieve a list of active workloads with details.
      * @summary List workloads.
      * @param {boolean} [deleted] Return only deleted resources when &#x60;true&#x60;.
@@ -39399,6 +39799,20 @@ export class WorkloadsApi extends BaseAPI {
      */
     public internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest: InternalEnrichOrgUnitRankingRequest, options?: AxiosRequestConfig) {
         return WorkloadsApiFp(this.configuration).internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template. 
+     * @summary List the workloads referencing a resource claim template (Internal API).
+     * @param {InternalResourceClaimTemplateWorkloadsRequest} internalResourceClaimTemplateWorkloadsRequest 
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkloadsApi
+     */
+    public internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest: InternalResourceClaimTemplateWorkloadsRequest, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return WorkloadsApiFp(this.configuration).internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

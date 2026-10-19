@@ -249,6 +249,7 @@ type WorkloadTemplatesAPIRouter interface {
 type WorkloadsAPIRouter interface {
 	InternalCreateWorkload(http.ResponseWriter, *http.Request)
 	InternalSyncWorkloads(http.ResponseWriter, *http.Request)
+	InternalGetResourceClaimTemplateWorkloads(http.ResponseWriter, *http.Request)
 	InternalEnrichOrgUnitRanking(http.ResponseWriter, *http.Request)
 	GetWorkloads(http.ResponseWriter, *http.Request)
 	SyncWorkloads(http.ResponseWriter, *http.Request)
@@ -268,6 +269,7 @@ type WorkloadsAPIRouter interface {
 	GetWorkloadElement(http.ResponseWriter, *http.Request)
 	GetWorkloadElementMetrics(http.ResponseWriter, *http.Request)
 	CountWorkloadElements(http.ResponseWriter, *http.Request)
+	GetWorkloadResourceClaims(http.ResponseWriter, *http.Request)
 	SyncJobsBackwards(http.ResponseWriter, *http.Request)
 	SyncPodsBackwards(http.ResponseWriter, *http.Request)
 	SyncPodgroupsBackwards(http.ResponseWriter, *http.Request)
@@ -533,6 +535,7 @@ type WorkloadTemplatesAPIServicer interface {
 type WorkloadsAPIServicer interface {
 	InternalCreateWorkload(context.Context, WorkloadCreationFields) (ImplResponse, error)
 	InternalSyncWorkloads(context.Context, []string, InternalWorkloadsSyncRequest) (ImplResponse, error)
+	InternalGetResourceClaimTemplateWorkloads(context.Context, InternalResourceClaimTemplateWorkloadsRequest, int32, int32) (ImplResponse, error)
 	InternalEnrichOrgUnitRanking(context.Context, InternalEnrichOrgUnitRankingRequest) (ImplResponse, error)
 	GetWorkloads(context.Context, bool, int32, int32, string, string, []string, string) (ImplResponse, error)
 	SyncWorkloads(context.Context, []string, WorkloadsSyncRequest) (ImplResponse, error)
@@ -552,6 +555,7 @@ type WorkloadsAPIServicer interface {
 	GetWorkloadElement(context.Context, string, string) (ImplResponse, error)
 	GetWorkloadElementMetrics(context.Context, string, string, []ElementMetricType, time.Time, time.Time, int32) (ImplResponse, error)
 	CountWorkloadElements(context.Context, string) (ImplResponse, error)
+	GetWorkloadResourceClaims(context.Context, string, int32, int32) (ImplResponse, error)
 	SyncJobsBackwards(context.Context, string, SyncJobsBackwardsRequest) (ImplResponse, error)
 	SyncPodsBackwards(context.Context, string, SyncJobsBackwardsRequest) (ImplResponse, error)
 	SyncPodgroupsBackwards(context.Context, string, string, SyncJobsBackwardsRequest) (ImplResponse, error)

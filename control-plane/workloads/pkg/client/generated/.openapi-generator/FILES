@@ -315,6 +315,7 @@ docs/IntegerRulesOptional.md
 docs/InternalEnrichOrgUnitRankingRequest.md
 docs/InternalEnrichOrgUnitRankingResponse.md
 docs/InternalPodsSyncRequest.md
+docs/InternalResourceClaimTemplateWorkloadsRequest.md
 docs/InternalSyncPods207Response.md
 docs/InternalSyncWorkloads207Response.md
 docs/InternalWorkloadsSyncRequest.md
@@ -375,6 +376,7 @@ docs/PodNodeAffinityRequired.md
 docs/PodPreferredNodeSelectorTerm.md
 docs/PodRequestResources.md
 docs/PodResourceClaim.md
+docs/PodResourceClaimBinding.md
 docs/PodSortFilterFields.md
 docs/PodSyncFields.md
 docs/PodToleration.md
@@ -431,6 +433,10 @@ docs/RequestInfo.md
 docs/RequestResourceCores.md
 docs/RequestResourceQuantity.md
 docs/RequestedPods.md
+docs/ResourceClaimTemplateRef.md
+docs/ResourceClaimTemplateWorkload.md
+docs/ResourceClaimTemplateWorkloadPod.md
+docs/ResourceClaimTemplateWorkloadsResponse.md
 docs/ResourceRef.md
 docs/ResourceRefKind.md
 docs/ResponseInfo.md
@@ -588,10 +594,13 @@ docs/WorkloadNetworkStatusServicesInnerPortsInner.md
 docs/WorkloadNetworkStatusServicesInnerUrlsInner.md
 docs/WorkloadNodeAffinity.md
 docs/WorkloadPatchFields.md
+docs/WorkloadPodResourceClaims.md
 docs/WorkloadPodsSyncRequest.md
 docs/WorkloadPriority.md
 docs/WorkloadPropertiesAPI.md
 docs/WorkloadRequestResources.md
+docs/WorkloadResourceClaim.md
+docs/WorkloadResourceClaimsResponse.md
 docs/WorkloadSlim.md
 docs/WorkloadSortFilterFields.md
 docs/WorkloadSubmissionV2EnabledSetting.md
@@ -926,6 +935,7 @@ model_integer_rules_optional.go
 model_internal_enrich_org_unit_ranking_request.go
 model_internal_enrich_org_unit_ranking_response.go
 model_internal_pods_sync_request.go
+model_internal_resource_claim_template_workloads_request.go
 model_internal_sync_pods_207_response.go
 model_internal_sync_workloads_207_response.go
 model_internal_workloads_sync_request.go
@@ -984,6 +994,7 @@ model_pod_node_affinity_required.go
 model_pod_preferred_node_selector_term.go
 model_pod_request_resources.go
 model_pod_resource_claim.go
+model_pod_resource_claim_binding.go
 model_pod_sort_filter_fields.go
 model_pod_sync_fields.go
 model_pod_toleration.go
@@ -1039,6 +1050,10 @@ model_request_info.go
 model_request_resource_cores.go
 model_request_resource_quantity.go
 model_requested_pods.go
+model_resource_claim_template_ref.go
+model_resource_claim_template_workload.go
+model_resource_claim_template_workload_pod.go
+model_resource_claim_template_workloads_response.go
 model_resource_ref.go
 model_resource_ref_kind.go
 model_response_info.go
@@ -1191,9 +1206,12 @@ model_workload_network_status_services_inner_ports_inner.go
 model_workload_network_status_services_inner_urls_inner.go
 model_workload_node_affinity.go
 model_workload_patch_fields.go
+model_workload_pod_resource_claims.go
 model_workload_pods_sync_request.go
 model_workload_priority.go
 model_workload_request_resources.go
+model_workload_resource_claim.go
+model_workload_resource_claims_response.go
 model_workload_slim.go
 model_workload_sort_filter_fields.go
 model_workload_submission_v2_enabled_setting.go

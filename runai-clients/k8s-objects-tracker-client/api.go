@@ -68,6 +68,9 @@ type IK8SObjectTrackerExternalClient interface {
 	UpdateResourceClaimTemplate(ctx context.Context, clusterId string, rct openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplate, *http.Response, error)
 	DeleteResourceClaimTemplate(ctx context.Context, clusterId string, scopeType openapi.ResourceScopeType, scopeId string, name string) (*http.Response, error)
 	SyncResourceClaimTemplates(ctx context.Context, clusterId string, rcts []openapi.ResourceClaimTemplate) (*openapi.ResourceClaimTemplates, *http.Response, error)
+	// ListResourceClaimTemplatesByName lists the templates of the cluster with the given name,
+	// across every scope. An empty origin lists every origin.
+	ListResourceClaimTemplatesByName(ctx context.Context, clusterId string, name string, origin string) (*openapi.ResourceClaimTemplates, *openapi.Error)
 
 	ListSecrets(ctx context.Context, clusterId string) (*openapi.SecretListResponse, *http.Response, error)
 	ListSecretsByScope(ctx context.Context, scopeType string, scopeId string) (*openapi.SecretListResponse, *openapi.Error)

@@ -10367,6 +10367,37 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/workloads/{workloadId}/resource-claims:
+    get:
+      summary: Get workload resource claims by workload id.
+      description: |
+        Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed.
+      operationId: get_workload_resource_claims
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/WorkloadId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadResourceClaimsResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/workload-categories:
     get:
       summary: List workload categories.
@@ -18074,6 +18105,20 @@ components:
           type: string
       nullable: true
       type: object
+    PodResourceClaimBinding:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+          example: gpu-1
+        claimName:
+          type: string
+          nullable: true
+          description: Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+          example: bert-worker-0-gpu-1-mk4s8
     AssetMetaForSync:
       allOf:
         - $ref: '#/components/schemas/AssetCreationFields'
@@ -32939,6 +32984,72 @@ components:
         - CPU_MEMORY_USAGE_BYTES
         - CPU_MEMORY_REQUEST_BYTES
         - CPU_MEMORY_LIMIT_BYTES
+    ResourceClaimTemplateRef:
+      description: The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
+      nullable: true
+      type: object
+      required:
+        - name
+        - managed
+      properties:
+        name:
+          type: string
+          description: Name of the ResourceClaimTemplate in the pod's namespace.
+          example: single-gpu
+        managed:
+          type: boolean
+          description: Whether the template is managed by NVIDIA Run:ai (created through the resource claim templates API) rather than created directly in the cluster.
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: The id of the managed resource claim template. Null for an unmanaged template.
+    WorkloadResourceClaim:
+      allOf:
+        - $ref: '#/components/schemas/PodResourceClaimBinding'
+        - type: object
+          properties:
+            template:
+              $ref: '#/components/schemas/ResourceClaimTemplateRef'
+    WorkloadPodResourceClaims:
+      type: object
+      required:
+        - podId
+        - podName
+        - resourceClaims
+      properties:
+        podId:
+          type: string
+          format: uuid
+          description: The id of the pod.
+        podName:
+          type: string
+          example: bert-worker-0
+        task:
+          type: string
+          nullable: true
+          description: Identifies the function of the pod within a distributed workload (for example, leader, worker, or master).
+          example: worker
+        resourceClaims:
+          type: array
+          description: The claims the pod references, in the order they appear in `pod.spec.resourceClaims`.
+          items:
+            $ref: '#/components/schemas/WorkloadResourceClaim'
+    WorkloadResourceClaimsResponse:
+      type: object
+      required:
+        - pods
+      properties:
+        next:
+          type: integer
+          format: int32
+          description: |
+            Offset for the next page of results. Present only when there are more pods beyond the current page (i.e., the number of returned pods equals the limit).
+        pods:
+          type: array
+          description: The pods of the workload that reference at least one claim.
+          items:
+            $ref: '#/components/schemas/WorkloadPodResourceClaims'
     WorkloadCategory:
       type: object
       required:

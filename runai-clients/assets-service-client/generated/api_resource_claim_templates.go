@@ -71,6 +71,21 @@ type ResourceClaimTemplatesAPI interface {
 	GetRctByIdExecute(r ApiGetRctByIdRequest) (*Rct, *http.Response, error)
 
 	/*
+		GetRctWorkloads List the workloads using a resource claim template.
+
+		Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param assetId Unique identifier of the asset.
+		@return ApiGetRctWorkloadsRequest
+	*/
+	GetRctWorkloads(ctx context.Context, assetId string) ApiGetRctWorkloadsRequest
+
+	// GetRctWorkloadsExecute executes the request
+	//  @return ResourceClaimTemplateWorkloadsResponse
+	GetRctWorkloadsExecute(r ApiGetRctWorkloadsRequest) (*ResourceClaimTemplateWorkloadsResponse, *http.Response, error)
+
+	/*
 		ListRcts List resource claim templates.
 
 		Use to retrieve a list of resource claim templates.
@@ -480,6 +495,180 @@ func (a *ResourceClaimTemplatesAPIService) GetRctByIdExecute(r ApiGetRctByIdRequ
 
 	if r.statusInfo != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "statusInfo", r.statusInfo, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiGetRctWorkloadsRequest struct {
+	ctx        context.Context
+	ApiService ResourceClaimTemplatesAPI
+	assetId    string
+	offset     *int32
+	limit      *int32
+}
+
+// The offset of the first item returned in the collection.
+func (r ApiGetRctWorkloadsRequest) Offset(offset int32) ApiGetRctWorkloadsRequest {
+	r.offset = &offset
+	return r
+}
+
+// The maximum number of entries to return.
+func (r ApiGetRctWorkloadsRequest) Limit(limit int32) ApiGetRctWorkloadsRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetRctWorkloadsRequest) Execute() (*ResourceClaimTemplateWorkloadsResponse, *http.Response, error) {
+	return r.ApiService.GetRctWorkloadsExecute(r)
+}
+
+/*
+GetRctWorkloads List the workloads using a resource claim template.
+
+Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param assetId Unique identifier of the asset.
+	@return ApiGetRctWorkloadsRequest
+*/
+func (a *ResourceClaimTemplatesAPIService) GetRctWorkloads(ctx context.Context, assetId string) ApiGetRctWorkloadsRequest {
+	return ApiGetRctWorkloadsRequest{
+		ApiService: a,
+		ctx:        ctx,
+		assetId:    assetId,
+	}
+}
+
+// Execute executes the request
+//  @return ResourceClaimTemplateWorkloadsResponse
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *ResourceClaimTemplatesAPIService) GetRctWorkloadsExecute(r ApiGetRctWorkloadsRequest) (*ResourceClaimTemplateWorkloadsResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ResourceClaimTemplateWorkloadsResponse
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ResourceClaimTemplatesAPIService.GetRctWorkloads")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads"
+	localVarPath = strings.Replace(localVarPath, "{"+"AssetId"+"}", url.PathEscape(parameterValueToString(r.assetId, "assetId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if strlen(r.assetId) < 1 {
+		return localVarReturnValue, nil, reportError("assetId must have at least 1 elements")
+	}
+
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue int32 = 50
+		r.limit = &defaultValue
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

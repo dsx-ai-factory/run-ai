@@ -220,6 +220,7 @@ type ResourceClaimTemplatesAPIRouter interface {
 	GetRctById(http.ResponseWriter, *http.Request)
 	UpdateRctById(http.ResponseWriter, *http.Request)
 	DeleteRctById(http.ResponseWriter, *http.Request)
+	GetRctWorkloads(http.ResponseWriter, *http.Request)
 }
 
 // S3APIRouter defines the required methods for binding the api requests to a responses for the S3API
@@ -527,6 +528,7 @@ type ResourceClaimTemplatesAPIServicer interface {
 	GetRctById(context.Context, string, bool) (ImplResponse, error)
 	UpdateRctById(context.Context, string, RctUpdateRequest) (ImplResponse, error)
 	DeleteRctById(context.Context, string) (ImplResponse, error)
+	GetRctWorkloads(context.Context, string, int32, int32) (ImplResponse, error)
 }
 
 // S3APIServicer defines the api actions for the S3API service

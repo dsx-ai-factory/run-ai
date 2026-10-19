@@ -87,6 +87,32 @@ func (s *WorkloadsAPIService) InternalSyncWorkloads(ctx context.Context, filterB
 	return Response(http.StatusNotImplemented, nil), errors.New("InternalSyncWorkloads method not implemented")
 }
 
+// InternalGetResourceClaimTemplateWorkloads - List the workloads referencing a resource claim template (Internal API).
+func (s *WorkloadsAPIService) InternalGetResourceClaimTemplateWorkloads(ctx context.Context, internalResourceClaimTemplateWorkloadsRequest InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32) (ImplResponse, error) {
+	// TODO - update InternalGetResourceClaimTemplateWorkloads with the required logic for this service method.
+	// Add api_workloads_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, ResourceClaimTemplateWorkloadsResponse{}) or use other options such as http.Ok ...
+	// return Response(200, ResourceClaimTemplateWorkloadsResponse{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("InternalGetResourceClaimTemplateWorkloads method not implemented")
+}
+
 // InternalEnrichOrgUnitRanking - Enrich org unit ranking with workload counts (Internal API).
 func (s *WorkloadsAPIService) InternalEnrichOrgUnitRanking(ctx context.Context, internalEnrichOrgUnitRankingRequest InternalEnrichOrgUnitRankingRequest) (ImplResponse, error) {
 	// TODO - update InternalEnrichOrgUnitRanking with the required logic for this service method.
@@ -588,6 +614,35 @@ func (s *WorkloadsAPIService) CountWorkloadElements(ctx context.Context, workloa
 	// return Response(503, Error{}), nil
 
 	return Response(http.StatusNotImplemented, nil), errors.New("CountWorkloadElements method not implemented")
+}
+
+// GetWorkloadResourceClaims - Get workload resource claims by workload id.
+func (s *WorkloadsAPIService) GetWorkloadResourceClaims(ctx context.Context, workloadId string, offset int32, limit int32) (ImplResponse, error) {
+	// TODO - update GetWorkloadResourceClaims with the required logic for this service method.
+	// Add api_workloads_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, WorkloadResourceClaimsResponse{}) or use other options such as http.Ok ...
+	// return Response(200, WorkloadResourceClaimsResponse{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
+	// return Response(404, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("GetWorkloadResourceClaims method not implemented")
 }
 
 // SyncJobsBackwards - Sync jobs.

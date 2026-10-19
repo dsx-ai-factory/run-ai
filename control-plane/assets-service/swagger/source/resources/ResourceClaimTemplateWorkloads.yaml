@@ -1,0 +1,35 @@
+parameters:
+  - $ref: "../../../../infra/openapi/docs/parameters/path/AssetId.yaml"
+get:
+  summary: List the workloads using a resource claim template.
+  description: >-
+    Use to list the workloads whose pods currently reference the resource claim template,
+    with the pods that use it and the ResourceClaim each pod is bound to. Only workloads
+    the caller is permitted to read are returned.
+  operationId: get_rct_workloads
+  x-authorize:
+    resource-type: resource-claim-templates
+    action: read
+  x-service: assets-service
+  x-test-coverage:
+    - control-plane/assets-service/pkg/services/api_rct_service_test.go
+  tags:
+    - Resource Claim Templates
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml"
+    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml"
+  responses:
+    200:
+      description: Request completed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: "../../../../infra/openapi/docs/schemas/workloads/ResourceClaimTemplateWorkloadsResponse.yaml"
+    401:
+      $ref: "../../../../infra/openapi/docs/responses/401Unauthorized.yaml"
+    403:
+      $ref: "../../../../infra/openapi/docs/responses/403Forbidden.yaml"
+    404:
+      $ref: "../../../../infra/openapi/docs/responses/404NotFound.yaml"
+    503:
+      $ref: "../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml"

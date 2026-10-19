@@ -329,6 +329,7 @@ pkg/api/model_integer_rules_optional.go
 pkg/api/model_internal_enrich_org_unit_ranking_request.go
 pkg/api/model_internal_enrich_org_unit_ranking_response.go
 pkg/api/model_internal_pods_sync_request.go
+pkg/api/model_internal_resource_claim_template_workloads_request.go
 pkg/api/model_internal_sync_pods_207_response.go
 pkg/api/model_internal_sync_workloads_207_response.go
 pkg/api/model_internal_workloads_sync_request.go
@@ -387,6 +388,7 @@ pkg/api/model_pod_node_affinity_required.go
 pkg/api/model_pod_preferred_node_selector_term.go
 pkg/api/model_pod_request_resources.go
 pkg/api/model_pod_resource_claim.go
+pkg/api/model_pod_resource_claim_binding.go
 pkg/api/model_pod_sort_filter_fields.go
 pkg/api/model_pod_sync_fields.go
 pkg/api/model_pod_toleration.go
@@ -442,6 +444,10 @@ pkg/api/model_request_info.go
 pkg/api/model_request_resource_cores.go
 pkg/api/model_request_resource_quantity.go
 pkg/api/model_requested_pods.go
+pkg/api/model_resource_claim_template_ref.go
+pkg/api/model_resource_claim_template_workload.go
+pkg/api/model_resource_claim_template_workload_pod.go
+pkg/api/model_resource_claim_template_workloads_response.go
 pkg/api/model_resource_ref.go
 pkg/api/model_resource_ref_kind.go
 pkg/api/model_response_info.go
@@ -594,9 +600,12 @@ pkg/api/model_workload_network_status_services_inner_ports_inner.go
 pkg/api/model_workload_network_status_services_inner_urls_inner.go
 pkg/api/model_workload_node_affinity.go
 pkg/api/model_workload_patch_fields.go
+pkg/api/model_workload_pod_resource_claims.go
 pkg/api/model_workload_pods_sync_request.go
 pkg/api/model_workload_priority.go
 pkg/api/model_workload_request_resources.go
+pkg/api/model_workload_resource_claim.go
+pkg/api/model_workload_resource_claims_response.go
 pkg/api/model_workload_slim.go
 pkg/api/model_workload_sort_filter_fields.go
 pkg/api/model_workload_submission_v2_enabled_setting.go

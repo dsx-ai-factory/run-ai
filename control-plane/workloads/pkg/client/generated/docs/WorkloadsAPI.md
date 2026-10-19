@@ -15,11 +15,13 @@ Method | HTTP request | Description
 [**GetWorkloadElements**](WorkloadsAPI.md#GetWorkloadElements) | **Get** /api/v1/workloads/{workloadId}/elements | Get workload structure elements by workload id.
 [**GetWorkloadEndpoints**](WorkloadsAPI.md#GetWorkloadEndpoints) | **Get** /api/v1/workloads/{workloadId}/endpoints | Get workload endpoints.
 [**GetWorkloadMetrics**](WorkloadsAPI.md#GetWorkloadMetrics) | **Get** /api/v1/workloads/{workloadId}/metrics | Get workload metrics data.
+[**GetWorkloadResourceClaims**](WorkloadsAPI.md#GetWorkloadResourceClaims) | **Get** /api/v1/workloads/{workloadId}/resource-claims | Get workload resource claims by workload id.
 [**GetWorkloads**](WorkloadsAPI.md#GetWorkloads) | **Get** /api/v1/workloads | List workloads.
 [**GetWorkloadsSlim**](WorkloadsAPI.md#GetWorkloadsSlim) | **Get** /api/v1/workloads/slim | List workloads, slim.
 [**GetWorkloadsTelemetry**](WorkloadsAPI.md#GetWorkloadsTelemetry) | **Get** /api/v1/workloads/telemetry | Get the workloads telemetry.
 [**InternalCreateWorkload**](WorkloadsAPI.md#InternalCreateWorkload) | **Post** /internal/workloads | Create a workload by the control plane.
 [**InternalEnrichOrgUnitRanking**](WorkloadsAPI.md#InternalEnrichOrgUnitRanking) | **Post** /internal/workloads/enrich-ranking | Enrich org unit ranking with workload counts (Internal API).
+[**InternalGetResourceClaimTemplateWorkloads**](WorkloadsAPI.md#InternalGetResourceClaimTemplateWorkloads) | **Post** /internal/workloads/resource-claim-templates/workloads | List the workloads referencing a resource claim template (Internal API).
 [**InternalPatchWorkloadPhase**](WorkloadsAPI.md#InternalPatchWorkloadPhase) | **Patch** /internal/workloads/{workloadId} | patch the workload phase from the client.
 [**InternalSyncWorkloads**](WorkloadsAPI.md#InternalSyncWorkloads) | **Post** /internal/workloads/sync | Sync workloads.
 [**PatchWorkloadPhase**](WorkloadsAPI.md#PatchWorkloadPhase) | **Patch** /api/v1/workloads/{workloadId} | patch the workload phase from the client.
@@ -837,6 +839,80 @@ Name | Type | Description  | Notes
 [[Back to README]](../README.md)
 
 
+## GetWorkloadResourceClaims
+
+> WorkloadResourceClaimsResponse GetWorkloadResourceClaims(ctx, workloadId).Offset(offset).Limit(limit).Execute()
+
+Get workload resource claims by workload id.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
+)
+
+func main() {
+	workloadId := "38400000-8cf0-11bd-b23e-10b96e4ef00d" // string | The  Universally Unique Identifier (UUID) of the workload.
+	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
+	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkloadsAPI.GetWorkloadResourceClaims(context.Background(), workloadId).Offset(offset).Limit(limit).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkloadsAPI.GetWorkloadResourceClaims``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetWorkloadResourceClaims`: WorkloadResourceClaimsResponse
+	fmt.Fprintf(os.Stdout, "Response from `WorkloadsAPI.GetWorkloadResourceClaims`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**workloadId** | **string** | The  Universally Unique Identifier (UUID) of the workload. | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetWorkloadResourceClaimsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **offset** | **int32** | The offset of the first item returned in the collection. | 
+ **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+
+### Return type
+
+[**WorkloadResourceClaimsResponse**](WorkloadResourceClaimsResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
 ## GetWorkloads
 
 > GetWorkloads200Response GetWorkloads(ctx).Deleted(deleted).Offset(offset).Limit(limit).SortOrder(sortOrder).SortBy(sortBy).FilterBy(filterBy).Search(search).Execute()
@@ -1181,6 +1257,76 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**InternalEnrichOrgUnitRankingResponse**](InternalEnrichOrgUnitRankingResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## InternalGetResourceClaimTemplateWorkloads
+
+> ResourceClaimTemplateWorkloadsResponse InternalGetResourceClaimTemplateWorkloads(ctx).InternalResourceClaimTemplateWorkloadsRequest(internalResourceClaimTemplateWorkloadsRequest).Offset(offset).Limit(limit).Execute()
+
+List the workloads referencing a resource claim template (Internal API).
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
+)
+
+func main() {
+	internalResourceClaimTemplateWorkloadsRequest := *openapiclient.NewInternalResourceClaimTemplateWorkloadsRequest("single-gpu", openapiclient.ScopeType("system"), "ScopeId_example") // InternalResourceClaimTemplateWorkloadsRequest | 
+	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
+	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkloadsAPI.InternalGetResourceClaimTemplateWorkloads(context.Background()).InternalResourceClaimTemplateWorkloadsRequest(internalResourceClaimTemplateWorkloadsRequest).Offset(offset).Limit(limit).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkloadsAPI.InternalGetResourceClaimTemplateWorkloads``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `InternalGetResourceClaimTemplateWorkloads`: ResourceClaimTemplateWorkloadsResponse
+	fmt.Fprintf(os.Stdout, "Response from `WorkloadsAPI.InternalGetResourceClaimTemplateWorkloads`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiInternalGetResourceClaimTemplateWorkloadsRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **internalResourceClaimTemplateWorkloadsRequest** | [**InternalResourceClaimTemplateWorkloadsRequest**](InternalResourceClaimTemplateWorkloadsRequest.md) |  | 
+ **offset** | **int32** | The offset of the first item returned in the collection. | 
+ **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+
+### Return type
+
+[**ResourceClaimTemplateWorkloadsResponse**](ResourceClaimTemplateWorkloadsResponse.md)
 
 ### Authorization
 

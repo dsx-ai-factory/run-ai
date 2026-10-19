@@ -343,6 +343,7 @@ docs/PodAffinityType.md
 docs/PodAffinityTypeOptions.md
 docs/PodAffinityTypeOptionsOptionsInner.md
 docs/PodAffinityTypeRules.md
+docs/PodResourceClaimBinding.md
 docs/PolicyInfo.md
 docs/PolicyRuleEnum.md
 docs/Port.md
@@ -381,6 +382,9 @@ docs/RelatedUrl.md
 docs/Repositories.md
 docs/RepositoryTags.md
 docs/RequestInfo.md
+docs/ResourceClaimTemplateWorkload.md
+docs/ResourceClaimTemplateWorkloadPod.md
+docs/ResourceClaimTemplateWorkloadsResponse.md
 docs/ResourceClaimTemplatesAPI.md
 docs/ResponseInfo.md
 docs/RestartPolicy.md
@@ -788,6 +792,7 @@ model_pod_affinity_type.go
 model_pod_affinity_type_options.go
 model_pod_affinity_type_options_options_inner.go
 model_pod_affinity_type_rules.go
+model_pod_resource_claim_binding.go
 model_policy_info.go
 model_policy_rule_enum.go
 model_port.go
@@ -831,6 +836,9 @@ model_related_url.go
 model_repositories.go
 model_repository_tags.go
 model_request_info.go
+model_resource_claim_template_workload.go
+model_resource_claim_template_workload_pod.go
+model_resource_claim_template_workloads_response.go
 model_response_info.go
 model_restart_policy.go
 model_restart_policy_options.go

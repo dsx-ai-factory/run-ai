@@ -42,6 +42,9 @@ paths:
   /internal/workloads/clusters/{clusterId}/nodes/{nodeName}/pods:
     $ref: './resources/InternalUpdateNodePods.yaml'
 
+  /internal/workloads/resource-claim-templates/workloads:
+    $ref: './resources/InternalResourceClaimTemplateWorkloads.yaml'
+
   /internal/workloads/sync-report:
     $ref: './resources/InternalSyncReport.yaml'
 
@@ -243,6 +246,9 @@ paths:
 
   /api/v1/workloads/{workloadId}/elements/count:
     $ref: './resources/WorkloadElementsCount.yaml'
+
+  /api/v1/workloads/{workloadId}/resource-claims:
+    $ref: './resources/WorkloadResourceClaims.yaml'
 
   /api/v1/workload-categories:
     $ref: './resources/Categories.yaml'

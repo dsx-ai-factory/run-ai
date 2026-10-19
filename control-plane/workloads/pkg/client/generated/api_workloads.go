@@ -199,6 +199,22 @@ type WorkloadsAPI interface {
 	GetWorkloadMetricsExecute(r ApiGetWorkloadMetricsRequest) (*MetricsCompositeResponse, *http.Response, error)
 
 	/*
+		GetWorkloadResourceClaims Get workload resource claims by workload id.
+
+		Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed.
+
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param workloadId The  Universally Unique Identifier (UUID) of the workload.
+		@return ApiGetWorkloadResourceClaimsRequest
+	*/
+	GetWorkloadResourceClaims(ctx context.Context, workloadId string) ApiGetWorkloadResourceClaimsRequest
+
+	// GetWorkloadResourceClaimsExecute executes the request
+	//  @return WorkloadResourceClaimsResponse
+	GetWorkloadResourceClaimsExecute(r ApiGetWorkloadResourceClaimsRequest) (*WorkloadResourceClaimsResponse, *http.Response, error)
+
+	/*
 		GetWorkloads List workloads.
 
 		Retrieve a list of active workloads with details.
@@ -285,6 +301,21 @@ type WorkloadsAPI interface {
 	// InternalEnrichOrgUnitRankingExecute executes the request
 	//  @return InternalEnrichOrgUnitRankingResponse
 	InternalEnrichOrgUnitRankingExecute(r ApiInternalEnrichOrgUnitRankingRequest) (*InternalEnrichOrgUnitRankingResponse, *http.Response, error)
+
+	/*
+		InternalGetResourceClaimTemplateWorkloads List the workloads referencing a resource claim template (Internal API).
+
+		Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template.
+
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@return ApiInternalGetResourceClaimTemplateWorkloadsRequest
+	*/
+	InternalGetResourceClaimTemplateWorkloads(ctx context.Context) ApiInternalGetResourceClaimTemplateWorkloadsRequest
+
+	// InternalGetResourceClaimTemplateWorkloadsExecute executes the request
+	//  @return ResourceClaimTemplateWorkloadsResponse
+	InternalGetResourceClaimTemplateWorkloadsExecute(r ApiInternalGetResourceClaimTemplateWorkloadsRequest) (*ResourceClaimTemplateWorkloadsResponse, *http.Response, error)
 
 	/*
 		InternalPatchWorkloadPhase patch the workload phase from the client.
@@ -2405,6 +2436,199 @@ func (a *WorkloadsAPIService) GetWorkloadMetricsExecute(r ApiGetWorkloadMetricsR
 	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
+type ApiGetWorkloadResourceClaimsRequest struct {
+	ctx        context.Context
+	ApiService WorkloadsAPI
+	workloadId string
+	offset     *int32
+	limit      *int32
+}
+
+// The offset of the first item returned in the collection.
+func (r ApiGetWorkloadResourceClaimsRequest) Offset(offset int32) ApiGetWorkloadResourceClaimsRequest {
+	r.offset = &offset
+	return r
+}
+
+// The maximum number of entries to return.
+func (r ApiGetWorkloadResourceClaimsRequest) Limit(limit int32) ApiGetWorkloadResourceClaimsRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiGetWorkloadResourceClaimsRequest) Execute() (*WorkloadResourceClaimsResponse, *http.Response, error) {
+	return r.ApiService.GetWorkloadResourceClaimsExecute(r)
+}
+
+/*
+GetWorkloadResourceClaims Get workload resource claims by workload id.
+
+Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param workloadId The  Universally Unique Identifier (UUID) of the workload.
+	@return ApiGetWorkloadResourceClaimsRequest
+*/
+func (a *WorkloadsAPIService) GetWorkloadResourceClaims(ctx context.Context, workloadId string) ApiGetWorkloadResourceClaimsRequest {
+	return ApiGetWorkloadResourceClaimsRequest{
+		ApiService: a,
+		ctx:        ctx,
+		workloadId: workloadId,
+	}
+}
+
+// Execute executes the request
+//  @return WorkloadResourceClaimsResponse
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *WorkloadsAPIService) GetWorkloadResourceClaimsExecute(r ApiGetWorkloadResourceClaimsRequest) (*WorkloadResourceClaimsResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodGet
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *WorkloadResourceClaimsResponse
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsAPIService.GetWorkloadResourceClaims")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/workloads/{workloadId}/resource-claims"
+	localVarPath = strings.Replace(localVarPath, "{"+"workloadId"+"}", url.PathEscape(parameterValueToString(r.workloadId, "workloadId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue int32 = 50
+		r.limit = &defaultValue
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiGetWorkloadsRequest struct {
 	ctx        context.Context
 	ApiService WorkloadsAPI
@@ -3333,6 +3557,195 @@ func (a *WorkloadsAPIService) InternalEnrichOrgUnitRankingExecute(r ApiInternalE
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 500 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiInternalGetResourceClaimTemplateWorkloadsRequest struct {
+	ctx                                           context.Context
+	ApiService                                    WorkloadsAPI
+	internalResourceClaimTemplateWorkloadsRequest *InternalResourceClaimTemplateWorkloadsRequest
+	offset                                        *int32
+	limit                                         *int32
+}
+
+func (r ApiInternalGetResourceClaimTemplateWorkloadsRequest) InternalResourceClaimTemplateWorkloadsRequest(internalResourceClaimTemplateWorkloadsRequest InternalResourceClaimTemplateWorkloadsRequest) ApiInternalGetResourceClaimTemplateWorkloadsRequest {
+	r.internalResourceClaimTemplateWorkloadsRequest = &internalResourceClaimTemplateWorkloadsRequest
+	return r
+}
+
+// The offset of the first item returned in the collection.
+func (r ApiInternalGetResourceClaimTemplateWorkloadsRequest) Offset(offset int32) ApiInternalGetResourceClaimTemplateWorkloadsRequest {
+	r.offset = &offset
+	return r
+}
+
+// The maximum number of entries to return.
+func (r ApiInternalGetResourceClaimTemplateWorkloadsRequest) Limit(limit int32) ApiInternalGetResourceClaimTemplateWorkloadsRequest {
+	r.limit = &limit
+	return r
+}
+
+func (r ApiInternalGetResourceClaimTemplateWorkloadsRequest) Execute() (*ResourceClaimTemplateWorkloadsResponse, *http.Response, error) {
+	return r.ApiService.InternalGetResourceClaimTemplateWorkloadsExecute(r)
+}
+
+/*
+InternalGetResourceClaimTemplateWorkloads List the workloads referencing a resource claim template (Internal API).
+
+Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@return ApiInternalGetResourceClaimTemplateWorkloadsRequest
+*/
+func (a *WorkloadsAPIService) InternalGetResourceClaimTemplateWorkloads(ctx context.Context) ApiInternalGetResourceClaimTemplateWorkloadsRequest {
+	return ApiInternalGetResourceClaimTemplateWorkloadsRequest{
+		ApiService: a,
+		ctx:        ctx,
+	}
+}
+
+// Execute executes the request
+//  @return ResourceClaimTemplateWorkloadsResponse
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *WorkloadsAPIService) InternalGetResourceClaimTemplateWorkloadsExecute(r ApiInternalGetResourceClaimTemplateWorkloadsRequest) (*ResourceClaimTemplateWorkloadsResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *ResourceClaimTemplateWorkloadsResponse
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "WorkloadsAPIService.InternalGetResourceClaimTemplateWorkloads")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/internal/workloads/resource-claim-templates/workloads"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.internalResourceClaimTemplateWorkloadsRequest == nil {
+		return localVarReturnValue, nil, reportError("internalResourceClaimTemplateWorkloadsRequest is required and must be specified")
+	}
+
+	if r.offset != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
+	} else {
+		var defaultValue int32 = 50
+		r.limit = &defaultValue
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.internalResourceClaimTemplateWorkloadsRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

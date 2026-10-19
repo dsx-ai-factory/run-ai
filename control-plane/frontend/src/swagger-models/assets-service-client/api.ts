@@ -10042,6 +10042,25 @@ export interface PodAffinityTypeRules {
 /**
  * 
  * @export
+ * @interface PodResourceClaimBinding
+ */
+export interface PodResourceClaimBinding {
+    /**
+     * Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'name': string;
+    /**
+     * Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'claimName'?: string | null;
+}
+/**
+ * 
+ * @export
  * @interface PolicyInfo
  */
 export interface PolicyInfo {
@@ -10943,6 +10962,87 @@ export interface RequestInfo {
      * @memberof RequestInfo
      */
     'afterUpdate': number;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkload
+ */
+export interface ResourceClaimTemplateWorkload {
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'workloadId': string;
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'name': string;
+    /**
+     * The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'type': string;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'projectId': string;
+    /**
+     * The pods of the workload that reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkloadPod>}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'pods': Array<ResourceClaimTemplateWorkloadPod>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadPod
+ */
+export interface ResourceClaimTemplateWorkloadPod {
+    /**
+     * The id of the pod.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podName': string;
+    /**
+     * The pod\'s claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.
+     * @type {Array<PodResourceClaimBinding>}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'resourceClaims': Array<PodResourceClaimBinding>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadsResponse
+ */
+export interface ResourceClaimTemplateWorkloadsResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit). 
+     * @type {number}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'next'?: number;
+    /**
+     * The workloads whose pods currently reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkload>}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'workloads': Array<ResourceClaimTemplateWorkload>;
 }
 /**
  * The lowest and highest update counts included in this bulk of updates. for example, it is possible that agent requester for afterUpdate=10 and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.
@@ -23945,6 +24045,54 @@ export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuratio
             };
         },
         /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctWorkloads: async (assetId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getRctWorkloads', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Use to retrieve a list of resource claim templates.
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -24105,6 +24253,19 @@ export const ResourceClaimTemplatesApiFp = function(configuration?: Configuratio
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplateWorkloadsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRctWorkloads(assetId, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Use to retrieve a list of resource claim templates.
          * @summary List resource claim templates.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -24174,6 +24335,18 @@ export const ResourceClaimTemplatesApiFactory = function (configuration?: Config
          */
         getRctById(assetId: string, statusInfo?: boolean, options?: any): AxiosPromise<Rct> {
             return localVarFp.getRctById(assetId, statusInfo, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: any): AxiosPromise<ResourceClaimTemplateWorkloadsResponse> {
+            return localVarFp.getRctWorkloads(assetId, offset, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * Use to retrieve a list of resource claim templates.
@@ -24248,6 +24421,20 @@ export class ResourceClaimTemplatesApi extends BaseAPI {
      */
     public getRctById(assetId: string, statusInfo?: boolean, options?: AxiosRequestConfig) {
         return ResourceClaimTemplatesApiFp(this.configuration).getRctById(assetId, statusInfo, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+     * @summary List the workloads using a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).getRctWorkloads(assetId, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

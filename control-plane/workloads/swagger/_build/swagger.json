@@ -413,6 +413,70 @@
         }
       }
     },
+    "/internal/workloads/resource-claim-templates/workloads": {
+      "post": {
+        "x-internal": true,
+        "summary": "List the workloads referencing a resource claim template (Internal API).",
+        "description": "Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template.\n",
+        "operationId": "internal_get_resource_claim_template_workloads",
+        "x-service": "workloads",
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services/resource_claims_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workloads",
+          "action": "read"
+        },
+        "tags": [
+          "Workloads"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InternalResourceClaimTemplateWorkloadsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaimTemplateWorkloadsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/internal/workloads/sync-report": {
       "post": {
         "summary": "report workload sync issues",
@@ -6943,6 +7007,66 @@
         }
       }
     },
+    "/api/v1/workloads/{workloadId}/resource-claims": {
+      "get": {
+        "summary": "Get workload resource claims by workload id.",
+        "description": "Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed.\n",
+        "operationId": "get_workload_resource_claims",
+        "x-service": "workloads",
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services/resource_claims_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workloads",
+          "action": "read",
+          "resource-id": "workloadId"
+        },
+        "tags": [
+          "Workloads"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkloadId"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkloadResourceClaimsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/workload-categories": {
       "get": {
         "summary": "List workload categories.",
@@ -11852,6 +11976,149 @@
         },
         "description": "Request to update pods on a specific node in a cluster"
       },
+      "ScopeType": {
+        "type": "string",
+        "enum": [
+          "system",
+          "tenant",
+          "cluster",
+          "department",
+          "project"
+        ]
+      },
+      "ScopeId": {
+        "type": "string",
+        "description": "The id of the cluster, department or project, depending on the scope type."
+      },
+      "InternalResourceClaimTemplateWorkloadsRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "scopeType",
+          "scopeId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The name of the ResourceClaimTemplate, as referenced by pods.",
+            "example": "single-gpu"
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          }
+        }
+      },
+      "ReportedWorkloadType": {
+        "description": "The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.",
+        "type": "string",
+        "example": "Training"
+      },
+      "ProjectId": {
+        "description": "The id of the project.",
+        "type": "string",
+        "example": 1,
+        "pattern": ".*"
+      },
+      "PodResourceClaimBinding": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.",
+            "example": "gpu-1"
+          },
+          "claimName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.",
+            "example": "bert-worker-0-gpu-1-mk4s8"
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkloadPod": {
+        "type": "object",
+        "required": [
+          "podId",
+          "podName",
+          "resourceClaims"
+        ],
+        "properties": {
+          "podId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of the pod."
+          },
+          "podName": {
+            "type": "string",
+            "example": "bert-worker-0"
+          },
+          "resourceClaims": {
+            "type": "array",
+            "description": "The pod's claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.",
+            "items": {
+              "$ref": "#/components/schemas/PodResourceClaimBinding"
+            }
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkload": {
+        "type": "object",
+        "required": [
+          "workloadId",
+          "name",
+          "type",
+          "projectId",
+          "pods"
+        ],
+        "properties": {
+          "workloadId": {
+            "$ref": "#/components/schemas/WorkloadId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/WorkloadName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ReportedWorkloadType"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "pods": {
+            "type": "array",
+            "description": "The pods of the workload that reference the resource claim template.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplateWorkloadPod"
+            }
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkloadsResponse": {
+        "type": "object",
+        "required": [
+          "workloads"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit).\n"
+          },
+          "workloads": {
+            "type": "array",
+            "description": "The workloads whose pods currently reference the resource claim template.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplateWorkload"
+            }
+          }
+        }
+      },
       "UpdateCount": {
         "description": "the value of an update counter of a data in the system.",
         "type": "integer",
@@ -12944,12 +13211,6 @@
           "VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES",
           "NVLINK_BANDWIDTH_TOTAL"
         ]
-      },
-      "ProjectId": {
-        "description": "The id of the project.",
-        "type": "string",
-        "example": 1,
-        "pattern": ".*"
       },
       "WorkloadCreationMeta": {
         "required": [
@@ -18430,20 +18691,6 @@
           "DistributedInference"
         ]
       },
-      "ScopeType": {
-        "type": "string",
-        "enum": [
-          "system",
-          "tenant",
-          "cluster",
-          "department",
-          "project"
-        ]
-      },
-      "ScopeId": {
-        "type": "string",
-        "description": "The id of the cluster, department or project, depending on the scope type."
-      },
       "ProjectIdOptional": {
         "description": "The id of the project.",
         "type": "integer",
@@ -23837,6 +24084,99 @@
           "CPU_MEMORY_REQUEST_BYTES",
           "CPU_MEMORY_LIMIT_BYTES"
         ]
+      },
+      "ResourceClaimTemplateRef": {
+        "description": "The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.",
+        "nullable": true,
+        "type": "object",
+        "required": [
+          "name",
+          "managed"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the ResourceClaimTemplate in the pod's namespace.",
+            "example": "single-gpu"
+          },
+          "managed": {
+            "type": "boolean",
+            "description": "Whether the template is managed by NVIDIA Run:ai (created through the resource claim templates API) rather than created directly in the cluster."
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The id of the managed resource claim template. Null for an unmanaged template."
+          }
+        }
+      },
+      "WorkloadResourceClaim": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PodResourceClaimBinding"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "template": {
+                "$ref": "#/components/schemas/ResourceClaimTemplateRef"
+              }
+            }
+          }
+        ]
+      },
+      "WorkloadPodResourceClaims": {
+        "type": "object",
+        "required": [
+          "podId",
+          "podName",
+          "resourceClaims"
+        ],
+        "properties": {
+          "podId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of the pod."
+          },
+          "podName": {
+            "type": "string",
+            "example": "bert-worker-0"
+          },
+          "task": {
+            "type": "string",
+            "nullable": true,
+            "description": "Identifies the function of the pod within a distributed workload (for example, leader, worker, or master).",
+            "example": "worker"
+          },
+          "resourceClaims": {
+            "type": "array",
+            "description": "The claims the pod references, in the order they appear in `pod.spec.resourceClaims`.",
+            "items": {
+              "$ref": "#/components/schemas/WorkloadResourceClaim"
+            }
+          }
+        }
+      },
+      "WorkloadResourceClaimsResponse": {
+        "type": "object",
+        "required": [
+          "pods"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Offset for the next page of results. Present only when there are more pods beyond the current page (i.e., the number of returned pods equals the limit).\n"
+          },
+          "pods": {
+            "type": "array",
+            "description": "The pods of the workload that reference at least one claim.",
+            "items": {
+              "$ref": "#/components/schemas/WorkloadPodResourceClaims"
+            }
+          }
+        }
       },
       "WorkloadCategory": {
         "type": "object",
