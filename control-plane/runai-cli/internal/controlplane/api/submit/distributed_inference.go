@@ -55,10 +55,14 @@ func DistributedInferenceComputeFlagSet(flagsCompute *pflag.FlagSet, compute *Co
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.WorkerGpuMemoryPortionRequest), consts.AttributeNameWorkerGpuMemoryPortionRequest, consts.AttributeUsageWorkerGpuMemoryPortionRequest)
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.WorkerGpuMemoryPortionLimit), consts.AttributeNameWorkerGpuMemoryPortionLimit, consts.AttributeUsageWorkerGpuMemoryPortionLimit)
 	flagsCompute.StringVar(&compute.WorkerGpuComputeMode, consts.AttributeNameWorkerGpuComputeMode, "", consts.AttributeUsageGpuComputeMode)
-	_ = flagsCompute.MarkDeprecated(consts.AttributeNameWorkerGpuPortionRequest,
+	if err := flagsCompute.MarkDeprecated(consts.AttributeNameWorkerGpuPortionRequest,
 		"use --"+consts.AttributeNameWorkerGpuMemoryPortionRequest+" for GPU memory fractions, or --"+
-			consts.AttributeNameWorkerGpuDevicesRequest+" for whole-GPU counts")
-	_ = flagsCompute.MarkDeprecated(consts.AttributeNameWorkerGpuPortionLimit, "use --"+consts.AttributeNameWorkerGpuMemoryPortionLimit+" instead")
+			consts.AttributeNameWorkerGpuDevicesRequest+" for whole-GPU counts"); err != nil {
+		panic(err)
+	}
+	if err := flagsCompute.MarkDeprecated(consts.AttributeNameWorkerGpuPortionLimit, "use --"+consts.AttributeNameWorkerGpuMemoryPortionLimit+" instead"); err != nil {
+		panic(err)
+	}
 	flagsCompute.StringVar(&compute.WorkerGpuMemoryRequest, consts.AttributeNameWorkerGpuMemoryRequest, "", consts.AttributeUsageWorkerGpuMemoryRequest)
 	flagsCompute.StringVar(&compute.WorkerGpuMemoryLimit, consts.AttributeNameWorkerGpuMemoryLimit, "", consts.AttributeUsageWorkerGpuMemoryLimit)
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.WorkerCpuCoreRequest), consts.AttributeNameWorkerCpuCoreRequest, consts.AttributeUsageWorkerCpuCoreRequest)

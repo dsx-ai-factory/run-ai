@@ -216,14 +216,24 @@ func ComputerFlagSet(flagsCompute *pflag.FlagSet, specCompute *Compute, getType 
 		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterGpuMemoryPortionRequest), consts.AttributeNameMasterGpuMemoryPortionRequest, consts.AttributeUsageMasterGpuMemoryPortionRequest)
 		flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.MasterGpuMemoryPortionLimit), consts.AttributeNameMasterGpuMemoryPortionLimit, consts.AttributeUsageMasterGpuMemoryPortionLimit)
 		flagsCompute.StringVar(&specCompute.MasterGpuComputeMode, consts.AttributeNameMasterGpuComputeMode, "", consts.AttributeUsageGpuComputeMode)
-		_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionRequest,
+		if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionRequest,
 			"use --"+consts.AttributeNameMasterGpuMemoryPortionRequest+" for GPU memory fractions, or --"+
-				consts.AttributeNameMasterGpuDeviceRequest+" for whole-GPU counts")
-		_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionLimit, "use --"+consts.AttributeNameMasterGpuMemoryPortionLimit+" instead")
+				consts.AttributeNameMasterGpuDeviceRequest+" for whole-GPU counts"); err != nil {
+			panic(err)
+		}
+		if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionLimit, "use --"+consts.AttributeNameMasterGpuMemoryPortionLimit+" instead"); err != nil {
+			panic(err)
+		}
 		if framework == api.MPI {
-			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuMemoryPortionRequest, consts.WarningSubmitMpuWithGpu)
-			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuMemoryPortionLimit, consts.WarningSubmitMpuWithGpu)
-			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuComputeMode, consts.WarningSubmitMpuWithGpu)
+			if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuMemoryPortionRequest, consts.WarningSubmitMpuWithGpu); err != nil {
+				panic(err)
+			}
+			if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuMemoryPortionLimit, consts.WarningSubmitMpuWithGpu); err != nil {
+				panic(err)
+			}
+			if err := flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuComputeMode, consts.WarningSubmitMpuWithGpu); err != nil {
+				panic(err)
+			}
 			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuDeviceRequest, consts.WarningSubmitMpuWithGpu)
 			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionRequest, consts.WarningSubmitMpuWithGpu)
 			_ = flagsCompute.MarkDeprecated(consts.AttributeNameMasterGpuPortionLimit, consts.WarningSubmitMpuWithGpu)
@@ -243,9 +253,13 @@ func GpuMemoryAndModeFlagSet(flags *pflag.FlagSet, compute *Compute) {
 	flags.Var(cli.NewNullableNonNegativeFloat64Flag(&compute.GpuMemoryPortionLimit), consts.AttributeNameGpuMemoryPortionLimit, consts.AttributeUsageGpuMemoryPortionLimit)
 	flags.StringVar(&compute.GpuComputeMode, consts.AttributeNameGpuComputeMode, "", consts.AttributeUsageGpuComputeMode)
 	if flags.Lookup(consts.AttributeNameGpuPortionRequest) != nil {
-		_ = flags.MarkDeprecated(consts.AttributeNameGpuPortionRequest,
+		if err := flags.MarkDeprecated(consts.AttributeNameGpuPortionRequest,
 			"use --"+consts.AttributeNameGpuMemoryPortionRequest+" for GPU memory fractions, or --"+
-				consts.AttributeNameGpuDeviceRequest+" for whole-GPU counts")
-		_ = flags.MarkDeprecated(consts.AttributeNameGpuPortionLimit, "use --"+consts.AttributeNameGpuMemoryPortionLimit+" instead")
+				consts.AttributeNameGpuDeviceRequest+" for whole-GPU counts"); err != nil {
+			panic(err)
+		}
+		if err := flags.MarkDeprecated(consts.AttributeNameGpuPortionLimit, "use --"+consts.AttributeNameGpuMemoryPortionLimit+" instead"); err != nil {
+			panic(err)
+		}
 	}
 }
