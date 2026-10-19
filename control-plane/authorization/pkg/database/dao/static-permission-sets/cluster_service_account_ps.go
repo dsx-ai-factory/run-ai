@@ -10,8 +10,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 )
 
-var ClusterAppPS = models.PermissionSet{
-	Name:        "Cluster app permission set",
+var ClusterServiceAccountPS = models.PermissionSet{
+	Name:        "Cluster service account permission set",
 	Description: "",
 	Internal:    true,
 	Permissions: []models.RolePermission{

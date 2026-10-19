@@ -52,8 +52,8 @@ var (
 		static_roles.Viewer,
 		static_roles.DepartmentViewer,
 		static_roles.CloudOperator,
-		static_roles.ClusterApp,
-		static_roles.InstallerApp,
+		static_roles.ClusterServiceAccount,
+		static_roles.InstallerServiceAccount,
 	}
 	// pre-defined roles which will be deployed starting 2.24
 	RolesNew = []models.Role{
@@ -85,6 +85,8 @@ func renameRoleIfLegacyNotExists(oldName, newName string) {
 
 func migrateDeprecatedRoleNames() {
 	renameRoleIfLegacyNotExists("Department administrator", "Department administrator (Legacy)")
+	renameRoleIfLegacyNotExists("Cluster application", "Cluster service account")
+	renameRoleIfLegacyNotExists("Installer application", "Installer service account")
 }
 
 func InitStaticLegacyRoles() {

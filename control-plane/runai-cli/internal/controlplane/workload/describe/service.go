@@ -153,10 +153,11 @@ func (s *Service) GetWorkload(ctx context.Context, reqWorkload *api.Workload, po
 // specWithRuntime holds both the displayer.Spec and extracted Runtime fields
 type specWithRuntime struct {
 	spec                 *displayer.Spec
-	runtimeFields        *displayer.Runtime               // Extracted runtime fields from spec (ImagePullPolicy, Security, etc.)
-	storage              *displayer.Storage               // Extracted storage from spec (PVCs, ConfigMaps, Secrets, EmptyDirs)
-	environmentVariables *map[string]string               // Effective environment from the typed response
-	compute              *displayer.Compute               // Effective requested resources from the typed response
+	runtimeFields        *displayer.Runtime // Extracted runtime fields from spec (ImagePullPolicy, Security, etc.)
+	storage              *displayer.Storage // Extracted storage from spec (PVCs, ConfigMaps, Secrets, EmptyDirs)
+	environmentVariables *map[string]string // Effective environment from the typed response
+	compute              *displayer.Compute // Effective requested resources from the typed response
+	gpuComputeMode       *string
 	command              *string                          // Effective command from the typed response
 	arguments            *string                          // Effective arguments from the typed response
 	useTypedSummary      bool                             // Prefer typed desired state over workload-level projections
@@ -369,6 +370,13 @@ func buildTypedSpecData[T interface {
 	typedSpec T,
 ) *specWithRuntime {
 	specData := &specWithRuntime{spec: spec, runtimeFields: runtimeFields, storage: storage}
+	computeSpec, _ := typedSpec.GetComputeOk()
+	if computeSpec != nil {
+		if mode, _ := computeSpec.GetGpuComputeModeOk(); mode != nil {
+			modeValue := string(*mode)
+			specData.gpuComputeMode = &modeValue
+		}
+	}
 	if !isWorkloadV2(workload) {
 		return specData
 	}
@@ -385,10 +393,8 @@ func buildTypedSpecData[T interface {
 	}
 
 	typedCompute := displayer.NewComputeBuilder().RequestedNodePools(typedSpec.GetNodePools())
-	if computeSpec, found := typedSpec.GetComputeOk(); found {
-		if computeFromSpec := displayer.BuildComputeFromSpec(computeSpec); computeFromSpec != nil {
-			typedCompute.RequestedResources(computeFromSpec.RequestedResources)
-		}
+	if computeFromSpec := displayer.BuildComputeFromSpec(computeSpec); computeFromSpec != nil {
+		typedCompute.Set(*computeFromSpec).RequestedNodePools(typedSpec.GetNodePools())
 	}
 	compute := typedCompute.Build()
 	specData.compute = &compute
@@ -475,7 +481,7 @@ func (s *Service) buildWorkloadFromApiResponses(workload *openapi.WorkloadDetail
 
 	setGeneralInformation(workloadBuilder, workload, specData)
 	s.setRuntimeInformation(workloadBuilder, workload, specData.runtimeFields)
-	setComputeInformation(workloadBuilder, workload, specData.compute)
+	setComputeInformation(workloadBuilder, workload, specData.compute, specData.gpuComputeMode)
 	setStorage(workloadBuilder, specData.storage)
 	workloadBuilder.SetMasterConfig(specData.masterConfig)
 	setNetworks(workloadBuilder, workload, spec)
@@ -953,7 +959,7 @@ func setAllocatedResourceString(resource openapi.NullableString, setter func(str
 	}
 }
 
-func setComputeInformation(builder *WorkloadBuilder, workload *openapi.WorkloadDetailed, computeFromSpec *displayer.Compute) {
+func setComputeInformation(builder *WorkloadBuilder, workload *openapi.WorkloadDetailed, computeFromSpec *displayer.Compute, gpuComputeMode *string) {
 	computeBuilder := displayer.NewComputeBuilder()
 	if computeFromSpec != nil {
 		computeBuilder.Set(*computeFromSpec).CurrentNodePools(workload.CurrentNodePools)
@@ -969,6 +975,9 @@ func setComputeInformation(builder *WorkloadBuilder, workload *openapi.WorkloadD
 
 	if workload.AllocatedResources.IsSet() {
 		computeBuilder.AllocatedResources(buildAllocatedResources(workload))
+	}
+	if gpuComputeMode != nil {
+		computeBuilder.GPUComputeMode(*gpuComputeMode)
 	}
 
 	builder.SetCompute(computeBuilder.Build())

@@ -214,6 +214,59 @@ var _ = Describe("Describe Service", func() {
 		})
 	})
 
+	DescribeTable("displays GPU mode without changing the resource summary source",
+		func(workloadType string, useV2 bool) {
+			workload := &openapi.WorkloadDetailed{}
+			Expect(json.Unmarshal([]byte(`{"requestedNodePools":["summary-pool"],"workloadRequestedResources":{"cpu":{"request":2}}}`), workload)).To(Succeed())
+			workload.Id = testWorkloadId
+			workload.Type = workloadType
+			if useV2 {
+				workload.SetSourceApi(openapi.SOURCEAPI_WORKLOADS_V2)
+			}
+			response := []byte(`{"spec":{"compute":{"cpuCoreRequest":4,"gpuComputeMode":"sm-sharing"},"nodePools":["typed-pool"]}}`)
+			switch workloadType {
+			case internalApi.Training.String():
+				var training openapi.Training
+				Expect(json.Unmarshal(response, &training)).To(Succeed())
+				mockWorkloadClient.EXPECT().GetTraining(ctx, testWorkloadId).Return(&training, nil)
+			case internalApi.Workspace.String():
+				var workspace openapi.Workspace
+				Expect(json.Unmarshal(response, &workspace)).To(Succeed())
+				mockWorkloadClient.EXPECT().GetWorkspace(ctx, testWorkloadId).Return(&workspace, nil)
+			case internalApi.Inference.String():
+				var inference openapi.Inference
+				Expect(json.Unmarshal(response, &inference)).To(Succeed())
+				mockWorkloadClient.EXPECT().GetInference(ctx, testWorkloadId).Return(&inference, nil)
+			case internalApi.Distributed.String():
+				var distributed openapi.DistributedWorkload
+				Expect(json.Unmarshal(response, &distributed)).To(Succeed())
+				mockWorkloadClient.EXPECT().GetDistributed(ctx, testWorkloadId).Return(&distributed, nil)
+			}
+			mockWorkloadClient.EXPECT().GetWorkload(ctx, testWorkloadId).Return(workload, nil)
+			mockPodsClient.EXPECT().ListByLimit(ctx, testWorkloadId, podLimit).Return(nil, nil)
+			mockEventClient.EXPECT().ListByLimit(ctx, testWorkloadId, eventLimit).Return(nil, nil)
+
+			result, err := service.GetWorkload(ctx, &api.Workload{ID: testWorkloadId}, podLimit, eventLimit)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(result.Compute.GPUComputeMode).To(Equal(ptr.To("sm-sharing")))
+			if useV2 {
+				Expect(result.Compute.RequestedResources.CPUCores.Requested).To(Equal(4.0))
+				Expect(result.Compute.RequestedNodePools).To(Equal([]string{"typed-pool"}))
+			} else {
+				Expect(result.Compute.RequestedResources.CPUCores.Requested).To(Equal(2.0))
+				Expect(result.Compute.RequestedNodePools).To(Equal([]string{"summary-pool"}))
+			}
+		},
+		Entry("native training", internalApi.Training.String(), false),
+		Entry("native workspace", internalApi.Workspace.String(), false),
+		Entry("native inference", internalApi.Inference.String(), false),
+		Entry("native distributed training", internalApi.Distributed.String(), false),
+		Entry("V2 training", internalApi.Training.String(), true),
+		Entry("V2 workspace", internalApi.Workspace.String(), true),
+		Entry("V2 inference", internalApi.Inference.String(), true),
+		Entry("V2 distributed training", internalApi.Distributed.String(), true),
+	)
+
 	Context("Workloads V2 spec resolution", func() {
 		var mockWorkloadDetailed *openapi.WorkloadDetailed
 
@@ -261,6 +314,7 @@ var _ = Describe("Describe Service", func() {
 			compute := openapi.NewWorkspaceSpecSpecAllOfCompute()
 			compute.SetGpuPortionRequest(0.5)
 			compute.SetGpuPortionLimit(0.75)
+			compute.SetGpuComputeMode(openapi.GPUCOMPUTEMODE_SM_SHARING)
 			compute.SetCpuCoreRequest(0.25)
 			compute.SetCpuMemoryRequest("128Mi")
 			inferenceSpec.Compute.Set(compute)
@@ -290,6 +344,7 @@ var _ = Describe("Describe Service", func() {
 			Expect(result.General.EnvironmentVariables).NotTo(BeNil())
 			Expect(*result.General.EnvironmentVariables).To(HaveKeyWithValue("SOURCE", "typed-snapshot"))
 			Expect(result.Compute.RequestedResources.GPUCompute.Requested).To(Equal(0.5))
+			Expect(result.Compute.GPUComputeMode).To(Equal(ptr.To("sm-sharing")))
 			Expect(result.Compute.RequestedResources.GPUCompute.Limit).NotTo(BeNil())
 			Expect(*result.Compute.RequestedResources.GPUCompute.Limit).To(Equal(0.75))
 			Expect(result.Compute.RequestedResources.CPUCores.Requested).To(Equal(0.25))

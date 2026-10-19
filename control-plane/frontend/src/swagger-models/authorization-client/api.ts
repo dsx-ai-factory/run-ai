@@ -1012,8 +1012,8 @@ export type Action = typeof Action[keyof typeof Action];
 
 export const AllowedInternalCreateRoles = {
     SystemAdministrator: 'System administrator',
-    ClusterApplication: 'Cluster application',
-    InstallerApplication: 'Installer application',
+    ClusterServiceAccount: 'Cluster service account',
+    InstallerServiceAccount: 'Installer service account',
     CloudOperator: 'Cloud operator'
 } as const;
 
