@@ -1561,6 +1561,127 @@ func (_c *WorkloadsAPI_GetWorkloadsExecute_Call) RunAndReturn(run func(r openapi
 	return _c
 }
 
+// GetWorkloadsSlim provides a mock function for the type WorkloadsAPI
+func (_mock *WorkloadsAPI) GetWorkloadsSlim(ctx context.Context) openapi.ApiGetWorkloadsSlimRequest {
+	ret := _mock.Called(ctx)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetWorkloadsSlim")
+	}
+
+	var r0 openapi.ApiGetWorkloadsSlimRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context) openapi.ApiGetWorkloadsSlimRequest); ok {
+		r0 = returnFunc(ctx)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiGetWorkloadsSlimRequest)
+	}
+	return r0
+}
+
+// WorkloadsAPI_GetWorkloadsSlim_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWorkloadsSlim'
+type WorkloadsAPI_GetWorkloadsSlim_Call struct {
+	*mock.Call
+}
+
+// GetWorkloadsSlim is a helper method to define mock.On call
+//   - ctx context.Context
+func (_e *WorkloadsAPI_Expecter) GetWorkloadsSlim(ctx any) *WorkloadsAPI_GetWorkloadsSlim_Call {
+	return &WorkloadsAPI_GetWorkloadsSlim_Call{Call: _e.mock.On("GetWorkloadsSlim", ctx)}
+}
+
+func (_c *WorkloadsAPI_GetWorkloadsSlim_Call) Run(run func(ctx context.Context)) *WorkloadsAPI_GetWorkloadsSlim_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *WorkloadsAPI_GetWorkloadsSlim_Call) Return(apiGetWorkloadsSlimRequest openapi.ApiGetWorkloadsSlimRequest) *WorkloadsAPI_GetWorkloadsSlim_Call {
+	_c.Call.Return(apiGetWorkloadsSlimRequest)
+	return _c
+}
+
+func (_c *WorkloadsAPI_GetWorkloadsSlim_Call) RunAndReturn(run func(ctx context.Context) openapi.ApiGetWorkloadsSlimRequest) *WorkloadsAPI_GetWorkloadsSlim_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetWorkloadsSlimExecute provides a mock function for the type WorkloadsAPI
+func (_mock *WorkloadsAPI) GetWorkloadsSlimExecute(r openapi.ApiGetWorkloadsSlimRequest) (*openapi.GetWorkloadsSlimResponse, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetWorkloadsSlimExecute")
+	}
+
+	var r0 *openapi.GetWorkloadsSlimResponse
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetWorkloadsSlimRequest) (*openapi.GetWorkloadsSlimResponse, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetWorkloadsSlimRequest) *openapi.GetWorkloadsSlimResponse); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.GetWorkloadsSlimResponse)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiGetWorkloadsSlimRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiGetWorkloadsSlimRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// WorkloadsAPI_GetWorkloadsSlimExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetWorkloadsSlimExecute'
+type WorkloadsAPI_GetWorkloadsSlimExecute_Call struct {
+	*mock.Call
+}
+
+// GetWorkloadsSlimExecute is a helper method to define mock.On call
+//   - r openapi.ApiGetWorkloadsSlimRequest
+func (_e *WorkloadsAPI_Expecter) GetWorkloadsSlimExecute(r any) *WorkloadsAPI_GetWorkloadsSlimExecute_Call {
+	return &WorkloadsAPI_GetWorkloadsSlimExecute_Call{Call: _e.mock.On("GetWorkloadsSlimExecute", r)}
+}
+
+func (_c *WorkloadsAPI_GetWorkloadsSlimExecute_Call) Run(run func(r openapi.ApiGetWorkloadsSlimRequest)) *WorkloadsAPI_GetWorkloadsSlimExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiGetWorkloadsSlimRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiGetWorkloadsSlimRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *WorkloadsAPI_GetWorkloadsSlimExecute_Call) Return(getWorkloadsSlimResponse *openapi.GetWorkloadsSlimResponse, response *http.Response, err error) *WorkloadsAPI_GetWorkloadsSlimExecute_Call {
+	_c.Call.Return(getWorkloadsSlimResponse, response, err)
+	return _c
+}
+
+func (_c *WorkloadsAPI_GetWorkloadsSlimExecute_Call) RunAndReturn(run func(r openapi.ApiGetWorkloadsSlimRequest) (*openapi.GetWorkloadsSlimResponse, *http.Response, error)) *WorkloadsAPI_GetWorkloadsSlimExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetWorkloadsTelemetry provides a mock function for the type WorkloadsAPI
 func (_mock *WorkloadsAPI) GetWorkloadsTelemetry(ctx context.Context) openapi.ApiGetWorkloadsTelemetryRequest {
 	ret := _mock.Called(ctx)

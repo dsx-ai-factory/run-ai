@@ -239,6 +239,7 @@ docs/GetWorkloadPriorities200Response.md
 docs/GetWorkloadSubmissionV2Enabled.md
 docs/GetWorkloads200Response.md
 docs/GetWorkloadsSetting.md
+docs/GetWorkloadsSlimResponse.md
 docs/GitAuthenticationMethod.md
 docs/GitCommon.md
 docs/GitInstance.md
@@ -600,6 +601,7 @@ docs/WorkloadPropertiesAPI.md
 docs/WorkloadRequestResources.md
 docs/WorkloadResourceClaim.md
 docs/WorkloadResourceClaimsResponse.md
+docs/WorkloadSlim.md
 docs/WorkloadSortFilterFields.md
 docs/WorkloadSubmissionV2EnabledSetting.md
 docs/WorkloadSyncFields.md
@@ -859,6 +861,7 @@ model_get_workload_priorities_200_response.go
 model_get_workload_submission_v2_enabled.go
 model_get_workloads_200_response.go
 model_get_workloads_setting.go
+model_get_workloads_slim_response.go
 model_git_authentication_method.go
 model_git_common.go
 model_git_instance.go
@@ -1209,6 +1212,7 @@ model_workload_priority.go
 model_workload_request_resources.go
 model_workload_resource_claim.go
 model_workload_resource_claims_response.go
+model_workload_slim.go
 model_workload_sort_filter_fields.go
 model_workload_submission_v2_enabled_setting.go
 model_workload_sync_fields.go

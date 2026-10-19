@@ -18,6 +18,7 @@ import (
 	internalApi "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
 	cpworkloadmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane/workload"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe/displayer"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
@@ -172,7 +173,7 @@ var _ = Describe("Describe Service", func() {
 				Spec:       openapi.NewTrainingSpecSpec(),
 			}
 
-			mockWorkloadClient.EXPECT().List(ctx, gomock.Any(), gomock.Any(), gomock.Any(), false).Return(mockWorkloadList, nil)
+			mockWorkloadClient.EXPECT().ListSlim(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(client.ToSlimResponse(mockWorkloadList), nil)
 			mockWorkloadClient.EXPECT().GetWorkload(gomock.Any(), gomock.Any()).Return(mockWorkloadDetailed, nil)
 			mockWorkloadClient.EXPECT().GetTraining(gomock.Any(), gomock.Any()).Return(mockTraining, nil)
 			mockPodsClient.EXPECT().ListByLimit(ctx, testWorkloadId, podLimit).Return(mockPods, nil)
@@ -203,7 +204,7 @@ var _ = Describe("Describe Service", func() {
 				Workloads: []openapi.Workload{},
 			}
 
-			mockWorkloadClient.EXPECT().List(ctx, gomock.Any(), gomock.Any(), gomock.Any(), false).Return(mockWorkloadList, nil)
+			mockWorkloadClient.EXPECT().ListSlim(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(client.ToSlimResponse(mockWorkloadList), nil)
 
 			result, err := service.GetWorkload(ctx, reqWorkload, podLimit, eventLimit)
 
@@ -447,7 +448,7 @@ var _ = Describe("Describe Service", func() {
 			}
 
 			mockWorkloadClient.EXPECT().GetWorkload(gomock.Any(), gomock.Any()).Return(mockWorkloadDetailed, nil)
-			mockWorkloadClient.EXPECT().List(ctx, gomock.Any(), gomock.Any(), gomock.Any(), false).Return(mockWorkloadList, nil)
+			mockWorkloadClient.EXPECT().ListSlim(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(client.ToSlimResponse(mockWorkloadList), nil)
 			mockPodsClient.EXPECT().ListByLimit(ctx, testWorkloadId, podLimit).Return(mockPods, nil)
 			mockEventClient.EXPECT().ListByLimit(ctx, testWorkloadId, eventLimit).Return(mockEvents, nil)
 		})
@@ -769,7 +770,7 @@ var _ = Describe("Describe Service", func() {
 			}
 
 			mockWorkloadClient.EXPECT().GetWorkload(gomock.Any(), gomock.Any()).Return(mockWorkloadDetailed, nil)
-			mockWorkloadClient.EXPECT().List(ctx, gomock.Any(), gomock.Any(), gomock.Any(), false).Return(mockWorkloadList, nil)
+			mockWorkloadClient.EXPECT().ListSlim(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(client.ToSlimResponse(mockWorkloadList), nil)
 			mockPodsClient.EXPECT().ListByLimit(ctx, testWorkloadId, podLimit).Return(mockPods, nil)
 			mockEventClient.EXPECT().ListByLimit(ctx, testWorkloadId, eventLimit).Return(mockEvents, nil)
 			mockWorkloadClient.EXPECT().GetTraining(gomock.Any(), gomock.Any()).Return(mockTraining, nil)
@@ -863,7 +864,7 @@ var _ = Describe("Describe Service", func() {
 			}
 
 			mockWorkloadClient.EXPECT().GetWorkload(gomock.Any(), gomock.Any()).Return(mockWorkloadDetailed, nil)
-			mockWorkloadClient.EXPECT().List(ctx, gomock.Any(), gomock.Any(), gomock.Any(), false).Return(mockWorkloadList, nil)
+			mockWorkloadClient.EXPECT().ListSlim(ctx, gomock.Any(), gomock.Any(), gomock.Any()).Return(client.ToSlimResponse(mockWorkloadList), nil)
 			mockPodsClient.EXPECT().ListByLimit(ctx, testWorkloadId, podLimit).Return(mockPods, nil)
 			mockEventClient.EXPECT().ListByLimit(ctx, testWorkloadId, eventLimit).Return(mockEvents, nil)
 			mockWorkloadClient.EXPECT().GetDistributed(gomock.Any(), gomock.Any()).Return(mockDistributed, nil)
