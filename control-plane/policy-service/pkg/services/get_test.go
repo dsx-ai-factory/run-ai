@@ -242,6 +242,7 @@ var _ = Describe("GetTest", func() {
 				Defaults: bodySetTenant.Policy.Defaults,
 			}
 			expectedRespSetTenant.Rules.Compute.GpuPortionRequest.SourceOfRule = &api.SourceOfRule{Scope: api.SCOPETYPE_TENANT}
+			expectedRespSetTenant.Rules.Compute.GpuMemoryPortionRequest = expectedRespSetTenant.Rules.Compute.GpuPortionRequest
 			dao.InjectSystemPolicyForTesting(&expectedRespSetTenant)
 			Expect(*actualRespSetTenant.Effective).To(Equal(expectedRespSetTenant))
 
@@ -260,6 +261,7 @@ var _ = Describe("GetTest", func() {
 
 			expectedRespGetTenant := *actualRespSetTenant.Effective
 			expectedRespGetTenant.Rules.Compute.GpuPortionRequest.SourceOfRule = &api.SourceOfRule{Scope: api.SCOPETYPE_TENANT}
+			expectedRespGetTenant.Rules.Compute.GpuMemoryPortionRequest = expectedRespGetTenant.Rules.Compute.GpuPortionRequest
 			dao.InjectSystemPolicyForTesting(&expectedRespGetTenant)
 			Expect(*actualRespGetTenant.Effective).To(Equal(expectedRespGetTenant))
 		})

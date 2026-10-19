@@ -43,6 +43,10 @@ func UpsertEffectivePolicy(ctx context.Context, tx orm.DB, effectivePolicy *dbmo
 
 	effectivePolicy.DefaultsV2 = database.CleanMap(effectivePolicy.DefaultsV2)
 	effectivePolicy.RulesV2 = database.CleanMap(effectivePolicy.RulesV2)
+	stored, projectionErr := effectivePolicy.ForDB()
+	if projectionErr != nil {
+		return database.Error(database.UPSERT, database.EffectivePolicy).WithDetails(projectionErr)
+	}
 
 	//
 	//   first step - see if we need to create or update. yes, it reminds you of firstOrCreate,
@@ -64,7 +68,7 @@ func UpsertEffectivePolicy(ctx context.Context, tx orm.DB, effectivePolicy *dbmo
 		//
 		//  if the record does not exist, meaning - hard deleted, create a new one
 		//
-		if _, createErr := tx.Table(dbtables.EffectivePoliciesTable).Create(&effectivePolicy); createErr != nil {
+		if _, createErr := tx.Table(dbtables.EffectivePoliciesTable).Create(stored); createErr != nil {
 			dbErr := database.Error(database.CREATE, database.EffectivePolicy).WithDetails(createErr)
 			logging.Errorf("failed to create effective policy: %s: %v", dbErr.Message, createErr)
 			return dbErr
@@ -77,11 +81,11 @@ func UpsertEffectivePolicy(ctx context.Context, tx orm.DB, effectivePolicy *dbmo
 			Where(fmt.Sprintf("%s.%s = ?", dbtables.EffectivePoliciesTable, dbtables.EffectivePoliciesColumnPolicyId), effectivePolicy.PolicyId).
 			UpdateColumns(map[string]interface{}{
 				dbtables.DeletedAtColumn:             nil,
-				dbtables.PoliciesColumnDefaults:      effectivePolicy.DefaultsV2,
-				dbtables.PoliciesColumnRules:         effectivePolicy.RulesV2,
+				dbtables.PoliciesColumnDefaults:      stored.DefaultsV2,
+				dbtables.PoliciesColumnRules:         stored.RulesV2,
 				dbtables.PoliciesColumnImposedAssets: effectivePolicy.ImposedAssets,
 
-				dbtables.EffectivePoliciesColumnDefaultFromOrder: effectivePolicy.DefaultFromOrder,
+				dbtables.EffectivePoliciesColumnDefaultFromOrder: stored.DefaultFromOrder,
 				dbtables.EffectivePoliciesColumnValidationError:  effectivePolicy.ValidationError,
 			})
 		if updateErr != nil {

@@ -64,7 +64,8 @@ func (ht *HierarchyTree) validateImposedAssets(ctx context.Context, policyScope 
 	resultRules := make(map[string]interface{})
 
 	if imposedAssetIds == nil || len(*imposedAssetIds) == 0 {
-		return resultDefaults, resultRules, nil
+		// Empty maps would introduce replica sections into non-distributed policies.
+		return nil, nil, nil
 	}
 
 	//

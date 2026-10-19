@@ -1,0 +1,2 @@
+type: string
+enum: [create, update, delete, suspend, resume]

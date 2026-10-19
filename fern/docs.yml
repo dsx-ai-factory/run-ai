@@ -47,6 +47,12 @@ products:
         path: archived-versions.yml
 
 redirects:
+  - source: /self-hosted/reference/rest-api/endpoints/ai-applications/ai-applications
+    destination: /run-ai/self-hosted/reference/rest-api/endpoints/ai-applications/list-applications
+    permanent: true
+  - source: /self-hosted/reference/rest-api/endpoints/ai-applications/ai-applications/:slug*
+    destination: /run-ai/self-hosted/reference/rest-api/endpoints/ai-applications/:slug*
+    permanent: true
   - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/fractions
     destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/memory-fractions
     permanent: true

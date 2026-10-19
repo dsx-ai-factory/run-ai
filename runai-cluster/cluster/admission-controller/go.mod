@@ -5,14 +5,14 @@ go 1.27.2
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261013153710-0a8ab25fffdf
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261013153710-0a8ab25fffdf
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.2
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261018152446-70997dcca3b4
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261018152446-70997dcca3b4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.3
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
 	github.com/magiconair/properties v1.18.12
 	github.com/stretchr/testify v1.12.1
-	golang.org/x/exp v0.0.0-20261013213113-2ab7f3cbc5fb
+	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
 	gomodules.xyz/jsonpatch/v2 v2.5.0
 	k8s.io/api v0.35.4
 	k8s.io/apimachinery v0.35.4
@@ -34,13 +34,13 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.16 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17 // indirect
 	github.com/emicklei/go-restful/v3 v3.14.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.9.6 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-openapi/jsonpointer v1.0.2 // indirect
 	github.com/go-openapi/jsonreference v0.21.6 // indirect

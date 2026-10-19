@@ -24,6 +24,9 @@ paths:
         200:
           description: Executed successfully.
 
+  /api/v1/workloads/{workloadId}/actions:
+    $ref: "./resources/WorkloadActions.yaml"
+
   /api/v1/workloads/scrapeable-metrics:
     $ref: './resources/WorkloadsScrapeableMetrics.yaml'
 

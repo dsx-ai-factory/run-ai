@@ -222,3 +222,17 @@ GpuOverProvisioningSetting:
   $ref: './Settings/GpuOverProvisioningSetting.yaml'
 ApplicationSubmissionSetting:
   $ref: './Settings/ApplicationSubmissionSetting.yaml'
+WorkloadActionType:
+  $ref: "./Events/WorkloadActionType.yaml"
+WorkloadActionId:
+  $ref: "./Events/WorkloadActionId.yaml"
+WorkloadActionSubject:
+  $ref: "./Events/WorkloadActionSubject.yaml"
+WorkloadActionSubjectType:
+  $ref: "./Events/WorkloadActionSubjectType.yaml"
+WorkloadActionAcceptedAt:
+  $ref: "./Events/WorkloadActionAcceptedAt.yaml"
+WorkloadActionRecord:
+  $ref: "./Events/WorkloadActionRecord.yaml"
+GetWorkloadActionsResponse:
+  $ref: "./Events/GetWorkloadActionsResponse.yaml"

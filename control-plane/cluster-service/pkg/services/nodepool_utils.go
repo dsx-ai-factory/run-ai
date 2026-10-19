@@ -17,10 +17,12 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 	clients_local "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clients"
+	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/settings"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	setting_pkg "github.com/dsx-ai-factory/run-ai/runai-common-packages/setting"
@@ -64,6 +66,10 @@ func isAdjustableWeightsFFOn(ctx context.Context) bool {
 	return setting.Enabled
 }
 
+func isEditableNodepoolCapabilitiesOn() bool {
+	return runai_config.Get[*config.EditableNodepoolCapabilities]().Enabled
+}
+
 func validateCreateParams(ctx context.Context, fields api.NodepoolCreateFields, capChecker clients_local.ClusterCapabilityChecker) error {
 	validationErr := gpuNetworkAccelerationDetectionValidation(ctx, fields.GpuNetworkAccelerationDetection, capChecker)
 	if validationErr != nil {
@@ -75,7 +81,7 @@ func validateCreateParams(ctx context.Context, fields api.NodepoolCreateFields, 
 		return validationErr
 	}
 
-	validationErr = validateSchedulingCapabilitiesOnCreate(fields.SchedulingCapabilities)
+	validationErr = validateSchedulingCapabilities(fields.SchedulingCapabilities)
 	if validationErr != nil {
 		return validationErr
 	}
@@ -94,22 +100,22 @@ func validatePatchParams(ctx context.Context, dbNodepool models.Nodepool, fields
 func validateUpdatePatchParamsInner(ctx context.Context, fields api.NodepoolUpdateFields,
 	isUpdate bool, dbNodepool *models.Nodepool, capChecker clients_local.ClusterCapabilityChecker,
 ) error {
+	validationErr := validateSchedulingCapabilities(fields.SchedulingCapabilities)
+	if validationErr != nil {
+		return validationErr
+	}
+
 	if fields.GpuNetworkAccelerationDetection == nil && fields.SchedulingConfiguration == nil {
 		// no need to even check capabilities if no need to
 		return nil
 	}
 
-	validationErr := gpuNetworkAccelerationDetectionValidation(ctx, fields.GpuNetworkAccelerationDetection, capChecker)
+	validationErr = gpuNetworkAccelerationDetectionValidation(ctx, fields.GpuNetworkAccelerationDetection, capChecker)
 	if validationErr != nil {
 		return validationErr
 	}
 
 	validationErr = validateSchedulingConfiguration(ctx, fields.SchedulingConfiguration, capChecker, !isUpdate, dbNodepool)
-	if validationErr != nil {
-		return validationErr
-	}
-
-	validationErr = validateSchedulingCapabilitiesUpdate(fields.SchedulingCapabilities, isUpdate)
 	if validationErr != nil {
 		return validationErr
 	}
@@ -343,23 +349,12 @@ func validateTimeBasedFairShareWindowTypeAndStartTime(
 	return nil
 }
 
-func validateSchedulingCapabilitiesOnCreate(sc api.SchedulingCapabilitiesNullable) error {
+func validateSchedulingCapabilities(sc api.SchedulingCapabilitiesNullable) error {
 	if sc.CpuQuota != nil && *sc.CpuQuota && sc.Quota != nil && !*sc.Quota {
 		return fmt.Errorf("SchedulingCapabilities.CpuQuota can only be enabled when SchedulingCapabilities.Quota is enabled")
 	}
 
 	// not checking min version for "ranks" - will be enforced in the org-unit-service
-
-	return nil
-}
-
-func validateSchedulingCapabilitiesUpdate(sc api.SchedulingCapabilitiesNullable, isUpdate bool) error {
-	validationErr := validateSchedulingCapabilitiesOnCreate(sc)
-	if validationErr != nil {
-		return validationErr
-	}
-
-	// TODO: add all validations using the internal API for org-unit here! if trying to change allowQuota/allowRanks.
 
 	return nil
 }
@@ -672,51 +667,45 @@ func setTimeBasedFairSharePatch(
 func setSchedulingCapabilitiesOnCreateUpdate(ctx context.Context,
 	nodePool *models.Nodepool,
 	fields api.SchedulingCapabilitiesNullable,
+	isCreate bool,
 ) {
 	if nodePool == nil {
 		return
 	}
 
-	/*
-		TODO: un-comment once we have the whole feature functioning and not x-internal
-		TODO: when uncommenting, add tests in api_clusters_service_test.go and in api_nodepools_settings_test.go
-		nodePool.AllowAdjustableWeights = ptr.Deref(fields.AdjustableWeights, isAdjustableWeightsFFOn(ctx))
-		nodePool.AllowQuota = ptr.Deref(fields.Quota, models.DefaultAllowQuota)
-		nodePool.AllowRanks = ptr.Deref(fields.Ranks, models.DefaultAllowRanks)
-		nodePool.AllowCpuQuota = ptr.Deref(fields.CpuQuota, isCpuQuotaFFOn(ctx))
-	*/
-	nodePool.AllowAdjustableWeights = isAdjustableWeightsFFOn(ctx)
-	nodePool.AllowQuota = models.DefaultAllowQuota
-	nodePool.AllowRanks = models.DefaultAllowRanks
-	nodePool.AllowCpuQuota = isCpuQuotaFFOn(ctx)
+	// create does not take capabilities from the request yet, so every capability gets its default
+	if isCreate || !isEditableNodepoolCapabilitiesOn() {
+		fields = api.SchedulingCapabilitiesNullable{}
+	}
+	nodePool.AllowAdjustableWeights = ptr.Deref(fields.AdjustableWeights, isAdjustableWeightsFFOn(ctx))
+	nodePool.AllowQuota = ptr.Deref(fields.Quota, models.DefaultAllowQuota)
+	nodePool.AllowRanks = ptr.Deref(fields.Ranks, models.DefaultAllowRanks)
+	nodePool.AllowCpuQuota = ptr.Deref(fields.CpuQuota, isCpuQuotaFFOn(ctx))
 
-	if !nodePool.AllowQuota && nodePool.AllowCpuQuota {
+	// an explicit cpuQuota with quota off is left for validateSchedulingMode to reject
+	if !nodePool.AllowQuota && fields.CpuQuota == nil {
 		nodePool.AllowCpuQuota = false
 	}
 }
 
 func setSchedulingCapabilitiesOnPatch(dbNodepool *models.Nodepool, fields api.SchedulingCapabilitiesNullable) {
-	if dbNodepool == nil {
+	if dbNodepool == nil || !isEditableNodepoolCapabilitiesOn() {
 		return
 	}
 
 	// the difference in Patch is that we only set the fields that are not nil
-
-	/*
-		TODO: un-comment once we have the whole feature functioning and not x-internal
-		if fields.AdjustableWeights != nil {
-			dbNodepool.AllowAdjustableWeights = *fields.AdjustableWeights
-		}
-		if fields.Quota != nil {
-			dbNodepool.AllowQuota = *fields.Quota
-		}
-		if fields.Ranks != nil {
-			dbNodepool.AllowRanks = *fields.Ranks
-		}
-		if fields.CpuQuota != nil {
-			dbNodepool.AllowCpuQuota = *fields.CpuQuota
-		}
-	*/
+	if fields.AdjustableWeights != nil {
+		dbNodepool.AllowAdjustableWeights = *fields.AdjustableWeights
+	}
+	if fields.Quota != nil {
+		dbNodepool.AllowQuota = *fields.Quota
+	}
+	if fields.Ranks != nil {
+		dbNodepool.AllowRanks = *fields.Ranks
+	}
+	if fields.CpuQuota != nil {
+		dbNodepool.AllowCpuQuota = *fields.CpuQuota
+	}
 }
 
 func setStatusSchedulingConfigurationFromApiToDao(dbNodepool *models.Nodepool, apiStatus *api.NodepoolSyncFieldsStatus) {

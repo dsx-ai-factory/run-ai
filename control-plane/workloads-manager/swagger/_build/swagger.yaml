@@ -1181,6 +1181,7 @@ components:
           nullable: true
           example: standard
         volumeMode:
+          type: string
           allOf:
             - $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode'
           nullable: true
@@ -1228,7 +1229,6 @@ components:
         userCredentials:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials'
         pvcs:
-          x-internal: true
           type: array
           nullable: true
           maxItems: 1000
@@ -1236,7 +1236,6 @@ components:
           items:
             $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvc'
         pvcsConfig:
-          x-internal: true
           nullable: true
           description: Configuration applied to PVCs that are created and reconciled alongside the workload.
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig'
@@ -1913,14 +1912,13 @@ components:
       maxLength: 63
       nullable: true
     GpuComputeMode:
-      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
       type: string
       minLength: 1
       enum:
         - time-slicing
         - sm-sharing
       nullable: true
-      x-gorm-ignore: true
     GpuDevicesRequest:
       description: Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
       type: integer

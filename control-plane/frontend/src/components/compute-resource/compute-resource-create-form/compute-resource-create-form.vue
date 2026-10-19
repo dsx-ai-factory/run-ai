@@ -84,7 +84,12 @@ import { RunaiBtn } from "@/components/common/runai-btn";
 // Models
 import type { IResourcesSectionModel, IUIComputeResourceCreation } from "@/models/compute-resource.model";
 import type { PermittedScopes } from "@/swagger-models/authorization-client";
-import { GpuRequestType, Scope, type ExtendedResource } from "@/swagger-models/assets-service-client";
+import {
+  type ComputeCreationRequestSpec,
+  GpuRequestType,
+  Scope,
+  type ExtendedResource,
+} from "@/swagger-models/assets-service-client";
 // Services
 import { scopeUtil } from "@/utils/scope.util";
 import { deepCopy } from "@/utils/common.util";
@@ -250,6 +255,10 @@ export default defineComponent({
       }
     },
     prepareModelForRequest(): void {
+      const spec: ComputeCreationRequestSpec = this.computeModel.spec;
+      delete spec.gpuMemoryPortionRequest;
+      delete spec.gpuMemoryPortionLimit;
+
       if (
         this.clusterStore.isClusterVersionSufficient(this.parentClusterId, MIN_CLUSTER_VERSION_FOR_MULTI_FRACTION_GPU)
       ) {

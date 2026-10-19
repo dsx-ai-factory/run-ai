@@ -72,6 +72,7 @@ type DistributedInferencesAPIRouter interface {
 // The EventsAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a EventsAPIServicer to perform the required actions, then write the service results to the http response.
 type EventsAPIRouter interface {
+	GetWorkloadActionsHistory(http.ResponseWriter, *http.Request)
 	SyncEvents(http.ResponseWriter, *http.Request)
 	GetWorkloadEvents(http.ResponseWriter, *http.Request)
 	GetWorkloadHistory(http.ResponseWriter, *http.Request)
@@ -341,6 +342,7 @@ type DistributedInferencesAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type EventsAPIServicer interface {
+	GetWorkloadActionsHistory(context.Context, string, int32, int32) (ImplResponse, error)
 	SyncEvents(context.Context, EventsSyncRequest) (ImplResponse, error)
 	GetWorkloadEvents(context.Context, string, int32, int32, string) (ImplResponse, error)
 	GetWorkloadHistory(context.Context, string, int32, int32) (ImplResponse, error)

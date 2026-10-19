@@ -588,7 +588,7 @@ export interface GetYamlSubmissionValue {
     'enabled'?: boolean | null;
 }
 /**
- * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
  * @export
  * @enum {string}
  */

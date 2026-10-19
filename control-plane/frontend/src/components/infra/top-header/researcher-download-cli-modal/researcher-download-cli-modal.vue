@@ -152,7 +152,8 @@ import {
   EOperatingSystems,
   cliService,
 } from "@/services/control-plane/cli-exposer.service/cli-exposer.service";
-import { ClusterState, type ClustersMinimalData } from "@/swagger-models/cluster-service-client";
+import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
+import { clusterUtil } from "@/utils/cluster.util";
 import { DownloadButtonWithProgress } from "@/components/infra/top-header/researcher-download-cli-modal/download-button-with-progress";
 import { DOCS } from "@/constants/docs";
 import { ErrorAlert } from "@/utils/error-alert.util/error-alert.util";
@@ -238,8 +239,7 @@ export default defineComponent({
     clusterOptions(): IClusterSelectOption[] {
       return this.clusterStore.clusterList
         .filter((c) => {
-          const isConnected = c.state === ClusterState.Connected;
-          return c.version && c.domain && isConnected;
+          return c.version && c.domain && clusterUtil.isClusterReachable(c.state);
         })
         .map((c: ClustersMinimalData) => {
           return {

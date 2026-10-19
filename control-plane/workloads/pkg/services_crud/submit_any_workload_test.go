@@ -91,10 +91,10 @@ func TestWorkloadFromV2SnapshotUsesSnapshotFieldsAndDesiredPhase(t *testing.T) {
 	if response.DesiredPhase != workloadsApi.WORKLOADDESIREDPHASE_RUNNING {
 		t.Fatalf("expected Running desired phase, got %q", response.DesiredPhase)
 	}
-	if response.RequestedName != "requested-name" || response.Spec != spec {
+	if response.RequestedName != "requested-name" || !reflect.DeepEqual(response.Spec, spec) {
 		t.Fatalf("expected requested name and updated typed spec from the snapshot")
 	}
-	if response.MasterSpec.Get() != masterSpec || response.MasterSpecSameAsWorker.Get() == nil || !*response.MasterSpecSameAsWorker.Get() {
+	if !reflect.DeepEqual(response.MasterSpec.Get(), masterSpec) || response.MasterSpecSameAsWorker.Get() == nil || !*response.MasterSpecSameAsWorker.Get() {
 		t.Fatalf("expected distributed inference master fields from the snapshot")
 	}
 	if response.ActualPhase != nil {

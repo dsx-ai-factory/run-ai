@@ -77,7 +77,7 @@ scope.
 | --- | --- | --- |
 | `cluster_id` | Always | Selects the cluster. |
 | `filter` | Overview | Compose from phase, kind, project, department, node pool, node, age, idle threshold, over-quota, priority, image, or owner. |
-| `sort` | Optional | Use a documented `list_workloads.sortBy` field with `sortOrder=asc|desc`. Sort restart count, error rate, or measured idle duration only after fetching their evidence because those are not server fields. |
+| `sort` | Optional | Use a documented `list_workloads` `sortBy` field with `sortOrder=asc` or `sortOrder=desc`. Sort restart count, error rate, or measured idle duration only after fetching their evidence because those are not server fields. |
 | `limit` | Optional | Default `50`; cap output and offer to widen. |
 | `metrics_window` | Optional | Default `1h`; use for metrics and idle/error enrichment. |
 | `correlation_budget` | Failed correlation | Maximum `50` failed workloads. If the complete scoped set is larger, report correlation as incomplete and suppress node-issue labels. |
@@ -169,7 +169,7 @@ Apply these gates in order. A stop means **zero MCP calls**.
    | Workloads on a node | Page `get_node_pods(limit=200)` within the 1,000-pod budget, deduplicate workload IDs, then call `get_workload_status` for each unique ID to obtain phase and ownership. | Do not call metrics unless the user requests a metric filter or ranking. Do not claim completeness after the paging budget is exceeded. |
    | Idle workloads | For a plain idle query, call `list_workloads(gpuIdleOnly=true, includeDetails=true)` after applying project/type scope. For an idle-duration threshold, use that result as the candidate set and then request metrics only for those candidates. | Do not treat `idleAllocatedGpus`, workload age, or phase duration as GPU-idle duration. |
    | Workloads using an image | Apply cheap filters first. Call `get_workload_spec` only when 10 or fewer candidates remain. | Do not make unbounded per-workload spec calls; ask the user to narrow the scope. |
-   | Failed-workload node correlation | Start from the complete scoped failed set with `includeDetails=true`. If it contains at most 50 workloads, call status and one `get_workload_pods(limit=500)` page per candidate before display capping. Collect optional scheduling-eligibility or independent node-health context only for implicated pools and nodes. | If the set exceeds 50, or any workload has more than 500 pods, report incomplete correlation and suppress node-issue labels. Pool size alone does not prove multiple nodes were eligible. Never infer a node issue from placement and `phaseUpdatedAt` alone. |
+   | Failed-workload node correlation | Follow Stage 3 before display capping. Collect optional scheduling-eligibility or independent node-health context only for implicated pools and nodes. | Never infer a node issue from placement and `phaseUpdatedAt` alone. |
 
    For other overview requests, add metrics only for a requested metric filter
    or ranking; add pods only for requested pod state, resources, placement,
@@ -187,14 +187,8 @@ Apply these gates in order. A stop means **zero MCP calls**.
    and report how many candidate specs were inspected.
 6. Sort by the requested key, apply `limit`, and keep `workload_id` in every row.
    Print the complete workload ID; never abbreviate it with an ellipsis.
-   Use documented server-side keys with `sortOrder`, including `type`, `name`,
-   `clusterId`, `projectId`, `projectName`, `departmentId`, `departmentName`,
-   `createdAt`, `deletedAt`, `submittedBy`, `phase`, `completedAt`, `nodepool`,
-   `nodePoolName`, `distributedFramework`, `allocatedGPU`, `allocatedGpu`,
-   `idleAllocatedGpus`, `phaseUpdatedAt`, `category`, `priority`,
-   `totalPendingTimeSeconds`, `totalRunningTimeSeconds`, `priorityClassName`,
-   `preemptibility`, `guaranteedRuntimeEndsAt`, `aiApplicationId`, and
-   `aiApplicationName`. An oldest-first age view maps to
+   Use a server-side key listed in the `list_workloads` `sortBy` schema with
+   `sortOrder`. An oldest-first age view maps to
    `sortBy=createdAt, sortOrder=asc`.
    For Kubernetes-backed restart-count or readiness overviews, label rows with
    restarts > 0 or desired-vs-ready mismatch as `DEGRADED` candidates, not root
@@ -215,48 +209,16 @@ Apply these gates in order. A stop means **zero MCP calls**.
 ### Stage 3 — Failed-workload node correlation
 
 Run this check whenever the overview filter includes `phase=Failed` or the user
-asks whether failures share a node.
-
-1. Start with the complete scoped `list_workloads(includeDetails=true)` result.
-   If it contains more than `50` failed workloads, do not start per-workload
-   correlation calls. Report the count, mark correlation incomplete, suppress
-   `POSSIBLE_NODE_ISSUE` and `LIKELY_NODE_ISSUE`, and ask for narrower scope.
-2. Within the budget, call `get_workload_status` and
-   `get_workload_pods(limit=500)` once per failed candidate. If a pod response
-   has `hasMore=true`, mark that workload's placement incomplete and suppress
-   node-issue labels for the set. Each displayed failed row
-   must include workload ID, name, project, department when returned, type,
-   priority, preemptibility, phase-updated time, and node when returned.
-   Print every workload ID in full and put the owner fields in the displayed
-   row; do not leave them only in prose or tool evidence.
-3. Inspect `phaseMessage`, `phaseReason`, conditions, and recent events before
-   interpreting co-location. If the co-located failures share an explicit
-   workload-level explanation such as the same container exit, user
-   configuration, or image/configuration error, report that shared signal and
-   do not label it a node issue. Do not turn this into root-cause diagnosis.
-4. Treat `phaseUpdatedAt` as retry-exhaustion time when status or events show
-   `BackoffLimitExceeded` or repeated retries. Do not use it as the first-fault
-   time; without an earlier returned failure timestamp, temporal correlation is
-   unavailable.
-5. When two or more failures share a node, first report the factual pattern as
-   `CORRELATED_FAILURES`. Upgrade it to `POSSIBLE_NODE_ISSUE` only when
-   placement and failure timing are complete, no shared workload-level
-   explanation is returned, and either actual scheduling evidence establishes
-   more than one eligible node or independent node-local health evidence
-   supports the pattern. Node-pool cardinality alone is not eligibility; if the
-   required evidence is unavailable, keep the factual label.
-6. Use `LIKELY_NODE_ISSUE` only when `POSSIBLE_NODE_ISSUE` is already supported,
-   the workload signals are node-directed (for example `NodeLost`), and
-   independent read-only evidence identifies the implicated node as unhealthy
-   or under node-local pressure. `get_cluster_infrastructure_health` or optional
-   Kubernetes node evidence may supply this context; absence of such evidence
-   is not proof that the node is healthy.
-7. Always identify affected projects and departments. A failure list is useful
-   only when every row can be routed to an owner. Keep a department column even
-   when every row shares the department used as the filter; do not rely on the
-   surrounding sentence as a substitute for row-level attribution.
-8. Inference workloads are SLA-bearing. Mark them as escalation candidates even
-   when they are not part of the node-correlation cluster.
+asks whether failures share a node, including a plain "what failed" question.
+Before the first status or pod call, read
+`references/failed-node-correlation.md` and follow all eight rules: the
+50-workload budget, one status and one pod call per candidate, shared
+workload-level explanations, what `phaseUpdatedAt` means, the evidence ladder
+from `CORRELATED_FAILURES` to `POSSIBLE_NODE_ISSUE` to `LIKELY_NODE_ISSUE`,
+owner attribution, and inference escalation. Never apply a node-issue label
+without those rules. Every displayed failed row must include workload ID, name,
+project, department when returned, type, priority, preemptibility,
+phase-updated time, and node when returned.
 
 ### Stage 4 — Drill-down
 
@@ -269,90 +231,27 @@ Always call `get_workload_status` first, then choose one path:
 - **Simple state question:** When the user asks only whether the workload is
   running, pending, failed, or finished, answer from status when it is
   conclusive. Stop after status. Do not fetch spec, pods, metrics, policy, or
-  Kubernetes evidence that cannot change that answer.
+  Kubernetes evidence that cannot change that answer. Asking whether a
+  workload is healthy is never a simple state question, even when status
+  already shows it failed.
 - **Full health snapshot:** When the user asks whether the workload is healthy,
   how it is doing, what looks off, or explicitly requests a health snapshot,
   fetch spec, pods, metrics, and policy after the status gate. Run independent
-  reads in parallel when supported. Return all five sections below in order,
-  followed by exactly one verdict. Never drop a section: if its endpoint is
-  unavailable or returns no data, retain the section and state the limitation
-  instead of guessing. If status cannot identify the requested workload
-  unambiguously, stop and ask for corrected scope rather than querying further.
-
-Full health snapshot sections:
-
-1. **State:** phase, submit time, started time when available, last transition,
-   recent five events, project, department, and kind.
-2. **Spec:** GPU and memory ask, CPU, node pools, priority, preemptibility,
-   image, mounts, runtime allocated resources, and actual placement.
-3. **Pods:** MCP pod phase, requested/allocated resources, measurements, and
-   node placement. Include desired-vs-ready, restart count, and readiness only
-   when optional Kubernetes evidence was actually collected.
-4. **Metrics:** request `start`, `end`, and `numberOfSamples`, then compute and
-   label summaries from the returned time-series values. Report GPU utilization
-   average and p95 and GPU-memory usage when those measurement types exist. For
-   inference, summarize returned throughput/latency or NIM counters; do not
-   invent percentiles, targets, request rates, or error rates that the returned
-   samples and labels do not support.
-5. **Policy/Notes:** effective policy when available, autoscaling caps,
-   idle-timeout, preemption-related notes, missing evidence, and anything that
-   needs follow-up.
-
-For policy, use the numeric `projectId` returned by `list_workloads`. If the
-drill-down began from a bare workload ID, resolve the status `projectName` with
-`list_projects(clusterId)` and select an exact name match. Call
-`get_workload_effective_policy(projectId, kind)` where `kind` is the lowercase
-singular status type (`training`, `workspace`, `distributed`, or `inference`).
-If the type is unsupported or project resolution is ambiguous, report policy
-as unavailable rather than guessing.
-
-End with exactly one verdict:
-
-| Verdict | Meaning |
-| --- | --- |
-| `HEALTHY` | Running or completed as expected; MCP pod phases are healthy and no material warning is present. If optional readiness evidence was collected, it must also be healthy. |
-| `DEGRADED` | Running but not fully healthy, near limit, restarting, low-use, or showing a readiness mismatch in evidence that was actually collected. |
-| `FAILED` | Terminal failed state or failed pods. |
-| `PENDING` | Waiting to start or initialize. |
-
-Flag near-cap and off-nominal signals:
-
-- GPU-memory usage above 90% of the workload's allocated GPU-memory limit from
-  `get_workload_spec.allocatedResources.gpuMemory`. Label this denominator
-  explicitly. If the limit is missing or cannot be converted to bytes, report
-  absolute usage only and do not make a percentage-based verdict.
-- Any Kubernetes-reported restart count above 0.
-- Any Kubernetes-reported desired-vs-ready mismatch such as `3/4 Ready`.
-- Inference p95 latency above two times its target when a target is available.
-- GPU idle threshold crossed, using the threshold stated in the filter.
+  reads in parallel when supported. Read `references/drill-down-snapshot.md`
+  and return its five sections in order (State, Spec, Pods, Metrics,
+  Policy/Notes), followed by exactly one verdict: `HEALTHY`, `DEGRADED`,
+  `FAILED`, or `PENDING`. It also holds the policy lookup and the near-cap
+  flags. Never drop a section: if its endpoint is unavailable or returns no
+  data, retain the section and state the limitation instead of guessing. If
+  status cannot identify the requested workload unambiguously, stop and ask for
+  corrected scope rather than querying further.
 
 ## Hand-off
 
 When the drill-down verdict is not `HEALTHY` and the user asks for the cause,
-route rather than guessing:
-
-- Terminal, crashed, pod-start, OOM, image-pull, init, mount, node, or
-  policy-terminated failures -> `runai-diagnose-failed-workload`.
-- Slow or throttled inference -> `runai-diagnose-inference-latency`.
-- Preempted workload -> `runai-diagnose-preempted-workload` when available.
-- Degraded or idle workload cause questions -> the most specific workload
-  diagnostic workflow available for that symptom. If none exists, state that
-  this skill can report the degraded/idle health signals but cannot prove cause.
-- Pending for capacity, placement, scheduling, quota, node selector, taint, or
-  admission reasons -> `runai-diagnose-pending-workload` or the Pending/
-  scheduling diagnostic workflow when available; otherwise state that this
-  summary can report `PENDING` but not diagnose the scheduling cause.
-- Cluster-wide scheduler, node-fleet, control-plane, or platform-health
-  questions -> `runai-get-cluster-health-summary` when available; otherwise
-  name the missing cluster-health workflow and stop.
-- Fleet-wide utilization waste or team efficiency questions -> the utilization
-  overview workflow, preferably `runai-get-utilization-overview`, when
-  available; otherwise name the missing utilization workflow and stop.
-- Historical run-to-run comparison -> a comparison workflow when available;
-  otherwise name the missing comparison workflow and stop.
-
-`HEALTHY` is a complete outcome. Do not hand off when the snapshot already
-answers the user's question.
+route rather than guessing, using the hand-off list in
+`references/drill-down-snapshot.md`. `HEALTHY` is a complete outcome. Do not
+hand off when the snapshot already answers the user's question.
 
 ## Examples
 
@@ -374,19 +273,7 @@ Attribution: node-gpu-17 affects 3 projects / 2 departments; one Inference workl
 Next: drill into any row by workload_id. For root cause, use runai-diagnose-failed-workload.
 ```
 
-### Drill-down
-
-```text
-Workload: training-example | Phase: Running (3h 12m) | Project: project-a | Kind: Distributed
-
-State: Submitted 11:14 | Started 11:16 | Last event: ScalingReplicaSet 2m ago
-Spec: 4 x h100, 256 GiB, 16 CPU | node-pool-a | priority=medium | preemptible=true
-Pods: 4 Running | nodes node-gpu-17/node-gpu-18 | readiness/restarts unavailable from MCP
-Metrics (1h, computed from returned samples): gpu_util avg 87% p95 94% | gpu_mem peak 78 GiB
-Policy/Notes: idle timeout 4h; current idle 0m; no preemption events
-
-Status: HEALTHY.
-```
+The drill-down example is in `references/drill-down-snapshot.md`.
 
 ## Quality standards
 

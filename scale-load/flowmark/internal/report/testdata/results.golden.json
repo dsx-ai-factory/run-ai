@@ -11,13 +11,13 @@
   "regression_detected": true,
   "regressions": [
     {
-      "section": "deployment-burst",
+      "section": "training-burst",
       "metric": "p90_ms@100",
-      "message": "deployment-burst p90_ms@100: 5754 ms is over the SLO of 5000 ms"
+      "message": "training-burst p90_ms@100: 5754 ms is over the SLO of 5000 ms"
     }
   ],
   "sections": {
-    "deployment-burst": {
+    "training-burst": {
       "category": "scale",
       "metrics": {
         "p90_ms@100": 5754,

@@ -184,7 +184,7 @@ jobs:
           PR_NUMBER:   ${{ steps.parse.outputs.number }}
         uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b # v7
         with:
-          github-token: ${{ secrets.GIT_HUB_OSS }}
+          github-token: ${{ secrets.GIT_HUB_OSS_COMMENT }}
           script: |
             // Re-read the head immediately before dispatching. If it moved between
             // Parse and now, the authorised commit is not what would be built.

@@ -29,6 +29,7 @@ properties:
     nullable: true
     example: standard
   volumeMode:
+    type: string
     allOf:
       - $ref: "./WorkloadV2UpdateConfigurationPvcVolumeMode.yaml"
     nullable: true

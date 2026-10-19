@@ -1233,8 +1233,9 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect(*update.Configuration.NetworkingEndpoints).To(HaveLen(1))
 		})
 
-		It("persists Configuration.Pvcs on create and returns it in updates and GET", func() {
+		It("persists PVC configuration on create and returns it in updates and GET", func() {
 			pvcName := "data"
+			pvcsConfig := &api.WorkloadV2UpdateConfigurationPvcsConfig{CleanupOnCompletion: convutils.Ref(true)}
 			accessMode := api.WORKLOADV2UPDATECONFIGURATIONPVCACCESSMODE_READ_WRITE_ONCE
 			pvcs := []api.WorkloadV2UpdateConfigurationPvc{
 				{
@@ -1254,7 +1255,8 @@ var _ = Describe("WorkloadsV2Impl", func() {
 					Priority:  convutils.Ref("high"),
 					Category:  convutils.Ref("train"),
 					Configuration: api.WorkloadV2Configuration{
-						Pvcs: &pvcs,
+						Pvcs:       &pvcs,
+						PvcsConfig: pvcsConfig,
 					},
 				},
 				Manifest: sampleManifest,
@@ -1265,6 +1267,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect(payload.Metadata.Configuration.Pvcs).NotTo(BeNil())
 			Expect(*payload.Metadata.Configuration.Pvcs).To(HaveLen(1))
 			Expect((*payload.Metadata.Configuration.Pvcs)[0].Metadata.Name).To(Equal(pvcName))
+			Expect(payload.Metadata.Configuration.PvcsConfig).To(Equal(pvcsConfig))
 
 			getPayload := getWorkloadForTest(router, randoms, id)
 			Expect(getPayload.Workload.Metadata.Configuration.Pvcs).NotTo(BeNil())
@@ -1272,6 +1275,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect((*getPayload.Workload.Metadata.Configuration.Pvcs)[0].Metadata.Name).To(Equal(pvcName))
 			Expect((*getPayload.Workload.Metadata.Configuration.Pvcs)[0].Spec.AccessModes).To(ConsistOf(accessMode))
 			Expect((*getPayload.Workload.Metadata.Configuration.Pvcs)[0].Spec.Resources.Requests.Storage).To(Equal("1Gi"))
+			Expect(getPayload.Workload.Metadata.Configuration.PvcsConfig).To(Equal(pvcsConfig))
 
 			updates := getUpdatesForTest(router, randoms, 0, 50, emptyClusterReports)
 			Expect(len(updates.Workloads)).To(BeNumerically(">=", 1))
@@ -1288,6 +1292,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect((*update.Configuration.Pvcs)[0].Metadata.Name).To(Equal(pvcName))
 			Expect((*update.Configuration.Pvcs)[0].Spec.AccessModes).To(ConsistOf(accessMode))
 			Expect((*update.Configuration.Pvcs)[0].Spec.Resources.Requests.Storage).To(Equal("1Gi"))
+			Expect(update.Configuration.PvcsConfig).To(Equal(pvcsConfig))
 		})
 
 	})

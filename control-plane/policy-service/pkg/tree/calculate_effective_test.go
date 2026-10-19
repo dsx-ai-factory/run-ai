@@ -8,9 +8,11 @@ package tree
 import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("calculate effective test", func() {
@@ -118,6 +120,96 @@ var _ = Describe("calculate effective test", func() {
 
 			testutils.Expect(actualRulesFromParent).ToEqual(expectedRulesFromParent)
 		})
+	})
+
+	Context("system rules inherited through an intermediate policy", func() {
+		It("allows the current policy to override the system rule", func() {
+			ht := HierarchyTree{}
+
+			systemRules := api.TrainingPolicyRulesV2{
+				Security: &api.SupersetRulesAllOfSecurity{
+					Privileged: &api.BooleanRules{
+						CanEdit: convutils.Ref(false),
+						SourceOfRule: &api.SourceOfRule{
+							Scope: api.SCOPETYPE_SYSTEM,
+						},
+					},
+				},
+			}
+			projectRules := api.TrainingPolicyRulesV2{
+				Security: &api.SupersetRulesAllOfSecurity{
+					Privileged: &api.BooleanRules{
+						CanEdit: convutils.Ref(true),
+					},
+				},
+			}
+
+			systemRulesMap, err := gojsonq.LoadJson(systemRules)
+			Expect(err).To(BeNil())
+			projectRulesMap, err := gojsonq.LoadJson(projectRules)
+			Expect(err).To(BeNil())
+
+			clusterEffectiveRules, err := ht.MergeRules(dbmodels.JsonBMap(systemRulesMap).Clone(), nil, nil, map[string]interface{}{
+				"scope":     api.SCOPETYPE_CLUSTER,
+				"clusterId": "cluster-1",
+			})
+			Expect(err).To(BeNil())
+
+			rulesFromParent := ht.DetermineSourceOfRules(projectRulesMap, clusterEffectiveRules)
+			testutils.Expect(rulesFromParent["security.privileged"]).ToEqual(false)
+
+			projectEffectiveRules, err := ht.MergeRules(clusterEffectiveRules, projectRulesMap, rulesFromParent, map[string]interface{}{
+				"scope":     api.SCOPETYPE_PROJECT,
+				"projectId": 1111,
+			})
+			Expect(err).To(BeNil())
+
+			privilegedRule := convutils.MapMe(convutils.MapMe(projectEffectiveRules["security"])["privileged"])
+			testutils.Expect(privilegedRule["canEdit"]).ToEqual(true)
+			testutils.Expect(convutils.MapMe(privilegedRule["sourceOfRule"])["scope"]).ToEqual(api.SCOPETYPE_PROJECT)
+		})
+
+		DescribeTable("keeps an explicitly authored ancestor security rule authoritative", func(sourceOfRule api.SourceOfRule) {
+			ht := HierarchyTree{}
+
+			parentRules := api.TrainingPolicyRulesV2{
+				Security: &api.SupersetRulesAllOfSecurity{
+					Privileged: &api.BooleanRules{
+						CanEdit:      convutils.Ref(false),
+						SourceOfRule: &sourceOfRule,
+					},
+				},
+			}
+			projectRules := api.TrainingPolicyRulesV2{
+				Security: &api.SupersetRulesAllOfSecurity{
+					Privileged: &api.BooleanRules{
+						CanEdit: convutils.Ref(true),
+					},
+				},
+			}
+
+			parentRulesMap, err := gojsonq.LoadJson(parentRules)
+			Expect(err).To(BeNil())
+			projectRulesMap, err := gojsonq.LoadJson(projectRules)
+			Expect(err).To(BeNil())
+
+			rulesFromParent := ht.DetermineSourceOfRules(projectRulesMap, parentRulesMap)
+			testutils.Expect(rulesFromParent["security.privileged"]).ToEqual(true)
+
+			projectEffectiveRules, err := ht.MergeRules(parentRulesMap, projectRulesMap, rulesFromParent, map[string]interface{}{
+				"scope":     api.SCOPETYPE_PROJECT,
+				"projectId": 1111,
+			})
+			Expect(err).To(BeNil())
+
+			privilegedRule := convutils.MapMe(convutils.MapMe(projectEffectiveRules["security"])["privileged"])
+			testutils.Expect(privilegedRule["canEdit"]).ToEqual(false)
+			testutils.Expect(convutils.MapMe(privilegedRule["sourceOfRule"])["scope"]).ToEqual(sourceOfRule.Scope)
+		},
+			Entry("tenant rule", api.SourceOfRule{Scope: api.SCOPETYPE_TENANT}),
+			Entry("cluster rule", api.SourceOfRule{Scope: api.SCOPETYPE_CLUSTER, ClusterId: convutils.Ref("cluster-1")}),
+			Entry("department rule", api.SourceOfRule{Scope: api.SCOPETYPE_DEPARTMENT, DepartmentId: convutils.Ref("department-1")}),
+		)
 	})
 
 	Context("fields from parent - distributed", func() {

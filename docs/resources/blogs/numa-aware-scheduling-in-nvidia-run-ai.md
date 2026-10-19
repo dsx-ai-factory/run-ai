@@ -15,7 +15,7 @@ This matters most for inference. Tokenization, detokenization, and staging of mo
 
 At a high level: a node can look like it has free GPUs and free CPU on paper, while in reality the free GPU sits on one socket and the free CPU and memory sit on the other. Nothing on that node can serve a workload that needs all of its resources together.
 
-<img src="../../assets/numa-d1-misalignment.png" alt="Resources are free on the node, but not on the same socket." height="315" width="560">
+<img src="../../assets/numa-d1-misalignment.png" alt="Resources are free on the node, but not on the same socket." height="315" width="560" />
 
 Kubernetes coordinates NUMA alignment through a kubelet component called the Topology Manager. It can be set to one of four policies: none, best-effort, restricted, or single-numa-node. The policy determines how strictly CPU, memory, and devices must align on a single NUMA node at the moment a pod is admitted.
 
@@ -29,7 +29,7 @@ At a high level: turning on strict NUMA policies looks like the obvious fix, but
 
 An administrator who notices the cross-socket tax will reach for one of the two rejecting policies. single-numa-node requires the entire pod to fit on one NUMA node; restricted admits a pod only on the minimal NUMA-node span that satisfies its needs. Both policies do what they advertise inside one node. The problem is the layer above: the scheduler is not NUMA-aware. It places pods using whole-node accounting (total free GPUs, total free CPU, total free memory) with no idea how those resources are distributed across the sockets.
 
-<img src="../../assets/numa-d2-today-vs-numa.png" alt="Without NUMA-aware scheduling, the scheduler binds to a node the kubelet then rejects, and often re-picks the same node." height="280" width="560">
+<img src="../../assets/numa-d2-today-vs-numa.png" alt="Without NUMA-aware scheduling, the scheduler binds to a node the kubelet then rejects, and often re-picks the same node." height="280" width="560" />
 
 The failure pattern is predictable. The scheduler sees a node with a free GPU and enough free CPU in total, and binds the pod there. The kubelet then tries to admit it, discovers the free GPU is on the opposite socket from the free CPU and memory, and rejects the pod with a TopologyAffinityError. The pod goes back to Pending. The scheduler, still looking at whole-node free counts, often re-picks the same node, wasting scheduling cycles, leaving capacity that looks free but cannot accept work, and stranding GPUs that should be earning their keep. Inference deployments end up bouncing between Pending and admission errors. On-call engineers chase the symptom across hosts before realizing the scheduler and the kubelet disagree about what the cluster can actually run.
 
@@ -43,9 +43,8 @@ The Run:ai Scheduler (built on KAI Scheduler) consumes the per-node NodeResource
 
 With NRT in hand, the Scheduler predicts each candidate node's admission verdict. For a single-numa-node policy, it places the workload only where all its resources fit on one NUMA node. For restricted, it admits a multi-NUMA workload only on the minimal NUMA-node span the kubelet would accept (for example, a 6-GPU pod on a node with a 4+2 split). For best-effort and none nodes, it passes through and lets the kubelet decide. The Scheduler reads each node's policy from that node's NRT object and self-configures, engaging only on nodes that actually run a strict policy.
 
-<img src="../../assets/numa-d3-policies.png" alt="NUMA-aware placement under the two strict policies: single-numa-node fits everything on one NUMA node; restricted admits a multi-NUMA pod on the minimal NUMA-node span." height="280" width="560">
+<img src="../../assets/numa-d3-policies.png" alt="NUMA-aware placement under the two strict policies: single-numa-node fits everything on one NUMA node; restricted admits a multi-NUMA pod on the minimal NUMA-node span." height="280" width="560" />
 
-\
 The kubelet remains the backstop. Even if the Scheduler ever mispredicts, the kubelet enforces real alignment at admission, so no workload is ever mis-pinned. The worst case is a wasted reschedule, not an incorrect placement.
 
 #### The Placement Agent: Trust, but Read the Node
@@ -73,9 +72,3 @@ For latency-critical inference pools, restricted is often worth the trade-off: p
 Without NUMA-aware scheduling, admins who turn on a strict Topology Manager policy can hit a persistent failure mode: the scheduler keeps binding pods to nodes that look fine at the whole-node level but the kubelet cannot align, and legitimate workloads bounce between Pending and admission errors. Run:ai's NUMA-aware scheduling closes this gap: the scheduler places workloads on nodes that can actually align them, so the persistent bounce loop goes away, and for managers the result is more throughput per GPU dollar: the same hardware delivers higher inference performance, GPUs previously stranded by NUMA fragmentation come back into play, and the long tail of stuck-pod incidents goes away. For engineers, the cluster behaves the way the documentation promised: inference deployments either run on aligned resources or stay pending with a clear, actionable reason. For platform operators, strict Topology Manager policies become a practical option in production, with per-node-pool control so inference and training can share the same cluster without one type forcing compromises on the other.
 
 NUMA-aware scheduling is one of those topics where the absence of failures is the point. With Run:ai's end-to-end approach (NRT-based prediction, full compliance with restricted and single-numa-node, the Run:ai on-node placement agent, clear visibility, and per-node-pool control), the layer that decides where your inference workload runs inside the box stops being the silent tax on your AI infrastructure.
-
-\
-<br>
-
-\
-<br>

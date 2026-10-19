@@ -47,6 +47,7 @@ import (
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	. "github.com/onsi/ginkgo/v2"
+	"github.com/stretchr/testify/mock"
 )
 
 var allWorkspaceTypes = []TableEntry{
@@ -99,6 +100,71 @@ var _ = Describe("unified service validations", func() {
 
 	AfterEach(func() {
 		testing.CleanTables()
+	})
+
+	Context("GPU memory compatibility for copy and edit", func() {
+		DescribeTable("preserves both aliases after creating a workspace", func(prefix string) {
+			request := api.WorkspaceCreationRequest{Name: "gpu-copy", ProjectId: randoms.ProjectIdStr, ClusterId: randoms.ClusterId}
+			Expect(json.Unmarshal([]byte(fmt.Sprintf(`{"image":"ubuntu","compute":{"gpuDevicesRequest":1,"gpuRequestType":"portion","%sRequest":0.5,"%sLimit":0.5}}`, prefix, prefix)), &request.Spec)).To(Succeed())
+			settings := &bc_mocks.TenantSettingsClient{}
+			settings.On("GetGpuResourceOptimization", mock.Anything).Return(true, nil).Once()
+			created, err := CreateWorkspace(ctx, settings, request)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(created.Code).To(Equal(http.StatusAccepted), "%v", created.Body)
+			workload := created.Body.(workloadsApi.SupersetWorkload)
+			req := unifiedReqByRandoms(api.WORKLOADTYPE_WORKSPACE, randoms)
+			req.WorkloadId = &workload.WorkloadId
+			response, err := NewUnifiedAPIService().GetUnifiedWorkload(ctx, api.UnifiedWorkloadRequest(*req))
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			result := response.Body.(*workloadsApi.UnifiedWorkload)
+			compute := result.Spec.Get().Worker.Get().Compute.Get()
+			Expect(compute.GetGpuPortionRequest()).To(Equal(0.5))
+			Expect(compute.GetGpuMemoryPortionRequest()).To(Equal(0.5))
+			Expect(compute.GetGpuPortionLimit()).To(Equal(0.5))
+			Expect(compute.GetGpuMemoryPortionLimit()).To(Equal(0.5))
+		}, Entry("legacy request", "gpuPortion"), Entry("new request", "gpuMemoryPortion"))
+
+		for _, workloadType := range []api.WorkloadType{api.WORKLOADTYPE_WORKSPACE, api.WORKLOADTYPE_TRAINING, api.WORKLOADTYPE_INFERENCE, api.WORKLOADTYPE_DISTRIBUTED, api.WORKLOADTYPE_DISTRIBUTED_INFERENCE} {
+			DescribeTable("preserves snapshot aliases for "+string(workloadType), func(prefix string, value float64) {
+				snapshot := workloadV2SnapshotForTest(uuid.New(), workloadType, randoms)
+				computeJSON := fmt.Sprintf(`{"compute":{"gpuDevicesRequest":1,"gpuRequestType":"portion","%sRequest":%v,"%sLimit":0.5}}`, prefix, value, prefix)
+				payload := computeJSON
+				if workloadType == api.WORKLOADTYPE_DISTRIBUTED_INFERENCE {
+					payload = fmt.Sprintf(`{"leader":%s,"worker":%s}`, computeJSON, computeJSON)
+				}
+				Expect(json.Unmarshal([]byte(payload), snapshot.Spec)).To(Succeed())
+				if workloadType == api.WORKLOADTYPE_DISTRIBUTED {
+					snapshot.MasterSpec = &workloadsApi.MasterSpec{}
+					Expect(json.Unmarshal([]byte(computeJSON), snapshot.MasterSpec)).To(Succeed())
+				}
+				Expect(dao_crud.DbUpsertWorkloadV2Snapshot(ctx, snapshot)).To(BeNil())
+				req := unifiedReqByRandoms(workloadType, randoms)
+				req.WorkloadId = convutils.Ref(snapshot.ID.String())
+				result, err := req.Exec(ctx)
+				Expect(err).To(BeNil())
+				spec := result.Spec.Get()
+				computes := []*workloadsApi.WorkspaceSpecSpecAllOfCompute{spec.Worker.Get().Compute.Get()}
+				if workloadType == api.WORKLOADTYPE_DISTRIBUTED {
+					computes = append(computes, spec.Master.Get().Compute.Get())
+				}
+				if workloadType == api.WORKLOADTYPE_DISTRIBUTED_INFERENCE {
+					computes = []*workloadsApi.WorkspaceSpecSpecAllOfCompute{spec.Worker.Get().Leader.Get().Compute.Get(), spec.Worker.Get().Worker.Get().Compute.Get()}
+				}
+				for _, compute := range computes {
+					Expect(compute).NotTo(BeNil())
+					Expect(compute.GetGpuPortionRequest()).To(Equal(value))
+					if value > 1 {
+						Expect(compute.GpuMemoryPortionRequest.IsSet()).To(BeFalse())
+					} else {
+						Expect(compute.GpuMemoryPortionRequest.Get()).NotTo(BeNil())
+						Expect(compute.GetGpuMemoryPortionRequest()).To(Equal(value))
+					}
+					Expect(compute.GetGpuPortionLimit()).To(Equal(0.5))
+					Expect(compute.GetGpuMemoryPortionLimit()).To(Equal(0.5))
+				}
+			}, Entry("legacy fraction", "gpuPortion", 0.5), Entry("new fraction", "gpuMemoryPortion", 0.5), Entry("explicit zero", "gpuPortion", 0.0), Entry("legacy whole GPU count", "gpuPortion", 4.0))
+		}
 	})
 
 	Context("no policy defined", func() {

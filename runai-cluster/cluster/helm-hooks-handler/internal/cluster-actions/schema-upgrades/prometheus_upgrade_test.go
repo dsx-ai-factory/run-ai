@@ -27,7 +27,7 @@ func TestPrometheusUpgradeRunaiConfigWithRunaiRemoteWrite(t *testing.T) {
 		CommonPrometheusFields: monitoringv1.CommonPrometheusFields{
 			RemoteWrite: []monitoringv1.RemoteWriteSpec{
 				{
-					URL: "https://aaa.runailabs.com/api/v1/receive",
+					URL: "https://aaa.example.com/api/v1/receive",
 					BasicAuth: &monitoringv1.BasicAuth{
 						Password: coreV1.SecretKeySelector{
 							Key: "remoteWritePassword",
@@ -67,7 +67,7 @@ func TestPrometheusUpgradeRunaiConfigWithMultipleRemoteWrites(t *testing.T) {
 		CommonPrometheusFields: monitoringv1.CommonPrometheusFields{
 			RemoteWrite: []monitoringv1.RemoteWriteSpec{
 				{
-					URL: "https://aaa.runailabs.com/api/v1/receive",
+					URL: "https://aaa.example.com/api/v1/receive",
 					BasicAuth: &monitoringv1.BasicAuth{
 						Password: coreV1.SecretKeySelector{
 							Key: "remoteWritePassword",
