@@ -56,9 +56,8 @@ name: Project Triage
 # Reuse in other repositories
 #
 # Any repository whose issues are on a Project can call this workflow, provided
-# its Actions policy allows this reusable workflow. This repository has no
-# `area/` labels, so the area-label condition is off here; repositories that
-# use such labels turn it on with `require_area_label: true`:
+# its Actions policy allows this reusable workflow. The area-label condition
+# needs `area/` labels; repositories without them turn it off:
 #
 #     name: Project Triage
 #     on:
@@ -69,7 +68,7 @@ name: Project Triage
 #       triage:
 #         uses: dsx-ai-factory/run-ai/.github/workflows/project-triage.yaml@main
 #         permissions: { contents: read, issues: read }
-#         with: { project_owner: dsx-ai-factory, project_number: 7, require_area_label: true }
+#         with: { project_owner: dsx-ai-factory, project_number: 7, require_area_label: false }
 #         secrets:
 #           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 #
@@ -100,7 +99,7 @@ on:
       require_area_label:
         description: "Require a label starting with `area_label_prefix` before promoting."
         type: boolean
-        default: false
+        default: true
       area_label_prefix:
         description: "Label prefix that marks a triaged area."
         type: string
@@ -161,7 +160,7 @@ jobs:
           # default only when the input is absent. The script compares strings.
           PROJECT_OWNER: ${{ inputs.project_owner || 'dsx-ai-factory' }}
           PROJECT_NUMBER: ${{ format('{0}', inputs.project_number) || '7' }}
-          REQUIRE_AREA_LABEL: ${{ format('{0}', inputs.require_area_label) || 'false' }}
+          REQUIRE_AREA_LABEL: ${{ format('{0}', inputs.require_area_label) || 'true' }}
           AREA_LABEL_PREFIX: ${{ inputs.area_label_prefix || 'area/' }}
           TRIAGE_STATUS: ${{ inputs.triage_status || 'Needs Triage' }}
           TARGET_STATUS: ${{ inputs.target_status || 'Backlog' }}
