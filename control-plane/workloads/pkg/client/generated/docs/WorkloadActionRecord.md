@@ -4,13 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | **string** | A unique ID of the workload action-history record. |
-**WorkloadId** | **string** | A unique ID of the workload. |
-**WorkloadName** | **string** | The name of the workload. |
-**Subject** | **string** | The authenticated subject that performed the workload action. |
-**SubjectType** | **string** | The authenticated subject type, preserved as provided by the identity context. Examples include user, service-account, and app, with casing determined by the identity provider. |
+**Id** | **string** | A unique ID of the workload action-history record. | 
+**WorkloadId** | **string** | A unique ID of the workload. | 
+**WorkloadName** | **string** | The name of the workload. | 
+**Subject** | **string** | The authenticated subject that performed the workload action. | 
+**SubjectType** | **string** | The authenticated subject type, preserved as provided by the identity context. Examples include user, service-account, and app, with casing determined by the identity provider. | 
 **Action** | [**WorkloadActionType**](WorkloadActionType.md) |  | 
-**AcceptedAt** | **time.Time** | The time when the workload action was accepted. |
+**AcceptedAt** | **time.Time** | The time when the workload action was accepted. | 
 
 ## Methods
 

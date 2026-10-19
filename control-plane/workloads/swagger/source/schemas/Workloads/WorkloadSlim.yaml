@@ -1,0 +1,24 @@
+type: object
+description: A workload as returned by GET /api/v1/workloads/slim.
+required:
+  - id
+  - name
+  - projectName
+  - clusterId
+properties:
+  id:
+    type: string
+    format: uuid
+  name:
+    type: string
+    example: "very-important-job"
+  type:
+    type: string
+  projectName:
+    type: string
+    example: "proj-1"
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
+  distributedFramework:
+    type: string
+    example: "Pytorch"

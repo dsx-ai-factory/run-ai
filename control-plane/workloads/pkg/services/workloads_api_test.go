@@ -1305,6 +1305,79 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 				Expect(workloadsResponse.Next).To(Equal(nextRecord))
 			}
 		})
+		Context("Slim", func() {
+			slimFilter := []string{fmt.Sprintf("clusterId==%s", testing.ClusterUuid1), fmt.Sprintf("name==%s", DefaultWorkloadName)}
+
+			getSlimWorkloads := func(filterBy []string) []api.WorkloadSlim {
+				apiResponse, _ := workloadsService.GetWorkloadsSlim(ctx, 0, 0, filterBy)
+				Expect(apiResponse.Code).To(Equal(http.StatusOK))
+				bytes, err := json.Marshal(apiResponse.Body)
+				Expect(err).To(BeNil())
+				response := api.GetWorkloadsSlimResponse{}
+				Expect(json.Unmarshal(bytes, &response)).To(Succeed())
+				return response.Workloads
+			}
+
+			It("fills the identity fields", func() {
+				workloads := getSlimWorkloads(slimFilter)
+				Expect(workloads).To(HaveLen(3))
+				for _, workload := range workloads {
+					Expect(workload.Name).To(Equal(DefaultWorkloadName))
+					Expect(workload.Type).To(Equal(DefaultType))
+					Expect(workload.ProjectName).To(Equal(DefaultProjectName))
+					Expect(workload.ClusterId).To(Equal(testing.ClusterUuid1))
+					Expect(workload.DistributedFramework).To(BeEmpty())
+				}
+			})
+			It("sorts by id ascending", func() {
+				ids := []string{}
+				for _, workload := range getSlimWorkloads(slimFilter) {
+					ids = append(ids, workload.Id)
+				}
+				Expect(ids).To(Equal([]string{testing.TestUuid1, testing.TestUuid2, testing.TestUuid3}))
+			})
+			It("filters by distributed framework", func() {
+				Expect(getSlimWorkloads(append(slimFilter, "distributedFramework!=PyTorchJob"))).To(HaveLen(3))
+				Expect(getSlimWorkloads(append(slimFilter, "distributedFramework==PyTorchJob"))).To(BeEmpty())
+			})
+			It("returns a workload as soon as it's created", func() {
+				newWorkload := SetupBaseWorkload(testing.TestUuid7, DefaultProjectId, testing.ClusterUuid1)
+				newWorkload.Name = "slim-new-workload"
+				apiResponse, _ := workloadsService.SyncWorkloads(ctx, []string{}, api.WorkloadsSyncRequest{
+					ProjectId: DefaultProjectId,
+					Workloads: []api.WorkloadSyncFields{
+						newWorkload,
+						SetupBaseWorkload(testing.TestUuid1, DefaultProjectId, testing.ClusterUuid1),
+						SetupBaseWorkload(testing.TestUuid2, DefaultProjectId, testing.ClusterUuid1),
+						SetupBaseWorkload(testing.TestUuid3, DefaultProjectId, testing.ClusterUuid1),
+					},
+				})
+				Expect(apiResponse.Code).To(Equal(http.StatusNoContent))
+				createdWorkloadsIds = append(createdWorkloadsIds, testing.TestUuid7)
+
+				workloads := getSlimWorkloads([]string{fmt.Sprintf("clusterId==%s", testing.ClusterUuid1), "name==slim-new-workload"})
+				Expect(workloads).To(HaveLen(1))
+				Expect(workloads[0].Id).To(Equal(testing.TestUuid7))
+			})
+			It("doesn't return deleted workloads", func() {
+				_, err := runaidb.DB().Table(dao.WorkloadsTableName).Where("id = ?", testing.TestUuid3).Update("deleted_at", time.Now())
+				Expect(err).To(BeNil())
+				DeferCleanup(func() {
+					_, err := runaidb.DB().Table(dao.WorkloadsTableName).Where("id = ?", testing.TestUuid3).Update("deleted_at", nil)
+					Expect(err).To(BeNil())
+				})
+
+				workloads := getSlimWorkloads(slimFilter)
+				Expect(workloads).To(HaveLen(2))
+				for _, workload := range workloads {
+					Expect(workload.Id).ToNot(Equal(testing.TestUuid3))
+				}
+			})
+			It("rejects filters on fields that aren't slim fields", func() {
+				apiResponse, _ := workloadsService.GetWorkloadsSlim(ctx, 0, 0, []string{"phase==Running"})
+				Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 		Describe("Idle GPUs", func() {
 			BeforeEach(func() {
 				_, err := runaidb.DB().Table(dao.WorkloadsTableName).Where("id = ?", id3).

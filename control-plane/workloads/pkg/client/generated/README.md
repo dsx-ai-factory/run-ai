@@ -210,6 +210,7 @@ Class | Method | HTTP request | Description
 *WorkloadsAPI* | [**GetWorkloadEndpoints**](docs/WorkloadsAPI.md#getworkloadendpoints) | **Get** /api/v1/workloads/{workloadId}/endpoints | Get workload endpoints.
 *WorkloadsAPI* | [**GetWorkloadMetrics**](docs/WorkloadsAPI.md#getworkloadmetrics) | **Get** /api/v1/workloads/{workloadId}/metrics | Get workload metrics data.
 *WorkloadsAPI* | [**GetWorkloads**](docs/WorkloadsAPI.md#getworkloads) | **Get** /api/v1/workloads | List workloads.
+*WorkloadsAPI* | [**GetWorkloadsSlim**](docs/WorkloadsAPI.md#getworkloadsslim) | **Get** /api/v1/workloads/slim | List workloads, slim.
 *WorkloadsAPI* | [**GetWorkloadsTelemetry**](docs/WorkloadsAPI.md#getworkloadstelemetry) | **Get** /api/v1/workloads/telemetry | Get the workloads telemetry.
 *WorkloadsAPI* | [**InternalCreateWorkload**](docs/WorkloadsAPI.md#internalcreateworkload) | **Post** /internal/workloads | Create a workload by the control plane.
 *WorkloadsAPI* | [**InternalEnrichOrgUnitRanking**](docs/WorkloadsAPI.md#internalenrichorgunitranking) | **Post** /internal/workloads/enrich-ranking | Enrich org unit ranking with workload counts (Internal API).
@@ -446,6 +447,7 @@ Class | Method | HTTP request | Description
  - [GetWorkloadSubmissionV2Enabled](docs/GetWorkloadSubmissionV2Enabled.md)
  - [GetWorkloads200Response](docs/GetWorkloads200Response.md)
  - [GetWorkloadsSetting](docs/GetWorkloadsSetting.md)
+ - [GetWorkloadsSlimResponse](docs/GetWorkloadsSlimResponse.md)
  - [GitAuthenticationMethod](docs/GitAuthenticationMethod.md)
  - [GitCommon](docs/GitCommon.md)
  - [GitInstance](docs/GitInstance.md)
@@ -787,6 +789,7 @@ Class | Method | HTTP request | Description
  - [WorkloadPodsSyncRequest](docs/WorkloadPodsSyncRequest.md)
  - [WorkloadPriority](docs/WorkloadPriority.md)
  - [WorkloadRequestResources](docs/WorkloadRequestResources.md)
+ - [WorkloadSlim](docs/WorkloadSlim.md)
  - [WorkloadSortFilterFields](docs/WorkloadSortFilterFields.md)
  - [WorkloadSubmissionV2EnabledSetting](docs/WorkloadSubmissionV2EnabledSetting.md)
  - [WorkloadSyncFields](docs/WorkloadSyncFields.md)

@@ -57,7 +57,7 @@ func (ig IssueGroup) String() string {
 }
 
 type WorkloadClient interface {
-	List(ctx context.Context, limit, offset int32, filters []string, deleted bool) (*openapi.GetWorkloads200Response, error)
+	ListSlim(ctx context.Context, limit, offset int32, filters []string) (*openapi.GetWorkloadsSlimResponse, error)
 	GetWorkload(ctx context.Context, id string) (*openapi.WorkloadDetailed, error)
 	GetTraining(ctx context.Context, id string) (*openapi.Training, error)
 	GetWorkspace(ctx context.Context, id string) (*openapi.Workspace, error)
@@ -107,8 +107,8 @@ func (s *Service) GetWorkload(ctx context.Context, reqWorkload *api.Workload, po
 	if reqWorkload.ID != "" {
 		workloadId = reqWorkload.ID
 	} else {
-		var workloadFromList *openapi.Workload
-		workloadFromList, err = getWorkloadByFilter(ctx, s.workloadClient, reqWorkload, false)
+		var workloadFromList *openapi.WorkloadSlim
+		workloadFromList, err = getWorkloadByFilter(ctx, s.workloadClient, reqWorkload)
 		if err != nil {
 			return nil, err
 		}
@@ -720,7 +720,7 @@ func buildInvolvedObject(apiObject *openapi.InvolvedObject) displayer.InvolvedOb
 		Build()
 }
 
-func getWorkloadByFilter(ctx context.Context, workloadClient WorkloadClient, reqWorkload *api.Workload, deleted bool) (*openapi.Workload, error) {
+func getWorkloadByFilter(ctx context.Context, workloadClient WorkloadClient, reqWorkload *api.Workload) (*openapi.WorkloadSlim, error) {
 	fb := filter.NewBuilder().
 		WithClusterID(reqWorkload.ClusterID).
 		WithProject(reqWorkload.Project)
@@ -738,7 +738,7 @@ func getWorkloadByFilter(ctx context.Context, workloadClient WorkloadClient, req
 	if reqWorkload.Framework != internalApi.UndefinedFramework {
 		fb.WithWorkloadFramework(reqWorkload.Framework)
 	}
-	workloadList, err := workloadClient.List(ctx, ListLimit, OffsetDefault, fb.StringList(), deleted)
+	workloadList, err := workloadClient.ListSlim(ctx, ListLimit, OffsetDefault, fb.StringList())
 	if err != nil {
 		return nil, err
 	}
@@ -752,7 +752,7 @@ func getWorkloadByFilter(ctx context.Context, workloadClient WorkloadClient, req
 				Name:    workload.Name,
 				ID:      workload.Id,
 				Project: workload.ProjectName,
-				Kind:    workload.Type,
+				Kind:    workload.GetType(),
 			})
 		}
 		return nil, api.NewMultiWorkloadsError(workloadsFound)
