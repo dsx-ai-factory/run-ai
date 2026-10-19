@@ -24394,49 +24394,6 @@ export interface WorkloadRequestResources {
     'extendedResources'?: Array<WorkloadsExtendedResource> | null;
 }
 /**
- * A workload as returned by GET /api/v1/workloads/slim.
- * @export
- * @interface WorkloadSlim
- */
-export interface WorkloadSlim {
-    /**
-     * 
-     * @type {string}
-     * @memberof WorkloadSlim
-     */
-    'id': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof WorkloadSlim
-     */
-    'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof WorkloadSlim
-     */
-    'type'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof WorkloadSlim
-     */
-    'projectName': string;
-    /**
-     * The id of the cluster.
-     * @type {string}
-     * @memberof WorkloadSlim
-     */
-    'clusterId': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof WorkloadSlim
-     */
-    'distributedFramework'?: string;
-}
-/**
  * 
  * @export
  * @interface WorkloadResourceClaim
@@ -24492,6 +24449,49 @@ export interface WorkloadResourceClaimsResponse {
      * @memberof WorkloadResourceClaimsResponse
      */
     'pods': Array<WorkloadPodResourceClaims>;
+}
+/**
+ * A workload as returned by GET /api/v1/workloads/slim.
+ * @export
+ * @interface WorkloadSlim
+ */
+export interface WorkloadSlim {
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'projectName': string;
+    /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'clusterId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'distributedFramework'?: string;
 }
 /**
  * 
