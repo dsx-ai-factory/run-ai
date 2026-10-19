@@ -108,7 +108,7 @@ Dependencies
 | `github.com/segmentio/kafka-go` | v0.4.51 | MIT | https://github.com/segmentio/kafka-go/blob/v0.4.51/LICENSE |
 | `github.com/segmentio/ksuid` | v1.0.4 | MIT | https://github.com/segmentio/ksuid/blob/v1.0.4/LICENSE.md |
 | `github.com/sethvargo/go-retry` | v0.4.0 | Apache-2.0 | https://github.com/sethvargo/go-retry/blob/v0.4.0/LICENSE |
-| `github.com/shopspring/decimal` | v1.5.0 | MIT | https://github.com/shopspring/decimal/blob/v1.5.0/LICENSE |
+| `github.com/shopspring/decimal` | v1.6.0 | MIT | https://github.com/shopspring/decimal/blob/v1.6.0/LICENSE |
 | `github.com/sony/gobreaker` | v1.0.0 | MIT | https://github.com/sony/gobreaker/blob/v1.0.0/LICENSE |
 | `github.com/spf13/afero` | v1.15.0 | Apache-2.0 | https://github.com/spf13/afero/blob/v1.15.0/LICENSE.txt |
 | `github.com/spf13/cast` | v1.10.0 | MIT | https://github.com/spf13/cast/blob/v1.10.0/LICENSE |
