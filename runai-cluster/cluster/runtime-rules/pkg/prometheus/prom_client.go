@@ -45,7 +45,7 @@ func (pc *PromClient) Query(ctx context.Context, query string) (result model.Val
 	ctx, cancel := context.WithTimeout(ctx, prometheusMetricTimeoutSeconds*time.Second)
 	defer cancel()
 
-	result, warnings, err := v1api.Query(ctx, query, time.Now())
+	result, warnings, _, err := v1api.Query(ctx, query, time.Now())
 	if err != nil {
 		klog.Error("Error querying prometheus: ", err.Error())
 		return nil, err

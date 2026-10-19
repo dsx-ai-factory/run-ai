@@ -73,7 +73,7 @@ var prometheusPerformanceMetricExtractors = []prometheusPerformanceMetricExtract
 	func(ctx context.Context, promClient v1.API, since time.Time) (*performanceMetricPair, error) {
 		query := fmt.Sprintf(`increase(prometheus_target_sync_failed_total{namespace="runai",container="prometheus"}[%ds])`, int(time.Since(since).Seconds()))
 
-		queryResult, _, err := promClient.Query(ctx, query, time.Now())
+		queryResult, _, _, err := promClient.Query(ctx, query, time.Now())
 		if err != nil {
 			return nil, fmt.Errorf("failed querying %s: %w", query, err)
 		}
@@ -109,7 +109,7 @@ var prometheusPerformanceMetricExtractors = []prometheusPerformanceMetricExtract
 }
 
 func extractUniqueInstantVectorValue(ctx context.Context, promClient v1.API, query string) (*model.SampleValue, error) {
-	queryResult, _, err := promClient.Query(ctx, query, time.Now())
+	queryResult, _, _, err := promClient.Query(ctx, query, time.Now())
 	if err != nil {
 		return nil, fmt.Errorf("failed querying %s: %w", query, err)
 	}
