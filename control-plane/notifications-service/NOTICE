@@ -55,7 +55,7 @@ Dependencies
 | `github.com/go-openapi/runtime/middleware/denco` | v0.33.3 | MIT | https://github.com/go-openapi/runtime/blob/v0.33.3/middleware/denco/LICENSE |
 | `github.com/go-openapi/runtime/server-middleware` | v0.33.3 | Apache-2.0 | https://github.com/go-openapi/runtime/blob/server-middleware/v0.33.3/server-middleware/LICENSE |
 | `github.com/go-openapi/spec` | v1.0.1 | Apache-2.0 | https://github.com/go-openapi/spec/blob/v1.0.1/LICENSE |
-| `github.com/go-openapi/strfmt` | v0.27.3 | Apache-2.0 | https://github.com/go-openapi/strfmt/blob/v0.27.3/LICENSE |
+| `github.com/go-openapi/strfmt` | v0.27.4 | Apache-2.0 | https://github.com/go-openapi/strfmt/blob/v0.27.4/LICENSE |
 | `github.com/go-openapi/swag` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/v0.29.2/LICENSE |
 | `github.com/go-openapi/swag/cmdutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/cmdutils/v0.29.2/cmdutils/LICENSE |
 | `github.com/go-openapi/swag/conv` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/conv/v0.29.2/conv/LICENSE |
