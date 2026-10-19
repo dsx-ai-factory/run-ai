@@ -41,6 +41,10 @@ WorkloadDetailed:
   $ref: './Workloads/WorkloadDetailed.yaml'
 Workloads:
   $ref: './Workloads/Workloads.yaml'
+WorkloadSlim:
+  $ref: './Workloads/WorkloadSlim.yaml'
+GetWorkloadsSlimResponse:
+  $ref: './Workloads/GetWorkloadsSlimResponse.yaml'
 Environment:
   $ref: './Workloads/Environment.yaml'
 Datasource:

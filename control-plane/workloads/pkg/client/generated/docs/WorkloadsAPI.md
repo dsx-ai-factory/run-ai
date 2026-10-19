@@ -16,6 +16,7 @@ Method | HTTP request | Description
 [**GetWorkloadEndpoints**](WorkloadsAPI.md#GetWorkloadEndpoints) | **Get** /api/v1/workloads/{workloadId}/endpoints | Get workload endpoints.
 [**GetWorkloadMetrics**](WorkloadsAPI.md#GetWorkloadMetrics) | **Get** /api/v1/workloads/{workloadId}/metrics | Get workload metrics data.
 [**GetWorkloads**](WorkloadsAPI.md#GetWorkloads) | **Get** /api/v1/workloads | List workloads.
+[**GetWorkloadsSlim**](WorkloadsAPI.md#GetWorkloadsSlim) | **Get** /api/v1/workloads/slim | List workloads, slim.
 [**GetWorkloadsTelemetry**](WorkloadsAPI.md#GetWorkloadsTelemetry) | **Get** /api/v1/workloads/telemetry | Get the workloads telemetry.
 [**InternalCreateWorkload**](WorkloadsAPI.md#InternalCreateWorkload) | **Post** /internal/workloads | Create a workload by the control plane.
 [**InternalEnrichOrgUnitRanking**](WorkloadsAPI.md#InternalEnrichOrgUnitRanking) | **Post** /internal/workloads/enrich-ranking | Enrich org unit ranking with workload counts (Internal API).
@@ -899,6 +900,76 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**GetWorkloads200Response**](GetWorkloads200Response.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## GetWorkloadsSlim
+
+> GetWorkloadsSlimResponse GetWorkloadsSlim(ctx).Offset(offset).Limit(limit).FilterBy(filterBy).Execute()
+
+List workloads, slim.
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
+)
+
+func main() {
+	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
+	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+	filterBy := []string{"Inner_example"} // []string | Filter results by a parameter. Use the format field-name operator value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal, `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts with and `=$` Ends with. (optional)
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.WorkloadsAPI.GetWorkloadsSlim(context.Background()).Offset(offset).Limit(limit).FilterBy(filterBy).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `WorkloadsAPI.GetWorkloadsSlim``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `GetWorkloadsSlim`: GetWorkloadsSlimResponse
+	fmt.Fprintf(os.Stdout, "Response from `WorkloadsAPI.GetWorkloadsSlim`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiGetWorkloadsSlimRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **offset** | **int32** | The offset of the first item returned in the collection. | 
+ **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+ **filterBy** | **[]string** | Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. | 
+
+### Return type
+
+[**GetWorkloadsSlimResponse**](GetWorkloadsSlimResponse.md)
 
 ### Authorization
 

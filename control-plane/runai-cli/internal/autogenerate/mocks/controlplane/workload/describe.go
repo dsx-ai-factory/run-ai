@@ -144,19 +144,19 @@ func (mr *MockWorkloadClientMockRecorder) GetWorkspace(ctx, id interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkspace", reflect.TypeOf((*MockWorkloadClient)(nil).GetWorkspace), ctx, id)
 }
 
-// List mocks base method.
-func (m *MockWorkloadClient) List(ctx context.Context, limit, offset int32, filters []string, deleted bool) (*openapi.GetWorkloads200Response, error) {
+// ListSlim mocks base method.
+func (m *MockWorkloadClient) ListSlim(ctx context.Context, limit, offset int32, filters []string) (*openapi.GetWorkloadsSlimResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "List", ctx, limit, offset, filters, deleted)
-	ret0, _ := ret[0].(*openapi.GetWorkloads200Response)
+	ret := m.ctrl.Call(m, "ListSlim", ctx, limit, offset, filters)
+	ret0, _ := ret[0].(*openapi.GetWorkloadsSlimResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// List indicates an expected call of List.
-func (mr *MockWorkloadClientMockRecorder) List(ctx, limit, offset, filters, deleted interface{}) *gomock.Call {
+// ListSlim indicates an expected call of ListSlim.
+func (mr *MockWorkloadClientMockRecorder) ListSlim(ctx, limit, offset, filters interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "List", reflect.TypeOf((*MockWorkloadClient)(nil).List), ctx, limit, offset, filters, deleted)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListSlim", reflect.TypeOf((*MockWorkloadClient)(nil).ListSlim), ctx, limit, offset, filters)
 }
 
 // MockWorkloadV2Getter is a mock of WorkloadV2Getter interface.
