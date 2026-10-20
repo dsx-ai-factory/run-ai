@@ -27,7 +27,7 @@ Dependencies
 
 | Package | Version | License | License source |
 |---------|---------|---------|----------------|
-| `github.com/awslabs/operatorpkg` | v0.0.0-20261006163503-855c7d06c363 | Apache-2.0 | https://github.com/awslabs/operatorpkg/blob/855c7d06c363/LICENSE |
+| `github.com/awslabs/operatorpkg` | v0.0.0-20261019155633-4e7ba6e9cd42 | Apache-2.0 | https://github.com/awslabs/operatorpkg/blob/4e7ba6e9cd42/LICENSE |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/cespare/xxhash/v2` | v2.3.0 | MIT | https://pkg.go.dev/github.com/cespare/xxhash/v2@v2.3.0?tab=licenses |
 | `github.com/davecgh/go-spew/spew` | v1.1.2-0.20180830191138-d8f796af33cc | ISC | https://github.com/davecgh/go-spew/blob/d8f796af33cc/LICENSE |
@@ -3653,7 +3653,7 @@ section 4(d) of the Apache License, Version 2.0 requires.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/awslabs/operatorpkg` v0.0.0-20261006163503-855c7d06c363
+  - `github.com/awslabs/operatorpkg` v0.0.0-20261019155633-4e7ba6e9cd42
 --------------------------------------------------------------------------------
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.

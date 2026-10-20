@@ -30,7 +30,7 @@ replace (
 )
 
 require (
-	github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363 // indirect
+	github.com/awslabs/operatorpkg v0.0.0-20261019155633-4e7ba6e9cd42 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
