@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/Rican7/retry v0.3.1
