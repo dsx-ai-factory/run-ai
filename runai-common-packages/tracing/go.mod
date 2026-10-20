@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/redis/go-redis/extra/redisotel/v9 v9.23.0
