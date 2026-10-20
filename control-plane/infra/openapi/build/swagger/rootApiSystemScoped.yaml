@@ -10,10 +10,6 @@ info:
 
     To get your access token, follow the instructions in [API Access Setup](/run-ai/multi-tenant/reference/rest-api/getting-started/api-access-setup).
   title: NVIDIA Run:ai
-  x-logo:
-    url: ./runai-logo-api.png
-    altText: NVIDIA Run:ai
-    href: https://run.ai
   license:
     name: NVIDIA Run:ai
     url: https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/

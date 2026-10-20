@@ -46,6 +46,8 @@ paths:
     $ref: "./resources/ResourceClaimTemplates.yaml"
   /api/v1/k8s-objects/resource-claim-templates/{AssetId}:
     $ref: './resources/ResourceClaimTemplatesById.yaml'
+  /api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads:
+    $ref: './resources/ResourceClaimTemplateWorkloads.yaml'
   /api/v1/k8s-objects/updates:
     $ref: "./resources/K8sObjectsUpdates.yaml"
 

@@ -1335,6 +1335,149 @@ func (_c *IOrgUnitClient_NodePoolDeleted_Call) RunAndReturn(run func(ctx context
 	return _c
 }
 
+// NodePoolResetResources provides a mock function for the type IOrgUnitClient
+func (_mock *IOrgUnitClient) NodePoolResetResources(ctx context.Context, clusterId string, nodePoolId string, action openapi.NodepoolResourcesResetAction) error {
+	ret := _mock.Called(ctx, clusterId, nodePoolId, action)
+
+	if len(ret) == 0 {
+		panic("no return value specified for NodePoolResetResources")
+	}
+
+	var r0 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, openapi.NodepoolResourcesResetAction) error); ok {
+		r0 = returnFunc(ctx, clusterId, nodePoolId, action)
+	} else {
+		r0 = ret.Error(0)
+	}
+	return r0
+}
+
+// IOrgUnitClient_NodePoolResetResources_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'NodePoolResetResources'
+type IOrgUnitClient_NodePoolResetResources_Call struct {
+	*mock.Call
+}
+
+// NodePoolResetResources is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - nodePoolId string
+//   - action openapi.NodepoolResourcesResetAction
+func (_e *IOrgUnitClient_Expecter) NodePoolResetResources(ctx any, clusterId any, nodePoolId any, action any) *IOrgUnitClient_NodePoolResetResources_Call {
+	return &IOrgUnitClient_NodePoolResetResources_Call{Call: _e.mock.On("NodePoolResetResources", ctx, clusterId, nodePoolId, action)}
+}
+
+func (_c *IOrgUnitClient_NodePoolResetResources_Call) Run(run func(ctx context.Context, clusterId string, nodePoolId string, action openapi.NodepoolResourcesResetAction)) *IOrgUnitClient_NodePoolResetResources_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 openapi.NodepoolResourcesResetAction
+		if args[3] != nil {
+			arg3 = args[3].(openapi.NodepoolResourcesResetAction)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *IOrgUnitClient_NodePoolResetResources_Call) Return(err error) *IOrgUnitClient_NodePoolResetResources_Call {
+	_c.Call.Return(err)
+	return _c
+}
+
+func (_c *IOrgUnitClient_NodePoolResetResources_Call) RunAndReturn(run func(ctx context.Context, clusterId string, nodePoolId string, action openapi.NodepoolResourcesResetAction) error) *IOrgUnitClient_NodePoolResetResources_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// NodePoolSummary provides a mock function for the type IOrgUnitClient
+func (_mock *IOrgUnitClient) NodePoolSummary(ctx context.Context, nodePoolId string, summaryType openapi.OrgUnitsNodepoolSummaryType) ([]openapi.OrgUnitsNodepoolSummaryInner, error) {
+	ret := _mock.Called(ctx, nodePoolId, summaryType)
+
+	if len(ret) == 0 {
+		panic("no return value specified for NodePoolSummary")
+	}
+
+	var r0 []openapi.OrgUnitsNodepoolSummaryInner
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.OrgUnitsNodepoolSummaryType) ([]openapi.OrgUnitsNodepoolSummaryInner, error)); ok {
+		return returnFunc(ctx, nodePoolId, summaryType)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, openapi.OrgUnitsNodepoolSummaryType) []openapi.OrgUnitsNodepoolSummaryInner); ok {
+		r0 = returnFunc(ctx, nodePoolId, summaryType)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]openapi.OrgUnitsNodepoolSummaryInner)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, openapi.OrgUnitsNodepoolSummaryType) error); ok {
+		r1 = returnFunc(ctx, nodePoolId, summaryType)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// IOrgUnitClient_NodePoolSummary_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'NodePoolSummary'
+type IOrgUnitClient_NodePoolSummary_Call struct {
+	*mock.Call
+}
+
+// NodePoolSummary is a helper method to define mock.On call
+//   - ctx context.Context
+//   - nodePoolId string
+//   - summaryType openapi.OrgUnitsNodepoolSummaryType
+func (_e *IOrgUnitClient_Expecter) NodePoolSummary(ctx any, nodePoolId any, summaryType any) *IOrgUnitClient_NodePoolSummary_Call {
+	return &IOrgUnitClient_NodePoolSummary_Call{Call: _e.mock.On("NodePoolSummary", ctx, nodePoolId, summaryType)}
+}
+
+func (_c *IOrgUnitClient_NodePoolSummary_Call) Run(run func(ctx context.Context, nodePoolId string, summaryType openapi.OrgUnitsNodepoolSummaryType)) *IOrgUnitClient_NodePoolSummary_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 openapi.OrgUnitsNodepoolSummaryType
+		if args[2] != nil {
+			arg2 = args[2].(openapi.OrgUnitsNodepoolSummaryType)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *IOrgUnitClient_NodePoolSummary_Call) Return(orgUnitsNodepoolSummaryInners []openapi.OrgUnitsNodepoolSummaryInner, err error) *IOrgUnitClient_NodePoolSummary_Call {
+	_c.Call.Return(orgUnitsNodepoolSummaryInners, err)
+	return _c
+}
+
+func (_c *IOrgUnitClient_NodePoolSummary_Call) RunAndReturn(run func(ctx context.Context, nodePoolId string, summaryType openapi.OrgUnitsNodepoolSummaryType) ([]openapi.OrgUnitsNodepoolSummaryInner, error)) *IOrgUnitClient_NodePoolSummary_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // SyncClusterProjects provides a mock function for the type IOrgUnitClient
 func (_mock *IOrgUnitClient) SyncClusterProjects(ctx context.Context, clusterId string, syncProjects []openapi.ProjectInSyncRequest) (*http.Response, error) {
 	ret := _mock.Called(ctx, clusterId, syncProjects)

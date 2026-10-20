@@ -24,7 +24,7 @@ var dummyGpuComputeMode = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// GpuComputeMode : GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+// GpuComputeMode : GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
 type GpuComputeMode string
 
 // List of GpuComputeMode

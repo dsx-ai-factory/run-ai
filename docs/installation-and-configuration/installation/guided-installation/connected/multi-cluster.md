@@ -82,13 +82,10 @@ For a control plane installation on Kubernetes, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
-       telemetryService: # Support-Entitled Release only
-         enabled: true
-         telemetryAuth: # Optional
-           token: <SERVICE_API_KEY>
+       telemetryService.enabled: true # Support-Entitled Release only
+       telemetryService.telemetryAuth.token: <SERVICE_API_KEY> # Optional
        # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 4. Configure external access to the control plane:
@@ -123,8 +120,7 @@ controlPlane:
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
     # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 externalConnection:
   type: ingress
@@ -182,13 +178,10 @@ For a control plane installation on OpenShift, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
-       telemetryService: # Support-Entitled Release only
-         enabled: true
-         telemetryAuth: # Optional
-           token: <SERVICE_API_KEY>
+       telemetryService.enabled: true # Support-Entitled Release only
+       telemetryService.telemetryAuth.token: <SERVICE_API_KEY> # Optional
        # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 The following example combines these settings to install the NVIDIA Run:ai control plane on OpenShift:
@@ -210,8 +203,7 @@ controlPlane:
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
     # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 ```
 
 </Accordion>
@@ -317,8 +309,7 @@ For a cluster installation on Kubernetes, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 4. Enable the prerequisites:
@@ -394,8 +385,7 @@ cluster:
   version: ""
   customHelmValues:
     # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 prerequisites:
   gpuOperator:
@@ -466,8 +456,7 @@ For a cluster installation on OpenShift, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 4. Enable the prerequisites:
@@ -528,8 +517,7 @@ cluster:
   version: ""
   customHelmValues:
     # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 prerequisites:
   gpuOperator:

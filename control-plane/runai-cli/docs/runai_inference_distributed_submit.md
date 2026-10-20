@@ -62,11 +62,12 @@ runai inference distributed submit <workload-name> -p <project-name> -i tiangolo
       --exclude-node stringArray                              Nodes that will be excluded from use by the scheduler. Format: --exclude-node node-a --exclude-node node-b
       --existing-pvc stringArray                              Mount an existing PersistentVolumeClaim. Format: claimname=CLAIM_NAME,path=PATH. Auto-complete supported.
       --extended-resource stringArray                         Request access to a Kubernetes extended resource. Format: resource_name=quantity.
+      --gpu-compute-mode string                               GPU compute sharing mode. Valid values: time-slicing, sm-sharing. Requires cluster version 3.0.14+.
   -g, --gpu-devices-request positiveInt                       Number of GPU devices to allocate for the workload (e.g. 1, 2).
       --gpu-memory-limit string                               Maximum GPU memory to allocate (e.g. 1G, 500M).
+      --gpu-memory-portion-limit positiveFloat                Maximum GPU memory fraction allowed per device (between 0 and 1).
+      --gpu-memory-portion-request positiveFloat              GPU memory fraction to allocate per device (between 0 and 1, e.g. 0.5).
       --gpu-memory-request string                             Amount of GPU memory to allocate (e.g. 1G, 500M).
-      --gpu-portion-limit positiveFloat                       Maximum GPU fraction allowed for the workload (between 0 and 1).
-      --gpu-portion-request positiveFloat                     Fraction of a GPU to allocate (between 0 and 1, e.g. 0.5).
       --gpu-request-type string                               Type of GPU request: portion, memory
   -h, --help                                                  help for submit
       --host-ipc                                              Enable host IPC for the container. Default: false.
@@ -124,11 +125,12 @@ runai inference distributed submit <workload-name> -p <project-name> -i tiangolo
       --worker-exclude-node stringArray                       Nodes that will be excluded from use by worker pods. Format: --worker-exclude-node node-a --worker-exclude-node node-b
       --worker-existing-pvc stringArray                       Mount an existing PersistentVolumeClaim for worker pods. Format: claimname=CLAIM_NAME,path=PATH. Auto-complete supported.
       --worker-extended-resource stringArray                  Request access to a Kubernetes extended resource per worker pod. Format: resource_name=quantity.
+      --worker-gpu-compute-mode string                        GPU compute sharing mode. Valid values: time-slicing, sm-sharing. Requires cluster version 3.0.14+.
       --worker-gpu-devices-request positiveInt                Number of GPU devices to allocate per worker pod (e.g. 1, 2).
       --worker-gpu-memory-limit string                        Maximum GPU memory to allocate per worker pod (e.g. 1G, 500M).
+      --worker-gpu-memory-portion-limit positiveFloat         Maximum GPU memory fraction allowed per device for each worker pod (between 0 and 1).
+      --worker-gpu-memory-portion-request positiveFloat       GPU memory fraction to allocate per device for each worker pod (between 0 and 1, e.g. 0.5).
       --worker-gpu-memory-request string                      Amount of GPU memory to allocate per worker pod (e.g. 1G, 500M).
-      --worker-gpu-portion-limit positiveFloat                Maximum GPU fraction allowed per worker pod (between 0 and 1).
-      --worker-gpu-portion-request positiveFloat              Fraction of a GPU to allocate per worker pod (between 0 and 1, e.g. 0.5).
       --worker-host-ipc                                       Enable host IPC for worker pods. Default: false.
       --worker-host-network                                   Enable host networking for worker pods. Default: false.
       --worker-image string                                   The container image to use for worker pods.

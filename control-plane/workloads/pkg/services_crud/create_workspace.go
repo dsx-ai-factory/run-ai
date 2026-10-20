@@ -9,6 +9,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
@@ -45,5 +47,7 @@ func CreateWorkspace(ctx context.Context, tenantSettingsClient clients.TenantSet
 		return api.Response(int(createErr.Code), createErr), nil
 	}
 
+	recordWorkloadCreate(ctx, &createWorkloadParams)
+	createWorkloadParams.Response.Spec = gpucompat.LegacyCompatibleWorkloadSpec(createWorkloadParams.Response.Spec)
 	return api.Response(http.StatusAccepted, createWorkloadParams.Response), nil
 }

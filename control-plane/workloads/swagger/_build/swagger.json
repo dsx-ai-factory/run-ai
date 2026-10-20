@@ -39,6 +39,66 @@
         }
       }
     },
+    "/api/v1/workloads/{workloadId}/actions": {
+      "get": {
+        "summary": "Get workload action history.",
+        "description": "Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.",
+        "operationId": "get_workload_actions_history",
+        "x-service": "workloads",
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services/workload_actions_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workloads",
+          "action": "read",
+          "resource-id": "workloadId"
+        },
+        "tags": [
+          "WorkloadActions"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkloadId"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWorkloadActionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/workloads/scrapeable-metrics": {
       "get": {
         "summary": "Get workloads metrics in openmetrics format for scraping.",
@@ -125,6 +185,49 @@
           },
           "409": {
             "$ref": "#/components/responses/409Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/workloads/actions": {
+      "post": {
+        "summary": "Store workload actions.",
+        "description": "Records workload actions accepted by workloads-manager, using the authenticated request context to identify who performed them and the supplied timestamp to record when they were accepted.",
+        "operationId": "internal_create_workload_actions",
+        "x-service": "workloads",
+        "x-internal": true,
+        "x-no-authorization": true,
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services/workload_actions_api_test.go"
+        ],
+        "tags": [
+          "WorkloadActions"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateWorkloadActionsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Actions stored successfully."
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "412": {
+            "$ref": "#/components/responses/412PreconditionFailed"
           },
           "500": {
             "$ref": "#/components/responses/500InternalServerError"
@@ -343,6 +446,70 @@
           },
           "404": {
             "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/internal/workloads/resource-claim-templates/workloads": {
+      "post": {
+        "x-internal": true,
+        "summary": "List the workloads referencing a resource claim template (Internal API).",
+        "description": "Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template.\n",
+        "operationId": "internal_get_resource_claim_template_workloads",
+        "x-service": "workloads",
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services/resource_claims_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workloads",
+          "action": "read"
+        },
+        "tags": [
+          "Workloads"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InternalResourceClaimTemplateWorkloadsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaimTemplateWorkloadsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
           },
           "500": {
             "$ref": "#/components/responses/500InternalServerError"
@@ -602,6 +769,63 @@
                       }
                     }
                   }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/workloads/slim": {
+      "get": {
+        "x-internal": true,
+        "summary": "List workloads, slim.",
+        "description": "Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.\nWorkloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.\n",
+        "operationId": "get_workloads_slim",
+        "x-service": "workloads",
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services/workloads_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workloads",
+          "action": "read"
+        },
+        "tags": [
+          "Workloads"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/WorkloadsSlimFilter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWorkloadsSlimResponse"
                 }
               }
             }
@@ -6826,6 +7050,66 @@
         }
       }
     },
+    "/api/v1/workloads/{workloadId}/resource-claims": {
+      "get": {
+        "summary": "Get workload resource claims by workload id.",
+        "description": "Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed.\n",
+        "operationId": "get_workload_resource_claims",
+        "x-service": "workloads",
+        "x-test-coverage": [
+          "control-plane/workloads/pkg/services/resource_claims_api_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "workloads",
+          "action": "read",
+          "resource-id": "workloadId"
+        },
+        "tags": [
+          "Workloads"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/WorkloadId"
+          },
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Executed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkloadResourceClaimsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/500InternalServerError"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/workload-categories": {
       "get": {
         "summary": "List workload categories.",
@@ -8696,6 +8980,40 @@
   },
   "components": {
     "parameters": {
+      "WorkloadId": {
+        "name": "workloadId",
+        "in": "path",
+        "required": true,
+        "description": "The  Universally Unique Identifier (UUID) of the workload.",
+        "schema": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "description": "The offset of the first item returned in the collection.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "example": 100
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "The maximum number of entries to return.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
       "WorkloadsFilter": {
         "name": "filterBy",
         "in": "query",
@@ -8754,30 +9072,6 @@
         "description": "Return only deleted resources when `true`.",
         "schema": {
           "type": "boolean"
-        }
-      },
-      "Offset": {
-        "name": "offset",
-        "in": "query",
-        "required": false,
-        "description": "The offset of the first item returned in the collection.",
-        "schema": {
-          "type": "integer",
-          "format": "int32",
-          "example": 100
-        }
-      },
-      "Limit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "The maximum number of entries to return.",
-        "schema": {
-          "type": "integer",
-          "format": "int32",
-          "default": 50,
-          "minimum": 1,
-          "maximum": 500
         }
       },
       "SortOrder": {
@@ -8841,15 +9135,24 @@
           "example": "test project"
         }
       },
-      "WorkloadId": {
-        "name": "workloadId",
-        "in": "path",
-        "required": true,
-        "description": "The  Universally Unique Identifier (UUID) of the workload.",
+      "WorkloadsSlimFilter": {
+        "name": "filterBy",
+        "in": "query",
+        "required": false,
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal, `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts with and `=$` Ends with.",
         "schema": {
-          "type": "string",
-          "format": "uuid"
-        }
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "pattern": "^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+          },
+          "example": [
+            "name==some-workload-name",
+            "projectName==proj-1"
+          ]
+        },
+        "explode": false
       },
       "Precise": {
         "name": "precise",
@@ -9596,6 +9899,105 @@
       }
     },
     "schemas": {
+      "WorkloadActionId": {
+        "description": "A unique ID of the workload action-history record.",
+        "type": "string",
+        "format": "uuid",
+        "example": "497f6eca-6276-4993-bfeb-53cbbbba6f08"
+      },
+      "WorkloadId": {
+        "description": "A unique ID of the workload.",
+        "type": "string",
+        "format": "uuid"
+      },
+      "WorkloadName": {
+        "description": "The name of the workload.",
+        "type": "string",
+        "minLength": 1,
+        "example": "my-workload-name",
+        "pattern": ".*"
+      },
+      "WorkloadActionSubject": {
+        "description": "The authenticated subject that performed the workload action.",
+        "type": "string",
+        "example": "user@run.ai"
+      },
+      "WorkloadActionSubjectType": {
+        "description": "The authenticated subject type, preserved as provided by the identity context. Examples include user, service-account, and app, with casing determined by the identity provider.",
+        "type": "string",
+        "example": "user"
+      },
+      "WorkloadActionType": {
+        "type": "string",
+        "enum": [
+          "create",
+          "update",
+          "delete",
+          "suspend",
+          "resume"
+        ]
+      },
+      "WorkloadActionAcceptedAt": {
+        "description": "The time when the workload action was accepted.",
+        "type": "string",
+        "format": "date-time",
+        "example": "2026-01-01T03:49:52.531Z"
+      },
+      "WorkloadActionRecord": {
+        "type": "object",
+        "required": [
+          "id",
+          "workloadId",
+          "workloadName",
+          "subject",
+          "subjectType",
+          "action",
+          "acceptedAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/WorkloadActionId"
+          },
+          "workloadId": {
+            "$ref": "#/components/schemas/WorkloadId"
+          },
+          "workloadName": {
+            "$ref": "#/components/schemas/WorkloadName"
+          },
+          "subject": {
+            "$ref": "#/components/schemas/WorkloadActionSubject"
+          },
+          "subjectType": {
+            "$ref": "#/components/schemas/WorkloadActionSubjectType"
+          },
+          "action": {
+            "$ref": "#/components/schemas/WorkloadActionType"
+          },
+          "acceptedAt": {
+            "$ref": "#/components/schemas/WorkloadActionAcceptedAt"
+          }
+        }
+      },
+      "GetWorkloadActionsResponse": {
+        "type": "object",
+        "required": [
+          "actions"
+        ],
+        "properties": {
+          "actions": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/components/schemas/WorkloadActionRecord"
+            }
+          },
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "example": 50
+          }
+        }
+      },
       "Error": {
         "required": [
           "code",
@@ -10712,6 +11114,53 @@
           }
         }
       },
+      "WorkloadActionRecordInput": {
+        "type": "object",
+        "required": [
+          "id",
+          "clusterId",
+          "workloadId",
+          "workloadName",
+          "action",
+          "acceptedAt"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/WorkloadActionId"
+          },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          },
+          "workloadId": {
+            "$ref": "#/components/schemas/WorkloadId"
+          },
+          "workloadName": {
+            "$ref": "#/components/schemas/WorkloadName"
+          },
+          "action": {
+            "$ref": "#/components/schemas/WorkloadActionType"
+          },
+          "acceptedAt": {
+            "$ref": "#/components/schemas/WorkloadActionAcceptedAt"
+          }
+        }
+      },
+      "CreateWorkloadActionsRequest": {
+        "type": "object",
+        "required": [
+          "actions"
+        ],
+        "properties": {
+          "actions": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/components/schemas/WorkloadActionRecordInput"
+            }
+          }
+        }
+      },
       "WorkloadNetworkStatus": {
         "type": "object",
         "properties": {
@@ -11502,6 +11951,37 @@
           }
         }
       },
+      "PodResourceClaim": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Pod-local name of the claim entry (DNS_LABEL). Mirrors `pod.spec.resourceClaims[].name` and the key used by `pod.status.resourceClaimStatuses[].name` to publish the bound claim.",
+            "example": "gpu-1"
+          },
+          "resourceClaimTemplateName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the referenced `ResourceClaimTemplate` in the pod's namespace, when the claim entry was created from a template. Mutually exclusive with `resourceClaimName`. Mirrors `pod.spec.resourceClaims[].resourceClaimTemplateName`.",
+            "example": "single-gpu"
+          },
+          "resourceClaimName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of a standalone `ResourceClaim` that the pod references directly, when the claim entry is not created from a template. Mutually exclusive with `resourceClaimTemplateName`. Mirrors `pod.spec.resourceClaims[].resourceClaimName`.",
+            "example": "shared-infiniband"
+          },
+          "allocatedResourceClaimName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the actual `ResourceClaim` bound to the pod for this entry. For a template-generated entry this is populated from `pod.status.resourceClaimStatuses[].resourceClaimName` once Kubernetes publishes it, and is null until then. For a standalone entry it equals `resourceClaimName` and is populated immediately. This is the field the forward-view API surfaces as the \"actual\" bound claim.",
+            "example": "dra-gpu-test-gpu-1-mk4s8"
+          }
+        }
+      },
       "PodSyncFields": {
         "type": "object",
         "required": [
@@ -11611,6 +12091,14 @@
               "$ref": "#/components/schemas/PodElement"
             },
             "description": "The workload structure elements this pod belongs to, ordered by hierarchy level."
+          },
+          "resourceClaims": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PodResourceClaim"
+            },
+            "description": "Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here."
           }
         }
       },
@@ -11658,6 +12146,149 @@
           }
         },
         "description": "Request to update pods on a specific node in a cluster"
+      },
+      "ScopeType": {
+        "type": "string",
+        "enum": [
+          "system",
+          "tenant",
+          "cluster",
+          "department",
+          "project"
+        ]
+      },
+      "ScopeId": {
+        "type": "string",
+        "description": "The id of the cluster, department or project, depending on the scope type."
+      },
+      "InternalResourceClaimTemplateWorkloadsRequest": {
+        "type": "object",
+        "required": [
+          "name",
+          "scopeType",
+          "scopeId"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The name of the ResourceClaimTemplate, as referenced by pods.",
+            "example": "single-gpu"
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          }
+        }
+      },
+      "ReportedWorkloadType": {
+        "description": "The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.",
+        "type": "string",
+        "example": "Training"
+      },
+      "ProjectId": {
+        "description": "The id of the project.",
+        "type": "string",
+        "example": 1,
+        "pattern": ".*"
+      },
+      "PodResourceClaimBinding": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.",
+            "example": "gpu-1"
+          },
+          "claimName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.",
+            "example": "bert-worker-0-gpu-1-mk4s8"
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkloadPod": {
+        "type": "object",
+        "required": [
+          "podId",
+          "podName",
+          "resourceClaims"
+        ],
+        "properties": {
+          "podId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of the pod."
+          },
+          "podName": {
+            "type": "string",
+            "example": "bert-worker-0"
+          },
+          "resourceClaims": {
+            "type": "array",
+            "description": "The pod's claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.",
+            "items": {
+              "$ref": "#/components/schemas/PodResourceClaimBinding"
+            }
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkload": {
+        "type": "object",
+        "required": [
+          "workloadId",
+          "name",
+          "type",
+          "projectId",
+          "pods"
+        ],
+        "properties": {
+          "workloadId": {
+            "$ref": "#/components/schemas/WorkloadId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/WorkloadName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ReportedWorkloadType"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "pods": {
+            "type": "array",
+            "description": "The pods of the workload that reference the resource claim template.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplateWorkloadPod"
+            }
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkloadsResponse": {
+        "type": "object",
+        "required": [
+          "workloads"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit).\n"
+          },
+          "workloads": {
+            "type": "array",
+            "description": "The workloads whose pods currently reference the resource claim template.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplateWorkload"
+            }
+          }
+        }
       },
       "UpdateCount": {
         "description": "the value of an update counter of a data in the system.",
@@ -11829,6 +12460,59 @@
             "items": {
               "type": "string",
               "format": "uuid"
+            }
+          }
+        }
+      },
+      "WorkloadSlim": {
+        "type": "object",
+        "description": "A workload as returned by GET /api/v1/workloads/slim.",
+        "required": [
+          "id",
+          "name",
+          "projectName",
+          "clusterId"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "example": "very-important-job"
+          },
+          "type": {
+            "type": "string"
+          },
+          "projectName": {
+            "type": "string",
+            "example": "proj-1"
+          },
+          "clusterId": {
+            "$ref": "#/components/schemas/ClusterId"
+          },
+          "distributedFramework": {
+            "type": "string",
+            "example": "Pytorch"
+          }
+        }
+      },
+      "GetWorkloadsSlimResponse": {
+        "type": "object",
+        "description": "The response of GET /api/v1/workloads/slim.",
+        "required": [
+          "workloads"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "example": 1
+          },
+          "workloads": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkloadSlim"
             }
           }
         }
@@ -12699,19 +13383,6 @@
           "NVLINK_BANDWIDTH_TOTAL"
         ]
       },
-      "WorkloadName": {
-        "description": "The name of the workload.",
-        "type": "string",
-        "minLength": 1,
-        "example": "my-workload-name",
-        "pattern": ".*"
-      },
-      "ProjectId": {
-        "description": "The id of the project.",
-        "type": "string",
-        "example": 1,
-        "pattern": ".*"
-      },
       "WorkloadCreationMeta": {
         "required": [
           "name",
@@ -12939,15 +13610,14 @@
         "nullable": true
       },
       "GpuComputeMode": {
-        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.",
+        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.",
         "type": "string",
         "minLength": 1,
         "enum": [
           "time-slicing",
           "sm-sharing"
         ],
-        "nullable": true,
-        "x-gorm-ignore": true
+        "nullable": true
       },
       "GpuDevicesRequest": {
         "description": "Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.",
@@ -15005,11 +15675,6 @@
             "$ref": "#/components/schemas/WorkspaceSpec"
           }
         ]
-      },
-      "WorkloadId": {
-        "description": "A unique ID of the workload.",
-        "type": "string",
-        "format": "uuid"
       },
       "DepartmentId": {
         "description": "The id of the department.",
@@ -18196,20 +18861,6 @@
           "Inference",
           "DistributedInference"
         ]
-      },
-      "ScopeType": {
-        "type": "string",
-        "enum": [
-          "system",
-          "tenant",
-          "cluster",
-          "department",
-          "project"
-        ]
-      },
-      "ScopeId": {
-        "type": "string",
-        "description": "The id of the cluster, department or project, depending on the scope type."
       },
       "ProjectIdOptional": {
         "description": "The id of the project.",
@@ -23605,6 +24256,99 @@
           "CPU_MEMORY_LIMIT_BYTES"
         ]
       },
+      "ResourceClaimTemplateRef": {
+        "description": "The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.",
+        "nullable": true,
+        "type": "object",
+        "required": [
+          "name",
+          "managed"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Name of the ResourceClaimTemplate in the pod's namespace.",
+            "example": "single-gpu"
+          },
+          "managed": {
+            "type": "boolean",
+            "description": "Whether the template is managed by NVIDIA Run:ai (created through the resource claim templates API) rather than created directly in the cluster."
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "The id of the managed resource claim template. Null for an unmanaged template."
+          }
+        }
+      },
+      "WorkloadResourceClaim": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/PodResourceClaimBinding"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "template": {
+                "$ref": "#/components/schemas/ResourceClaimTemplateRef"
+              }
+            }
+          }
+        ]
+      },
+      "WorkloadPodResourceClaims": {
+        "type": "object",
+        "required": [
+          "podId",
+          "podName",
+          "resourceClaims"
+        ],
+        "properties": {
+          "podId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of the pod."
+          },
+          "podName": {
+            "type": "string",
+            "example": "bert-worker-0"
+          },
+          "task": {
+            "type": "string",
+            "nullable": true,
+            "description": "Identifies the function of the pod within a distributed workload (for example, leader, worker, or master).",
+            "example": "worker"
+          },
+          "resourceClaims": {
+            "type": "array",
+            "description": "The claims the pod references, in the order they appear in `pod.spec.resourceClaims`.",
+            "items": {
+              "$ref": "#/components/schemas/WorkloadResourceClaim"
+            }
+          }
+        }
+      },
+      "WorkloadResourceClaimsResponse": {
+        "type": "object",
+        "required": [
+          "pods"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Offset for the next page of results. Present only when there are more pods beyond the current page (i.e., the number of returned pods equals the limit).\n"
+          },
+          "pods": {
+            "type": "array",
+            "description": "The pods of the workload that reference at least one claim.",
+            "items": {
+              "$ref": "#/components/schemas/WorkloadPodResourceClaims"
+            }
+          }
+        }
+      },
       "WorkloadCategory": {
         "type": "object",
         "required": [
@@ -25320,6 +26064,20 @@
           }
         }
       },
+      "404NotFound": {
+        "description": "The specified resource was not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            },
+            "example": {
+              "code": 404,
+              "message": "Resource id not found."
+            }
+          }
+        }
+      },
       "500InternalServerError": {
         "description": "unexpected error",
         "content": {
@@ -25362,22 +26120,22 @@
           }
         }
       },
-      "204NoContent": {
-        "description": "No Content."
-      },
-      "404NotFound": {
-        "description": "The specified resource was not found",
+      "412PreconditionFailed": {
+        "description": "The specified resource was not found.",
         "content": {
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
             },
             "example": {
-              "code": 404,
-              "message": "Resource id not found."
+              "code": 412,
+              "message": "Precondition failed"
             }
           }
         }
+      },
+      "204NoContent": {
+        "description": "No Content."
       },
       "400SubmissionErrorV2": {
         "description": "Bad submission request.",
@@ -25437,20 +26195,6 @@
           "application/json": {
             "schema": {
               "$ref": "#/components/schemas/Error"
-            }
-          }
-        }
-      },
-      "412PreconditionFailed": {
-        "description": "The specified resource was not found.",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/Error"
-            },
-            "example": {
-              "code": 412,
-              "message": "Precondition failed"
             }
           }
         }

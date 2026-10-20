@@ -1,0 +1,2 @@
+Distributed inference enables running inference workloads across multiple pods, typically to scale model serving beyond a single container or node. This approach is useful when a single instance cannot meet resource requirements.NVIDIA Run:ai supports this model using Leader Worker Set (LWS).
+Each pod plays a specific role, either as a leader or worker, and together they form a coordinated service. NVIDIA Run:ai manages the orchestration and configuration of these pods to ensure efficient and scalable inference execution

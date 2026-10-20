@@ -47,6 +47,12 @@ products:
         path: archived-versions.yml
 
 redirects:
+  - source: /self-hosted/reference/rest-api/endpoints/ai-applications/ai-applications
+    destination: /run-ai/self-hosted/reference/rest-api/endpoints/ai-applications/list-applications
+    permanent: true
+  - source: /self-hosted/reference/rest-api/endpoints/ai-applications/ai-applications/:slug*
+    destination: /run-ai/self-hosted/reference/rest-api/endpoints/ai-applications/:slug*
+    permanent: true
   - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/fractions
     destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/memory-fractions
     permanent: true
@@ -55,6 +61,12 @@ redirects:
     permanent: true
   - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/time-slicing
     destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/compute-modes
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/platform-management/authentication/cluster-authentication
+    destination: /run-ai/self-hosted/documentation/installation-and-configuration/config/cluster-authentication
+    permanent: true
+  - source: /run-ai/self-hosted/documentation/platform-management/authentication/permissions
+    destination: /run-ai/self-hosted/documentation/platform-management/authentication/roles/permissions
     permanent: true
   - source: /self-hosted/v2.26/:slug*
     destination: https://run-ai-docs.nvidia.com/self-hosted

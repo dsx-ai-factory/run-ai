@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/google/uuid"
@@ -37,6 +38,7 @@ func sendSubmissionToWorkloadMgr(ctx context.Context, params *createWorkloadPara
 		return workloadsApi.NewSubmissionErrorV2(createErr.Code, createErr.Message)
 	}
 
+	params.AcceptedAt = time.Now().UTC()
 	params.Response.WorkloadId = workload.Metadata.Id
 	params.Response.DesiredPhase = workloadsApi.WorkloadDesiredPhase(workload.DesiredPhase)
 

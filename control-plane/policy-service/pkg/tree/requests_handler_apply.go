@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	"gorm.io/gorm"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -69,6 +71,13 @@ type ApplyPolicyOptions struct {
 
 func (ht *HierarchyTree) HandleApplyRequest(ctx context.Context, request *ApplyPolicyRequest, options ApplyPolicyOptions) (*dbmodel.PolicyWithOptionalEffective, *api.Error) {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("[%s] apply %s policy started validate only? [%v] overwrite? [%v]", ht.treeId.ToString(), request.WorkloadType, options.ValidateOnly, options.Overwrite)
+
+	if err := gpucompat.ValidateMemoryRequestInput(request.Defaults); err != nil {
+		return nil, api.NewValidationError(err.Error())
+	}
+	if aliasErr := normalizeGPUPolicyRequest(request); aliasErr != nil {
+		return nil, aliasErr
+	}
 
 	request.Defaults = database.CleanMap(request.Defaults)
 	request.Rules = database.CleanMap(request.Rules)
@@ -291,6 +300,12 @@ func (ht *HierarchyTree) HandleApplyRequest(ctx context.Context, request *ApplyP
 // defaults and rules to add/update, and also list of fields to remove from the policy. the function updates the existing
 // policy with those changes
 func applyRequestedChangesOnGivenPolicy(existingPolicy *dbmodel.PolicyWithOptionalEffective, request *ApplyPolicyRequest) *api.Error {
+	if err := existingPolicy.NormalizeGPUMemory(); err != nil {
+		return api.NewError(http.StatusBadRequest, err.Error(), err)
+	}
+	if err := normalizeGPUPolicyRequest(request); err != nil {
+		return err
+	}
 	existingPolicy.UpdatedBy = request.Requester
 
 	// Before merging - clean all the fields that we intend to apply. this is needed only for itemized fields

@@ -5,6 +5,9 @@
 # Default codeowners every team
 /* @dsx-ai-factory/resource-mgmt @dsx-ai-factory/dev-team-leads @dsx-ai-factory/workloads @dsx-ai-factory/infra @dsx-ai-factory/ops
 
+# Root markdown files
+/*.md @camielRunai @itayvallach
+
 # Team Leaders
 /.nspect-vuln-allowlist.toml @dsx-ai-factory/dev-team-leads
 /CODEOWNERS @dsx-ai-factory/dev-team-leads
@@ -71,6 +74,8 @@ code-rabbit/ @dsx-ai-factory/workloads
 
 # DevOps
 /common/opa-policies/ @dsx-ai-factory/ops
+/local-dev.sh @dsx-ai-factory/ops
+/local-dev.md @dsx-ai-factory/ops
 
 # Tech Docs
 /docs/** @dsx-ai-factory/tech-docs

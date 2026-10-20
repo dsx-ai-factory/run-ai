@@ -57,11 +57,11 @@ const (
 
 var SharedFieldMap = []textinput.Model{
 	{
-		Placeholder: credentials.InteractiveAppName,
+		Placeholder: credentials.InteractiveClientID,
 		CharLimit:   charLimitation,
 	},
 	{
-		Placeholder:   credentials.InteractiveAppSecret,
+		Placeholder:   credentials.InteractiveClientSecret,
 		EchoMode:      textinput.EchoPassword,
 		EchoCharacter: '*',
 		CharLimit:     charLimitation,
@@ -133,7 +133,7 @@ func AccessKeyPreRunE(
 	if argsCommand.Secret != "" {
 		*credential = credentials.NewAccessKeyAuth(argsCommand.ClientId, argsCommand.Secret)
 	} else if argsCommand.SecretFile != "" {
-		secret, err := auth.ReadApplicationSecret(argsCommand.SecretFile)
+		secret, err := auth.ReadAccessKeySecret(argsCommand.SecretFile)
 		if err != nil {
 			return cmdtxn.CmdErrorPrintAndSet(cmd, auth.AuthenticationSecretFileReadError, err)
 		}
@@ -158,7 +158,7 @@ func AccessKeyRunE(
 		return nil
 	}
 
-	msg, err := auth.ApplicationLogin(txn, credential.GetID(), credential.GetSecret(), instance.GetConfigValue(config.AuthenticationUrl), authFilePath)
+	msg, err := auth.AccessKeyLogin(txn, credential.GetID(), credential.GetSecret(), instance.GetConfigValue(config.AuthenticationUrl), authFilePath)
 	if err != nil {
 		return cmdtxn.CmdErrorPrintAndSet(cmd, msg, err)
 	}
@@ -181,7 +181,7 @@ func InteractiveAccessKeyLogin() (string, error) {
 		response *map[string]string
 	)
 
-	option, err = choises.ExecuteTea(consts.AccessKeyMethodSelection, "", auth.AppOption)
+	option, err = choises.ExecuteTea(consts.AccessKeyMethodSelection, "", auth.AccessKeyLoginOptions)
 	if err != nil {
 		return msg, err
 	}
@@ -192,17 +192,17 @@ func InteractiveAccessKeyLogin() (string, error) {
 		if err != nil {
 			return msg, err
 		}
-	case auth.ApplicationKey:
+	case auth.AccessKeyOption:
 		response, err = inputs.MultiTexts(SharedFieldMap, "")
 		if err != nil {
 			return msg, err
 		}
-		appKey := credentials.NewAccessKeyAuth((*response)[credentials.InteractiveAppName], (*response)[credentials.InteractiveAppSecret])
-		msg, err = auth.ApplicationLogin(txn, appKey.GetID(), appKey.GetSecret(), instance.GetConfigValue(config.AuthenticationUrl), authFilePath)
+		creds := credentials.NewAccessKeyAuth((*response)[credentials.InteractiveClientID], (*response)[credentials.InteractiveClientSecret])
+		msg, err = auth.AccessKeyLogin(txn, creds.GetID(), creds.GetSecret(), instance.GetConfigValue(config.AuthenticationUrl), authFilePath)
 		if err != nil {
 			return msg, err
 		}
-		err = instance.SetCredentials(appKey)
+		err = instance.SetCredentials(creds)
 		if err != nil {
 			return msg, err
 		}
@@ -231,7 +231,7 @@ func UseConfiguredAccessKeyCredentials(cmd *cobra.Command, credential *credentia
 				return cmdtxn.CmdErrorPrintAndSet(cmd, consts.ChooseErrorExitingCredLoadFailed, err)
 			}
 
-			msg, err = auth.ApplicationLogin(txn, (*credential).GetID(), (*credential).GetSecret(), instance.GetConfigValue(config.AuthenticationUrl), authFilePath)
+			msg, err = auth.AccessKeyLogin(txn, (*credential).GetID(), (*credential).GetSecret(), instance.GetConfigValue(config.AuthenticationUrl), authFilePath)
 			if err != nil {
 				return cmdtxn.CmdErrorPrintAndSet(cmd, msg, err)
 			}

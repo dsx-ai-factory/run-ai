@@ -13,7 +13,7 @@ local-dev.sh spins up a complete, working NVIDIA Run:ai platform on your machine
 | **Linux host: ≥ 4 CPUs, ≥ 16 GB RAM, ≥ 100 GB free disk** | Linux only. Kind nodes, ~50 services, and parallel builds all share the host directly, with no VM to size. Disk is measured where the container runtime stores data (usually `/var/lib/docker`). One full build leaves about 44 GB of caches: roughly 11 GB of Docker build cache, and 33 GB of Go module and build caches in `~/.cache`. It also needs about 8 GB of images, which are stored both in the registry and in the Kind nodes. The script warns at startup if the host is below any of these; it does not stop. On a tight host, use `--parallel 2` and `--skip-frontend`. |
 | **Podman VM ≥ 12 GB RAM** | macOS only. The full stack (NATS×3, PostgreSQL, Keycloak, ~50 services) requires at least 12 GB. With 8 GB the API server starves under QEMU overhead and the cluster never stabilises. Resize with `podman machine stop && podman machine set --memory 12288 && podman machine start`. |
 | **`GITHUB_TOKEN`** | Only needed while the repo is private — Go builds pull modules from `github.com/run-ai/*`. Not required with `--skip-build` or once the repo is public. Set it before running: `export GITHUB_TOKEN=ghp_...` |
-| **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.31.0`, node image `v1.32.5`); `kubectl` and `helm` always install the latest release. |
+| **`kind`, `kubectl`, `helm`** | Installed automatically if missing. `kind` is version-pinned (`v0.33.0`, node image `v1.37.0`) and upgraded if an older version is installed; `kubectl` and `helm` always install the latest release. Kubernetes 1.37 needs a cgroup v2 host (current Docker Desktop, Podman machine, and Linux distributions all use it). |
 | **`openssl`** | For TLS cert generation. Ships with macOS and most Linux distros; not auto-installed if missing. |
 | **`make`, `git`, `curl`, `python3`** | Used directly by the script and the service Makefiles. Not auto-installed; the script stops at startup if any is missing. |
 
@@ -66,7 +66,7 @@ The script runs these phases in order. Each phase is independently skippable.
 
 ### Kind Cluster
 
-- Creates a 5-node Kind cluster (1 control-plane + 4 workers) named `runai-local`, pinned to Kubernetes `v1.32.5`.
+- Creates a 5-node Kind cluster (1 control-plane + 4 workers) named `runai-local`, pinned to Kubernetes `v1.37.0`.
 - The control-plane node maps host ports 80/443 for ingress, and is labeled `ingress-ready=true`.
 - containerd on each node is pointed at `/etc/containerd/certs.d` for registry settings. In the next phase, each node gets a `hosts.toml` there that sends `localhost:5001` pulls to the local registry container.
 
@@ -91,7 +91,7 @@ Installs `kube-prometheus-stack` into the `monitoring` namespace — a minimal i
 - Skip with `--skip-fake-gpu`. Replaced by the real NVIDIA GPU Operator when `--gpu-operator` is set — see [Real GPUs](#real-gpus---gpu-operator).
 
 ### Build — control-plane (25 Go Services + Frontend)
-For each Go service, the script compiles an `amd64` binary inside a golang Docker container (workspace-mounted, uses the Go module cache at `~/.cache/go-build-docker-*`), builds a `linux/amd64` image, and **pushes it to the local registry**. Up to `--parallel N` services build concurrently.
+For each Go service, the script compiles an `amd64` binary inside a golang Docker container (workspace-mounted, uses the Go module cache at `~/.cache/go-build-docker-*`), builds a `linux/amd64` image, and **pushes it to the local registry**. Up to `--parallel N` services build concurrently. When the module cache is empty, the script first pre-warms it with `go mod download` in every Go module, `N` modules at a time, and logs how long that took.
 
 The frontend (React → nginx) runs `npm run build` inside a Node container, then builds and pushes the nginx image.
 
@@ -108,9 +108,10 @@ The same build pattern applies to the cluster-side controllers and operators. `r
 
 ### Provision Cluster Credentials
 
+- Gets an API token for the admin user: the Keycloak master admin (password from `runai-backend-gen-keycloakx`) impersonates the user and completes a browser login (authorization code + PKCE) with the `runai-cli` or `runai-admin-ui` client.
 - Waits for the Keycloak realm to be ready, then registers the cluster with the control plane via its REST API (reusing the existing registration if one already exists for the cluster name).
-- Fetches the installer client secret for the newly registered cluster.
-- Feeds both the cluster UID and the client secret into the `runai-cluster` Helm install in the next phase (`controlPlane.clientSecret`, `cluster.uid`).
+- Mints a one-time installer bootstrap token for the cluster from `/api/v1/clusters/{uuid}/cluster-install-info`.
+- Feeds both the cluster UID and the bootstrap token into the `runai-cluster` Helm install in the next phase (`controlPlane.bootstrapToken`, `cluster.uid`).
 
 ### Deploy — runai-cluster
 
@@ -125,7 +126,7 @@ The runai-cluster chart configures these scheduling subcharts:
 
 #### KRM and kai-scheduler CRDs
 
-The script applies nothing by hand. Both charts ship their CRDs in their own `crds/` directory, which Helm applies for subcharts, and each carries a crd-upgrader hook for the upgrade path. If a placeholder subchart was installed (see below), the CRDs are missing along with everything else.
+The script applies nothing by hand. Both charts ship their CRDs in their own `crds/` directory, which Helm applies for subcharts, and each carries a crd-upgrader hook for the upgrade path.
 
 #### Scale-Adjust Namespace
 
@@ -135,13 +136,11 @@ Enabling `kai-resource-management` triggers creation of the `runai-scale-adjust`
 
 Before installing, the script reconciles `charts/` against `Chart.yaml`, since Helm needs a subchart present for every declared dependency and `charts/*.tgz` is gitignored (a fresh clone has none):
 
-1. **Prune** — deletes any tarball that no longer matches a declared dependency. Helm loads *every* tarball in `charts/`, so a leftover from a previous version bump would make the resolved subchart ambiguous, and a tarball for a removed dependency would render with no condition to gate it.
-2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/workload-map/karta`) and need no credentials.
-3. **Fall back** — if the fetch fails (offline, registry down), generates a minimal placeholder so the install can still proceed, and warns that the subchart will be empty.
+1. **Check** — runs `helm dependency list`. Helm compares `charts/` against `Chart.yaml` itself, so a dependency may use any version constraint Helm supports (`0.2.6`, `~0.18.0`, `^1.2`, `>=1.0 <2.0`). Anything not `ok` (missing, wrong version, too many matches) or a tarball `Chart.yaml` does not declare triggers a fetch. Helm loads *every* tarball in `charts/`, so a leftover from a removed dependency would otherwise render with no condition to gate it.
+2. **Fetch** — runs `helm dependency update`, which resolves version ranges, pulls the real subcharts and replaces outdated or undeclared tarballs. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/workload-map/karta`) and need no credentials.
+3. **Fail** — if a dependency is still not satisfied (offline, registry down, no version matches the constraint), the script stops with the Helm error instead of installing a chart with an empty scheduler.
 
-Names and versions are read from `Chart.yaml`, so bumping a dependency cannot leave the script stale.
-
-> **If you see the placeholder warning,** `kai-resource-management` and `karta` will be enabled but deploy nothing — Helm matches dependencies by name only, so a placeholder satisfies the check and the subchart installs empty. Re-run once you have network access, or fetch manually with `helm dependency build runai-cluster/cluster/runai-chart`. See [Known Issues](#known-issues).
+Empty placeholder tarballs left in `charts/` by older versions of the script are removed first, so the real charts are fetched.
 
 ---
 
@@ -430,24 +429,22 @@ Images are pushed to the local `kind-registry` container and referenced as `loca
 
 ### No KRM / kai-scheduler / karta Pods After Deploy
 
-The script fetches these subcharts automatically, but if the fetch failed it falls back to an empty placeholder and the scheduler silently deploys nothing. Look for this in the output:
+The script stops before installing the chart if it cannot fetch these subcharts:
 
 ```
-[warn]   Could not fetch kai-resource-management@<version> — installing an EMPTY placeholder.
+ERROR: runai-cluster chart dependencies are not satisfied (see above and the helm output). ...
 ```
 
-The version comes from `Chart.yaml`, so it moves as that pin moves. Confirm by size: a real chart is tens of KB, a placeholder a few hundred bytes:
+The Helm error above it says why (no network, registry down, no version matching the constraint in `Chart.yaml`). Check what Helm sees in `charts/`; every dependency should be `ok`:
 
 ```bash
-ls -l runai-cluster/cluster/runai-chart/charts/*.tgz
-# kai-resource-management-v<version>.tgz  ~140 KB   real  (bundles kai-scheduler)
-# karta-<version>.tgz                      ~13 KB   real
+helm dependency list runai-cluster/cluster/runai-chart
 ```
 
-Fix by fetching manually, then redeploying just the chart:
+Fix the cause, fetch manually, then redeploy just the chart:
 
 ```bash
-helm dependency build runai-cluster/cluster/runai-chart
+helm dependency update runai-cluster/cluster/runai-chart
 ./local-dev.sh --skip-build --skip-cluster
 ```
 
@@ -465,7 +462,7 @@ With the real charts you should see these pods:
 kubectl get pods -n runai | grep -E 'kai|karta'
 ```
 
-Historically this was a hard failure rather than a fallback: the placeholder versions were hardcoded in `local-dev.sh` and drifted from `Chart.yaml` (which moved to kai-scheduler `v0.16.8` and karta `0.2.1`, and dropped `runai-engine` entirely), so every fresh clone got empty subcharts. The script now derives names and versions from `Chart.yaml`.
+Earlier versions of the script installed an empty placeholder subchart when the fetch failed, so the scheduler silently deployed nothing; they also could not handle a version range in `Chart.yaml` ([#2716](https://github.com/dsx-ai-factory/run-ai/issues/2716)).
 
 ### Go Build Failures After an OSS Re-Export
 

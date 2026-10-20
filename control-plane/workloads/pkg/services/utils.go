@@ -215,7 +215,20 @@ func RevisionEventViewModelToApi(event models.RevisionEventView) api.Event {
 	}
 }
 
-func WorkloadModelToApi(ctx context.Context, workload models.WorkloadView) api.Workload {
+// getClusterConfiguration returns nil when the cluster configuration can't be fetched; WorkloadModelToApi then
+// disables the workload's actions, the same as when the ownership protection check fails.
+func getClusterConfiguration(ctx context.Context, clusterId string) *checker.ClusterConfiguration {
+	clusterConfig, err := checker.NewClusterCapabilitiesChecker(clusterId).ClusterConfiguration(ctx)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to get cluster configuration of cluster <%s>, err: %v", clusterId, err)
+		return nil
+	}
+	return clusterConfig
+}
+
+// WorkloadModelToApi converts a workload view row to the API model. clusterConfig is the configuration of the
+// workload's cluster (see getClusterConfiguration); callers converting many workloads fetch it once per cluster.
+func WorkloadModelToApi(ctx context.Context, workload models.WorkloadView, clusterConfig *checker.ClusterConfiguration) api.Workload {
 	actionsSupport := api.ActionsSupport{
 		Delete:  workload.SupportDelete,
 		Suspend: workload.SupportSuspend,
@@ -225,8 +238,8 @@ func WorkloadModelToApi(ctx context.Context, workload models.WorkloadView) api.W
 		actionsSupport.Delete = true
 	}
 
-	err := services_utils.CheckWorkloadOwnershipProtection(ctx, workload.ClusterID.String(), workload.DepartmentID, workload.SubmittedBy)
-	if err != nil {
+	if clusterConfig == nil || services_utils.CheckWorkloadOwnershipProtectionWithClusterConfig(ctx, clusterConfig,
+		workload.ClusterID.String(), workload.DepartmentID, workload.SubmittedBy) != nil {
 		actionsSupport = api.ActionsSupport{
 			Delete:  false,
 			Suspend: false,
@@ -383,7 +396,7 @@ func ModelEndpointToApi(endpoints models.EndpointArray) []api.Endpoint {
 }
 
 func WorkloadModelToWorkloadDetailedApi(ctx context.Context, workload models.WorkloadView) api.WorkloadDetailed {
-	apiWorkload := WorkloadModelToApi(ctx, workload)
+	apiWorkload := WorkloadModelToApi(ctx, workload, getClusterConfiguration(ctx, workload.ClusterID.String()))
 	var pendingSchedulingMessages *[]api.PendingSchedulingMessage
 	if workload.Phase == api.PHASE_PENDING {
 		pendingSchedulingMessages = getPendingSchedulingMessages(workload.SchedulingConditions)
@@ -1049,6 +1062,10 @@ func CreationRequestToPodModel(ctx context.Context, tenantId uint, projectId str
 		Ip:                 pod.Ip,
 		Task:               pod.Task,
 		NodeAffinity:       NodeAffinityApiToModel(pod.NodeAffinity),
+		// DRA usage reported as-is by cluster-sync. Managed/ownership
+		// resolution against the k8s-object store happens at API read time,
+		// not here — this ingest path performs no cross-service lookup.
+		ResourceClaims: podResourceClaimsApiToModel(pod.ResourceClaims),
 		// temp
 		RequestedGPULimit:         nil,
 		RequestedGPURequest:       nil,
@@ -1244,6 +1261,26 @@ func tolerationApiToModel(toleration api.PodToleration) models.Toleration {
 	}
 }
 
+// podResourceClaimsApiToModel is a straight pass-through from the API wire
+// shape into the jsonb-backed model slice. Nil pointer → nil model slice;
+// empty-but-non-nil → empty model slice, matching the Toleration pattern
+// (no empty→nil collapse).
+func podResourceClaimsApiToModel(claims *[]api.PodResourceClaim) models.PodResourceClaimArray {
+	if claims == nil {
+		return nil
+	}
+	return convutils.ConvertSliceTypes(*claims, podResourceClaimApiToModel)
+}
+
+func podResourceClaimApiToModel(claim api.PodResourceClaim) models.PodResourceClaim {
+	return models.PodResourceClaim{
+		Name:                       claim.Name,
+		ResourceClaimTemplateName:  claim.ResourceClaimTemplateName,
+		ResourceClaimName:          claim.ResourceClaimName,
+		AllocatedResourceClaimName: claim.AllocatedResourceClaimName,
+	}
+}
+
 func PodModelToApi(pod models.Pod, projectId string) api.Pod {
 	apiPod := api.Pod{
 		Name:               pod.Name,
@@ -1286,6 +1323,7 @@ func PodModelToApi(pod models.Pod, projectId string) api.Pod {
 		Task:              pod.Task,
 		NodeAffinity:      NodeAffinityModelToApi(pod.NodeAffinity),
 		Elements:          podElementsModelToApi(pod.Elements),
+		ResourceClaims:    podResourceClaimsModelToApi(pod.ResourceClaims),
 	}
 
 	return apiPod
@@ -1313,6 +1351,27 @@ func podElementsModelToApi(elements []*models.PodElement) *[]api.PodElement {
 		})
 	}
 	return &result
+}
+
+// podResourceClaimsModelToApi mirrors podResourceClaimsApiToModel for the
+// read side. nil model → nil API (field omitted); the API's *[]-shape is a
+// nullable schema, so a pod with no DRA usage omits the field entirely rather
+// than serializing as an empty array.
+func podResourceClaimsModelToApi(claims models.PodResourceClaimArray) *[]api.PodResourceClaim {
+	if claims == nil {
+		return nil
+	}
+	result := convutils.ConvertSliceTypes(claims, podResourceClaimModelToApi)
+	return &result
+}
+
+func podResourceClaimModelToApi(claim models.PodResourceClaim) api.PodResourceClaim {
+	return api.PodResourceClaim{
+		Name:                       claim.Name,
+		ResourceClaimTemplateName:  claim.ResourceClaimTemplateName,
+		ResourceClaimName:          claim.ResourceClaimName,
+		AllocatedResourceClaimName: claim.AllocatedResourceClaimName,
+	}
 }
 
 func ContainerModelToApi(container *models.Container) api.Container {

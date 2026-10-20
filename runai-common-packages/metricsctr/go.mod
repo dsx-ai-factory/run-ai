@@ -1,9 +1,9 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/metricsctr
 
-go 1.27.2
+go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
 	sigs.k8s.io/controller-runtime v0.25.2
 )
 

@@ -29,10 +29,10 @@ configurations {
 
 dependencies {
     // Keycloak SPI deps are provided at runtime by the server
-    compileOnly "org.keycloak:keycloak-core:26.8.0"
-    compileOnly "org.keycloak:keycloak-server-spi:26.8.0"
-    compileOnly "org.keycloak:keycloak-services:26.8.0"
-    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.22.3'
+    compileOnly "org.keycloak:keycloak-core:26.8.1"
+    compileOnly "org.keycloak:keycloak-server-spi:26.8.1"
+    compileOnly "org.keycloak:keycloak-services:26.8.1"
+    compileOnly 'com.fasterxml.jackson.core:jackson-databind:2.22.4'
     compileOnly 'jakarta.ws.rs:jakarta.ws.rs-api:4.0.0'
     compileOnly 'org.slf4j:slf4j-api:2.0.20'
 

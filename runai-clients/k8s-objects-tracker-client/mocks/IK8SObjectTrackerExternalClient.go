@@ -2945,6 +2945,88 @@ func (_c *IK8SObjectTrackerExternalClient_ListPvcsByScopeAndName_Call) RunAndRet
 	return _c
 }
 
+// ListResourceClaimTemplatesByName provides a mock function for the type IK8SObjectTrackerExternalClient
+func (_mock *IK8SObjectTrackerExternalClient) ListResourceClaimTemplatesByName(ctx context.Context, clusterId string, name string, origin string) (*openapi.ResourceClaimTemplates, *openapi.Error) {
+	ret := _mock.Called(ctx, clusterId, name, origin)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ListResourceClaimTemplatesByName")
+	}
+
+	var r0 *openapi.ResourceClaimTemplates
+	var r1 *openapi.Error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) (*openapi.ResourceClaimTemplates, *openapi.Error)); ok {
+		return returnFunc(ctx, clusterId, name, origin)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, string, string) *openapi.ResourceClaimTemplates); ok {
+		r0 = returnFunc(ctx, clusterId, name, origin)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*openapi.ResourceClaimTemplates)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, string, string) *openapi.Error); ok {
+		r1 = returnFunc(ctx, clusterId, name, origin)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*openapi.Error)
+		}
+	}
+	return r0, r1
+}
+
+// IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'ListResourceClaimTemplatesByName'
+type IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call struct {
+	*mock.Call
+}
+
+// ListResourceClaimTemplatesByName is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterId string
+//   - name string
+//   - origin string
+func (_e *IK8SObjectTrackerExternalClient_Expecter) ListResourceClaimTemplatesByName(ctx any, clusterId any, name any, origin any) *IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call {
+	return &IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call{Call: _e.mock.On("ListResourceClaimTemplatesByName", ctx, clusterId, name, origin)}
+}
+
+func (_c *IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call) Run(run func(ctx context.Context, clusterId string, name string, origin string)) *IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 string
+		if args[3] != nil {
+			arg3 = args[3].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
+	})
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call) Return(resourceClaimTemplates *openapi.ResourceClaimTemplates, error *openapi.Error) *IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call {
+	_c.Call.Return(resourceClaimTemplates, error)
+	return _c
+}
+
+func (_c *IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call) RunAndReturn(run func(ctx context.Context, clusterId string, name string, origin string) (*openapi.ResourceClaimTemplates, *openapi.Error)) *IK8SObjectTrackerExternalClient_ListResourceClaimTemplatesByName_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // ListSecrets provides a mock function for the type IK8SObjectTrackerExternalClient
 func (_mock *IK8SObjectTrackerExternalClient) ListSecrets(ctx context.Context, clusterId string) (*openapi.SecretListResponse, *http.Response, error) {
 	ret := _mock.Called(ctx, clusterId)

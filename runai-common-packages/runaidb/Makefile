@@ -20,7 +20,7 @@ integration-tests:
 lint: lint-go ## Run linter.
 .PHONY: lint
 
-validate:
+validate: validate-mockery
 	# no op
 .PHONY: validate
 

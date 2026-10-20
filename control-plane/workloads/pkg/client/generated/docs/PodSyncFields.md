@@ -25,6 +25,7 @@ Name | Type | Description | Notes
 **Task** | Pointer to **NullableString** | Identifies the function of the pod within a distributed workload (for example, leader, worker, or master). | [optional] 
 **NodeAffinity** | Pointer to [**PodNodeAffinity**](PodNodeAffinity.md) |  | [optional] 
 **Elements** | Pointer to [**[]PodElement**](PodElement.md) | The workload structure elements this pod belongs to, ordered by hierarchy level. | [optional] 
+**ResourceClaims** | Pointer to [**[]PodResourceClaim**](PodResourceClaim.md) | Per-pod DRA usage reported as-is from the cluster. One entry per &#x60;pod.spec.resourceClaims[]&#x60; member — either a reference to a &#x60;ResourceClaimTemplate&#x60; or a standalone &#x60;ResourceClaim&#x60; — enriched with the actual bound &#x60;ResourceClaim&#x60; name once published in &#x60;pod.status.resourceClaimStatuses[]&#x60;. Managed/ownership resolution against the k8s-object store happens at API read time, not here. | [optional] 
 
 ## Methods
 
@@ -620,6 +621,41 @@ HasElements returns a boolean if a field has been set.
 `func (o *PodSyncFields) UnsetElements()`
 
 UnsetElements ensures that no value is present for Elements, not even an explicit nil
+### GetResourceClaims
+
+`func (o *PodSyncFields) GetResourceClaims() []PodResourceClaim`
+
+GetResourceClaims returns the ResourceClaims field if non-nil, zero value otherwise.
+
+### GetResourceClaimsOk
+
+`func (o *PodSyncFields) GetResourceClaimsOk() (*[]PodResourceClaim, bool)`
+
+GetResourceClaimsOk returns a tuple with the ResourceClaims field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetResourceClaims
+
+`func (o *PodSyncFields) SetResourceClaims(v []PodResourceClaim)`
+
+SetResourceClaims sets ResourceClaims field to given value.
+
+### HasResourceClaims
+
+`func (o *PodSyncFields) HasResourceClaims() bool`
+
+HasResourceClaims returns a boolean if a field has been set.
+
+### SetResourceClaimsNil
+
+`func (o *PodSyncFields) SetResourceClaimsNil(b bool)`
+
+ SetResourceClaimsNil sets the value for ResourceClaims to be an explicit nil
+
+### UnsetResourceClaims
+`func (o *PodSyncFields) UnsetResourceClaims()`
+
+UnsetResourceClaims ensures that no value is present for ResourceClaims, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -333,7 +333,7 @@ func writeScenarioIn(t *testing.T, dir, folder, filename, content string) {
 func TestRunFindsScenariosInCategoryFolders(t *testing.T) {
 	dir := t.TempDir()
 	writeScenario(t, dir, "selfcheck.yaml", "suite: fake-a\n")
-	writeScenarioIn(t, dir, "scale", "deployment-burst.yaml", "suite: fake-a\n")
+	writeScenarioIn(t, dir, "scale", "training-burst.yaml", "suite: fake-a\n")
 	writeScenarioIn(t, dir, "load", "training-ramp.yaml", "suite: fake-load\n")
 	writeScenarioIn(t, dir, "load", "README.md", "load scenarios arrive later\n")
 	a := &fakeSuite{name: "fake-a"}
@@ -343,7 +343,7 @@ func TestRunFindsScenariosInCategoryFolders(t *testing.T) {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	for _, name := range []string{"selfcheck", "deployment-burst", "training-ramp"} {
+	for _, name := range []string{"selfcheck", "training-burst", "training-ramp"} {
 		if _, ok := results[name]; !ok {
 			t.Errorf("scenario %q from its folder must run, got %v", name, results)
 		}
@@ -355,7 +355,7 @@ func TestRunFindsScenariosInCategoryFolders(t *testing.T) {
 
 func TestRunRejectsAScenarioInTheWrongCategoryFolder(t *testing.T) {
 	dir := t.TempDir()
-	writeScenarioIn(t, dir, "load", "deployment-burst.yaml", "suite: fake-a\n")
+	writeScenarioIn(t, dir, "load", "training-burst.yaml", "suite: fake-a\n")
 	a := &fakeSuite{name: "fake-a"}
 
 	_, err := Run(context.Background(), core.Target{}, dir, map[string]core.Suite{"fake-a": a}, Options{})

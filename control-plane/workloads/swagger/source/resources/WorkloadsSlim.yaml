@@ -1,0 +1,36 @@
+get:
+  x-internal: true
+  summary: List workloads, slim.
+  description: |
+    Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
+    Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
+  operationId: get_workloads_slim
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+  tags:
+    - Workloads
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../parameters/query/WorkloadsSlimFilter.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Workloads/GetWorkloadsSlimResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

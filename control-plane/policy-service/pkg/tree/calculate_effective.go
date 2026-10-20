@@ -118,10 +118,9 @@ func CalculateEffectiveOfGvkPolicy(ctx context.Context, tx orm.DB,
 	return ht.calculateEffectivePolicy(withEffective, tx, appliedPolicyId, 0, nil, nil, nil, nil)
 }
 
-// calculateEffectivePolicy receives list of hierarchy nodes (proj -> dept -> tenant, for example) and
-// calculates the effective policy of the node in "idxToCalculate". the function is recursive, because it is possible
-// that the parent node, from which we inherit our effective policy, needs also to re-calculate its effective policy
-func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB,
+// calculateEffectivePolicyAt calculates the effective policy of the node at idxToCalculate.
+// Missing parent policies are calculated recursively before merging their rules and defaults.
+func (ht *HierarchyTree) calculateEffectivePolicyAt(ctx context.Context, tx orm.DB,
 	appliedPolicyId string, idxToCalculate int,
 	imposedAssets map[string]interface{}, masterImposedAssets map[string]interface{},
 	imposedAssetsRules map[string]interface{}, masterImposedAssetsRules map[string]interface{}) (
@@ -189,7 +188,9 @@ func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB
 
 	// if the effective policy of the parent scope is missing, calculate it.
 	if effectiveContext.Hierarchy[inheritFrom].Policy.EffectivePolicy.IsDeleted() {
-		ht.calculateEffectivePolicy(ctx, tx, appliedPolicyId, inheritFrom, nil, nil, nil, nil)
+		if _, err := ht.calculateEffectivePolicyAt(ctx, tx, appliedPolicyId, inheritFrom, nil, nil, nil, nil); err != nil {
+			return nil, err
+		}
 	}
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("[%s] effective policy of %s based on %s", ht.treeId.ToString(),
@@ -219,8 +220,8 @@ func (ht *HierarchyTree) calculateEffectivePolicy(ctx context.Context, tx orm.DB
 		} else {
 			//
 			//   need to determine for each field, if the rules from the parent override rules of the current scope.
-			//   note that system level is exception, its rules never restrictive they are only "recommendations" tath
-			//   lower level policy can override.
+			//   note that system level is exception, its rules are never restrictive; they are only recommendations that
+			//   lower level policies can override.
 			//
 			rulesFromParent := make(RulesFromParentPerField)
 
@@ -327,10 +328,11 @@ func (ht *HierarchyTree) DetermineSourceOfRules(currentRulesMap map[string]inter
 		field := fieldWithRules // we play with it so copy it aside
 		fromParent := false
 
-		// that also has rules in the parent policy, we have to decide which rules we
-		// prefer: allow the current policy overrides the parent policy or let the
-		// parent take over.
-		if fieldsWithRulesParent[field] != nil {
+		// The current policy has a rule for this field.
+		// If the parent's effective policy also has one, check whether it came from the system.
+		// System rules stay overridable. For rules defined by tenant, cluster, or department policies,
+		// use the checks below to decide whether the parent or current policy wins.
+		if fieldsWithRulesParent[field] != nil && !isRuleFromSystem(fieldsWithRulesParent[field]) {
 			// we do not distinguish master/worker fields
 
 			field = strings.TrimPrefix(field, MasterPrefix)
@@ -362,11 +364,20 @@ func (ht *HierarchyTree) DetermineSourceOfRules(currentRulesMap map[string]inter
 	return rulesFromParentPerField
 }
 
+func isRuleFromSystem(rule interface{}) bool {
+	ruleAsMap := convutils.MapMe(rule)
+	sourceOfRule := convutils.MapMe(ruleAsMap[policyCompliance.PolicySourceOfRule])
+	return api.ScopeType(fmt.Sprintf("%v", sourceOfRule["scope"])) == api.SCOPETYPE_SYSTEM
+}
+
 func calculateDefaultFromOrder(rules map[string]interface{}) (*api.DefaultFromOrder, *string) {
 	var result api.DefaultFromOrder
 	var err error
 
 	masterRules := rules[masterSection]
+	if masterRules == nil {
+		masterRules = rules[leaderSection]
+	}
 	workerRules := rules[workerSection]
 
 	if masterRules != nil || workerRules != nil {

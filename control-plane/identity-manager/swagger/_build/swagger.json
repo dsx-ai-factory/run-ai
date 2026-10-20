@@ -2968,15 +2968,6 @@
                     "grantType": "external_token_exchange",
                     "externalToken": "access token from external idp"
                   }
-                },
-                "app_token (deprecated)": {
-                  "x-internal": true,
-                  "value": {
-                    "grantType": "app_token",
-                    "appID": "appID",
-                    "appSecret": "appSecret"
-                  },
-                  "description": "Deprecated - Obtain the appID and the appSecret using applications or access keys endpoints"
                 }
               }
             }
@@ -3668,53 +3659,6 @@
           },
           "409": {
             "$ref": "#/components/responses/409Conflict"
-          },
-          "500": {
-            "$ref": "#/components/responses/500InternalServerError"
-          },
-          "503": {
-            "$ref": "#/components/responses/503ServiceUnavailable"
-          }
-        }
-      }
-    },
-    "/v1/k8s/auth/oauth/apptoken": {
-      "x-internal": true,
-      "post": {
-        "deprecated": true,
-        "tags": [
-          "Tokens"
-        ],
-        "x-no-authorization": true,
-        "summary": "get application token",
-        "x-service": "identity-manager",
-        "x-test-coverage": [
-          "src/test/suites/parallel/applicationsV2/applicationsAuth.test.ts"
-        ],
-        "description": "Retrieve access token for an application.\nThe application token is retrieved from the authorization server.\nThis endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token\n",
-        "operationId": "app_token",
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AppTokenRequest"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Executed successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AppTokenResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/400BadRequest"
           },
           "500": {
             "$ref": "#/components/responses/500InternalServerError"
@@ -5504,16 +5448,12 @@
         }
       },
       "TokenRequestGrantTypeEnum": {
-        "x-enum-internal": [
-          "app_token"
-        ],
         "enum": [
           "client_credentials",
           "refresh_token",
           "exchange_token",
           "password",
-          "external_token_exchange",
-          "app_token"
+          "external_token_exchange"
         ]
       },
       "TokenRequest": {
@@ -5521,18 +5461,6 @@
         "properties": {
           "grantType": {
             "$ref": "#/components/schemas/TokenRequestGrantTypeEnum"
-          },
-          "appID": {
-            "deprecated": true,
-            "x-internal": true,
-            "type": "string",
-            "maxLength": 255
-          },
-          "appSecret": {
-            "deprecated": true,
-            "x-internal": true,
-            "type": "string",
-            "maxLength": 500
           },
           "code": {
             "type": "string",
@@ -6132,43 +6060,6 @@
         "example": {
           "force": true,
           "reconcilerType": "clients"
-        }
-      },
-      "AppTokenRequest": {
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "secret"
-        ],
-        "properties": {
-          "id": {
-            "type": "string",
-            "maxLength": 64
-          },
-          "name": {
-            "type": "string",
-            "maxLength": 255
-          },
-          "secret": {
-            "type": "string",
-            "maxLength": 500
-          }
-        }
-      },
-      "AppTokenResponse": {
-        "type": "object",
-        "required": [
-          "access_token",
-          "id_token"
-        ],
-        "properties": {
-          "access_token": {
-            "type": "string"
-          },
-          "id_token": {
-            "type": "string"
-          }
         }
       },
       "ConfigSamlResponse": {

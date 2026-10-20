@@ -70,6 +70,7 @@ func SetContext(tenantId string, subjectId string, groups []string) context.Cont
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, runaictx.CfTenantId, tenantId)
 	ctx = context.WithValue(ctx, runaictx.CfSubjectID, subjectId)
+	ctx = context.WithValue(ctx, runaictx.CfSubjectType, "user")
 	ctx = context.WithValue(ctx, runaictx.CfGroups, groups)
 	ctx = context.WithValue(ctx, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{Tenants: []string{tenantId}})
 
@@ -81,6 +82,7 @@ func SetSystemContext(subjectId string) context.Context {
 	ctx = context.WithValue(ctx, runaictx.CfIsManagementTenant, "true")
 	ctx = context.WithValue(ctx, runaictx.CfTenantId, ManagementTestTenant)
 	ctx = context.WithValue(ctx, runaictx.CfSubjectID, subjectId)
+	ctx = context.WithValue(ctx, runaictx.CfSubjectType, "user")
 	ctx = context.WithValue(ctx, runaictx.CfGroups, []string{"Super-Admins"})
 	ctx = context.WithValue(ctx, authorization_utils.PermittedScopesKey,
 		&authorization_api.PermittedScopes{Tenants: []string{ManagementTestTenant}, System: ptr.To(true)})
@@ -99,6 +101,7 @@ func SetProjectOnlyContext(tenantId string, subjectId string, groups []string, p
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, runaictx.CfTenantId, tenantId)
 	ctx = context.WithValue(ctx, runaictx.CfSubjectID, subjectId)
+	ctx = context.WithValue(ctx, runaictx.CfSubjectType, "user")
 	ctx = context.WithValue(ctx, runaictx.CfGroups, groups)
 	ctx = context.WithValue(ctx, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{Projects: []string{projectId}})
 
@@ -109,6 +112,7 @@ func SetContextWithAccept(tenantId string, subjectId string, groups []string, ac
 	ctx := context.Background()
 	ctx = context.WithValue(ctx, runaictx.CfTenantId, tenantId)
 	ctx = context.WithValue(ctx, runaictx.CfSubjectID, subjectId)
+	ctx = context.WithValue(ctx, runaictx.CfSubjectType, "user")
 	ctx = context.WithValue(ctx, runaictx.CfGroups, groups)
 	ctx = context.WithValue(ctx, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{Tenants: []string{tenantId}})
 	ctx = context.WithValue(ctx, runaictx.CfAccept, accept)
@@ -121,6 +125,7 @@ func CreateTables() {
 }
 
 func CleanTables() {
+	runaidb.DB().Where(All).Delete(&models.WorkloadActionHistory{})
 	gormDb := runaidb.DB()
 	gormDb.Unscoped().Delete(&models.PodElement{}, All)
 	gormDb.Unscoped().Delete(&models.Container{}, All)

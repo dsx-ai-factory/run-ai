@@ -18,27 +18,27 @@ type Authenticator interface {
 	Authenticate(ctx context.Context) (*oauth2.Token, error)
 }
 
-type ApplicationAuthenticator struct {
+type AccessKeyAuthenticator struct {
 	clientLogin  *openapi.APIClient
 	clientName   string
 	clientSecret string
 }
 
-func NewApplicationAuthenticator(authUrl string, clientName string, clientSecret string) (*ApplicationAuthenticator, error) {
+func NewAccessKeyAuthenticator(authUrl string, clientName string, clientSecret string) (*AccessKeyAuthenticator, error) {
 	clientLogin, err := NewLoginClient(authUrl)
 	if err != nil {
 		return nil, err
 	}
-	return &ApplicationAuthenticator{
+	return &AccessKeyAuthenticator{
 		clientLogin:  clientLogin,
 		clientName:   clientName,
 		clientSecret: clientSecret,
 	}, nil
 }
 
-func (aa *ApplicationAuthenticator) Authenticate(ctx context.Context) (*oauth2.Token, error) {
+func (aa *AccessKeyAuthenticator) Authenticate(ctx context.Context) (*oauth2.Token, error) {
 	logger := config.GetInstance().GetLogger()
-	logger.Debug(LoginWithApplicationCreds)
+	logger.Debug(LoginWithAccessKeyCreds)
 	applicationId := NewApplicationID(aa.clientName, aa.clientSecret, aa.clientLogin.TokensAPI)
 	return applicationId.Authenticate(ctx)
 }

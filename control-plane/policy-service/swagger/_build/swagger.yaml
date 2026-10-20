@@ -3194,14 +3194,13 @@ components:
       minimum: 0
       deprecated: true
     GpuComputeMode:
-      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
       type: string
       minLength: 1
       enum:
         - time-slicing
         - sm-sharing
       nullable: true
-      x-gorm-ignore: true
     GpuRequestType:
       description: Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.
       type: string

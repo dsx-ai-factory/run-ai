@@ -89,7 +89,10 @@ func (gs *GeneralSpec) CheckDistributeMpiFlags() error {
 
 	if gs.flags.Compute.MasterGpuDeviceRequest.IsSet() && *gs.flags.Compute.MasterGpuDeviceRequest.Get() > 0 ||
 		gs.flags.Compute.MasterGpuPortionLimit.IsSet() && *gs.flags.Compute.MasterGpuPortionLimit.Get() > 0 ||
-		gs.flags.Compute.MasterGpuPortionRequest.IsSet() && *gs.flags.Compute.MasterGpuPortionRequest.Get() > 0 {
+		gs.flags.Compute.MasterGpuPortionRequest.IsSet() && *gs.flags.Compute.MasterGpuPortionRequest.Get() > 0 ||
+		gs.flags.Compute.MasterGpuMemoryPortionRequest.IsSet() && *gs.flags.Compute.MasterGpuMemoryPortionRequest.Get() > 0 ||
+		gs.flags.Compute.MasterGpuMemoryPortionLimit.IsSet() && *gs.flags.Compute.MasterGpuMemoryPortionLimit.Get() > 0 ||
+		gs.flags.Compute.MasterGpuComputeMode != "" {
 		return errors.New(consts.ErrorSubmitMpiWithGpu) //nolint:staticcheck // user facing message
 	}
 
@@ -267,24 +270,40 @@ func updateFlags(gs *GeneralSpec) {
 	if gs.framework == api.MPI {
 		compute.GpuDeviceRequest.Unset()
 		compute.GpuPortionRequest.Set(ptr.To(float64(0)))
+		compute.GpuMemoryPortionRequest.Unset()
+		compute.GpuMemoryPortionLimit.Unset()
+		compute.GpuComputeMode = ""
 	} else {
 		if convutils.HasValue(compute.MasterGpuDeviceRequest) {
 			compute.GpuDeviceRequest.Set(compute.MasterGpuDeviceRequest.Get())
 			compute.GpuPortionRequest.Set(ptr.To(float64(0)))
+			compute.GpuMemoryPortionRequest.Unset()
 			if *compute.MasterGpuDeviceRequest.Get() == 0 {
 				// A CPU-only master must not inherit the workers' fractional GPU settings.
 				compute.GpuRequestType = ""
 				compute.GpuPortionLimit.Unset()
+				compute.GpuMemoryPortionLimit.Unset()
+				compute.GpuComputeMode = ""
 				compute.GpuMemoryRequest = ""
 				compute.GpuMemoryLimit = ""
 			}
 		}
-		if compute.MasterGpuPortionRequest.IsSet() && *compute.MasterGpuPortionRequest.Get() > 0 {
-			compute.GpuPortionRequest.Set(compute.MasterGpuPortionRequest.Get())
-			compute.GpuDeviceRequest.Unset()
+		if compute.MasterGpuPortionRequest.IsSet() && *compute.MasterGpuPortionRequest.Get() > 0 || compute.MasterGpuMemoryPortionRequest.IsSet() {
+			compute.GpuPortionRequest = compute.MasterGpuPortionRequest
+			compute.GpuMemoryPortionRequest = compute.MasterGpuMemoryPortionRequest
+			// Keep explicit device counts for fractions, without inheriting worker counts or changing legacy whole-GPU precedence.
+			hasMasterDevices := convutils.HasValue(compute.MasterGpuDeviceRequest) && *compute.MasterGpuDeviceRequest.Get() > 0
+			legacyWholeGPUs := convutils.HasValue(compute.MasterGpuPortionRequest) && *compute.MasterGpuPortionRequest.Get() > 1
+			if !hasMasterDevices || legacyWholeGPUs {
+				compute.GpuDeviceRequest.Unset()
+			}
 		}
-		if compute.MasterGpuPortionLimit.IsSet() && *compute.MasterGpuPortionLimit.Get() > 0 {
-			compute.GpuPortionLimit.Set(compute.MasterGpuPortionLimit.Get())
+		if compute.MasterGpuPortionLimit.IsSet() && *compute.MasterGpuPortionLimit.Get() > 0 || compute.MasterGpuMemoryPortionLimit.IsSet() {
+			compute.GpuPortionLimit = compute.MasterGpuPortionLimit
+			compute.GpuMemoryPortionLimit = compute.MasterGpuMemoryPortionLimit
+		}
+		if compute.MasterGpuComputeMode != "" {
+			compute.GpuComputeMode = compute.MasterGpuComputeMode
 		}
 	}
 	if compute.MasterExtendedResources != nil {
@@ -345,11 +364,16 @@ func updateWorkerFlags(gs *GeneralSpec, workerAsLeader bool) {
 	if compute.WorkerGpuDevicesRequest.IsSet() && *compute.WorkerGpuDevicesRequest.Get() > 0 {
 		compute.GpuDeviceRequest.Set(compute.WorkerGpuDevicesRequest.Get())
 	}
-	if compute.WorkerGpuPortionRequest.IsSet() && *compute.WorkerGpuPortionRequest.Get() > 0 {
-		compute.GpuPortionRequest.Set(compute.WorkerGpuPortionRequest.Get())
+	if compute.WorkerGpuPortionRequest.IsSet() && *compute.WorkerGpuPortionRequest.Get() > 0 || compute.WorkerGpuMemoryPortionRequest.IsSet() {
+		compute.GpuPortionRequest = compute.WorkerGpuPortionRequest
+		compute.GpuMemoryPortionRequest = compute.WorkerGpuMemoryPortionRequest
 	}
-	if compute.WorkerGpuPortionLimit.IsSet() && *compute.WorkerGpuPortionLimit.Get() > 0 {
-		compute.GpuPortionLimit.Set(compute.WorkerGpuPortionLimit.Get())
+	if compute.WorkerGpuPortionLimit.IsSet() && *compute.WorkerGpuPortionLimit.Get() > 0 || compute.WorkerGpuMemoryPortionLimit.IsSet() {
+		compute.GpuPortionLimit = compute.WorkerGpuPortionLimit
+		compute.GpuMemoryPortionLimit = compute.WorkerGpuMemoryPortionLimit
+	}
+	if compute.WorkerGpuComputeMode != "" {
+		compute.GpuComputeMode = compute.WorkerGpuComputeMode
 	}
 	if compute.WorkerGpuMemoryRequest != "" {
 		compute.GpuMemoryRequest = compute.WorkerGpuMemoryRequest
@@ -456,7 +480,8 @@ func generateMasterSpec(gs *GeneralFullSpec) (*openapi.MasterSpec, error) {
 
 func uniqueMasterSpecRequired(gf *GeneralFlags) bool {
 	if gf.DistributedTraining.DistributedFramework == api.MPI.String() &&
-		(gf.Compute.GpuPortionRequest.IsSet() && *gf.Compute.GpuPortionRequest.Get() > 0 ||
+		(gf.Compute.GpuMemoryPortionRequest.IsSet() || gf.Compute.GpuMemoryPortionLimit.IsSet() || gf.Compute.GpuComputeMode != "" ||
+			gf.Compute.GpuPortionRequest.IsSet() && *gf.Compute.GpuPortionRequest.Get() > 0 ||
 			gf.Compute.GpuDeviceRequest.IsSet() && *gf.Compute.GpuDeviceRequest.Get() > 0 ||
 			gf.Compute.GpuPortionLimit.IsSet() && *gf.Compute.GpuPortionLimit.Get() > 0) {
 		return true
@@ -468,6 +493,9 @@ func uniqueMasterSpecRequired(gf *GeneralFlags) bool {
 		len(gf.Container.MasterDatasourceAssetIds) > 0 ||
 		len(gf.Compute.MasterExtendedResources) > 0 ||
 		convutils.HasValue(gf.Compute.MasterGpuDeviceRequest) ||
+		gf.Compute.MasterGpuMemoryPortionRequest.IsSet() ||
+		gf.Compute.MasterGpuMemoryPortionLimit.IsSet() ||
+		gf.Compute.MasterGpuComputeMode != "" ||
 		gf.Compute.MasterGpuPortionLimit.IsSet() && *gf.Compute.MasterGpuPortionLimit.Get() > 0 ||
 		gf.Compute.MasterGpuPortionRequest.IsSet() && *gf.Compute.MasterGpuPortionRequest.Get() > 0 ||
 		gf.Compute.MasterCpuCoreRequest.IsSet() && *gf.Compute.MasterCpuCoreRequest.Get() > 0 ||
@@ -499,7 +527,10 @@ func uniqueWorkerSpecRequired(gf *GeneralFlags) bool {
 		return true
 	}
 
-	if gf.Compute.WorkerGpuDevicesRequest.IsSet() && *gf.Compute.WorkerGpuDevicesRequest.Get() > 0 ||
+	if gf.Compute.WorkerGpuMemoryPortionRequest.IsSet() ||
+		gf.Compute.WorkerGpuMemoryPortionLimit.IsSet() ||
+		gf.Compute.WorkerGpuComputeMode != "" ||
+		gf.Compute.WorkerGpuDevicesRequest.IsSet() && *gf.Compute.WorkerGpuDevicesRequest.Get() > 0 ||
 		gf.Compute.WorkerGpuPortionRequest.IsSet() && *gf.Compute.WorkerGpuPortionRequest.Get() > 0 ||
 		gf.Compute.WorkerGpuPortionLimit.IsSet() && *gf.Compute.WorkerGpuPortionLimit.Get() > 0 ||
 		gf.Compute.WorkerGpuMemoryRequest != "" ||

@@ -1,0 +1,35 @@
+get:
+  summary: Get workload action history.
+  description: Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+  operationId: get_workload_actions_history
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workload_actions_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+    resource-id: workloadId
+  tags: [WorkloadActions]
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/WorkloadActions/GetWorkloadActionsResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

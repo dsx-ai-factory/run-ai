@@ -69,9 +69,10 @@ CP_IMAGE_TAG="0.0.0"
 RC_IMAGE_TAG="0.0.0-dev"
 
 KIND_CLUSTER="${KIND_CLUSTER:-runai-local}"
-KIND_VERSION="v0.31.0"
-# Pin to K8s 1.32 — kind 0.31 defaults to 1.35 which drops cgroup v1 (breaks Docker Desktop on Mac)
-KIND_NODE_IMAGE="kindest/node:v1.32.5"
+KIND_VERSION="v0.33.0"
+# K8s 1.37 image from the kind v0.33.0 release, pinned by digest as kind recommends.
+# K8s 1.35+ has no cgroup v1 support: the container runtime host must use cgroup v2.
+KIND_NODE_IMAGE="kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5"
 GPU_OPERATOR_VERSION="${GPU_OPERATOR_VERSION:-v26.7.1}"
 
 # Linux host floor: 5 Kind nodes + ~50 services + parallel builds share the host
@@ -90,11 +91,14 @@ CP_NAMESPACE="runai-backend"
 RC_NAMESPACE="runai"
 CP_TENANT_NAME="runai"
 CP_CLUSTER_NAME="${KIND_CLUSTER}"
+# Keycloak master admin, set in .local-dev/values-cp.yaml; its password is generated
+# into runai-backend-gen-keycloakx. Used to impersonate ADMIN_EMAIL for API tokens.
+KC_ADMIN_USER="admin"
 PARALLEL_JOBS="${PARALLEL_JOBS:-4}"
 
 # Set by provision_cluster_credentials() after CP is up
 CLUSTER_UUID=""
-CLUSTER_CLIENT_SECRET=""
+CLUSTER_BOOTSTRAP_TOKEN=""
 
 CERT_DIR="${REPO_ROOT}/.local-dev/certs"
 LOG_DIR="${REPO_ROOT}/.local-dev/logs"
@@ -240,6 +244,13 @@ install_kind() {
     sudo mv "${tmp}" /usr/local/bin/kind
   fi
   log "kind installed: $(kind --version)"
+}
+
+kind_at_least_pinned() {
+  local installed pinned="${KIND_VERSION#v}"
+  installed="$(kind --version 2>/dev/null | awk '{print $3}')"
+  [[ -n "${installed}" ]] || return 1
+  [[ "$(printf '%s\n' "${installed}" "${pinned}" | sort -V | head -1)" == "${pinned}" ]]
 }
 
 install_kubectl() {
@@ -567,6 +578,11 @@ SHIM
 
   if ! command -v kind &>/dev/null; then
     install_kind
+  elif ! kind_at_least_pinned; then
+    # Node images are built for a kind release; older kind binaries may not run them.
+    warn "kind $(kind --version | awk '{print $3}') is older than ${KIND_VERSION} (needed for ${KIND_NODE_IMAGE%@*}) — upgrading"
+    install_kind
+    kind_at_least_pinned || die "An older kind still comes first in PATH at $(command -v kind). Upgrade or remove it, then re-run."
   else
     log "kind: $(kind --version)"
   fi
@@ -1807,7 +1823,7 @@ prefetch_go_modules() {
     return 0
   fi
 
-  log "First run — pre-warming Go module cache (saves redundant downloads across ${PARALLEL_JOBS} parallel builds)..."
+  log "First run — pre-warming Go module cache, ${PARALLEL_JOBS} modules at a time (saves redundant downloads across parallel builds)..."
   mkdir -p "${gopath_vol}" "${gocache_vol}"
 
   # Build a script that runs go mod download in each service directory.
@@ -1826,13 +1842,13 @@ prefetch_go_modules() {
   local go_version
   go_version=$(for rel in "${mod_dirs[@]}"; do awk '$1=="go"{print $2;exit}' "${REPO_ROOT}/${rel}/go.mod"; done | sort -V | tail -1)
 
-  # A cold cache is several GB and takes a long time; print one line per module so the
-  # step does not look hung.
-  local cmds="" i=0
-  for rel in "${mod_dirs[@]}"; do
-    i=$((i + 1))
-    cmds+="echo '[${i}/${#mod_dirs[@]}] ${rel}'; (cd /repo/${rel} && go mod download all 2>/dev/null) || true; "
-  done
+  # A cold cache is several GB, so download PARALLEL_JOBS modules at a time (Go locks
+  # the shared module cache, so concurrent downloads are safe). Each module prints its
+  # path when done, numbered below in completion order, so the step does not look hung.
+  # No `all`: that fetches every module version in the dependency graph, ~2-3x more
+  # than the modules go.mod requires, which is everything the builds need.
+  local cmds i=0 prewarm_start=${SECONDS}
+  cmds="printf '%s\n' ${mod_dirs[*]} | xargs -n 1 -P ${PARALLEL_JOBS} sh -c 'cd /repo/\$1 && go mod download 2>/dev/null; echo \$1' _"
 
   local af_args=()
   [[ "${CONTAINER_TOOL}" == "podman" && -f "${HOME}/.docker/config.json" ]] && \
@@ -1864,10 +1880,11 @@ prefetch_go_modules() {
     -e GO111MODULE=on \
     "library/golang:${go_version}" \
     bash -c "${cmds}" 2>/dev/null \
-    | while IFS= read -r line; do log "  ${line}"; done || \
+    | while IFS= read -r line; do i=$((i + 1)); log "  [${i}/${#mod_dirs[@]}] ${line}"; done || \
     warn "Module pre-warm incomplete — remaining modules will download during build"
 
-  log "Go module cache warm"
+  local prewarm_elapsed=$(( SECONDS - prewarm_start ))
+  log "Go module cache warm ($(( prewarm_elapsed / 60 ))m $(( prewarm_elapsed % 60 ))s)"
 }
 
 setup_git_token() {
@@ -2331,18 +2348,99 @@ resolve_admin_password() {
   [[ -n "${ADMIN_PASSWORD}" ]]
 }
 
-# Fetches an admin access token from Keycloak. Prints the token on stdout and
-# returns non-zero if the realm/token endpoint is not (yet) available.
+# Fetches an access token for ADMIN_EMAIL: the Keycloak master admin impersonates
+# the user, then runs the authorization code + PKCE flow of a browser login client
+# of the tenant realm (the realm has no password-grant client). Prints the token on
+# stdout and returns non-zero if Keycloak or the realm is not (yet) available.
 get_cp_token() {
-  local token
-  token="$(curl --insecure --silent --fail --max-time 60 \
-    -X POST "https://${DOMAIN}/auth/realms/${CP_TENANT_NAME}/protocol/openid-connect/token" \
-    -H 'Content-Type: application/x-www-form-urlencoded' \
+  local kc="https://${DOMAIN}/auth"
+  local kc_admin_password admin_token user_id client_info client_id client_uuid redirect_uri
+  local jar verifier challenge location code token
+  local secret_args=()
+
+  kc_admin_password="$(kubectl get secret runai-backend-gen-keycloakx -n "${CP_NAMESPACE}" \
+    -o jsonpath='{.data.KEYCLOAK_ADMIN_PASSWORD}' 2>/dev/null | base64 --decode 2>/dev/null || true)"
+  [[ -n "${kc_admin_password}" ]] || return 1
+
+  admin_token="$(curl --insecure --silent --fail --max-time 60 \
+    -X POST "${kc}/realms/master/protocol/openid-connect/token" \
     --data-urlencode 'grant_type=password' \
-    --data-urlencode 'client_id=runai' \
+    --data-urlencode 'client_id=admin-cli' \
+    --data-urlencode "username=${KC_ADMIN_USER}" \
+    --data-urlencode "password=${kc_admin_password}" \
+    | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])" 2>/dev/null)" || return 1
+  [[ -n "${admin_token}" ]] || return 1
+
+  # The user exists only once tenants-manager has provisioned the realm.
+  user_id="$(curl --insecure --silent --fail --max-time 60 \
+    -G "${kc}/admin/realms/${CP_TENANT_NAME}/users" \
+    --data-urlencode 'exact=true' \
     --data-urlencode "username=${ADMIN_EMAIL}" \
-    --data-urlencode "password=${ADMIN_PASSWORD}" \
+    -H "Authorization: Bearer ${admin_token}" \
+    | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['id'])" 2>/dev/null)" || return 1
+
+  # Browser login client that redirects back to the domain: prefer runai-cli, then
+  # runai-admin-ui. Prints "clientId|uuid (confidential clients only)|redirect_uri".
+  client_info="$(curl --insecure --silent --fail --max-time 60 \
+    "${kc}/admin/realms/${CP_TENANT_NAME}/clients?max=500" \
+    -H "Authorization: Bearer ${admin_token}" \
+    | python3 -c "
+import sys, json
+base = 'https://${DOMAIN}'
+def redirect(c):
+    for u in c.get('redirectUris') or []:
+        if u == base or u.startswith(base + '/'):
+            return u.rstrip('*')
+cs = [c for c in json.load(sys.stdin)
+      if c.get('enabled') and c.get('standardFlowEnabled')
+      and not c['clientId'].startswith('runai-internal.') and redirect(c)]
+cs.sort(key=lambda c: {'runai-cli': 0, 'runai-admin-ui': 1}.get(c['clientId'], 2))
+c = cs[0]
+print(c['clientId'], '' if c.get('publicClient') else c['id'], redirect(c), sep='|')
+" 2>/dev/null)" || return 1
+  IFS='|' read -r client_id client_uuid redirect_uri <<< "${client_info}"
+
+  if [[ -n "${client_uuid}" ]]; then
+    secret_args=(--data-urlencode "client_secret=$(curl --insecure --silent --fail --max-time 60 \
+      "${kc}/admin/realms/${CP_TENANT_NAME}/clients/${client_uuid}/client-secret" \
+      -H "Authorization: Bearer ${admin_token}" \
+      | python3 -c "import sys,json; print(json.load(sys.stdin)['value'])" 2>/dev/null)")
+  fi
+
+  read -r verifier challenge < <(python3 -c "
+import base64, hashlib, secrets
+v = secrets.token_urlsafe(48)
+print(v, base64.urlsafe_b64encode(hashlib.sha256(v.encode()).digest()).rstrip(b'=').decode())
+")
+
+  # Impersonation sets the user's SSO session cookies, so the authorization request
+  # redirects straight back with a code instead of showing the login page.
+  jar="$(mktemp)"
+  curl --insecure --silent --max-time 60 -o /dev/null -c "${jar}" -b "${jar}" \
+    -X POST "${kc}/admin/realms/${CP_TENANT_NAME}/users/${user_id}/impersonation" \
+    -H "Authorization: Bearer ${admin_token}" || true
+  location="$(curl --insecure --silent --max-time 60 -o /dev/null -c "${jar}" -b "${jar}" \
+    -w '%{redirect_url}' \
+    -G "${kc}/realms/${CP_TENANT_NAME}/protocol/openid-connect/auth" \
+    --data-urlencode "client_id=${client_id}" \
+    --data-urlencode "redirect_uri=${redirect_uri}" \
+    --data-urlencode 'response_type=code' \
     --data-urlencode 'scope=openid' \
+    --data-urlencode 'state=local-dev' \
+    --data-urlencode "code_challenge=${challenge}" \
+    --data-urlencode 'code_challenge_method=S256')" || location=""
+  rm -f "${jar}"
+  code="$(printf '%s' "${location}" | sed -n 's/.*[?&#]code=\([^&]*\).*/\1/p')"
+  [[ -n "${code}" ]] || return 1
+
+  token="$(curl --insecure --silent --fail --max-time 60 \
+    -X POST "${kc}/realms/${CP_TENANT_NAME}/protocol/openid-connect/token" \
+    --data-urlencode 'grant_type=authorization_code' \
+    --data-urlencode "code=${code}" \
+    --data-urlencode "redirect_uri=${redirect_uri}" \
+    --data-urlencode "client_id=${client_id}" \
+    ${secret_args[@]+"${secret_args[@]}"} \
+    --data-urlencode "code_verifier=${verifier}" \
     | python3 -c "import sys,json; print(json.load(sys.stdin)['access_token'])" 2>/dev/null)" || return 1
   [[ -n "${token}" ]] || return 1
   printf '%s' "${token}"
@@ -2372,8 +2470,8 @@ wait_for_cp_health() {
   log "Control plane is healthy"
 }
 
-# Registers the cluster in the CP via the REST API and retrieves the
-# installer clientSecret.  Sets CLUSTER_UUID and CLUSTER_CLIENT_SECRET.
+# Registers the cluster in the CP via the REST API and mints the one-time
+# installer bootstrap token.  Sets CLUSTER_UUID and CLUSTER_BOOTSTRAP_TOKEN.
 provision_cluster_credentials() {
   log "Provisioning cluster credentials via CP API..."
 
@@ -2433,18 +2531,24 @@ print(cs[0]['uuid'] if cs else '')
     log "  Cluster '${CP_CLUSTER_NAME}' registered (uuid: ${CLUSTER_UUID})"
   fi
 
-  # Retrieve the installer client secret (CP may take a moment to propagate it).
+  # Mint the installer bootstrap token for this cluster (a new one on every call).
   local attempt=0
   while true; do
-    CLUSTER_CLIENT_SECRET="$(curl --insecure --silent --fail --max-time 60 \
-      "https://${DOMAIN}/api/v1/service-accounts/installer" \
+    CLUSTER_BOOTSTRAP_TOKEN="$(curl --insecure --silent --fail --max-time 60 \
+      -G "https://${DOMAIN}/api/v1/clusters/${CLUSTER_UUID}/cluster-install-info" \
+      --data-urlencode "version=${RC_IMAGE_TAG}" \
       -H "Authorization: Bearer ${token}" \
-      | python3 -c "import sys,json; print(json.load(sys.stdin).get('clientSecret',''))" 2>/dev/null)" \
-      || CLUSTER_CLIENT_SECRET=""
-    [[ -n "${CLUSTER_CLIENT_SECRET}" ]] && break
+      | python3 -c "import sys,json; print(json.load(sys.stdin).get('bootstrapToken',''))" 2>/dev/null)" \
+      || CLUSTER_BOOTSTRAP_TOKEN=""
+    [[ -n "${CLUSTER_BOOTSTRAP_TOKEN}" ]] && break
     attempt=$(( attempt + 1 ))
-    (( attempt >= 30 )) && die "Timed out waiting for installer client secret from control plane"
-    log "  Waiting for installer client secret (${attempt}/30)..."
+    (( attempt >= 30 )) && die "Timed out waiting for installer bootstrap token from control plane"
+    if (( attempt % 10 == 0 )); then
+      local refreshed
+      refreshed="$(get_cp_token)" || refreshed=""
+      [[ -n "${refreshed}" ]] && token="${refreshed}"
+    fi
+    log "  Waiting for installer bootstrap token (${attempt}/30)..."
     sleep 5
   done
 
@@ -2530,107 +2634,54 @@ ${DOMAIN}:53 {
   # regardless of its condition — conditions are only evaluated later, at render time.
   # charts/*.tgz is gitignored, so a fresh clone has none.
   #
-  # Dependency names and versions are read from Chart.yaml rather than hardcoded here,
-  # so bumping a dependency (e.g. kai-scheduler v0.16.8, karta 0.2.6) cannot leave this
-  # block stale.
+  # Helm itself checks charts/ against Chart.yaml, so a dependency may use any version
+  # constraint Helm supports (exact, "~0.18.0", "^1.2", ">=1.0 <2.0", ...).
   local charts_dir="${rc_chart}/charts"
   mkdir -p "${charts_dir}"
 
-  # Drop tarballs that no longer match a declared dependency — left behind by an earlier
-  # run after a version bump, or by a dependency being removed outright. Helm loads every
-  # tarball in charts/, so leftovers are not inert: two tarballs named kai-scheduler make
-  # the resolved subchart ambiguous, and an undeclared one (e.g. runai-engine) has no
-  # condition to gate it, so it renders unconditionally.
-  # Placeholders from an earlier failed fetch are dropped too: they satisfy the
-  # missing-dependency check below, so otherwise the real chart is never fetched again.
-  local stale_chart
-  while read -r stale_chart; do
-    [[ -z "${stale_chart}" ]] && continue
-    log "  Removing stale subchart tarball: $(basename "${stale_chart}")"
-    rm -f "${stale_chart}"
-  done < <(python3 - "${rc_chart}/Chart.yaml" "${charts_dir}" <<'PYEOF'
-import sys, re, os, glob, tarfile
-chart_yaml, charts_dir = sys.argv[1], sys.argv[2]
+  # Older versions of this script installed an empty placeholder when a fetch failed.
+  # Helm reports a placeholder as "ok", so drop it, or the real chart is never fetched.
+  local chart_tgz
+  for chart_tgz in "${charts_dir}"/*.tgz; do
+    [[ -e "${chart_tgz}" ]] || continue
+    if helm show chart "${chart_tgz}" 2>/dev/null \
+        | grep -q 'Placeholder — real chart could not be fetched'; then
+      log "  Removing placeholder subchart tarball: $(basename "${chart_tgz}")"
+      rm -f "${chart_tgz}"
+    fi
+  done
 
-def is_placeholder(path):
-    try:
-        with tarfile.open(path) as tar:
-            for member in tar.getmembers():
-                if member.name.count("/") == 1 and member.name.endswith("/Chart.yaml"):
-                    return "Placeholder — real chart could not be fetched" in tar.extractfile(member).read().decode()
-    except (tarfile.TarError, OSError):
-        return True
-    return False
-
-wanted = set()
-block = re.search(r'^dependencies:\s*\n(.*?)(?=^\S|\Z)', open(chart_yaml).read(), re.S | re.M)
-if block:
-    for entry in re.split(r'^\s*-\s+', block.group(1), flags=re.M)[1:]:
-        name = re.search(r'\bname:\s*(\S+)', entry)
-        version = re.search(r'\bversion:\s*(\S+)', entry)
-        if name and version:
-            wanted.add(f"{name.group(1)}-{version.group(1)}.tgz")
-for path in sorted(glob.glob(os.path.join(charts_dir, "*.tgz"))):
-    if os.path.basename(path) not in wanted or is_placeholder(path):
-        print(path)
-PYEOF
-)
-
-  # Emits "<name> <version>" for each declared dependency that has neither a matching
-  # tarball nor an unpacked directory in charts/ (Helm accepts either form).
-  _rc_missing_deps() {
-    python3 - "${rc_chart}/Chart.yaml" "${charts_dir}" <<'PYEOF'
-import sys, re, os
-chart_yaml, charts_dir = sys.argv[1], sys.argv[2]
-block = re.search(r'^dependencies:\s*\n(.*?)(?=^\S|\Z)', open(chart_yaml).read(), re.S | re.M)
-if not block:
-    sys.exit(0)
-for entry in re.split(r'^\s*-\s+', block.group(1), flags=re.M)[1:]:
-    name = re.search(r'\bname:\s*(\S+)', entry)
-    version = re.search(r'\bversion:\s*(\S+)', entry)
-    if not (name and version):
-        continue
-    n, v = name.group(1), version.group(1)
-    if os.path.exists(os.path.join(charts_dir, f"{n}-{v}.tgz")):
-        continue
-    if os.path.isdir(os.path.join(charts_dir, n)):
-        continue
-    print(f"{n} {v}")
-PYEOF
+  # Prints every dependency Helm does not report as ok/unpacked (missing, wrong version,
+  # too many matches, ...), and every tarball in charts/ that Chart.yaml does not declare.
+  # Helm loads every tarball in charts/, so an undeclared one (e.g. runai-engine) has no
+  # condition to gate it and renders unconditionally.
+  _rc_dep_problems() {
+    local out
+    if ! out="$(helm dependency list "${rc_chart}" 2>&1)"; then
+      echo "${out}"
+      return 0
+    fi
+    awk '/^WARNING: .* is not in Chart\.yaml/ { print; next }
+         NR > 1 && NF >= 4 && $NF != "ok" && $NF != "unpacked" { print }' <<<"${out}"
   }
 
-  if [[ -n "$(_rc_missing_deps)" ]]; then
+  local dep_problems
+  dep_problems="$(_rc_dep_problems)"
+  if [[ -n "${dep_problems}" ]]; then
     log "  Fetching runai-cluster chart dependencies..."
-    # Pulls the real subcharts from their OCI repositories. Needs network access, and
-    # credentials for any private registry — hence the placeholder fallback below.
+    echo "${dep_problems}"
+    # Pulls the subcharts from their repositories, resolving version ranges, and replaces
+    # anything outdated or undeclared in charts/.
     # `update`, not `build`: Chart.lock is gitignored, so a local copy left over from an
     # older Chart.yaml makes `build` refuse to run ("lock file is out of sync").
     helm dependency update "${rc_chart}" 2>&1 \
       | grep -v '^Saving\|^Deleting\|^$' || true
+    dep_problems="$(_rc_dep_problems)"
+    if [[ -n "${dep_problems}" ]]; then
+      echo "${dep_problems}" >&2
+      die "runai-cluster chart dependencies are not satisfied (see above and the helm output). Fix the cause, then retry: helm dependency update ${rc_chart}"
+    fi
   fi
-
-  # Anything still missing gets a minimal placeholder so Helm's dependency check passes.
-  # This is a real degradation, not a no-op: Helm matches dependencies by name only, so a
-  # placeholder satisfies the check and the subchart installs EMPTY. For kai-scheduler and
-  # karta — both enabled below — that means no scheduler workloads. Warn loudly.
-  local dep_name dep_version
-  while read -r dep_name dep_version; do
-    [[ -z "${dep_name}" ]] && continue
-    warn "  Could not fetch ${dep_name}@${dep_version} — installing an EMPTY placeholder."
-    warn "    '${dep_name}' will be enabled but deploy nothing. Fix with:"
-    warn "      helm dependency update ${rc_chart}"
-    local tmpdir
-    tmpdir="$(mktemp -d)"
-    mkdir -p "${tmpdir}/${dep_name}"
-    cat > "${tmpdir}/${dep_name}/Chart.yaml" <<CHARTEOF
-apiVersion: v2
-name: ${dep_name}
-version: ${dep_version}
-description: Placeholder — real chart could not be fetched
-CHARTEOF
-    helm package "${tmpdir}/${dep_name}" -d "${charts_dir}" >/dev/null 2>&1
-    rm -rf "${tmpdir}"
-  done < <(_rc_missing_deps)
 
   local scheduler_args=(
     --set runai-engine.enabled=false
@@ -2649,7 +2700,7 @@ CHARTEOF
     --create-namespace \
     --set "controlPlane.url=https://${DOMAIN}" \
     --set "controlPlane.clientID=runai-internal.installer" \
-    --set "controlPlane.clientSecret=${CLUSTER_CLIENT_SECRET}" \
+    --set "controlPlane.bootstrapToken=${CLUSTER_BOOTSTRAP_TOKEN}" \
     --set "cluster.uid=${CLUSTER_UUID}" \
     --set "cluster.url=https://${DOMAIN}" \
     --set "global.customCA.enabled=true" \
@@ -2713,12 +2764,10 @@ print_access_info() {
   echo "  Cluster namespace:    ${RC_NAMESPACE}"
   echo ""
   echo "  Scheduler:  kai-resource-management (bundles kai-scheduler) + karta enabled"
-  echo "    If no KRM/kai-scheduler/karta pods are running, charts/ holds placeholder"
-  echo "    subcharts. Fix with: helm dependency update ${REPO_ROOT}/runai-cluster/cluster/runai-chart"
   echo "  Re-deploy cluster with updated credentials:"
   echo "    helm upgrade runai-cluster ${REPO_ROOT}/runai-cluster/cluster/runai-chart \\"
   echo "      -n ${RC_NAMESPACE} \\"
-  echo "      --set controlPlane.clientSecret=<SECRET> \\"
+  echo "      --set controlPlane.bootstrapToken=<TOKEN> \\"
   echo "      --set cluster.uid=<UID> \\"
   echo "      --reuse-values"
 }

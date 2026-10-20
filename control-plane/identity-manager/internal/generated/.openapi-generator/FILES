@@ -38,8 +38,6 @@ pkg/api/model_access_key_creation_request.go
 pkg/api/model_access_key_post_response.go
 pkg/api/model_access_keys.go
 pkg/api/model_access_keys_administration.go
-pkg/api/model_app_token_request.go
-pkg/api/model_app_token_response.go
 pkg/api/model_auth_configuration.go
 pkg/api/model_bulk_user_creation_request.go
 pkg/api/model_bulk_user_creation_response.go

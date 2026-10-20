@@ -347,6 +347,7 @@ pkg/api/model_pod_affinity_type.go
 pkg/api/model_pod_affinity_type_options.go
 pkg/api/model_pod_affinity_type_options_options_inner.go
 pkg/api/model_pod_affinity_type_rules.go
+pkg/api/model_pod_resource_claim_binding.go
 pkg/api/model_policy_info.go
 pkg/api/model_policy_rule_enum.go
 pkg/api/model_port.go
@@ -390,6 +391,9 @@ pkg/api/model_related_url.go
 pkg/api/model_repositories.go
 pkg/api/model_repository_tags.go
 pkg/api/model_request_info.go
+pkg/api/model_resource_claim_template_workload.go
+pkg/api/model_resource_claim_template_workload_pod.go
+pkg/api/model_resource_claim_template_workloads_response.go
 pkg/api/model_response_info.go
 pkg/api/model_restart_policy.go
 pkg/api/model_restart_policy_options.go

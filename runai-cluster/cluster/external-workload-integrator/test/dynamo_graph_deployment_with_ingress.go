@@ -35,7 +35,7 @@ var (
 					constants.GpuResourceName: *resource.NewQuantity(2*deploymentGpuRequestWorkerWithIngress, resource.DecimalSI),
 				},
 			},
-			Urls:             []string{"https://llm-api.runailabs.com"},
+			Urls:             []string{"https://llm-api.example.com"},
 			AdditionalFields: nil,
 		},
 		Status: v1alpha1.ExternalWorkloadStatus{
@@ -73,7 +73,7 @@ func getSecureLlmDGD() dynamov1alpha1.DynamoGraphDeployment {
 			Finalizers: []string{"nvidia.com/finalizer"},
 			Annotations: map[string]string{
 				//nolint:lll // test data JSON annotation
-				"kubectl.kubernetes.io/last-applied-configuration": `{"apiVersion":"nvidia.com/v1alpha1","kind":"DynamoGraphDeployment","metadata":{"annotations":{},"name":"secure-llm","namespace":"runai-proj001"},"spec":{"services":{"Frontend":{"componentType":"frontend","dynamoNamespace":"secure-llm","extraPodSpec":{"mainContainer":{"image":"nvcr.io/nvidia/ai-dynamo/vllm-runtime:0.5.0"}},"ingress":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"enabled":true,"host":"api","hostPrefix":"llm-","hostSuffix":"runailabs.com","ingressControllerClassName":"nginx","tls":{"secretName":"my-tls-secret"}},"replicas":1},"VllmWorker":{"componentType":"worker","dynamoNamespace":"secure-llm","envFromSecret":"hf-token-secret","extraPodSpec":{"mainContainer":{"args":["--model","Qwen/Qwen3-0.6B"],"command":["python3","-m","dynamo.vllm"],"image":"nvcr.io/nvidia/ai-dynamo/vllm-runtime:0.5.0","workingDir":"/workspace/components/backends/vllm"}},"replicas":2,"resources":{"limits":{"gpu":"3"}}}}}}`,
+				"kubectl.kubernetes.io/last-applied-configuration": `{"apiVersion":"nvidia.com/v1alpha1","kind":"DynamoGraphDeployment","metadata":{"annotations":{},"name":"secure-llm","namespace":"runai-proj001"},"spec":{"services":{"Frontend":{"componentType":"frontend","dynamoNamespace":"secure-llm","extraPodSpec":{"mainContainer":{"image":"nvcr.io/nvidia/ai-dynamo/vllm-runtime:0.5.0"}},"ingress":{"annotations":{"cert-manager.io/cluster-issuer":"letsencrypt-prod","nginx.ingress.kubernetes.io/ssl-redirect":"true"},"enabled":true,"host":"api","hostPrefix":"llm-","hostSuffix":"example.com","ingressControllerClassName":"nginx","tls":{"secretName":"my-tls-secret"}},"replicas":1},"VllmWorker":{"componentType":"worker","dynamoNamespace":"secure-llm","envFromSecret":"hf-token-secret","extraPodSpec":{"mainContainer":{"args":["--model","Qwen/Qwen3-0.6B"],"command":["python3","-m","dynamo.vllm"],"image":"nvcr.io/nvidia/ai-dynamo/vllm-runtime:0.5.0","workingDir":"/workspace/components/backends/vllm"}},"replicas":2,"resources":{"limits":{"gpu":"3"}}}}}}`,
 			},
 		},
 		Spec: dynamov1alpha1.DynamoGraphDeploymentSpec{
@@ -93,7 +93,7 @@ func getSecureLlmDGD() dynamov1alpha1.DynamoGraphDeployment {
 						Enabled:                    true,
 						Host:                       "api",
 						HostPrefix:                 ptr.To("llm-"),
-						HostSuffix:                 ptr.To("runailabs.com"),
+						HostSuffix:                 ptr.To("example.com"),
 						IngressControllerClassName: ptr.To("nginx"),
 						Annotations: map[string]string{
 							"cert-manager.io/cluster-issuer":           "letsencrypt-prod",

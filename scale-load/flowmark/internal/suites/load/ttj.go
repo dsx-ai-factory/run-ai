@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"slices"
 	"strings"
 	"sync"
@@ -90,7 +91,7 @@ func (s Suite) Run(ctx context.Context, target core.Target, scenario core.Scenar
 	}
 	defer watchers.Stop()
 
-	log.Printf("%s: submitting %s workloads at %d/s for %s with %d users", suiteName, opts.workloadType, opts.rate, opts.duration, opts.users)
+	log.Printf("%s: submitting %s workloads at %d/s for %s with %d users%s", suiteName, opts.workloadType, opts.rate, opts.duration, opts.users, describeRamp(opts))
 	submissions, pacing := submitWorkloads(ctx, clients, project, watchers, opts, runID)
 	log.Printf("%s: submitted %d workloads at %.2f/s (target %d/s), %d rejected; waiting up to %s for arrivals", suiteName, pacing.Submitted, pacing.Rate(), opts.rate, rejected(submissions), opts.timeout)
 
@@ -122,7 +123,7 @@ func submitWorkloads(ctx context.Context, clients *client.Clients, project submi
 	defer stopProgress()
 	go reportProgress(progressCtx, &accepted, &failed, opts)
 
-	pacer := submit.Pacer{Rate: opts.rate, Duration: opts.duration, Users: opts.users}
+	pacer := submit.Pacer{Rate: opts.rate, SpawnRate: opts.spawnRate, Duration: opts.duration, Users: opts.users}
 	pacing := pacer.Run(ctx, func(ctx context.Context, index int) {
 		name := fmt.Sprintf("flowmark-load-%s-%d", runID, index+1)
 		createCtx, cancel := context.WithTimeout(ctx, opts.setupTimeout)
@@ -162,6 +163,13 @@ func reportProgress(ctx context.Context, accepted, failed *atomic.Int64, opts op
 			log.Printf("%s: %s in: %d submitted (%.2f/s, target %d/s), %d rejected", suiteName, elapsed.Round(time.Second), total, float64(total)/elapsed.Seconds(), opts.rate, failed.Load())
 		}
 	}
+}
+
+func describeRamp(opts options) string {
+	if opts.spawnRate == 0 {
+		return ""
+	}
+	return fmt.Sprintf(", ramping up %d users per second", opts.spawnRate)
 }
 
 func rejected(submissions []measure.Submission) int {
@@ -230,8 +238,8 @@ const (
 
 var (
 	spanNames    = []string{"api_accepted", "cluster_synced", "pod_created", "ttj"}
-	latencyStats = []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms"}
-	sloKeys      = latencySLOKeys()
+	latencyStats = []string{"p50_ms", "p90_ms", "p99_ms"}
+	sloKeys      = append(latencySLOKeys(), "failed_count")
 )
 
 func latencySLOKeys() []string {
@@ -244,10 +252,11 @@ func latencySLOKeys() []string {
 	return keys
 }
 
-var knownKnobs = []string{"users", "rate", "duration", "workloadType", "image", "timeout", "setupTimeout", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "cluster", "slo"}
+var knownKnobs = []string{"users", "spawnRate", "rate", "duration", "workloadType", "image", "timeout", "setupTimeout", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "cluster", "slo"}
 
 type options struct {
 	users        int
+	spawnRate    int
 	rate         int
 	duration     time.Duration
 	workloadType string
@@ -270,6 +279,12 @@ func parseOptions(scenario core.Scenario) (options, error) {
 	}
 	if opts.users < 1 || opts.users > maxUsers {
 		return options{}, fmt.Errorf("knob \"users\" must be between 1 and %d, got %d", maxUsers, opts.users)
+	}
+	if opts.spawnRate, err = scenario.Int("spawnRate", 0); err != nil {
+		return options{}, err
+	}
+	if opts.spawnRate < 0 || opts.spawnRate > maxUsers {
+		return options{}, fmt.Errorf("knob \"spawnRate\" must be between 0 and %d users per second, got %d", maxUsers, opts.spawnRate)
 	}
 	if opts.rate, err = scenario.Int("rate", 2); err != nil {
 		return options{}, err
@@ -317,7 +332,7 @@ func parseOptions(scenario core.Scenario) (options, error) {
 	}
 	for key := range opts.slo {
 		if !slices.Contains(sloKeys, key) {
-			return options{}, fmt.Errorf("slo key %q is not a latency this suite reports; use <span>_<stat> with span %s and stat %s",
+			return options{}, fmt.Errorf("slo key %q is not a metric this suite reports; use failed_count or <span>_<stat> with span %s and stat %s",
 				key, strings.Join(spanNames, ", "), strings.Join(latencyStats, ", "))
 		}
 	}
@@ -339,13 +354,12 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 		metrics[name+"_p50_ms"] = summary.P50.Milliseconds()
 		metrics[name+"_p90_ms"] = summary.P90.Milliseconds()
 		metrics[name+"_p99_ms"] = summary.P99.Milliseconds()
-		metrics[name+"_mean_ms"] = summary.Mean.Milliseconds()
-		metrics[name+"_max_ms"] = summary.Max.Milliseconds()
 	}
 
 	var problems []string
-	if achieved := pacing.Rate(); pacing.Submitted >= 2 && achieved < float64(opts.rate)*(1-rateShortfall) {
-		problems = append(problems, fmt.Sprintf("the pacer kept only %.2f/s of the %d/s target: the environment could not absorb the load", achieved, opts.rate))
+	if required := int(math.Ceil(float64(pacing.Planned) * (1 - rateShortfall))); pacing.Planned > 0 && pacing.Submitted < required {
+		problems = append(problems, fmt.Sprintf("the pacer kept only %d of the %d planned submissions (%.2f/s against the %d/s target): "+
+			"the environment could not absorb the load", pacing.Submitted, pacing.Planned, pacing.Rate(), opts.rate))
 	}
 	switch {
 	case interrupted != nil:

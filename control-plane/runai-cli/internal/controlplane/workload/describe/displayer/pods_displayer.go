@@ -124,7 +124,7 @@ func (p *PodsDisplayer) Data() [][]string {
 	return data
 }
 
-func (p *PodsDisplayer) DisplayBeforeTable() {
+func (p *PodsDisplayer) DisplayBeforeTable(indent string) {
 	totalPods := len(p.pods)
 	columnPadding := GeneralAndRuntimeColumnPadding
 
@@ -134,7 +134,7 @@ func (p *PodsDisplayer) DisplayBeforeTable() {
 		leaderCount, workerCount := p.countPodRoles()
 		runningPodsLine += fmt.Sprintf(" (%d leaders, %d workers)", leaderCount, workerCount)
 	}
-	fmt.Printf("  %-*s %s\n", columnPadding, FieldRunningPods+":", runningPodsLine) //nolint:forbidigo
+	fmt.Printf("%s%-*s %s\n", indent, columnPadding, FieldRunningPods+":", runningPodsLine) //nolint:forbidigo
 
 	// Show requested pods for distributed workloads
 	if p.replicas != nil && *p.replicas > 0 {
@@ -143,7 +143,7 @@ func (p *PodsDisplayer) DisplayBeforeTable() {
 			workers = *p.workersPerReplica
 		}
 		total := *p.replicas * (1 + workers)
-		fmt.Printf("  %-*s Leaders: %d, Workers: %d, Total: %d\n", columnPadding, FieldRequestedPods+":", *p.replicas, *p.replicas*workers, total) //nolint:forbidigo
+		fmt.Printf("%s%-*s Leaders: %d, Workers: %d, Total: %d\n", indent, columnPadding, FieldRequestedPods+":", *p.replicas, *p.replicas*workers, total) //nolint:forbidigo
 	}
 }
 

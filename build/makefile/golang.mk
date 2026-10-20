@@ -28,7 +28,7 @@ MOCKERY_VERSION=v3.8.1
 # Must be new enough to decode the Go release's export data: v2.9.0 fails
 # every package on Go 1.27 with "export data version 4 ... (typecheck)".
 # renovate: datasource=go depName=github.com/golangci/golangci-lint/v2
-GOLANGCI_LINT_VERSION=v2.14.0
+GOLANGCI_LINT_VERSION=v2.15.0
 GOPRIVATE=github.com/run-ai/*
 
 # Ginkgo runner settings. Override per service if needed.
@@ -230,50 +230,37 @@ test-go-acc-local: git-config-command gocache
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: test-go-acc-local
 
-
-generate-mocks: git-config-command
-	@if [ ! -f .mockery.yml ] && [ ! -f .mockery.yaml ]; then \
-		${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} No .mockery.yml in ${SERVICE_NAME}; nothing to generate" ${BASE_CONSOLE}; \
-		exit 0; \
-	fi
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME}" ${BASE_CONSOLE}
-	${DOCKER_MOCKERY_COMMAND} mockery' || ${FAILURE_MESSAGE_HANDLER}
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
-	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh .
+# Regenerates the service mocks (.mockery.yml) and the client mocks
+# (pkg/client/.mockery.yml), then fails if either left the working tree dirty.
+# Each generator is a no-op when its .mockery.yml is absent, so services
+# without a pkg/client need no extra target.
+validate-mockery: git-config-command
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Validating mocks are up to date for ${SERVICE_NAME}" ${BASE_CONSOLE}
+	@set -e; \
+	mocks_state() { \
+		git status --porcelain --untracked-files=all; \
+		git diff HEAD; \
+		git ls-files --others --exclude-standard | while IFS= read -r f; do git hash-object -- "$$f"; done; \
+	}; \
+	elapsed() { echo "$$(( $$(date +%s) - $$1 ))"; }; \
+	started=$$(date +%s); \
+	before=$$(mocks_state); \
+	step=$$(date +%s); \
+	$(MAKE) generate-mocks; \
+	${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} generate-mocks took $$(elapsed $$step)s" ${BASE_CONSOLE}; \
+	step=$$(date +%s); \
+	$(MAKE) generate-mocks-client; \
+	${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} generate-mocks-client took $$(elapsed $$step)s" ${BASE_CONSOLE}; \
+	after=$$(mocks_state); \
+	if [ "$$before" != "$$after" ]; then \
+		${ECHO_COMMAND} ${RED_CONSOLE} "${CONSOLE_PREFIX} mockery produced uncommitted changes in ${SERVICE_NAME}. Run 'make generate-mocks generate-mocks-client' and commit them." ${BASE_CONSOLE}; \
+		git --no-pager status --porcelain --untracked-files=all; \
+		git --no-pager diff; \
+		${FAILURE_MESSAGE_HANDLER}; \
+	fi; \
+	${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} validate-mockery took $$(elapsed $$started)s for ${SERVICE_NAME}" ${BASE_CONSOLE}
 	${SUCCESS_MESSAGE_HANDLER}
-.PHONY: generate-mocks
-
-# Same as generate-mocks, without Docker. The Renovate post-upgrade hook runs
-# inside the Renovate container, which has no Docker socket, so the containerised
-# target fails there with "Cannot connect to the Docker daemon". No GOTOOLCHAIN
-# override: the toolchain has to follow the module, or mockery is built by one Go
-# and shells out to the `go list` of another.
-generate-mocks-local: git-config-command
-	@if [ ! -f .mockery.yml ] && [ ! -f .mockery.yaml ]; then \
-		${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} No .mockery.yml in ${SERVICE_NAME}; nothing to generate" ${BASE_CONSOLE}; \
-		exit 0; \
-	fi
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME} (no container)" ${BASE_CONSOLE}
-	@mkdir -p ${BIN_DIR}
-	GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v3@${MOCKERY_VERSION}
-	${BIN_DIR}/mockery
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
-	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh .
-	${SUCCESS_MESSAGE_HANDLER}
-.PHONY: generate-mocks-local
-
-generate-mocks-client: git-config-command
-	@if [ ! -f pkg/client/.mockery.yml ] && [ ! -f pkg/client/.mockery.yaml ]; then \
-		${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} No pkg/client/.mockery.yml in ${SERVICE_NAME}; nothing to generate" ${BASE_CONSOLE}; \
-		exit 0; \
-	fi
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME} pkg/client" ${BASE_CONSOLE}
-	${DOCKER_MOCKERY_COMMAND} cd pkg/client && mockery' || ${FAILURE_MESSAGE_HANDLER}
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
-	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh pkg/client
-	${SUCCESS_MESSAGE_HANDLER}
-.PHONY: generate-mocks-client
-
+.PHONY: validate-mockery
 
 lint-go: git-config-command gocache
 	@ echo $(GREEN_CONSOLE) "${CONSOLE_PREFIX} Running golangci linter for ${SERVICE_NAME}" $(BASE_CONSOLE); \
@@ -315,3 +302,46 @@ build-integration-tests-generic: git-config-command gocache
 	${DOCKER_GO_COMMAND_LINUX} go test -c -tags ${INTEG_TESTS_TAGS} ${INTEG_TESTS_PACKAGE} -o ${INTEG_TESTS_BIN} || ${FAILURE_MESSAGE_HANDLER}
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: build-integration-tests-generic
+
+generate-mocks: git-config-command gocache
+	@if [ ! -f .mockery.yml ] && [ ! -f .mockery.yaml ]; then \
+		${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} No .mockery.yml in ${SERVICE_NAME}; nothing to generate" ${BASE_CONSOLE}; \
+	else \
+		${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME}" ${BASE_CONSOLE}; \
+		${DOCKER_MOCKERY_COMMAND} mockery' || ${FAILURE_MESSAGE_HANDLER}; \
+		${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}; \
+		sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh .; \
+	fi
+	${SUCCESS_MESSAGE_HANDLER}
+.PHONY: generate-mocks
+
+generate-mocks-client: git-config-command gocache
+	@if [ ! -d pkg/client ] || ([ ! -f pkg/client/.mockery.yml ] && [ ! -f pkg/client/.mockery.yaml ]); then \
+		${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} No pkg/client/.mockery.yml in ${SERVICE_NAME}; nothing to generate" ${BASE_CONSOLE}; \
+	else \
+		${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME} pkg/client" ${BASE_CONSOLE}; \
+		${DOCKER_MOCKERY_COMMAND} cd pkg/client && mockery' || ${FAILURE_MESSAGE_HANDLER}; \
+		${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}; \
+		sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh pkg/client; \
+	fi
+	${SUCCESS_MESSAGE_HANDLER}
+.PHONY: generate-mocks-client
+
+# Same as generate-mocks, without Docker. The Renovate post-upgrade hook runs
+# inside the Renovate container, which has no Docker socket, so the containerised
+# target fails there with "Cannot connect to the Docker daemon". No GOTOOLCHAIN
+# override: the toolchain has to follow the module, or mockery is built by one Go
+# and shells out to the `go list` of another.
+generate-mocks-local: git-config-command
+	@if [ ! -f .mockery.yml ] && [ ! -f .mockery.yaml ]; then \
+		${ECHO_COMMAND} ${YELLOW_CONSOLE} "${CONSOLE_PREFIX} No .mockery.yml in ${SERVICE_NAME}; nothing to generate" ${BASE_CONSOLE}; \
+		exit 0; \
+	fi
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating mocks for ${SERVICE_NAME} (no container)" ${BASE_CONSOLE}
+	@mkdir -p ${BIN_DIR}
+	GOBIN=${BIN_DIR} go install github.com/vektra/mockery/v3@${MOCKERY_VERSION}
+	${BIN_DIR}/mockery
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Stamping SPDX headers on generated mocks" ${BASE_CONSOLE}
+	sh ${BUILD_MAKEFILE_DIR}scripts/spdx-header-go.sh .
+	${SUCCESS_MESSAGE_HANDLER}
+.PHONY: generate-mocks-local

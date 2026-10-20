@@ -25,6 +25,115 @@ paths:
       x-no-authorization: true
     x-internal: true
     x-service: workloads
+  /api/v1/workloads/{workloadId}/actions:
+    get:
+      description: Returns accepted workload actions. History remains available after
+        a workload is deleted and is removed when the workload is permanently removed
+        from the system.
+      operationId: get_workload_actions_history
+      parameters:
+      - description: The  Universally Unique Identifier (UUID) of the workload.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadActionsResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get workload action history.
+      tags:
+      - WorkloadActions
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workload_actions_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
   /api/v1/workloads/scrapeable-metrics:
     get:
       operationId: get_workloads_scrapeable_metrics
@@ -150,6 +259,64 @@ paths:
       - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
       - e2e/src/test/suites/parallel/workloads/jobsStatus.test.ts
       x-no-authorization: true
+  /internal/workloads/actions:
+    post:
+      description: "Records workload actions accepted by workloads-manager, using\
+        \ the authenticated request context to identify who performed them and the\
+        \ supplied timestamp to record when they were accepted."
+      operationId: internal_create_workload_actions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkloadActionsRequest'
+        required: true
+      responses:
+        "204":
+          description: Actions stored successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "412":
+          content:
+            application/json:
+              example:
+                code: 412
+                message: Precondition failed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Store workload actions.
+      tags:
+      - WorkloadActions
+      x-service: workloads
+      x-no-authorization: true
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workload_actions_api_test.go
   /internal/workloads/sync:
     post:
       operationId: internal_sync_workloads
@@ -411,6 +578,102 @@ paths:
       x-authorize:
         resource-type: workloads
         action: sync
+  /internal/workloads/resource-claim-templates/workloads:
+    post:
+      description: |
+        Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template.
+      operationId: internal_get_resource_claim_template_workloads
+      parameters:
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalResourceClaimTemplateWorkloadsRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplateWorkloadsResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List the workloads referencing a resource claim template (Internal
+        API).
+      tags:
+      - Workloads
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/resource_claims_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
   /internal/workloads/sync-report:
     post:
       description: "needed when the updates are not sent directly from the cluster\
@@ -815,6 +1078,114 @@ paths:
       x-authorize:
         resource-type: workloads
         action: sync
+  /api/v1/workloads/slim:
+    get:
+      description: |
+        Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
+        Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
+      operationId: get_workloads_slim
+      parameters:
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
+          \ `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^`\
+          \ Starts with and `=$` Ends with."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name==some-workload-name
+          - projectName==proj-1
+          items:
+            pattern: ^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadsSlimResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "List workloads, slim."
+      tags:
+      - Workloads
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workloads_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
   /internal/workloads/{workloadId}/ancestors:
     get:
       operationId: get_workload_ancestors
@@ -10777,6 +11148,114 @@ paths:
         resource-type: workloads
         action: read
         resource-id: workloadId
+  /api/v1/workloads/{workloadId}/resource-claims:
+    get:
+      description: |
+        Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed.
+      operationId: get_workload_resource_claims
+      parameters:
+      - description: The  Universally Unique Identifier (UUID) of the workload.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadResourceClaimsResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get workload resource claims by workload id.
+      tags:
+      - Workloads
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/resource_claims_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
   /api/v1/workload-categories:
     get:
       description: Retrieves a list of workload categories. These categories are used
@@ -13432,6 +13911,40 @@ paths:
         action: update
 components:
   parameters:
+    WorkloadId:
+      description: The  Universally Unique Identifier (UUID) of the workload.
+      explode: false
+      in: path
+      name: workloadId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+    Offset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 100
+        format: int32
+        type: integer
+      style: form
+    Limit:
+      description: The maximum number of entries to return.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        format: int32
+        maximum: 500
+        minimum: 1
+        type: integer
+      style: form
     WorkloadsFilter:
       description: "Filter results by a parameter. Use the format field-name operator\
         \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
@@ -13494,30 +14007,6 @@ components:
       schema:
         type: boolean
       style: form
-    Offset:
-      description: The offset of the first item returned in the collection.
-      explode: true
-      in: query
-      name: offset
-      required: false
-      schema:
-        example: 100
-        format: int32
-        type: integer
-      style: form
-    Limit:
-      description: The maximum number of entries to return.
-      explode: true
-      in: query
-      name: limit
-      required: false
-      schema:
-        default: 50
-        format: int32
-        maximum: 500
-        minimum: 1
-        type: integer
-      style: form
     SortOrder:
       description: Sort results in descending or ascending order.
       explode: true
@@ -13577,16 +14066,25 @@ components:
         example: test project
         type: string
       style: form
-    WorkloadId:
-      description: The  Universally Unique Identifier (UUID) of the workload.
+    WorkloadsSlimFilter:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
+        \ `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts\
+        \ with and `=$` Ends with."
       explode: false
-      in: path
-      name: workloadId
-      required: true
+      in: query
+      name: filterBy
+      required: false
       schema:
-        format: uuid
-        type: string
-      style: simple
+        example:
+        - name==some-workload-name
+        - projectName==proj-1
+        items:
+          pattern: ^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        maxItems: 10
+        type: array
+      style: form
     Precise:
       description: "Use this if you want to count the precise amount of workloads,\
         \ uncached. Defaults to false."
@@ -14353,6 +14851,15 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Forbidden
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
     "500InternalServerError":
       content:
         application/json:
@@ -14380,17 +14887,17 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: The specified resource already exists
-    "204NoContent":
-      description: No Content.
-    "404NotFound":
+    "412PreconditionFailed":
       content:
         application/json:
           example:
-            code: 404
-            message: Resource id not found.
+            code: 412
+            message: Precondition failed
           schema:
             $ref: '#/components/schemas/Error'
-      description: The specified resource was not found
+      description: The specified resource was not found.
+    "204NoContent":
+      description: No Content.
     "400SubmissionErrorV2":
       content:
         application/json:
@@ -14432,15 +14939,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Not acceptable request
-    "412PreconditionFailed":
-      content:
-        application/json:
-          example:
-            code: 412
-            message: Precondition failed
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: The specified resource was not found.
     "415UnsupportedMediaType":
       content:
         application/json:
@@ -14457,6 +14955,147 @@ components:
             $ref: '#/components/schemas/Error'
       description: unexpected error
   schemas:
+    WorkloadActionId:
+      description: A unique ID of the workload action-history record.
+      example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+      format: uuid
+      type: string
+    WorkloadId:
+      description: A unique ID of the workload.
+      format: uuid
+      type: string
+    WorkloadName:
+      description: The name of the workload.
+      example: my-workload-name
+      minLength: 1
+      pattern: .*
+      type: string
+    WorkloadActionSubject:
+      description: The authenticated subject that performed the workload action.
+      example: user@run.ai
+      type: string
+    WorkloadActionSubjectType:
+      description: "The authenticated subject type, preserved as provided by the identity\
+        \ context. Examples include user, service-account, and app, with casing determined\
+        \ by the identity provider."
+      example: user
+      type: string
+    WorkloadActionType:
+      enum:
+      - create
+      - update
+      - delete
+      - suspend
+      - resume
+      type: string
+    WorkloadActionAcceptedAt:
+      description: The time when the workload action was accepted.
+      example: 2026-01-01T03:49:52.531Z
+      format: date-time
+      type: string
+    WorkloadActionRecord:
+      example:
+        subject: user@run.ai
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        workloadName: my-workload-name
+        action: create
+        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+        subjectType: user
+        acceptedAt: 2026-01-01T03:49:52.531Z
+      properties:
+        id:
+          description: A unique ID of the workload action-history record.
+          example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          format: uuid
+          type: string
+        workloadId:
+          description: A unique ID of the workload.
+          format: uuid
+          type: string
+        workloadName:
+          description: The name of the workload.
+          example: my-workload-name
+          minLength: 1
+          pattern: .*
+          type: string
+        subject:
+          description: The authenticated subject that performed the workload action.
+          example: user@run.ai
+          type: string
+        subjectType:
+          description: "The authenticated subject type, preserved as provided by the\
+            \ identity context. Examples include user, service-account, and app, with\
+            \ casing determined by the identity provider."
+          example: user
+          type: string
+        action:
+          $ref: '#/components/schemas/WorkloadActionType'
+        acceptedAt:
+          description: The time when the workload action was accepted.
+          example: 2026-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+      required:
+      - acceptedAt
+      - action
+      - id
+      - subject
+      - subjectType
+      - workloadId
+      - workloadName
+      type: object
+    GetWorkloadActionsResponse:
+      example:
+        next: 50
+        actions:
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+      properties:
+        actions:
+          items:
+            $ref: '#/components/schemas/WorkloadActionRecord'
+          maxItems: 500
+          type: array
+        next:
+          example: 50
+          format: int32
+          type: integer
+      required:
+      - actions
+      type: object
     Error:
       example:
         code: 400
@@ -16723,6 +17362,93 @@ components:
       - tenantId
       - type
       - updatedAt
+      type: object
+    WorkloadActionRecordInput:
+      example:
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        workloadName: my-workload-name
+        action: create
+        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        acceptedAt: 2026-01-01T03:49:52.531Z
+      properties:
+        id:
+          description: A unique ID of the workload action-history record.
+          example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          format: uuid
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        workloadId:
+          description: A unique ID of the workload.
+          format: uuid
+          type: string
+        workloadName:
+          description: The name of the workload.
+          example: my-workload-name
+          minLength: 1
+          pattern: .*
+          type: string
+        action:
+          $ref: '#/components/schemas/WorkloadActionType'
+        acceptedAt:
+          description: The time when the workload action was accepted.
+          example: 2026-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+      required:
+      - acceptedAt
+      - action
+      - clusterId
+      - id
+      - workloadId
+      - workloadName
+      type: object
+    CreateWorkloadActionsRequest:
+      example:
+        actions:
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+      properties:
+        actions:
+          items:
+            $ref: '#/components/schemas/WorkloadActionRecordInput'
+          maxItems: 500
+          minItems: 1
+          type: array
+      required:
+      - actions
       type: object
     WorkloadNetworkStatus:
       example:
@@ -19304,6 +20030,45 @@ components:
       - elementId
       - hierarchyLevel
       type: object
+    PodResourceClaim:
+      example:
+        resourceClaimName: shared-infiniband
+        name: gpu-1
+        allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+        resourceClaimTemplateName: single-gpu
+      properties:
+        name:
+          description: "Pod-local name of the claim entry (DNS_LABEL). Mirrors `pod.spec.resourceClaims[].name`\
+            \ and the key used by `pod.status.resourceClaimStatuses[].name` to publish\
+            \ the bound claim."
+          example: gpu-1
+          type: string
+        resourceClaimTemplateName:
+          description: "Name of the referenced `ResourceClaimTemplate` in the pod's\
+            \ namespace, when the claim entry was created from a template. Mutually\
+            \ exclusive with `resourceClaimName`. Mirrors `pod.spec.resourceClaims[].resourceClaimTemplateName`."
+          example: single-gpu
+          nullable: true
+          type: string
+        resourceClaimName:
+          description: "Name of a standalone `ResourceClaim` that the pod references\
+            \ directly, when the claim entry is not created from a template. Mutually\
+            \ exclusive with `resourceClaimTemplateName`. Mirrors `pod.spec.resourceClaims[].resourceClaimName`."
+          example: shared-infiniband
+          nullable: true
+          type: string
+        allocatedResourceClaimName:
+          description: "Name of the actual `ResourceClaim` bound to the pod for this\
+            \ entry. For a template-generated entry this is populated from `pod.status.resourceClaimStatuses[].resourceClaimName`\
+            \ once Kubernetes publishes it, and is null until then. For a standalone\
+            \ entry it equals `resourceClaimName` and is populated immediately. This\
+            \ is the field the forward-view API surfaces as the \"actual\" bound claim."
+          example: dra-gpu-test-gpu-1-mk4s8
+          nullable: true
+          type: string
+      required:
+      - name
+      type: object
     PodSyncFields:
       example:
         nodeName: gpu-node-1
@@ -19502,6 +20267,15 @@ components:
           cpuMemory: 0B
           cpu: 0.5
           gpu: 1.5
+        resourceClaims:
+        - resourceClaimName: shared-infiniband
+          name: gpu-1
+          allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+          resourceClaimTemplateName: single-gpu
+        - resourceClaimName: shared-infiniband
+          name: gpu-1
+          allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+          resourceClaimTemplateName: single-gpu
         tolerations:
         - effect: NoExecute
           value: ""
@@ -19632,6 +20406,17 @@ components:
             \ by hierarchy level."
           items:
             $ref: '#/components/schemas/PodElement'
+          nullable: true
+          type: array
+        resourceClaims:
+          description: "Per-pod DRA usage reported as-is from the cluster. One entry\
+            \ per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate`\
+            \ or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim`\
+            \ name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership\
+            \ resolution against the k8s-object store happens at API read time, not\
+            \ here."
+          items:
+            $ref: '#/components/schemas/PodResourceClaim'
           nullable: true
           type: array
       required:
@@ -19843,6 +20628,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -20089,6 +20883,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -20186,6 +20989,211 @@ components:
             $ref: '#/components/schemas/LabelValue'
           nullable: true
           type: array
+      type: object
+    ScopeType:
+      enum:
+      - system
+      - tenant
+      - cluster
+      - department
+      - project
+      type: string
+    ScopeId:
+      description: "The id of the cluster, department or project, depending on the\
+        \ scope type."
+      type: string
+    InternalResourceClaimTemplateWorkloadsRequest:
+      example:
+        scopeId: scopeId
+        scopeType: system
+        name: single-gpu
+      properties:
+        name:
+          description: "The name of the ResourceClaimTemplate, as referenced by pods."
+          example: single-gpu
+          minLength: 1
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          description: "The id of the cluster, department or project, depending on\
+            \ the scope type."
+          type: string
+      required:
+      - name
+      - scopeId
+      - scopeType
+      type: object
+    ReportedWorkloadType:
+      description: "The type of the workload. Any workload type the cluster reports,\
+        \ not only the NVIDIA Run:ai native ones."
+      example: Training
+      type: string
+    ProjectId:
+      description: The id of the project.
+      example: "1"
+      pattern: .*
+      type: string
+    PodResourceClaimBinding:
+      example:
+        claimName: bert-worker-0-gpu-1-mk4s8
+        name: gpu-1
+      properties:
+        name:
+          description: "Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name`\
+            \ and referenced by containers in `resources.claims`."
+          example: gpu-1
+          type: string
+        claimName:
+          description: "Name of the ResourceClaim bound to the pod for this entry.\
+            \ For a claim generated from a template, this is null until Kubernetes\
+            \ creates and binds the claim."
+          example: bert-worker-0-gpu-1-mk4s8
+          nullable: true
+          type: string
+      required:
+      - name
+      type: object
+    ResourceClaimTemplateWorkloadPod:
+      example:
+        resourceClaims:
+        - claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        - claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        podName: bert-worker-0
+        podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        podId:
+          description: The id of the pod.
+          format: uuid
+          type: string
+        podName:
+          example: bert-worker-0
+          type: string
+        resourceClaims:
+          description: "The pod's claims that were generated from the resource claim\
+            \ template. A pod usually has one, but may list several when more than\
+            \ one of its claim entries references the same template."
+          items:
+            $ref: '#/components/schemas/PodResourceClaimBinding'
+          type: array
+      required:
+      - podId
+      - podName
+      - resourceClaims
+      type: object
+    ResourceClaimTemplateWorkload:
+      example:
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        name: my-workload-name
+        pods:
+        - resourceClaims:
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - resourceClaims:
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        type: Training
+        projectId: "1"
+      properties:
+        workloadId:
+          description: A unique ID of the workload.
+          format: uuid
+          type: string
+        name:
+          description: The name of the workload.
+          example: my-workload-name
+          minLength: 1
+          pattern: .*
+          type: string
+        type:
+          description: "The type of the workload. Any workload type the cluster reports,\
+            \ not only the NVIDIA Run:ai native ones."
+          example: Training
+          type: string
+        projectId:
+          description: The id of the project.
+          example: "1"
+          pattern: .*
+          type: string
+        pods:
+          description: The pods of the workload that reference the resource claim
+            template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkloadPod'
+          type: array
+      required:
+      - name
+      - pods
+      - projectId
+      - type
+      - workloadId
+      type: object
+    ResourceClaimTemplateWorkloadsResponse:
+      example:
+        next: 0
+        workloads:
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: my-workload-name
+          pods:
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: Training
+          projectId: "1"
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: my-workload-name
+          pods:
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: Training
+          projectId: "1"
+      properties:
+        next:
+          description: |
+            Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit).
+          format: int32
+          type: integer
+        workloads:
+          description: The workloads whose pods currently reference the resource claim
+            template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkload'
+          type: array
+      required:
+      - workloads
       type: object
     UpdateCount:
       description: the value of an update counter of a data in the system.
@@ -21634,6 +22642,69 @@ components:
       - projectId
       - workloads
       type: object
+    WorkloadSlim:
+      description: A workload as returned by GET /api/v1/workloads/slim.
+      example:
+        name: very-important-job
+        distributedFramework: Pytorch
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        type: type
+        projectName: proj-1
+      properties:
+        id:
+          format: uuid
+          type: string
+        name:
+          example: very-important-job
+          type: string
+        type:
+          type: string
+        projectName:
+          example: proj-1
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        distributedFramework:
+          example: Pytorch
+          type: string
+      required:
+      - clusterId
+      - id
+      - name
+      - projectName
+      type: object
+    GetWorkloadsSlimResponse:
+      description: The response of GET /api/v1/workloads/slim.
+      example:
+        next: 1
+        workloads:
+        - name: very-important-job
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          type: type
+          projectName: proj-1
+        - name: very-important-job
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          type: type
+          projectName: proj-1
+      properties:
+        next:
+          example: 1
+          type: integer
+        workloads:
+          items:
+            $ref: '#/components/schemas/WorkloadSlim'
+          type: array
+      required:
+      - workloads
+      type: object
     ClusterIdOptional:
       description: The id of the cluster.
       example: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -22725,6 +23796,15 @@ components:
           cpuMemory: 0B
           cpu: 0.5
           gpu: 1.5
+        resourceClaims:
+        - resourceClaimName: shared-infiniband
+          name: gpu-1
+          allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+          resourceClaimTemplateName: single-gpu
+        - resourceClaimName: shared-infiniband
+          name: gpu-1
+          allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+          resourceClaimTemplateName: single-gpu
         deletedAt: 2022-08-12T19:28:24.131Z
         task: leader
         elements:
@@ -22971,6 +24051,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -23217,6 +24306,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -23506,6 +24604,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -23752,6 +24859,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -24278,17 +25394,6 @@ components:
       - VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES
       - NVLINK_BANDWIDTH_TOTAL
       type: string
-    WorkloadName:
-      description: The name of the workload.
-      example: my-workload-name
-      minLength: 1
-      pattern: .*
-      type: string
-    ProjectId:
-      description: The id of the project.
-      example: "1"
-      pattern: .*
-      type: string
     WorkloadCreationMeta:
       properties:
         name:
@@ -24529,15 +25634,14 @@ components:
       type: array
     GpuComputeMode:
       description: GPU compute sharing mode. Policy and template defaults apply before
-        the built-in time-slicing fallback. Explicit modes require an available GPU
-        fractioning runtime on the selected cluster.
+        the built-in time-slicing fallback. Explicit modes require Run:ai cluster
+        version 3.0.14 or later.
       enum:
       - time-slicing
       - sm-sharing
       minLength: 1
       nullable: true
       type: string
-      x-gorm-ignore: true
     GpuDevicesRequest:
       description: "Requested number of GPU devices. Currently if more than one device\
         \ is requested, it is not possible to provide values for gpuMemory or gpuPortion."
@@ -28589,10 +29693,6 @@ components:
             url: https://my-url.com
           tty: null
           category: null
-    WorkloadId:
-      description: A unique ID of the workload.
-      format: uuid
-      type: string
     DepartmentId:
       description: The id of the department.
       example: "2"
@@ -52810,18 +53910,6 @@ components:
       - Distributed
       - Inference
       - DistributedInference
-      type: string
-    ScopeType:
-      enum:
-      - system
-      - tenant
-      - cluster
-      - department
-      - project
-      type: string
-    ScopeId:
-      description: "The id of the cluster, department or project, depending on the\
-        \ scope type."
       type: string
     ProjectIdOptional:
       description: The id of the project.
@@ -126144,6 +127232,141 @@ components:
       - CPU_MEMORY_REQUEST_BYTES
       - CPU_MEMORY_LIMIT_BYTES
       type: string
+    ResourceClaimTemplateRef:
+      description: The ResourceClaimTemplate the claim was generated from. Absent
+        for a standalone ResourceClaim that the pod references directly.
+      example:
+        managed: true
+        name: single-gpu
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      nullable: true
+      properties:
+        name:
+          description: Name of the ResourceClaimTemplate in the pod's namespace.
+          example: single-gpu
+          type: string
+        managed:
+          description: Whether the template is managed by NVIDIA Run:ai (created through
+            the resource claim templates API) rather than created directly in the
+            cluster.
+          type: boolean
+        id:
+          description: The id of the managed resource claim template. Null for an
+            unmanaged template.
+          format: uuid
+          nullable: true
+          type: string
+      required:
+      - managed
+      - name
+      type: object
+    WorkloadResourceClaim:
+      allOf:
+      - $ref: '#/components/schemas/PodResourceClaimBinding'
+      - properties:
+          template:
+            $ref: '#/components/schemas/ResourceClaimTemplateRef'
+        type: object
+      example:
+        template:
+          managed: true
+          name: single-gpu
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        claimName: bert-worker-0-gpu-1-mk4s8
+        name: gpu-1
+    WorkloadPodResourceClaims:
+      example:
+        resourceClaims:
+        - template:
+            managed: true
+            name: single-gpu
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        - template:
+            managed: true
+            name: single-gpu
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        task: worker
+        podName: bert-worker-0
+        podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        podId:
+          description: The id of the pod.
+          format: uuid
+          type: string
+        podName:
+          example: bert-worker-0
+          type: string
+        task:
+          description: "Identifies the function of the pod within a distributed workload\
+            \ (for example, leader, worker, or master)."
+          example: worker
+          nullable: true
+          type: string
+        resourceClaims:
+          description: "The claims the pod references, in the order they appear in\
+            \ `pod.spec.resourceClaims`."
+          items:
+            $ref: '#/components/schemas/WorkloadResourceClaim'
+          type: array
+      required:
+      - podId
+      - podName
+      - resourceClaims
+      type: object
+    WorkloadResourceClaimsResponse:
+      example:
+        next: 0
+        pods:
+        - resourceClaims:
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          task: worker
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - resourceClaims:
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          task: worker
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        next:
+          description: |
+            Offset for the next page of results. Present only when there are more pods beyond the current page (i.e., the number of returned pods equals the limit).
+          format: int32
+          type: integer
+        pods:
+          description: The pods of the workload that reference at least one claim.
+          items:
+            $ref: '#/components/schemas/WorkloadPodResourceClaims'
+          type: array
+      required:
+      - pods
+      type: object
     WorkloadCategory:
       example:
         createdAt: 2000-01-23T04:56:07.000+00:00
@@ -129815,6 +131038,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           deletedAt: 2022-08-12T19:28:24.131Z
           task: leader
           elements:
@@ -130067,6 +131299,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           deletedAt: 2022-08-12T19:28:24.131Z
           task: leader
           elements:
@@ -130697,6 +131938,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           deletedAt: 2022-08-12T19:28:24.131Z
           task: leader
           elements:
@@ -130949,6 +132199,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           deletedAt: 2022-08-12T19:28:24.131Z
           task: leader
           elements:

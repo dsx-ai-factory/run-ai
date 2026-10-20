@@ -27,6 +27,7 @@ func SetClusterDependentOptions(ctx context.Context, options *composer.FieldsCom
 		checker.MinVersionWorkloadV2NetworkingEndpoints: &options.WorkloadV2NetworkingSupported,
 		checker.MinVersionWorkloadV2ServiceSpecLabels:   &options.WorkloadV2ServiceSpecLabelsSupported,
 		checker.MinVersionGpuMemoryLimitAnnotations:     &options.GpuMemoryLimitAnnotationsSupported,
+		checker.MinVersionGpuComputeMode:                &options.GpuComputeModeSupported,
 		checker.MinVersionOAuth2ProxyTemplates:          &options.OAuth2ProxyTemplatesSupported,
 	}
 

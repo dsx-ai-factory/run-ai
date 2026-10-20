@@ -141,8 +141,6 @@ type TokensAPIRouter interface {
 	// Deprecated
 	GrantToken(http.ResponseWriter, *http.Request)
 	GrantTokenV2(http.ResponseWriter, *http.Request)
-	// Deprecated
-	AppToken(http.ResponseWriter, *http.Request)
 }
 
 // UsersAPIRouter defines the required methods for binding the api requests to a responses for the UsersAPI
@@ -293,8 +291,6 @@ type TokensAPIServicer interface {
 	// Deprecated
 	GrantToken(context.Context, TokenRequest) (ImplResponse, error)
 	GrantTokenV2(context.Context, string, string, string, string, string, string, string, string, string, string) (ImplResponse, error)
-	// Deprecated
-	AppToken(context.Context, AppTokenRequest) (ImplResponse, error)
 }
 
 // UsersAPIServicer defines the api actions for the UsersAPI service

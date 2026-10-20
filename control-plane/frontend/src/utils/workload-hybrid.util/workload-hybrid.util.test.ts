@@ -19,9 +19,11 @@ import {
 } from "@/swagger-models/assets-service-client";
 import {
   GpuRequestType,
+  GpuComputeMode,
   ScopeType,
   UidGidSource,
   WorkloadType,
+  type UnifiedWorkload,
   type WorkspaceSpecSpecAllOfCompute,
   type WorkspaceSpecSpecAllOfSecurity,
   AuthorizationType,
@@ -294,6 +296,38 @@ describe("workload-hybrid.util", () => {
   });
 
   describe("_getCleanedComputeFieldsFromUI", () => {
+    it("preserves the configured mode through load and edit", () => {
+      const loaded = workloadHybridUtil.getComputeField({
+        gpuDevicesRequest: 1,
+        gpuComputeMode: GpuComputeMode.SmSharing,
+      });
+      expect(loaded?.gpuComputeMode).toBe(GpuComputeMode.SmSharing);
+      const result = workloadHybridUtil._getCleanedComputeFieldsFromUI({
+        ...loaded,
+      });
+      expect(result).toEqual({ gpuDevicesRequest: 1, gpuComputeMode: GpuComputeMode.SmSharing });
+    });
+
+    it("preserves mode omission through load and edit", () => {
+      const loaded = workloadHybridUtil.getComputeField({ gpuDevicesRequest: 1 });
+      const result = workloadHybridUtil._getCleanedComputeFieldsFromUI(loaded || {});
+      expect(result).toEqual({ gpuDevicesRequest: 1 });
+      expect(result).not.toHaveProperty("gpuComputeMode");
+    });
+
+    it("does not restore cleared memory portions from response aliases", () => {
+      const compute: WorkspaceSpecSpecAllOfCompute = {
+        gpuDevicesRequest: 2,
+        gpuPortionRequest: undefined,
+        gpuPortionLimit: undefined,
+        gpuMemoryPortionRequest: 0.5,
+        gpuMemoryPortionLimit: 0.75,
+      };
+
+      expect(workloadHybridUtil._getCleanedComputeFieldsFromUI(compute)).toEqual({ gpuDevicesRequest: 2 });
+      expect(compute.gpuMemoryPortionRequest).toBe(0.5);
+    });
+
     it("removes gpuPortionRequest and gpuRequestType when gpuPortionRequest is 1", () => {
       const compute: WorkspaceSpecSpecAllOfCompute = {
         gpuPortionRequest: 1,
@@ -1983,4 +2017,47 @@ describe("workload-hybrid.util", () => {
       expect(result.spec.worker?.storage?.s3).toHaveLength(1);
     });
   });
+});
+
+describe("GPU memory aliases in workload copy and edit", () => {
+  const forms = [
+    {
+      name: "workspace",
+      model: workloadHybridUtil.getHybridWorkspaceModel,
+      prepare: workloadHybridUtil.prepareWorkloadFlatRequest,
+    },
+    {
+      name: "training",
+      model: workloadHybridUtil.getHybridTrainingModel,
+      prepare: workloadHybridUtil.prepareTrainingFlatRequest,
+    },
+    {
+      name: "distributed",
+      model: workloadHybridUtil.getHybridDistributedModel,
+      prepare: workloadHybridUtil.prepareDistributedFlatRequest,
+    },
+  ];
+  for (const form of forms) {
+    it(`${form.name} edits a dual-alias response without stale duplicates`, () => {
+      const compute: WorkspaceSpecSpecAllOfCompute = { gpuDevicesRequest: 1, gpuRequestType: GpuRequestType.Portion };
+      Object.assign(compute, { gpuPortionRequest: 0.5, gpuPortionLimit: 0.5 });
+      Object.assign(compute, { gpuMemoryPortionRequest: 0.5, gpuMemoryPortionLimit: 0.5 });
+      const unified: UnifiedWorkload = { spec: { worker: { image: "ubuntu", compute } } };
+      const original = JSON.stringify(unified);
+      const model = form.model(unified);
+      expect(model.spec.compute).toMatchObject({ gpuPortionRequest: 0.5, gpuPortionLimit: 0.5 });
+      model.spec.compute = {
+        ...model.spec.compute,
+        gpuPortionRequest: 0.25,
+        gpuPortionLimit: 0.75,
+        gpuMemoryPortionRequest: 0.5,
+        gpuMemoryPortionLimit: 0.5,
+      };
+      const request = form.prepare(model);
+      expect(request.spec?.compute).toMatchObject({ gpuPortionRequest: 0.25, gpuPortionLimit: 0.75 });
+      expect(request.spec?.compute).not.toHaveProperty("gpuMemoryPortionRequest");
+      expect(request.spec?.compute).not.toHaveProperty("gpuMemoryPortionLimit");
+      expect(JSON.stringify(unified)).toBe(original);
+    });
+  }
 });

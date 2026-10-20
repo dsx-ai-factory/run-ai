@@ -311,4 +311,20 @@ describe("cluster.util", () => {
       expect(result).toBe("");
     });
   });
+
+  describe("isClusterReachable", () => {
+    it.each([ClusterState.Connected, ClusterState.MissingPrerequisites, ClusterState.ServiceIssues])(
+      "treats %s as reachable",
+      (state) => {
+        expect(clusterUtil.isClusterReachable(state)).toBe(true);
+      },
+    );
+
+    it.each([ClusterState.WaitingToConnect, ClusterState.Disconnected, ClusterState.Unknown, undefined])(
+      "treats %s as unreachable",
+      (state) => {
+        expect(clusterUtil.isClusterReachable(state)).toBe(false);
+      },
+    );
+  });
 });
