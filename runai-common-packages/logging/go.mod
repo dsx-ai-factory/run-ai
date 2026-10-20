@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/logging
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
