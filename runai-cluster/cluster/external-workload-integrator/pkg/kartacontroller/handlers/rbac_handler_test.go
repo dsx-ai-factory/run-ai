@@ -16,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/test/fakecachedclient"
 
 	rbacv1 "k8s.io/api/rbac/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -73,10 +74,10 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			Expect(err).To(BeNil())
 			cr := getClusterRoleOrFail(ctx, k8s, existing.Name)
 			Expect(cr.Rules).To(HaveLen(1))
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, cr, false)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, cr, false, resourceNameFromGVK)).To(BeTrue())
 			crCrud := getClusterRoleOrFail(ctx, k8s, existingCrud.Name)
 			Expect(cr.Rules).To(HaveLen(1))
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, crCrud, true)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, crCrud, true, resourceNameFromGVK)).To(BeTrue())
 
 			// same when updater enabled
 			handler = NewKartaRBACHandler(k8s, fakeCachedClient, true, existing.Name, existingCrud.Name)
@@ -129,9 +130,9 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			// then
 			Expect(err).To(BeNil())
 			created := getClusterRoleOrFail(ctx, k8s, "role-created")
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, created, false)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, created, false, resourceNameFromGVK)).To(BeTrue())
 			createdCrud := getClusterRoleOrFail(ctx, k8s, "role-created-crud")
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, createdCrud, true)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, createdCrud, true, resourceNameFromGVK)).To(BeTrue())
 
 			// ensure the exact rule was created
 			rule, ok := findRule(created, "apps", "deployments")
@@ -156,9 +157,9 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			// then
 			Expect(err).To(BeNil())
 			updated := getClusterRoleOrFail(ctx, k8s, cr.Name)
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, updated, false)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, updated, false, resourceNameFromGVK)).To(BeTrue())
 			updatedCrud := getClusterRoleOrFail(ctx, k8s, crCrud.Name)
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, updatedCrud, true)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, updatedCrud, true, resourceNameFromGVK)).To(BeTrue())
 
 			// ensure the exact rule was created
 			rule, ok := findRule(updated, "apps", "deployments")
@@ -193,10 +194,10 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 
 			// sanity
 			current := getClusterRoleOrFail(ctx, k8s, cr.Name)
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, current, false)).To(BeFalse())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, current, false, resourceNameFromGVK)).To(BeFalse())
 			existingRules := len(current.Rules)
 			currentCrud := getClusterRoleOrFail(ctx, k8s, crCrud.Name)
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, current, true)).To(BeFalse())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, current, true, resourceNameFromGVK)).To(BeFalse())
 			existingCrudRules := len(currentCrud.Rules)
 
 			// when
@@ -206,11 +207,11 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			Expect(err).To(BeNil())
 			updated := getClusterRoleOrFail(ctx, k8s, cr.Name)
 			Expect(len(updated.Rules)).To(Equal(existingRules + 1))
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, updated, false)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, updated, false, resourceNameFromGVK)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updated, "kubevirt.io", "virtualmachineinstances", false)).To(BeTrue())
 			updatedCrud := getClusterRoleOrFail(ctx, k8s, crCrud.Name)
 			Expect(len(updatedCrud.Rules)).To(Equal(existingCrudRules + 1))
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, updatedCrud, true)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvk}, updatedCrud, true, resourceNameFromGVK)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updatedCrud, "kubevirt.io", "virtualmachineinstances", true)).To(BeTrue())
 		})
 
@@ -232,13 +233,13 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			// then
 			Expect(err).To(BeNil())
 			updated := getClusterRoleOrFail(ctx, k8s, cr.Name)
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, updated, false)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, updated, false, resourceNameFromGVK)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updated, "apps", "deployments", false)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updated, "batch", "jobs", false)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updated, "kubevirt.io", "virtualmachineinstances", false)).To(BeTrue())
 
 			updatedCrud := getClusterRoleOrFail(ctx, k8s, crCrud.Name)
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, updatedCrud, true)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, updatedCrud, true, resourceNameFromGVK)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updatedCrud, "apps", "deployments", true)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updatedCrud, "batch", "jobs", true)).To(BeTrue())
 			Expect(hasAnyRuleWithAllVerbs(updatedCrud, "kubevirt.io", "virtualmachineinstances", true)).To(BeTrue())
@@ -268,8 +269,8 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, cr.Name, crCrud.Name)
 
 			// sanity precondition
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, cr, false)).To(BeTrue())
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, crCrud, true)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, cr, false, resourceNameFromGVK)).To(BeTrue())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, crCrud, true, resourceNameFromGVK)).To(BeTrue())
 
 			// when
 			err := handler.HandleDeletion(ctx, gvkMain, additional)
@@ -277,17 +278,90 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			// then
 			Expect(err).To(BeNil())
 			updated := getClusterRoleOrFail(ctx, k8s, cr.Name)
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, updated, false)).To(BeFalse())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, updated, false, resourceNameFromGVK)).To(BeFalse())
 			updatedCrud := getClusterRoleOrFail(ctx, k8s, crCrud.Name)
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, updatedCrud, true)).To(BeFalse())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{gvkMain, gvkAdditional1, gvkAdditional2}, updatedCrud, true, resourceNameFromGVK)).To(BeFalse())
 		})
 	})
 
-	Context("helpers", func() {
-		It("resourceNameFromGVK lowercases and pluralizes kind", func() {
-			gvk := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: "Foo"}
-			Expect(resourceNameFromGVK(gvk)).To(Equal("foos"))
+	Context("resource names", func() {
+		sandbox := schema.GroupVersionKind{Group: "agents.x-k8s.io", Version: "v1beta1", Kind: "Sandbox"}
+
+		It("uses the resource name served by the API server instead of guessing it from the kind", func() {
+			// given
+			irregular := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: "Mouse"}
+			mapper := meta.NewDefaultRESTMapper(nil)
+			mapper.AddSpecific(sandbox, sandbox.GroupVersion().WithResource("sandboxes"),
+				sandbox.GroupVersion().WithResource("sandbox"), meta.RESTScopeNamespace)
+			mapper.AddSpecific(irregular, irregular.GroupVersion().WithResource("mice"),
+				irregular.GroupVersion().WithResource("mouse"), meta.RESTScopeNamespace)
+			k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).Build()
+			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, "role-mapped", "role-mapped-crud")
+
+			// when
+			err := handler.Handle(ctx, sandbox, []schema.GroupVersionKind{irregular})
+
+			// then
+			Expect(err).To(BeNil())
+			created := getClusterRoleOrFail(ctx, k8s, "role-mapped")
+			Expect(created.Rules).ToNot(BeEmpty())
+			Expect(created.Rules[0].Resources).To(ConsistOf("sandboxes", "mice"))
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{sandbox, irregular}, created, false, handler.resourceName)).To(BeTrue())
 		})
+
+		It("guesses the resource name from the kind when the API server does not know it", func() {
+			// given
+			k8s := newFakeClientWithObjects(scheme)
+			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, "role-guessed", "role-guessed-crud")
+
+			// when
+			err := handler.Handle(ctx, sandbox, []schema.GroupVersionKind{})
+
+			// then
+			Expect(err).To(BeNil())
+			created := getClusterRoleOrFail(ctx, k8s, "role-guessed")
+			Expect(created.Rules).ToNot(BeEmpty())
+			Expect(created.Rules[0].Resources).To(ConsistOf("sandboxes"))
+		})
+
+		It("removes the rule for the resource name served by the API server", func() {
+			// given
+			mapper := meta.NewDefaultRESTMapper(nil)
+			mapper.AddSpecific(sandbox, sandbox.GroupVersion().WithResource("sandboxes"),
+				sandbox.GroupVersion().WithResource("sandbox"), meta.RESTScopeNamespace)
+			cr := &rbacv1.ClusterRole{
+				ObjectMeta: objMeta("role-remove"),
+				Rules: []rbacv1.PolicyRule{{
+					APIGroups: []string{"agents.x-k8s.io"},
+					Resources: []string{"sandboxes"},
+					Verbs:     []string{"get", "list", "watch"},
+				}},
+			}
+			k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).WithObjects(cr).Build()
+			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, "role-remove", "")
+
+			// when
+			err := handler.removeRuleFromClusterRole(ctx, cr, []schema.GroupVersionKind{sandbox}, false, "read")
+
+			// then
+			Expect(err).To(BeNil())
+			Expect(getClusterRoleOrFail(ctx, k8s, "role-remove").Rules).To(BeEmpty())
+		})
+
+		DescribeTable("guesses the plural of a kind",
+			func(kind, expected string) {
+				gvk := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: kind}
+				Expect(resourceNameFromGVK(gvk)).To(Equal(expected))
+			},
+			Entry("adds s", "Foo", "foos"),
+			Entry("adds s to a kind ending in a vowel followed by y", "Gateway", "gateways"),
+			Entry("adds es to a kind ending in x", "Sandbox", "sandboxes"),
+			Entry("adds es to a kind ending in s", "Ingress", "ingresses"),
+			Entry("adds es to a kind ending in ch", "Batch", "batches"),
+			Entry("adds es to a kind ending in sh", "Bush", "bushes"),
+			Entry("replaces a consonant followed by y with ies", "Policy", "policies"),
+			Entry("lowercases the kind", "Deployment", "deployments"),
+		)
 	})
 })
 
