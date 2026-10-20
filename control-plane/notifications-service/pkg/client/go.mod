@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/go-playground/validator/v10 v10.30.5
