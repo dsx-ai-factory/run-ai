@@ -56,8 +56,10 @@ name: Project Triage
 # Reuse in other repositories
 #
 # Any repository whose issues are on a Project can call this workflow, provided
-# its Actions policy allows this reusable workflow. The area-label condition
-# needs `area/` labels; repositories without them turn it off:
+# its Actions policy allows this reusable workflow. A sweep evaluates every
+# item on the board, not only the caller's issues, so the rule inputs
+# (`require_area_label`, `priority_field`, the statuses) describe the board
+# and must be the same in every caller of the same project:
 #
 #     name: Project Triage
 #     on:
@@ -68,7 +70,7 @@ name: Project Triage
 #       triage:
 #         uses: dsx-ai-factory/run-ai/.github/workflows/project-triage.yaml@main
 #         permissions: { contents: read, issues: read }
-#         with: { project_owner: dsx-ai-factory, project_number: 7, require_area_label: false }
+#         with: { project_owner: dsx-ai-factory, project_number: 7 }
 #         secrets:
 #           GH_TOKEN: ${{ secrets.GH_TOKEN }}
 #
@@ -141,8 +143,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # Never run two sweeps of the same project at once; let the earlier one finish.
+    # GitHub keeps only one pending run per group, so the `issues` fast path gets
+    # a group of its own per issue and is not displaced by a sweep. Overlap is
+    # harmless: both apply the same rule, and the next sweep settles any race.
     concurrency:
-      group: project-triage-${{ inputs.project_owner || 'dsx-ai-factory' }}-${{ inputs.project_number || 7 }}
+      group: project-triage-${{ inputs.project_owner || 'dsx-ai-factory' }}-${{ inputs.project_number || 7 }}-${{ github.event_name == 'issues' && format('issue-{0}', github.event.issue.number) || 'sweep' }}
     permissions:
       contents: read
       issues: read
@@ -274,7 +279,7 @@ jobs:
             }
             const fields = project.fields.nodes.filter(f => f && f.name);
             const statusField = fields.find(f => f.name === 'Status' && f.options);
-            const priorityField = fields.find(f => f.name === cfg.priorityField);
+            const priorityField = fields.find(f => f.name === cfg.priorityField && f.options);
             const option = name => statusField && statusField.options.find(o => o.name === name);
             const triageOption = option(cfg.triageStatus);
             const targetOption = option(cfg.targetStatus);
@@ -282,7 +287,7 @@ jobs:
             if (!statusField) problems.push('no single-select field named "Status"');
             if (statusField && !triageOption) problems.push(`Status has no option "${cfg.triageStatus}"`);
             if (statusField && !targetOption) problems.push(`Status has no option "${cfg.targetStatus}"`);
-            if (!priorityField) problems.push(`no field named "${cfg.priorityField}"`);
+            if (!priorityField) problems.push(`no single-select field named "${cfg.priorityField}"`);
             if (problems.length) {
               core.setFailed(`Project "${project.title}": ${problems.join('; ')}.`);
               return;
