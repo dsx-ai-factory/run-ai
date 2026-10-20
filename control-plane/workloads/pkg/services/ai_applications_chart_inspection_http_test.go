@@ -89,7 +89,7 @@ func TestChartInspectionRouteReauthorizesWarmResultsThroughRealClients(t *testin
 	inspector := newApplicationChartInspector()
 	archive := inspectionTestArchive(t)
 	downloads := 0
-	inspector.inspector = chartinspection.NewInspector(func(_ context.Context, _ chartinspection.Selection, key string) ([]byte, error) {
+	inspector.inspector = chartinspection.NewInspector(func(_ context.Context, _ chartinspection.Selection, key string) ([]byte, *api.Error) {
 		downloads++
 		if key != "synthetic-test-key" {
 			t.Error("saved credential did not reach acquisition")
@@ -206,7 +206,7 @@ func TestChartInspectionHTTPDistinguishesDeclarationsAndAcquisitionFailures(t *t
 	for _, tc := range []struct {
 		name      string
 		questions *string
-		fetchErr  error
+		fetchErr  *api.Error
 		corrupt   bool
 		code      int
 		status    string
@@ -218,15 +218,15 @@ func TestChartInspectionHTTPDistinguishesDeclarationsAndAcquisitionFailures(t *t
 		{name: "download failure", fetchErr: api.NewError(http.StatusServiceUnavailable, "chart_download_failed: Chart download failed.", nil), code: http.StatusServiceUnavailable},
 		{name: "upstream denial", fetchErr: api.NewError(http.StatusForbidden, "chart_download_denied: Chart access denied.", nil), code: 403},
 		{name: "corrupt archive", corrupt: true, code: http.StatusBadRequest},
-		{name: "unexpected internal failure", fetchErr: errors.New("private internal diagnostic"), code: http.StatusInternalServerError},
-		{name: "expired request", fetchErr: context.DeadlineExceeded, code: 408},
+		{name: "unexpected internal failure", fetchErr: api.NewError(http.StatusInternalServerError, "chart inspection failed unexpectedly", errors.New("private internal diagnostic")), code: http.StatusInternalServerError},
+		{name: "expired request", fetchErr: api.NewError(http.StatusRequestTimeout, "chart inspection request cancelled or expired", nil), code: 408},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			archive := inspectionTestArchiveWithQuestions(t, tc.questions)
 			if tc.corrupt {
 				archive = []byte("invalid gzip")
 			}
-			inspector := &applicationChartInspector{inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, error) {
+			inspector := &applicationChartInspector{inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, *api.Error) {
 				return archive, tc.fetchErr
 			}, 0)}
 			controller := api.NewAIApplicationsAPIController(&AIApplicationsService{chartInspection: inspector})

@@ -24399,11 +24399,13 @@
       },
       "ChartName": {
         "type": "string",
-        "description": "Chart name declared in the archive Chart.yaml."
+        "description": "Helm chart name.",
+        "example": "redis"
       },
       "ChartVersion": {
         "type": "string",
-        "description": "Chart version declared in the archive Chart.yaml."
+        "description": "Helm chart version.",
+        "example": "17.3.17"
       },
       "AIApplicationChartUrl": {
         "type": "string",
@@ -24430,9 +24432,7 @@
                 "$ref": "#/components/schemas/ChartName"
               }
             ],
-            "description": "The name of the chart within the specified repository. This corresponds to the chart’s directory name.",
-            "maxLength": 250,
-            "example": "redis"
+            "maxLength": 250
           },
           "chartVersion": {
             "allOf": [
@@ -24440,9 +24440,7 @@
                 "$ref": "#/components/schemas/ChartVersion"
               }
             ],
-            "description": "The specific Semantic Version (SemVer) of the chart to deploy.",
-            "maxLength": 50,
-            "example": "17.3.17"
+            "maxLength": 50
           },
           "chartURL": {
             "$ref": "#/components/schemas/AIApplicationChartUrl"
@@ -24653,6 +24651,15 @@
           }
         }
       },
+      "AIApplicationChartQuestionsStatus": {
+        "type": "string",
+        "enum": [
+          "absent",
+          "usable",
+          "unusable"
+        ],
+        "description": "Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is\nusable after supported normalization. Unusable means declaration validation failed;\nquestions and groups are empty and warnings explain the failure. An unusable declaration\ndoes not block raw YAML configuration or deployment.\n"
+      },
       "AIApplicationChartInspectionWarning": {
         "type": "object",
         "required": [
@@ -24703,13 +24710,7 @@
             "description": "Whether the chart contains a root questions.yaml or questions.yml file, including an unusable file."
           },
           "questionsStatus": {
-            "type": "string",
-            "enum": [
-              "absent",
-              "usable",
-              "unusable"
-            ],
-            "description": "Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is\nusable after supported normalization. Unusable means declaration validation failed;\nquestions and groups are empty and warnings explain the failure. An unusable declaration\ndoes not block raw YAML configuration or deployment.\n"
+            "$ref": "#/components/schemas/AIApplicationChartQuestionsStatus"
           },
           "groups": {
             "type": "array",

@@ -206,7 +206,7 @@ func (i *Inspector) run(ctx context.Context, key string, flight *inspectionFligh
 	var err *api.Error
 	if !fromCache {
 		data, fetchErr := fetch(ctx, selection, credential)
-		err = inspectionError(fetchErr)
+		err = fetchErr
 		if err == nil {
 			result, err = ParseArchive(data)
 		}

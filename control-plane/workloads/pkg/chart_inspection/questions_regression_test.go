@@ -4,6 +4,7 @@
 package chart_inspection
 
 import (
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -16,7 +17,7 @@ var _ = Describe("Declaration normalization contract", func() {
   group: 123
   min: invalid
 `, "{}")
-		Expect(result.QuestionsStatus).To(Equal(QuestionsUnusable))
+		Expect(result.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE))
 		Expect(result.Questions).To(BeEmpty())
 		Expect(result.Groups).To(BeEmpty())
 		Expect(result.Warnings).To(HaveLen(3))
@@ -31,7 +32,7 @@ var _ = Describe("Declaration normalization contract", func() {
 - {variable: first, type: boolean, label: First}
 - {variable: second, type: boolean, label: Second, subquestions: [], show_subquestions_if: false}
 `, "{}")
-		Expect(result.QuestionsStatus).To(Equal(QuestionsUsable))
+		Expect(result.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE))
 		Expect(result.Questions[0]).NotTo(HaveKey("subquestions"))
 		Expect(result.Questions[1]).To(HaveKeyWithValue("subquestions", []any{}))
 		Expect(result.Questions[1]).To(HaveKeyWithValue("show_subquestion_if", false))
@@ -41,9 +42,9 @@ var _ = Describe("Declaration normalization contract", func() {
 	DescribeTable("visibility dependencies", func(body string, usable bool) {
 		result := inspectQuestions(body, "{}")
 		if usable {
-			Expect(result.QuestionsStatus).To(Equal(QuestionsUsable))
+			Expect(result.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE))
 		} else {
-			Expect(result.QuestionsStatus).To(Equal(QuestionsUnusable))
+			Expect(result.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE))
 			Expect(result.Warnings[len(result.Warnings)-1].Message).To(ContainSubstring("question visibility conditions contain a cycle"))
 		}
 	},

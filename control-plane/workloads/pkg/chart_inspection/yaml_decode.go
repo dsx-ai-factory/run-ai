@@ -13,6 +13,7 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"go.yaml.in/yaml/v3"
 )
 
@@ -29,9 +30,9 @@ type yamlBudget struct {
 	bytes int
 }
 
-func (b *yamlBudget) charge(value string) error {
+func (b *yamlBudget) charge(value string) *api.Error {
 	if len(value) > b.bytes {
-		return fmt.Errorf("expanded YAML content exceeds 4 MiB")
+		return api.NewValidationError("expanded YAML content exceeds 4 MiB")
 	}
 	b.bytes -= len(value)
 	return nil
@@ -39,24 +40,24 @@ func (b *yamlBudget) charge(value string) error {
 
 // Decode to nodes before conversion so aliases, duplicate keys and expansion
 // budgets are checked before allocating an unrestricted object graph.
-func yamlObject(data []byte) (map[string]any, error) {
+func yamlObject(data []byte) (map[string]any, *api.Error) {
 	decoder := yaml.NewDecoder(bytes.NewReader(data))
 	var document yaml.Node
 	if err := decoder.Decode(&document); err != nil {
 		if err == io.EOF {
 			return map[string]any{}, nil
 		}
-		return nil, fmt.Errorf("decode YAML: %w", err)
+		return nil, api.NewValidationError(fmt.Sprintf("decode YAML: %v", err))
 	}
 	var extra yaml.Node
 	if err := decoder.Decode(&extra); err != io.EOF {
 		if err != nil {
-			return nil, fmt.Errorf("decode YAML: %w", err)
+			return nil, api.NewValidationError(fmt.Sprintf("decode YAML: %v", err))
 		}
-		return nil, fmt.Errorf("multiple YAML documents are unsupported")
+		return nil, api.NewValidationError("multiple YAML documents are unsupported")
 	}
 	if len(document.Content) != 1 {
-		return nil, fmt.Errorf("YAML must contain an object")
+		return nil, api.NewValidationError("YAML must contain an object")
 	}
 	if document.Content[0].Tag == "!!null" {
 		return map[string]any{}, nil
@@ -68,15 +69,15 @@ func yamlObject(data []byte) (map[string]any, error) {
 	}
 	object, ok := value.(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("YAML must contain an object")
+		return nil, api.NewValidationError("YAML must contain an object")
 	}
 	return object, nil
 }
 
-func yamlValue(node *yaml.Node, active map[*yaml.Node]bool, depth int, budget *yamlBudget) (any, error) {
+func yamlValue(node *yaml.Node, active map[*yaml.Node]bool, depth int, budget *yamlBudget) (any, *api.Error) {
 	budget.nodes--
 	if depth > maxYAMLDepth || budget.nodes < 0 || active[node] {
-		return nil, fmt.Errorf("YAML is too complex or contains an alias cycle")
+		return nil, api.NewValidationError("YAML is too complex or contains an alias cycle")
 	}
 	active[node] = true
 	defer delete(active, node)
@@ -90,10 +91,10 @@ func yamlValue(node *yaml.Node, active map[*yaml.Node]bool, depth int, budget *y
 		for i := 0; i < len(node.Content); i += 2 {
 			key := node.Content[i]
 			if key.Kind != yaml.ScalarNode || (key.Tag != "!!str" && key.Tag != "!!merge") {
-				return nil, fmt.Errorf("YAML object keys must be strings")
+				return nil, api.NewValidationError("YAML object keys must be strings")
 			}
 			if seen[key.Value] {
-				return nil, fmt.Errorf("duplicate YAML key %q", key.Value)
+				return nil, api.NewValidationError(fmt.Sprintf("duplicate YAML key %q", key.Value))
 			}
 			if err := budget.charge(key.Value); err != nil {
 				return nil, err
@@ -111,7 +112,7 @@ func yamlValue(node *yaml.Node, active map[*yaml.Node]bool, depth int, budget *y
 				for _, item := range maps {
 					object, ok := item.(map[string]any)
 					if !ok {
-						return nil, fmt.Errorf("YAML merge requires objects")
+						return nil, api.NewValidationError("YAML merge requires objects")
 					}
 					for k, v := range object {
 						if _, exists := out[k]; !exists {
@@ -147,16 +148,16 @@ func yamlValue(node *yaml.Node, active map[*yaml.Node]bool, depth int, budget *y
 		case "!!binary":
 			value, err := base64.StdEncoding.DecodeString(node.Value)
 			if err != nil {
-				return nil, fmt.Errorf("decode YAML binary: %w", err)
+				return nil, api.NewValidationError(fmt.Sprintf("decode YAML binary: %v", err))
 			}
 			return string(value), nil
 		case "!!int", "!!float", "!!bool":
 			var value any
 			if err := node.Decode(&value); err != nil {
-				return nil, fmt.Errorf("decode YAML scalar: %w", err)
+				return nil, api.NewValidationError(fmt.Sprintf("decode YAML scalar: %v", err))
 			}
 			if number, ok := value.(float64); ok && (math.IsNaN(number) || math.IsInf(number, 0)) {
-				return nil, fmt.Errorf("YAML numbers must be finite")
+				return nil, api.NewValidationError("YAML numbers must be finite")
 			}
 			if _, rounded := value.(float64); rounded {
 				// YAML falls back to float64 for integers exceeding native integer ranges.
@@ -166,9 +167,9 @@ func yamlValue(node *yaml.Node, active map[*yaml.Node]bool, depth int, budget *y
 			}
 			return value, nil
 		default:
-			return nil, fmt.Errorf("unsupported YAML tag %s", node.Tag)
+			return nil, api.NewValidationError(fmt.Sprintf("unsupported YAML tag %s", node.Tag))
 		}
 	default:
-		return nil, fmt.Errorf("unsupported YAML node")
+		return nil, api.NewValidationError("unsupported YAML node")
 	}
 }

@@ -241,6 +241,7 @@ Class | Method | HTTP request | Description
  - [AIApplicationChartInspectionRequest](docs/AIApplicationChartInspectionRequest.md)
  - [AIApplicationChartInspectionResponse](docs/AIApplicationChartInspectionResponse.md)
  - [AIApplicationChartInspectionWarning](docs/AIApplicationChartInspectionWarning.md)
+ - [AIApplicationChartQuestionsStatus](docs/AIApplicationChartQuestionsStatus.md)
  - [AIApplicationChartUploadResponse](docs/AIApplicationChartUploadResponse.md)
  - [AIApplicationCreationRequest](docs/AIApplicationCreationRequest.md)
  - [AIApplicationForSync](docs/AIApplicationForSync.md)

@@ -11,7 +11,6 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"io"
 	"net"
 	"net/http"
@@ -19,6 +18,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -68,8 +68,8 @@ var _ = Describe("Remote chart acquisition", func() {
 				dialed = true
 				return nil, errors.New("unexpected dial")
 			})
-			_, err = fetcher.safeDial(context.Background(), "tcp", "registry.example.com:443")
-			Expect(err).To(HaveOccurred())
+			_, dialErr := fetcher.safeDial(context.Background(), "tcp", "registry.example.com:443")
+			Expect(dialErr).To(HaveOccurred())
 			Expect(dialed).To(BeFalse())
 		}
 	})
@@ -264,9 +264,8 @@ var _ = Describe("Remote chart acquisition", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 		_, err := FetchRemote(ctx, Selection{ChartURL: "https://example.com/a"}, "")
-		Expect(errors.Is(err, context.Canceled)).To(BeTrue(), func() string {
-			return fmt.Sprintf("cancellation lost: %v", err)
-		})
+		Expect(err).To(HaveOccurred())
+		Expect(err.Code).To(BeNumerically("==", http.StatusRequestTimeout))
 	})
 	It("Fetch Remote Preserves Escaped Repository Path", func() {
 
@@ -311,4 +310,38 @@ var _ = Describe("Remote chart acquisition", func() {
 			}
 		}
 	})
+})
+
+var _ = Describe("Chart source address policy", func() {
+	DescribeTable("keeps the address policy at CIDR boundaries", func(address string, blocked bool) {
+		ip := net.ParseIP(address)
+		Expect(ip).NotTo(BeNil())
+		Expect(blockedIP(ip)).To(Equal(blocked))
+		if ipv4 := ip.To4(); ipv4 != nil {
+			Expect(blockedIP(ipv4)).To(Equal(blocked), "four-byte IPv4 representation")
+		}
+	},
+		Entry("current network", "0.255.255.255", true),
+		Entry("after current network", "1.0.0.0", false),
+		Entry("before CGNAT", "100.63.255.255", false),
+		Entry("CGNAT start", "100.64.0.0", true),
+		Entry("CGNAT end", "100.127.255.255", true),
+		Entry("after CGNAT", "100.128.0.0", false),
+		Entry("before benchmark", "198.17.255.255", false),
+		Entry("benchmark start", "198.18.0.0", true),
+		Entry("benchmark end", "198.19.255.255", true),
+		Entry("after benchmark", "198.20.0.0", false),
+		Entry("reserved start", "240.0.0.0", true),
+		Entry("reserved end", "255.255.255.255", true),
+		Entry("before site-local", "fe7f:ffff:ffff:ffff:ffff:ffff:ffff:ffff", false),
+		Entry("link-local", "fe80::1", true),
+		Entry("site-local start", "fec0::", true),
+		Entry("site-local end", "feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff", true),
+		Entry("unique-local", "fc00::1", true),
+		Entry("IPv4-mapped CGNAT", "::ffff:100.64.0.1", true),
+		Entry("public IPv6", "2606:4700:4700::1111", false),
+		Entry("private IPv4", "10.0.0.1", true),
+		Entry("IPv4 loopback", "127.0.0.1", true),
+		Entry("IPv6 loopback", "::1", true),
+	)
 })

@@ -127052,10 +127052,12 @@ components:
       maxLength: 250
       type: string
     ChartName:
-      description: Chart name declared in the archive Chart.yaml.
+      description: Helm chart name.
+      example: redis
       type: string
     ChartVersion:
-      description: Chart version declared in the archive Chart.yaml.
+      description: Helm chart version.
+      example: 17.3.17
       type: string
     AIApplicationChartUrl:
       description: "A direct HTTPS URL to a packaged Helm chart archive (.tgz). When\
@@ -127078,8 +127080,8 @@ components:
         (`repo` + `chartName` + `chartVersion`), a direct chart URL (`chartURL`), or the identifier of a
         previously uploaded chart archive (`chartId`).
       example:
-        chartName: redis
-        chartVersion: 17.3.17
+        chartName: ""
+        chartVersion: ""
         chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
         repo: https://charts.bitnami.com/bitnami
         chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -127094,15 +127096,10 @@ components:
         chartName:
           allOf:
           - $ref: '#/components/schemas/ChartName'
-          description: The name of the chart within the specified repository. This
-            corresponds to the chart’s directory name.
-          example: redis
           maxLength: 250
         chartVersion:
           allOf:
           - $ref: '#/components/schemas/ChartVersion'
-          description: The specific Semantic Version (SemVer) of the chart to deploy.
-          example: 17.3.17
           maxLength: 50
         chartURL:
           description: "A direct HTTPS URL to a packaged Helm chart archive (.tgz).\
@@ -127146,8 +127143,8 @@ components:
         values:
           key: ""
         chartRef:
-          chartName: redis
-          chartVersion: 17.3.17
+          chartName: ""
+          chartVersion: ""
           chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           repo: https://charts.bitnami.com/bitnami
           chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -127214,8 +127211,8 @@ components:
           values:
             key: ""
           chartRef:
-            chartName: redis
-            chartVersion: 17.3.17
+            chartName: ""
+            chartVersion: ""
             chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             repo: https://charts.bitnami.com/bitnami
             chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -127373,8 +127370,8 @@ components:
           values:
             key: ""
           chartRef:
-            chartName: redis
-            chartVersion: 17.3.17
+            chartName: ""
+            chartVersion: ""
             chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             repo: https://charts.bitnami.com/bitnami
             chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -127432,8 +127429,8 @@ components:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           userCredential: true
         chartRef:
-          chartName: redis
-          chartVersion: 17.3.17
+          chartName: ""
+          chartVersion: ""
           chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           repo: https://charts.bitnami.com/bitnami
           chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -127445,6 +127442,17 @@ components:
       required:
       - chartRef
       type: object
+    AIApplicationChartQuestionsStatus:
+      description: |
+        Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is
+        usable after supported normalization. Unusable means declaration validation failed;
+        questions and groups are empty and warnings explain the failure. An unusable declaration
+        does not block raw YAML configuration or deployment.
+      enum:
+      - absent
+      - usable
+      - unusable
+      type: string
     AIApplicationChartInspectionWarning:
       example:
         path: path
@@ -127468,8 +127476,8 @@ components:
       type: object
     AIApplicationChartInspectionResponse:
       example:
-        chartName: chartName
-        chartVersion: chartVersion
+        chartName: redis
+        chartVersion: 17.3.17
         warnings:
         - path: path
           code: code
@@ -127488,10 +127496,12 @@ components:
         questionsStatus: absent
       properties:
         chartName:
-          description: Chart name declared in the archive Chart.yaml.
+          description: Helm chart name.
+          example: redis
           type: string
         chartVersion:
-          description: Chart version declared in the archive Chart.yaml.
+          description: Helm chart version.
+          example: 17.3.17
           type: string
         archiveSHA256:
           description: Lowercase hexadecimal SHA-256 digest of the exact inspected
@@ -127502,16 +127512,7 @@ components:
             \ file, including an unusable file."
           type: boolean
         questionsStatus:
-          description: |
-            Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is
-            usable after supported normalization. Unusable means declaration validation failed;
-            questions and groups are empty and warnings explain the failure. An unusable declaration
-            does not block raw YAML configuration or deployment.
-          enum:
-          - absent
-          - usable
-          - unusable
-          type: string
+          $ref: '#/components/schemas/AIApplicationChartQuestionsStatus'
         groups:
           description: Normalized group declarations in author order; empty for absent
             or unusable declarations.
@@ -127770,8 +127771,8 @@ components:
           values:
             key: ""
           chartRef:
-            chartName: redis
-            chartVersion: 17.3.17
+            chartName: ""
+            chartVersion: ""
             chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             repo: https://charts.bitnami.com/bitnami
             chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -127840,8 +127841,8 @@ components:
             values:
               key: ""
             chartRef:
-              chartName: redis
-              chartVersion: 17.3.17
+              chartName: ""
+              chartVersion: ""
               chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
               repo: https://charts.bitnami.com/bitnami
               chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -127885,8 +127886,8 @@ components:
               values:
                 key: ""
               chartRef:
-                chartName: redis
-                chartVersion: 17.3.17
+                chartName: ""
+                chartVersion: ""
                 chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
                 repo: https://charts.bitnami.com/bitnami
                 chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -127912,8 +127913,8 @@ components:
               values:
                 key: ""
               chartRef:
-                chartName: redis
-                chartVersion: 17.3.17
+                chartName: ""
+                chartVersion: ""
                 chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
                 repo: https://charts.bitnami.com/bitnami
                 chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -131387,8 +131388,8 @@ components:
             values:
               key: ""
             chartRef:
-              chartName: redis
-              chartVersion: 17.3.17
+              chartName: ""
+              chartVersion: ""
               chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
               repo: https://charts.bitnami.com/bitnami
               chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -131467,8 +131468,8 @@ components:
             values:
               key: ""
             chartRef:
-              chartName: redis
-              chartVersion: 17.3.17
+              chartName: ""
+              chartVersion: ""
               chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
               repo: https://charts.bitnami.com/bitnami
               chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz

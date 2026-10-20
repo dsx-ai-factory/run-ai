@@ -50,8 +50,8 @@ type Selection struct {
 
 // FetchFunc acquires archive bytes with the supplied context and resolved credential.
 // Custom upload fetchers must enforce access to stored bytes and honor cancellation.
-// Inspector converts callback and context errors into service API errors.
-type FetchFunc func(context.Context, Selection, string) ([]byte, error)
+// Fetchers return service API errors; cancellation maps to a request timeout.
+type FetchFunc func(context.Context, Selection, string) ([]byte, *api.Error)
 
 func (s Selection) validate() *api.Error {
 	sources := 0
@@ -74,6 +74,16 @@ func (s Selection) validate() *api.Error {
 	return nil
 }
 
+type repositoryIndex struct {
+	Entries map[string][]repositoryChartEntry `json:"entries"`
+}
+
+type repositoryChartEntry struct {
+	Name    string   `json:"name"`
+	Version string   `json:"version"`
+	URLs    []string `json:"urls"`
+}
+
 type hostResolver interface {
 	LookupIPAddr(context.Context, string) ([]net.IPAddr, error)
 }
@@ -91,13 +101,13 @@ func newRemoteFetcher(resolver hostResolver, dial dialFunc) *remoteFetcher {
 // FetchRemote downloads an HTTP(S) archive or exact repository version without
 // installing it. Private/internal addresses are rejected; saved credentials are
 // accepted only for HTTPS NGC sources and are not forwarded across origins.
-func FetchRemote(ctx context.Context, selection Selection, apiKey string) ([]byte, error) {
+func FetchRemote(ctx context.Context, selection Selection, apiKey string) ([]byte, *api.Error) {
 	return newRemoteFetcher(net.DefaultResolver, (&net.Dialer{Timeout: downloadTimeout}).DialContext).fetch(ctx, selection, apiKey)
 }
 
-func (f *remoteFetcher) fetch(ctx context.Context, selection Selection, apiKey string) ([]byte, error) {
+func (f *remoteFetcher) fetch(ctx context.Context, selection Selection, apiKey string) ([]byte, *api.Error) {
 	if err := ctx.Err(); err != nil {
-		return nil, err
+		return nil, inspectionError(err)
 	}
 	if err := selection.validate(); err != nil {
 		return nil, err
@@ -109,11 +119,11 @@ func (f *remoteFetcher) fetch(ctx context.Context, selection Selection, apiKey s
 	if selection.Repo != "" {
 		source = selection.Repo
 	}
-	u, err := validateSourceURL(source)
+	sourceURL, err := validateSourceURL(source)
 	if err != nil {
 		return nil, err
 	}
-	if apiKey != "" && (u.Scheme != httpsScheme || !ngcHost(u.Hostname())) {
+	if apiKey != "" && (sourceURL.Scheme != httpsScheme || !ngcHost(sourceURL.Hostname())) {
 		return nil, api.NewValidationError("unsupported_chart_auth: Saved NGC credentials require an HTTPS NGC chart source.")
 	}
 	ctx, cancel := context.WithTimeout(ctx, downloadTimeout)
@@ -130,7 +140,7 @@ func (f *remoteFetcher) fetch(ctx context.Context, selection Selection, apiKey s
 	client := &http.Client{Transport: transport, Timeout: downloadTimeout}
 	// Repository entries and redirects may point elsewhere. Keep credentials
 	// tied to the original origin even when the target address is public.
-	origin := *u
+	origin := *sourceURL
 	client.CheckRedirect = func(next *http.Request, via []*http.Request) error {
 		if len(via) >= maxRedirects {
 			return api.NewValidationError("chart_redirect_limit: Chart source returned too many redirects.")
@@ -144,9 +154,9 @@ func (f *remoteFetcher) fetch(ctx context.Context, selection Selection, apiKey s
 		return nil
 	}
 	if selection.Repo == "" {
-		return f.download(ctx, client, u, apiKey, maxDownloadBytes)
+		return f.download(ctx, client, sourceURL, apiKey, maxDownloadBytes)
 	}
-	indexURL := *u
+	indexURL := *sourceURL
 	indexURL.RawPath = fmt.Sprintf("%s/%s", strings.TrimRight(indexURL.EscapedPath(), "/"), repositoryIndexFilename)
 	indexURL.Path = fmt.Sprintf("%s/%s", strings.TrimRight(indexURL.Path, "/"), repositoryIndexFilename)
 	data, err := f.download(ctx, client, &indexURL, apiKey, maxIndexBytes)
@@ -157,17 +167,11 @@ func (f *remoteFetcher) fetch(ctx context.Context, selection Selection, apiKey s
 	if err != nil {
 		return nil, api.NewValidationError("invalid_chart_index: Repository index is not valid YAML.")
 	}
-	jsonIndex, err := json.Marshal(boundedIndex)
-	if err != nil {
+	jsonIndex, marshalErr := json.Marshal(boundedIndex)
+	if marshalErr != nil {
 		return nil, api.NewValidationError("invalid_chart_index: Repository index could not be decoded.")
 	}
-	var index struct {
-		Entries map[string][]struct {
-			Name    string   `json:"name"`
-			Version string   `json:"version"`
-			URLs    []string `json:"urls"`
-		} `json:"entries"`
-	}
+	var index repositoryIndex
 	if err := json.Unmarshal(jsonIndex, &index); err != nil || index.Entries == nil {
 		return nil, api.NewValidationError("invalid_chart_index: Repository index must contain chart entries.")
 	}
@@ -192,24 +196,24 @@ func (f *remoteFetcher) fetch(ctx context.Context, selection Selection, apiKey s
 	return nil, api.NewValidationError("chart_version_not_found: The selected chart name and version are absent from the repository index.")
 }
 
-func validateSourceURL(raw string) (*url.URL, error) {
+func validateSourceURL(raw string) (*url.URL, *api.Error) {
 	if len(raw) > maxSourceURLBytes {
 		return nil, api.NewValidationError("invalid_chart_url: Chart source URL is too long.")
 	}
-	u, err := url.Parse(raw)
+	parsedURL, err := url.Parse(raw)
 	if err != nil {
 		return nil, api.NewValidationError("invalid_chart_url: Chart source URL is malformed.")
 	}
-	if u.Scheme == ociScheme {
+	if parsedURL.Scheme == ociScheme {
 		return nil, api.NewValidationError("unsupported_chart_transport: OCI chart inspection is not supported.")
 	}
-	if (u.Scheme != httpScheme && u.Scheme != httpsScheme) || u.Hostname() == "" || u.User != nil || u.Fragment != "" {
+	if (parsedURL.Scheme != httpScheme && parsedURL.Scheme != httpsScheme) || parsedURL.Hostname() == "" || parsedURL.User != nil || parsedURL.Fragment != "" {
 		return nil, api.NewValidationError("invalid_chart_url: Use an HTTP or HTTPS chart URL without embedded credentials or a fragment.")
 	}
-	if ip := net.ParseIP(u.Hostname()); ip != nil && blockedIP(ip) {
+	if ip := net.ParseIP(parsedURL.Hostname()); ip != nil && blockedIP(ip) {
 		return nil, api.NewValidationError("blocked_chart_address: Chart source must not use a private or internal address.")
 	}
-	return u, nil
+	return parsedURL, nil
 }
 
 // Keep this allowlist fixed: it controls where saved NGC credentials may be sent.
@@ -221,16 +225,33 @@ func sameOrigin(a, b *url.URL) bool {
 	return strings.EqualFold(a.Scheme, b.Scheme) && strings.EqualFold(a.Host, b.Host)
 }
 
+// Additional internal/reserved ranges not covered by the standard IP predicates.
+var blockedChartNetworks = []*net.IPNet{
+	mustParseChartCIDR("0.0.0.0/8"),     // Current network.
+	mustParseChartCIDR("100.64.0.0/10"), // Carrier-grade NAT.
+	mustParseChartCIDR("198.18.0.0/15"), // Benchmarking.
+	mustParseChartCIDR("240.0.0.0/4"),   // Reserved IPv4.
+	mustParseChartCIDR("fec0::/10"),     // Deprecated IPv6 site-local; may still route internally.
+}
+
+func mustParseChartCIDR(value string) *net.IPNet {
+	_, network, err := net.ParseCIDR(value)
+	if err != nil {
+		panic(fmt.Sprintf("invalid static chart address range %q: %v", value, err))
+	}
+	return network
+}
+
 func blockedIP(ip net.IP) bool {
 	if !ip.IsGlobalUnicast() || ip.IsPrivate() || ip.IsLoopback() || ip.IsLinkLocalUnicast() {
 		return true
 	}
-	if v4 := ip.To4(); v4 != nil {
-		return v4[0] == 0 || v4[0] >= 240 || (v4[0] == 100 && v4[1] >= 64 && v4[1] <= 127) || (v4[0] == 198 && (v4[1] == 18 || v4[1] == 19))
+	for _, network := range blockedChartNetworks {
+		if network.Contains(ip) {
+			return true
+		}
 	}
-	// Deprecated IPv6 site-local addresses can still route to internal services.
-	v6 := ip.To16()
-	return v6 != nil && v6[0] == 0xfe && v6[1]&0xc0 == 0xc0
+	return false
 }
 
 // Resolve and validate immediately before connecting, then dial the validated IP itself.
@@ -267,8 +288,8 @@ func (f *remoteFetcher) safeDial(ctx context.Context, network, address string) (
 	return nil, api.NewError(http.StatusServiceUnavailable, "chart_download_failed: Could not connect to the chart source.", nil)
 }
 
-func (f *remoteFetcher) download(ctx context.Context, client *http.Client, u *url.URL, apiKey string, limit int64) ([]byte, error) {
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, u.String(), nil)
+func (f *remoteFetcher) download(ctx context.Context, client *http.Client, sourceURL *url.URL, apiKey string, limit int64) ([]byte, *api.Error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, sourceURL.String(), nil)
 	if err != nil {
 		return nil, api.NewValidationError("invalid_chart_url: Chart source URL is malformed.")
 	}
@@ -278,7 +299,7 @@ func (f *remoteFetcher) download(ctx context.Context, client *http.Client, u *ur
 	resp, err := client.Do(req)
 	if err != nil {
 		if ctx.Err() != nil {
-			return nil, ctx.Err()
+			return nil, inspectionError(ctx.Err())
 		}
 		var public *api.Error
 		if errors.As(err, &public) {
@@ -296,7 +317,7 @@ func (f *remoteFetcher) download(ctx context.Context, client *http.Client, u *ur
 	data, err := io.ReadAll(io.LimitReader(resp.Body, limit+1))
 	if err != nil {
 		if ctx.Err() != nil {
-			return nil, ctx.Err()
+			return nil, inspectionError(ctx.Err())
 		}
 		return nil, api.NewError(http.StatusServiceUnavailable, "chart_download_failed: Could not read the chart source.", nil)
 	}

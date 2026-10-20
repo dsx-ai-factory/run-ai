@@ -7,9 +7,9 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"strings"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -58,7 +58,7 @@ questions:
     type: number
     default: 1.25
 `, "enabled: true\nworkers: [{name: original}]\nscale: 1\n")
-		Expect(got.QuestionsStatus != QuestionsUsable || len(got.Questions) != 2).To(BeFalse(), func() string {
+		Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE || len(got.Questions) != 2).To(BeFalse(), func() string {
 			return fmt.Sprintf("declaration = %#v", got)
 		})
 		Expect(got.Questions[0]["label"] != "enabled" || got.Questions[0]["default"] != false || got.Questions[0]["show_subquestion_if"] != true).To(BeFalse(), func() string {
@@ -101,7 +101,7 @@ questions:
 					body += "    " + strings.ReplaceAll(tc.extra, "\n      ", "\n    ") + "\n"
 				}
 				got := inspectQuestions(body, "setting: null\n")
-				Expect(got.QuestionsStatus).To(Equal(QuestionsUsable), func() string {
+				Expect(got.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE), func() string {
 					return fmt.Sprintf("supported field rejected: %#v", got.Warnings)
 				})
 			}
@@ -136,7 +136,7 @@ questions:
 			{
 				By(tc.name)
 				got := inspectQuestions(tc.body, "{}\n")
-				Expect(got.QuestionsStatus != QuestionsUnusable || !got.HasQuestions || len(got.Questions) != 0 || len(got.Groups) != 0 || !hasWarning(got, "UNUSABLE_QUESTIONS")).To(BeFalse(), func() string {
+				Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE || !got.HasQuestions || len(got.Questions) != 0 || len(got.Groups) != 0 || !hasWarning(got, "UNUSABLE_QUESTIONS")).To(BeFalse(), func() string {
 					return fmt.Sprintf("invalid declaration was salvaged: %#v", got)
 				})
 			}
@@ -151,7 +151,7 @@ questions:
 			return "questions: [" + child + "]"
 		}
 		got := inspectQuestions(makeTree(4), "{}")
-		Expect(got.QuestionsStatus).To(Equal(QuestionsUsable), func() string {
+		Expect(got.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE), func() string {
 			return fmt.Sprintf("four levels rejected: %#v", got.Warnings)
 		})
 
@@ -166,14 +166,14 @@ questions:
 		Expect(child["group"]).To(Equal("basics"), "leaf group not inherited")
 		{
 			got := inspectQuestions(makeTree(5), "{}")
-			Expect(got.QuestionsStatus).To(Equal(QuestionsUnusable), func() string {
+			Expect(got.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE), func() string {
 				return fmt.Sprintf("fifth child level accepted: %#v", got)
 			})
 		}
 	})
 	It("Declaration Warns For Dynamic Values And Conditions", func() {
 		got := inspectQuestions("questions: [{variable: dynamic, type: string, show_if: 'name= || ready=true'}]", "ready: true\n")
-		Expect(got.QuestionsStatus != QuestionsUsable || !hasWarning(got, "MISSING_DEFAULT_PATH") || !hasWarning(got, "UNKNOWN_CONDITION_REFERENCE")).To(BeFalse(), func() string {
+		Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE || !hasWarning(got, "MISSING_DEFAULT_PATH") || !hasWarning(got, "UNKNOWN_CONDITION_REFERENCE")).To(BeFalse(), func() string {
 			return fmt.Sprintf("dynamic input rejected or unreported: %#v", got)
 		})
 	})
@@ -185,14 +185,14 @@ questions:
 			"questions: [{variable: x, type: boolean, default: 'True'}]",
 		} {
 			got := inspectQuestions(body, "{}")
-			Expect(got.QuestionsStatus).To(Equal(QuestionsUnusable), func() string {
+			Expect(got.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE), func() string {
 				return fmt.Sprintf("invalid structure accepted: %s", body)
 			})
 		}
 	})
 	It("Declaration Ignores Optional Option Metadata", func() {
 		got := inspectQuestions("questions: [{variable: mode, type: enum, options: [{label: Basic, value: basic, description: extra}]}]", "mode: basic")
-		Expect(got.QuestionsStatus != QuestionsUsable || !hasWarning(got, "IGNORED_PROPERTY")).To(BeFalse(), func() string {
+		Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE || !hasWarning(got, "IGNORED_PROPERTY")).To(BeFalse(), func() string {
 			return fmt.Sprintf("optional option metadata rejected: %#v", got)
 		})
 
@@ -206,7 +206,7 @@ questions:
 	})
 	It("Declaration Warns When Whitespace Label Is Defaulted", func() {
 		got := inspectQuestions("questions: [{variable: setting, label: '   ', type: string}]", "setting: original")
-		Expect(got.QuestionsStatus != QuestionsUsable || len(got.Questions) != 1 || got.Questions[0]["label"] != "setting").To(BeFalse(), func() string {
+		Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE || len(got.Questions) != 1 || got.Questions[0]["label"] != "setting").To(BeFalse(), func() string {
 			return fmt.Sprintf("whitespace label was not normalized: %#v", got)
 		})
 
@@ -224,13 +224,13 @@ questions:
 			{"workers[0].slots[0]", "workers[0].slots.name"},
 		} {
 			got := inspectQuestions(fmt.Sprintf("questions: [{variable: '%s', type: string}, {variable: '%s', type: string}]", pair[0], pair[1]), "{}")
-			Expect(got.QuestionsStatus != QuestionsUnusable || len(got.Questions) != 0 || !hasWarning(got, "UNUSABLE_QUESTIONS")).To(BeFalse(), func() string {
+			Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE || len(got.Questions) != 0 || !hasWarning(got, "UNUSABLE_QUESTIONS")).To(BeFalse(), func() string {
 				return fmt.Sprintf("incompatible containers accepted: %v: %#v", pair, got)
 			})
 		}
 		for _, pair := range [][2]string{{fixtureWorkerNamePath, "workers[1].name"}, {"workers.name", fixtureWorkerEnabledPath}} {
 			got := inspectQuestions(fmt.Sprintf("questions: [{variable: '%s', type: string}, {variable: '%s', type: string}]", pair[0], pair[1]), "{}")
-			Expect(got.QuestionsStatus).To(Equal(QuestionsUsable), func() string {
+			Expect(got.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE), func() string {
 				return fmt.Sprintf("compatible containers rejected: %v: %#v", pair, got.Warnings)
 			})
 		}
@@ -241,7 +241,7 @@ questions:
 				By(value)
 				body := fmt.Sprintf("questions: [{variable: setting, type: string, show_if: 'image.tag=%s'}]", value)
 				got := inspectQuestions(body, "image: {tag: original}")
-				Expect(got.QuestionsStatus != QuestionsUsable || got.Questions[0]["show_if"] != "image.tag="+value).To(BeFalse(), func() string {
+				Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE || got.Questions[0]["show_if"] != "image.tag="+value).To(BeFalse(), func() string {
 					return fmt.Sprintf("unquoted text condition rejected or changed: %#v", got)
 				})
 			}
@@ -249,7 +249,7 @@ questions:
 	})
 	It("Declaration Preserves Distinct Large Integer Options", func() {
 		got := inspectQuestions("questions: [{variable: mode, type: enum, options: [9007199254740992, 9007199254740993], default: 9007199254740993}]", "mode: 9007199254740993")
-		Expect(got.QuestionsStatus != QuestionsUsable || len(got.Questions) != 1).To(BeFalse(), func() string {
+		Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE || len(got.Questions) != 1).To(BeFalse(), func() string {
 			return fmt.Sprintf("distinct integer options rejected: %#v", got)
 		})
 
@@ -261,7 +261,7 @@ questions:
 	})
 	It("Declaration Preserves Integers Beyond Uint64", func() {
 		got := inspectQuestions("questions: [{variable: mode, type: enum, options: [18446744073709551616, 18446744073709551617], default: 18446744073709551617}]", "mode: 18446744073709551617")
-		Expect(got.QuestionsStatus != QuestionsUsable || len(got.Questions) != 1).To(BeFalse(), func() string {
+		Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE || len(got.Questions) != 1).To(BeFalse(), func() string {
 			return fmt.Sprintf("distinct integers were rounded: %#v", got.Warnings)
 		})
 
@@ -280,7 +280,7 @@ questions:
 			"max: 18446744073709551614, default: 18446744073709551615",
 		} {
 			got := inspectQuestions("questions: [{variable: number, type: int, "+extra+"}]", "{}")
-			Expect(got.QuestionsStatus != QuestionsUnusable || len(got.Questions) != 0).To(BeFalse(), func() string {
+			Expect(got.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE || len(got.Questions) != 0).To(BeFalse(), func() string {
 				return fmt.Sprintf("exact integer bound ignored: %s: %#v", extra, got)
 			})
 		}

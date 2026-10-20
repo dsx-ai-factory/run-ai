@@ -32,9 +32,9 @@ type conditionParser struct {
 // Validate the restricted visibility grammar and collect referenced values paths.
 // This parses comparisons, boolean literals, &&, || and parentheses; it does not
 // evaluate expressions or run a general-purpose template/expression language.
-func parseCondition(value string) ([]string, error) {
+func parseCondition(value string) ([]string, *api.Error) {
 	if len(value) > maxConditionBytes {
-		return nil, fmt.Errorf("condition exceeds %d bytes", maxConditionBytes)
+		return nil, api.NewValidationError(fmt.Sprintf("condition exceeds %d bytes", maxConditionBytes))
 	}
 	p := &conditionParser{text: value}
 	if err := p.or(0); err != nil {
@@ -42,7 +42,7 @@ func parseCondition(value string) ([]string, error) {
 	}
 	p.whitespace()
 	if p.pos != len(value) {
-		return nil, fmt.Errorf("unexpected condition text")
+		return nil, api.NewValidationError("unexpected condition text")
 	}
 	return p.references, nil
 }
@@ -60,7 +60,7 @@ func (p *conditionParser) take(value string) bool {
 	}
 	return false
 }
-func (p *conditionParser) or(depth int) error {
+func (p *conditionParser) or(depth int) *api.Error {
 	if err := p.and(depth); err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func (p *conditionParser) or(depth int) error {
 	}
 	return nil
 }
-func (p *conditionParser) and(depth int) error {
+func (p *conditionParser) and(depth int) *api.Error {
 	if err := p.primary(depth); err != nil {
 		return err
 	}
@@ -83,17 +83,17 @@ func (p *conditionParser) and(depth int) error {
 	return nil
 }
 
-func (p *conditionParser) primary(depth int) error {
+func (p *conditionParser) primary(depth int) *api.Error {
 	p.count++
 	if p.count > maxConditionTerms || depth > maxConditionDepth {
-		return fmt.Errorf("condition exceeds %d terms or %d nesting levels", maxConditionTerms, maxConditionDepth)
+		return api.NewValidationError(fmt.Sprintf("condition exceeds %d terms or %d nesting levels", maxConditionTerms, maxConditionDepth))
 	}
 	if p.take("(") {
 		if err := p.or(depth + 1); err != nil {
 			return err
 		}
 		if !p.take(")") {
-			return fmt.Errorf("missing closing condition parenthesis")
+			return api.NewValidationError("missing closing condition parenthesis")
 		}
 		return nil
 	}
@@ -134,15 +134,15 @@ func (p *conditionParser) primary(depth int) error {
 		return nil
 	}
 	if _, err := parsePath(valuePath); err != nil {
-		return fmt.Errorf("invalid condition path: %w", err)
+		return api.NewValidationError(fmt.Sprintf("invalid condition path: %s", err.Message))
 	}
 	if !p.take("!=") && !p.take("=") {
-		return fmt.Errorf("condition requires = or !=")
+		return api.NewValidationError("condition requires = or !=")
 	}
 	p.references = append(p.references, valuePath)
 	p.whitespace()
 	if p.pos < len(p.text) && p.text[p.pos] == '=' {
-		return fmt.Errorf("condition requires a single equality operator")
+		return api.NewValidationError("condition requires a single equality operator")
 	}
 	match := conditionTypedValue.FindString(p.text[p.pos:])
 	if match != "" && match[0] != '\'' && match[0] != '"' {
@@ -158,17 +158,17 @@ func (p *conditionParser) primary(depth int) error {
 		if match[0] != '\'' {
 			var value any
 			if err := json.Unmarshal([]byte(match), &value); err != nil {
-				return fmt.Errorf("invalid condition literal: %w", err)
+				return api.NewValidationError(fmt.Sprintf("invalid condition literal: %v", err))
 			}
 			if number, ok := value.(float64); ok && (math.IsNaN(number) || math.IsInf(number, 0)) {
-				return fmt.Errorf("condition number must be finite")
+				return api.NewValidationError("condition number must be finite")
 			}
 		}
 		p.pos += len(match)
 		return nil
 	}
 	if p.pos < len(p.text) && (p.text[p.pos] == '"' || p.text[p.pos] == '\'') {
-		return fmt.Errorf("unterminated condition string")
+		return api.NewValidationError("unterminated condition string")
 	}
 	for p.pos < len(p.text) && !strings.ContainsRune("&|()", rune(p.text[p.pos])) {
 		p.pos++
@@ -183,7 +183,7 @@ type declarationQuestion struct {
 
 // Resolve references after every field is known, allowing forward references.
 // Parent visibility and show_if dependencies share one graph for cycle detection.
-func (v *declarationValidator) checkConditions() error {
+func (v *declarationValidator) checkConditions() *api.Error {
 	known := map[string]bool{}
 	for _, q := range v.questions {
 		known[q.key] = true
@@ -207,7 +207,7 @@ func (v *declarationValidator) checkConditions() error {
 		}
 	}
 	if _, err := graph.FindOrder(); err != nil {
-		return fmt.Errorf("question visibility conditions contain a cycle")
+		return api.NewValidationError("question visibility conditions contain a cycle")
 	}
 	return nil
 }

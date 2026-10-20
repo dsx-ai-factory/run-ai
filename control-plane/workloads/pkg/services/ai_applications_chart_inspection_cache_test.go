@@ -45,7 +45,7 @@ var _ = Describe("Chart inspection cache sharing", func() {
 		var downloads, lookups atomic.Int32
 		key := credential
 		c := &applicationChartInspector{
-			inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, error) {
+			inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, *api.Error) {
 				downloads.Add(1)
 				return archive, nil
 			}, 0),
@@ -85,7 +85,7 @@ var _ = Describe("Chart inspection cache sharing", func() {
 	DescribeTable("denies another user's personal asset even when marked shared", func(flag *bool) {
 		var downloads atomic.Int32
 		c := &applicationChartInspector{
-			inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, error) {
+			inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, *api.Error) {
 				downloads.Add(1)
 				return archive, nil
 			}, 0),
@@ -116,13 +116,13 @@ var _ = Describe("Chart inspection cache sharing", func() {
 		unblock := func() { once.Do(func() { close(release) }) }
 		defer unblock()
 		c := &applicationChartInspector{
-			inspector: chartinspection.NewInspector(func(ctx context.Context, _ chartinspection.Selection, _ string) ([]byte, error) {
+			inspector: chartinspection.NewInspector(func(ctx context.Context, _ chartinspection.Selection, _ string) ([]byte, *api.Error) {
 				downloads.Add(1)
 				select {
 				case <-release:
 					return archive, nil
 				case <-ctx.Done():
-					return nil, ctx.Err()
+					return nil, api.NewError(http.StatusRequestTimeout, "chart inspection request cancelled or expired", nil)
 				}
 			}, 0),
 			loadKey: func(ctx context.Context, _ string) (string, *api.Error) {

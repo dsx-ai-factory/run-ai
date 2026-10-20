@@ -9,15 +9,11 @@ properties:
   chartName:
     allOf:
       - $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartName.yaml"
-    description: The name of the chart within the specified repository. This corresponds to the chart’s directory name.
     maxLength: 250
-    example: redis
   chartVersion:
     allOf:
       - $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartVersion.yaml"
-    description: The specific Semantic Version (SemVer) of the chart to deploy.
     maxLength: 50
-    example: 17.3.17
   chartURL:
     $ref: "./AIApplicationChartUrl.yaml"
   chartId:

@@ -6,8 +6,8 @@ package chart_inspection
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )

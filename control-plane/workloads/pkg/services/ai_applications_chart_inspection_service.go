@@ -116,7 +116,7 @@ func (s *applicationChartInspector) inspect(ctx context.Context, request api.AiA
 		if parseErr != nil {
 			return NewErrorResponse(api.NewValidationError("chartId must be a valid uuid")), nil
 		}
-		result, e = s.inspector.InspectWithFetch(ctx, selection, scope, "", func(fetchCtx context.Context, _ chartinspection.Selection, _ string) ([]byte, error) {
+		result, e = s.inspector.InspectWithFetch(ctx, selection, scope, "", func(fetchCtx context.Context, _ chartinspection.Selection, _ string) ([]byte, *api.Error) {
 			data, loadErr := s.loadUpload(fetchCtx, id, fmt.Sprint(tenant))
 			if loadErr != nil {
 				return nil, loadErr

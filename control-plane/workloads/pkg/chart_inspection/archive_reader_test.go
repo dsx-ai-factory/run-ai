@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -27,7 +28,7 @@ func chartArchive(entries ...archiveEntry) []byte {
 
 	var data bytes.Buffer
 	gz := gzip.NewWriter(&data)
-	tw := tar.NewWriter(gz)
+	tarWriter := tar.NewWriter(gz)
 	for _, entry := range entries {
 		kind := entry.kind
 		if kind == 0 {
@@ -39,19 +40,19 @@ func chartArchive(entries ...archiveEntry) []byte {
 			header.Linkname = "elsewhere"
 		}
 		{
-			err := tw.WriteHeader(header)
+			err := tarWriter.WriteHeader(header)
 			Expect(err).NotTo(HaveOccurred())
 		}
 
 		if kind == tar.TypeReg {
 			{
-				_, err := tw.Write([]byte(entry.body))
+				_, err := tarWriter.Write([]byte(entry.body))
 				Expect(err).NotTo(HaveOccurred())
 			}
 		}
 	}
 	{
-		err := tw.Close()
+		err := tarWriter.Close()
 		Expect(err).NotTo(HaveOccurred())
 	}
 	{
@@ -87,10 +88,10 @@ var _ = Describe("Chart archive parsing", func() {
 						archiveEntry{name: fixtureChartMetadataPath, body: fixtureChartMetadataYAML},
 						archiveEntry{name: "demo/" + filename, body: questions},
 					)
-					inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) { return archive, nil }, 0)
+					inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) { return archive, nil }, 0)
 					result, err := inspector.Inspect(context.Background(), Selection{ChartID: fixtureUploadID}, "tenant", "")
 					Expect(err).NotTo(HaveOccurred())
-					Expect(!result.HasQuestions || result.QuestionsStatus != QuestionsUnusable || len(result.Questions) != 0 || !hasWarning(result, "UNUSABLE_QUESTIONS")).To(BeFalse(), func() string {
+					Expect(!result.HasQuestions || result.QuestionsStatus != api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE || len(result.Questions) != 0 || !hasWarning(result, "UNUSABLE_QUESTIONS")).To(BeFalse(), func() string {
 						return fmt.Sprintf("expanded aliases were accepted: %#v", result)
 					})
 
@@ -131,7 +132,7 @@ var _ = Describe("Chart archive parsing", func() {
 				Expect(got.ChartName).To(Equal(fixtureExampleChartName))
 				Expect(got.ChartVersion).To(Equal(fixtureVersion))
 				Expect(got.HasQuestions).To(BeTrue())
-				Expect(got.QuestionsStatus).To(Equal(QuestionsUsable))
+				Expect(got.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE))
 				Expect(got.Questions).To(HaveLen(1))
 				Expect(got.Groups).To(HaveLen(1))
 
@@ -163,7 +164,7 @@ var _ = Describe("Chart archive parsing", func() {
 					Expect(got.ChartName).To(Equal(fixtureExampleChartName))
 					Expect(got.ChartVersion).To(Equal(fixtureVersion))
 					Expect(got.HasQuestions).To(BeTrue())
-					Expect(got.QuestionsStatus).To(Equal(QuestionsUnusable))
+					Expect(got.QuestionsStatus).To(Equal(api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE))
 					Expect(got.Questions).To(HaveLen(0))
 					Expect(got.Groups).To(HaveLen(0))
 
@@ -348,10 +349,13 @@ var _ = Describe("Chart archive parsing", func() {
 			{"node budget", manyNodes.String()},
 			{"alias budget", "large: &large " + strings.Repeat("x", 32<<10) + "\ncopies: [" + strings.TrimSuffix(strings.Repeat("*large,", 130), ",") + "]\n"},
 		} {
-			for _, questions := range []struct{ name, body, status string }{
-				{"absent", "", QuestionsAbsent},
-				{QuestionsUsable, "questions:\n- variable: replicas\n  type: int\n  default: 1\n  show_if: enabled=true\n  ignored_property: example\n", QuestionsUsable},
-				{QuestionsUnusable, "questions:\n- variable: replicas\n  type: int\n  default: invalid\n", QuestionsUnusable},
+			for _, questions := range []struct {
+				name, body string
+				status     api.AiApplicationChartQuestionsStatus
+			}{
+				{"absent", "", api.AIAPPLICATIONCHARTQUESTIONSSTATUS_ABSENT},
+				{"usable", "questions:\n- variable: replicas\n  type: int\n  default: 1\n  show_if: enabled=true\n  ignored_property: example\n", api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE},
+				{"unusable", "questions:\n- variable: replicas\n  type: int\n  default: invalid\n", api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE},
 			} {
 				{
 					By(values.name + "/" + questions.name)
@@ -372,10 +376,10 @@ var _ = Describe("Chart archive parsing", func() {
 					Expect(hasWarning(got, "MISSING_DEFAULT_PATH") || hasWarning(got, "UNKNOWN_CONDITION_REFERENCE")).To(BeFalse(), func() string {
 						return fmt.Sprintf("unreadable defaults caused speculative path warnings: %#v", got.Warnings)
 					})
-					Expect(questions.status == QuestionsUsable && (len(got.Questions) != 1 || !hasWarning(got, "IGNORED_PROPERTY"))).To(BeFalse(), func() string {
+					Expect(questions.status == api.AIAPPLICATIONCHARTQUESTIONSSTATUS_USABLE && (len(got.Questions) != 1 || !hasWarning(got, "IGNORED_PROPERTY"))).To(BeFalse(), func() string {
 						return fmt.Sprintf("usable question diagnostics were lost: %#v", got)
 					})
-					Expect(questions.status == QuestionsUnusable && (len(got.Questions) != 0 || len(got.Groups) != 0 || !hasWarning(got, "UNUSABLE_QUESTIONS"))).To(BeFalse(), func() string {
+					Expect(questions.status == api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE && (len(got.Questions) != 0 || len(got.Groups) != 0 || !hasWarning(got, "UNUSABLE_QUESTIONS"))).To(BeFalse(), func() string {
 						return fmt.Sprintf("invalid question defaults were accepted: %#v", got)
 					})
 				}

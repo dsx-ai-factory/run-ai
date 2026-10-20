@@ -45,7 +45,7 @@ func TestChartInspectionReauthorizesCredentialsOnCacheHits(t *testing.T) {
 	allowed := true
 	downloads := 0
 	c := &applicationChartInspector{
-		inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, error) {
+		inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, *api.Error) {
 			downloads++
 			return inspectionTestArchive(t), nil
 		}, time.Minute),

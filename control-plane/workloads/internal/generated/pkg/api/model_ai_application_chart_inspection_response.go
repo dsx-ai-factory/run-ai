@@ -22,13 +22,13 @@ var dummyAiApplicationChartInspectionResponse = runaihttp.AssertPattern
 
 type AiApplicationChartInspectionResponse struct {
 
-	// Chart name declared in the archive Chart.yaml.
+	// Helm chart name.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ChartName string `json:"chartName"`
 	ChartName string `json:"chartName" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Chart version declared in the archive Chart.yaml.
+	// Helm chart version.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ChartVersion string `json:"chartVersion"`
 	ChartVersion string `json:"chartVersion" gorm:"not null;"`
@@ -46,10 +46,9 @@ type AiApplicationChartInspectionResponse struct {
 	HasQuestions bool `json:"hasQuestions" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is usable after supported normalization. Unusable means declaration validation failed; questions and groups are empty and warnings explain the failure. An unusable declaration does not block raw YAML configuration or deployment.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//QuestionsStatus string `json:"questionsStatus"`
-	QuestionsStatus string `json:"questionsStatus" gorm:"not null;"`
+	//QuestionsStatus AiApplicationChartQuestionsStatus `json:"questionsStatus"`
+	QuestionsStatus AiApplicationChartQuestionsStatus `json:"questionsStatus" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// Normalized group declarations in author order; empty for absent or unusable declarations.
@@ -122,6 +121,10 @@ func AssertAiApplicationChartInspectionResponseConstraints(obj AiApplicationChar
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if okValue := obj.QuestionsStatus.IsValid(); !okValue {
+		return &UnsupportedValueError{Field: "QuestionsStatus", Value: string(obj.QuestionsStatus)}
+	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////

@@ -39,62 +39,62 @@ func ParseArchive(data []byte) (*api.AiApplicationChartInspectionResponse, *api.
 	if err != nil {
 		validationErr := api.NewValidationError("invalid Helm chart archive")
 		// WithDetails interprets database error text; chart contents must not change the status.
-		validationErr.Details = err.Error()
+		validationErr.Details = err.Message
 		return nil, validationErr
 	}
 	return result, nil
 }
 
-func parseArchive(data []byte) (*api.AiApplicationChartInspectionResponse, error) {
+func parseArchive(data []byte) (*api.AiApplicationChartInspectionResponse, *api.Error) {
 	if len(data) > maxCompressedBytes {
-		return nil, fmt.Errorf("chart archive exceeds 32 MiB")
+		return nil, api.NewValidationError("chart archive exceeds 32 MiB")
 	}
 	source := bytes.NewReader(data)
 	gz, err := gzip.NewReader(source)
 	if err != nil {
-		return nil, fmt.Errorf("read chart gzip: %w", err)
+		return nil, api.NewValidationError(fmt.Sprintf("read chart gzip: %v", err))
 	}
 	defer gz.Close()
 	gz.Multistream(false)
 	limited := &io.LimitedReader{R: gz, N: maxExpandedBytes + 1}
-	tr := tar.NewReader(limited)
+	tarReader := tar.NewReader(limited)
 	files := map[string][]byte{}
 	root := ""
 	for count := 0; ; count++ {
-		header, err := tr.Next()
+		header, err := tarReader.Next()
 		if limited.N <= 0 {
-			return nil, fmt.Errorf("expanded chart exceeds 64 MiB")
+			return nil, api.NewValidationError("expanded chart exceeds 64 MiB")
 		}
 		if err == io.EOF {
 			break
 		}
 		if err != nil {
-			return nil, fmt.Errorf("read chart tar: %w", err)
+			return nil, api.NewValidationError(fmt.Sprintf("read chart tar: %v", err))
 		}
 		if count >= maxArchiveEntries {
-			return nil, fmt.Errorf("chart archive exceeds 4096 entries")
+			return nil, api.NewValidationError("chart archive exceeds 4096 entries")
 		}
 		name := header.Name
 		if strings.Contains(name, "\\") || strings.HasPrefix(name, "/") || path.Clean(name) != strings.TrimSuffix(name, "/") {
-			return nil, fmt.Errorf("chart archive contains an unsafe path")
+			return nil, api.NewValidationError("chart archive contains an unsafe path")
 		}
 		parts := strings.Split(strings.TrimSuffix(name, "/"), "/")
 		for _, part := range parts {
 			if part == "" || part == "." || part == ".." || strings.Contains(part, ":") {
-				return nil, fmt.Errorf("chart archive contains an unsafe path")
+				return nil, api.NewValidationError("chart archive contains an unsafe path")
 			}
 		}
 		if root == "" {
 			root = parts[0]
 		}
 		if parts[0] != root {
-			return nil, fmt.Errorf("chart archive contains multiple roots")
+			return nil, api.NewValidationError("chart archive contains multiple roots")
 		}
 		if header.Typeflag != tar.TypeReg && header.Typeflag != tar.TypeDir {
-			return nil, fmt.Errorf("chart archive contains a link or unsupported entry")
+			return nil, api.NewValidationError("chart archive contains a link or unsupported entry")
 		}
 		if header.Size < 0 || header.Size > limited.N {
-			return nil, fmt.Errorf("expanded chart exceeds 64 MiB")
+			return nil, api.NewValidationError("expanded chart exceeds 64 MiB")
 		}
 		if header.Typeflag == tar.TypeDir {
 			continue
@@ -107,14 +107,14 @@ func parseArchive(data []byte) (*api.AiApplicationChartInspectionResponse, error
 			continue
 		}
 		if _, exists := files[file]; exists {
-			return nil, fmt.Errorf("duplicate root chart metadata %s", file)
+			return nil, api.NewValidationError(fmt.Sprintf("duplicate root chart metadata %s", file))
 		}
 		if header.Size > maxMetadataBytes {
-			return nil, fmt.Errorf("%s exceeds 1 MiB", file)
+			return nil, api.NewValidationError(fmt.Sprintf("%s exceeds 1 MiB", file))
 		}
-		body, err := io.ReadAll(tr)
+		body, err := io.ReadAll(tarReader)
 		if err != nil {
-			return nil, fmt.Errorf("read %s: %w", file, err)
+			return nil, api.NewValidationError(fmt.Sprintf("read %s: %v", file, err))
 		}
 		files[file] = body
 	}
@@ -123,43 +123,43 @@ func parseArchive(data []byte) (*api.AiApplicationChartInspectionResponse, error
 		return nil, err
 	}
 	if limited.N <= 0 {
-		return nil, fmt.Errorf("expanded chart exceeds 64 MiB")
+		return nil, api.NewValidationError("expanded chart exceeds 64 MiB")
 	}
 	if source.Len() != 0 {
-		return nil, fmt.Errorf("chart archive contains trailing gzip data")
+		return nil, api.NewValidationError("chart archive contains trailing gzip data")
 	}
 	if _, yamlExists := files[questionsYAMLFilename]; yamlExists {
 		if _, ymlExists := files[questionsYMLFilename]; ymlExists {
-			return nil, fmt.Errorf("chart archive contains both root questions.yaml and questions.yml")
+			return nil, api.NewValidationError("chart archive contains both root questions.yaml and questions.yml")
 		}
 	}
 	metadata, exists := files[chartMetadataFilename]
 	if !exists {
-		return nil, fmt.Errorf("chart archive has no root Chart.yaml")
+		return nil, api.NewValidationError("chart archive has no root Chart.yaml")
 	}
-	chart, err := yamlObject(metadata)
-	if err != nil {
-		return nil, fmt.Errorf("parse Chart.yaml: %w", err)
+	chart, metadataErr := yamlObject(metadata)
+	if metadataErr != nil {
+		return nil, api.NewValidationError(fmt.Sprintf("parse Chart.yaml: %s", metadataErr.Message))
 	}
 	name, nameOK := chart[chartNameProperty].(string)
 	version, versionOK := chart[chartVersionProperty].(string)
 	if !nameOK || strings.TrimSpace(name) == "" || !versionOK || strings.TrimSpace(version) == "" {
-		return nil, fmt.Errorf("chart metadata requires a chart name and version")
+		return nil, api.NewValidationError("chart metadata requires a chart name and version")
 	}
 	sum := sha256.Sum256(data)
 	out := &api.AiApplicationChartInspectionResponse{
 		ChartName:       name,
 		ChartVersion:    version,
 		ArchiveSHA256:   hex.EncodeToString(sum[:]),
-		QuestionsStatus: QuestionsAbsent,
+		QuestionsStatus: api.AIAPPLICATIONCHARTQUESTIONSSTATUS_ABSENT,
 		Groups:          []map[string]any{},
 		Questions:       []map[string]any{},
 		Warnings:        []api.AiApplicationChartInspectionWarning{},
 	}
 	defaults := map[string]any{}
 	if values, ok := files[chartValuesFilename]; ok {
-		defaults, err = yamlObject(values)
-		if err != nil {
+		defaults, metadataErr = yamlObject(values)
+		if metadataErr != nil {
 			// Defaults are advisory; nil suppresses checks that require readable defaults.
 			defaults = nil
 			out.Warnings = append(out.Warnings, api.AiApplicationChartInspectionWarning{Code: "UNREADABLE_DEFAULTS", Message: "values.yaml could not be read for default checks", Path: "$"})
@@ -175,10 +175,14 @@ func parseArchive(data []byte) (*api.AiApplicationChartInspectionResponse, error
 		return out, nil
 	}
 	out.HasQuestions = true
-	out.QuestionsStatus = QuestionsUnusable
-	declaration, err := yamlObject(questions)
-	if err != nil {
-		out.Warnings = append(out.Warnings, api.AiApplicationChartInspectionWarning{Code: warningUnusableQuestions, Message: fmt.Sprintf("%s must contain valid YAML with an object root: %s", questionsFile, err), Path: "$"})
+	out.QuestionsStatus = api.AIAPPLICATIONCHARTQUESTIONSSTATUS_UNUSABLE
+	declaration, declarationErr := yamlObject(questions)
+	if declarationErr != nil {
+		out.Warnings = append(out.Warnings, api.AiApplicationChartInspectionWarning{
+			Code:    warningUnusableQuestions,
+			Message: fmt.Sprintf("%s must contain valid YAML with an object root: %s", questionsFile, declarationErr.Message),
+			Path:    "$",
+		})
 		return out, nil
 	}
 	parseDeclaration(declaration, defaults, out)
@@ -192,20 +196,20 @@ func parseArchive(data []byte) (*api.AiApplicationChartInspectionResponse, error
 
 // Read through the gzip trailer to validate its checksum and reject payloads
 // hidden after the tar end marker; legal zero padding is still accepted.
-func consumeTarPadding(reader io.Reader) error {
+func consumeTarPadding(reader io.Reader) *api.Error {
 	buffer := make([]byte, tarPaddingBufferBytes)
 	for {
 		count, err := reader.Read(buffer)
 		for _, value := range buffer[:count] {
 			if value != 0 {
-				return fmt.Errorf("chart tar contains data after its end marker")
+				return api.NewValidationError("chart tar contains data after its end marker")
 			}
 		}
 		if err == io.EOF {
 			return nil
 		}
 		if err != nil {
-			return fmt.Errorf("read chart gzip trailer: %w", err)
+			return api.NewValidationError(fmt.Sprintf("read chart gzip trailer: %v", err))
 		}
 	}
 }

@@ -251,13 +251,13 @@ export interface AIApplicationChartInspectionRequest {
  */
 export interface AIApplicationChartInspectionResponse {
     /**
-     * Chart name declared in the archive Chart.yaml.
+     * Helm chart name.
      * @type {string}
      * @memberof AIApplicationChartInspectionResponse
      */
     'chartName': string;
     /**
-     * Chart version declared in the archive Chart.yaml.
+     * Helm chart version.
      * @type {string}
      * @memberof AIApplicationChartInspectionResponse
      */
@@ -275,11 +275,11 @@ export interface AIApplicationChartInspectionResponse {
      */
     'hasQuestions': boolean;
     /**
-     * Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is usable after supported normalization. Unusable means declaration validation failed; questions and groups are empty and warnings explain the failure. An unusable declaration does not block raw YAML configuration or deployment. 
-     * @type {string}
+     * 
+     * @type {AIApplicationChartQuestionsStatus}
      * @memberof AIApplicationChartInspectionResponse
      */
-    'questionsStatus': AIApplicationChartInspectionResponseQuestionsStatusEnum;
+    'questionsStatus': AIApplicationChartQuestionsStatus;
     /**
      * Normalized group declarations in author order; empty for absent or unusable declarations.
      * @type {Array<{ [key: string]: any; }>}
@@ -299,15 +299,6 @@ export interface AIApplicationChartInspectionResponse {
      */
     'warnings': Array<AIApplicationChartInspectionWarning>;
 }
-
-export const AIApplicationChartInspectionResponseQuestionsStatusEnum = {
-    Absent: 'absent',
-    Usable: 'usable',
-    Unusable: 'unusable'
-} as const;
-
-export type AIApplicationChartInspectionResponseQuestionsStatusEnum = typeof AIApplicationChartInspectionResponseQuestionsStatusEnum[keyof typeof AIApplicationChartInspectionResponseQuestionsStatusEnum];
-
 /**
  * 
  * @export
@@ -333,6 +324,21 @@ export interface AIApplicationChartInspectionWarning {
      */
     'path': string;
 }
+/**
+ * Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is usable after supported normalization. Unusable means declaration validation failed; questions and groups are empty and warnings explain the failure. An unusable declaration does not block raw YAML configuration or deployment. 
+ * @export
+ * @enum {string}
+ */
+
+export const AIApplicationChartQuestionsStatus = {
+    Absent: 'absent',
+    Usable: 'usable',
+    Unusable: 'unusable'
+} as const;
+
+export type AIApplicationChartQuestionsStatus = typeof AIApplicationChartQuestionsStatus[keyof typeof AIApplicationChartQuestionsStatus];
+
+
 /**
  * Result of uploading a packaged Helm chart archive.
  * @export
@@ -556,13 +562,13 @@ export interface AIApplicationSpecChartRef {
      */
     'repo'?: string;
     /**
-     * The name of the chart within the specified repository. This corresponds to the chart’s directory name.
+     * 
      * @type {string}
      * @memberof AIApplicationSpecChartRef
      */
     'chartName'?: string;
     /**
-     * The specific Semantic Version (SemVer) of the chart to deploy.
+     * 
      * @type {string}
      * @memberof AIApplicationSpecChartRef
      */

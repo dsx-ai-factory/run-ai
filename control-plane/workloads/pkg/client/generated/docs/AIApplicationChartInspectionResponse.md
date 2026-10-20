@@ -4,11 +4,11 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**ChartName** | **string** | Chart name declared in the archive Chart.yaml. | 
-**ChartVersion** | **string** | Chart version declared in the archive Chart.yaml. | 
+**ChartName** | **string** | Helm chart name. | 
+**ChartVersion** | **string** | Helm chart version. | 
 **ArchiveSHA256** | **string** | Lowercase hexadecimal SHA-256 digest of the exact inspected archive bytes. | 
 **HasQuestions** | **bool** | Whether the chart contains a root questions.yaml or questions.yml file, including an unusable file. | 
-**QuestionsStatus** | **string** | Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is usable after supported normalization. Unusable means declaration validation failed; questions and groups are empty and warnings explain the failure. An unusable declaration does not block raw YAML configuration or deployment.  | 
+**QuestionsStatus** | [**AIApplicationChartQuestionsStatus**](AIApplicationChartQuestionsStatus.md) |  | 
 **Groups** | **[]map[string]interface{}** | Normalized group declarations in author order; empty for absent or unusable declarations. | 
 **Questions** | **[]map[string]interface{}** | Normalized root questions in author order. Each question preserves supported declared metadata and may contain recursive subquestions through four child levels (five levels total), with roots at depth zero. Supported compatibility forms are normalized. Unknown question types become string with a warning; unsupported optional properties are ignored with a warning. Invalid mandatory metadata, bindings, options, defaults, conditions, or excessive nesting make the entire declaration unusable. Credential and Secret question types are not supported. This response contains no raw declaration YAML or complete values.yaml defaults.  | 
 **Warnings** | [**[]AIApplicationChartInspectionWarning**](AIApplicationChartInspectionWarning.md) | Diagnostics for recoverable metadata and unusable declarations. | 
@@ -17,7 +17,7 @@ Name | Type | Description | Notes
 
 ### NewAIApplicationChartInspectionResponse
 
-`func NewAIApplicationChartInspectionResponse(chartName string, chartVersion string, archiveSHA256 string, hasQuestions bool, questionsStatus string, groups []map[string]interface{}, questions []map[string]interface{}, warnings []AIApplicationChartInspectionWarning, ) *AIApplicationChartInspectionResponse`
+`func NewAIApplicationChartInspectionResponse(chartName string, chartVersion string, archiveSHA256 string, hasQuestions bool, questionsStatus AIApplicationChartQuestionsStatus, groups []map[string]interface{}, questions []map[string]interface{}, warnings []AIApplicationChartInspectionWarning, ) *AIApplicationChartInspectionResponse`
 
 NewAIApplicationChartInspectionResponse instantiates a new AIApplicationChartInspectionResponse object
 This constructor will assign default values to properties that have it defined,
@@ -114,20 +114,20 @@ SetHasQuestions sets HasQuestions field to given value.
 
 ### GetQuestionsStatus
 
-`func (o *AIApplicationChartInspectionResponse) GetQuestionsStatus() string`
+`func (o *AIApplicationChartInspectionResponse) GetQuestionsStatus() AIApplicationChartQuestionsStatus`
 
 GetQuestionsStatus returns the QuestionsStatus field if non-nil, zero value otherwise.
 
 ### GetQuestionsStatusOk
 
-`func (o *AIApplicationChartInspectionResponse) GetQuestionsStatusOk() (*string, bool)`
+`func (o *AIApplicationChartInspectionResponse) GetQuestionsStatusOk() (*AIApplicationChartQuestionsStatus, bool)`
 
 GetQuestionsStatusOk returns a tuple with the QuestionsStatus field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetQuestionsStatus
 
-`func (o *AIApplicationChartInspectionResponse) SetQuestionsStatus(v string)`
+`func (o *AIApplicationChartInspectionResponse) SetQuestionsStatus(v AIApplicationChartQuestionsStatus)`
 
 SetQuestionsStatus sets QuestionsStatus field to given value.
 

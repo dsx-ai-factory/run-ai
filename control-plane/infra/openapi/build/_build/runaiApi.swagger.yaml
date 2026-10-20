@@ -8401,6 +8401,8 @@ paths:
 
 
 
+
+
           For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
         - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
       tags:
@@ -14183,6 +14185,8 @@ components:
 
 
 
+
+
              - binpack - Place as many GPU pods as possible on each GPU device to use fewer devices and maximize available capacity, minimizing GPU fraction fragmentation.
              - spread - Distribute GPU pods across as many GPU devices as possible to balance load across devices.
           allOf:
@@ -14237,6 +14241,8 @@ components:
 
 
 
+
+
              - 0.0: Ignore historical usage data (100% current usage).
              - 1.0: Historical usage data has higher impact, it may cause fairshare to be 0.
              - Values between 0.0 and 1.0 combine historical and current usage to maintain a balanced fairshare
@@ -14249,6 +14255,8 @@ components:
           pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
           description: |
             Set the half-life time to define the decay rate of a project’s historical resource usage. The half-life defines how long it takes for past usage to diminish to half of its original influence on a project's fairshare.
+
+
 
 
 
@@ -33391,15 +33399,13 @@ components:
       description: The HTTP or HTTPS URL of the Helm repository that hosts the chart. This must match a repository that is accessible. Used together with `name` and `version`.
       maxLength: 250
       example: https://charts.bitnami.com/bitnami
-    AIApplicationChartName:
+    ChartName:
       type: string
-      description: The name of the chart within the specified repository. This corresponds to the chart’s directory name.
-      maxLength: 250
+      description: Helm chart name.
       example: redis
-    AIApplicationChartVersion:
+    ChartVersion:
       type: string
-      description: The specific Semantic Version (SemVer) of the chart to deploy.
-      maxLength: 50
+      description: Helm chart version.
       example: 17.3.17
     AIApplicationChartUrl:
       type: string
@@ -33424,9 +33430,13 @@ components:
         repo:
           $ref: '#/components/schemas/AIApplicationChartRepo'
         chartName:
-          $ref: '#/components/schemas/AIApplicationChartName'
+          allOf:
+            - $ref: '#/components/schemas/ChartName'
+          maxLength: 250
         chartVersion:
-          $ref: '#/components/schemas/AIApplicationChartVersion'
+          allOf:
+            - $ref: '#/components/schemas/ChartVersion'
+          maxLength: 50
         chartURL:
           $ref: '#/components/schemas/AIApplicationChartUrl'
         chartId:

@@ -29,9 +29,9 @@ func FuzzYAMLObject(f *testing.F) {
 		if err != nil {
 			return
 		}
-		encoded, err := json.Marshal(value)
-		if err != nil {
-			t.Fatalf("accepted YAML could not be encoded: %v", err)
+		encoded, marshalErr := json.Marshal(value)
+		if marshalErr != nil {
+			t.Fatalf("accepted YAML could not be encoded: %v", marshalErr)
 		}
 
 		// JSON escaping can multiply scalar bytes by six; leave room for bounded containers.

@@ -9,6 +9,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 )
 
 const (
@@ -22,16 +24,16 @@ var pathIdentifier = regexp.MustCompile(`^[A-Za-z_][A-Za-z0-9_-]*`)
 // Accept a bounded values-path grammar: dotted keys, bracketed array indices
 // and JSON-quoted keys. Reserved keys are rejected because consumers may apply
 // these bindings to JavaScript objects.
-func parsePath(value string) ([]any, error) {
+func parsePath(value string) ([]any, *api.Error) {
 	if value == "" || len(value) > maxValuesPathBytes {
-		return nil, fmt.Errorf("invalid values path")
+		return nil, api.NewValidationError("invalid values path")
 	}
 	segments := []any{}
 	pos := 0
-	identifier := func() error {
+	identifier := func() *api.Error {
 		match := pathIdentifier.FindString(value[pos:])
 		if match == "" {
-			return fmt.Errorf("invalid values path")
+			return api.NewValidationError("invalid values path")
 		}
 		segments = append(segments, match)
 		pos += len(match)
@@ -50,7 +52,7 @@ func parsePath(value string) ([]any, error) {
 		case '[':
 			pos++
 			if pos >= len(value) {
-				return nil, fmt.Errorf("invalid values path")
+				return nil, api.NewValidationError("invalid values path")
 			}
 			if value[pos] == '"' {
 				start := pos
@@ -62,12 +64,12 @@ func parsePath(value string) ([]any, error) {
 					pos++
 				}
 				if pos >= len(value) {
-					return nil, fmt.Errorf("invalid values path")
+					return nil, api.NewValidationError("invalid values path")
 				}
 				pos++
 				var key string
 				if err := json.Unmarshal([]byte(value[start:pos]), &key); err != nil {
-					return nil, fmt.Errorf("decode values key: %w", err)
+					return nil, api.NewValidationError(fmt.Sprintf("decode values key: %v", err))
 				}
 				segments = append(segments, key)
 			} else {
@@ -76,28 +78,28 @@ func parsePath(value string) ([]any, error) {
 					pos++
 				}
 				if start == pos {
-					return nil, fmt.Errorf("invalid array index")
+					return nil, api.NewValidationError("invalid array index")
 				}
 				index, err := strconv.Atoi(value[start:pos])
 				if err != nil || index > maxValuesArrayIndex {
-					return nil, fmt.Errorf("invalid array index")
+					return nil, api.NewValidationError("invalid array index")
 				}
 				segments = append(segments, index)
 			}
 			if pos >= len(value) || value[pos] != ']' {
-				return nil, fmt.Errorf("invalid values path")
+				return nil, api.NewValidationError("invalid values path")
 			}
 			pos++
 		default:
-			return nil, fmt.Errorf("invalid values path")
+			return nil, api.NewValidationError("invalid values path")
 		}
 	}
 	if len(segments) > maxValuesPathDepth {
-		return nil, fmt.Errorf("values path is too deep")
+		return nil, api.NewValidationError("values path is too deep")
 	}
 	for _, segment := range segments {
 		if key, ok := segment.(string); ok && (key == "__proto__" || key == "prototype" || key == "constructor") {
-			return nil, fmt.Errorf("values path uses a reserved key")
+			return nil, api.NewValidationError("values path uses a reserved key")
 		}
 	}
 	return segments, nil
@@ -152,11 +154,11 @@ type pathTree struct {
 
 // Reject bindings that would overwrite one another or require the same values
 // container to be both an object and an array.
-func (tree *pathTree) insert(path []any) error {
+func (tree *pathTree) insert(path []any) *api.Error {
 	node := tree
 	for _, segment := range path {
 		if node.terminal {
-			return fmt.Errorf("duplicate or overlapping values path")
+			return api.NewValidationError("duplicate or overlapping values path")
 		}
 		if node.children == nil {
 			node.children = map[any]*pathTree{}
@@ -166,7 +168,7 @@ func (tree *pathTree) insert(path []any) error {
 			container = 2
 		}
 		if node.container != 0 && node.container != container {
-			return fmt.Errorf("values paths require incompatible object and array containers")
+			return api.NewValidationError("values paths require incompatible object and array containers")
 		}
 		node.container = container
 		if node.children[segment] == nil {
@@ -175,7 +177,7 @@ func (tree *pathTree) insert(path []any) error {
 		node = node.children[segment]
 	}
 	if node.terminal || len(node.children) > 0 {
-		return fmt.Errorf("duplicate or overlapping values path")
+		return api.NewValidationError("duplicate or overlapping values path")
 	}
 	node.terminal = true
 	return nil

@@ -14,8 +14,12 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
+	"k8s.io/apimachinery/pkg/util/validation"
 )
+
+const numCrontabFields = 5
 
 var textTypes = datastructs.NewSet(strings.Fields("string multiline password storageclass pvc configmap hostname ipaddr cidr cron")...)
 var hostnamePart = regexp.MustCompile(`(?i)^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$`)
@@ -88,7 +92,7 @@ func scalarKey(value any) string {
 	return "unsupported"
 }
 
-func validateAnswer(question map[string]any, value any) error {
+func validateAnswer(question map[string]any, value any) *api.Error {
 	if value == nil || value == "" {
 		return nil
 	}
@@ -96,52 +100,52 @@ func validateAnswer(question map[string]any, value any) error {
 	if textTypes.Has(kind) {
 		text, ok := value.(string)
 		if !ok {
-			return fmt.Errorf("default must be text")
+			return api.NewValidationError("default must be text")
 		}
 		length := new(big.Rat).SetInt64(int64(utf8.RuneCountInString(text)))
 		if low, ok := numeric(question[propertyMinLength]); ok && length.Cmp(low) < 0 {
-			return fmt.Errorf("default is shorter than min_length")
+			return api.NewValidationError("default is shorter than min_length")
 		}
 		if high, ok := numeric(question[propertyMaxLength]); ok && length.Cmp(high) > 0 {
-			return fmt.Errorf("default is longer than max_length")
+			return api.NewValidationError("default is longer than max_length")
 		}
 		if kind == "hostname" {
-			if len(text) > 253 {
-				return fmt.Errorf("invalid hostname")
+			if len(text) > validation.DNS1123SubdomainMaxLength {
+				return api.NewValidationError(fmt.Sprintf("hostname exceeds %d bytes", validation.DNS1123SubdomainMaxLength))
 			}
 			for _, part := range strings.Split(text, ".") {
 				if !hostnamePart.MatchString(part) {
-					return fmt.Errorf("invalid hostname")
+					return api.NewValidationError("invalid hostname")
 				}
 			}
 		}
 		if kind == "ipaddr" && net.ParseIP(text) == nil {
-			return fmt.Errorf("invalid IP address")
+			return api.NewValidationError("invalid IP address")
 		}
 		if kind == "cidr" {
 			if _, _, err := net.ParseCIDR(text); err != nil {
-				return fmt.Errorf("invalid CIDR: %w", err)
+				return api.NewValidationError(fmt.Sprintf("invalid CIDR: %v", err))
 			}
 		}
 		if kind == "cron" && !validCron(text) {
-			return fmt.Errorf("invalid five-field numeric cron")
+			return api.NewValidationError("invalid five-field numeric cron")
 		}
 	}
 	if kind == "boolean" {
 		if _, ok := value.(bool); !ok {
-			return fmt.Errorf("default must be a boolean")
+			return api.NewValidationError("default must be a boolean")
 		}
 	}
 	if kind == questionInteger || kind == questionFloat {
 		number, ok := numeric(value)
 		if !ok || (kind == questionInteger && !number.IsInt()) {
-			return fmt.Errorf("default must match the numeric field type")
+			return api.NewValidationError("default must match the numeric field type")
 		}
 		if low, ok := numeric(question[propertyMin]); ok && number.Cmp(low) < 0 {
-			return fmt.Errorf("default is below min")
+			return api.NewValidationError(fmt.Sprintf("default is below min (%v)", question[propertyMin]))
 		}
 		if high, ok := numeric(question[propertyMax]); ok && number.Cmp(high) > 0 {
-			return fmt.Errorf("default is above max")
+			return api.NewValidationError(fmt.Sprintf("default is above max (%v)", question[propertyMax]))
 		}
 	}
 	if kind == questionEnum || kind == "radio" {
@@ -150,7 +154,7 @@ func validateAnswer(question map[string]any, value any) error {
 			var ok bool
 			answers, ok = value.([]any)
 			if !ok {
-				return fmt.Errorf("multiple default must be a list")
+				return api.NewValidationError("multiple default must be a list")
 			}
 		}
 		available := map[string]bool{}
@@ -161,10 +165,10 @@ func validateAnswer(question map[string]any, value any) error {
 		for _, answer := range answers {
 			key := scalarKey(answer)
 			if !isScalar(answer) || !available[key] {
-				return fmt.Errorf("default must be an available option")
+				return api.NewValidationError("default must be an available option")
 			}
 			if seen[key] {
-				return fmt.Errorf("multiple default must be distinct")
+				return api.NewValidationError("multiple default must be distinct")
 			}
 			seen[key] = true
 		}
@@ -172,22 +176,22 @@ func validateAnswer(question map[string]any, value any) error {
 	if kind == "array[string]" {
 		list, ok := value.([]any)
 		if !ok {
-			return fmt.Errorf("default must be a string list")
+			return api.NewValidationError("default must be a string list")
 		}
 		for _, item := range list {
 			if _, ok := item.(string); !ok {
-				return fmt.Errorf("default list must contain strings")
+				return api.NewValidationError("default list must contain strings")
 			}
 		}
 	}
 	if kind == "map[string]" {
 		object, ok := value.(map[string]any)
 		if !ok {
-			return fmt.Errorf("default must be a string map")
+			return api.NewValidationError("default must be a string map")
 		}
 		for _, item := range object {
 			if _, ok := item.(string); !ok {
-				return fmt.Errorf("default map must contain string values")
+				return api.NewValidationError("default map must contain string values")
 			}
 		}
 	}
@@ -196,10 +200,11 @@ func validateAnswer(question map[string]any, value any) error {
 
 func validCron(value string) bool {
 	fields := strings.Fields(value)
-	if len(fields) != 5 {
+	if len(fields) != numCrontabFields {
 		return false
 	}
-	limits := [][2]int{{0, 59}, {0, 23}, {1, 31}, {1, 12}, {0, 7}}
+	// Minute, hour, day of month, month, day of week; Sunday accepts both 0 and 7.
+	limits := [numCrontabFields][2]int{{0, 59}, {0, 23}, {1, 31}, {1, 12}, {0, 7}}
 	for index, field := range fields {
 		for _, piece := range strings.Split(field, ",") {
 			parts := cronPart.FindStringSubmatch(piece)

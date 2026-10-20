@@ -13,19 +13,19 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"
-	cachetesting "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/testing"
-	"github.com/stretchr/testify/mock"
 	"net/http"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"
+	cachetesting "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/testing"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/stretchr/testify/mock"
 )
 
 func cacheChart() []byte {
@@ -89,7 +89,7 @@ var _ = Describe("Inspection cache and admission", func() {
 		cachetesting.DisableCache()
 		archive := cacheChart()
 		calls := 0
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			calls++
 			return archive, nil
 		}, 0)
@@ -124,7 +124,7 @@ var _ = Describe("Inspection cache and admission", func() {
 				shared.On("Set", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(unavailable)
 			}
 			calls := 0
-			inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+			inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 				calls++
 				return archive, nil
 			}, 0)
@@ -147,9 +147,9 @@ var _ = Describe("Inspection cache and admission", func() {
 		shared.On("Get", mock.Anything, mock.Anything, mock.Anything).
 			Return(&chartInspectionMetadata{Data: encoded}, nil).Once()
 		called := false
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			called = true
-			return nil, errors.New("unexpected download")
+			return nil, inspectionError(errors.New("unexpected download"))
 		}, 0)
 		result, err := inspector.Inspect(context.Background(), ngcCacheSelection(), "tenant", "")
 		Expect(err).NotTo(HaveOccurred())
@@ -168,7 +168,7 @@ var _ = Describe("Inspection cache and admission", func() {
 				close(started)
 				<-args.Get(0).(context.Context).Done()
 			}).Return(context.Canceled).Once()
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			return archive, nil
 		}, 0)
 		ctx, cancel := context.WithCancel(context.Background())
@@ -210,8 +210,8 @@ var _ = Describe("Inspection cache and admission", func() {
 			{"unexpected failure", errors.New("private callback diagnostic"), http.StatusInternalServerError, "chart inspection failed unexpectedly"},
 		} {
 			By(tc.name)
-			inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
-				return nil, tc.err
+			inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
+				return nil, inspectionError(tc.err)
 			}, 0)
 			result, err := inspector.Inspect(context.Background(), ngcCacheSelection(), "tenant", "")
 			Expect(result).To(BeNil())
@@ -226,7 +226,7 @@ var _ = Describe("Inspection cache and admission", func() {
 		ctx, cancel := context.WithCancel(context.Background())
 		cancel()
 		called := false
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			called = true
 			return nil, nil
 		}, 0)
@@ -259,7 +259,7 @@ var _ = Describe("Inspection cache and admission", func() {
 			{
 				By(tc.name)
 				calls := 0
-				inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+				inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 					calls++
 					if calls == 1 {
 						return first, nil
@@ -303,7 +303,7 @@ var _ = Describe("Inspection cache and admission", func() {
 	It("expires metadata through the shared CP cache", func() {
 		archive := cacheChart()
 		calls := 0
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			calls++
 			return archive, nil
 		}, 100*time.Millisecond)
@@ -326,7 +326,7 @@ var _ = Describe("Inspection cache and admission", func() {
 		unblock := func() { releaseOnce.Do(func() { close(release) }) }
 		DeferCleanup(unblock)
 		done := make(chan *api.Error, 2)
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			started <- struct{}{}
 			<-release
 			return archive, nil
@@ -355,7 +355,7 @@ var _ = Describe("Inspection cache and admission", func() {
 	It("Inspector Cache Isolation Mutation And Invalidation", func() {
 		archive := cacheChart()
 		var calls atomic.Int32
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) { calls.Add(1); return archive, nil }, time.Minute)
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) { calls.Add(1); return archive, nil }, time.Minute)
 		selection := ngcCacheSelection()
 		first, err := inspector.Inspect(context.Background(), selection, "tenant1:caller1", "key1")
 		Expect(err).NotTo(HaveOccurred())
@@ -407,7 +407,7 @@ var _ = Describe("Inspection cache and admission", func() {
 			archiveEntry{name: "app/questions.yaml", body: "questions:\n  - variable: counter\n    type: int\n    label: Counter\n    default: 9007199254740993\n"},
 		)
 		var calls int
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			calls++
 			return archive, nil
 		}, time.Minute)
@@ -428,10 +428,10 @@ var _ = Describe("Inspection cache and admission", func() {
 	It("Inspector Retries Failures", func() {
 		archive := cacheChart()
 		var calls int
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			calls++
 			if calls == 1 {
-				return nil, errors.New("temporary failure")
+				return nil, inspectionError(errors.New("temporary failure"))
 			}
 			if calls == 2 {
 				return []byte("invalid archive"), nil
@@ -461,7 +461,7 @@ var _ = Describe("Inspection cache and admission", func() {
 		started := make(chan struct{})
 		release := make(chan struct{})
 		var calls atomic.Int32
-		inspector := NewInspector(func(ctx context.Context, _ Selection, _ string) ([]byte, error) {
+		inspector := NewInspector(func(ctx context.Context, _ Selection, _ string) ([]byte, *api.Error) {
 			if calls.Add(1) == 1 {
 				close(started)
 			}
@@ -469,7 +469,7 @@ var _ = Describe("Inspection cache and admission", func() {
 			case <-release:
 				return archive, nil
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				return nil, inspectionError(ctx.Err())
 			}
 		}, time.Minute)
 		selection := ngcCacheSelection()
@@ -530,12 +530,12 @@ var _ = Describe("Inspection cache and admission", func() {
 		started := make(chan struct{})
 		abandoned := make(chan struct{})
 		var calls atomic.Int32
-		inspector := NewInspector(func(ctx context.Context, _ Selection, _ string) ([]byte, error) {
+		inspector := NewInspector(func(ctx context.Context, _ Selection, _ string) ([]byte, *api.Error) {
 			if calls.Add(1) == 1 {
 				close(started)
 				<-ctx.Done()
 				close(abandoned)
-				return nil, ctx.Err()
+				return nil, inspectionError(ctx.Err())
 			}
 			return archive, nil
 		}, time.Minute)
@@ -567,7 +567,7 @@ var _ = Describe("Inspection cache and admission", func() {
 	It("Inspector Does Not Share Different Selections", func() {
 		archive := cacheChart()
 		var calls atomic.Int32
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) { calls.Add(1); return archive, nil }, time.Minute)
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) { calls.Add(1); return archive, nil }, time.Minute)
 		for _, sel := range []Selection{{ChartID: "one"}, {ChartID: "two"}} {
 			{
 				_, err := inspector.Inspect(context.Background(), sel, "tenant", "")
@@ -584,13 +584,13 @@ var _ = Describe("Inspection cache and admission", func() {
 		archive := cacheChart()
 		release := make(chan struct{})
 		started := make(chan struct{}, 4)
-		inspector := NewInspector(func(ctx context.Context, _ Selection, _ string) ([]byte, error) {
+		inspector := NewInspector(func(ctx context.Context, _ Selection, _ string) ([]byte, *api.Error) {
 			started <- struct{}{}
 			select {
 			case <-release:
 				return archive, nil
 			case <-ctx.Done():
-				return nil, ctx.Err()
+				return nil, inspectionError(ctx.Err())
 			}
 		}, time.Minute)
 		var wg sync.WaitGroup
@@ -615,7 +615,7 @@ var _ = Describe("Inspection cache and admission", func() {
 	It("Inspector Rejects Identity Mismatch Without Caching", func() {
 		wrong, correct := cacheChart(), cacheChartMetadata(fixtureChartName, "2")
 		var calls int
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			calls++
 			if calls < 3 {
 				return wrong, nil
@@ -645,12 +645,12 @@ var _ = Describe("Inspection cache and admission", func() {
 
 		archive := cacheChart()
 		var calls int
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			defer GinkgoRecover()
 			Fail("remote fetch used for authorized upload")
-			return nil, errors.New("wrong source")
+			return nil, inspectionError(errors.New("wrong source"))
 		}, time.Minute)
-		uploaded := func(context.Context, Selection, string) ([]byte, error) { calls++; return archive, nil }
+		uploaded := func(context.Context, Selection, string) ([]byte, *api.Error) { calls++; return archive, nil }
 		for n := 0; n < 2; n++ {
 			result, err := inspector.InspectWithFetch(context.Background(), Selection{ChartID: fixtureUploadID}, "tenant", "", uploaded)
 			Expect(err != nil || result.ChartName != fixtureChartName).To(BeFalse(), func() string {
@@ -670,7 +670,7 @@ var _ = Describe("Inspection cache and admission", func() {
 			archiveEntry{name: "app/questions.yaml", body: "questions:\n- variable: description\n  label: Description\n  type: string\n  default: " + strings.Repeat("x", 2048) + "\n"},
 		)
 		calls := 0
-		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, error) {
+		inspector := NewInspector(func(context.Context, Selection, string) ([]byte, *api.Error) {
 			calls++
 			return archive, nil
 		}, 0)

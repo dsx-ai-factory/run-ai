@@ -24,16 +24,15 @@ var _ MappedNullable = &AIApplicationChartInspectionResponse{}
 
 // AIApplicationChartInspectionResponse struct for AIApplicationChartInspectionResponse
 type AIApplicationChartInspectionResponse struct {
-	// Chart name declared in the archive Chart.yaml.
+	// Helm chart name.
 	ChartName string `json:"chartName"`
-	// Chart version declared in the archive Chart.yaml.
+	// Helm chart version.
 	ChartVersion string `json:"chartVersion"`
 	// Lowercase hexadecimal SHA-256 digest of the exact inspected archive bytes.
 	ArchiveSHA256 string `json:"archiveSHA256"`
 	// Whether the chart contains a root questions.yaml or questions.yml file, including an unusable file.
-	HasQuestions bool `json:"hasQuestions"`
-	// Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is usable after supported normalization. Unusable means declaration validation failed; questions and groups are empty and warnings explain the failure. An unusable declaration does not block raw YAML configuration or deployment.
-	QuestionsStatus string `json:"questionsStatus"`
+	HasQuestions    bool                              `json:"hasQuestions"`
+	QuestionsStatus AIApplicationChartQuestionsStatus `json:"questionsStatus"`
 	// Normalized group declarations in author order; empty for absent or unusable declarations.
 	Groups []map[string]interface{} `json:"groups"`
 	// Normalized root questions in author order. Each question preserves supported declared metadata and may contain recursive subquestions through four child levels (five levels total), with roots at depth zero. Supported compatibility forms are normalized. Unknown question types become string with a warning; unsupported optional properties are ignored with a warning. Invalid mandatory metadata, bindings, options, defaults, conditions, or excessive nesting make the entire declaration unusable. Credential and Secret question types are not supported. This response contains no raw declaration YAML or complete values.yaml defaults.
@@ -48,7 +47,7 @@ type _AIApplicationChartInspectionResponse AIApplicationChartInspectionResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewAIApplicationChartInspectionResponse(chartName string, chartVersion string, archiveSHA256 string, hasQuestions bool, questionsStatus string, groups []map[string]interface{}, questions []map[string]interface{}, warnings []AIApplicationChartInspectionWarning) *AIApplicationChartInspectionResponse {
+func NewAIApplicationChartInspectionResponse(chartName string, chartVersion string, archiveSHA256 string, hasQuestions bool, questionsStatus AIApplicationChartQuestionsStatus, groups []map[string]interface{}, questions []map[string]interface{}, warnings []AIApplicationChartInspectionWarning) *AIApplicationChartInspectionResponse {
 	this := AIApplicationChartInspectionResponse{}
 	this.ChartName = chartName
 	this.ChartVersion = chartVersion
@@ -166,9 +165,9 @@ func (o *AIApplicationChartInspectionResponse) SetHasQuestions(v bool) {
 }
 
 // GetQuestionsStatus returns the QuestionsStatus field value
-func (o *AIApplicationChartInspectionResponse) GetQuestionsStatus() string {
+func (o *AIApplicationChartInspectionResponse) GetQuestionsStatus() AIApplicationChartQuestionsStatus {
 	if o == nil {
-		var ret string
+		var ret AIApplicationChartQuestionsStatus
 		return ret
 	}
 
@@ -177,7 +176,7 @@ func (o *AIApplicationChartInspectionResponse) GetQuestionsStatus() string {
 
 // GetQuestionsStatusOk returns a tuple with the QuestionsStatus field value
 // and a boolean to check if the value has been set.
-func (o *AIApplicationChartInspectionResponse) GetQuestionsStatusOk() (*string, bool) {
+func (o *AIApplicationChartInspectionResponse) GetQuestionsStatusOk() (*AIApplicationChartQuestionsStatus, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -185,7 +184,7 @@ func (o *AIApplicationChartInspectionResponse) GetQuestionsStatusOk() (*string, 
 }
 
 // SetQuestionsStatus sets field value
-func (o *AIApplicationChartInspectionResponse) SetQuestionsStatus(v string) {
+func (o *AIApplicationChartInspectionResponse) SetQuestionsStatus(v AIApplicationChartQuestionsStatus) {
 	o.QuestionsStatus = v
 }
 
