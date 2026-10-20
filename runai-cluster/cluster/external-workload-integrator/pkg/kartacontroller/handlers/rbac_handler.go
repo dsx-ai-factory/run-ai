@@ -77,14 +77,15 @@ func (h *KartaRBACHandler) Handle(ctx context.Context, gvk schema.GroupVersionKi
 
 func (h *KartaRBACHandler) HandleDeletion(ctx context.Context, gvk schema.GroupVersionKind, additionalGvks []schema.GroupVersionKind) error {
 	allGvks := append([]schema.GroupVersionKind{gvk}, additionalGvks...)
+	targets := h.removalTargets(allGvks)
 	var err error
 
-	innerErr := h.handleClusterRoleOnDeletion(ctx, allGvks, h.ClusterRoleReadName, false)
+	innerErr := h.handleClusterRoleOnDeletion(ctx, targets, h.ClusterRoleReadName, false)
 	if innerErr != nil {
 		err = multierror.Append(err, innerErr)
 	}
 
-	innerErr = h.handleClusterRoleOnDeletion(ctx, allGvks, h.ClusterRoleCrudName, true)
+	innerErr = h.handleClusterRoleOnDeletion(ctx, targets, h.ClusterRoleCrudName, true)
 	if innerErr != nil {
 		err = multierror.Append(err, innerErr)
 	}
@@ -210,10 +211,11 @@ func (h *KartaRBACHandler) createClusterRole(ctx context.Context, name string, c
 	return cr, err
 }
 
-func (h *KartaRBACHandler) handleClusterRoleOnDeletion(ctx context.Context, gvks []schema.GroupVersionKind, clusterRoleName string, crudRole bool) error {
-	if len(gvks) == 0 {
+func (h *KartaRBACHandler) handleClusterRoleOnDeletion(ctx context.Context, targets []removalTarget, clusterRoleName string, crudRole bool) error {
+	if len(targets) == 0 {
 		return nil
 	}
+	main := targets[0].gvk.String()
 
 	permissionsMsg := "read"
 	if crudRole {
@@ -221,29 +223,31 @@ func (h *KartaRBACHandler) handleClusterRoleOnDeletion(ctx context.Context, gvks
 	}
 
 	if clusterRoleName == "" {
-		log.Warn().Msgf("No cluster role defined for RBAC %s deletion handling for %s", permissionsMsg, gvks[0].String())
+		log.Warn().Msgf("No cluster role defined for RBAC %s deletion handling for %s", permissionsMsg, main)
 		return nil
 	}
 
 	cr, err := h.getClusterRole(ctx, clusterRoleName)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Debug().Msgf("Cluster role '%s' not found on deletion handling for %s, nothing to do", clusterRoleName, gvks[0].String())
+			log.Debug().Msgf("Cluster role '%s' not found on deletion handling for %s, nothing to do", clusterRoleName, main)
 			return nil
 		}
 		return fmt.Errorf("failed to get cluster role '%s': %w", clusterRoleName, err)
 	}
 
-	if !h.hasRuleToRemove(cr, gvks, crudRole) {
-		if unresolved := h.gvksWithoutServedResourceName(gvks); len(unresolved) > 0 {
+	if !hasRuleToRemove(cr, targets, crudRole) {
+		if unresolved := unresolvedGvks(targets); len(unresolved) > 0 {
 			// the API server no longer serves these kinds (for example the CRD was deleted before the type), so
 			// the real resource name is unknown and an irregular plural cannot be matched by its Kind
-			log.Warn().Msgf("Could not find %s permissions RBAC for %s (and %d additional gvks) in cluster role '%s', and the resource name of %v could not be resolved from the API server. A rule with an irregular resource name may remain",
-				permissionsMsg, gvks[0].String(), len(gvks)-1, clusterRoleName, unresolved)
+			log.Warn().Msgf("Could not find %s permissions RBAC for %s (and %d additional gvks) in cluster role '%s', "+
+				"and the resource name of %v could not be resolved from the API server. "+
+				"A rule with an irregular resource name may remain",
+				permissionsMsg, main, len(targets)-1, clusterRoleName, unresolved)
 			return nil
 		}
 		log.Debug().Msgf("%s permissions RBAC for %s (and %d additional gvks) are already removed from cluster role '%s'",
-			permissionsMsg, gvks[0].String(), len(gvks)-1, clusterRoleName)
+			permissionsMsg, main, len(targets)-1, clusterRoleName)
 		return nil
 	}
 
@@ -252,48 +256,87 @@ func (h *KartaRBACHandler) handleClusterRoleOnDeletion(ctx context.Context, gvks
 		return nil
 	}
 
-	err = h.removeRuleFromClusterRole(ctx, cr, gvks, crudRole, permissionsMsg)
+	err = h.removeRuleFromClusterRole(ctx, cr, targets, crudRole, permissionsMsg)
 	if err != nil {
 		return err
 	}
 
-	log.Info().Msgf("Successfully removed %s permissions RBAC for <%s> (and %d additional gvks) from cluster role %s", permissionsMsg, gvks[0].String(), len(gvks)-1, cr.Name)
+	log.Info().Msgf("Successfully removed %s permissions RBAC for <%s> (and %d additional gvks) from cluster role %s",
+		permissionsMsg, main, len(targets)-1, cr.Name)
 	return nil
 }
 
-func (h *KartaRBACHandler) removeRuleFromClusterRole(ctx context.Context, cr *rbacv1.ClusterRole, gvks []schema.GroupVersionKind, crudRole bool, permissionsMsg string) error {
-	// remove the rule that covers ALL the gvks, written by Handle for them together
+func (h *KartaRBACHandler) removeRuleFromClusterRole(ctx context.Context, cr *rbacv1.ClusterRole, targets []removalTarget, crudRole bool, permissionsMsg string) error {
 	newRules := []rbacv1.PolicyRule{}
 	for _, rule := range cr.Rules {
-		if HasAllVerbs(rule, crudRole) && h.ruleCoversGvks(rule, gvks) {
+		if !HasAllVerbs(rule, crudRole) || !ruleCoversTargets(rule, targets) {
+			newRules = append(newRules, rule)
 			continue
 		}
-		newRules = append(newRules, rule)
+
+		// drop only the resources of the removed gvks, so that a broad rule keeps granting its other resources
+		remaining := slices.DeleteFunc(slices.Clone(rule.Resources), func(resource string) bool {
+			return isTargetResource(targets, resource)
+		})
+		if len(remaining) > 0 {
+			rule.Resources = remaining
+			newRules = append(newRules, rule)
+		}
 	}
 
 	cr.Rules = newRules
 	if err := h.Client.Update(ctx, cr); err != nil {
 		return fmt.Errorf("failed to update cluster role '%s' with removal of %s RBAC for <%s> (and %d additional gvks), error: %w",
-			cr.Name, permissionsMsg, gvks[0].String(), len(gvks)-1, err)
+			cr.Name, permissionsMsg, targets[0].gvk.String(), len(targets)-1, err)
 	}
 
 	return nil
 }
 
-// hasRuleToRemove reports whether the cluster role has a rule that removeRuleFromClusterRole would remove.
-func (h *KartaRBACHandler) hasRuleToRemove(cr *rbacv1.ClusterRole, gvks []schema.GroupVersionKind, crudRole bool) bool {
+// removalTarget is a GVK together with every resource name that RBAC rules for it may use.
+type removalTarget struct {
+	gvk schema.GroupVersionKind
+	// names are the name the API server serves (when it can be resolved), the guessed name, and the Kind + "s"
+	// name that earlier versions generated. Removal matches any of them, because the API server may no longer
+	// serve a type that is being deleted, and because rules written by earlier versions can carry the wrong name.
+	names []string
+	// served is whether the API server resolves the resource name of the GVK.
+	served bool
+}
+
+// removalTargets resolves the candidate resource names of each GVK once, for all the matching that follows.
+func (h *KartaRBACHandler) removalTargets(gvks []schema.GroupVersionKind) []removalTarget {
+	targets := make([]removalTarget, 0, len(gvks))
+	for _, gvk := range gvks {
+		target := removalTarget{gvk: gvk}
+		if served, ok := h.servedResourceName(gvk); ok {
+			target.names = append(target.names, served)
+			target.served = true
+		}
+		for _, name := range []string{resourceNameFromGVK(gvk), strings.ToLower(gvk.Kind) + "s"} {
+			if !slices.Contains(target.names, name) {
+				target.names = append(target.names, name)
+			}
+		}
+		targets = append(targets, target)
+	}
+	return targets
+}
+
+// hasRuleToRemove reports whether the cluster role has a rule that removeRuleFromClusterRole would change.
+func hasRuleToRemove(cr *rbacv1.ClusterRole, targets []removalTarget, crudRole bool) bool {
 	for _, rule := range cr.Rules {
-		if HasAllVerbs(rule, crudRole) && h.ruleCoversGvks(rule, gvks) {
+		if HasAllVerbs(rule, crudRole) && ruleCoversTargets(rule, targets) {
 			return true
 		}
 	}
 	return false
 }
 
-// ruleCoversGvks reports whether the rule names every gvk, under any of the resource names it may have been written with.
-func (h *KartaRBACHandler) ruleCoversGvks(rule rbacv1.PolicyRule, gvks []schema.GroupVersionKind) bool {
-	for _, gvk := range gvks {
-		if !slices.Contains(rule.APIGroups, gvk.Group) || !slices.ContainsFunc(h.resourceNameCandidates(gvk), func(name string) bool {
+// ruleCoversTargets reports whether the rule names every target, under any of the resource names it may have been written with.
+func ruleCoversTargets(rule rbacv1.PolicyRule, targets []removalTarget) bool {
+	for _, target := range targets {
+		if !slices.Contains(rule.APIGroups, target.gvk.Group) || !slices.ContainsFunc(target.names, func(name string) bool {
 			return slices.Contains(rule.Resources, name)
 		}) {
 			return false
@@ -302,29 +345,18 @@ func (h *KartaRBACHandler) ruleCoversGvks(rule rbacv1.PolicyRule, gvks []schema.
 	return true
 }
 
-// resourceNameCandidates returns every resource name that RBAC rules for the gvk may use: the name the API server
-// serves (when it can be resolved), the guessed name, and the Kind + "s" name that earlier versions generated.
-// Removal matches any of them, because the API server may no longer serve a type that is being deleted, and
-// because rules written by earlier versions can carry the wrong name.
-func (h *KartaRBACHandler) resourceNameCandidates(gvk schema.GroupVersionKind) []string {
-	candidates := []string{}
-	if served, ok := h.servedResourceName(gvk); ok {
-		candidates = append(candidates, served)
-	}
-	for _, name := range []string{resourceNameFromGVK(gvk), strings.ToLower(gvk.Kind) + "s"} {
-		if !slices.Contains(candidates, name) {
-			candidates = append(candidates, name)
-		}
-	}
-	return candidates
+func isTargetResource(targets []removalTarget, resource string) bool {
+	return slices.ContainsFunc(targets, func(target removalTarget) bool {
+		return slices.Contains(target.names, resource)
+	})
 }
 
-// gvksWithoutServedResourceName returns the kinds whose resource name cannot be resolved from the API server.
-func (h *KartaRBACHandler) gvksWithoutServedResourceName(gvks []schema.GroupVersionKind) []string {
+// unresolvedGvks returns the kinds whose resource name cannot be resolved from the API server.
+func unresolvedGvks(targets []removalTarget) []string {
 	unresolved := []string{}
-	for _, gvk := range gvks {
-		if _, ok := h.servedResourceName(gvk); !ok {
-			unresolved = append(unresolved, gvk.String())
+	for _, target := range targets {
+		if !target.served {
+			unresolved = append(unresolved, target.gvk.String())
 		}
 	}
 	return unresolved
