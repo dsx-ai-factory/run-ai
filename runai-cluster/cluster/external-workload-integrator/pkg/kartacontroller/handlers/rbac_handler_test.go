@@ -341,7 +341,7 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, "role-remove", "")
 
 			// when
-			err := handler.removeRuleFromClusterRole(ctx, cr, []schema.GroupVersionKind{sandbox}, false, "read")
+			err := handler.removeRuleFromClusterRole(ctx, cr, handler.removalTargets([]schema.GroupVersionKind{sandbox}), false, "read")
 
 			// then
 			Expect(err).To(BeNil())
@@ -395,6 +395,27 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 				Expect(err).To(BeNil())
 				Expect(getClusterRoleOrFail(ctx, k8s, read.Name).Rules).To(BeEmpty())
 				Expect(getClusterRoleOrFail(ctx, k8s, crud.Name).Rules).To(BeEmpty())
+			})
+
+			It("keeps the other resources of a rule that is shared with the removed type", func() {
+				// given
+				sandbox := schema.GroupVersionKind{Group: "agents.x-k8s.io", Version: "v1beta1", Kind: "Sandbox"}
+				mapper := meta.NewDefaultRESTMapper(nil)
+				mapper.AddSpecific(sandbox, sandbox.GroupVersion().WithResource("sandboxes"),
+					sandbox.GroupVersion().WithResource("sandbox"), meta.RESTScopeNamespace)
+				read := &rbacv1.ClusterRole{ObjectMeta: objMeta("role-shared-read"), Rules: []rbacv1.PolicyRule{{
+					APIGroups: []string{"agents.x-k8s.io"}, Resources: []string{"sandboxes", "widgets"}, Verbs: readVerbs}}}
+				k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).WithObjects(read).Build()
+				handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, read.Name, "")
+
+				// when
+				err := handler.HandleDeletion(ctx, sandbox, nil)
+
+				// then
+				Expect(err).To(BeNil())
+				rules := getClusterRoleOrFail(ctx, k8s, read.Name).Rules
+				Expect(rules).To(HaveLen(1))
+				Expect(rules[0].Resources).To(ConsistOf("widgets"))
 			})
 
 			It("does not fail, and leaves the rule, when an irregular plural cannot be resolved", func() {
