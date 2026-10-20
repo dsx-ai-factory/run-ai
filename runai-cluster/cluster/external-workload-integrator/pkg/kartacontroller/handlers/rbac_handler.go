@@ -273,15 +273,7 @@ func (h *KartaRBACHandler) removeRuleFromClusterRole(ctx context.Context, cr *rb
 			newRules = append(newRules, rule)
 			continue
 		}
-
-		// drop only the resources of the removed gvks, so that a broad rule keeps granting its other resources
-		remaining := slices.DeleteFunc(slices.Clone(rule.Resources), func(resource string) bool {
-			return isTargetResource(targets, resource)
-		})
-		if len(remaining) > 0 {
-			rule.Resources = remaining
-			newRules = append(newRules, rule)
-		}
+		newRules = append(newRules, ruleWithoutTargets(rule, targets)...)
 	}
 
 	cr.Rules = newRules
@@ -345,9 +337,41 @@ func ruleCoversTargets(rule rbacv1.PolicyRule, targets []removalTarget) bool {
 	return true
 }
 
-func isTargetResource(targets []removalTarget, resource string) bool {
+// ruleWithoutTargets returns the rule without the resources of the targets. A rule grants the cross product of its
+// API groups and resources, so the resources are filtered for each API group separately: a resource name that
+// belongs to a removed type in one group is kept for the other groups. Groups that keep the same resources stay
+// together in one rule, and the rule disappears when nothing is left.
+func ruleWithoutTargets(rule rbacv1.PolicyRule, targets []removalTarget) []rbacv1.PolicyRule {
+	rules := []rbacv1.PolicyRule{}
+	for _, group := range rule.APIGroups {
+		remaining := slices.DeleteFunc(slices.Clone(rule.Resources), func(resource string) bool {
+			return isTargetResource(targets, group, resource)
+		})
+		if len(remaining) == 0 {
+			continue
+		}
+
+		merged := false
+		for i := range rules {
+			if slices.Equal(rules[i].Resources, remaining) {
+				rules[i].APIGroups = append(rules[i].APIGroups, group)
+				merged = true
+				break
+			}
+		}
+		if !merged {
+			kept := *rule.DeepCopy()
+			kept.APIGroups = []string{group}
+			kept.Resources = remaining
+			rules = append(rules, kept)
+		}
+	}
+	return rules
+}
+
+func isTargetResource(targets []removalTarget, group, resource string) bool {
 	return slices.ContainsFunc(targets, func(target removalTarget) bool {
-		return slices.Contains(target.names, resource)
+		return target.gvk.Group == group && slices.Contains(target.names, resource)
 	})
 }
 

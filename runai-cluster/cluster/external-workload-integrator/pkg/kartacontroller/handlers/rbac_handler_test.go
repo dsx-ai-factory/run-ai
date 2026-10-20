@@ -418,6 +418,28 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 				Expect(rules[0].Resources).To(ConsistOf("widgets"))
 			})
 
+			It("keeps a resource of the same name that belongs to another API group", func() {
+				// given: one rule that grants widgets and gadgets in two API groups
+				widget := schema.GroupVersionKind{Group: "a.run.ai", Version: "v1", Kind: "Widget"}
+				read := &rbacv1.ClusterRole{ObjectMeta: objMeta("role-groups-read"), Rules: []rbacv1.PolicyRule{{
+					APIGroups: []string{"a.run.ai", "b.run.ai"}, Resources: []string{"widgets", "gadgets"}, Verbs: readVerbs}}}
+				k8s := newFakeClientWithObjects(scheme, read)
+				handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, read.Name, "")
+
+				// when
+				err := handler.HandleDeletion(ctx, widget, nil)
+
+				// then: a.run.ai keeps gadgets only, and b.run.ai still has both
+				Expect(err).To(BeNil())
+				rules := getClusterRoleOrFail(ctx, k8s, read.Name).Rules
+				Expect(rules).To(HaveLen(2))
+				Expect(rules[0].APIGroups).To(ConsistOf("a.run.ai"))
+				Expect(rules[0].Resources).To(ConsistOf("gadgets"))
+				Expect(rules[0].Verbs).To(ConsistOf(readVerbs))
+				Expect(rules[1].APIGroups).To(ConsistOf("b.run.ai"))
+				Expect(rules[1].Resources).To(ConsistOf("widgets", "gadgets"))
+			})
+
 			It("does not fail, and leaves the rule, when an irregular plural cannot be resolved", func() {
 				// given: the API server no longer serves the type, so only the guessed names can be matched
 				mouse := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: "Mouse"}
