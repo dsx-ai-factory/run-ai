@@ -119,7 +119,7 @@ func (h *KartaRBACHandler) handleClusterRole(ctx context.Context, gvks []schema.
 	if err != nil && !errors.IsNotFound(err) {
 		return fmt.Errorf("failed to get cluster role '%s': %w", clusterRoleName, err)
 	}
-	if err == nil && cr != nil && hasGvksRbacInClusterRole(gvks, cr, crudRole) {
+	if err == nil && cr != nil && hasGvksRbacInClusterRole(gvks, cr, crudRole, h.resourceName) {
 		log.Debug().Msgf("%s permissions RBAC for %s (and %d additional gvks) already exist in cluster role '%s'",
 			permissionsMsg, gvks[0].String(), len(gvks)-1, clusterRoleName)
 		return nil
@@ -157,7 +157,7 @@ func (h *KartaRBACHandler) addRuleToClusterRole(ctx context.Context, cr *rbacv1.
 	resources := []string{}
 	for _, gvk := range gvks {
 		groups.Add(gvk.Group)
-		resources = append(resources, resourceNameFromGVK(gvk))
+		resources = append(resources, h.resourceName(gvk))
 	}
 
 	apiGroups := []string{}
@@ -233,7 +233,7 @@ func (h *KartaRBACHandler) handleClusterRoleOnDeletion(ctx context.Context, gvks
 		return fmt.Errorf("failed to get cluster role '%s': %w", clusterRoleName, err)
 	}
 
-	if !hasGvksRbacInClusterRole(gvks, cr, crudRole) {
+	if !hasGvksRbacInClusterRole(gvks, cr, crudRole, h.resourceName) {
 		log.Debug().Msgf("%s permissions RBAC for %s (and %d additional gvks) are already removed from cluster role '%s'",
 			permissionsMsg, gvks[0].String(), len(gvks)-1, clusterRoleName)
 		return nil
@@ -257,7 +257,7 @@ func (h *KartaRBACHandler) removeRuleFromClusterRole(ctx context.Context, cr *rb
 	// Build target set of (apiGroup|resource) pairs to remove
 	targetsToRemove := datastructs.Set[string]{}
 	for _, g := range gvks {
-		key := g.Group + "|" + resourceNameFromGVK(g)
+		key := g.Group + "|" + h.resourceName(g)
 		targetsToRemove.Add(key)
 	}
 
@@ -295,7 +295,10 @@ func (h *KartaRBACHandler) removeRuleFromClusterRole(ctx context.Context, cr *rb
 	return nil
 }
 
-func hasGvksRbacInClusterRole(gvks []schema.GroupVersionKind, cr *rbacv1.ClusterRole, hasCrud bool) bool {
+// resourceNamer returns the plural resource name that RBAC rules use for a GVK.
+type resourceNamer func(gvk schema.GroupVersionKind) string
+
+func hasGvksRbacInClusterRole(gvks []schema.GroupVersionKind, cr *rbacv1.ClusterRole, hasCrud bool, nameOf resourceNamer) bool {
 	if len(gvks) == 0 {
 		return true
 	}
@@ -316,7 +319,7 @@ func hasGvksRbacInClusterRole(gvks []schema.GroupVersionKind, cr *rbacv1.Cluster
 		// check if all gvks are allowed in this rule
 		allFound := true
 		for _, gvk := range gvks {
-			resource := resourceNameFromGVK(gvk)
+			resource := nameOf(gvk)
 			key := gvk.Group + "|" + resource
 			if !allowed.Has(key) {
 				allFound = false
@@ -366,6 +369,32 @@ func HasAllVerbs(rule rbacv1.PolicyRule, hasCrud bool) bool {
 	return foundGet && foundList && foundWatch
 }
 
+// resourceName returns the resource name the API server serves for the GVK, which is what RBAC rules must
+// reference. The plural of a Kind is defined by its CRD and is not always Kind + "s" (for example Sandbox
+// is served as "sandboxes"), so it is read from the REST mapper. It falls back to guessing from the Kind
+// when the mapping is not available, for example when the CRD is installed after the type is registered.
+func (h *KartaRBACHandler) resourceName(gvk schema.GroupVersionKind) string {
+	if mapper := h.Client.RESTMapper(); mapper != nil {
+		mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+		if err == nil {
+			return mapping.Resource.Resource
+		}
+		log.Warn().Err(err).Msgf("Could not resolve the resource name of <%s> from the API server, guessing it from the kind", gvk.String())
+	}
+	return resourceNameFromGVK(gvk)
+}
+
+// resourceNameFromGVK guesses the plural resource name of a Kind using the usual English rules. It is only a
+// fallback for when the REST mapper cannot resolve the real name: irregular plurals are not covered.
 func resourceNameFromGVK(gvk schema.GroupVersionKind) string {
-	return strings.ToLower(gvk.Kind) + "s"
+	kind := strings.ToLower(gvk.Kind)
+	switch {
+	case strings.HasSuffix(kind, "s"), strings.HasSuffix(kind, "x"), strings.HasSuffix(kind, "z"),
+		strings.HasSuffix(kind, "ch"), strings.HasSuffix(kind, "sh"):
+		return kind + "es"
+	case len(kind) > 1 && strings.HasSuffix(kind, "y") && !strings.ContainsRune("aeiou", rune(kind[len(kind)-2])):
+		return strings.TrimSuffix(kind, "y") + "ies"
+	default:
+		return kind + "s"
+	}
 }
