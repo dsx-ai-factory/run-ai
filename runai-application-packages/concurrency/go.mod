@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/concurrency
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/puzpuzpuz/xsync/v2 v2.5.1
