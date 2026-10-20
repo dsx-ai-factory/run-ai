@@ -38,6 +38,9 @@ func TestParseOptions(t *testing.T) {
 		{name: "misspelled knob", knobs: map[string]any{"rat": 2}, wantErr: `unknown knob "rat"`},
 		{name: "rate above the control plane limit", knobs: map[string]any{"rate": 30, "controlPlaneRequestsPerSecond": 25}, wantErr: "cannot exceed controlPlaneRequestsPerSecond"},
 		{name: "zero users", knobs: map[string]any{"users": 0}, wantErr: `"users" must be between 1 and 512`},
+		{name: "submitted floor off", knobs: map[string]any{"minSubmittedPercent": 0}, check: func(o options) bool { return o.minSubmitted == 0 }},
+		{name: "submitted floor default", knobs: map[string]any{}, check: func(o options) bool { return o.minSubmitted == 90 }},
+		{name: "submitted floor above 100", knobs: map[string]any{"minSubmittedPercent": 101}, wantErr: `"minSubmittedPercent" must be between 0 and 100`},
 		{name: "slo not a number", knobs: map[string]any{"slo": map[string]any{"ttj_p90_ms": "10s"}}, wantErr: "must be a whole number"},
 		{name: "slo of another suite", knobs: map[string]any{"slo": map[string]any{"p90_ms": 10000}}, wantErr: `slo key "p90_ms" is not a metric this suite reports; use failed_count or <span>_<stat> with span api_accepted, cluster_synced, pod_created, ttj and stat p50_ms, p90_ms, p99_ms`},
 		{name: "slo on a rate", knobs: map[string]any{"slo": map[string]any{"success_rate": 1}}, wantErr: `slo key "success_rate" is not a metric`},
@@ -69,7 +72,7 @@ func at(seconds float64) time.Time {
 }
 
 func testOptions() options {
-	return options{users: 10, rate: 2, duration: time.Minute, workloadType: submit.WorkspaceType, image: defaultImage, timeout: 10 * time.Minute, slo: map[string]int{"ttj_p90_ms": 10000, "api_accepted_p90_ms": 500}}
+	return options{users: 10, rate: 2, duration: time.Minute, workloadType: submit.WorkspaceType, image: defaultImage, timeout: 10 * time.Minute, minSubmitted: minSubmittedDefault, slo: map[string]int{"ttj_p90_ms": 10000, "api_accepted_p90_ms": 500}}
 }
 
 func TestBuildSectionReportsEverySpanAndTheRates(t *testing.T) {
@@ -122,6 +125,12 @@ func TestBuildSectionFailsWhenThePacerFellBehind(t *testing.T) {
 
 	if !section.Failed || !strings.Contains(section.Error, "kept only 61 of the 120 planned submissions") {
 		t.Fatalf("a pacer more than 10%% under its target must fail the section and say so: %+v", section)
+	}
+
+	tolerant := testOptions()
+	tolerant.minSubmitted = 0
+	if section := buildSection(measure.CollectSpans(arrived), behind, arrived, tolerant, 0, nil, nil); section.Failed {
+		t.Fatalf("minSubmittedPercent 0 turns the shortfall into a measurement, not a failure: %+v", section)
 	}
 }
 

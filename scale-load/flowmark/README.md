@@ -52,6 +52,7 @@ scenarios/
     workspace-burst.yaml    Workspace created through the control plane → WorkloadRunner appears
   load/                     how latency behaves under a steady stream of submissions
     workspace-ttj.yaml      Workspaces submitted at a fixed rate → time to job, split into spans
+    workspace-ttj-stress.yaml  the same at 100/s with 500 users, to find the ceiling
 ```
 
 The selfcheck scenario is not a test and stays out of this tree. It lives
@@ -91,6 +92,7 @@ Knobs of the `load-ttj` suite:
 | `image` | `registry.k8s.io/pause:3.9` | container image of every workload |
 | `timeout` | `10m` | how long to wait for arrivals after the last submission |
 | `setupTimeout` | `5m` | project creation, each create call, cleanup |
+| `minSubmittedPercent` | 90 | share of the planned submissions the pacer must get out, else the scenario fails with "the environment could not absorb the load"; 0 keeps the shortfall out of the verdict |
 | `slo` | none | upper bounds named `<span>_<stat>`, e.g. `ttj_p90_ms: 10000`, `cluster_synced_p99_ms: 12000`, and `failed_count`, the most rejected submissions allowed; `p90_ms` alone belongs to `scale-burst` |
 | `kubeRequestsPerSecond`, `controlPlaneRequestsPerSecond`, `cluster` | as above | shared with `scale-burst` |
 
