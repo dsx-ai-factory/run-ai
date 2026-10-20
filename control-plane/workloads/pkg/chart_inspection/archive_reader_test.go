@@ -64,14 +64,26 @@ func chartArchive(entries ...archiveEntry) []byte {
 }
 
 var _ = Describe("Chart archive parsing", func() {
-	It("keeps malformed archive diagnostics as validation errors", func() {
+	It("uses the standard API error mapping for archive diagnostics", func() {
 		archive := chartArchive(archiveEntry{
 			name: fixtureChartMetadataPath,
 			body: fixtureChartMetadataYAML + "record not found: first\nrecord not found: second\n",
 		})
 		_, err := ParseArchive(archive)
 		Expect(err).To(HaveOccurred())
+		Expect(err.Code).To(BeNumerically("==", http.StatusNotFound))
+		Expect(err.Details).To(Equal("requested resource does not exist"))
+	})
+
+	It("returns bad request for ordinary malformed archive diagnostics", func() {
+		archive := chartArchive(archiveEntry{
+			name: fixtureChartMetadataPath,
+			body: fixtureChartMetadataYAML + "duplicate: first\nduplicate: second\n",
+		})
+		_, err := ParseArchive(archive)
+		Expect(err).To(HaveOccurred())
 		Expect(err.Code).To(BeNumerically("==", http.StatusBadRequest))
+		Expect(err.Message).To(Equal("invalid Helm chart archive"))
 		Expect(err.Details).To(ContainSubstring("duplicate YAML key"))
 	})
 

@@ -11,6 +11,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
+	"net/http"
 	"path"
 	"strings"
 
@@ -37,10 +38,7 @@ const (
 func ParseArchive(data []byte) (*api.AiApplicationChartInspectionResponse, *api.Error) {
 	result, err := parseArchive(data)
 	if err != nil {
-		validationErr := api.NewValidationError("invalid Helm chart archive")
-		// WithDetails interprets database error text; chart contents must not change the status.
-		validationErr.Details = err.Message
-		return nil, validationErr
+		return nil, api.NewError(http.StatusBadRequest, "invalid Helm chart archive", err)
 	}
 	return result, nil
 }
