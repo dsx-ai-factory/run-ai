@@ -4,7 +4,7 @@ go 1.27.2
 
 require (
 	github.com/go-playground/validator/v10 v10.30.5
-	github.com/maypok86/otter/v2 v2.3.0
+	github.com/maypok86/otter/v2 v2.4.0
 	github.com/sethvargo/go-retry v0.4.0
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
