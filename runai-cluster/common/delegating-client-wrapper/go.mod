@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/common/delegating-client-wrapper
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/supported-workloads v0.0.0-00010101000000-000000000000
