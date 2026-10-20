@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19
