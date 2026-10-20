@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/cluster-migrator
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service v0.0.0
