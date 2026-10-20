@@ -113,7 +113,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/lib/pq v1.12.3
-	github.com/maypok86/otter/v2 v2.3.0
+	github.com/maypok86/otter/v2 v2.4.0
 	github.com/microcosm-cc/bluemonday v1.0.27
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/pkg/errors v0.9.1
