@@ -8,6 +8,7 @@ package handlers
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/go-multierror"
@@ -233,7 +234,14 @@ func (h *KartaRBACHandler) handleClusterRoleOnDeletion(ctx context.Context, gvks
 		return fmt.Errorf("failed to get cluster role '%s': %w", clusterRoleName, err)
 	}
 
-	if !hasGvksRbacInClusterRole(gvks, cr, crudRole, h.resourceName) {
+	if !h.hasRuleToRemove(cr, gvks, crudRole) {
+		if unresolved := h.gvksWithoutServedResourceName(gvks); len(unresolved) > 0 {
+			// the API server no longer serves these kinds (for example the CRD was deleted before the type), so
+			// the real resource name is unknown and an irregular plural cannot be matched by its Kind
+			log.Warn().Msgf("Could not find %s permissions RBAC for %s (and %d additional gvks) in cluster role '%s', and the resource name of %v could not be resolved from the API server. A rule with an irregular resource name may remain",
+				permissionsMsg, gvks[0].String(), len(gvks)-1, clusterRoleName, unresolved)
+			return nil
+		}
 		log.Debug().Msgf("%s permissions RBAC for %s (and %d additional gvks) are already removed from cluster role '%s'",
 			permissionsMsg, gvks[0].String(), len(gvks)-1, clusterRoleName)
 		return nil
@@ -254,36 +262,13 @@ func (h *KartaRBACHandler) handleClusterRoleOnDeletion(ctx context.Context, gvks
 }
 
 func (h *KartaRBACHandler) removeRuleFromClusterRole(ctx context.Context, cr *rbacv1.ClusterRole, gvks []schema.GroupVersionKind, crudRole bool, permissionsMsg string) error {
-	// Build target set of (apiGroup|resource) pairs to remove
-	targetsToRemove := datastructs.Set[string]{}
-	for _, g := range gvks {
-		key := g.Group + "|" + h.resourceName(g)
-		targetsToRemove.Add(key)
-	}
-
+	// remove the rule that covers ALL the gvks, written by Handle for them together
 	newRules := []rbacv1.PolicyRule{}
-	// search for a rule that has ALL the verbs we need
 	for _, rule := range cr.Rules {
-		if !HasAllVerbs(rule, crudRole) {
-			newRules = append(newRules, rule)
+		if HasAllVerbs(rule, crudRole) && h.ruleCoversGvks(rule, gvks) {
 			continue
 		}
-
-		targetsInCurrentRule := datastructs.Set[string]{}
-		for _, apiGroup := range rule.APIGroups {
-			for _, resource := range rule.Resources {
-				key := apiGroup + "|" + resource
-				if targetsToRemove.Has(key) {
-					targetsInCurrentRule.Add(key)
-				}
-			}
-		}
-
-		// will remove the rule if it has ALL the targets we want to remove
-
-		if len(targetsInCurrentRule) != len(targetsToRemove) {
-			newRules = append(newRules, rule)
-		}
+		newRules = append(newRules, rule)
 	}
 
 	cr.Rules = newRules
@@ -293,6 +278,56 @@ func (h *KartaRBACHandler) removeRuleFromClusterRole(ctx context.Context, cr *rb
 	}
 
 	return nil
+}
+
+// hasRuleToRemove reports whether the cluster role has a rule that removeRuleFromClusterRole would remove.
+func (h *KartaRBACHandler) hasRuleToRemove(cr *rbacv1.ClusterRole, gvks []schema.GroupVersionKind, crudRole bool) bool {
+	for _, rule := range cr.Rules {
+		if HasAllVerbs(rule, crudRole) && h.ruleCoversGvks(rule, gvks) {
+			return true
+		}
+	}
+	return false
+}
+
+// ruleCoversGvks reports whether the rule names every gvk, under any of the resource names it may have been written with.
+func (h *KartaRBACHandler) ruleCoversGvks(rule rbacv1.PolicyRule, gvks []schema.GroupVersionKind) bool {
+	for _, gvk := range gvks {
+		if !slices.Contains(rule.APIGroups, gvk.Group) || !slices.ContainsFunc(h.resourceNameCandidates(gvk), func(name string) bool {
+			return slices.Contains(rule.Resources, name)
+		}) {
+			return false
+		}
+	}
+	return true
+}
+
+// resourceNameCandidates returns every resource name that RBAC rules for the gvk may use: the name the API server
+// serves (when it can be resolved), the guessed name, and the Kind + "s" name that earlier versions generated.
+// Removal matches any of them, because the API server may no longer serve a type that is being deleted, and
+// because rules written by earlier versions can carry the wrong name.
+func (h *KartaRBACHandler) resourceNameCandidates(gvk schema.GroupVersionKind) []string {
+	candidates := []string{}
+	if served, ok := h.servedResourceName(gvk); ok {
+		candidates = append(candidates, served)
+	}
+	for _, name := range []string{resourceNameFromGVK(gvk), strings.ToLower(gvk.Kind) + "s"} {
+		if !slices.Contains(candidates, name) {
+			candidates = append(candidates, name)
+		}
+	}
+	return candidates
+}
+
+// gvksWithoutServedResourceName returns the kinds whose resource name cannot be resolved from the API server.
+func (h *KartaRBACHandler) gvksWithoutServedResourceName(gvks []schema.GroupVersionKind) []string {
+	unresolved := []string{}
+	for _, gvk := range gvks {
+		if _, ok := h.servedResourceName(gvk); !ok {
+			unresolved = append(unresolved, gvk.String())
+		}
+	}
+	return unresolved
 }
 
 // resourceNamer returns the plural resource name that RBAC rules use for a GVK.
@@ -374,14 +409,24 @@ func HasAllVerbs(rule rbacv1.PolicyRule, hasCrud bool) bool {
 // is served as "sandboxes"), so it is read from the REST mapper. It falls back to guessing from the Kind
 // when the mapping is not available, for example when the CRD is installed after the type is registered.
 func (h *KartaRBACHandler) resourceName(gvk schema.GroupVersionKind) string {
-	if mapper := h.Client.RESTMapper(); mapper != nil {
-		mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-		if err == nil {
-			return mapping.Resource.Resource
-		}
-		log.Warn().Err(err).Msgf("Could not resolve the resource name of <%s> from the API server, guessing it from the kind", gvk.String())
+	if served, ok := h.servedResourceName(gvk); ok {
+		return served
 	}
+	log.Warn().Msgf("Could not resolve the resource name of <%s> from the API server, guessing it from the kind", gvk.String())
 	return resourceNameFromGVK(gvk)
+}
+
+// servedResourceName returns the resource name the API server serves for the GVK, if it can be resolved.
+func (h *KartaRBACHandler) servedResourceName(gvk schema.GroupVersionKind) (string, bool) {
+	mapper := h.Client.RESTMapper()
+	if mapper == nil {
+		return "", false
+	}
+	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
+	if err != nil {
+		return "", false
+	}
+	return mapping.Resource.Resource, true
 }
 
 // resourceNameFromGVK guesses the plural resource name of a Kind using the usual English rules. It is only a
@@ -389,8 +434,7 @@ func (h *KartaRBACHandler) resourceName(gvk schema.GroupVersionKind) string {
 func resourceNameFromGVK(gvk schema.GroupVersionKind) string {
 	kind := strings.ToLower(gvk.Kind)
 	switch {
-	case strings.HasSuffix(kind, "s"), strings.HasSuffix(kind, "x"), strings.HasSuffix(kind, "z"),
-		strings.HasSuffix(kind, "ch"), strings.HasSuffix(kind, "sh"):
+	case strings.HasSuffix(kind, "s"), strings.HasSuffix(kind, "x"), strings.HasSuffix(kind, "ch"), strings.HasSuffix(kind, "sh"):
 		return kind + "es"
 	case len(kind) > 1 && strings.HasSuffix(kind, "y") && !strings.ContainsRune("aeiou", rune(kind[len(kind)-2])):
 		return strings.TrimSuffix(kind, "y") + "ies"

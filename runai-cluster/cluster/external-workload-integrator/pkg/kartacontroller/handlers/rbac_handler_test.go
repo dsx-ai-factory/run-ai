@@ -348,6 +348,71 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			Expect(getClusterRoleOrFail(ctx, k8s, "role-remove").Rules).To(BeEmpty())
 		})
 
+		Context("deletion", func() {
+			readVerbs := []string{"get", "list", "watch"}
+			crudVerbs := []string{"get", "list", "watch", "create", "update", "patch", "delete"}
+			rolesWith := func(group, resource string) (*rbacv1.ClusterRole, *rbacv1.ClusterRole) {
+				read := &rbacv1.ClusterRole{ObjectMeta: objMeta("role-del-read"), Rules: []rbacv1.PolicyRule{
+					{APIGroups: []string{group}, Resources: []string{resource}, Verbs: readVerbs}}}
+				crud := &rbacv1.ClusterRole{ObjectMeta: objMeta("role-del-crud"), Rules: []rbacv1.PolicyRule{
+					{APIGroups: []string{group}, Resources: []string{resource}, Verbs: crudVerbs}}}
+				return read, crud
+			}
+
+			It("removes the rule of an irregular plural when the API server serves the type", func() {
+				// given
+				mouse := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: "Mouse"}
+				mapper := meta.NewDefaultRESTMapper(nil)
+				mapper.AddSpecific(mouse, mouse.GroupVersion().WithResource("mice"),
+					mouse.GroupVersion().WithResource("mouse"), meta.RESTScopeNamespace)
+				read, crud := rolesWith("x.run.ai", "mice")
+				k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).WithObjects(read, crud).Build()
+				handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, read.Name, crud.Name)
+
+				// when
+				err := handler.HandleDeletion(ctx, mouse, nil)
+
+				// then
+				Expect(err).To(BeNil())
+				Expect(getClusterRoleOrFail(ctx, k8s, read.Name).Rules).To(BeEmpty())
+				Expect(getClusterRoleOrFail(ctx, k8s, crud.Name).Rules).To(BeEmpty())
+			})
+
+			It("removes rules that earlier versions wrote with the Kind + s name", func() {
+				// given
+				sandbox := schema.GroupVersionKind{Group: "agents.x-k8s.io", Version: "v1beta1", Kind: "Sandbox"}
+				mapper := meta.NewDefaultRESTMapper(nil)
+				mapper.AddSpecific(sandbox, sandbox.GroupVersion().WithResource("sandboxes"),
+					sandbox.GroupVersion().WithResource("sandbox"), meta.RESTScopeNamespace)
+				read, crud := rolesWith("agents.x-k8s.io", "sandboxs")
+				k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).WithObjects(read, crud).Build()
+				handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, read.Name, crud.Name)
+
+				// when
+				err := handler.HandleDeletion(ctx, sandbox, nil)
+
+				// then
+				Expect(err).To(BeNil())
+				Expect(getClusterRoleOrFail(ctx, k8s, read.Name).Rules).To(BeEmpty())
+				Expect(getClusterRoleOrFail(ctx, k8s, crud.Name).Rules).To(BeEmpty())
+			})
+
+			It("does not fail, and leaves the rule, when an irregular plural cannot be resolved", func() {
+				// given: the API server no longer serves the type, so only the guessed names can be matched
+				mouse := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: "Mouse"}
+				read, crud := rolesWith("x.run.ai", "mice")
+				k8s := newFakeClientWithObjects(scheme, read, crud)
+				handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, read.Name, crud.Name)
+
+				// when
+				err := handler.HandleDeletion(ctx, mouse, nil)
+
+				// then: deletion is not blocked, and the rule it could not identify is kept (a warning is logged)
+				Expect(err).To(BeNil())
+				Expect(getClusterRoleOrFail(ctx, k8s, read.Name).Rules).To(HaveLen(1))
+			})
+		})
+
 		DescribeTable("guesses the plural of a kind",
 			func(kind, expected string) {
 				gvk := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: kind}
