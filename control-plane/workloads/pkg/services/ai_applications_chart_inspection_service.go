@@ -63,28 +63,32 @@ func (s *AIApplicationsService) InspectApplicationChart(ctx context.Context, req
 	if s.chartInspection == nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "chart inspection is not configured", nil)), nil
 	}
-	return s.chartInspection.inspect(ctx, request)
+	result, err := s.chartInspection.inspect(ctx, request)
+	if err != nil {
+		return NewErrorResponse(err), nil
+	}
+	return api.Response(http.StatusOK, result), nil
 }
 
-func (s *applicationChartInspector) inspect(ctx context.Context, request api.AiApplicationChartInspectionRequest) (api.ImplResponse, error) {
+func (s *applicationChartInspector) inspect(ctx context.Context, request api.AiApplicationChartInspectionRequest) (*api.AiApplicationChartInspectionResponse, *api.Error) {
 	tenant, e := services_utils.ParseTenantId(ctx)
 	if e != nil {
-		return NewErrorResponse(e), nil
+		return nil, e
 	}
 	if actor := runaictx.GetString(ctx, runaictx.CfSubjectID); actor == nil || *actor == "" {
 		if client := runaictx.GetString(ctx, runaictx.CfClientId); client == nil || *client == "" {
-			return NewErrorResponse(api.NewError(http.StatusUnauthorized, "chart inspection requires authenticated caller identity", nil)), nil
+			return nil, api.NewError(http.StatusUnauthorized, "chart inspection requires authenticated caller identity", nil)
 		}
 	}
 	selection, e := chartInspectionSelection(request.ChartRef)
 	if e != nil {
-		return NewErrorResponse(e), nil
+		return nil, e
 	}
 	if request.Auth.UserCredential != nil && *request.Auth.UserCredential && request.Auth.AssetId == "" {
-		return NewErrorResponse(api.NewValidationError("assetId is required for a personal chart credential")), nil
+		return nil, api.NewValidationError("assetId is required for a personal chart credential")
 	}
 	if selection.ChartID != "" && request.Auth.AssetId != "" {
-		return NewErrorResponse(api.NewValidationError("uploaded charts do not accept source credentials")), nil
+		return nil, api.NewValidationError("uploaded charts do not accept source credentials")
 	}
 
 	// Assets checks tenant/RBAC access and personal ownership before every cache lookup
@@ -92,29 +96,29 @@ func (s *applicationChartInspector) inspect(ctx context.Context, request api.AiA
 	key := ""
 	if request.Auth.AssetId != "" {
 		if id, err := uuid.Parse(request.Auth.AssetId); err != nil || id == uuid.Nil {
-			return NewErrorResponse(api.NewValidationError("assetId must be a valid uuid")), nil
+			return nil, api.NewValidationError("assetId must be a valid uuid")
 		}
 		if s.loadKey == nil {
-			return NewErrorResponse(api.NewError(http.StatusInternalServerError, "chart credential lookup is not configured", nil)), nil
+			return nil, api.NewError(http.StatusInternalServerError, "chart credential lookup is not configured", nil)
 		}
 		key, e = s.loadKey(ctx, request.Auth.AssetId)
 		if e != nil {
-			return NewErrorResponse(e), nil
+			return nil, e
 		}
 	}
 	scope, e := chartInspectionScope(ctx, request.Auth)
 	if e != nil {
-		return NewErrorResponse(e), nil
+		return nil, e
 	}
 
 	var result *api.AiApplicationChartInspectionResponse
 	if selection.ChartID != "" {
 		if s.loadUpload == nil {
-			return NewErrorResponse(api.NewError(http.StatusInternalServerError, "uploaded chart lookup is not configured", nil)), nil
+			return nil, api.NewError(http.StatusInternalServerError, "uploaded chart lookup is not configured", nil)
 		}
 		id, parseErr := uuid.Parse(selection.ChartID)
 		if parseErr != nil {
-			return NewErrorResponse(api.NewValidationError("chartId must be a valid uuid")), nil
+			return nil, api.NewValidationError("chartId must be a valid uuid")
 		}
 		result, e = s.inspector.InspectWithFetch(ctx, selection, scope, "", func(fetchCtx context.Context, _ chartinspection.Selection, _ string) ([]byte, *api.Error) {
 			data, loadErr := s.loadUpload(fetchCtx, id, fmt.Sprint(tenant))
@@ -127,9 +131,9 @@ func (s *applicationChartInspector) inspect(ctx context.Context, request api.AiA
 		result, e = s.inspector.Inspect(ctx, selection, scope, key)
 	}
 	if e != nil {
-		return NewErrorResponse(e), nil
+		return nil, e
 	}
-	return api.Response(http.StatusOK, result), nil
+	return result, nil
 }
 
 func chartInspectionSelection(ref api.AiApplicationSpecChartRef) (chartinspection.Selection, *api.Error) {

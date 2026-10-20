@@ -41,6 +41,31 @@ var _ = Describe("Chart inspection cache sharing", func() {
 	})
 	AfterEach(func() { cachetesting.DisableCache() })
 
+	It("returns metadata and typed errors before HTTP response conversion", func() {
+		denied := false
+		accessErr := api.NewError(http.StatusForbidden, "credential access denied", nil)
+		c := &applicationChartInspector{
+			inspector: chartinspection.NewInspector(func(context.Context, chartinspection.Selection, string) ([]byte, *api.Error) {
+				return archive, nil
+			}, 0),
+			loadKey: func(context.Context, string) (string, *api.Error) {
+				if denied {
+					return "", accessErr
+				}
+				return credential, nil
+			},
+		}
+		request.Auth = api.AiApplicationAuth{AssetId: asset}
+		result, err := c.inspect(caller("1", "alice"), request)
+		Expect(err).To(BeNil())
+		Expect(result).NotTo(BeNil())
+		Expect(result.ChartName).To(Equal(request.ChartRef.ChartName))
+		denied = true
+		result, err = c.inspect(caller("1", "alice"), request)
+		Expect(result).To(BeNil())
+		Expect(err).To(BeIdenticalTo(accessErr))
+	})
+
 	DescribeTable("reuses only equivalent authorized selections", func(tenant, user, firstAsset, nextAsset, nextKey string, personal bool, wantDownloads int32) {
 		var downloads, lookups atomic.Int32
 		key := credential
@@ -52,12 +77,12 @@ var _ = Describe("Chart inspection cache sharing", func() {
 			loadKey: func(context.Context, string) (string, *api.Error) { lookups.Add(1); return key, nil },
 		}
 		request.Auth = api.AiApplicationAuth{AssetId: firstAsset, UserCredential: convutils.Ref(personal)}
-		first, err := c.inspect(caller("1", "alice"), request)
+		first, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(caller("1", "alice"), request)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(first.Code).To(Equal(http.StatusOK))
 		key = nextKey
 		request.Auth.AssetId = nextAsset
-		second, err := c.inspect(caller(tenant, user), request)
+		second, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(caller(tenant, user), request)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(second.Code).To(Equal(http.StatusOK))
 		Expect(second.Body).To(Equal(first.Body))
@@ -98,10 +123,10 @@ var _ = Describe("Chart inspection cache sharing", func() {
 			},
 		}
 		request.Auth.UserCredential = flag
-		first, err := c.inspect(caller("1", "alice"), request)
+		first, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(caller("1", "alice"), request)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(first.Code).To(Equal(http.StatusOK))
-		second, err := c.inspect(caller("1", "bob"), request)
+		second, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(caller("1", "bob"), request)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(second.Code).To(Equal(http.StatusNotFound))
 		Expect(downloads.Load()).To(Equal(int32(1)))
@@ -143,7 +168,7 @@ var _ = Describe("Chart inspection cache sharing", func() {
 		responses := make(chan api.ImplResponse, 2)
 		inspect := func(callCtx context.Context, req api.AiApplicationChartInspectionRequest) {
 			defer GinkgoRecover()
-			out, err := c.inspect(callCtx, req)
+			out, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(callCtx, req)
 			Expect(err).NotTo(HaveOccurred())
 			responses <- out
 		}
@@ -169,7 +194,7 @@ var _ = Describe("Chart inspection cache sharing", func() {
 		defer deniedCancel()
 		deniedRequest := request
 		deniedRequest.Auth.AssetId = asset
-		denied, err := c.inspect(deniedCtx, deniedRequest)
+		denied, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(deniedCtx, deniedRequest)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(denied.Code).To(Equal(http.StatusForbidden))
 		unblock()

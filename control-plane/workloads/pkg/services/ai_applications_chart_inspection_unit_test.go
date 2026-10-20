@@ -61,7 +61,7 @@ func TestChartInspectionReauthorizesCredentialsOnCacheHits(t *testing.T) {
 		Auth:     api.AiApplicationAuth{AssetId: "11111111-1111-4111-8111-111111111111"},
 	}
 	for i := 0; i < 2; i++ {
-		out, err := c.inspect(inspectionTestContext("1", "alice"), req)
+		out, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(inspectionTestContext("1", "alice"), req)
 		if err != nil || out.Code != 200 {
 			t.Fatalf("inspection failed: %#v %v", out, err)
 		}
@@ -70,7 +70,7 @@ func TestChartInspectionReauthorizesCredentialsOnCacheHits(t *testing.T) {
 		t.Fatalf("warm selection downloaded %d times", downloads)
 	}
 	allowed = false
-	out, err := c.inspect(inspectionTestContext("1", "alice"), req)
+	out, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(inspectionTestContext("1", "alice"), req)
 	if err != nil || out.Code != 403 {
 		t.Fatalf("cached metadata bypassed revoked access: %#v %v", out, err)
 	}
@@ -89,16 +89,16 @@ func TestChartInspectionUploadsAreTenantScopedAndRechecked(t *testing.T) {
 		},
 	}
 	req := api.AiApplicationChartInspectionRequest{ChartRef: api.AiApplicationSpecChartRef{ChartId: chartID}}
-	out, err := c.inspect(inspectionTestContext("1", "alice"), req)
+	out, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(inspectionTestContext("1", "alice"), req)
 	if err != nil || out.Code != 200 {
 		t.Fatalf("owner inspection failed: %#v %v", out, err)
 	}
-	out, err = c.inspect(inspectionTestContext("2", "alice"), req)
+	out, err = (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(inspectionTestContext("2", "alice"), req)
 	if err != nil || out.Code != 404 {
 		t.Fatalf("cross-tenant upload visible: %#v %v", out, err)
 	}
 	present = false
-	out, err = c.inspect(inspectionTestContext("1", "alice"), req)
+	out, err = (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(inspectionTestContext("1", "alice"), req)
 	if err != nil || out.Code != 404 {
 		t.Fatalf("deleted upload cached: %#v %v", out, err)
 	}
@@ -150,7 +150,7 @@ func TestChartInspectionBoundsConcurrentUploadLookups(t *testing.T) {
 			for i := 0; i < requests; i++ {
 				go func() {
 					<-start
-					response, err := c.inspect(ctx, request)
+					response, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(ctx, request)
 					events <- lookupEvent{response: response, err: err}
 				}()
 			}
@@ -209,7 +209,7 @@ func TestChartInspectionUploadLookupPreservesAPIError(t *testing.T) {
 					return nil, expected
 				},
 			}
-			response, err := c.inspect(inspectionTestContext("1", "alice"), api.AiApplicationChartInspectionRequest{
+			response, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(inspectionTestContext("1", "alice"), api.AiApplicationChartInspectionRequest{
 				ChartRef: api.AiApplicationSpecChartRef{ChartId: "11111111-1111-4111-8111-111111111111"},
 			})
 			body, ok := response.Body.(api.Error)
@@ -236,7 +236,7 @@ func TestChartInspectionCancelsUploadLookupWithCaller(t *testing.T) {
 		},
 	}
 	go func() {
-		out, _ := c.inspect(ctx, api.AiApplicationChartInspectionRequest{
+		out, _ := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(ctx, api.AiApplicationChartInspectionRequest{
 			ChartRef: api.AiApplicationSpecChartRef{ChartId: "11111111-1111-4111-8111-111111111111"},
 		})
 		response <- out
@@ -271,7 +271,7 @@ func TestChartInspectionCancelsUploadLookupWithCaller(t *testing.T) {
 func TestChartInspectionRequiresTrustedCallerIdentity(t *testing.T) {
 	c := &applicationChartInspector{inspector: chartinspection.NewInspector(nil, time.Minute)}
 	ctx := context.WithValue(context.Background(), runaictx.CfTenantId, "1")
-	out, err := c.inspect(ctx, api.AiApplicationChartInspectionRequest{ChartRef: api.AiApplicationSpecChartRef{ChartURL: "https://example.com/chart.tgz"}})
+	out, err := (&AIApplicationsService{chartInspection: c}).InspectApplicationChart(ctx, api.AiApplicationChartInspectionRequest{ChartRef: api.AiApplicationSpecChartRef{ChartURL: "https://example.com/chart.tgz"}})
 	if err != nil || out.Code != 401 {
 		t.Fatalf("missing caller identity accepted: %#v %v", out, err)
 	}
