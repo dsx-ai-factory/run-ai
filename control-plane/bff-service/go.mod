@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/bff-service
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.12
