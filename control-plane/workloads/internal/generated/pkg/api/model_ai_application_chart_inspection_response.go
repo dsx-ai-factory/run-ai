@@ -99,11 +99,17 @@ func AssertAiApplicationChartInspectionResponseRequired(obj AiApplicationChartIn
 // AssertAiApplicationChartInspectionResponseConstraints checks if the values respects the defined constraints
 func AssertAiApplicationChartInspectionResponseConstraints(obj AiApplicationChartInspectionResponse) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.ChartName, "ChartName", 250); maxLengthErr != nil {
+		return &ParsingError{Param: "ChartName", Err: maxLengthErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.ChartVersion, "ChartVersion", 50); maxLengthErr != nil {
+		return &ParsingError{Param: "ChartVersion", Err: maxLengthErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

@@ -2,5 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 type: string
+maxLength: 250
 description: Helm chart name.
 example: redis

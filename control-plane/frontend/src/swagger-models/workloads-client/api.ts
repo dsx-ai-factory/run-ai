@@ -562,13 +562,13 @@ export interface AIApplicationSpecChartRef {
      */
     'repo'?: string;
     /**
-     * 
+     * Helm chart name.
      * @type {string}
      * @memberof AIApplicationSpecChartRef
      */
     'chartName'?: string;
     /**
-     * 
+     * Helm chart version.
      * @type {string}
      * @memberof AIApplicationSpecChartRef
      */

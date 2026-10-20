@@ -33509,10 +33509,12 @@ components:
       example: https://charts.bitnami.com/bitnami
     ChartName:
       type: string
+      maxLength: 250
       description: Helm chart name.
       example: redis
     ChartVersion:
       type: string
+      maxLength: 50
       description: Helm chart version.
       example: 17.3.17
     AIApplicationChartUrl:
@@ -33538,13 +33540,9 @@ components:
         repo:
           $ref: '#/components/schemas/AIApplicationChartRepo'
         chartName:
-          allOf:
-            - $ref: '#/components/schemas/ChartName'
-          maxLength: 250
+          $ref: '#/components/schemas/ChartName'
         chartVersion:
-          allOf:
-            - $ref: '#/components/schemas/ChartVersion'
-          maxLength: 50
+          $ref: '#/components/schemas/ChartVersion'
         chartURL:
           $ref: '#/components/schemas/AIApplicationChartUrl'
         chartId:

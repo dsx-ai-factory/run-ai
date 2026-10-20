@@ -128277,10 +128277,12 @@ components:
     ChartName:
       description: Helm chart name.
       example: redis
+      maxLength: 250
       type: string
     ChartVersion:
       description: Helm chart version.
       example: 17.3.17
+      maxLength: 50
       type: string
     AIApplicationChartUrl:
       description: "A direct HTTPS URL to a packaged Helm chart archive (.tgz). When\
@@ -128303,8 +128305,8 @@ components:
         (`repo` + `chartName` + `chartVersion`), a direct chart URL (`chartURL`), or the identifier of a
         previously uploaded chart archive (`chartId`).
       example:
-        chartName: ""
-        chartVersion: ""
+        chartName: redis
+        chartVersion: 17.3.17
         chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
         repo: https://charts.bitnami.com/bitnami
         chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -128317,13 +128319,15 @@ components:
           maxLength: 250
           type: string
         chartName:
-          allOf:
-          - $ref: '#/components/schemas/ChartName'
+          description: Helm chart name.
+          example: redis
           maxLength: 250
+          type: string
         chartVersion:
-          allOf:
-          - $ref: '#/components/schemas/ChartVersion'
+          description: Helm chart version.
+          example: 17.3.17
           maxLength: 50
+          type: string
         chartURL:
           description: "A direct HTTPS URL to a packaged Helm chart archive (.tgz).\
             \ When provided, the chart is downloaded directly from this location instead\
@@ -128366,8 +128370,8 @@ components:
         values:
           key: ""
         chartRef:
-          chartName: ""
-          chartVersion: ""
+          chartName: redis
+          chartVersion: 17.3.17
           chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           repo: https://charts.bitnami.com/bitnami
           chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -128434,8 +128438,8 @@ components:
           values:
             key: ""
           chartRef:
-            chartName: ""
-            chartVersion: ""
+            chartName: redis
+            chartVersion: 17.3.17
             chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             repo: https://charts.bitnami.com/bitnami
             chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -128593,8 +128597,8 @@ components:
           values:
             key: ""
           chartRef:
-            chartName: ""
-            chartVersion: ""
+            chartName: redis
+            chartVersion: 17.3.17
             chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             repo: https://charts.bitnami.com/bitnami
             chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -128652,8 +128656,8 @@ components:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           userCredential: true
         chartRef:
-          chartName: ""
-          chartVersion: ""
+          chartName: redis
+          chartVersion: 17.3.17
           chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
           repo: https://charts.bitnami.com/bitnami
           chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -128721,10 +128725,12 @@ components:
         chartName:
           description: Helm chart name.
           example: redis
+          maxLength: 250
           type: string
         chartVersion:
           description: Helm chart version.
           example: 17.3.17
+          maxLength: 50
           type: string
         archiveSHA256:
           description: Lowercase hexadecimal SHA-256 digest of the exact inspected
@@ -128994,8 +129000,8 @@ components:
           values:
             key: ""
           chartRef:
-            chartName: ""
-            chartVersion: ""
+            chartName: redis
+            chartVersion: 17.3.17
             chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
             repo: https://charts.bitnami.com/bitnami
             chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -129064,8 +129070,8 @@ components:
             values:
               key: ""
             chartRef:
-              chartName: ""
-              chartVersion: ""
+              chartName: redis
+              chartVersion: 17.3.17
               chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
               repo: https://charts.bitnami.com/bitnami
               chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -129109,8 +129115,8 @@ components:
               values:
                 key: ""
               chartRef:
-                chartName: ""
-                chartVersion: ""
+                chartName: redis
+                chartVersion: 17.3.17
                 chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
                 repo: https://charts.bitnami.com/bitnami
                 chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -129136,8 +129142,8 @@ components:
               values:
                 key: ""
               chartRef:
-                chartName: ""
-                chartVersion: ""
+                chartName: redis
+                chartVersion: 17.3.17
                 chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
                 repo: https://charts.bitnami.com/bitnami
                 chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -132647,8 +132653,8 @@ components:
             values:
               key: ""
             chartRef:
-              chartName: ""
-              chartVersion: ""
+              chartName: redis
+              chartVersion: 17.3.17
               chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
               repo: https://charts.bitnami.com/bitnami
               chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
@@ -132727,8 +132733,8 @@ components:
             values:
               key: ""
             chartRef:
-              chartName: ""
-              chartVersion: ""
+              chartName: redis
+              chartVersion: 17.3.17
               chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
               repo: https://charts.bitnami.com/bitnami
               chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz

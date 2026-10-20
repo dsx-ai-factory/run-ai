@@ -7,13 +7,9 @@ properties:
   repo:
     $ref: "./AIApplicationChartRepo.yaml"
   chartName:
-    allOf:
-      - $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartName.yaml"
-    maxLength: 250
+    $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartName.yaml"
   chartVersion:
-    allOf:
-      - $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartVersion.yaml"
-    maxLength: 50
+    $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartVersion.yaml"
   chartURL:
     $ref: "./AIApplicationChartUrl.yaml"
   chartId:

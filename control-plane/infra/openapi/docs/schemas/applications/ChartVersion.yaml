@@ -2,5 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 type: string
+maxLength: 50
 description: Helm chart version.
 example: 17.3.17
