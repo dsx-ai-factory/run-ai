@@ -129,8 +129,12 @@ func TestBuildSectionFailsWhenThePacerFellBehind(t *testing.T) {
 
 	tolerant := testOptions()
 	tolerant.minSubmitted = 0
-	if section := buildSection(measure.CollectSpans(arrived), behind, arrived, tolerant, 0, nil, nil); section.Failed {
+	section = buildSection(measure.CollectSpans(arrived), behind, arrived, tolerant, 0, nil, nil)
+	if section.Failed {
 		t.Fatalf("minSubmittedPercent 0 turns the shortfall into a measurement, not a failure: %+v", section)
+	}
+	if section.Metrics["planned_count"] != 120 || section.Metrics["submitted_count"] != 61 {
+		t.Fatalf("the shortfall must stay visible in the report when it is not a failure: %v", section.Metrics)
 	}
 }
 

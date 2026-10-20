@@ -350,8 +350,10 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 	ttj := measure.Stats(s.TTJ)
 	api := measure.Stats(s.ApiAccepted)
 	metrics := map[string]any{
-		"workload_type": opts.workloadType,
-		"failed_count":  api.FailedCount,
+		"workload_type":   opts.workloadType,
+		"failed_count":    api.FailedCount,
+		"planned_count":   pacing.Planned,
+		"submitted_count": pacing.Submitted,
 	}
 	for name, timings := range map[string][]measure.Timing{"api_accepted": s.ApiAccepted, "cluster_synced": s.ClusterSynced, "pod_created": s.PodCreated, "ttj": s.TTJ} {
 		summary := measure.Stats(timings)

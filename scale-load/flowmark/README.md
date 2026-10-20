@@ -123,7 +123,9 @@ of arrived workloads divided by the time from the first create response to
 the last arrival. A `load-ttj` section has `<span>_p50_ms`,
 `<span>_p90_ms` and `<span>_p99_ms` for `api_accepted`, `cluster_synced`,
 `pod_created` and `ttj`, plus `failed_count`, the creates the control plane
-rejected; the accepted ones are still timed. A workload that never reached
+rejected; the accepted ones are still timed. `planned_count` and
+`submitted_count` show how much of the schedule the pacer got out, which is
+the ceiling reading when `minSubmittedPercent` is 0. A workload that never reached
 the cluster fails the section, is counted in `error` and never enters a
 latency as zero. The health of
 the measurement itself is not a metric: when the cluster watch had to be
