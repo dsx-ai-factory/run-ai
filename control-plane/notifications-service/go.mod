@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/notifications-service
 
-go 1.27.2
+go 1.27.3
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
