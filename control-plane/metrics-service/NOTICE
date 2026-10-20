@@ -80,7 +80,7 @@ Dependencies
 | `github.com/lithammer/shortuuid/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v4@v4.3.0?tab=licenses |
 | `github.com/mattn/go-colorable` | v0.1.16 | MIT | https://github.com/mattn/go-colorable/blob/v0.1.16/LICENSE |
 | `github.com/mattn/go-isatty` | v0.0.24 | MIT | https://github.com/mattn/go-isatty/blob/v0.0.24/LICENSE |
-| `github.com/maypok86/otter/v2` | v2.3.0 | Apache-2.0 | https://pkg.go.dev/github.com/maypok86/otter/v2@v2.3.0?tab=licenses |
+| `github.com/maypok86/otter/v2` | v2.4.0 | Apache-2.0 | https://pkg.go.dev/github.com/maypok86/otter/v2@v2.4.0?tab=licenses |
 | `github.com/minio/crc64nvme` | v1.1.1 | Apache-2.0 | https://github.com/minio/crc64nvme/blob/v1.1.1/LICENSE |
 | `github.com/minio/md5-simd` | v1.1.2 | Apache-2.0 | https://github.com/minio/md5-simd/blob/v1.1.2/LICENSE |
 | `github.com/minio/minio-go/v7` | v7.4.1 | Apache-2.0 | https://pkg.go.dev/github.com/minio/minio-go/v7@v7.4.1?tab=licenses |
@@ -145,8 +145,8 @@ Dependencies
 | `golang.org/x/sync/semaphore` | v0.24.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.24.0?tab=licenses |
 | `golang.org/x/sys` | v0.49.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.49.0?tab=licenses |
 | `golang.org/x/text` | v0.43.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.43.0?tab=licenses |
-| `google.golang.org/genproto/googleapis/api/httpbody` | v0.0.0-20261012220534-4341edf3f941 | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261012220534-4341edf3f941?tab=licenses |
-| `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261012220534-4341edf3f941 | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261012220534-4341edf3f941?tab=licenses |
+| `google.golang.org/genproto/googleapis/api/httpbody` | v0.0.0-20261019180522-ce908d29299b | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261019180522-ce908d29299b?tab=licenses |
+| `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261019180522-ce908d29299b | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261019180522-ce908d29299b?tab=licenses |
 | `google.golang.org/grpc` | v1.84.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.84.0?tab=licenses |
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
 | `gopkg.in/ini.v1` | v1.67.3 | Apache-2.0 | https://pkg.go.dev/gopkg.in/ini.v1@v1.67.3?tab=licenses |
