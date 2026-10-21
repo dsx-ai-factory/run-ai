@@ -1,0 +1,41 @@
+suite: Audit service retention cleaner configuration
+
+templates:
+  - templates/audit-service/configmap.yaml
+
+tests:
+  # The service reads these keys as audit_record_cleaner_enabled,
+  # audit_record_cleaner_interval_hours and audit_record_ttl_days, so the env
+  # var names have to match exactly; a misspelled key is silently ignored and
+  # the service keeps its built-in defaults.
+  - it: passes the retention cleaner settings under the names the service reads
+    set:
+      auditService:
+        config:
+          auditRecordCleanerEnabled: true
+          auditRecordCleanerIntervalHours: 6
+          auditRecordTtlDays: 30
+    asserts:
+      - isKind:
+          of: ConfigMap
+      - equal:
+          path: data.AUDIT_RECORD_CLEANER_ENABLED
+          value: "true"
+      - notExists:
+          path: data.AUDIT_RECORED_CLEANER_ENABLED
+      - equal:
+          path: data.AUDIT_RECORD_CLEANER_INTERVAL_HOURS
+          value: "6"
+      - equal:
+          path: data.AUDIT_RECORD_TTL_DAYS
+          value: "30"
+
+  - it: passes a disabled cleaner through the same key
+    set:
+      auditService:
+        config:
+          auditRecordCleanerEnabled: false
+    asserts:
+      - equal:
+          path: data.AUDIT_RECORD_CLEANER_ENABLED
+          value: "false"
