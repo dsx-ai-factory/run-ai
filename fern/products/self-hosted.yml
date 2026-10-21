@@ -536,6 +536,11 @@ navigation:
       - page: RAG Blueprint Deployment from NGC Catalog
         slug: rag-blueprint-deployment
         path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
+    - section: Agent Tutorials
+      contents:
+      - page: Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
+        slug: openshell-on-runai
+        path: ../../docs/tutorials/agent-tutorials/openshell-on-runai.md
   - section: Agents
     contents:
     - page: Overview
