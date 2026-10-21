@@ -12,7 +12,7 @@ import (
 
 func TestThreeZeroMatrix(t *testing.T) {
 	expected := Locks{
-		Prometheus:          "76.2.0",
+		Prometheus:          "92.7.0",
 		GPUOperator:         "v26.7.1",
 		GPUOperatorFake:     "0.0.62",
 		NetworkOperator:     "v26.7.0",
