@@ -664,15 +664,6 @@ OpenShell, not NVIDIA Run:ai, enforces the sandbox policy. To watch the sandbox'
   * Access is enforced by OpenShell workspace membership, which a Platform Admin manages ([Step 4](#step-4-adding-users-to-the-openshell-workspace)).
   * NVIDIA Run:ai access rules and OpenShell workspace membership are two separate lists, so keep them consistent when a person changes teams.
 * **NVIDIA Run:ai shows no submitter for agents.** NVIDIA Run:ai records the gateway, not the user, as the creator. Use the NVIDIA Run:ai project (and OpenShell workspace membership and audit) to attribute agents.
-* **NVIDIA Run:ai's own identity clients are not used for sign-in.** The OpenShell CLI's browser login redirects to `http://127.0.0.1:<random port>`, which NVIDIA Run:ai's built-in clients do not allow, and their device flow is disabled. Register a dedicated OIDC client in your identity provider instead ([Step 2](#step-2-signing-in-to-openshell)).
-
-### Models and Agents
-
-* **Model served on NVIDIA Run:ai: a private CA was not validated.**
-  * The gateway fetches and refreshes the token with an OAuth2 client-credentials grant and verifies the endpoint's TLS certificate.
-  * With a private CA that the gateway does not trust, the refresh fails with `oauth_token_endpoint_unavailable`.
-  * Use certificates from a public CA on the model's control plane until you have validated the private-CA case.
-* **Agent quality depends on the model.** Check the result in the sandbox ([Step 6](#step-6-running-an-agent-that-pushes-to-github)), because a weak model can report a result it did not achieve.
 
 ### Setup and Operations
 
