@@ -68,7 +68,7 @@ Dependencies
 | `github.com/go-openapi/swag/stringutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/stringutils/v0.29.2/stringutils/LICENSE |
 | `github.com/go-openapi/swag/typeutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/typeutils/v0.29.2/typeutils/LICENSE |
 | `github.com/go-openapi/swag/yamlutils` | v0.29.2 | Apache-2.0 | https://github.com/go-openapi/swag/blob/yamlutils/v0.29.2/yamlutils/LICENSE |
-| `github.com/go-openapi/validate` | v1.0.0 | Apache-2.0 | https://github.com/go-openapi/validate/blob/v1.0.0/LICENSE |
+| `github.com/go-openapi/validate` | v1.0.1 | Apache-2.0 | https://github.com/go-openapi/validate/blob/v1.0.1/LICENSE |
 | `github.com/go-playground/locales` | v0.14.2 | MIT | https://github.com/go-playground/locales/blob/v0.14.2/LICENSE |
 | `github.com/go-playground/universal-translator` | v0.18.2 | MIT | https://github.com/go-playground/universal-translator/blob/v0.18.2/LICENSE |
 | `github.com/go-playground/validator/v10` | v10.30.5 | MIT | https://github.com/go-playground/validator/blob/v10.30.5/LICENSE |
