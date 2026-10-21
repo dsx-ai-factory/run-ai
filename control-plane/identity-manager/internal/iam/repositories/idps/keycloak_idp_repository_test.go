@@ -7,13 +7,17 @@ package idps
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"net/http"
+	"strings"
 	"testing"
 
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 
 	"github.com/Nerzal/gocloak/v13"
 	authMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/auth/mocks"
+	iamError "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/errors"
 	kcMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/config"
@@ -23,7 +27,8 @@ import (
 )
 
 const (
-	realm string = "testRealm"
+	realm       string = "testRealm"
+	metadataUrl string = "https://idp.example.com/metadata"
 )
 
 func initTest(t *testing.T) (authMock *authMocks.Auth, goCloakMock *kcMocks.GoCloak, testSubject *KeycloakIdpRepository) {
@@ -476,4 +481,115 @@ func TestDeleteMandatoryClaimMapper_FailToDeleteMapper(t *testing.T) {
 	assert.NotNil(t, err)
 	authMock.AssertExpectations(t)
 	goCloakMock.AssertExpectations(t)
+}
+
+func TestGetIdpConfig_HappyFlow(t *testing.T) {
+	authMock, goCloakMock, testSubject := initTest(t)
+	ctx := context.Background()
+	token := kcMocks.GetMockAccessToken()
+	kcConfig := map[string]string{"entityId": "https://idp.example.com"}
+	authMock.On("GetAdminToken", ctx).Return(token, nil)
+	goCloakMock.On("ImportIdentityProviderConfig", ctx, *token, realm, metadataUrl, "saml").Return(kcConfig, nil)
+	config, err := testSubject.GetIdpConfig(ctx, realm, metadataUrl, "saml")
+	assert.Nil(t, err)
+	assert.Equal(t, kcConfig, config)
+	authMock.AssertExpectations(t)
+	goCloakMock.AssertExpectations(t)
+}
+
+func TestGetIdpConfig_MetadataRejectedByKeycloak(t *testing.T) {
+	authMock, goCloakMock, testSubject := initTest(t)
+	ctx := context.Background()
+	token := kcMocks.GetMockAccessToken()
+	authMock.On("GetAdminToken", ctx).Return(token, nil)
+	goCloakMock.On("ImportIdentityProviderConfig", ctx, *token, realm, metadataUrl, "saml").
+		Return(nil, getKcApiError(http.StatusBadRequest))
+	_, err := testSubject.GetIdpConfig(ctx, realm, metadataUrl, "saml")
+	assert.NotNil(t, err)
+	assert.True(t, errors.Is(err, iamError.ErrInvalidInput))
+	authMock.AssertExpectations(t)
+	goCloakMock.AssertExpectations(t)
+}
+
+func TestGetIdpConfig_FailToGetToken(t *testing.T) {
+	authMock, goCloakMock, testSubject := initTest(t)
+	ctx := context.Background()
+	authMock.On("GetAdminToken", ctx).Return(nil, assert.AnError)
+	_, err := testSubject.GetIdpConfig(ctx, realm, metadataUrl, "saml")
+	assert.NotNil(t, err)
+	authMock.AssertExpectations(t)
+	goCloakMock.AssertExpectations(t)
+}
+
+func TestGetIdpConfigFromFile_HappyFlow(t *testing.T) {
+	authMock, goCloakMock, testSubject := initTest(t)
+	ctx := context.Background()
+	token := kcMocks.GetMockAccessToken()
+	kcConfig := map[string]string{"entityId": "https://idp.example.com"}
+	reader := strings.NewReader("<EntityDescriptor/>")
+	authMock.On("GetAdminToken", ctx).Return(token, nil)
+	goCloakMock.On("ImportIdentityProviderConfigFromFile", ctx, *token, realm, "saml", "metadata.xml", reader).Return(kcConfig, nil)
+	config, err := testSubject.GetIdpConfigFromFile(ctx, realm, "saml", "metadata.xml", reader)
+	assert.Nil(t, err)
+	assert.Equal(t, kcConfig, config)
+	authMock.AssertExpectations(t)
+	goCloakMock.AssertExpectations(t)
+}
+
+func TestGetIdpConfigFromFile_MetadataRejectedByKeycloak(t *testing.T) {
+	authMock, goCloakMock, testSubject := initTest(t)
+	ctx := context.Background()
+	token := kcMocks.GetMockAccessToken()
+	reader := strings.NewReader("not xml")
+	authMock.On("GetAdminToken", ctx).Return(token, nil)
+	goCloakMock.On("ImportIdentityProviderConfigFromFile", ctx, *token, realm, "saml", "metadata.xml", reader).
+		Return(nil, getKcApiError(http.StatusBadRequest))
+	_, err := testSubject.GetIdpConfigFromFile(ctx, realm, "saml", "metadata.xml", reader)
+	assert.NotNil(t, err)
+	assert.True(t, errors.Is(err, iamError.ErrInvalidInput))
+	authMock.AssertExpectations(t)
+	goCloakMock.AssertExpectations(t)
+}
+
+func TestGetIdpConfigFromFile_FailToGetToken(t *testing.T) {
+	authMock, goCloakMock, testSubject := initTest(t)
+	ctx := context.Background()
+	authMock.On("GetAdminToken", ctx).Return(nil, assert.AnError)
+	_, err := testSubject.GetIdpConfigFromFile(ctx, realm, "saml", "metadata.xml", strings.NewReader("not xml"))
+	assert.NotNil(t, err)
+	authMock.AssertExpectations(t)
+	goCloakMock.AssertExpectations(t)
+}
+
+func TestGetIdpConfig_KeycloakServerError(t *testing.T) {
+	authMock, goCloakMock, testSubject := initTest(t)
+	ctx := context.Background()
+	token := kcMocks.GetMockAccessToken()
+	authMock.On("GetAdminToken", ctx).Return(token, nil)
+	goCloakMock.On("ImportIdentityProviderConfig", ctx, *token, realm, metadataUrl, "saml").
+		Return(nil, getKcApiError(http.StatusInternalServerError))
+	_, err := testSubject.GetIdpConfig(ctx, realm, metadataUrl, "saml")
+	assert.NotNil(t, err)
+	assert.True(t, errors.Is(err, iamError.ErrInternal))
+	assert.False(t, errors.Is(err, iamError.ErrInvalidInput))
+	authMock.AssertExpectations(t)
+	goCloakMock.AssertExpectations(t)
+}
+
+func TestUpdateIdp_IdpNotFound(t *testing.T) {
+	authMock, goCloakMock, testSubject := initTest(t)
+	ctx := context.Background()
+	token := kcMocks.GetMockAccessToken()
+	idp := getMockIdps()[0]
+	authMock.On("GetAdminToken", ctx).Return(token, nil)
+	goCloakMock.On("GetIdentityProvider", ctx, *token, realm, *idp.Alias).Return(nil, getKcApiError(http.StatusNotFound))
+	err := testSubject.UpdateIdp(ctx, realm, *idp)
+	assert.NotNil(t, err)
+	assert.True(t, errors.Is(err, iamError.ErrNotFound))
+	authMock.AssertExpectations(t)
+	goCloakMock.AssertExpectations(t)
+}
+
+func getKcApiError(code int) error {
+	return &gocloak.APIError{Code: code, Message: fmt.Sprintf("%d %s", code, http.StatusText(code))}
 }

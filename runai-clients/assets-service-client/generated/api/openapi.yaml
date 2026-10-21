@@ -1498,6 +1498,97 @@ paths:
         resource-type: resource-claim-templates
         action: update
       x-audit: true
+  /api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads:
+    get:
+      description: "Use to list the workloads whose pods currently reference the resource\
+        \ claim template, with the pods that use it and the ResourceClaim each pod\
+        \ is bound to. Only workloads the caller is permitted to read are returned."
+      operationId: get_rct_workloads
+      parameters:
+      - description: Unique identifier of the asset.
+        explode: false
+        in: path
+        name: AssetId
+        required: true
+        schema:
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplateWorkloadsResponse'
+          description: Request completed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List the workloads using a resource claim template.
+      tags:
+      - Resource Claim Templates
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: read
+      x-service: assets-service
+      x-test-coverage:
+      - control-plane/assets-service/pkg/services/api_rct_service_test.go
   /api/v1/k8s-objects/updates:
     post:
       operationId: k8s_objects_sync_updates
@@ -15482,6 +15573,177 @@ components:
       required:
       - meta
       - spec
+      type: object
+    ReportedWorkloadType:
+      description: "The type of the workload. Any workload type the cluster reports,\
+        \ not only the NVIDIA Run:ai native ones."
+      example: Training
+      type: string
+    ProjectId:
+      description: The id of the project.
+      example: "1"
+      pattern: .*
+      type: string
+    PodResourceClaimBinding:
+      example:
+        claimName: bert-worker-0-gpu-1-mk4s8
+        name: gpu-1
+      properties:
+        name:
+          description: "Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name`\
+            \ and referenced by containers in `resources.claims`."
+          example: gpu-1
+          type: string
+        claimName:
+          description: "Name of the ResourceClaim bound to the pod for this entry.\
+            \ For a claim generated from a template, this is null until Kubernetes\
+            \ creates and binds the claim."
+          example: bert-worker-0-gpu-1-mk4s8
+          nullable: true
+          type: string
+      required:
+      - name
+      type: object
+    ResourceClaimTemplateWorkloadPod:
+      example:
+        resourceClaims:
+        - claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        - claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        podName: bert-worker-0
+        podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        podId:
+          description: The id of the pod.
+          format: uuid
+          type: string
+        podName:
+          example: bert-worker-0
+          type: string
+        resourceClaims:
+          description: "The pod's claims that were generated from the resource claim\
+            \ template. A pod usually has one, but may list several when more than\
+            \ one of its claim entries references the same template."
+          items:
+            $ref: '#/components/schemas/PodResourceClaimBinding'
+          type: array
+      required:
+      - podId
+      - podName
+      - resourceClaims
+      type: object
+    ResourceClaimTemplateWorkload:
+      example:
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        name: my-workload-name
+        pods:
+        - resourceClaims:
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - resourceClaims:
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        type: Training
+        projectId: "1"
+      properties:
+        workloadId:
+          description: A unique ID of the workload.
+          format: uuid
+          type: string
+        name:
+          description: The name of the workload.
+          example: my-workload-name
+          minLength: 1
+          pattern: .*
+          type: string
+        type:
+          description: "The type of the workload. Any workload type the cluster reports,\
+            \ not only the NVIDIA Run:ai native ones."
+          example: Training
+          type: string
+        projectId:
+          description: The id of the project.
+          example: "1"
+          pattern: .*
+          type: string
+        pods:
+          description: The pods of the workload that reference the resource claim
+            template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkloadPod'
+          type: array
+      required:
+      - name
+      - pods
+      - projectId
+      - type
+      - workloadId
+      type: object
+    ResourceClaimTemplateWorkloadsResponse:
+      example:
+        next: 0
+        workloads:
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: my-workload-name
+          pods:
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: Training
+          projectId: "1"
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: my-workload-name
+          pods:
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: Training
+          projectId: "1"
+      properties:
+        next:
+          description: |
+            Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit).
+          format: int32
+          type: integer
+        workloads:
+          description: The workloads whose pods currently reference the resource claim
+            template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkload'
+          type: array
+      required:
+      - workloads
       type: object
     ClusterSyncReportUpdate:
       description: success/failure report of a single update attempt of the cluster
@@ -37177,11 +37439,6 @@ components:
           rule: min
           details: value must be no less than 3
         message: message
-    ProjectId:
-      description: The id of the project.
-      example: "1"
-      pattern: .*
-      type: string
     DepartmentId:
       description: The id of the department.
       example: "2"

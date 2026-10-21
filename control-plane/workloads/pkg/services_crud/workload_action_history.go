@@ -22,7 +22,7 @@ import (
 
 // Log history write failures without failing the accepted workload action.
 func recordWorkloadAction(ctx context.Context, workload actionhistory.WorkloadToLog, action api.WorkloadActionType, acceptedAt time.Time) {
-	record, apiErr := actionhistory.NewWorkloadActionRecord(ctx, action, workload, acceptedAt)
+	record, apiErr := actionhistory.NewWorkloadActionRecord(ctx, uuid.Nil, action, workload, acceptedAt)
 	if apiErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to record accepted workload %s action for %s: %v", action, workload.ID, apiErr)
 		return

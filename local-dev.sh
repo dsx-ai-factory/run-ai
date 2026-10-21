@@ -2634,107 +2634,54 @@ ${DOMAIN}:53 {
   # regardless of its condition — conditions are only evaluated later, at render time.
   # charts/*.tgz is gitignored, so a fresh clone has none.
   #
-  # Dependency names and versions are read from Chart.yaml rather than hardcoded here,
-  # so bumping a dependency (e.g. kai-scheduler v0.16.8, karta 0.2.6) cannot leave this
-  # block stale.
+  # Helm itself checks charts/ against Chart.yaml, so a dependency may use any version
+  # constraint Helm supports (exact, "~0.18.0", "^1.2", ">=1.0 <2.0", ...).
   local charts_dir="${rc_chart}/charts"
   mkdir -p "${charts_dir}"
 
-  # Drop tarballs that no longer match a declared dependency — left behind by an earlier
-  # run after a version bump, or by a dependency being removed outright. Helm loads every
-  # tarball in charts/, so leftovers are not inert: two tarballs named kai-scheduler make
-  # the resolved subchart ambiguous, and an undeclared one (e.g. runai-engine) has no
-  # condition to gate it, so it renders unconditionally.
-  # Placeholders from an earlier failed fetch are dropped too: they satisfy the
-  # missing-dependency check below, so otherwise the real chart is never fetched again.
-  local stale_chart
-  while read -r stale_chart; do
-    [[ -z "${stale_chart}" ]] && continue
-    log "  Removing stale subchart tarball: $(basename "${stale_chart}")"
-    rm -f "${stale_chart}"
-  done < <(python3 - "${rc_chart}/Chart.yaml" "${charts_dir}" <<'PYEOF'
-import sys, re, os, glob, tarfile
-chart_yaml, charts_dir = sys.argv[1], sys.argv[2]
+  # Older versions of this script installed an empty placeholder when a fetch failed.
+  # Helm reports a placeholder as "ok", so drop it, or the real chart is never fetched.
+  local chart_tgz
+  for chart_tgz in "${charts_dir}"/*.tgz; do
+    [[ -e "${chart_tgz}" ]] || continue
+    if helm show chart "${chart_tgz}" 2>/dev/null \
+        | grep -q 'Placeholder — real chart could not be fetched'; then
+      log "  Removing placeholder subchart tarball: $(basename "${chart_tgz}")"
+      rm -f "${chart_tgz}"
+    fi
+  done
 
-def is_placeholder(path):
-    try:
-        with tarfile.open(path) as tar:
-            for member in tar.getmembers():
-                if member.name.count("/") == 1 and member.name.endswith("/Chart.yaml"):
-                    return "Placeholder — real chart could not be fetched" in tar.extractfile(member).read().decode()
-    except (tarfile.TarError, OSError):
-        return True
-    return False
-
-wanted = set()
-block = re.search(r'^dependencies:\s*\n(.*?)(?=^\S|\Z)', open(chart_yaml).read(), re.S | re.M)
-if block:
-    for entry in re.split(r'^\s*-\s+', block.group(1), flags=re.M)[1:]:
-        name = re.search(r'\bname:\s*(\S+)', entry)
-        version = re.search(r'\bversion:\s*(\S+)', entry)
-        if name and version:
-            wanted.add(f"{name.group(1)}-{version.group(1)}.tgz")
-for path in sorted(glob.glob(os.path.join(charts_dir, "*.tgz"))):
-    if os.path.basename(path) not in wanted or is_placeholder(path):
-        print(path)
-PYEOF
-)
-
-  # Emits "<name> <version>" for each declared dependency that has neither a matching
-  # tarball nor an unpacked directory in charts/ (Helm accepts either form).
-  _rc_missing_deps() {
-    python3 - "${rc_chart}/Chart.yaml" "${charts_dir}" <<'PYEOF'
-import sys, re, os
-chart_yaml, charts_dir = sys.argv[1], sys.argv[2]
-block = re.search(r'^dependencies:\s*\n(.*?)(?=^\S|\Z)', open(chart_yaml).read(), re.S | re.M)
-if not block:
-    sys.exit(0)
-for entry in re.split(r'^\s*-\s+', block.group(1), flags=re.M)[1:]:
-    name = re.search(r'\bname:\s*(\S+)', entry)
-    version = re.search(r'\bversion:\s*(\S+)', entry)
-    if not (name and version):
-        continue
-    n, v = name.group(1), version.group(1)
-    if os.path.exists(os.path.join(charts_dir, f"{n}-{v}.tgz")):
-        continue
-    if os.path.isdir(os.path.join(charts_dir, n)):
-        continue
-    print(f"{n} {v}")
-PYEOF
+  # Prints every dependency Helm does not report as ok/unpacked (missing, wrong version,
+  # too many matches, ...), and every tarball in charts/ that Chart.yaml does not declare.
+  # Helm loads every tarball in charts/, so an undeclared one (e.g. runai-engine) has no
+  # condition to gate it and renders unconditionally.
+  _rc_dep_problems() {
+    local out
+    if ! out="$(helm dependency list "${rc_chart}" 2>&1)"; then
+      echo "${out}"
+      return 0
+    fi
+    awk '/^WARNING: .* is not in Chart\.yaml/ { print; next }
+         NR > 1 && NF >= 4 && $NF != "ok" && $NF != "unpacked" { print }' <<<"${out}"
   }
 
-  if [[ -n "$(_rc_missing_deps)" ]]; then
+  local dep_problems
+  dep_problems="$(_rc_dep_problems)"
+  if [[ -n "${dep_problems}" ]]; then
     log "  Fetching runai-cluster chart dependencies..."
-    # Pulls the real subcharts from their OCI repositories. Needs network access, and
-    # credentials for any private registry — hence the placeholder fallback below.
+    echo "${dep_problems}"
+    # Pulls the subcharts from their repositories, resolving version ranges, and replaces
+    # anything outdated or undeclared in charts/.
     # `update`, not `build`: Chart.lock is gitignored, so a local copy left over from an
     # older Chart.yaml makes `build` refuse to run ("lock file is out of sync").
     helm dependency update "${rc_chart}" 2>&1 \
       | grep -v '^Saving\|^Deleting\|^$' || true
+    dep_problems="$(_rc_dep_problems)"
+    if [[ -n "${dep_problems}" ]]; then
+      echo "${dep_problems}" >&2
+      die "runai-cluster chart dependencies are not satisfied (see above and the helm output). Fix the cause, then retry: helm dependency update ${rc_chart}"
+    fi
   fi
-
-  # Anything still missing gets a minimal placeholder so Helm's dependency check passes.
-  # This is a real degradation, not a no-op: Helm matches dependencies by name only, so a
-  # placeholder satisfies the check and the subchart installs EMPTY. For kai-scheduler and
-  # karta — both enabled below — that means no scheduler workloads. Warn loudly.
-  local dep_name dep_version
-  while read -r dep_name dep_version; do
-    [[ -z "${dep_name}" ]] && continue
-    warn "  Could not fetch ${dep_name}@${dep_version} — installing an EMPTY placeholder."
-    warn "    '${dep_name}' will be enabled but deploy nothing. Fix with:"
-    warn "      helm dependency update ${rc_chart}"
-    local tmpdir
-    tmpdir="$(mktemp -d)"
-    mkdir -p "${tmpdir}/${dep_name}"
-    cat > "${tmpdir}/${dep_name}/Chart.yaml" <<CHARTEOF
-apiVersion: v2
-name: ${dep_name}
-version: ${dep_version}
-description: Placeholder — real chart could not be fetched
-CHARTEOF
-    helm package "${tmpdir}/${dep_name}" -d "${charts_dir}" >/dev/null 2>&1
-    rm -rf "${tmpdir}"
-  done < <(_rc_missing_deps)
 
   local scheduler_args=(
     --set runai-engine.enabled=false
@@ -2817,8 +2764,6 @@ print_access_info() {
   echo "  Cluster namespace:    ${RC_NAMESPACE}"
   echo ""
   echo "  Scheduler:  kai-resource-management (bundles kai-scheduler) + karta enabled"
-  echo "    If no KRM/kai-scheduler/karta pods are running, charts/ holds placeholder"
-  echo "    subcharts. Fix with: helm dependency update ${REPO_ROOT}/runai-cluster/cluster/runai-chart"
   echo "  Re-deploy cluster with updated credentials:"
   echo "    helm upgrade runai-cluster ${REPO_ROOT}/runai-cluster/cluster/runai-chart \\"
   echo "      -n ${RC_NAMESPACE} \\"

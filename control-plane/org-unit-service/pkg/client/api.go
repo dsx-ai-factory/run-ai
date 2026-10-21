@@ -44,6 +44,8 @@ type IOrgUnitClient interface {
 	GetInternalDeletedOrgUnits(ctx context.Context, deletedAfter time.Time) ([]openapi.DeletedOrgUnit, *openapi.Error)
 	GetOrgTree(ctx context.Context) ([]openapi.OrgUnit, *openapi.Error)
 	UpdateOrgUnitSettings(ctx context.Context, name string, value string) error
+	NodePoolSummary(ctx context.Context, nodePoolId string, summaryType openapi.OrgUnitsNodepoolSummaryType) ([]openapi.OrgUnitsNodepoolSummaryInner, error)
+	NodePoolResetResources(ctx context.Context, clusterId string, nodePoolId string, action openapi.NodepoolResourcesResetAction) error
 }
 
 func NewOrgUnitClient(baseURL string) IOrgUnitClient {

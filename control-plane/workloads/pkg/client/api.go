@@ -28,6 +28,7 @@ type IWorkloadsClient interface {
 
 	// CreateWorkload is a notification to workloads service, informing it about workload creation
 	CreateWorkload(ctx context.Context, workload openapi.WorkloadCreationFields) (*openapi.Workload, *openapi.Error)
+	CreateWorkloadActions(ctx context.Context, request openapi.CreateWorkloadActionsRequest) *openapi.Error
 
 	PatchWorkload(ctx context.Context, workloadId string, fields openapi.WorkloadPatchFields) *openapi.Error
 

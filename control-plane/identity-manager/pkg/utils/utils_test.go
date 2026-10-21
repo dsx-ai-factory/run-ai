@@ -258,6 +258,77 @@ func TestDecodeBase64ToReader_InvalidBase64(t *testing.T) {
 	assert.Nil(t, reader)
 }
 
+func TestValidateSamlMetadata(t *testing.T) {
+	tests := []struct {
+		name     string
+		metadata string
+		wantErr  bool
+	}{
+		{
+			name:     "entity descriptor",
+			metadata: `<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com"></md:EntityDescriptor>`,
+		},
+		{
+			name:     "entities descriptor aggregate",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntityDescriptor entityID="https://idp.example.com"/></EntitiesDescriptor>`,
+		},
+		{
+			name:     "entities descriptor without children",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"></EntitiesDescriptor>`,
+			wantErr:  true,
+		},
+		{
+			name:     "entities descriptor child without entity id",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntityDescriptor/></EntitiesDescriptor>`,
+			wantErr:  true,
+		},
+		{
+			name:     "leading declaration and comment",
+			metadata: `<?xml version="1.0"?><!-- exported --><EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com"/>`,
+		},
+		{
+			name:     "entity descriptor without entity id",
+			metadata: `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"/>`,
+			wantErr:  true,
+		},
+		{
+			name:     "plain text",
+			metadata: "this is not saml metadata",
+			wantErr:  true,
+		},
+		{
+			name:     "empty document",
+			metadata: "",
+			wantErr:  true,
+		},
+		{
+			name:     "unclosed root element",
+			metadata: `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata">`,
+			wantErr:  true,
+		},
+		{
+			name:     "well formed but not saml",
+			metadata: `<html><body>login here</body></html>`,
+			wantErr:  true,
+		},
+		{
+			name:     "wrong namespace",
+			metadata: `<EntityDescriptor xmlns="urn:example:not:saml"/>`,
+			wantErr:  true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := utils.ValidateSamlMetadata([]byte(tt.metadata))
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
 func TestReadUrlContent_HappyFlow(t *testing.T) {
 	url := "https://example.com/auth/realms/workAI/protocol/saml/descriptor"
 	res, err := utils.ReadUrlContent(context.Background(), url)

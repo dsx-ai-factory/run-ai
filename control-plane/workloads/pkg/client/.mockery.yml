@@ -29,6 +29,7 @@ packages:
       UnifiedAPI: {}
       WorkloadPropertiesAPI: {}
       WorkloadTemplatesAPI: {}
+      WorkloadActionsAPI: {}
       WorkloadsAPI: {}
       WorkloadsBatchAPI: {}
       WorkspacesAPI: {}

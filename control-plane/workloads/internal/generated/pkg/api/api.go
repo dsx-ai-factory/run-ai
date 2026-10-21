@@ -72,7 +72,6 @@ type DistributedInferencesAPIRouter interface {
 // The EventsAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a EventsAPIServicer to perform the required actions, then write the service results to the http response.
 type EventsAPIRouter interface {
-	GetWorkloadActionsHistory(http.ResponseWriter, *http.Request)
 	SyncEvents(http.ResponseWriter, *http.Request)
 	GetWorkloadEvents(http.ResponseWriter, *http.Request)
 	GetWorkloadHistory(http.ResponseWriter, *http.Request)
@@ -182,6 +181,14 @@ type UnifiedAPIRouter interface {
 	GetUnifiedWorkload(http.ResponseWriter, *http.Request)
 }
 
+// WorkloadActionsAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadActionsAPI
+// The WorkloadActionsAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a WorkloadActionsAPIServicer to perform the required actions, then write the service results to the http response.
+type WorkloadActionsAPIRouter interface {
+	GetWorkloadActionsHistory(http.ResponseWriter, *http.Request)
+	InternalCreateWorkloadActions(http.ResponseWriter, *http.Request)
+}
+
 // WorkloadPropertiesAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadPropertiesAPI
 // The WorkloadPropertiesAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a WorkloadPropertiesAPIServicer to perform the required actions, then write the service results to the http response.
@@ -249,9 +256,11 @@ type WorkloadTemplatesAPIRouter interface {
 type WorkloadsAPIRouter interface {
 	InternalCreateWorkload(http.ResponseWriter, *http.Request)
 	InternalSyncWorkloads(http.ResponseWriter, *http.Request)
+	InternalGetResourceClaimTemplateWorkloads(http.ResponseWriter, *http.Request)
 	InternalEnrichOrgUnitRanking(http.ResponseWriter, *http.Request)
 	GetWorkloads(http.ResponseWriter, *http.Request)
 	SyncWorkloads(http.ResponseWriter, *http.Request)
+	GetWorkloadsSlim(http.ResponseWriter, *http.Request)
 	GetWorkloadAncestors(http.ResponseWriter, *http.Request)
 	GetWorkload(http.ResponseWriter, *http.Request)
 	UpsertWorkload(http.ResponseWriter, *http.Request)
@@ -267,6 +276,7 @@ type WorkloadsAPIRouter interface {
 	GetWorkloadElement(http.ResponseWriter, *http.Request)
 	GetWorkloadElementMetrics(http.ResponseWriter, *http.Request)
 	CountWorkloadElements(http.ResponseWriter, *http.Request)
+	GetWorkloadResourceClaims(http.ResponseWriter, *http.Request)
 	SyncJobsBackwards(http.ResponseWriter, *http.Request)
 	SyncPodsBackwards(http.ResponseWriter, *http.Request)
 	SyncPodgroupsBackwards(http.ResponseWriter, *http.Request)
@@ -342,7 +352,6 @@ type DistributedInferencesAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type EventsAPIServicer interface {
-	GetWorkloadActionsHistory(context.Context, string, int32, int32) (ImplResponse, error)
 	SyncEvents(context.Context, EventsSyncRequest) (ImplResponse, error)
 	GetWorkloadEvents(context.Context, string, int32, int32, string) (ImplResponse, error)
 	GetWorkloadHistory(context.Context, string, int32, int32) (ImplResponse, error)
@@ -462,6 +471,15 @@ type UnifiedAPIServicer interface {
 	GetUnifiedWorkload(context.Context, UnifiedWorkloadRequest) (ImplResponse, error)
 }
 
+// WorkloadActionsAPIServicer defines the api actions for the WorkloadActionsAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type WorkloadActionsAPIServicer interface {
+	GetWorkloadActionsHistory(context.Context, string, int32, int32) (ImplResponse, error)
+	InternalCreateWorkloadActions(context.Context, CreateWorkloadActionsRequest) (ImplResponse, error)
+}
+
 // WorkloadPropertiesAPIServicer defines the api actions for the WorkloadPropertiesAPI service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
@@ -532,9 +550,11 @@ type WorkloadTemplatesAPIServicer interface {
 type WorkloadsAPIServicer interface {
 	InternalCreateWorkload(context.Context, WorkloadCreationFields) (ImplResponse, error)
 	InternalSyncWorkloads(context.Context, []string, InternalWorkloadsSyncRequest) (ImplResponse, error)
+	InternalGetResourceClaimTemplateWorkloads(context.Context, InternalResourceClaimTemplateWorkloadsRequest, int32, int32) (ImplResponse, error)
 	InternalEnrichOrgUnitRanking(context.Context, InternalEnrichOrgUnitRankingRequest) (ImplResponse, error)
 	GetWorkloads(context.Context, bool, int32, int32, string, string, []string, string) (ImplResponse, error)
 	SyncWorkloads(context.Context, []string, WorkloadsSyncRequest) (ImplResponse, error)
+	GetWorkloadsSlim(context.Context, int32, int32, []string) (ImplResponse, error)
 	GetWorkloadAncestors(context.Context, string) (ImplResponse, error)
 	GetWorkload(context.Context, string) (ImplResponse, error)
 	UpsertWorkload(context.Context, string, WorkloadSyncFields) (ImplResponse, error)
@@ -550,6 +570,7 @@ type WorkloadsAPIServicer interface {
 	GetWorkloadElement(context.Context, string, string) (ImplResponse, error)
 	GetWorkloadElementMetrics(context.Context, string, string, []ElementMetricType, time.Time, time.Time, int32) (ImplResponse, error)
 	CountWorkloadElements(context.Context, string) (ImplResponse, error)
+	GetWorkloadResourceClaims(context.Context, string, int32, int32) (ImplResponse, error)
 	SyncJobsBackwards(context.Context, string, SyncJobsBackwardsRequest) (ImplResponse, error)
 	SyncPodsBackwards(context.Context, string, SyncJobsBackwardsRequest) (ImplResponse, error)
 	SyncPodgroupsBackwards(context.Context, string, string, SyncJobsBackwardsRequest) (ImplResponse, error)

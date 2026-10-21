@@ -103,7 +103,6 @@ Class | Method | HTTP request | Description
 *DistributedInferencesAPI* | [**UpdateDistributedInferenceSpec**](docs/DistributedInferencesAPI.md#updatedistributedinferencespec) | **Patch** /api/v1/workloads/distributed-inferences/{workloadId} | Update distributed inference spec.
 *EventsAPI* | [**GetRevisionEvents**](docs/EventsAPI.md#getrevisionevents) | **Get** /api/v1/workloads/inferences/revisions/{revisionId}/events | Get revision events by id.
 *EventsAPI* | [**GetRevisionHistory**](docs/EventsAPI.md#getrevisionhistory) | **Get** /api/v1/workloads/inferences/revisions/{revisionId}/history | Get the revision history.
-*EventsAPI* | [**GetWorkloadActionsHistory**](docs/EventsAPI.md#getworkloadactionshistory) | **Get** /api/v1/workloads/{workloadId}/actions | Get workload action history.
 *EventsAPI* | [**GetWorkloadEvents**](docs/EventsAPI.md#getworkloadevents) | **Get** /api/v1/workloads/{workloadId}/events | Get the workload events.
 *EventsAPI* | [**GetWorkloadHistory**](docs/EventsAPI.md#getworkloadhistory) | **Get** /api/v1/workloads/{workloadId}/history | Get the workload history.
 *EventsAPI* | [**SyncEvents**](docs/EventsAPI.md#syncevents) | **Post** /api/v1/workloads/events | Sync events.
@@ -149,6 +148,8 @@ Class | Method | HTTP request | Description
 *TrainingsAPI* | [**ResumeTraining**](docs/TrainingsAPI.md#resumetraining) | **Post** /api/v1/workloads/trainings/{workloadId}/resume | Resume a training.
 *TrainingsAPI* | [**SuspendTraining**](docs/TrainingsAPI.md#suspendtraining) | **Post** /api/v1/workloads/trainings/{workloadId}/suspend | Suspend a training.
 *UnifiedAPI* | [**GetUnifiedWorkload**](docs/UnifiedAPI.md#getunifiedworkload) | **Post** /api/v1/workloads/unified | Request unified workload information (internal for UI purposes)
+*WorkloadActionsAPI* | [**GetWorkloadActionsHistory**](docs/WorkloadActionsAPI.md#getworkloadactionshistory) | **Get** /api/v1/workloads/{workloadId}/actions | Get workload action history.
+*WorkloadActionsAPI* | [**InternalCreateWorkloadActions**](docs/WorkloadActionsAPI.md#internalcreateworkloadactions) | **Post** /internal/workloads/actions | Store workload actions.
 *WorkloadPropertiesAPI* | [**CreateWorkloadPriorities**](docs/WorkloadPropertiesAPI.md#createworkloadpriorities) | **Post** /api/v1/workload-priorities | Create workload priorities.
 *WorkloadPropertiesAPI* | [**CreateWorkloadType**](docs/WorkloadPropertiesAPI.md#createworkloadtype) | **Post** /api/v1/workload-types | Create a workload type. [Experimental]
 *WorkloadPropertiesAPI* | [**DeleteWorkloadType**](docs/WorkloadPropertiesAPI.md#deleteworkloadtype) | **Delete** /api/v1/workload-types/{workloadTypeId} | Delete a workload type by id. [Experimental]
@@ -209,10 +210,13 @@ Class | Method | HTTP request | Description
 *WorkloadsAPI* | [**GetWorkloadElements**](docs/WorkloadsAPI.md#getworkloadelements) | **Get** /api/v1/workloads/{workloadId}/elements | Get workload structure elements by workload id.
 *WorkloadsAPI* | [**GetWorkloadEndpoints**](docs/WorkloadsAPI.md#getworkloadendpoints) | **Get** /api/v1/workloads/{workloadId}/endpoints | Get workload endpoints.
 *WorkloadsAPI* | [**GetWorkloadMetrics**](docs/WorkloadsAPI.md#getworkloadmetrics) | **Get** /api/v1/workloads/{workloadId}/metrics | Get workload metrics data.
+*WorkloadsAPI* | [**GetWorkloadResourceClaims**](docs/WorkloadsAPI.md#getworkloadresourceclaims) | **Get** /api/v1/workloads/{workloadId}/resource-claims | Get workload resource claims by workload id.
 *WorkloadsAPI* | [**GetWorkloads**](docs/WorkloadsAPI.md#getworkloads) | **Get** /api/v1/workloads | List workloads.
+*WorkloadsAPI* | [**GetWorkloadsSlim**](docs/WorkloadsAPI.md#getworkloadsslim) | **Get** /api/v1/workloads/slim | List workloads, slim.
 *WorkloadsAPI* | [**GetWorkloadsTelemetry**](docs/WorkloadsAPI.md#getworkloadstelemetry) | **Get** /api/v1/workloads/telemetry | Get the workloads telemetry.
 *WorkloadsAPI* | [**InternalCreateWorkload**](docs/WorkloadsAPI.md#internalcreateworkload) | **Post** /internal/workloads | Create a workload by the control plane.
 *WorkloadsAPI* | [**InternalEnrichOrgUnitRanking**](docs/WorkloadsAPI.md#internalenrichorgunitranking) | **Post** /internal/workloads/enrich-ranking | Enrich org unit ranking with workload counts (Internal API).
+*WorkloadsAPI* | [**InternalGetResourceClaimTemplateWorkloads**](docs/WorkloadsAPI.md#internalgetresourceclaimtemplateworkloads) | **Post** /internal/workloads/resource-claim-templates/workloads | List the workloads referencing a resource claim template (Internal API).
 *WorkloadsAPI* | [**InternalPatchWorkloadPhase**](docs/WorkloadsAPI.md#internalpatchworkloadphase) | **Patch** /internal/workloads/{workloadId} | patch the workload phase from the client.
 *WorkloadsAPI* | [**InternalSyncWorkloads**](docs/WorkloadsAPI.md#internalsyncworkloads) | **Post** /internal/workloads/sync | Sync workloads.
 *WorkloadsAPI* | [**PatchWorkloadPhase**](docs/WorkloadsAPI.md#patchworkloadphase) | **Patch** /api/v1/workloads/{workloadId} | patch the workload phase from the client.
@@ -315,6 +319,7 @@ Class | Method | HTTP request | Description
  - [CountResponse](docs/CountResponse.md)
  - [CountWorkloadElements200Response](docs/CountWorkloadElements200Response.md)
  - [CountWorkloads200Response](docs/CountWorkloads200Response.md)
+ - [CreateWorkloadActionsRequest](docs/CreateWorkloadActionsRequest.md)
  - [DataVolume](docs/DataVolume.md)
  - [DataVolumeInstance](docs/DataVolumeInstance.md)
  - [DataVolumeRules](docs/DataVolumeRules.md)
@@ -446,6 +451,7 @@ Class | Method | HTTP request | Description
  - [GetWorkloadSubmissionV2Enabled](docs/GetWorkloadSubmissionV2Enabled.md)
  - [GetWorkloads200Response](docs/GetWorkloads200Response.md)
  - [GetWorkloadsSetting](docs/GetWorkloadsSetting.md)
+ - [GetWorkloadsSlimResponse](docs/GetWorkloadsSlimResponse.md)
  - [GitAuthenticationMethod](docs/GitAuthenticationMethod.md)
  - [GitCommon](docs/GitCommon.md)
  - [GitInstance](docs/GitInstance.md)
@@ -519,6 +525,7 @@ Class | Method | HTTP request | Description
  - [InternalEnrichOrgUnitRankingRequest](docs/InternalEnrichOrgUnitRankingRequest.md)
  - [InternalEnrichOrgUnitRankingResponse](docs/InternalEnrichOrgUnitRankingResponse.md)
  - [InternalPodsSyncRequest](docs/InternalPodsSyncRequest.md)
+ - [InternalResourceClaimTemplateWorkloadsRequest](docs/InternalResourceClaimTemplateWorkloadsRequest.md)
  - [InternalSyncPods207Response](docs/InternalSyncPods207Response.md)
  - [InternalSyncWorkloads207Response](docs/InternalSyncWorkloads207Response.md)
  - [InternalWorkloadsSyncRequest](docs/InternalWorkloadsSyncRequest.md)
@@ -577,6 +584,7 @@ Class | Method | HTTP request | Description
  - [PodPreferredNodeSelectorTerm](docs/PodPreferredNodeSelectorTerm.md)
  - [PodRequestResources](docs/PodRequestResources.md)
  - [PodResourceClaim](docs/PodResourceClaim.md)
+ - [PodResourceClaimBinding](docs/PodResourceClaimBinding.md)
  - [PodSortFilterFields](docs/PodSortFilterFields.md)
  - [PodSyncFields](docs/PodSyncFields.md)
  - [PodToleration](docs/PodToleration.md)
@@ -632,6 +640,10 @@ Class | Method | HTTP request | Description
  - [RequestResourceCores](docs/RequestResourceCores.md)
  - [RequestResourceQuantity](docs/RequestResourceQuantity.md)
  - [RequestedPods](docs/RequestedPods.md)
+ - [ResourceClaimTemplateRef](docs/ResourceClaimTemplateRef.md)
+ - [ResourceClaimTemplateWorkload](docs/ResourceClaimTemplateWorkload.md)
+ - [ResourceClaimTemplateWorkloadPod](docs/ResourceClaimTemplateWorkloadPod.md)
+ - [ResourceClaimTemplateWorkloadsResponse](docs/ResourceClaimTemplateWorkloadsResponse.md)
  - [ResourceRef](docs/ResourceRef.md)
  - [ResourceRefKind](docs/ResourceRefKind.md)
  - [ResponseInfo](docs/ResponseInfo.md)
@@ -758,6 +770,7 @@ Class | Method | HTTP request | Description
  - [UpdateWorkloadsSettingByKeyRequest](docs/UpdateWorkloadsSettingByKeyRequest.md)
  - [Workload](docs/Workload.md)
  - [WorkloadActionRecord](docs/WorkloadActionRecord.md)
+ - [WorkloadActionRecordInput](docs/WorkloadActionRecordInput.md)
  - [WorkloadActionType](docs/WorkloadActionType.md)
  - [WorkloadAllocatedResources](docs/WorkloadAllocatedResources.md)
  - [WorkloadBatch](docs/WorkloadBatch.md)
@@ -784,9 +797,13 @@ Class | Method | HTTP request | Description
  - [WorkloadNetworkStatusServicesInnerUrlsInner](docs/WorkloadNetworkStatusServicesInnerUrlsInner.md)
  - [WorkloadNodeAffinity](docs/WorkloadNodeAffinity.md)
  - [WorkloadPatchFields](docs/WorkloadPatchFields.md)
+ - [WorkloadPodResourceClaims](docs/WorkloadPodResourceClaims.md)
  - [WorkloadPodsSyncRequest](docs/WorkloadPodsSyncRequest.md)
  - [WorkloadPriority](docs/WorkloadPriority.md)
  - [WorkloadRequestResources](docs/WorkloadRequestResources.md)
+ - [WorkloadResourceClaim](docs/WorkloadResourceClaim.md)
+ - [WorkloadResourceClaimsResponse](docs/WorkloadResourceClaimsResponse.md)
+ - [WorkloadSlim](docs/WorkloadSlim.md)
  - [WorkloadSortFilterFields](docs/WorkloadSortFilterFields.md)
  - [WorkloadSubmissionV2EnabledSetting](docs/WorkloadSubmissionV2EnabledSetting.md)
  - [WorkloadSyncFields](docs/WorkloadSyncFields.md)

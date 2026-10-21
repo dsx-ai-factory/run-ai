@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/init-ca
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/cert-manager/cert-manager v1.21.2

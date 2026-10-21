@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/safemapcache
 
-go 1.27.2
+go 1.27.3
 
 require github.com/stretchr/testify v1.12.1
 

@@ -10,8 +10,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 )
 
-var InstallerAppPS = models.PermissionSet{
-	Name:        "Installer app permission set",
+var InstallerServiceAccountPS = models.PermissionSet{
+	Name:        "Installer service account permission set",
 	Description: "",
 	Internal:    true,
 	Permissions: []models.RolePermission{

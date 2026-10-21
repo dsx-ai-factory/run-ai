@@ -52,6 +52,7 @@ var _ = Describe("DistributedInference Builder", func() {
 			Expect(result.Leader.RunAsGroup).To(Equal(ptr.To(int64(1000))))
 			Expect(result.Leader.Compute).NotTo(BeNil())
 			Expect(result.Leader.Compute.RequestedResources.GPUCompute.Requested).To(Equal(float64(4)))
+			Expect(result.Leader.Compute.GPUComputeMode).To(Equal(ptr.To("time-slicing")))
 			Expect(result.Leader.Compute.RequestedResources.CPUCores.Requested).To(Equal(float64(8)))
 
 			// Worker configuration
@@ -67,6 +68,7 @@ var _ = Describe("DistributedInference Builder", func() {
 			Expect(result.Worker.RunAsUser).To(Equal(ptr.To(int64(2000))))
 			Expect(result.Worker.Compute).NotTo(BeNil())
 			Expect(result.Worker.Compute.RequestedResources.GPUCompute.Requested).To(Equal(float64(2)))
+			Expect(result.Worker.Compute.GPUComputeMode).To(Equal(ptr.To("sm-sharing")))
 
 			// Leader storage
 			Expect(result.Leader.Storage).NotTo(BeNil())
@@ -217,6 +219,7 @@ func createFullSpec() *openapi.DistributedInferenceSpecSpec {
 	}
 
 	leaderCompute := &openapi.WorkspaceSpecSpecAllOfCompute{
+		GpuComputeMode:    *openapi.NewNullableGpuComputeMode(ptr.To(openapi.GPUCOMPUTEMODE_TIME_SLICING)),
 		GpuDevicesRequest: *openapi.NewNullableInt32(ptr.To(int32(4))),
 		CpuCoreRequest:    *openapi.NewNullableFloat64(ptr.To(float64(8))),
 	}
@@ -275,6 +278,7 @@ func createFullSpec() *openapi.DistributedInferenceSpecSpec {
 	}
 
 	workerCompute := &openapi.WorkspaceSpecSpecAllOfCompute{
+		GpuComputeMode:    *openapi.NewNullableGpuComputeMode(ptr.To(openapi.GPUCOMPUTEMODE_SM_SHARING)),
 		GpuDevicesRequest: *openapi.NewNullableInt32(ptr.To(int32(2))),
 	}
 

@@ -25,6 +25,7 @@ As part of the installation, you will be required to install the NVIDIA Run:ai c
 
 * To customize the installation based on your environment, see [Advanced control plane configurations](../../configuration/control-plane-config.md).
 * PostgreSQL and Keycloakx are installed with default usernames and passwords. To change the default credentials, see [Changing PostgreSQL Passwords](../../configuration/control-plane-config.md#changing-postgresql-passwords) and [Changing the Keycloak Admin Password](../../configuration/control-plane-config.md#changing-the-keycloak-admin-password) in Advanced Control Plane Configurations.
+* If you set an invalid administrator password, correcting it with `helm upgrade` has no effect. Delete the `runai-backend-gen-tenants-manager` secret in the `runai-backend` namespace, and then run the command again with a valid password.
 
 </Note>
 
@@ -41,12 +42,12 @@ Use the Helm command for the release type you are installing and update the valu
 * If you are using a local certificate authority, add `--set global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
 * Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
-  * **Minimum Length**: At least 8 characters long.
-  * **Digits**: At least 1 numeric digit (0-9).
-  * **Lowercase Characters**: At least 1 lowercase letter (a-z).
-  * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
-  * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+  * **Minimum Length**: Passwords must be at least 8 characters long.
+  * **Digits**: Must contain at least 1 numeric digit (0-9).
+  * **Lowercase Characters**: Must contain at least 1 lowercase letter (a-z).
+  * **Uppercase Characters**: Must contain at least 1 uppercase letter (A-Z).
+  * **Special Characters**: Must contain at least 1 special character from the following list: `- ! @ # $ % ^ & * ( ) _ + =`.
+* Add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. This file holds the Gov-ready values: the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 * Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
@@ -126,20 +127,20 @@ If your internal registry requires authentication, you must create the `runai-re
 
 Use the Helm command for the release type you are installing and update the values as follows. The `control-plane-airgap-values.yaml` file is written by the `airgap load` step in [Preparations](preparations.md#software-artifacts).
 
-* Replace `control-plane-<VERSION>.tgz` with the full filename of the control plane Helm chart (e.g., `control-plane-3.0.2.tgz`), located in the `charts` folder of the working directory you specified to `airgap load`.
+* Replace `control-plane-<VERSION>.tgz` with the full filename of the control plane Helm chart, located in the `charts` folder of the working directory you specified to `airgap load`.
 * Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml` during [Preparations](preparations.md#software-artifacts) - this is where `control-plane-airgap-values.yaml` was written.
 * Replace `global.domain=<DOMAIN>` with the fully qualified domain name (FQDN) obtained in [FQDN and DNS](../../system-requirements/networking-setup.md#fqdn-and-dns).
-* Set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
+* If you are using a local certificate authority, set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
 * The recommended ingress controller is HAProxy. If you are using a different ingress controller, set `--set global.ingress.ingressClass=<INGRESS_CLASS>` to the ingress class configured for your environment.
 * If your internal registry requires authentication, add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
 * Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
-  * **Minimum Length**: At least 8 characters long.
-  * **Digits**: At least 1 numeric digit (0-9).
-  * **Lowercase Characters**: At least 1 lowercase letter (a-z).
-  * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
-  * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Save the external PostgreSQL connection and the Keycloak and NATS settings of the control plane third-party services in a values file, and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command, next to the `-f` of the generated values file. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+  * **Minimum Length**: Passwords must be at least 8 characters long.
+  * **Digits**: Must contain at least 1 numeric digit (0-9).
+  * **Lowercase Characters**: Must contain at least 1 lowercase letter (a-z).
+  * **Uppercase Characters**: Must contain at least 1 uppercase letter (A-Z).
+  * **Special Characters**: Must contain at least 1 special character from the following list: `- ! @ # $ % ^ & * ( ) _ + =`.
+* Add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command, in addition to the generated values file. This file holds the Gov-ready values that are not image locations: the external PostgreSQL connection, the Keycloak user ID and start command, and the NATS command. The generated values file already sets the image locations. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#air-gapped-installations) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 * Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
@@ -147,7 +148,6 @@ Use the Helm command for the release type you are installing and update the valu
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
     --set global.domain=<DOMAIN> \
-    --set global.customCA.enabled=true \
     --set global.ingress.ingressClass=haproxy \
     --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
     --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
@@ -156,31 +156,27 @@ helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
 
 **Support-Entitled**
 
-In addition to the values above, add `--set supportEntitled=true` and `--set telemetryService.enabled=true` to the `helm upgrade` command:
+In addition to the values above, add `--set supportEntitled=true` to the `helm upgrade` command:
 
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
     --set global.domain=<DOMAIN> \
-    --set global.customCA.enabled=true \
     --set global.ingress.ingressClass=haproxy \
     --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
     --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
     --set supportEntitled=true \
-    --set telemetryService.enabled=true \
     -n runai-backend -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
 For example:
 
 ```bash
-helm upgrade -i runai-backend ./charts/control-plane-3.0.2.tgz \
+helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz \
     --set global.domain=runai.mycorp.local \
-    --set global.customCA.enabled=true \
     --set global.ingress.ingressClass=haproxy \
     --set tenantsManager.config.adminUsername=email@local.com \
     --set tenantsManager.config.adminPassword="myPassw0rd\!" \
     --set supportEntitled=true \
-    --set telemetryService.enabled=true \
     -n runai-backend -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
@@ -206,12 +202,12 @@ Use the Helm command for the release type you are installing and update the valu
 * If you are using a local certificate authority, add `--set global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
 * Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
-  * **Minimum Length**: At least 8 characters long.
-  * **Digits**: At least 1 numeric digit (0-9).
-  * **Lowercase Characters**: At least 1 lowercase letter (a-z).
-  * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
-  * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Save the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services, in a values file and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+  * **Minimum Length**: Passwords must be at least 8 characters long.
+  * **Digits**: Must contain at least 1 numeric digit (0-9).
+  * **Lowercase Characters**: Must contain at least 1 lowercase letter (a-z).
+  * **Uppercase Characters**: Must contain at least 1 uppercase letter (A-Z).
+  * **Special Characters**: Must contain at least 1 special character from the following list: `- ! @ # $ % ^ & * ( ) _ + =`.
+* Add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command. This file holds the Gov-ready values: the image pull secrets, the external PostgreSQL connection, and the hardened images and settings of the control plane third-party services. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 * Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
@@ -291,19 +287,19 @@ If your internal registry requires authentication, you must create the `runai-re
 
 Use the Helm command for the release type you are installing and update the values as follows. The `control-plane-airgap-values.yaml` file is written by the `airgap load` step in [Preparations](preparations.md#software-artifacts).
 
-* Replace `control-plane-<VERSION>.tgz` with the full filename of the control plane Helm chart (e.g., `control-plane-3.0.2.tgz`), located in the `charts` folder of the working directory you specified to `airgap load`.
+* Replace `control-plane-<VERSION>.tgz` with the full filename of the control plane Helm chart, located in the `charts` folder of the working directory you specified to `airgap load`.
 * Replace `<VALUES_DIR>` with the `valuesDir` path you set in `airgap-load.yaml` during [Preparations](preparations.md#software-artifacts) - this is where `control-plane-airgap-values.yaml` was written.
 * Replace `<OPENSHIFT-CLUSTER-DOMAIN>` with the domain configured for the OpenShift cluster. To determine the OpenShift cluster domain, run `oc get routes -A`.
-* Set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
+* If you are using a local certificate authority, set `global.customCA.enabled=true` as described in [Control Plane Local CA](preparations.md#control-plane-local-ca).
 * If your internal registry requires authentication, add `--set global.imagePullSecrets[0].name=runai-reg-creds` to reference the secret created in [Software Artifacts](preparations.md#software-artifacts).
 * Set `tenantsManager.config.adminUsername=<ADMIN_EMAIL>` to the administrator email address.
 * Set `tenantsManager.config.adminPassword=<ADMIN_PASSWORD>` to the initial administrator password. The password must meet the following requirements:
-  * **Minimum Length**: At least 8 characters long.
-  * **Digits**: At least 1 numeric digit (0-9).
-  * **Lowercase Characters**: At least 1 lowercase letter (a-z).
-  * **Uppercase Characters**: At least 1 uppercase letter (A-Z).
-  * **Special Characters**: At least 1 special character (e.g., !, @, #, $).
-* Save the external PostgreSQL connection and the Keycloak and NATS settings of the control plane third-party services in a values file, and add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command, next to the `-f` of the generated values file. Do not set image values, because `airgap load` generates them. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+  * **Minimum Length**: Passwords must be at least 8 characters long.
+  * **Digits**: Must contain at least 1 numeric digit (0-9).
+  * **Lowercase Characters**: Must contain at least 1 lowercase letter (a-z).
+  * **Uppercase Characters**: Must contain at least 1 uppercase letter (A-Z).
+  * **Special Characters**: Must contain at least 1 special character from the following list: `- ! @ # $ % ^ & * ( ) _ + =`.
+* Add `-f <GOV_READY_VALUES_FILE>` to the `helm upgrade` command, in addition to the generated values file. This file holds the Gov-ready values that are not image locations: the external PostgreSQL connection, the Keycloak user ID and start command, and the NATS command. The generated values file already sets the image locations. See [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md#air-gapped-installations) for the values. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 * Add `--set global.fipsMode=only` to the `helm upgrade` command to enable FIPS mode, so that the NVIDIA Run:ai services use only FIPS-validated cryptography. <Badge intent="info" minimal outlined>Gov-ready</Badge>
 
 **Open Source**
@@ -312,7 +308,6 @@ Use the Helm command for the release type you are installing and update the valu
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
     --set global.domain=runai.apps.<OPENSHIFT-CLUSTER-DOMAIN> \
     --set global.config.kubernetesDistribution=openshift \
-    --set global.customCA.enabled=true \
     --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
     --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
     -f <VALUES_DIR>/control-plane-airgap-values.yaml
@@ -320,31 +315,27 @@ helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-back
 
 **Support-Entitled**
 
-In addition to the values above, add `--set supportEntitled=true` and `--set telemetryService.enabled=true` to the `helm upgrade` command:
+In addition to the values above, add `--set supportEntitled=true` to the `helm upgrade` command:
 
 ```bash
 helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
     --set global.domain=runai.apps.<OPENSHIFT-CLUSTER-DOMAIN> \
     --set global.config.kubernetesDistribution=openshift \
-    --set global.customCA.enabled=true \
     --set tenantsManager.config.adminUsername=<ADMIN_EMAIL> \
     --set tenantsManager.config.adminPassword="<ADMIN_PASSWORD>" \
     --set supportEntitled=true \
-    --set telemetryService.enabled=true \
     -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 
 For example:
 
 ```bash
-helm upgrade -i runai-backend ./charts/control-plane-3.0.2.tgz -n runai-backend \
+helm upgrade -i runai-backend ./charts/control-plane-<VERSION>.tgz -n runai-backend \
     --set global.domain=runai.apps.mycorp.local \
     --set global.config.kubernetesDistribution=openshift \
-    --set global.customCA.enabled=true \
     --set tenantsManager.config.adminUsername=email@local.com \
     --set tenantsManager.config.adminPassword="myPassw0rd\!" \
     --set supportEntitled=true \
-    --set telemetryService.enabled=true \
     -f <VALUES_DIR>/control-plane-airgap-values.yaml
 ```
 

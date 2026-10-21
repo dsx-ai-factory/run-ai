@@ -170,6 +170,7 @@ Class | Method | HTTP request | Description
 *ResourceClaimTemplatesAPI* | [**CreateRct**](docs/ResourceClaimTemplatesAPI.md#createrct) | **Post** /api/v1/k8s-objects/resource-claim-templates | Create resource claim template.
 *ResourceClaimTemplatesAPI* | [**DeleteRctById**](docs/ResourceClaimTemplatesAPI.md#deleterctbyid) | **Delete** /api/v1/k8s-objects/resource-claim-templates/{AssetId} | Delete a resource claim template.
 *ResourceClaimTemplatesAPI* | [**GetRctById**](docs/ResourceClaimTemplatesAPI.md#getrctbyid) | **Get** /api/v1/k8s-objects/resource-claim-templates/{AssetId} | Retrieve a resource claim template.
+*ResourceClaimTemplatesAPI* | [**GetRctWorkloads**](docs/ResourceClaimTemplatesAPI.md#getrctworkloads) | **Get** /api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads | List the workloads using a resource claim template.
 *ResourceClaimTemplatesAPI* | [**ListRcts**](docs/ResourceClaimTemplatesAPI.md#listrcts) | **Get** /api/v1/k8s-objects/resource-claim-templates | List resource claim templates.
 *ResourceClaimTemplatesAPI* | [**UpdateRctById**](docs/ResourceClaimTemplatesAPI.md#updaterctbyid) | **Put** /api/v1/k8s-objects/resource-claim-templates/{AssetId} | Update a resource claim template.
 *S3API* | [**CreateS3Asset**](docs/S3API.md#creates3asset) | **Post** /api/v1/asset/datasource/s3 | Create an S3 asset.
@@ -517,6 +518,7 @@ Class | Method | HTTP request | Description
  - [PodAffinityTypeOptions](docs/PodAffinityTypeOptions.md)
  - [PodAffinityTypeOptionsOptionsInner](docs/PodAffinityTypeOptionsOptionsInner.md)
  - [PodAffinityTypeRules](docs/PodAffinityTypeRules.md)
+ - [PodResourceClaimBinding](docs/PodResourceClaimBinding.md)
  - [PolicyInfo](docs/PolicyInfo.md)
  - [PolicyRuleEnum](docs/PolicyRuleEnum.md)
  - [Port](docs/Port.md)
@@ -554,6 +556,9 @@ Class | Method | HTTP request | Description
  - [Repositories](docs/Repositories.md)
  - [RepositoryTags](docs/RepositoryTags.md)
  - [RequestInfo](docs/RequestInfo.md)
+ - [ResourceClaimTemplateWorkload](docs/ResourceClaimTemplateWorkload.md)
+ - [ResourceClaimTemplateWorkloadPod](docs/ResourceClaimTemplateWorkloadPod.md)
+ - [ResourceClaimTemplateWorkloadsResponse](docs/ResourceClaimTemplateWorkloadsResponse.md)
  - [ResponseInfo](docs/ResponseInfo.md)
  - [RestartPolicy](docs/RestartPolicy.md)
  - [RestartPolicyOptions](docs/RestartPolicyOptions.md)

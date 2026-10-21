@@ -101,6 +101,14 @@ helm install haproxy-kubernetes-ingress haproxytech/kubernetes-ingress \
  --set controller.service.type=NodePort
 ```
 
+<Note>
+
+**Note**
+
+For ingresses with TLS, HAProxy redirects HTTP requests to the port set in `controller.config.ssl-redirect-port`. The default is 8443, the controller's container port, which clients cannot reach through a NodePort Service. Set it to the HTTPS port that clients connect to. Use the HTTPS NodePort when clients reach the nodes directly, or 443 when an external load balancer forwards port 443 to the HTTPS NodePort. For example, add `--set-string controller.config.ssl-redirect-port=443` to the command above. For more information, refer to [ssl-redirect-port](https://www.haproxy.com/documentation/kubernetes-ingress/community/configuration-reference/configmap/) in the HAProxy Kubernetes Ingress Controller documentation.
+
+</Note>
+
 </Accordion>
 
 <Accordion title="Managed Kubernetes (EKS, GKE, AKS)">

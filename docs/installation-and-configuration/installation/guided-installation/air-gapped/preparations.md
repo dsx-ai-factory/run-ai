@@ -86,15 +86,22 @@ Getting images into your air-gapped network happens in two stages, on two differ
 
 Packing happens on a separate connected machine - any machine with outbound internet access.
 
-On that connected machine, download the `runai-installer` binary and use its `airgap pack` command to build a single tarball containing every image your release needs - NVIDIA Run:ai platform images and third-party service images (PostgreSQL, Keycloak, and others) alike. See [Third-Party Services](../../../system-requirements/third-party-services.md#image-registry).
+On that connected machine, download the `runai-installer` binary and use its `airgap pack` command to build a single tarball containing every image your release needs - NVIDIA Run:ai platform images and third-party service images (PostgreSQL, Keycloak, and others) alike.
+
+`airgap pack` automatically fetches the artifact lock that NVIDIA Run:ai publishes for your release. The lock lists the exact images and charts, with their versions, that the release requires. The command downloads them and packages them into a single bundle. You do not need to select images manually unless you want to override the defaults.
 
 1. Download the `runai-installer` binary for your operating system and CPU architecture - see [Download the Installer](#download-the-installer) above.
 2. Create a pack configuration file (`airgap-pack.yaml`) and run `airgap pack` against it:
 
-   - `settings` - Required. Your target NVIDIA Run:ai version, architecture, and output path.
-   - `imageOverrides` - Points specific third-party service images (for example, Keycloak) at your own source instead of the default one. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference.
-   - `registryAuth` - Authenticates to your own registry hosting an `imageOverrides` source.
-   - Third-party services - Add an entry to `imageOverrides` for each hardened third-party image, and an entry to `registryAuth` for `docker.io` with your Docker Hub credentials. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the full example. <Badge intent="info" minimal outlined>Gov-ready</Badge>
+   - `settings` - Your target NVIDIA Run:ai version, architecture, and output path. For example, `runaiVersion: 3.0.17`. <Badge intent="info" minimal outlined>Required</Badge>
+   - `imageOverrides` - Replaces specific third-party service images with an image from your own source. Add an entry only for an image you want to replace. Each entry needs the full image reference, including the tag. Each entry also accepts `group`, required only when `name` exists in more than one image group - see [`imageOverrides`](../configuration-reference.md#pack-an-air-gapped-bundle) in the Configuration Reference. <Badge intent="info" minimal outlined>Optional</Badge>
+     - Non-default images - Add an entry for each image you want to replace, for example Keycloak from your own registry. See [Third-Party Services](../../../system-requirements/third-party-services.md#image-registry).
+     - Gov-ready - Add an entry for each hardened third-party image. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md) for the full example.
+   - `registryAuth` - Authenticates to the registry that hosts an `imageOverrides` source. <Badge intent="info" minimal outlined>Optional</Badge>
+     - Non-default images - Add an entry for your own registry.
+     - Gov-ready - Add an entry for `docker.io` with your Docker Hub credentials. See [Gov-Ready Third-Party Services](../../../system-requirements/gov-ready-third-party-services.md).
+
+   A standard air-gapped bundle needs only the `settings` section:
 
    ```bash
    cat > airgap-pack.yaml <<'EOF'
@@ -103,16 +110,18 @@ On that connected machine, download the `runai-installer` binary and use its `ai
      architecture: amd64
      output: /path/to/runai-airgap.tar
 
-   imageOverrides:
-     - name: keycloak
-       source: <your-registry>/keycloak:<tag>
-     # Gov-ready: add an entry for each hardened image (keycloak, postgres, traefik, nats, thanos, valkey, git-sync)
+   # Optional: replace specific images with images from your own registry
+   # imageOverrides:
+   #   - name: keycloak
+   #     source: <your-registry>/keycloak:<tag>
+   #   # Gov-ready: add an entry for each hardened image (keycloak, postgres, traefik, nats, thanos, valkey, git-sync)
 
-   registryAuth:
-     - registry: <your-registry-host>
-       username: <username>
-       passwordPath: /path/to/registry-password
-     # Gov-ready: add an entry for docker.io with your Docker Hub credentials
+   # Optional: credentials for the registry that hosts an imageOverrides source
+   # registryAuth:
+   #   - registry: <your-registry-host>
+   #     username: <username>
+   #     passwordPath: /path/to/registry-password
+   #   # Gov-ready: add an entry for docker.io with your Docker Hub credentials
    EOF
 
    ./runai-installer airgap pack \

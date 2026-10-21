@@ -103,13 +103,69 @@ func TestSAMLIdp_Create_Conflict(t *testing.T) {
 	requireApiError(t, err, httpResp, http.StatusConflict)
 }
 
+func TestSAMLIdp_Create_InvalidBase64MetadataFile(t *testing.T) {
+	t.Parallel()
+	ctx, _, _ := TestStepsClient.NewTestContextWithRealm("saml-idp-create-invalid-base64")
+	alias := GenerateRandomString("saml-idp-invalid-base64")
+	idpRequest := makeSamlIdpRawFileRequest(alias, samlEntityId, "metadata.xml", "not!valid!base64", GetDefaultIDPMappers())
+
+	_, httpResp, err := OpenapiClient.IdpsAPI.CreateIdp(ctx).IdpCreationRequest(idpRequest).Execute()
+	requireApiError(t, err, httpResp, http.StatusBadRequest)
+}
+
+func TestSAMLIdp_Create_UnparseableMetadataFile(t *testing.T) {
+	t.Parallel()
+	ctx, _, _ := TestStepsClient.NewTestContextWithRealm("saml-idp-create-unparseable")
+	alias := GenerateRandomString("saml-idp-unparseable")
+	idpRequest := makeSamlIdpFileRequest(alias, samlEntityId, "metadata.xml", "this is not saml metadata", GetDefaultIDPMappers())
+
+	_, httpResp, err := OpenapiClient.IdpsAPI.CreateIdp(ctx).IdpCreationRequest(idpRequest).Execute()
+	require.Error(t, err)
+	require.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
+}
+
+func TestSAMLIdp_Create_UnresolvableMetadataUrl(t *testing.T) {
+	t.Parallel()
+	ctx, _, _ := TestStepsClient.NewTestContextWithRealm("saml-idp-create-unresolvable-url")
+	alias := GenerateRandomString("saml-idp-unresolvable-url")
+	idpRequest := makeSamlIdpRequest(alias, samlEntityId, "http://no-such-host.invalid/descriptor", GetDefaultIDPMappers())
+
+	_, httpResp, err := OpenapiClient.IdpsAPI.CreateIdp(ctx).IdpCreationRequest(idpRequest).Execute()
+	requireApiError(t, err, httpResp, http.StatusBadRequest)
+}
+
 func TestSAMLIdp_Update_NotFound(t *testing.T) {
 	t.Parallel()
 	ctx, _, _ := TestStepsClient.NewTestContextWithRealm("saml-idp-update-notfound")
 	alias, entityId, metadataUrl, mappers := newRandomSamlIdpTestDataWithRealm()
 	idpRequest := makeSamlIdpRequest(alias, entityId, metadataUrl, mappers)
 	httpResp, err := OpenapiClient.IdpsAPI.UpdateIdp(ctx, alias).IdpCreationRequest(idpRequest).Execute()
-	requireApiError(t, err, httpResp, http.StatusInternalServerError)
+	requireApiError(t, err, httpResp, http.StatusNotFound)
+}
+
+func TestSAMLIdp_Update_InvalidBase64MetadataFile(t *testing.T) {
+	t.Parallel()
+	ctx, _, _ := TestStepsClient.NewTestContextWithRealm("saml-idp-update-invalid-base64")
+	alias, entityId, metadataUrl, mappers := newRandomSamlIdpTestDataWithRealm()
+	createSamlIdp(t, ctx, alias, entityId, metadataUrl, mappers)
+	defer deleteIDP(t, ctx, alias)
+	invalidRequest := makeSamlIdpRawFileRequest(alias, entityId, "metadata.xml", "not!valid!base64", mappers)
+
+	httpResp, err := OpenapiClient.IdpsAPI.UpdateIdp(ctx, alias).IdpCreationRequest(invalidRequest).Execute()
+	requireApiError(t, err, httpResp, http.StatusBadRequest)
+}
+
+func TestSAMLIdp_Update_UnparseableMetadataFile(t *testing.T) {
+	t.Parallel()
+	ctx, _, _ := TestStepsClient.NewTestContextWithRealm("saml-idp-update-unparseable")
+	alias, entityId, metadataUrl, mappers := newRandomSamlIdpTestDataWithRealm()
+	createSamlIdp(t, ctx, alias, entityId, metadataUrl, mappers)
+	defer deleteIDP(t, ctx, alias)
+	invalidRequest := makeSamlIdpFileRequest(alias, entityId, "metadata.xml", "this is not saml metadata", mappers)
+
+	httpResp, err := OpenapiClient.IdpsAPI.UpdateIdp(ctx, alias).IdpCreationRequest(invalidRequest).Execute()
+	require.Error(t, err)
+	require.Equal(t, http.StatusBadRequest, httpResp.StatusCode)
 }
 
 func TestSAMLIdp_Update_Invalid(t *testing.T) {
@@ -229,6 +285,21 @@ func makeSamlIdpFileRequest(alias, entityId, fileName, xmlContent string, mapper
 		SamlData: *openapi.NewNullableSamlCreationData(&openapi.SamlCreationData{
 			MetadataXmlType: &metadataType,
 			MetadataXmlFile: StrPtr(xmlBase64),
+			FileName:        StrPtr(fileName),
+			EntityId:        StrPtr(entityId),
+		}),
+		Mappers: mappers,
+	}
+}
+
+func makeSamlIdpRawFileRequest(alias, entityId, fileName, metadataXmlFile string, mappers *openapi.Mappers) openapi.IdpCreationRequest {
+	metadataType := openapi.SAMLCREATIONDATAMETADATAXMLTYPEENUM_FILE
+	return openapi.IdpCreationRequest{
+		Name: StrPtr(alias),
+		Type: openapi.IDPCREATIONREQUESTTYPEENUM_SAML,
+		SamlData: *openapi.NewNullableSamlCreationData(&openapi.SamlCreationData{
+			MetadataXmlType: &metadataType,
+			MetadataXmlFile: StrPtr(metadataXmlFile),
 			FileName:        StrPtr(fileName),
 			EntityId:        StrPtr(entityId),
 		}),

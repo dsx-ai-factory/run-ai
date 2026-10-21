@@ -1,0 +1,17 @@
+type: object
+required:
+  - name
+properties:
+  name:
+    type: string
+    description: >-
+      Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name`
+      and referenced by containers in `resources.claims`.
+    example: "gpu-1"
+  claimName:
+    type: string
+    nullable: true
+    description: >-
+      Name of the ResourceClaim bound to the pod for this entry. For a claim generated
+      from a template, this is null until Kubernetes creates and binds the claim.
+    example: "bert-worker-0-gpu-1-mk4s8"

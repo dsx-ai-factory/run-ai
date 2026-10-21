@@ -17,6 +17,7 @@ api_settings.go
 api_sync.go
 api_trainings.go
 api_unified.go
+api_workload_actions.go
 api_workload_properties.go
 api_workload_templates.go
 api_workloads.go
@@ -105,6 +106,7 @@ docs/Container.md
 docs/CountResponse.md
 docs/CountWorkloadElements200Response.md
 docs/CountWorkloads200Response.md
+docs/CreateWorkloadActionsRequest.md
 docs/DataVolume.md
 docs/DataVolumeInstance.md
 docs/DataVolumeRules.md
@@ -239,6 +241,7 @@ docs/GetWorkloadPriorities200Response.md
 docs/GetWorkloadSubmissionV2Enabled.md
 docs/GetWorkloads200Response.md
 docs/GetWorkloadsSetting.md
+docs/GetWorkloadsSlimResponse.md
 docs/GitAuthenticationMethod.md
 docs/GitCommon.md
 docs/GitInstance.md
@@ -314,6 +317,7 @@ docs/IntegerRulesOptional.md
 docs/InternalEnrichOrgUnitRankingRequest.md
 docs/InternalEnrichOrgUnitRankingResponse.md
 docs/InternalPodsSyncRequest.md
+docs/InternalResourceClaimTemplateWorkloadsRequest.md
 docs/InternalSyncPods207Response.md
 docs/InternalSyncWorkloads207Response.md
 docs/InternalWorkloadsSyncRequest.md
@@ -374,6 +378,7 @@ docs/PodNodeAffinityRequired.md
 docs/PodPreferredNodeSelectorTerm.md
 docs/PodRequestResources.md
 docs/PodResourceClaim.md
+docs/PodResourceClaimBinding.md
 docs/PodSortFilterFields.md
 docs/PodSyncFields.md
 docs/PodToleration.md
@@ -430,6 +435,10 @@ docs/RequestInfo.md
 docs/RequestResourceCores.md
 docs/RequestResourceQuantity.md
 docs/RequestedPods.md
+docs/ResourceClaimTemplateRef.md
+docs/ResourceClaimTemplateWorkload.md
+docs/ResourceClaimTemplateWorkloadPod.md
+docs/ResourceClaimTemplateWorkloadsResponse.md
 docs/ResourceRef.md
 docs/ResourceRefKind.md
 docs/ResponseInfo.md
@@ -561,7 +570,9 @@ docs/UpdateSpecSpec.md
 docs/UpdateWorkloadsSettingByKeyRequest.md
 docs/Workload.md
 docs/WorkloadActionRecord.md
+docs/WorkloadActionRecordInput.md
 docs/WorkloadActionType.md
+docs/WorkloadActionsAPI.md
 docs/WorkloadAllocatedResources.md
 docs/WorkloadBatch.md
 docs/WorkloadCategory.md
@@ -587,10 +598,14 @@ docs/WorkloadNetworkStatusServicesInnerPortsInner.md
 docs/WorkloadNetworkStatusServicesInnerUrlsInner.md
 docs/WorkloadNodeAffinity.md
 docs/WorkloadPatchFields.md
+docs/WorkloadPodResourceClaims.md
 docs/WorkloadPodsSyncRequest.md
 docs/WorkloadPriority.md
 docs/WorkloadPropertiesAPI.md
 docs/WorkloadRequestResources.md
+docs/WorkloadResourceClaim.md
+docs/WorkloadResourceClaimsResponse.md
+docs/WorkloadSlim.md
 docs/WorkloadSortFilterFields.md
 docs/WorkloadSubmissionV2EnabledSetting.md
 docs/WorkloadSyncFields.md
@@ -719,6 +734,7 @@ model_container.go
 model_count_response.go
 model_count_workload_elements_200_response.go
 model_count_workloads_200_response.go
+model_create_workload_actions_request.go
 model_data_volume.go
 model_data_volume_instance.go
 model_data_volume_rules.go
@@ -850,6 +866,7 @@ model_get_workload_priorities_200_response.go
 model_get_workload_submission_v2_enabled.go
 model_get_workloads_200_response.go
 model_get_workloads_setting.go
+model_get_workloads_slim_response.go
 model_git_authentication_method.go
 model_git_common.go
 model_git_instance.go
@@ -923,6 +940,7 @@ model_integer_rules_optional.go
 model_internal_enrich_org_unit_ranking_request.go
 model_internal_enrich_org_unit_ranking_response.go
 model_internal_pods_sync_request.go
+model_internal_resource_claim_template_workloads_request.go
 model_internal_sync_pods_207_response.go
 model_internal_sync_workloads_207_response.go
 model_internal_workloads_sync_request.go
@@ -981,6 +999,7 @@ model_pod_node_affinity_required.go
 model_pod_preferred_node_selector_term.go
 model_pod_request_resources.go
 model_pod_resource_claim.go
+model_pod_resource_claim_binding.go
 model_pod_sort_filter_fields.go
 model_pod_sync_fields.go
 model_pod_toleration.go
@@ -1036,6 +1055,10 @@ model_request_info.go
 model_request_resource_cores.go
 model_request_resource_quantity.go
 model_requested_pods.go
+model_resource_claim_template_ref.go
+model_resource_claim_template_workload.go
+model_resource_claim_template_workload_pod.go
+model_resource_claim_template_workloads_response.go
 model_resource_ref.go
 model_resource_ref_kind.go
 model_response_info.go
@@ -1162,6 +1185,7 @@ model_update_spec_spec.go
 model_update_workloads_setting_by_key_request.go
 model_workload.go
 model_workload_action_record.go
+model_workload_action_record_input.go
 model_workload_action_type.go
 model_workload_allocated_resources.go
 model_workload_batch.go
@@ -1188,9 +1212,13 @@ model_workload_network_status_services_inner_ports_inner.go
 model_workload_network_status_services_inner_urls_inner.go
 model_workload_node_affinity.go
 model_workload_patch_fields.go
+model_workload_pod_resource_claims.go
 model_workload_pods_sync_request.go
 model_workload_priority.go
 model_workload_request_resources.go
+model_workload_resource_claim.go
+model_workload_resource_claims_response.go
+model_workload_slim.go
 model_workload_sort_filter_fields.go
 model_workload_submission_v2_enabled_setting.go
 model_workload_sync_fields.go
@@ -1247,6 +1275,7 @@ test/api_settings_test.go
 test/api_sync_test.go
 test/api_trainings_test.go
 test/api_unified_test.go
+test/api_workload_actions_test.go
 test/api_workload_properties_test.go
 test/api_workload_templates_test.go
 test/api_workloads_batch_test.go

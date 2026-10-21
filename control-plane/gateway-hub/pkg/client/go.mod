@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/gateway-hub/pkg/client
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9

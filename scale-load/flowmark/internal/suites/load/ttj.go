@@ -24,12 +24,12 @@ import (
 )
 
 const (
-	suiteName          = "load-ttj"
-	projectPrefix      = "flowmark-load"
-	runLabel           = "flowmark/run"
-	progressInterval   = 30 * time.Second
-	timestampTolerance = time.Second
-	rateShortfall      = 0.10
+	suiteName           = "load-ttj"
+	projectPrefix       = "flowmark-load"
+	runLabel            = "flowmark/run"
+	progressInterval    = 30 * time.Second
+	timestampTolerance  = time.Second
+	minSubmittedDefault = 90
 )
 
 type sessionOpener func(ctx context.Context, target core.Target, limits client.Limits, cluster, projectPrefix string, setupTimeout time.Duration) (*submit.Session, error)
@@ -231,7 +231,7 @@ func deleteBudget(count int, opts options) time.Duration {
 
 const (
 	defaultImage         = "registry.k8s.io/pause:3.9"
-	maxUsers             = 64
+	maxUsers             = 512
 	maxRatePerSecond     = 1000
 	maxRequestsPerSecond = 1000
 )
@@ -252,7 +252,7 @@ func latencySLOKeys() []string {
 	return keys
 }
 
-var knownKnobs = []string{"users", "spawnRate", "rate", "duration", "workloadType", "image", "timeout", "setupTimeout", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "cluster", "slo"}
+var knownKnobs = []string{"users", "spawnRate", "rate", "duration", "workloadType", "image", "timeout", "setupTimeout", "minSubmittedPercent", "kubeRequestsPerSecond", "controlPlaneRequestsPerSecond", "cluster", "slo"}
 
 type options struct {
 	users        int
@@ -263,6 +263,7 @@ type options struct {
 	image        string
 	timeout      time.Duration
 	setupTimeout time.Duration
+	minSubmitted int
 	limits       client.Limits
 	cluster      string
 	slo          map[string]int
@@ -310,6 +311,12 @@ func parseOptions(scenario core.Scenario) (options, error) {
 	if opts.setupTimeout, err = scenario.Duration("setupTimeout", 5*time.Minute); err != nil {
 		return options{}, err
 	}
+	if opts.minSubmitted, err = scenario.Int("minSubmittedPercent", minSubmittedDefault); err != nil {
+		return options{}, err
+	}
+	if opts.minSubmitted < 0 || opts.minSubmitted > 100 {
+		return options{}, fmt.Errorf("knob \"minSubmittedPercent\" must be between 0 and 100, got %d", opts.minSubmitted)
+	}
 	if opts.limits.KubeRequestsPerSecond, err = scenario.Int("kubeRequestsPerSecond", client.DefaultLimits.KubeRequestsPerSecond); err != nil {
 		return options{}, err
 	}
@@ -343,8 +350,10 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 	ttj := measure.Stats(s.TTJ)
 	api := measure.Stats(s.ApiAccepted)
 	metrics := map[string]any{
-		"workload_type": opts.workloadType,
-		"failed_count":  api.FailedCount,
+		"workload_type":   opts.workloadType,
+		"failed_count":    api.FailedCount,
+		"planned_count":   pacing.Planned,
+		"submitted_count": pacing.Submitted,
 	}
 	for name, timings := range map[string][]measure.Timing{"api_accepted": s.ApiAccepted, "cluster_synced": s.ClusterSynced, "pod_created": s.PodCreated, "ttj": s.TTJ} {
 		summary := measure.Stats(timings)
@@ -357,7 +366,7 @@ func buildSection(s measure.Spans, pacing submit.Pacing, submissions []measure.S
 	}
 
 	var problems []string
-	if required := int(math.Ceil(float64(pacing.Planned) * (1 - rateShortfall))); pacing.Planned > 0 && pacing.Submitted < required {
+	if required := int(math.Ceil(float64(pacing.Planned) * float64(opts.minSubmitted) / 100)); pacing.Planned > 0 && pacing.Submitted < required {
 		problems = append(problems, fmt.Sprintf("the pacer kept only %d of the %d planned submissions (%.2f/s against the %d/s target): "+
 			"the environment could not absorb the load", pacing.Submitted, pacing.Planned, pacing.Rate(), opts.rate))
 	}

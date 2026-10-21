@@ -7,6 +7,7 @@ package clients
 
 import (
 	cpworkloadmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane/workload"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/describe"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	nimclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
@@ -104,10 +105,10 @@ func (dm *DescribeMocker) CreateDescribeService() *describe.Service {
 func (dm *DescribeMocker) setupWorkloadClientMock() {
 	dm.MockWorkloadClient = cpworkloadmocks.NewMockWorkloadClient(dm.mockCtrl)
 
-	// Mock List - return the workload list from fixtures
+	// Mock ListSlim - return the workload list from fixtures
 	dm.MockWorkloadClient.EXPECT().
-		List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any(), false).
-		Return(dm.fixtures.WorkloadList, nil).
+		ListSlim(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).
+		Return(client.ToSlimResponse(dm.fixtures.WorkloadList), nil).
 		AnyTimes()
 
 	// Mock GetWorkload - return the detailed workload from fixtures

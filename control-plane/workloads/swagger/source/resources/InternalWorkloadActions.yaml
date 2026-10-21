@@ -1,0 +1,27 @@
+post:
+  summary: Store workload actions.
+  description: Records workload actions accepted by workloads-manager, using the authenticated request context to identify who performed them and the supplied timestamp to record when they were accepted.
+  operationId: internal_create_workload_actions
+  x-service: workloads
+  x-internal: true
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workload_actions_api_test.go
+  tags: [WorkloadActions]
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/WorkloadActions/CreateWorkloadActionsRequest.yaml'
+  responses:
+    204:
+      description: Actions stored successfully.
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    412:
+      $ref: '../../../../infra/openapi/docs/responses/412PreconditionFailed.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

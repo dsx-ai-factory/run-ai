@@ -148,3 +148,26 @@ func (s *ResourceClaimTemplatesAPIService) DeleteRctById(ctx context.Context, as
 
 	return Response(http.StatusNotImplemented, nil), errors.New("DeleteRctById method not implemented")
 }
+
+// GetRctWorkloads - List the workloads using a resource claim template.
+func (s *ResourceClaimTemplatesAPIService) GetRctWorkloads(ctx context.Context, assetId string, offset int32, limit int32) (ImplResponse, error) {
+	// TODO - update GetRctWorkloads with the required logic for this service method.
+	// Add api_resource_claim_templates_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, ResourceClaimTemplateWorkloadsResponse{}) or use other options such as http.Ok ...
+	// return Response(200, ResourceClaimTemplateWorkloadsResponse{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
+	// return Response(404, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("GetRctWorkloads method not implemented")
+}

@@ -214,17 +214,18 @@ navigation:
         - page: Set Up SSO with OpenShift
           slug: openshift
           path: ../../docs/platform-management/authentication/sso/openshift.md
-      - page: Permissions
-        path: ../../docs/platform-management/authentication/permissions.md
-      - page: Roles
+      - section: Roles
         path: ../../docs/platform-management/authentication/roles.md
+        contents:
+        - page: Permissions
+          path: ../../docs/platform-management/authentication/permissions.md
+        - page: Role to ClusterRole Mapping
+          path: ../../docs/platform-management/authentication/role-clusterrole-mapping.md
       - page: Service Accounts (formerly applications)
         slug: service-accounts
         path: ../../docs/platform-management/authentication/service-accounts.md
       - page: Access Rules
         path: ../../docs/platform-management/authentication/accessrules.md
-      - page: Cluster Authentication
-        path: ../../docs/platform-management/authentication/cluster-authentication.md
     - section: Manage AI Initiatives
       contents:
       - page: Adapting AI Initiatives to Your Organization
