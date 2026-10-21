@@ -79,7 +79,7 @@ var _ = Describe("ClusterVersionList", func() {
 		It("should generate a public NGC installation string without credentials", func() {
 			// Arrange
 			data := &clusterinstallation.InstallationData{
-				RepoURL:          "https://helm.ngc.nvidia.com/nvidia/runai",
+				RepoURL:          "https://helm.ngc.nvidia.com/nvidia/runai-oss",
 				Host:             "test-url",
 				BootstrapToken:   "test-secret",
 				Uuid:             "test-uuid",
@@ -87,7 +87,7 @@ var _ = Describe("ClusterVersionList", func() {
 				Version:          "test-version",
 			}
 
-			expectedInstallationStr := `helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai --force-update
+			expectedInstallationStr := `helm repo add runai https://helm.ngc.nvidia.com/nvidia/runai-oss --force-update
 helm repo update
 helm upgrade -i runai-cluster runai/runai-cluster -n runai \
 --set controlPlane.url=test-url \

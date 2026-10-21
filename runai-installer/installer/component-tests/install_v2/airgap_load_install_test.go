@@ -168,7 +168,7 @@ func artifactInstallLock() *artifactlock.ArtifactLock {
 	lock.Spec.Charts[0].Version = "3.0.0"
 	lock.Spec.Charts[0].BundlePath = "charts/control-plane-3.0.0.tgz"
 	lock.Spec.Charts[1].Version = "3.0.0"
-	lock.Spec.Charts[1].Source = "https://helm.ngc.nvidia.com/nvidia/runai/charts/runai-cluster-3.0.0.tgz"
+	lock.Spec.Charts[1].Source = "https://helm.ngc.nvidia.com/nvidia/runai-oss/charts/runai-cluster-3.0.0.tgz"
 	lock.Spec.Charts[1].BundlePath = "charts/runai-cluster-3.0.0.tgz"
 	return lock
 }
