@@ -116,7 +116,13 @@ func installPlanApprovalCheck(s *spec.Spec) []Finding {
 		)
 	}
 	if f := s.Features; f != nil {
-		entries = append(entries, entry{"features.knative", f.Knative})
+		// LWS is validated alongside Knative: it installs through the same
+		// OperatorHub/OLM surface on OpenShift, where the plan feeds this value
+		// into the Subscription.
+		entries = append(entries,
+			entry{"features.knative", f.Knative},
+			entry{"features.lws", f.LWS},
+		)
 	}
 
 	var findings []Finding
