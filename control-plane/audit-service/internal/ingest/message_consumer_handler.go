@@ -75,7 +75,10 @@ func (mc *MessageConsumerHandler) handleLog(log *api.AuditLog) error {
 func ParseToModelLog(log *api.AuditLog) (*models.AuditLog, error) {
 	uid, err := uuid.Parse(log.RequestId)
 	if err != nil {
-		log.RequestId = uuid.NewString()
+		// The request id is missing or is not a UUID. Store a generated one —
+		// the zero UUID would make every such log share the same request id.
+		uid = uuid.New()
+		log.RequestId = uid.String()
 	}
 
 	tenant, err := strconv.Atoi(log.TenantId)
