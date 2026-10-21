@@ -18,9 +18,9 @@ OpenShell and NVIDIA Run:ai each handle a different part of running AI agents. O
 Each part of the setup is responsible for the following:
 
 - **OpenShell** is the platform where users manage agents. It provides:
-  - **Sign-in with your identity provider.** The gateway accepts any OIDC identity provider (IdP) that puts the user's roles or groups in a claim of its tokens (the claim is configurable). Users do not need NVIDIA Run:ai accounts. The token's subject, an identifier chosen by the IdP, is the identity OpenShell records and checks.
-  - **OpenShell workspaces and permissions.** A Platform Admin decides who can use which OpenShell workspace. OpenShell workspace membership is the access control: a user can create and use sandboxes only in the OpenShell workspaces they are members of.
-  - **Sandboxes.** Each agent runs as an agent pod and an OpenShell supervisor pod in the NVIDIA Run:ai project namespace. The supervisor enforces the sandbox policy (which binaries may reach which endpoints) and injects real credentials into approved requests, so the agent holds only a placeholder.
+  - **Sign-in with your identity provider.** Users sign in through any OIDC identity provider (IdP) and do not need NVIDIA Run:ai accounts. For how sign-in works, refer to [Gateway Authentication](https://docs.nvidia.com/openshell/latest/how-it-works/gateways/authentication).
+  - **OpenShell workspaces and permissions.** A Platform Admin decides who can use which OpenShell workspace, and workspace membership is the access control. For more details, refer to [Workspaces](https://docs.nvidia.com/openshell/latest/how-it-works/workspaces).
+  - **Sandboxes.** Each agent runs in a sandbox in the NVIDIA Run:ai project namespace, where the OpenShell supervisor enforces the sandbox policy and keeps real credentials away from the agent. For more details, refer to [Manage Sandboxes](https://docs.nvidia.com/openshell/latest/how-it-works/sandboxes/overview).
   - **The OpenShell gateway** is platform infrastructure. It runs outside the NVIDIA Run:ai projects, so NVIDIA Run:ai project quota covers the agents.
 - **NVIDIA Run:ai** schedules the agents' workloads and monitors them. It is responsible for:
   - **Scheduling.** NVIDIA Run:ai schedules every pod in a project namespace under the NVIDIA Run:ai project's [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [fairness](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#fairness-fair-resource-distribution), and [node pools](../../platform-management/aiinitiatives/resources/node-pools.md).
@@ -32,12 +32,12 @@ Each part of the setup is responsible for the following:
 
 The Platform Admin, Workspace Admin, and Workspace User roles are OpenShell roles. For more details, refer to [Understand the Role Model](https://docs.nvidia.com/openshell/latest/how-it-works/workspaces#understand-the-role-model) in the OpenShell documentation. The IdP group names `openshell-admin` and `openshell-user` are the values that you set as `admin_role` and `user_role` on the gateway in [Step 1](#step-1-installing-openshell).
 
-| Role | Who they are | Responsible for | Works with |
-|---|---|---|---|
-| **Cluster administrator** | Cluster and infrastructure administrator. The identity provider (IdP) administrator joins for the IdP steps. | Installs and configures the OpenShell gateway: Helm charts, IdP settings, network policy, ingress and certificates | `kubectl`, Helm, the IdP admin console |
-| **Platform Admin** | A member of the IdP group `openshell-admin` | Runs OpenShell for the organization: creates an OpenShell workspace for the NVIDIA Run:ai project, adds users to it, and creates the providers that supply model credentials. Can delegate adding users to Workspace Admins. | The `openshell` CLI. |
-| **Workspace Admin** | A user that a Platform Admin gave the `admin` role in an OpenShell workspace | Adds users to their own OpenShell workspace and manages the providers of their own OpenShell workspace | The `openshell` CLI |
-| **Workspace User** | A member of the IdP group `openshell-user` and of the team's OpenShell workspace | Runs agents in their team's OpenShell workspace | The `openshell` CLI |
+| Role | Who they are | Steps |
+|---|---|---|
+| **Cluster administrator** | Cluster and infrastructure administrator. The identity provider (IdP) administrator joins for the IdP steps. | [Step 1](#step-1-installing-openshell) and [Step 2](#step-2-signing-in-to-openshell) (registers the OIDC client) |
+| **Platform Admin** | A member of the IdP group `openshell-admin` | [Step 2](#step-2-signing-in-to-openshell) to [Step 5](#step-5-giving-agents-model-access), and [Step 7](#step-7-monitoring-agents) |
+| **Workspace Admin** | A user that a Platform Admin gave the `admin` role in an OpenShell workspace | [Step 4](#step-4-adding-users-to-the-openshell-workspace), for their own OpenShell workspace |
+| **Workspace User** | A member of the IdP group `openshell-user` and of the team's OpenShell workspace | [Step 2](#step-2-signing-in-to-openshell) and [Step 6](#step-6-running-an-agent-that-pushes-to-github) |
 
 ## Prerequisites
 
@@ -55,7 +55,7 @@ Before you install OpenShell in [Step 1](#step-1-installing-openshell), make sur
 
 Make sure the following are set up in NVIDIA Run:ai:
 
-- **A project.** An NVIDIA Run:ai [project](../../platform-management/aiinitiatives/organization/projects.md) for the team that runs agents, with the quota you want to limit its agents to. This tutorial uses the NVIDIA Run:ai project `team-a`. Users do not need NVIDIA Run:ai accounts. Agents run in the NVIDIA Run:ai project under its quota. In [Step 3](#step-3-creating-an-openshell-workspace-for-the-nvidia-runai-project), the Platform Admin creates an OpenShell workspace that matches the NVIDIA Run:ai project, and in [Step 4](#step-4-adding-users-to-the-openshell-workspace) adds the team's users to it.
+- **A project.** An NVIDIA Run:ai [project](../../platform-management/aiinitiatives/organization/projects.md) for the team that runs agents, with the quota you want to limit its agents to. This tutorial uses the NVIDIA Run:ai project `team-a`. In [Step 3](#step-3-creating-an-openshell-workspace-for-the-nvidia-runai-project), the Platform Admin creates an OpenShell workspace that matches the NVIDIA Run:ai project, and in [Step 4](#step-4-adding-users-to-the-openshell-workspace) adds the team's users to it.
 - **A service account.** A [service account](../../platform-management/authentication/service-accounts.md) has a client ID and a client secret. In [Step 5](#step-5-giving-agents-model-access), the OpenShell gateway uses them to get access tokens for the model endpoint.
 - **The sandbox workload type.** An administrator registers the OpenShell sandbox as a workload type, so that NVIDIA Run:ai can schedule and monitor the sandbox workloads. Use the [sandbox workload type](https://github.com/dsx-ai-factory/workload-map/blob/main/docs/catalog/agents-x-k8s-io-sandbox-v1beta1.yaml) from the workload-map repository, and follow [Registering New Workload Types](../../workloads-in-nvidia-run-ai/workload-types/extending-workload-support/README.md#registering-new-workload-types).
 
@@ -155,11 +155,10 @@ Install OpenShell on the cluster and expose the gateway to users:
 
 1. **Install OpenShell.** Follow the OpenShell [Kubernetes setup](https://docs.nvidia.com/openshell/kubernetes/setup) guide. This tutorial uses OpenShell **0.1.5** and Agent Sandbox **1.0.7**. When you configure the gateway values, make sure to set the following:
 
-   * `workspaceMode: operator` - Runs each sandbox in an existing namespace. For NVIDIA Run:ai, the OpenShell workspace `runai-<project>` runs in the namespace of the NVIDIA Run:ai project with that name, under the project's quota.
+   * `workspaceMode: operator` - Runs each sandbox in an existing namespace. For NVIDIA Run:ai, the OpenShell workspace `runai-<project>` runs in the namespace of the NVIDIA Run:ai project with that name.
    * `workspaceResources.enabled: false` - Splits the gateway from the per-namespace resources, as described in [Split gateway and workspace releases](https://docs.nvidia.com/openshell/kubernetes/setup#split-gateway-and-workspace-releases). The `openshell-workspace` chart creates those resources instead, as described in the next step.
    * `operatorNamespaceLabel: runai/queue` - Tells the gateway which namespaces it may use. In operator mode, OpenShell requires exactly one of `operatorNamespaceLabel` or `operatorNamespaceFile`. NVIDIA Run:ai labels the namespace of each project with `runai/queue=<project>`, so this label selects the namespaces of your NVIDIA Run:ai projects.
-   * `issuer` and `audience` - Tell the gateway which IdP to trust. Set `issuer` to the issuer URL of your IdP, which must use HTTPS. Set `audience` to the audience that your IdP puts in the tokens (the OpenShell examples use `openshell-cli`). For the setting paths, refer to [Access Control](https://docs.nvidia.com/openshell/latest/kubernetes/access-control).
-   * `roles_claim`, `admin_role`, and `user_role` - Map the roles from your IdP to OpenShell roles. Set `admin_role` to `openshell-admin` and `user_role` to `openshell-user`, the names used in this tutorial, and set `roles_claim` to the claim that your IdP uses for roles. For the setting paths and the claim for each IdP, refer to [Access Control](https://docs.nvidia.com/openshell/latest/kubernetes/access-control).
+   * `issuer`, `audience`, `roles_claim`, `admin_role`, and `user_role` - Tell the gateway which IdP to trust and how to map its roles to OpenShell roles. Set `admin_role` to `openshell-admin` and `user_role` to `openshell-user`, the names used in this tutorial. For the settings and the claim for each IdP, refer to [Access Control](https://docs.nvidia.com/openshell/latest/kubernetes/access-control).
 
    ```yaml
    workspaceResources:
@@ -316,11 +315,7 @@ This tutorial creates one OpenShell workspace, for the [NVIDIA Run:ai project](.
 
 As a **Platform Admin** (a user in the `openshell-admin` group), create the [OpenShell workspace](https://docs.nvidia.com/openshell/latest/how-it-works/workspaces) for the NVIDIA Run:ai project. In operator mode, the OpenShell workspace name must equal the NVIDIA Run:ai project namespace name.
 
-For the NVIDIA Run:ai project, the order is:
-
-1. The NVIDIA Run:ai project exists.
-2. The cluster administrator installs the `openshell-workspace` chart in the NVIDIA Run:ai project namespace ([Step 1](#step-1-installing-openshell)).
-3. You create the OpenShell workspace:
+Before you create the OpenShell workspace, make sure that the NVIDIA Run:ai project exists and that the cluster administrator has installed the `openshell-workspace` chart in its namespace ([Step 1](#step-1-installing-openshell)). Then create the OpenShell workspace:
 
 ```bash
 openshell workspace create --name runai-team-a
@@ -453,7 +448,7 @@ This step runs a Claude Code agent in an OpenShell sandbox that pushes code to a
 
 1. **Target the OpenShell workspace.** Run every command in the OpenShell workspace that is mapped to the NVIDIA Run:ai project, `runai-team-a`. Use the `OPENSHELL_WORKSPACE` setting from [Step 4](#step-4-adding-users-to-the-openshell-workspace), or add `--workspace runai-team-a` to each command. For how this works, refer to [Target a Workspace](https://docs.nvidia.com/openshell/latest/how-it-works/workspaces#target-a-workspace). The sandbox then runs in the NVIDIA Run:ai project namespace, under the project's quota.
 
-2. **Use an image that has Claude Code.** The OpenShell tutorial requires an image with Claude Code, `git`, and the GitHub CLI installed, as listed in its prerequisites. The default sandbox image has none of them. Build your own image, or use one that ships Claude Code, and pass it when you create the sandbox, with `--from <image>`. If the image includes a policy that is not valid, the sandbox stays in `Provisioning`. Pass a valid policy with `--policy <file>` when you create the sandbox. For details, refer to [A New Sandbox Stays in Provisioning](https://docs.nvidia.com/openshell/latest/how-it-works/policies/manage-policies#a-new-sandbox-stays-in-provisioning) in the OpenShell documentation.
+2. **Use an image that has Claude Code.** The OpenShell tutorial requires an image with Claude Code, `git`, and the GitHub CLI installed, which the default sandbox image does not have. Build your own image, or use one that ships Claude Code, and pass it with `--from <image>` when you create the sandbox. If the sandbox stays in `Provisioning`, pass a valid policy with `--policy <file>`. For details, refer to [A New Sandbox Stays in Provisioning](https://docs.nvidia.com/openshell/latest/how-it-works/policies/manage-policies#a-new-sandbox-stays-in-provisioning) in the OpenShell documentation.
 
 3. **Use the model from Step 5.** Do not create the Anthropic provider from the OpenShell tutorial. Attach the `runai-model` provider to the sandbox instead, together with the GitHub provider:
 
@@ -534,6 +529,8 @@ OpenShell, not NVIDIA Run:ai, enforces the sandbox policy. To watch the sandbox'
 | `not a member of workspace 'runai-<project>'` | The user is not a member of that OpenShell workspace | A Platform Admin or a Workspace Admin of that OpenShell workspace adds the user ([Step 4](#step-4-adding-users-to-the-openshell-workspace)) |
 | Provider refresh shows `oauth_token_endpoint_unavailable` | The gateway cannot connect to the model's token endpoint, typically a TLS certificate it does not trust | Check network access; make the gateway trust the endpoint's CA ([Step 5](#step-5-giving-agents-model-access)) |
 | `workspace '...' is not in the operator namespace allowlist` | The OpenShell workspace name differs from the namespace name | Name the OpenShell workspace exactly `runai-<project>` |
+| The sandbox does not appear as a workload in NVIDIA Run:ai, or each pod appears on its own | NVIDIA Run:ai generated permissions for the resource name `sandboxs` instead of `sandboxes` | Grant permissions for Sandbox resources ([Prerequisites](#nvidia-runai-prerequisites)) |
+| `API Error: 403` from the model endpoint | The endpoint allows only the service account that you set in the access settings of the inference serving endpoint, and the provider uses a different one | Use the client ID and client secret of the allowed service account in the provider ([Step 5](#step-5-giving-agents-model-access)) |
 | Sandbox stuck before starting; the gateway logs a Secret or Role error in the NVIDIA Run:ai project namespace | The `openshell-workspace` chart is missing in that namespace | Install it ([Step 1](#step-1-installing-openshell)) |
 | `claude: not found`, or the agent cannot reach the model, in a pod terminal | The terminal was opened with `kubectl exec` or the NVIDIA Run:ai UI, which bypasses OpenShell | Use `openshell sandbox exec -n <sandbox> --tty -- bash` |
 | Agent pod shows no logs in NVIDIA Run:ai | The agent ran through `openshell sandbox exec`, so its output went to the caller's terminal | Check the agent's output in your terminal, and `openshell logs <sandbox>` for its network activity |
