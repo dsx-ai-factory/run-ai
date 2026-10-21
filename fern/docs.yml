@@ -68,9 +68,6 @@ redirects:
   - source: /run-ai/self-hosted/documentation/platform-management/authentication/cluster-authentication
     destination: /run-ai/self-hosted/documentation/installation-and-configuration/config/cluster-authentication
     permanent: true
-  - source: /self-hosted/v3.0/documentation/platform-management/authentication/cluster-authentication
-    destination: /run-ai/self-hosted/documentation/installation-and-configuration/config/cluster-authentication
-    permanent: true
   - source: /self-hosted/documentation/installation-and-configuration/config/cluster-configuration
     destination: /run-ai/self-hosted/documentation/installation-and-configuration/config/advanced-cluster-configuration
     permanent: true
