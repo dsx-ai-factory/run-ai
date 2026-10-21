@@ -64,9 +64,9 @@ Make sure the following are set up in NVIDIA Run:ai:
   The Workload Types API takes a JSON request body, not the YAML file. To register the type, build the body from the file as follows:
 
   1. **Get the IDs.** Get the category ID with `GET /api/v1/workload-categories` and the priority ID with `GET /api/v1/workload-priorities`. For the sandbox, use the category `Build` and the priority `high`.
-  2. **Build the request body.** Set `name` to `Sandbox`, `group` to `agents.x-k8s.io`, and `preemptibility` to `non-preemptible`. Put the `spec` section of the file under `kartas`:
+  2. **Build the request body.** Use the following body. Replace `<build-category-id>` and `<high-priority-id>` with the IDs from the previous step. The `spec` is the `spec` section of the [sandbox workload type](https://github.com/dsx-ai-factory/workload-map/blob/main/docs/catalog/agents-x-k8s-io-sandbox-v1beta1.yaml) file, converted to JSON:
 
-     ```text
+     ```json
      {
        "categoryId": "<build-category-id>",
        "priorityId": "<high-priority-id>",
@@ -74,7 +74,169 @@ Make sure the following are set up in NVIDIA Run:ai:
        "name": "Sandbox",
        "group": "agents.x-k8s.io",
        "kartas": [
-         { "spec": <the spec section of the file, as JSON> }
+         {
+           "spec": {
+             "structureDefinition": {
+               "rootComponent": {
+                 "name": "sandbox",
+                 "kind": {
+                   "group": "agents.x-k8s.io",
+                   "version": "v1beta1",
+                   "kind": "Sandbox"
+                 },
+                 "statusDefinition": {
+                   "conditionsDefinition": {
+                     "path": ".status.conditions",
+                     "typeFieldName": "type",
+                     "statusFieldName": "status",
+                     "messageFieldName": "message",
+                     "reasonFieldName": "reason"
+                   },
+                   "statusMappings": {
+                     "initializing": [
+                       {
+                         "byConditions": [
+                           {
+                             "type": "Ready",
+                             "status": "False"
+                           },
+                           {
+                             "type": "Suspended",
+                             "status": "False"
+                           }
+                         ],
+                         "byExpression": {
+                           "expression": "(.spec.operatingMode // \"Running\") != \"Suspended\"",
+                           "expectedResult": "true"
+                         }
+                       }
+                     ],
+                     "running": [
+                       {
+                         "byConditions": [
+                           {
+                             "type": "Ready",
+                             "status": "True"
+                           }
+                         ],
+                         "byExpression": {
+                           "expression": "(.spec.operatingMode // \"Running\") != \"Suspended\" and ([(.status.conditions // [])[] | select(.type == \"Suspended\" and .status == \"True\")] | length) == 0",
+                           "expectedResult": "true"
+                         }
+                       }
+                     ],
+                     "suspended": [
+                       {
+                         "byConditions": [
+                           {
+                             "type": "Suspended",
+                             "status": "True"
+                           }
+                         ],
+                         "byExpression": {
+                           "expression": ".spec.operatingMode == \"Suspended\"",
+                           "expectedResult": "true"
+                         }
+                       }
+                     ],
+                     "suspending": [
+                       {
+                         "byExpression": {
+                           "expression": ".spec.operatingMode == \"Suspended\" and ([(.status.conditions // [])[] | select(.type == \"Suspended\" and .status == \"True\")] | length) == 0",
+                           "expectedResult": "true"
+                         }
+                       }
+                     ],
+                     "resuming": [
+                       {
+                         "byConditions": [
+                           {
+                             "type": "Suspended",
+                             "status": "True"
+                           }
+                         ],
+                         "byExpression": {
+                           "expression": "(.spec.operatingMode // \"Running\") != \"Suspended\"",
+                           "expectedResult": "true"
+                         }
+                       }
+                     ]
+                   }
+                 },
+                 "suspendDefinition": {
+                   "suspendActions": [
+                     {
+                       "path": ".spec.operatingMode",
+                       "value": "\"Suspended\""
+                     }
+                   ],
+                   "resumeActions": [
+                     {
+                       "path": ".spec.operatingMode",
+                       "value": "\"Running\""
+                     }
+                   ]
+                 }
+               },
+               "childComponents": [
+                 {
+                   "name": "agent",
+                   "kind": {
+                     "group": "",
+                     "version": "v1",
+                     "kind": "Pod"
+                   },
+                   "ownerRef": "sandbox",
+                   "specDefinition": {
+                     "podTemplateSpecPath": ".spec.podTemplate"
+                   },
+                   "podSelector": {
+                     "componentTypeSelector": {
+                       "keyPath": ".metadata.labels[\"agents.x-k8s.io/sandbox-name-hash\"]"
+                     }
+                   }
+                 },
+                 {
+                   "name": "companion",
+                   "kind": {
+                     "group": "",
+                     "version": "v1",
+                     "kind": "Pod"
+                   },
+                   "ownerRef": "sandbox",
+                   "podSelector": {
+                     "componentTypeSelector": {
+                       "keyPath": "select(.metadata.labels[\"agents.x-k8s.io/sandbox-name-hash\"] == null) | [.metadata.ownerReferences[]? | select(.kind == \"Sandbox\" and (.apiVersion | startswith(\"agents.x-k8s.io/\"))) | .uid][0]"
+                     }
+                   }
+                 }
+               ]
+             },
+             "optimizationInstructions": {
+               "gangScheduling": {
+                 "podGroups": [
+                   {
+                     "name": "sandbox",
+                     "members": [
+                       {
+                         "componentName": "agent",
+                         "groupByKeyPaths": [
+                           "[.metadata.ownerReferences[]? | select(.kind == \"Sandbox\" and (.apiVersion | startswith(\"agents.x-k8s.io/\"))) | .uid][0]"
+                         ]
+                       },
+                       {
+                         "componentName": "companion",
+                         "groupByKeyPaths": [
+                           "[.metadata.ownerReferences[]? | select(.kind == \"Sandbox\" and (.apiVersion | startswith(\"agents.x-k8s.io/\"))) | .uid][0]"
+                         ]
+                       }
+                     ]
+                   }
+                 ]
+               }
+             }
+           }
+         }
        ]
      }
      ```
