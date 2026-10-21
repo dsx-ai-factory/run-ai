@@ -159,24 +159,16 @@ func (g *GpuOperatorInstallStep) labelNonMasterNodes() error {
 	}
 	logging.Infof("[Prereq] Found %d nodes in cluster", len(nodes.Items))
 
-	// Label non-master nodes
+	// Label worker nodes only
 	labeledCount := 0
 	for _, node := range nodes.Items {
-		// Check if node is a master node
-		isMaster := false
-		if node.Labels != nil {
-			if _, exists := node.Labels["node-role.kubernetes.io/master"]; exists {
-				isMaster = true
-			}
-		}
-
-		// Skip master nodes
-		if isMaster {
-			logging.Infof("[Prereq] Skipping master node: %s", node.Name)
+		// Skip control-plane nodes
+		if isControlPlaneNode(node.Labels) {
+			logging.Infof("[Prereq] Skipping control-plane node: %s", node.Name)
 			continue
 		}
 
-		// Label the non-master node
+		// Label the worker node
 		logging.Infof("[Prereq] Labeling node '%s' with 'run.ai/simulated-gpu-node-pool=default'...", node.Name)
 		cmd := exec.Command("kubectl", "label", "node", node.Name, "run.ai/simulated-gpu-node-pool=default", "--overwrite")
 		cmd.Stdout = logging.InfoWriter()
@@ -190,6 +182,24 @@ func (g *GpuOperatorInstallStep) labelNonMasterNodes() error {
 	logging.Infof("[Prereq] Successfully labeled %d worker nodes", labeledCount)
 
 	return nil
+}
+
+// controlPlaneRoleLabels are the node role labels that mark a control-plane
+// node. kubeadm has set node-role.kubernetes.io/control-plane since 1.20 and
+// stopped adding the legacy master label in 1.24, so both have to be checked.
+var controlPlaneRoleLabels = []string{
+	"node-role.kubernetes.io/control-plane",
+	"node-role.kubernetes.io/master",
+}
+
+func isControlPlaneNode(labels map[string]string) bool {
+	for _, role := range controlPlaneRoleLabels {
+		if _, exists := labels[role]; exists {
+			return true
+		}
+	}
+
+	return false
 }
 
 func (g *GpuOperatorInstallStep) installFakeGpuOperatorHelm() error {
