@@ -87,7 +87,7 @@ describe("inference-submit-form preemptibility", () => {
     wrapper.unmount();
   });
 
-  it("emits the non-preemptible value in the form model when inference becomes single-pod", async () => {
+  it("filters options without changing the model when inference becomes single-pod", async () => {
     const wrapper = factory(1, 5);
     await wrapper.setProps({
       modelValue: {
@@ -104,18 +104,9 @@ describe("inference-submit-form preemptibility", () => {
       } as IUISuperWorkloadCreationRequest,
     });
 
-    const updates = wrapper.emitted("update:model-value") || [];
-    const updatedModel = updates[updates.length - 1]?.[0] as IUISuperWorkloadCreationRequest;
-    expect(updatedModel).toMatchObject({
-      spec: {
-        autoscaling: { minReplicas: 1, maxReplicas: 1 },
-        preemptibility: Preemptibility.NonPreemptible,
-      },
-    });
-
-    await wrapper.setProps({ modelValue: updatedModel });
     expect(wrapper.findComponent(PreemptibilitySection).vm.preemptibilityOptions).toHaveLength(2);
-    expect(wrapper.findComponent(PreemptibilitySection).vm.preemptibilityHint).toContain("Changed to non-preemptible");
+    expect(wrapper.props("modelValue").spec.preemptibility).toBe(Preemptibility.SemiPreemptible);
+    expect(wrapper.emitted("update:model-value")).toBeUndefined();
     wrapper.unmount();
   });
 

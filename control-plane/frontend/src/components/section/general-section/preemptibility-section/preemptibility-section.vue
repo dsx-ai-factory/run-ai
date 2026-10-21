@@ -9,14 +9,14 @@
       <runai-select
         class="preemptibility-select col-3"
         aid="preemptibility-select"
-        :class="{ 'q-pb-none': !preemptibilityHint }"
+        :class="{ 'q-pb-none': !hint }"
         :model-value="selectedPreemptibilityOption"
         @update:model-value="updatePreemptibility"
         :options="preemptibilityOptions"
         :policy-rules="selectGenericPolicyRules"
         :disable="isSectionDisabled"
         label="Preemptibility"
-        :hint="preemptibilityHint"
+        :hint="hint"
       />
       <notification-alert-bar
         v-if="shouldShowQuotaWarning"
@@ -87,7 +87,6 @@ export default defineComponent({
   data() {
     return {
       tooltipText: `Non-preemptible workloads will use the project's available GPU quota and won't be interrupted once they start running.`,
-      wasPreemptibilityReset: false,
       ENotificationBarVariant,
       Preemptibility,
       SelectType,
@@ -96,11 +95,7 @@ export default defineComponent({
 
   computed: {
     preemptibilityOptions(): ISelectOption[] {
-      const retainSelectedSemiPreemptibility =
-        this.hasSinglePodSemiPreemptibility && !this.shouldResetSinglePodPreemptibility;
-      const showSemiPreemptibility =
-        this.supportSemiPreemptibility && (!this.singlePodWorkload || retainSelectedSemiPreemptibility);
-
+      const showSemiPreemptibility = this.supportSemiPreemptibility && !this.singlePodWorkload;
       return getWorkloadPreemptibilityOptions(showSemiPreemptibility).map((option) => {
         const policyOption = this.policyRules?.options?.find(
           (pOption: PreemptibilityOptionsOptionsInner) => pOption.value === option.value,
@@ -127,38 +122,8 @@ export default defineComponent({
           warningTooltip,
           type: warningTooltip ? SelectType.Warning : undefined,
           isHtmlTooltipText: !!warningTooltip,
-          ...(this.singlePodWorkload && option.value === Preemptibility.SemiPreemptible
-            ? {
-                disable: true,
-                disabledTooltip: "Semi-preemptible behaves as non-preemptible for single-pod workloads.",
-              }
-            : {}),
         };
       });
-    },
-    hasSinglePodSemiPreemptibility(): boolean {
-      return this.singlePodWorkload && this.modelValue === Preemptibility.SemiPreemptible;
-    },
-    shouldResetSinglePodPreemptibility(): boolean {
-      return (
-        this.hasSinglePodSemiPreemptibility &&
-        !this.isSectionDisabled &&
-        (!this.policyRules?.options?.length ||
-          this.policyRules.options.some((option) => option.value === Preemptibility.NonPreemptible))
-      );
-    },
-    preemptibilityHint(): string | undefined {
-      let singlePodHint: string | undefined;
-      if (this.hasSinglePodSemiPreemptibility) {
-        singlePodHint = "Semi-preemptible behaves as non-preemptible for single-pod workloads.";
-      } else if (
-        this.singlePodWorkload &&
-        this.wasPreemptibilityReset &&
-        this.modelValue === Preemptibility.NonPreemptible
-      ) {
-        singlePodHint = "Changed to non-preemptible because this workload is configured for a single pod.";
-      }
-      return [this.hint, singlePodHint].filter(Boolean).join(" ") || undefined;
     },
     selectedPreemptibilityOption(): ISelectOption | null {
       if (!this.modelValue) return null;
@@ -189,18 +154,7 @@ export default defineComponent({
   },
   methods: {
     updatePreemptibility(selectedOption: ISelectOption | null): void {
-      this.wasPreemptibilityReset = false;
       this.$emit("update:model-value", selectedOption?.value || null);
-    },
-  },
-  watch: {
-    shouldResetSinglePodPreemptibility: {
-      immediate: true,
-      handler(shouldReset: boolean): void {
-        if (!shouldReset) return;
-        this.wasPreemptibilityReset = true;
-        this.$emit("update:model-value", Preemptibility.NonPreemptible);
-      },
     },
   },
 });
