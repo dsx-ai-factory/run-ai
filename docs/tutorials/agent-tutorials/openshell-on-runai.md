@@ -248,7 +248,7 @@ Make sure the following are set up in NVIDIA Run:ai:
 
   <Accordion title="Grant permissions for Sandbox resources">
 
-  After you register the type, NVIDIA Run:ai generates permissions for the resource name `sandboxs` instead of `sandboxes`, so its components cannot read Sandboxes. As a result, no Sandbox workload appears in the project, and each pod is grouped on its own. To fix this, add the correct resource name to the two cluster roles that NVIDIA Run:ai created for registered workload types. Run these commands once per cluster. The existing project roles pick up the new rules, so no project-specific step is needed.
+  This step is a temporary workaround for [issue 3130](https://github.com/dsx-ai-factory/run-ai/issues/3130). After you register the type, add the Sandbox resource to the two cluster roles that NVIDIA Run:ai created for registered workload types. Run these commands once per cluster. The existing project roles pick up the new rules, so no project-specific step is needed.
 
   ```bash
   kubectl patch clusterrole runai-additional-workload-gvks-read --type=json \
@@ -257,7 +257,7 @@ Make sure the following are set up in NVIDIA Run:ai:
     -p='[{"op":"add","path":"/rules/-","value":{"apiGroups":["agents.x-k8s.io"],"resources":["sandboxes"],"verbs":["get","list","watch","create","update","delete","patch"]}}]'
   ```
 
-  NVIDIA Run:ai manages these cluster roles, so check them again after you register other workload types. This step works around a naming issue in how NVIDIA Run:ai generates these permissions, and is not needed in a release that includes the fix.
+  NVIDIA Run:ai manages these cluster roles, so check them again after you register other workload types. You do not need this step in a release that includes the fix for the issue.
 
   </Accordion>
 
@@ -691,7 +691,7 @@ OpenShell, not NVIDIA Run:ai, enforces the sandbox policy. To watch the sandbox'
 | `not a member of workspace 'runai-<project>'` | The user is not a member of that OpenShell workspace | A Platform Admin or a Workspace Admin of that OpenShell workspace adds the user ([Step 4](#step-4-adding-users-to-the-openshell-workspace)) |
 | Provider refresh shows `oauth_token_endpoint_unavailable` | The gateway cannot connect to the model's token endpoint, typically a TLS certificate it does not trust | Check network access; make the gateway trust the endpoint's CA ([Step 5](#step-5-giving-agents-model-access)) |
 | `workspace '...' is not in the operator namespace allowlist` | The OpenShell workspace name differs from the namespace name | Name the OpenShell workspace exactly `runai-<project>` |
-| The sandbox does not appear as a workload in NVIDIA Run:ai, or each pod appears on its own | NVIDIA Run:ai generated permissions for the resource name `sandboxs` instead of `sandboxes` | Grant permissions for Sandbox resources ([Prerequisites](#nvidia-runai-prerequisites)) |
+| The sandbox does not appear as a workload in NVIDIA Run:ai, or each pod appears on its own | The permissions for Sandbox resources are missing | Apply the workaround in [Grant permissions for Sandbox resources](#nvidia-runai-prerequisites) |
 | `API Error: 403` from the model endpoint | The endpoint allows only the service account that you set in the access settings of the inference serving endpoint, and the provider uses a different one | Use the client ID and client secret of the allowed service account in the provider ([Step 5](#step-5-giving-agents-model-access)) |
 | Sandbox stuck before starting; the gateway logs a Secret or Role error in the NVIDIA Run:ai project namespace | The `openshell-workspace` chart is missing in that namespace | Install it ([Step 1](#step-1-installing-openshell)) |
 | `claude: not found`, or the agent cannot reach the model, in a pod terminal | The terminal was opened with `kubectl exec` or the NVIDIA Run:ai UI, which bypasses OpenShell | Use `openshell sandbox exec -n <sandbox> --tty -- bash` |
