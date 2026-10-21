@@ -95,7 +95,12 @@ export default defineComponent({
 
   computed: {
     preemptibilityOptions(): ISelectOption[] {
-      const showSemiPreemptibility = this.supportSemiPreemptibility && !this.singlePodWorkload;
+      const policyOptions = this.policyRules?.options;
+      // Preserve semi-only policies because the API accepts this value for single-pod workloads.
+      const requiresSemiPreemptibility =
+        !!policyOptions?.length && policyOptions.every((option) => option.value === Preemptibility.SemiPreemptible);
+      const showSemiPreemptibility =
+        this.supportSemiPreemptibility && (!this.singlePodWorkload || requiresSemiPreemptibility);
       return getWorkloadPreemptibilityOptions(showSemiPreemptibility).map((option) => {
         const policyOption = this.policyRules?.options?.find(
           (pOption: PreemptibilityOptionsOptionsInner) => pOption.value === option.value,
