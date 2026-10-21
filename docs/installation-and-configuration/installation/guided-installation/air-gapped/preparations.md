@@ -88,6 +88,8 @@ Packing happens on a separate connected machine - any machine with outbound inte
 
 On that connected machine, download the `runai-installer` binary and use its `airgap pack` command to build a single tarball containing every image your release needs - NVIDIA Run:ai platform images and third-party service images (PostgreSQL, Keycloak, and others) alike.
 
+`airgap pack` automatically fetches the artifact lock that NVIDIA Run:ai publishes for your release. The lock lists the exact images and charts, with their versions, that the release requires. The command downloads them and packages them into a single bundle. You do not need to select images manually unless you want to override the defaults.
+
 1. Download the `runai-installer` binary for your operating system and CPU architecture - see [Download the Installer](#download-the-installer) above.
 2. Create a pack configuration file (`airgap-pack.yaml`) and run `airgap pack` against it:
 
