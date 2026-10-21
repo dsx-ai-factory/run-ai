@@ -95,11 +95,11 @@ Make sure the following are set up in NVIDIA Run:ai:
     -p='[{"op":"add","path":"/rules/-","value":{"apiGroups":["agents.x-k8s.io"],"resources":["sandboxes"],"verbs":["get","list","watch","create","update","delete","patch"]}}]'
   ```
 
-  NVIDIA Run:ai manages these cluster roles, so check them again after you register other workload types.
+  NVIDIA Run:ai manages these cluster roles, so check them again after you register other workload types. This step works around a naming issue in how NVIDIA Run:ai generates these permissions, and is not needed in a release that includes the fix.
 
   </Accordion>
 
-- **A language model for the agents to call.** In [Step 5](#step-5-giving-agents-model-access), the Platform Admin connects the agents to the model, and the agents use it in [Step 6](#step-6-running-an-agent-that-pushes-to-github). Deploy the model on NVIDIA Run:ai as an inference workload, as described in [Deploy Inference Workloads with vLLM](../../workloads-in-nvidia-run-ai/using-inference/hugging-face-inference.md) or [Deploy Inference Workloads with NVIDIA NIM](../../workloads-in-nvidia-run-ai/using-inference/nim-inference.md). Set the access of the inference serving endpoint to the service account that you created above.
+- **A language model for the agents to call.** In [Step 5](#step-5-giving-agents-model-access), the Platform Admin connects the agents to the model, and the agents use it in [Step 6](#step-6-running-an-agent-that-pushes-to-github). Deploy the model on NVIDIA Run:ai as an inference workload, as described in [Deploy Inference Workloads with vLLM](../../workloads-in-nvidia-run-ai/using-inference/hugging-face-inference.md) or [Deploy Inference Workloads with NVIDIA NIM](../../workloads-in-nvidia-run-ai/using-inference/nim-inference.md). When you set who can access the inference serving endpoint, select **Specific user(s) and service account(s)** and enter the service account that you created above, so that only this service account can call the model. For how to get a token, refer to [Accessing the inference workload](../../workloads-in-nvidia-run-ai/using-inference/hugging-face-inference.md#accessing-the-inference-workload).
 
   <Accordion title="Model requirements and example">
 
@@ -136,6 +136,10 @@ Throughout this tutorial, replace:
 | `<client-secret>` | Client secret of the NVIDIA Run:ai service account | - |
 | `<model-host>` | Hostname of the endpoint of your model served on NVIDIA Run:ai, from the **Connections** column of the workload in the NVIDIA Run:ai UI | `model.runai-inference.example.com` |
 | `<model-name>` | Model the agent uses, as named by your endpoint | `my-model` |
+| `<issuer-url>` | Issuer URL of your identity provider, which must use HTTPS | `https://idp.example.com/realms/openshell` |
+| `<audience>` | Audience that your IdP puts in the tokens. It must match the gateway setting | `openshell-cli` |
+| `<roles-claim>` | Claim in the IdP tokens that carries the user's roles or groups | `groups` |
+| `<idp-client-id>` | Client ID of the OIDC client that you registered for the OpenShell CLI | `openshell-cli` |
 
 ## Step 1: Installing OpenShell
 
@@ -149,12 +153,12 @@ Throughout this tutorial, replace:
 
 Install OpenShell on the cluster and expose the gateway to users:
 
-1. **Install OpenShell.** Follow the OpenShell [Kubernetes setup](https://docs.nvidia.com/openshell/kubernetes/setup) guide. This tutorial uses OpenShell **0.1.4** and Agent Sandbox **1.0.7**. When you configure the gateway values, make sure to set the following:
+1. **Install OpenShell.** Follow the OpenShell [Kubernetes setup](https://docs.nvidia.com/openshell/kubernetes/setup) guide. This tutorial uses OpenShell **0.1.5** and Agent Sandbox **1.0.7**. When you configure the gateway values, make sure to set the following:
 
    * `workspaceMode: operator` - Runs each sandbox in an existing namespace. For NVIDIA Run:ai, the OpenShell workspace `runai-<project>` runs in the namespace of the NVIDIA Run:ai project with that name, under the project's quota.
    * `workspaceResources.enabled: false` - Splits the gateway from the per-namespace resources, as described in [Split gateway and workspace releases](https://docs.nvidia.com/openshell/kubernetes/setup#split-gateway-and-workspace-releases). The `openshell-workspace` chart creates those resources instead, as described in the next step.
    * `operatorNamespaceLabel: runai/queue` - Tells the gateway which namespaces it may use. In operator mode, OpenShell requires exactly one of `operatorNamespaceLabel` or `operatorNamespaceFile`. NVIDIA Run:ai labels the namespace of each project with `runai/queue=<project>`, so this label selects the namespaces of your NVIDIA Run:ai projects.
-   * `issuer` and `audience` - Tell the gateway which IdP to trust. Set `issuer` to the issuer URL of your IdP, which must use HTTPS. The `audience` defaults to `openshell-cli`, so set it only if your IdP uses a different audience. For the setting paths, refer to [Access Control](https://docs.nvidia.com/openshell/latest/kubernetes/access-control).
+   * `issuer` and `audience` - Tell the gateway which IdP to trust. Set `issuer` to the issuer URL of your IdP, which must use HTTPS. Set `audience` to the audience that your IdP puts in the tokens (the OpenShell examples use `openshell-cli`). For the setting paths, refer to [Access Control](https://docs.nvidia.com/openshell/latest/kubernetes/access-control).
    * `roles_claim`, `admin_role`, and `user_role` - Map the roles from your IdP to OpenShell roles. Set `admin_role` to `openshell-admin` and `user_role` to `openshell-user`, the names used in this tutorial, and set `roles_claim` to the claim that your IdP uses for roles. For the setting paths and the claim for each IdP, refer to [Access Control](https://docs.nvidia.com/openshell/latest/kubernetes/access-control).
 
    ```yaml
@@ -168,6 +172,7 @@ Install OpenShell on the cluster and expose the gateway to users:
    gatewayConfig:
      openshell.gateway.oidc:
        issuer: <issuer-url>
+       audience: <audience>
        roles_claim: <roles-claim>
        admin_role: openshell-admin
        user_role: openshell-user
@@ -177,7 +182,7 @@ Install OpenShell on the cluster and expose the gateway to users:
 
    ```bash
    helm upgrade --install openshell-workspace oci://ghcr.io/nvidia/openshell/openshell-workspace \
-     --version 0.1.4 --namespace runai-team-a
+     --version 0.1.5 --namespace runai-team-a
    ```
 
 3. **Verify the gateway.** Check the gateway logs to confirm that it accepts tokens from your IdP and has found the NVIDIA Run:ai project namespaces:
