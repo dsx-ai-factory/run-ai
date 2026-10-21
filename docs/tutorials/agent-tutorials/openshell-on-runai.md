@@ -17,11 +17,11 @@ OpenShell and NVIDIA Run:ai each handle a different part of running AI agents. O
 
 Each part of the setup is responsible for the following:
 
-- **OpenShell** is the platform where users manage agents. It provides:
+- **OpenShell** is the platform where users manage agents. It includes:
+  - **The OpenShell gateway** is the platform infrastructure that users connect to. It runs outside the NVIDIA Run:ai projects, so NVIDIA Run:ai project quota covers the agents.
   - **Sign-in with your identity provider.** Users sign in through any OIDC identity provider (IdP) and do not need NVIDIA Run:ai accounts. For how sign-in works, refer to [Gateway Authentication](https://docs.nvidia.com/openshell/latest/how-it-works/gateways/authentication).
   - **OpenShell workspaces and permissions.** A Platform Admin decides who can use which OpenShell workspace, and workspace membership is the access control. For more details, refer to [Workspaces](https://docs.nvidia.com/openshell/latest/how-it-works/workspaces).
   - **Sandboxes.** Each agent runs in a sandbox in the NVIDIA Run:ai project namespace, where the OpenShell supervisor enforces the sandbox policy and keeps real credentials away from the agent. For more details, refer to [Manage Sandboxes](https://docs.nvidia.com/openshell/latest/how-it-works/sandboxes/overview).
-  - **The OpenShell gateway** is platform infrastructure. It runs outside the NVIDIA Run:ai projects, so NVIDIA Run:ai project quota covers the agents.
 - **NVIDIA Run:ai** schedules the agents' workloads and monitors them. It is responsible for:
   - **Scheduling.** NVIDIA Run:ai schedules every pod in a project namespace under the NVIDIA Run:ai project's [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [fairness](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#fairness-fair-resource-distribution), and [node pools](../../platform-management/aiinitiatives/resources/node-pools.md).
   - **Workload monitoring.** The agents' pods appear as workloads in NVIDIA Run:ai, where administrators can monitor them.
