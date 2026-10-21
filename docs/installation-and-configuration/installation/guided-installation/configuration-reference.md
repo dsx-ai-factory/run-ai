@@ -439,7 +439,7 @@ airgap:
 
 #### Pack an Air-Gapped Bundle
 
-Configures the `airgap pack` command, which builds an air-gapped bundle from a release's artifacts on a connected machine. See [Air-Gapped Bundle](air-gapped/preparations.md#air-gapped-bundle) for the full procedure.
+Configures the `airgap pack` command, which builds an air-gapped bundle from a release's artifacts on a connected machine. It automatically fetches the artifact lock that NVIDIA Run:ai publishes for your release. The lock lists the exact images and charts, with their versions, that the release requires, so you do not need to select images manually unless you want to override the defaults. See [Air-Gapped Bundle](air-gapped/preparations.md#air-gapped-bundle) for the full procedure.
 
 ```yaml
 settings:
