@@ -157,20 +157,20 @@ func validateAnswer(question map[string]any, value any) *api.Error {
 				return api.NewValidationError("multiple default must be a list")
 			}
 		}
-		available := map[string]bool{}
+		available := datastructs.NewSet[string]()
 		for _, option := range question["options"].([]any) {
-			available[scalarKey(option.(map[string]any)["value"])] = true
+			available.Add(scalarKey(option.(map[string]any)["value"]))
 		}
-		seen := map[string]bool{}
+		seen := datastructs.NewSet[string]()
 		for _, answer := range answers {
 			key := scalarKey(answer)
-			if !isScalar(answer) || !available[key] {
+			if !isScalar(answer) || !available.Has(key) {
 				return api.NewValidationError("default must be an available option")
 			}
-			if seen[key] {
+			if seen.Has(key) {
 				return api.NewValidationError("multiple default must be distinct")
 			}
-			seen[key] = true
+			seen.Add(key)
 		}
 	}
 	if kind == "array[string]" {
