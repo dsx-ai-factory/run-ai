@@ -8,7 +8,8 @@ import { mount } from "@vue/test-utils";
 import { Quasar } from "quasar";
 import { describe, beforeEach, test, expect } from "vitest";
 import { GeneralSection } from ".";
-import { EWorkloadFormType } from "@/models/workload.model";
+import { EWorkloadFormType, Preemptibility } from "@/models/workload.model";
+import { PreemptibilitySection } from "./preemptibility-section";
 import type { Project } from "@/swagger-models/org-unit-service-client";
 
 describe("general-section.vue", () => {
@@ -45,6 +46,50 @@ describe("general-section.vue", () => {
     expect(subheader.classes()).toContain("no-wrap");
     expect(subheader.classes()).toContain("q-pr-md");
     expect(generalSectionCmp.find(".general-section__summary").exists()).toBeTruthy();
+  });
+
+  test.each([
+    { workloadFormType: EWorkloadFormType.Workspace, offersSemiPreemptible: false },
+    { workloadFormType: EWorkloadFormType.Training, offersSemiPreemptible: false },
+    { workloadFormType: EWorkloadFormType.Distributed, offersSemiPreemptible: true },
+    { workloadFormType: EWorkloadFormType.Inference, offersSemiPreemptible: true },
+  ])("filters semi-preemptible for $workloadFormType forms", async ({ workloadFormType, offersSemiPreemptible }) => {
+    await generalSectionCmp.setProps({
+      workloadFormType,
+      supportPreemptibility: true,
+      workloadPriorityData: { supportSemiPreemptibility: true },
+    });
+
+    const options = generalSectionCmp.findComponent(PreemptibilitySection).vm.preemptibilityOptions;
+    expect(options.some((option) => option.value === Preemptibility.SemiPreemptible)).toBe(offersSemiPreemptible);
+    expect(options.some((option) => option.value === Preemptibility.Preemptible)).toBe(true);
+    expect(options.some((option) => option.value === Preemptibility.NonPreemptible)).toBe(true);
+  });
+
+  test("keeps semi-preemptible for arbitrary YAML using the default training form type", async () => {
+    await generalSectionCmp.setProps({
+      workloadFormType: EWorkloadFormType.Training,
+      singlePodWorkload: false,
+      supportPreemptibility: true,
+      workloadPriorityData: { supportSemiPreemptibility: true },
+    });
+
+    expect(generalSectionCmp.findComponent(PreemptibilitySection).vm.preemptibilityOptions).toHaveLength(3);
+  });
+
+  test("updates inference options when its single-pod configuration changes", async () => {
+    await generalSectionCmp.setProps({
+      workloadFormType: EWorkloadFormType.Inference,
+      supportPreemptibility: true,
+      workloadPriorityData: { supportSemiPreemptibility: true },
+      singlePodWorkload: true,
+    });
+    const preemptibilitySection = generalSectionCmp.findComponent(PreemptibilitySection);
+    expect(preemptibilitySection.vm.preemptibilityOptions).toHaveLength(2);
+
+    await generalSectionCmp.setProps({ singlePodWorkload: false });
+
+    expect(preemptibilitySection.vm.preemptibilityOptions).toHaveLength(3);
   });
 
   describe("over quota toggle", () => {

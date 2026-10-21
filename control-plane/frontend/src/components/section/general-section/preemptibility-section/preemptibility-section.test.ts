@@ -71,6 +71,85 @@ describe("preemptibility-section.vue", () => {
       expect(preemptibilitySection.vm.selectedPreemptibilityOption).toBeNull();
     });
 
+    test("Should hide semi-preemptible for single-pod workloads", () => {
+      preemptibilitySection = factory({ singlePodWorkload: true });
+
+      expect(preemptibilitySection.vm.preemptibilityOptions.map((option) => option.value)).toEqual([
+        Preemptibility.Preemptible,
+        Preemptibility.NonPreemptible,
+      ]);
+      expect(preemptibilitySection.emitted("update:model-value")).toBeUndefined();
+    });
+
+    test("Should reset a selected semi-preemptible value when the workload becomes single-pod", async () => {
+      preemptibilitySection = factory({ modelValue: Preemptibility.SemiPreemptible });
+
+      await preemptibilitySection.setProps({ singlePodWorkload: true });
+
+      expect(preemptibilitySection.emitted("update:model-value")).toEqual([[Preemptibility.NonPreemptible]]);
+      await preemptibilitySection.setProps({ modelValue: Preemptibility.NonPreemptible });
+      expect(preemptibilitySection.findComponent(RunaiSelect).props("hint")).toContain("Changed to non-preemptible");
+      expect(preemptibilitySection.findComponent(RunaiSelect).vm.selectedText).toBe("Non-Preemptible Workload");
+
+      await preemptibilitySection.setProps({ singlePodWorkload: false });
+
+      expect(preemptibilitySection.vm.preemptibilityOptions).toHaveLength(3);
+      expect(preemptibilitySection.findComponent(RunaiSelect).props("hint")).toBeUndefined();
+      expect(preemptibilitySection.emitted("update:model-value")).toHaveLength(1);
+    });
+
+    test("Should reset semi-preemptible loaded into a single-pod form", async () => {
+      preemptibilitySection = factory({ singlePodWorkload: true, policyRules: null });
+
+      await preemptibilitySection.setProps({ modelValue: Preemptibility.SemiPreemptible });
+
+      expect(preemptibilitySection.emitted("update:model-value")).toEqual([[Preemptibility.NonPreemptible]]);
+    });
+
+    test("Should reset an initial semi-preemptible value for a single-pod workload", () => {
+      preemptibilitySection = factory({ singlePodWorkload: true, modelValue: Preemptibility.SemiPreemptible });
+
+      expect(preemptibilitySection.emitted("update:model-value")).toEqual([[Preemptibility.NonPreemptible]]);
+    });
+
+    test.each([true, false])("Should preserve semi-preemptible when policy prevents a reset (canEdit=%s)", (canEdit) => {
+      preemptibilitySection = factory({
+        singlePodWorkload: true,
+        modelValue: Preemptibility.SemiPreemptible,
+        policyRules: { canEdit, options: [{ value: Preemptibility.SemiPreemptible }] },
+      });
+
+      expect(preemptibilitySection.emitted("update:model-value")).toBeUndefined();
+      expect(
+        preemptibilitySection.vm.preemptibilityOptions.find((option) => option.value === Preemptibility.SemiPreemptible),
+      ).toMatchObject({ disable: true });
+      expect(preemptibilitySection.findComponent(RunaiSelect).vm.selectedText).toBe("Semi-preemptible");
+      expect(preemptibilitySection.findComponent(RunaiSelect).props("hint")).toContain("behaves as non-preemptible");
+    });
+
+    test("Should preserve the value when the section is disabled", () => {
+      preemptibilitySection = factory({
+        singlePodWorkload: true,
+        modelValue: Preemptibility.SemiPreemptible,
+        disabled: true,
+      });
+
+      expect(preemptibilitySection.emitted("update:model-value")).toBeUndefined();
+      expect(preemptibilitySection.findComponent(RunaiSelect).vm.selectedText).toBe("Semi-preemptible");
+    });
+
+    test("Should preserve the YAML override hint after resetting preemptibility", async () => {
+      preemptibilitySection = factory({
+        singlePodWorkload: true,
+        modelValue: Preemptibility.SemiPreemptible,
+        hint: "Overrides YAML",
+      });
+      await preemptibilitySection.setProps({ modelValue: Preemptibility.NonPreemptible });
+
+      expect(preemptibilitySection.findComponent(RunaiSelect).props("hint")).toContain("Overrides YAML");
+      expect(preemptibilitySection.findComponent(RunaiSelect).props("hint")).toContain("Changed to non-preemptible");
+    });
+
     test("Should compute selectedPreemptibilityOption correctly", () => {
       const selectedOption = preemptibilitySection.vm.selectedPreemptibilityOption;
       expect(selectedOption).toBeDefined();
