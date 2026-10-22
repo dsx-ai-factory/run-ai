@@ -8499,7 +8499,7 @@ POSSIBILITY OF SUCH DAMAGES.
 Copyright Dmitrij Koniajev (dimchansky@gmail.com) - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/dimchansky/utfbom v1.1.1
+  github.com/dimchansky/utfbom v1.2.0
 
                                  Apache License
                            Version 2.0, January 2004
@@ -11764,7 +11764,7 @@ Copyright Google Inc - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/googleapis/gax-go/v2 v2.22.0
-  github.com/googleapis/gax-go/v2 v2.26.2
+  github.com/googleapis/gax-go/v2 v2.27.0
 
 Copyright 2016, Google Inc.
 All rights reserved.
@@ -11833,7 +11833,7 @@ Copyright Google Inc - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   google.golang.org/api v0.278.0
-  google.golang.org/api v0.288.0
+  google.golang.org/api v0.307.0
   google.golang.org/api/support/bundler v0.278.0
 
 Copyright (c) 2011 Google Inc. All rights reserved.
@@ -12973,7 +12973,7 @@ Copyright Joshua Tacoma - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   google.golang.org/api/internal/third_party/uritemplates v0.278.0
-  google.golang.org/api/internal/third_party/uritemplates v0.288.0
+  google.golang.org/api/internal/third_party/uritemplates v0.307.0
 
 Copyright (c) 2013 Joshua Tacoma. All rights reserved.
 
@@ -18371,7 +18371,9 @@ Components:
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
+  cloud.google.com/go/auth v0.24.1
   cloud.google.com/go/auth/oauth2adapt v0.2.8
+  cloud.google.com/go/auth/oauth2adapt v0.3.0
   cloud.google.com/go/compute/metadata v0.10.0
   cloud.google.com/go/compute/metadata v0.9.0
   cloud.google.com/go/iam v1.14.0
@@ -18381,7 +18383,7 @@ Components:
   cloud.google.com/go/monitoring v1.24.3
   cloud.google.com/go/monitoring v1.31.0
   cloud.google.com/go/storage v1.56.0
-  cloud.google.com/go/storage v1.69.0
+  cloud.google.com/go/storage v1.70.0
   dompurify 3.4.16
   echarts 6.1.0
   github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.34.0
@@ -18463,7 +18465,7 @@ Components:
   github.com/google/s2a-go v0.1.11
   github.com/google/s2a-go v0.1.9
   github.com/googleapis/enterprise-certificate-proxy/client v0.3.15
-  github.com/googleapis/enterprise-certificate-proxy/client v0.3.23
+  github.com/googleapis/enterprise-certificate-proxy/client v0.3.24
   github.com/googleapis/google-cloud-go-testing/storage/stiface v0.0.0-20210719221736-1c9a4c676720
   github.com/jmespath/go-jmespath v0.4.1-0.20220621161143-b0104c826a24
   github.com/kai-scheduler/KAI-scheduler/pkg v0.18.2
@@ -21449,7 +21451,6 @@ Components:
   golang.org/x/mod/semver v0.42.0
   golang.org/x/net v0.55.0
   golang.org/x/net v0.56.0
-  golang.org/x/net v0.58.0
   golang.org/x/net v0.59.0
   golang.org/x/net v0.61.0
   golang.org/x/oauth2 v0.30.0
