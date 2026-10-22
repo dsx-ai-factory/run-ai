@@ -715,6 +715,86 @@ var _ = Describe("ExternalWorkloadHandler", Ordered, func() {
 			})
 		})
 	})
+
+	Context("external workload deleted while its update is sent", func() {
+		var externalWorkload *v1alpha1.ExternalWorkload
+		var externalWorkloadHandler *handlers.ExternalWorkloadHandler
+		var onUpsert func()
+		key := types.NamespacedName{Name: workloadName1, Namespace: namespaceForTest}
+
+		BeforeEach(func() {
+			externalWorkload, _, _ = BuildExternalWorkload(workloadName1, namespaceForTest, workloadId1, v1alpha1.ExWRunningPhase)
+			onUpsert = func() {}
+
+			server.RouteToHandler("PUT", pathWithId, func(writer http.ResponseWriter, request *http.Request) {
+				onUpsert()
+				updatedExternalWorkloadId <- strings.TrimPrefix(request.URL.Path, apiPathPrefix)
+				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
+			})
+			server.RouteToHandler("DELETE", pathWithId, func(writer http.ResponseWriter, request *http.Request) {
+				deletedExternalWorkloadId <- strings.TrimPrefix(request.URL.Path, apiPathPrefix)
+				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
+			})
+
+			backendClient = backendclient.NewBackendClient(server.URL(), nil)
+			ns := BuildNamespace(namespaceForTest, map[string]string{constants.RunaiQueueLabel: projectForTest})
+			project1 := BuildProjectWithDepId(projectForTest, projectIdStr1, namespaceForTest, depId)
+			kaiProject1 := BuildKaiProjectWithDepId(projectForTest, projectIdStr1, namespaceForTest, depId)
+			fakeClientBuilder := fakerunaiclient.NewClientBuilder().WithScheme(GetTestScheme()).
+				WithObjects(ns, project1, kaiProject1, externalWorkload)
+			fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+			podHandler := handlers.NewPodHandler(backendClient, fakeCachedClient)
+			podRateLimiter := fakeCachedClient.NewRateLimitedController(cachedclient.PodRL, podHandler)
+			workloadHandler := handlers.NewWorkloadHandler(backendClient, fakeCachedClient, podHandler, podRateLimiter)
+			externalWorkloadHandler = handlers.NewExternalWorkloadHandler(workloadHandler)
+		})
+
+		It("does not delete an external workload that still exists", func() {
+			Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+			Expect(updatedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
+			Expect(deletedExternalWorkloadId).NotTo(Receive())
+		})
+
+		It("deletes the external workload again when it was deleted during the update", func() {
+			onUpsert = func() {
+				Expect(fakeCachedClient.Delete(context.Background(), externalWorkload)).To(Succeed())
+			}
+
+			Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+			Expect(updatedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
+			Expect(deletedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
+		})
+
+		It("deletes the updated workload when another workload replaced it under the same name", func() {
+			replacement, _, _ := BuildExternalWorkload(workloadName1, namespaceForTest, workloadId2, v1alpha1.ExWRunningPhase)
+			onUpsert = func() {
+				Expect(fakeCachedClient.Delete(context.Background(), externalWorkload)).To(Succeed())
+				Expect(fakeCachedClient.Create(context.Background(), replacement)).To(Succeed())
+			}
+
+			Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+			Expect(updatedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
+			Expect(deletedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
+			Expect(deletedExternalWorkloadId).NotTo(Receive())
+		})
+
+		It("does not delete the workload when its external workload was recreated during the update", func() {
+			recreated, _, _ := BuildExternalWorkload(workloadName1, namespaceForTest, workloadId1, v1alpha1.ExWRunningPhase)
+			recreated.UID = "recreated-external-workload-uid"
+			onUpsert = func() {
+				Expect(fakeCachedClient.Delete(context.Background(), externalWorkload)).To(Succeed())
+				Expect(fakeCachedClient.Create(context.Background(), recreated)).To(Succeed())
+			}
+
+			Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+			Expect(updatedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
+			Expect(deletedExternalWorkloadId).NotTo(Receive())
+		})
+	})
 })
 
 func eventuallyExpectPodGroupAnnotatedWithExternalWorkloadName(pg *kaiv2alpha2.PodGroup, expectedExternalWorkloadName string,

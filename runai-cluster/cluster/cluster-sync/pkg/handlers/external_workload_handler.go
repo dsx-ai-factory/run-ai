@@ -36,7 +36,26 @@ func (h *ExternalWorkloadHandler) HandleUpdateItem(key client.ObjectKey) error {
 		return err
 	}
 
-	return h.handleAddUpdate(externalWorkload)
+	err = h.handleAddUpdate(externalWorkload)
+	if err != nil {
+		return err
+	}
+
+	// The informer drops an object from the cache before calling the delete handler, which doesn't wait for queued
+	// updates, so an object that's gone or replaced by now may have had its delete reach the backend before this update.
+	current := &v1alpha1.ExternalWorkload{}
+	err = h.cachedClient.Get(context.Background(), key, current)
+	if client.IgnoreNotFound(err) != nil {
+		return err
+	}
+	workloadId := topowner.GetRunaiWorkloadId(externalWorkload.Spec.OriginalWorkloadUID, externalWorkload.Annotations)
+	if err == nil && topowner.GetRunaiWorkloadId(current.Spec.OriginalWorkloadUID, current.Annotations) == workloadId {
+		return nil
+	}
+
+	zap.S().Infof("ExternalWorkload <%s/%s> was deleted while its update was sent - deleting it again",
+		externalWorkload.Namespace, externalWorkload.Name)
+	return h.HandleDelete(externalWorkload)
 }
 
 func NewExternalWorkloadHandler(workloadHandler *WorkloadHandler) *ExternalWorkloadHandler {

@@ -45,7 +45,24 @@ func (h *ApplicationHandler) HandleUpdateItem(key client.ObjectKey) error {
 		return err
 	}
 
-	return h.HandleAddUpdate(application)
+	err = h.HandleAddUpdate(application)
+	if err != nil {
+		return err
+	}
+
+	// The informer drops an object from the cache before calling the delete handler, which doesn't wait for queued
+	// updates, so an object that's gone or replaced by now may have had its delete reach the backend before this update.
+	current := &v1alpha1.Application{}
+	err = h.runaiClient.Get(context.Background(), key, current)
+	if client.IgnoreNotFound(err) != nil {
+		return err
+	}
+	if err == nil && parsers.GetApplicationId(current) == parsers.GetApplicationId(application) {
+		return nil
+	}
+
+	zap.S().Infof("Application %s was deleted while its update was sent - deleting it again", application.Name)
+	return h.HandleDelete(application)
 }
 
 func (h *ApplicationHandler) HandleAddUpdate(application *v1alpha1.Application) error {
