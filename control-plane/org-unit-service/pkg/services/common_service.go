@@ -255,18 +255,11 @@ func ValidateResourcesPatchRequest(ctx context.Context, resources []api.Resource
 	return ValidateNodePools(ctx, resources)
 }
 
-// storedGpuDeserved is the node pool's current gpu deserved; it stands in for a gpu deserved the request omits.
-func ValidateNodePoolResourcesPatchRequest(ctx context.Context, npr api.NodePoolResourcesPatchRequest,
-	nodePoolsMetadata map[string]apiClusters.NodepoolMinimal, storedGpuDeserved *float64,
+func ValidateNodePoolResourcesPatchRequest(ctx context.Context, resources api.ResourcesNullable,
+	nodePoolsMetadata map[string]apiClusters.NodepoolMinimal,
 ) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Validating node pool resources patch request")
-
-	resourcesNullable := ConvertNodePoolResourcesPatchRequest(npr)
-	if npr.Resources != nil && npr.Resources.Gpu != nil && npr.Resources.Gpu.Deserved == nil {
-		resourcesNullable.Gpu.Deserved = storedGpuDeserved
-	}
-
-	_, err := validateNodePoolResources(resourcesNullable, nodePoolsMetadata, false)
+	_, err := validateNodePoolResources(resources, nodePoolsMetadata, false)
 	return err
 }
 
@@ -324,7 +317,7 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 
 	gpuDeserved := ptr.Deref(nodePoolResources.Gpu.Deserved, 0)
 	if !quotaFlag && (gpuDeserved > 0 || (nodePoolResources.Gpu.Limit != nil && *nodePoolResources.Gpu.Limit != -1)) {
-		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. Deserved should be 0 and limit should be -1", nodepoolId)
+		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. GPU deserved should be 0 or omitted, and GPU limit should be -1, null or omitted", nodepoolId)
 	}
 
 	if !adjustableWeightsFlag && nodePoolResources.Gpu.OverQuotaWeight != nil && !IsValidNonAdjustableOverQuotaWeight(*nodePoolResources.Gpu.OverQuotaWeight, &gpuDeserved) {

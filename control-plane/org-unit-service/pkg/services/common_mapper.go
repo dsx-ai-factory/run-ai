@@ -776,20 +776,21 @@ func MapAllocationStatus(status float64) *float64 {
 	return ptr.To(status)
 }
 
-func ConvertNodePoolResourcesPatchRequest(npr api.NodePoolResourcesPatchRequest) api.ResourcesNullable {
+func ConvertNodePoolResourcesPatchRequest(npr api.NodePoolResourcesPatchRequest, storedGpuDeserved *float64) api.ResourcesNullable {
 	result := api.ResourcesNullable{
 		NodePool: &api.ResourcesNodePool{
 			Id: npr.NodePoolId,
 		},
 		Rank: npr.Rank,
+		Gpu:  api.ResourcesNullableGpu{Deserved: storedGpuDeserved},
 	}
 
 	if npr.Resources != nil {
 		if npr.Resources.Gpu != nil {
-			result.Gpu = api.ResourcesNullableGpu{
-				Deserved:        npr.Resources.Gpu.Deserved,
-				Limit:           npr.Resources.Gpu.Limit,
-				OverQuotaWeight: npr.Resources.Gpu.OverQuotaWeight,
+			result.Gpu.Limit = npr.Resources.Gpu.Limit
+			result.Gpu.OverQuotaWeight = npr.Resources.Gpu.OverQuotaWeight
+			if npr.Resources.Gpu.Deserved != nil {
+				result.Gpu.Deserved = npr.Resources.Gpu.Deserved
 			}
 		}
 		if npr.Resources.Cpu != nil {
