@@ -17,6 +17,7 @@ type Idp struct {
 	LinkOnly                  *bool
 	PostBrokerLoginFlowAlias  *string
 	SupportTokenExchange      *bool
+	ValidateSignature         *bool
 }
 
 type IdpMapper struct {

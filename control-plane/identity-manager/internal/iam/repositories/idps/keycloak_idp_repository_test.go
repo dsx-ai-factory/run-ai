@@ -590,6 +590,26 @@ func TestUpdateIdp_IdpNotFound(t *testing.T) {
 	goCloakMock.AssertExpectations(t)
 }
 
+func TestToIdpModel_ValidateSignature(t *testing.T) {
+	_, _, testSubject := initTest(t)
+	for _, tc := range []struct {
+		name   string
+		config *map[string]string
+		want   *bool
+	}{
+		{name: "nil config", config: nil, want: nil},
+		{name: "key missing", config: &map[string]string{"entityId": "e"}, want: nil},
+		{name: "true", config: &map[string]string{"validateSignature": "true"}, want: ptr.To(true)},
+		{name: "false", config: &map[string]string{"validateSignature": "false"}, want: ptr.To(false)},
+		{name: "unparseable", config: &map[string]string{"validateSignature": "maybe"}, want: nil},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			got := testSubject.toIdpModel(&gocloak.IdentityProviderRepresentation{Config: tc.config})
+			assert.Equal(t, tc.want, got.ValidateSignature)
+		})
+	}
+}
+
 func getKcApiError(code int) error {
 	return &gocloak.APIError{Code: code, Message: fmt.Sprintf("%d %s", code, http.StatusText(code))}
 }

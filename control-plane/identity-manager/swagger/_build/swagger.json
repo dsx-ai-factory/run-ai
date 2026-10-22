@@ -4161,6 +4161,9 @@
       "SamlData": {
         "type": "object",
         "nullable": true,
+        "required": [
+          "validateSignature"
+        ],
         "properties": {
           "signingCertificate": {
             "type": "string"
@@ -4170,6 +4173,10 @@
           },
           "entityId": {
             "type": "string"
+          },
+          "validateSignature": {
+            "type": "boolean",
+            "description": "Whether Keycloak validates the signature of SAML responses from the identity provider"
           },
           "serviceProviderMetadataUrl": {
             "type": "string",

@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
@@ -318,12 +319,30 @@ func (k *KeycloakIdpRepository) fromIdpMapperModel(idpMapper *models.IdpMapper) 
 
 func (k *KeycloakIdpRepository) toIdpModel(kcIdp *gocloak.IdentityProviderRepresentation) *models.Idp {
 	return &models.Idp{
-		Alias:       kcIdp.Alias,
-		ProviderID:  kcIdp.ProviderID,
-		DisplayName: kcIdp.DisplayName,
-		Enabled:     kcIdp.Enabled,
-		Config:      kcIdp.Config,
+		Alias:             kcIdp.Alias,
+		ProviderID:        kcIdp.ProviderID,
+		DisplayName:       kcIdp.DisplayName,
+		Enabled:           kcIdp.Enabled,
+		Config:            kcIdp.Config,
+		ValidateSignature: validateSignatureFromConfig(kcIdp.Config),
 	}
+}
+
+// validateSignatureFromConfig returns nil when Keycloak does not report the setting
+// (e.g. non-SAML providers), so callers can tell "unset" apart from "false".
+func validateSignatureFromConfig(config *map[string]string) *bool {
+	if config == nil {
+		return nil
+	}
+	value, ok := (*config)["validateSignature"]
+	if !ok {
+		return nil
+	}
+	validate, err := strconv.ParseBool(value)
+	if err != nil {
+		return nil
+	}
+	return &validate
 }
 
 func (k *KeycloakIdpRepository) fromIdpModel(idp *models.Idp, kcIdp *gocloak.IdentityProviderRepresentation) *gocloak.IdentityProviderRepresentation {
