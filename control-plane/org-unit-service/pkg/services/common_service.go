@@ -259,7 +259,7 @@ func ValidateNodePoolResourcesPatchRequest(ctx context.Context, resources api.Re
 	nodePoolsMetadata map[string]apiClusters.NodepoolMinimal,
 ) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Validating node pool resources patch request")
-	_, err := validateNodePoolResources(resources, nodePoolsMetadata, false)
+	_, err := validateNodePoolResources(resources, nodePoolsMetadata)
 	return err
 }
 
@@ -298,8 +298,7 @@ func ValidateNodePools(ctx context.Context, resources []api.ResourcesNullable) e
 	return nil
 }
 
-// requireGpuDeserved is false for the batch patch, which can patch other fields of a node pool without the gpu quota.
-func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePoolsMetadata map[string]apiClusters.NodepoolMinimal, requireGpuDeserved bool) ([][]*float64, error) {
+func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePoolsMetadata map[string]apiClusters.NodepoolMinimal) ([][]*float64, error) {
 	deservedLimitPairs := [][]*float64{}
 
 	npSchedulingCapabilities, nodepoolId, err := getSchedulingCapabilitiesPerNodePool(nodePoolsMetadata, nodePoolResources.NodePool)
@@ -311,7 +310,7 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 	quotaFlag := npSchedulingCapabilities.Quota
 	ranksFlag := npSchedulingCapabilities.Ranks
 
-	if quotaFlag && requireGpuDeserved && nodePoolResources.Gpu.Deserved == nil {
+	if quotaFlag && nodePoolResources.Gpu.Deserved == nil {
 		return nil, fmt.Errorf("quota is enabled on nodepool id <%s>. GPU deserved is required", nodepoolId)
 	}
 
@@ -358,7 +357,7 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 func ValidateResources(ctx context.Context, resources []api.ResourcesNullable, nodePoolsMetadata map[string]apiClusters.NodepoolMinimal) error {
 	deservedLimitPairs := [][]*float64{}
 	for i, nodePoolResources := range resources {
-		npDeservedLimitPairs, err := validateNodePoolResources(nodePoolResources, nodePoolsMetadata, true)
+		npDeservedLimitPairs, err := validateNodePoolResources(nodePoolResources, nodePoolsMetadata)
 		if err != nil {
 			return fmt.Errorf("%s in index %d", err.Error(), i)
 		}
