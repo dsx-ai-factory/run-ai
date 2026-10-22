@@ -18,7 +18,7 @@ GOLANG_LINTER_CONFIG_PATH?=../infra/lint/.golangci.yaml
 # GO_VERSION_DEFAULT; services that need to pin a different value (e.g.
 # traefik, which has no service-level go.mod) can still override GO_VERSION
 # in their own Makefile.
-GO_VERSION_DEFAULT?=1.26.8
+GO_VERSION_DEFAULT?=1.27.3
 
 GO_VERSION_BASE?=$(or $(strip $(if $(wildcard go.mod),$(shell awk '$$1=="go"{print $$2;exit}' go.mod),)), $(GO_VERSION_DEFAULT))
 # Use the default tagged version which should be ubuntu-based
