@@ -30,9 +30,6 @@ files. Any later change to a skill's files breaks its signature until the next
 ## Skills
 - **runai-audit-assigned-quota** — audit GPU quota fairness (starved vs over-borrowing
   per node pool, cause = borrowing vs over-subscription, and the correct fix). Read-only.
-- **runai-get-workload-health-summary** — summarize workload health at overview or
-  single-workload drill-down depth, including failed-workload node correlation and
-  diagnostic hand-off. Read-only.
 - **runai-get-cluster-health-summary** — one-screen HEALTHY / DEGRADED / STUCK verdict
   per node pool with the dominant blocker: unhealthy nodes, GPUs lost, allocation and
   utilization, and a stuck scheduler vs a full pool. Read-only.
