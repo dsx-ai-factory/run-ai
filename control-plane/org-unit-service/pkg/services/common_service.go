@@ -202,10 +202,7 @@ func PatchOrgUnitDataResourcesPartial(
 		// GPU: update when touched (values may be nil to clear)
 		if patchRequest.Resources.Gpu != nil {
 			existingResources[i].GpuLimit = newResource.GpuLimit
-			// an omitted deserved keeps the stored quota; the department batch save does the same
-			if patchRequest.Resources.Gpu.Deserved != nil {
-				existingResources[i].GpuDeserved = newResource.GpuDeserved
-			}
+			existingResources[i].GpuDeserved = newResource.GpuDeserved
 			existingResources[i].GpuOverQuotaWeight = newResource.GpuOverQuotaWeight
 		}
 
