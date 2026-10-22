@@ -227,7 +227,7 @@ variables to command flags and output paths:
 |---|---|---|
 | `GO` | Go executable used for build, run, test, vet, formatting, and module validation. | `go` |
 | `VERSION` | Shared default for control-plane and cluster versions. | `0.0.0` |
-| `REPOSITORY` | Shared default for control-plane and cluster image repositories. | `nvcr.io/nvidia/runai` |
+| `REPOSITORY` | Shared default for control-plane and cluster image repositories. | `nvcr.io/nvidia/runai-oss` |
 | `CONTROL_PLANE_VERSION` | Version used for control-plane images. | `VERSION` |
 | `CLUSTER_VERSION` | Version used for cluster images. | `VERSION` |
 | `CONTROL_PLANE_REPOSITORY` | Repository prefix for control-plane images. | `REPOSITORY` |
@@ -237,7 +237,7 @@ variables to command flags and output paths:
 | `IMAGE_LOCK_OUTPUT_DIR` | Destination for generated `ImageLock` files. | `../../dist/image-locks` |
 | `ARTIFACT_LOCK_OUTPUT_DIR` | Destination for generated `ArtifactLock` files. | `../../dist/artifact-locks` |
 | `ARTIFACT_LOCK_IMAGE_LOCKS` | Space-separated input lock paths; required by `make artifact-lock`. | Empty |
-| `NGC_HELM_BASE_URL` | Base URL for published Run:ai charts. | `https://helm.ngc.nvidia.com/nvidia/runai/charts` |
+| `NGC_HELM_BASE_URL` | Base URL for published Run:ai charts. | `https://helm.ngc.nvidia.com/nvidia/runai-oss/charts` |
 | `ARTIFACT_LOCK_CHART_URLS` | Space-separated root chart URLs. | Control-plane and runai-cluster charts for `VERSION` |
 | `ARTIFACT_LOCK_CHART_VERSIONS` | Space-separated chart versions corresponding by position to `ARTIFACT_LOCK_CHART_URLS`. | `VERSION VERSION` |
 | `ARTIFACT_LOCK_CLI_ROOTS` | Space-separated roots searched for optional `cli` metadata. | Empty |
