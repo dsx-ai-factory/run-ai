@@ -1267,7 +1267,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				Expect(pool2Resources.Gpu.Deserved).To(Equal(float64(0)))
 			})
 
-			It("put and patch project resources fail when quota is enabled and gpu deserved is omitted", func() {
+			It("update project and put and patch project resources fail when quota is enabled and gpu deserved is omitted", func() {
 				reqP := getProjectCreateRequest(createProjectName(), "", defaultDepId, clusterId2)
 				reqP.Resources = []api.ResourcesNullable{
 					CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default"),
@@ -1292,9 +1292,20 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				Expect(err).To(BeNil())
 				Expect(putRes.Code).To(Equal(http.StatusBadRequest))
 				Expect(putRes.Body.(api.Error).Details).To(ContainSubstring(expectedMessage))
+
+				updateReq := getProjectUpdateRequest(proj)
+				for i := range updateReq.Resources {
+					if updateReq.Resources[i].NodePool.Id == fmt.Sprint(defaultNodePoolId) {
+						updateReq.Resources[i].Gpu.Deserved = nil
+					}
+				}
+				updateRes, err := projectApiService2.UpdateProject(ctx, proj.Id, updateReq)
+				Expect(err).To(BeNil())
+				Expect(updateRes.Code).To(Equal(http.StatusBadRequest))
+				Expect(updateRes.Body.(api.Error).Message).To(ContainSubstring(expectedMessage))
 			})
 
-			It("put and patch department resources fail when quota is enabled and gpu deserved is omitted", func() {
+			It("update department and put and patch department resources fail when quota is enabled and gpu deserved is omitted", func() {
 				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId2)
 				depReq.Resources = []api.ResourcesNullable{
 					CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default"),
@@ -1319,6 +1330,17 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				Expect(err).To(BeNil())
 				Expect(putRes.Code).To(Equal(http.StatusBadRequest))
 				Expect(putRes.Body.(api.Error).Details).To(ContainSubstring(expectedMessage))
+
+				updateReq := getDepartmentUpdateRequest(dep)
+				for i := range updateReq.Resources {
+					if updateReq.Resources[i].NodePool.Id == fmt.Sprint(defaultNodePoolId) {
+						updateReq.Resources[i].Gpu.Deserved = nil
+					}
+				}
+				updateRes, err := departmentApiService2.UpdateDepartment(ctx, dep.Id, updateReq)
+				Expect(err).To(BeNil())
+				Expect(updateRes.Code).To(Equal(http.StatusBadRequest))
+				Expect(updateRes.Body.(api.Error).Message).To(ContainSubstring(expectedMessage))
 			})
 
 			It("batch patch without resources keeps the stored gpu deserved", func() {
