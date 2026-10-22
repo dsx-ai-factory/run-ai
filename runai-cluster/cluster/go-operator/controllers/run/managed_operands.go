@@ -7,6 +7,7 @@ package run
 
 import (
 	"context"
+	inference_endpoint_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/inference-endpoint-controller"
 
 	advice_restart_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/advice-restart-controller"
 	application_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/application-controller"
@@ -125,6 +126,8 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 
 	// The below operands are deployed to the remote cluster (tenant cluster) in a dual-cluster setup
 	// TODO start migrating all operands to this
+	// The controller uses its in-cluster client to manage the serving stack on the workload cluster.
+	mo.addRemoteCluster(inference_endpoint_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(advice_restart_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(runai_public.Operand(remoteClusterClient, *runaiConfig))
 	mo.addRemoteCluster(encryption_key.Operand(remoteClusterClient, *runaiConfig))

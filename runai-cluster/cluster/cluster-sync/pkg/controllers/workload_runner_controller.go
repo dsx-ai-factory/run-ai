@@ -12,6 +12,7 @@ import (
 	"slices"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
@@ -55,6 +56,13 @@ func AddWorkloadRunnerHandlerToCache(cachedClient cachedclient.CachedClient,
 }
 
 func wlrSyncFieldsChanged(oldWlr, newWlr *dromosv1alpha1.WorkloadRunner) bool {
+	oldIntent, oldConfigured := oldWlr.Annotations[endpoints.InferenceEndpointAnnotation]
+	newIntent, newConfigured := newWlr.Annotations[endpoints.InferenceEndpointAnnotation]
+	if oldConfigured != newConfigured || oldIntent != newIntent ||
+		(newConfigured && oldWlr.Generation != newWlr.Generation) {
+		return true
+	}
+
 	if !bytes.Equal(oldWlr.Spec.Template.Raw, newWlr.Spec.Template.Raw) {
 		return true
 	}
@@ -87,10 +95,25 @@ func wlrSyncFieldsChanged(oldWlr, newWlr *dromosv1alpha1.WorkloadRunner) bool {
 				(externalAccessConditionChanged(oldPlugin, newPlugin) || pluginDetailsChanged(oldPlugin, newPlugin)) {
 				return true
 			}
+			if name == endpoints.InferenceEndpointPluginName &&
+				(oldPlugin.Phase != newPlugin.Phase || inferenceEndpointConditionChanged(oldPlugin, newPlugin) || pluginDetailsChanged(oldPlugin, newPlugin)) {
+				return true
+			}
 		}
 	}
 
 	return false
+}
+
+func inferenceEndpointConditionChanged(old, new *dromosv1alpha1.PluginStatus) bool {
+	oldCond := findCondition(old.Conditions, endpoints.InferenceEndpointReadyCondition)
+	newCond := findCondition(new.Conditions, endpoints.InferenceEndpointReadyCondition)
+	if oldCond == nil || newCond == nil {
+		return oldCond != newCond
+	}
+	// Transition timestamps alone do not change the routing state reported to users.
+	return oldCond.Status != newCond.Status || oldCond.Reason != newCond.Reason ||
+		oldCond.Message != newCond.Message || oldCond.ObservedGeneration != newCond.ObservedGeneration
 }
 
 func externalAccessConditionChanged(old, new *dromosv1alpha1.PluginStatus) bool {

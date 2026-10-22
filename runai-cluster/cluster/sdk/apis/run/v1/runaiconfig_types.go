@@ -18,6 +18,7 @@ import (
 	device_plugin "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/device-plugin"
 	engine "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/engine"
 	external_workload_integrator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/external-workload-integrator"
+	inference_endpoint_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/inference-endpoint-controller"
 	kai_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/kai-operator"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/knative"
 	krm_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/krm-operator"
@@ -152,14 +153,15 @@ var ServiceGroupMapping = map[string]ServiceGroup{
 	"ClusterSync": SyncServicesGroup,
 
 	// Workload Services
-	"RuntimeRules":               WorkloadServicesGroup,
-	"AnyworkloadController":      WorkloadServicesGroup,
-	"ExternalWorkloadIntegrator": WorkloadServicesGroup,
-	"ClusterRedis":               WorkloadServicesGroup,
-	"ClusterApi":                 WorkloadServicesGroup,
-	"ResearcherService":          WorkloadServicesGroup,
-	"SharedObjectsController":    WorkloadServicesGroup,
-	"WorkloadExporter":           WorkloadServicesGroup,
+	"RuntimeRules":                WorkloadServicesGroup,
+	"AnyworkloadController":       WorkloadServicesGroup,
+	"ExternalWorkloadIntegrator":  WorkloadServicesGroup,
+	"InferenceEndpointController": WorkloadServicesGroup,
+	"ClusterRedis":                WorkloadServicesGroup,
+	"ClusterApi":                  WorkloadServicesGroup,
+	"ResearcherService":           WorkloadServicesGroup,
+	"SharedObjectsController":     WorkloadServicesGroup,
+	"WorkloadExporter":            WorkloadServicesGroup,
 }
 
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
@@ -309,6 +311,10 @@ type RunaiConfigSpec struct {
 	// +kubebuilder:validation:Optional
 	AdviceRestartController *advice_restart_controller.AdviceRestartController `json:"advice-restart-controller,omitempty"`
 
+	// InferenceEndpointController configures inference routing on the workload cluster.
+	// +kubebuilder:validation:Optional
+	InferenceEndpointController *inference_endpoint_controller.InferenceEndpointController `json:"inference-endpoint-controller,omitempty"`
+
 	// AnyworkloadController specifies configuration for the anyworkload-controller
 	// +kubebuilder:validation:Optional
 	AnyworkloadController *anyworkload_controller.AnyworkloadController `json:"anyworkload-controller,omitempty"`
@@ -432,6 +438,9 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	if spec.ExternalWorkloadIntegrator == nil {
 		spec.ExternalWorkloadIntegrator = &external_workload_integrator.ExternalWorkloadIntegrator{}
 	}
+	if spec.InferenceEndpointController == nil {
+		spec.InferenceEndpointController = &inference_endpoint_controller.InferenceEndpointController{}
+	}
 	if spec.AdviceRestartController == nil {
 		spec.AdviceRestartController = &advice_restart_controller.AdviceRestartController{}
 	}
@@ -489,6 +498,7 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	spec.MetricsExporter.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.StatusUpdater.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.ExternalWorkloadIntegrator.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
+	spec.InferenceEndpointController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)
 	spec.AdviceRestartController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry)
 	spec.AnyworkloadController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry)
 	spec.ApplicationController.SetDefaultsWhereNeeded(spec.Internal.Global.ImageRegistry, spec.Global.ReplicaCount)

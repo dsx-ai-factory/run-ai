@@ -206,6 +206,7 @@ func parseClusterInfoConfigToServerScheme(configuration *runv1.PublicConfigurati
 		openshiftRouteTerminationPolicy = &policy
 	}
 	configServerScheme := swagger.ClusterReportedConfig{
+		InferenceEndpointSchemaVersion:         *swagger.NewNullableString(configuration.InferenceEndpointSchemaVersion),
 		WorkloadOwnershipProtection:            *swagger.NewNullableBool(&workloadOwnershipProtection),
 		SubdomainEnabled:                       *swagger.NewNullableBool(configuration.SubdomainEnabled),
 		IngressClass:                           *swagger.NewNullableString(configuration.IngressClass),

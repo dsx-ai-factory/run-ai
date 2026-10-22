@@ -1,0 +1,226 @@
+# Derived from test/testdata/golden/04-epp.yaml, namespaced objects only. The EPP stack: ServiceAccount,
+# ConfigMap, two Roles, two RoleBindings, Service, Deployment. Objects and flags originally came from
+# `helm template oci://registry.k8s.io/gateway-api-inference-extension/charts/inferencepool --version v1.5.0`.
+# The metrics-auth ClusterRole and ClusterRoleBindings from the lab file are not generated in v0: a
+# namespaced owner cannot garbage-collect cluster-scoped objects.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ printf "%s-epp" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ printf "%s-epp" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+data:
+  default-plugins.yaml: |
+{{- if .RuntimeProfiles }}
+    apiVersion: llm-d.ai/v1alpha1
+    kind: EndpointPickerConfig
+    plugins:
+    - type: header-profile-handler
+      parameters:
+        headerName: EPP-Profile
+        defaultProfile: {{ .DefaultProfile | toJSON }}
+    - type: max-score-picker
+{{- range .ProfilePlugins }}
+    - type: {{ . | toJSON }}
+{{- end }}
+{{- else }}
+    apiVersion: inference.networking.x-k8s.io/v1alpha1
+    kind: EndpointPickerConfig
+    plugins:
+{{- range .Scorers }}
+    - type: {{ .Plugin | toJSON }}
+{{- end }}
+{{- end }}
+    - type: metrics-data-source
+      parameters:
+        scheme: "http"
+        path: "/metrics"
+        insecureSkipVerify: true
+    - type: core-metrics-extractor
+    schedulingProfiles:
+{{- if .RuntimeProfiles }}
+{{- range .Profiles }}
+    - name: {{ .Name | toJSON }}
+      plugins:
+{{- range .Scorers }}
+      - pluginRef: {{ .Plugin | toJSON }}
+        weight: {{ .Weight }}
+{{- end }}
+      - pluginRef: max-score-picker
+{{- end }}
+{{- else }}
+    - name: default
+      plugins:
+{{- range .Scorers }}
+      - pluginRef: {{ .Plugin | toJSON }}
+        weight: {{ .Weight }}
+{{- end }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ printf "%s-epp-non-sa" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+rules:
+- apiGroups: ["inference.networking.x-k8s.io"]
+  resources: ["inferenceobjectives", "inferencemodelrewrites"]
+  verbs: ["get", "watch", "list"]
+- apiGroups: ["inference.networking.k8s.io"]
+  resources: ["inferencepools"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ printf "%s-epp-sa" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ printf "%s-epp-non-sa" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+subjects:
+- kind: ServiceAccount
+  name: {{ printf "%s-epp" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ printf "%s-epp-non-sa" .Name | toJSON }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ printf "%s-epp-sa" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+subjects:
+- kind: ServiceAccount
+  name: {{ printf "%s-epp" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ printf "%s-epp-sa" .Name | toJSON }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ printf "%s-epp" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+spec:
+  selector:
+    inferencepool: {{ printf "%s-epp" .Name | toJSON }}
+  ports:
+  - name: grpc-ext-proc
+    protocol: TCP
+    port: 9002
+  - name: http-metrics
+    protocol: TCP
+    port: 9090
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ printf "%s-epp" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+  labels:
+    inference.networking.k8s.io/igw-mode: inferencepool
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate                   # single active replica; prefix-cache state is in memory
+  selector:
+    matchLabels:
+      inferencepool: {{ printf "%s-epp" .Name | toJSON }}
+  template:
+    metadata:
+      labels:
+        inferencepool: {{ printf "%s-epp" .Name | toJSON }}
+        inference.networking.k8s.io/igw-mode: inferencepool
+    spec:
+      serviceAccountName: {{ printf "%s-epp" .Name | toJSON }}
+      # EPP watches Pods, InferencePools, and model-routing resources.
+      automountServiceAccountToken: true
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      terminationGracePeriodSeconds: 130
+      containers:
+      - name: epp
+        image: {{ .EppImage | toJSON }}
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        args:
+        - --pool-name
+        - {{ printf "%s-pool" .Name | toJSON }}
+        - --pool-namespace
+        - {{ .Namespace | toJSON }}
+        - --pool-group
+        - inference.networking.k8s.io
+        - --zap-encoder
+        - json
+        - --config-file
+        - /config/default-plugins.yaml
+        - --v
+        - "3"                          # verbose enough to see "Scheduling succeeded" and per-pod scores
+        - --tracing=false
+{{- if .RuntimeProfiles }}
+        - --allow-experimental-plugins
+{{- end }}
+        resources:
+          requests:
+            cpu: 100m
+            memory: 256Mi
+          limits:
+            memory: 1Gi
+        ports:
+        - name: grpc
+          containerPort: 9002
+        - name: grpc-health
+          containerPort: 9003
+        - name: metrics
+          containerPort: 9090
+        livenessProbe:
+          grpc:
+            port: 9003
+            service: inference-extension
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        readinessProbe:
+          grpc:
+            port: 9003
+            service: inference-extension
+          periodSeconds: 2
+        env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        volumeMounts:
+        - name: plugins-config-volume
+          mountPath: /config
+      volumes:
+      - name: plugins-config-volume
+        configMap:
+          name: {{ printf "%s-epp" .Name | toJSON }}

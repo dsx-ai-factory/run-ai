@@ -1,0 +1,26 @@
+# Derived from test/testdata/golden/07-phase1-modelrewrite.yaml. One InferenceModelRewrite per endpoint, one rule per
+# rewrite. The EPP watches this object at runtime, so changes apply without a restart.
+{{- if .Rewrites }}
+apiVersion: inference.networking.x-k8s.io/v1alpha2
+kind: InferenceModelRewrite
+metadata:
+  name: {{ printf "%s-rewrite" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+spec:
+  poolRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: {{ printf "%s-pool" .Name | toJSON }}
+  rules:
+{{- range .Rewrites }}
+  - matches:
+    - model:
+        type: Exact
+        value: {{ .Model | toJSON }}
+    targets:
+{{- range .Targets }}
+    - modelRewrite: {{ .Model | toJSON }}
+      weight: {{ .Weight }}
+{{- end }}
+{{- end }}
+{{- end }}

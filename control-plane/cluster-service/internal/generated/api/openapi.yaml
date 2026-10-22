@@ -6747,6 +6747,13 @@ components:
       description: Holds cluster configuration values.
       nullable: true
       properties:
+        inferenceEndpointSchemaVersion:
+          description: "InferenceEndpoint integration contract declared by the operator\
+            \ when Agent, Anyworkload and inference-endpoint-controller are enabled.\
+            \ Omitted by older clusters. Operand readiness and administrator Gateway\
+            \ settings must also be checked before enabling new workloads."
+          nullable: true
+          type: string
         workloadOwnershipProtection:
           description: indicates if the cluster workload ownership protection is enabled
           example: false

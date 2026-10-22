@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**InferenceEndpointSchemaVersion** | Pointer to **NullableString** | InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads. | [optional] 
 **WorkloadOwnershipProtection** | Pointer to **NullableBool** | indicates if the cluster workload ownership protection is enabled | [optional] 
 **SubdomainEnabled** | Pointer to **NullableBool** | indicates if the cluster subdomain is enabled | [optional] 
 **IngressClass** | Pointer to **NullableString** | the ingress class that is configured for the cluster | [optional] 
@@ -51,6 +52,41 @@ NewClusterReportedConfigWithDefaults instantiates a new ClusterReportedConfig ob
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
+### GetInferenceEndpointSchemaVersion
+
+`func (o *ClusterReportedConfig) GetInferenceEndpointSchemaVersion() string`
+
+GetInferenceEndpointSchemaVersion returns the InferenceEndpointSchemaVersion field if non-nil, zero value otherwise.
+
+### GetInferenceEndpointSchemaVersionOk
+
+`func (o *ClusterReportedConfig) GetInferenceEndpointSchemaVersionOk() (*string, bool)`
+
+GetInferenceEndpointSchemaVersionOk returns a tuple with the InferenceEndpointSchemaVersion field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetInferenceEndpointSchemaVersion
+
+`func (o *ClusterReportedConfig) SetInferenceEndpointSchemaVersion(v string)`
+
+SetInferenceEndpointSchemaVersion sets InferenceEndpointSchemaVersion field to given value.
+
+### HasInferenceEndpointSchemaVersion
+
+`func (o *ClusterReportedConfig) HasInferenceEndpointSchemaVersion() bool`
+
+HasInferenceEndpointSchemaVersion returns a boolean if a field has been set.
+
+### SetInferenceEndpointSchemaVersionNil
+
+`func (o *ClusterReportedConfig) SetInferenceEndpointSchemaVersionNil(b bool)`
+
+ SetInferenceEndpointSchemaVersionNil sets the value for InferenceEndpointSchemaVersion to be an explicit nil
+
+### UnsetInferenceEndpointSchemaVersion
+`func (o *ClusterReportedConfig) UnsetInferenceEndpointSchemaVersion()`
+
+UnsetInferenceEndpointSchemaVersion ensures that no value is present for InferenceEndpointSchemaVersion, not even an explicit nil
 ### GetWorkloadOwnershipProtection
 
 `func (o *ClusterReportedConfig) GetWorkloadOwnershipProtection() bool`

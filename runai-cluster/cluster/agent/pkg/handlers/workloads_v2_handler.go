@@ -631,6 +631,9 @@ func wrapWithWorkloadRunner(manifest client.Object, workloadId string, configura
 	if configuration == nil {
 		return runner, nil
 	}
+	if err := applyInferenceEndpoint(runner, configuration.InferenceEndpoint.Get()); err != nil {
+		return nil, fmt.Errorf("invalid inference endpoint configuration: %w", err)
+	}
 
 	hasMnnvl := configuration.Mnnvl != nil && configuration.Mnnvl.Mode != nil
 	hasNetworkingEndpoints := hasNetworkingEndpointsConfiguration(configuration)

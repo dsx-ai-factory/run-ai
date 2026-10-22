@@ -1,0 +1,21 @@
+# The llama3 endpoint from Track A of the lab. Applying this CR must produce the
+# same objects as test/testdata/golden/03-inferencepool.yaml, 04-epp.yaml (namespaced
+# objects), and 05-httproute.yaml.
+apiVersion: inference.platform.run.ai/v1alpha1
+kind: InferenceEndpoint
+metadata:
+  name: llama3
+  namespace: model-serving
+spec:
+  workload:
+    selector:
+      matchLabels:
+        app: vllm-llama3          # the only contract with the pods
+    port: 8000
+  routing:
+    gatewayRef:
+      name: inference-agw         # admin-owned Gateway, referenced by name
+    hostnames:
+    - llama3.test
+  epp:
+    image: registry.k8s.io/gateway-api-inference-extension/epp:v1.5.0

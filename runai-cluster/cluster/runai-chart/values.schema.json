@@ -2045,6 +2045,35 @@
       },
       "type": "object"
     },
+    "InferenceEndpointController": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "image": {
+          "$ref": "#/$defs/Image"
+        },
+        "resources": {
+          "$ref": "#/$defs/Resources"
+        },
+        "replicas": {
+          "type": "integer"
+        },
+        "useDebugLogLevel": {
+          "type": "boolean"
+        },
+        "metrics": {
+          "$ref": "#/$defs/Metrics"
+        },
+        "metricsScrapeNamespace": {
+          "type": "string"
+        },
+        "affinity": {
+          "$ref": "#/$defs/Affinity"
+        }
+      },
+      "type": "object"
+    },
     "Ingress": {
       "properties": {
         "enabled": {
@@ -4392,6 +4421,9 @@
         },
         "advice-restart-controller": {
           "$ref": "#/$defs/AdviceRestartController"
+        },
+        "inference-endpoint-controller": {
+          "$ref": "#/$defs/InferenceEndpointController"
         },
         "anyworkload-controller": {
           "$ref": "#/$defs/AnyworkloadController"

@@ -22,6 +22,12 @@ var dummyClusterReportedConfig = runaihttp.AssertPattern
 // ClusterReportedConfig - Holds cluster configuration values.
 type ClusterReportedConfig struct {
 
+	// InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//InferenceEndpointSchemaVersion *string `json:"inferenceEndpointSchemaVersion,omitempty"`
+	InferenceEndpointSchemaVersion *string `json:"inferenceEndpointSchemaVersion,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// indicates if the cluster workload ownership protection is enabled
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//WorkloadOwnershipProtection *bool `json:"workloadOwnershipProtection,omitempty"`
@@ -218,6 +224,11 @@ func AssertClusterReportedConfigRequired(obj ClusterReportedConfig) error {
 
 // AssertClusterReportedConfigConstraints checks if the values respects the defined constraints
 func AssertClusterReportedConfigConstraints(obj ClusterReportedConfig) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

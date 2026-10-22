@@ -1,0 +1,37 @@
+# Track A step 4b · 🆕 what the controller creates next to the EPP: an ingress-only NetworkPolicy.
+# Type ✅ core Kubernetes, instance 🆕 ours. Enforced only where the CNI enforces NetworkPolicy.
+# Ingress: the Gateway namespace reaches ext_proc (9002) and gRPC health (9003); the metrics
+# namespace reaches Prometheus metrics (9090). Kubelet probes bypass NetworkPolicy.
+# Egress is deliberately open: the EPP scrapes model Pods and talks to the API server and DNS,
+# and both the API-server address and the CNI behaviour differ per cluster.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: llama3-epp
+  namespace: model-serving
+  labels:
+    lab.track: a
+spec:
+  podSelector:
+    matchLabels:
+      inferencepool: llama3-epp
+      inference.networking.k8s.io/igw-mode: inferencepool
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: model-serving
+    ports:
+    - protocol: TCP
+      port: 9002
+    - protocol: TCP
+      port: 9003
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: monitoring
+    ports:
+    - protocol: TCP
+      port: 9090

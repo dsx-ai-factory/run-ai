@@ -9,6 +9,7 @@ api_settings.go
 api_workloads_v2.go
 client.go
 configuration.go
+docs/AgentInferenceEndpoint.md
 docs/AgentNetworkingConfiguration.md
 docs/AgentNetworkingService.md
 docs/AgentServiceCreate.md
@@ -125,6 +126,7 @@ docs/YamlSubmissionSetting.md
 git_push.sh
 go.mod
 go.sum
+model_agent_inference_endpoint.go
 model_agent_networking_configuration.go
 model_agent_networking_service.go
 model_agent_service_create.go

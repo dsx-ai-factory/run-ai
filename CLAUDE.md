@@ -98,6 +98,7 @@ service, run `/write-service-docs <path>` to document it and add it below.
 - [runai-cluster/cluster/accessrule-controller](runai-cluster/cluster/accessrule-controller)
 - [runai-cluster/cluster/admission-controller](runai-cluster/cluster/admission-controller)
 - [runai-cluster/cluster/advice-restart-controller](runai-cluster/cluster/advice-restart-controller)
+- [runai-cluster/cluster/inference-endpoint-controller](runai-cluster/cluster/inference-endpoint-controller)
 - [runai-cluster/cluster/agent](runai-cluster/cluster/agent)
 - [runai-cluster/cluster/anyworkload-controller](runai-cluster/cluster/anyworkload-controller)
 - [runai-cluster/cluster/application-controller](runai-cluster/cluster/application-controller)

@@ -394,6 +394,8 @@ github.com/joshdk/go-junit v1.0.0/go.mod h1:TiiV0PqkaNfFXjEiyjWM3XXrhVyCa1K4Zfga
 github.com/json-iterator/go v1.1.12 h1:PV8peI4a0ysnczrg+LtxykD8LfKY9ML6u2jnxaEnrnM=
 github.com/json-iterator/go v1.1.12/go.mod h1:e30LSqwooZae/UwlEbR2852Gd8hjQvJoHmT4TnhNGBo=
 github.com/jstemmer/go-junit-report v0.0.0-20190106144839-af01ea7f8024/go.mod h1:6v2b51hI/fHJwM22ozAgKL4VKDeJcHhJFhtBdhmNjmU=
+github.com/kai-scheduler/KAI-scheduler v0.18.2 h1:PAviSE6imo5bP24VabUi4+XvlD7f6IJTOAhDTnX5QMs=
+github.com/kai-scheduler/KAI-scheduler v0.18.2/go.mod h1:Iq9bW16dfU3vuhAT4CMM1ZqG5aKXg8z/0K4Qt+LiS0Q=
 github.com/kedacore/keda/v2 v2.18.3 h1:PY3o80tzBAzCffS8J6eBZctT4B+g/r26zErNSMleC50=
 github.com/kedacore/keda/v2 v2.18.3/go.mod h1:gaFzDtqtXg6KPmMcwzeCjv7aoK8Z1I2NaUkqHkREbDk=
 github.com/keybase/go-keychain v0.0.1 h1:way+bWYa6lDppZoZcgMbYsvC7GxljxrskdNInRtuthU=
@@ -819,6 +821,7 @@ gorm.io/gorm v1.31.2 h1:3o8FXNo9v9S858gil+3LlZA1LkCOzgb4g5BL64FgaCo=
 gorm.io/gorm v1.31.2/go.mod h1:XyQVbO2k6YkOis7C2437jSit3SsDK72s7n7rsSHd+Gs=
 gorm.io/plugin/opentelemetry v0.1.16 h1:Kypj2YYAliJqkIczDZDde6P6sFMhKSlG5IpngMFQGpc=
 gorm.io/plugin/opentelemetry v0.1.16/go.mod h1:P3RmTeZXT+9n0F1ccUqR5uuTvEXDxF8k2UpO7mTIB2Y=
+gotest.tools v2.2.0+incompatible h1:VsBPFP1AI068pPrMxtb/S8Zkgf9xEmTLJjfM+P5UIEo=
 gotest.tools/v3 v3.5.2 h1:7koQfIKdy+I8UTetycgUqXWSDwpgv193Ka+qRsmBY8Q=
 gotest.tools/v3 v3.5.2/go.mod h1:LtdLGcnqToBH83WByAAi/wiwSFCArdFIUV/xxN4pcjA=
 honnef.co/go/tools v0.0.0-20190102054323-c2f93a96b099/go.mod h1:rf3lG4BRIbNafJWhAfAdb/ePZxsR/4RtNHQocxwk9r4=
