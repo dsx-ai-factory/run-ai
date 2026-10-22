@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/NVIDIA/k8s-nim-operator v0.0.0-20260601160319-679627a97be7
