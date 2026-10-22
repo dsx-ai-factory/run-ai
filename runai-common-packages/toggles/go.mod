@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	github.com/Unleash/unleash-client-go/v3 v3.9.2
-	github.com/aws/smithy-go v1.28.5
+	github.com/aws/smithy-go v1.28.6
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
 	github.com/stretchr/testify v1.12.1
