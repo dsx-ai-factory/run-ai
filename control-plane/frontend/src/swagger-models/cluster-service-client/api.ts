@@ -5983,7 +5983,7 @@ export const ClustersApiAxiosParamCreator = function (configuration?: Configurat
         },
         /**
          * Retrieve a list of clusters with details.
-         * @summary Get a list of clusters.
+         * @summary Get a list of clusters (Fern preview demo)
          * @param {'metadata' | 'full'} [verbosity] response verbosity level. 
          * @param {Array<string>} [tenantId] The tenant Ids of the current request.
          * @param {boolean} [includeRequestedForDelete] When true, includes clusters that are marked for deletion
@@ -6431,7 +6431,7 @@ export const ClustersApiFp = function(configuration?: Configuration) {
         },
         /**
          * Retrieve a list of clusters with details.
-         * @summary Get a list of clusters.
+         * @summary Get a list of clusters (Fern preview demo)
          * @param {'metadata' | 'full'} [verbosity] response verbosity level. 
          * @param {Array<string>} [tenantId] The tenant Ids of the current request.
          * @param {boolean} [includeRequestedForDelete] When true, includes clusters that are marked for deletion
@@ -6644,7 +6644,7 @@ export const ClustersApiFactory = function (configuration?: Configuration, baseP
         },
         /**
          * Retrieve a list of clusters with details.
-         * @summary Get a list of clusters.
+         * @summary Get a list of clusters (Fern preview demo)
          * @param {'metadata' | 'full'} [verbosity] response verbosity level. 
          * @param {Array<string>} [tenantId] The tenant Ids of the current request.
          * @param {boolean} [includeRequestedForDelete] When true, includes clusters that are marked for deletion
@@ -6872,7 +6872,7 @@ export class ClustersApi extends BaseAPI {
 
     /**
      * Retrieve a list of clusters with details.
-     * @summary Get a list of clusters.
+     * @summary Get a list of clusters (Fern preview demo)
      * @param {'metadata' | 'full'} [verbosity] response verbosity level. 
      * @param {Array<string>} [tenantId] The tenant Ids of the current request.
      * @param {boolean} [includeRequestedForDelete] When true, includes clusters that are marked for deletion
@@ -9690,8 +9690,8 @@ export class NodePoolsApi extends BaseAPI {
 export const NodesApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Count nodes
-         * @summary Count nodes
+         * Returns the number of nodes in a cluster. Demo change to showcase the Fern docs preview.
+         * @summary Count nodes (Fern preview demo)
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
          * @param {string} [search] Filter results by a free text search.
@@ -10243,8 +10243,8 @@ export const NodesApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = NodesApiAxiosParamCreator(configuration)
     return {
         /**
-         * Count nodes
-         * @summary Count nodes
+         * Returns the number of nodes in a cluster. Demo change to showcase the Fern docs preview.
+         * @summary Count nodes (Fern preview demo)
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
          * @param {string} [search] Filter results by a free text search.
@@ -10396,8 +10396,8 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
     const localVarFp = NodesApiFp(configuration)
     return {
         /**
-         * Count nodes
-         * @summary Count nodes
+         * Returns the number of nodes in a cluster. Demo change to showcase the Fern docs preview.
+         * @summary Count nodes (Fern preview demo)
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
          * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
          * @param {string} [search] Filter results by a free text search.
@@ -10538,8 +10538,8 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
  */
 export class NodesApi extends BaseAPI {
     /**
-     * Count nodes
-     * @summary Count nodes
+     * Returns the number of nodes in a cluster. Demo change to showcase the Fern docs preview.
+     * @summary Count nodes (Fern preview demo)
      * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
      * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal, &#x3D;@ contains, !@ Does not contains, &#x3D;^ Starts with and &#x3D;$ Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D;.
      * @param {string} [search] Filter results by a free text search.

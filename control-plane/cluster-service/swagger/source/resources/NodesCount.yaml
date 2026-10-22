@@ -1,8 +1,8 @@
 get:
-  summary: Count nodes
+  summary: Count nodes (Fern preview demo)
   operationId: count_nodes
   x-service: cluster-service
-  description: Count nodes
+  description: Returns the number of nodes in a cluster. Demo change to showcase the Fern docs preview.
   x-test-coverage:
     - control-plane/cluster-service/pkg/test/node_db_test.go
   x-authorize:

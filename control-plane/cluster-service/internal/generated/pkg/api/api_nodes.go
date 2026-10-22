@@ -344,7 +344,7 @@ func (c *NodesAPIController) Routes() Routes {
 	}
 }
 
-// CountNodes - Count nodes
+// CountNodes - Count nodes (Fern preview demo)
 func (c *NodesAPIController) CountNodes(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {

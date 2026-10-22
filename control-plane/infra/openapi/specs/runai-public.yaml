@@ -86,9 +86,9 @@ tags:
 paths:
   /api/v1/clusters/{clusterUuid}/nodes/count:
     get:
-      summary: Count nodes
+      summary: Count nodes (Fern preview demo)
       operationId: count_nodes
-      description: Count nodes
+      description: Returns the number of nodes in a cluster. Demo change to showcase the Fern docs preview.
       tags:
         - Nodes
       parameters:
@@ -120,7 +120,7 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/clusters:
     get:
-      summary: Get a list of clusters.
+      summary: Get a list of clusters (Fern preview demo)
       description: Retrieve a list of clusters with details.
       operationId: get_clusters
       tags:
@@ -8304,8 +8304,6 @@ paths:
 
 
 
-
-
           For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
         - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
       tags:
@@ -14119,8 +14117,6 @@ components:
 
 
 
-
-
              - binpack - Place as many GPU pods as possible on each GPU device to use fewer devices and maximize available capacity, minimizing GPU fraction fragmentation.
              - spread - Distribute GPU pods across as many GPU devices as possible to balance load across devices.
           allOf:
@@ -14175,8 +14171,6 @@ components:
 
 
 
-
-
              - 0.0: Ignore historical usage data (100% current usage).
              - 1.0: Historical usage data has higher impact, it may cause fairshare to be 0.
              - Values between 0.0 and 1.0 combine historical and current usage to maintain a balanced fairshare
@@ -14189,8 +14183,6 @@ components:
           pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
           description: |
             Set the half-life time to define the decay rate of a project’s historical resource usage. The half-life defines how long it takes for past usage to diminish to half of its original influence on a project's fairshare.
-
-
 
 
 

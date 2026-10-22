@@ -146,7 +146,7 @@ func (s *ClustersAPIService) GetInternalClusters(ctx context.Context, includeDel
 	return Response(http.StatusNotImplemented, nil), errors.New("GetInternalClusters method not implemented")
 }
 
-// GetClusters - Get a list of clusters.
+// GetClusters - Get a list of clusters (Fern preview demo)
 func (s *ClustersAPIService) GetClusters(ctx context.Context, verbosity string, tenantId []string, includeRequestedForDelete bool) (ImplResponse, error) {
 	// TODO - update GetClusters with the required logic for this service method.
 	// Add api_clusters_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.

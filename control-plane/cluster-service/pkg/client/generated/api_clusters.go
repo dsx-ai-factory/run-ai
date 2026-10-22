@@ -195,7 +195,7 @@ type ClustersAPI interface {
 	GetClusterVersionsExecute(r ApiGetClusterVersionsRequest) (map[string]string, *http.Response, error)
 
 	/*
-		GetClusters Get a list of clusters.
+		GetClusters Get a list of clusters (Fern preview demo)
 
 		Retrieve a list of clusters with details.
 
@@ -2145,7 +2145,7 @@ func (r ApiGetClustersRequest) Execute() ([]DisplayedCluster, *http.Response, er
 }
 
 /*
-GetClusters Get a list of clusters.
+GetClusters Get a list of clusters (Fern preview demo)
 
 Retrieve a list of clusters with details.
 

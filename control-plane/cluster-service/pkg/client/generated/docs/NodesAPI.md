@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**CountNodes**](NodesAPI.md#CountNodes) | **Get** /api/v1/clusters/{clusterUuid}/nodes/count | Count nodes
+[**CountNodes**](NodesAPI.md#CountNodes) | **Get** /api/v1/clusters/{clusterUuid}/nodes/count | Count nodes (Fern preview demo)
 [**CountTenantNodes**](NodesAPI.md#CountTenantNodes) | **Get** /api/v1/nodes/count | Count tenant nodes
 [**DeleteNode**](NodesAPI.md#DeleteNode) | **Delete** /api/v1/clusters/{clusterUuid}/nodes/{nodeName} | Delete a node from a cluster.
 [**GetNode**](NodesAPI.md#GetNode) | **Get** /api/v1/nodes/{nodeId} | Get a node by ID.
@@ -22,7 +22,7 @@ Method | HTTP request | Description
 
 > CountNodes200Response CountNodes(ctx, clusterUuid).FilterBy(filterBy).Search(search).Execute()
 
-Count nodes
+Count nodes (Fern preview demo)
 
 
 

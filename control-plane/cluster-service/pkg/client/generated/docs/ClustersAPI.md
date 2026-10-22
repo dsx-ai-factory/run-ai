@@ -15,7 +15,7 @@ Method | HTTP request | Description
 [**GetClusterName**](ClustersAPI.md#GetClusterName) | **Get** /internal/clusters/{clusterUuid}/name | Get the cluster name.
 [**GetClusterUrl**](ClustersAPI.md#GetClusterUrl) | **Get** /internal/clusters/{clusterUuid}/url | Get the cluster url.
 [**GetClusterVersions**](ClustersAPI.md#GetClusterVersions) | **Get** /api/v1/clusters/versions | Get cluster versions.
-[**GetClusters**](ClustersAPI.md#GetClusters) | **Get** /api/v1/clusters | Get a list of clusters.
+[**GetClusters**](ClustersAPI.md#GetClusters) | **Get** /api/v1/clusters | Get a list of clusters (Fern preview demo)
 [**GetClustersCount**](ClustersAPI.md#GetClustersCount) | **Get** /api/v1/clusters/count | Count the amount of clusters in a tenant.
 [**GetClustersMinimalData**](ClustersAPI.md#GetClustersMinimalData) | **Get** /api/v1/clusters/minimal | Get clusters minimal data
 [**GetInternalClusters**](ClustersAPI.md#GetInternalClusters) | **Get** /internal/clusters | Get an internal list of clusters.
@@ -805,7 +805,7 @@ Other parameters are passed through a pointer to a apiGetClusterVersionsRequest 
 
 > []DisplayedCluster GetClusters(ctx).Verbosity(verbosity).TenantId(tenantId).IncludeRequestedForDelete(includeRequestedForDelete).Execute()
 
-Get a list of clusters.
+Get a list of clusters (Fern preview demo)
 
 
 
