@@ -7,13 +7,20 @@ package services
 
 import (
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"math/big"
 	"net/http"
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"k8s.io/utils/ptr"
 
@@ -307,7 +314,8 @@ func TestCreateIdp_SamlHappyFlow(t *testing.T) {
 	dalMock := MocksList.IdpMock
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	config := map[string]string{"clientSecret": "test"}
+	config := signedSamlConfig(t)
+	config["clientSecret"] = "test"
 	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
 	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, "saml").Return(config, nil)
 	iamMock.MockIdpService.On("CreateIdp", ctx, realm, mock.Anything).Return(ptr.To(idpAlias), nil)
@@ -548,10 +556,11 @@ func TestGetIdpConfig_SAML_File(t *testing.T) {
 	}
 	idpData := getIdpMetadataModel(idpAlias, XML_FILE, utils.File, models.SAML, map[string]string{}, conf)
 	iamMock := MocksList.IamServicesContainerMock
-	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
 	config, err := testSubject.getIdpConfig(ctx, "runai", &idpData)
 	assert.Nil(t, err)
-	assert.Equal(t, map[string]string{}, config)
+	assert.Equal(t, "true", config[utils.ValidateSignature])
+	assert.NoError(t, utils.ValidateSigningCertificate(config[utils.SigningCertificate]))
 }
 
 func TestGetIdpConfig_SAML_Url(t *testing.T) {
@@ -565,10 +574,11 @@ func TestGetIdpConfig_SAML_Url(t *testing.T) {
 	}
 	idpData := getIdpMetadataModel(idpAlias, "fromUrl", utils.Url, models.SAML, map[string]string{}, conf)
 	iamMock := MocksList.IamServicesContainerMock
-	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
+	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
 	config, err := testSubject.getIdpConfig(ctx, "runai", &idpData)
 	assert.Nil(t, err)
-	assert.Equal(t, map[string]string{}, config)
+	assert.Equal(t, "true", config[utils.ValidateSignature])
+	assert.NoError(t, utils.ValidateSigningCertificate(config[utils.SigningCertificate]))
 }
 
 func TestGetIdpConfig_OIDC_Url(t *testing.T) {
@@ -667,7 +677,7 @@ func TestUpdateIdp_HappyFlow(t *testing.T) {
 
 	mappers := generateMapperConfigArray()
 	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
-	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
 	iamMock.MockIdpService.On("UpdateIdp", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	iamMock.MockIdpService.On("GetIdp", mock.Anything, mock.Anything, mock.Anything).Return(&iamModels.Idp{}, nil)
 	iamMock.MockIdpService.On("GetIdpMappers", mock.Anything, mock.Anything, mock.Anything).Return(mappers, nil)
@@ -874,7 +884,7 @@ func TestUpdateIdp_IdpNotFound(t *testing.T) {
 	iamMock := MocksList.IamServicesContainerMock
 	authMock := MocksList.AuthManagerMock
 	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
-	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
 	iamMock.MockIdpService.On("UpdateIdp", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(fmt.Errorf("failed to get idp: %w", iamError.HandleKeyCloakError(&gocloak.APIError{Code: http.StatusNotFound, Message: "404 Not Found"})))
 
@@ -904,7 +914,7 @@ func TestUpdateIdp_Update_Error(t *testing.T) {
 	iamMock := MocksList.IamServicesContainerMock
 	authMock := MocksList.AuthManagerMock
 	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
-	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
 	iamMock.MockIdpService.On("UpdateIdp", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
 	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
 	assert.Equal(t, http.StatusInternalServerError, res.Code)
@@ -1310,4 +1320,27 @@ func TestSetIdpSettings_SpacesInMandatoryClaimValues(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Equal(t, "invalid mandatory claim value - spaces not allowed", err.Error())
 	iamMock.MockIdpService.AssertNotCalled(t, "SetMandatotyClaimMapper")
+}
+
+func signedSamlConfig(t *testing.T) map[string]string {
+	t.Helper()
+	return map[string]string{
+		utils.SigningCertificate: selfSignedSigningCertificate(t),
+	}
+}
+
+func selfSignedSigningCertificate(t *testing.T) string {
+	t.Helper()
+	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	assert.NoError(t, err)
+	template := &x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject:      pkix.Name{CommonName: "test-idp"},
+		NotBefore:    time.Now().Add(-time.Hour),
+		NotAfter:     time.Now().Add(time.Hour),
+		KeyUsage:     x509.KeyUsageDigitalSignature,
+	}
+	der, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
+	assert.NoError(t, err)
+	return base64.StdEncoding.EncodeToString(der)
 }

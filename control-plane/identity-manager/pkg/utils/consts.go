@@ -107,6 +107,7 @@ const (
 	FileName               = "fileName"
 	MetadataXmlType        = "metadataXmlType"
 	SigningCertificate     = "signingCertificate"
+	ValidateSignature      = "validateSignature"
 	SingleSignOnServiceUrl = "singleSignOnServiceUrl"
 )
 
