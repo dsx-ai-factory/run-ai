@@ -32,7 +32,7 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.5.3 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5 // indirect
 	github.com/andybalholm/brotli v1.2.6 // indirect
-	github.com/aws/smithy-go v1.28.5 // indirect
+	github.com/aws/smithy-go v1.28.6 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
