@@ -5,7 +5,7 @@ description: >-
   ImagePullBackOff, init, mount, node, or policy-terminated Run:ai workloads.
 license: Apache-2.0 AND CC-BY-4.0
 metadata:
-  author: Run:ai
+  author: Run:ai <runai-skills@nvidia.com>
 ---
 
 # Run:ai — Diagnose Failed Workload
@@ -128,7 +128,7 @@ Convert `lookback` to a timestamp cutoff. Call `get_workload_history(workloadId,
 
 ### Step 4 — Collect conditional evidence
 
-- If status, pod, history, or Kubernetes evidence indicates `OOMKilled` or unexplained exit 137, call `get_workload_metrics` with the lookback time range and compare peak CPU memory usage with `requestedResources.cpuMemory.limit`, not the request. The request is the reservation floor; the limit is the OOM ceiling. Run:ai GPU workloads are commonly Guaranteed so request and limit may match, but verify both values.
+- If status, pod, history, or Kubernetes evidence indicates `OOMKilled` or unexplained exit 137, call `get_workload_metrics` with the lookback time range and compare peak CPU memory usage with the memory limit (`limit` of `cpuMemory` under `requestedResources`), not the request. The request is the reservation floor; the limit is the OOM ceiling. Run:ai GPU workloads are commonly Guaranteed so request and limit may match, but verify both values.
 - Short-lived jobs may return an empty metrics series. In that case, state that no peak was observed and classify from a direct `OOMKilled` signal plus the configured memory limit. Never describe the requested, limited, or allocated memory as a measured peak.
 - If container-level evidence is needed, exit 137 remains unexplained, or Tier 1 produces no category, run:
 

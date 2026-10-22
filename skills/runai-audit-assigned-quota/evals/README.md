@@ -1,4 +1,7 @@
-# BENCHMARK — runai-audit-assigned-quota
+# Local evaluation — runai-audit-assigned-quota
+
+The certified `BENCHMARK.md` next to `SKILL.md` is generated and signed by
+NVSkills CI, so it must not be edited by hand. This file keeps the local runs.
 
 Evaluated with **NVSkills-Eval (NV-BASE / NV-ACES)** under the `external` publication
 profile — three tiers: static validation, deduplication, and live agent evaluation
