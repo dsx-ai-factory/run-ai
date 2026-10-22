@@ -63,7 +63,7 @@ export type DocsKey = keyof typeof DOCS_CATALOG_V1;
 
 export const DOCS_CATALOG_V2 = {
   clusterOverview: "documentation/getting-started/overview#nvidia-runai-cluster",
-  systemRequirements: null,
+  systemRequirements: "documentation/installation-and-configuration/system-requirements",
   networkRequirements: null,
   clusterInstallation: "documentation/installation-and-configuration/install/manual-helm/install-the-cluster",
   customInstallation: null,
