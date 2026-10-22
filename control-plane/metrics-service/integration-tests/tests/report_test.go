@@ -600,7 +600,10 @@ func (suite *ReportTestSuite) TestGetReport_ReturnsTheCreatedReport() {
 	require.Equal(suite.T(), int32(1), got.TenantId)
 	require.Equal(suite.T(), []openapi.Label{{Name: "clusterId", DisplayName: "ClusterId"}}, got.Labels)
 	require.False(suite.T(), got.CreatedAt.IsZero())
-	require.False(suite.T(), got.StatusUpdatedAt.Before(got.CreatedAt))
+	// created_at is stamped by the service after the transaction opens, while the
+	// DB trigger sets status_updated_at to the transaction start, so the two can
+	// differ by a few milliseconds in either direction.
+	require.WithinDuration(suite.T(), got.CreatedAt, got.StatusUpdatedAt, 5*time.Second)
 }
 
 func (suite *ReportTestSuite) TestDeleteReport() {
