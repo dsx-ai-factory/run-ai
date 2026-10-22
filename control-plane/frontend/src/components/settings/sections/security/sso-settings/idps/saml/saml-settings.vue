@@ -80,6 +80,15 @@
       :title="certificateWarningTitle"
       message="Edit the identity provider and replace the metadata XML with an updated file."
     />
+    <notification-alert-bar
+      v-if="signingDisabled"
+      class="q-mx-sm q-mb-sm certificate-warning"
+      :variant="signingDisabledVariant"
+      icon-override="ph-bold ph-warning-circle"
+      show-h1-content
+      :title="signingDisabledTitle"
+      :message="signingDisabledMessage"
+    />
     <div v-if="hasIdpAttributes" class="redirect-url-field">
       <div>Use the following if required by the identity provider</div>
       <setting-readable-field label="Redirect URL">
@@ -100,7 +109,7 @@ import { defineComponent } from "vue";
 import type { IIdpMapperItem, IWrapperBoxSettingMessages, SamlConfigSettings } from "@/models/setting.model";
 import { settingsUtil } from "@/utils/settings.util";
 import { useAuthStore } from "@/stores/auth.store";
-import { idpCommon } from "../idp-common/idp-common";
+import { idpCommon, SAML_SIGNING_DISABLED_MESSAGE, SAML_SIGNING_DISABLED_TITLE } from "../idp-common/idp-common";
 import type {
   Idp,
   IdpCreationRequest,
@@ -159,6 +168,7 @@ export default defineComponent({
       isIdpFieldsChanged: false,
       certificateExpirationDate: null as Date | null,
       certificateRequestToken: 0,
+      signingDisabled: false,
       idpStore: useIdpsStore(),
       idpResources: {} as IdpResources,
       DOCS,
@@ -166,7 +176,7 @@ export default defineComponent({
   },
   async created(): Promise<void> {
     this.isEditMode = this.isNewIdp;
-    await this.refreshCertificateExpiration();
+    await Promise.all([this.refreshCertificateExpiration(), this.refreshSigningDisabled()]);
   },
   computed: {
     isExpiredCertificate(): boolean {
@@ -183,6 +193,15 @@ export default defineComponent({
     },
     certificateWarningTitle(): string {
       return this.isExpiredCertificate ? "The certificate expired." : "The certificate is expiring soon.";
+    },
+    signingDisabledVariant(): ENotificationBarVariant {
+      return ENotificationBarVariant.Error;
+    },
+    signingDisabledTitle(): string {
+      return SAML_SIGNING_DISABLED_TITLE;
+    },
+    signingDisabledMessage(): string {
+      return SAML_SIGNING_DISABLED_MESSAGE;
     },
     defaultEntityId(): string {
       return settingsUtil.getDefaultEntityId(window.location.hostname);
@@ -266,6 +285,7 @@ export default defineComponent({
     changeToReadMode(): void {
       this.isEditMode = false;
       this.idpFields = {} as SamlCreationData;
+      void this.refreshSigningDisabled();
     },
     _getIdpMappers(): Record<string, IIdpMapperItem> {
       return this.idpMappers ? settingsUtil.getIdpMappersItems(this.idpMappers) : {};
@@ -275,6 +295,15 @@ export default defineComponent({
       if (spMetadataUrl) {
         window.open(spMetadataUrl, "_blank");
       }
+    },
+    async refreshSigningDisabled(): Promise<void> {
+      if (this.isNewIdp) {
+        this.signingDisabled = false;
+        return;
+      }
+      const resources = await this.idpStore.loadIdpResources();
+      const resource = resources?.resource;
+      this.signingDisabled = typeof resource === "string" && idpCommon.isSamlSigningDisabled(resource);
     },
     async refreshCertificateExpiration(): Promise<void> {
       const signingCertificate = this.idp?.samlData?.signingCertificate;

@@ -41,6 +41,33 @@ describe("getDefaultScope", () => {
   });
 });
 
+describe("isSamlSigningDisabled", () => {
+  test("is true when WantAssertionsSigned is false", () => {
+    const xml = `<SPSSODescriptor WantAssertionsSigned="false"></SPSSODescriptor>`;
+    expect(idpCommon.isSamlSigningDisabled(xml)).toBe(true);
+  });
+
+  test("is true when AuthnRequestsSigned is false", () => {
+    const xml = `<SPSSODescriptor AuthnRequestsSigned="false"></SPSSODescriptor>`;
+    expect(idpCommon.isSamlSigningDisabled(xml)).toBe(true);
+  });
+
+  test("is true when WantAuthnRequestsSigned is false", () => {
+    const attribute = "WantAuthnRequestsSigned";
+    const xml = `<IDPSSODescriptor ${attribute}="false"></IDPSSODescriptor>`;
+    expect(idpCommon.isSamlSigningDisabled(xml)).toBe(true);
+  });
+
+  test("is false when signing is required", () => {
+    const xml = `<SPSSODescriptor WantAssertionsSigned="true" AuthnRequestsSigned="true"></SPSSODescriptor>`;
+    expect(idpCommon.isSamlSigningDisabled(xml)).toBe(false);
+  });
+
+  test("is false for metadata that does not mention signing", () => {
+    expect(idpCommon.isSamlSigningDisabled("<EntityDescriptor></EntityDescriptor>")).toBe(false);
+  });
+});
+
 describe("isCertificateExpiringSoon", () => {
   const now = new Date("2026-01-01T00:00:00.000Z");
   const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);

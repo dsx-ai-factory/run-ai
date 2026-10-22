@@ -12,7 +12,7 @@ import { markRaw } from "vue";
 import SamlFields from "./saml-fields.vue";
 import type { SamlConfigSettings } from "@/models/setting.model";
 import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
-import { idpCommon } from "../../idp-common/idp-common";
+import { idpCommon, SAML_SIGNING_DISABLED_TITLE } from "../../idp-common/idp-common";
 
 describe("saml-fields.vue", () => {
   const validSamlSettings: SamlConfigSettings = {
@@ -243,6 +243,45 @@ describe("saml-fields.vue", () => {
 
       expect(vm.expirationDate).toBeNull();
       expect(wrapper.text()).not.toContain("Certificate expired");
+    });
+  });
+
+  describe("disabled SAML signing warning", () => {
+    const xmlWith = (attribute: string) =>
+      `<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata">` +
+      `<md:IDPSSODescriptor ${attribute}="false"/>` +
+      `</md:EntityDescriptor>`;
+
+    it.each(["WantAssertionsSigned", "AuthnRequestsSigned", "WantAuthnRequestsSigned"])(
+      "shows the warning when %s is false",
+      async (attribute) => {
+        vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(null);
+
+        const { wrapper } = factory({ isNewIdp: true });
+        await (wrapper.vm as unknown as { setFileContent: (n: string, c: string) => Promise<void> }).setFileContent(
+          "idp.xml",
+          xmlWith(attribute),
+        );
+        await flushPromises();
+
+        expect(wrapper.text()).toContain(SAML_SIGNING_DISABLED_TITLE);
+      },
+    );
+
+    it("hides the warning when the file is cleared", async () => {
+      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(null);
+
+      const { wrapper } = factory({ isNewIdp: true });
+      await (wrapper.vm as unknown as { setFileContent: (n: string, c: string) => Promise<void> }).setFileContent(
+        "idp.xml",
+        xmlWith("WantAssertionsSigned"),
+      );
+      await flushPromises();
+
+      (wrapper.vm as unknown as { clearFile: () => void }).clearFile();
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.text()).not.toContain(SAML_SIGNING_DISABLED_TITLE);
     });
   });
 

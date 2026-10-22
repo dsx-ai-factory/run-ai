@@ -5,6 +5,15 @@
 
 <template>
   <div class="saml-fields col-12">
+    <notification-alert-bar
+      v-if="signingDisabled"
+      class="q-mb-md signing-disabled-warning"
+      :variant="signingDisabledVariant"
+      icon-override="ph-bold ph-warning-circle"
+      show-h1-content
+      :title="signingDisabledTitle"
+      :message="signingDisabledMessage"
+    />
     <div class="row">
       <div class="q-mb-md">
         <div class="col-12 q-mb-md">Upload your identity provider metadata file</div>
@@ -155,15 +164,18 @@ import {
   DEFAULT_METADATA_FILE_NAME,
   DEFAULT_METADATA_FILE_TYPE,
   idpCommon,
+  SAML_SIGNING_DISABLED_MESSAGE,
+  SAML_SIGNING_DISABLED_TITLE,
 } from "@/components/settings/sections/security/sso-settings/idps/idp-common/idp-common";
 import { urlHintMessage } from "@/models/setting.model";
 import { SettingReadonlyInput } from "@/components/settings/setting-readonly-input";
 import { RunaiBtn } from "@/components/common/runai-btn";
+import { ENotificationBarVariant, NotificationAlertBar } from "@/components/common/notification-alert-bar";
 import type { ResourceType } from "@/swagger-models/authorization-client";
 
 export default defineComponent({
   name: "saml-fields",
-  components: { RunaiBtn, SettingReadonlyInput },
+  components: { RunaiBtn, SettingReadonlyInput, NotificationAlertBar },
   emits: ["updated"],
   props: {
     samlSettings: {
@@ -198,6 +210,7 @@ export default defineComponent({
       metadataFile: null as File | null,
       originalSamlFields: {} as SamlCreationData,
       fileSelectionToken: 0,
+      signingDisabled: false,
     };
   },
   async created() {
@@ -239,6 +252,15 @@ export default defineComponent({
     },
     securityResourceType(): keyof typeof ResourceType {
       return "SecuritySettings";
+    },
+    signingDisabledVariant(): ENotificationBarVariant {
+      return ENotificationBarVariant.Error;
+    },
+    signingDisabledTitle(): string {
+      return SAML_SIGNING_DISABLED_TITLE;
+    },
+    signingDisabledMessage(): string {
+      return SAML_SIGNING_DISABLED_MESSAGE;
     },
   },
   methods: {
@@ -329,6 +351,7 @@ export default defineComponent({
       this.samlFields.fileName = "";
       this.expirationDate = null;
       this.isValidated = false;
+      this.signingDisabled = false;
       (this.$refs.metadataFileInput as typeof QFile)?.validate();
       this.onUpdated();
       const reader = new FileReader();
@@ -344,6 +367,7 @@ export default defineComponent({
       if (token !== this.fileSelectionToken) return;
       const isCurrent = await this.validateCertificate(this.extractCertificateFromMetadataXml(fileContent), token);
       if (!isCurrent || token !== this.fileSelectionToken) return;
+      this.signingDisabled = idpCommon.isSamlSigningDisabled(fileContent);
       this.samlFields.metadataXmlFile = stringUtil.stringToBase64(fileContent);
       this.samlFields.fileName = fileName;
       this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.File;
@@ -364,6 +388,7 @@ export default defineComponent({
       this.samlFields.fileName = "";
       this.expirationDate = null;
       this.isValidated = false;
+      this.signingDisabled = false;
       (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
       this.onUpdated();
     },

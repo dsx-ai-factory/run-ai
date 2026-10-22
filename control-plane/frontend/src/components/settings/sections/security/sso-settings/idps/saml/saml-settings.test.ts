@@ -12,6 +12,7 @@ import SamlSettings from "./saml-settings.vue";
 import type { Idp, SamlData } from "@/swagger-models/identity-manager-client";
 import { IdpTypeEnum } from "@/swagger-models/identity-manager-client";
 import { idpCommon } from "../idp-common/idp-common";
+import { useIdpsStore } from "@/stores/idps.store";
 
 describe("saml-settings.vue", () => {
   const mockSamlData: SamlData = {
@@ -232,6 +233,20 @@ describe("saml-settings.vue", () => {
       expect((wrapper.vm as unknown as { certificateWarningVariant: string | null }).certificateWarningVariant).toBe(
         null,
       );
+    });
+
+    it("shows an error banner when stored metadata disables SAML signing", async () => {
+      const { wrapper } = factory(mockIdp, false);
+      const store = useIdpsStore();
+      const attribute = "WantAuthnRequestsSigned";
+      store.loadIdpResources = vi.fn().mockResolvedValue({
+        resource: `<IDPSSODescriptor ${attribute}="false"></IDPSSODescriptor>`,
+      });
+
+      await (wrapper.vm as unknown as { refreshSigningDisabled: () => Promise<void> }).refreshSigningDisabled();
+      await wrapper.vm.$nextTick();
+
+      expect((wrapper.vm as unknown as { signingDisabled: boolean }).signingDisabled).toBe(true);
     });
 
     it("clears the expiration date when the signing certificate is removed", async () => {

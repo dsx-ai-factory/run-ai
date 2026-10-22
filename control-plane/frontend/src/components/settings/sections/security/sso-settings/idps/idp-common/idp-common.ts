@@ -14,7 +14,14 @@ export const idpCommon = {
   iValidCertificateDate,
   isCertificateExpiringSoon,
   getDefaultScope,
+  isSamlSigningDisabled,
 };
+
+export const SAML_SIGNING_DISABLED_TITLE = "SAML signing is disabled.";
+export const SAML_SIGNING_DISABLED_MESSAGE =
+  "Edit the identity provider and replace the metadata XML with an updated file.";
+
+const DISABLED_SAML_SIGNING_ATTRIBUTES = ["WantAssertionsSigned", "AuthnRequestsSigned", "WantAuthnRequestsSigned"];
 
 export const DEFAULT_METADATA_FILE_NAME = "metadata.xml";
 export const DEFAULT_METADATA_FILE_TYPE = "application/xml";
@@ -48,6 +55,22 @@ function isCertificateExpiringSoon(expirationDate: Date): boolean {
     iValidCertificateDate(expirationDate) &&
     dateUtil.differenceBy(TimeUnit.day, expirationDate, new Date()) <= CERTIFICATE_EXPIRING_SOON_THRESHOLD_DAYS
   );
+}
+
+function isSamlSigningDisabled(xmlContent: string): boolean {
+  try {
+    const doc = new DOMParser().parseFromString(xmlContent, "text/xml");
+    if (doc.querySelector("parsererror")) return false;
+    const elements = doc.getElementsByTagName("*");
+    for (let i = 0; i < elements.length; i++) {
+      for (const name of DISABLED_SAML_SIGNING_ATTRIBUTES) {
+        if (elements[i].getAttribute(name)?.toLowerCase() === "false") return true;
+      }
+    }
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 function getDefaultScope(scopes: string | string[] | undefined, withOpenId: boolean): Array<string> {
