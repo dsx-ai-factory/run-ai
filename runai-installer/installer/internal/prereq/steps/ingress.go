@@ -82,7 +82,7 @@ func (n *NgnixIngressInstallStep) Execute(ctx context.Context, runaiData *model.
 	logging.Infof("[Prereq] NGINX Ingress values: %v", values)
 	err := helmclient.InstallOrUpgradeRelease(context.Background(),
 		"https://kubernetes.github.io/ingress-nginx",
-		n.version, "ingress-nginx", "ingress-nginx", "ingress-nginx", false, values)
+		n.version, "ingress-nginx", "ingress-nginx", "ingress-nginx", false, helmclient.Values{Overrides: values})
 	if err != nil {
 		logging.Errorf("[Prereq] Failed to install NGINX Ingress: %v", err)
 		n.SetStatus(model.Failed, err)

@@ -181,33 +181,36 @@ func newControlPlaneChartStep(s *spec.Spec, caPath string, deps orchestrator2.De
 		workingDir := s.Airgap.WorkingDir
 		if s.UsesAirgapLoad() {
 			return steps.Titled(steps.NewControlPlaneChart("install-control-plane-chart", actions.HelmInstallLocal{
-				WorkingDir:  workingDir,
-				LockChart:   step.CPChartName,
-				ReleaseName: step.CPReleaseName,
-				Namespace:   step.CPNamespace,
-				Values:      controlPlaneValuesAirgap(s, caPath),
-				ValueFiles:  []string{filepath.Join(s.Airgap.ValuesDir, airgapvalues.ControlPlaneValuesFile)},
+				WorkingDir:   workingDir,
+				LockChart:    step.CPChartName,
+				ReleaseName:  step.CPReleaseName,
+				Namespace:    step.CPNamespace,
+				Values:       controlPlaneValuesAirgap(s, caPath),
+				CustomValues: cp.CustomHelmValues,
+				ValueFiles:   []string{filepath.Join(s.Airgap.ValuesDir, airgapvalues.ControlPlaneValuesFile)},
 			}, caPath, deps), title)
 		}
 		return steps.Titled(steps.NewControlPlaneChart("install-control-plane-chart", actions.HelmInstallLocal{
-			WorkingDir:  workingDir,
-			ChartPrefix: step.CPChartName,
-			ReleaseName: step.CPReleaseName,
-			Namespace:   step.CPNamespace,
-			Values:      controlPlaneValuesAirgap(s, caPath),
-			ValueFiles:  []string{filepath.Join(workingDir, airgap.CustomEnvFile)},
+			WorkingDir:   workingDir,
+			ChartPrefix:  step.CPChartName,
+			ReleaseName:  step.CPReleaseName,
+			Namespace:    step.CPNamespace,
+			Values:       controlPlaneValuesAirgap(s, caPath),
+			CustomValues: cp.CustomHelmValues,
+			ValueFiles:   []string{filepath.Join(workingDir, airgap.CustomEnvFile)},
 		}, caPath, deps), title)
 	}
 	repo, isOCI := cpChartSource(s)
 	return steps.Titled(steps.NewControlPlaneChart("install-control-plane-chart", actions.HelmInstall{
-		RepoURL:     repo,
-		IsOCI:       isOCI,
-		Auth:        chartAuth(s.Registry),
-		Version:     cp.Version,
-		ReleaseName: step.CPReleaseName,
-		ChartName:   step.CPChartName,
-		Namespace:   step.CPNamespace,
-		Values:      controlPlaneValues(s, caPath),
+		RepoURL:      repo,
+		IsOCI:        isOCI,
+		Auth:         chartAuth(s.Registry),
+		Version:      cp.Version,
+		ReleaseName:  step.CPReleaseName,
+		ChartName:    step.CPChartName,
+		Namespace:    step.CPNamespace,
+		Values:       controlPlaneValues(s, caPath),
+		CustomValues: cp.CustomHelmValues,
 	}, caPath, deps), title)
 }
 
@@ -276,6 +279,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 				HostRouting:     c.HostRouting(),
 				ValueFiles:      []string{filepath.Join(s.Airgap.ValuesDir, airgapvalues.ClusterValuesFile)},
 				ExtraValues:     clusterExtraValues(s, c),
+				CustomValues:    c.CustomHelmValues,
 			}, deps), title)
 		}
 		return steps.Titled(steps.NewClusterChart("install-cluster-chart", actions.InstallClusterChartLocal{
@@ -295,6 +299,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 			HostRouting:     c.HostRouting(),
 			ValueFiles:      []string{filepath.Join(workingDir, airgap.CustomEnvFile)},
 			ExtraValues:     clusterExtraValues(s, c),
+			CustomValues:    c.CustomHelmValues,
 		}, deps), title)
 	}
 	repo, isOCI := clusterChartSource(s)
@@ -316,6 +321,7 @@ func newClusterChartStep(s *spec.Spec, domain, version, caPath string, deps orch
 		Namespace:       step.ClusterNamespace,
 		HostRouting:     c.HostRouting(),
 		ExtraValues:     clusterExtraValues(s, c),
+		CustomValues:    c.CustomHelmValues,
 	}, deps), title)
 }
 
@@ -352,7 +358,7 @@ func controlPlaneValues(s *spec.Spec, caPath string) []string {
 	}
 	values = append(values, externalConnectionCPValues(s.ExternalConnection)...)
 	values = append(values, systemAffinity(s, "global.affinity")...)
-	return actions.MergeValues(values, s.ControlPlane.CustomHelmValues)
+	return values
 }
 
 // systemAffinity renders the system-node affinity helm values under prefix, or
@@ -460,7 +466,7 @@ func clusterExtraValues(s *spec.Spec, c *spec.Cluster) []string {
 	// system Deployments (which have no built-in runai-system default).
 	values = append(values, systemAffinity(s, "global.affinity")...)
 	values = append(values, systemAffinity(s, "runai-operator.config.global.affinity")...)
-	return append(values, actions.MapToValues(c.CustomHelmValues)...)
+	return values
 }
 
 // lwsClusterValues points RunaiConfig (spec.lws.namespace) at the namespace the
@@ -491,7 +497,7 @@ func controlPlaneValuesAirgap(s *spec.Spec, caPath string) []string {
 	}
 	values = append(values, externalConnectionCPValues(s.ExternalConnection)...)
 	values = append(values, systemAffinity(s, "global.affinity")...)
-	return actions.MergeValues(values, s.ControlPlane.CustomHelmValues)
+	return values
 }
 
 func hasImagePullConfig(registry *spec.Registry) bool {

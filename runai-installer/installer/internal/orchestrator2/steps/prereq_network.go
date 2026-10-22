@@ -18,14 +18,14 @@ const (
 )
 
 // NewNetworkOperator builds the NVIDIA Network Operator install step (NGC).
-func NewNetworkOperator(version string, customValues map[string]string, deps orchestrator2.Deps) orchestrator2.Step {
+func NewNetworkOperator(version string, customValues map[string]any, deps orchestrator2.Deps) orchestrator2.Step {
 	action := actions.HelmInstall{
-		RepoURL:     ngcHelmRepo,
-		Version:     version,
-		ReleaseName: networkOperatorRelease,
-		ChartName:   networkOperatorChart,
-		Namespace:   networkOperatorNamespace,
-		Values:      actions.MapToValues(customValues),
+		RepoURL:      ngcHelmRepo,
+		Version:      version,
+		ReleaseName:  networkOperatorRelease,
+		ChartName:    networkOperatorChart,
+		Namespace:    networkOperatorNamespace,
+		CustomValues: customValues,
 	}
 	return newPrereqStep("install-network-operator", deploymentSentinel(networkOperatorSentinel, networkOperatorNamespace), deps, action)
 }

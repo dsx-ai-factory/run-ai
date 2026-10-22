@@ -15,6 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/airgap"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 type InstallAirgapCPChart struct {
@@ -62,8 +63,7 @@ func (i *InstallAirgapCPChart) Execute(ctx context.Context, runaiData *model.Run
 
 	logging.Infof("[Airgap] Installing CP chart from %s with values file %s...", chartPath, customEnvPath)
 	err := i.helmInstaller.InstallOrUpgradeFromLocalChart(ctx,
-		chartPath, step.CPReleaseName, step.CPNamespace,
-		values, []string{customEnvPath})
+		chartPath, step.CPReleaseName, step.CPNamespace, helmclient.Values{Overrides: values}, []string{customEnvPath})
 	if err != nil {
 		logging.Errorf("[Airgap] Failed to install Control Plane chart: %v", err)
 		i.SetStatus(model.Failed, err)

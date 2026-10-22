@@ -11,7 +11,6 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
@@ -215,7 +214,7 @@ type ControlPlane struct {
 	Domain           string
 	Version          string
 	TLS              *TLS
-	CustomHelmValues map[string]string
+	CustomHelmValues map[string]any
 }
 
 type Cluster struct {
@@ -230,7 +229,7 @@ type Cluster struct {
 	BootstrapToken          string
 	ClientSecret            string
 	ControlPlaneCredentials *ControlPlaneCredentials
-	CustomHelmValues        map[string]string
+	CustomHelmValues        map[string]any
 }
 
 type ControlPlaneCredentials struct {
@@ -361,12 +360,12 @@ func (c *Cluster) SubdomainOverride() (host, present, valid bool) {
 	if c == nil {
 		return false, false, false
 	}
-	raw, ok := c.CustomHelmValues[SubdomainSupportHelmKey]
+	raw, ok := HelmValue(c.CustomHelmValues, "clusterConfig", "global", "subdomainSupport")
 	if !ok {
 		return false, false, false
 	}
-	b, err := strconv.ParseBool(strings.TrimSpace(raw))
-	if err != nil {
+	b, valid := raw.(bool)
+	if !valid {
 		return false, true, false
 	}
 	return b, true, true
@@ -419,7 +418,7 @@ const (
 type Dependency struct {
 	Mode             DependencyMode
 	Version          string
-	CustomHelmValues map[string]string
+	CustomHelmValues map[string]any
 	// OpenShiftInstallPlanApproval sets the OLM Subscription upgrade strategy
 	// for an OperatorHub install: OLMApprovalManual (the default) or
 	// OLMApprovalAutomatic. Empty means the default. Ignored on Helm installs.

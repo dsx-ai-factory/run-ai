@@ -65,19 +65,20 @@ const (
 )
 
 // NewPrometheusChart builds the Prometheus (kube-prometheus-stack) install step.
-func NewPrometheusChart(version string, customValues map[string]string, deps orchestrator2.Deps) orchestrator2.Step {
-	values := actions.MergeValues([]string{
+func NewPrometheusChart(version string, customValues map[string]any, deps orchestrator2.Deps) orchestrator2.Step {
+	values := []string{
 		"grafana.enabled=false",
 		"prometheus.prometheusSpec.scrapeConfigs[0].jobLabel=runai-cluster",
-	}, customValues)
+	}
 	action := actions.HelmInstall{
-		RepoURL:     prometheusRepo,
-		Version:     version,
-		ReleaseName: prometheusRelease,
-		ChartName:   prometheusChart,
-		Namespace:   prometheusNamespace,
-		IsOCI:       true,
-		Values:      values,
+		RepoURL:      prometheusRepo,
+		Version:      version,
+		ReleaseName:  prometheusRelease,
+		ChartName:    prometheusChart,
+		Namespace:    prometheusNamespace,
+		IsOCI:        true,
+		Values:       values,
+		CustomValues: customValues,
 	}
 	return newPrereqStep("install-prometheus", deploymentSentinel(prometheusSentinel, prometheusNamespace), deps, action)
 }

@@ -28,20 +28,21 @@ const (
 // integrated, not bundled: the Run:ai cluster already provides KAI, and the
 // Grove operator is installed by its own feature step (input validation
 // enforces that Grove is enabled alongside Dynamo).
-func NewDynamo(version string, customValues map[string]string, deps orchestrator2.Deps) orchestrator2.Step {
-	values := actions.MergeValues([]string{
+func NewDynamo(version string, customValues map[string]any, deps orchestrator2.Deps) orchestrator2.Step {
+	values := []string{
 		"global.kai-scheduler.install=false",
 		"global.kai-scheduler.enabled=true",
 		"global.grove.install=false",
 		"global.grove.enabled=true",
-	}, customValues)
+	}
 	action := actions.HelmInstall{
-		RepoURL:     dynamoRepo,
-		Version:     version,
-		ReleaseName: dynamoRelease,
-		ChartName:   dynamoChart,
-		Namespace:   dynamoNamespace,
-		Values:      values,
+		RepoURL:      dynamoRepo,
+		Version:      version,
+		ReleaseName:  dynamoRelease,
+		ChartName:    dynamoChart,
+		Namespace:    dynamoNamespace,
+		Values:       values,
+		CustomValues: customValues,
 	}
 	return newPrereqStep("install-dynamo", deploymentSentinel(dynamoSentinel, dynamoNamespace), deps, action)
 }

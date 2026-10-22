@@ -16,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/upgrade"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 )
 
 const upgradeInfoRetryInterval = 15 * time.Second
@@ -110,7 +111,7 @@ func (s *UpgradeClusterChart) Execute(ctx context.Context, runaiData *model.RunA
 	}
 	logging.Infof("[Upgrade] Upgrading cluster chart to version %s from %s", version, repo)
 	err := s.helmInstaller.InstallOrUpgradeRelease(ctx,
-		repo, version, step.ClusterReleaseName, step.ClusterChartName, step.ClusterNamespace, false, values)
+		repo, version, step.ClusterReleaseName, step.ClusterChartName, step.ClusterNamespace, false, helmclient.Values{Overrides: values})
 	if err != nil {
 		s.SetStatus(model.Failed, err)
 		return err

@@ -21,15 +21,15 @@ const (
 )
 
 // NewLWS builds the LeaderWorkerSet (distributed inference) install step.
-func NewLWS(version string, customValues map[string]string, deps orchestrator2.Deps) orchestrator2.Step {
+func NewLWS(version string, customValues map[string]any, deps orchestrator2.Deps) orchestrator2.Step {
 	action := actions.HelmInstall{
-		RepoURL:     lwsRepo,
-		Version:     version,
-		ReleaseName: lwsRelease,
-		ChartName:   lwsChart,
-		Namespace:   LWSNamespace,
-		IsOCI:       true,
-		Values:      actions.MapToValues(customValues),
+		RepoURL:      lwsRepo,
+		Version:      version,
+		ReleaseName:  lwsRelease,
+		ChartName:    lwsChart,
+		Namespace:    LWSNamespace,
+		IsOCI:        true,
+		CustomValues: customValues,
 	}
 	return newPrereqStep("install-lws", deploymentSentinel(lwsSentinel, LWSNamespace), deps, action)
 }

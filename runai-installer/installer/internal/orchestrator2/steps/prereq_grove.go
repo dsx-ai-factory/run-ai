@@ -21,15 +21,15 @@ const (
 // NewGrove builds the Grove operator install step (multi-component AI workload
 // orchestration via PodCliqueSets). Grove relies on a PodGang-aware scheduler,
 // which the Run:ai cluster already provides through KAI Scheduler.
-func NewGrove(version string, customValues map[string]string, deps orchestrator2.Deps) orchestrator2.Step {
+func NewGrove(version string, customValues map[string]any, deps orchestrator2.Deps) orchestrator2.Step {
 	action := actions.HelmInstall{
-		RepoURL:     groveRepo,
-		Version:     version,
-		ReleaseName: groveRelease,
-		ChartName:   groveChart,
-		Namespace:   groveNamespace,
-		IsOCI:       true,
-		Values:      actions.MapToValues(customValues),
+		RepoURL:      groveRepo,
+		Version:      version,
+		ReleaseName:  groveRelease,
+		ChartName:    groveChart,
+		Namespace:    groveNamespace,
+		IsOCI:        true,
+		CustomValues: customValues,
 	}
 	return newPrereqStep("install-grove", deploymentSentinel(groveSentinel, groveNamespace), deps, action)
 }

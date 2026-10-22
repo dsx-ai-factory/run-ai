@@ -535,16 +535,16 @@ func TestCluster_HostRouting(t *testing.T) {
 	cases := []struct {
 		name    string
 		routing string
-		helm    map[string]string
+		helm    map[string]any
 		want    bool
 	}{
 		{name: "default is host", want: true},
 		{name: "explicit host", routing: "host", want: true},
 		{name: "explicit path", routing: "path", want: false},
-		{name: "override path", helm: map[string]string{SubdomainSupportHelmKey: "false"}, want: false},
-		{name: "override host", helm: map[string]string{SubdomainSupportHelmKey: "true"}, want: true},
-		{name: "explicit setting beats override", routing: "path", helm: map[string]string{SubdomainSupportHelmKey: "true"}, want: false},
-		{name: "unparseable override falls back to default", helm: map[string]string{SubdomainSupportHelmKey: "yes"}, want: true},
+		{name: "override path", helm: map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": false}}}, want: false},
+		{name: "override host", helm: map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": true}}}, want: true},
+		{name: "explicit setting beats override", routing: "path", helm: map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": true}}}, want: false},
+		{name: "unparseable override falls back to default", helm: map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": "yes"}}}, want: true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -562,12 +562,12 @@ func TestCluster_SubdomainOverride(t *testing.T) {
 	assert.False(t, valid)
 	assert.False(t, host)
 
-	host, present, valid = (&Cluster{CustomHelmValues: map[string]string{SubdomainSupportHelmKey: "false"}}).SubdomainOverride()
+	host, present, valid = (&Cluster{CustomHelmValues: map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": false}}}}).SubdomainOverride()
 	assert.True(t, present)
 	assert.True(t, valid)
 	assert.False(t, host)
 
-	_, present, valid = (&Cluster{CustomHelmValues: map[string]string{SubdomainSupportHelmKey: "maybe"}}).SubdomainOverride()
+	_, present, valid = (&Cluster{CustomHelmValues: map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": "maybe"}}}}).SubdomainOverride()
 	assert.True(t, present)
 	assert.False(t, valid)
 }

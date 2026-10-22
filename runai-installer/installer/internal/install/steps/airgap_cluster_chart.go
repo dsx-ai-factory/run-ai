@@ -15,6 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/model"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/airgap"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/utils/helmclient"
 	pkgvalidation "github.com/dsx-ai-factory/run-ai/runai-installer/installer/pkg/validation"
 )
 
@@ -79,8 +80,7 @@ func (i *InstallAirgapClusterChart) Execute(ctx context.Context, runaiData *mode
 
 	logging.Infof("[Airgap] Installing cluster chart from %s...", chartPath)
 	err := i.helmInstaller.InstallOrUpgradeFromLocalChart(ctx,
-		chartPath, step.ClusterReleaseName, step.ClusterNamespace,
-		values, []string{customEnvPath})
+		chartPath, step.ClusterReleaseName, step.ClusterNamespace, helmclient.Values{Overrides: values}, []string{customEnvPath})
 	if err != nil {
 		logging.Errorf("[Airgap] Failed to install cluster chart: %v", err)
 		i.SetStatus(model.Failed, err)

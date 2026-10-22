@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/component-tests/harness"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/installconfig"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2"
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/specrun"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -49,7 +50,7 @@ func TestWorkloadRouting_SubdomainSupport(t *testing.T) {
 		{
 			name: "path derived from subdomainSupport override",
 			setup: func(c *installconfig.Config) {
-				c.Cluster.CustomHelmValues = map[string]any{key: false}
+				c.Cluster.CustomHelmValues = map[string]any{"clusterConfig": map[string]any{"global": map[string]any{"subdomainSupport": false}}}
 			},
 			want: key + "=false",
 		},
@@ -71,8 +72,11 @@ func TestWorkloadRouting_SubdomainSupport(t *testing.T) {
 
 			calls := helm.CallsByRelease("runai-cluster")
 			require.Len(t, calls, 1)
-			assert.Contains(t, calls[0].Values, tc.want)
-			assert.Equal(t, 1, countWithPrefix(calls[0].Values, key+"="), "subdomainSupport must be emitted once")
+			resolved, err := calls[0].ResolvedValues()
+			require.NoError(t, err)
+			value, present := spec.HelmValue(resolved, "clusterConfig", "global", "subdomainSupport")
+			require.True(t, present)
+			assert.Equal(t, tc.want == key+"=true", value)
 		})
 	}
 }
