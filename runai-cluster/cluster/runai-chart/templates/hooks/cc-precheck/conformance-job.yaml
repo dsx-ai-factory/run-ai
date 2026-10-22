@@ -1,0 +1,123 @@
+{{- if .Values.global.confidentialComputing.enabled }}
+{{- $name := include "ccPrecheck.name" . }}
+{{- $anyOf := .Values.ccPrecheck.anyOf | uniq }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ $name }}-conformance
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-7"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    run.ai/hook: cc-precheck
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        run.ai/hook: cc-precheck
+        {{- include "jobLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ $name }}-collector
+      automountServiceAccountToken: false
+      imagePullSecrets:{{ include "imagePullSecretList" . | nindent 8 }}
+      initContainers:
+        - name: collect
+          image: {{ include "ccPrecheck.collectorImage" . | quote }}
+          imagePullPolicy: {{ .Values.ccPrecheck.collectorImage.pullPolicy }}
+          command: [/bin/bash, -c]
+          args:
+            - bash /etc/krab/collect.sh > /work/precheck.json 2> /work/collection-error.txt; exit 0
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: OWNER_LABEL
+              value: {{ $name | quote }}
+            - name: CHECKER_VERSION
+              value: {{ .Values.ccPrecheck.probeImage.tag | quote }}
+            - name: NODE_SELECTOR
+              value: {{ include "ccPrecheck.nodeSelector" . | quote }}
+            - name: DISPATCHER_JOB_NAME
+              value: {{ include "ccPrecheck.dispatcherName" . | quote }}
+            - name: WAIT_FOR_DISPATCHER
+              value: "true"
+          volumeMounts:
+            - name: scripts
+              mountPath: /etc/krab
+              readOnly: true
+            - name: reports
+              mountPath: /work
+            - name: api-access
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+      containers:
+        - name: conformance
+          image: {{ include "ccPrecheck.probeImage" . | quote }}
+          imagePullPolicy: {{ .Values.ccPrecheck.probeImage.pullPolicy }}
+          command: [/usr/local/bin/krab-preflight]
+          args:
+            - conformance
+            - --report
+            - /work/precheck.json
+            - --collection-error
+            - /work/collection-error.txt
+            - --termination-message
+            - /dev/termination-log
+            - --json
+            {{- range $requirement := .Values.ccPrecheck.requirements }}
+            - --require
+            - {{ $requirement | quote }}
+            {{- end }}
+            {{- range $model := .Values.ccPrecheck.gpuModels }}
+            - --gpu-model
+            - {{ $model | quote }}
+            {{- end }}
+            {{- if $anyOf }}
+            - --require-any
+            - {{ join "," $anyOf | quote }}
+            {{- end }}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: reports
+              mountPath: /work
+              readOnly: true
+      volumes:
+        - name: reports
+          emptyDir: {}
+        - name: scripts
+          configMap:
+            name: {{ $name }}-files
+        - name: api-access
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  expirationSeconds: 3600
+              - configMap:
+                  name: kube-root-ca.crt
+                  items:
+                    - key: ca.crt
+                      path: ca.crt
+      affinity: {{- include "deploymentAffinity" . | nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" . | nindent 8 }}
+{{- end }}

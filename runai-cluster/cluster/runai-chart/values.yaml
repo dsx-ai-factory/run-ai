@@ -24,6 +24,8 @@ global:
   # Changing this value may cause undefined behavior.
   # If set, used by all helm-managed components.
   serviceAccountName: ""
+  confidentialComputing:
+    enabled: false
 # Cluster configuration applied to RunaiConfig using JSON Merge Patch (RFC 7396).
 # Allows overriding specific fields without replacing the entire configuration.
 # Null values will delete the corresponding field.
@@ -64,6 +66,34 @@ crdUpgrader:
     limits:
       cpu: 100m
       memory: 512Mi
+ccPrecheck:
+  nodeSelector: ""
+  parallelism: 20
+  requirements:
+    - cc
+  anyOf:
+    - gpu-cc
+    - gpu-ppcie
+  gpuModels: []
+  cache:
+    enabled: true
+    hostPath: /var/lib/krab/preflight
+  probeImage:
+    registry: ghcr.io/fidencio
+    name: krab-preflight
+    tag: 0.2.2
+    pullPolicy: IfNotPresent
+  collectorImage:
+    registry: ghcr.io/fidencio
+    name: krab-collector
+    tag: 0.2.2
+    pullPolicy: IfNotPresent
+  dispatcherImage:
+    registry: ghcr.io/kata-containers
+    name: k8s-job-dispatcher
+    tag: 0.4.0
+    pullPolicy: IfNotPresent
+
 helmHooksHandler:
   enabled: true
   image:

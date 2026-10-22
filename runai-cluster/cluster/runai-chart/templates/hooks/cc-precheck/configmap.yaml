@@ -1,0 +1,95 @@
+{{- if .Values.global.confidentialComputing.enabled }}
+{{- include "ccPrecheck.validate" . }}
+{{- $name := include "ccPrecheck.name" . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-files
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-9"
+    "helm.sh/hook-delete-policy": before-hook-creation
+  labels:
+    run.ai/hook: cc-precheck
+data:
+  collect.sh: |
+{{ .Files.Get "files/cc-precheck/collect.sh" | indent 4 }}
+  node-job.yaml: |
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      name: {{ $name }}-template
+    spec:
+      backoffLimit: 0
+      ttlSecondsAfterFinished: 3600
+      activeDeadlineSeconds: 600
+      template:
+        metadata:
+          labels:
+            run.ai/hook: cc-precheck
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          hostPID: true
+          tolerations:
+            - operator: Exists
+          imagePullSecrets:{{ include "imagePullSecretList" . | nindent 12 }}
+          containers:
+            - name: precheck
+              image: {{ include "ccPrecheck.probeImage" . | quote }}
+              imagePullPolicy: {{ .Values.ccPrecheck.probeImage.pullPolicy }}
+              args:
+                {{- if .Values.ccPrecheck.cache.enabled }}
+                - --cache-dir
+                - /var/cache/krab-preflight
+                - --force-refresh
+                {{- else }}
+                - --no-cache
+                {{- end }}
+              securityContext:
+                privileged: true
+              volumeMounts:
+                {{- if .Values.ccPrecheck.cache.enabled }}
+                - name: preflight-cache
+                  mountPath: /var/cache/krab-preflight
+                {{- end }}
+                - name: host
+                  mountPath: /host
+                  readOnly: true
+                - name: host-proc
+                  mountPath: /host/proc
+                  readOnly: true
+                - name: host-sys
+                  mountPath: /host/sys
+                  readOnly: true
+                - name: host-dev
+                  mountPath: /host/dev
+                  readOnly: true
+                - name: host-sys
+                  mountPath: /sys
+                  readOnly: true
+          volumes:
+            {{- if .Values.ccPrecheck.cache.enabled }}
+            - name: preflight-cache
+              hostPath:
+                path: {{ .Values.ccPrecheck.cache.hostPath | quote }}
+                type: DirectoryOrCreate
+            {{- end }}
+            - name: host
+              hostPath:
+                path: /
+                type: Directory
+            - name: host-proc
+              hostPath:
+                path: /proc
+                type: Directory
+            - name: host-sys
+              hostPath:
+                path: /sys
+                type: Directory
+            - name: host-dev
+              hostPath:
+                path: /dev
+                type: Directory
+{{- end }}

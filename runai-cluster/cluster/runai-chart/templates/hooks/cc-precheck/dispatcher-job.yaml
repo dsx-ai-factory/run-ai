@@ -1,0 +1,63 @@
+{{- if .Values.global.confidentialComputing.enabled }}
+{{- $name := include "ccPrecheck.name" . }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "ccPrecheck.dispatcherName" . }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-8"
+    "helm.sh/hook-delete-policy": before-hook-creation
+    {{- include "jobAnnotations" . | nindent 4 }}
+  labels:
+    run.ai/hook: cc-precheck
+    {{- include "jobLabels" . | nindent 4 }}
+spec:
+  backoffLimit: 0
+  activeDeadlineSeconds: 1200
+  ttlSecondsAfterFinished: 3600
+  template:
+    metadata:
+      annotations:
+        {{- include "jobAnnotations" . | nindent 8 }}
+      labels:
+        run.ai/hook: cc-precheck
+        {{- include "jobLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      serviceAccountName: {{ $name }}-dispatcher
+      imagePullSecrets:{{ include "imagePullSecretList" . | nindent 8 }}
+      containers:
+        - name: dispatcher
+          image: {{ include "ccPrecheck.dispatcherImage" . | quote }}
+          imagePullPolicy: {{ .Values.ccPrecheck.dispatcherImage.pullPolicy }}
+          args:
+            - --job-template=/etc/krab/node-job.yaml
+            - --name-prefix={{ $name }}
+            - --namespace={{ .Release.Namespace }}
+            - --parallelism={{ .Values.ccPrecheck.parallelism }}
+            - --owner-job-name={{ include "ccPrecheck.dispatcherName" . }}
+            - --tracking-label-prefix={{ $name }}
+            - {{ printf "--node-selector=%s" (include "ccPrecheck.nodeSelector" .) | quote }}
+            - --wait-for-nodes-secs=0
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
+          volumeMounts:
+            - name: scripts
+              mountPath: /etc/krab
+              readOnly: true
+      volumes:
+        - name: scripts
+          configMap:
+            name: {{ $name }}-files
+      affinity: {{- include "deploymentAffinity" . | nindent 8 }}
+      tolerations: {{- include "deploymentTolerations" . | nindent 8 }}
+{{- end }}
