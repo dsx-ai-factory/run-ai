@@ -230,6 +230,9 @@ func parseClusterInfoConfigToServerScheme(configuration *runv1.PublicConfigurati
 		DistGPUNetworkAcceleration:             *swagger.NewNullableBool(configuration.DistGPUNetworkAcceleration),
 		DinfGPUNetworkAcceleration:             *swagger.NewNullableBool(configuration.DinfGPUNetworkAcceleration),
 	}
+	if configuration.S3FileSystemMountCheckImage != nil {
+		configServerScheme.SetS3FileSystemMountCheckImage(*configuration.S3FileSystemMountCheckImage)
+	}
 	if configuration.FipsMode != nil {
 		configServerScheme.SetFipsMode(swagger.FipsModeEnum(*configuration.FipsMode))
 	}

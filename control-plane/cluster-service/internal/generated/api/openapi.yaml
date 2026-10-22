@@ -6802,6 +6802,11 @@ components:
           type: string
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          description: The exact S3 image reference that supports goofys --ready-file
+            and --check-ready. Omitted when support is unknown or disabled.
+          nullable: true
+          type: string
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:
