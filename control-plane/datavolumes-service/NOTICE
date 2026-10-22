@@ -36,7 +36,7 @@ Dependencies
 | `github.com/ThreeDotsLabs/watermill` | v1.5.3 | MIT | https://github.com/ThreeDotsLabs/watermill/blob/v1.5.3/LICENSE |
 | `github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream` | v1.4.5 | MIT | https://github.com/ThreeDotsLabs/watermill-redisstream/blob/v1.4.5/LICENSE |
 | `github.com/andybalholm/brotli` | v1.2.6 | MIT | https://github.com/andybalholm/brotli/blob/v1.2.6/LICENSE |
-| `github.com/aws/smithy-go/ptr` | v1.28.5 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.5/LICENSE |
+| `github.com/aws/smithy-go/ptr` | v1.28.6 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.6/LICENSE |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/cenkalti/backoff/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v4@v4.3.0?tab=licenses |
 | `github.com/cenkalti/backoff/v5` | v5.0.3 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v5@v5.0.3?tab=licenses |
@@ -4770,7 +4770,7 @@ section 4(d) of the Apache License, Version 2.0 requires.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/aws/smithy-go` v1.28.5
+  - `github.com/aws/smithy-go` v1.28.6
 --------------------------------------------------------------------------------
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
