@@ -675,6 +675,176 @@ export interface RegistryIntegrationUpdateRequest {
 /**
  * 
  * @export
+ * @interface RightSizingRequest
+ */
+export interface RightSizingRequest {
+    /**
+     * Cluster whose node-pool hardware metadata is evaluated.
+     * @type {string}
+     * @memberof RightSizingRequest
+     */
+    'clusterId': string;
+    /**
+     * Untagged public nvcr.io/nim/organization/model image reference.
+     * @type {string}
+     * @memberof RightSizingRequest
+     */
+    'image': string;
+    /**
+     * Exact image tag. NGC does not automatically refresh latest metadata.
+     * @type {string}
+     * @memberof RightSizingRequest
+     */
+    'tag': string;
+    /**
+     * Exact inventory GPU type. Omitted or null evaluates all reported types and capacities.
+     * @type {string}
+     * @memberof RightSizingRequest
+     */
+    'gpuType'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface RightSizingResponse
+ */
+export interface RightSizingResponse {
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingResponse
+     */
+    'image': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingResponse
+     */
+    'tag': string;
+    /**
+     * 
+     * @type {Array<RightSizingResponseResultsInner>}
+     * @memberof RightSizingResponse
+     */
+    'results': Array<RightSizingResponseResultsInner>;
+}
+/**
+ * 
+ * @export
+ * @interface RightSizingResponseResultsInner
+ */
+export interface RightSizingResponseResultsInner {
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'gpuType': string;
+    /**
+     * Reported per-device capacity, not free memory or a quota guarantee.
+     * @type {number}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'gpuMemoryCapacityBytes'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'status': RightSizingResponseResultsInnerStatusEnum;
+    /**
+     * Published NGC minimum for the source profile, before allocation rounding.
+     * @type {number}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'minimumGpuMemoryPerDeviceGb'?: number;
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'profileId'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'precision'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'inferenceBackend'?: string;
+    /**
+     * Explanation when sizing cannot be recommended.
+     * @type {string}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'reason'?: string;
+    /**
+     * 
+     * @type {RightSizingResponseResultsInnerRecommendation}
+     * @memberof RightSizingResponseResultsInner
+     */
+    'recommendation'?: RightSizingResponseResultsInnerRecommendation | null;
+}
+
+export const RightSizingResponseResultsInnerStatusEnum = {
+    Recommended: 'recommended',
+    NoRecommendation: 'no_recommendation'
+} as const;
+
+export type RightSizingResponseResultsInnerStatusEnum = typeof RightSizingResponseResultsInnerStatusEnum[keyof typeof RightSizingResponseResultsInnerStatusEnum];
+
+/**
+ * 
+ * @export
+ * @interface RightSizingResponseResultsInnerRecommendation
+ */
+export interface RightSizingResponseResultsInnerRecommendation {
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingResponseResultsInnerRecommendation
+     */
+    'allocationType': RightSizingResponseResultsInnerRecommendationAllocationTypeEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof RightSizingResponseResultsInnerRecommendation
+     */
+    'gpuCount': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RightSizingResponseResultsInnerRecommendation
+     */
+    'gpuMemoryPerDeviceBytes'?: number;
+    /**
+     * Whether GPU count is a naive estimate. False describes allocation arithmetic only; it does not verify runtime or hardware compatibility.
+     * @type {boolean}
+     * @memberof RightSizingResponseResultsInnerRecommendation
+     */
+    'estimated': boolean;
+    /**
+     * Conditional sizing prerequisites, unverified hardware/runtime compatibility, and limitations of an estimated count. Read before using the allocation.
+     * @type {string}
+     * @memberof RightSizingResponseResultsInnerRecommendation
+     */
+    'warning'?: string;
+}
+
+export const RightSizingResponseResultsInnerRecommendationAllocationTypeEnum = {
+    Memory: 'gpu_memory',
+    Count: 'gpu_count'
+} as const;
+
+export type RightSizingResponseResultsInnerRecommendationAllocationTypeEnum = typeof RightSizingResponseResultsInnerRecommendationAllocationTypeEnum[keyof typeof RightSizingResponseResultsInnerRecommendationAllocationTypeEnum];
+
+/**
+ * 
+ * @export
  * @enum {string}
  */
 
@@ -2021,6 +2191,117 @@ export class RegistriesApi extends BaseAPI {
      */
     public updateRegistryIntegration(registryIntegrationId: string, registryIntegrationUpdateRequest?: RegistryIntegrationUpdateRequest, options?: AxiosRequestConfig) {
         return RegistriesApiFp(this.configuration).updateRegistryIntegration(registryIntegrationId, registryIntegrationUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * RightSizingApi - axios parameter creator
+ * @export
+ */
+export const RightSizingApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns recommendations without deploying or reserving resources. Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+         * @summary Recommend GPU allocation for a NIM test/dev workload.
+         * @param {RightSizingRequest} rightSizingRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        recommendInferenceResources: async (rightSizingRequest: RightSizingRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'rightSizingRequest' is not null or undefined
+            assertParamExists('recommendInferenceResources', 'rightSizingRequest', rightSizingRequest)
+            const localVarPath = `/api/v1/inference/right-sizing/recommendation`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(rightSizingRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * RightSizingApi - functional programming interface
+ * @export
+ */
+export const RightSizingApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = RightSizingApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns recommendations without deploying or reserving resources. Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+         * @summary Recommend GPU allocation for a NIM test/dev workload.
+         * @param {RightSizingRequest} rightSizingRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async recommendInferenceResources(rightSizingRequest: RightSizingRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RightSizingResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.recommendInferenceResources(rightSizingRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * RightSizingApi - factory interface
+ * @export
+ */
+export const RightSizingApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = RightSizingApiFp(configuration)
+    return {
+        /**
+         * Returns recommendations without deploying or reserving resources. Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+         * @summary Recommend GPU allocation for a NIM test/dev workload.
+         * @param {RightSizingRequest} rightSizingRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        recommendInferenceResources(rightSizingRequest: RightSizingRequest, options?: any): AxiosPromise<RightSizingResponse> {
+            return localVarFp.recommendInferenceResources(rightSizingRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * RightSizingApi - object-oriented interface
+ * @export
+ * @class RightSizingApi
+ * @extends {BaseAPI}
+ */
+export class RightSizingApi extends BaseAPI {
+    /**
+     * Returns recommendations without deploying or reserving resources. Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+     * @summary Recommend GPU allocation for a NIM test/dev workload.
+     * @param {RightSizingRequest} rightSizingRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof RightSizingApi
+     */
+    public recommendInferenceResources(rightSizingRequest: RightSizingRequest, options?: AxiosRequestConfig) {
+        return RightSizingApiFp(this.configuration).recommendInferenceResources(rightSizingRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 

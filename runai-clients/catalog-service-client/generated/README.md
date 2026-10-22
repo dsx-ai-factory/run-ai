@@ -93,6 +93,7 @@ Class | Method | HTTP request | Description
 *RegistriesAPI* | [**GetRegistryIntegrationById**](docs/RegistriesAPI.md#getregistryintegrationbyid) | **Get** /api/v1/registries/{RegistryIntegrationId} | Get registry integration by id
 *RegistriesAPI* | [**ListRegistryIntegrations**](docs/RegistriesAPI.md#listregistryintegrations) | **Get** /api/v1/registries | List registry integrations
 *RegistriesAPI* | [**UpdateRegistryIntegration**](docs/RegistriesAPI.md#updateregistryintegration) | **Put** /api/v1/registries/{RegistryIntegrationId} | Update registry integration
+*RightSizingAPI* | [**RecommendInferenceResources**](docs/RightSizingAPI.md#recommendinferenceresources) | **Post** /api/v1/inference/right-sizing/recommendation | Recommend GPU allocation for a NIM test/dev workload.
 *SettingsAPI* | [**GetCatalogSettingByKey**](docs/SettingsAPI.md#getcatalogsettingbykey) | **Get** /api/v1/catalog/settings/{key} | Get catalog setting by key
 *SettingsAPI* | [**GetCatalogSettings**](docs/SettingsAPI.md#getcatalogsettings) | **Get** /api/v1/catalog/settings | Get catalog settings
 *SettingsAPI* | [**UpdateCatalogSettingByKey**](docs/SettingsAPI.md#updatecatalogsettingbykey) | **Put** /api/v1/catalog/settings/{key} | Update catalog setting by key
@@ -124,6 +125,10 @@ Class | Method | HTTP request | Description
  - [RegistryIntegrationCreationRequest](docs/RegistryIntegrationCreationRequest.md)
  - [RegistryIntegrationListResponse](docs/RegistryIntegrationListResponse.md)
  - [RegistryIntegrationUpdateRequest](docs/RegistryIntegrationUpdateRequest.md)
+ - [RightSizingRequest](docs/RightSizingRequest.md)
+ - [RightSizingResponse](docs/RightSizingResponse.md)
+ - [RightSizingResponseResultsInner](docs/RightSizingResponseResultsInner.md)
+ - [RightSizingResponseResultsInnerRecommendation](docs/RightSizingResponseResultsInnerRecommendation.md)
  - [ScopeType](docs/ScopeType.md)
  - [SubmissionError](docs/SubmissionError.md)
  - [UpdateCatalogSettingByKeyRequest](docs/UpdateCatalogSettingByKeyRequest.md)

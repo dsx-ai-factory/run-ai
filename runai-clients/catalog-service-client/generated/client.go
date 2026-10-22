@@ -66,6 +66,8 @@ type APIClient struct {
 
 	RegistriesAPI RegistriesAPI
 
+	RightSizingAPI RightSizingAPI
+
 	SettingsAPI SettingsAPI
 }
 
@@ -90,6 +92,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ImagesAPI = (*ImagesAPIService)(&c.common)
 	c.InferencesAPI = (*InferencesAPIService)(&c.common)
 	c.RegistriesAPI = (*RegistriesAPIService)(&c.common)
+	c.RightSizingAPI = (*RightSizingAPIService)(&c.common)
 	c.SettingsAPI = (*SettingsAPIService)(&c.common)
 
 	return c

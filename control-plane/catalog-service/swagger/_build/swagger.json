@@ -907,6 +907,58 @@
           }
         }
       }
+    },
+    "/api/v1/inference/right-sizing/recommendation": {
+      "post": {
+        "summary": "Recommend GPU allocation for a NIM test/dev workload.",
+        "description": "Returns recommendations without deploying or reserving resources. Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.",
+        "operationId": "recommend_inference_resources",
+        "x-service": "catalog-service",
+        "x-authorize": {
+          "resource-type": "inferences",
+          "action": "create"
+        },
+        "x-test-coverage": [
+          "control-plane/catalog-service/pkg/services/rightsizing/service_test.go"
+        ],
+        "tags": [
+          "RightSizing"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RightSizingRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Results per GPU type and capacity; may contain no recommendations.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RightSizingResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1748,6 +1800,132 @@
         },
         "example": {
           "enabled": false
+        }
+      },
+      "RightSizingRequest": {
+        "type": "object",
+        "required": [
+          "clusterId",
+          "image",
+          "tag"
+        ],
+        "properties": {
+          "clusterId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Cluster whose node-pool hardware metadata is evaluated."
+          },
+          "image": {
+            "type": "string",
+            "description": "Untagged public nvcr.io/nim/organization/model image reference."
+          },
+          "tag": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Exact image tag. NGC does not automatically refresh latest metadata."
+          },
+          "gpuType": {
+            "type": "string",
+            "nullable": true,
+            "description": "Exact inventory GPU type. Omitted or null evaluates all reported types and capacities."
+          }
+        }
+      },
+      "RightSizingResponse": {
+        "type": "object",
+        "required": [
+          "image",
+          "tag",
+          "results"
+        ],
+        "properties": {
+          "image": {
+            "type": "string"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "gpuType",
+                "status"
+              ],
+              "properties": {
+                "gpuType": {
+                  "type": "string"
+                },
+                "gpuMemoryCapacityBytes": {
+                  "type": "integer",
+                  "format": "int64",
+                  "description": "Reported per-device capacity, not free memory or a quota guarantee."
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "recommended",
+                    "no_recommendation"
+                  ]
+                },
+                "minimumGpuMemoryPerDeviceGb": {
+                  "type": "number",
+                  "format": "double",
+                  "description": "Published NGC minimum for the source profile, before allocation rounding."
+                },
+                "profileId": {
+                  "type": "string"
+                },
+                "precision": {
+                  "type": "string"
+                },
+                "inferenceBackend": {
+                  "type": "string"
+                },
+                "reason": {
+                  "type": "string",
+                  "description": "Explanation when sizing cannot be recommended."
+                },
+                "recommendation": {
+                  "type": "object",
+                  "nullable": true,
+                  "required": [
+                    "allocationType",
+                    "gpuCount",
+                    "estimated"
+                  ],
+                  "properties": {
+                    "allocationType": {
+                      "type": "string",
+                      "enum": [
+                        "gpu_memory",
+                        "gpu_count"
+                      ]
+                    },
+                    "gpuCount": {
+                      "type": "integer",
+                      "format": "int64",
+                      "minimum": 1
+                    },
+                    "gpuMemoryPerDeviceBytes": {
+                      "type": "integer",
+                      "format": "int64",
+                      "minimum": 1
+                    },
+                    "estimated": {
+                      "type": "boolean",
+                      "description": "Whether GPU count is a naive estimate. False describes allocation arithmetic only; it does not verify runtime or hardware compatibility."
+                    },
+                    "warning": {
+                      "type": "string",
+                      "description": "Conditional sizing prerequisites, unverified hardware/runtime compatibility, and limitations of an estimated count. Read before using the allocation."
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "EnableNgcIntegrationSetting": {

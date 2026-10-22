@@ -71,6 +71,13 @@ type RegistriesAPIRouter interface {
 	DeleteRegistryIntegration(http.ResponseWriter, *http.Request)
 }
 
+// RightSizingAPIRouter defines the required methods for binding the api requests to a responses for the RightSizingAPI
+// The RightSizingAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a RightSizingAPIServicer to perform the required actions, then write the service results to the http response.
+type RightSizingAPIRouter interface {
+	RecommendInferenceResources(http.ResponseWriter, *http.Request)
+}
+
 // SettingsAPIRouter defines the required methods for binding the api requests to a responses for the SettingsAPI
 // The SettingsAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a SettingsAPIServicer to perform the required actions, then write the service results to the http response.
@@ -128,6 +135,14 @@ type RegistriesAPIServicer interface {
 	GetRegistryIntegrationById(context.Context, string) (ImplResponse, error)
 	UpdateRegistryIntegration(context.Context, string, RegistryIntegrationUpdateRequest) (ImplResponse, error)
 	DeleteRegistryIntegration(context.Context, string) (ImplResponse, error)
+}
+
+// RightSizingAPIServicer defines the api actions for the RightSizingAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type RightSizingAPIServicer interface {
+	RecommendInferenceResources(context.Context, RightSizingRequest) (ImplResponse, error)
 }
 
 // SettingsAPIServicer defines the api actions for the SettingsAPI service

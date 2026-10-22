@@ -12,12 +12,16 @@ import (
 )
 
 type Services struct {
-	AuthorizationUrl       string `mapstructure:"authorization_service_url" validate:"required"`
-	AssetsServiceUrl       string `mapstructure:"assets_service_url" validate:"required"`
-	TempBackendSettingsUrl string `mapstructure:"temp_backend_settings_url" validate:"required"` // named after the actual service: temp-backend-settings
+	InventoryRequestTimeoutSec int    `mapstructure:"inventory_request_timeout_sec" validate:"gt=0"`
+	ClusterServiceUrl          string `mapstructure:"cluster_service_url" validate:"required"`
+	AuthorizationUrl           string `mapstructure:"authorization_service_url" validate:"required"`
+	AssetsServiceUrl           string `mapstructure:"assets_service_url" validate:"required"`
+	TempBackendSettingsUrl     string `mapstructure:"temp_backend_settings_url" validate:"required"` // named after the actual service: temp-backend-settings
 }
 
 func (s *Services) SetDefaults() {
+	s.InventoryRequestTimeoutSec = 30
+	s.ClusterServiceUrl = "http://runai-backend-cluster-service:8080"
 	s.AuthorizationUrl = "http://runai-backend-authorization:8080"
 	s.AssetsServiceUrl = "http://runai-backend-assets-service:8080"
 	s.TempBackendSettingsUrl = "http://runai-backend-temp-backend-settings:8080"

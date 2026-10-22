@@ -12,6 +12,8 @@ pkg/api/api_inferences.go
 pkg/api/api_inferences_service.go
 pkg/api/api_registries.go
 pkg/api/api_registries_service.go
+pkg/api/api_right_sizing.go
+pkg/api/api_right_sizing_service.go
 pkg/api/api_settings.go
 pkg/api/api_settings_service.go
 pkg/api/error.go
@@ -42,6 +44,10 @@ pkg/api/model_registry_integration.go
 pkg/api/model_registry_integration_creation_request.go
 pkg/api/model_registry_integration_list_response.go
 pkg/api/model_registry_integration_update_request.go
+pkg/api/model_right_sizing_request.go
+pkg/api/model_right_sizing_response.go
+pkg/api/model_right_sizing_response_results_inner.go
+pkg/api/model_right_sizing_response_results_inner_recommendation.go
 pkg/api/model_scope_type.go
 pkg/api/model_submission_error.go
 pkg/api/model_update_catalog_setting_by_key_request.go

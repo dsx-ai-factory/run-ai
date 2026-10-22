@@ -5,6 +5,7 @@ go 1.27.3
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.12
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
+	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/client v1.0.6
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.7
@@ -195,3 +196,5 @@ replace github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabiliti
 replace github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies => ./../workloads-and-policies
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client => ../../control-plane/org-unit-service/pkg/client
+
+replace github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client => ../cluster-service/pkg/client
