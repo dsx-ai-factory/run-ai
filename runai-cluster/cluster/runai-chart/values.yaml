@@ -26,6 +26,7 @@ global:
   serviceAccountName: ""
   confidentialComputing:
     enabled: false
+    initdataConfigMap: ""
 # Cluster configuration applied to RunaiConfig using JSON Merge Patch (RFC 7396).
 # Allows overriding specific fields without replacing the entire configuration.
 # Null values will delete the corresponding field.
