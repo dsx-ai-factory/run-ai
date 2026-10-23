@@ -28,6 +28,24 @@ spec:
       restartPolicy: Never
       serviceAccountName: {{ $name }}-dispatcher
       imagePullSecrets:{{ include "imagePullSecretList" . | nindent 8 }}
+{{- if .Values.global.confidentialComputing.initdataConfigMap }}
+      initContainers:
+        - name: check-initdata
+          image: {{ include "ccPrecheck.collectorImage" . | quote }}
+          imagePullPolicy: {{ .Values.ccPrecheck.collectorImage.pullPolicy }}
+          command: [/bin/bash, /etc/krab/check-initdata.sh]
+          env:
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: INITDATA_CONFIGMAP
+              value: {{ .Values.global.confidentialComputing.initdataConfigMap | quote }}
+          volumeMounts:
+            - name: scripts
+              mountPath: /etc/krab
+              readOnly: true
+{{- end }}
       containers:
         - name: dispatcher
           image: {{ include "ccPrecheck.dispatcherImage" . | quote }}

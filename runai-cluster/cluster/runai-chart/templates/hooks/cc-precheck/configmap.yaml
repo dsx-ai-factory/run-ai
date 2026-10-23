@@ -15,6 +15,8 @@ metadata:
 data:
   collect.sh: |
 {{ .Files.Get "files/cc-precheck/collect.sh" | indent 4 }}
+  check-initdata.sh: |
+{{ .Files.Get "files/cc-precheck/check-initdata.sh" | indent 4 }}
   node-job.yaml: |
     apiVersion: batch/v1
     kind: Job
