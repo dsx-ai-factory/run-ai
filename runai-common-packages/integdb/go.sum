@@ -30,10 +30,10 @@ github.com/docker/go-connections v0.7.0 h1:6SsRfJddP22WMrCkj19x9WKjEDTB+ahsdiGYf
 github.com/docker/go-connections v0.7.0/go.mod h1:no1qkHdjq7kLMGUXYAduOhYPSJxxvgWBh7ogVvptn3Q=
 github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4=
 github.com/docker/go-units v0.5.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2 h1:JVzD27sYiITgpN3IqSJFdWtMsX1bY4unyN1AxvWw8BI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2/go.mod h1:LrD5w0Y8LUNfoR47mdZqDFFXTSODeeM/CVZGKJ5s+wI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19 h1:xzukmYxFSFemjci6Kn3RyPZbPPq/TsfBOdPYT9XBYKg=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19/go.mod h1:atYSbz+LRYUV/FUsBm12AS4mIp3eENc5cnSkCd7BaJo=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 h1:GMqipJVJQYWroi0wqs4KPJTWtJz8YUJ5p5qWRL6l6ZY=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3/go.mod h1:U7eJ5tj0D0oAIENeWRziD+OdoJS/7fRDispUbhL1NMU=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20 h1:C35fkvaSizub7errX6e976WuWFOFCv39OinzqBiUr5E=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20/go.mod h1:8fWGq4fp1i14TQ2WP9yCpzy0ijFMuaPv04df3RM6ueU=
 github.com/ebitengine/purego v0.11.2 h1:WWiTx8rD8zYdOwSj8O/NiNbsOvSAgJMTlyV1XlbUSeU=
 github.com/ebitengine/purego v0.11.2/go.mod h1:DCHPP08djqhNSoTfImcnHYQRZmd0qhakvrozqaEYhGQ=
 github.com/felixge/httpsnoop v1.1.0 h1:3YtUj32ZZkqZtt3sZZsClsymw/QDuVfpNhoA31zeORc=
