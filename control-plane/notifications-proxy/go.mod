@@ -129,7 +129,7 @@ require (
 	github.com/sethvargo/go-retry v0.4.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
-	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
+	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 )
 
 replace github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client => ../../control-plane/authorization/pkg/client
