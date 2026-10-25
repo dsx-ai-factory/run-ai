@@ -65,6 +65,31 @@ describe("cluster.util", () => {
     expect(result.tooltipText).not.toContain("gpu-stack");
   });
 
+  it("links the missing-prerequisites tooltip to the prerequisites and features guide", () => {
+    const status = {
+      state: ClusterState.MissingPrerequisites,
+      dependencies: {
+        required: {
+          "gpu-stack": {
+            available: false,
+            reason: "not ready: MpsdReady",
+            components: {
+              nvidia: { available: true },
+              "gpu-fractioning": { available: false, reason: "not ready: MpsdReady" },
+            },
+          },
+        },
+      },
+    };
+
+    const result: IStatusColOptions = clusterUtil.getStatusColOptions(status);
+
+    expect(result.tooltipText).toContain(
+      'href="https://docs.nvidia.com/run-ai/self-hosted/documentation/installation-and-configuration/install/manual-helm/prerequisites-and-features"',
+    );
+    expect(result.tooltipText).toContain("Prerequisites guide</a>");
+  });
+
   it("keeps both sections, and one guide link, when fractioning and another dependency fail together", () => {
     const status = {
       state: ClusterState.MissingPrerequisites,

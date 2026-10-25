@@ -21,6 +21,7 @@ export const DOCS = {
   INSTALLATION: {
     CLUSTER: getDocsLink("clusterOverview"),
     PREREQUISITES: getDocsLink("systemRequirements"),
+    CLUSTER_PREREQUISITES: getDocsLink("clusterPrerequisites"),
     NETWORK_REQUIREMENTS: getDocsLink("networkRequirements"),
     HELM_INSTALL: getDocsLink("clusterInstallation"),
     CUSTOM_INSTALL: getDocsLink("customInstallation"),
