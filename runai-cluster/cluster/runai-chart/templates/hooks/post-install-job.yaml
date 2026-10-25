@@ -42,6 +42,7 @@ spec:
             - --development-skip-dependency-checks={{ .Values.development.skipDependeciesChecks }}
             - --enable-rbac-escalation={{ .Values.cluster.rbac.escalate }}
             - --fips-mode={{ include "globalFipsMode" . }}
+            - --confidential-computing={{ .Values.global.confidentialComputing.enabled }}
             {{- if .Values.global.nmc }}
             - --nmc-enabled={{ .Values.global.nmc.enabled }}
             - --nmc-remote-cluster-api-server-url={{ .Values.global.nmc.remoteCluster.apiServer.url }}

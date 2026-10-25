@@ -159,9 +159,11 @@ func checkDependencies(ctx context.Context, kubeClient kube_client.HybridClient,
 		multiErr.Append(fmt.Errorf(format, consts.PrometheusOperatorDeploymentName, err))
 	}
 
-	err = controller_utils.CheckGpuOperatorDependency(ctx, kubeClient)
-	if err != nil {
-		multiErr.Append(fmt.Errorf(format, consts.GPUOperatorDeploymentName, err))
+	if !runaiConfig.IsConfidentialComputing() {
+		err = controller_utils.CheckGpuOperatorDependency(ctx, kubeClient)
+		if err != nil {
+			multiErr.Append(fmt.Errorf(format, consts.GPUOperatorDeploymentName, err))
+		}
 	}
 
 	gatewayEnabled := runaiConfig.Spec.Global.GatewayAPI != nil &&

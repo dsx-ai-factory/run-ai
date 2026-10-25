@@ -47,6 +47,7 @@ type ClusterHookParams struct {
 	EnableRbacEscalation                        bool
 	ClusterConfig                               json.RawMessage
 	FipsMode                                    string
+	ConfidentialComputing                       bool
 }
 
 type NMCParams struct {

@@ -81,6 +81,7 @@ type Options struct {
 	EnableRbacEscalation     bool
 	RequiresKubernetesAccess bool
 	FipsMode                 string
+	ConfidentialComputing    bool
 }
 
 type development struct {
@@ -223,6 +224,9 @@ func (opts *Options) parseCommandLineArgs(flagSet *flag.FlagSet) {
 
 	flagSet.StringVar(&opts.FipsMode, "fips-mode", "off",
 		"Go FIPS 140-3 runtime mode for cluster components (off, on, or only)")
+
+	flagSet.BoolVar(&opts.ConfidentialComputing, "confidential-computing", false,
+		"Whether the cluster runs confidential workloads")
 
 	opts.ZapOptions = zap.Options{
 		Development: true,

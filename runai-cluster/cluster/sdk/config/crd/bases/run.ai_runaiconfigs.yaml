@@ -74,6 +74,11 @@ spec:
                       clusterURL:
                         description: ClusterURL specifies the cluster URL
                         type: string
+                      confidentialComputing:
+                        description: |-
+                          ConfidentialComputing reports that the cluster runs confidential workloads.
+                          Set from chart values at install/upgrade; independent of control-plane mode.
+                        type: boolean
                       controlPlane:
                         description: ControlPlane specifies the control plane details
                         properties:

@@ -510,6 +510,11 @@ func (in *PublicConfiguration) DeepCopyInto(out *PublicConfiguration) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.ConfidentialComputing != nil {
+		in, out := &in.ConfidentialComputing, &out.ConfidentialComputing
+		*out = new(bool)
+		**out = **in
+	}
 	if in.RunaiOauth2ProxyImage != nil {
 		in, out := &in.RunaiOauth2ProxyImage, &out.RunaiOauth2ProxyImage
 		*out = new(string)

@@ -42,6 +42,7 @@ spec:
             - --development-skip-dependency-checks={{ .Values.development.skipDependeciesChecks }}
             - --enable-rbac-escalation={{ .Values.cluster.rbac.escalate }}
             - --fips-mode={{ include "globalFipsMode" . }}
+            - --confidential-computing={{ .Values.global.confidentialComputing.enabled }}
             - --engine-to-kai-migration-enabled={{ .Values.engineToKaiMigration.enabled }}
             - --resource-management-migration-enabled={{ .Values.resourceManagementMigration.enabled }}
             - --resource-management-migration-cleanup={{ .Values.resourceManagementMigration.cleanup }}

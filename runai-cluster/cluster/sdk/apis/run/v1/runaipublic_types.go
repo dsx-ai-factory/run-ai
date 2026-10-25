@@ -42,6 +42,7 @@ type PublicConfiguration struct {
 	S3FileSystemImage                      *string                     `yaml:"s3FileSystemImage,omitempty"`
 	S3FileSystemResources                  *PublicResourceRequirements `yaml:"s3FileSystemResources,omitempty"`
 	FipsMode                               *string                     `yaml:"fipsMode,omitempty"`
+	ConfidentialComputing                  *bool                       `yaml:"confidentialComputing,omitempty"`
 	RunaiOauth2ProxyImage                  *string                     `yaml:"runaiOauth2ProxyImage,omitempty"`
 	RunaiOauth2ProxyResources              *PublicResourceRequirements `yaml:"runaiOauth2ProxyResources,omitempty"`
 	RunaiOauth2ProxyUsernameLoaderImage    *string                     `yaml:"runaiOauth2ProxyUsernameLoaderImage,omitempty"`
