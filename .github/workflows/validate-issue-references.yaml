@@ -4,7 +4,9 @@
 name: Validate Issue Reference
 
 # Every pull request must be linked to at least one open issue that carries the
-# approval label. The only source of linked issues is the pull request's
+# approval label (`issue/approved`). Draft pull requests, pull requests opened by
+# bots and dependency updates (`renovate/*` and `dependabot/*` branches opened
+# by the Renovate or Dependabot account) are exempt. The only source of linked issues is the pull request's
 # "Development" panel, read through the GraphQL `closingIssuesReferences`
 # connection. GitHub fills that panel from two places, so a pull request
 # satisfies the check by either:
@@ -121,7 +123,11 @@ permissions: {}
 
 env:
   # Label an issue must carry for a pull request linked to it to pass.
-  APPROVED_LABEL: approved
+  APPROVED_LABEL: issue/approved
+  # Automated dependency updates need no issue. Anyone can push a branch with
+  # these prefixes, so a pull request is exempt only when its head branch has
+  # the prefix AND it was opened by the matching account ("prefix=login").
+  EXEMPT_UPDATES: renovate/=devops-runai dependabot/=dependabot[bot]
 
 jobs:
   validate:
@@ -144,10 +150,20 @@ jobs:
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
             const approvedLabel = process.env.APPROVED_LABEL;
+            const exemptUpdates = (process.env.EXEMPT_UPDATES || '').split(/\s+/).filter(Boolean)
+              .map(pair => { const [prefix, login] = pair.split('='); return { prefix, login }; });
             const privateToken = process.env.GH_TOKEN || '';
 
             if (pr.user && pr.user.type === 'Bot') {
               core.info(`Pull request was opened by ${pr.user.login} (bot) - skipping the issue requirement.`);
+              return;
+            }
+            // Renovate runs here with a personal token, so its pull requests are not
+            // bot-authored; recognise dependency updates by branch prefix and author.
+            const update = exemptUpdates.find(u =>
+              u.prefix && pr.head.ref.startsWith(u.prefix) && pr.user && pr.user.login === u.login);
+            if (update) {
+              core.info(`${pr.head.ref} by ${pr.user.login} is an automated dependency update - skipping the issue requirement.`);
               return;
             }
             if (pr.draft) {
