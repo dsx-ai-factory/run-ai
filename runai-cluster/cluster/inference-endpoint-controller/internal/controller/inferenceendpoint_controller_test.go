@@ -57,7 +57,7 @@ const (
 	imageField   = "image"
 	customImage  = "example.com/custom-epp:v1"
 	// metricsNamespace stands in for the --metrics-scrape-namespace flag.
-	metricsNamespace = "monitoring"
+	metricsNamespace = "runai"
 )
 
 // child pairs a typed (or unstructured) object with the name it should have.

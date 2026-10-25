@@ -80,7 +80,7 @@ func main() {
 	flag.StringVar(&metricsCertKey, "metrics-cert-key", "tls.key", "The name of the metrics server key file.")
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics server")
-	flag.StringVar(&metricsScrapeNamespace, "metrics-scrape-namespace", "monitoring",
+	flag.StringVar(&metricsScrapeNamespace, "metrics-scrape-namespace", "runai",
 		"The namespace Prometheus scrapes from. Each EPP NetworkPolicy admits metrics traffic only from this namespace.")
 	opts := zap.Options{
 		Development: true,

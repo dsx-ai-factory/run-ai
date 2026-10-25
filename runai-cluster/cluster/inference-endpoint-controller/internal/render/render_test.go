@@ -38,7 +38,7 @@ const (
 	llama3Ns     = "model-serving"
 	llama3Labels = "vllm-llama3"
 	configMapKey = "default-plugins.yaml"
-	metricsNs    = "monitoring"
+	metricsNs    = "runai"
 	// namespaceNameLabel is the label the API server sets on every Namespace.
 	namespaceNameLabel = "kubernetes.io/metadata.name"
 

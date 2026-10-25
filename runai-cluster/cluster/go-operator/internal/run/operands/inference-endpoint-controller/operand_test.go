@@ -77,7 +77,7 @@ var _ = Describe("Inference endpoint operand", func() {
 		container := deployment.Spec.Template.Spec.Containers[0]
 		Expect(container.Image).To(Equal("mirror.example/inference-endpoint-controller:test"))
 		Expect(container.Args).To(ContainElement("--leader-elect"))
-		Expect(container.Args).To(ContainElement("--metrics-scrape-namespace=monitoring"), "SDK default reaches the controller")
+		Expect(container.Args).To(ContainElement("--metrics-scrape-namespace=runai"), "SDK default reaches the controller")
 		Expect(container.ReadinessProbe.HTTPGet.Path).To(Equal("/readyz"))
 		Expect(container.LivenessProbe.HTTPGet.Path).To(Equal("/healthz"))
 		Expect(container.Resources).To(Equal(corev1.ResourceRequirements(*settings.Resources)))

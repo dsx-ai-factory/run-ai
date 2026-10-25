@@ -50,6 +50,10 @@ type Metrics struct {
 
 type Resources v1.ResourceRequirements
 
+// defaultMetricsScrapeNamespace is the namespace the platform Prometheus runs in.
+// It equals run/v1 DefaultNamespace; this package cannot import run/v1 without a cycle.
+const defaultMetricsScrapeNamespace = "runai"
+
 func (c *InferenceEndpointController) SetDefaultsWhereNeeded(globalRegistry string, globalReplicaCount *int32) {
 	if c.Enabled == nil {
 		// Opt-in: Gateway API and GIE CRDs are prerequisites the chart does not install,
@@ -101,6 +105,6 @@ func (c *InferenceEndpointController) SetDefaultsWhereNeeded(globalRegistry stri
 		c.Metrics.PortName = "metrics"
 	}
 	if c.MetricsScrapeNamespace == nil {
-		c.MetricsScrapeNamespace = ptr.To("monitoring")
+		c.MetricsScrapeNamespace = ptr.To(defaultMetricsScrapeNamespace)
 	}
 }

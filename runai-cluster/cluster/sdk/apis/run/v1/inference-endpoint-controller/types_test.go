@@ -51,7 +51,7 @@ var _ = Describe("Defaults", func() {
 		Expect(*config.Image.Registry).To(Equal("registry.example/runai"))
 		Expect(*config.Image.Name).To(Equal("inference-endpoint-controller"))
 		Expect(config.Resources.Requests).NotTo(BeEmpty())
-		Expect(*config.MetricsScrapeNamespace).To(Equal("monitoring"))
+		Expect(*config.MetricsScrapeNamespace).To(Equal("runai"))
 	})
 
 	It("preserves explicit disablement and image and replica overrides", func() {

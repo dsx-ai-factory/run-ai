@@ -31,7 +31,7 @@ spec:
   - from:
     - namespaceSelector:
         matchLabels:
-          kubernetes.io/metadata.name: monitoring
+          kubernetes.io/metadata.name: runai
     ports:
     - protocol: TCP
       port: 9090

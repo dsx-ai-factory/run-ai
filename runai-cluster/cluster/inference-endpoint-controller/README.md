@@ -56,7 +56,7 @@ the Gateway namespace, and TCP 9090 (metrics) from Pods in the metrics namespace
 probes are not subject to NetworkPolicy. The policy is enforced only where the CNI enforces
 NetworkPolicy. Egress is deliberately open: the EPP scrapes model Pods, the API server, and
 DNS, and both the API-server address and the CNI behaviour differ per cluster, so an egress
-allow-list is a follow-up. The metrics namespace defaults to `monitoring`; set
+allow-list is a follow-up. The metrics namespace defaults to `runai`, where the platform Prometheus runs; set
 `inference-endpoint-controller.metricsScrapeNamespace` in `RunaiConfig` (passed to the
 controller as `--metrics-scrape-namespace`) when Prometheus runs elsewhere.
 
