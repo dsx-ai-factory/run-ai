@@ -30,7 +30,7 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
-	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
+	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 )
 
 require (
