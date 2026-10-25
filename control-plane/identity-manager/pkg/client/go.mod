@@ -3,11 +3,11 @@ module github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/clien
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.3
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.4
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
@@ -15,7 +15,7 @@ require (
 
 require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
