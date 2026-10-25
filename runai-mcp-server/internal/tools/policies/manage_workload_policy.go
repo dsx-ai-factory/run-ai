@@ -26,7 +26,7 @@ type manageWorkloadPolicyInput struct {
 	Request                map[string]any `json:"request,omitempty" jsonschema:"API body required for create/update; omit for delete. GVK update needs policyId AND request. See tool description for body shapes."`
 	ReplaceRules           bool           `json:"replaceRules,omitempty" jsonschema:"GVK update: false/default uses PATCH; true uses PUT with the full nonempty rule list. PATCH replaces matching rules and retains others."`
 	ApproveClusterDeletion bool           `json:"approveClusterDeletion,omitempty" jsonschema:"Legacy except nimService: approve removal of copies on Run:ai 2.20 or earlier clusters; separate from confirm."`
-	Confirm                bool           `json:"confirm,omitempty" jsonschema:"Update/delete: accept the prompt, or set true after approval when prompting is unavailable. Unused for create."`
+	Confirm                bool           `json:"confirm,omitempty" jsonschema:"Legacy create and all update/delete: accept the prompt, or set true after approval when prompting is unavailable."`
 }
 
 func (in manageWorkloadPolicyInput) Validate() error {
@@ -71,7 +71,7 @@ func manageWorkloadPolicyDescription() string {
 			"Use get_workload_policy_mapping to discover rule fields, selectors, and enforcement types.\n\n"
 		guidance = "Find policies with list_workload_policies; check both families when unknown. Names are not unique: resolve the family and exact target before update/delete, and ask if ambiguous. " +
 			policyScopeResolutionDescription +
-			"This tool has no dry-run. Use API request fields only; unknown fields are rejected. Update/delete require confirmation; create does not, including legacy overwrite. " +
+			"This tool has no dry-run. Use API request fields only; unknown fields are rejected. Legacy create and all update/delete require confirmation; GVK create does not. " +
 			"Returns the API policy object for create/update, or {} for delete; failures return an error."
 	)
 	return common + legacy + gvk + guidance
@@ -97,7 +97,7 @@ func manageWorkloadPolicyRun(ctx context.Context, client *runaiclient.Client, in
 }
 
 func confirmPolicyOperation(ctx context.Context, in manageWorkloadPolicyInput) error {
-	if in.Action == actionCreate {
+	if in.Action == actionCreate && in.PolicyVersion == versionGVK {
 		return nil
 	}
 
@@ -130,5 +130,9 @@ func confirmPolicyOperation(ctx context.Context, in manageWorkloadPolicyInput) e
 			}
 		}
 	}
-	return common.ConfirmWrite(ctx, in.Confirm, in.Action, "workload policy", target, in.PolicyID, details)
+	message := ""
+	if in.PolicyVersion == versionLegacy && in.Action == actionCreate {
+		message = "Confirm legacy policy creation? This may overwrite an existing policy, replacing its defaults, rules, and asset assignments."
+	}
+	return common.ConfirmWrite(ctx, in.Confirm, in.Action, "workload policy", target, in.PolicyID, details, common.WithConfirmMessage(message))
 }

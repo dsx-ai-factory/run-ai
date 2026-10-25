@@ -102,7 +102,6 @@ func TestManageLegacyPolicy(t *testing.T) {
 					runaiclienttest.WriteJSON(w, http.StatusOK, testLegacyPolicy())
 				})
 				in := testLegacyPolicyInput(kind, action)
-				in.Confirm = action != actionCreate
 				if action == actionUpdate {
 					delete(in.Request, "policy")
 					in.Request["reset"] = []any{"compute.gpu"}
@@ -174,9 +173,12 @@ func TestManageGVKPolicy(t *testing.T) {
 	}
 }
 
-func TestPolicyUpdateAndDeleteNeedConfirmation(t *testing.T) {
+func TestPolicyOperationsNeedConfirmation(t *testing.T) {
 	for _, version := range []string{versionLegacy, versionGVK} {
-		for _, action := range []string{actionUpdate, actionDelete} {
+		for _, action := range []string{actionCreate, actionUpdate, actionDelete} {
+			if version == versionGVK && action == actionCreate {
+				continue
+			}
 			t.Run(version+"/"+action, func(t *testing.T) {
 				// 1. Set up the API and input.
 				c, mux := runaiclienttest.NewServer(t)
@@ -584,18 +586,27 @@ func TestPolicyDeclineOverridesConfirm(t *testing.T) {
 }
 
 func TestLegacyPolicyConfirmationShowsScope(t *testing.T) {
-	in := testLegacyPolicyInput("training", actionUpdate)
-	in.Request["meta"] = map[string]any{
-		"name": strings.Repeat("policy", 20), "scope": "project",
-		"clusterId": testPolicyID, "departmentId": "department-1", "projectId": float64(123),
+	for _, action := range []string{actionCreate, actionUpdate} {
+		t.Run(action, func(t *testing.T) {
+			in := testLegacyPolicyInput("training", action)
+			in.Request["meta"] = map[string]any{
+				"name": strings.Repeat("policy", 20), "scope": "project",
+				"clusterId": testPolicyID, "departmentId": "department-1", "projectId": float64(123),
+			}
+
+			session := &decliningPolicySession{}
+			err := confirmPolicyOperation(runaimcp.WithSession(context.Background(), session), in)
+			require.ErrorIs(t, err, runaimcp.ErrDeclined)
+			assert.Equal(t, 1, session.calls)
+			assert.Contains(t, session.message, "scope: project")
+			assert.Contains(t, session.message, "projectId: 123")
+			assert.Contains(t, session.message, "departmentId: department-1")
+			assert.Contains(t, session.message, "clusterId: "+testPolicyID)
+			if action == actionCreate {
+				assert.Contains(t, session.message, "may overwrite an existing policy")
+			}
+		})
 	}
-	session := &decliningPolicySession{}
-	err := confirmPolicyOperation(runaimcp.WithSession(context.Background(), session), in)
-	require.ErrorIs(t, err, runaimcp.ErrDeclined)
-	assert.Contains(t, session.message, "scope: project")
-	assert.Contains(t, session.message, "projectId: 123")
-	assert.Contains(t, session.message, "departmentId: department-1")
-	assert.Contains(t, session.message, "clusterId: "+testPolicyID)
 }
 
 func TestGVKPolicyConfirmationIdentifiesTarget(t *testing.T) {
