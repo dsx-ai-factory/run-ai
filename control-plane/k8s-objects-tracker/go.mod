@@ -35,7 +35,7 @@ require (
 	github.com/onsi/gomega v1.44.0
 	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
 	gorm.io/gorm v1.31.2
-	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
+	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 )
 
 require (
