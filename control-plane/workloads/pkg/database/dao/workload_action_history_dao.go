@@ -12,6 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm/clause"
 	"github.com/google/uuid"
@@ -33,6 +34,32 @@ func DbInsertWorkloadActions(ctx context.Context, records []models.WorkloadActio
 		return api.NewError(http.StatusInternalServerError, "Failed to insert workload action history", err)
 	}
 	return nil
+}
+
+// Check that all workload rows exist so the cleaner does not remove their history.
+// If any row is missing, return an error without inserting; the caller can retry or stop.
+func DbInsertRegisteredWorkloadActions(ctx context.Context, records []models.WorkloadActionHistory) *api.Error {
+	if len(records) == 0 {
+		return nil
+	}
+	tenantID, apiErr := services_utils.ParseTenantId(ctx)
+	if apiErr != nil {
+		return apiErr
+	}
+	workloadIDs := datastructs.NewSet[uuid.UUID]()
+	for _, record := range records {
+		workloadIDs.Add(record.WorkloadID)
+	}
+	var count int64
+	err := runaidb.DB().WithContext(ctx).Unscoped().Model(&models.Workload{}).
+		Where("tenant_id = ? AND id IN ?", tenantID, workloadIDs.Keys()).Count(&count)
+	if err != nil {
+		return api.NewError(http.StatusInternalServerError, "Failed to check workload registration", err)
+	}
+	if count != int64(len(workloadIDs)) {
+		return api.NewError(http.StatusPreconditionFailed, "Workload registration is pending; retry action delivery", nil)
+	}
+	return DbInsertWorkloadActions(ctx, records)
 }
 
 func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, limit int32) ([]models.WorkloadActionHistory, bool, *api.Error) {

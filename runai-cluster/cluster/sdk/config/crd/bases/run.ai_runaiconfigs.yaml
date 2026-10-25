@@ -1405,6 +1405,13 @@ spec:
                         description: Tag is the tag of the image
                         type: string
                     type: object
+                  s3FileSystemMountCheckEnabled:
+                    description: |-
+                      S3FileSystemMountCheckEnabled overrides startup-probe support for the configured S3 image.
+                      When unset, only the bundled goofys image from this operator build is enabled.
+                      Custom images must implement goofys --ready-file and --check-ready before opting in.
+                      Enabling probes requires a writable /runai-goofys-ready on the sidecar root filesystem.
+                    type: boolean
                   storagePluginEnabled:
                     description: |-
                       StoragePluginEnabled indicates whether the anyworkload-controller storage plugin is enabled.

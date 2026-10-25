@@ -33,6 +33,9 @@ paths:
   /internal/workloads:
     $ref: './resources/InternalWorkloads.yaml'
 
+  /internal/workloads/actions:
+    $ref: './resources/InternalWorkloadActions.yaml'
+
   /internal/workloads/sync:
     $ref: './resources/InternalWorkloadsSync.yaml'
 
@@ -319,6 +322,10 @@ paths:
 
   /api/v1/ai-applications/charts:
     $ref: "./resources/ApplicationCharts.yaml"
+
+  /api/v1/ai-applications/charts/inspect:
+    x-internal: true
+    $ref: "./resources/ApplicationChartInspection.yaml"
 
   /api/v1/ai-applications/charts/{chartId}/content:
     x-internal: true

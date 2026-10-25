@@ -212,6 +212,30 @@ var _ = Describe("NimServicesImpl", func() {
 		cleanTables()
 	})
 
+	Context("workload action history", func() {
+		It("records NIM create and update once", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			nimServicesImpl.workloadsImpl.workloadActionRecorder = recorder
+			id, _ := createNimServiceForTest(router, randoms, &api.NimServiceCreateRequest{
+				Metadata: api.NimServiceMetadataCreateParams{Name: "nim-action-history", ProjectId: randoms.ProjectIdStr},
+				Spec:     sampleNimServiceSpec,
+			})
+			updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{
+				Spec: api.NimServiceSpec{Image: convutils.Ref("nvidia/nim:updated")},
+			})
+
+			actions := recorder.recorded()
+			Expect(actions).To(HaveLen(2))
+			Expect(actions[0].Action).To(Equal(workloadsApi.WORKLOADACTIONTYPE_CREATE))
+			Expect(actions[1].Action).To(Equal(workloadsApi.WORKLOADACTIONTYPE_UPDATE))
+			for _, action := range actions {
+				Expect(action.WorkloadID).To(Equal(id))
+				Expect(action.WorkloadName).To(Equal("nim-action-history"))
+				Expect(action.ClusterID).To(Equal(randoms.ClusterId))
+			}
+		})
+	})
+
 	Context("successful creation", func() {
 		DescribeTable("creates a default NIM service workload", func(ctx SpecContext, domain *string) {
 			cluster, err := clustersClient.Get().GetClusterByUuid(ctx, randoms.ClusterId)

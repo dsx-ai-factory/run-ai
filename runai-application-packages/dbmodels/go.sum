@@ -1,9 +1,9 @@
-github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.8 h1:aC8WnY49EaHBChUGc4G18P3hTLYgxxKCYH0RSzO2WZw=
-github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.8/go.mod h1:De6AZymhFj15iJC91go/D9OGaAbc/qxZ8JGcMB/cdQk=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2 h1:JVzD27sYiITgpN3IqSJFdWtMsX1bY4unyN1AxvWw8BI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2/go.mod h1:LrD5w0Y8LUNfoR47mdZqDFFXTSODeeM/CVZGKJ5s+wI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17 h1:ZCzuH3k7+SA/pSzKjmjuaEteG/74rwwOUwXg+HFOWXI=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17/go.mod h1:XphvhGwcptSm5mE2Beb2mJoi5JjLiXvCTynF00VNhQk=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.9 h1:UYiezmL5p6opg2mqA0ZP9SzEo2Zt3BSqiGs3l1QQpIg=
+github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.9/go.mod h1:FmiKV8RNBEuAB73l9vlpfJCG+ctgr2gNpIhEMpzyYn0=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 h1:GMqipJVJQYWroi0wqs4KPJTWtJz8YUJ5p5qWRL6l6ZY=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3/go.mod h1:U7eJ5tj0D0oAIENeWRziD+OdoJS/7fRDispUbhL1NMU=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18 h1:710hM8Br39+SS9WBTpt+MkegY2HiXwOm2PIRIbsnxWM=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18/go.mod h1:K8uJaxO5N+Y8VFmCJgKmIR3lMr6eiykdYFFWFd+bNrU=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.10.1 h1:b0/UzAf9yR5rhf3RPm9gf3ehBPpf0oZKIjtpKrx59Ho=

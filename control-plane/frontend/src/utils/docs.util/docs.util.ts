@@ -36,8 +36,8 @@ function getNumaAwareSchedulingHTMLLink(): string {
 function getPrerequisitesHTMLLink(): string {
   // The docs catalog in use may have no destination for this page, in which case it is rendered
   // without a link rather than pointing nowhere.
-  if (!DOCS.INSTALLATION.PREREQUISITES) return "";
-  const prerequisitesURL = escapeHTML(DOCS.INSTALLATION.PREREQUISITES);
+  if (!DOCS.INSTALLATION.CLUSTER_PREREQUISITES) return "";
+  const prerequisitesURL = escapeHTML(DOCS.INSTALLATION.CLUSTER_PREREQUISITES);
   return `For more information, see the <a href="${prerequisitesURL}" target="_blank" rel="noopener noreferrer">Prerequisites guide.</a>`;
 }
 

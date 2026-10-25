@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 )
@@ -13,14 +13,14 @@ require (
 	github.com/ClickHouse/ch-go v0.74.0 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.49.0 // indirect
 	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
-	github.com/aws/smithy-go v1.28.5 // indirect
+	github.com/andybalholm/brotli v1.2.7 // indirect
+	github.com/aws/smithy-go v1.28.6 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-faster/city v1.0.1 // indirect

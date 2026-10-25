@@ -2204,7 +2204,7 @@ clusterService:
         # Inclusive
         # Defaults to the chart's app version
         max: ''
-      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai
+      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai-oss
       helmRegistryUsername: ''
       helmRegistryPasswordPlaceholder: ''
     maxWaitForClusterRemoteConfigStatusUpdate: 5m
@@ -3311,6 +3311,7 @@ workloads:
     # (CHART_RETENTION_MINUTES). Charts referenced by an already-deployed application
     # are removed regardless; this bounds abandoned/unclaimed uploads. Default 24h.
     chartRetentionMinutes: 1440
+    chartInspectionCacheTTLSeconds: 600
     server:
       writeTimeout: 2m
       readTimeout: 2m

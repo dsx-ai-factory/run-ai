@@ -833,7 +833,7 @@ func getProjectCreateRequest(name string, clusterId string, departmentId string)
 func getResources() []api.ResourcesNullable {
 	return []api.ResourcesNullable{{
 		Gpu: api.ResourcesNullableGpu{
-			Deserved:        2,
+			Deserved:        ptr.To(float64(2)),
 			Limit:           ptr.To(float64(2)),
 			OverQuotaWeight: ptr.To(float64(2)),
 		},

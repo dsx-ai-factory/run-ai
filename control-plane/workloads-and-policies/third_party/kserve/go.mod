@@ -1,6 +1,6 @@
 module github.com/kserve/kserve
 
-go 1.26.8
+go 1.27.3
 
 require (
 	cloud.google.com/go/storage v1.52.0

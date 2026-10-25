@@ -6,8 +6,11 @@
 package services
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"strings"
 	"time"
@@ -38,7 +41,7 @@ var _ = Describe("Workload action history", func() {
 	var ctx context.Context
 	var workloadID uuid.UUID
 	var records []models.WorkloadActionHistory
-	service := NewEventsService()
+	service := NewWorkloadActionsService()
 
 	BeforeEach(func() {
 		ctx = testing.SetContext(testing.TestTenant, testing.TestUser, nil)
@@ -66,6 +69,150 @@ var _ = Describe("Workload action history", func() {
 		Expect(second.Actions[0].SubjectType).To(Equal("user"))
 		Expect(second.Actions[0].WorkloadName).To(Equal("deleted-workspace"))
 	})
+
+	It("records who performed the action", func() {
+		input := api.WorkloadActionRecordInput{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: uuid.NewString(),
+			WorkloadName: "direct-v2-workload", Action: api.WORKLOADACTIONTYPE_CREATE,
+			AcceptedAt: time.Now().UTC().Truncate(time.Microsecond),
+		}
+		workload := testActionWorkload(uuid.MustParse(input.WorkloadId), records[0].WorkloadActionScope)
+		_, createErr := runaidb.DB().Create(&workload)
+		Expect(createErr).NotTo(HaveOccurred())
+		body, err := json.Marshal(api.CreateWorkloadActionsRequest{Actions: []api.WorkloadActionRecordInput{input}})
+		Expect(err).NotTo(HaveOccurred())
+		request := httptest.NewRequest(http.MethodPost, "/internal/workloads/actions", bytes.NewReader(body)).WithContext(ctx)
+		request.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+		api.NewWorkloadActionsAPIController(service).InternalCreateWorkloadActions(response, request)
+		Expect(response.Code).To(Equal(http.StatusNoContent))
+
+		stored := storedWorkloadActions(ctx, uuid.MustParse(input.WorkloadId), 0)
+		Expect(stored).To(HaveLen(1))
+		Expect(stored[0].ID.String()).To(Equal(input.Id))
+		Expect(stored[0].Subject).To(Equal(testing.TestUser))
+		Expect(stored[0].SubjectType).To(Equal("user"))
+		Expect(stored[0].Action).To(Equal(string(api.WORKLOADACTIONTYPE_CREATE)))
+		Expect(stored[0].AcceptedAt).To(BeTemporally("==", input.AcceptedAt))
+	})
+
+	It("stores saved and new actions once when retrying a batch", func() {
+		input := api.WorkloadActionRecordInput{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: uuid.NewString(),
+			WorkloadName: "retried-workload", Action: api.WORKLOADACTIONTYPE_UPDATE, AcceptedAt: time.Now().UTC(),
+		}
+		workload := testActionWorkload(uuid.MustParse(input.WorkloadId), records[0].WorkloadActionScope)
+		_, createErr := runaidb.DB().Create(&workload)
+		Expect(createErr).NotTo(HaveOccurred())
+		request := api.CreateWorkloadActionsRequest{Actions: []api.WorkloadActionRecordInput{input}}
+		response, err := service.InternalCreateWorkloadActions(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusNoContent))
+		Expect(storedWorkloadActions(ctx, workload.ID, 0)).To(HaveLen(1))
+
+		newInput := input
+		newInput.Id = uuid.NewString()
+		newInput.Action = api.WORKLOADACTIONTYPE_DELETE
+		request.Actions = append(request.Actions, newInput)
+		for range 2 {
+			response, err := service.InternalCreateWorkloadActions(ctx, request)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(response.Code).To(Equal(http.StatusNoContent))
+			stored := storedWorkloadActions(ctx, workload.ID, 0)
+			Expect(stored).To(HaveLen(2))
+			Expect([]string{stored[0].ID.String(), stored[1].ID.String()}).To(ConsistOf(input.Id, newInput.Id))
+		}
+	})
+
+	It("retries a batch until every workload is registered", func() {
+		registered := testActionWorkload(uuid.New(), records[0].WorkloadActionScope)
+		pending := testActionWorkload(uuid.New(), records[0].WorkloadActionScope)
+		_, err := runaidb.DB().Create(&registered)
+		Expect(err).NotTo(HaveOccurred())
+		request := api.CreateWorkloadActionsRequest{}
+		for _, id := range []uuid.UUID{registered.ID, registered.ID, pending.ID} {
+			request.Actions = append(request.Actions, api.WorkloadActionRecordInput{
+				Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: id.String(),
+				WorkloadName: "registered-workload", Action: api.WORKLOADACTIONTYPE_CREATE, AcceptedAt: time.Now().UTC(),
+			})
+		}
+		response, err := service.InternalCreateWorkloadActions(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusPreconditionFailed))
+		Expect(storedWorkloadActions(ctx, registered.ID, 0)).To(BeEmpty())
+		Expect(storedWorkloadActions(ctx, pending.ID, 0)).To(BeEmpty())
+
+		cleanupQuery := workloadActionCleanupQuery()
+		_, err = runaidb.DB().Exec(cleanupQuery)
+		Expect(err).NotTo(HaveOccurred())
+		_, err = runaidb.DB().Create(&pending)
+		Expect(err).NotTo(HaveOccurred())
+		_, err = runaidb.DB().Delete(&pending)
+		Expect(err).NotTo(HaveOccurred())
+
+		response, err = service.InternalCreateWorkloadActions(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusNoContent))
+		_, err = runaidb.DB().Exec(cleanupQuery)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(storedWorkloadActions(ctx, registered.ID, 0)).To(HaveLen(2))
+		Expect(storedWorkloadActions(ctx, pending.ID, 0)).To(HaveLen(1))
+	})
+
+	It("requires workload registration in the authenticated tenant", func() {
+		scope := records[0].WorkloadActionScope
+		scope.TenantID = 2
+		workload := testActionWorkload(uuid.New(), scope)
+		_, err := runaidb.DB().Create(&workload)
+		Expect(err).NotTo(HaveOccurred())
+		request := api.CreateWorkloadActionsRequest{Actions: []api.WorkloadActionRecordInput{{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: workload.ID.String(),
+			WorkloadName: workload.Name, Action: api.WORKLOADACTIONTYPE_CREATE, AcceptedAt: time.Now().UTC(),
+		}}}
+		response, err := service.InternalCreateWorkloadActions(ctx, request)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusPreconditionFailed))
+		Expect(storedWorkloadActions(ctx, workload.ID, 0)).To(BeEmpty())
+	})
+
+	DescribeTable("rejects malformed internal action IDs", func(field string) {
+		input := api.WorkloadActionRecordInput{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: uuid.NewString(),
+			WorkloadName: "invalid-action", Action: api.WORKLOADACTIONTYPE_CREATE, AcceptedAt: time.Now().UTC(),
+		}
+		switch field {
+		case "record":
+			input.Id = "invalid"
+		case "cluster":
+			input.ClusterId = "invalid"
+		case "workload":
+			input.WorkloadId = "invalid"
+		}
+
+		response, err := service.InternalCreateWorkloadActions(ctx, api.CreateWorkloadActionsRequest{Actions: []api.WorkloadActionRecordInput{input}})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusBadRequest))
+	},
+		Entry("record ID", "record"),
+		Entry("cluster ID", "cluster"),
+		Entry("workload ID", "workload"),
+	)
+
+	DescribeTable("rejects empty and oversized action batches", func(size int) {
+		input := api.WorkloadActionRecordInput{
+			Id: uuid.NewString(), ClusterId: testing.ClusterUuid1, WorkloadId: uuid.NewString(),
+			WorkloadName: "bounded-workload", Action: api.WORKLOADACTIONTYPE_CREATE, AcceptedAt: time.Now().UTC(),
+		}
+		request := api.CreateWorkloadActionsRequest{Actions: make([]api.WorkloadActionRecordInput, size)}
+		for i := range request.Actions {
+			request.Actions[i] = input
+			request.Actions[i].Id = uuid.NewString()
+		}
+		Expect(api.AssertCreateWorkloadActionsRequestConstraints(request)).To(HaveOccurred())
+	},
+		Entry("empty batch", 0),
+		Entry("more than 500 actions", 501),
+	)
 
 	It("omits next when the final page exactly matches the limit", func() {
 		response := getWorkloadActionsHistory(service, ctx, workloadID, 1, 2)
@@ -160,27 +307,10 @@ var _ = Describe("Workload action history", func() {
 	})
 
 	It("aligns history cleanup with workload row deletion", func() {
-		_, err := runaidb.DB().Exec("CREATE EXTENSION IF NOT EXISTS pg_cron")
-		Expect(err).NotTo(HaveOccurred())
-
-		stop := make(chan struct{})
-		DeferCleanup(func() { close(stop) })
-		originalConfig := *runai_config.Get[*config.DBCleanerConfig]()
-		cleanerConfig := originalConfig
-		cleanerConfig.CleanerIntervalHours = 1
-		Expect(runai_config.Set(&cleanerConfig)).To(Succeed())
-		DeferCleanup(func() { Expect(runai_config.Set(&originalConfig)).To(Succeed()) })
-
-		database.InitGoRoutines(stop)
-		var command string
-		Expect(runaidb.DB().Table("cron.job").Where("jobname = ?", "workloads_cleaner").Pluck("command", &command)).To(Succeed())
-		actionQuery := findQuery(command, "DELETE FROM workloads_action_history")
-		Expect(actionQuery).NotTo(BeEmpty())
-		Expect(actionQuery).To(ContainSubstring("NOT EXISTS"))
-		Expect(actionQuery).NotTo(ContainSubstring("accepted_at"))
+		actionQuery := workloadActionCleanupQuery()
 
 		workload := testActionWorkload(workloadID, records[0].WorkloadActionScope)
-		_, err = runaidb.DB().Create(&workload)
+		_, err := runaidb.DB().Create(&workload)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(dao.DbInsertWorkloadActions(ctx, records)).To(Succeed())
 		_, err = runaidb.DB().Model(&models.WorkloadActionHistory{}).
@@ -243,7 +373,7 @@ func testWorkloadActionRecords(workloadID uuid.UUID) []models.WorkloadActionHist
 	return records
 }
 
-func getWorkloadActionsHistory(service api.EventsAPIServicer, ctx context.Context, workloadID uuid.UUID, offset, limit int32) api.GetWorkloadActionsResponse {
+func getWorkloadActionsHistory(service api.WorkloadActionsAPIServicer, ctx context.Context, workloadID uuid.UUID, offset, limit int32) api.GetWorkloadActionsResponse {
 	GinkgoHelper()
 	response, err := service.GetWorkloadActionsHistory(ctx, workloadID.String(), offset, limit)
 	Expect(err).NotTo(HaveOccurred())
@@ -284,4 +414,27 @@ func expectWorkloadAncestorProject(ctx context.Context, workloadID uuid.UUID, pr
 	ancestors := response.Body.(authorization_utils.Ancestors)
 	Expect(ancestors.ProjectId).NotTo(BeNil())
 	Expect(*ancestors.ProjectId).To(Equal(projectID))
+}
+
+func workloadActionCleanupQuery() string {
+	GinkgoHelper()
+	_, err := runaidb.DB().Exec("CREATE EXTENSION IF NOT EXISTS pg_cron")
+	Expect(err).NotTo(HaveOccurred())
+
+	stop := make(chan struct{})
+	DeferCleanup(func() { close(stop) })
+	originalConfig := *runai_config.Get[*config.DBCleanerConfig]()
+	cleanerConfig := originalConfig
+	cleanerConfig.CleanerIntervalHours = 1
+	Expect(runai_config.Set(&cleanerConfig)).To(Succeed())
+	DeferCleanup(func() { Expect(runai_config.Set(&originalConfig)).To(Succeed()) })
+
+	database.InitGoRoutines(stop)
+	var command string
+	Expect(runaidb.DB().Table("cron.job").Where("jobname = ?", "workloads_cleaner").Pluck("command", &command)).To(Succeed())
+	actionQuery := findQuery(command, "DELETE FROM workloads_action_history")
+	Expect(actionQuery).NotTo(BeEmpty())
+	Expect(actionQuery).To(ContainSubstring("NOT EXISTS"))
+	Expect(actionQuery).NotTo(ContainSubstring("accepted_at"))
+	return actionQuery
 }

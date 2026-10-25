@@ -30,6 +30,8 @@ pkg/api/api_trainings.go
 pkg/api/api_trainings_service.go
 pkg/api/api_unified.go
 pkg/api/api_unified_service.go
+pkg/api/api_workload_actions.go
+pkg/api/api_workload_actions_service.go
 pkg/api/api_workload_properties.go
 pkg/api/api_workload_properties_service.go
 pkg/api/api_workload_templates.go
@@ -50,6 +52,10 @@ pkg/api/model_activation_replicas_field.go
 pkg/api/model_ai_application.go
 pkg/api/model_ai_application_allocated_resources.go
 pkg/api/model_ai_application_auth.go
+pkg/api/model_ai_application_chart_inspection_request.go
+pkg/api/model_ai_application_chart_inspection_response.go
+pkg/api/model_ai_application_chart_inspection_warning.go
+pkg/api/model_ai_application_chart_questions_status.go
 pkg/api/model_ai_application_chart_upload_response.go
 pkg/api/model_ai_application_creation_request.go
 pkg/api/model_ai_application_endpoint.go
@@ -124,6 +130,7 @@ pkg/api/model_container.go
 pkg/api/model_count_response.go
 pkg/api/model_count_workload_elements_200_response.go
 pkg/api/model_count_workloads_200_response.go
+pkg/api/model_create_workload_actions_request.go
 pkg/api/model_data_volume.go
 pkg/api/model_data_volume_instance.go
 pkg/api/model_data_volume_rules.go
@@ -574,6 +581,7 @@ pkg/api/model_update_spec_spec.go
 pkg/api/model_update_workloads_setting_by_key_request.go
 pkg/api/model_workload.go
 pkg/api/model_workload_action_record.go
+pkg/api/model_workload_action_record_input.go
 pkg/api/model_workload_action_type.go
 pkg/api/model_workload_allocated_resources.go
 pkg/api/model_workload_batch.go

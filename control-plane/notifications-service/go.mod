@@ -37,7 +37,7 @@ require (
 	github.com/go-openapi/swag/stringutils v0.29.2 // indirect
 	github.com/go-openapi/swag/typeutils v0.29.2 // indirect
 	github.com/go-openapi/swag/yamlutils v0.29.2 // indirect
-	github.com/go-openapi/validate v1.0.0 // indirect
+	github.com/go-openapi/validate v1.0.1 // indirect
 	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
 	github.com/go-sql-driver/mysql v1.10.1 // indirect
@@ -101,9 +101,9 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.2
-	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
+	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
 	github.com/emersion/go-smtp v0.25.0
 	github.com/go-chi/chi/v5 v5.5.0
@@ -132,7 +132,7 @@ require (
 	k8s.io/api v0.37.1
 	k8s.io/apimachinery v0.37.1
 	k8s.io/client-go v0.37.1
-	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
+	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 	sigs.k8s.io/controller-runtime v0.25.2
 )
 

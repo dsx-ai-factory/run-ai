@@ -2372,18 +2372,19 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 				Workloads: workloads,
 			})
 			Expect(apiResponse.Code).To(Equal(http.StatusNoContent))
-			waitForGetWorkloadsLength(ctx, workloadsService, 3+len(workloads), []string{})
 
 			// Verify the value is preserved by both the list and details APIs.
 			user1Ctx := testing.SetContext(testing.TestTenant, "user1", []string{})
-			apiResponse, _ = workloadsService.GetWorkloads(user1Ctx, false, 0, 0, "", "", []string{fmt.Sprintf("projectId==%s", DefaultProjectId)}, "")
-			Expect(apiResponse.Code).To(Equal(http.StatusOK))
-			workloadsResponse := httpResponseBodyToWorkloadsResponse(apiResponse)
+			Eventually(func(g Gomega) {
+				apiResponse, _ := workloadsService.GetWorkloads(user1Ctx, false, 0, 0, "", "", []string{fmt.Sprintf("projectId==%s", DefaultProjectId)}, "")
+				Expect(apiResponse.Code).To(Equal(http.StatusOK))
+				workloadsResponse := httpResponseBodyToWorkloadsResponse(apiResponse)
+				for i := range workloadsResponse.Workloads {
+					workload := &workloadsResponse.Workloads[i]
+					Expect(workload.ExternalWorkloadName).To(Equal(fmt.Sprintf("ew-training-%s", workload.Id)))
+				}
+			}, TimeoutWhenWaitingForView, IntervalWhenWaitingForView).Should(Succeed())
 
-			for i := range workloadsResponse.Workloads {
-				workload := &workloadsResponse.Workloads[i]
-				Expect(workload.ExternalWorkloadName).To(Equal(fmt.Sprintf("ew-training-%s", workload.Id)))
-			}
 			apiResponse, _ = workloadsService.GetWorkload(user1Ctx, workloads[0].Id)
 			fetchedWorkload, ok := apiResponse.Body.(api.WorkloadDetailed)
 			Expect(ok).To(BeTrue())

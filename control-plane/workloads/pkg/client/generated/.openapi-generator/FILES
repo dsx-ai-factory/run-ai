@@ -17,6 +17,7 @@ api_settings.go
 api_sync.go
 api_trainings.go
 api_unified.go
+api_workload_actions.go
 api_workload_properties.go
 api_workload_templates.go
 api_workloads.go
@@ -27,6 +28,10 @@ configuration.go
 docs/AIApplication.md
 docs/AIApplicationAllocatedResources.md
 docs/AIApplicationAuth.md
+docs/AIApplicationChartInspectionRequest.md
+docs/AIApplicationChartInspectionResponse.md
+docs/AIApplicationChartInspectionWarning.md
+docs/AIApplicationChartQuestionsStatus.md
 docs/AIApplicationChartUploadResponse.md
 docs/AIApplicationCreationRequest.md
 docs/AIApplicationForSync.md
@@ -105,6 +110,7 @@ docs/Container.md
 docs/CountResponse.md
 docs/CountWorkloadElements200Response.md
 docs/CountWorkloads200Response.md
+docs/CreateWorkloadActionsRequest.md
 docs/DataVolume.md
 docs/DataVolumeInstance.md
 docs/DataVolumeRules.md
@@ -568,7 +574,9 @@ docs/UpdateSpecSpec.md
 docs/UpdateWorkloadsSettingByKeyRequest.md
 docs/Workload.md
 docs/WorkloadActionRecord.md
+docs/WorkloadActionRecordInput.md
 docs/WorkloadActionType.md
+docs/WorkloadActionsAPI.md
 docs/WorkloadAllocatedResources.md
 docs/WorkloadBatch.md
 docs/WorkloadCategory.md
@@ -656,6 +664,10 @@ model_activation_replicas_field.go
 model_ai_application.go
 model_ai_application_allocated_resources.go
 model_ai_application_auth.go
+model_ai_application_chart_inspection_request.go
+model_ai_application_chart_inspection_response.go
+model_ai_application_chart_inspection_warning.go
+model_ai_application_chart_questions_status.go
 model_ai_application_chart_upload_response.go
 model_ai_application_creation_request.go
 model_ai_application_endpoint.go
@@ -730,6 +742,7 @@ model_container.go
 model_count_response.go
 model_count_workload_elements_200_response.go
 model_count_workloads_200_response.go
+model_create_workload_actions_request.go
 model_data_volume.go
 model_data_volume_instance.go
 model_data_volume_rules.go
@@ -1180,6 +1193,7 @@ model_update_spec_spec.go
 model_update_workloads_setting_by_key_request.go
 model_workload.go
 model_workload_action_record.go
+model_workload_action_record_input.go
 model_workload_action_type.go
 model_workload_allocated_resources.go
 model_workload_batch.go
@@ -1269,6 +1283,7 @@ test/api_settings_test.go
 test/api_sync_test.go
 test/api_trainings_test.go
 test/api_unified_test.go
+test/api_workload_actions_test.go
 test/api_workload_properties_test.go
 test/api_workload_templates_test.go
 test/api_workloads_batch_test.go

@@ -7,6 +7,7 @@
 export const DOCS_CATALOG_V1 = {
   clusterOverview: "getting-started/overview#nvidia-run-ai-cluster",
   systemRequirements: "getting-started/installation/install-using-helm/system-requirements",
+  clusterPrerequisites: "getting-started/installation/install-using-helm/system-requirements",
   networkRequirements: "getting-started/installation/install-using-helm/network-requirements",
   clusterInstallation: "getting-started/installation/install-using-helm/helm-install",
   customInstallation: "infrastructure-setup/advanced-setup/cluster-config",
@@ -63,7 +64,8 @@ export type DocsKey = keyof typeof DOCS_CATALOG_V1;
 
 export const DOCS_CATALOG_V2 = {
   clusterOverview: "documentation/getting-started/overview#nvidia-runai-cluster",
-  systemRequirements: null,
+  systemRequirements: "documentation/installation-and-configuration/system-requirements",
+  clusterPrerequisites: "documentation/installation-and-configuration/install/manual-helm/prerequisites-and-features",
   networkRequirements: null,
   clusterInstallation: "documentation/installation-and-configuration/install/manual-helm/install-the-cluster",
   customInstallation: null,

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/aws/amazon-ssm-agent v0.0.0-20260407151232-1233a2a55f57

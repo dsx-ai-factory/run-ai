@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+type: string
+enum:
+  - absent
+  - usable
+  - unusable
+description: |
+  Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is
+  usable after supported normalization. Unusable means declaration validation failed;
+  questions and groups are empty and warnings explain the failure. An unusable declaration
+  does not block raw YAML configuration or deployment.

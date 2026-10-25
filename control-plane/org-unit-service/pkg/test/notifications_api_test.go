@@ -296,7 +296,7 @@ var _ = Describe("Node pool resources API tests", Ordered, func() {
 			updateRes, err := departmentService.UpdateDepartment(ctx, departments[0].Id, api.DepartmentUpdateRequest{
 				Resources: []api.ResourcesNullable{{
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        10,
+						Deserved:        ptr.To(float64(10)),
 						OverQuotaWeight: ptr.To(float64(10)),
 					},
 				}},

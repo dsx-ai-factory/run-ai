@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+type: object
+required:
+  - chartRef
+description: |
+  Select exactly one chart source: chartId for an existing uploaded archive, chartURL for a direct
+  archive URL, or repo with chartName and an exact chartVersion. Sources cannot be combined.
+  Inspection of a repository chart requires an explicit version; latest-version selection
+  is not supported. Authentication uses the caller-accessible personal or shared credential asset.
+properties:
+  chartRef:
+    $ref: './AIApplicationSpecChartRef.yaml'
+  auth:
+    $ref: './AIApplicationAuth.yaml'

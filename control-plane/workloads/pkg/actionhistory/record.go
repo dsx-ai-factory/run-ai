@@ -28,7 +28,7 @@ type WorkloadToLog struct {
 }
 
 // NewWorkloadActionRecord builds a history record from the authenticated request context.
-func NewWorkloadActionRecord(ctx context.Context, action api.WorkloadActionType, workload WorkloadToLog, acceptedAt time.Time) (*models.WorkloadActionHistory, *api.Error) {
+func NewWorkloadActionRecord(ctx context.Context, recordID uuid.UUID, action api.WorkloadActionType, workload WorkloadToLog, acceptedAt time.Time) (*models.WorkloadActionHistory, *api.Error) {
 	if ctx == nil {
 		return nil, api.NewValidationError("missing authenticated context")
 	}
@@ -44,9 +44,12 @@ func NewWorkloadActionRecord(ctx context.Context, action api.WorkloadActionType,
 	if apiErr != nil {
 		return nil, apiErr
 	}
-	recordID, err := uuid.NewRandom()
-	if err != nil {
-		return nil, api.NewError(http.StatusInternalServerError, "failed to generate workload action ID", err)
+	if recordID == uuid.Nil {
+		var err error
+		recordID, err = uuid.NewRandom()
+		if err != nil {
+			return nil, api.NewError(http.StatusServiceUnavailable, "failed to generate workload action ID", err)
+		}
 	}
 	return &models.WorkloadActionHistory{
 		ID: recordID,

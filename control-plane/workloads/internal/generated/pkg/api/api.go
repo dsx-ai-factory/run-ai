@@ -35,6 +35,7 @@ type AIApplicationsAPIRouter interface {
 	ListApplications(http.ResponseWriter, *http.Request)
 	CreateApplication(http.ResponseWriter, *http.Request)
 	UploadApplicationChart(http.ResponseWriter, *http.Request)
+	InspectApplicationChart(http.ResponseWriter, *http.Request)
 	DownloadApplicationChart(http.ResponseWriter, *http.Request)
 	CountApplications(http.ResponseWriter, *http.Request)
 	GetApplication(http.ResponseWriter, *http.Request)
@@ -72,7 +73,6 @@ type DistributedInferencesAPIRouter interface {
 // The EventsAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a EventsAPIServicer to perform the required actions, then write the service results to the http response.
 type EventsAPIRouter interface {
-	GetWorkloadActionsHistory(http.ResponseWriter, *http.Request)
 	SyncEvents(http.ResponseWriter, *http.Request)
 	GetWorkloadEvents(http.ResponseWriter, *http.Request)
 	GetWorkloadHistory(http.ResponseWriter, *http.Request)
@@ -180,6 +180,14 @@ type TrainingsAPIRouter interface {
 // pass the data to a UnifiedAPIServicer to perform the required actions, then write the service results to the http response.
 type UnifiedAPIRouter interface {
 	GetUnifiedWorkload(http.ResponseWriter, *http.Request)
+}
+
+// WorkloadActionsAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadActionsAPI
+// The WorkloadActionsAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a WorkloadActionsAPIServicer to perform the required actions, then write the service results to the http response.
+type WorkloadActionsAPIRouter interface {
+	GetWorkloadActionsHistory(http.ResponseWriter, *http.Request)
+	InternalCreateWorkloadActions(http.ResponseWriter, *http.Request)
 }
 
 // WorkloadPropertiesAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadPropertiesAPI
@@ -305,6 +313,7 @@ type AIApplicationsAPIServicer interface {
 	ListApplications(context.Context, AiApplicationVerbosity, int32, int32, string, AiApplicationsSortFilterFields, []string, string) (ImplResponse, error)
 	CreateApplication(context.Context, AiApplicationCreationRequest) (ImplResponse, error)
 	UploadApplicationChart(context.Context, *os.File) (ImplResponse, error)
+	InspectApplicationChart(context.Context, AiApplicationChartInspectionRequest) (ImplResponse, error)
 	DownloadApplicationChart(context.Context, string) (ImplResponse, error)
 	CountApplications(context.Context, []string, string) (ImplResponse, error)
 	GetApplication(context.Context, string) (ImplResponse, error)
@@ -345,7 +354,6 @@ type DistributedInferencesAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type EventsAPIServicer interface {
-	GetWorkloadActionsHistory(context.Context, string, int32, int32) (ImplResponse, error)
 	SyncEvents(context.Context, EventsSyncRequest) (ImplResponse, error)
 	GetWorkloadEvents(context.Context, string, int32, int32, string) (ImplResponse, error)
 	GetWorkloadHistory(context.Context, string, int32, int32) (ImplResponse, error)
@@ -463,6 +471,15 @@ type TrainingsAPIServicer interface {
 // and updated with the logic required for the API.
 type UnifiedAPIServicer interface {
 	GetUnifiedWorkload(context.Context, UnifiedWorkloadRequest) (ImplResponse, error)
+}
+
+// WorkloadActionsAPIServicer defines the api actions for the WorkloadActionsAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type WorkloadActionsAPIServicer interface {
+	GetWorkloadActionsHistory(context.Context, string, int32, int32) (ImplResponse, error)
+	InternalCreateWorkloadActions(context.Context, CreateWorkloadActionsRequest) (ImplResponse, error)
 }
 
 // WorkloadPropertiesAPIServicer defines the api actions for the WorkloadPropertiesAPI service

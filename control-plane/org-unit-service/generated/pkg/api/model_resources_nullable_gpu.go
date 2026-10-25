@@ -22,10 +22,10 @@ var dummyResourcesNullableGpu = runaihttp.AssertPattern
 
 type ResourcesNullableGpu struct {
 
-	// The GPU quota assigned to this org-unit.
+	// The GPU quota assigned to this org-unit. Required for node pools with quota enabled. For node pools with quota disabled, it must be 0 or omitted.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Deserved float64 `json:"deserved,omitempty"`
-	Deserved float64 `json:"deserved,omitempty" gorm:"not null;"`
+	Deserved *float64 `json:"deserved,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// The maximum GPU device allocation the org-unit can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs. Set to null for unlimited.

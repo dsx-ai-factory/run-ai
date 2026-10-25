@@ -7,7 +7,10 @@ package actionhistory_test
 
 import (
 	"context"
+	"io"
+	"net/http"
 	"sync"
+	"testing/iotest"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
@@ -34,8 +37,21 @@ type authenticatedContextCase struct {
 }
 
 var _ = Describe("NewWorkloadActionRecord", func() {
+	It("returns 503 when action ID generation fails", func() {
+		ctx := authenticatedContext("42", "user@example.test", "user")
+		workload := acceptedWorkload()
+		uuid.SetRand(iotest.ErrReader(io.ErrUnexpectedEOF))
+		DeferCleanup(func() { uuid.SetRand(nil) })
+
+		record, apiErr := actionhistory.NewWorkloadActionRecord(ctx, uuid.Nil, api.WORKLOADACTIONTYPE_CREATE, workload, time.Now())
+
+		Expect(record).To(BeNil())
+		Expect(apiErr).To(HaveOccurred())
+		Expect(apiErr.Code).To(Equal(int32(http.StatusServiceUnavailable)))
+	})
+
 	DescribeTable("rejects invalid authenticated context", func(tc authenticatedContextCase) {
-		record, apiErr := actionhistory.NewWorkloadActionRecord(tc.ctx, api.WORKLOADACTIONTYPE_CREATE, acceptedWorkload(), time.Now())
+		record, apiErr := actionhistory.NewWorkloadActionRecord(tc.ctx, uuid.Nil, api.WORKLOADACTIONTYPE_CREATE, acceptedWorkload(), time.Now())
 		Expect(record).To(BeNil())
 		Expect(apiErr).To(HaveOccurred())
 	},
@@ -53,7 +69,7 @@ var _ = Describe("NewWorkloadActionRecord", func() {
 		ctx := authenticatedContext("42", subject, subjectType)
 		workload := acceptedWorkload()
 		acceptedAt := time.Date(2026, 10, 11, 14, 15, 16, 123456789, time.FixedZone("offset", 3*60*60))
-		first, apiErr := actionhistory.NewWorkloadActionRecord(ctx, api.WORKLOADACTIONTYPE_CREATE, workload, acceptedAt)
+		first, apiErr := actionhistory.NewWorkloadActionRecord(ctx, uuid.Nil, api.WORKLOADACTIONTYPE_CREATE, workload, acceptedAt)
 		Expect(apiErr).NotTo(HaveOccurred())
 		Expect(first).NotTo(BeNil())
 		Expect(first.ID).NotTo(Equal(uuid.Nil))
@@ -69,7 +85,7 @@ var _ = Describe("NewWorkloadActionRecord", func() {
 
 		workload.Name = "changed"
 		ctx = context.WithValue(ctx, runaictx.CfSubjectID, "another-user@example.test")
-		second, apiErr := actionhistory.NewWorkloadActionRecord(ctx, api.WORKLOADACTIONTYPE_CREATE, workload, acceptedAt)
+		second, apiErr := actionhistory.NewWorkloadActionRecord(ctx, uuid.Nil, api.WORKLOADACTIONTYPE_CREATE, workload, acceptedAt)
 		Expect(apiErr).NotTo(HaveOccurred())
 		Expect(second.ID).NotTo(Equal(first.ID))
 		Expect(first.Subject).To(Equal(subject))
@@ -88,7 +104,7 @@ var _ = Describe("NewWorkloadActionRecord", func() {
 
 	DescribeTable("accepts tenant boundaries", func(tenant string, expected uint64) {
 		ctx := authenticatedContext(tenant, "user@example.test", "user")
-		record, apiErr := actionhistory.NewWorkloadActionRecord(ctx, api.WORKLOADACTIONTYPE_CREATE, acceptedWorkload(), time.Now())
+		record, apiErr := actionhistory.NewWorkloadActionRecord(ctx, uuid.Nil, api.WORKLOADACTIONTYPE_CREATE, acceptedWorkload(), time.Now())
 		Expect(apiErr).NotTo(HaveOccurred())
 		Expect(uint64(record.TenantID)).To(Equal(expected))
 	},
@@ -107,7 +123,7 @@ var _ = Describe("NewWorkloadActionRecord", func() {
 			go func() {
 				defer GinkgoRecover()
 				defer wg.Done()
-				record, apiErr := actionhistory.NewWorkloadActionRecord(ctx, api.WORKLOADACTIONTYPE_DELETE, acceptedWorkload(), time.Now())
+				record, apiErr := actionhistory.NewWorkloadActionRecord(ctx, uuid.Nil, api.WORKLOADACTIONTYPE_DELETE, acceptedWorkload(), time.Now())
 				if apiErr != nil {
 					errors <- apiErr
 					return

@@ -3551,6 +3551,8 @@ components:
 
 
 
+
+
              - binpack - Place as many GPU pods as possible on each GPU device to use fewer devices and maximize available capacity, minimizing GPU fraction fragmentation.
              - spread - Distribute GPU pods across as many GPU devices as possible to balance load across devices.
           allOf:
@@ -3605,6 +3607,8 @@ components:
 
 
 
+
+
              - 0.0: Ignore historical usage data (100% current usage).
              - 1.0: Historical usage data has higher impact, it may cause fairshare to be 0.
              - Values between 0.0 and 1.0 combine historical and current usage to maintain a balanced fairshare
@@ -3617,6 +3621,8 @@ components:
           pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
           description: |
             Set the half-life time to define the decay rate of a project’s historical resource usage. The half-life defines how long it takes for past usage to diminish to half of its original influence on a project's fairshare.
+
+
 
 
 

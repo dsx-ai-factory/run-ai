@@ -3846,8 +3846,12 @@ paths:
       operationId: patch_department_resources
       x-service: org-unit-service
       description: >-
-        Partial updates to specific items in the list. Should be used for update
-        one or more attributes of an item without modifying the entire resource.
+        Updates the resources of the node pools in the request. Node pools that
+        are not in the request stay unchanged. Each node pool in the request is
+        replaced as a whole. GPU deserved is required for node pools with quota
+        enabled, and other omitted fields are set to their defaults. To change
+        only part of a node pool, for example only its rank, use the node pool
+        resources batch patch.
       x-test-coverage:
         - control-plane/org-unit-service/pkg/test/department_api_test.go
       x-authorize:
@@ -4316,8 +4320,12 @@ paths:
       operationId: patch_project_resources
       x-service: org-unit-service
       description: >-
-        Partial updates to specific items in the list. Should be used for update
-        one or more attributes of an item without modifying the entire resource.
+        Updates the resources of the node pools in the request. Node pools that
+        are not in the request stay unchanged. Each node pool in the request is
+        replaced as a whole. GPU deserved is required for node pools with quota
+        enabled, and other omitted fields are set to their defaults. To change
+        only part of a node pool, for example only its rank, use the node pool
+        resources batch patch.
       x-test-coverage:
         - control-plane/org-unit-service/pkg/test/project_api_test.go
       x-authorize:
@@ -17348,7 +17356,7 @@ paths:
         action: read
         resource-id: workloadId
       tags:
-        - Events
+        - WorkloadActions
       parameters:
         - $ref: '#/components/parameters/WorkloadId'
         - $ref: '#/components/parameters/Offset'
@@ -17433,6 +17441,38 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         '409':
           $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/workloads/actions:
+    post:
+      summary: Store workload actions.
+      description: >-
+        Records workload actions accepted by workloads-manager, using the
+        authenticated request context to identify who performed them and the
+        supplied timestamp to record when they were accepted.
+      operationId: internal_create_workload_actions
+      x-service: workloads
+      x-internal: true
+      x-no-authorization: true
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workload_actions_api_test.go
+      tags:
+        - WorkloadActions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkloadActionsRequest'
+      responses:
+        '204':
+          description: Actions stored successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '412':
+          $ref: '#/components/responses/412PreconditionFailed'
         '500':
           $ref: '#/components/responses/500InternalServerError'
         '503':
@@ -22746,6 +22786,87 @@ paths:
           $ref: '#/components/responses/401Unauthorized'
         '403':
           $ref: '#/components/responses/403Forbidden'
+  /api/v1/ai-applications/charts/inspect:
+    x-internal: true
+    post:
+      summary: Inspect a Helm chart questions declaration.
+      description: >
+        Download or read the selected chart archive and inspect its root
+        questions.yaml or questions.yml declaration
+
+        in the control plane. Uploaded charts reference an archive already
+        stored by the chart upload API.
+
+        The response contains normalized question metadata and diagnostics; it
+        does not contain the
+
+        complete chart defaults or credential values. Missing or unusable
+        questions declarations return
+
+        a successful response so callers can offer raw YAML configuration.
+        Download, authentication,
+
+        and invalid archive failures return an error and are not reported as
+        absent questions.
+
+        Archives containing both root declaration filenames are rejected as
+        ambiguous.
+      operationId: inspect_application_chart
+      x-service: workloads
+      x-test-coverage:
+        - >-
+          control-plane/workloads/pkg/services/ai_applications_chart_inspection_unit_test.go
+        - >-
+          control-plane/workloads/pkg/services/ai_applications_chart_inspection_http_test.go
+      x-authorize:
+        resource-type: applications
+        action: create
+      tags:
+        - AI Applications
+      requestBody:
+        description: >-
+          Chart source selection and optional saved credential reference, up to
+          64 KiB of JSON.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIApplicationChartInspectionRequest'
+      responses:
+        '200':
+          description: >-
+            Chart inspected, including absent or unusable questions
+            declarations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIApplicationChartInspectionResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '408':
+          description: The chart inspection request was cancelled or exceeded its deadline.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          $ref: '#/components/responses/413RequestEntityTooLarge'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          description: >-
+            The upstream chart source is unavailable or inspection capacity is
+            exhausted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   '/api/v1/ai-applications/charts/{chartId}/content':
     x-internal: true
     get:
@@ -27833,6 +27954,12 @@ components:
           example: 'gcr.io/runai/goofys:v0.24.0'
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          type: string
+          nullable: true
+          description: >-
+            The exact S3 image reference that supports goofys --ready-file and
+            --check-ready. Omitted when support is unknown or disabled.
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:
@@ -31369,7 +31496,7 @@ components:
             - description: >-
                 Defines the GPU quota assignment, maximum GPU device allocation,
                 and weight assigned that determines the fairshare of over-quota
-                resources.
+                resources. For node pools with quota disabled, deserved is 0.
         cpu:
           type: object
           nullable: true
@@ -31445,6 +31572,39 @@ components:
               items:
                 $ref: '#/components/schemas/Resources'
               description: Resources assigned to this Organization per Node Pool
+    GpuResourceRequest:
+      properties:
+        deserved:
+          type: number
+          format: double
+          description: >-
+            The GPU quota assigned to this org-unit. Required for node pools
+            with quota enabled. For node pools with quota disabled, it must be 0
+            or omitted.
+          example: 1000
+          x-go-pointer: true
+        limit:
+          type: number
+          format: double
+          description: >-
+            The maximum GPU device allocation the org-unit can get from this
+            node pool, representing the maximum sum of assigned quota and
+            over-quota GPUs. Set to null for unlimited.
+          nullable: true
+          example: 0
+        overQuotaWeight:
+          type: number
+          format: double
+          description: >
+            The weight assigned to determine the org-unit's share of over-quota
+            resources within its rank. When multiple org-units share the same
+            rank in a node pool, resources are distributed proportionally based
+            on their weights. Valid values: 1–20. Requires over-quota weight to
+            be enabled. When enabled, the default is 2. See [GPU over
+            quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects)
+            for more details.
+          nullable: true
+          example: 2
     ResourcesNullable:
       properties:
         nodePool:
@@ -31464,11 +31624,13 @@ components:
           nullable: true
         gpu:
           allOf:
-            - $ref: '#/components/schemas/NonNullResource'
+            - $ref: '#/components/schemas/GpuResourceRequest'
             - description: >-
                 Defines the GPU quota assignment, maximum GPU device allocation,
                 and weight assigned that determines the fairshare of over-quota
-                resources.
+                resources. Required for node pools with quota enabled. For node
+                pools with quota disabled, deserved must be 0 or omitted and
+                limit must be -1, null or omitted.
         cpu:
           type: object
           nullable: true
@@ -32474,7 +32636,9 @@ components:
             - description: >-
                 Defines the GPU quota assignment, maximum GPU device allocation,
                 and weight assigned that determines the fairshare of over-quota
-                resources.
+                resources. Optional. If omitted, the GPU values stay unchanged.
+                For node pools with quota disabled, deserved must be 0 or
+                omitted and limit must be -1, null or omitted.
         cpu:
           type: object
           nullable: true
@@ -37874,9 +38038,14 @@ components:
       description: >-
         Specifies whether the workload can be preempted by higher-priority
         workloads. Valid values are preemptible, semi-preemptible and
-        non-preemptible. If explicitly set, this value takes precedence. If not
-        set, the system derives the preemptibility from the priorityClassName
-        field, ensuring backward compatibility. Each workload type has a default
+        non-preemptible. Semi-preemptible is intended for multi-pod workloads.
+        Replicas up to the configured minimum are non-preemptible, while
+        replicas above that minimum are preemptible. On single-pod workloads
+        with a fixed replica count of one, semi-preemptible behaves as
+        non-preemptible. The API continues to accept semi-preemptible for these
+        workloads. If explicitly set, this value takes precedence. If not set,
+        the system derives the preemptibility from the priorityClassName field,
+        ensuring backward compatibility. Each workload type has a default
         preemptibility. To view the default preemptibility for each workload
         type, use the GET /workload-types endpoint.
       type: string
@@ -51800,6 +51969,39 @@ components:
           $ref: '#/components/schemas/WorkloadNodeAffinities'
         kubernetesRef:
           $ref: '#/components/schemas/WorkloadKubernetesRef'
+    WorkloadActionRecordInput:
+      type: object
+      required:
+        - id
+        - clusterId
+        - workloadId
+        - workloadName
+        - action
+        - acceptedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/WorkloadActionId'
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+        workloadId:
+          $ref: '#/components/schemas/WorkloadId'
+        workloadName:
+          $ref: '#/components/schemas/WorkloadName'
+        action:
+          $ref: '#/components/schemas/WorkloadActionType'
+        acceptedAt:
+          $ref: '#/components/schemas/WorkloadActionAcceptedAt'
+    CreateWorkloadActionsRequest:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/WorkloadActionRecordInput'
     WorkloadNetworkStatus:
       type: object
       properties:
@@ -56774,17 +56976,15 @@ components:
         and `version`.
       maxLength: 250
       example: 'https://charts.bitnami.com/bitnami'
-    AIApplicationChartName:
+    ChartName:
       type: string
-      description: >-
-        The name of the chart within the specified repository. This corresponds
-        to the chart’s directory name.
       maxLength: 250
+      description: Helm chart name.
       example: redis
-    AIApplicationChartVersion:
+    ChartVersion:
       type: string
-      description: The specific Semantic Version (SemVer) of the chart to deploy.
       maxLength: 50
+      description: Helm chart version.
       example: 17.3.17
     AIApplicationChartUrl:
       type: string
@@ -56821,9 +57021,9 @@ components:
         repo:
           $ref: '#/components/schemas/AIApplicationChartRepo'
         chartName:
-          $ref: '#/components/schemas/AIApplicationChartName'
+          $ref: '#/components/schemas/ChartName'
         chartVersion:
-          $ref: '#/components/schemas/AIApplicationChartVersion'
+          $ref: '#/components/schemas/ChartVersion'
         chartURL:
           $ref: '#/components/schemas/AIApplicationChartUrl'
         chartId:
@@ -56997,6 +57197,129 @@ components:
       properties:
         chartId:
           $ref: '#/components/schemas/AIApplicationChartId'
+    AIApplicationChartInspectionRequest:
+      type: object
+      required:
+        - chartRef
+      description: >
+        Select exactly one chart source: chartId for an existing uploaded
+        archive, chartURL for a direct
+
+        archive URL, or repo with chartName and an exact chartVersion. Sources
+        cannot be combined.
+
+        Inspection of a repository chart requires an explicit version;
+        latest-version selection
+
+        is not supported. Authentication uses the caller-accessible personal or
+        shared credential asset.
+      properties:
+        chartRef:
+          $ref: '#/components/schemas/AIApplicationSpecChartRef'
+        auth:
+          $ref: '#/components/schemas/AIApplicationAuth'
+    AIApplicationChartQuestionsStatus:
+      type: string
+      enum:
+        - absent
+        - usable
+        - unusable
+      description: >
+        Absent means neither root questions.yaml nor questions.yml exists.
+        Usable means the entire declaration is
+
+        usable after supported normalization. Unusable means declaration
+        validation failed;
+
+        questions and groups are empty and warnings explain the failure. An
+        unusable declaration
+
+        does not block raw YAML configuration or deployment.
+    AIApplicationChartInspectionWarning:
+      type: object
+      required:
+        - code
+        - message
+        - path
+      properties:
+        code:
+          type: string
+          description: Stable machine-readable diagnostic identifier.
+        message:
+          type: string
+          description: Explanation of the problem and available recovery.
+        path:
+          type: string
+          description: >-
+            Location within the declaration, or an empty string for a
+            document-wide diagnostic.
+    AIApplicationChartInspectionResponse:
+      type: object
+      required:
+        - chartName
+        - chartVersion
+        - archiveSHA256
+        - hasQuestions
+        - questionsStatus
+        - groups
+        - questions
+        - warnings
+      properties:
+        chartName:
+          $ref: '#/components/schemas/ChartName'
+        chartVersion:
+          $ref: '#/components/schemas/ChartVersion'
+        archiveSHA256:
+          type: string
+          description: >-
+            Lowercase hexadecimal SHA-256 digest of the exact inspected archive
+            bytes.
+        hasQuestions:
+          type: boolean
+          description: >-
+            Whether the chart contains a root questions.yaml or questions.yml
+            file, including an unusable file.
+        questionsStatus:
+          $ref: '#/components/schemas/AIApplicationChartQuestionsStatus'
+        groups:
+          type: array
+          description: >-
+            Normalized group declarations in author order; empty for absent or
+            unusable declarations.
+          items:
+            type: object
+            additionalProperties: true
+        questions:
+          type: array
+          description: >
+            Normalized root questions in author order. Each question preserves
+            supported declared
+
+            metadata and may contain recursive subquestions through four child
+            levels (five levels total), with roots at
+
+            depth zero. Supported compatibility forms are normalized. Unknown
+            question types become
+
+            string with a warning; unsupported optional properties are ignored
+            with a warning. Invalid
+
+            mandatory metadata, bindings, options, defaults, conditions, or
+            excessive nesting make the
+
+            entire declaration unusable. Credential and Secret question types
+            are not supported.
+
+            This response contains no raw declaration YAML or complete
+            values.yaml defaults.
+          items:
+            type: object
+            additionalProperties: true
+        warnings:
+          type: array
+          description: Diagnostics for recoverable metadata and unusable declarations.
+          items:
+            $ref: '#/components/schemas/AIApplicationChartInspectionWarning'
     AIApplicationSyncResource:
       type: object
       properties:

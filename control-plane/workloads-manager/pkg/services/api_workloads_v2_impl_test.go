@@ -257,6 +257,81 @@ var _ = Describe("WorkloadsV2Impl", func() {
 		cleanTables()
 	})
 
+	Context("workload action history", func() {
+		It("records create, update, and delete once", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
+			request := &api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "action-history", ProjectId: randoms.ProjectIdStr,
+					Priority: convutils.Ref("high"), Category: convutils.Ref("train"),
+				},
+				Manifest: sampleManifest,
+			}
+
+			id, _ := createWorkloadForTest(router, randoms, request)
+			updateWorkloadForTest(router, randoms, id, &api.WorkloadV2UpdateRequest{
+				Metadata: api.WorkloadV2MetadataUpdateParams{Priority: convutils.Ref("high"), Category: convutils.Ref("train")},
+				Manifest: sampleManifest,
+			})
+			deleteWorkloadForTest(router, randoms, id)
+
+			actions := recorder.recorded()
+			Expect(actions).To(HaveLen(3))
+			Expect([]workloadsApi.WorkloadActionType{actions[0].Action, actions[1].Action, actions[2].Action}).To(Equal([]workloadsApi.WorkloadActionType{
+				workloadsApi.WORKLOADACTIONTYPE_CREATE,
+				workloadsApi.WORKLOADACTIONTYPE_UPDATE,
+				workloadsApi.WORKLOADACTIONTYPE_DELETE,
+			}))
+			for _, action := range actions {
+				Expect(action.WorkloadID).To(Equal(id))
+				Expect(action.WorkloadName).To(Equal("action-history"))
+				Expect(action.ClusterID).To(Equal(randoms.ClusterId))
+				Expect(action.AcceptedAt).NotTo(BeZero())
+			}
+		})
+
+		It("skips dry-run creates", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
+			_, submissionErrors := impl.CreateWorkloadV2WithDryRun(
+				setContext(randoms.TenantIdStr, adminUser, nil),
+				api.WorkloadV2CreateRequest{
+					Metadata: api.WorkloadV2MetadataCreateParams{
+						Name: "dry-run-action-history", ProjectId: randoms.ProjectIdStr,
+						Priority: convutils.Ref("high"), Category: convutils.Ref("train"),
+					},
+					Manifest: sampleManifest,
+				},
+				CreateWorkloadV2Options{DryRun: true, RecordAction: recordAction},
+			)
+			Expect(submissionErrors).To(BeEmpty())
+			Expect(recorder.recorded()).To(BeEmpty())
+		})
+
+		It("does not duplicate v1 actions handled through internal manager paths", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
+			id, _ := createInternalWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "v1-translated", ProjectId: randoms.ProjectIdStr,
+					Priority: convutils.Ref("high"), Category: convutils.Ref("train"),
+				},
+				Manifest: sampleManifest,
+			})
+			updateResponse := tryToUpdateInternalWorkloadForTest(router, randoms, id, &api.WorkloadV2UpdateRequest{
+				Metadata: api.WorkloadV2MetadataUpdateParams{Priority: convutils.Ref("high"), Category: convutils.Ref("train")},
+				Manifest: sampleManifest,
+			})
+			Expect(updateResponse.Code).To(Equal(http.StatusAccepted), updateResponse.Body.String())
+			ctx := setContext(randoms.TenantIdStr, adminUser, nil)
+			response, apiErr := impl.ProcessBatch(ctx, api.WorkloadsV2Batch{Ids: []string{id}, Action: api.WORKLOADSV2BATCHACTION_DELETE})
+			Expect(apiErr).To(BeNil())
+			Expect(response.Succeeded).To(ConsistOf(id))
+			Expect(recorder.recorded()).To(BeEmpty())
+		})
+	})
+
 	Context("networking input validation", func() {
 		for _, operation := range []string{"create", "dry-run", "update"} {
 			Context(operation, func() {
@@ -2567,12 +2642,19 @@ var _ = Describe("SetWorkloadRunState", func() {
 	}
 
 	Context("suspend", func() {
-		It("should suspend a Running workload and set DesiredPhase=Stopped", func() {
+		It("records an accepted suspend", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
 			id := createRunningJob("job-suspend-1")
+			recorder.reset()
 
 			result := runStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_SUSPEND})
 
 			Expect(result.DesiredPhase).To(Equal(api.DESIREDPHASE_STOPPED))
+			actions := recorder.recorded()
+			Expect(actions).To(HaveLen(1))
+			Expect(actions[0].Action).To(Equal(workloadsApi.WORKLOADACTIONTYPE_SUSPEND))
+			Expect(actions[0].WorkloadID).To(Equal(id))
 		})
 
 		It("should apply spec.suspend=true patch to both manifests", func() {
@@ -2636,17 +2718,21 @@ var _ = Describe("SetWorkloadRunState", func() {
 			Expect(runPolicy["suspend"]).To(Equal(true))
 		})
 
-		It("should reject suspending a workload already in Stopped state", func() {
+		It("does not record a rejected suspend", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
 			id := createRunningJob("job-suspend-dup")
 
 			runStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_SUSPEND})
 
 			// Simulate the cluster reporting the workload as Stopped after the suspend.
 			workloadsMock.SetWorkloadPhase(id, workloadsApi.PHASE_STOPPED)
+			recorder.reset()
 
 			resp := tryRunStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_SUSPEND})
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
 			Expect(resp.Body.String()).To(ContainSubstring("not permitted"))
+			Expect(recorder.recorded()).To(BeEmpty())
 		})
 
 		It("should reject suspending a workload whose actual phase is Failed", func() {
@@ -2685,15 +2771,22 @@ var _ = Describe("SetWorkloadRunState", func() {
 	})
 
 	Context("resume", func() {
-		It("should resume a Stopped workload and set DesiredPhase=Running", func() {
+		It("records an accepted resume", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
 			id := createRunningJob("job-resume-1")
 
 			runStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_SUSPEND})
 			// Simulate the cluster reporting the workload as Stopped after the suspend.
 			workloadsMock.SetWorkloadPhase(id, workloadsApi.PHASE_STOPPED)
+			recorder.reset()
 			result := runStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_RESUME})
 
 			Expect(result.DesiredPhase).To(Equal(api.DESIREDPHASE_RUNNING))
+			actions := recorder.recorded()
+			Expect(actions).To(HaveLen(1))
+			Expect(actions[0].Action).To(Equal(workloadsApi.WORKLOADACTIONTYPE_RESUME))
+			Expect(actions[0].WorkloadID).To(Equal(id))
 		})
 
 		It("should apply spec.suspend=false patch on resume", func() {

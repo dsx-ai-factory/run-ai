@@ -22,14 +22,15 @@ func ValidateNoCommas(field, value string) error {
 	return nil
 }
 
-// ValidateFilterValue rejects the filterBy metacharacters — the comma separator
-// and the == operator — so a value can't smuggle an extra predicate into FilterEq.
+// ValidateFilterValue rejects filterBy syntax so FilterEq produces one exact value.
 func ValidateFilterValue(field, value string) error {
 	if err := ValidateNoCommas(field, value); err != nil {
 		return err
 	}
-	if strings.Contains(value, "==") {
-		return fmt.Errorf("%s must not contain '=='", field)
+	for _, token := range []string{"==", "!=", "<=", ">=", "=@", "!@", "=^", "=$", "||"} {
+		if strings.Contains(value, token) {
+			return fmt.Errorf("%s must not contain %q", field, token)
+		}
 	}
 	return nil
 }
