@@ -251,7 +251,7 @@ To run the test, identify the IP address that should reach the cluster’s nodes
 2.  Run the following command:
 
     ```yaml
-    kubectl apply -f ha-proxy-test.yml
+    kubectl apply -f haproxy-test.yml
     ```
 
 Once the application is deployed, access the cluster’s IP address in a browser. If the page displays **“hello from haproxy-ingress”**, HAProxy is functioning correctly and you can proceed with upgrading NVIDIA Run:ai.
@@ -295,7 +295,7 @@ The NVIDIA Run:ai control plane uses an ingress with TLS, so also verify how HAP
     ```bash
     kubectl apply -f haproxy-tls-test.yml
     ```
-4.  Send an HTTP request and check the `location` header in the response. Replace `<IP>` with the IP address you identified, and `<HTTP-PORT>` with the port that clients use for HTTP, for example, the HTTP NodePort (`32080`) or `80` behind a load balancer:
+4.  Send an HTTP request and check the `location` header in the response. Replace `<IP>` with the address that clients use: a node IP address for direct NodePort access, or the load balancer address for LoadBalancer installations. Replace `<HTTP-PORT>` with the port that clients use for HTTP, for example, the HTTP NodePort (`32080`) or `80` behind a load balancer:
 
     ```bash
     curl -sI -H "Host: hello.example.com" http://<IP>:<HTTP-PORT>/
