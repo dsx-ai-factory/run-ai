@@ -18577,7 +18577,6 @@ Components:
   k8s.io/utils/ptr v0.0.0-20260707023825-cf1189d6abe3
   k8s.io/utils/ptr v0.0.0-20261023123148-ca04ba58ecab
   k8s.io/utils/third_party/forked/golang/btree v0.0.0-20260626114624-be93311217bd
-  k8s.io/utils/third_party/forked/golang/btree v0.0.0-20260707023825-cf1189d6abe3
   k8s.io/utils/third_party/forked/golang/btree v0.0.0-20261023123148-ca04ba58ecab
   knative.dev/serving/pkg v0.48.1
   public/static-cli/fonts/Roboto-Black.ttf 2.137; 2017
@@ -18784,7 +18783,7 @@ Components:
   contrib.go.opencensus.io/exporter/prometheus v0.4.2
   github.com/NVIDIA/k8s-nim-operator v0.0.0-20260601160319-679627a97be7
   github.com/NVIDIA/k8s-nim-operator v1.0.0
-  github.com/cert-manager/cert-manager/pkg v1.21.2
+  github.com/cert-manager/cert-manager/pkg v1.21.3
   github.com/cert-manager/cert-manager/pkg/apis v1.20.3
   github.com/cncf/xds/go v0.0.0-20260202195803-dba9d589def2
   github.com/devfile/api/v2/pkg v2.2.2
@@ -25443,7 +25442,7 @@ Components:
   sigs.k8s.io/controller-runtime/pkg v0.24.1
   sigs.k8s.io/controller-runtime/pkg v0.25.2
   sigs.k8s.io/gateway-api-inference-extension v1.3.0
-  sigs.k8s.io/karpenter/pkg v1.15.0
+  sigs.k8s.io/karpenter/pkg v1.15.1
   sigs.k8s.io/kustomize/api v0.21.1
   sigs.k8s.io/kustomize/api v0.21.2
   sigs.k8s.io/kustomize/kyaml v0.21.1
@@ -35565,7 +35564,7 @@ limitations under the License.
 --------------------------------------------------------------------------------
 NOTICE of sigs.k8s.io/karpenter
 Components:
-  sigs.k8s.io/karpenter v1.15.0
+  sigs.k8s.io/karpenter v1.15.1
 
 When donating the karpenter-core project to the CNCF, not all contributors were reached
 to sign the CNCF CLA prior to donation. As such, according to the CNCF rules to donate a repository,
