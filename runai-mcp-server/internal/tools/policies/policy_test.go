@@ -137,6 +137,10 @@ func TestManageGVKPolicy(t *testing.T) {
 			c, mux := runaiclienttest.NewServer(t)
 			writes := 0
 			mux.HandleFunc(tc.path, func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodGet {
+					runaiclienttest.WriteJSON(w, http.StatusOK, testGVKPolicy())
+					return
+				}
 				writes++
 				assert.Equal(t, tc.method, r.Method)
 				if tc.action == actionDelete {
@@ -183,7 +187,11 @@ func TestPolicyOperationsNeedConfirmation(t *testing.T) {
 				// 1. Set up the API and input.
 				c, mux := runaiclienttest.NewServer(t)
 				calls := 0
-				mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
+				mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+					if version == versionGVK && r.Method == http.MethodGet {
+						runaiclienttest.WriteJSON(w, http.StatusOK, testGVKPolicy())
+						return
+					}
 					calls++
 					w.WriteHeader(http.StatusInternalServerError)
 				})
@@ -203,7 +211,7 @@ func TestPolicyOperationsNeedConfirmation(t *testing.T) {
 				// 3. Check the result.
 				assert.ErrorIs(t, err, runaimcp.ErrConfirmationRequired)
 				assert.Nil(t, out)
-				assert.Zero(t, calls, "confirmation must not make API requests")
+				assert.Zero(t, calls, "confirmation must not write")
 			})
 		}
 	}
@@ -445,6 +453,10 @@ func TestReplaceGVKPolicyRules(t *testing.T) {
 			c, mux := runaiclienttest.NewServer(t)
 			writes := 0
 			mux.HandleFunc("/api/v1/policies/"+testPolicyID, func(w http.ResponseWriter, r *http.Request) {
+				if r.Method == http.MethodGet {
+					runaiclienttest.WriteJSON(w, http.StatusOK, testGVKPolicy())
+					return
+				}
 				writes++
 				assert.Equal(t, http.MethodPut, r.Method)
 				var body map[string]any
@@ -569,7 +581,11 @@ func TestPolicyDeclineOverridesConfirm(t *testing.T) {
 	// 1. Set up the API and input.
 	c, mux := runaiclienttest.NewServer(t)
 	calls := 0
-	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			runaiclienttest.WriteJSON(w, http.StatusOK, testGVKPolicy())
+			return
+		}
 		calls++
 		w.WriteHeader(http.StatusInternalServerError)
 	})
@@ -595,7 +611,7 @@ func TestLegacyPolicyConfirmationShowsScope(t *testing.T) {
 			}
 
 			session := &decliningPolicySession{}
-			err := confirmPolicyOperation(runaimcp.WithSession(context.Background(), session), in)
+			err := confirmPolicyOperation(runaimcp.WithSession(context.Background(), session), nil, in)
 			require.ErrorIs(t, err, runaimcp.ErrDeclined)
 			assert.Equal(t, 1, session.calls)
 			assert.Contains(t, session.message, "scope: project")
@@ -610,15 +626,48 @@ func TestLegacyPolicyConfirmationShowsScope(t *testing.T) {
 }
 
 func TestGVKPolicyConfirmationIdentifiesTarget(t *testing.T) {
-	session := &decliningPolicySession{}
-	err := confirmPolicyOperation(runaimcp.WithSession(context.Background(), session), manageWorkloadPolicyInput{
-		Action: actionDelete, PolicyVersion: versionGVK, PolicyID: testPolicyID,
-	})
-	require.ErrorIs(t, err, runaimcp.ErrDeclined)
-	assert.Contains(t, session.message, `workload policy "GVK" (`+testPolicyID+`)`)
-	assert.NotContains(t, session.message, "request:")
-	assert.NotContains(t, session.message, "replaceRules:")
-	assert.NotContains(t, session.message, "approveClusterDeletion:")
+	for _, action := range []string{actionUpdate, actionDelete} {
+		for _, scope := range []string{"tenant", "cluster", "department", "project"} {
+			t.Run(action+"/"+scope, func(t *testing.T) {
+				client, mux := runaiclienttest.NewServer(t)
+				reads := 0
+				mux.HandleFunc("/api/v1/policies/"+testPolicyID, func(w http.ResponseWriter, r *http.Request) {
+					assert.Equal(t, http.MethodGet, r.Method)
+					reads++
+					current := testGVKPolicy()
+					delete(current, "projectId")
+					current["scope"] = scope
+					current["description"] = "production policy"
+					if scope != "tenant" {
+						current[scope+"Id"] = "scope-id"
+					}
+					if scope == "tenant" {
+						current["workloadType"] = map[string]any{"version": "v1", "kind": "Pod"}
+					}
+					runaiclienttest.WriteJSON(w, http.StatusOK, current)
+				})
+				session := &decliningPolicySession{}
+				in := manageWorkloadPolicyInput{Action: action, PolicyVersion: versionGVK, PolicyID: testPolicyID, Confirm: true}
+				if action == actionUpdate {
+					in.Request = map[string]any{"description": "updated description"}
+				}
+				out, err := manageWorkloadPolicyRun(runaimcp.WithSession(context.Background(), session), client, in)
+				require.ErrorIs(t, err, runaimcp.ErrDeclined)
+				assert.Nil(t, out)
+				assert.Equal(t, 1, reads)
+				assert.Contains(t, session.message, testPolicyID)
+				assert.Contains(t, session.message, "scope: "+scope)
+				assert.Contains(t, session.message, "description: production policy")
+				assert.Contains(t, session.message, "workloadType:")
+				if scope == "tenant" {
+					assert.Contains(t, session.message, `workload policy "v1/Pod"`)
+				} else {
+					assert.Contains(t, session.message, `workload policy "apps/v1/Deployment"`)
+					assert.Contains(t, session.message, scope+"Id: scope-id")
+				}
+			})
+		}
+	}
 }
 
 func TestLegacyPolicyScopeIsPreserved(t *testing.T) {
@@ -690,7 +739,11 @@ func TestManagePolicyAPIErrors(t *testing.T) {
 				calls := 0
 				mux.HandleFunc(path, func(w http.ResponseWriter, r *http.Request) {
 					calls++
-					assert.Equal(t, http.MethodPatch, r.Method)
+					if version == versionGVK {
+						assert.Equal(t, http.MethodGet, r.Method)
+					} else {
+						assert.Equal(t, http.MethodPatch, r.Method)
+					}
 					runaiclienttest.WriteJSON(w, status, map[string]any{"message": http.StatusText(status)})
 				})
 

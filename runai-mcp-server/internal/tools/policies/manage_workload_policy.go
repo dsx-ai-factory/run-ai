@@ -67,7 +67,7 @@ func manageWorkloadPolicyDescription() string {
 			"Update requires policyId and request with description and/or rules. " +
 			"PATCH replaces matching rules in full, identified by field, specSelector, itemSelector, and selectorParams; other rules remain. " +
 			"replaceRules=true replaces the entire list. Remove rules by sending the remaining nonempty list, or delete the policy to remove all. " +
-			"Update/delete use policyId and the stored scope; omit top-level workloadType and scope IDs. " +
+			"Update/delete read the policy by policyId to show its stored target before confirmation; omit top-level workloadType and scope IDs. " +
 			"Use get_workload_policy_mapping to discover rule fields, selectors, and enforcement types.\n\n"
 		guidance = "Find policies with list_workload_policies; check both families when unknown. Names are not unique: resolve the family and exact target before update/delete, and ask if ambiguous. " +
 			policyScopeResolutionDescription +
@@ -90,13 +90,13 @@ func registerManageWorkloadPolicy(r *runaimcp.Registry, client *runaiclient.Clie
 }
 
 func manageWorkloadPolicyRun(ctx context.Context, client *runaiclient.Client, in manageWorkloadPolicyInput) (map[string]any, error) {
-	if err := confirmPolicyOperation(ctx, in); err != nil {
+	if err := confirmPolicyOperation(ctx, client, in); err != nil {
 		return nil, err
 	}
 	return executePolicyOperation(ctx, client, in)
 }
 
-func confirmPolicyOperation(ctx context.Context, in manageWorkloadPolicyInput) error {
+func confirmPolicyOperation(ctx context.Context, client *runaiclient.Client, in manageWorkloadPolicyInput) error {
 	if in.Action == actionCreate && in.PolicyVersion == versionGVK {
 		return nil
 	}
@@ -113,7 +113,22 @@ func confirmPolicyOperation(ctx context.Context, in manageWorkloadPolicyInput) e
 	}
 	target := in.WorkloadType
 	if in.PolicyVersion == versionGVK {
-		target = "GVK"
+		// Read the stored target so approval identifies the policy being changed.
+		current, err := getGVKPolicy(ctx, client, in.PolicyID)
+		if err != nil {
+			return fmt.Errorf("read GVK policy for confirmation: %w", err)
+		}
+		workloadType, _ := current["workloadType"].(map[string]any)
+		group, _ := workloadType["group"].(string)
+		target = fmt.Sprintf("%s/%s", workloadType["version"], workloadType["kind"])
+		if group != "" {
+			target = group + "/" + target
+		}
+		for _, field := range []string{"workloadType", "scope", "description", fmt.Sprint(current["scope"]) + "Id"} {
+			if value, ok := current[field]; ok {
+				details[field] = value
+			}
+		}
 	}
 	if in.PolicyVersion == versionLegacy {
 		// Show the target separately because the request preview is truncated.
