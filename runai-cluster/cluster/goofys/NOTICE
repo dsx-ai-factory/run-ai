@@ -40,9 +40,9 @@ Dependencies
 | `cloud.google.com/go/auth` | v0.24.1 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go/auth@v0.24.1?tab=licenses |
 | `cloud.google.com/go/auth/oauth2adapt` | v0.3.0 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go/auth/oauth2adapt@v0.3.0?tab=licenses |
 | `cloud.google.com/go/compute/metadata` | v0.10.0 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go/compute/metadata@v0.10.0?tab=licenses |
-| `cloud.google.com/go/iam` | v1.14.0 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go/iam@v1.14.0?tab=licenses |
+| `cloud.google.com/go/iam` | v1.15.0 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go/iam@v1.15.0?tab=licenses |
 | `cloud.google.com/go/internal` | v0.123.0 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go@v0.123.0?tab=licenses |
-| `cloud.google.com/go/monitoring` | v1.31.0 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go/monitoring@v1.31.0?tab=licenses |
+| `cloud.google.com/go/monitoring` | v1.32.0 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go/monitoring@v1.32.0?tab=licenses |
 | `cloud.google.com/go/storage` | v1.70.0 | Apache-2.0 | https://pkg.go.dev/cloud.google.com/go/storage@v1.70.0?tab=licenses |
 | `github.com/Azure/azure-pipeline-go/pipeline` | v0.2.3 | MIT | https://github.com/Azure/azure-pipeline-go/blob/v0.2.3/LICENSE |
 | `github.com/Azure/azure-sdk-for-go` | v68.0.0+incompatible | MIT | https://github.com/Azure/azure-sdk-for-go/blob/v68.0.0/LICENSE.txt |
