@@ -177,7 +177,7 @@ Dependencies
 | `gorm.io/gorm` | v1.31.2 | MIT | https://pkg.go.dev/gorm.io/gorm@v1.31.2?tab=licenses |
 | `gorm.io/plugin/opentelemetry` | v0.1.16 | MIT | https://pkg.go.dev/gorm.io/plugin/opentelemetry@v0.1.16?tab=licenses |
 | `k8s.io/apimachinery/pkg` | v0.37.1 | Apache-2.0 | https://pkg.go.dev/k8s.io/apimachinery@v0.37.1?tab=licenses |
-| `k8s.io/utils/ptr` | v0.0.0-20260707023825-cf1189d6abe3 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
+| `k8s.io/utils/ptr` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 | `sigs.k8s.io/json` | v0.0.0-20260909141634-11ed52e25bc5 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/json@v0.0.0-20260909141634-11ed52e25bc5?tab=licenses |
 
 ================================================================================
