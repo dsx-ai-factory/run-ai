@@ -43,7 +43,7 @@ func TestPodOwnershipPolicyAdmission(t *testing.T) {
 	admin, err := client.New(cfg, client.Options{Scheme: scheme})
 	require.NoError(t, err)
 	ctx := context.Background()
-	require.NoError(t, admin.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "workloads"}}))
+	require.NoError(t, admin.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "workloads", Labels: map[string]string{"runai/queue": "project-a"}}}))
 	// Give the impersonated callers Pod permissions so denials come from admission, not RBAC.
 	require.NoError(t, admin.Create(ctx, &rbacv1.Role{
 		ObjectMeta: metav1.ObjectMeta{Name: "pod-writer", Namespace: "workloads"},
@@ -85,6 +85,14 @@ func TestPodOwnershipPolicyAdmission(t *testing.T) {
 		err := other.Patch(ctx, probe, client.RawPatch("application/merge-patch+json", []byte(`{"metadata":{"labels":{"run.ai/workload-id":"W99"}}}`)), client.DryRunAll)
 		return apierrors.IsForbidden(err)
 	}, 15*time.Second, 100*time.Millisecond)
+	// Ownership-looking labels outside Run:ai namespaces must not trigger the policy.
+	require.NoError(t, admin.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: "outside-runai"}}))
+	outside := pod("outside", original)
+	outside.Namespace = "outside-runai"
+	require.NoError(t, admin.Create(ctx, outside))
+	require.NoError(t, admin.Patch(ctx, outside, client.RawPatch("application/merge-patch+json", []byte(`{"metadata":{"labels":{"run.ai/workload-id":"W99"}}}`))))
+	require.NoError(t, admin.Patch(ctx, outside, client.RawPatch("application/merge-patch+json", []byte(`{"metadata":{"labels":null}}`))))
+
 	cases := []struct {
 		name, patch string
 		writer      client.Client
