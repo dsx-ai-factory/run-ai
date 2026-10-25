@@ -28,7 +28,7 @@ Dependencies
 | Package | Version | License | License source |
 |---------|---------|---------|----------------|
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
-| `github.com/cert-manager/cert-manager/pkg` | v1.21.2 | Apache-2.0 | https://github.com/cert-manager/cert-manager/blob/v1.21.2/LICENSE |
+| `github.com/cert-manager/cert-manager/pkg` | v1.21.3 | Apache-2.0 | https://github.com/cert-manager/cert-manager/blob/v1.21.3/LICENSE |
 | `github.com/cespare/xxhash/v2` | v2.3.0 | MIT | https://pkg.go.dev/github.com/cespare/xxhash/v2@v2.3.0?tab=licenses |
 | `github.com/davecgh/go-spew/spew` | v1.1.2-0.20180830191138-d8f796af33cc | ISC | https://github.com/davecgh/go-spew/blob/d8f796af33cc/LICENSE |
 | `github.com/emicklei/go-restful/v3` | v3.14.0 | MIT | https://pkg.go.dev/github.com/emicklei/go-restful/v3@v3.14.0?tab=licenses |
@@ -107,9 +107,9 @@ Dependencies
 | `k8s.io/kube-openapi/pkg` | v0.0.0-20260501160325-927ab1f70cd6 | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260501160325-927ab1f70cd6?tab=licenses |
 | `k8s.io/kube-openapi/pkg/internal/third_party/go-json-experiment/json` | v0.0.0-20260501160325-927ab1f70cd6 | BSD-3-Clause | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260501160325-927ab1f70cd6?tab=licenses |
 | `k8s.io/kube-openapi/pkg/validation/spec` | v0.0.0-20260501160325-927ab1f70cd6 | Apache-2.0 | https://pkg.go.dev/k8s.io/kube-openapi@v0.0.0-20260501160325-927ab1f70cd6?tab=licenses |
-| `k8s.io/utils` | v0.0.0-20260707023825-cf1189d6abe3 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
-| `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20260707023825-cf1189d6abe3 | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
-| `k8s.io/utils/third_party/forked/golang/btree` | v0.0.0-20260707023825-cf1189d6abe3 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
+| `k8s.io/utils` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
+| `k8s.io/utils/internal/third_party/forked/golang` | v0.0.0-20261023123148-ca04ba58ecab | BSD-3-Clause | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
+| `k8s.io/utils/third_party/forked/golang/btree` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 | `sigs.k8s.io/controller-runtime` | v0.24.1 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.24.1?tab=licenses |
 | `sigs.k8s.io/gateway-api/apis/v1` | v1.6.3 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/gateway-api@v1.6.3?tab=licenses |
 | `sigs.k8s.io/json` | v0.0.0-20260909141634-11ed52e25bc5 | Apache-2.0 | https://pkg.go.dev/sigs.k8s.io/json@v0.0.0-20260909141634-11ed52e25bc5?tab=licenses |
