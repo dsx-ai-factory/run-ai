@@ -4,7 +4,9 @@
 name: Validate Issue Reference
 
 # Every pull request must be linked to at least one open issue that carries the
-# approval label. The only source of linked issues is the pull request's
+# approval label (`issue/approved`). Draft pull requests, pull requests opened by
+# bots and Renovate's dependency updates (`renovate/*` branches opened by the
+# Renovate account) are exempt. The only source of linked issues is the pull request's
 # "Development" panel, read through the GraphQL `closingIssuesReferences`
 # connection. GitHub fills that panel from two places, so a pull request
 # satisfies the check by either:
@@ -121,7 +123,11 @@ permissions: {}
 
 env:
   # Label an issue must carry for a pull request linked to it to pass.
-  APPROVED_LABEL: approved
+  APPROVED_LABEL: issue/approved
+  # Automated dependency updates need no issue. Anyone can push a renovate/*
+  # branch, so the pull request must also be opened by the Renovate account.
+  EXEMPT_BRANCH_PREFIX: renovate/
+  EXEMPT_AUTHOR: devops-runai
 
 jobs:
   validate:
@@ -144,10 +150,19 @@ jobs:
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
             const approvedLabel = process.env.APPROVED_LABEL;
+            const exemptBranchPrefix = process.env.EXEMPT_BRANCH_PREFIX || '';
+            const exemptAuthor = process.env.EXEMPT_AUTHOR || '';
             const privateToken = process.env.GH_TOKEN || '';
 
             if (pr.user && pr.user.type === 'Bot') {
               core.info(`Pull request was opened by ${pr.user.login} (bot) - skipping the issue requirement.`);
+              return;
+            }
+            // Renovate runs here with a personal token, so its pull requests are not
+            // bot-authored; recognise them by branch prefix and author instead.
+            if (exemptBranchPrefix && pr.head.ref.startsWith(exemptBranchPrefix) &&
+                (!exemptAuthor || (pr.user && pr.user.login === exemptAuthor))) {
+              core.info(`${pr.head.ref} by ${pr.user.login} is an automated dependency update - skipping the issue requirement.`);
               return;
             }
             if (pr.draft) {

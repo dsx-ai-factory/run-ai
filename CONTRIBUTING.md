@@ -106,7 +106,7 @@ git push origin your-branch-name
 
 - Open the PR against `main` (preferred) or the release branch (`release-3.0`).
 - Fill in the PR template.
-- Reference the issue with `Fixes #123`. The `PR links an approved issue` check requires exactly one linked issue that is open and labelled `approved` by a maintainer; for a PR into a release branch, link it from the issue's "Development" panel, as GitHub ignores closing keywords there.
+- Reference the issue with `Fixes #123`. The `PR links an approved issue` check requires exactly one linked issue that is open and labelled `issue/approved` by a maintainer; for a PR into a release branch, link it from the issue's "Development" panel, as GitHub ignores closing keywords there.
 
 ### Step 7: Wait for CI
 
