@@ -12,6 +12,7 @@ import (
 	"maps"
 	"reflect"
 
+	composer "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -64,7 +65,7 @@ func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.Networki
 	}
 	networkingService := (*endpoint.Services)[0]
 	service := networkingService.Spec
-	if service == nil || networkingService.Ref != nil || networkingService.Authorization != nil || service.Name == "" || len(service.Ports) != 1 {
+	if service == nil || networkingService.Ref != nil || service.Name == "" || len(service.Ports) != 1 {
 		return nil, fmt.Errorf("distributed inference requires one public created Service with one serving port")
 	}
 	if service.Selector == nil || (*service.Selector)[lwsv1.SetNameLabelKey] != lws.Name || (*service.Selector)[lwsv1.WorkerIndexLabelKey] != "0" {
@@ -84,14 +85,45 @@ func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.Networki
 		(port.Protocol != nil && *port.Protocol != api.SERVICEPROTOCOL_TCP) {
 		return nil, fmt.Errorf("distributed inference serving Service requires an explicit TCP container target port")
 	}
+	if isProtected(networkingService.Authorization) {
+		// The auth proxy is a sidecar in the leader Pod. It is the only valid target for
+		// protected serving; the model port behind it must never be exposed directly.
+		if *port.TargetPort != composer.Oauth2ContainerDefaultPort {
+			return nil, fmt.Errorf("protected distributed inference must target the auth proxy port %d", composer.Oauth2ContainerDefaultPort)
+		}
+		if !containersDeclarePort(leader.Spec.Containers, *port.TargetPort) {
+			return nil, fmt.Errorf("protected distributed inference requires a leader container that declares the auth proxy port %d", *port.TargetPort)
+		}
+		return service, nil
+	}
+	if *port.TargetPort == composer.Oauth2ContainerDefaultPort {
+		return nil, fmt.Errorf("public distributed inference must not target the auth proxy port %d", composer.Oauth2ContainerDefaultPort)
+	}
 	// Native DINF puts the application in the first leader container. In particular,
 	// do not turn a Service targeting an authorization proxy into direct pod access.
-	for _, declared := range leader.Spec.Containers[0].Ports {
-		if declared.ContainerPort == *port.TargetPort && (declared.Protocol == "" || declared.Protocol == corev1.ProtocolTCP) {
-			return service, nil
-		}
+	if containersDeclarePort(leader.Spec.Containers[:1], *port.TargetPort) {
+		return service, nil
 	}
 	return nil, fmt.Errorf("distributed inference target port must address the primary leader container directly; proxy routing is unsupported")
+}
+
+// authorizationTypePublic is the authorizationType value for an unauthenticated serving port.
+const authorizationTypePublic = "public"
+
+func isProtected(authorization *api.Workloadv2Authorization) bool {
+	return authorization != nil && authorization.AuthorizationType != nil &&
+		string(*authorization.AuthorizationType) != authorizationTypePublic
+}
+
+func containersDeclarePort(containers []corev1.Container, port int32) bool {
+	for _, container := range containers {
+		for _, declared := range container.Ports {
+			if declared.ContainerPort == port && (declared.Protocol == "" || declared.Protocol == corev1.ProtocolTCP) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 func distributedServingHostname(access *api.ExternalAccess, service *api.ServiceSpec, defaults *Defaults) (string, error) {

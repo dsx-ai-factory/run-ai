@@ -159,7 +159,6 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Entry("unsupported EPP profile", func() { defaults.EPPProfile = "unknown" }),
 		Entry("internal-only endpoint", func() { endpoint.ExternalAccess = nil }),
 		Entry("parallel Ingress", func() { endpoint.ExternalAccess.Ingress = &map[string]interface{}{} }),
-		Entry("protected Service", func() { (*endpoint.Services)[0].Authorization = &api.Workloadv2Authorization{} }),
 		Entry("referenced Service", func() { (*endpoint.Services)[0].Spec = nil; (*endpoint.Services)[0].Ref = &api.ServiceRef{} }),
 		Entry("all workers selected", func() { delete(*(*endpoint.Services)[0].Spec.Selector, lwsv1.WorkerIndexLabelKey) }),
 		Entry("another LWS selected", func() { (*(*endpoint.Services)[0].Spec.Selector)[lwsv1.SetNameLabelKey] = "other" }),
@@ -169,6 +168,60 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Entry("UDP serving port", func() { (*endpoint.Services)[0].Spec.Ports[0].Protocol = ptr.To(api.SERVICEPROTOCOL_UDP) }),
 		Entry("missing leader template", func() { lws.Spec.LeaderWorkerTemplate.LeaderTemplate = nil }),
 	)
+
+	Context("protected serving", func() {
+		authorize := func(kind string) {
+			(*endpoint.Services)[0].Authorization = &api.Workloadv2Authorization{
+				AuthorizationType: ptr.To(api.AuthorizationType(kind)),
+			}
+		}
+		addSidecar := func(ports ...int32) {
+			container := corev1.Container{Name: "oauth2-proxy"}
+			for _, port := range ports {
+				container.Ports = append(container.Ports, corev1.ContainerPort{ContainerPort: port, Protocol: corev1.ProtocolTCP})
+			}
+			template := lws.Spec.LeaderWorkerTemplate.LeaderTemplate
+			template.Spec.Containers = append(template.Spec.Containers, container)
+		}
+
+		It("accepts protected serving on the auth proxy port that the sidecar declares", func() {
+			authorize("authorizedUsers")
+			(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
+			addSidecar(composer.Oauth2ContainerDefaultPort)
+			setRoute()
+			intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(intent).NotTo(BeNil())
+		})
+
+		DescribeTable("rejects a serving port that does not match the auth mode", func(mutate func()) {
+			mutate()
+			setRoute()
+			intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("port"))
+			Expect(intent).To(BeNil())
+		},
+			Entry("protected on the model port", func() {
+				authorize("authorizedUsers")
+				addSidecar(composer.Oauth2ContainerDefaultPort)
+			}),
+			Entry("protected without a sidecar that declares the proxy port", func() {
+				authorize("authorizedUsers")
+				(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
+			}),
+			Entry("public on the auth proxy port", func() {
+				(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
+				leader := lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers[0]
+				leader.Ports = append(leader.Ports, corev1.ContainerPort{ContainerPort: composer.Oauth2ContainerDefaultPort, Protocol: corev1.ProtocolTCP})
+				lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers[0] = leader
+			}),
+			Entry("public with an explicit public type on the auth proxy port", func() {
+				authorize("public")
+				(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
+			}),
+		)
+	})
 
 	DescribeTable("rejects routing constraints that the endpoint CR cannot preserve", func(mutate func()) {
 		mutate()
