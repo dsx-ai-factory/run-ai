@@ -5,9 +5,9 @@ go 1.27.3
 require (
 	github.com/aws/smithy-go v1.28.6
 	github.com/cenkalti/backoff/v4 v4.3.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/lithammer/shortuuid/v4 v4.3.0
 	github.com/maypok86/otter/v2 v2.4.0
