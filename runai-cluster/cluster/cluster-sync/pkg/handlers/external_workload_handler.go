@@ -55,9 +55,16 @@ func (h *ExternalWorkloadHandler) isWorkloadRunnerDeleted(externalWorkload *v1al
 		return false
 	}
 
+	workloadRunner := &dromosv1alpha1.WorkloadRunner{}
 	err := h.cachedClient.Get(context.Background(),
-		client.ObjectKey{Name: wlrName, Namespace: externalWorkload.Namespace}, &dromosv1alpha1.WorkloadRunner{})
-	return apierrors.IsNotFound(err)
+		client.ObjectKey{Name: wlrName, Namespace: externalWorkload.Namespace}, workloadRunner)
+	if apierrors.IsNotFound(err) {
+		return true
+	}
+
+	// A same-name runner with another UID is a replacement, so this external workload's own runner is gone.
+	wlrUid := externalWorkload.Labels[commonconstants.WorkloadRunnerUidLabel]
+	return err == nil && wlrUid != "" && string(workloadRunner.UID) != wlrUid
 }
 
 func NewExternalWorkloadHandler(workloadHandler *WorkloadHandler) *ExternalWorkloadHandler {

@@ -726,9 +726,12 @@ var _ = Describe("ExternalWorkloadHandler", Ordered, func() {
 
 		BeforeEach(func() {
 			externalWorkload, _, _ = BuildExternalWorkload(workloadName1, namespaceForTest, workloadId1, v1alpha1.ExWRunningPhase)
-			externalWorkload.Labels = map[string]string{commonconstants.WorkloadRunnerNameLabel: workloadName1}
+			externalWorkload.Labels = map[string]string{
+				commonconstants.WorkloadRunnerNameLabel: workloadName1,
+				commonconstants.WorkloadRunnerUidLabel:  "workload-runner-uid",
+			}
 			workloadRunner = &dromosv1alpha1.WorkloadRunner{
-				ObjectMeta: metav1.ObjectMeta{Name: workloadName1, Namespace: namespaceForTest},
+				ObjectMeta: metav1.ObjectMeta{Name: workloadName1, Namespace: namespaceForTest, UID: "workload-runner-uid"},
 			}
 
 			server.RouteToHandler("PUT", pathWithId, func(writer http.ResponseWriter, request *http.Request) {
@@ -769,6 +772,31 @@ var _ = Describe("ExternalWorkloadHandler", Ordered, func() {
 				Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
 
 				Expect(updatedExternalWorkloadId).NotTo(Receive())
+			})
+		})
+
+		When("its WorkloadRunner was replaced by another one with the same name", func() {
+			BeforeEach(func() {
+				workloadRunner.UID = "replacement-workload-runner-uid"
+			})
+
+			It("does not upsert the workload", func() {
+				Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+				Expect(updatedExternalWorkloadId).NotTo(Receive())
+			})
+		})
+
+		When("it has no WorkloadRunner UID label", func() {
+			BeforeEach(func() {
+				delete(externalWorkload.Labels, commonconstants.WorkloadRunnerUidLabel)
+				workloadRunner.UID = "replacement-workload-runner-uid"
+			})
+
+			It("upserts the workload while its WorkloadRunner exists", func() {
+				Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+				Expect(updatedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
 			})
 		})
 
