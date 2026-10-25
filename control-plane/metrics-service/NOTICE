@@ -155,7 +155,7 @@ Dependencies
 | `gorm.io/driver/postgres` | v1.6.3 | MIT | https://pkg.go.dev/gorm.io/driver/postgres@v1.6.3?tab=licenses |
 | `gorm.io/gorm` | v1.31.2 | MIT | https://pkg.go.dev/gorm.io/gorm@v1.31.2?tab=licenses |
 | `gorm.io/plugin/opentelemetry` | v0.1.16 | MIT | https://pkg.go.dev/gorm.io/plugin/opentelemetry@v0.1.16?tab=licenses |
-| `k8s.io/utils/ptr` | v0.0.0-20260707023825-cf1189d6abe3 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
+| `k8s.io/utils/ptr` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 
 ================================================================================
 License texts
