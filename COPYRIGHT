@@ -18269,10 +18269,13 @@ Components:
   k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
   k8s.io/utils v0.0.0-20260626114624-be93311217bd
   k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
+  k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
   k8s.io/utils/ptr v0.0.0-20260507154919-ff6756f316d2
   k8s.io/utils/ptr v0.0.0-20260707023825-cf1189d6abe3
+  k8s.io/utils/ptr v0.0.0-20261023123148-ca04ba58ecab
   k8s.io/utils/third_party/forked/golang/btree v0.0.0-20260626114624-be93311217bd
   k8s.io/utils/third_party/forked/golang/btree v0.0.0-20260707023825-cf1189d6abe3
+  k8s.io/utils/third_party/forked/golang/btree v0.0.0-20261023123148-ca04ba58ecab
   knative.dev/serving/pkg v0.48.1
   public/static-cli/fonts/Roboto-Black.ttf 2.137; 2017
   public/static-cli/fonts/Roboto-BlackItalic.ttf 2.137; 2017
@@ -21440,9 +21443,11 @@ Components:
   k8s.io/utils/internal/third_party/forked/golang v0.0.0-20260507154919-ff6756f316d2
   k8s.io/utils/internal/third_party/forked/golang v0.0.0-20260626114624-be93311217bd
   k8s.io/utils/internal/third_party/forked/golang v0.0.0-20260707023825-cf1189d6abe3
+  k8s.io/utils/internal/third_party/forked/golang v0.0.0-20261023123148-ca04ba58ecab
   k8s.io/utils/internal/third_party/forked/golang/net v0.0.0-20251002143259-bc988d571ff4
   k8s.io/utils/internal/third_party/forked/golang/net v0.0.0-20260507154919-ff6756f316d2
   k8s.io/utils/internal/third_party/forked/golang/net v0.0.0-20260707023825-cf1189d6abe3
+  k8s.io/utils/internal/third_party/forked/golang/net v0.0.0-20261023123148-ca04ba58ecab
 
 Copyright (c) 2012 The Go Authors. All rights reserved.
 
