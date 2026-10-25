@@ -16,7 +16,14 @@ import (
 )
 
 func ParseBackendApplication(application *v1alpha1.Application, isDelete bool) (swagger.AIApplicationForSync, error) {
-	applicationId := GetApplicationId(application)
+	// if the application is created in the cluster, use the cluster UID as application identifier
+	// if it is run-ai managed application, need to use the CP application ID
+	applicationId := string(application.UID)
+	if application.Annotations != nil {
+		if cpApplicationId, ok := application.Annotations[global_consts.ControlPlaneApplicationIdAnnotation]; ok {
+			applicationId = cpApplicationId
+		}
+	}
 
 	departmentId, ok := application.Labels[global_consts.DepartmentIdLabel]
 	if !ok || departmentId == "" {
@@ -101,15 +108,6 @@ func ParseBackendApplication(application *v1alpha1.Application, isDelete bool) (
 	}
 
 	return backendApplication, nil
-}
-
-func GetApplicationId(application *v1alpha1.Application) string {
-	// if the application is created in the cluster, use the cluster UID as application identifier
-	// if it is run-ai managed application, need to use the CP application ID
-	if cpApplicationId, ok := application.Annotations[global_consts.ControlPlaneApplicationIdAnnotation]; ok {
-		return cpApplicationId
-	}
-	return string(application.UID)
 }
 
 func nonEmptyPtr(str string) *string {
