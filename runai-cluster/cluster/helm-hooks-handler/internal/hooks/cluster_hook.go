@@ -48,6 +48,7 @@ type ClusterHookParams struct {
 	ClusterConfig                               json.RawMessage
 	FipsMode                                    string
 	ConfidentialComputing                       bool
+	ConfidentialComputingInitdataConfigMap      string
 }
 
 type NMCParams struct {

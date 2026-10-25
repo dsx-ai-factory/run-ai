@@ -78,10 +78,11 @@ type Options struct {
 	ResourceManagementMigrationNodePoolsEnabled bool
 	ResourceManagementMigrationNodePoolsCleanup bool
 
-	EnableRbacEscalation     bool
-	RequiresKubernetesAccess bool
-	FipsMode                 string
-	ConfidentialComputing    bool
+	EnableRbacEscalation                   bool
+	RequiresKubernetesAccess               bool
+	FipsMode                               string
+	ConfidentialComputing                  bool
+	ConfidentialComputingInitdataConfigMap string
 }
 
 type development struct {
@@ -227,6 +228,10 @@ func (opts *Options) parseCommandLineArgs(flagSet *flag.FlagSet) {
 
 	flagSet.BoolVar(&opts.ConfidentialComputing, "confidential-computing", false,
 		"Whether the cluster runs confidential workloads")
+
+	flagSet.StringVar(&opts.ConfidentialComputingInitdataConfigMap,
+		"confidential-computing-initdata-configmap", "",
+		"ConfigMap holding the initdata document for confidential workloads")
 
 	opts.ZapOptions = zap.Options{
 		Development: true,

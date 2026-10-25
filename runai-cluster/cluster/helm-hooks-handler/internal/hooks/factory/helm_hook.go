@@ -104,5 +104,6 @@ func getClusterHookParams(opts *util.Options) (*hooks.ClusterHookParams, error) 
 		EnableRbacEscalation:                        opts.EnableRbacEscalation,
 		FipsMode:                                    opts.FipsMode,
 		ConfidentialComputing:                       opts.ConfidentialComputing,
+		ConfidentialComputingInitdataConfigMap:      opts.ConfidentialComputingInitdataConfigMap,
 	}, nil
 }

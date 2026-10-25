@@ -43,6 +43,7 @@ spec:
             - --enable-rbac-escalation={{ .Values.cluster.rbac.escalate }}
             - --fips-mode={{ include "globalFipsMode" . }}
             - --confidential-computing={{ .Values.global.confidentialComputing.enabled }}
+            - --confidential-computing-initdata-configmap={{ .Values.global.confidentialComputing.initdataConfigMap }}
             - --engine-to-kai-migration-enabled={{ .Values.engineToKaiMigration.enabled }}
             - --resource-management-migration-enabled={{ .Values.resourceManagementMigration.enabled }}
             - --resource-management-migration-cleanup={{ .Values.resourceManagementMigration.cleanup }}

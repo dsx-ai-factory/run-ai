@@ -115,6 +115,11 @@ type Global struct {
 	// Set from chart values at install/upgrade; independent of control-plane mode.
 	// +kubebuilder:validation:Optional
 	ConfidentialComputing bool `json:"confidentialComputing,omitempty"`
+
+	// ConfidentialComputingInitdataConfigMap names the ConfigMap in the Run:ai namespace
+	// holding the initdata document under the initdata.toml key.
+	// +kubebuilder:validation:Optional
+	ConfidentialComputingInitdataConfigMap string `json:"confidentialComputingInitdataConfigMap,omitempty"`
 }
 
 // SetDefaultsWhereNeeded sets default for unset fields

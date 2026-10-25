@@ -19,8 +19,11 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const ccInitdataMountPath = "/etc/runai/cc-initdata"
 
 func DeploymentForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 	runaiConfig *runaiv1.RunaiConfig) (client.Object, error) {
@@ -75,13 +78,23 @@ func DeploymentForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 				SecurityContext: outils.GlobalSecurityContext(runaiConfig),
 				Image:           fmt.Sprintf("%s/%s:%s", *image.Registry, *image.Name, *image.Tag),
 				ImagePullPolicy: image.PullPolicy,
-				VolumeMounts: append(outils.GlobalVolumeMounts(runaiConfig),
-					v1.VolumeMount{
-						Name:      "webhook-certs",
-						MountPath: "/etc/webhook/certs",
-						ReadOnly:  true,
-					},
-				),
+				VolumeMounts: func() []v1.VolumeMount {
+					mounts := append(outils.GlobalVolumeMounts(runaiConfig),
+						v1.VolumeMount{
+							Name:      "webhook-certs",
+							MountPath: "/etc/webhook/certs",
+							ReadOnly:  true,
+						},
+					)
+					if initdataConfigMapName(runaiConfig) != "" {
+						mounts = append(mounts, v1.VolumeMount{
+							Name:      "cc-initdata",
+							MountPath: ccInitdataMountPath,
+							ReadOnly:  true,
+						})
+					}
+					return mounts
+				}(),
 				Env: []v1.EnvVar{
 					{
 						Name:  "WEBHOOK_SERVER_READ_TIMEOUT",
@@ -120,16 +133,30 @@ func DeploymentForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 			},
 		},
 		ImagePullSecrets: outils.GetGlobalImagePullSecrets(runaiConfig),
-		Volumes: append(outils.GlobalVolumes(runaiConfig),
-			v1.Volume{
-				Name: "webhook-certs",
-				VolumeSource: v1.VolumeSource{
-					Secret: &v1.SecretVolumeSource{
-						SecretName: "runai-tls-secret",
+		Volumes: func() []v1.Volume {
+			volumes := append(outils.GlobalVolumes(runaiConfig),
+				v1.Volume{
+					Name: "webhook-certs",
+					VolumeSource: v1.VolumeSource{
+						Secret: &v1.SecretVolumeSource{
+							SecretName: "runai-tls-secret",
+						},
 					},
 				},
-			},
-		),
+			)
+			if name := initdataConfigMapName(runaiConfig); name != "" {
+				volumes = append(volumes, v1.Volume{
+					Name: "cc-initdata",
+					VolumeSource: v1.VolumeSource{
+						ConfigMap: &v1.ConfigMapVolumeSource{
+							LocalObjectReference: v1.LocalObjectReference{Name: name},
+							Optional:             ptr.To(true),
+						},
+					},
+				})
+			}
+			return volumes
+		}(),
 	}
 
 	return deployment, nil
@@ -164,4 +191,14 @@ func DeploymentStatus(ctx context.Context,
 
 	return operands.NotReadyStatus(fmt.Sprintf("deployment [%s] has not reached the Available condition",
 		deployment.GetName())), nil
+}
+
+func initdataConfigMapName(runaiConfig *runaiv1.RunaiConfig) string {
+	if !runaiConfig.IsConfidentialComputing() {
+		return ""
+	}
+	if runaiConfig.Spec.Internal == nil || runaiConfig.Spec.Internal.Global == nil {
+		return ""
+	}
+	return runaiConfig.Spec.Internal.Global.ConfidentialComputingInitdataConfigMap
 }
