@@ -4,11 +4,11 @@ go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service v0.0.0
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.12.3
 	github.com/onsi/ginkgo/v2 v2.33.1
@@ -29,7 +29,7 @@ require (
 	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/ThreeDotsLabs/watermill v1.5.3 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5 // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
+	github.com/andybalholm/brotli v1.2.7 // indirect
 	github.com/aws/smithy-go v1.28.6 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -43,18 +43,18 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.12 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.13 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.7 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.6 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.7 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.11 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.7 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.7 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.9 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.12 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31 // indirect
 	github.com/ebitengine/purego v0.11.2 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
@@ -103,7 +103,7 @@ require (
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nats-io/nats.go v1.54.0 // indirect
+	github.com/nats-io/nats.go v1.55.0 // indirect
 	github.com/nats-io/nkeys v0.4.16 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
