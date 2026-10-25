@@ -32,7 +32,7 @@ func getUpdateResources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:           ptr.To(float64(2)),
-				Deserved:        float64(2),
+				Deserved:        ptr.To(float64(2)),
 				OverQuotaWeight: ptr.To(float64(1)),
 			},
 			Cpu: &api.ResourcesCpu{
@@ -53,7 +53,7 @@ func getUpdateResources() []api.ResourcesNullable {
 			},
 			Gpu: api.ResourcesNullableGpu{
 				Limit:           ptr.To(float64(0)),
-				Deserved:        float64(0),
+				Deserved:        ptr.To(float64(0)),
 				OverQuotaWeight: ptr.To(float64(1)),
 			},
 		},
@@ -76,7 +76,7 @@ func CreateNodePoolApiResources(fullResources bool, nodePoolId string, nodePoolN
 		NodePool: &nodePool,
 		Gpu: api.ResourcesNullableGpu{
 			Limit:           &gpuLimit,
-			Deserved:        gpuDeserved,
+			Deserved:        ptr.To(gpuDeserved),
 			OverQuotaWeight: &gpuOqWeight,
 		},
 	}

@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Deserved** | Pointer to **float64** | The GPU quota assigned to this org-unit. | [optional] [default to 0]
+**Deserved** | Pointer to **float64** | The GPU quota assigned to this org-unit. Required for node pools with quota enabled. For node pools with quota disabled, it must be 0 or omitted. | [optional] 
 **Limit** | Pointer to **NullableFloat64** | The maximum GPU device allocation the org-unit can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs. Set to null for unlimited. | [optional] 
 **OverQuotaWeight** | Pointer to **NullableFloat64** | The weight assigned to determine the org-unit&#39;s share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.  | [optional] 
 

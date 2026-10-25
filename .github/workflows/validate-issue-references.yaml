@@ -1,0 +1,450 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Validate Issue Reference
+
+# Every pull request must be linked to at least one open issue that carries the
+# approval label. The only source of linked issues is the pull request's
+# "Development" panel, read through the GraphQL `closingIssuesReferences`
+# connection. GitHub fills that panel from two places, so a pull request
+# satisfies the check by either:
+#
+#   - linking the issue through the "Development" panel, or
+#   - writing a closing keyword such as `Closes #123` in the description
+#     (GitHub turns it into the same Development link).
+#
+# Nothing else in the description is parsed. The check re-runs automatically
+# when the approval label is added to or removed from an issue, so
+# contributors do not need to push an empty commit.
+#
+# External issue tracker (optional)
+#
+# Issues may also live in another GitHub repository, typically a private
+# tracker; the tracker is never named in this file. GitHub allows an issue and
+# a pull request to be in different repositories, so such an issue is linked
+# from the ISSUE's own "Development" panel. The link is visible only to people
+# with access to the issue and leaves no trace in the public pull request.
+#
+# The workflow token sees only issues of this repository. To find and verify
+# linked issues of the external tracker, set the `GH_TOKEN`
+# secret to a fine-grained personal access token with:
+#
+#   - resource owner: the organization
+#   - repository access: the external tracker AND this repository
+#   - permissions: Issues: read, Pull requests: read
+#
+# Without the token, which is always the case for pull requests from forks,
+# external references are reported as unverifiable and the check fails closed.
+#
+# Label changes on the external tracker do not raise `issues` events here.
+# The tracker can run a tiny companion workflow that sends a
+# `repository_dispatch` to this repository instead; the `revalidate` job
+# handles it like a local issue change. The companion workflow needs a token
+# with `actions: write` on this repository, for example a secret named
+# `PUBLIC_REPO_DISPATCH_TOKEN`:
+#
+#     name: Notify public repository of issue changes
+#     on:
+#       issues:
+#         types: [labeled, unlabeled, closed, reopened]
+#     permissions: {}
+#     jobs:
+#       dispatch:
+#         runs-on: ubuntu-latest
+#         steps:
+#           - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+#             with:
+#               github-token: ${{ secrets.PUBLIC_REPO_DISPATCH_TOKEN }}
+#               script: |
+#                 await github.rest.repos.createDispatchEvent({
+#                   owner: '<owner>', repo: '<public-repo>',
+#                   event_type: 'private-issue-changed',
+#                   client_payload: {
+#                     repository: `${context.repo.owner}/${context.repo.repo}`,
+#                     issue_number: context.payload.issue.number,
+#                   },
+#                 });
+#
+# Reuse in other repositories
+#
+# The workflow also exposes a `workflow_call` trigger, so other repositories
+# can reuse it with a small caller workflow:
+#
+#     name: Validate Issue Reference
+#     on:
+#       pull_request:
+#         types: [opened, reopened, edited, synchronize, ready_for_review, labeled, unlabeled]
+#     permissions: {}
+#     jobs:
+#       validate-issue-references:
+#         uses: dsx-ai-factory/run-ai/.github/workflows/validate-issue-references.yaml@main
+#         permissions:
+#           contents: read
+#           issues: read
+#           pull-requests: read
+#         secrets: inherit   # forwards GH_TOKEN when the caller has it
+#
+# When called this way the status-check context is
+# `<caller job> / PR links an approved issue`.
+#
+# Adapted from run-ai/fake-gpu-operator's validate-issue-references workflow.
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - synchronize
+      - ready_for_review
+      - labeled
+      - unlabeled
+  issues:
+    types:
+      - labeled
+      - unlabeled
+      - closed
+      - reopened
+  repository_dispatch:
+    types:
+      - private-issue-changed
+  workflow_call:
+    secrets:
+      GH_TOKEN:
+        description: "Optional fine-grained PAT (Issues: read, Pull requests: read on the external tracker and this repository)."
+        required: false
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || format('issue-{0}', github.event.issue.number || github.event.client_payload.issue_number) }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  # Label an issue must carry for a pull request linked to it to pass.
+  APPROVED_LABEL: approved
+
+jobs:
+  validate:
+    name: PR links an approved issue
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      # Read the pull request's Development links and the issues they point to.
+      contents: read
+      pull-requests: read
+      issues: read
+    steps:
+      - name: Validate issue reference
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const approvedLabel = process.env.APPROVED_LABEL;
+            const privateToken = process.env.GH_TOKEN || '';
+
+            if (pr.user && pr.user.type === 'Bot') {
+              core.info(`Pull request was opened by ${pr.user.login} (bot) - skipping the issue requirement.`);
+              return;
+            }
+            if (pr.draft) {
+              core.info('Pull request is a draft - the check runs again when it is marked ready for review.');
+              return;
+            }
+
+            // Headers for the GraphQL call made with the external token.
+            // actions/github-script bundles its dependencies, so a second Octokit
+            // client cannot be created with require('@actions/github').
+            const externalHeaders = {
+              Authorization: `Bearer ${privateToken}`,
+              Accept: 'application/vnd.github+json',
+              'X-GitHub-Api-Version': '2022-11-28',
+              'User-Agent': 'validate-issue-references',
+            };
+
+            // References are { owner, repo, number }, keyed by "owner/repo#number" to dedupe.
+            const references = new Map();
+            const addReference = (node) => {
+              const [refOwner, refRepo] = node.repository.nameWithOwner.split('/');
+              references.set(`${refOwner}/${refRepo}#${node.number}`, {
+                owner: refOwner, repo: refRepo, number: Number(node.number),
+                state: node.state,
+                labels: (node.labels && node.labels.nodes || []).map(l => l.name),
+              });
+            };
+            const isPublic = ref =>
+              `${ref.owner}/${ref.repo}`.toLowerCase() === `${owner}/${repo}`.toLowerCase();
+            const describe = ref => (isPublic(ref) ? `#${ref.number}` : `${ref.owner}/${ref.repo}#${ref.number}`);
+
+            // Issues linked through the pull request's "Development" panel. The
+            // workflow token only sees issues of this repository; when the external
+            // token is configured, the same query is repeated with it so issues of the
+            // external tracker are found too. GitHub hides those links from viewers
+            // without access to the issue.
+            const linkedQuery = `
+              query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) {
+                    closingIssuesReferences(first: 50) {
+                      nodes { number state repository { nameWithOwner } labels(first: 50) { nodes { name } } }
+                    }
+                  }
+                }
+              }`;
+            const variables = { owner, repo, number: pr.number };
+            const addLinkedNodes = (result) => {
+              for (const node of result.repository.pullRequest.closingIssuesReferences.nodes || []) {
+                addReference(node);
+              }
+            };
+            try {
+              addLinkedNodes(await github.graphql(linkedQuery, variables));
+            } catch (error) {
+              core.warning(`Could not read the Development panel: ${error.message}`);
+            }
+            if (privateToken) {
+              try {
+                const response = await fetch('https://api.github.com/graphql', {
+                  method: 'POST',
+                  headers: { ...externalHeaders, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ query: linkedQuery, variables }),
+                });
+                const payload = await response.json();
+                if (!response.ok || payload.errors) {
+                  throw new Error(payload.errors ? payload.errors.map(e => e.message).join('; ') : `HTTP ${response.status}`);
+                }
+                addLinkedNodes(payload.data);
+              } catch (error) {
+                core.warning(`Could not read the Development panel with GH_TOKEN: ${error.message}`);
+              }
+            }
+
+            const howTo =
+              `Link the issue through the pull request's "Development" panel; for an issue that lives ` +
+              `in another repository, such as the external tracker, link this pull request from the ` +
+              `issue's own "Development" panel. For an issue in this repository you can instead add ` +
+              `\`Closes #123\` to the pull request description. ` +
+              `Exactly one issue must be linked, and it must be open and labeled \`${approvedLabel}\` by a maintainer. ` +
+              `Pull requests into release branches must be linked manually (GitHub ignores closing keywords there).`;
+
+            if (references.size === 0) {
+              await core.summary
+                .addHeading('Linked issue missing')
+                .addRaw(howTo)
+                .write();
+              core.setFailed(`This pull request is not linked to an issue. ${howTo}`);
+              return;
+            }
+
+            // Public references first, each group by ascending number.
+            const ordered = [...references.values()].sort((a, b) => {
+              if (isPublic(a) !== isPublic(b)) return isPublic(a) ? -1 : 1;
+              return a.number - b.number;
+            });
+            core.info(`Linked issue(s): ${ordered.map(describe).join(', ')}`);
+
+            // One pull request addresses exactly one issue (an issue may have several PRs).
+            if (ordered.length > 1) {
+              const list = ordered.map(describe).join(', ');
+              await core.summary
+                .addHeading('More than one issue linked')
+                .addRaw(`This pull request is linked to ${ordered.length} issues (${list}). ${howTo}`)
+                .write();
+              core.setFailed(`This pull request is linked to ${ordered.length} issues (${list}); unlink all but one. ${howTo}`);
+              return;
+            }
+
+            // The linked-issue query already carries each issue's state and labels, so no
+            // per-issue REST call is needed (some tokens can read issues over GraphQL
+            // only). closingIssuesReferences never returns pull requests.
+            const problems = [];
+            let approvedIssue = null;
+            for (const ref of ordered) {
+              const name = describe(ref);
+              if (ref.state !== 'OPEN') {
+                problems.push(`${name} is closed`);
+                continue;
+              }
+              if (!ref.labels.includes(approvedLabel)) {
+                problems.push(`${name} is open but is not labeled \`${approvedLabel}\``);
+                continue;
+              }
+              approvedIssue = name;
+              break;
+            }
+
+            if (approvedIssue === null) {
+              const details = problems.map(p => `- ${p}`).join('\n');
+              await core.summary
+                .addHeading('No approved issue linked')
+                .addRaw(details, true)
+                .addRaw(howTo)
+                .write();
+              core.setFailed(
+                `None of the linked issues are open and labeled "${approvedLabel}":\n${details}\n\n${howTo}`);
+              return;
+            }
+
+            core.info(`Issue ${approvedIssue} is open and labeled "${approvedLabel}".`);
+            await core.summary
+              .addHeading('Approved issue linked')
+              .addRaw(`This pull request is linked to ${approvedIssue}, which is open and labeled \`${approvedLabel}\`.`)
+              .write();
+
+  revalidate:
+    name: Re-run validation for linked pull requests
+    if: github.event_name == 'issues' || github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      # Re-run this workflow for the pull requests affected by the issue change.
+      actions: write
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Re-run affected pull request checks
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const privateToken = process.env.GH_TOKEN || '';
+
+            // The changed issue: local for `issues` events, external for `repository_dispatch`.
+            let target;
+            if (context.eventName === 'issues') {
+              target = { owner, repo, number: context.payload.issue.number };
+            } else {
+              const payload = context.payload.client_payload || {};
+              const [targetOwner, targetRepo] = String(payload.repository || '').split('/');
+              const number = Number(payload.issue_number);
+              if (!targetOwner || !targetRepo || !Number.isInteger(number) || number <= 0) {
+                core.setFailed(
+                  'repository_dispatch payload must contain client_payload.repository ("owner/repo") ' +
+                  'and client_payload.issue_number.');
+                return;
+              }
+              target = { owner: targetOwner, repo: targetRepo, number };
+            }
+            const targetKey = `${target.owner}/${target.repo}#${target.number}`.toLowerCase();
+            const isPublic = `${target.owner}/${target.repo}`.toLowerCase() === `${owner}/${repo}`.toLowerCase();
+            const targetName = isPublic ? `#${target.number}` : `${target.owner}/${target.repo}#${target.number}`;
+
+            // Issues linked through a pull request's "Development" panel. The workflow
+            // token covers issues of this repository, which is all an `issues` event can
+            // be about; a `repository_dispatch` from the external tracker also needs
+            // GH_TOKEN to see the external links.
+            const linkedQuery = `
+              query($owner: String!, $repo: String!, $number: Int!) {
+                repository(owner: $owner, name: $repo) {
+                  pullRequest(number: $number) {
+                    closingIssuesReferences(first: 50) {
+                      nodes { number repository { nameWithOwner } }
+                    }
+                  }
+                }
+              }`;
+            const linkedKeys = (result) =>
+              (result.repository.pullRequest.closingIssuesReferences.nodes || [])
+                .map(node => `${node.repository.nameWithOwner}#${node.number}`.toLowerCase());
+            const linksTarget = async (prNumber) => {
+              const variables = { owner, repo, number: prNumber };
+              const keys = new Set();
+              try {
+                for (const key of linkedKeys(await github.graphql(linkedQuery, variables))) keys.add(key);
+              } catch (error) {
+                core.warning(`PR #${prNumber}: could not read the Development panel: ${error.message}`);
+              }
+              if (!isPublic && privateToken) {
+                try {
+                  const response = await fetch('https://api.github.com/graphql', {
+                    method: 'POST',
+                    headers: {
+                      Authorization: `Bearer ${privateToken}`,
+                      'Content-Type': 'application/json',
+                      'User-Agent': 'validate-issue-references',
+                    },
+                    body: JSON.stringify({ query: linkedQuery, variables }),
+                  });
+                  const payload = await response.json();
+                  if (!response.ok || payload.errors) {
+                    throw new Error(payload.errors ? payload.errors.map(e => e.message).join('; ') : `HTTP ${response.status}`);
+                  }
+                  for (const key of linkedKeys(payload.data)) keys.add(key);
+                } catch (error) {
+                  core.warning(`PR #${prNumber}: could not read the Development panel with GH_TOKEN: ${error.message}`);
+                }
+              }
+              return keys.has(targetKey);
+            };
+
+            const pulls = await github.paginate(github.rest.pulls.list, {
+              owner, repo, state: 'open', per_page: 100,
+            });
+            const affected = [];
+            for (const pr of pulls) {
+              if (await linksTarget(pr.number)) affected.push(pr);
+            }
+
+            if (affected.length === 0) {
+              core.info(`No open pull request is linked to issue ${targetName}.`);
+              return;
+            }
+
+            // Look up this workflow by id so the job stays correct when the
+            // file is reused under another name via workflow_call.
+            const { data: me } = await github.rest.actions.getWorkflowRun({
+              owner, repo, run_id: context.runId,
+            });
+            const workflowId = me.workflow_id;
+
+            // A run that is still executing may have read the issue labels
+            // before this change landed, and GitHub offers no completion event
+            // to retry on, so wait for it rather than dropping the request.
+            const waitForCompletion = async (runId, prNumber) => {
+              const deadline = Date.now() + 10 * 60 * 1000;
+              while (Date.now() < deadline) {
+                await new Promise(resolve => setTimeout(resolve, 15000));
+                const { data: run } = await github.rest.actions.getWorkflowRun({
+                  owner, repo, run_id: runId,
+                });
+                if (run.status === 'completed') {
+                  return run;
+                }
+              }
+              core.warning(
+                `PR #${prNumber}: validation run ${runId} did not finish in time. ` +
+                'Re-run it by hand to pick up the label change.');
+              return null;
+            };
+
+            for (const pr of affected) {
+              const runs = await github.rest.actions.listWorkflowRuns({
+                owner, repo, workflow_id: workflowId, head_sha: pr.head.sha, per_page: 20,
+              });
+              // Runs come back newest first; only the latest one shows on the PR.
+              let latest = runs.data.workflow_runs.find(run => run.event === 'pull_request');
+              if (!latest) {
+                core.info(`PR #${pr.number}: no validation run to re-run.`);
+                continue;
+              }
+              if (latest.status !== 'completed') {
+                core.info(
+                  `PR #${pr.number}: validation run ${latest.id} is ${latest.status}; ` +
+                  'waiting for it to finish before re-running.');
+                latest = await waitForCompletion(latest.id, pr.number);
+                if (!latest) {
+                  continue;
+                }
+              }
+              try {
+                await github.rest.actions.reRunWorkflow({ owner, repo, run_id: latest.id });
+                core.info(`PR #${pr.number}: re-running validation (run ${latest.id}).`);
+              } catch (error) {
+                core.warning(`PR #${pr.number}: could not re-run ${latest.id}: ${error.message}`);
+              }
+            }

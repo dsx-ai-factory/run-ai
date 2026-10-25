@@ -4,10 +4,10 @@ go 1.27.3
 
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
-	github.com/aws/smithy-go v1.28.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30
+	github.com/aws/smithy-go v1.28.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
 	github.com/golang-migrate/migrate/v4 v4.20.1
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/stretchr/testify v1.12.1
@@ -19,7 +19,7 @@ require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/ClickHouse/ch-go v0.74.0 // indirect
 	github.com/ClickHouse/clickhouse-go/v2 v2.49.0 // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
+	github.com/andybalholm/brotli v1.2.7 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect

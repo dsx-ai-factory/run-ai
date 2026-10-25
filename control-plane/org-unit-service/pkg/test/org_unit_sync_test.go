@@ -192,7 +192,7 @@ var _ = Describe("Org unit sync tests", Ordered, func() {
 			updateRequest := getProjectUpdateRequest(project)
 			updateRequest.Resources[0].Gpu.OverQuotaWeight = ptr.To(float64(3))
 			updateRequest.Resources[0].Gpu.Limit = ptr.To(float64(3))
-			updateRequest.Resources[0].Gpu.Deserved = float64(3)
+			updateRequest.Resources[0].Gpu.Deserved = ptr.To(float64(3))
 			updateRequest.Resources[0].Rank = ptr.To(services.DefaultResourceRank)
 			updateResponse, err := projectApiService.UpdateProject(ctx, project.Id, updateRequest)
 			if err != nil {
@@ -328,7 +328,7 @@ var _ = Describe("Org unit sync tests", Ordered, func() {
 			updateRequest := getProjectUpdateRequest(project)
 			updateRequest.Resources[0].Gpu.OverQuotaWeight = ptr.To(float64(3))
 			updateRequest.Resources[0].Gpu.Limit = ptr.To(float64(3))
-			updateRequest.Resources[0].Gpu.Deserved = float64(3)
+			updateRequest.Resources[0].Gpu.Deserved = ptr.To(float64(3))
 			updateRequest.Resources[0].Rank = ptr.To("VeryLow")
 			updateResponse, err := projectApiService.UpdateProject(ctx, project.Id, updateRequest)
 			if err != nil {
@@ -574,7 +574,7 @@ var _ = Describe("Org unit sync tests", Ordered, func() {
 			updateRequest := getDepartmentUpdateRequest(department)
 			updateRequest.Resources[0].Gpu.OverQuotaWeight = ptr.To(float64(3))
 			updateRequest.Resources[0].Gpu.Limit = ptr.To(float64(3))
-			updateRequest.Resources[0].Gpu.Deserved = float64(3)
+			updateRequest.Resources[0].Gpu.Deserved = ptr.To(float64(3))
 			updateResponse, err := departmentApiService.UpdateDepartment(ctx, departmentId, updateRequest)
 			if err != nil {
 				Fail("Failed updating department")
@@ -1047,7 +1047,7 @@ func getUpdateRequestFromDepartment(department api.Department) api.DepartmentUpd
 		resources = append(resources, api.ResourcesNullable{
 			NodePool: department.Resources[i].NodePool,
 			Gpu: api.ResourcesNullableGpu{
-				Deserved:        department.Resources[i].Gpu.Deserved,
+				Deserved:        ptr.To(department.Resources[i].Gpu.Deserved),
 				Limit:           department.Resources[i].Gpu.Limit,
 				OverQuotaWeight: department.Resources[i].Gpu.OverQuotaWeight,
 			},
@@ -1071,7 +1071,7 @@ func getUpdateRequestFromProject(project api.Project) api.ProjectUpdateRequest {
 		resources = append(resources, api.ResourcesNullable{
 			NodePool: project.Resources[i].NodePool,
 			Gpu: api.ResourcesNullableGpu{
-				Deserved:        project.Resources[i].Gpu.Deserved,
+				Deserved:        ptr.To(project.Resources[i].Gpu.Deserved),
 				Limit:           project.Resources[i].Gpu.Limit,
 				OverQuotaWeight: project.Resources[i].Gpu.OverQuotaWeight,
 			},

@@ -365,7 +365,7 @@ After installing the NVIDIA Run:ai control plane, it may take a few minutes for 
 
 <Tab title="Kubernetes">
 
-`https://runai.<DOMAIN>.local`
+`https://<DOMAIN>`
 
 </Tab>
 
