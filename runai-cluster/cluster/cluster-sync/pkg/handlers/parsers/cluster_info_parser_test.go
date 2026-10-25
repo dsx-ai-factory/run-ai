@@ -195,9 +195,10 @@ var _ = Describe("ClusterInfoParser", func() {
 			dinfGPUNetworkAcceleration := false
 
 			configuration := &runv1.PublicConfiguration{
-				GitSyncImage:          &gitSync,
-				S3FileSystemImage:     &s3,
-				RunaiOauth2ProxyImage: &oauth,
+				GitSyncImage:                &gitSync,
+				S3FileSystemImage:           &s3,
+				S3FileSystemMountCheckImage: &s3,
+				RunaiOauth2ProxyImage:       &oauth,
 				RunaiOauth2ProxyResources: &runv1.PublicResourceRequirements{
 					Requests: map[string]string{"cpu": "100m", "memory": "128Mi"},
 					Limits:   map[string]string{"cpu": "100m", "memory": "128Mi"},
@@ -240,6 +241,7 @@ var _ = Describe("ClusterInfoParser", func() {
 
 			Expect(result.GitSyncImage.Get()).To(Equal(&gitSync))
 			Expect(result.S3FileSystemImage.Get()).To(Equal(&s3))
+			Expect(result.S3FileSystemMountCheckImage.Get()).To(Equal(&s3))
 			Expect(result.RunaiOauth2ProxyImage.Get()).To(Equal(&oauth))
 			Expect(result.RunaiOauth2ProxyResources.Get()).NotTo(BeNil())
 			Expect(result.RunaiOauth2ProxyResources.Get().GetRequests()).To(Equal(map[string]string{"cpu": "100m", "memory": "128Mi"}))
@@ -285,6 +287,10 @@ var _ = Describe("ClusterInfoParser", func() {
 
 			Expect(result.GitSyncImage.Get()).To(BeNil())
 			Expect(result.S3FileSystemImage.Get()).To(BeNil())
+			Expect(result.S3FileSystemMountCheckImage.Get()).To(BeNil())
+			wire, err := result.ToMap()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(wire).NotTo(HaveKey("s3FileSystemMountCheckImage"))
 			Expect(result.RunaiOauth2ProxyImage.Get()).To(BeNil())
 			Expect(result.RunaiOauth2ProxyResources.Get()).To(BeNil())
 			Expect(result.UsernameLoaderResources.Get()).To(BeNil())

@@ -13,6 +13,9 @@ import (
 	"k8s.io/utils/ptr"
 )
 
+// DefaultS3FileSystemImageName identifies the bundled S3 filesystem image.
+const DefaultS3FileSystemImageName = "goofys"
+
 // AnyworkloadController defines configurations for the anyworkload-controller
 type AnyworkloadController struct {
 	// Enabled specifies if the anyworkload-controller should be installed
@@ -65,6 +68,13 @@ type AnyworkloadController struct {
 	// S3FileSystemImage specifies the image used by the S3 filesystem injected container.
 	// +kubebuilder:validation:Optional
 	S3FileSystemImage *common.Image `json:"s3FileSystemImage,omitempty"`
+
+	// S3FileSystemMountCheckEnabled overrides startup-probe support for the configured S3 image.
+	// When unset, only the bundled goofys image from this operator build is enabled.
+	// Custom images must implement goofys --ready-file and --check-ready before opting in.
+	// Enabling probes requires a writable /runai-goofys-ready on the sidecar root filesystem.
+	// +kubebuilder:validation:Optional
+	S3FileSystemMountCheckEnabled *bool `json:"s3FileSystemMountCheckEnabled,omitempty"`
 
 	// RunaiOauth2ProxyImage specifies the image of oauth2-proxy, which is used to authenticate users for external URL workloads.
 	// +kubebuilder:validation:Optional
@@ -191,7 +201,7 @@ func (a *AnyworkloadController) SetDefaultsWhereNeeded(globalRegistry string) {
 	}
 	a.S3FileSystemImage.SetDefaultsWhereNeeded(&common.Image{
 		Registry: ptr.To(globalRegistry),
-		Name:     ptr.To("goofys"),
+		Name:     ptr.To(DefaultS3FileSystemImageName),
 	})
 
 	if a.RunaiOauth2ProxyImage == nil {

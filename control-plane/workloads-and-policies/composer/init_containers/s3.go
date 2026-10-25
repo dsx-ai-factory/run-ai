@@ -26,9 +26,10 @@ const (
 	s3CADefaultMode int32 = 420
 
 	s3CACertsDir = "/etc/ssl/certs"
+	s3ReadyFile  = "/runai-goofys-ready"
 
-	// goofys gets at most these extra args per item: --uid <v>, --gid <v>, --endpoint <v>, bucket, path.
-	maxGoofysPerItemArgs = 8
+	// goofys gets at most these extra args: --uid <v>, --gid <v>, --endpoint <v>, --ready-file <v>, bucket, path.
+	maxGoofysPerItemArgs = 10
 )
 
 // goofysBaseCommand are the flags goofys is always launched with; uid/gid,
@@ -96,6 +97,20 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 		if item.Url != "" {
 			command = append(command, "--endpoint", item.Url)
 		}
+		// Older and custom images may not implement the readiness flags.
+		mountCheckEnabled := cfg.S3FsMountCheckImage() == image
+		var startupProbe *corev1.Probe
+		if mountCheckEnabled {
+			command = append(command, "--ready-file", s3ReadyFile)
+			startupProbe = &corev1.Probe{
+				ProbeHandler: corev1.ProbeHandler{Exec: &corev1.ExecAction{
+					Command: []string{"goofys", "--check-ready", s3ReadyFile, item.Path},
+				}},
+				PeriodSeconds:    2,
+				TimeoutSeconds:   2,
+				FailureThreshold: 150,
+			}
+		}
 		command = append(command, item.Bucket, item.Path)
 
 		volumeMounts := []corev1.VolumeMount{
@@ -130,6 +145,7 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 			Resources:       resources,
 			VolumeMounts:    volumeMounts,
 			RestartPolicy:   &restartAlways,
+			StartupProbe:    startupProbe,
 		})
 	}
 
