@@ -2887,6 +2887,10 @@ components:
           example: gcr.io/runai/goofys:v0.24.0
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          type: string
+          nullable: true
+          description: The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:

@@ -8,6 +8,7 @@ package configmaps
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	_ "regexp"
 	"slices"
@@ -33,6 +34,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/prometheus/resources"
 	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
+	anyworkloadcontroller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common"
 	runv1_internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 	kfv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
@@ -165,6 +167,7 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 	if aw := rp.runaiConfig.Spec.AnyworkloadController; aw != nil {
 		configuration.GitSyncImage = formatImageRef(aw.GitSyncImage)
 		configuration.S3FileSystemImage = formatImageRef(aw.S3FileSystemImage)
+		configuration.S3FileSystemMountCheckImage = s3MountCheckImage(aw.S3FileSystemImage, aw.S3FileSystemMountCheckEnabled)
 		configuration.RunaiOauth2ProxyImage = formatImageRef(aw.RunaiOauth2ProxyImage)
 		configuration.RunaiOauth2ProxyUsernameLoaderImage = formatImageRef(aw.RunaiOauth2ProxyUsernameLoaderImage)
 		configuration.RunaiOauth2ProxyRedisFQDN = aw.RunaiOauth2ProxyRedisFQDN
@@ -681,6 +684,26 @@ func errToString(err error) string {
 	}
 
 	return err.Error()
+}
+
+func s3MountCheckImage(image *common.Image, enabled *bool) *string {
+	ref := formatImageRef(image)
+	if ref == nil {
+		return nil
+	}
+	// Only the bundled image from this build is known to support goofys readiness flags.
+	// Older tags and custom images retain their behavior unless explicitly opted in.
+	if enabled == nil {
+		// Helm derives both this registry and the default S3 image registry from global.image.registry.
+		registry := os.Getenv(common.DefaultRegistryEnvVarName)
+		tag := os.Getenv(common.DefaultVersionEnvVarName)
+		if registry == "" || tag == "" || *image.Registry != registry || *image.Name != anyworkloadcontroller.DefaultS3FileSystemImageName || *image.Tag != tag {
+			return nil
+		}
+	} else if !*enabled {
+		return nil
+	}
+	return ref
 }
 
 func formatImageRef(image *common.Image) *string {
