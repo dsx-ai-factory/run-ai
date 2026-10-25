@@ -124,7 +124,7 @@ func confirmPolicyOperation(ctx context.Context, client *runaiclient.Client, in 
 		if group != "" {
 			target = group + "/" + target
 		}
-		for _, field := range []string{"workloadType", "scope", "description", fmt.Sprint(current["scope"]) + "Id"} {
+		for _, field := range []string{"workloadType", fieldScope, "description", fmt.Sprint(current[fieldScope]) + "Id"} {
 			if value, ok := current[field]; ok {
 				details[field] = value
 			}
@@ -135,11 +135,11 @@ func confirmPolicyOperation(ctx context.Context, client *runaiclient.Client, in 
 		meta, _ := in.Request["meta"].(map[string]any)
 		if in.Action == actionDelete {
 			meta = map[string]any{
-				"scope": in.Scope, fieldClusterID: in.ClusterID,
+				fieldScope: in.Scope, fieldClusterID: in.ClusterID,
 				fieldDepartmentID: in.DepartmentID, fieldProjectID: in.ProjectID,
 			}
 		}
-		for _, field := range []string{"scope", fieldClusterID, fieldDepartmentID, fieldProjectID} {
+		for _, field := range []string{fieldScope, fieldClusterID, fieldDepartmentID, fieldProjectID} {
 			if value, ok := meta[field]; ok {
 				details[field] = value
 			}

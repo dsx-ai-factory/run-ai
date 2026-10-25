@@ -41,7 +41,7 @@ func (in getWorkloadPolicyMappingInput) Validate() error {
 }
 
 type getWorkloadPolicyMappingOutput struct {
-	Mapping map[string]any `json:"mapping" jsonschema:"Policy API response. The initial lookup returns field and selector names with descriptions; fieldsRef returns expressions, types, selector details, and possible enforcements."`
+	Mapping map[string]any `json:"mapping" jsonschema:"Policy API response. Initial lookup: field and selector names with descriptions; fieldsRef: expressions, types, selector details, and supported enforcements."`
 }
 
 func registerGetWorkloadPolicyMapping(r *runaimcp.Registry, client *runaiclient.Client) {

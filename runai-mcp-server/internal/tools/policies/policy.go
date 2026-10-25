@@ -19,6 +19,7 @@ const (
 	actionCreate      = string(common.ActionCreate)
 	actionUpdate      = string(common.ActionUpdate)
 	actionDelete      = string(common.ActionDelete)
+	fieldScope        = "scope"
 	fieldClusterID    = "clusterId"
 	fieldDepartmentID = "departmentId"
 	fieldProjectID    = "projectId"
