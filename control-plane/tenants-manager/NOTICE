@@ -35,7 +35,7 @@ Dependencies
 | `github.com/Rican7/retry` | v0.3.1 | MIT | https://github.com/Rican7/retry/blob/v0.3.1/LICENSE |
 | `github.com/ThreeDotsLabs/watermill` | v1.5.3 | MIT | https://github.com/ThreeDotsLabs/watermill/blob/v1.5.3/LICENSE |
 | `github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream` | v1.4.5 | MIT | https://github.com/ThreeDotsLabs/watermill-redisstream/blob/v1.4.5/LICENSE |
-| `github.com/andybalholm/brotli` | v1.2.6 | MIT | https://github.com/andybalholm/brotli/blob/v1.2.6/LICENSE |
+| `github.com/andybalholm/brotli` | v1.2.7 | MIT | https://github.com/andybalholm/brotli/blob/v1.2.7/LICENSE |
 | `github.com/aws/smithy-go/ptr` | v1.28.6 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.6/LICENSE |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/cenkalti/backoff/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v4@v4.3.0?tab=licenses |
@@ -79,7 +79,7 @@ Dependencies
 | `github.com/maypok86/otter/v2` | v2.4.0 | Apache-2.0 | https://pkg.go.dev/github.com/maypok86/otter/v2@v2.4.0?tab=licenses |
 | `github.com/mitchellh/mapstructure` | v1.5.0 | MIT | https://github.com/mitchellh/mapstructure/blob/v1.5.0/LICENSE |
 | `github.com/munnerz/goautoneg` | v0.0.0-20191010083416-a7dc8b61c822 | BSD-3-Clause | https://github.com/munnerz/goautoneg/blob/a7dc8b61c822/LICENSE |
-| `github.com/nats-io/nats.go` | v1.54.0 | Apache-2.0 | https://github.com/nats-io/nats.go/blob/v1.54.0/LICENSE |
+| `github.com/nats-io/nats.go` | v1.55.0 | Apache-2.0 | https://github.com/nats-io/nats.go/blob/v1.55.0/LICENSE |
 | `github.com/nats-io/nkeys` | v0.4.16 | Apache-2.0 | https://github.com/nats-io/nkeys/blob/v0.4.16/LICENSE |
 | `github.com/nats-io/nuid` | v1.0.1 | Apache-2.0 | https://github.com/nats-io/nuid/blob/v1.0.1/LICENSE |
 | `github.com/oklog/ulid` | v1.3.1 | Apache-2.0 | https://github.com/oklog/ulid/blob/v1.3.1/LICENSE |
