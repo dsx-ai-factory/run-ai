@@ -537,7 +537,7 @@ The NVIDIA Run:ai control plane uses an ingress with TLS, so also verify how HAP
     ```bash
     kubectl apply -f haproxy-tls-test.yml
     ```
-4.  Send an HTTP request and check the `location` header in the response. Replace `<IP>` with the IP address you identified, and `<HTTP-PORT>` with the port that clients use for HTTP, for example, the HTTP NodePort (`32080`) or `80` behind a load balancer:
+4.  Send an HTTP request and check the `location` header in the response. Replace `<IP>` with the address that clients use: a node IP address for direct NodePort access, or the load balancer address for LoadBalancer installations. Replace `<HTTP-PORT>` with the port that clients use for HTTP, for example, the HTTP NodePort (`32080`) or `80` behind a load balancer:
 
     ```bash
     curl -sI -H "Host: hello.example.com" http://<IP>:<HTTP-PORT>/
