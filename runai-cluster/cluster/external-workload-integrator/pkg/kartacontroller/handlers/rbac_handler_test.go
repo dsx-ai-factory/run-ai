@@ -7,6 +7,8 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -21,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/apiutil"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -306,7 +309,9 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			created := getClusterRoleOrFail(ctx, k8s, "role-mapped")
 			Expect(created.Rules).ToNot(BeEmpty())
 			Expect(created.Rules[0].Resources).To(ConsistOf("sandboxes", "mice"))
-			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{sandbox, irregular}, created, false, handler.resourceName)).To(BeTrue())
+			names, err := handler.resolveResourceNames([]schema.GroupVersionKind{sandbox, irregular})
+			Expect(err).To(BeNil())
+			Expect(hasGvksRbacInClusterRole([]schema.GroupVersionKind{sandbox, irregular}, created, false, names.of)).To(BeTrue())
 		})
 
 		It("guesses the resource name from the kind when the API server does not know it", func() {
@@ -322,6 +327,100 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 			created := getClusterRoleOrFail(ctx, k8s, "role-guessed")
 			Expect(created.Rules).ToNot(BeEmpty())
 			Expect(created.Rules[0].Resources).To(ConsistOf("sandboxes"))
+		})
+
+		It("guesses the resource name when discovery reports the group as missing, as aggregated discovery does", func() {
+			// given: a CRD that is not installed yet comes back from the lazy REST mapper wrapped in a discovery error
+			discoveryErr := apiutil.ErrResourceDiscoveryFailed{
+				sandbox.GroupVersion(): &meta.NoResourceMatchError{PartialResource: sandbox.GroupVersion().WithResource("")},
+			}
+			mapper := &countingRESTMapper{RESTMapper: meta.NewDefaultRESTMapper(nil), err: &discoveryErr}
+			k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).Build()
+			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, "role-missing-group", "role-missing-group-crud")
+
+			// when
+			err := handler.Handle(ctx, sandbox, nil)
+
+			// then
+			Expect(err).To(BeNil())
+			Expect(getClusterRoleOrFail(ctx, k8s, "role-missing-group").Rules[0].Resources).To(ConsistOf("sandboxes"))
+		})
+
+		It("returns the error instead of guessing when the API server fails to resolve a name", func() {
+			// given: the rule with the real, irregular name exists, and the lookup fails like a discovery timeout
+			mouse := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: "Mouse"}
+			base := meta.NewDefaultRESTMapper(nil)
+			base.AddSpecific(mouse, mouse.GroupVersion().WithResource("mice"),
+				mouse.GroupVersion().WithResource("mouse"), meta.RESTScopeNamespace)
+			mapper := &countingRESTMapper{RESTMapper: base, err: errors.New("discovery timed out")}
+			existing := &rbacv1.ClusterRole{ObjectMeta: objMeta("role-transient"), Rules: []rbacv1.PolicyRule{{
+				APIGroups: []string{"x.run.ai"}, Resources: []string{"mice"}, Verbs: []string{"get", "list", "watch"}}}}
+			k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).WithObjects(existing).Build()
+			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, existing.Name, "")
+
+			// when
+			err := handler.Handle(ctx, mouse, nil)
+
+			// then: no rule is written with the guessed name "mouses", and the reconcile is retried
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("failed to resolve the resource name of <x.run.ai/v1, Kind=Mouse>"))
+			Expect(getClusterRoleOrFail(ctx, k8s, existing.Name).Rules).To(HaveLen(1))
+
+			// when the lookup works again
+			mapper.err = nil
+			err = handler.Handle(ctx, mouse, nil)
+
+			// then the existing rule is found and nothing is added
+			Expect(err).To(BeNil())
+			Expect(getClusterRoleOrFail(ctx, k8s, existing.Name).Rules).To(HaveLen(1))
+		})
+
+		It("resolves each resource name once, however many rules the cluster roles hold", func() {
+			// given: cluster roles with many unrelated rules, so that matching has to visit every one of them
+			irregular := schema.GroupVersionKind{Group: "x.run.ai", Version: "v1", Kind: "Mouse"}
+			base := meta.NewDefaultRESTMapper(nil)
+			base.AddSpecific(sandbox, sandbox.GroupVersion().WithResource("sandboxes"),
+				sandbox.GroupVersion().WithResource("sandbox"), meta.RESTScopeNamespace)
+			base.AddSpecific(irregular, irregular.GroupVersion().WithResource("mice"),
+				irregular.GroupVersion().WithResource("mouse"), meta.RESTScopeNamespace)
+			mapper := &countingRESTMapper{RESTMapper: base}
+			unrelatedRules := func(verbs []string) []rbacv1.PolicyRule {
+				rules := []rbacv1.PolicyRule{}
+				for i := 0; i < 10; i++ {
+					rules = append(rules, rbacv1.PolicyRule{
+						APIGroups: []string{"other.run.ai"}, Resources: []string{fmt.Sprintf("things%d", i)}, Verbs: verbs})
+				}
+				return rules
+			}
+			read := &rbacv1.ClusterRole{ObjectMeta: objMeta("role-once-read"),
+				Rules: unrelatedRules([]string{"get", "list", "watch"})}
+			crud := &rbacv1.ClusterRole{ObjectMeta: objMeta("role-once-crud"),
+				Rules: unrelatedRules([]string{"get", "list", "watch", "create", "update", "patch", "delete"})}
+			k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).WithObjects(read, crud).Build()
+			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, read.Name, crud.Name)
+
+			// when
+			err := handler.Handle(ctx, sandbox, []schema.GroupVersionKind{irregular})
+
+			// then: one lookup for each of the two kinds, not one for every rule and cluster role
+			Expect(err).To(BeNil())
+			Expect(mapper.calls).To(Equal(2))
+		})
+
+		It("still removes the rules on deletion when the API server fails to resolve a name", func() {
+			// given: a rule written with the guessed name, and a lookup that fails like a discovery timeout
+			mapper := &countingRESTMapper{RESTMapper: meta.NewDefaultRESTMapper(nil), err: errors.New("discovery timed out")}
+			read := &rbacv1.ClusterRole{ObjectMeta: objMeta("role-del-failing"), Rules: []rbacv1.PolicyRule{{
+				APIGroups: []string{"agents.x-k8s.io"}, Resources: []string{"sandboxes"}, Verbs: []string{"get", "list", "watch"}}}}
+			k8s := fake.NewClientBuilder().WithScheme(scheme).WithRESTMapper(mapper).WithObjects(read).Build()
+			handler := NewKartaRBACHandler(k8s, fakeCachedClient, true, read.Name, "")
+
+			// when
+			err := handler.HandleDeletion(ctx, sandbox, nil)
+
+			// then: deletion does not wait for the API server
+			Expect(err).To(BeNil())
+			Expect(getClusterRoleOrFail(ctx, k8s, read.Name).Rules).To(BeEmpty())
 		})
 
 		It("removes the rule for the resource name served by the API server", func() {
@@ -474,6 +573,21 @@ var _ = Describe("KartaRBACHandler", Ordered, func() {
 })
 
 // helpers
+// countingRESTMapper counts the lookups of a REST mapper, and can fail them like a discovery timeout.
+type countingRESTMapper struct {
+	meta.RESTMapper
+	err   error
+	calls int
+}
+
+func (m *countingRESTMapper) RESTMapping(gk schema.GroupKind, versions ...string) (*meta.RESTMapping, error) {
+	m.calls++
+	if m.err != nil {
+		return nil, m.err
+	}
+	return m.RESTMapper.RESTMapping(gk, versions...)
+}
+
 func newFakeClientWithObjects(s *runtime.Scheme, objs ...client.Object) client.Client {
 	return fake.NewClientBuilder().WithScheme(s).WithObjects(objs...).Build()
 }

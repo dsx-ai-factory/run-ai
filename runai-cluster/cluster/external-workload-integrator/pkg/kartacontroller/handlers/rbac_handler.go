@@ -18,6 +18,7 @@ import (
 
 	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -51,14 +52,20 @@ func NewKartaRBACHandler(client client.Client,
 
 func (h *KartaRBACHandler) Handle(ctx context.Context, gvk schema.GroupVersionKind, additionalGvks []schema.GroupVersionKind) error {
 	allGvks := append([]schema.GroupVersionKind{gvk}, additionalGvks...)
+
+	names, resolveErr := h.resolveResourceNames(allGvks)
+	if resolveErr != nil {
+		return resolveErr
+	}
+
 	var err error
 
-	innerErr := h.handleClusterRole(ctx, allGvks, h.ClusterRoleReadName, false)
+	innerErr := h.handleClusterRole(ctx, allGvks, names, h.ClusterRoleReadName, false)
 	if innerErr != nil {
 		err = multierror.Append(err, innerErr)
 	}
 
-	innerErr = h.handleClusterRole(ctx, allGvks, h.ClusterRoleCrudName, true)
+	innerErr = h.handleClusterRole(ctx, allGvks, names, h.ClusterRoleCrudName, true)
 	if innerErr != nil {
 		err = multierror.Append(err, innerErr)
 	}
@@ -102,7 +109,7 @@ func (h *KartaRBACHandler) HandleDeletion(ctx context.Context, gvk schema.GroupV
 	return nil
 }
 
-func (h *KartaRBACHandler) handleClusterRole(ctx context.Context, gvks []schema.GroupVersionKind, clusterRoleName string, crudRole bool) error {
+func (h *KartaRBACHandler) handleClusterRole(ctx context.Context, gvks []schema.GroupVersionKind, names resourceNames, clusterRoleName string, crudRole bool) error {
 	if len(gvks) == 0 {
 		return nil
 	}
@@ -121,7 +128,7 @@ func (h *KartaRBACHandler) handleClusterRole(ctx context.Context, gvks []schema.
 	if err != nil && !errors.IsNotFound(err) {
 		return fmt.Errorf("failed to get cluster role '%s': %w", clusterRoleName, err)
 	}
-	if err == nil && cr != nil && hasGvksRbacInClusterRole(gvks, cr, crudRole, h.resourceName) {
+	if err == nil && cr != nil && hasGvksRbacInClusterRole(gvks, cr, crudRole, names.of) {
 		log.Debug().Msgf("%s permissions RBAC for %s (and %d additional gvks) already exist in cluster role '%s'",
 			permissionsMsg, gvks[0].String(), len(gvks)-1, clusterRoleName)
 		return nil
@@ -140,7 +147,7 @@ func (h *KartaRBACHandler) handleClusterRole(ctx context.Context, gvks []schema.
 		}
 	}
 
-	err = h.addRuleToClusterRole(ctx, cr, gvks, crudRole, permissionsMsg)
+	err = h.addRuleToClusterRole(ctx, cr, gvks, names, crudRole, permissionsMsg)
 	if err != nil {
 		return err
 	}
@@ -150,7 +157,7 @@ func (h *KartaRBACHandler) handleClusterRole(ctx context.Context, gvks []schema.
 	return nil
 }
 
-func (h *KartaRBACHandler) addRuleToClusterRole(ctx context.Context, cr *rbacv1.ClusterRole, gvks []schema.GroupVersionKind, crudRole bool, permissionsMsg string) error {
+func (h *KartaRBACHandler) addRuleToClusterRole(ctx context.Context, cr *rbacv1.ClusterRole, gvks []schema.GroupVersionKind, names resourceNames, crudRole bool, permissionsMsg string) error {
 	verbs := []string{"get", "list", "watch"}
 	if crudRole {
 		verbs = append(verbs, "create", "update", "delete", "patch")
@@ -159,7 +166,7 @@ func (h *KartaRBACHandler) addRuleToClusterRole(ctx context.Context, cr *rbacv1.
 	resources := []string{}
 	for _, gvk := range gvks {
 		groups.Add(gvk.Group)
-		resources = append(resources, h.resourceName(gvk))
+		resources = append(resources, names.of(gvk))
 	}
 
 	apiGroups := []string{}
@@ -301,7 +308,12 @@ func (h *KartaRBACHandler) removalTargets(gvks []schema.GroupVersionKind) []remo
 	targets := make([]removalTarget, 0, len(gvks))
 	for _, gvk := range gvks {
 		target := removalTarget{gvk: gvk}
-		if served, ok := h.servedResourceName(gvk); ok {
+		served, ok, err := h.servedResourceName(gvk)
+		if err != nil {
+			// deletion does not wait for the API server: the guessed names below still match the rules
+			log.Warn().Msgf("%v, matching the rules of <%s> by its guessed names", err, gvk.String())
+		}
+		if ok {
 			target.names = append(target.names, served)
 			target.served = true
 		}
@@ -460,29 +472,56 @@ func HasAllVerbs(rule rbacv1.PolicyRule, hasCrud bool) bool {
 	return foundGet && foundList && foundWatch
 }
 
-// resourceName returns the resource name the API server serves for the GVK, which is what RBAC rules must
-// reference. The plural of a Kind is defined by its CRD and is not always Kind + "s" (for example Sandbox
-// is served as "sandboxes"), so it is read from the REST mapper. It falls back to guessing from the Kind
-// when the mapping is not available, for example when the CRD is installed after the type is registered.
-func (h *KartaRBACHandler) resourceName(gvk schema.GroupVersionKind) string {
-	if served, ok := h.servedResourceName(gvk); ok {
-		return served
+// resourceNames holds the resource name that RBAC rules use for each GVK of one Handle call.
+type resourceNames map[schema.GroupVersionKind]string
+
+func (n resourceNames) of(gvk schema.GroupVersionKind) string { return n[gvk] }
+
+// resolveResourceNames returns the resource name of each GVK, which is what RBAC rules must reference. The plural of
+// a Kind is defined by its CRD and is not always Kind + "s" (for example Sandbox is served as "sandboxes"), so it is
+// read from the REST mapper, once per GVK. A GVK that the API server does not know yet, for example because its CRD
+// is installed after the type is registered, gets a name guessed from its Kind. Any other failure of the REST mapper,
+// such as a discovery timeout, is returned so that the reconcile is retried: a guess written during such a failure
+// can be wrong, and nothing would correct it.
+func (h *KartaRBACHandler) resolveResourceNames(gvks []schema.GroupVersionKind) (resourceNames, error) {
+	names := make(resourceNames, len(gvks))
+	var err error
+	for _, gvk := range gvks {
+		if _, resolved := names[gvk]; resolved {
+			continue
+		}
+		served, ok, resolveErr := h.servedResourceName(gvk)
+		if resolveErr != nil {
+			err = multierror.Append(err, resolveErr)
+			continue
+		}
+		if !ok {
+			log.Warn().Msgf("Could not resolve the resource name of <%s> from the API server, guessing it from the kind", gvk.String())
+			served = resourceNameFromGVK(gvk)
+		}
+		names[gvk] = served
 	}
-	log.Warn().Msgf("Could not resolve the resource name of <%s> from the API server, guessing it from the kind", gvk.String())
-	return resourceNameFromGVK(gvk)
+	if err != nil {
+		return nil, err
+	}
+	return names, nil
 }
 
-// servedResourceName returns the resource name the API server serves for the GVK, if it can be resolved.
-func (h *KartaRBACHandler) servedResourceName(gvk schema.GroupVersionKind) (string, bool) {
+// servedResourceName returns the resource name the API server serves for the GVK. The bool is false, without an
+// error, when the API server does not know the GVK. Any other failure of the REST mapper is returned.
+func (h *KartaRBACHandler) servedResourceName(gvk schema.GroupVersionKind) (string, bool, error) {
 	mapper := h.Client.RESTMapper()
 	if mapper == nil {
-		return "", false
+		return "", false, nil
 	}
 	mapping, err := mapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-	if err != nil {
-		return "", false
+	if meta.IsNoMatchError(err) {
+		return "", false, nil
 	}
-	return mapping.Resource.Resource, true
+	if err != nil {
+		return "", false, fmt.Errorf("failed to resolve the resource name of <%s> from the API server: %w", gvk.String(), err)
+	}
+	return mapping.Resource.Resource, true, nil
 }
 
 // resourceNameFromGVK guesses the plural resource name of a Kind using the usual English rules. It is only a
