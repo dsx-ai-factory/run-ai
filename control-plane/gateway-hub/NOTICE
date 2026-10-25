@@ -117,7 +117,7 @@ Dependencies
 | `google.golang.org/grpc` | v1.84.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.84.0?tab=licenses |
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
 | `gorm.io/gorm` | v1.31.2 | MIT | https://pkg.go.dev/gorm.io/gorm@v1.31.2?tab=licenses |
-| `k8s.io/utils/ptr` | v0.0.0-20260707023825-cf1189d6abe3 | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20260707023825-cf1189d6abe3?tab=licenses |
+| `k8s.io/utils/ptr` | v0.0.0-20261023123148-ca04ba58ecab | Apache-2.0 | https://pkg.go.dev/k8s.io/utils@v0.0.0-20261023123148-ca04ba58ecab?tab=licenses |
 
 ================================================================================
 License texts
