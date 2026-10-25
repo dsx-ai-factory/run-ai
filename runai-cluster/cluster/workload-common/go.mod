@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/NVIDIA/k8s-dra-driver-gpu v0.0.0-20250516142240-dc61b93a9b0a

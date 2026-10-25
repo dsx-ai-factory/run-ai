@@ -1,6 +1,6 @@
 module github.com/ory/go-acc
 
-go 1.26.8
+go 1.27.3
 
 require (
 	github.com/magiconair/properties v1.8.1

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra
 
-go 1.26.8
+go 1.27.3
 
 require (
 	k8s.io/api v0.35.4

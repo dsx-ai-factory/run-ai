@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect

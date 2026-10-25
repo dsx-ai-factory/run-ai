@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/NVIDIA/k8s-nim-operator v1.0.0

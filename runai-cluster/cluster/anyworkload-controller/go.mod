@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller
 
-go 1.27.2
+go 1.27.3
 
 require (
 	cel.dev/expr v0.25.2 // indirect
