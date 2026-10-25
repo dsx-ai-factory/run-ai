@@ -8,6 +8,7 @@ package resources
 import (
 	"fmt"
 
+	runutils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/admissionpolicy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
@@ -45,13 +46,16 @@ func PodOwnershipPolicyDefinition(runaiConfig *runv1.RunaiConfig) admissionpolic
 			ObjectMeta: metav1.ObjectMeta{Name: policyName, Labels: labels},
 			Spec: admissionv1.ValidatingAdmissionPolicySpec{
 				FailurePolicy: ptr.To(admissionv1.Fail),
-				MatchConstraints: &admissionv1.MatchResources{ResourceRules: []admissionv1.NamedRuleWithOperations{{
-					RuleWithOperations: admissionv1.RuleWithOperations{
-						Operations: []admissionv1.OperationType{admissionv1.Update},
-						Rule: admissionv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"},
-							Resources: []string{"pods", "pods/*"}, Scope: ptr.To(admissionv1.NamespacedScope)},
-					},
-				}}},
+				MatchConstraints: &admissionv1.MatchResources{
+					// Match EWI's managed-namespace boundary.
+					NamespaceSelector: runutils.NamespaceSelectorRunaiQueue(),
+					ResourceRules: []admissionv1.NamedRuleWithOperations{{
+						RuleWithOperations: admissionv1.RuleWithOperations{
+							Operations: []admissionv1.OperationType{admissionv1.Update},
+							Rule: admissionv1.Rule{APIGroups: []string{""}, APIVersions: []string{"v1"},
+								Resources: []string{"pods", "pods/*"}, Scope: ptr.To(admissionv1.NamespacedScope)},
+						},
+					}}},
 				Variables:   []admissionv1.Variable{{Name: "ewiUsername", Expression: fmt.Sprintf("'%s'", ewiUsername)}},
 				Validations: validations,
 			},

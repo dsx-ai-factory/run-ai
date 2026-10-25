@@ -31,6 +31,9 @@ func TestPodOwnershipPolicyDefinition(t *testing.T) {
 	assert.Equal(t, admissionv1.Fail, *d.Policy.Spec.FailurePolicy)
 	assert.Equal(t, []admissionv1.ValidationAction{admissionv1.Audit}, d.Binding.Spec.ValidationActions)
 	require.Len(t, d.Policy.Spec.MatchConstraints.ResourceRules, 1)
+	assert.Equal(t, &metav1.LabelSelector{MatchExpressions: []metav1.LabelSelectorRequirement{
+		{Key: "runai/queue", Operator: metav1.LabelSelectorOpExists},
+	}}, d.Policy.Spec.MatchConstraints.NamespaceSelector)
 	rule := d.Policy.Spec.MatchConstraints.ResourceRules[0]
 	assert.Equal(t, []admissionv1.OperationType{admissionv1.Update}, rule.Operations)
 	assert.Equal(t, []string{""}, rule.APIGroups)
