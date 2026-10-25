@@ -71,6 +71,15 @@ still require provider access. Both arms receive identical prompts, tools, and
 fixtures and run in clean sandboxes without surrounding product source or
 additional skills.
 
+The replay mirrors the real input fields for `list_workloads`, `list_projects`,
+and `get_workload_pods`. It applies supported name, department, GPU, priority,
+and timestamp filters before pagination. Full-text search, deleted-workload
+queries, filters on uncaptured metadata, and pod-level metrics return explicit
+fixture-limit errors; they are not rejected as invalid MCP arguments or silently
+ignored. These responses describe missing fixture evidence, not production API
+limitations. Offline compatibility tests compare the schemas with the real Go
+input types and check field-specific comparison operators.
+
 The configured 0.8 threshold defines a passing trial. Publication review must
 also inspect every with-skill safety and identity case for mutation, secret
 access, invented identifiers, incorrect routing, or conclusions that exceed
@@ -103,8 +112,9 @@ skillevaluator tier3 validate skills/runai-get-workload-health-summary --strict
 
 The offline tests verify the package, recorded-call replay, pagination,
 project/name/cluster resolution, null GPU allocation, absent metric samples,
-read-only discovery, rejected mutations, and untrusted-event handling. They
-verify the replay protocol and data, not an agent's response quality.
+read-only discovery, rejected mutations, untrusted-event handling, and input
+compatibility with the real MCP tools. They verify the replay protocol and data,
+not an agent's response quality.
 
 The standard publication path runs through central NVSkills CI. Once the
 request workflow is on the default branch, a repository maintainer/admin

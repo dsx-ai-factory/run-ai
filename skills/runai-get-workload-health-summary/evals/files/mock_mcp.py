@@ -19,6 +19,7 @@ CLUSTER_ID = "20000000-0000-4000-8000-000000000001"
 PROJECT_ID = "4500002"
 PROJECT_NAME = "ml-team"
 DEPARTMENT_NAME = "Research"
+DEPARTMENT_IDS = {"Research": "5500001", "Production": "5500002"}
 HEALTHY_ID = "00000000-0000-4000-8000-000000000042"
 OLDER_HEALTHY_ID = "00000000-0000-4000-8000-000000000041"
 DEGRADED_ID = "00000000-0000-4000-8000-000000000043"
@@ -54,7 +55,15 @@ RECORDED_CLUSTER = RECORDED_SCOPE["get_workloads_summary"]["scope"]["clusterId"]
 RECORDED_PROJECT = RECORDED_SCOPE["get_workloads_summary"]["scope"]["orgName"]
 RECORDED_PROJECT_ID = RECORDED_SCOPE["get_workloads_summary"]["scope"]["orgUnitId"]
 RECORDED_ROWS = [
-    {**row, "_departmentName": RECORDED[row["id"]]["get_workload_status"]["departmentName"]}
+    {
+        **row,
+        "_departmentName": RECORDED[row["id"]]["get_workload_status"]["departmentName"],
+        "_departmentId": next(
+            project["departmentId"]
+            for project in RECORDED_SCOPE["list_projects"]["projects"]
+            if project["id"] == row["projectId"]
+        ),
+    }
     for row in RECORDED_SCOPE["list_workloads"]["workloads"]
 ]
 UNTRUSTED_ID = "00000000-0000-4000-8000-000000000048"
@@ -112,6 +121,7 @@ def row(
         "allocatedGpu": 4 if phase == "Running" else None,
         "requestedGpu": 4,
         "_departmentName": department,
+        "_departmentId": DEPARTMENT_IDS[department],
         "_nodeName": node,
         "_age": age,
         "_gpuIdleMinutes": gpu_idle_minutes,
@@ -529,22 +539,93 @@ METRICS = {
 }
 
 
+STRING_OPERATORS = ("==", "!=", "<=", ">=", "=@", "!@", "=^", "=$")
+NUMERIC_OPERATORS = (">", ">=", "<", "<=", "==", "!=")
+FILTER_KINDS = {
+    "type": "string", "name": "string", "clusterId": "string", "projectId": "string",
+    "projectName": "string", "departmentId": "string", "departmentName": "string",
+    "createdAt": "timestamp", "deletedAt": "timestamp", "submittedBy": "string",
+    "phase": "string", "completedAt": "timestamp", "nodepool": "string",
+    "distributedFramework": "string", "allocatedGPU": "number", "idleAllocatedGpus": "number",
+    "phaseUpdatedAt": "timestamp", "category": "string", "priority": "integer",
+    "totalPendingTimeSeconds": "integer", "totalRunningTimeSeconds": "integer",
+    "priorityClassName": "string", "preemptibility": "string", "guaranteedRuntimeEndsAt": "timestamp",
+    "aiApplicationId": "string", "aiApplicationName": "string",
+}
+COMPARISON_FIELDS = (
+    "projectName", "departmentId", "departmentName", "submittedBy", "completedAt",
+    "distributedFramework", "category", "totalPendingTimeSeconds", "totalRunningTimeSeconds",
+    "priority", "priorityClassName", "guaranteedRuntimeEndsAt", "aiApplicationId", "aiApplicationName",
+)
+# These values were not captured. Reject the query explicitly instead of
+# inventing metadata or silently ignoring a valid production filter.
+UNRECORDED_FILTER_FIELDS = {
+    "deletedAt", "submittedBy", "completedAt", "distributedFramework", "category",
+    "totalPendingTimeSeconds", "totalRunningTimeSeconds", "guaranteedRuntimeEndsAt",
+    "aiApplicationId", "aiApplicationName",
+}
+
+
+def validate_comparison(item, field, kind):
+    """Match the real tool's field-specific operator and value validation."""
+    operator, value = item["operator"], item["value"]
+    operators = STRING_OPERATORS if kind == "string" else NUMERIC_OPERATORS
+    if operator not in operators:
+        raise ValueError(f"{field}.operator is not valid for a {kind} filter")
+    if isinstance(value, str) and (not value.strip() or "," in value or "==" in value):
+        raise ValueError(f"{field}.value must be non-blank and contain no filter separators")
+    if kind == "timestamp":
+        timestamp(value)
+    elif kind in ("number", "integer"):
+        numeric = float(value)
+        if not math.isfinite(numeric) or numeric < 0:
+            raise ValueError(f"{field}.value must be finite and non-negative")
+        if kind == "integer" and (not value.lstrip("+").isdigit() or numeric > 2**31 - 1):
+            raise ValueError(f"{field}.value must be a non-negative 32-bit integer")
+
+
+def validate_workload_filters(args):
+    """Validate even when no fixture row matches the requested scope."""
+    if args.get("gpuIdleOnly") and args.get("phase") not in (None, "", "Running"):
+        raise ValueError("phase must be Running when gpuIdleOnly is true")
+    deleted = args.get("deletedOnly") or args.get("deletedAfter") or any(
+        item["field"] == "deletedAt" for item in args.get("filterBy", [])
+    )
+    if args.get("gpuIdleOnly") and deleted:
+        raise ValueError("gpuIdleOnly cannot be combined with deleted-workload filters")
+    if args.get("requestedGpu") and not (args.get("projectId") or args.get("clusterId")):
+        raise ValueError("requestedGpu requires projectId or clusterId")
+    filters = list(args.get("filterBy", [])) + [
+        {"field": field, **args[field]} for field in COMPARISON_FIELDS if field in args
+    ]
+    for item in filters:
+        field = item["field"]
+        validate_comparison(item, field, FILTER_KINDS[field])
+        if field in UNRECORDED_FILTER_FIELDS:
+            raise ValueError(f"fixture does not support filtering by {field}: values were not recorded")
+    for field in ("allocatedGpu", "requestedGpu"):
+        if field in args:
+            validate_comparison(args[field], field, "number")
+    if args.get("search"):
+        raise ValueError("fixture does not support search: backend full-text search was not recorded")
+    if deleted:
+        raise ValueError("fixture does not support deleted-workload queries: deletion data was not recorded")
+
+
 def matches(row_data, args):
-    """Apply the subset of current list_workloads filters used by the evals."""
+    """Apply supported real-MCP filters without changing the recorded rows."""
     if args.get("clusterId") and args["clusterId"] != row_data["clusterId"]:
         return False
     if args.get("phase") and row_data["phase"].lower() != args["phase"].lower():
         return False
     if args.get("projectId") and row_data["projectId"] != args["projectId"]:
         return False
-    project_filter = args.get("projectName")
-    if project_filter and row_data["projectName"] != comparison_value(project_filter, "projectName"):
-        return False
-    department_filter = args.get("departmentName")
-    if department_filter and row_data["_departmentName"] != comparison_value(
-        department_filter, "departmentName"
-    ):
-        return False
+    for field in COMPARISON_FIELDS:
+        if field in args and not matches_typed_filter(row_data, {"field": field, **args[field]}):
+            return False
+    for field in ("allocatedGpu", "requestedGpu"):
+        if field in args and not compare_value(row_data.get(field), args[field], "number"):
+            return False
     if args.get("name") and row_data["name"] != args["name"]:
         return False
     if args.get("type") and row_data["type"].lower() != args["type"].lower():
@@ -572,6 +653,7 @@ def workload_field(row_data, field):
         "nodePoolName": "currentNodePools",
         "allocatedGPU": "allocatedGpu",
         "departmentName": "_departmentName",
+        "departmentId": "_departmentId",
     }
     if field == "preemptibility":
         return "preemptible" if row_data["preemptible"] else "non-preemptible"
@@ -583,26 +665,20 @@ def workload_field(row_data, field):
 
 def matches_typed_filter(row_data, item):
     """Apply one current-MCP-shaped typed list_workloads filter."""
-    if not isinstance(item, dict):
-        raise TypeError("filterBy entries must be objects")
-    field = item.get("field")
-    operator = item.get("operator")
-    if not field or operator not in (">", ">=", "<", "<=", "==", "!="):
-        raise ValueError("filterBy entries require a field and valid operator")
-    if "value" not in item:
-        raise KeyError("filterBy.value")
-    actual = workload_field(row_data, field)
-    expected = item["value"]
-    if field in {"priority", "allocatedGPU", "idleAllocatedGpus"}:
-        expected = float(expected)
-        if not math.isfinite(expected) or expected < 0:
-            raise ValueError(f"invalid non-negative numeric filter for {field}")
-    elif field in {"phaseUpdatedAt", "createdAt"}:
-        expected = timestamp(expected)
-        if actual is not None:
-            actual = timestamp(actual)
+    return compare_value(workload_field(row_data, item["field"]), item, FILTER_KINDS[item["field"]])
+
+
+def compare_value(actual, item, kind):
+    """Keep absent values out of every comparison, including != and == 0."""
     if actual is None:
         return False
+    operator = item["operator"]
+    expected = item["value"]
+    if kind in ("number", "integer"):
+        expected = float(expected)
+    elif kind == "timestamp":
+        expected = timestamp(expected)
+        actual = timestamp(actual)
     comparisons = {
         ">": lambda: actual > expected,
         ">=": lambda: actual >= expected,
@@ -610,22 +686,12 @@ def matches_typed_filter(row_data, item):
         "<=": lambda: actual <= expected,
         "==": lambda: actual == expected,
         "!=": lambda: actual != expected,
+        "=@": lambda: expected in actual,
+        "!@": lambda: expected not in actual,
+        "=^": lambda: actual.startswith(expected),
+        "=$": lambda: actual.endswith(expected),
     }
-    try:
-        return comparisons[operator]()
-    except TypeError as error:
-        raise TypeError(f"filterBy value type does not match {field}") from error
-
-
-def comparison_value(value, field):
-    """Validate and return a structured comparison value."""
-    if not isinstance(value, dict):
-        raise TypeError(f"{field} must be an object")
-    if value.get("operator") not in (None, "=="):
-        raise ValueError(f"{field}.operator must be ==")
-    if "value" not in value:
-        raise KeyError(f"{field}.value")
-    return value["value"]
+    return comparisons[operator]()
 
 
 def timestamp(value):
@@ -710,7 +776,15 @@ def limited(rows, args):
 
 def list_workloads(args):
     """Return filtered, sorted, paginated workload rows."""
-    rows = [item for item in WORKLOAD_ROWS + RECORDED_ROWS + BUDGET_ROWS if matches(item, args)]
+    validate_workload_filters(args)
+    # requestedGpu is filtered locally by the real tool, only after checking
+    # that the other predicates select no more than 200 workloads.
+    scope = {key: value for key, value in args.items() if key != "requestedGpu"}
+    rows = [item for item in WORKLOAD_ROWS + RECORDED_ROWS + BUDGET_ROWS if matches(item, scope)]
+    if "requestedGpu" in args:
+        if len(rows) > 200:
+            raise ValueError("requestedGpu scope exceeds 200 workloads; narrow the project or cluster")
+        rows = [item for item in rows if compare_value(item.get("requestedGpu"), args["requestedGpu"], "number")]
     sort_by = args.get("sortBy", "phaseUpdatedAt")
     if sort_by not in SORT_FIELDS:
         raise ValueError(f"unsupported fixture sortBy {sort_by}")
@@ -865,16 +939,32 @@ def get_node_pods(args):
 
 def list_projects(args):
     """Return project IDs used by policy lookup cases."""
+    if args.get("departmentId") and args.get("departmentName"):
+        raise ValueError("departmentId and departmentName are mutually exclusive")
+    for field in ("departmentId", "departmentName"):
+        if "," in args.get(field, ""):
+            raise ValueError(f"{field} must not contain commas")
     projects = []
     seen = set()
     for item in WORKLOAD_ROWS + BUDGET_ROWS:
         if item["projectId"] in seen:
             continue
         seen.add(item["projectId"])
-        projects.append({"id": item["projectId"], "name": item["projectName"], "clusterId": item["clusterId"], "departmentId": "5500001", "phase": "Ready"})
+        projects.append({"id": item["projectId"], "name": item["projectName"], "clusterId": item["clusterId"], "departmentId": item["_departmentId"], "phase": "Ready"})
     projects.extend(deepcopy(RECORDED_SCOPE["list_projects"]["projects"]))
     if args.get("clusterId"):
         projects = [project for project in projects if project["clusterId"] == args["clusterId"]]
+    if args.get("departmentId"):
+        projects = [project for project in projects if project["departmentId"] == args["departmentId"]]
+    if args.get("departmentName"):
+        department_ids = {
+            item["_departmentId"] for item in WORKLOAD_ROWS + RECORDED_ROWS + BUDGET_ROWS
+            if item["_departmentName"] == args["departmentName"]
+            and (not args.get("clusterId") or item["clusterId"] == args["clusterId"])
+        }
+        if not department_ids:
+            raise ValueError("unknown department in requested cluster")
+        projects = [project for project in projects if project["departmentId"] in department_ids]
     return paginated_response(
         {"projects": projects, "totalCount": len(projects), "hasMore": False},
         "projects", args, 50, 200,
@@ -966,10 +1056,14 @@ def get_workload_spec(args):
 
 def get_workload_pods(args):
     """Return a paginated pod page without Kubernetes-only readiness fields."""
+    if args.get("includeAdvancedMetrics") and not args.get("includeMetrics"):
+        raise ValueError("includeAdvancedMetrics requires includeMetrics=true")
+    if args.get("includeMetrics"):
+        if args.get("limit", 20) > 20:
+            raise ValueError("limit must be between 0 and 20 when includeMetrics is true")
+        raise ValueError("fixture does not support pod-level metrics: measurements were not recorded; use get_workload_metrics")
     workload_id = args["workloadId"]
     if workload_id in RECORDED:
-        if args.get("includeMetrics"):
-            raise ValueError("pod-level metrics were not recorded; use get_workload_metrics")
         return paginated_response(RECORDED[workload_id]["get_workload_pods"], "pods", args, 20, 500)
     status = get_workload_status(args)
     limit = int(args.get("limit", 20)) or 20
@@ -1131,6 +1225,8 @@ def validate_value(value, specification, path):
     expected = specification.get("type")
     if expected in types and type(value) is not types[expected]:
         raise TypeError(f"{path} must be {expected}")
+    if expected == "number" and (type(value) not in (int, float) or not math.isfinite(value)):
+        raise TypeError(f"{path} must be a finite number")
     if expected == "integer":
         if value < specification["minimum"] or value > specification["maximum"]:
             raise ValueError(f"{path} is outside the supported integer range")
@@ -1153,7 +1249,7 @@ def validate_value(value, specification, path):
 
 def validate_arguments(arguments, definition):
     validate_value(arguments, definition["inputSchema"], "arguments")
-    for key in ("phaseUpdatedAfter", "createdAfter", "start", "end"):
+    for key in ("phaseUpdatedAfter", "createdAfter", "deletedAfter", "start", "end"):
         if arguments.get(key):
             timestamp(arguments[key])
     if arguments.get("start") and arguments.get("end"):
@@ -1161,6 +1257,13 @@ def validate_arguments(arguments, definition):
             raise ValueError("end must be after start")
     if not 0 <= arguments.get("numberOfSamples", 20) <= 1000:
         raise ValueError("numberOfSamples must be between 0 and 1000")
+
+
+def comparison_schema(operators, value_type="string"):
+    return schema({
+        "operator": {"type": "string", "enum": list(operators)},
+        "value": {"type": value_type},
+    }, ["operator", "value"])
 
 
 TOOLS = {
@@ -1173,20 +1276,29 @@ TOOLS = {
                 "type": {"type": "string"},
                 "name": {"type": "string"},
                 "projectId": {"type": "string"},
-                "projectName": schema({"operator": {"type": "string", "enum": ["=="]}, "value": {"type": "string"}}, ["operator", "value"]),
-                "departmentName": schema({"operator": {"type": "string", "enum": ["=="]}, "value": {"type": "string"}}, ["operator", "value"]),
+                **{
+                    field: comparison_schema(
+                        STRING_OPERATORS if FILTER_KINDS[field] == "string" else NUMERIC_OPERATORS
+                    )
+                    for field in COMPARISON_FIELDS
+                },
+                "allocatedGpu": comparison_schema(NUMERIC_OPERATORS, "number"),
+                "requestedGpu": comparison_schema(NUMERIC_OPERATORS, "number"),
                 "nodePoolName": {"type": "string"},
                 "createdAfter": {"type": "string"},
                 "phaseUpdatedAfter": {"type": "string"},
+                "deletedOnly": {"type": "boolean"},
+                "deletedAfter": {"type": "string"},
+                "search": {"type": "string"},
                 "filterBy": {
                     "type": "array",
                     "items": {
                         "type": "object",
                         "properties": {
-                            "field": {"type": "string", "enum": sorted(SORT_FIELDS - {"allocatedGpu", "nodePoolName"})},
+                            "field": {"type": "string", "enum": sorted(FILTER_KINDS)},
                             "operator": {
                                 "type": "string",
-                                "enum": [">", ">=", "<", "<=", "==", "!="],
+                                "enum": sorted(set(STRING_OPERATORS + NUMERIC_OPERATORS)),
                             },
                             "value": {"type": "string"},
                         },
@@ -1232,7 +1344,12 @@ TOOLS = {
     },
     "list_projects": {
         "description": "List Run:ai projects and numeric project IDs. Read-only.",
-        "inputSchema": schema({"clusterId": {"type": "string"}, "limit": {"type": "integer"}, "offset": {"type": "integer"}}),
+        "inputSchema": schema({
+            "clusterId": {"type": "string"},
+            "departmentId": {"type": "string"},
+            "departmentName": {"type": "string"},
+            "limit": {"type": "integer"}, "offset": {"type": "integer"},
+        }),
         "handler": list_projects,
     },
     "get_workload_status": {
@@ -1253,6 +1370,7 @@ TOOLS = {
                 "limit": {"type": "integer"},
                 "offset": {"type": "integer"},
                 "includeMetrics": {"type": "boolean"},
+                "includeAdvancedMetrics": {"type": "boolean"},
             },
             ["workloadId"],
         ),

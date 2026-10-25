@@ -48,6 +48,51 @@ def payload(response):
 
 
 class PackageTests(unittest.TestCase):
+    def test_mock_input_schemas_match_real_mcp_json_tags_and_types(self):
+        tool_sources = {
+            "list_workloads": ("workloads/list_workloads.go", "listWorkloadsInput"),
+            "list_projects": ("orgunits/list_projects.go", "listProjectsInput"),
+            "get_workload_pods": ("workloads/workload_pods.go", "getWorkloadPodsInput"),
+        }
+        go_types = {
+            "string": "string", "bool": "boolean", "int32": "integer",
+            "*workloadFilterComparison": "object", "*gpuComparison": "object",
+            "[]apiWorkloadFilter": "array",
+        }
+        for name, (source_path, struct_name) in tool_sources.items():
+            source = (REPO / "runai-mcp-server/internal/tools" / source_path).read_text()
+            body = re.search(rf"type {struct_name} struct {{(.*?)\n}}", source, re.S).group(1)
+            fields = re.findall(r'\w+\s+(\S+)\s+`json:"([^",]+)([^\"]*)"', body)
+            schema = mock.TOOLS[name]["inputSchema"]
+            with self.subTest(tool=name):
+                self.assertEqual(set(schema["properties"]), {field for _, field, _ in fields})
+                self.assertEqual(set(schema["required"]), {field for _, field, opts in fields if "omitempty" not in opts})
+            for go_type, field, _ in fields:
+                with self.subTest(tool=name, field=field):
+                    definition = schema["properties"][field]
+                    self.assertEqual(definition["type"], go_types[go_type])
+                    if go_type in ("*gpuComparison", "*workloadFilterComparison"):
+                        self.assertEqual(set(definition["required"]), {"operator", "value"})
+                        value_type = "number" if go_type == "*gpuComparison" else "string"
+                        self.assertEqual(definition["properties"]["value"]["type"], value_type)
+
+    def test_mock_filter_fields_and_operators_match_real_mcp(self):
+        source = (REPO / "runai-mcp-server/internal/tools/workloads/list_workloads.go").read_text()
+        body = re.search(r"var workloadFilterKinds = map\[string\]string{(.*?)\n}", source, re.S).group(1)
+        self.assertEqual(mock.FILTER_KINDS, dict(re.findall(r'"(\w+)":\s*"(\w+)"', body)))
+        operator_maps = re.findall(r'allowed\s*:?= map\[string\]bool{([^}]+)}', source)
+        numeric, string = [{operator for operator in re.findall(r'"([^"]+)": true', body)} for body in operator_maps]
+        self.assertEqual(set(mock.NUMERIC_OPERATORS), numeric)
+        self.assertEqual(set(mock.STRING_OPERATORS), string)
+        properties = mock.TOOLS["list_workloads"]["inputSchema"]["properties"]
+        for field in mock.COMPARISON_FIELDS:
+            expected = string if mock.FILTER_KINDS[field] == "string" else numeric
+            with self.subTest(field=field):
+                self.assertEqual(set(properties[field]["properties"]["operator"]["enum"]), expected)
+        filter_properties = properties["filterBy"]["items"]["properties"]
+        self.assertEqual(set(filter_properties["field"]["enum"]), set(mock.FILTER_KINDS))
+        self.assertEqual(set(filter_properties["operator"]["enum"]), numeric | string)
+
     def test_package_contains_no_generated_bytecode(self):
         self.assertEqual(list(SKILL.rglob("*.pyc")), [])
         self.assertEqual(list(SKILL.rglob("*.pyo")), [])
@@ -89,6 +134,128 @@ class PackageTests(unittest.TestCase):
 
 
 class ReplayTests(unittest.TestCase):
+    def test_name_comparison_operators_work_in_convenience_and_typed_filters(self):
+        rows = [row for row in mock.WORKLOAD_ROWS if row["clusterId"] == mock.CLUSTER_ID]
+        comparisons = [
+            ("==", "ml-team", lambda name: name == "ml-team"),
+            ("!=", "ml-team", lambda name: name != "ml-team"),
+            ("<=", "ml-team", lambda name: name <= "ml-team"),
+            (">=", "ml-team", lambda name: name >= "ml-team"),
+            ("=@", "team", lambda name: "team" in name),
+            ("!@", "team", lambda name: "team" not in name),
+            ("=^", "ml-", lambda name: name.startswith("ml-")),
+            ("=$", "team", lambda name: name.endswith("team")),
+        ]
+        for operator, value, predicate in comparisons:
+            expected = {row["id"] for row in rows if predicate(row["projectName"])}
+            for filters in (
+                {"projectName": {"operator": operator, "value": value}},
+                {"filterBy": [{"field": "projectName", "operator": operator, "value": value}]},
+            ):
+                with self.subTest(operator=operator, filters=filters):
+                    response = exchange([call("list_workloads", {"clusterId": mock.CLUSTER_ID, **filters})])[0]
+                    self.assertNotIn("isError", response["result"])
+                    self.assertEqual({row["id"] for row in payload(response)["workloads"]}, expected)
+
+    def test_department_filters_preserve_project_and_workload_scope(self):
+        projects = payload(exchange([call("list_projects", {
+            "clusterId": mock.CLUSTER_ID, "departmentName": "Production",
+        })])[0])["projects"]
+        self.assertTrue(projects)
+        self.assertTrue(all(project["departmentId"] == mock.DEPARTMENT_IDS["Production"] for project in projects))
+        by_id = payload(exchange([call("list_projects", {
+            "clusterId": mock.CLUSTER_ID, "departmentId": mock.DEPARTMENT_IDS["Production"],
+        })])[0])["projects"]
+        self.assertEqual(projects, by_id)
+        for filters in (
+            {"departmentId": {"operator": "==", "value": mock.DEPARTMENT_IDS["Production"]}},
+            {"departmentName": {"operator": "=@", "value": "Prod"}},
+            {"filterBy": [{"field": "departmentName", "operator": "=^", "value": "Prod"}]},
+        ):
+            with self.subTest(filters=filters):
+                workloads = payload(exchange([call("list_workloads", {
+                    "clusterId": mock.CLUSTER_ID, **filters,
+                })])[0])["workloads"]
+                self.assertTrue(workloads)
+                self.assertEqual({row["projectId"] for row in workloads}, {project["id"] for project in projects})
+
+    def test_gpu_comparisons_exclude_null_allocation_and_preserve_strict_boundaries(self):
+        for field in ("allocatedGpu", "requestedGpu"):
+            for operator, value, expected_ids in (
+                (">", 4, set()),
+                (">=", 4, {row["id"] for row in mock.WORKLOAD_ROWS if row[field] == 4}),
+                ("==", 0, set()),
+                ("!=", 0, {row["id"] for row in mock.WORKLOAD_ROWS if row[field] is not None and row[field] != 0}),
+            ):
+                with self.subTest(field=field, operator=operator):
+                    response = exchange([call("list_workloads", {
+                        "clusterId": mock.CLUSTER_ID,
+                        field: {"operator": operator, "value": value},
+                    })])[0]
+                    self.assertNotIn("isError", response["result"])
+                    self.assertEqual({row["id"] for row in payload(response)["workloads"]}, expected_ids)
+        recorded = payload(exchange([call("list_workloads", {
+            "clusterId": mock.RECORDED_CLUSTER, "allocatedGpu": {"operator": "!=", "value": 0},
+        })])[0])
+        self.assertEqual(recorded["workloads"], [])
+
+    def test_priority_and_priority_class_filters_are_applied_together(self):
+        response = exchange([call("list_workloads", {
+            "clusterId": mock.CLUSTER_ID,
+            "priority": {"operator": ">=", "value": "150"},
+            "priorityClassName": {"operator": "=^", "value": "hi"},
+        })])[0]
+        self.assertEqual([row["id"] for row in payload(response)["workloads"]], [mock.INFERENCE_ID])
+
+    def test_unrecorded_filters_report_fixture_limitations_not_invalid_api_arguments(self):
+        filters = [
+            {"submittedBy": {"operator": "=@", "value": "user"}},
+            {"completedAt": {"operator": ">=", "value": "2026-05-31T00:00:00Z"}},
+            {"search": "train"}, {"deletedOnly": True},
+            {"deletedAfter": "2026-05-31T00:00:00Z"},
+            {"filterBy": [{"field": "category", "operator": "==", "value": "test"}]},
+        ]
+        for arguments in filters:
+            with self.subTest(arguments=arguments):
+                response = exchange([call("list_workloads", {"clusterId": mock.CLUSTER_ID, **arguments})])[0]
+                self.assertTrue(response["result"]["isError"])
+                self.assertIn("fixture does not support", payload(response)["error"])
+                self.assertNotIn("unsupported argument", payload(response)["error"])
+
+    def test_advanced_pod_metrics_are_accepted_but_report_missing_fixture_evidence(self):
+        for workload_id in (mock.HEALTHY_ID, next(iter(mock.RECORDED))):
+            with self.subTest(workload=workload_id):
+                response = exchange([call("get_workload_pods", {
+                    "workloadId": workload_id, "includeMetrics": True, "includeAdvancedMetrics": True,
+                })])[0]
+                self.assertTrue(response["result"]["isError"])
+                self.assertIn("fixture does not support pod-level metrics", payload(response)["error"])
+                response = exchange([call("get_workload_pods", {
+                    "workloadId": workload_id, "includeAdvancedMetrics": False,
+                })])[0]
+                self.assertNotIn("isError", response["result"])
+
+    def test_real_mcp_filter_validation_is_preserved(self):
+        requests = [
+            call("list_workloads", {"projectName": {"operator": ">", "value": "ml-team"}}),
+            call("list_workloads", {"filterBy": [{"field": "priority", "operator": "=@", "value": "150"}]}),
+            call("list_workloads", {"allocatedGpu": {"operator": ">", "value": True}}),
+            call("list_workloads", {"allocatedGpu": {"operator": ">", "value": -1}}),
+            call("list_workloads", {"allocatedGpu": {"operator": ">", "value": float("nan")}}),
+            call("list_workloads", {"priority": {"operator": "==", "value": "1.5"}}),
+            call("list_workloads", {"requestedGpu": {"operator": ">", "value": 0}}),
+            call("list_workloads", {"gpuIdleOnly": True, "phase": "Failed"}),
+            call("list_workloads", {"gpuIdleOnly": True, "deletedOnly": True}),
+            call("list_workloads", {"projectName": {"operator": "==", "value": "ml-team,phase==Failed"}}),
+            call("list_projects", {"departmentId": "5500001", "departmentName": "Research"}),
+            call("get_workload_pods", {"workloadId": mock.HEALTHY_ID, "includeAdvancedMetrics": True}),
+            call("get_workload_pods", {"workloadId": mock.HEALTHY_ID, "includeMetrics": True, "limit": 21}),
+        ]
+        for request, response in zip(requests, exchange(requests), strict=True):
+            with self.subTest(request=request):
+                self.assertTrue(response["result"]["isError"])
+                self.assertNotIn("internal:", payload(response)["error"])
+
     def test_ping_heartbeat_and_notification_preserve_the_session(self):
         responses = exchange([
             {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {}},
