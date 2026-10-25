@@ -82,12 +82,12 @@ ccPrecheck:
   probeImage:
     registry: ghcr.io/fidencio
     name: krab-preflight
-    tag: 0.2.2
+    tag: 0.2.3
     pullPolicy: IfNotPresent
   collectorImage:
     registry: ghcr.io/fidencio
     name: krab-collector
-    tag: 0.2.2
+    tag: 0.2.3
     pullPolicy: IfNotPresent
   dispatcherImage:
     registry: ghcr.io/kata-containers
