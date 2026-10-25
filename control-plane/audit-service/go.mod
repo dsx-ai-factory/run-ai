@@ -37,7 +37,7 @@ require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2 // indirect
 	github.com/ThreeDotsLabs/watermill v1.5.3 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5 // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
+	github.com/andybalholm/brotli v1.2.7 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -77,7 +77,7 @@ require (
 	github.com/maypok86/otter/v2 v2.4.0 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nats-io/nats.go v1.54.0 // indirect
+	github.com/nats-io/nats.go v1.55.0 // indirect
 	github.com/nats-io/nkeys v0.4.16 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
