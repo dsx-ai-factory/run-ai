@@ -6,23 +6,23 @@ require (
 	github.com/Nerzal/gocloak/v13 v13.9.0
 	github.com/avast/retry-go/v4 v4.7.0
 	github.com/crewjam/saml v0.5.1
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.12
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.13
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21
-	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.3
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.8
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30
+	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.4
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.9
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/setting v1.2.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/golang-jwt/jwt/v5 v5.3.1
@@ -47,7 +47,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.4 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
