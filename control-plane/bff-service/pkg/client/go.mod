@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
 	github.com/stretchr/testify v1.12.1
 )
 
