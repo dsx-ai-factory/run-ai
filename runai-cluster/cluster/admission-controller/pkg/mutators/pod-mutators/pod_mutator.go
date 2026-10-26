@@ -62,6 +62,7 @@ func (pm *PodMutator) listSingleActionPodMutators() []PodMutatingFunc {
 	mutators := []PodMutatingFunc{
 		pm.mutateSchedulerName,
 		pm.mutateProjectNameLabel,
+		pm.mutateConfidentialRuntimeClass,
 		pm.mutateConfidentialLabel,
 		pm.mutateConfidentialInitdata,
 		pm.mutatePodResources,

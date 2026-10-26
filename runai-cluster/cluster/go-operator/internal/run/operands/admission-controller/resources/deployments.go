@@ -120,6 +120,10 @@ func DeploymentForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 						args = append(args, "--runai-schedule-workflow-pods")
 					}
 
+					if runaiConfig.IsConfidentialComputing() {
+						args = append(args, "--confidential-computing")
+					}
+
 					if runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor == internal.KubernetesFlavorGKE {
 						args = append(args, "--specific-cluster-type", "gke")
 					}
