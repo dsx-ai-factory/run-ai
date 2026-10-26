@@ -197,6 +197,8 @@ overwritten on the next generation run.
 
 ## NIM test/dev right-sizing
 
+See the [feature, API decision and allocation diagrams](docs/right-sizing-diagrams/README.md) for the implemented flow and response branches.
+
 `POST /api/v1/inference/right-sizing/recommendation` and `runai inference recommend` use the exact NIM image/tag and the selected cluster's installed GPU inventory. Omitted/null `gpuType` returns one result per reported type/capacity; an explicit type restricts the results. Inventory does not establish free memory, quota, available device count, or schedulability.
 
 Only profiles with explicit TP=1, PP=1 and a positive published per-device minimum are eligible. Following [NGC's targeting guide](https://docs.nvidia.com/nim/metadata-api/1.0.0/guides/choose-a-profile), fitting direct PCI matches take preference over tested matches, then GPU-agnostic profiles (both `gpu` and `gpu_device` absent). Within the preferred surviving tier, choose the lowest minimum, then profile ID for deterministic ties. An empty tested list does not exclude direct or GPU-agnostic profiles; a nonempty list records validation history rather than an exclusive GPU allowlist. A display name alone cannot establish a targeted match.
