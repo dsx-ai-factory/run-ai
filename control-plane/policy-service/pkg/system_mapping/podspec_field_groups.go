@@ -11,6 +11,13 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 )
 
+const (
+	itemSelAllResourceClaims          = "allResourceClaims"
+	itemSelResourceClaimByName        = "resourceClaimByName"
+	itemSelAllDirectResourceClaims    = "allDirectResourceClaims"
+	itemSelAllTemplatedResourceClaims = "allTemplatedResourceClaims"
+)
+
 func BuildFieldGroupFieldMap(entries []SystemFgField) map[string]api.FieldGroupField {
 	out := make(map[string]api.FieldGroupField, len(entries))
 
@@ -157,23 +164,23 @@ func podSpecItemSelectorDefs() []SystemItemSel {
 			Query: `(.schedulingGates // [])[]`,
 		},
 		{
-			Name:  "allResourceClaims",
+			Name:  itemSelAllResourceClaims,
 			Desc:  "all resource claims",
 			Query: `(.resourceClaims // [])[]`,
 		},
 		{
-			Name:     "resourceClaimByName",
+			Name:     itemSelResourceClaimByName,
 			Desc:     "resource claim with a given name",
 			Query:    `(.resourceClaims // [])[] | select(.name == $ARGS.named.resourceClaimPodName)`,
 			ArgsInfo: map[string]api.MappingFieldType{"resourceClaimPodName": api.MAPPINGFIELDTYPE_STRING},
 		},
 		{
-			Name:  "allDirectResourceClaims",
+			Name:  itemSelAllDirectResourceClaims,
 			Desc:  "resource claims that reference a ResourceClaim by name",
 			Query: `(.resourceClaims // [])[] | select(.resourceClaimName != null and .resourceClaimName != "")`,
 		},
 		{
-			Name:  "allTemplatedResourceClaims",
+			Name:  itemSelAllTemplatedResourceClaims,
 			Desc:  "resource claims produced from a ResourceClaimTemplate",
 			Query: `(.resourceClaims // [])[] | select(.resourceClaimTemplateName != null and .resourceClaimTemplateName != "")`,
 		},
@@ -331,9 +338,9 @@ func podSpecFgFields() []SystemFgField {
 	selectorsImagePullSecrets := []string{"allImagePullSecrets"}
 	selectorsReadinessGates := []string{"allReadinessGates"}
 	selectorsSchedulingGates := []string{"allSchedulingGates"}
-	selectorsResourceClaimsAll := []string{"allResourceClaims", "resourceClaimByName", "allDirectResourceClaims", "allTemplatedResourceClaims"}
-	selectorsResourceClaimsDirect := []string{"allResourceClaims", "resourceClaimByName", "allDirectResourceClaims"}
-	selectorsResourceClaimsTemplated := []string{"allResourceClaims", "resourceClaimByName", "allTemplatedResourceClaims"}
+	selectorsResourceClaimsAll := []string{itemSelAllResourceClaims, itemSelResourceClaimByName, itemSelAllDirectResourceClaims, itemSelAllTemplatedResourceClaims}
+	selectorsResourceClaimsDirect := []string{itemSelAllResourceClaims, itemSelResourceClaimByName, itemSelAllDirectResourceClaims}
+	selectorsResourceClaimsTemplated := []string{itemSelAllResourceClaims, itemSelResourceClaimByName, itemSelAllTemplatedResourceClaims}
 	selectorsVolumesAllKinds := []string{"allVolumes", "allConfigMapVolumes", "allEmptyDirVolumes", "allHostPathVolumes", "allNfsVolumes", "allPvcVolumes", "allSecretVolumes"}
 	selectorsVolumesConfigMap := []string{"allConfigMapVolumes"}
 	selectorsVolumesEmptyDir := []string{"allEmptyDirVolumes"}
