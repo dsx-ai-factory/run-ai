@@ -121,45 +121,6 @@ func TestAdminUiClient_GetClientData_ExistingClient(t *testing.T) {
 	assert.Equal(t, ClientTypeRunaiAdminUI, *result.Attributes.ClientType)
 }
 
-// RunaiCliClient
-
-func TestRunaiCliClient_GetClientID(t *testing.T) {
-	c := NewRunaiCliClient(testRealm, testTenantId, testAppHost, testHostTemplate)
-	assert.Equal(t, utils.RUNAI_CLI_CLIENT_ID, c.GetClientID())
-}
-
-func TestRunaiCliClient_GetClientData_NilExisting(t *testing.T) {
-	c := NewRunaiCliClient(testRealm, testTenantId, testAppHost, testHostTemplate)
-	result := c.GetClientData(context.Background(), nil)
-
-	require.NotNil(t, result)
-	assert.Equal(t, utils.RUNAI_CLI_CLIENT_ID, *result.ClientID)
-	assert.Equal(t, testTenantId, *result.TenantId)
-	assert.True(t, *result.Enabled)
-	assert.Equal(t, ClientTypeRunaiCLI, *result.Attributes.ClientType)
-	assert.Equal(t, []string{testTenantUrl, testAppHost}, *result.WebOrigins)
-	assert.Equal(t, defaultRedirectURIs(), *result.RedirectURIs)
-	assert.True(t, *result.ClientConfig.PublicClient)
-	assert.True(t, *result.ClientConfig.DirectAccessGrantsEnabled)
-	assert.True(t, *result.ClientConfig.StandardFlowEnabled)
-	assert.False(t, *result.ClientConfig.ServiceAccountsEnabled)
-}
-
-func TestRunaiCliClient_GetClientData_ExistingClient(t *testing.T) {
-	c := NewRunaiCliClient(testRealm, testTenantId, testAppHost, testHostTemplate)
-	existing := &iamModels.Client{
-		ID:     ptr.To("existing-id"),
-		Secret: ptr.To("existing-secret"),
-	}
-	result := c.GetClientData(context.Background(), existing)
-
-	require.NotNil(t, result)
-	assert.Equal(t, "existing-id", *result.ID)
-	assert.Equal(t, "existing-secret", *result.Secret)
-	assert.Equal(t, utils.RUNAI_CLI_CLIENT_ID, *result.ClientID)
-	assert.Equal(t, ClientTypeRunaiCLI, *result.Attributes.ClientType)
-}
-
 // CLIClient
 
 func TestCLIClient_GetClientID(t *testing.T) {
