@@ -157,6 +157,9 @@ global:
 
   fipsMode: "off"
 
+  confidentialComputing:
+    enabled: false
+
   seo:
     allowSearchEngineIndexing: false
   image:
