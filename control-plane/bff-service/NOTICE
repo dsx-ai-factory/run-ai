@@ -31,7 +31,7 @@ Dependencies
 |---------|---------|---------|----------------|
 | `filippo.io/edwards25519` | v1.2.0 | BSD-3-Clause | https://pkg.go.dev/filippo.io/edwards25519@v1.2.0?tab=licenses |
 | `github.com/ClickHouse/ch-go` | v0.74.0 | Apache-2.0 | https://github.com/ClickHouse/ch-go/blob/v0.74.0/LICENSE |
-| `github.com/ClickHouse/clickhouse-go/v2` | v2.49.0 | Apache-2.0 | https://pkg.go.dev/github.com/ClickHouse/clickhouse-go/v2@v2.49.0?tab=licenses |
+| `github.com/ClickHouse/clickhouse-go/v2` | v2.50.0 | Apache-2.0 | https://pkg.go.dev/github.com/ClickHouse/clickhouse-go/v2@v2.50.0?tab=licenses |
 | `github.com/Rican7/retry` | v0.3.1 | MIT | https://github.com/Rican7/retry/blob/v0.3.1/LICENSE |
 | `github.com/ThreeDotsLabs/watermill` | v1.5.3 | MIT | https://github.com/ThreeDotsLabs/watermill/blob/v1.5.3/LICENSE |
 | `github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream` | v1.4.5 | MIT | https://github.com/ThreeDotsLabs/watermill-redisstream/blob/v1.4.5/LICENSE |
