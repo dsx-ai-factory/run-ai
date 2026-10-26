@@ -21,6 +21,7 @@ import (
 )
 
 const (
+	oauth2CAVolumeName          = "custom-ca"
 	oauth2ProxyContainerName    = "runai-oauth2-proxy"
 	oauth2AuthVolumeName        = "runai-auth"
 	oauth2AuthVolumePath        = "/etc/runai/auth/users"
@@ -269,7 +270,7 @@ func BuildOAuth2ProxyVolumes(info *composer.ExposedUrlInfo) []corev1.Volume {
 
 func oauth2CAVolumeMount(cfg composer.ClusterStorageConfig) corev1.VolumeMount {
 	return corev1.VolumeMount{
-		Name:      cfg.CustomCAAuthSecret(),
+		Name:      oauth2CAVolumeName,
 		MountPath: fmt.Sprintf("/etc/ssl/certs/%s", cfg.CustomCAAuthKey()),
 		SubPath:   cfg.CustomCAAuthKey(),
 	}
@@ -277,7 +278,7 @@ func oauth2CAVolumeMount(cfg composer.ClusterStorageConfig) corev1.VolumeMount {
 
 func oauth2CAVolume(cfg composer.ClusterStorageConfig) corev1.Volume {
 	return corev1.Volume{
-		Name: cfg.CustomCAAuthSecret(),
+		Name: oauth2CAVolumeName,
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
 				DefaultMode: convutils.Ref(oauth2CADefaultMode),
