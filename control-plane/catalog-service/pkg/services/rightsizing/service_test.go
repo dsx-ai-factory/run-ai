@@ -36,7 +36,7 @@ func TestRecommendKeepsCapacitiesAndAppliesCutoff(t *testing.T) {
 			t.Fatalf("wrong image/tag: %s %s", image, tag)
 		}
 		return ngcmetadata.Metadata{Profiles: []ngcmetadata.Profile{{ID: "profile", Precision: "bf16", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}}, nil
-	}))
+	}), 90)
 	result, err := s.Recommend(context.Background(), validRequest())
 	if err != nil {
 		t.Fatal(err)
@@ -64,7 +64,7 @@ func TestRecommendNeverUsesMultiDeviceMinimumAsTotal(t *testing.T) {
 	}),
 		metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
 			return ngcmetadata.Metadata{Profiles: []ngcmetadata.Profile{{ID: "tp4", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &tp, PipelineParallelSize: &pp}}}, nil
-		}))
+		}), 90)
 	result, err := s.Recommend(context.Background(), validRequest())
 	if err != nil {
 		t.Fatal(err)
@@ -81,7 +81,7 @@ func TestRecommendMissingMetadataAndUpstreamErrors(t *testing.T) {
 	})
 	s := New(inventory, metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
 		return ngcmetadata.Metadata{}, nil
-	}))
+	}), 90)
 	result, err := s.Recommend(context.Background(), validRequest())
 	if err != nil || result.Results[0].Status != "no_recommendation" {
 		t.Fatalf("missing data=%+v %v", result, err)
@@ -89,18 +89,18 @@ func TestRecommendMissingMetadataAndUpstreamErrors(t *testing.T) {
 	failure := errors.New("upstream unavailable")
 	s = New(inventory, metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
 		return ngcmetadata.Metadata{}, failure
-	}))
+	}), 90)
 	if _, err = s.Recommend(context.Background(), validRequest()); err == nil || err.Code != 503 {
 		t.Fatalf("metadata failure hidden: %v", err)
 	}
-	s = New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) { return nil, failure }), nil)
+	s = New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) { return nil, failure }), nil, 90)
 	if _, err = s.Recommend(context.Background(), validRequest()); err == nil || err.Code != 503 {
 		t.Fatalf("inventory failure hidden: %v", err)
 	}
 }
 
 func TestRecommendRejectsInvalidContextBeforeLookup(t *testing.T) {
-	s := New(nil, nil)
+	s := New(nil, nil, 90)
 	request := validRequest()
 	request.ClusterId = "invalid"
 	if _, err := s.Recommend(context.Background(), request); err == nil || err.Code != 400 {
@@ -118,7 +118,7 @@ func TestRejectsUnverifiedTargetedProfiles(t *testing.T) {
 		{"display name only", "A100", ""}, {"PCI only", "", "20b2:10de"}, {"matching name different PCI", "A100", "ffff:10de"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, []ngcmetadata.Profile{{ID: "targeted", GPU: tc.gpu, GPUDevice: tc.device, MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}})
+			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, []ngcmetadata.Profile{{ID: "targeted", GPU: tc.gpu, GPUDevice: tc.device, MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, 90)
 			if result.Status != "no_recommendation" || result.Recommendation != nil {
 				t.Fatalf("unverified hardware recommended: %+v", result)
 			}
@@ -128,7 +128,7 @@ func TestRejectsUnverifiedTargetedProfiles(t *testing.T) {
 
 func TestSingleDeviceBaselineProducesExplicitEstimate(t *testing.T) {
 	capacity, minimum, one := int64(40_000_000_000), 81.0, 1
-	result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, []ngcmetadata.Profile{{ID: "generic", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}})
+	result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, []ngcmetadata.Profile{{ID: "generic", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, 90)
 	if result.Recommendation == nil || !result.Recommendation.Estimated || result.Recommendation.GpuCount != 3 || result.Recommendation.Warning == "" || result.ProfileId != "generic" {
 		t.Fatalf("bad estimate: %+v", result)
 	}
@@ -148,7 +148,7 @@ func TestProfileSelectionRequiresEvidenceAndIsDeterministic(t *testing.T) {
 		{"tested devices are history", []ngcmetadata.Profile{{ID: "generic", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one, TestedGPUDevices: []string{"different-pci"}}}, "generic"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, tc.profiles)
+			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, tc.profiles, 90)
 			if result.ProfileId != tc.want {
 				t.Fatalf("profile=%q want=%q", result.ProfileId, tc.want)
 			}
@@ -160,7 +160,7 @@ func TestProfileSelectionRequiresEvidenceAndIsDeterministic(t *testing.T) {
 }
 
 func TestUnavailableRequestedGPUFailsBeforeMetadata(t *testing.T) {
-	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) { return nil, nil }), nil)
+	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) { return nil, nil }), nil, 90)
 	request := validRequest()
 	missing := "missing"
 	request.GpuType = &missing

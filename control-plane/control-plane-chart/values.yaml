@@ -3959,6 +3959,8 @@ catalogService:
   affinity: {}
 
   config:
+    # null uses catalog-service's default sharing cutoff; explicit values must be 1..100.
+    wholeGPUCutoffPercent: null
     inventoryRequestTimeoutSec: 30
     logLevel: Info
     dbScheme: catalog

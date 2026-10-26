@@ -12,6 +12,7 @@ import (
 )
 
 type Services struct {
+	WholeGPUCutoffPercent      int64  `mapstructure:"whole_gpu_cutoff_percent" validate:"gte=1,lte=100"`
 	InventoryRequestTimeoutSec int    `mapstructure:"inventory_request_timeout_sec" validate:"gt=0"`
 	ClusterServiceUrl          string `mapstructure:"cluster_service_url" validate:"required"`
 	AuthorizationUrl           string `mapstructure:"authorization_service_url" validate:"required"`
@@ -20,6 +21,8 @@ type Services struct {
 }
 
 func (s *Services) SetDefaults() {
+	// Rajan's initial sharing policy; this is not runtime/OOM headroom.
+	s.WholeGPUCutoffPercent = 90
 	s.InventoryRequestTimeoutSec = 30
 	s.ClusterServiceUrl = "http://runai-backend-cluster-service:8080"
 	s.AuthorizationUrl = "http://runai-backend-authorization:8080"

@@ -7,6 +7,7 @@ package rightsizing
 
 import (
 	"context"
+	"errors"
 	"math"
 	"net/http"
 	"strings"
@@ -26,12 +27,13 @@ type Metadata interface {
 }
 
 type Service struct {
-	inventory Inventory
-	metadata  Metadata
+	inventory     Inventory
+	metadata      Metadata
+	cutoffPercent int64
 }
 
-func New(inventory Inventory, metadata Metadata) *Service {
-	return &Service{inventory: inventory, metadata: metadata}
+func New(inventory Inventory, metadata Metadata, cutoffPercent int64) *Service {
+	return &Service{inventory: inventory, metadata: metadata, cutoffPercent: cutoffPercent}
 }
 
 func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest) (api.RightSizingResponse, *api.Error) {
@@ -66,39 +68,51 @@ func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest)
 		return response, api.NewError(http.StatusServiceUnavailable, "NGC sizing metadata unavailable", err)
 	}
 	for _, gpu := range selected {
-		response.Results = append(response.Results, recommendForHardware(gpu, metadata.Profiles))
+		response.Results = append(response.Results, recommendForHardware(gpu, metadata.Profiles, s.cutoffPercent))
 	}
 	return response, nil
 }
 
-func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Profile) api.RightSizingResult {
+func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Profile, cutoffPercent int64) api.RightSizingResult {
 	result := api.RightSizingResult{GpuType: gpu.Type, Status: "no_recommendation"}
 	if gpu.MemoryBytes == nil || *gpu.MemoryBytes <= 0 {
 		result.Reason = "GPU memory capacity is not reported by the cluster"
 		return result
 	}
 	result.GpuMemoryCapacityBytes = *gpu.MemoryBytes
+	pciDevice, pciError := gpuinventory.ResolvePCIDevice(gpu.Type)
 	var chosen *ngcmetadata.Profile
+	chosenMatch := noHardwareMatch
+	chosenFits := false
 	for i := range profiles {
 		profile := &profiles[i]
 		// Only explicit single-device profiles establish the baseline for this
 		// API slice. Multi-device profile selection belongs to a separate effort.
 		if profile.ID == "" || profile.TensorParallelSize == nil || *profile.TensorParallelSize != 1 ||
 			profile.PipelineParallelSize == nil || *profile.PipelineParallelSize != 1 ||
-			!matchesHardware(*profile) || profile.MinimumVRAMPerDeviceGB == nil {
+			profile.MinimumVRAMPerDeviceGB == nil {
 			continue
 		}
 		minimum := *profile.MinimumVRAMPerDeviceGB
 		if math.IsNaN(minimum) || math.IsInf(minimum, 0) || minimum <= 0 || minimum >= float64(math.MaxInt64)/1e9 {
 			continue
 		}
-		if chosen == nil || minimum < *chosen.MinimumVRAMPerDeviceGB ||
-			(minimum == *chosen.MinimumVRAMPerDeviceGB && profile.ID < chosen.ID) {
-			chosen = profile
+		match := matchHardware(*profile, pciDevice)
+		if match == noHardwareMatch {
+			continue
+		}
+		fits := int64(math.Ceil(minimum*1e9)) <= *gpu.MemoryBytes
+		if chosen == nil || (fits && !chosenFits) || (fits == chosenFits &&
+			(match < chosenMatch || (match == chosenMatch &&
+				(minimum < *chosen.MinimumVRAMPerDeviceGB || (minimum == *chosen.MinimumVRAMPerDeviceGB && profile.ID < chosen.ID))))) {
+			chosen, chosenMatch, chosenFits = profile, match, fits
 		}
 	}
 	if chosen == nil {
-		result.Reason = "No compatible explicit single-GPU profile with a positive minimum memory value"
+		result.Reason = "No matching direct, tested, or GPU-agnostic explicit single-GPU profile with a positive published minimum"
+		if pciError != nil {
+			result.Reason += "; " + pciError.Error()
+		}
 		return result
 	}
 	result.MinimumGpuMemoryPerDeviceGb = *chosen.MinimumVRAMPerDeviceGB
@@ -107,8 +121,12 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 	result.InferenceBackend = chosen.InferenceBackend
 	// NGC reports GB; inventory reports bytes. Round requirements upward.
 	minimumBytes := int64(math.Ceil(*chosen.MinimumVRAMPerDeviceGB * 1e9))
-	allocation, err := SingleGPUAllocation(minimumBytes, *gpu.MemoryBytes)
+	allocation, err := SingleGPUAllocation(minimumBytes, *gpu.MemoryBytes, cutoffPercent)
 	if err != nil {
+		if !errors.Is(err, ErrDoesNotFitSingleGPU) {
+			result.Reason = "GPU allocation sharing policy is invalid"
+			return result
+		}
 		// The baseline here is explicitly TP=1, PP=1. This remains only a naive
 		// estimate; it must not be mistaken for a supported parallel profile.
 		count := minimumBytes / *gpu.MemoryBytes
@@ -118,7 +136,7 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 		result.Status = "recommended"
 		result.Recommendation = &api.RightSizingRecommendation{
 			AllocationType: "gpu_count", GpuCount: count, Estimated: true,
-			Warning: profileSizingWarning(*chosen) + " Estimated from a single-device profile. This count is not a validated tensor-parallel configuration.",
+			Warning: profileSizingWarning(*chosen, chosenMatch) + " Estimated from a single-device profile. This count is not a validated tensor-parallel configuration.",
 		}
 		return result
 	}
@@ -131,21 +149,51 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 		AllocationType: allocationType, GpuCount: 1,
 		GpuMemoryPerDeviceBytes: allocation.AllocatedMemoryBytes,
 		Estimated:               false,
-		Warning:                 profileSizingWarning(*chosen),
+		Warning:                 profileSizingWarning(*chosen, chosenMatch),
 	}
 	return result
 }
 
-func matchesHardware(profile ngcmetadata.Profile) bool {
-	// NGC requires PCI identifiers to verify targeted profiles; inventory currently
-	// exposes only display names. Tested devices are history, not restrictions.
-	return profile.GPU == "" && profile.GPUDevice == ""
+type hardwareMatch int
+
+const (
+	directHardwareMatch hardwareMatch = iota
+	testedHardwareMatch
+	genericHardwareMatch
+	noHardwareMatch
+)
+
+func matchHardware(profile ngcmetadata.Profile, pciDevice string) hardwareMatch {
+	if pciDevice != "" {
+		if strings.EqualFold(profile.GPUDevice, pciDevice) {
+			return directHardwareMatch
+		}
+		for _, tested := range profile.TestedGPUDevices {
+			if strings.EqualFold(tested, pciDevice) {
+				return testedHardwareMatch
+			}
+		}
+	}
+	// NGC treats an untargeted profile as GPU-agnostic. A tested-device list
+	// records validation history; it does not turn this into a SKU allowlist.
+	if profile.GPU == "" && profile.GPUDevice == "" {
+		return genericHardwareMatch
+	}
+	return noHardwareMatch
 }
 
 // A published memory floor does not establish that the profile can execute on
 // every GPU. Keep this prerequisite visible even for exact allocation arithmetic.
-func profileSizingWarning(profile ngcmetadata.Profile) string {
-	warning := "Memory sizing only; compatibility of the selected profile, precision, backend and runtime configuration with the target GPU is unverified. Verify the profile can run on the target hardware before deploying."
+func profileSizingWarning(profile ngcmetadata.Profile, match hardwareMatch) string {
+	evidence := "GPU-agnostic NGC profile; testing on the target GPU is not recorded. "
+	if match == directHardwareMatch {
+		evidence = "NGC profile targets this GPU PCI device. "
+	}
+	if match == testedHardwareMatch {
+		evidence = "NGC records this profile as tested on the target GPU PCI device. "
+	}
+	warning := evidence + "Memory sizing only; compatibility of the selected profile, precision, backend and runtime configuration with the target GPU is unverified. " +
+		"Verify the profile can run on the target hardware before deploying."
 	if strings.EqualFold(profile.Precision, "nvfp4") {
 		warning += " NVFP4 requires Blackwell by default. Pre-Blackwell emulation requires a supported vLLM or SGLang image" +
 			" and NIM_ALLOW_NVFP4_EMULATION=1; TensorRT-LLM does not support emulation. Verify the exact image tag and host configuration."

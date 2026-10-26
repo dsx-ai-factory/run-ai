@@ -27,7 +27,7 @@ func TestSizingRecommendationsExposeUnverifiedRuntimeCompatibility(t *testing.T)
 			result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-A10G", MemoryBytes: &capacity}, []ngcmetadata.Profile{{
 				ID: "published-profile", Precision: tc.precision, InferenceBackend: tc.backend,
 				MinimumVRAMPerDeviceGB: &tc.minimum, TensorParallelSize: &one, PipelineParallelSize: &one,
-			}})
+			}}, 90)
 			if result.Recommendation == nil || result.ProfileId != "published-profile" || result.Recommendation.Estimated != tc.estimated {
 				t.Fatalf("sizing/source information changed: %+v", result)
 			}

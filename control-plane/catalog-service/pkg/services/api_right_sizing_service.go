@@ -29,7 +29,7 @@ func NewRightSizingAPIService() *RightSizingAPIService {
 	metadata := ngcmetadata.New(&http.Client{
 		Timeout: time.Duration(config.Get[*catalogconfig.NGC]().RequestTimeoutSec) * time.Second,
 	})
-	return &RightSizingAPIService{service: rightsizing.New(inventory, metadata)}
+	return &RightSizingAPIService{service: rightsizing.New(inventory, metadata, servicesConfig.WholeGPUCutoffPercent)}
 }
 
 func (s *RightSizingAPIService) RecommendInferenceResources(ctx context.Context, request api.RightSizingRequest) (api.ImplResponse, error) {

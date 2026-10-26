@@ -7,11 +7,6 @@ package rightsizing
 
 import "errors"
 
-// WholeGPUCutoffPercent is a provisional product policy, pending further
-// research. It is not runtime headroom and must never make an oversized
-// requirement appear to fit.
-const WholeGPUCutoffPercent int64 = 90
-
 var ErrDoesNotFitSingleGPU = errors.New("minimum memory exceeds single-GPU capacity")
 
 type Allocation struct {
@@ -23,7 +18,10 @@ type Allocation struct {
 // SingleGPUAllocation applies the cutoff to an already resolved, compatible
 // single-device requirement. Both inputs must use the same byte units. Hardware
 // compatibility, usable capacity, and multi-GPU estimates are separate concerns.
-func SingleGPUAllocation(minimumBytes, capacityBytes int64) (Allocation, error) {
+func SingleGPUAllocation(minimumBytes, capacityBytes, cutoffPercent int64) (Allocation, error) {
+	if cutoffPercent < 1 || cutoffPercent > 100 {
+		return Allocation{}, errors.New("whole-GPU sharing cutoff must be between 1 and 100 percent")
+	}
 	if minimumBytes <= 0 || capacityBytes <= 0 {
 		return Allocation{}, errors.New("minimum memory and GPU capacity must be positive")
 	}
@@ -32,8 +30,8 @@ func SingleGPUAllocation(minimumBytes, capacityBytes int64) (Allocation, error) 
 	}
 	// ceil(capacity * percent / 100), without multiplying the full capacity
 	// (which can overflow) or rounding a floating-point ratio at the boundary.
-	threshold := capacityBytes/100*WholeGPUCutoffPercent +
-		(capacityBytes%100*WholeGPUCutoffPercent+99)/100
+	threshold := capacityBytes/100*cutoffPercent +
+		(capacityBytes%100*cutoffPercent+99)/100
 	allocation := Allocation{
 		MinimumMemoryBytes:   minimumBytes,
 		AllocatedMemoryBytes: minimumBytes,

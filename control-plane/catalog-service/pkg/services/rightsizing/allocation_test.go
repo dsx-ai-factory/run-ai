@@ -27,7 +27,7 @@ func TestSingleGPUAllocationUsesNinetyPercentCutoff(t *testing.T) {
 		{"large capacity does not overflow", math.MaxInt64, math.MaxInt64, true},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := SingleGPUAllocation(tt.minimum, tt.capacity)
+			got, err := SingleGPUAllocation(tt.minimum, tt.capacity, 90)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -46,7 +46,7 @@ func TestSingleGPUAllocationUsesNinetyPercentCutoff(t *testing.T) {
 }
 
 func TestSingleGPUAllocationNeverRoundsOversizedRequirementDown(t *testing.T) {
-	_, err := SingleGPUAllocation(80_000_000_001, 80_000_000_000)
+	_, err := SingleGPUAllocation(80_000_000_001, 80_000_000_000, 90)
 	if !errors.Is(err, ErrDoesNotFitSingleGPU) {
 		t.Fatalf("oversized requirement must not become one whole GPU: %v", err)
 	}
@@ -56,7 +56,7 @@ func TestSingleGPUAllocationRejectsMissingOrInvalidMemory(t *testing.T) {
 	for _, tt := range []struct{ minimum, capacity int64 }{
 		{0, 80}, {-1, 80}, {32, 0}, {32, -1},
 	} {
-		if _, err := SingleGPUAllocation(tt.minimum, tt.capacity); err == nil {
+		if _, err := SingleGPUAllocation(tt.minimum, tt.capacity, 90); err == nil {
 			t.Errorf("accepted minimum %d capacity %d", tt.minimum, tt.capacity)
 		}
 	}

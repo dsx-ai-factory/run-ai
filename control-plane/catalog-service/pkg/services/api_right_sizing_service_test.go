@@ -30,7 +30,7 @@ func (sizingMetadata) Get(context.Context, string, string) (ngcmetadata.Metadata
 }
 
 func TestRightSizingControllerPreservesNullGPUAndMissingRecommendations(t *testing.T) {
-	service := &RightSizingAPIService{service: rightsizing.New(sizingInventory{}, sizingMetadata{})}
+	service := &RightSizingAPIService{service: rightsizing.New(sizingInventory{}, sizingMetadata{}, 90)}
 	controller := api.NewRightSizingAPIController(service)
 	request := httptest.NewRequest("POST", "/api/v1/inference/right-sizing/recommendation", strings.NewReader(`{"clusterId":"4b94efde-b05a-4118-a03a-1dedff81fa8e","image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","gpuType":null}`))
 	response := httptest.NewRecorder()

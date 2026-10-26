@@ -19,6 +19,9 @@ data:
   DB_SSL_MODE: {{ $top.Values.catalogService.config.dbSslMode | default $top.Values.global.postgresql.auth.dbSslMode | quote }}
   DB_PORT: {{ $top.Values.catalogService.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
   DB_SCHEMA: {{ $top.Values.catalogService.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
+  {{- if ne $top.Values.catalogService.config.wholeGPUCutoffPercent nil }}
+  WHOLE_GPU_CUTOFF_PERCENT: {{ $top.Values.catalogService.config.wholeGPUCutoffPercent | quote }}
+  {{- end }}
   INVENTORY_REQUEST_TIMEOUT_SEC: {{ $top.Values.catalogService.config.inventoryRequestTimeoutSec | default 30 | quote }}
   CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name (toString $top.Values.clusterService.service.port) }}
   TEMP_BACKEND_SETTINGS_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name (toString $top.Values.tempBackendSettings.service.port) }}
