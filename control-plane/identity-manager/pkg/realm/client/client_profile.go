@@ -17,7 +17,6 @@ const (
 	ClientTypeWorkloadsAuth = "WorkloadsAuth"
 	ClientTypeRunaiAdminUI  = "RunaiAdminUI"
 	ClientTypeCLI           = "CLI"
-	ClientTypeRunaiCLI      = "RunaiCLI"
 	ClientTypeRunai         = "Runai"
 	ClientTypeTokenExchange = "TokenExchange"
 	ClientTypeAgent         = "agent"
@@ -86,16 +85,6 @@ var clientProfiles = map[string]clientProfile{
 		webOrigins:              true,
 		staticRedirectURIs:      []string{"http://localhost/login/callback"},
 		secretlessUserGrant:     true,
-	},
-	ClientTypeRunaiCLI: {
-		clientID:            utils.RUNAI_CLI_CLIENT_ID,
-		publicClient:        true,
-		directAccessGrants:  true,
-		standardFlow:        true,
-		emailScopeDefault:   true,
-		redirect:            redirectDefault,
-		webOrigins:          true,
-		secretlessUserGrant: true,
 	},
 	ClientTypeCLI: {
 		clientID:            utils.CLI_CLIENT_ID,
