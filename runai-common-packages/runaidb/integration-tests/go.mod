@@ -15,7 +15,7 @@ require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20261013165250-51075c6ea6bc // indirect
 	github.com/ClickHouse/ch-go v0.74.0 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.49.0 // indirect
+	github.com/ClickHouse/clickhouse-go/v2 v2.50.0 // indirect
 	github.com/Microsoft/go-winio v0.6.4 // indirect
 	github.com/andybalholm/brotli v1.2.7 // indirect
 	github.com/aws/smithy-go v1.28.6 // indirect
