@@ -15,6 +15,7 @@ import type {
   DistributedWorkload,
   PodNodeAffinity,
   ServingPort,
+  WorkloadAllocatedResources,
 } from "@/swagger-models/workloads-client";
 import type { TItemDetail } from "@/models/workload-creation-drawer-model";
 import type {
@@ -34,7 +35,15 @@ import type {
   INetworkSectionData,
   IStorageSectionData,
 } from "@/models/workload-details.model";
-import { matchesItem, objectMatchesTerm } from "@/utils/details-panel.utils";
+import {
+  matchAnyItem,
+  filterDefined,
+  objectMatchesTerm,
+  topologyMatches,
+  defineSection,
+  buildSections,
+  type SectionBuilder,
+} from "@/utils/details-panel.utils";
 import type { CrudWorkload } from "@/services/cluster/workload.service/workload.service";
 import type { ICpuCore, ICpuMemory } from "@/models/compute-resource.model";
 import { InternalConnectionType } from "@/swagger-models/assets-service-client";
@@ -42,6 +51,7 @@ import { dateUtil } from "@/utils/date.util";
 import { DATE_FORMATS } from "@/constants/date-formats";
 import { LINE_BREAK } from "@/utils/workload-hybrid.util/workload-hybrid.util";
 import { getMemoryUnitsForUI, getCpuCoresForUI } from "@/utils/table-format.util";
+import { formatK8sResourceMemory } from "@/utils/format.util/format.util";
 import { EDistributedReplicaType } from "@/models/workload.model";
 import { workloadHybridUtil } from "@/utils/workload-hybrid.util/workload-hybrid.util";
 import { PROJECT_ROUTE_NAMES } from "@/router/project.routes/project.routes.names";
@@ -50,6 +60,7 @@ import { CLUSTER_ROUTE_NAMES } from "@/router/cluster.routes/cluster.routes.name
 import { DepartmentFilterSortFields, ProjectFilterSortFields } from "@/swagger-models/org-unit-service-client";
 import { EFilterOperator } from "@/models/filter.model";
 import { filterUtil } from "@/utils/filter.util/filter.util";
+import { workloadUtil } from "@/utils/workload.util/workload.util";
 
 export const DETAILS_PANEL_SECTIONS = {
   GENERAL: { id: "general", title: "General information" },
@@ -92,6 +103,8 @@ export const workloadDetailsUtil = {
   buildGeneralInfoGroups,
   itemDetailsToSearchableItems,
   buildSearchableSections,
+  buildAllocatedResourceItems,
+  pair,
 };
 
 function _buildFieldsContent(fields: FieldConfig[]): string[] {
@@ -262,10 +275,27 @@ function getEnrichedConnections(
   const specPorts = ((workloadSpec as { ports?: SpecPortLike[] | null } | undefined)?.ports ?? []) as SpecPortLike[];
   const servingPort = (workloadSpec as WorkloadSpecWithServingPort)?.servingPort;
 
+  // Clusters may report the ServingPort connection without a URL; fall back to the only
+  // workload URL that no other connection claims. A serving port that is not exposed
+  // externally has no URL to show.
+  const servingPortExposure = servingPort as { exposeExternally?: boolean | null } | null | undefined;
+  const isServingPortInternal = servingPortExposure?.exposeExternally === false || !!servingPort?.clusterLocalAccessOnly;
+  const servingUrl = isServingPortInternal
+    ? undefined
+    : workloadUtil.getUnclaimedServingUrl(
+        workloadDetailed.urls,
+        allEnvConnections,
+        exposedUrls.map((exposed) => exposed.url),
+      );
+  const withServingUrl = (conn: ConnectionWithAccess): ConnectionWithAccess =>
+    conn.connectionType === InternalConnectionType.ServingPort && !conn.url && servingUrl
+      ? { ...conn, url: servingUrl }
+      : conn;
+
   // When the spec declares no networking entries at all, fall back to the runtime list
   // (covers completed workloads with no spec, externally-wired connections, etc.).
   if (!exposedUrls.length && !specPorts.length && !servingPort) {
-    return [...allEnvConnections, ...externalConnections];
+    return [...allEnvConnections.map(withServingUrl), ...externalConnections];
   }
 
   // Build the list from the SPEC so switching Master / Worker reflects each spec. Each spec
@@ -325,10 +355,13 @@ function getEnrichedConnections(
   }
 
   if (servingPort) {
-    const matching = allEnvConnections.find((conn) => conn.containerPort === servingPort.container);
+    // Prefer the ServingPort connection: a NodePort on the same container port must not take its place.
+    const matching =
+      allEnvConnections.find((conn) => conn.connectionType === InternalConnectionType.ServingPort) ??
+      allEnvConnections.find((conn) => conn.containerPort === servingPort.container);
     if (matching) {
       result.push({
-        ...matching,
+        ...withServingUrl(matching),
         exposedUrlAuthorizationType: servingPort.authorizationType,
         exposedUrlAuthorizedUsers: servingPort.authorizedUsers,
         exposedUrlAuthorizedGroups: servingPort.authorizedGroups,
@@ -339,6 +372,7 @@ function getEnrichedConnections(
         toolType: "custom",
         connectionType: "ServingPort",
         containerPort: servingPort.container ?? undefined,
+        url: servingUrl,
         authorizationType: servingPort.authorizationType ?? undefined,
         authorizedUsers: servingPort.authorizedUsers ?? undefined,
         authorizedGroups: servingPort.authorizedGroups ?? undefined,
@@ -477,6 +511,11 @@ function parseComputeDetails(workloadDetailed: WorkloadDetailed, workloadCrudSpe
       const parts = formatResourceRequestLimit(value, suffix);
       if (parts) content.push(`${label}: ${parts}`);
     });
+  }
+
+  // Allocated resources
+  for (const item of buildAllocatedResourceItems(workloadDetailed.allocatedResources)) {
+    content.push(`${item.label}: ${item.value}`);
   }
 
   // Master-specific resources for distributed workloads
@@ -638,6 +677,29 @@ function formatResourceValue(value: number | string, suffix?: string): string {
 
   // Default: just the value
   return suffix ? `${value} ${suffix}` : value.toString();
+}
+
+/**
+ * Shared by the workload-level and element-level Compute sections — both surface the same four
+ * allocation fields from a `WorkloadAllocatedResources`-shaped object.
+ */
+function buildAllocatedResourceItems(allocated?: WorkloadAllocatedResources | null): IDetailsPanelItem[] {
+  const items: IDetailsPanelItem[] = [];
+
+  if (allocated?.gpu !== null && allocated?.gpu !== undefined) {
+    items.push({ label: "GPU compute allocation", value: String(allocated.gpu) });
+  }
+  if (allocated?.gpuMemory) {
+    items.push({ label: "GPU memory allocation", value: formatK8sResourceMemory(allocated.gpuMemory) });
+  }
+  if (allocated?.cpu !== null && allocated?.cpu !== undefined) {
+    items.push({ label: "CPU compute allocation", value: getCpuCoresForUI(allocated.cpu) });
+  }
+  if (allocated?.cpuMemory) {
+    items.push({ label: "CPU memory allocation", value: formatK8sResourceMemory(allocated.cpuMemory) });
+  }
+
+  return items;
 }
 
 function formatBoolean(value: string | number | boolean | null | undefined): string {
@@ -847,10 +909,6 @@ function pair(label: string, value: string | undefined | null): IDetailsPanelIte
   return { label, value };
 }
 
-function filterDefined<T>(arr: Array<T | null | undefined>): T[] {
-  return arr.filter((x): x is T => x !== null && x !== undefined);
-}
-
 interface IBuildSearchableSectionsInput {
   workloadDetailed: WorkloadDetailed;
   workloadCrud?: CrudWorkload;
@@ -862,25 +920,18 @@ interface IBuildSearchableSectionsInput {
   nodeAffinity?: PodNodeAffinity;
 }
 
-type SectionBuilder = (input: IBuildSearchableSectionsInput) => IDetailsPanelSectionDef | undefined;
-
-function matchAnyItem(items: IDetailsPanelItem[], term: string): boolean {
-  return items.some((it) => matchesItem(it, term));
-}
-
 function buildGeneralSection(input: IBuildSearchableSectionsInput): IDetailsPanelSectionDef | undefined {
   const groups = buildGeneralInfoGroups(input.workloadDetailed, input.clusterName, {
     projectLink: buildProjectLink(input.workloadDetailed),
     clusterLink: buildClusterLink(input.clusterName),
     departmentLink: buildDepartmentLink(input.workloadDetailed),
   });
-  if (!groups.length) return undefined;
   const data: IGeneralSectionData = { groups };
-  return {
-    ...DETAILS_PANEL_SECTIONS.GENERAL,
-    customMatch: (term: string) => matchAnyItem(groups.flat(), term),
+  return defineSection(DETAILS_PANEL_SECTIONS.GENERAL, {
+    isEmpty: !groups.length,
     data,
-  };
+    customMatch: (term: string) => matchAnyItem(groups.flat(), term),
+  });
 }
 
 const CODE_ITEM_LABELS = new Set(["Command", "Arguments"]);
@@ -894,15 +945,6 @@ function buildEnvironmentSection(input: IBuildSearchableSectionsInput): IDetails
   const applicationParameters = buildApplicationParameters(workloadDetailed, currentSpec);
   const labels = buildLabels(currentSpec, workloadDetailed);
   const annotations = buildAnnotations(currentSpec);
-  if (
-    !items.length &&
-    !environmentVariables.length &&
-    !applicationParameters.length &&
-    !labels.length &&
-    !annotations.length
-  ) {
-    return undefined;
-  }
 
   const data: IEnvironmentSectionData = {
     items,
@@ -911,8 +953,14 @@ function buildEnvironmentSection(input: IBuildSearchableSectionsInput): IDetails
     labels,
     annotations,
   };
-  return {
-    ...DETAILS_PANEL_SECTIONS.ENVIRONMENT,
+  return defineSection(DETAILS_PANEL_SECTIONS.ENVIRONMENT, {
+    isEmpty:
+      !items.length &&
+      !environmentVariables.length &&
+      !applicationParameters.length &&
+      !labels.length &&
+      !annotations.length,
+    data,
     // Section is visible only when at least one rendered value contains the term — mirrors what
     // the section component filters in place. Walk values only (not JSON keys) to avoid false
     // positives like "label" / "value".
@@ -922,24 +970,21 @@ function buildEnvironmentSection(input: IBuildSearchableSectionsInput): IDetails
       environmentVariables.some((s) => includesCI(s, term)) ||
       labels.some((s) => includesCI(s, term)) ||
       annotations.some((s) => includesCI(s, term)),
-    data,
-  };
+  });
 }
 
 function buildNetworkSection(input: IBuildSearchableSectionsInput): IDetailsPanelSectionDef | undefined {
   const { workloadDetailed, currentSpec, topologyLevels = [] } = input;
   const connections = buildNetworkConnections(workloadDetailed, currentSpec);
   const topology = workloadDetailed.topology?.name ? workloadDetailed.topology : undefined;
-  if (!connections.length && !topology) return undefined;
-
   const data: INetworkSectionData = { connections, topology, topologyLevels: topology ? topologyLevels : [] };
-  return {
-    ...DETAILS_PANEL_SECTIONS.NETWORK,
+  return defineSection(DETAILS_PANEL_SECTIONS.NETWORK, {
+    isEmpty: !connections.length && !topology,
+    data,
     customMatch: (term: string) =>
       connections.some((c) => objectMatchesTerm(c, term)) ||
-      (topology ? objectMatchesTerm({ ...topology, levels: data.topologyLevels }, term) : false),
-    data,
-  };
+      (topology ? topologyMatches(topology, data.topologyLevels, term) : false),
+  });
 }
 
 function buildComputeSection(input: IBuildSearchableSectionsInput): IDetailsPanelSectionDef | undefined {
@@ -949,43 +994,40 @@ function buildComputeSection(input: IBuildSearchableSectionsInput): IDetailsPane
     !!nodeAffinity &&
     ((nodeAffinity.required?.nodeSelectorTerms?.length ?? 0) > 0 ||
       (nodeAffinity.preferred?.nodeSelectorTerms?.length ?? 0) > 0);
-  if (!items.length && !hasNodeAffinity) return undefined;
 
   const data: IComputeSectionData = { items, nodeAffinity: hasNodeAffinity ? nodeAffinity : undefined };
-  return {
-    ...DETAILS_PANEL_SECTIONS.COMPUTE,
+  return defineSection(DETAILS_PANEL_SECTIONS.COMPUTE, {
+    isEmpty: !items.length && !hasNodeAffinity,
+    data,
     // Walk only the rendered values (not JSON keys) so "preferred" / "required" keys don't make
     // the card show up with an empty body for unrelated search terms.
     customMatch: (term: string) =>
       matchAnyItem(items, term) || (hasNodeAffinity ? objectMatchesTerm(nodeAffinity, term) : false),
-    data,
-  };
+  });
 }
 
 function buildStorageSection(input: IBuildSearchableSectionsInput): IDetailsPanelSectionDef | undefined {
   const volumes = buildStorageVolumes(input.currentSpec);
-  if (!volumes.length) return undefined;
   const data: IStorageSectionData = { volumes };
-  return {
-    ...DETAILS_PANEL_SECTIONS.STORAGE,
-    customMatch: (term: string) => volumes.some((v) => objectMatchesTerm(v, term)),
+  return defineSection(DETAILS_PANEL_SECTIONS.STORAGE, {
+    isEmpty: !volumes.length,
     data,
-  };
+    customMatch: (term: string) => volumes.some((v) => objectMatchesTerm(v, term)),
+  });
 }
 
 function buildCliCommandSection(input: IBuildSearchableSectionsInput): IDetailsPanelSectionDef | undefined {
   const command = input.workloadDetailed.additionalFields?.cliCommand;
-  if (!command) return undefined;
-  const data: ICliCommandSectionData = { command };
-  return {
-    ...DETAILS_PANEL_SECTIONS.CLI_COMMAND,
-    customMatch: (term: string) => includesCI(command, term),
+  const data: ICliCommandSectionData = { command: command ?? "" };
+  return defineSection(DETAILS_PANEL_SECTIONS.CLI_COMMAND, {
+    isEmpty: !command,
     data,
-  };
+    customMatch: (term: string) => includesCI(command ?? "", term),
+  });
 }
 
 // Order here determines the on-screen order of the accordion cards.
-const SECTION_BUILDERS: SectionBuilder[] = [
+const SECTION_BUILDERS: SectionBuilder<IBuildSearchableSectionsInput>[] = [
   buildGeneralSection,
   buildEnvironmentSection,
   buildNetworkSection,
@@ -1000,7 +1042,7 @@ const SECTION_BUILDERS: SectionBuilder[] = [
  * when the section has no data to show; empty sections are filtered out.
  */
 export function buildSearchableSections(input: IBuildSearchableSectionsInput): IDetailsPanelSectionDef[] {
-  return SECTION_BUILDERS.map((build) => build(input)).filter((s): s is IDetailsPanelSectionDef => s !== undefined);
+  return buildSections(SECTION_BUILDERS, input);
 }
 
 function includesCI(haystack: string, term: string): boolean {

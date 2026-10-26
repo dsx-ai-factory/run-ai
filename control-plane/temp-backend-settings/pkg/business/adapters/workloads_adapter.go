@@ -13,7 +13,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/autorization"
 	"github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/business/settings"
-	wc_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wc_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 var settingKeyToWorkloadsAPIKey = map[string]wc_openapi.WorkloadsSettingsKeyEnum{

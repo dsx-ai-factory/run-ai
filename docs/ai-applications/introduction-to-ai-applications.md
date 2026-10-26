@@ -13,13 +13,13 @@ An AI application represents a high-level logical grouping of all Kubernetes res
 
 AI applications are deployed using Kubernetes Helm charts into an NVIDIA Run:ai project. You can submit an AI application directly from the NVIDIA Run:ai platform by selecting a chart from the NGC catalog or providing a custom Helm chart URL. See [AI applications](ai-applications.md) for step-by-step instructions.
 
-<Info>
+<Note>
 
 **Note**
 
 AI applications can also be deployed externally by running a Helm chart directly into an NVIDIA Run:ai project namespace. For guidance on creating or configuring Helm charts, see the official [Helm](https://helm.sh/docs/intro/using_helm/) documentation.
 
-</Info>
+</Note>
 
 Once the chart is deployed:
 

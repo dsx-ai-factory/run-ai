@@ -55,6 +55,32 @@ func (s *SynchronizationAPIService) ListAssetsById(ctx context.Context, id strin
 	return Response(http.StatusNotImplemented, nil), errors.New("ListAssetsById method not implemented")
 }
 
+// K8sObjectsSyncUpdates - Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+func (s *SynchronizationAPIService) K8sObjectsSyncUpdates(ctx context.Context, clusterId string, after int64, clusterSyncReport ClusterSyncReport) (ImplResponse, error) {
+	// TODO - update K8sObjectsSyncUpdates with the required logic for this service method.
+	// Add api_synchronization_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, K8sObjectsUpdatesResp{}) or use other options such as http.Ok ...
+	// return Response(200, K8sObjectsUpdatesResp{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
+	// return Response(404, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("K8sObjectsSyncUpdates method not implemented")
+}
+
 // CredentialsSyncUpdates - Allow cluster to request a list of updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
 func (s *SynchronizationAPIService) CredentialsSyncUpdates(ctx context.Context, clusterId string, after int64, clusterSyncReport ClusterSyncReport) (ImplResponse, error) {
 	// TODO - update CredentialsSyncUpdates with the required logic for this service method.

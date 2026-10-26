@@ -16,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/controllers"
+	syncutil "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/util"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/test/fakecachedclient"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	. "github.com/onsi/ginkgo/v2"
@@ -36,6 +37,7 @@ var _ = Describe("A Secret controller test", func() {
 	var createdSecretName chan string
 	var syncedSecretNumber chan int
 	var tested chan bool
+	var personalCredentialCopyCalls chan string
 
 	var stopper chan struct{}
 	var ctx context.Context
@@ -52,9 +54,12 @@ var _ = Describe("A Secret controller test", func() {
 	Context("runai backend is alive, one secret is in the cluster", Serial, func() {
 		var existingSecret = BuildSecret(NamespaceIdForTests, "existing-secret", commonconstants.RunaiResourceLabel, "password")
 		var addedSecret = BuildSecret(NamespaceIdForTests, "new-secret-1", commonconstants.RunaiResourceLabel, "password")
+		var existingPersonalCredentialCopy = BuildSecret(NamespaceIdForTests, "existing-personal-credential-copy", commonconstants.RunaiAssetLabel, "password")
 		var expectedIssues []k8sobjectstracker.Issue
 
 		BeforeEach(func() {
+			existingPersonalCredentialCopy.Labels[syncutil.PersonalCredentialCopyLabel] = syncutil.TrueAsString
+
 			// init channels
 			syncedSecretName = make(chan string, 1)
 			deletedSecretName = make(chan string, 1)
@@ -62,6 +67,7 @@ var _ = Describe("A Secret controller test", func() {
 			syncedSecretNumber = make(chan int, 1)
 			expectedIssues = nil
 			tested = make(chan bool, 1)
+			personalCredentialCopyCalls = make(chan string, 10)
 
 			//start server Route Handler of Secret sync
 			server.RouteToHandler("POST", "/api/v1/secrets/7daba6ee-2ea9-4af3-b735-a364bcdff72f/namespace/runai-namespace-project", func(writer http.ResponseWriter, request *http.Request) {
@@ -95,6 +101,16 @@ var _ = Describe("A Secret controller test", func() {
 				tested <- true
 			})
 
+			server.RouteToHandler("POST", "/api/v1/secrets/7daba6ee-2ea9-4af3-b735-a364bcdff72f/namespace/runai-namespace-project/personal-credential-copy", func(writer http.ResponseWriter, request *http.Request) {
+				personalCredentialCopyCalls <- request.Method
+				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
+			})
+
+			server.RouteToHandler("DELETE", "/api/v1/secrets/7daba6ee-2ea9-4af3-b735-a364bcdff72f/namespace/runai-namespace-project/personal-credential-copy", func(writer http.ResponseWriter, request *http.Request) {
+				personalCredentialCopyCalls <- request.Method
+				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
+			})
+
 			//start server Route Handler of Secret delete
 			server.RouteToHandler("DELETE", "/api/v1/secrets/7daba6ee-2ea9-4af3-b735-a364bcdff72f/namespace/runai-namespace-project/existing-secret", func(writer http.ResponseWriter, request *http.Request) {
 				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
@@ -105,7 +121,13 @@ var _ = Describe("A Secret controller test", func() {
 			runaiProject := BuildProject(ProjectIdForTests, ProjectIdForTests, NamespaceIdForTests)
 			kaiProject := BuildKaiProject(ProjectIdForTests, ProjectIdForTests, NamespaceIdForTests)
 
-			fakeClientBuilder := fakerunaiclient.NewClientBuilder().WithScheme(GetTestScheme()).WithObjects(runaiManagedNamespace, runaiProject, kaiProject, existingSecret)
+			fakeClientBuilder := fakerunaiclient.NewClientBuilder().WithScheme(GetTestScheme()).WithObjects(
+				runaiManagedNamespace,
+				runaiProject,
+				kaiProject,
+				existingSecret,
+				existingPersonalCredentialCopy,
+			)
 			fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
 
 			// 3. start secret controller and Liveness
@@ -128,6 +150,7 @@ var _ = Describe("A Secret controller test", func() {
 			close(createdSecretName)
 			close(syncedSecretNumber)
 			close(tested)
+			close(personalCredentialCopyCalls)
 		})
 
 		It("Tests Secret sync", func() {
@@ -166,6 +189,27 @@ var _ = Describe("A Secret controller test", func() {
 			err := fakeCachedClient.Create(context.TODO(), issuedSecret)
 			Expect(err).To(BeNil())
 			Eventually(tested).WithTimeout(time.Second * 10).Should(Receive(BeTrue()))
+		})
+
+		It("does not sync marked personal credential copies during create, update, rotation, or delete", func() {
+			Eventually(syncedSecretNumber).WithTimeout(threeSecondTimeout).Should(Receive(Equal(1)))
+
+			secret := BuildSecret(NamespaceIdForTests, "personal-credential-copy", commonconstants.RunaiAssetLabel, "password")
+			secret.Labels[syncutil.PersonalCredentialCopyLabel] = syncutil.TrueAsString
+			secret.Data = map[string][]byte{"password": []byte("first")}
+			Expect(fakeCachedClient.Create(context.TODO(), secret)).To(Succeed())
+			Consistently(personalCredentialCopyCalls, 500*time.Millisecond).ShouldNot(Receive())
+
+			secret.Data["username"] = []byte("user")
+			Expect(fakeCachedClient.Update(context.TODO(), secret)).To(Succeed())
+			Consistently(personalCredentialCopyCalls, 500*time.Millisecond).ShouldNot(Receive())
+
+			secret.Data["password"] = []byte("rotated")
+			Expect(fakeCachedClient.Update(context.TODO(), secret)).To(Succeed())
+			Consistently(personalCredentialCopyCalls, 500*time.Millisecond).ShouldNot(Receive())
+
+			Expect(fakeCachedClient.Delete(context.TODO(), secret)).To(Succeed())
+			Consistently(personalCredentialCopyCalls, 500*time.Millisecond).ShouldNot(Receive())
 		})
 	})
 })

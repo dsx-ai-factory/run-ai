@@ -66,6 +66,7 @@ const props = withDefaults(
     title?: string;
     orientation?: "horizontal" | "vertical";
     ctAs?: INotificationBarCta[];
+    iconOverride?: string;
   }>(),
   {
     variant: ENotificationBarVariant.Info,
@@ -76,6 +77,7 @@ const props = withDefaults(
     title: undefined,
     orientation: "horizontal",
     ctAs: undefined,
+    iconOverride: undefined,
   },
 );
 
@@ -86,7 +88,7 @@ defineEmits<{
 const config = computed(() => variantConfig[props.variant] ?? variantConfig[ENotificationBarVariant.Info]);
 
 const containerClasses = computed(() => config.value.background);
-const icon = computed(() => config.value.icon);
+const icon = computed(() => props.iconOverride ?? config.value.icon);
 const iconClasses = computed(() => config.value.iconColor);
 const orientationClass = computed(() =>
   props.orientation === "vertical" ? "notification-alert-bar--vertical" : "notification-alert-bar--horizontal",

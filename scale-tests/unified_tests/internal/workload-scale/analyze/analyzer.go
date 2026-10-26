@@ -6,7 +6,7 @@
 package analyze
 
 import (
-	workloadclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/workload-scale"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/workload-scale/aggregated_report/common/stages"
 	"sort"

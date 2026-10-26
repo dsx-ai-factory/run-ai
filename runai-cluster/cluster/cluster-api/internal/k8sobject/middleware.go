@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	workloadsapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/auth"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/go-chi/chi/v5"

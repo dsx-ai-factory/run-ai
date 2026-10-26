@@ -2,6 +2,8 @@
 
 To allow users to securely submit workloads using `kubectl`, you must configure the Kubernetes API server to authenticate users via the NVIDIA Run:ai identity provider. This is done by adding OpenID Connect (OIDC) flags to the Kubernetes API server configuration on each cluster.&#x20;
 
+Each predefined role is mapped to Kubernetes ClusterRoles. When users authenticate to the cluster with their NVIDIA Run:ai identity, they receive the permissions of these ClusterRoles when they use `kubectl`. To see what each role grants in Kubernetes, refer to [Role to ClusterRole Mapping](../../platform-management/authentication/role-clusterrole-mapping.md).
+
 ### Retrieve Required OIDC Flags
 
 1. Go to **General settings**
@@ -20,24 +22,24 @@ To allow users to securely submit workloads using `kubectl`, you must configure 
 * `--oidc-issuer-url` - The URL of the NVIDIA Run:ai identity provider
 * `--oidc-username-prefix` - Prefix prepended to username claims to prevent clashes with existing names (e.g., `-user@example.com`).
 
-<Info>
+<Note>
 
 **Note**
 
 These flags must be configured in the API server startup parameters for each cluster in your environment.
 
-</Info>
+</Note>
 
 ## Kubernetes Distribution-Specific Configuration
 
-<Info>
+<Note>
 
 **Note**
 
 * Azure Kubernetes Service (AKS) is not supported.
 * For other Kubernetes distributions, refer to specific instructions in the documentation.
 
-</Info>
+</Note>
 
 <Accordion title="Vanilla Kubernetes">
 
@@ -45,7 +47,7 @@ These flags must be configured in the API server startup parameters for each clu
 
 1. Locate the Kubernetes API server configuration file. For vanilla Kubernetes, the configuration file is typically located at: `/etc/kubernetes/manifests/kube-apiserver.yaml`.
 2. Edit the file. Under the `command` section, add the [required OIDC flags](cluster-authentication.md#retrieve-required-oidc-values).
-3.  Verify that the changes have been applied. After saving the file, the API server should automatically restart since it's managed as a static pod. Confirm that the `kube-apiserver-<master-node-name>` pod in the `kube-system` namespace has restarted and is running with the new configuration. You can run the following command to check the pod status:
+3.  Verify that the changes have been applied. After saving the file, the API server should automatically restart since it is managed as a static pod. Confirm that the `kube-apiserver-<master-node-name>` pod in the `kube-system` namespace has restarted and is running with the new configuration. You can run the following command to check the pod status:
 
     ```bash
     kubectl get pods -n kube-system kube-apiserver-<master-node-name> -o yaml
@@ -65,7 +67,7 @@ No additional configuration is required.
 
 **Rancher Kubernetes Engine 2 (RKE2)**
 
-If you're using the [RKE2 Quickstart](https://docs.rke2.io/install/quickstart/):
+If you are using the [RKE2 Quickstart](https://docs.rke2.io/install/quickstart/):
 
 1. Edit `/etc/rancher/rke2/config.yaml`.
 2.  Add the [required OIDC flags](cluster-authentication.md#retrieve-required-oidc-values) under `kube-apiserver-arg`, using the format shown below:
@@ -76,7 +78,7 @@ If you're using the [RKE2 Quickstart](https://docs.rke2.io/install/quickstart/):
     ...
     ```
 
-If you're using Rancher UI:
+If you are using Rancher UI:
 
 1. Add the required flags during the cluster provisioning process.
 2. Navigate to: Cluster Management > Create, select RKE2, and choose your platform.
@@ -150,7 +152,7 @@ The process can take up to 30 minutes.
 
 **NVIDIA Base Command Manager (BCM)**
 
-While it is possible to edit the manifest files directly on the control plane nodes (as described in the Vanilla Kubernetes instructions), the BCM preferred method is to make changes through the kubeadm configmap. This ensures that kubeadm can always regenerate the manifest files correctly — for example, when adding new control plane nodes or upgrading Kubernetes.
+While it is possible to edit the manifest files directly on the control plane nodes (as described in the Vanilla Kubernetes instructions), the BCM preferred method is to make changes through the kubeadm configmap. This ensures that kubeadm can always regenerate the manifest files correctly, for example, when adding new control plane nodes or upgrading Kubernetes.
 
 <Warning>
 

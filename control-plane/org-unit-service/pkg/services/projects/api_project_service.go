@@ -30,10 +30,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
+	workloads_client "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	telemetry "github.com/dsx-ai-factory/run-ai/runai-application-packages/telemetry"
-	workloads_client "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/google/uuid"
@@ -96,6 +96,20 @@ func createFieldsMap() map[string][]string {
 }
 
 func (s *ProjectApiService) CountProjects(ctx context.Context, filterBy []string, search string) (api.ImplResponse, error) {
+	permittedScopes, err := auth_client.ParsePermittedScopes(ctx)
+	if err != nil {
+		permittedScopes = nil
+	}
+	return s.countProjects(ctx, filterBy, search, permittedScopes)
+}
+
+func (s *ProjectApiService) CountInternalProjects(ctx context.Context, filterBy []string, search string) (api.ImplResponse, error) {
+	return s.countProjects(ctx, filterBy, search, nil)
+}
+
+func (s *ProjectApiService) countProjects(ctx context.Context, filterBy []string, search string,
+	permittedScopes *openapi.PermittedScopes,
+) (api.ImplResponse, error) {
 	tenantId, tenantErr := services.ParseTenantId(ctx)
 	if tenantErr != nil {
 		return services.HandleError(tenantErr, http.StatusBadRequest, "Failed to parse tenant id"), nil
@@ -105,11 +119,6 @@ func (s *ProjectApiService) CountProjects(ctx context.Context, filterBy []string
 	if filterErr != nil {
 		errResponse := services.HandleError(filterErr, http.StatusBadRequest, fmt.Sprintf("filters %s invalid", filterBy))
 		return errResponse, nil
-	}
-
-	permittedScopes, err := auth_client.ParsePermittedScopes(ctx)
-	if err != nil {
-		permittedScopes = nil
 	}
 
 	count, dbErr := dao.CountProjects(ctx, *tenantId, permittedScopes, filters, search, models.SlimVerbosity)

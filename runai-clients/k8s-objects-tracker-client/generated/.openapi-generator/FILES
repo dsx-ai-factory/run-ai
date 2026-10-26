@@ -5,8 +5,10 @@ README.md
 api/openapi.yaml
 api_cluster_objects_status.go
 api_config_maps.go
+api_device_classes.go
 api_health.go
 api_pvcs.go
+api_resource_claim_templates.go
 api_secrets.go
 api_storage_class_configuration.go
 api_storage_classes.go
@@ -28,6 +30,9 @@ docs/ConfigMaps.md
 docs/ConfigMapsAPI.md
 docs/ConfigMapsListResponse.md
 docs/CreateClusterWidePvcV1Request.md
+docs/DeviceClass.md
+docs/DeviceClasses.md
+docs/DeviceClassesAPI.md
 docs/Error.md
 docs/HealthAPI.md
 docs/Issue.md
@@ -46,6 +51,10 @@ docs/PvcAttributesToRemove.md
 docs/PvcPhaseOptional.md
 docs/PvcSupportedAccessModes.md
 docs/PvcVolumeMode.md
+docs/ResourceClaimTemplate.md
+docs/ResourceClaimTemplates.md
+docs/ResourceClaimTemplatesAPI.md
+docs/ResourceScopeType.md
 docs/Secret.md
 docs/SecretCreationRequest.md
 docs/SecretListInfo.md
@@ -93,6 +102,8 @@ model_config_map_list_info.go
 model_config_maps.go
 model_config_maps_list_response.go
 model_create_cluster_wide_pvc_v1_request.go
+model_device_class.go
+model_device_classes.go
 model_error.go
 model_issue.go
 model_origin.go
@@ -109,6 +120,9 @@ model_pvc_phase_optional.go
 model_pvc_supported_access_modes.go
 model_pvc_volume_mode.go
 model_pvcs.go
+model_resource_claim_template.go
+model_resource_claim_templates.go
+model_resource_scope_type.go
 model_secret.go
 model_secret_creation_request.go
 model_secret_list_info.go
@@ -139,8 +153,10 @@ model_volume_mode_customization_supported_values.go
 response.go
 test/api_cluster_objects_status_test.go
 test/api_config_maps_test.go
+test/api_device_classes_test.go
 test/api_health_test.go
 test/api_pvcs_test.go
+test/api_resource_claim_templates_test.go
 test/api_secrets_test.go
 test/api_storage_class_configuration_test.go
 test/api_storage_classes_test.go

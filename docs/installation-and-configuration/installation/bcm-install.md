@@ -1,30 +1,11 @@
----
-layout:
-  width: default
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: false
-  metadata:
-    visible: true
-  tags:
-    visible: true
----
-
 # Base Command Manager (BCM)
 
-<Info>
+<Note>
 
 **Note**
 
 NVIDIA Run:ai version 3.0 is not yet available through NVIDIA Base Command Manager (BCM).
 
-NVIDIA Base Command Manager (BCM) currently supports NVIDIA Run:ai versions [2.26](https://run-ai-docs.nvidia.com/self-hosted/getting-started/installation/bcm-install), [2.25](https://run-ai-docs.nvidia.com/self-hosted/2.25/getting-started/installation/bcm-install), and [2.23](https://run-ai-docs.nvidia.com/self-hosted/2.23/getting-started/installation/bcm-install). If you are deploying through BCM, refer to the BCM-specific installation instructions for these supported releases.
+NVIDIA Base Command Manager (BCM) currently supports NVIDIA Run:ai versions [2.25](https://run-ai-docs.nvidia.com/self-hosted/2.25/getting-started/installation/bcm-install) and [2.23](https://run-ai-docs.nvidia.com/self-hosted/2.23/getting-started/installation/bcm-install). If you are deploying through BCM, refer to the BCM-specific installation instructions for these supported releases.
 
-</Info>
+</Note>

@@ -63,7 +63,6 @@ export default {
     }
   }
   .tool-tip-dark {
-    // TODO: check why its not working
     background-color: $positive;
     color: $white;
   }

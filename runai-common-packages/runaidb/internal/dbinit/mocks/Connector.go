@@ -19,10 +19,19 @@ func NewConnector(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Connector {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Connector{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -74,14 +83,20 @@ type Connector_ConnectDB_Call struct {
 }
 
 // ConnectDB is a helper method to define mock.On call
-//   - conf
-func (_e *Connector_Expecter) ConnectDB(conf interface{}) *Connector_ConnectDB_Call {
+//   - conf *config.Config
+func (_e *Connector_Expecter) ConnectDB(conf any) *Connector_ConnectDB_Call {
 	return &Connector_ConnectDB_Call{Call: _e.mock.On("ConnectDB", conf)}
 }
 
 func (_c *Connector_ConnectDB_Call) Run(run func(conf *config.Config)) *Connector_ConnectDB_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*config.Config))
+		var arg0 *config.Config
+		if args[0] != nil {
+			arg0 = args[0].(*config.Config)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -130,14 +145,20 @@ type Connector_ConnectReadDB_Call struct {
 }
 
 // ConnectReadDB is a helper method to define mock.On call
-//   - conf
-func (_e *Connector_Expecter) ConnectReadDB(conf interface{}) *Connector_ConnectReadDB_Call {
+//   - conf *config.Config
+func (_e *Connector_Expecter) ConnectReadDB(conf any) *Connector_ConnectReadDB_Call {
 	return &Connector_ConnectReadDB_Call{Call: _e.mock.On("ConnectReadDB", conf)}
 }
 
 func (_c *Connector_ConnectReadDB_Call) Run(run func(conf *config.Config)) *Connector_ConnectReadDB_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*config.Config))
+		var arg0 *config.Config
+		if args[0] != nil {
+			arg0 = args[0].(*config.Config)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

@@ -45,6 +45,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -355,7 +356,7 @@ func (h *ExternalWorkloadHandler) handleTopOwnedObject(ctx context.Context, obje
 		// this is not considered an error, no need to retry
 		return nil
 	}
-	externWorkloadOfObj, err := utils.GetExternalWorkloadOfObject(ctx, string(uid), object.GetNamespace(), h.cachedClient)
+	externWorkloadOfObj, err := h.getOrRebindExternalWorkloadOfObject(ctx, object, uid)
 	if err != nil || externWorkloadOfObj == nil {
 		if errors.IsNotFound(err) {
 			return h.createExternalWorkloadForObject(ctx, object)
@@ -452,6 +453,68 @@ func (h *ExternalWorkloadHandler) createExternalWorkloadForObject(ctx context.Co
 	return nil
 }
 
+// getOrRebindExternalWorkloadOfObject finds the ExternalWorkload of a top-owned object, falling
+// back to re-binding a surviving one when the object is a child the workload runner has just recreated.
+func (h *ExternalWorkloadHandler) getOrRebindExternalWorkloadOfObject(ctx context.Context,
+	object client.Object, uid types.UID,
+) (*v1alpha1.ExternalWorkload, error) {
+	externalWorkload, err := utils.GetExternalWorkloadOfObject(ctx, string(uid),
+		object.GetNamespace(), h.cachedClient)
+	if err == nil || !errors.IsNotFound(err) {
+		return externalWorkload, err
+	}
+
+	reboundEW, rebindErr := h.rebindExternalWorkloadToObject(ctx, object, uid)
+	if rebindErr != nil {
+		return nil, rebindErr
+	}
+	if reboundEW == nil {
+		// nothing safe to re-bind, so the caller creates a new one
+		return nil, err
+	}
+	return reboundEW, nil
+}
+
+// rebindExternalWorkloadToObject re-points a surviving ExternalWorkload at the child the runner
+// just recreated: the workload runner owns it, so it outlives the child, but it is looked up by the child
+// uid, which changes on every restart of the workload.
+// Returns nil when there is nothing safe to re-bind.
+func (h *ExternalWorkloadHandler) rebindExternalWorkloadToObject(ctx context.Context,
+	object client.Object, uid types.UID,
+) (*v1alpha1.ExternalWorkload, error) {
+	runnerRef := workloadRunnerOwnerRef(object)
+	if runnerRef == nil || runnerRef.UID == "" {
+		return nil, nil
+	}
+
+	existing, err := utils.GetExternalWorkloadOfWorkloadRunner(ctx, string(runnerRef.UID),
+		object.GetNamespace(), h.cachedClient)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	// without this annotation the workload id falls back to the child uid, which would change the
+	// control-plane identity on every restart
+	if existing.Annotations[commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload] == "" {
+		return nil, nil
+	}
+
+	reboundEW := existing.DeepCopy()
+	reboundEW.Spec.OriginalWorkloadUID = uid
+	if err = h.cachedClient.Patch(ctx, reboundEW, client.MergeFrom(existing)); err != nil {
+		log.Error().Msgf("Failed to re-bind externalworkload <%s/%s>, error: %s",
+			reboundEW.Namespace, reboundEW.Name, err.Error())
+		return nil, err
+	}
+
+	log.Info().Msgf("Re-bound externalworkload <%s/%s> to recreated %s",
+		reboundEW.Namespace, reboundEW.Name, objectLogStr(object))
+	return reboundEW, nil
+}
+
 func (h *ExternalWorkloadHandler) getOriginalWorkloadUidName(object client.Object) (types.UID, string, error) {
 	gvk := object.GetObjectKind().GroupVersionKind()
 	gvkHandler, found := h.supportedGVKsHandlers[gvk]
@@ -481,6 +544,18 @@ func (h *ExternalWorkloadHandler) getOwnerReferences(object client.Object) []met
 				return ownerReferences
 			}
 			// else, we fall back to the default owner reference, to be on the safe side and never have a nil owner reference.
+		}
+	}
+
+	// the runner outlives the children it recreates, so it owns the external workload
+	if runnerRef := workloadRunnerOwnerRef(object); runnerRef != nil {
+		return []metav1.OwnerReference{
+			{
+				APIVersion: runnerRef.APIVersion,
+				Kind:       runnerRef.Kind,
+				Name:       runnerRef.Name,
+				UID:        runnerRef.UID,
+			},
 		}
 	}
 
@@ -553,8 +628,10 @@ func (h *ExternalWorkloadHandler) updateSpecIfNeeded(ctx context.Context,
 	labelsChanged := !maps.Equal(originalExternalWorkload.Labels, externalWorkloadToUpdate.Labels)
 	// Annotations carry the ewi-status handshake; without this they only persist when spec/labels also change.
 	annotationsChanged := !maps.Equal(originalExternalWorkload.Annotations, externalWorkloadToUpdate.Annotations)
+	ownerRefsChanged := !reflect.DeepEqual(originalExternalWorkload.OwnerReferences,
+		externalWorkloadToUpdate.OwnerReferences)
 
-	if specChanged || labelsChanged || annotationsChanged {
+	if specChanged || labelsChanged || annotationsChanged || ownerRefsChanged {
 		return h.updateExternalWorkload(ctx, externalWorkloadToUpdate)
 	}
 	return nil
@@ -596,6 +673,7 @@ func (h *ExternalWorkloadHandler) parseObjectToExternalWorkload(ctx context.Cont
 	// Group or Version.
 	externalWorkload.Spec.Group = gvk.Group
 	externalWorkload.Spec.Version = gvk.Version
+	externalWorkload.Spec.OriginalWorkloadKind = gvk.Kind
 
 	gvkHandler, found := h.supportedGVKsHandlers[gvk]
 	if !found {
@@ -700,13 +778,23 @@ func (h *ExternalWorkloadHandler) setWorkloadCategory(ctx context.Context, objec
 }
 
 func setWorkloadRunnerLabel(object client.Object, externalWorkload *v1alpha1.ExternalWorkload) {
-	for _, ownerRef := range object.GetOwnerReferences() {
-		if ownerRef.Kind == dromosv1alpha1.WorkloadRunnerKind &&
-			ownerRef.APIVersion == v1alpha1.SchemeGroupVersion.String() {
-			addToLabels(externalWorkload, commonconstants.WorkloadRunnerNameLabel, ownerRef.Name)
-			return
+	runnerRef := workloadRunnerOwnerRef(object)
+	if runnerRef == nil {
+		return
+	}
+	addToLabels(externalWorkload, commonconstants.WorkloadRunnerNameLabel, runnerRef.Name)
+	addToLabels(externalWorkload, commonconstants.WorkloadRunnerUidLabel, string(runnerRef.UID))
+}
+
+func workloadRunnerOwnerRef(object client.Object) *metav1.OwnerReference {
+	ownerRefs := object.GetOwnerReferences()
+	for i := range ownerRefs {
+		if ownerRefs[i].Kind == dromosv1alpha1.WorkloadRunnerKind &&
+			ownerRefs[i].APIVersion == v1alpha1.SchemeGroupVersion.String() {
+			return &ownerRefs[i]
 		}
 	}
+	return nil
 }
 
 func addToLabels(object client.Object, label, value string) {
@@ -1027,6 +1115,7 @@ func equalExternalWorkloadSpec(left, right *v1alpha1.ExternalWorkloadSpec) bool 
 	return left.ImageName == right.ImageName &&
 		left.Group == right.Group &&
 		left.Version == right.Version &&
+		left.OriginalWorkloadKind == right.OriginalWorkloadKind &&
 		reflect.DeepEqual(left.RequestedNodePools, right.RequestedNodePools) &&
 		reflect.DeepEqual(left.RequestedPods, right.RequestedPods) &&
 		reflect.DeepEqual(left.PriorityClassName, right.PriorityClassName) &&
@@ -1147,4 +1236,128 @@ func fillTopology(annotations map[string]string, externalWorkload *v1alpha1.Exte
 	externalWorkload.Spec.Topology.Name = topologyName
 	externalWorkload.Spec.Topology.PreferredPlacement = topologyPreferred
 	externalWorkload.Spec.Topology.RequiredPlacement = topologyRequired
+}
+
+func (h *ExternalWorkloadHandler) handleWorkloadRunnerWithoutObject(ctx context.Context,
+	task utils.ExternalWorkloadTask,
+) error {
+	runner := &dromosv1alpha1.WorkloadRunner{}
+	key := client.ObjectKey{Name: task.WorkloadRunnerName, Namespace: task.Key.Namespace}
+	if err := h.cachedClient.Get(ctx, key, runner); err != nil {
+		if errors.IsNotFound(err) {
+			return nil
+		}
+		log.Warn().Msgf("Failed to get WorkloadRunner <%s/%s>, error: %s",
+			key.Namespace, key.Name, err.Error())
+		return err
+	}
+
+	return h.createExternalWorkloadForRunner(ctx, runner)
+}
+
+// createExternalWorkloadForRunner builds an ExternalWorkload for a runner whose workload object
+// was never created, so the workload is reported with the runner's phase and issues instead of
+// being absent from the control plane. The spec stays minimal: there is nothing to parse.
+func (h *ExternalWorkloadHandler) createExternalWorkloadForRunner(ctx context.Context,
+	runner *dromosv1alpha1.WorkloadRunner,
+) error {
+	// the annotation is what keeps the control-plane identity stable once the workload object
+	// appears and the ExternalWorkload is re-bound to it
+	workloadId := runner.Annotations[commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload]
+	if workloadId == "" {
+		log.Debug().Msgf("Skipping WorkloadRunner <%s/%s>: no control-plane workload id",
+			runner.Namespace, runner.Name)
+		return nil
+	}
+
+	template := parseWorkloadRunnerTemplate(runner)
+	if template == nil {
+		log.Warn().Msgf("Skipping WorkloadRunner <%s/%s>: cannot read the workload object template",
+			runner.Namespace, runner.Name)
+		return nil
+	}
+	gvk := template.GroupVersionKind()
+	if gvk.Kind == "" || template.GetName() == "" {
+		log.Warn().Msgf("Skipping WorkloadRunner <%s/%s>: template has no name or kind",
+			runner.Namespace, runner.Name)
+		return nil
+	}
+
+	// the workload object may have appeared since the runner was enqueued; its own handler
+	// creates the ExternalWorkload, and racing it here would produce a second one
+	key := client.ObjectKey{Name: template.GetName(), Namespace: runner.Namespace}
+	if child, getErr := h.GetFreshObject(ctx, key, gvk); getErr == nil && !utils.IsObjectNilOrEmpty(child) {
+		return nil
+	}
+
+	existing, err := utils.GetExternalWorkloadOfWorkloadRunner(ctx, string(runner.UID),
+		runner.Namespace, h.cachedClient)
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	}
+	if existing != nil {
+		return nil
+	}
+
+	externalWorkload := &v1alpha1.ExternalWorkload{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      utils.GenerateExternalWorkloadName(gvk, template.GetName()),
+			Namespace: runner.Namespace,
+			Annotations: map[string]string{
+				commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload: workloadId,
+			},
+			OwnerReferences: []metav1.OwnerReference{
+				{
+					APIVersion: dromosv1alpha1.SchemeGroupVersion.String(),
+					Kind:       dromosv1alpha1.WorkloadRunnerKind,
+					Name:       runner.Name,
+					UID:        runner.UID,
+				},
+			},
+		},
+		Spec: v1alpha1.ExternalWorkloadSpec{
+			// the runner uid stands in for the workload object's; the re-bind re-points it
+			OriginalWorkloadUID:  runner.UID,
+			OriginalWorkloadName: template.GetName(),
+			OriginalWorkloadKind: gvk.Kind,
+			Type:                 externalWorkloadTypeFromObjectLabels(template.GetLabels(), gvk.Kind),
+			Group:                gvk.Group,
+			Version:              gvk.Version,
+			// a zero timestamp is rejected by the control plane and fails the whole sync batch
+			CreationTimestamp: runner.CreationTimestamp,
+		},
+	}
+
+	addToLabels(externalWorkload, commonconstants.WorkloadRunnerNameLabel, runner.Name)
+	addToLabels(externalWorkload, commonconstants.WorkloadRunnerUidLabel, string(runner.UID))
+	h.setWorkloadCategory(ctx, template, externalWorkload)
+
+	if err = h.fillHierarchyInfoForTopOwner(ctx, runner, &externalWorkload.Spec); err != nil {
+		return err
+	}
+
+	if err = h.cachedClient.Create(ctx, externalWorkload); err != nil {
+		if errors.IsAlreadyExists(err) {
+			return nil
+		}
+		return err
+	}
+
+	log.Info().Msgf("Created externalworkload <%s/%s> for WorkloadRunner <%s/%s> with no workload object",
+		externalWorkload.Namespace, externalWorkload.Name, runner.Namespace, runner.Name)
+	return nil
+}
+
+// parseWorkloadRunnerTemplate reads the workload object the runner would have created. EWI
+// depends on the runner api module only, so this mirrors cluster-sync rather than importing
+// the dromos template parser.
+func parseWorkloadRunnerTemplate(runner *dromosv1alpha1.WorkloadRunner) *unstructured.Unstructured {
+	if len(runner.Spec.Template.Raw) == 0 {
+		return nil
+	}
+	object := make(map[string]any)
+	if err := json.Unmarshal(runner.Spec.Template.Raw, &object); err != nil {
+		return nil
+	}
+	return &unstructured.Unstructured{Object: object}
 }

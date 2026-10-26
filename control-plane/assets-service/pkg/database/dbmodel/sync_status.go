@@ -51,6 +51,19 @@ var DatasourceAssetsToSync = []api.AssetKind{
 }
 var dataSourceAssetsToSync = datastructs.NewSet(DatasourceAssetsToSync...)
 
+var K8sObjectsAssetsToSync = []api.AssetKind{
+	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
+}
+var k8sObjectsAssetsToSyncSet = datastructs.NewSet(K8sObjectsAssetsToSync...)
+
+// k8sObjectDisplayName maps each k8s-object asset kind to a human-readable
+// singular noun used in user-visible messages (e.g. cluster sync failures).
+// Kept alongside K8sObjectsAssetsToSync so new kinds land here in the same
+// change.
+var k8sObjectDisplayName = map[api.AssetKind]string{
+	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE: "resource claim template",
+}
+
 func (SyncStatusRec) TableName() string {
 	return dbtables.TableNameSyncStatus
 }
@@ -110,6 +123,13 @@ func (ssr *SyncStatusRec) DetermineStatus(ctx context.Context, meta *api.AssetMe
 			}
 			if dataSourceAssetsToSync.Has(meta.Kind) {
 				(*status).Message = "The data source couldn't be synchronized to the cluster"
+			}
+			if k8sObjectsAssetsToSyncSet.Has(meta.Kind) {
+				name, ok := k8sObjectDisplayName[meta.Kind]
+				if !ok {
+					name = "k8s object"
+				}
+				(*status).Message = "The " + name + " couldn't be synchronized to the cluster"
 			}
 		} else {
 			(*status).Status = api.ASSETSYNCSTATUSENUM_DELETION_FAILED

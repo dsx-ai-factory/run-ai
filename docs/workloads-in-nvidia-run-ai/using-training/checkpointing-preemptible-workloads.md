@@ -48,13 +48,13 @@ def graceful_exit_handler(signum, frame):
 signal.signal(signal.SIGTERM, graceful_exit_handler)
 ```
 
-<Info>
+<Note>
 
 **Note**
 
 For the signal to be captured, it must be propagated from the startup script to the Python child process. See code [here](https://github.com/run-ai/docs/blob/master/quickstart/unattended-execution/startup.sh).
 
-</Info>
+</Note>
 
 ## Grace Period for Preemption
 

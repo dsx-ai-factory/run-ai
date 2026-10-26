@@ -1,0 +1,128 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+package measure
+
+import (
+	"fmt"
+	"testing"
+	"time"
+)
+
+func arrivals(base time.Time, durations ...time.Duration) []Timing {
+	timings := make([]Timing, 0, len(durations))
+	for i, d := range durations {
+		created := base.Add(time.Duration(i) * time.Second)
+		timings = append(timings, Timing{Name: fmt.Sprintf("w%d", i), Outcome: Arrived, Created: created, Arrived: created.Add(d), Duration: d})
+	}
+	return timings
+}
+
+func neverArrived(n int) []Timing {
+	timings := make([]Timing, 0, n)
+	for i := range n {
+		timings = append(timings, Timing{Name: fmt.Sprintf("p%d", i), Outcome: NeverArrived})
+	}
+	return timings
+}
+
+func seconds(values ...int) []time.Duration {
+	out := make([]time.Duration, 0, len(values))
+	for _, v := range values {
+		out = append(out, time.Duration(v)*time.Second)
+	}
+	return out
+}
+
+func TestStatsPercentiles(t *testing.T) {
+	base := time.Date(2026, 9, 17, 12, 0, 0, 0, time.UTC)
+	cases := []struct {
+		name          string
+		durations     []time.Duration
+		p50, p90, p99 time.Duration
+	}{
+		{"odd count", seconds(1, 2, 3, 4, 5), 3 * time.Second, 5 * time.Second, 5 * time.Second},
+		{"even count", seconds(1, 2, 3, 4), 2 * time.Second, 4 * time.Second, 4 * time.Second},
+		{"single", seconds(7), 7 * time.Second, 7 * time.Second, 7 * time.Second},
+		{"unsorted input", seconds(9, 1, 5, 3, 7, 2, 8, 4, 6, 10), 5 * time.Second, 9 * time.Second, 10 * time.Second},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got := Stats(arrivals(base, tc.durations...))
+			if got.P50 != tc.p50 || got.P90 != tc.p90 || got.P99 != tc.p99 {
+				t.Fatalf("p50/p90/p99 = %s/%s/%s, want %s/%s/%s", got.P50, got.P90, got.P99, tc.p50, tc.p90, tc.p99)
+			}
+			if got.SampleSize != len(tc.durations) {
+				t.Fatalf("sample_size %d", got.SampleSize)
+			}
+		})
+	}
+}
+
+func TestStatsNeverArrivedIsExcludedNotZero(t *testing.T) {
+	base := time.Date(2026, 9, 17, 12, 0, 0, 0, time.UTC)
+	timings := append(arrivals(base, seconds(60, 60, 60, 60, 60)...), neverArrived(5)...)
+
+	got := Stats(timings)
+
+	if got.P50 != 60*time.Second || got.P99 != 60*time.Second {
+		t.Fatalf("items that never arrived must not enter the distribution: %+v", got)
+	}
+	if got.NeverArrivedCount != 5 || got.SampleSize != 5 {
+		t.Fatalf("expected 5 never arrived and 5 samples, got %+v", got)
+	}
+}
+
+func TestStatsFailedIsCountedNotTimed(t *testing.T) {
+	base := time.Date(2026, 9, 17, 12, 0, 0, 0, time.UTC)
+	timings := append(arrivals(base, seconds(2, 4)...), Timing{Name: "x", Outcome: Failed, Err: fmt.Errorf("boom")})
+
+	got := Stats(timings)
+
+	if got.FailedCount != 1 || got.SampleSize != 2 || got.P50 != 2*time.Second {
+		t.Fatalf("failed item must be counted only: %+v", got)
+	}
+}
+
+func TestStatsEmptyAndAllNeverArrived(t *testing.T) {
+	for name, timings := range map[string][]Timing{"empty": nil, "all never arrived": neverArrived(3)} {
+		t.Run(name, func(t *testing.T) {
+			got := Stats(timings)
+			if got.SampleSize != 0 || got.P50 != 0 || got.Throughput != 0 || got.HasThroughput() {
+				t.Fatalf("no samples must mean no latencies and no throughput: %+v", got)
+			}
+			if got.NeverArrivedCount != len(timings) {
+				t.Fatalf("never arrived items must still be counted: %+v", got)
+			}
+		})
+	}
+}
+
+func TestStatsThroughputAndMakespan(t *testing.T) {
+	base := time.Date(2026, 9, 17, 12, 0, 0, 0, time.UTC)
+	timings := arrivals(base, seconds(2, 2, 2, 2)...)
+
+	got := Stats(timings)
+
+	if got.Makespan != 5*time.Second {
+		t.Fatalf("makespan from first creation to last arrival must be 5s, got %s", got.Makespan)
+	}
+	if got.Throughput != 4.0/5.0 {
+		t.Fatalf("throughput must be 4 items / 5s, got %v", got.Throughput)
+	}
+	instant := Stats([]Timing{{Name: "a", Outcome: Arrived, Created: base, Arrived: base.Add(-time.Second)}})
+	if instant.Makespan != 0 || instant.Throughput != 0 {
+		t.Fatalf("an arrival stamped before its create must give a zero window, never a negative one: %+v", instant)
+	}
+	single := Stats(arrivals(base, seconds(2)...))
+	if single.Throughput != 0 {
+		t.Fatalf("one arrival is not a rate, got throughput %v", single.Throughput)
+	}
+	for _, summary := range []Summary{instant, single} {
+		if summary.HasThroughput() {
+			t.Fatalf("throughput needs at least two arrivals over a real window: %+v", summary)
+		}
+	}
+}

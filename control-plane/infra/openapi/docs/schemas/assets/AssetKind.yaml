@@ -20,3 +20,4 @@ enum:
   - secret-volume
   - data-volume
   - ngcApiKey
+  - resource-claim-template

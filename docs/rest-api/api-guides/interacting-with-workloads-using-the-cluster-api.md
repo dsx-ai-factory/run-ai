@@ -1,8 +1,8 @@
 # Interacting with Workloads Using the Cluster API
 
-Use the Cluster API for live, cluster-scoped operations on running workloads—checking cluster/workload status, streaming and downloading logs, executing commands, attaching to containers, and forwarding ports. For creating or managing workloads across a tenant, use the [Control plane API](../about-the-rest-api.md).
+Use the Cluster API for live, cluster-scoped operations on running workloads: checking cluster/workload status, streaming and downloading logs, executing commands, attaching to containers, and forwarding ports. For creating or managing workloads across a tenant, use the [Control plane API](../about-the-rest-api.md).
 
-The API is exposed per cluster at `https://<cluster-fqdn>/cluster-api/`. The interactive endpoints (`exec`, `attach`, `port-forward`, and both `logs` modes) use WebSocket; `status`, `logs/download`, and the cluster `status` endpoint use standard HTTPS. All endpoints require a bearer token (JWT)—refer to [How to authenticate to the API](../how-to-authenticate-to-the-api.md).
+The API is exposed per cluster at `https://<cluster-fqdn>/cluster-api/`. The interactive endpoints (`exec`, `attach`, `port-forward`, and both `logs` modes) use WebSocket; `status`, `logs/download`, and the cluster `status` endpoint use standard HTTPS. All endpoints require a bearer token (JWT), refer to [How to authenticate to the API](../how-to-authenticate-to-the-api.md).
 
 ## Before You Start
 
@@ -21,7 +21,7 @@ Most endpoints take the same four path parameters. They are documented once here
 | ------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
 | `projectName`       | Required | The NVIDIA Run:ai project name that owns the workload.                                                                                                                                                                                                                                                                                       | `project1` |
 | `workloadType`      | Required | The workload type. One of: `workspace`, `training`, `distributed`, `inference`, `external`.                                                                                                                                                                                                                                                  | `training` |
-| `workloadFramework` | Required | The workload framework. One of: `runai`, `mpi`, `pytorch`, `tf`, `xgboost`, `any`, `external`. Use `external` together with `workloadType=external` for workloads created from third-party CRDs (refer to the CRD-mapping table below). The `any` value does **not** route to anyworkload-managed third-party CRDs—use `external` for those. | `pytorch`  |
+| `workloadFramework` | Required | The workload framework. One of: `runai`, `mpi`, `pytorch`, `tf`, `xgboost`, `any`, `external`. Use `external` together with `workloadType=external` for workloads created from third-party CRDs (refer to the CRD-mapping table below). The `any` value does **not** route to any workload-managed third-party CRDs, use `external` for those. | `pytorch`  |
 | `workloadName`      | Required | The name of the workload, as it appears in the NVIDIA Run:ai UI or CLI. For workloads created from third-party CRDs, refer to the CRD-mapping table below.                                                                                                                                                                                   | `my-jp`    |
 
 ### CRD to Path Parameter Mapping
@@ -43,7 +43,7 @@ The cluster-api resolves the path parameters to an NVIDIA Run:ai V2 CRD inside t
 | `ExternalWorkload` (third-party `LeaderWorkerSet`)  | `external`    | `external`         | `ew-leaderworkerset-{originalName}`     |
 | `ExternalWorkload` (any other third-party CRD)      | `external`    | `external`         | `ew-{kind-lowercase}-{originalName}`    |
 
-<Info>
+<Note>
 
 **Tip**
 
@@ -52,15 +52,15 @@ For finding the right name:
 * For NVIDIA Run:ai-native workloads (workspace / training / distributed / inference): the name in the UI matches the `workloadName` directly.
 * For third-party CRDs: run `kubectl get externalworkloads -n runai-{project}` to list the auto-generated `ew-…` names, or look at the workload entry in the NVIDIA Run:ai UI.
 
-</Info>
+</Note>
 
-<Info>
+<Note>
 
 **Note**
 
 `GET /cluster-api/status` is cluster-scoped and does not take these parameters. All other endpoints are project- and workload-scoped.
 
-</Info>
+</Note>
 
 ## Request and Response Conventions
 
@@ -127,7 +127,7 @@ The connection closes when:
 * The bearer token expires (server closes with code `1008`).
 * Idle timeout is reached.
 
-Clients should handle abrupt disconnection and reconnect if needed. No replay is provided—on reconnect, only new log lines or output are delivered.
+Clients should handle abrupt disconnection and reconnect if needed. No replay is provided: on reconnect, only new log lines or output are delivered.
 
 ## Errors
 
@@ -150,7 +150,7 @@ All endpoints return standard HTTP status codes. Error responses have the follow
 | `403` | Forbidden             | Token is valid but the associated user lacks permission to access the project or workload.                                                                                                                                                                                                                                                                                                                                                     |
 | `404` | Not Found             | Project, pod, or container does not exist. Also returned when a workload exists but is not yet scheduled (no pods).                                                                                                                                                                                                                                                                                                                            |
 | `409` | Conflict              | Operation cannot be performed in the workload's current state (for example, `exec` on a pod that is terminating).                                                                                                                                                                                                                                                                                                                              |
-| `500` | Internal Server Error | Unexpected cluster-side failure. Also currently returned (with a plain-text body) when the requested workload cannot be located in the cluster—verify that `projectName`, `workloadType`, `workloadFramework`, and `workloadName` match an existing workload (refer to [CRD to Path Parameter Mapping](interacting-with-workloads-using-the-cluster-api.md#crd-to-path-parameter-mapping)). Retry with backoff. |
+| `500` | Internal Server Error | Unexpected cluster-side failure. Also currently returned (with a plain-text body) when the requested workload cannot be located in the cluster: verify that `projectName`, `workloadType`, `workloadFramework`, and `workloadName` match an existing workload (refer to [CRD to Path Parameter Mapping](interacting-with-workloads-using-the-cluster-api.md#crd-to-path-parameter-mapping)). Retry with backoff. |
 | `503` | Service Unavailable   | Cluster is temporarily unreachable, the cluster-api service is restarting, or the requested operation cannot complete (for example, `attach` to a container whose primary process already holds stdio).                                                                                                                                                                                                                                        |
 
 For WebSocket endpoints, authentication and permission errors are returned on the HTTP handshake (before upgrade). Errors during an active stream are reported through WebSocket close codes:
@@ -209,7 +209,7 @@ Returns the workload status as a JSON object with a `status` field carrying the 
 GET https://<cluster-fqdn>/cluster-api/api/v1/{projectName}/workloads/{workloadType}/{workloadFramework}/{workloadName}/status
 ```
 
-**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`—refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters) for values and the CRD-mapping table.
+**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`, refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters) for values and the CRD-mapping table.
 
 **Example**
 
@@ -240,7 +240,7 @@ GET wss://<cluster-fqdn>/cluster-api/api/v1/{projectName}/workloads/{workloadTyp
 
 **The `logs` endpoint is WebSocket-only**, in both one-shot and follow modes. Plain HTTPS GET returns `HTTP 426 Upgrade Required`. Each log line is delivered as a binary WebSocket message. In one-shot mode (`follow=false` or omitted), the server closes the connection with code `1000` after delivering the requested range; in follow mode, the connection stays open and new lines are pushed as they arrive.
 
-**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`—refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
+**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`, refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
 
 **Query Parameters**
 
@@ -282,7 +282,7 @@ Download the logs for a container in a pod as a file. If the pod has multiple co
 GET https://<cluster-fqdn>/cluster-api/api/v1/{projectName}/workloads/{workloadType}/{workloadFramework}/{workloadName}/logs/download
 ```
 
-**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`—refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
+**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`, refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
 
 **Query Parameters**
 
@@ -317,15 +317,15 @@ Attach to a container in a pod.
 GET wss://<cluster-fqdn>/cluster-api/api/v1/{projectName}/workloads/{workloadType}/{workloadFramework}/{workloadName}/attach
 ```
 
-<Info>
+<Note>
 
 **Tip**
 
 Attaching to a container whose primary process is already consuming stdio (for example, an actively-running training job) can fail with `503`. Use `exec` to start a new shell in the same container instead.
 
-</Info>
+</Note>
 
-**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`—refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
+**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`, refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
 
 **Query Parameters**
 
@@ -359,7 +359,7 @@ GET wss://<cluster-fqdn>/cluster-api/api/v1/{projectName}/workloads/{workloadTyp
 
 To forward more than one port, repeat the `port` query key (for example `?port=8090&port=8080`). Comma-separated lists are not accepted.
 
-**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`—refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
+**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`, refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
 
 **Query Parameters**
 
@@ -402,7 +402,7 @@ The command can be passed in two equivalent forms:
 
 For example, `["/bin/bash"]` base64-encodes to `WyIvYmluL2Jhc2giXQ==`.
 
-**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`—refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
+**Path Parameters**: `projectName`, `workloadType`, `workloadFramework`, `workloadName`, refer to [Common path parameters](interacting-with-workloads-using-the-cluster-api.md#common-path-parameters).
 
 **Query Parameters**
 
@@ -434,13 +434,13 @@ websocat -H "Authorization: Bearer $TOKEN" \
 
 ### Fetch Workload Object
 
-<Info>
+<Note>
 
 **Note**
 
 The following endpoints require **cluster v2.26 or later**.
 
-</Info>
+</Note>
 
 These endpoints return a point-in-time snapshot of the Kubernetes object for a workload, one of its child elements, or one of its pods, as read directly from the Kubernetes API server. The response includes the full `spec`, `status`, and metadata; `metadata.managedFields` and the `last-applied-configuration` annotation are stripped. Use these endpoints for inspection and debugging -- for example, to see why a component is degraded or to confirm the exact spec your workload produced after reconciliation.
 

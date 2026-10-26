@@ -33,6 +33,7 @@ import (
 	"github.com/google/uuid"
 
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
+	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/topology"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
@@ -59,6 +60,7 @@ const (
 	RequestedNodepools          = "RequestedNodepools"
 	Phase                       = "Phase"
 	Category                    = "Category"
+	Source                      = "Source"
 	Bucket                      = "Bucket"
 )
 
@@ -92,6 +94,7 @@ func createFieldsMap() map[string][]string {
 		RequestedNodepools: {"unnest(requested_nodepools)"},
 		Phase:              {"phase"},
 		Category:           {"category"},
+		Source:             {"source"},
 	}
 }
 
@@ -146,6 +149,34 @@ func validateNodepoolFilterGroups(clusterFilter string, nodepoolFilter string, g
 
 func (s *WorkloadsService) GetWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
 	clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, phases []api.Phase,
+	filterBy []string,
+) (api.ImplResponse, error) {
+	permittedScopes, scopesErr := authorization_client.ParsePermittedScopes(ctx)
+	if scopesErr != nil {
+		permittedScopes = nil
+	}
+	filters, filterErr := queryapi.NewParser(models.WorkloadView{}.TelemetryFilterFieldsToColumn()).Filters(filterBy)
+	if filterErr != nil {
+		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
+	}
+	return s.getWorkloadsTelemetry(ctx, telemetryType, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases, filters)
+}
+
+func (s *WorkloadsService) GetInternalWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
+	clusterId string, nodepoolName string, departmentId string, projectId string, groupBy []string, phases []api.Phase,
+	filterBy []string,
+) (api.ImplResponse, error) {
+	filters, filterErr := queryapi.NewParser(models.WorkloadView{}.TelemetryFilterFieldsToColumn()).Filters(filterBy)
+	if filterErr != nil {
+		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
+	}
+	return s.getWorkloadsTelemetry(ctx, telemetryType, clusterId, nodepoolName, departmentId, projectId, nil, groupBy, phases, filters)
+}
+
+func (s *WorkloadsService) getWorkloadsTelemetry(ctx context.Context, telemetryType api.WorkloadTelemetryType,
+	clusterId string, nodepoolName string, departmentId string, projectId string,
+	permittedScopes *authorization_api.PermittedScopes, groupBy []string, phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (api.ImplResponse, error) {
 	err := validateNodepoolFilterGroups(clusterId, nodepoolName, groupBy, ClusterId, CurrentNodepools)
 	if err != nil {
@@ -177,27 +208,22 @@ func (s *WorkloadsService) GetWorkloadsTelemetry(ctx context.Context, telemetryT
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
-	permittedScopes, scopesErr := authorization_client.ParsePermittedScopes(ctx)
-	if scopesErr != nil {
-		permittedScopes = nil
-	}
-
 	var telemetryGroups *[]telemetry_utils.TelemetryGroupValue
 	var dbErr *api.Error
 
 	timestamp := time.Now()
 	switch telemetryType {
 	case api.WORKLOADTELEMETRYTYPE_WORKLOADS_COUNT:
-		telemetryGroups, dbErr = s.WorkloadsDao.DbGetWorkloadCount(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases)
+		telemetryGroups, dbErr = s.WorkloadsDao.DbGetWorkloadCount(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases, filterBy)
 
 	case api.WORKLOADTELEMETRYTYPE_GPU_ALLOCATION:
-		telemetryGroups, dbErr = s.WorkloadsDao.DbGetGpuAllocation(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases)
+		telemetryGroups, dbErr = s.WorkloadsDao.DbGetGpuAllocation(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases, filterBy)
 
 	case api.WORKLOADTELEMETRYTYPE_IDLE_ALLOCATED_GPUS:
-		telemetryGroups, dbErr = s.WorkloadsDao.DbGetIdleAllocatedGpus(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases)
+		telemetryGroups, dbErr = s.WorkloadsDao.DbGetIdleAllocatedGpus(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, phases, filterBy)
 
 	case api.WORKLOADTELEMETRYTYPE_PENDING_TIME_DISTRIBUTION:
-		telemetryGroups, dbErr = s.WorkloadsDao.DbGetPendingTimeDistribution(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy)
+		telemetryGroups, dbErr = s.WorkloadsDao.DbGetPendingTimeDistribution(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, modelGroupBy, filterBy)
 
 	// case AllocationRatioTelemetryType:
 
@@ -390,7 +416,8 @@ func (s *WorkloadsService) InternalEnrichOrgUnitRanking(ctx context.Context, int
 }
 
 // GetWorkloads - List workloads. [Experimental]
-func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offset int32, limit int32, sortOrder string, sortBy string, filterBy []string, search string) (api.ImplResponse, error) {
+func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offset int32, limit int32, sortOrder string, sortBy string,
+	filterBy []string, search string) (api.ImplResponse, error) {
 	tenantId, apiErr := services_utils.ParseTenantId(ctx)
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
@@ -418,9 +445,16 @@ func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offse
 		return NewErrorResponse(dbErr), nil
 	}
 
-	apiWorkloads := []api.Workload{}
+	clusterConfigs := map[string]*checker.ClusterConfiguration{}
+	apiWorkloads := make([]api.Workload, 0, len(*workloads))
 	for _, workload := range *workloads {
-		apiWorkloads = append(apiWorkloads, WorkloadModelToApi(ctx, workload))
+		clusterId := workload.ClusterID.String()
+		clusterConfig, found := clusterConfigs[clusterId]
+		if !found {
+			clusterConfig = getClusterConfiguration(ctx, clusterId)
+			clusterConfigs[clusterId] = clusterConfig
+		}
+		apiWorkloads = append(apiWorkloads, WorkloadModelToApi(ctx, workload, clusterConfig))
 	}
 
 	recordsCount := int32(len(apiWorkloads))
@@ -428,6 +462,53 @@ func (s *WorkloadsService) GetWorkloads(ctx context.Context, deleted bool, offse
 	response := api.GetWorkloads200Response{
 		Workloads: apiWorkloads,
 	}
+	if recordsCount == limit {
+		response.Next = recordsCount + offset
+	}
+
+	return api.Response(http.StatusOK, response), nil
+}
+
+// GetWorkloadsSlim - List workloads, slim. Serves GET /api/v1/workloads/slim from the workloads table, sorted by id
+// ascending.
+func (s *WorkloadsService) GetWorkloadsSlim(ctx context.Context, offset int32, limit int32, filterBy []string) (api.ImplResponse, error) {
+	tenantId, apiErr := services_utils.ParseTenantId(ctx)
+	if apiErr != nil {
+		return NewErrorResponse(apiErr), nil
+	}
+
+	limit = setDefaultLimit(limit)
+
+	permittedScopes, err := authorization_client.ParsePermittedScopes(ctx)
+	if err != nil {
+		permittedScopes = nil
+	}
+
+	filters, filterErr := queryapi.NewParser(models.WorkloadSlim{}.FilterFieldsToColumn()).Filters(filterBy)
+	if filterErr != nil {
+		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
+	}
+
+	workloads, dbErr := s.WorkloadsDao.DbGetWorkloadsSlim(ctx, tenantId, permittedScopes, offset, limit, filters)
+	if dbErr != nil {
+		return NewErrorResponse(dbErr), nil
+	}
+
+	response := api.GetWorkloadsSlimResponse{
+		Workloads: make([]api.WorkloadSlim, 0, len(*workloads)),
+	}
+	for _, workload := range *workloads {
+		response.Workloads = append(response.Workloads, api.WorkloadSlim{
+			Id:                   workload.ID.String(),
+			Name:                 workload.Name,
+			Type:                 workload.Type,
+			ProjectName:          workload.ProjectName,
+			ClusterId:            workload.ClusterID.String(),
+			DistributedFramework: workload.DistributedFramework,
+		})
+	}
+
+	recordsCount := int32(len(response.Workloads))
 	if recordsCount == limit {
 		response.Next = recordsCount + offset
 	}
@@ -589,7 +670,7 @@ func (s *WorkloadsService) InternalCreateWorkload(ctx context.Context, workloadC
 	}
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully created workload <%s>", workloadCreationFields.Id)
-	return api.Response(http.StatusCreated, WorkloadModelToApi(ctx, *workload)), nil
+	return api.Response(http.StatusCreated, WorkloadModelToApi(ctx, *workload, getClusterConfiguration(ctx, workload.ClusterID.String()))), nil
 }
 
 func (s *WorkloadsService) InternalCreateWorkloadHelper(ctx context.Context, workloadCreationFields api.WorkloadCreationFields) (models.Workload, *api.Error) {
@@ -1085,7 +1166,7 @@ func (s *WorkloadsService) GetWorkloadEndpoints(ctx context.Context, workloadId 
 
 	var endpoints []api.Endpoint
 	if common.WorkloadType(workload.Type).IsNative() {
-		apiWorkload := WorkloadModelToApi(ctx, *workload)
+		apiWorkload := WorkloadModelToApi(ctx, *workload, getClusterConfiguration(ctx, workload.ClusterID.String()))
 		endpoints = apiWorkload.Endpoints
 	} else {
 		endpoints = ModelEndpointToApi(workload.Endpoints)
@@ -1176,7 +1257,7 @@ func createConnectionsFromUrls(urls []string, ewKind string) ([]models.Connectio
 			return nil, fmt.Errorf("failed to parse URL %s: %w", rawUrl, err)
 		}
 
-		// Extract subdomain from host (e.g., "sub-domain" from "sub-domain.runailabs.com")
+		// Extract subdomain from host (e.g., "sub-domain" from "sub-domain.example.com")
 		var subdomain *string
 		if parsedUrl.Host != "" {
 			hostParts := strings.Split(parsedUrl.Host, ".")

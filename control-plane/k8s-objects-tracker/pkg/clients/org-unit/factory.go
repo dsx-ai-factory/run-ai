@@ -11,9 +11,9 @@ import (
 	"sync"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/k8s-objects-tracker/pkg/config"
-	orgUnitService "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
+	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 )
 
 // ClientInterface lists the assets services that workloads service needs

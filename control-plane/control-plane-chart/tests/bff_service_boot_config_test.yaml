@@ -16,7 +16,13 @@ tests:
           value: cc
       - equal:
           path: data.DOCS_BASE_URL
-          value: https://run-ai-docs.nvidia.com/self-hosted
+          value: https://docs.nvidia.com/run-ai/self-hosted
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v2
+      - equal:
+          path: data.DOCS_WHATS_NEW_URL_TEMPLATE
+          value: "{docsBaseUrl}/documentation/getting-started/whats-new/whats-new"
       - equal:
           path: data.DOCS_VERSIONED
           value: "true"
@@ -35,7 +41,7 @@ tests:
       - notExists:
           path: data.VERSION_DISPLAY_PREFIX
 
-  - it: passes support entitlement to the BFF and keeps self-hosted boot defaults
+  - it: passes support entitlement to the BFF and keeps documentation defaults
     set:
       supportEntitled: true
     asserts:
@@ -47,7 +53,13 @@ tests:
           value: cc
       - equal:
           path: data.DOCS_BASE_URL
-          value: https://run-ai-docs.nvidia.com/self-hosted
+          value: https://docs.nvidia.com/run-ai/self-hosted
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v2
+      - equal:
+          path: data.DOCS_WHATS_NEW_URL_TEMPLATE
+          value: "{docsBaseUrl}/documentation/getting-started/whats-new/whats-new"
       - notExists:
           path: data.SUPPORT_URL
       - notExists:
@@ -88,6 +100,7 @@ tests:
           distributionAssets:
             profile: ce
           docs:
+            catalogVersion: v1
             baseUrl: /product-docs
             versioned: false
             whatsNew:
@@ -116,6 +129,9 @@ tests:
       - equal:
           path: data.DOCS_BASE_URL
           value: /product-docs
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v1
       - equal:
           path: data.DOCS_VERSIONED
           value: "false"
@@ -146,3 +162,37 @@ tests:
       - equal:
           path: data.UNLEASH_PROJECT
           value: example-project
+
+  - it: defaults the documentation catalog to v2
+    asserts:
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v2
+
+  - it: renders v2 independently of asset profile and support entitlement
+    set:
+      supportEntitled: true
+      bffService.bootConfig.distributionAssets.profile: ce
+      bffService.bootConfig.docs.catalogVersion: v2
+    asserts:
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v2
+      - equal:
+          path: data.DISTRIBUTION_ASSETS_PROFILE
+          value: ce
+
+  - it: uses v2 when the catalog is omitted
+    set:
+      bffService.bootConfig.docs.catalogVersion: null
+    asserts:
+      - equal:
+          path: data.DOCS_CATALOG_VERSION
+          value: v2
+
+  - it: rejects unsupported documentation catalogs
+    set:
+      bffService.bootConfig.docs.catalogVersion: v3
+    asserts:
+      - failedTemplate:
+          errorMessage: bffService.bootConfig.docs.catalogVersion must be v1 or v2

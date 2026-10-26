@@ -24,7 +24,7 @@ var _ MappedNullable = &AccessRuleCreationFields{}
 
 // AccessRuleCreationFields struct for AccessRuleCreationFields
 type AccessRuleCreationFields struct {
-	// The unique identifier of the subject (e.g., user, group, or app).
+	// The unique identifier of the subject (e.g., user, group, or service account).
 	SubjectId string `json:"subjectId"`
 	// The numeric ID of the assigned role.
 	RoleId int32 `json:"roleId"`

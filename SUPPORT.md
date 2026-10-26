@@ -16,5 +16,6 @@ When a new release ships, this section is updated to reflect the current support
 
 | Channel | Use it for |
 |---|---|
-| [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) | Bugs, feature requests, documentation issues, usage questions |
+| [GitHub Discussions](https://github.com/dsx-ai-factory/run-ai/discussions) | Usage questions and design conversations |
+| [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) | Bugs, feature requests, documentation issues |
 | [NVIDIA PSIRT](https://www.nvidia.com/en-us/security/) | Private vulnerability reports — see [Security](SECURITY.md) |

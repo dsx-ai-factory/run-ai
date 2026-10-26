@@ -11,7 +11,6 @@ import (
 	api "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
 )
 
-//go:generate mockery --name TenantsClienter
 type TenantsClienter interface {
 	GetTenantIds(ctx context.Context) ([]int32, error)
 }

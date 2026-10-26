@@ -54,7 +54,7 @@ The service is responsible for:
 ├── sinks_templates/        # Per-sink Go templates (email/, slack/)
 ├── integration_tests/      # Docker-compose e2e tests (service + postgres + mailhog SMTP + slack)
 ├── bin/                    # Build output (notifications-service-<arch>, mockery)
-├── .mockery.yaml           # Mock generation config
+├── .mockery.yml            # Mock generation config (mockery v3)
 ├── Dockerfile
 ├── Makefile
 └── go.mod
@@ -73,7 +73,7 @@ Built with Go (see [`go.mod`](go.mod) — module `github.com/dsx-ai-factory/run-
 | `make openapi-lint` | Lints the OpenAPI bundle (`openapi-lint-generic`). |
 | `make validate` | No-op (kept for control-plane target parity). |
 | `make purify` | Auto-fix formatting and imports (`purify-go`). |
-| `make mockery` / `make generate_mocks` | (Re)generate mocks per `.mockery.yaml` (installs pinned mockery `v2.53.5`). |
+| `make generate-mocks-local` / `make generate-mocks` | (Re)generate mocks per `.mockery.yml` with the shared mockery v3 targets (locally / in Docker); `make generate-mocks-client` does the same for `pkg/client/.mockery.yml`. |
 | `make local-deploy` | `openapi-generate-code build-go docker-build-generic docker-push-generic` (amd64) — build and push the image. |
 
 ### Local build (local-dev.sh)

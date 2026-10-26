@@ -151,8 +151,8 @@ func TestReconcileClient_CreatesNewClient(t *testing.T) {
 
 func TestReconcileClient_SetsEmailScopeDefaultWhenProfileRequiresIt(t *testing.T) {
 	const (
-		realm    = "test-realm"
-		clientID = "runai-admin-ui"
+		realm      = "test-realm"
+		clientID   = "runai-admin-ui"
 		internalID = "some-internal-id"
 	)
 
@@ -185,8 +185,8 @@ func TestReconcileClient_SetsEmailScopeDefaultWhenProfileRequiresIt(t *testing.T
 
 func TestReconcileClient_DoesNotSetEmailScopeDefaultWhenProfileDoesNotRequireIt(t *testing.T) {
 	const (
-		realm    = "test-realm"
-		clientID = "runai-token-exchange"
+		realm      = "test-realm"
+		clientID   = "runai-token-exchange"
 		internalID = "some-internal-id"
 	)
 
@@ -212,6 +212,92 @@ func TestReconcileClient_DoesNotSetEmailScopeDefaultWhenProfileDoesNotRequireIt(
 
 	assert.NoError(t, err)
 	mockContainer.MockClientService.AssertNotCalled(t, "SetEmailScopeDefault")
+}
+
+func TestDeleteClientIfExists_DeletesExistingClient(t *testing.T) {
+	const (
+		realm      = "test-realm"
+		clientID   = "runai"
+		internalID = "some-internal-id"
+	)
+
+	existingClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
+
+	mockContainer := iamMock.NewMockServicesContainer()
+	mockContainer.MockClientService.On(
+		"GetClientByClientId", context.Background(), realm, clientID,
+	).Return(existingClient, nil)
+	mockContainer.MockClientService.On(
+		"DeleteClient", context.Background(), realm, internalID,
+	).Return(nil)
+
+	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
+
+	err := helper.DeleteClientIfExists(context.Background(), realm, clientID)
+
+	assert.NoError(t, err)
+	mockContainer.MockClientService.AssertCalled(t, "DeleteClient", context.Background(), realm, internalID)
+}
+
+func TestDeleteClientIfExists_NoopWhenClientDoesNotExist(t *testing.T) {
+	const (
+		realm    = "test-realm"
+		clientID = "runai"
+	)
+
+	mockContainer := iamMock.NewMockServicesContainer()
+	mockContainer.MockClientService.On(
+		"GetClientByClientId", context.Background(), realm, clientID,
+	).Return(nil, nil)
+
+	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
+
+	err := helper.DeleteClientIfExists(context.Background(), realm, clientID)
+
+	assert.NoError(t, err)
+	mockContainer.MockClientService.AssertNotCalled(t, "DeleteClient", mock.Anything, mock.Anything, mock.Anything)
+}
+
+func TestDeleteClientIfExists_GetClientByClientIdError(t *testing.T) {
+	const (
+		realm    = "test-realm"
+		clientID = "runai"
+	)
+
+	mockContainer := iamMock.NewMockServicesContainer()
+	mockContainer.MockClientService.On(
+		"GetClientByClientId", context.Background(), realm, clientID,
+	).Return(nil, errors.New("iam unavailable"))
+
+	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
+
+	err := helper.DeleteClientIfExists(context.Background(), realm, clientID)
+
+	assert.ErrorContains(t, err, "iam unavailable")
+}
+
+func TestDeleteClientIfExists_DeleteClientError(t *testing.T) {
+	const (
+		realm      = "test-realm"
+		clientID   = "runai"
+		internalID = "some-internal-id"
+	)
+
+	existingClient := &iamModels.Client{ID: ptr.To(internalID), ClientID: ptr.To(clientID)}
+
+	mockContainer := iamMock.NewMockServicesContainer()
+	mockContainer.MockClientService.On(
+		"GetClientByClientId", context.Background(), realm, clientID,
+	).Return(existingClient, nil)
+	mockContainer.MockClientService.On(
+		"DeleteClient", context.Background(), realm, internalID,
+	).Return(errors.New("delete failed"))
+
+	helper := NewClientReconcilerHelper(context.Background(), *mockContainer.ToServicesContainer(), nil)
+
+	err := helper.DeleteClientIfExists(context.Background(), realm, clientID)
+
+	assert.ErrorContains(t, err, "delete failed")
 }
 
 func TestReconcileClient_CreateClientError(t *testing.T) {

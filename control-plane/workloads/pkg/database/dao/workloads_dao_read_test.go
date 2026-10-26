@@ -8,6 +8,7 @@ package dao
 import (
 	"context"
 	"errors"
+	"net/http"
 	"strings"
 
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
@@ -18,6 +19,7 @@ import (
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"gorm.io/gorm"
 )
 
 const (
@@ -51,6 +53,7 @@ const (
 	wlReadChildrenWithTypesSelect = "SELECT * FROM workloads_children WHERE workload_id = ? AND child_type IN (?)"
 
 	wlReadClusterIdSelect = "SELECT cluster_id FROM workloads WHERE tenant_id = ? AND id = ? ORDER BY workloads.id LIMIT ?"
+	wlReadScopeSelect     = "SELECT cluster_id, project_id, department_id, namespace FROM workloads WHERE tenant_id = ? AND id = ? AND workloads.deleted_at IS NULL ORDER BY workloads.id LIMIT ?"
 
 	wlReadByIdsSelect               = "SELECT * FROM workloads_view WHERE tenant_id = ? AND id IN (?)"
 	wlReadByIdsExcludeDeletedSelect = "SELECT * FROM workloads_view WHERE tenant_id = ? AND id IN (?) AND deleted_at IS NULL"
@@ -73,6 +76,13 @@ type wlReadPhaseRow struct {
 
 type wlReadClusterIdRow struct {
 	ClusterID string `gorm:"column:cluster_id"`
+}
+
+type wlReadScopeRow struct {
+	ClusterID    string `gorm:"column:cluster_id"`
+	ProjectID    string `gorm:"column:project_id"`
+	DepartmentID string `gorm:"column:department_id"`
+	Namespace    string `gorm:"column:namespace"`
 }
 
 type wlReadChildRow struct {
@@ -404,7 +414,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryCountSelect).Returns([]wlReadSimpleTelemetryRow{{Data: "9"}})
 
-		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -415,7 +425,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryCountSelect).Returns([]wlReadSimpleTelemetryRow{})
 
-		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", wlReadScopes(true), nil, nil)
+		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", wlReadScopes(true), nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(BeEmpty())
@@ -431,7 +441,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		}})
 
 		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "c1", "np1", "d1", "p1", wlReadScopes(false),
-			[][]string{{"cluster_id", "cluster_name"}, {"project_id"}}, []api.Phase{api.PHASE_RUNNING})
+			[][]string{{"cluster_id", "cluster_name"}, {"project_id"}}, []api.Phase{api.PHASE_RUNNING}, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -443,7 +453,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryCountPendingNpSel).Returns([]wlReadSimpleTelemetryRow{{Data: "1"}})
 
-		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "np1", "", "", nil, nil, []api.Phase{api.PHASE_PENDING})
+		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "np1", "", "", nil, nil, []api.Phase{api.PHASE_PENDING}, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -453,7 +463,7 @@ var _ = Describe("DbGetWorkloadCount", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryCountSelect).ReturnsError(errors.New("boom"))
 
-		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetWorkloadCount(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).ToNot(BeNil())
 		Expect(*values).To(BeEmpty())
@@ -465,7 +475,7 @@ var _ = Describe("DbGetGpuAllocation", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryGpuSelect).Returns([]wlReadSimpleTelemetryRow{{Data: "2.5"}})
 
-		values, apiErr := wlReadDao().DbGetGpuAllocation(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetGpuAllocation(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -476,7 +486,7 @@ var _ = Describe("DbGetGpuAllocation", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryGpuSelect).ReturnsError(errors.New("boom"))
 
-		values, apiErr := wlReadDao().DbGetGpuAllocation(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetGpuAllocation(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).ToNot(BeNil())
 		Expect(*values).To(BeEmpty())
@@ -488,7 +498,7 @@ var _ = Describe("DbGetIdleAllocatedGpus", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryIdleGpuSelect).Returns([]wlReadSimpleTelemetryRow{{Data: "0"}})
 
-		values, apiErr := wlReadDao().DbGetIdleAllocatedGpus(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetIdleAllocatedGpus(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(1))
@@ -498,7 +508,7 @@ var _ = Describe("DbGetIdleAllocatedGpus", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadTelemetryIdleGpuSelect).ReturnsError(errors.New("boom"))
 
-		values, apiErr := wlReadDao().DbGetIdleAllocatedGpus(testCtx(1), 1, "", "", "", "", nil, nil, nil)
+		values, apiErr := wlReadDao().DbGetIdleAllocatedGpus(testCtx(1), 1, "", "", "", "", nil, nil, nil, nil)
 
 		Expect(apiErr).ToNot(BeNil())
 		Expect(*values).To(BeEmpty())
@@ -599,6 +609,46 @@ var _ = Describe("DbGetWorkloadClusterId", func() {
 
 		Expect(apiErr).ToNot(BeNil())
 		Expect(got).To(Equal(uuid.UUID{}))
+	})
+})
+
+var _ = Describe("DbGetWorkloadScope", func() {
+	It("returns the scope columns of the workload", func() {
+		m := setupDaoMock(GinkgoT())
+		clusterId := uuid.New()
+		m.ExpectQuery(wlReadScopeSelect).Returns([]wlReadScopeRow{{
+			ClusterID: clusterId.String(), ProjectID: "p1", DepartmentID: "d1", Namespace: "runai-p1",
+		}})
+
+		got, apiErr := wlReadDao().DbGetWorkloadScope(testCtx(1), 1, uuid.New())
+
+		Expect(apiErr).To(BeNil())
+		Expect(got.ClusterID).To(Equal(clusterId))
+		Expect(got.ProjectID).To(Equal("p1"))
+		Expect(got.DepartmentID).To(Equal("d1"))
+		Expect(got.Namespace).To(Equal("runai-p1"))
+	})
+
+	It("returns not found when the workload does not exist", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectQuery(wlReadScopeSelect).ReturnsError(gorm.ErrRecordNotFound)
+
+		got, apiErr := wlReadDao().DbGetWorkloadScope(testCtx(1), 1, uuid.New())
+
+		Expect(got).To(BeNil())
+		Expect(apiErr).ToNot(BeNil())
+		Expect(apiErr.Code).To(BeEquivalentTo(http.StatusNotFound))
+	})
+
+	It("returns an internal server error when the query fails", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectQuery(wlReadScopeSelect).ReturnsError(errors.New("boom"))
+
+		got, apiErr := wlReadDao().DbGetWorkloadScope(testCtx(1), 1, uuid.New())
+
+		Expect(got).To(BeNil())
+		Expect(apiErr).ToNot(BeNil())
+		Expect(apiErr.Code).To(BeEquivalentTo(http.StatusInternalServerError))
 	})
 })
 

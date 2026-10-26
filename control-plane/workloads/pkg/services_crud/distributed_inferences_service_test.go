@@ -30,9 +30,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	bc_mocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/mocks/pkg/clients/backend"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadsMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
@@ -131,6 +131,7 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(response.Code).To(Equal(http.StatusAccepted))
 				payload := response.Body.(workloadsApi.SupersetWorkload)
+				expectWorkloadActions(ctx, payload.WorkloadId, "create")
 				getResponse, err := distributedInferencesService.GetDistributedInference(ctx, payload.WorkloadId)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(getResponse.Code).To(Equal(http.StatusOK))
@@ -712,6 +713,7 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 			var generatedClientResponse workloadsApi.DistributedInference
 			Expect(json.Unmarshal(body, &generatedClientResponse)).To(Succeed())
 			Expect(generatedClientResponse.DesiredPhase).To(Equal(workloadsApi.WORKLOADDESIREDPHASE_RUNNING))
+			expectWorkloadActions(ctx, workloadID.String(), "update")
 		})
 
 		It("should update replicas field successfully", func() {
@@ -755,6 +757,7 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 
 			updateResponse, _ := distributedInferencesService.UpdateDistributedInferenceSpec(ctx, workloadId, updateRequest)
 			Expect(updateResponse.Code).To(Equal(http.StatusAccepted))
+			expectWorkloadActions(ctx, workloadId, "update", "create")
 
 			// Verify the update was applied by getting the workload
 			getResponse, _ := distributedInferencesService.GetDistributedInference(ctx, workloadId)

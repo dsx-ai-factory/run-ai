@@ -6,7 +6,7 @@
 package manipulate
 
 import (
-	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/utils/ptr"

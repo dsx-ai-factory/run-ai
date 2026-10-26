@@ -31,7 +31,7 @@ import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError
  */
 export interface AccessRule {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRule
      */
@@ -154,7 +154,7 @@ export interface AccessRuleAllOf1 {
  */
 export interface AccessRuleById {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleById
      */
@@ -285,7 +285,7 @@ export type AccessRuleClusterPhase = typeof AccessRuleClusterPhase[keyof typeof 
  */
 export interface AccessRuleCreationFields {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleCreationFields
      */
@@ -341,7 +341,7 @@ export interface AccessRuleCreationFieldsAllOf {
  */
 export interface AccessRuleCreationFieldsInternal {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleCreationFieldsInternal
      */
@@ -588,7 +588,7 @@ export interface AccessRuleStatusResponse {
  */
 export interface AccessRuleSubjectsInner {
     /**
-     * The unique identifier of the subject e.g., user, group, or app).
+     * The unique identifier of the subject e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleSubjectsInner
      */
@@ -607,7 +607,7 @@ export interface AccessRuleSubjectsInner {
  */
 export interface AccessRuleSync {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof AccessRuleSync
      */
@@ -1012,8 +1012,8 @@ export type Action = typeof Action[keyof typeof Action];
 
 export const AllowedInternalCreateRoles = {
     SystemAdministrator: 'System administrator',
-    ClusterApplication: 'Cluster application',
-    InstallerApplication: 'Installer application',
+    ClusterServiceAccount: 'Cluster service account',
+    InstallerServiceAccount: 'Installer service account',
     CloudOperator: 'Cloud operator'
 } as const;
 
@@ -1073,12 +1073,6 @@ export interface AuthorizationSettingsGetResponse {
      * @memberof AuthorizationSettingsGetResponse
      */
     'enableScopedAuthorization'?: EnableScopedAuthorizationSetting;
-    /**
-     * 
-     * @type {TenantIsCspManagedSetting}
-     * @memberof AuthorizationSettingsGetResponse
-     */
-    'tenantIsCspManaged'?: TenantIsCspManagedSetting;
 }
 /**
  * 
@@ -1087,8 +1081,7 @@ export interface AuthorizationSettingsGetResponse {
  */
 
 export const AuthorizationSettingsKeyEnum = {
-    EnableScopedAuthorization: 'enableScopedAuthorization',
-    TenantIsCspManaged: 'tenantIsCspManaged'
+    EnableScopedAuthorization: 'enableScopedAuthorization'
 } as const;
 
 export type AuthorizationSettingsKeyEnum = typeof AuthorizationSettingsKeyEnum[keyof typeof AuthorizationSettingsKeyEnum];
@@ -1440,7 +1433,7 @@ export interface KubernetesPermissions {
  */
 export interface MeAccessRule {
     /**
-     * The unique identifier of the subject (e.g., user, group, or app).
+     * The unique identifier of the subject (e.g., user, group, or service account).
      * @type {string}
      * @memberof MeAccessRule
      */
@@ -1813,6 +1806,7 @@ export const ResourceType = {
     NfsAssets: 'nfs-assets',
     S3Assets: 's3-assets',
     ComputeResources: 'compute-resources',
+    ResourceClaimTemplates: 'resource-claim-templates',
     Templates: 'templates',
     Credentials: 'credentials',
     EventsHistory: 'events-history',
@@ -1821,6 +1815,7 @@ export const ResourceType = {
     Datavolumes: 'datavolumes',
     SecretVolumeAssets: 'secret-volume-assets',
     StorageClassConfiguration: 'storage-class-configuration',
+    DeviceClasses: 'device-classes',
     AccessKeys: 'access-keys',
     WorkloadProperties: 'workload-properties',
     NetworkTopologies: 'network-topologies',
@@ -2266,105 +2261,6 @@ export interface RolePermissionSet {
 /**
  * 
  * @export
- * @interface RoleV1
- */
-export interface RoleV1 {
-    /**
-     * 
-     * @type {number}
-     * @memberof RoleV1
-     */
-    'id': number;
-    /**
-     * 
-     * @type {string}
-     * @memberof RoleV1
-     */
-    'createdAt': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RoleV1
-     */
-    'updatedAt': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RoleV1
-     */
-    'deletedAt'?: string | null;
-    /**
-     * 
-     * @type {string}
-     * @memberof RoleV1
-     */
-    'createdBy': string;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof RoleV1
-     */
-    'custom': boolean;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof RoleV1
-     */
-    'effectiveEnabled': boolean;
-    /**
-     * 
-     * @type {Array<Permission>}
-     * @memberof RoleV1
-     */
-    'permissions': Array<Permission>;
-    /**
-     * 
-     * @type {string}
-     * @memberof RoleV1
-     */
-    'name': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RoleV1
-     */
-    'description': string;
-    /**
-     * 
-     * @type {string}
-     * @memberof RoleV1
-     */
-    'scopeType'?: RoleV1ScopeTypeEnum;
-    /**
-     * 
-     * @type {string}
-     * @memberof RoleV1
-     */
-    'scopeId'?: string | null;
-    /**
-     * 
-     * @type {boolean}
-     * @memberof RoleV1
-     */
-    'enabled'?: boolean | null;
-    /**
-     * 
-     * @type {KubernetesPermissions}
-     * @memberof RoleV1
-     */
-    'kubernetesPermissions'?: KubernetesPermissions;
-}
-
-export const RoleV1ScopeTypeEnum = {
-    System: 'system',
-    Tenant: 'tenant'
-} as const;
-
-export type RoleV1ScopeTypeEnum = typeof RoleV1ScopeTypeEnum[keyof typeof RoleV1ScopeTypeEnum];
-
-/**
- * 
- * @export
  * @enum {string}
  */
 
@@ -2398,7 +2294,7 @@ export type ScopeType = typeof ScopeType[keyof typeof ScopeType];
 
 
 /**
- * Subject type enum for access rules.  Note: The \'app\' subject type is DEPRECATED. Please use \'service-account\' instead for service accounts. 
+ * Subject type enum for access rules.  Note: The \'app\' subject type is DEPRECATED and no longer supported. Please use \'service-account\' instead for service accounts. Requests that create an access rule with \'app\' are rejected with 415 Unsupported Media Type. 
  * @export
  * @enum {string}
  */
@@ -2414,7 +2310,7 @@ export type SubjectType = typeof SubjectType[keyof typeof SubjectType];
 
 
 /**
- * Subject type enum for access rule responses. Extends SubjectType with the built-in all-authenticated-users subject, which applies to every authenticated user and service account.  Note: The \'app\' subject type is DEPRECATED. Please use \'service-account\' instead for service accounts. 
+ * Subject type enum for access rule responses. Extends SubjectType with the built-in all-authenticated-users subject, which applies to every authenticated user and service account.  Note: The \'app\' subject type is DEPRECATED and is no longer returned. Please use \'service-account\' instead for service accounts. 
  * @export
  * @enum {string}
  */
@@ -2460,19 +2356,6 @@ export interface SubmissionError {
      * @memberof SubmissionError
      */
     'complianceIssues'?: Array<ComplianceIssuesComplianceIssuesInner>;
-}
-/**
- * 
- * @export
- * @interface TenantIsCspManagedSetting
- */
-export interface TenantIsCspManagedSetting {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof TenantIsCspManagedSetting
-     */
-    'enabled'?: boolean | null;
 }
 /**
  * 
@@ -2671,7 +2554,7 @@ export const AccessRulesApiAxiosParamCreator = function (configuration?: Configu
             };
         },
         /**
-         * Use to bind a predefined role to a subject (user, group or application) in a scope.
+         * Use to bind a predefined role to a subject (user, group or service account) in a scope.
          * @summary Create an access rule.
          * @param {AccessRuleCreationFields} accessRuleCreationFields The access rule to create.
          * @param {*} [options] Override http request option.
@@ -3121,7 +3004,7 @@ export const AccessRulesApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Use to bind a predefined role to a subject (user, group or application) in a scope.
+         * Use to bind a predefined role to a subject (user, group or service account) in a scope.
          * @summary Create an access rule.
          * @param {AccessRuleCreationFields} accessRuleCreationFields The access rule to create.
          * @param {*} [options] Override http request option.
@@ -3278,7 +3161,7 @@ export const AccessRulesApiFactory = function (configuration?: Configuration, ba
             return localVarFp.countAccessRules(includeDeleted, filterBy, search, options).then((request) => request(axios, basePath));
         },
         /**
-         * Use to bind a predefined role to a subject (user, group or application) in a scope.
+         * Use to bind a predefined role to a subject (user, group or service account) in a scope.
          * @summary Create an access rule.
          * @param {AccessRuleCreationFields} accessRuleCreationFields The access rule to create.
          * @param {*} [options] Override http request option.
@@ -3435,7 +3318,7 @@ export class AccessRulesApi extends BaseAPI {
     }
 
     /**
-     * Use to bind a predefined role to a subject (user, group or application) in a scope.
+     * Use to bind a predefined role to a subject (user, group or service account) in a scope.
      * @summary Create an access rule.
      * @param {AccessRuleCreationFields} accessRuleCreationFields The access rule to create.
      * @param {*} [options] Override http request option.
@@ -5075,45 +4958,6 @@ export const RolesApiAxiosParamCreator = function (configuration?: Configuration
             };
         },
         /**
-         * Retrieve the details of a role by id. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles/{roleIdPath} instead.
-         * @summary Get a role by id.
-         * @param {number} roleIdPath The ID of the role
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getRoleV1: async (roleIdPath: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'roleIdPath' is not null or undefined
-            assertParamExists('getRoleV1', 'roleIdPath', roleIdPath)
-            const localVarPath = `/api/v1/authorization/roles/{roleIdPath}`
-                .replace(`{${"roleIdPath"}}`, encodeURIComponent(String(roleIdPath)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Retrieves a list of all available roles, including both NVIDIA Run:ai predefined roles and custom roles. Use this endpoint to review role configurations, permission sets and permissions.
          * @summary Get a list of roles.
          * @param {number} [limit] The maximum number of entries to return.
@@ -5166,46 +5010,6 @@ export const RolesApiAxiosParamCreator = function (configuration?: Configuration
             if (search !== undefined) {
                 localVarQueryParameter['search'] = search;
             }
-
-            if (includeInternal !== undefined) {
-                localVarQueryParameter['includeInternal'] = includeInternal;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
-         * Use to retrieve a list of roles. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles instead.
-         * @summary Get a list of roles.
-         * @param {boolean} [includeInternal] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getRolesV1: async (includeInternal?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            const localVarPath = `/api/v1/authorization/roles`;
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
             if (includeInternal !== undefined) {
                 localVarQueryParameter['includeInternal'] = includeInternal;
@@ -5442,18 +5246,6 @@ export const RolesApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Retrieve the details of a role by id. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles/{roleIdPath} instead.
-         * @summary Get a role by id.
-         * @param {number} roleIdPath The ID of the role
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async getRoleV1(roleIdPath: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RoleV1>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getRoleV1(roleIdPath, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
          * Retrieves a list of all available roles, including both NVIDIA Run:ai predefined roles and custom roles. Use this endpoint to review role configurations, permission sets and permissions.
          * @summary Get a list of roles.
          * @param {number} [limit] The maximum number of entries to return.
@@ -5468,18 +5260,6 @@ export const RolesApiFp = function(configuration?: Configuration) {
          */
         async getRoles(limit?: number, offset?: number, sortOrder?: 'asc' | 'desc', sortBy?: RolesSortFilterFields, filterBy?: Array<string>, search?: string, includeInternal?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetRoles200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getRoles(limit, offset, sortOrder, sortBy, filterBy, search, includeInternal, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
-         * Use to retrieve a list of roles. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles instead.
-         * @summary Get a list of roles.
-         * @param {boolean} [includeInternal] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        async getRolesV1(includeInternal?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<RoleV1>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getRolesV1(includeInternal, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -5571,17 +5351,6 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
             return localVarFp.getRole(roleIdPath, options).then((request) => request(axios, basePath));
         },
         /**
-         * Retrieve the details of a role by id. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles/{roleIdPath} instead.
-         * @summary Get a role by id.
-         * @param {number} roleIdPath The ID of the role
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getRoleV1(roleIdPath: number, options?: any): AxiosPromise<RoleV1> {
-            return localVarFp.getRoleV1(roleIdPath, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Retrieves a list of all available roles, including both NVIDIA Run:ai predefined roles and custom roles. Use this endpoint to review role configurations, permission sets and permissions.
          * @summary Get a list of roles.
          * @param {number} [limit] The maximum number of entries to return.
@@ -5596,17 +5365,6 @@ export const RolesApiFactory = function (configuration?: Configuration, basePath
          */
         getRoles(limit?: number, offset?: number, sortOrder?: 'asc' | 'desc', sortBy?: RolesSortFilterFields, filterBy?: Array<string>, search?: string, includeInternal?: boolean, options?: any): AxiosPromise<GetRoles200Response> {
             return localVarFp.getRoles(limit, offset, sortOrder, sortBy, filterBy, search, includeInternal, options).then((request) => request(axios, basePath));
-        },
-        /**
-         * Use to retrieve a list of roles. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles instead.
-         * @summary Get a list of roles.
-         * @param {boolean} [includeInternal] 
-         * @param {*} [options] Override http request option.
-         * @deprecated
-         * @throws {RequiredError}
-         */
-        getRolesV1(includeInternal?: boolean, options?: any): AxiosPromise<Array<RoleV1>> {
-            return localVarFp.getRolesV1(includeInternal, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -5699,19 +5457,6 @@ export class RolesApi extends BaseAPI {
     }
 
     /**
-     * Retrieve the details of a role by id. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles/{roleIdPath} instead.
-     * @summary Get a role by id.
-     * @param {number} roleIdPath The ID of the role
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof RolesApi
-     */
-    public getRoleV1(roleIdPath: number, options?: AxiosRequestConfig) {
-        return RolesApiFp(this.configuration).getRoleV1(roleIdPath, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
      * Retrieves a list of all available roles, including both NVIDIA Run:ai predefined roles and custom roles. Use this endpoint to review role configurations, permission sets and permissions.
      * @summary Get a list of roles.
      * @param {number} [limit] The maximum number of entries to return.
@@ -5727,19 +5472,6 @@ export class RolesApi extends BaseAPI {
      */
     public getRoles(limit?: number, offset?: number, sortOrder?: 'asc' | 'desc', sortBy?: RolesSortFilterFields, filterBy?: Array<string>, search?: string, includeInternal?: boolean, options?: AxiosRequestConfig) {
         return RolesApiFp(this.configuration).getRoles(limit, offset, sortOrder, sortBy, filterBy, search, includeInternal, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Use to retrieve a list of roles. This endpoint is deprecated and will be removed in a future release. Use GET /api/v2/authorization/roles instead.
-     * @summary Get a list of roles.
-     * @param {boolean} [includeInternal] 
-     * @param {*} [options] Override http request option.
-     * @deprecated
-     * @throws {RequiredError}
-     * @memberof RolesApi
-     */
-    public getRolesV1(includeInternal?: boolean, options?: AxiosRequestConfig) {
-        return RolesApiFp(this.configuration).getRolesV1(includeInternal, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

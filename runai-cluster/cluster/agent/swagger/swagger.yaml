@@ -134,7 +134,7 @@ paths:
           $ref: '#/components/responses/ServiceUnavailable'
   /api/v1/authorization/access-rules:
     post:
-      summary: 'Create an access rule. Bind a predefined role to a subject (user, group or app) in some scope.'
+      summary: 'Create an access rule. Bind a predefined role to a subject (user, group or service account) in some scope.'
       operationId: create_access_rule
       x-authorize:
         resource-type: access_rules
@@ -1011,11 +1011,8 @@ components:
       type: string
       description: |
         Subject type enum for access rules.
-        
-        Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
       enum:
         - user
-        - app
         - service-account
         - group
     ScopeType:

@@ -23,7 +23,7 @@ import (
 	backendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers"
 
-	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	swagger "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 var _ = Describe("PriorityClassHandler", func() {

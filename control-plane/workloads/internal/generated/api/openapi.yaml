@@ -25,6 +25,115 @@ paths:
       x-no-authorization: true
     x-internal: true
     x-service: workloads
+  /api/v1/workloads/{workloadId}/actions:
+    get:
+      description: Returns accepted workload actions. History remains available after
+        a workload is deleted and is removed when the workload is permanently removed
+        from the system.
+      operationId: get_workload_actions_history
+      parameters:
+      - description: The  Universally Unique Identifier (UUID) of the workload.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadActionsResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get workload action history.
+      tags:
+      - WorkloadActions
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workload_actions_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
   /api/v1/workloads/scrapeable-metrics:
     get:
       operationId: get_workloads_scrapeable_metrics
@@ -150,6 +259,64 @@ paths:
       - e2e/src/test/suites/parallel/submitUI/distributedTrainingUI.test.ts
       - e2e/src/test/suites/parallel/workloads/jobsStatus.test.ts
       x-no-authorization: true
+  /internal/workloads/actions:
+    post:
+      description: "Records workload actions accepted by workloads-manager, using\
+        \ the authenticated request context to identify who performed them and the\
+        \ supplied timestamp to record when they were accepted."
+      operationId: internal_create_workload_actions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkloadActionsRequest'
+        required: true
+      responses:
+        "204":
+          description: Actions stored successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "412":
+          content:
+            application/json:
+              example:
+                code: 412
+                message: Precondition failed
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found.
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Store workload actions.
+      tags:
+      - WorkloadActions
+      x-service: workloads
+      x-no-authorization: true
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workload_actions_api_test.go
   /internal/workloads/sync:
     post:
       operationId: internal_sync_workloads
@@ -411,6 +578,102 @@ paths:
       x-authorize:
         resource-type: workloads
         action: sync
+  /internal/workloads/resource-claim-templates/workloads:
+    post:
+      description: |
+        Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template.
+      operationId: internal_get_resource_claim_template_workloads
+      parameters:
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InternalResourceClaimTemplateWorkloadsRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplateWorkloadsResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: List the workloads referencing a resource claim template (Internal
+        API).
+      tags:
+      - Workloads
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/resource_claims_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
   /internal/workloads/sync-report:
     post:
       description: "needed when the updates are not sent directly from the cluster\
@@ -815,6 +1078,114 @@ paths:
       x-authorize:
         resource-type: workloads
         action: sync
+  /api/v1/workloads/slim:
+    get:
+      description: |
+        Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order.
+        Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately.
+      operationId: get_workloads_slim
+      parameters:
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
+          \ `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^`\
+          \ Starts with and `=$` Ends with."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - name==some-workload-name
+          - projectName==proj-1
+          items:
+            pattern: ^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadsSlimResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: "List workloads, slim."
+      tags:
+      - Workloads
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workloads_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
   /internal/workloads/{workloadId}/ancestors:
     get:
       operationId: get_workload_ancestors
@@ -1423,6 +1794,7 @@ paths:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
             type: string
           maxItems: 2
           type: array
@@ -1447,6 +1819,24 @@ paths:
           - Failed
           items:
             $ref: '#/components/schemas/Phase'
+          maxItems: 10
+          type: array
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal. Dates are in ISO 8601 timestamp format."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - createdAt>=2026-09-01T00:00:00Z
+          - createdAt<=2026-09-02T00:00:00Z
+          items:
+            maxLength: 1000
+            pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+            type: string
           maxItems: 10
           type: array
         style: form
@@ -1521,6 +1911,170 @@ paths:
       x-authorize:
         resource-type: workloads
         action: read
+  /internal/workloads/telemetry:
+    get:
+      description: |
+        Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.
+
+        Telemetry Types:
+        - WORKLOADS_COUNT: Count of workloads
+        - GPU_ALLOCATION: GPU allocation metrics
+        - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+          For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+        - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
+      operationId: get_internal_workloads_telemetry
+      parameters:
+      - description: Filter using the Universally Unique Identifier (UUID) of the
+          cluster.
+        explode: true
+        in: query
+        name: clusterId
+        required: false
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: Filter using the nodepool.
+        explode: true
+        in: query
+        name: nodepoolName
+        required: false
+        schema:
+          example: default
+          type: string
+        style: form
+      - description: Filter using the department id.
+        explode: true
+        in: query
+        name: departmentId
+        required: false
+        schema:
+          example: "1"
+          type: string
+        style: form
+      - description: project id to filter by
+        explode: true
+        in: query
+        name: projectId
+        required: false
+        schema:
+          example: "1"
+          type: string
+        style: form
+      - description: Group workloads by field.
+        explode: false
+        in: query
+        name: groupBy
+        required: false
+        schema:
+          items:
+            enum:
+            - ClusterId
+            - DepartmentId
+            - ProjectId
+            - Type
+            - CurrentNodepools
+            - RequestedNodepools
+            - Phase
+            - Category
+            - Source
+            type: string
+          maxItems: 2
+          type: array
+        style: form
+      - description: Specifies the telemetry type.
+        explode: true
+        in: query
+        name: telemetryType
+        required: true
+        schema:
+          $ref: '#/components/schemas/WorkloadTelemetryType'
+        style: form
+      - description: "Filter workloads by specific phases. If not specified, all phases\
+          \ are included."
+        explode: false
+        in: query
+        name: filterByPhases
+        required: false
+        schema:
+          example:
+          - Running
+          - Failed
+          items:
+            $ref: '#/components/schemas/Phase'
+          maxItems: 10
+          type: array
+        style: form
+      - description: "Filter results by a parameter. Use the format field-name operator\
+          \ value. Operators are == Equals, != Not equals, <= Less than or equal,\
+          \ >= Greater than or equal. Dates are in ISO 8601 timestamp format."
+        explode: false
+        in: query
+        name: filterBy
+        required: false
+        schema:
+          example:
+          - createdAt>=2026-09-01T00:00:00Z
+          - createdAt<=2026-09-02T00:00:00Z
+          items:
+            maxLength: 1000
+            pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+            type: string
+          maxItems: 10
+          type: array
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get the internal workloads telemetry.
+      tags:
+      - Workloads
+      x-no-authorization: true
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+    x-internal: true
   /api/v1/workloads/podgroups/sync:
     post:
       operationId: sync_pod_groups
@@ -5083,7 +5637,7 @@ paths:
       - Distributed Inferences
       x-service: workloads
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -5177,7 +5731,7 @@ paths:
       - Distributed Inferences
       x-service: workloads
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -5443,7 +5997,7 @@ paths:
       - Inferences
       x-service: workloads
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -5537,7 +6091,7 @@ paths:
       - Inferences
       x-service: workloads
       x-test-coverage:
-      - e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+      - e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -10594,6 +11148,114 @@ paths:
         resource-type: workloads
         action: read
         resource-id: workloadId
+  /api/v1/workloads/{workloadId}/resource-claims:
+    get:
+      description: |
+        Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed.
+      operationId: get_workload_resource_claims
+      parameters:
+      - description: The  Universally Unique Identifier (UUID) of the workload.
+        explode: false
+        in: path
+        name: workloadId
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadResourceClaimsResponse'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get workload resource claims by workload id.
+      tags:
+      - Workloads
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/resource_claims_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
   /api/v1/workload-categories:
     get:
       description: Retrieves a list of workload categories. These categories are used
@@ -12429,6 +13091,108 @@ paths:
       x-authorize:
         resource-type: applications
         action: create
+  /api/v1/ai-applications/charts/inspect:
+    post:
+      description: |
+        Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration
+        in the control plane. Uploaded charts reference an archive already stored by the chart upload API.
+        The response contains normalized question metadata and diagnostics; it does not contain the
+        complete chart defaults or credential values. Missing or unusable questions declarations return
+        a successful response so callers can offer raw YAML configuration. Download, authentication,
+        and invalid archive failures return an error and are not reported as absent questions.
+        Archives containing both root declaration filenames are rejected as ambiguous.
+      operationId: inspect_application_chart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIApplicationChartInspectionRequest'
+        description: "Chart source selection and optional saved credential reference,\
+          \ up to 64 KiB of JSON."
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIApplicationChartInspectionResponse'
+          description: "Chart inspected, including absent or unusable questions declarations."
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "408":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The chart inspection request was cancelled or exceeded its
+            deadline.
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Request entity too large
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The upstream chart source is unavailable or inspection capacity
+            is exhausted.
+      summary: Inspect a Helm chart questions declaration.
+      tags:
+      - AI Applications
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/ai_applications_chart_inspection_unit_test.go
+      - control-plane/workloads/pkg/services/ai_applications_chart_inspection_http_test.go
+      x-authorize:
+        resource-type: applications
+        action: create
+    x-internal: true
   /api/v1/ai-applications/charts/{chartId}/content:
     get:
       description: |
@@ -13147,6 +13911,40 @@ paths:
         action: update
 components:
   parameters:
+    WorkloadId:
+      description: The  Universally Unique Identifier (UUID) of the workload.
+      explode: false
+      in: path
+      name: workloadId
+      required: true
+      schema:
+        format: uuid
+        type: string
+      style: simple
+    Offset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 100
+        format: int32
+        type: integer
+      style: form
+    Limit:
+      description: The maximum number of entries to return.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        format: int32
+        maximum: 500
+        minimum: 1
+        type: integer
+      style: form
     WorkloadsFilter:
       description: "Filter results by a parameter. Use the format field-name operator\
         \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
@@ -13209,30 +14007,6 @@ components:
       schema:
         type: boolean
       style: form
-    Offset:
-      description: The offset of the first item returned in the collection.
-      explode: true
-      in: query
-      name: offset
-      required: false
-      schema:
-        example: 100
-        format: int32
-        type: integer
-      style: form
-    Limit:
-      description: The maximum number of entries to return.
-      explode: true
-      in: query
-      name: limit
-      required: false
-      schema:
-        default: 50
-        format: int32
-        maximum: 500
-        minimum: 1
-        type: integer
-      style: form
     SortOrder:
       description: Sort results in descending or ascending order.
       explode: true
@@ -13292,16 +14066,25 @@ components:
         example: test project
         type: string
       style: form
-    WorkloadId:
-      description: The  Universally Unique Identifier (UUID) of the workload.
+    WorkloadsSlimFilter:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,\
+        \ `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts\
+        \ with and `=$` Ends with."
       explode: false
-      in: path
-      name: workloadId
-      required: true
+      in: query
+      name: filterBy
+      required: false
       schema:
-        format: uuid
-        type: string
-      style: simple
+        example:
+        - name==some-workload-name
+        - projectName==proj-1
+        items:
+          pattern: ^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+          type: string
+        maxItems: 10
+        type: array
+      style: form
     Precise:
       description: "Use this if you want to count the precise amount of workloads,\
         \ uncached. Defaults to false."
@@ -13371,6 +14154,7 @@ components:
           - RequestedNodepools
           - Phase
           - Category
+          - Source
           type: string
         maxItems: 2
         type: array
@@ -13397,6 +14181,25 @@ components:
         - Failed
         items:
           $ref: '#/components/schemas/Phase'
+        maxItems: 10
+        type: array
+      style: form
+    TelemetryFilterBy:
+      description: "Filter results by a parameter. Use the format field-name operator\
+        \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
+        \ Greater than or equal. Dates are in ISO 8601 timestamp format."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        example:
+        - createdAt>=2026-09-01T00:00:00Z
+        - createdAt<=2026-09-02T00:00:00Z
+        items:
+          maxLength: 1000
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+          type: string
         maxItems: 10
         type: array
       style: form
@@ -14048,6 +14851,15 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Forbidden
+    "404NotFound":
+      content:
+        application/json:
+          example:
+            code: 404
+            message: Resource id not found.
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: The specified resource was not found
     "500InternalServerError":
       content:
         application/json:
@@ -14075,17 +14887,17 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: The specified resource already exists
-    "204NoContent":
-      description: No Content.
-    "404NotFound":
+    "412PreconditionFailed":
       content:
         application/json:
           example:
-            code: 404
-            message: Resource id not found.
+            code: 412
+            message: Precondition failed
           schema:
             $ref: '#/components/schemas/Error'
-      description: The specified resource was not found
+      description: The specified resource was not found.
+    "204NoContent":
+      description: No Content.
     "400SubmissionErrorV2":
       content:
         application/json:
@@ -14105,6 +14917,12 @@ components:
           schema:
             $ref: '#/components/schemas/HttpResponse'
       description: Accepted.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
     "400BadSubmissionRequest":
       content:
         application/json:
@@ -14121,21 +14939,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Not acceptable request
-    "412PreconditionFailed":
-      content:
-        application/json:
-          example:
-            code: 412
-            message: Precondition failed
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: The specified resource was not found.
-    "413RequestEntityTooLarge":
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Request entity too large
     "415UnsupportedMediaType":
       content:
         application/json:
@@ -14152,6 +14955,147 @@ components:
             $ref: '#/components/schemas/Error'
       description: unexpected error
   schemas:
+    WorkloadActionId:
+      description: A unique ID of the workload action-history record.
+      example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+      format: uuid
+      type: string
+    WorkloadId:
+      description: A unique ID of the workload.
+      format: uuid
+      type: string
+    WorkloadName:
+      description: The name of the workload.
+      example: my-workload-name
+      minLength: 1
+      pattern: .*
+      type: string
+    WorkloadActionSubject:
+      description: The authenticated subject that performed the workload action.
+      example: user@run.ai
+      type: string
+    WorkloadActionSubjectType:
+      description: "The authenticated subject type, preserved as provided by the identity\
+        \ context. Examples include user, service-account, and app, with casing determined\
+        \ by the identity provider."
+      example: user
+      type: string
+    WorkloadActionType:
+      enum:
+      - create
+      - update
+      - delete
+      - suspend
+      - resume
+      type: string
+    WorkloadActionAcceptedAt:
+      description: The time when the workload action was accepted.
+      example: 2026-01-01T03:49:52.531Z
+      format: date-time
+      type: string
+    WorkloadActionRecord:
+      example:
+        subject: user@run.ai
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        workloadName: my-workload-name
+        action: create
+        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+        subjectType: user
+        acceptedAt: 2026-01-01T03:49:52.531Z
+      properties:
+        id:
+          description: A unique ID of the workload action-history record.
+          example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          format: uuid
+          type: string
+        workloadId:
+          description: A unique ID of the workload.
+          format: uuid
+          type: string
+        workloadName:
+          description: The name of the workload.
+          example: my-workload-name
+          minLength: 1
+          pattern: .*
+          type: string
+        subject:
+          description: The authenticated subject that performed the workload action.
+          example: user@run.ai
+          type: string
+        subjectType:
+          description: "The authenticated subject type, preserved as provided by the\
+            \ identity context. Examples include user, service-account, and app, with\
+            \ casing determined by the identity provider."
+          example: user
+          type: string
+        action:
+          $ref: '#/components/schemas/WorkloadActionType'
+        acceptedAt:
+          description: The time when the workload action was accepted.
+          example: 2026-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+      required:
+      - acceptedAt
+      - action
+      - id
+      - subject
+      - subjectType
+      - workloadId
+      - workloadName
+      type: object
+    GetWorkloadActionsResponse:
+      example:
+        next: 50
+        actions:
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - subject: user@run.ai
+          workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          subjectType: user
+          acceptedAt: 2026-01-01T03:49:52.531Z
+      properties:
+        actions:
+          items:
+            $ref: '#/components/schemas/WorkloadActionRecord'
+          maxItems: 500
+          type: array
+        next:
+          example: 50
+          format: int32
+          type: integer
+      required:
+      - actions
+      type: object
     Error:
       example:
         code: 400
@@ -16418,6 +17362,93 @@ components:
       - tenantId
       - type
       - updatedAt
+      type: object
+    WorkloadActionRecordInput:
+      example:
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        workloadName: my-workload-name
+        action: create
+        id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        acceptedAt: 2026-01-01T03:49:52.531Z
+      properties:
+        id:
+          description: A unique ID of the workload action-history record.
+          example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          format: uuid
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        workloadId:
+          description: A unique ID of the workload.
+          format: uuid
+          type: string
+        workloadName:
+          description: The name of the workload.
+          example: my-workload-name
+          minLength: 1
+          pattern: .*
+          type: string
+        action:
+          $ref: '#/components/schemas/WorkloadActionType'
+        acceptedAt:
+          description: The time when the workload action was accepted.
+          example: 2026-01-01T03:49:52.531Z
+          format: date-time
+          type: string
+      required:
+      - acceptedAt
+      - action
+      - clusterId
+      - id
+      - workloadId
+      - workloadName
+      type: object
+    CreateWorkloadActionsRequest:
+      example:
+        actions:
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          workloadName: my-workload-name
+          action: create
+          id: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          acceptedAt: 2026-01-01T03:49:52.531Z
+      properties:
+        actions:
+          items:
+            $ref: '#/components/schemas/WorkloadActionRecordInput'
+          maxItems: 500
+          minItems: 1
+          type: array
+      required:
+      - actions
       type: object
     WorkloadNetworkStatus:
       example:
@@ -18999,6 +20030,45 @@ components:
       - elementId
       - hierarchyLevel
       type: object
+    PodResourceClaim:
+      example:
+        resourceClaimName: shared-infiniband
+        name: gpu-1
+        allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+        resourceClaimTemplateName: single-gpu
+      properties:
+        name:
+          description: "Pod-local name of the claim entry (DNS_LABEL). Mirrors `pod.spec.resourceClaims[].name`\
+            \ and the key used by `pod.status.resourceClaimStatuses[].name` to publish\
+            \ the bound claim."
+          example: gpu-1
+          type: string
+        resourceClaimTemplateName:
+          description: "Name of the referenced `ResourceClaimTemplate` in the pod's\
+            \ namespace, when the claim entry was created from a template. Mutually\
+            \ exclusive with `resourceClaimName`. Mirrors `pod.spec.resourceClaims[].resourceClaimTemplateName`."
+          example: single-gpu
+          nullable: true
+          type: string
+        resourceClaimName:
+          description: "Name of a standalone `ResourceClaim` that the pod references\
+            \ directly, when the claim entry is not created from a template. Mutually\
+            \ exclusive with `resourceClaimTemplateName`. Mirrors `pod.spec.resourceClaims[].resourceClaimName`."
+          example: shared-infiniband
+          nullable: true
+          type: string
+        allocatedResourceClaimName:
+          description: "Name of the actual `ResourceClaim` bound to the pod for this\
+            \ entry. For a template-generated entry this is populated from `pod.status.resourceClaimStatuses[].resourceClaimName`\
+            \ once Kubernetes publishes it, and is null until then. For a standalone\
+            \ entry it equals `resourceClaimName` and is populated immediately. This\
+            \ is the field the forward-view API surfaces as the \"actual\" bound claim."
+          example: dra-gpu-test-gpu-1-mk4s8
+          nullable: true
+          type: string
+      required:
+      - name
+      type: object
     PodSyncFields:
       example:
         nodeName: gpu-node-1
@@ -19197,6 +20267,15 @@ components:
           cpuMemory: 0B
           cpu: 0.5
           gpu: 1.5
+        resourceClaims:
+        - resourceClaimName: shared-infiniband
+          name: gpu-1
+          allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+          resourceClaimTemplateName: single-gpu
+        - resourceClaimName: shared-infiniband
+          name: gpu-1
+          allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+          resourceClaimTemplateName: single-gpu
         tolerations:
         - effect: NoExecute
           value: ""
@@ -19327,6 +20406,17 @@ components:
             \ by hierarchy level."
           items:
             $ref: '#/components/schemas/PodElement'
+          nullable: true
+          type: array
+        resourceClaims:
+          description: "Per-pod DRA usage reported as-is from the cluster. One entry\
+            \ per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate`\
+            \ or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim`\
+            \ name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership\
+            \ resolution against the k8s-object store happens at API read time, not\
+            \ here."
+          items:
+            $ref: '#/components/schemas/PodResourceClaim'
           nullable: true
           type: array
       required:
@@ -19538,6 +20628,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -19784,6 +20883,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -19881,6 +20989,211 @@ components:
             $ref: '#/components/schemas/LabelValue'
           nullable: true
           type: array
+      type: object
+    ScopeType:
+      enum:
+      - system
+      - tenant
+      - cluster
+      - department
+      - project
+      type: string
+    ScopeId:
+      description: "The id of the cluster, department or project, depending on the\
+        \ scope type."
+      type: string
+    InternalResourceClaimTemplateWorkloadsRequest:
+      example:
+        scopeId: scopeId
+        scopeType: system
+        name: single-gpu
+      properties:
+        name:
+          description: "The name of the ResourceClaimTemplate, as referenced by pods."
+          example: single-gpu
+          minLength: 1
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          description: "The id of the cluster, department or project, depending on\
+            \ the scope type."
+          type: string
+      required:
+      - name
+      - scopeId
+      - scopeType
+      type: object
+    ReportedWorkloadType:
+      description: "The type of the workload. Any workload type the cluster reports,\
+        \ not only the NVIDIA Run:ai native ones."
+      example: Training
+      type: string
+    ProjectId:
+      description: The id of the project.
+      example: "1"
+      pattern: .*
+      type: string
+    PodResourceClaimBinding:
+      example:
+        claimName: bert-worker-0-gpu-1-mk4s8
+        name: gpu-1
+      properties:
+        name:
+          description: "Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name`\
+            \ and referenced by containers in `resources.claims`."
+          example: gpu-1
+          type: string
+        claimName:
+          description: "Name of the ResourceClaim bound to the pod for this entry.\
+            \ For a claim generated from a template, this is null until Kubernetes\
+            \ creates and binds the claim."
+          example: bert-worker-0-gpu-1-mk4s8
+          nullable: true
+          type: string
+      required:
+      - name
+      type: object
+    ResourceClaimTemplateWorkloadPod:
+      example:
+        resourceClaims:
+        - claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        - claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        podName: bert-worker-0
+        podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        podId:
+          description: The id of the pod.
+          format: uuid
+          type: string
+        podName:
+          example: bert-worker-0
+          type: string
+        resourceClaims:
+          description: "The pod's claims that were generated from the resource claim\
+            \ template. A pod usually has one, but may list several when more than\
+            \ one of its claim entries references the same template."
+          items:
+            $ref: '#/components/schemas/PodResourceClaimBinding'
+          type: array
+      required:
+      - podId
+      - podName
+      - resourceClaims
+      type: object
+    ResourceClaimTemplateWorkload:
+      example:
+        workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        name: my-workload-name
+        pods:
+        - resourceClaims:
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - resourceClaims:
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        type: Training
+        projectId: "1"
+      properties:
+        workloadId:
+          description: A unique ID of the workload.
+          format: uuid
+          type: string
+        name:
+          description: The name of the workload.
+          example: my-workload-name
+          minLength: 1
+          pattern: .*
+          type: string
+        type:
+          description: "The type of the workload. Any workload type the cluster reports,\
+            \ not only the NVIDIA Run:ai native ones."
+          example: Training
+          type: string
+        projectId:
+          description: The id of the project.
+          example: "1"
+          pattern: .*
+          type: string
+        pods:
+          description: The pods of the workload that reference the resource claim
+            template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkloadPod'
+          type: array
+      required:
+      - name
+      - pods
+      - projectId
+      - type
+      - workloadId
+      type: object
+    ResourceClaimTemplateWorkloadsResponse:
+      example:
+        next: 0
+        workloads:
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: my-workload-name
+          pods:
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: Training
+          projectId: "1"
+        - workloadId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          name: my-workload-name
+          pods:
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          - resourceClaims:
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            - claimName: bert-worker-0-gpu-1-mk4s8
+              name: gpu-1
+            podName: bert-worker-0
+            podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          type: Training
+          projectId: "1"
+      properties:
+        next:
+          description: |
+            Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit).
+          format: int32
+          type: integer
+        workloads:
+          description: The workloads whose pods currently reference the resource claim
+            template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkload'
+          type: array
+      required:
+      - workloads
       type: object
     UpdateCount:
       description: the value of an update counter of a data in the system.
@@ -21329,6 +22642,69 @@ components:
       - projectId
       - workloads
       type: object
+    WorkloadSlim:
+      description: A workload as returned by GET /api/v1/workloads/slim.
+      example:
+        name: very-important-job
+        distributedFramework: Pytorch
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+        type: type
+        projectName: proj-1
+      properties:
+        id:
+          format: uuid
+          type: string
+        name:
+          example: very-important-job
+          type: string
+        type:
+          type: string
+        projectName:
+          example: proj-1
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
+          type: string
+        distributedFramework:
+          example: Pytorch
+          type: string
+      required:
+      - clusterId
+      - id
+      - name
+      - projectName
+      type: object
+    GetWorkloadsSlimResponse:
+      description: The response of GET /api/v1/workloads/slim.
+      example:
+        next: 1
+        workloads:
+        - name: very-important-job
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          type: type
+          projectName: proj-1
+        - name: very-important-job
+          distributedFramework: Pytorch
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
+          type: type
+          projectName: proj-1
+      properties:
+        next:
+          example: 1
+          type: integer
+        workloads:
+          items:
+            $ref: '#/components/schemas/WorkloadSlim'
+          type: array
+      required:
+      - workloads
+      type: object
     ClusterIdOptional:
       description: The id of the cluster.
       example: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -22420,6 +23796,15 @@ components:
           cpuMemory: 0B
           cpu: 0.5
           gpu: 1.5
+        resourceClaims:
+        - resourceClaimName: shared-infiniband
+          name: gpu-1
+          allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+          resourceClaimTemplateName: single-gpu
+        - resourceClaimName: shared-infiniband
+          name: gpu-1
+          allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+          resourceClaimTemplateName: single-gpu
         deletedAt: 2022-08-12T19:28:24.131Z
         task: leader
         elements:
@@ -22666,6 +24051,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -22912,6 +24306,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -23201,6 +24604,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -23447,6 +24859,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           tolerations:
           - effect: NoExecute
             value: ""
@@ -23973,17 +25394,6 @@ components:
       - VLLM_INTER_TOKEN_LATENCY_SECONDS_PERCENTILES
       - NVLINK_BANDWIDTH_TOTAL
       type: string
-    WorkloadName:
-      description: The name of the workload.
-      example: my-workload-name
-      minLength: 1
-      pattern: .*
-      type: string
-    ProjectId:
-      description: The id of the project.
-      example: "1"
-      pattern: .*
-      type: string
     WorkloadCreationMeta:
       properties:
         name:
@@ -24222,6 +25632,16 @@ components:
       maxItems: 1000
       nullable: true
       type: array
+    GpuComputeMode:
+      description: GPU compute sharing mode. Policy and template defaults apply before
+        the built-in time-slicing fallback. Explicit modes require Run:ai cluster
+        version 3.0.14 or later.
+      enum:
+      - time-slicing
+      - sm-sharing
+      minLength: 1
+      nullable: true
+      type: string
     GpuDevicesRequest:
       description: "Requested number of GPU devices. Currently if more than one device\
         \ is requested, it is not possible to provide values for gpuMemory or gpuPortion."
@@ -24238,6 +25658,25 @@ components:
       nullable: true
       pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
       type: string
+    GpuMemoryPortionLimit:
+      description: Maximum GPU memory fraction consumed per GPU device. Must be no
+        less than gpuMemoryPortionRequest.
+      example: 0.5
+      format: double
+      minimum: 0
+      nullable: true
+      type: number
+      x-gorm-ignore: true
+    GpuMemoryPortionRequest:
+      description: "GPU memory fraction to allocate per GPU device, between 0 and\
+        \ 1. Required when gpuRequestType is portion."
+      example: 0.5
+      format: double
+      maximum: 1
+      minimum: 0
+      nullable: true
+      type: number
+      x-gorm-ignore: true
     GpuMemoryRequest:
       description: "Required if and only if gpuRequestType is memory. States the GPU\
         \ memory to allocate for the created workload, per GPU device. Note that the\
@@ -24249,17 +25688,21 @@ components:
       pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
       type: string
     GpuPortionLimit:
-      description: "Limitations on the portion consumed by the workload, per GPU device.\
-        \ The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
+      deprecated: true
+      description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations on\
+        \ the portion consumed by the workload, per GPU device. The system guarantees\
+        \ The gpuPotionLimit must be no less than the gpuPortionRequest."
       example: 0.5
       format: double
       minimum: 0
       nullable: true
       type: number
     GpuPortionRequest:
-      description: "Required if and only if gpuRequestType is portion. States the\
-        \ portion of the GPU to allocate for the created workload, per GPU device,\
-        \ between 0 and 1. The default is no allocated GPUs."
+      deprecated: true
+      description: "Deprecated. Use gpuMemoryPortionRequest instead. Required if and\
+        \ only if gpuRequestType is portion. States the portion of the GPU to allocate\
+        \ for the created workload, per GPU device, between 0 and 1. The default is\
+        \ no allocated GPUs."
       example: 0.5
       format: double
       minimum: 0
@@ -25016,10 +26459,15 @@ components:
     Preemptibility:
       description: "Specifies whether the workload can be preempted by higher-priority\
         \ workloads. Valid values are preemptible, semi-preemptible and non-preemptible.\
-        \ If explicitly set, this value takes precedence. If not set, the system derives\
-        \ the preemptibility from the priorityClassName field, ensuring backward compatibility.\
-        \ Each workload type has a default preemptibility. To view the default preemptibility\
-        \ for each workload type, use the GET /workload-types endpoint."
+        \ Semi-preemptible is intended for multi-pod workloads. Replicas up to the\
+        \ configured minimum are non-preemptible, while replicas above that minimum\
+        \ are preemptible. On single-pod workloads with a fixed replica count of one,\
+        \ semi-preemptible behaves as non-preemptible. The API continues to accept\
+        \ semi-preemptible for these workloads. If explicitly set, this value takes\
+        \ precedence. If not set, the system derives the preemptibility from the priorityClassName\
+        \ field, ensuring backward compatibility. Each workload type has a default\
+        \ preemptibility. To view the default preemptibility for each workload type,\
+        \ use the GET /workload-types endpoint."
       enum:
       - preemptible
       - semi-preemptible
@@ -25191,9 +26639,9 @@ components:
       nullable: true
       type: string
     AllowPrivilegeEscalation:
-      description: Allow the container running the workload and all launched processes
-        to gain additional privileges after the workload starts. For more information
-        consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+      description: "Allow the container running the workload and all launched processes\
+        \ to gain additional privileges after the workload starts. For more information\
+        \ consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
       example: false
       nullable: true
       type: boolean
@@ -25323,7 +26771,7 @@ components:
         \ `custom` - user and group ids can be specified in the environment asset\
         \ and/or the workload creation request. c. `idpToken` - user and group IDs\
         \ are automatically taken from the identity provider (IdP) token (available\
-        \ only in SSO-enabled installations). For more information, see [User Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers)."
+        \ only in SSO-enabled installations). For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)."
       enum:
       - fromTheImage
       - fromIdpToken
@@ -26866,16 +28314,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           privileged: ""
@@ -27832,16 +29283,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -28244,10 +29698,6 @@ components:
             url: https://my-url.com
           tty: null
           category: null
-    WorkloadId:
-      description: A unique ID of the workload.
-      format: uuid
-      type: string
     DepartmentId:
       description: The id of the department.
       example: "2"
@@ -28882,16 +30332,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -29658,7 +31111,7 @@ components:
           description: "Indicates whether the inference serving endpoint should be\
             \ accessible outside the cluster. If set to true, the endpoint will be\
             \ exposed externally. To enable external access, your administrator must\
-            \ configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference).\
+            \ configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate).\
             \ section."
           nullable: true
           type: boolean
@@ -30303,16 +31756,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         cleanPodPolicy: None
         servingConfiguration:
           requestTimeoutSeconds: 1
@@ -31764,16 +33220,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: null
         security:
           privileged: ""
@@ -32414,6 +33873,7 @@ components:
       - secret-volume
       - data-volume
       - ngcApiKey
+      - resource-claim-template
       minLength: 1
       type: string
     AssetsMapping:
@@ -32989,16 +34449,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: null
           security:
             privileged: ""
@@ -33510,16 +34973,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           cleanPodPolicy: None
           servingConfiguration:
             requestTimeoutSeconds: 1
@@ -34943,16 +36409,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: null
             security:
               privileged: ""
@@ -35464,16 +36933,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             cleanPodPolicy: None
             servingConfiguration:
               requestTimeoutSeconds: 1
@@ -36908,16 +38380,19 @@ components:
                 - quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: null
               security:
                 privileged: ""
@@ -37429,16 +38904,19 @@ components:
                 - quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               cleanPodPolicy: None
               servingConfiguration:
                 requestTimeoutSeconds: 1
@@ -38860,16 +40338,19 @@ components:
                 - quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: null
               security:
                 privileged: ""
@@ -39381,16 +40862,19 @@ components:
                 - quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               cleanPodPolicy: None
               servingConfiguration:
                 requestTimeoutSeconds: 1
@@ -40912,16 +42396,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           privileged: ""
@@ -41880,16 +43367,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -42841,16 +44331,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -43874,16 +45367,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         cleanPodPolicy: None
         security:
@@ -44860,16 +46356,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: null
           security:
             privileged: ""
@@ -45809,16 +47308,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -46767,16 +48269,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: null
           security:
             privileged: ""
@@ -47713,16 +49218,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -49054,16 +50562,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           capabilities:
@@ -50018,16 +51529,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -50975,16 +52489,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -51664,16 +53181,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           servingConfiguration:
             requestTimeoutSeconds: 1
@@ -52396,18 +53916,6 @@ components:
       - Inference
       - DistributedInference
       type: string
-    ScopeType:
-      enum:
-      - system
-      - tenant
-      - cluster
-      - department
-      - project
-      type: string
-    ScopeId:
-      description: "The id of the cluster, department or project, depending on the\
-        \ scope type."
-      type: string
     ProjectIdOptional:
       description: The id of the project.
       example: 1
@@ -53080,16 +54588,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           privileged: ""
@@ -54224,16 +55735,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -55216,16 +56730,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -55767,16 +57284,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           cleanPodPolicy: None
           servingConfiguration:
             requestTimeoutSeconds: 1
@@ -57169,16 +58689,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -57689,16 +59212,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           cleanPodPolicy: None
           servingConfiguration:
             requestTimeoutSeconds: 1
@@ -59105,16 +60631,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -59656,16 +61185,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             cleanPodPolicy: None
             servingConfiguration:
               requestTimeoutSeconds: 1
@@ -61058,16 +62590,19 @@ components:
                 - quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -61578,16 +63113,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             cleanPodPolicy: None
             servingConfiguration:
               requestTimeoutSeconds: 1
@@ -62973,16 +64511,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -63524,16 +65065,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             cleanPodPolicy: None
             servingConfiguration:
               requestTimeoutSeconds: 1
@@ -64926,16 +66470,19 @@ components:
                 - quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -65446,16 +66993,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             cleanPodPolicy: None
             servingConfiguration:
               requestTimeoutSeconds: 1
@@ -66930,16 +68480,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           privileged: ""
@@ -67898,16 +69451,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -68825,16 +70381,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -69787,16 +71346,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -70714,16 +72276,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -71674,16 +73239,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -72601,16 +74169,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -73558,16 +75129,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -74485,16 +76059,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -75482,16 +77059,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -76451,16 +78031,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -77443,16 +79026,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -78442,16 +80028,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           privileged: ""
@@ -79408,16 +80997,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -80337,16 +81929,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -81301,16 +82896,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -82230,16 +83828,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -83192,16 +84793,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -84121,16 +85725,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -85080,16 +86687,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -86009,16 +87619,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -86968,16 +88581,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -87914,16 +89530,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -88864,16 +90483,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -89879,16 +91501,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         cleanPodPolicy: None
         security:
@@ -90833,16 +92458,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -91786,16 +93414,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -92727,16 +94358,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -93672,16 +95306,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -94611,16 +96248,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             privileged: ""
@@ -95571,16 +97211,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -96512,16 +98155,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -97457,16 +99103,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -98394,16 +100043,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -99354,16 +101006,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             cleanPodPolicy: None
             security:
@@ -100295,16 +101950,19 @@ components:
                 - quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -101240,16 +102898,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             cleanPodPolicy: None
             security:
@@ -102174,16 +103835,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -103134,16 +104798,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             cleanPodPolicy: None
             security:
@@ -104075,16 +105742,19 @@ components:
                 - quantity: "2"
                   resource: hardware-vendor.example/foo
                   exclude: false
-                gpuMemoryRequest: 10M
-                gpuPortionRequest: 0.5
                 gpuMemoryLimit: 10M
                 cpuCoreLimit: 2
-                largeShmRequest: false
-                cpuCoreRequest: 0.5
-                gpuPortionLimit: 0.5
                 gpuRequestType: portion
                 cpuMemoryRequest: 20M
                 gpuDevicesRequest: 1
+                gpuMemoryRequest: 10M
+                gpuMemoryPortionLimit: 0.5
+                gpuPortionRequest: 0.5
+                gpuComputeMode: time-slicing
+                gpuMemoryPortionRequest: 0.5
+                largeShmRequest: false
+                cpuCoreRequest: 0.5
+                gpuPortionLimit: 0.5
               preemptibility: preemptible
               security:
                 privileged: ""
@@ -105020,16 +106690,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             cleanPodPolicy: None
             security:
@@ -105995,16 +107668,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -106936,16 +108612,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -107891,16 +109570,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -108832,16 +110514,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -109791,16 +111476,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           cleanPodPolicy: None
           security:
@@ -110732,16 +112420,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               privileged: ""
@@ -111701,16 +113392,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           capabilities:
@@ -112665,16 +114359,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -113590,16 +115287,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -114550,16 +116250,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -115475,16 +117178,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -116433,16 +118139,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               capabilities:
@@ -117358,16 +119067,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               capabilities:
@@ -118313,16 +120025,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               capabilities:
@@ -119238,16 +120953,19 @@ components:
               - quantity: "2"
                 resource: hardware-vendor.example/foo
                 exclude: false
-              gpuMemoryRequest: 10M
-              gpuPortionRequest: 0.5
               gpuMemoryLimit: 10M
               cpuCoreLimit: 2
-              largeShmRequest: false
-              cpuCoreRequest: 0.5
-              gpuPortionLimit: 0.5
               gpuRequestType: portion
               cpuMemoryRequest: 20M
               gpuDevicesRequest: 1
+              gpuMemoryRequest: 10M
+              gpuMemoryPortionLimit: 0.5
+              gpuPortionRequest: 0.5
+              gpuComputeMode: time-slicing
+              gpuMemoryPortionRequest: 0.5
+              largeShmRequest: false
+              cpuCoreRequest: 0.5
+              gpuPortionLimit: 0.5
             preemptibility: preemptible
             security:
               capabilities:
@@ -120194,16 +121912,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -121137,16 +122858,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -122084,16 +123808,19 @@ components:
             - quantity: "2"
               resource: hardware-vendor.example/foo
               exclude: false
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            largeShmRequest: false
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            largeShmRequest: false
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             capabilities:
@@ -123272,24 +124999,48 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuMemoryPortionLimit:
+          description: Maximum GPU memory fraction consumed per GPU device. Must be
+            no less than gpuMemoryPortionRequest.
+          example: 0.5
+          format: double
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
         gpuPortionLimit:
-          description: "Limitations on the portion consumed by the workload, per GPU\
-            \ device. The system guarantees The gpuPotionLimit must be no less than\
-            \ the gpuPortionRequest."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations\
+            \ on the portion consumed by the workload, per GPU device. The system\
+            \ guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
           example: 0.5
           format: double
           minimum: 0
           nullable: true
           type: number
+        gpuMemoryPortionRequest:
+          description: "GPU memory fraction to allocate per GPU device, between 0\
+            \ and 1. Required when gpuRequestType is portion."
+          example: 0.5
+          format: double
+          maximum: 1
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
         gpuPortionRequest:
-          description: "Required if and only if gpuRequestType is portion. States\
-            \ the portion of the GPU to allocate for the created workload, per GPU\
-            \ device, between 0 and 1. The default is no allocated GPUs."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionRequest instead. Required\
+            \ if and only if gpuRequestType is portion. States the portion of the\
+            \ GPU to allocate for the created workload, per GPU device, between 0\
+            \ and 1. The default is no allocated GPUs."
           example: 0.5
           format: double
           minimum: 0
           nullable: true
           type: number
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestType'
         largeShmRequest:
@@ -123637,9 +125388,9 @@ components:
       nullable: true
       properties:
         allowPrivilegeEscalation:
-          description: Allow the container running the workload and all launched processes
-            to gain additional privileges after the workload starts. For more information
-            consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+          description: "Allow the container running the workload and all launched\
+            \ processes to gain additional privileges after the workload starts. For\
+            \ more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
           example: false
           nullable: true
           type: boolean
@@ -124172,6 +125923,23 @@ components:
         instances:
           $ref: '#/components/schemas/ItemRules'
       type: object
+    GpuComputeModeOptions:
+      nullable: true
+      properties:
+        options:
+          description: Limit the permitted values for gpuComputeMode to a given set
+            of values.
+          items:
+            $ref: '#/components/schemas/GpuComputeModeOptions_options_inner'
+          nullable: true
+          type: array
+      type: object
+    GpuComputeModeRules:
+      allOf:
+      - $ref: '#/components/schemas/StringRulesCommon'
+      - $ref: '#/components/schemas/GpuComputeModeOptions'
+      nullable: true
+      type: object
     GpuRequestOptions:
       nullable: true
       properties:
@@ -124222,10 +125990,20 @@ components:
           $ref: '#/components/schemas/QuantityRules'
         gpuMemoryRequest:
           $ref: '#/components/schemas/QuantityRules'
+        gpuMemoryPortionLimit:
+          $ref: '#/components/schemas/NumberRules'
         gpuPortionLimit:
+          allOf:
+          - $ref: '#/components/schemas/NumberRules'
+          deprecated: true
+        gpuMemoryPortionRequest:
           $ref: '#/components/schemas/NumberRules'
         gpuPortionRequest:
-          $ref: '#/components/schemas/NumberRules'
+          allOf:
+          - $ref: '#/components/schemas/NumberRules'
+          deprecated: true
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeModeRules'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestRules'
         largeShmRequest:
@@ -125459,6 +127237,141 @@ components:
       - CPU_MEMORY_REQUEST_BYTES
       - CPU_MEMORY_LIMIT_BYTES
       type: string
+    ResourceClaimTemplateRef:
+      description: The ResourceClaimTemplate the claim was generated from. Absent
+        for a standalone ResourceClaim that the pod references directly.
+      example:
+        managed: true
+        name: single-gpu
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      nullable: true
+      properties:
+        name:
+          description: Name of the ResourceClaimTemplate in the pod's namespace.
+          example: single-gpu
+          type: string
+        managed:
+          description: Whether the template is managed by NVIDIA Run:ai (created through
+            the resource claim templates API) rather than created directly in the
+            cluster.
+          type: boolean
+        id:
+          description: The id of the managed resource claim template. Null for an
+            unmanaged template.
+          format: uuid
+          nullable: true
+          type: string
+      required:
+      - managed
+      - name
+      type: object
+    WorkloadResourceClaim:
+      allOf:
+      - $ref: '#/components/schemas/PodResourceClaimBinding'
+      - properties:
+          template:
+            $ref: '#/components/schemas/ResourceClaimTemplateRef'
+        type: object
+      example:
+        template:
+          managed: true
+          name: single-gpu
+          id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        claimName: bert-worker-0-gpu-1-mk4s8
+        name: gpu-1
+    WorkloadPodResourceClaims:
+      example:
+        resourceClaims:
+        - template:
+            managed: true
+            name: single-gpu
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        - template:
+            managed: true
+            name: single-gpu
+            id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          claimName: bert-worker-0-gpu-1-mk4s8
+          name: gpu-1
+        task: worker
+        podName: bert-worker-0
+        podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        podId:
+          description: The id of the pod.
+          format: uuid
+          type: string
+        podName:
+          example: bert-worker-0
+          type: string
+        task:
+          description: "Identifies the function of the pod within a distributed workload\
+            \ (for example, leader, worker, or master)."
+          example: worker
+          nullable: true
+          type: string
+        resourceClaims:
+          description: "The claims the pod references, in the order they appear in\
+            \ `pod.spec.resourceClaims`."
+          items:
+            $ref: '#/components/schemas/WorkloadResourceClaim'
+          type: array
+      required:
+      - podId
+      - podName
+      - resourceClaims
+      type: object
+    WorkloadResourceClaimsResponse:
+      example:
+        next: 0
+        pods:
+        - resourceClaims:
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          task: worker
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        - resourceClaims:
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          - template:
+              managed: true
+              name: single-gpu
+              id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            claimName: bert-worker-0-gpu-1-mk4s8
+            name: gpu-1
+          task: worker
+          podName: bert-worker-0
+          podId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+      properties:
+        next:
+          description: |
+            Offset for the next page of results. Present only when there are more pods beyond the current page (i.e., the number of returned pods equals the limit).
+          format: int32
+          type: integer
+        pods:
+          description: The pods of the workload that reference at least one claim.
+          items:
+            $ref: '#/components/schemas/WorkloadPodResourceClaims'
+          type: array
+      required:
+      - pods
+      type: object
     WorkloadCategory:
       example:
         createdAt: 2000-01-23T04:56:07.000+00:00
@@ -126366,14 +128279,13 @@ components:
       example: https://charts.bitnami.com/bitnami
       maxLength: 250
       type: string
-    AIApplicationChartName:
-      description: The name of the chart within the specified repository. This corresponds
-        to the chart’s directory name.
+    ChartName:
+      description: Helm chart name.
       example: redis
       maxLength: 250
       type: string
-    AIApplicationChartVersion:
-      description: The specific Semantic Version (SemVer) of the chart to deploy.
+    ChartVersion:
+      description: Helm chart version.
       example: 17.3.17
       maxLength: 50
       type: string
@@ -126412,13 +128324,12 @@ components:
           maxLength: 250
           type: string
         chartName:
-          description: The name of the chart within the specified repository. This
-            corresponds to the chart’s directory name.
+          description: Helm chart name.
           example: redis
           maxLength: 250
           type: string
         chartVersion:
-          description: The specific Semantic Version (SemVer) of the chart to deploy.
+          description: Helm chart version.
           example: 17.3.17
           maxLength: 50
           type: string
@@ -126443,7 +128354,14 @@ components:
         repository or chart URL. This is used when the chart source requires credentials.
       example:
         assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        userCredential: true
       properties:
+        userCredential:
+          description: "Indicates whether the asset is a user credential owned by\
+            \ the caller. When omitted or false, the asset is treated as a shared\
+            \ credential."
+          nullable: true
+          type: boolean
         assetId:
           description: The ID of the asset to use for authentication.
           format: uuid
@@ -126453,6 +128371,7 @@ components:
       example:
         auth:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          userCredential: true
         values:
           key: ""
         chartRef:
@@ -126467,13 +128386,16 @@ components:
           $ref: '#/components/schemas/AIApplicationSpecChartRef'
         values:
           additionalProperties: true
-          description: Inline Helm values used to override the Helm chart’s default
-            configuration. These values are merged with the Helm chart’s `values.yaml`.
-            This field is mutually exclusive with `valuesBase64`.
+          description: |
+            Inline Helm values used to override the Helm chart’s default configuration. These values are merged with the Helm chart’s `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+
+            A complete string value can reference a personal credential using `USERCREDENTIAL:<name>`. Generic secret and Docker registry credentials use that form. NGC credentials require an explicit representation: `USERCREDENTIAL:<name>,generic-secret` or `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial placeholders are not supported. The resolved value is a Kubernetes Secret name, never credential plaintext.
           type: object
         valuesBase64:
-          description: Base64-encoded Helm values used to override the Helm chart’s
-            default configuration. This field is mutually exclusive with `values`.
+          description: |
+            Base64-encoded Helm values used to override the Helm chart’s default configuration. This field is mutually exclusive with `values`. When the decoded content contains personal credential references, it must be a YAML object.
+
+            String values support the same exact personal credential placeholder grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and Docker registry credentials, or `USERCREDENTIAL:<name>,generic-secret` and `USERCREDENTIAL:<name>,docker-registry` for NGC credentials. Embedded or partial placeholders are not supported.
           format: byte
           type: string
         auth:
@@ -126512,10 +128434,12 @@ components:
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         source: source
+        clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
         type: type
         spec:
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           values:
             key: ""
           chartRef:
@@ -126582,6 +128506,11 @@ components:
           type: string
         phase:
           description: The actual status of the release in the cluster.
+          type: string
+        clusterId:
+          description: The id of the cluster.
+          example: 71f69d83-ba66-4822-adf5-55ce55efd210
+          format: uuid
           type: string
         projectId:
           description: The id of the project.
@@ -126704,6 +128633,128 @@ components:
       required:
       - chartId
       type: object
+    AIApplicationChartInspectionRequest:
+      description: |
+        Select exactly one chart source: chartId for an existing uploaded archive, chartURL for a direct
+        archive URL, or repo with chartName and an exact chartVersion. Sources cannot be combined.
+        Inspection of a repository chart requires an explicit version; latest-version selection
+        is not supported. Authentication uses the caller-accessible personal or shared credential asset.
+      properties:
+        chartRef:
+          $ref: '#/components/schemas/AIApplicationSpecChartRef'
+        auth:
+          $ref: '#/components/schemas/AIApplicationAuth'
+      required:
+      - chartRef
+      type: object
+    AIApplicationChartQuestionsStatus:
+      description: |
+        Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is
+        usable after supported normalization. Unusable means declaration validation failed;
+        questions and groups are empty and warnings explain the failure. An unusable declaration
+        does not block raw YAML configuration or deployment.
+      enum:
+      - absent
+      - usable
+      - unusable
+      type: string
+    AIApplicationChartInspectionWarning:
+      example:
+        path: path
+        code: code
+        message: message
+      properties:
+        code:
+          description: Stable machine-readable diagnostic identifier.
+          type: string
+        message:
+          description: Explanation of the problem and available recovery.
+          type: string
+        path:
+          description: "Location within the declaration, or an empty string for a\
+            \ document-wide diagnostic."
+          type: string
+      required:
+      - code
+      - message
+      - path
+      type: object
+    AIApplicationChartInspectionResponse:
+      example:
+        chartName: redis
+        chartVersion: 17.3.17
+        warnings:
+        - path: path
+          code: code
+          message: message
+        - path: path
+          code: code
+          message: message
+        questions:
+        - key: ""
+        - key: ""
+        archiveSHA256: archiveSHA256
+        groups:
+        - key: ""
+        - key: ""
+        hasQuestions: true
+        questionsStatus: absent
+      properties:
+        chartName:
+          description: Helm chart name.
+          example: redis
+          maxLength: 250
+          type: string
+        chartVersion:
+          description: Helm chart version.
+          example: 17.3.17
+          maxLength: 50
+          type: string
+        archiveSHA256:
+          description: Lowercase hexadecimal SHA-256 digest of the exact inspected
+            archive bytes.
+          type: string
+        hasQuestions:
+          description: "Whether the chart contains a root questions.yaml or questions.yml\
+            \ file, including an unusable file."
+          type: boolean
+        questionsStatus:
+          $ref: '#/components/schemas/AIApplicationChartQuestionsStatus'
+        groups:
+          description: Normalized group declarations in author order; empty for absent
+            or unusable declarations.
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+        questions:
+          description: |
+            Normalized root questions in author order. Each question preserves supported declared
+            metadata and may contain recursive subquestions through four child levels (five levels total), with roots at
+            depth zero. Supported compatibility forms are normalized. Unknown question types become
+            string with a warning; unsupported optional properties are ignored with a warning. Invalid
+            mandatory metadata, bindings, options, defaults, conditions, or excessive nesting make the
+            entire declaration unusable. Credential and Secret question types are not supported.
+            This response contains no raw declaration YAML or complete values.yaml defaults.
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+        warnings:
+          description: Diagnostics for recoverable metadata and unusable declarations.
+          items:
+            $ref: '#/components/schemas/AIApplicationChartInspectionWarning'
+          type: array
+      required:
+      - archiveSHA256
+      - chartName
+      - chartVersion
+      - groups
+      - hasQuestions
+      - questions
+      - questionsStatus
+      - warnings
+      type: object
     AIApplicationSyncResource:
       properties:
         id:
@@ -126794,6 +128845,7 @@ components:
         phase: phase
         auth:
           assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          userCredential: true
         desiredPhase: desiredPhase
         name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126805,6 +128857,7 @@ components:
         spec:
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           values:
             key: ""
           chartRef:
@@ -126862,6 +128915,7 @@ components:
           phase: phase
           auth:
             assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+            userCredential: true
           desiredPhase: desiredPhase
           name: name
           id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126873,6 +128927,7 @@ components:
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:
@@ -126905,6 +128960,7 @@ components:
             phase: phase
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             desiredPhase: desiredPhase
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126916,6 +128972,7 @@ components:
             spec:
               auth:
                 assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                userCredential: true
               values:
                 key: ""
               chartRef:
@@ -126930,6 +128987,7 @@ components:
             phase: phase
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             desiredPhase: desiredPhase
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -126941,6 +128999,7 @@ components:
             spec:
               auth:
                 assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+                userCredential: true
               values:
                 key: ""
               chartRef:
@@ -128846,6 +130905,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           deletedAt: 2022-08-12T19:28:24.131Z
           task: leader
           elements:
@@ -129098,6 +131166,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           deletedAt: 2022-08-12T19:28:24.131Z
           task: leader
           elements:
@@ -129728,6 +131805,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           deletedAt: 2022-08-12T19:28:24.131Z
           task: leader
           elements:
@@ -129980,6 +132066,15 @@ components:
             cpuMemory: 0B
             cpu: 0.5
             gpu: 1.5
+          resourceClaims:
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
+          - resourceClaimName: shared-infiniband
+            name: gpu-1
+            allocatedResourceClaimName: dra-gpu-test-gpu-1-mk4s8
+            resourceClaimTemplateName: single-gpu
           deletedAt: 2022-08-12T19:28:24.131Z
           task: leader
           elements:
@@ -130410,10 +132505,12 @@ components:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           source: source
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           type: type
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:
@@ -130488,10 +132585,12 @@ components:
             name: name
             id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
           source: source
+          clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
           type: type
           spec:
             auth:
               assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+              userCredential: true
             values:
               key: ""
             chartRef:
@@ -131190,16 +133289,19 @@ components:
         - quantity: "2"
           resource: hardware-vendor.example/foo
           exclude: false
-        gpuMemoryRequest: 10M
-        gpuPortionRequest: 0.5
         gpuMemoryLimit: 10M
         cpuCoreLimit: 2
-        largeShmRequest: false
-        cpuCoreRequest: 0.5
-        gpuPortionLimit: 0.5
         gpuRequestType: portion
         cpuMemoryRequest: 20M
         gpuDevicesRequest: 1
+        gpuMemoryRequest: 10M
+        gpuMemoryPortionLimit: 0.5
+        gpuPortionRequest: 0.5
+        gpuComputeMode: time-slicing
+        gpuMemoryPortionRequest: 0.5
+        largeShmRequest: false
+        cpuCoreRequest: 0.5
+        gpuPortionLimit: 0.5
       nullable: true
       properties:
         cpuCoreLimit:
@@ -131248,6 +133350,8 @@ components:
           maxItems: 1000
           nullable: true
           type: array
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuDevicesRequest:
           description: "Requested number of GPU devices. Currently if more than one\
             \ device is requested, it is not possible to provide values for gpuMemory\
@@ -131266,6 +133370,25 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuMemoryPortionLimit:
+          description: Maximum GPU memory fraction consumed per GPU device. Must be
+            no less than gpuMemoryPortionRequest.
+          example: 0.5
+          format: double
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
+        gpuMemoryPortionRequest:
+          description: "GPU memory fraction to allocate per GPU device, between 0\
+            \ and 1. Required when gpuRequestType is portion."
+          example: 0.5
+          format: double
+          maximum: 1
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
         gpuMemoryRequest:
           description: "Required if and only if gpuRequestType is memory. States the\
             \ GPU memory to allocate for the created workload, per GPU device. Note\
@@ -131277,18 +133400,21 @@ components:
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
         gpuPortionLimit:
-          description: "Limitations on the portion consumed by the workload, per GPU\
-            \ device. The system guarantees The gpuPotionLimit must be no less than\
-            \ the gpuPortionRequest."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations\
+            \ on the portion consumed by the workload, per GPU device. The system\
+            \ guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
           example: 0.5
           format: double
           minimum: 0
           nullable: true
           type: number
         gpuPortionRequest:
-          description: "Required if and only if gpuRequestType is portion. States\
-            \ the portion of the GPU to allocate for the created workload, per GPU\
-            \ device, between 0 and 1. The default is no allocated GPUs."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionRequest instead. Required\
+            \ if and only if gpuRequestType is portion. States the portion of the\
+            \ GPU to allocate for the created workload, per GPU device, between 0\
+            \ and 1. The default is no allocated GPUs."
           example: 0.5
           format: double
           minimum: 0
@@ -131322,9 +133448,9 @@ components:
       nullable: true
       properties:
         allowPrivilegeEscalation:
-          description: Allow the container running the workload and all launched processes
-            to gain additional privileges after the workload starts. For more information
-            consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+          description: "Allow the container running the workload and all launched\
+            \ processes to gain additional privileges after the workload starts. For\
+            \ more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)"
           example: false
           nullable: true
           type: boolean
@@ -132831,16 +134957,19 @@ components:
           - quantity: "2"
             resource: hardware-vendor.example/foo
             exclude: false
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          largeShmRequest: false
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          largeShmRequest: false
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         servingConfiguration:
           requestTimeoutSeconds: 1
@@ -133002,6 +135131,17 @@ components:
           nullable: true
           pattern: "^[a-zA-Z_:][a-zA-Z0-9_:]*$"
           type: string
+        displayed:
+          description: Textual description of the value
+          nullable: true
+          pattern: .*
+          type: string
+      required:
+      - value
+    GpuComputeModeOptions_options_inner:
+      properties:
+        value:
+          $ref: '#/components/schemas/GpuComputeMode'
         displayed:
           description: Textual description of the value
           nullable: true

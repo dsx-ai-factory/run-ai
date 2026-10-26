@@ -78,6 +78,29 @@ func (s *ProjectsAPIService) GetInternalProjectsTelemetry(ctx context.Context, t
 	return Response(http.StatusNotImplemented, nil), errors.New("GetInternalProjectsTelemetry method not implemented")
 }
 
+// CountInternalProjects - Count internal projects
+func (s *ProjectsAPIService) CountInternalProjects(ctx context.Context, filterBy []string, search string) (ImplResponse, error) {
+	// TODO - update CountInternalProjects with the required logic for this service method.
+	// Add api_projects_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, CountResponse{}) or use other options such as http.Ok ...
+	// return Response(200, CountResponse{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("CountInternalProjects method not implemented")
+}
+
 // GetProjects - Get projects
 func (s *ProjectsAPIService) GetProjects(ctx context.Context, filterBy []string, sortBy ProjectFilterSortFields, sortOrder string, offset int32, limit int32, search string) (ImplResponse, error) {
 	// TODO - update GetProjects with the required logic for this service method.

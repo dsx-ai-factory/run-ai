@@ -5,8 +5,9 @@
 
 <template>
   <section class="form-ngc-image-section">
-    <template v-if="supportAuthenticatedNgc">
+    <template v-if="supportAuthenticatedNgc || authenticatedOnly">
       <runai-radio-options
+        v-if="!authenticatedOnly"
         class="q-mt-lg q-mb-md"
         :options="imagesTypeOptions"
         v-model="selectedImagesType"
@@ -25,7 +26,9 @@
             allowedTypes: [ERunaiCredentialType.NgcApiKey],
             disable: true,
           }"
-          :credential-select-config="{ showCreateNewBtn: true }"
+          :credential-select-config="
+            authenticatedOnly ? { required: true, showCreateNewBtn: true } : { showCreateNewBtn: true }
+          "
         />
       </div>
     </template>
@@ -68,6 +71,10 @@ export default defineComponent({
       required: false,
       default: false,
     },
+    authenticatedOnly: {
+      type: Boolean,
+      default: false,
+    },
     scopeId: {
       type: String as PropType<string>,
       required: false,
@@ -104,7 +111,7 @@ export default defineComponent({
           label: "Authenticated",
         },
       ] as ISelectOption[],
-      selectedImagesType: EImagesType.Guest as EImagesType | null,
+      selectedImagesType: this.authenticatedOnly ? EImagesType.Authenticated : EImagesType.Guest,
       EImagesType,
       ERunaiCredentialType,
       ERunaiCredentialSource,
@@ -125,13 +132,14 @@ export default defineComponent({
     },
     showImageSelector(): boolean {
       return (
-        this.selectedImagesType === EImagesType.Guest ||
+        (!this.authenticatedOnly && this.selectedImagesType === EImagesType.Guest) ||
         (this.selectedImagesType === EImagesType.Authenticated && !!this.selectedCredentialId)
       );
     },
   },
   methods: {
     onImagesTypeSelected(imagesType: EImagesType): void {
+      if (this.authenticatedOnly && imagesType === EImagesType.Guest) return;
       this.selectedImagesType = imagesType;
       this.selectedCredentialId = null;
       this.credentialSelectorModel = {

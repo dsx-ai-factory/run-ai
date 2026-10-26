@@ -368,7 +368,7 @@ func (p *Plugin) reconcileExternalAccess(
 			exposures = append(exposures, resource.object)
 		}
 		if err := validateExposureServiceOwnership(ctx, p.ownershipReader, runner, exposures...); err != nil {
-			return fail(ownershipEnforcementError("validate external access backends", err))
+			return fail(ownershipEnforcementError("validate external access", err))
 		}
 
 		// Check every name before applying any object so a collision cannot leave
@@ -414,7 +414,7 @@ func (p *Plugin) validateLiveExternalAccess(
 	if err := validateExposureServiceOwnership(
 		ctx, p.ownershipReader, runner, liveExposures...,
 	); err != nil {
-		return ownershipEnforcementError("validate live external access backends", err)
+		return ownershipEnforcementError("validate live external access", err)
 	}
 	return nil
 }

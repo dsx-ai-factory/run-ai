@@ -132,13 +132,13 @@ Once your administrator has [deployed the MCP server](deploy.md), configure your
 
 <Tab title="Claude Code">
 
-**Option 1 — CLI:**
+**Option 1: CLI**
 
 ```bash
 claude mcp add --transport http --client-id runai-mcp runai https://<fqdn>/mcp
 ```
 
-**Option 2 — Config file:**
+**Option 2: Config file**
 
 Add the following to `~/.claude/settings.json`:
 

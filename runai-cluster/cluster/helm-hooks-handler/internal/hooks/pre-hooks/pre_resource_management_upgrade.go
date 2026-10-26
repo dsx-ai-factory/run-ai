@@ -142,7 +142,12 @@ func (p *PreResourceManagementUpgradeHook) migrateOrgUnits(ctx context.Context, 
 		return fmt.Errorf("failed to disable agent: %w", err)
 	}
 
-	if err = p.waitForOperandsDown(ctx, resources, hooks.ProjectControllerOperandName, hooks.AgentOperandName); err != nil {
+	// Both project-controller names: a pre-KRM cluster still runs Run:ai's
+	// runai-project-controller, a KRM one runs KRM's project-controller, and the hook
+	// cannot tell which version it is upgrading from. Waiting on a name that matches
+	// no pods returns on the first tick.
+	if err = p.waitForOperandsDown(ctx, resources, hooks.ProjectControllerOperandName,
+		hooks.ProjectControllerDeploymentName, hooks.AgentOperandName); err != nil {
 		return err
 	}
 

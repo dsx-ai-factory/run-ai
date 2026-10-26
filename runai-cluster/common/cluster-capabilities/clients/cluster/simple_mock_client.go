@@ -60,6 +60,16 @@ func (self SimpleMockClient) GetClusterMinimalDataById(_ context.Context, cluste
 	if displayed.Domain.IsSet() {
 		minimal.Domain = displayed.Domain
 	}
+	// Propagate Status.Platform → top-level Platform. Callers that gate on
+	// clusterInfo.Platform (e.g. RCT's DRA kube-version check in
+	// ValidateAssetCreateRequestMeta) rely on this, and the two schemas
+	// nest the same NullableClusterReportedStatusPlatform type on either
+	// side so the copy is direct.
+	if displayed.Status.IsSet() {
+		if status := displayed.Status.Get(); status != nil && status.Platform.IsSet() {
+			minimal.Platform = status.Platform
+		}
+	}
 	return &minimal, nil
 }
 

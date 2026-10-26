@@ -48,7 +48,6 @@ Each managed Kubernetes cluster runs a set of controllers and webhooks installed
 - **Workload lifecycle** - translates Run:ai workload CRDs into Kubernetes resources and manages their full lifecycle (creation, status, teardown): `anyworkload-controller`
 - **Scheduling enforcement** - intercepts pod admission and applies runtime time-limit policies: `admission-controller`, `runtime-rules`
 - **RBAC and project isolation** - keeps cluster-side namespaces, queues, and role bindings in sync with the control plane's access rules and project definitions: `accessrule-controller`, `shared-objects-controller`
-- **Resource management** - reconciles node pools and organizational units into the physical and namespace resources workloads run in, and assigns pod groups across multi-node-pool workloads: `nodepool-controller`, `project-controller`, `pod-group-assigner`
 
 | Component | Description |
 |-----------|-------------|
@@ -69,9 +68,6 @@ Each managed Kubernetes cluster runs a set of controllers and webhooks installed
 | [application-controller](https://github.com/dsx-ai-factory/run-ai/tree/main/runai-cluster/cluster/application-controller) | Manages Application CRs in two modes: tracks existing deployed resources and reflects their state into Application status, or owns the full install/upgrade/uninstall lifecycle of a Helm chart. |
 | [runtime-rules](https://github.com/dsx-ai-factory/run-ai/tree/main/runai-cluster/cluster/runtime-rules) | Enforces time-based runtime policies on cluster workloads, terminating jobs that exceed configured idle or time limits for interactive and training workload types. |
 | [workload-exporter](https://github.com/dsx-ai-factory/run-ai/tree/main/runai-cluster/cluster/workload-exporter) | Exports Prometheus metrics for Run:ai workloads at the workload level (replaces the legacy pod-group metrics-exporter as of v2.17), covering GPU allocation, GPU memory, CPU, and memory per pod. |
-| [nodepool-controller](https://github.com/dsx-ai-factory/run-ai/tree/main/runai-cluster/cluster/nodepool-controller) | Tags each node with the NodePool it belongs to and starts a dedicated KAI Scheduler instance per node pool. |
-| [project-controller](https://github.com/dsx-ai-factory/run-ai/tree/main/runai-cluster/cluster/project-controller) | Reconciles Project CRDs into their corresponding namespace, queue, limit range, and image pull secret. |
-| [pod-group-assigner](https://github.com/dsx-ai-factory/run-ai/tree/main/runai-cluster/cluster/pod-group-assigner) | Assigns PodGroups across the node pools a workload was submitted to, trying each in turn until the PodGroup schedules successfully. |
 
 ---
 

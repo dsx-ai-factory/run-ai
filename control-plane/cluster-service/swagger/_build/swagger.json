@@ -7294,7 +7294,7 @@
           },
           "bootstrapToken": {
             "type": "string",
-            "description": "Short-lived JWT (2h TTL) for the installer service account.\nPass to the Helm hook via --set cluster.bootstrapToken=<token>.\n"
+            "description": "Short-lived JWT (2h TTL) for the installer service account.\nPass to the Helm hook via --set controlPlane.bootstrapToken=<token>.\n"
           },
           "clientSecret": {
             "type": "string",
@@ -7304,7 +7304,7 @@
           }
         },
         "example": {
-          "installationStr": "helm upgrade -i runai-cluster runai/runai-cluster -n runai --set cluster.uid=... --set cluster.bootstrapToken=<installer-bootstrap-jwt>",
+          "installationStr": "helm upgrade -i runai-cluster runai/runai-cluster -n runai --set cluster.uid=... --set controlPlane.bootstrapToken=<installer-bootstrap-jwt>",
           "repositoryName": "runai",
           "chartRepoURL": "https://charts.example.com",
           "bootstrapToken": "<installer-bootstrap-jwt>"

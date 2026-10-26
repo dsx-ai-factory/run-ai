@@ -217,6 +217,21 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 		withTemplateAnnotations := func(runner *dromosv1alpha1.WorkloadRunner, annotations map[string]string) {
 			runner.Spec.Template = apiruntime.RawExtension{Raw: buildJobTemplateRaw("placeholder", nil, annotations)}
 		}
+		// withPodTemplateAnnotations mirrors the control-plane composer, which stamps
+		// partial-GPU annotations on the Job's pod template, not its top-level metadata.
+		withPodTemplateAnnotations := func(runner *dromosv1alpha1.WorkloadRunner, annotations map[string]string) {
+			raw, err := json.Marshal(map[string]any{
+				"apiVersion": "batch/v1",
+				"kind":       "Job",
+				"metadata":   map[string]any{"name": "placeholder"},
+				"spec": map[string]any{"template": map[string]any{
+					"metadata": map[string]any{"annotations": annotations},
+					"spec":     map[string]any{"containers": []any{map[string]any{"name": "main"}}},
+				}},
+			})
+			Expect(err).To(BeNil())
+			runner.Spec.Template = apiruntime.RawExtension{Raw: raw}
+		}
 
 		It("populates AutoDeletionTimeAfterCompletionSeconds from the template annotation", func() {
 			runner := BuildWorkloadRunner(testNamespaceName, "with-autodelete", dromosv1alpha1.WorkloadRunnerPhaseCompleted)
@@ -254,8 +269,35 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 			Expect(jw.Spec.AutoDeletionTimeAfterCompletionSeconds).To(BeNil())
 		})
 
-		It("detects GPU via gpu-fraction annotation on the template", func() {
+		It("detects GPU via gpu-fraction annotation on the pod template", func() {
 			runner := BuildWorkloadRunner(testNamespaceName, "gpu-fraction", dromosv1alpha1.WorkloadRunnerPhaseRunning)
+			withPodTemplateAnnotations(runner, map[string]string{
+				constants.AnnotationGpuFraction: "0.5",
+			})
+			jw := convertRunner(runner)
+			Expect(util.HasRequestedGpu(jw)).To(BeTrue())
+		})
+
+		It("detects GPU via gpu-fraction-num-devices annotation on the pod template", func() {
+			runner := BuildWorkloadRunner(testNamespaceName, "gpu-devices", dromosv1alpha1.WorkloadRunnerPhaseRunning)
+			withPodTemplateAnnotations(runner, map[string]string{
+				constants.AnnotationGpuFractionDevices: "2",
+			})
+			jw := convertRunner(runner)
+			Expect(util.HasRequestedGpu(jw)).To(BeTrue())
+		})
+
+		It("detects GPU via gpu-memory annotation on the pod template", func() {
+			runner := BuildWorkloadRunner(testNamespaceName, "gpu-memory", dromosv1alpha1.WorkloadRunnerPhaseRunning)
+			withPodTemplateAnnotations(runner, map[string]string{
+				constants.AnnotationGpuMemory: "1024",
+			})
+			jw := convertRunner(runner)
+			Expect(util.HasRequestedGpu(jw)).To(BeTrue())
+		})
+
+		It("detects GPU via gpu-fraction annotation on the top-level template metadata", func() {
+			runner := BuildWorkloadRunner(testNamespaceName, "gpu-fraction-top", dromosv1alpha1.WorkloadRunnerPhaseRunning)
 			withTemplateAnnotations(runner, map[string]string{
 				constants.AnnotationGpuFraction: "0.5",
 			})
@@ -263,22 +305,23 @@ var _ = Describe("WorkloadRunner observation wiring", func() {
 			Expect(util.HasRequestedGpu(jw)).To(BeTrue())
 		})
 
-		It("detects GPU via gpu-fraction-num-devices annotation on the template", func() {
-			runner := BuildWorkloadRunner(testNamespaceName, "gpu-devices", dromosv1alpha1.WorkloadRunnerPhaseRunning)
-			withTemplateAnnotations(runner, map[string]string{
-				constants.AnnotationGpuFractionDevices: "2",
-			})
+		It("detects GPU via gpu-fraction annotation on a distributed replica pod template", func() {
+			runner := BuildWorkloadRunner(testNamespaceName, "gpu-fraction-dist", dromosv1alpha1.WorkloadRunnerPhaseRunning)
+			runner.Spec.Template = apiruntime.RawExtension{Raw: []byte(`{"apiVersion":"kubeflow.org/v1","kind":"PyTorchJob","metadata":{"name":"dist"},` +
+				`"spec":{"pytorchReplicaSpecs":{"Worker":{"template":{"metadata":{"annotations":{"gpu-fraction":"0.5"}},` +
+				`"spec":{"containers":[{"name":"main"}]}}}}}}`)}
 			jw := convertRunner(runner)
 			Expect(util.HasRequestedGpu(jw)).To(BeTrue())
 		})
 
-		It("detects GPU via gpu-memory annotation on the template", func() {
-			runner := BuildWorkloadRunner(testNamespaceName, "gpu-memory", dromosv1alpha1.WorkloadRunnerPhaseRunning)
-			withTemplateAnnotations(runner, map[string]string{
-				constants.AnnotationGpuMemory: "1024",
+		It("ignores an empty partial-GPU annotation on the pod template", func() {
+			runner := BuildWorkloadRunner(testNamespaceName, "gpu-fraction-empty", dromosv1alpha1.WorkloadRunnerPhaseRunning)
+			withPodTemplateAnnotations(runner, map[string]string{
+				constants.AnnotationGpuFraction: "",
+				"user":                          "test@run.ai",
 			})
 			jw := convertRunner(runner)
-			Expect(util.HasRequestedGpu(jw)).To(BeTrue())
+			Expect(util.HasRequestedGpu(jw)).To(BeFalse())
 		})
 
 		It("reports HasRequestedGpu=false when the template carries no GPU annotation", func() {

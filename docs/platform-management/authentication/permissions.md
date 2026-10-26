@@ -8,14 +8,14 @@ A permission is the actions (View, Edit, Create and Delete) that the user can pe
 
 When you build a custom role through the API, permissions are referenced by their **API name** (for example, `compute-resources`). The NVIDIA Run:ai user interface presents the same permission under a **display name** (for example, "Compute resources"). The tables below map the two and describe what each permission controls.
 
-<Info>
+<Note>
 
 **Note**
 
 * Some permissions are system-internal and are not shown in the Roles view in the user interface. These are noted in the tables below.
 * **Deprecated:** The `apps` API name is deprecated. Use `service-account` for managing service accounts.
 
-</Info>
+</Note>
 
 ## Permission Reference
 
@@ -29,9 +29,9 @@ The following table lists all permissions, mapping each permission's API name to
 | `applications` | [AI Applications](../../ai-applications/ai-applications.md) | An AI application represents a high-level logical grouping of all Kubernetes resources that together deliver a functional AI solution. |
 | `apps` | [Applications](service-accounts.md) | Deprecated. Superseded by `service-account`. Distinct from `applications` (AI Applications). |
 | `branding-settings` | [Branding settings](../../settings/general-settings/README.md#branding) | Custom logo displayed in the top-right corner of the NVIDIA Run:ai platform interface. |
-| `cluster-config` | [Cluster configuration](../../installation-and-configuration/post-installation-configuration/cluster-config.md) | Governs synchronization of cluster configuration between a cluster and the control plane. This permission is system-internal: it is not shown in the Roles view and is not held by tenant administrators. Do not include `cluster-config` in a custom role. A role that includes it cannot be assigned, and access rule creation fails with `403 Insufficient permissions`. |
-| `cluster` | [Clusters](../procedures/clusters.md) | A registered Kubernetes cluster that the NVIDIA Run:ai control plane manages, schedules workloads on, and monitors. |
-| `clusters-minimal` | [Clusters minimal](../procedures/clusters.md) | Provides read-only access to a lightweight subset of cluster metadata (name, ID, status). Automatically included by the platform when a role grants cluster read access, to support resource display in the user interface. |
+| `cluster-config` | [Advanced cluster configuration](../../installation-and-configuration/configuration/cluster-config.md) | Governs synchronization of cluster configuration between a cluster and the control plane. This permission is system-internal: it is not shown in the Roles view and is not held by tenant administrators. Do not include `cluster-config` in a custom role. A role that includes it cannot be assigned, and access rule creation fails with `403 Insufficient permissions`. |
+| `cluster` | [Clusters](../../installation-and-configuration/operations/clusters.md) | A registered Kubernetes cluster that the NVIDIA Run:ai control plane manages, schedules workloads on, and monitors. |
+| `clusters-minimal` | [Clusters minimal](../../installation-and-configuration/operations/clusters.md) | Provides read-only access to a lightweight subset of cluster metadata (name, ID, status). Automatically included by the platform when a role grants cluster read access, to support resource display in the user interface. |
 | `compute-resources` | [Compute resources](../../workloads-in-nvidia-run-ai/workload-assets/compute-resources.md) | A compute resource is a workload asset template that simplifies how workloads are submitted and can be used by AI practitioners when they submit their workloads. |
 | `credentials` | [Credentials](../../workloads-in-nvidia-run-ai/workload-assets/credentials.md) | Credentials are workload assets that mask sensitive access information, such as passwords, tokens, and access keys, necessary for accessing protected resources. |
 | `pvc-assets` | [Data sources](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | A data source asset backed by a Persistent Volume Claim (PVC), a Kubernetes concept for managing cluster storage provisioned by an administrator or dynamically using a StorageClass. |
@@ -44,9 +44,9 @@ The following table lists all permissions, mapping each permission's API name to
 | `datavolumes` | [Data volumes](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) | Data volumes are workload assets that offer a solution for storing, managing, and sharing AI training data across scopes and workloads. |
 | `department` | [Departments](../../platform-management/aiinitiatives/organization/departments.md) | Departments group multiple projects under a shared organizational scope for quota management, policy enforcement, and asset sharing. |
 | `environments` | [Environments](../../workloads-in-nvidia-run-ai/workload-assets/environments.md) | An environment is a workload asset consisting of a configuration that simplifies how workloads are submitted and can be used by AI practitioners. |
-| `events-history` | [Event history](../procedures/event-history.md) | An audit log of all changes to business objects (clusters, projects, assets, and more) in the NVIDIA Run:ai platform, accessible to system administrators with tenant-wide permissions. |
+| `events-history` | [Event history](../../installation-and-configuration/operations/observability/event-history.md) | An audit log of all changes to business objects (clusters, projects, assets, and more) in the NVIDIA Run:ai platform, accessible to system administrators with tenant-wide permissions. |
 | `inferences` | [Inferences](../../workloads-in-nvidia-run-ai/using-inference/custom-inference.md) | Inference workloads deploy trained models to make real-time or batch predictions in a production environment. |
-| `network-topologies` | [Network topologies](../procedures/clusters.md) | Named configurations of node labels that describe the physical network structure of a cluster (racks, blocks, NVLink domains), used by the scheduler to minimize latency for distributed workloads. |
+| `network-topologies` | [Network topologies](../../installation-and-configuration/operations/clusters.md) | Named configurations of node labels that describe the physical network structure of a cluster (racks, blocks, NVLink domains), used by the scheduler to minimize latency for distributed workloads. |
 | `nodepools` | [Node pools](../../platform-management/aiinitiatives/resources/node-pools.md) | A node pool is a NVIDIA Run:ai construct representing a set of nodes grouped into a bucket of resources using a predefined or administrator-defined node label. |
 | `nodepools-minimal` | [Node pools minimal](../../platform-management/aiinitiatives/resources/node-pools.md) | Provides read-only access to a lightweight subset of node pool metadata. Automatically included by the platform when a role grants node pool, department, or project read access. |
 | `nodes` | [Nodes](../../platform-management/aiinitiatives/resources/nodes.md) | Nodes are Kubernetes elements automatically discovered by the NVIDIA Run:ai platform and registered for scheduling and administrator visibility. |
@@ -68,13 +68,13 @@ The following table lists all permissions, mapping each permission's API name to
 | `workloads` | [Workloads](../../workloads-in-nvidia-run-ai/workloads.md) | Workloads are the fundamental building blocks for consuming resources, enabling AI practitioners to support the entire lifecycle of an AI initiative. |
 | `workspaces` | [Workspaces](../../workloads-in-nvidia-run-ai/using-workspaces/running-workspace.md) | The workspace is where data scientists conduct initial research, experiment with data sets, and test algorithms — the most flexible stage in the ML lifecycle. |
 
-<Info>
+<Note>
 
 **Note**
 
 The seven `*-assets` API names above all appear under the single **Data sources** display name in the user interface. When building a custom role via the API, grant the specific asset types your users need using the relevant permission sets.
 
-</Info>
+</Note>
 
 ## Permission Sets
 

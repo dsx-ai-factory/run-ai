@@ -20,10 +20,19 @@ func NewTenantPublishServicer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *TenantPublishServicer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &TenantPublishServicer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,15 +73,26 @@ type TenantPublishServicer_PublishTenantDeleteEvent_Call struct {
 }
 
 // PublishTenantDeleteEvent is a helper method to define mock.On call
-//   - ctx
-//   - event
-func (_e *TenantPublishServicer_Expecter) PublishTenantDeleteEvent(ctx interface{}, event interface{}) *TenantPublishServicer_PublishTenantDeleteEvent_Call {
+//   - ctx context.Context
+//   - event *async_events.TenantDelete
+func (_e *TenantPublishServicer_Expecter) PublishTenantDeleteEvent(ctx any, event any) *TenantPublishServicer_PublishTenantDeleteEvent_Call {
 	return &TenantPublishServicer_PublishTenantDeleteEvent_Call{Call: _e.mock.On("PublishTenantDeleteEvent", ctx, event)}
 }
 
 func (_c *TenantPublishServicer_PublishTenantDeleteEvent_Call) Run(run func(ctx context.Context, event *async_events.TenantDelete)) *TenantPublishServicer_PublishTenantDeleteEvent_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*async_events.TenantDelete))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *async_events.TenantDelete
+		if args[1] != nil {
+			arg1 = args[1].(*async_events.TenantDelete)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

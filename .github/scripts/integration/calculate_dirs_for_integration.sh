@@ -13,8 +13,8 @@ if [[ "$RUN_ALL_TESTS" == "true" ]]; then
   exit 0
 fi
 
-git fetch origin master
-changed_files=$(git --no-pager diff --name-only origin/master..HEAD "$CLUSTER_PATH")
+git fetch origin main
+changed_files=$(git --no-pager diff --name-only origin/main..HEAD "$CLUSTER_PATH")
 
 # First, we need to extract all the directories that have changed from the files
 all_changed_dirs=""

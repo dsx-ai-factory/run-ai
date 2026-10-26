@@ -114,7 +114,7 @@ Released client versions are cut with the shared versioning targets (see
 
 | Target | Description |
 |--------|-------------|
-| `make client-bump-version` | Cut a production client tag (only from a synced `master`) |
+| `make client-bump-version` | Cut a production client tag (only from a synced `main`) |
 | `make client-bump-version-dev` | Cut a `-dev` client tag from a feature branch |
 
 Within the monorepo consumers use the `v0.0.0` + `replace` workspace pattern above, so a tag bump is

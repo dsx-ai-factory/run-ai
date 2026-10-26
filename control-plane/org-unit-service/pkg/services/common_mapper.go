@@ -96,15 +96,19 @@ func MapRequestToOrgUnitData(
 	var err error
 	if originalOrgUnitData != nil {
 		originalResourcesNodePoolToId := make(map[string]uuid.UUID)
-		originalResourcesNodePoolIdToRank := make(map[string]string)
+		originalResourcesNodePoolIdToStatus := make(map[string]models.ResourcesStatus)
 		for _, originalResources := range originalOrgUnitData.Resources {
 			originalResourcesNodePoolToId[originalResources.NodePoolId] = originalResources.ID
-			originalResourcesNodePoolIdToRank[originalResources.NodePoolId] = ptr.Deref(originalResources.Rank, models.DefaultResourceRank)
+			originalResourcesNodePoolIdToStatus[originalResources.NodePoolId] = originalResources.ResourcesStatus
 		}
 		data.ID = originalOrgUnitData.ID
-		data.Resources, err = ApiResourcesToModel(ctx, resources, isDepartment, nodePoolsMetadata, true, originalResourcesNodePoolToId, originalResourcesNodePoolIdToRank)
+		data.Resources, err = ApiResourcesToModel(ctx, resources, isDepartment, nodePoolsMetadata, true, originalResourcesNodePoolToId)
 		if err != nil {
 			return data, err
+		}
+		// Status columns are written by the cluster sync; carry them over so the save doesn't null them.
+		for i := range data.Resources {
+			data.Resources[i].ResourcesStatus = originalResourcesNodePoolIdToStatus[data.Resources[i].NodePoolId]
 		}
 	} else {
 		data.Resources, err = ApiNewResourcesToModel(ctx, resources, isDepartment, nodePoolsMetadata)
@@ -225,7 +229,7 @@ func getDefaultNodePool(nodePoolsMetadata map[string]openapi.NodepoolMinimal) st
 	return ""
 }
 
-func ParseRank(rank, priorityDeprecated *string) (*string, error) {
+func ParseRank(rank *string) (*string, error) {
 	if rank != nil {
 		if isKnownRank(*rank) {
 			return rank, nil
@@ -233,33 +237,7 @@ func ParseRank(rank, priorityDeprecated *string) (*string, error) {
 		return nil, fmt.Errorf("unknown rank %s", *rank)
 	}
 
-	if priorityDeprecated != nil {
-		if isKnownRank(*priorityDeprecated) {
-			return priorityDeprecated, nil
-		}
-		return nil, fmt.Errorf("unknown priority [deprecated] %s", *priorityDeprecated)
-	}
-
 	return ptr.To(DefaultResourceRank), nil
-}
-
-func ParseRankOnUpdate(rank, priorityDeprecated *string, dbRank string) (*string, error) {
-	if rank == nil || priorityDeprecated == nil || *rank == *priorityDeprecated {
-		return ParseRank(rank, priorityDeprecated)
-	}
-
-	// both are non-nil and *rank != *priorityDeprecated.
-	// Prefer the one that differs from the current DB value when exactly one does.
-
-	effectiveDbRank := dbRank
-	if effectiveDbRank == "" {
-		effectiveDbRank = DefaultResourceRank
-	}
-
-	if *priorityDeprecated != effectiveDbRank {
-		return ParseRank(nil, priorityDeprecated)
-	}
-	return ParseRank(rank, nil)
 }
 
 func isKnownRank(rank string) bool {
@@ -280,14 +258,13 @@ func MapRankToNumber(rank *string) int32 {
 }
 
 func ApiNewResourcesToModel(ctx context.Context, apiResources []api.ResourcesNullable, isDepartment bool, nodePoolsMetadata map[string]openapi.NodepoolMinimal) ([]models.Resources, error) {
-	return ApiResourcesToModel(ctx, apiResources, isDepartment, nodePoolsMetadata, true, make(map[string]uuid.UUID), make(map[string]string))
+	return ApiResourcesToModel(ctx, apiResources, isDepartment, nodePoolsMetadata, true, make(map[string]uuid.UUID))
 }
 
 func isResourceRankNilOrNormal(apiResources []api.ResourcesNullable) (nilOrNormal bool) {
 	nilOrNormal = true
 	for _, resource := range apiResources {
-		if (resource.Rank != nil && *resource.Rank != DefaultResourceRank) ||
-			(resource.Priority != nil && *resource.Priority != DefaultResourceRank) {
+		if resource.Rank != nil && *resource.Rank != DefaultResourceRank {
 			nilOrNormal = false
 			break
 		}
@@ -309,7 +286,6 @@ func ApiResourcesToModel(
 	nodePoolsMetadata map[string]openapi.NodepoolMinimal,
 	addEmptyResources bool,
 	originalResourcesNodePoolToId map[string]uuid.UUID,
-	originalResourcesNodePoolIdToRank map[string]string,
 ) ([]models.Resources, error) {
 	modelResources := make([]models.Resources, len(apiResources))
 	highestGpuLimit := float64(-1)
@@ -343,16 +319,17 @@ func ApiResourcesToModel(
 
 		nodePoolId := resources.NodePool.Id
 		nodePoolsInResources[nodePoolId] = resources.NodePool
-		rank, err := ParseRankOnUpdate(resources.Rank, resources.Priority, originalResourcesNodePoolIdToRank[nodePoolId])
+		rank, err := ParseRank(resources.Rank)
 		if err != nil {
 			return nil, err
 		}
+		gpuDeserved := ptr.To(ptr.Deref(resources.Gpu.Deserved, 0))
 		modelResources[i] = models.Resources{
 			NodePoolId:         nodePoolId,
 			NodePoolName:       resources.NodePool.Name,
-			GpuDeserved:        ptr.To(resources.Gpu.Deserved),
+			GpuDeserved:        gpuDeserved,
 			GpuLimit:           resources.Gpu.Limit,
-			GpuOverQuotaWeight: calcOverQuotaWeight(adjustableWeightsFlag, isDepartment, ptr.To(resources.Gpu.Deserved), resources.Gpu.OverQuotaWeight),
+			GpuOverQuotaWeight: calcOverQuotaWeight(adjustableWeightsFlag, isDepartment, gpuDeserved, resources.Gpu.OverQuotaWeight),
 			Rank:               rank,
 		}
 		resourcesId, found := originalResourcesNodePoolToId[nodePoolId]
@@ -528,7 +505,7 @@ func ApiResourcesFromModelSync(modelResources []models.Resources, nodePools map[
 			},
 			Cpu:      apiResourceFromModel.Cpu,
 			Rank:     rankValue,
-			Priority: rankValue,
+			Priority: rankValue, // cluster agents that predate rank still read priority
 		}
 		if apiResourceFromModel.Memory != nil {
 			apiResources[i].Memory = &api.ResourcesSyncMemory{
@@ -546,7 +523,6 @@ func ApiResourceFromModel(resources models.Resources, adjustableWeightsFlag, cpu
 		Id:   resources.NodePoolId,
 		Name: resources.NodePoolName,
 	}
-	rank := RankOrDefault(resources.Rank)
 	result := api.Resources{
 		NodePool: &apiResourcesNodePool,
 		Gpu: api.ResourcesGpu{
@@ -554,8 +530,7 @@ func ApiResourceFromModel(resources models.Resources, adjustableWeightsFlag, cpu
 			Deserved:        UnlimitedOrNil(resources.GpuDeserved),
 			OverQuotaWeight: PtrOrNil(resources.GpuOverQuotaWeight),
 		},
-		Rank:     rank,
-		Priority: rank,
+		Rank: RankOrDefault(resources.Rank),
 	}
 	if !adjustableWeightsFlag {
 		result.Gpu.OverQuotaWeight = nonAdjustableOverQuotaWeight(resources.GpuDeserved)
@@ -801,20 +776,21 @@ func MapAllocationStatus(status float64) *float64 {
 	return ptr.To(status)
 }
 
-func ConvertNodePoolResourcesPatchRequest(npr api.NodePoolResourcesPatchRequest) api.ResourcesNullable {
+func ConvertNodePoolResourcesPatchRequest(npr api.NodePoolResourcesPatchRequest, storedGpuDeserved *float64) api.ResourcesNullable {
 	result := api.ResourcesNullable{
 		NodePool: &api.ResourcesNodePool{
 			Id: npr.NodePoolId,
 		},
 		Rank: npr.Rank,
+		Gpu:  api.ResourcesNullableGpu{Deserved: storedGpuDeserved},
 	}
 
 	if npr.Resources != nil {
 		if npr.Resources.Gpu != nil {
-			result.Gpu = api.ResourcesNullableGpu{
-				Deserved:        ptr.Deref(npr.Resources.Gpu.Deserved, 0),
-				Limit:           npr.Resources.Gpu.Limit,
-				OverQuotaWeight: npr.Resources.Gpu.OverQuotaWeight,
+			result.Gpu.Limit = npr.Resources.Gpu.Limit
+			result.Gpu.OverQuotaWeight = npr.Resources.Gpu.OverQuotaWeight
+			if npr.Resources.Gpu.Deserved != nil {
+				result.Gpu.Deserved = npr.Resources.Gpu.Deserved
 			}
 		}
 		if npr.Resources.Cpu != nil {
@@ -910,7 +886,7 @@ func MapNodePoolPatchResourcesRequestToModel(
 	}
 
 	// Map the incoming API resources to model resources (per-nodepool)
-	newResources, err := ApiResourcesToModel(ctx, requestedResources, false, nodePoolsMetadata, false, originalResourcesNodePoolToId, make(map[string]string))
+	newResources, err := ApiResourcesToModel(ctx, requestedResources, false, nodePoolsMetadata, false, originalResourcesNodePoolToId)
 	if err != nil {
 		return nil, err
 	}

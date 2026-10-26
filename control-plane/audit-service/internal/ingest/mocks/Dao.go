@@ -20,10 +20,19 @@ func NewDao(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Dao {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Dao{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,15 +73,26 @@ type Dao_Store_Call struct {
 }
 
 // Store is a helper method to define mock.On call
-//   - ctx
-//   - batch
-func (_e *Dao_Expecter) Store(ctx interface{}, batch interface{}) *Dao_Store_Call {
+//   - ctx context.Context
+//   - batch []*models.AuditLog
+func (_e *Dao_Expecter) Store(ctx any, batch any) *Dao_Store_Call {
 	return &Dao_Store_Call{Call: _e.mock.On("Store", ctx, batch)}
 }
 
 func (_c *Dao_Store_Call) Run(run func(ctx context.Context, batch []*models.AuditLog)) *Dao_Store_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].([]*models.AuditLog))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 []*models.AuditLog
+		if args[1] != nil {
+			arg1 = args[1].([]*models.AuditLog)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

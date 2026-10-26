@@ -27,180 +27,6 @@ paths:
       x-service: authorization
     x-internal: true
     x-service: authorization
-  /api/v1/authorization/roles:
-    get:
-      deprecated: true
-      description: Use to retrieve a list of roles. This endpoint is deprecated and
-        will be removed in a future release. Use GET /api/v2/authorization/roles instead.
-      operationId: get_roles_v1
-      parameters:
-      - explode: true
-        in: query
-        name: includeInternal
-        required: false
-        schema:
-          default: false
-          example: false
-          type: boolean
-        style: form
-        x-internal: true
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RolesV1'
-          description: Executed successfully.
-        "400":
-          content:
-            application/json:
-              example:
-                code: 400
-                message: Required parameter is missing
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request.
-        "401":
-          content:
-            application/json:
-              example:
-                code: 401
-                message: Issuer is not familiar.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              example:
-                code: 403
-                message: You do not have sufficient permissions.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "500":
-          content:
-            application/json:
-              example:
-                code: 500
-                message: Something went wrong.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-        "503":
-          content:
-            application/json:
-              example:
-                code: 503
-                message: Please try again in few minutes.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: Get a list of roles.
-      tags:
-      - Roles
-      x-service: authorization
-      x-test-coverage:
-      - e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts
-      - e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts
-      x-authorize:
-        resource-type: roles
-        action: read
-    x-scope:
-    - system
-    - tenant
-  /api/v1/authorization/roles/{roleIdPath}:
-    get:
-      deprecated: true
-      description: "Retrieve the details of a role by id. This endpoint is deprecated\
-        \ and will be removed in a future release. Use GET /api/v2/authorization/roles/{roleIdPath}\
-        \ instead."
-      operationId: get_role_v1
-      parameters:
-      - description: The ID of the role
-        example: 32
-        explode: false
-        in: path
-        name: roleIdPath
-        required: true
-        schema:
-          format: int32
-          minimum: 0
-          type: integer
-        style: simple
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoleV1'
-          description: Executed successfully.
-        "400":
-          content:
-            application/json:
-              example:
-                code: 400
-                message: Required parameter is missing
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request.
-        "401":
-          content:
-            application/json:
-              example:
-                code: 401
-                message: Issuer is not familiar.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Unauthorized
-        "403":
-          content:
-            application/json:
-              example:
-                code: 403
-                message: You do not have sufficient permissions.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Forbidden
-        "404":
-          content:
-            application/json:
-              example:
-                code: 404
-                message: Resource id not found.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: The specified resource was not found
-        "500":
-          content:
-            application/json:
-              example:
-                code: 500
-                message: Something went wrong.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-        "503":
-          content:
-            application/json:
-              example:
-                code: 503
-                message: Please try again in few minutes.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: Get a role by id.
-      tags:
-      - Roles
-      x-service: authorization
-      x-test-coverage:
-      - control-plane/authorization/pkg/services/role_api_test.go
-      x-authorize:
-        resource-type: roles
-        action: read
-    x-scope:
-    - system
-    - tenant
   /api/v2/authorization/roles:
     get:
       description: "Retrieves a list of all available roles, including both NVIDIA\
@@ -1300,8 +1126,8 @@ paths:
         resource-type: access_rules
         action: read
     post:
-      description: "Use to bind a predefined role to a subject (user, group or application)\
-        \ in a scope."
+      description: "Use to bind a predefined role to a subject (user, group or service\
+        \ account) in a scope."
       operationId: create_access_rule
       requestBody:
         content:
@@ -3232,9 +3058,6 @@ paths:
               enableScopedAuthorization:
                 value:
                   enabled: false
-              tenantIsCspManaged:
-                value:
-                  enabled: false
             schema:
               $ref: '#/components/schemas/UpdateAuthorizationSettingByKeyRequest'
         required: true
@@ -3308,29 +3131,6 @@ paths:
     - tenant
 components:
   parameters:
-    IncludeInternal:
-      explode: true
-      in: query
-      name: includeInternal
-      required: false
-      schema:
-        default: false
-        example: false
-        type: boolean
-      style: form
-      x-internal: true
-    RoleIdPath:
-      description: The ID of the role
-      example: 32
-      explode: false
-      in: path
-      name: roleIdPath
-      required: true
-      schema:
-        format: int32
-        minimum: 0
-        type: integer
-      style: simple
     Limit:
       description: The maximum number of entries to return.
       explode: true
@@ -3407,6 +3207,29 @@ components:
         example: test project
         type: string
       style: form
+    IncludeInternal:
+      explode: true
+      in: query
+      name: includeInternal
+      required: false
+      schema:
+        default: false
+        example: false
+        type: boolean
+      style: form
+      x-internal: true
+    RoleIdPath:
+      description: The ID of the role
+      example: 32
+      explode: false
+      in: path
+      name: roleIdPath
+      required: true
+      schema:
+        format: int32
+        minimum: 0
+        type: integer
+      style: simple
     PermissionSetId:
       explode: false
       in: path
@@ -3766,227 +3589,6 @@ components:
             $ref: '#/components/schemas/Error'
       description: unexpected error
   schemas:
-    ResourceType:
-      description: "Resource type enum for authorization. \n\nNote: The 'apps' resource\
-        \ type is DEPRECATED. Please use 'service-account' instead for managing service\
-        \ accounts.\n"
-      enum:
-      - department
-      - tenant
-      - project
-      - cluster
-      - cluster-config
-      - nodepools
-      - nodes
-      - settings
-      - security-settings
-      - notification-settings
-      - branding-settings
-      - users
-      - apps
-      - service-account
-      - roles
-      - access_rules
-      - workloads
-      - applications
-      - workspaces
-      - trainings
-      - inferences
-      - environments
-      - pvc-assets
-      - git-assets
-      - host-path-assets
-      - nfs-assets
-      - s3-assets
-      - compute-resources
-      - templates
-      - credentials
-      - events-history
-      - policies
-      - cm-volume-assets
-      - datavolumes
-      - secret-volume-assets
-      - storage-class-configuration
-      - access-keys
-      - workload-properties
-      - network-topologies
-      - registries
-      - workload-integration-metrics
-      - nodepools-minimal
-      - clusters-minimal
-      - users-minimal
-      type: string
-    ResourceTypeGroupId:
-      enum:
-      - organization
-      - physical-resource
-      - iam
-      - workload
-      - workload-asset
-      type: string
-    Action:
-      enum:
-      - create
-      - read
-      - update
-      - delete
-      - sync
-      type: string
-    Permission:
-      example:
-        displayName: Projects
-        groupId: organization
-        actions:
-        - create
-        - create
-        resourceType: department
-      properties:
-        resourceType:
-          $ref: '#/components/schemas/ResourceType'
-        displayName:
-          example: Projects
-          type: string
-        groupId:
-          $ref: '#/components/schemas/ResourceTypeGroupId'
-        actions:
-          items:
-            $ref: '#/components/schemas/Action'
-          type: array
-      required:
-      - actions
-      - displayName
-      - groupId
-      - resourceType
-      type: object
-    Permissions:
-      items:
-        $ref: '#/components/schemas/Permission'
-      type: array
-      x-schema-name: Permissions
-    KubernetesPermissions:
-      example:
-        predefinedRole: "12"
-      properties:
-        predefinedRole:
-          description: The ID of an NVIDIA Run:ai predefined role. The custom role
-            will include the mapped Kubernetes ClusterRole and its permissions.
-          example: "12"
-          nullable: true
-          type: string
-      type: object
-    RoleV1:
-      example:
-        scopeId: scopeId
-        custom: true
-        description: can manage all resources
-        enabled: true
-        createdAt: 2000-01-23T04:56:07.000+00:00
-        deletedAt: 2000-01-23T04:56:07.000+00:00
-        createdBy: user@run.ai
-        scopeType: tenant
-        kubernetesPermissions:
-          predefinedRole: "12"
-        permissions:
-        - displayName: Projects
-          groupId: organization
-          actions:
-          - create
-          - create
-          resourceType: department
-        - displayName: Projects
-          groupId: organization
-          actions:
-          - create
-          - create
-          resourceType: department
-        name: admin
-        id: 32
-        effectiveEnabled: true
-        updatedAt: 2000-01-23T04:56:07.000+00:00
-      properties:
-        id:
-          example: 32
-          format: int32
-          type: integer
-        createdAt:
-          format: date-time
-          type: string
-        updatedAt:
-          format: date-time
-          type: string
-        deletedAt:
-          format: date-time
-          nullable: true
-          type: string
-        createdBy:
-          example: user@run.ai
-          type: string
-        custom:
-          type: boolean
-        effectiveEnabled:
-          default: true
-          type: boolean
-        permissions:
-          items:
-            $ref: '#/components/schemas/Permission'
-          type: array
-          x-schema-name: Permissions
-        name:
-          example: admin
-          type: string
-        description:
-          example: can manage all resources
-          type: string
-        scopeType:
-          default: tenant
-          enum:
-          - system
-          - tenant
-          type: string
-          x-internal: true
-          x-csp: true
-        scopeId:
-          nullable: true
-          type: string
-          x-internal: true
-          x-csp: true
-        enabled:
-          default: true
-          nullable: true
-          type: boolean
-        kubernetesPermissions:
-          $ref: '#/components/schemas/KubernetesPermissions'
-      required:
-      - createdAt
-      - createdBy
-      - custom
-      - description
-      - effectiveEnabled
-      - id
-      - name
-      - permissions
-      - updatedAt
-      type: object
-    RolesV1:
-      items:
-        $ref: '#/components/schemas/RoleV1'
-      type: array
-    Error:
-      example:
-        code: 400
-        message: Bad request - Resource should have a name
-      properties:
-        code:
-          maximum: 599
-          minimum: 100
-          type: integer
-        message:
-          type: string
-        details:
-          type: string
-      required:
-      - code
-      - message
     RolesSortFilterFields:
       enum:
       - name
@@ -4011,6 +3613,15 @@ components:
           type: string
       required:
       - id
+      type: object
+    KubernetesPermissions:
+      properties:
+        predefinedRole:
+          description: The ID of an NVIDIA Run:ai predefined role. The custom role
+            will include the mapped Kubernetes ClusterRole and its permissions.
+          example: "12"
+          nullable: true
+          type: string
       type: object
     RoleCreationFields:
       properties:
@@ -4060,6 +3671,58 @@ components:
       - description
       - name
       type: object
+    ResourceType:
+      description: "Resource type enum for authorization. \n\nNote: The 'apps' resource\
+        \ type is DEPRECATED. Please use 'service-account' instead for managing service\
+        \ accounts.\n"
+      enum:
+      - department
+      - tenant
+      - project
+      - cluster
+      - cluster-config
+      - nodepools
+      - nodes
+      - settings
+      - security-settings
+      - notification-settings
+      - branding-settings
+      - users
+      - apps
+      - service-account
+      - roles
+      - access_rules
+      - workloads
+      - applications
+      - workspaces
+      - trainings
+      - inferences
+      - environments
+      - pvc-assets
+      - git-assets
+      - host-path-assets
+      - nfs-assets
+      - s3-assets
+      - compute-resources
+      - resource-claim-templates
+      - templates
+      - credentials
+      - events-history
+      - policies
+      - cm-volume-assets
+      - datavolumes
+      - secret-volume-assets
+      - storage-class-configuration
+      - device-classes
+      - access-keys
+      - workload-properties
+      - network-topologies
+      - registries
+      - workload-integration-metrics
+      - nodepools-minimal
+      - clusters-minimal
+      - users-minimal
+      type: string
     PermissionAction:
       enum:
       - create
@@ -4189,6 +3852,38 @@ components:
         $ref: '#/components/schemas/Role'
       type: array
       x-schema-name: Roles
+    Error:
+      example:
+        code: 400
+        message: Bad request - Resource should have a name
+      properties:
+        code:
+          maximum: 599
+          minimum: 100
+          type: integer
+        message:
+          type: string
+        details:
+          type: string
+      required:
+      - code
+      - message
+    ResourceTypeGroupId:
+      enum:
+      - organization
+      - physical-resource
+      - iam
+      - workload
+      - workload-asset
+      type: string
+    Action:
+      enum:
+      - create
+      - read
+      - update
+      - delete
+      - sync
+      type: string
     PostPermission:
       example:
         displayName: Projects
@@ -4351,7 +4046,7 @@ components:
       properties:
         subjectId:
           description: "The unique identifier of the subject (e.g., user, group, or\
-            \ app)."
+            \ service account)."
           example: user@run.ai
           type: string
         roleId:
@@ -4384,7 +4079,7 @@ components:
         Subject type enum for access rule responses. Extends SubjectType with the built-in
         all-authenticated-users subject, which applies to every authenticated user and service account.
 
-        Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
+        Note: The 'app' subject type is DEPRECATED and is no longer returned. Please use 'service-account' instead for service accounts.
       enum:
       - user
       - app
@@ -4519,7 +4214,8 @@ components:
       description: |
         Subject type enum for access rules.
 
-        Note: The 'app' subject type is DEPRECATED. Please use 'service-account' instead for service accounts.
+        Note: The 'app' subject type is DEPRECATED and no longer supported. Please use 'service-account' instead for service accounts.
+        Requests that create an access rule with 'app' are rejected with 415 Unsupported Media Type.
       enum:
       - user
       - app
@@ -5088,6 +4784,37 @@ components:
       - failed
       - succeeded
       type: object
+    Permission:
+      example:
+        displayName: Projects
+        groupId: organization
+        actions:
+        - create
+        - create
+        resourceType: department
+      properties:
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+        displayName:
+          example: Projects
+          type: string
+        groupId:
+          $ref: '#/components/schemas/ResourceTypeGroupId'
+        actions:
+          items:
+            $ref: '#/components/schemas/Action'
+          type: array
+      required:
+      - actions
+      - displayName
+      - groupId
+      - resourceType
+      type: object
+    Permissions:
+      items:
+        $ref: '#/components/schemas/Permission'
+      type: array
+      x-schema-name: Permissions
     PermittedScopes:
       example:
         tenants:
@@ -5287,8 +5014,8 @@ components:
     AllowedInternalCreateRoles:
       enum:
       - System administrator
-      - Cluster application
-      - Installer application
+      - Cluster service account
+      - Installer service account
       - Cloud operator
       type: string
     InternalCreateAccessRuleRequest:
@@ -5323,30 +5050,17 @@ components:
           nullable: true
           type: boolean
       type: object
-    TenantIsCspManagedSetting:
-      example:
-        enabled: false
-      properties:
-        enabled:
-          nullable: true
-          type: boolean
-      type: object
     AuthorizationSettingsGetResponse:
       example:
         enableScopedAuthorization:
           enabled: false
-        tenantIsCspManaged:
-          enabled: false
       properties:
         enableScopedAuthorization:
           $ref: '#/components/schemas/EnableScopedAuthorizationSetting'
-        tenantIsCspManaged:
-          $ref: '#/components/schemas/TenantIsCspManagedSetting'
       type: object
     AuthorizationSettingsKeyEnum:
       enum:
       - enableScopedAuthorization
-      - tenantIsCspManaged
       type: string
     UpdateAuthorizationSettingByKeyRequest:
       example:
@@ -5718,14 +5432,14 @@ components:
       properties:
         subjectId:
           description: "The unique identifier of the subject e.g., user, group, or\
-            \ app)."
+            \ service account)."
           example: user@run.ai
           type: string
         subjectType:
           allOf:
           - $ref: '#/components/schemas/SubjectType'
           - description: "The subject assigned to the access rule. Valid values: user,\
-              \ group, app."
+              \ group, service-account."
       required:
       - subjectId
       - subjectType

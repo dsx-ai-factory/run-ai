@@ -6,8 +6,8 @@
 package source
 
 import (
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	"k8s.io/utils/ptr"
 )
@@ -38,7 +38,7 @@ func BuildKubeflowMPIJobV1() models.Karta {
 					StatusDefinition:  buildKubeflowJobStatusDefinition(),
 					SuspendDefinition: buildKubeflowSuspendDefinition(),
 				},
-				ChildComponents: buildKubeflowMPIJobChildComponents(),
+				ChildComponents: buildKubeflowMPIJobChildComponents(".metadata.labels[\"training.kubeflow.org/replica-type\"]"),
 			},
 			Instructions: buildKubeflowMPIJobInstructions(),
 		},
@@ -59,14 +59,14 @@ func BuildKubeflowMPIJobV2beta1() models.Karta {
 					StatusDefinition:  buildKubeflowJobStatusDefinition(),
 					SuspendDefinition: buildKubeflowSuspendDefinition(),
 				},
-				ChildComponents: buildKubeflowMPIJobChildComponents(),
+				ChildComponents: buildKubeflowMPIJobChildComponents(".metadata.labels[\"training.kubeflow.org/job-role\"]"),
 			},
 			Instructions: buildKubeflowMPIJobInstructions(),
 		},
 	}
 }
 
-func buildKubeflowMPIJobChildComponents() []kartav1alpha1.ComponentDefinition {
+func buildKubeflowMPIJobChildComponents(roleLabelPath string) []kartav1alpha1.ComponentDefinition {
 	return []kartav1alpha1.ComponentDefinition{
 		{
 			Name: "launcher",
@@ -84,7 +84,7 @@ func buildKubeflowMPIJobChildComponents() []kartav1alpha1.ComponentDefinition {
 			},
 			PodSelector: &kartav1alpha1.PodSelector{
 				ComponentTypeSelector: &kartav1alpha1.ComponentTypeSelector{
-					KeyPath: ".metadata.labels[\"training.kubeflow.org/replica-type\"]",
+					KeyPath: roleLabelPath,
 					Value:   ptr.To("launcher"),
 				},
 			},
@@ -105,7 +105,7 @@ func buildKubeflowMPIJobChildComponents() []kartav1alpha1.ComponentDefinition {
 			},
 			PodSelector: &kartav1alpha1.PodSelector{
 				ComponentTypeSelector: &kartav1alpha1.ComponentTypeSelector{
-					KeyPath: ".metadata.labels[\"training.kubeflow.org/replica-type\"]",
+					KeyPath: roleLabelPath,
 					Value:   ptr.To("worker"),
 				},
 			},

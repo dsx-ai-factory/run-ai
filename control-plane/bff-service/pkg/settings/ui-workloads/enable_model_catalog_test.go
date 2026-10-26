@@ -93,7 +93,7 @@ func TestEnableModelCatalog_TransformForMigration(t *testing.T) {
 
 func TestEnableModelCatalog_TransformToResponse(t *testing.T) {
 	description := "Enable instant deployment of Hugging Face models via the Models view or the workload submission form. " +
-		"For more information, see the <a href='https://run-ai-docs.nvidia.com/self-hosted/workloads-in-nvidia-run-ai/using-inference/hugging-face-inference' target='_blank'>Deploy Inference Workloads from Hugging Face</a>"
+		"For more information, see the <a data-doc-key='huggingFaceInference' target='_blank'>Deploy Inference Workloads from Hugging Face</a>"
 
 	tests := []struct {
 		name     string

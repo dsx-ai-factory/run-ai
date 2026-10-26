@@ -50,7 +50,7 @@
       "name": "NIMService",
       "toolType": "NIMService",
       "connectionType": "ExternalUrl",
-      "url": "https://test-cluster.runailabs.com/testnim/mynim-auto",
+      "url": "https://test-cluster.example.com/testnim/mynim-auto",
       "port": 8080
     }
   ],
@@ -70,7 +70,7 @@
     "preemptibility": "non-preemptible",
     "servingPort": 8000,
     "exposeExternally": true,
-    "servingUrl": "https://test-cluster.runailabs.com/testnim/mynim-auto",
+    "servingUrl": "https://test-cluster.example.com/testnim/mynim-auto",
     "serviceType": "ClusterIP",
     "cpuCoreRequest": 0.1,
     "cpuMemoryRequest": "100M",

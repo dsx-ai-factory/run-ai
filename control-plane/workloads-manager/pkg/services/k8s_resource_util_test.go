@@ -14,9 +14,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/clusters"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/plugins"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/google/uuid"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -243,6 +244,51 @@ var _ = Describe("K8sResourceUtil", func() {
 				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationPreferredKey))
 				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationRequiredKey))
 				Expect(metadata["namespace"]).To(Equal("test-namespace"))
+			})
+
+			It("should not add project default topology to converted native resources", func() {
+				modifiedResource, err := util.updateResourceMetadataWithOptions(
+					ctx, validPodMap, workloadId, project,
+					resourceMetadataUpdateOptions{trustedConvertedFromNative: true},
+				)
+				Expect(err).To(BeNil())
+
+				annotations := modifiedResource["metadata"].(map[string]interface{})["annotations"].(map[string]interface{})
+				Expect(annotations[WorkloadIdAnnotation]).To(Equal(workloadId))
+				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationKey))
+				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationPreferredKey))
+			})
+
+			It("should not add project default topology when pods select a pool without topology", func() {
+				csclient.WithNodePools("test-cluster", "no-topology")
+				job := jobManifestForNodePoolsTest(
+					map[string]interface{}{"labels": map[string]interface{}{clusterconstants.NodePoolNameLabel: "no-topology"}},
+					map[string]interface{}{},
+				)
+
+				modifiedResource, err := util.updateResourceMetadataWithOptions(
+					ctx, job, workloadId, project,
+					resourceMetadataUpdateOptions{karta: jobKartaForNodePoolsTest()},
+				)
+				Expect(err).To(BeNil())
+
+				annotations := modifiedResource["metadata"].(map[string]interface{})["annotations"].(map[string]interface{})
+				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationKey))
+				Expect(annotations).NotTo(HaveKey(topology.KAITopologyAnnotationPreferredKey))
+			})
+
+			It("should add project default topology when pods do not select a pool", func() {
+				job := jobManifestForNodePoolsTest(map[string]interface{}{}, map[string]interface{}{})
+
+				modifiedResource, err := util.updateResourceMetadataWithOptions(
+					ctx, job, workloadId, project,
+					resourceMetadataUpdateOptions{karta: jobKartaForNodePoolsTest()},
+				)
+				Expect(err).To(BeNil())
+
+				annotations := modifiedResource["metadata"].(map[string]interface{})["annotations"].(map[string]interface{})
+				Expect(annotations[topology.KAITopologyAnnotationKey]).To(Equal("test-topology"))
+				Expect(annotations[topology.KAITopologyAnnotationPreferredKey]).To(Equal("level1"))
 			})
 		})
 	})

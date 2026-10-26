@@ -265,7 +265,7 @@ def main():
     )
     parser.add_argument(
         "--branch",
-        default="master",
+        default="main",
         help="Git branch to run tests from",
     )
     parser.add_argument(

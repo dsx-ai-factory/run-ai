@@ -25,18 +25,18 @@ export interface IAuthProviderConfig {
 }
 
 export interface IUser {
-  email: string; // todo: remove - use username instead
-  name: string; // todo: remove
+  email: string;
+  name: string;
   roles: Array<string>;
-  entityType: EUserType; // todo: remove
+  entityType: EUserType;
   needToChangePassword: boolean;
   permitAllClusters: boolean;
   permittedClusters: [];
   username: string;
   tenantId?: number;
-  userId?: string; // todo: remove - use id instead
+  userId?: string;
   lastUpdated?: string;
-  password?: string; // todo: remove - use tempPassword instead
+  password?: string;
   id: string;
   createdAt?: string;
   lastLogin?: string;

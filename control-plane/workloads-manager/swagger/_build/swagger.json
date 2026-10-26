@@ -1199,7 +1199,7 @@
         "pattern": ".*"
       },
       "Preemptibility": {
-        "description": "Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.",
+        "description": "Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.",
         "type": "string",
         "minLength": 1,
         "enum": [
@@ -1265,7 +1265,6 @@
       "ServicePort": {
         "type": "object",
         "description": "Service port specification.",
-        "nullable": true,
         "properties": {
           "name": {
             "description": "The Service port name.",
@@ -1319,7 +1318,7 @@
             "description": "The Kubernetes Service name.",
             "type": "string",
             "minLength": 1,
-            "maxLength": 253,
+            "maxLength": 63,
             "example": "workload-service"
           },
           "type": {
@@ -1365,14 +1364,14 @@
       },
       "ServiceRef": {
         "type": "object",
-        "description": "Reference an existing Service.",
+        "description": "Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint.",
         "nullable": true,
         "properties": {
           "name": {
             "description": "The name of the existing Kubernetes Service.",
             "type": "string",
             "minLength": 1,
-            "maxLength": 253,
+            "maxLength": 63,
             "example": "existing-service"
           },
           "port": {
@@ -1447,6 +1446,7 @@
       },
       "Workloadv2Authorization": {
         "type": "object",
+        "description": "Access control for this networking endpoint. Requires externalAccess.\nOnly the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.",
         "example": {
           "forceJsonResponse": false,
           "authorizationType": "authenticatedUsers"
@@ -1471,8 +1471,7 @@
       },
       "NetworkingService": {
         "type": "object",
-        "description": "Service configuration for routing traffic to the workload. Use 'spec' or 'ref' (not both).",
-        "nullable": true,
+        "description": "Service configuration for routing traffic to the workload. Provide exactly one of spec or ref.",
         "properties": {
           "spec": {
             "description": "Specification for a new Kubernetes service to create for this endpoint. Mutually exclusive with `ref`.",
@@ -1483,15 +1482,14 @@
             "$ref": "#/components/schemas/ServiceRef"
           },
           "authorization": {
-            "description": "Access control configuration for traffic through this endpoint.",
+            "description": "Access control configuration for traffic through this endpoint. Required when using ref. Requires externalAccess on the endpoint.",
             "$ref": "#/components/schemas/Workloadv2Authorization"
           }
         }
       },
       "NetworkingEndpoint": {
         "type": "object",
-        "description": "A single networking endpoint. An endpoint may create or reference one Service and may expose it externally.",
-        "nullable": true,
+        "description": "A single networking endpoint. Provide a Service, externalAccess containing an Ingress, Route, or HTTPRoute, or both.\nAn endpoint may create or reference at most one Service. Authorization requires externalAccess.",
         "properties": {
           "externalAccess": {
             "description": "External access configuration for exposing the endpoint outside the cluster.",
@@ -1510,7 +1508,7 @@
       },
       "NetworkingConfiguration": {
         "type": "array",
-        "description": "Networking endpoint configurations for the workload (external access, services with auth).\nSupported for cluster version 2.25 and above.\n",
+        "description": "Networking endpoint configurations for the workload (external access, services with auth).\nRequires cluster version 3.0.0 or later.\n",
         "nullable": true,
         "maxItems": 1000,
         "items": {
@@ -1665,6 +1663,7 @@
             "example": "standard"
           },
           "volumeMode": {
+            "type": "string",
             "allOf": [
               {
                 "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode"
@@ -1724,14 +1723,12 @@
             "nullable": true
           },
           "networking": {
-            "x-internal": true,
             "$ref": "#/components/schemas/NetworkingConfiguration"
           },
           "userCredentials": {
             "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials"
           },
           "pvcs": {
-            "x-internal": true,
             "type": "array",
             "nullable": true,
             "maxItems": 1000,
@@ -1741,7 +1738,6 @@
             }
           },
           "pvcsConfig": {
-            "x-internal": true,
             "nullable": true,
             "description": "Configuration applied to PVCs that are created and reconciled alongside the workload.",
             "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig"
@@ -2637,6 +2633,16 @@
         "maxLength": 63,
         "nullable": true
       },
+      "GpuComputeMode": {
+        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.",
+        "type": "string",
+        "minLength": 1,
+        "enum": [
+          "time-slicing",
+          "sm-sharing"
+        ],
+        "nullable": true
+      },
       "GpuDevicesRequest": {
         "description": "Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.",
         "type": "integer",
@@ -2653,6 +2659,25 @@
         "example": "10M",
         "nullable": true
       },
+      "GpuMemoryPortionLimit": {
+        "description": "Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.",
+        "type": "number",
+        "format": "double",
+        "example": 0.5,
+        "nullable": true,
+        "minimum": 0,
+        "x-gorm-ignore": true
+      },
+      "GpuMemoryPortionRequest": {
+        "description": "GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.",
+        "type": "number",
+        "format": "double",
+        "example": 0.5,
+        "nullable": true,
+        "minimum": 0,
+        "maximum": 1,
+        "x-gorm-ignore": true
+      },
       "GpuMemoryRequest": {
         "description": "Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.",
         "type": "string",
@@ -2662,20 +2687,22 @@
         "nullable": true
       },
       "GpuPortionLimit": {
-        "description": "Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.",
+        "description": "Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.",
         "type": "number",
         "format": "double",
         "example": 0.5,
         "nullable": true,
-        "minimum": 0
+        "minimum": 0,
+        "deprecated": true
       },
       "GpuPortionRequest": {
-        "description": "Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.",
+        "description": "Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.",
         "type": "number",
         "format": "double",
         "example": 0.5,
         "nullable": true,
-        "minimum": 0
+        "minimum": 0,
+        "deprecated": true
       },
       "GpuRequestType": {
         "description": "Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.",
@@ -3285,7 +3312,7 @@
         "nullable": true
       },
       "ServingPortExposeExternally": {
-        "description": "Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.",
+        "description": "Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.",
         "type": "boolean",
         "nullable": true,
         "default": true
@@ -3506,11 +3533,20 @@
                   "cpuMemoryRequest": {
                     "$ref": "#/components/schemas/CpuMemoryRequest"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"

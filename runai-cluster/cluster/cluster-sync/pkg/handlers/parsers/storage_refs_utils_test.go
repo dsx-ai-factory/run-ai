@@ -8,7 +8,7 @@ package parsers
 import (
 	"context"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/test"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/test/fakecachedclient"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
@@ -122,4 +122,38 @@ var _ = Describe("nativeStorageRefs", func() {
 	It("returns nil for empty storage fields and no imagePullSecrets", func() {
 		Expect(nativeStorageRefs("tw-1", "runai-project-a", field_groups.StorageFields{}, nil)).To(BeEmpty())
 	})
+})
+
+var _ = Describe("legacy storage-reference naming", func() {
+	It("skips nil and ephemeral PVC entries without consuming an index", func() {
+		sf := field_groups.StorageFields{Pvcs: field_types.NewPvcsField(map[string]field_types.PvcsItemAndRules{
+			"a": {Value: nil},
+			"b": {Value: &field_types.PvcsItemValue{Ephemeral: ptr.To(true)}},
+			"c": {Value: &field_types.PvcsItemValue{ClaimName: ptr.To("existing")}},
+			"d": {Value: &field_types.PvcsItemValue{}},
+		})}
+		Expect(nativeStorageRefs("job", "ns", sf, nil)).To(Equal([]storageRef{
+			{kind: v1alpha1.StorageRefKindPVC, name: "existing"},
+			{kind: v1alpha1.StorageRefKindPVC, name: "pvc-job-1"},
+		}))
+	})
+	DescribeTable("image pull secrets", func(value string, expected []string, invalid bool) {
+		names, err := parseImagePullSecrets(value, "job")
+		if invalid {
+			Expect(err).To(HaveOccurred())
+			Expect(names).To(BeNil())
+			return
+		}
+		Expect(err).NotTo(HaveOccurred())
+		actual := make([]string, 0, len(names))
+		for name := range names {
+			actual = append(actual, name)
+		}
+		Expect(actual).To(ConsistOf(expected))
+	},
+		Entry("empty", "  ", []string{}, false),
+		Entry("whitespace and duplicates", " regcred\tother\nregcred ", []string{"regcred", "other"}, false),
+		Entry("invalid name rejects the list", "valid Bad_Name", nil, true),
+		Entry("preserves rejection of credentials without a native kind prefix", "USERCREDENTIAL:registry", nil, true),
+	)
 })

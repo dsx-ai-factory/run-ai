@@ -106,8 +106,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 		allStaticRoles = append(allStaticRoles, dao.LegacyRoles...)
 		allStaticRoles = append(allStaticRoles, dao.RolesMigrated...)
 		allStaticRoles = append(allStaticRoles, dao.RolesNew...)
-		allStaticRoles = append(allStaticRoles, static_roles.ApplicationAdmin)
-		allStaticRoles = append(allStaticRoles, static_roles.CloudSupport)
 
 		// Check all static roles
 		for _, role := range allStaticRoles {
@@ -623,64 +621,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 	})
 
 	Context("LegacyRoles", func() {
-		It("Get V1", func() {
-			getRolesResponse, err := rolesApiService.GetRolesV1(ctx, false)
-			Expect(err).To(BeNil())
-			Expect(getRolesResponse.Code).To(Equal(http.StatusOK))
-
-			roles := httpResponseBodyToRoles(getRolesResponse)
-
-			var createdTenantRoleFromServer api.Role
-			var createdSystemRoleFromServer api.Role
-			var internalRoleRetrieved bool = false
-			for _, role := range roles {
-				if role.Name == tenantScopedRole.Name {
-					createdTenantRoleFromServer = role
-					continue
-				}
-				if role.Name == systemScopedRole.Name {
-					createdSystemRoleFromServer = role
-					continue
-				}
-				if role.Name == static_roles.IntegrationMetricsCollector.Name {
-					internalRoleRetrieved = true
-				}
-			}
-
-			Expect(internalRoleRetrieved).To(BeFalse())
-			validateRole(createdTenantRoleFromServer, tenantScopedRole)
-			validateRole(createdSystemRoleFromServer, systemScopedRole)
-		})
-
-		It("Get V1 include internal", func() {
-			getRolesResponse, err := rolesApiService.GetRolesV1(ctx, true)
-			Expect(err).To(BeNil())
-			Expect(getRolesResponse.Code).To(Equal(http.StatusOK))
-
-			roles := httpResponseBodyToRoles(getRolesResponse)
-
-			var createdTenantRoleFromServer api.Role
-			var createdSystemRoleFromServer api.Role
-			var internalRoleRetrieved bool = false
-			for _, role := range roles {
-				if role.Name == tenantScopedRole.Name {
-					createdTenantRoleFromServer = role
-					continue
-				}
-				if role.Name == systemScopedRole.Name {
-					createdSystemRoleFromServer = role
-					continue
-				}
-				if role.Name == static_roles.IntegrationMetricsCollector.Name {
-					internalRoleRetrieved = true
-				}
-			}
-
-			Expect(internalRoleRetrieved).To(BeTrue())
-			validateRole(createdTenantRoleFromServer, tenantScopedRole)
-			validateRole(createdSystemRoleFromServer, systemScopedRole)
-		})
-
 		It("Get V2", func() {
 			getRolesResponse, err := rolesApiService.GetRoles(ctx, 0, 0, "", "", []string{}, "", false)
 			Expect(err).To(BeNil())
@@ -740,6 +680,18 @@ var _ = Describe("Roles API tests", Ordered, func() {
 			Expect(internalRoleRetrieved).To(BeTrue())
 			validateRole(createdTenantRoleFromServer, tenantScopedRole)
 			validateRole(createdSystemRoleFromServer, systemScopedRole)
+		})
+
+		It("Get V2 filtered by name returns only the exact match", func() {
+			getRolesResponse, err := rolesApiService.GetRoles(ctx, 0, 0, "", "", []string{"name==" + static_roles.DepartmentAdmin.Name}, "", false)
+			Expect(err).To(BeNil())
+			Expect(getRolesResponse.Code).To(Equal(http.StatusOK))
+
+			// "Department administrator (Legacy)" shares the prefix and must not match.
+			roles := getRolesResponse.Body.(api.GetRoles200Response).Roles
+			Expect(roles).To(HaveLen(1))
+			Expect(roles[0].Name).To(Equal(static_roles.DepartmentAdmin.Name))
+			Expect(roles[0].Id).To(Equal(int32(dao.MapStaticRoleNameToRoleId[static_roles.DepartmentAdmin.Name])))
 		})
 
 		It("Get V2 search", func() {
@@ -810,7 +762,7 @@ var _ = Describe("Roles API tests", Ordered, func() {
 			Expect(upsertErr).To(BeNil())
 			Expect(created.ID).To(Equal(updateId))
 
-			dbRole, apiErr := dao.DbGetRoleById(ctx, tenantId, updateId, nil)
+			dbRole, apiErr := dao.DbGetRoleById(ctx, tenantId, updateId)
 			Expect(apiErr).To(BeNil())
 			for _, permission := range dbRole.Permissions {
 				Expect(permission.Create).To(Equal(false))
@@ -1088,15 +1040,6 @@ var _ = Describe("Roles API tests", Ordered, func() {
 	})
 
 	Context("LegacyRoles by ID", func() {
-		It("Get V1", func() {
-			getRoleResponse, err := rolesApiService.GetRoleV1(ctx, tenantScopedRole.Id)
-			Expect(err).To(BeNil())
-			Expect(getRoleResponse.Code).To(Equal(http.StatusOK))
-
-			role := httpResponseBodyToRole(getRoleResponse)
-			validateRole(role, tenantScopedRole)
-		})
-
 		It("Get V2", func() {
 			getRoleResponse, err := rolesApiService.GetRole(ctx, tenantScopedRole.Id)
 			Expect(err).To(BeNil())
@@ -1107,11 +1050,7 @@ var _ = Describe("Roles API tests", Ordered, func() {
 		})
 
 		It("Get should fail, not found", func() {
-			getRoleResponse, err := rolesApiService.GetRoleV1(ctx, math.MaxInt32)
-			Expect(err).To(BeNil())
-			Expect(getRoleResponse.Code).To(Equal(http.StatusNotFound))
-
-			getRoleResponse, err = rolesApiService.GetRole(ctx, math.MaxInt32)
+			getRoleResponse, err := rolesApiService.GetRole(ctx, math.MaxInt32)
 			Expect(err).To(BeNil())
 			Expect(getRoleResponse.Code).To(Equal(http.StatusNotFound))
 		})
@@ -1953,16 +1892,6 @@ func httpResponseBodyToRole(httpResponse api.ImplResponse) api.Role {
 	err = json.Unmarshal(bytes, role)
 	Expect(err).To(BeNil())
 	return *role
-}
-
-func httpResponseBodyToRoles(httpResponse api.ImplResponse) []api.Role {
-	bytes, err := json.Marshal(httpResponse.Body)
-	Expect(err).To(BeNil())
-
-	roles := &[]api.Role{}
-	err = json.Unmarshal(bytes, roles)
-	Expect(err).To(BeNil())
-	return *roles
 }
 
 func permissionActionsToActions(permissionActions []api.PermissionAction) []api.Action {

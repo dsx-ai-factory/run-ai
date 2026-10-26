@@ -16,8 +16,8 @@ make package-bump-version        # automatic: patch (compatible) or minor (break
 ```
 
 **Requirements:**
-- Must be on `master` branch
-- Local `master` must be up-to-date with `origin/master`
+- Must be on `main` branch
+- Local `main` must be up-to-date with `origin/main`
 
 **Behavior:**
 - Compares **only this package** to its latest `${TAG_FORMAT}/vX.Y.Z` prod tag
@@ -73,7 +73,7 @@ To release a Go package, follow these steps:
 > This is a production release, for a dev release check out [here](#development-release-process)
 
 1. **Tag the Branch**:  
-   To release a package, you need to tag the master branch using the following format:
+   To release a package, you need to tag the main branch using the following format:
 
    ```
    package_folder_name/vX.X.X

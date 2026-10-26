@@ -405,7 +405,6 @@ export default defineComponent({
         (this.$refs[this.vllmWidgetsRef] as TWorkloadCharts)?.resizeCharts();
       });
     },
-    // barak:todo the history API is not paginated here - fetches all records to find the first Running phase.
     // Discuss with team whether a dedicated endpoint or query param would be more efficient.
     async loadWorkloadFirstRunDate(): Promise<void> {
       try {

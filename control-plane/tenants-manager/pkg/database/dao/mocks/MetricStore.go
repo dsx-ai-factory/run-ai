@@ -21,10 +21,19 @@ func NewMetricStore(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MetricStore {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MetricStore{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -78,15 +87,26 @@ type MetricStore_GetByTenantId_Call struct {
 }
 
 // GetByTenantId is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *MetricStore_Expecter) GetByTenantId(ctx interface{}, tenantId interface{}) *MetricStore_GetByTenantId_Call {
+//   - ctx context.Context
+//   - tenantId uint
+func (_e *MetricStore_Expecter) GetByTenantId(ctx any, tenantId any) *MetricStore_GetByTenantId_Call {
 	return &MetricStore_GetByTenantId_Call{Call: _e.mock.On("GetByTenantId", ctx, tenantId)}
 }
 
 func (_c *MetricStore_GetByTenantId_Call) Run(run func(ctx context.Context, tenantId uint)) *MetricStore_GetByTenantId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

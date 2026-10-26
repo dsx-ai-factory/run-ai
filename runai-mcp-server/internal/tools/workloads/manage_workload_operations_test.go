@@ -12,7 +12,7 @@ import (
 	"strings"
 	"testing"
 
-	workloadsapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 

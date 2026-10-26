@@ -6,9 +6,8 @@
 package nodeexclusion
 
 import (
-	"sort"
+	"slices"
 
-	mapset "github.com/deckarep/golang-set/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -57,7 +56,9 @@ func addExclusionToTerm(term *field_types.NodeSelectorTerm, exclusions []string)
 }
 
 func unionStrings(a, b []string) []string {
-	result := mapset.NewSet(append(a, b...)...).ToSlice()
-	sort.Strings(result)
-	return result
+	result := make([]string, 0, len(a)+len(b))
+	result = append(result, a...)
+	result = append(result, b...)
+	slices.Sort(result)
+	return slices.Compact(result)
 }

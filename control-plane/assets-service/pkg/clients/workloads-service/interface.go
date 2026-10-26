@@ -8,7 +8,7 @@ package workloads_service
 import (
 	"context"
 
-	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // FactoryInterface defines and interface for client factory
@@ -26,4 +26,10 @@ type ClientInterface interface {
 	CreateTraining(ctx context.Context, training *workloadsServiceClient.TrainingCreationRequest) (*workloadsServiceClient.Training, *workloadsServiceClient.SubmissionErrorV2)
 	CreateDistributed(ctx context.Context, distributed *workloadsServiceClient.DistributedCreationRequest) (*workloadsServiceClient.DistributedWorkload, *workloadsServiceClient.SubmissionErrorV2)
 	CreateInference(ctx context.Context, inference *workloadsServiceClient.InferenceCreationRequest) (*workloadsServiceClient.Inference, *workloadsServiceClient.Error)
+
+	// InternalGetResourceClaimTemplateWorkloads lists the workloads in the request's scope whose pods
+	// reference the resource claim template with the request's name
+	InternalGetResourceClaimTemplateWorkloads(ctx context.Context,
+		request *workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32,
+	) (*workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse, *workloadsServiceClient.Error)
 }

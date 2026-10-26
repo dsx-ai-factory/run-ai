@@ -15,9 +15,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/notifications"
 	workloadsServerApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/google/uuid"
 )
@@ -91,10 +91,10 @@ func TestWorkloadFromV2SnapshotUsesSnapshotFieldsAndDesiredPhase(t *testing.T) {
 	if response.DesiredPhase != workloadsApi.WORKLOADDESIREDPHASE_RUNNING {
 		t.Fatalf("expected Running desired phase, got %q", response.DesiredPhase)
 	}
-	if response.RequestedName != "requested-name" || response.Spec != spec {
+	if response.RequestedName != "requested-name" || !reflect.DeepEqual(response.Spec, spec) {
 		t.Fatalf("expected requested name and updated typed spec from the snapshot")
 	}
-	if response.MasterSpec.Get() != masterSpec || response.MasterSpecSameAsWorker.Get() == nil || !*response.MasterSpecSameAsWorker.Get() {
+	if !reflect.DeepEqual(response.MasterSpec.Get(), masterSpec) || response.MasterSpecSameAsWorker.Get() == nil || !*response.MasterSpecSameAsWorker.Get() {
 		t.Fatalf("expected distributed inference master fields from the snapshot")
 	}
 	if response.ActualPhase != nil {

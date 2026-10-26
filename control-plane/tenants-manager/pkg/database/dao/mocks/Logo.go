@@ -21,10 +21,19 @@ func NewLogo(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Logo {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Logo{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -78,16 +87,32 @@ type Logo_GetAll_Call struct {
 }
 
 // GetAll is a helper method to define mock.On call
-//   - ctx
-//   - offset
-//   - limit
-func (_e *Logo_Expecter) GetAll(ctx interface{}, offset interface{}, limit interface{}) *Logo_GetAll_Call {
+//   - ctx context.Context
+//   - offset int
+//   - limit int
+func (_e *Logo_Expecter) GetAll(ctx any, offset any, limit any) *Logo_GetAll_Call {
 	return &Logo_GetAll_Call{Call: _e.mock.On("GetAll", ctx, offset, limit)}
 }
 
 func (_c *Logo_GetAll_Call) Run(run func(ctx context.Context, offset int, limit int)) *Logo_GetAll_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int), args[2].(int))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int
+		if args[1] != nil {
+			arg1 = args[1].(int)
+		}
+		var arg2 int
+		if args[2] != nil {
+			arg2 = args[2].(int)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -138,15 +163,26 @@ type Logo_GetByTenantId_Call struct {
 }
 
 // GetByTenantId is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *Logo_Expecter) GetByTenantId(ctx interface{}, tenantId interface{}) *Logo_GetByTenantId_Call {
+//   - ctx context.Context
+//   - tenantId uint
+func (_e *Logo_Expecter) GetByTenantId(ctx any, tenantId any) *Logo_GetByTenantId_Call {
 	return &Logo_GetByTenantId_Call{Call: _e.mock.On("GetByTenantId", ctx, tenantId)}
 }
 
 func (_c *Logo_GetByTenantId_Call) Run(run func(ctx context.Context, tenantId uint)) *Logo_GetByTenantId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -186,16 +222,32 @@ type Logo_SetByTenantId_Call struct {
 }
 
 // SetByTenantId is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - logo
-func (_e *Logo_Expecter) SetByTenantId(ctx interface{}, tenantId interface{}, logo interface{}) *Logo_SetByTenantId_Call {
+//   - ctx context.Context
+//   - tenantId uint
+//   - logo *[]byte
+func (_e *Logo_Expecter) SetByTenantId(ctx any, tenantId any, logo any) *Logo_SetByTenantId_Call {
 	return &Logo_SetByTenantId_Call{Call: _e.mock.On("SetByTenantId", ctx, tenantId, logo)}
 }
 
 func (_c *Logo_SetByTenantId_Call) Run(run func(ctx context.Context, tenantId uint, logo *[]byte)) *Logo_SetByTenantId_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint), args[2].(*[]byte))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		var arg2 *[]byte
+		if args[2] != nil {
+			arg2 = args[2].(*[]byte)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

@@ -7,54 +7,67 @@ package workloads
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
+	policy "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaimcp"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/common"
 )
 
 const (
-	policyKindTraining    = "training"
-	policyKindWorkspace   = "workspace"
-	policyKindDistributed = "distributed"
-	policyKindInference   = "inference"
+	policyKindTraining             = string(policy.POLICYTYPE_TRAINING)
+	policyKindWorkspace            = string(policy.POLICYTYPE_WORKSPACE)
+	policyKindDistributed          = string(policy.POLICYTYPE_DISTRIBUTED)
+	policyKindInference            = string(policy.POLICYTYPE_INFERENCE)
+	policyKindDistributedInference = string(policy.POLICYTYPE_DISTRIBUTED_INFERENCE)
+	policyKindNimService           = string(policy.POLICYTYPE_NIM_SERVICE)
+	policyKindFallback             = string(policy.POLICYTYPE_FALLBACK)
 )
 
 type getWorkloadEffectivePolicyInput struct {
-	ProjectID string `json:"projectId" jsonschema:"Run:ai project ID as a numeric string (e.g. \"4500002\")"`
-	Kind      string `json:"kind"      jsonschema:"Singular workload kind: one of training | workspace | distributed | inference. Case-insensitive — same vocabulary as the type field returned by get_workload_status, lowercased"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	Kind         string `json:"kind" jsonschema:"Legacy workload type: training, workspace, distributed, inference, distributedInference, nimService, or fallback. Case-insensitive."`
+	Scope        string `json:"scope,omitempty" jsonschema:"Defaults to project. Exact scope: tenant, cluster, department, or project."`
+	ClusterID    string `json:"clusterId,omitempty" jsonschema:"Cluster UUID required for scope=cluster. Resolve names through list_clusters."`
+	DepartmentID string `json:"departmentId,omitempty" jsonschema:"Department ID required for scope=department. Resolve names through list_departments."`
+	ProjectID    string `json:"projectId,omitempty" jsonschema:"Numeric project ID as a string, required for scope=project. Resolve names through list_projects."`
+}
+
+func (in getWorkloadEffectivePolicyInput) targetScope() string {
+	if in.Scope == "" {
+		return string(policy.SCOPETYPE_PROJECT)
+	}
+	return in.Scope
 }
 
 func (in getWorkloadEffectivePolicyInput) Validate() error {
-	if err := common.ValidateNumericString("projectId", in.ProjectID); err != nil {
+	if err := common.ValidatePolicyScope(in.targetScope(), in.ClusterID, in.DepartmentID, in.ProjectID); err != nil {
 		return err
 	}
-	switch strings.ToLower(strings.TrimSpace(in.Kind)) {
-	case policyKindTraining, policyKindWorkspace, policyKindDistributed, policyKindInference:
-		return nil
-	default:
-		return fmt.Errorf("kind must be one of training | workspace | distributed | inference (got %q)", in.Kind)
-	}
+	_, err := policy.NewPolicyTypeFromValue(normalizePolicyKind(in.Kind))
+	return err
 }
 
 type getWorkloadEffectivePolicyOutput struct {
-	ProjectID string         `json:"projectId" jsonschema:"Project ID this policy applies to"`
-	Kind      string         `json:"kind"      jsonschema:"Workload kind this policy applies to, lowercased (training | workspace | distributed | inference)"`
-	Effective map[string]any `json:"effective" jsonschema:"Effective policy tree at the project level — the merged result of all policy layers — forwarded verbatim. Modern responses split it into {defaults, rules} (defaults.<key> for pre-merged values; rules.<key>.{required | forbidden | min | max | enum | regex, options, sourceOfRule, message} at leaves). Legacy responses come through as a flat tree with default + verb keys interleaved. The MCP server does not normalise either shape — walk the tree as-is. Empty object when there is no effective policy at this scope"` //nolint:lll // long jsonschema tool description; cannot be wrapped in a struct tag
+	ProjectID string         `json:"projectId,omitempty" jsonschema:"Target project ID, when scope is project."`
+	Scope     string         `json:"scope" jsonschema:"Scope at which the policy was read."`
+	Kind      string         `json:"kind" jsonschema:"Legacy workload type in the spelling used by manage_workload_policy.workloadType."`
+	Policy    map[string]any `json:"policy" jsonschema:"Settings declared at the target scope, including defaults, rules, and asset assignments."`
+	Effective map[string]any `json:"effective" jsonschema:"Merged policy at the target scope, including inherited settings. This is not an update request."`
 }
 
 func registerGetWorkloadEffectivePolicy(r *runaimcp.Registry, client *runaiclient.Client) {
 	runaimcp.Register(r, runaimcp.Tool[getWorkloadEffectivePolicyInput, getWorkloadEffectivePolicyOutput]{
 		Name: "get_workload_effective_policy",
-		Description: "Call when the user asks what policy rules or defaults apply to a project's workloads of a given kind. " +
-			"Do NOT call to validate a specific workload spec — that is a skill (audit_workload_against_policy). " +
-			"Do NOT call to check if a workload is currently running — use get_workload_status.",
+		Description: "Read policy rules and defaults that apply at a scope, including inheritance. " +
+			"Select a legacy workload kind; scope defaults to project and also supports tenant, cluster, and department with its matching ID. " +
+			"The policy result contains settings declared at that scope; effective includes inherited settings. Read policy.imposedAssets before an edit when assignments must be preserved. " +
+			"Use list_workload_policies for policy discovery, IDs, names, and GVK policies. Resolve scope names through list_clusters, list_departments, or list_projects; ask if ambiguous. " +
+			"This tool does not validate workload specs or change policy settings.",
 		ReadOnly:      true,
 		MinAPIVersion: "2.18",
 		Handler: func(ctx context.Context, in getWorkloadEffectivePolicyInput) (getWorkloadEffectivePolicyOutput, error) {
@@ -64,59 +77,61 @@ func registerGetWorkloadEffectivePolicy(r *runaimcp.Registry, client *runaiclien
 }
 
 func getWorkloadEffectivePolicyRun(ctx context.Context, client *runaiclient.Client, in getWorkloadEffectivePolicyInput) (getWorkloadEffectivePolicyOutput, error) {
-	kind := strings.ToLower(strings.TrimSpace(in.Kind))
-	httpResp, err := dispatchPolicyByKind(ctx, client, kind, in.ProjectID)
-	if err != nil {
-		return getWorkloadEffectivePolicyOutput{}, fmt.Errorf("get %s policy for project %q: %w", kind, in.ProjectID, err)
+	out := getWorkloadEffectivePolicyOutput{
+		ProjectID: in.ProjectID, Scope: in.targetScope(), Kind: normalizePolicyKind(in.Kind),
+		Policy: map[string]any{}, Effective: map[string]any{},
 	}
-	effective, err := extractEffectivePolicy(httpResp)
+	resp, err := getLegacyPolicyResponse(ctx, client, out.Kind, in)
 	if err != nil {
-		return getWorkloadEffectivePolicyOutput{}, fmt.Errorf("decode %s policy for project %q: %w", kind, in.ProjectID, err)
+		return out, fmt.Errorf("get %s policy: %w", out.Kind, err)
 	}
-	return getWorkloadEffectivePolicyOutput{
-		ProjectID: in.ProjectID,
-		Kind:      kind,
-		Effective: effective,
-	}, nil
+	if err := common.ReadJSONResponse(resp, &out); err != nil && !errors.Is(err, io.EOF) {
+		return out, fmt.Errorf("read %s policy: %w: %w", out.Kind, err, runaimcp.ErrUpstream)
+	}
+	if out.Policy == nil {
+		out.Policy = map[string]any{}
+	}
+	if out.Effective == nil {
+		out.Effective = map[string]any{}
+	}
+	return out, nil
 }
 
-// dispatchPolicyByKind returns the raw response of the kind-specific policy
-func dispatchPolicyByKind(ctx context.Context, client *runaiclient.Client, kind, projectID string) (*http.Response, error) {
-	const scope = "project"
+func normalizePolicyKind(kind string) string {
+	kind = strings.TrimSpace(kind)
+	for _, candidate := range policy.AllowedPolicyTypeEnumValues {
+		if strings.EqualFold(kind, string(candidate)) {
+			return string(candidate)
+		}
+	}
+	return kind
+}
+
+func getLegacyPolicyResponse(ctx context.Context, client *runaiclient.Client, kind string, in getWorkloadEffectivePolicyInput) (*http.Response, error) {
 	api := client.Policy.PolicyAPI
-	var (
-		resp *http.Response
-		err  error
-	)
+	var resp *http.Response
+	var err error
 	switch kind {
 	case policyKindTraining:
-		_, resp, err = api.GetTrainingPolicyV2(ctx).Scope(scope).ProjectId(projectID).Execute()
+		_, resp, err = api.GetTrainingPolicyV2(ctx).Scope(in.targetScope()).ClusterId(in.ClusterID).DepartmentId(in.DepartmentID).ProjectId(in.ProjectID).Execute()
 	case policyKindWorkspace:
-		_, resp, err = api.GetWorkspacePolicyV2(ctx).Scope(scope).ProjectId(projectID).Execute()
+		_, resp, err = api.GetWorkspacePolicyV2(ctx).Scope(in.targetScope()).ClusterId(in.ClusterID).DepartmentId(in.DepartmentID).ProjectId(in.ProjectID).Execute()
 	case policyKindDistributed:
-		_, resp, err = api.GetDistributedPolicyV2(ctx).Scope(scope).ProjectId(projectID).Execute()
+		_, resp, err = api.GetDistributedPolicyV2(ctx).Scope(in.targetScope()).ClusterId(in.ClusterID).DepartmentId(in.DepartmentID).ProjectId(in.ProjectID).Execute()
 	case policyKindInference:
-		_, resp, err = api.GetInferencePolicyV2(ctx).Scope(scope).ProjectId(projectID).Execute()
+		_, resp, err = api.GetInferencePolicyV2(ctx).Scope(in.targetScope()).ClusterId(in.ClusterID).DepartmentId(in.DepartmentID).ProjectId(in.ProjectID).Execute()
+	case policyKindDistributedInference:
+		_, resp, err = api.GetDistributedInferencePolicyV2(ctx).Scope(in.targetScope()).ClusterId(in.ClusterID).DepartmentId(in.DepartmentID).ProjectId(in.ProjectID).Execute()
+	case policyKindNimService:
+		_, resp, err = api.GetNimServicePolicy(ctx).Scope(in.targetScope()).ClusterId(in.ClusterID).DepartmentId(in.DepartmentID).ProjectId(in.ProjectID).Execute()
+	case policyKindFallback:
+		_, resp, err = api.GetFallbackPolicy(ctx).Scope(in.targetScope()).ClusterId(in.ClusterID).DepartmentId(in.DepartmentID).ProjectId(in.ProjectID).Execute()
 	default:
 		return nil, fmt.Errorf("unsupported policy kind %q: %w", kind, runaimcp.ErrValidation)
 	}
-	if resp != nil && resp.StatusCode < 300 {
+	// Older response shapes may not decode into the generated model; read the raw body on success.
+	if resp != nil && resp.StatusCode >= 200 && resp.StatusCode < 300 {
 		return resp, nil
 	}
 	return resp, runaimcp.MapHTTPError(resp, err)
-}
-
-func extractEffectivePolicy(httpResp *http.Response) (map[string]any, error) {
-	var raw struct {
-		Effective map[string]any `json:"effective"`
-	}
-	if httpResp != nil && httpResp.Body != nil {
-		if err := json.NewDecoder(httpResp.Body).Decode(&raw); err != nil && !errors.Is(err, io.EOF) {
-			return nil, fmt.Errorf("decode policy: %w", err)
-		}
-	}
-	if raw.Effective == nil {
-		raw.Effective = map[string]any{}
-	}
-	return raw.Effective, nil
 }

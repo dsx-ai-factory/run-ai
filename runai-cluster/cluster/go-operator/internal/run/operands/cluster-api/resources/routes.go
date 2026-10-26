@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
-	rsResources "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/researcher-service/resources"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
@@ -137,7 +136,7 @@ func getTlsSecretDataIfNeeded(ctx context.Context, runaiConfig *runv1.RunaiConfi
 	var certificate, key string
 	var err error
 	if runaiConfig.Spec.ClusterApi.Route.TlsSecret != "" {
-		certificate, key, err = rsResources.GetTlsSecretCertAndKey(ctx, k8sReader, runaiConfig.Spec.ClusterApi.Route.TlsSecret, runaiConfig.Namespace)
+		certificate, key, err = GetTlsSecretCertAndKey(ctx, k8sReader, runaiConfig.Spec.ClusterApi.Route.TlsSecret, runaiConfig.Namespace)
 		if err != nil {
 			return "", "", fmt.Errorf("failed to get tls secret for cluster-api route: %w", err)
 		}

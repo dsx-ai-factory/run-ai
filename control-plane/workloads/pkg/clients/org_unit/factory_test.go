@@ -14,9 +14,9 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
 
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	orgUnitMocks "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/mocks"
-	"github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/structs"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	orgUnitMocks "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
 	cache "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	cacheconfig "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"

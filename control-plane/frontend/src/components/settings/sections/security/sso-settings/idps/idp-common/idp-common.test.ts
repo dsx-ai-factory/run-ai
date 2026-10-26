@@ -4,7 +4,7 @@
  */
 
 // scopeUtil.test.ts
-import { describe, test, expect } from "vitest";
+import { afterEach, beforeEach, describe, test, expect, vi } from "vitest";
 import { idpCommon } from "@/components/settings/sections/security/sso-settings/idps/idp-common/idp-common";
 
 describe("getDefaultScope", () => {
@@ -38,5 +38,35 @@ describe("getDefaultScope", () => {
     expect(result).toEqual(["openid"]);
     const noOpenIDResult = idpCommon.getDefaultScope(scope, false);
     expect(noOpenIDResult).toEqual([]);
+  });
+});
+
+describe("isCertificateExpiringSoon", () => {
+  const now = new Date("2026-01-01T00:00:00.000Z");
+  const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(now);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  test("should return false when the certificate is far from expiring", () => {
+    expect(idpCommon.isCertificateExpiringSoon(daysFromNow(61))).toBe(false);
+  });
+
+  test("should return true at the 60-day threshold", () => {
+    expect(idpCommon.isCertificateExpiringSoon(daysFromNow(60))).toBe(true);
+  });
+
+  test("should return true when within the 60-day window", () => {
+    expect(idpCommon.isCertificateExpiringSoon(daysFromNow(1))).toBe(true);
+  });
+
+  test("should return false once the certificate has already expired", () => {
+    expect(idpCommon.isCertificateExpiringSoon(daysFromNow(-1))).toBe(false);
   });
 });

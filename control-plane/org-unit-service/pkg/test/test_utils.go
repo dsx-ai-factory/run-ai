@@ -16,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/google/uuid"
 	"k8s.io/apimachinery/pkg/util/rand"
+	"k8s.io/utils/ptr"
 )
 
 func createDefaultApiV1NodePoolResources(fullResources bool, nodePools []api.ResourcesNodePool) []api.ResourcesNullable {
@@ -27,7 +28,7 @@ func createDefaultApiV1NodePoolResources(fullResources bool, nodePools []api.Res
 		npResources := api.ResourcesNullable{
 			NodePool: &nodePool,
 			Gpu: api.ResourcesNullableGpu{
-				Deserved:        gpuDeserved,
+				Deserved:        ptr.To(gpuDeserved),
 				Limit:           &gpuLimit,
 				OverQuotaWeight: &gpuOqWeight,
 			},
@@ -77,20 +78,19 @@ func buildDisplayedCluster(clusterId string, version string) openapi.DisplayedCl
 }
 
 func validateRank(requestedRank *string, actualRank *string, fieldName string) {
-	p1, _ := services.ParseRank(requestedRank, nil)
-	p2, _ := services.ParseRank(actualRank, nil)
+	p1, _ := services.ParseRank(requestedRank)
+	p2, _ := services.ParseRank(actualRank)
 	ExpectWithOffset(3, p1).To(Equal(p2), fmt.Sprintf("mismatch in %s", fieldName))
 }
 
 func validateResourcesAndNullable(requestedResources api.ResourcesNullable, actualResources api.Resources) {
 	Expect(requestedResources.Cpu).To(Equal(actualResources.Cpu))
-	Expect(requestedResources.Gpu.Deserved).To(Equal(actualResources.Gpu.Deserved))
+	Expect(ptr.Deref(requestedResources.Gpu.Deserved, 0)).To(Equal(actualResources.Gpu.Deserved))
 	Expect(requestedResources.Gpu.Limit).To(Equal(actualResources.Gpu.Limit))
 	Expect(requestedResources.Gpu.OverQuotaWeight).To(Equal(actualResources.Gpu.OverQuotaWeight))
 	Expect(requestedResources.NodePool).To(Equal(actualResources.NodePool))
 	Expect(requestedResources.Memory).To(Equal(actualResources.Memory))
 	validateRank(requestedResources.Rank, actualResources.Rank, "rank")
-	validateRank(requestedResources.Rank, actualResources.Priority, "priority")
 }
 
 func validateResources(resources1 api.Resources, resources2 api.Resources) {
@@ -99,7 +99,6 @@ func validateResources(resources1 api.Resources, resources2 api.Resources) {
 	Expect(resources1.NodePool).To(Equal(resources2.NodePool))
 	Expect(resources1.Memory).To(Equal(resources2.Memory))
 	validateRank(resources1.Rank, resources2.Rank, "rank")
-	validateRank(resources1.Rank, resources2.Priority, "priority")
 }
 
 func findResourceByNodePoolId(resourcesSlice []api.Resources, nodePoolId string) *api.Resources {

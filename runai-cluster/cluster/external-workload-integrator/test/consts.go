@@ -1860,7 +1860,7 @@ var (
 			},
 			Annotations: map[string]string{
 				commonconsts.ControlPlaneWorkloadIdAnnotationForWorkload: "runai-inference-workload-id",
-				clusterconstants.AnnotationJobUrl:                        "https://env.runailabs.com/team-a/test, https://env.runailabs.com/team-a/test/url-2",
+				clusterconstants.AnnotationJobUrl:                        "https://env.example.com/team-a/test, https://env.example.com/team-a/test/url-2",
 				constants.HelmReleaseAnnotationKey:                       "rel",
 				"otherKey":                                               "otherVal",
 			},
@@ -1971,7 +1971,7 @@ var (
 					constants.GpuResourceName: *resource.NewMilliQuantity(2*1000*testDeploymentGpuRequest, resource.DecimalSI),
 				},
 			},
-			Urls: []string{"https://env.runailabs.com/team-a/test, https://env.runailabs.com/team-a/test/url-2", "http://depl1.runai-test.svc.cluster.local"},
+			Urls: []string{"https://env.example.com/team-a/test, https://env.example.com/team-a/test/url-2", "http://depl1.runai-test.svc.cluster.local"},
 		},
 		Status: v1alpha1.ExternalWorkloadStatus{
 			ObservedStatus: v1alpha1.ExternalWorkloadObservedStatus{

@@ -12,7 +12,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	swagger "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers/parsers"

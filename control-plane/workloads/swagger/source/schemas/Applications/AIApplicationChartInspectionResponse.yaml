@@ -1,0 +1,51 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+type: object
+required:
+  - chartName
+  - chartVersion
+  - archiveSHA256
+  - hasQuestions
+  - questionsStatus
+  - groups
+  - questions
+  - warnings
+properties:
+  # Return archive identity verbatim; submission name/version length limits do not apply.
+  chartName:
+    $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartName.yaml"
+  chartVersion:
+    $ref: "../../../../../infra/openapi/docs/schemas/applications/ChartVersion.yaml"
+  archiveSHA256:
+    type: string
+    description: Lowercase hexadecimal SHA-256 digest of the exact inspected archive bytes.
+  hasQuestions:
+    type: boolean
+    description: Whether the chart contains a root questions.yaml or questions.yml file, including an unusable file.
+  questionsStatus:
+    $ref: "./AIApplicationChartQuestionsStatus.yaml"
+  groups:
+    type: array
+    description: Normalized group declarations in author order; empty for absent or unusable declarations.
+    items:
+      type: object
+      additionalProperties: true
+  questions:
+    type: array
+    description: |
+      Normalized root questions in author order. Each question preserves supported declared
+      metadata and may contain recursive subquestions through four child levels (five levels total), with roots at
+      depth zero. Supported compatibility forms are normalized. Unknown question types become
+      string with a warning; unsupported optional properties are ignored with a warning. Invalid
+      mandatory metadata, bindings, options, defaults, conditions, or excessive nesting make the
+      entire declaration unusable. Credential and Secret question types are not supported.
+      This response contains no raw declaration YAML or complete values.yaml defaults.
+    items:
+      type: object
+      additionalProperties: true
+  warnings:
+    type: array
+    description: Diagnostics for recoverable metadata and unusable declarations.
+    items:
+      $ref: './AIApplicationChartInspectionWarning.yaml'

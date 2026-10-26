@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/google/uuid"
@@ -18,9 +19,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 
 	workloadsServerApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	workloadsMgr "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/workloads_mgr"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_integration"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 
@@ -37,6 +38,7 @@ func sendSubmissionToWorkloadMgr(ctx context.Context, params *createWorkloadPara
 		return workloadsApi.NewSubmissionErrorV2(createErr.Code, createErr.Message)
 	}
 
+	params.AcceptedAt = time.Now().UTC()
 	params.Response.WorkloadId = workload.Metadata.Id
 	params.Response.DesiredPhase = workloadsApi.WorkloadDesiredPhase(workload.DesiredPhase)
 

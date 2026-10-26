@@ -116,7 +116,7 @@ Click one of the values of Workload(s) column, to view the list of workloads and
     * Click **CREATE PROJECT & CLOSE** to create the project without assigning resources.
     * Click **CREATE PROJECT & CONTINUE** to set dedicated resources and scheduling guarantees.
 
-    <Info><p><strong>Note</strong></p><ul><li>The project is created and appears in the <strong>Projects</strong> grid.</li><li><p>When you select <strong>CREATE PROJECT &#x26; CLOSE</strong>, the project is created without assigned resources. The project’s quota is set to 0, which means workloads can run only when spare GPUs are available. The following default settings are applied:</p><ul><li>The project is created with a <strong>Medium Low</strong> rank.</li><li>Over quota weight is always applied when distributing over-quota GPUs among projects in the same rank. By default, the project’s weight is derived proportionally from its assigned GPU quota. Since the quota is set to 0, the effective weight is 0. If <strong>Over quota weight</strong> is enabled via <strong>General settings</strong>, the project is assigned a default weight of 2.</li></ul></li></ul></Info>
+    <Note><p><strong>Note</strong></p><ul><li>The project is created and appears in the <strong>Projects</strong> grid.</li><li><p>When you select <strong>CREATE PROJECT &#x26; CLOSE</strong>, the project is created without assigned resources. The project’s quota is set to 0, which means workloads can run only when spare GPUs are available. The following default settings are applied:</p><ul><li>The project is created with a <strong>Medium Low</strong> rank.</li><li>Over quota weight is always applied when distributing over-quota GPUs among projects in the same rank. By default, the project’s weight is derived proportionally from its assigned GPU quota. Since the quota is set to 0, the effective weight is 0. If <strong>Over quota weight</strong> is enabled via <strong>General settings</strong>, the project is assigned a default weight of 2.</li></ul></li></ul></Note>
 
 ### Assigning GPU Quota
 
@@ -125,7 +125,7 @@ Assign GPUs to the project and define how the [Scheduler](../../runai-scheduler/
 1. Review the **node pools** available to the project. By default, a project inherits the node pools defined at the department level. This represents the default (suggested) configuration set by the department and can be changed per project by selecting which node pools are available and adjusting their order.
 2.  Add **node pools** and set the default order in which workloads will be scheduled to use them. The leftmost node pool is the first one workloads will attempt to schedule onto. The Scheduler first tries to allocate resources using the highest priority node pool, then the next in priority, until it reaches the lowest priority node pool list, then the Scheduler starts from the highest again.
 
-    <Info><p><strong>Note</strong></p><ul><li>When no node pools are configured, you can assign quota for the whole project, instead of per node pool. After node pools are created, you can assign quota for each node pool separately.</li><li>The order of node pools can be overridden during workload submission by an admin policy or by the user.</li></ul></Info>
+    <Note><p><strong>Note</strong></p><ul><li>When no node pools are configured, you can assign quota for the whole project, instead of per node pool. After node pools are created, you can assign quota for each node pool separately.</li><li>The order of node pools can be overridden during workload submission by an admin policy or by the user.</li></ul></Note>
 3. Review the department's GPU quota per node pool:
    * **Unassigned** - The number of GPUs not assigned as quota to subordinate projects.
    * **Total** - The total number of GPUs assigned to the department in this node pool.
@@ -134,7 +134,7 @@ Assign GPUs to the project and define how the [Scheduler](../../runai-scheduler/
    * **Unassigned quota** - The number of GPUs still available in the node pool that are not yet assigned for any project.
    *   **Sum of other projects’ assigned quota** - The total number of GPUs already assigned to all other projects in the same node pool.
 
-       <Info><p><strong>Note</strong></p><ul><li>If the department’s quota is set to <strong>Unlimited</strong>, projects under that department can consume available GPUs up to the physical capacity of the node pool or cluster.</li><li><p>If the department’s quota is limited, project behavior depends on whether the <strong>Limit projects from exceeding department quota</strong> is enabled/disabled via <strong>General settings</strong>:</p><ul><li>If disabled, projects can be assigned a GPU quota that exceeds the department quota. In this case, the system may display warnings, but the department quota is not enforced.</li><li>If enabled, the project’s assigned GPU quota must remain within the department quota. You cannot assign more GPUs than the department has available.</li></ul></li><li>Setting a quota to 0 (GPU, CPU, or CPU memory) and disabling <strong>Over quota weight</strong> via <strong>General settings</strong>, means the project is blocked from using those resources on this node pool.</li></ul></Info>
+       <Note><p><strong>Note</strong></p><ul><li>If the department’s quota is set to <strong>Unlimited</strong>, projects under that department can consume available GPUs up to the physical capacity of the node pool or cluster.</li><li><p>If the department’s quota is limited, project behavior depends on whether the <strong>Limit projects from exceeding department quota</strong> is enabled/disabled via <strong>General settings</strong>:</p><ul><li>If disabled, projects can be assigned a GPU quota that exceeds the department quota. In this case, the system may display warnings, but the department quota is not enforced.</li><li>If enabled, the project’s assigned GPU quota must remain within the department quota. You cannot assign more GPUs than the department has available.</li></ul></li><li>Setting a quota to 0 (GPU, CPU, or CPU memory) and disabling <strong>Over quota weight</strong> via <strong>General settings</strong>, means the project is blocked from using those resources on this node pool.</li></ul></Note>
 5. You can adjust **other projects' quotas** to free up additional resources. A table lists all projects and their assigned GPU quotas. Updating these values redistributes the department’s assigned and unassigned GPU quota across projects for the selected node pool, as reflected in the **Quota distribution** graph next to each project:
    * Use the **Search** icon to find a project
    * Click the **GPU** quota value and set the number of GPUs
@@ -148,7 +148,7 @@ Define how workloads can consume GPUs beyond the project’s assigned quota when
 
 1.  **Allow workloads to exceed the project’s quota** is enabled by default, allowing workloads in the project to consume GPUs beyond the assigned quota. If disabled, workloads from the project will run only within the assigned quota and will not consume additional GPUs, even if resources are available.
 
-    <Info><p><strong>Note</strong></p><p>Workloads running over quota are <strong>opportunistic</strong> and may be preempted or stopped at any time when higher priority workloads require resources.</p></Info>
+    <Note><p><strong>Note</strong></p><p>Workloads running over quota are <strong>opportunistic</strong> and may be preempted or stopped at any time when higher priority workloads require resources.</p></Note>
 2. Set the **max GPU allocation**. This value defines the maximum GPU device allocation the project can get from the node pool, representing the maximum sum of assigned quota and over-quota GPUs:
    * By default, this field is set to **Unlimited**, allowing the project to consume any available over-quota GPUs
    * Enter a **number** equal to or above the assigned quota
@@ -190,7 +190,7 @@ Assign CPU resources (cores and memory) to the project and define the maximum CP
 1. Set the number of **CPU (Cores)** the project can use in the selected node pool. By default, CPU cores are set to **Unlimited**, allowing the project to consume any available CPU resources in the node pool. Enter a **number**.
 2.  Set the amount of **CPU memory** available to the project in the selected node pool. By default, CPU memory is set to **Unlimited**, allowing the project to consume any available CPU resources in the node pool. Enter a **number** and select a unit (**MB**, **MiB**, or **GB**).
 
-    <Info><p><strong>Note</strong></p><ul><li><p>If the department’s quota is limited, project behavior depends on whether the <strong>Limit projects from exceeding department quota</strong> is enabled/disabled via <strong>General settings</strong>:</p><ul><li>If disabled, projects can be assigned a CPU quota that exceeds the department quota. In this case, the system may display warnings, but the department quota is not enforced.</li><li>If enabled, the project’s assigned CPU quota must remain within the department quota. You cannot assign more CPU resources than the department has available.</li></ul></li><li>When the <strong>CPU quota</strong> feature flag is disabled, any previously set CPU quotas for a project are automatically removed.</li></ul></Info>
+    <Note><p><strong>Note</strong></p><ul><li><p>If the department’s quota is limited, project behavior depends on whether the <strong>Limit projects from exceeding department quota</strong> is enabled/disabled via <strong>General settings</strong>:</p><ul><li>If disabled, projects can be assigned a CPU quota that exceeds the department quota. In this case, the system may display warnings, but the department quota is not enforced.</li><li>If enabled, the project’s assigned CPU quota must remain within the department quota. You cannot assign more CPU resources than the department has available.</li></ul></li><li>When the <strong>CPU quota</strong> feature flag is disabled, any previously set CPU quotas for a project are automatically removed.</li></ul></Note>
 3. These steps apply to the selected node pool. If multiple node pools are configured, repeat the process for each.
 4. Click **SAVE & CONTINUE**
 
@@ -208,14 +208,14 @@ Scheduling rules control how compute resources are used by workloads. The restri
 
 Once scheduling rules are set for a project, all matching workloads associated with the project have the restrictions applied to them, as defined, when the workload is submitted. New scheduling rules added to a project are not applied over previously created workloads associated with that project.
 
-<Info>
+<Note>
 
 **Note**
 
 * When editing a scheduling rule within a project, you can only **tighten** rules inherited from the department (for example, by setting a shorter time limit).
 * Scheduling rules defined at the department level **cannot be deleted** from within a project.
 
-</Info>
+</Note>
 
 ### Applying Access Rules
 
@@ -238,7 +238,7 @@ To edit a project:
 3. From the dropdown menu, select the form you want to modify
 4. Update the settings and click **SAVE & CONTINUE**
 
-<Info>
+<Note>
 
 **Note**
 
@@ -248,7 +248,7 @@ When editing a project:
 * Changes apply only to the selected form; previously configured settings in other forms remain unchanged.
 * You cannot reduce GPU and CPU quotas below the quotas currently consumed by **non-preemptible** workloads.
 
-</Info>
+</Note>
 
 ## Viewing a Project’s Policy
 
@@ -263,13 +263,13 @@ To view the policy of a project:
    * **Rule** - Set up constraints on workload policy fields
    * **Source** - The origin of the applied policy (cluster, department or project)
 
-<Info>
+<Note>
 
 **Note**
 
 The policy affecting the project consists of rules and defaults. Some of these rules and defaults may be derived from policies of a parent cluster and/or department (source). You can see the source of each rule in the policy form.
 
-</Info>
+</Note>
 
 ## Deleting a Project
 
@@ -279,7 +279,7 @@ To delete a project:
 2. Click **DELETE**
 3. On the dialog, click **DELETE** to confirm
 
-<Info>
+<Note>
 
 **Note**
 
@@ -291,7 +291,7 @@ Deleting a project does not delete its associated namespace, any of the workload
 
 Deleting a project does not delete its associated namespace, but will attempt to delete it’s associated workloads and assets. Any assets created in the scope of this project such as compute resources, environments, data sources, templates and credentials, are permanently deleted from the system.
 
-</Info>
+</Note>
 
 ## Using CLI
 
@@ -299,4 +299,16 @@ To view the available actions on projects, see the project [CLI v2 reference](..
 
 ## Using API
 
-To view the available actions, go to the [Projects](https://run-ai-docs.nvidia.com/api/2.26/organizations/projects) API reference.
+To view the available actions, go to the [Projects](api:main-api:GET/api/v1/org-unit/projects) API reference.
+
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes [Resources and Organization](../../../agents/tools-reference.md#resources-and-organization) tools to manage projects via natural language:
+
+* `list_projects` - list projects by name, count, or parent department
+* `list_project_resources` - see a project's configured and allocated GPU, CPU, and memory quota per node pool
+* `get_org_unit_metrics` - track a project's GPU, CPU, and memory allocation and utilization over time
+* `manage_org_unit` - create, update, or delete a project, including quota per node pool
+
+See [AI Agents](../../../agents/overview.md) for setup.

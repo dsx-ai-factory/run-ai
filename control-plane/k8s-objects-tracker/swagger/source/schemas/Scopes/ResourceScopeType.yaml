@@ -1,0 +1,6 @@
+description: The scope type the resource is defined at.
+type: string
+enum:
+  - cluster
+  - department
+  - project

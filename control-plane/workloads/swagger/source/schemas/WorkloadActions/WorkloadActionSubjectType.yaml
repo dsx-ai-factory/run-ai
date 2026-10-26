@@ -1,0 +1,3 @@
+description: The authenticated subject type, preserved as provided by the identity context. Examples include user, service-account, and app, with casing determined by the identity provider.
+type: string
+example: user

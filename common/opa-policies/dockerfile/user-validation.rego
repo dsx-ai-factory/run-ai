@@ -8,8 +8,7 @@ required_user := "65532:65532"
 
 # List of Dockerfile paths that are exceptions for user validation
 user_exception_dockerfiles := {
-    "runai-cluster/cluster/git-sync/Dockerfile",
-    "runai-cluster/cluster/oauth2-proxy/Dockerfile"
+    "runai-cluster/cluster/git-sync/Dockerfile"
 }
 
 # Check if the current Dockerfile is in the exception list for user validation

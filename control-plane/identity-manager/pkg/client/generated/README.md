@@ -121,7 +121,6 @@ Class | Method | HTTP request | Description
 *SettingsAPI* | [**GetSecuritySettingByKey**](docs/SettingsAPI.md#getsecuritysettingbykey) | **Get** /api/v1/security/settings/{key} | Get security setting by key
 *SettingsAPI* | [**GetSecuritySettings**](docs/SettingsAPI.md#getsecuritysettings) | **Get** /api/v1/security/settings | Get security settings
 *SettingsAPI* | [**UpdateSecuritySettingByKey**](docs/SettingsAPI.md#updatesecuritysettingbykey) | **Put** /api/v1/security/settings/{key} | Update security setting by key
-*TokensAPI* | [**AppToken**](docs/TokensAPI.md#apptoken) | **Post** /v1/k8s/auth/oauth/apptoken | get application token
 *TokensAPI* | [**GrantToken**](docs/TokensAPI.md#granttoken) | **Post** /api/v1/token | Create an access token v1
 *TokensAPI* | [**GrantTokenV2**](docs/TokensAPI.md#granttokenv2) | **Post** /api/v2/token | Create an access token v2
 *UsersAPI* | [**BatchCreateUsers**](docs/UsersAPI.md#batchcreateusers) | **Post** /api/v1/users/batch-create | Create multiple local users in batch.
@@ -149,8 +148,6 @@ Class | Method | HTTP request | Description
  - [AccessKeyPostResponse](docs/AccessKeyPostResponse.md)
  - [AccessKeys](docs/AccessKeys.md)
  - [AccessKeysAdministration](docs/AccessKeysAdministration.md)
- - [AppTokenRequest](docs/AppTokenRequest.md)
- - [AppTokenResponse](docs/AppTokenResponse.md)
  - [AuthConfiguration](docs/AuthConfiguration.md)
  - [BulkUserCreationRequest](docs/BulkUserCreationRequest.md)
  - [BulkUserCreationResponse](docs/BulkUserCreationResponse.md)

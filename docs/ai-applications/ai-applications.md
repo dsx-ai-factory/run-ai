@@ -61,20 +61,31 @@ NVIDIA Run:ai surfaces the Helm chart state as-is and maps it to the AI applicat
 
 ### Show/Hide Details
 
-Click a row in the AI applications table and then click the SHOW DETAILS button at the upper-right side of the action bar. The details pane appears, presenting detailed breakdown of some Kubernetes resources that belong to it. The details pane displays:
+Click a row in the AI applications table and then click **SHOW DETAILS** at the upper-right of the action bar to open the details pane.
 
-* A list of all AI application components (workloads, services, secrets, PVCs, ConfigMaps, etc.)
-* Status indicators (Running, Pending, Failed, etc.) for each workload
+The details pane displays a diagram of the AI application's structure. Each workload in the AI application appears in its own group, connected to the endpoints and Kubernetes resources it uses:
+
+* **Workload** - The workload, with a status indicator (Running, Pending, Failed, and so on)
+* **Endpoint** - A network endpoint the workload exposes
+* **Secret** - A Kubernetes Secret the workload references
+* **PVC** - A PersistentVolumeClaim the workload references
+* **ConfigMap** - A Kubernetes ConfigMap the workload references
+
+A legend in the upper-left corner of the diagram identifies each node type. Use the **Type** filter or the search box above the diagram to filter nodes by type or name.
+
+Click a workload node to expand it and view its GPU compute allocation, GPU memory allocation, CPU compute allocation, and CPU memory allocation. The expanded view includes a link to open the workload in the Workloads table.
+
+Use the zoom and pan controls, or the minimap, to navigate the diagram.
 
 ## Creating an AI Application
 
-<Info>
+<Note>
 
 **Note**
 
 AI application submission is enabled by default. If you do not see it in the menu, contact your administrator to enable it under **General settings** → Workloads → AI application submission.
 
-</Info>
+</Note>
 
 1. To create an AI application, go to Workload manager → AI applications.
 2. Click **+ NEW AI APPLICATION**
@@ -88,6 +99,8 @@ AI application submission is enabled by default. If you do not see it in the men
      * Select the **Chart version** to deploy. To browse available charts, click **View on NGC catalog**.
    * **Custom URL** - Provide a link to a Helm chart hosted on a private or public repository (for example, GitHub, S3, or a private registry). Use this for proprietary applications or customized versions of existing charts:
      * Enter the **Chart URL**. The URL must point directly to a versioned Helm chart package (`.tgz` file), for example: `https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz`.
+   * **Upload file** - Upload a packaged Helm chart (`.tgz`) file from your local machine. Use this to deploy a chart you built locally without hosting it in a repository or registry:
+     * Click **Chart file** and select a `.tgz` file. The file must be no larger than 10 MB.
 6.  Optional: Under **Set application overrides** to override specific parameters in your Helm chart, enter the corresponding key-value pairs in YAML format. These will replace the defaults in your values.yaml.
 
     ```yaml
@@ -122,4 +135,4 @@ If no endpoints appear, the workloads may not yet be in a running state, or the 
 
 ## Using API
 
-Go to the [AI Applications](https://run-ai-docs.nvidia.com/api/2.26/ai-applications/ai-applications) API reference to view the available actions.
+Go to the [AI Applications](api:main-api:GET/api/v1/ai-applications) API reference to view the available actions.

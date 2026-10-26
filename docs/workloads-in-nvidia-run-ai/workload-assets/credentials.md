@@ -69,13 +69,13 @@ To add a new credential:
 
 These credentials allow users to authenticate and pull images from a Docker registry, enabling access to containerized applications and services.
 
-<Info>
+<Note>
 
 **Note**
 
 **Docker registry URL for inference workloads** - For Knative-based inference workloads, Docker Hub credentials must be configured using `https://index.docker.io/v1/` as the registry URL. Credentials configured with `docker.io` result in `401 Unauthorized` errors for Knative-based inference workloads due to differences in how image digests are resolved during image pull.
 
-</Info>
+</Note>
 
 After creating the credential, it is used automatically when pulling images.
 
@@ -157,13 +157,13 @@ To delete a credential:
 2. Click **DELETE**
 3. In the dialog, click **DELETE** to confirm
 
-<Info>
+<Note>
 
 **Note**
 
 Credentials cannot be deleted if they are being used by a workload and template.
 
-</Info>
+</Note>
 
 ## Using Credentials
 
@@ -219,6 +219,20 @@ The secret is now displayed for that scope in the list of existing secrets.
    3. Username and password - `run.ai/resource: "password"`
    4. Generic secret - `run.ai/resource: "generic"`
 
+## Using CLI
+
+To view the available actions on credentials, see the credential [CLI v2 reference](../../reference/cli/runai/runai_credential.md).
+
 ## Using API
 
-To view the available actions, go to the [Credentials](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/credentials) API reference
+To view the available actions, go to the [Credentials](api:main-api:GET/api/v1/asset/credentials) API reference
+
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes [Credentials](../../agents/tools-reference.md#credentials) tools to manage credentials via natural language:
+
+* `list_credentials` - list safe metadata for shared and user credentials
+* `manage_credentials` - create, update, or delete credentials
+
+See [AI Agents](../../agents/overview.md) for setup.

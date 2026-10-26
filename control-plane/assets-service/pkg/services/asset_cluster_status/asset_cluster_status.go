@@ -56,18 +56,45 @@ type AssetClusterStatus struct {
 
 type AssetIdStatusMap map[string]*api.AssetClusterStatusInfo
 
+// Adding a new k8s-objects-tracker-backed asset kind means updating FOUR
+// maps/functions in this file together, or the status projection will silently
+// fall through to nil / to the wrong message:
+//
+//  1. assetKindToClusterResourceType (below)      — required for
+//     HasClusterResourceMapping(kind) to return true so PatchStatusInfo stops
+//     short-circuiting.
+//  2. assetKindToTargetAssetType                  — routes to
+//     calculateAssetStatus vs calculateAssetStatusFromCredential. For k8s
+//     resources (RCT, PVC, ConfigMap) use targetAssetType_K8SResource.
+//  3. getAssetClusterResourceName switch          — tells the calculator the
+//     name(s) to look up in the tracker's response.
+//  4. getAssetIssuesFoundMessage / getAssetNoIssuesFoundMessage /
+//     getAssetNotCreatedMessage                   — the K8SResource branch keys
+//     off assetKind so each kind surfaces its own copy ("data source ..." for
+//     PVC/ConfigMap, "resource claim template ..." for RCT).
 var assetKindToClusterResourceType = map[api.AssetKind]openapi.ClusterResourceType{
-	api.ASSETKIND_PVC:             openapi.CLUSTERRESOURCETYPE_PVC,
-	api.ASSETKIND_ACCESS_KEY:      openapi.CLUSTERRESOURCETYPE_SECRET,
-	api.ASSETKIND_PASSWORD:        openapi.CLUSTERRESOURCETYPE_SECRET,
-	api.ASSETKIND_DOCKER_REGISTRY: openapi.CLUSTERRESOURCETYPE_SECRET,
-	api.ASSETKIND_S3:              openapi.CLUSTERRESOURCETYPE_SECRET,
-	api.ASSETKIND_GIT:             openapi.CLUSTERRESOURCETYPE_SECRET,
-	api.ASSETKIND_GENERIC_SECRET:  openapi.CLUSTERRESOURCETYPE_SECRET,
-	api.ASSETKIND_CONFIG_MAP:      openapi.CLUSTERRESOURCETYPE_CONFIG_MAP,
-	api.ASSETKIND_SECRET_VOLUME:   openapi.CLUSTERRESOURCETYPE_SECRET,
-	api.ASSETKIND_ENVIRONMENT:     openapi.CLUSTERRESOURCETYPE_SECRET,
-	api.ASSETKIND_NGC_API_KEY:     openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_PVC:                     openapi.CLUSTERRESOURCETYPE_PVC,
+	api.ASSETKIND_ACCESS_KEY:              openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_PASSWORD:                openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_DOCKER_REGISTRY:         openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_S3:                      openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_GIT:                     openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_GENERIC_SECRET:          openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_CONFIG_MAP:              openapi.CLUSTERRESOURCETYPE_CONFIG_MAP,
+	api.ASSETKIND_SECRET_VOLUME:           openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_ENVIRONMENT:             openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_NGC_API_KEY:             openapi.CLUSTERRESOURCETYPE_SECRET,
+	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE: openapi.CLUSTERRESOURCETYPE_RESOURCE_CLAIM_TEMPLATE,
+}
+
+// HasClusterResourceMapping reports whether the given asset kind has a
+// k8s-objects-tracker projection (a native k8s resource type the tracker can
+// report status for). Kinds without a mapping have their status driven entirely
+// by sync_status and must not fall through to the tracker call, which would fire
+// an HTTP request with an empty resourceType.
+func HasClusterResourceMapping(kind api.AssetKind) bool {
+	_, ok := assetKindToClusterResourceType[kind]
+	return ok
 }
 
 type UniqueKey struct {
@@ -103,6 +130,9 @@ var assetKindToTargetAssetType = map[api.AssetKind]targetAssetType{
 	api.ASSETKIND_SECRET_VOLUME:   targetAssetType_Credential,
 	api.ASSETKIND_ENVIRONMENT:     targetAssetType_Credential,
 	api.ASSETKIND_NGC_API_KEY:     targetAssetType_Secret,
+	// RCT is a native k8s resource (resource.k8s.io/v1 ResourceClaimTemplate),
+	// so it follows the same calculateAssetStatus path as PVC/ConfigMap.
+	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE: targetAssetType_K8SResource,
 }
 
 func NewAssetClusterStatus(patchingInfo map[string]response_patching.ResponsePatchingPtrs, permittedScopes *auth.PermittedScopes) *AssetClusterStatus {
@@ -620,7 +650,7 @@ func newTenantScopeStatus(assetKind api.AssetKind) api.AssetClusterStatusInfo {
 func getAccountScopeMessage(assetKind api.AssetKind) string {
 	switch assetKindToTargetAssetType[assetKind] {
 	case targetAssetType_K8SResource:
-		return "Status cannot be displayed because the data source's scope is an account"
+		return "Status cannot be displayed because the resource's scope is an account"
 	case targetAssetType_Secret:
 		return "Status cannot be displayed because the credentials' scope is an account"
 	case targetAssetType_Credential:
@@ -633,11 +663,20 @@ func getAccountScopeMessage(assetKind api.AssetKind) string {
 	}
 }
 
+// The K8SResource branches in the three getAsset*Message helpers below key off
+// assetKind: PVC/ConfigMap surface "data source ..." copy while RCT surfaces
+// "resource claim template ..." copy. When adding another k8s-object kind,
+// extend each K8SResource branch (or add a new target type) so it doesn't
+// inherit the wrong family's message.
 func getAssetNotCreatedMessage(statusInfo *api.AssetClusterStatusInfo, assetKind api.AssetKind) {
 	statusInfo.Url = runaiSupportUrl
 	switch assetKindToTargetAssetType[assetKind] {
 	case targetAssetType_K8SResource:
-		statusInfo.Message = "The data source couldn't be synchronized in the cluster"
+		if assetKind == api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE {
+			statusInfo.Message = "The resource claim template couldn't be synchronized in the cluster"
+			return
+		}
+		statusInfo.Message = "The resource couldn't be synchronized in the cluster"
 	case targetAssetType_Secret:
 		statusInfo.Message = "The credential couldn't be synchronized in the cluster"
 	case targetAssetType_Credential:
@@ -653,6 +692,10 @@ func getAssetIssuesFoundMessage(statusInfo *api.AssetClusterStatusInfo, assetKin
 	statusInfo.Url = runaiSupportUrl
 	switch assetKindToTargetAssetType[assetKind] {
 	case targetAssetType_K8SResource:
+		if assetKind == api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE {
+			statusInfo.Message = "Issues were found while propagating the resource claim template to the resource claim template's scope"
+			return
+		}
 		statusInfo.Message = "Issues were found while propagating the data source to the data source's scope"
 	case targetAssetType_Secret:
 		statusInfo.Message = "Issues were found while propagating the credential to the credentials' scope"
@@ -668,7 +711,11 @@ func getAssetIssuesFoundMessage(statusInfo *api.AssetClusterStatusInfo, assetKin
 func getAssetNoIssuesFoundMessage(statusInfo *api.AssetClusterStatusInfo, assetKind api.AssetKind) {
 	switch assetKindToTargetAssetType[assetKind] {
 	case targetAssetType_K8SResource:
-		statusInfo.Message = "No issues were found while propagating the data source to the data source's scope"
+		if assetKind == api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE {
+			statusInfo.Message = "No issues were found while propagating the resource claim template to the resource claim template's scope"
+			return
+		}
+		statusInfo.Message = "No issues were found while propagating the resource to the resource's scope"
 	case targetAssetType_Secret:
 		statusInfo.Message = "No issues were found while propagating the credential to the credentials' scope"
 	case targetAssetType_Credential:
@@ -703,6 +750,12 @@ func getAssetClusterResourceName(ctx context.Context, patchingInfo response_patc
 		return []string{*getDockerRegistryResourceName(patchingInfo)}
 	case api.ASSETKIND_NGC_API_KEY:
 		return getNGCApiKeyResourcesName(patchingInfo)
+	case api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE:
+		// The agent names the cluster ResourceClaimTemplate after the asset
+		// itself (k8s_objects_builders.go: ObjectMeta.Name = asset name), and
+		// the tracker reports it back under that same name, so the asset name
+		// is the key to look up in the tracker's response.
+		return []string{patchingInfo.Meta.Name}
 	}
 	return nil
 }

@@ -55,8 +55,8 @@ original_dir=$(pwd)
 script_dir=$(dirname "$ALLOF_MERGE_SCRIPT_PATH")
 echo "Installing js-yaml and allof-merge in $script_dir"
 cd $script_dir
-npm install js-yaml
-npm install allof-merge
+npm install --ignore-scripts js-yaml
+npm install --ignore-scripts allof-merge
 
 cd $original_dir
 

@@ -7,9 +7,9 @@ Day 1 Configuration covers the infrastructure configuration that makes NVIDIA Ru
 
 ## Cluster and Control Plane Settings
 
-* **[Node Roles](node-roles.md)** - Designates dedicated nodes for NVIDIA Run:ai system services, GPU workloads, and CPU-only workloads, so system services don't compete with GPU workloads for CPU cycles on expensive GPU machines.
-* **[Control Plane Configuration](control-plane-config.md)** - Advanced Helm chart values for customizing the control plane deployment beyond its defaults.
-* **[Cluster Configuration](cluster-config.md)** - Advanced Helm chart and `runaiconfig` values for customizing cluster behavior - scheduling policies, resource management, and system service tuning.
+* **[Node Roles](node-roles.md)** - Designates dedicated nodes for NVIDIA Run:ai system services, GPU workloads, and CPU-only workloads, so system services do not compete with GPU workloads for CPU cycles on expensive GPU machines.
+* **[Advanced Control Plane Configuration](control-plane-config.md)** - Advanced Helm chart values for customizing the control plane deployment beyond its defaults.
+* **[Advanced Cluster Configuration](cluster-config.md)** - Advanced Helm chart and `runaiconfig` values for customizing cluster behavior - scheduling policies, resource management, and system service tuning.
 * **[Cluster Authentication](cluster-authentication.md)** - Configures the Kubernetes API server to authenticate users via the NVIDIA Run:ai identity provider (OIDC), so users can securely submit workloads directly with `kubectl`.
 
 ## Networking

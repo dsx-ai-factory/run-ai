@@ -6,7 +6,6 @@
 package common
 
 const (
-	WorkloadRunaiOauth2ProxyImageName               = "oauth2-proxy"
 	WorkloadRunaiOauth2ProxyWorkloadAuthSecretName  = "workloads-auth"
 	WorkloadRunaiOauth2ProxyDefaultSessionStoreType = "redis"
 

@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"time"
 
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	bc_mocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/mocks/pkg/clients/backend"
 	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
@@ -23,7 +24,6 @@ import (
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
@@ -514,6 +514,7 @@ var _ = Describe("AI applications API tests", Ordered, func() {
 			Expect(application.Id).To(Equal(application2.Id))
 			Expect(application.Source).To(Equal(application2.Source))
 			Expect(application.Type).To(Equal(application2.Type))
+			Expect(application.ClusterId).To(Equal(clusterId.String()))
 			Expect(application.ProjectName).To(Equal(application2.ProjectName))
 			Expect(application.ProjectId).To(Equal(application2.ProjectId))
 			Expect(application.DepartmentId).To(Equal(application2.DepartmentId))

@@ -14,12 +14,11 @@ import (
 	"testing"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
@@ -32,7 +31,7 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Minute)
 	defer cancel()
 
-	clients, err := client.New(ctx, core.Env{
+	clients, err := client.New(ctx, core.Target{
 		KubeconfigPath:  os.Getenv("KUBECONFIG"),
 		ControlPlaneURL: os.Getenv("FLOWMARK_CP_URL"),
 		Username:        os.Getenv("FLOWMARK_CP_USER"),
@@ -43,13 +42,14 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 		t.Fatalf("client.New: %v", err)
 	}
 
-	clusterID, err := ClusterID(ctx, clients, os.Getenv("FLOWMARK_CLUSTER"))
+	cluster, err := clients.Cluster(ctx, os.Getenv("FLOWMARK_CLUSTER"))
 	if err != nil {
-		t.Fatalf("ClusterID: %v", err)
+		t.Fatalf("Cluster: %v", err)
 	}
+	clusterID := cluster.Uuid
 
-	cfg := core.Config{Knobs: map[string]any{"project_ready_timeout": "3m"}}
-	timeout, err := cfg.Duration("project_ready_timeout", 2*time.Minute)
+	scenario := core.Scenario{Knobs: map[string]any{"project_ready_timeout": "3m"}}
+	timeout, err := scenario.Duration("project_ready_timeout", 2*time.Minute)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -93,10 +93,6 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Workspace: %v", err)
 	}
-	deployment, err := K8sDeployment(ctx, clients.Kube, DeploymentSpec{Name: "fm-dep", Namespace: projectA.Namespace, Image: "nginx", Replicas: 1})
-	if err != nil {
-		t.Fatalf("K8sDeployment: %v", err)
-	}
 
 	for _, ref := range []WorkloadRef{training, workspace} {
 		detailed, _, err := clients.Workloads.WorkloadsAPI.GetWorkload(ctx, ref.ID).Execute()
@@ -108,11 +104,6 @@ func TestLiveSubmitAndCleanup(t *testing.T) {
 		}
 		t.Logf("workload %s exists (id %s, phase %s)", ref.Name, ref.ID, detailed.Phase)
 	}
-	var fetched appsv1.Deployment
-	if err := clients.Kube.Get(ctx, k8sclient.ObjectKeyFromObject(deployment), &fetched); err != nil {
-		t.Fatalf("deployment not found: %v", err)
-	}
-	t.Logf("deployment %s/%s exists", fetched.Namespace, fetched.Name)
 
 	projectB, err := Project(ctx, clients, clusterID, nameB, timeout)
 	if err != nil {

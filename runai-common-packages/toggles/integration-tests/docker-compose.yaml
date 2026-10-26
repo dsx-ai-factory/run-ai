@@ -3,7 +3,7 @@ name: toggles-integration-tests
 services:
   postgres:
     attach: false
-    image: postgres:15-alpine
+    image: postgres:18-alpine
     profiles:
       - unleash-setup
     environment:
@@ -19,7 +19,7 @@ services:
 
   unleash:
     attach: false
-    image: unleashorg/unleash-server:6
+    image: unleashorg/unleash-server:8
     profiles:
       - unleash-setup
     environment:

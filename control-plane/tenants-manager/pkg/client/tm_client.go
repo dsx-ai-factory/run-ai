@@ -13,7 +13,6 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client/generated"
 )
 
-//go:generate mockery
 type ITenantsManager interface {
 	ListAllTenantsInternal(ctx context.Context) ([]openapi.Tenant, *http.Response, error)
 	GetTenantByIdInternal(ctx context.Context, id int32) (*openapi.Tenant, *http.Response, error)

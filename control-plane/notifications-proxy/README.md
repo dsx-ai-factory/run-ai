@@ -108,7 +108,7 @@ and orchestrated through the [`Makefile`](Makefile), which includes the shared
 | `make validate` | `openapi-validate` — validate the OpenAPI spec |
 | `make lint` | `lint-go` — golangci-lint in the builder container |
 | `make purify` | `purify-go` — `go fmt` + `go vet` + `go mod tidy` |
-| `make mockery` / `make generate_mocks` | Install mockery (`v2.53.5`) if needed and regenerate test mocks (`.mockery.yml`) |
+| `make generate-mocks` / `make generate-mocks-local` | Regenerate test mocks from `.mockery.yml` with mockery v3 (shared targets; in Docker / without Docker) |
 | `make generate-integration-test-smtp-openapi-client` | Regenerate the MailHog SMTP test client from its OpenAPI spec |
 | `make local-deploy` | `openapi-generate-code` + `build-go` + `docker-build-generic` + `docker-push-generic` (linux/amd64) |
 

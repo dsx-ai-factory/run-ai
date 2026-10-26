@@ -57,7 +57,6 @@ func (r *RoleDaoInitializer) DbUpsertRole(ctx context.Context, roleRequest model
 	if err != nil {
 		return 0, err
 	}
-	deletePermissionsWithoutSet(ctx, roleRequest)
 	return roleRequest.ID, nil
 }
 
@@ -80,9 +79,6 @@ func (r *RoleDaoInitializer) DbUpsertLegacyRole(ctx context.Context, roleRequest
 			existingRole.Description = roleRequest.Description
 			existingRole.UpdatedAt = roleRequest.UpdatedAt
 			existingRole.Deprecated = roleRequest.Deprecated
-			if roleRequest.RoleType != "" {
-				existingRole.RoleType = roleRequest.RoleType
-			}
 			if err := upsertPermissionSetAndPermissions(ctx, tx, roleRequest, existingRole); err != nil {
 				return err
 			}
@@ -120,7 +116,6 @@ func (r *RoleDaoInitializer) DbUpsertLegacyRole(ctx context.Context, roleRequest
 func (r *RoleDaoInitializer) getRoleByName(ctx context.Context, roleName string, scopeId *string, scopeType models.RoleScope) (*models.Role, error) {
 	role := &models.Role{}
 	query := runaidb.DB().
-		Preload("Permissions").
 		Preload("PermissionSets").
 		Where("name = ?", roleName).
 		Where("scope_type = ?", scopeType)

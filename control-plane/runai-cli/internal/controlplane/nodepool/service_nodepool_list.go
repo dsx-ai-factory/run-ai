@@ -36,7 +36,7 @@ func NewBackendNodepoolService(nodepoolClient Client, nodeService nodes.Client) 
 
 func (bns *BackendNodepoolService) GetNodepoolList(ctx context.Context,
 	clusterUuid string) (*openapi.GetNodepools200Response, *openapi.Nodes, api.NodeTelemetriesByType, error) {
-	nodeList, err := bns.nodeService.GetNodeList(ctx, clusterUuid)
+	nodesList, err := nodes.FetchAllNodes(ctx, bns.nodeService, clusterUuid)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -51,7 +51,7 @@ func (bns *BackendNodepoolService) GetNodepoolList(ctx context.Context,
 		return nil, nil, nil, err
 	}
 
-	return nodepoolList, nodeList, nodesTelemetry, nil
+	return nodepoolList, &openapi.Nodes{Nodes: nodesList}, nodesTelemetry, nil
 }
 
 func (bns *BackendNodepoolService) GetNodepoolMinimalList(ctx context.Context,

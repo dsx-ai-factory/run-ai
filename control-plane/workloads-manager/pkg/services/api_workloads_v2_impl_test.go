@@ -30,11 +30,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/database/dao"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 	policyApi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	cache "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
@@ -255,6 +255,133 @@ var _ = Describe("WorkloadsV2Impl", func() {
 
 	AfterEach(func() {
 		cleanTables()
+	})
+
+	Context("workload action history", func() {
+		It("records create, update, and delete once", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
+			request := &api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "action-history", ProjectId: randoms.ProjectIdStr,
+					Priority: convutils.Ref("high"), Category: convutils.Ref("train"),
+				},
+				Manifest: sampleManifest,
+			}
+
+			id, _ := createWorkloadForTest(router, randoms, request)
+			updateWorkloadForTest(router, randoms, id, &api.WorkloadV2UpdateRequest{
+				Metadata: api.WorkloadV2MetadataUpdateParams{Priority: convutils.Ref("high"), Category: convutils.Ref("train")},
+				Manifest: sampleManifest,
+			})
+			deleteWorkloadForTest(router, randoms, id)
+
+			actions := recorder.recorded()
+			Expect(actions).To(HaveLen(3))
+			Expect([]workloadsApi.WorkloadActionType{actions[0].Action, actions[1].Action, actions[2].Action}).To(Equal([]workloadsApi.WorkloadActionType{
+				workloadsApi.WORKLOADACTIONTYPE_CREATE,
+				workloadsApi.WORKLOADACTIONTYPE_UPDATE,
+				workloadsApi.WORKLOADACTIONTYPE_DELETE,
+			}))
+			for _, action := range actions {
+				Expect(action.WorkloadID).To(Equal(id))
+				Expect(action.WorkloadName).To(Equal("action-history"))
+				Expect(action.ClusterID).To(Equal(randoms.ClusterId))
+				Expect(action.AcceptedAt).NotTo(BeZero())
+			}
+		})
+
+		It("skips dry-run creates", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
+			_, submissionErrors := impl.CreateWorkloadV2WithDryRun(
+				setContext(randoms.TenantIdStr, adminUser, nil),
+				api.WorkloadV2CreateRequest{
+					Metadata: api.WorkloadV2MetadataCreateParams{
+						Name: "dry-run-action-history", ProjectId: randoms.ProjectIdStr,
+						Priority: convutils.Ref("high"), Category: convutils.Ref("train"),
+					},
+					Manifest: sampleManifest,
+				},
+				CreateWorkloadV2Options{DryRun: true, RecordAction: recordAction},
+			)
+			Expect(submissionErrors).To(BeEmpty())
+			Expect(recorder.recorded()).To(BeEmpty())
+		})
+
+		It("does not duplicate v1 actions handled through internal manager paths", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
+			id, _ := createInternalWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "v1-translated", ProjectId: randoms.ProjectIdStr,
+					Priority: convutils.Ref("high"), Category: convutils.Ref("train"),
+				},
+				Manifest: sampleManifest,
+			})
+			updateResponse := tryToUpdateInternalWorkloadForTest(router, randoms, id, &api.WorkloadV2UpdateRequest{
+				Metadata: api.WorkloadV2MetadataUpdateParams{Priority: convutils.Ref("high"), Category: convutils.Ref("train")},
+				Manifest: sampleManifest,
+			})
+			Expect(updateResponse.Code).To(Equal(http.StatusAccepted), updateResponse.Body.String())
+			ctx := setContext(randoms.TenantIdStr, adminUser, nil)
+			response, apiErr := impl.ProcessBatch(ctx, api.WorkloadsV2Batch{Ids: []string{id}, Action: api.WORKLOADSV2BATCHACTION_DELETE})
+			Expect(apiErr).To(BeNil())
+			Expect(response.Succeeded).To(ConsistOf(id))
+			Expect(recorder.recorded()).To(BeEmpty())
+		})
+	})
+
+	Context("networking input validation", func() {
+		for _, operation := range []string{"create", "dry-run", "update"} {
+			Context(operation, func() {
+				DescribeTable("rejects malformed networking before queueing",
+					func(networking, message string) {
+						method, path := http.MethodPost, urlWorkloads
+						metadata := map[string]interface{}{"projectId": randoms.ProjectIdStr}
+						var id string
+						if operation == "dry-run" {
+							path += "?dryRun=true"
+						} else if operation == "update" {
+							id, _ = createWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+								Metadata: api.WorkloadV2MetadataCreateParams{
+									ProjectId: randoms.ProjectIdStr,
+									Category:  convutils.Ref("default-category"),
+									Priority:  convutils.Ref("default-priority"),
+								},
+								Manifest: sampleManifest,
+							})
+							method, path = http.MethodPut, urlWorkloads+"/"+id
+							metadata = map[string]interface{}{}
+						}
+						ctx := setContext(randoms.TenantIdStr, adminUser, nil)
+						before, err := dao.DbListUpdates(ctx, randoms.ClusterId, 0, 50)
+						Expect(err).To(BeNil())
+						// Keep JSON null entries intact through the actual HTTP decoder.
+						metadata["configuration"] = map[string]interface{}{"networking": json.RawMessage(networking)}
+						req := httptest.NewRequest(method, testHost+path, makePayload(map[string]interface{}{
+							"metadata": metadata, "manifest": sampleManifest,
+						}))
+						req.Header = *headerForAdmin(randoms)
+						resp := httptest.NewRecorder()
+						router.ServeHTTP(resp, req)
+
+						Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+						Expect(resp.Body.String()).To(ContainSubstring(message))
+						after, err := dao.DbListUpdates(ctx, randoms.ClusterId, 0, 50)
+						Expect(err).To(BeNil())
+						Expect(after).To(Equal(before))
+						if id != "" {
+							Expect(getWorkloadForTest(router, randoms, id).Workload.Metadata.Configuration.Networking).To(BeNil())
+						}
+					},
+					Entry("null endpoint", `[null]`, "networking[0] must contain a service or externalAccess"),
+					Entry("null service", `[{"services":[null]}]`, "networking[0].services[0] must contain spec or ref"),
+					Entry("service with both spec and ref", `[{"services":[{"spec":{"name":"one","selector":{"app":"one"},"ports":[{"port":80}]},"ref":{"name":"one","port":80}}]}]`, "networking[0].services[0] must not contain both spec and ref"),
+					Entry("multiple services", `[{"services":[{"ref":{"name":"one","port":80}},{"ref":{"name":"two","port":80}}]}]`, "networking[0].services must contain at most one service"),
+				)
+			})
+		}
 	})
 
 	Context("gvk policy is skipped for workloads translated from v1", func() {
@@ -1010,6 +1137,51 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect((*update.Configuration.Networking.Services)[0].Ref.Port).To(Equal(port))
 		})
 
+		DescribeTable("requires ownership enforcement for direct networking submissions", func(dryRun bool) {
+			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
+				WithCluster(randoms.ClusterId, clusterInfoOf(randoms, "2.26.0")))
+			checker.InitClusterCapabilitiesChecker("", defaultClusterCacheConfig(), "")
+			request := api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "networking-version-gate", ProjectId: randoms.ProjectIdStr,
+					Configuration: api.WorkloadV2Configuration{Networking: &[]api.NetworkingEndpoint{{
+						Services: &[]api.NetworkingService{{Ref: &api.ServiceRef{Name: "networking-version-gate", Port: 8080}}},
+					}}},
+				},
+				Manifest: sampleManifest,
+			}
+			req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s%s?dryRun=%t", testHost, urlWorkloads, dryRun), makePayload(request))
+			Expect(err).NotTo(HaveOccurred())
+			req.Header = *headerForAdmin(randoms)
+			resp := httptest.NewRecorder()
+			router.ServeHTTP(resp, req)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+			Expect(resp.Body.String()).To(ContainSubstring("requires cluster version 3.0.0 and above for networking ownership validation"))
+		}, Entry("create", false), Entry("dry run", true))
+
+		It("allows old-cluster workloads without networking but rejects adding networking on update", func() {
+			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
+				WithCluster(randoms.ClusterId, clusterInfoOf(randoms, "2.26.0")))
+			checker.InitClusterCapabilitiesChecker("", defaultClusterCacheConfig(), "")
+			id, _ := createWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name: "networking-update-gate", ProjectId: randoms.ProjectIdStr,
+					Priority: convutils.Ref("high"), Category: convutils.Ref("train"),
+				},
+				Manifest: sampleManifest,
+			})
+			request := api.WorkloadV2UpdateRequest{Manifest: sampleManifest, Metadata: api.WorkloadV2MetadataUpdateParams{
+				Configuration: &api.WorkloadV2Configuration{Networking: &[]api.NetworkingEndpoint{{
+					Services: &[]api.NetworkingService{{Ref: &api.ServiceRef{Name: "networking-update-gate", Port: 8080}}},
+				}}},
+			}}
+			resp := tryToUpdateWorkloadForTest(router, randoms, id, &request)
+			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+			Expect(resp.Body.String()).To(ContainSubstring("networking ownership validation"))
+			request.Metadata.Configuration.Networking = &[]api.NetworkingEndpoint{}
+			updateWorkloadForTest(router, randoms, id, &request)
+		})
+
 		It("rejects metadata.configuration.networking for cluster < 2.25", func() {
 			// Use a cluster version that supports V2 workloads (>= 2.23) but not networking (< 2.25)
 			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
@@ -1049,7 +1221,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect(createResp.Body.String()).To(ContainSubstring("metadata.configuration.networking is supported for cluster version 2.25.0 and above"))
 		})
 
-		It("rejects endpoint-only networking fields for clusters below endpoint-array networking support", func() {
+		It("rejects native endpoint-only networking fields for clusters below endpoint-array networking support", func() {
 			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
 				WithCluster(randoms.ClusterId, clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)).
 				WithCluster(oldCluster.ClusterId, clusterInfoOf(oldCluster, "2.25.0")))
@@ -1084,13 +1256,13 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				Manifest: sampleManifest,
 			}
 
-			createResp := tryToCreateWorkloadForTest(router, oldCluster, &toCreate)
+			createResp := tryToCreateInternalWorkloadForTest(router, oldCluster, &toCreate)
 			Expect(createResp.Code).To(Equal(http.StatusBadRequest), "create with endpoint-only fields on cluster below endpoint-array networking support should be rejected: %s", createResp.Body.String())
 			Expect(createResp.Body.String()).To(ContainSubstring("metadata.configuration.networking includes values that require cluster version 2.26.0 and above"))
 			Expect(createResp.Body.String()).To(ContainSubstring("type"))
 		})
 
-		It("accepts agent-networking-compatible config for clusters below endpoint-array networking support", func() {
+		It("accepts native agent-networking-compatible config for clusters below endpoint-array networking support", func() {
 			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().
 				WithCluster(randoms.ClusterId, clusterInfoOf(randoms, "2.25.0")).
 				WithCluster(oldCluster.ClusterId, clusterInfoOf(oldCluster, "2.22.0")))
@@ -1115,7 +1287,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				Manifest: sampleManifest,
 			}
 
-			id, _ := createWorkloadForTest(router, randoms, &toCreate)
+			id, _ := createInternalWorkloadForTest(router, randoms, &toCreate)
 
 			updates := getUpdatesForTest(router, randoms, 0, 50, emptyClusterReports)
 			var update *api.WorkloadV2Update
@@ -1136,8 +1308,9 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect(*update.Configuration.NetworkingEndpoints).To(HaveLen(1))
 		})
 
-		It("persists Configuration.Pvcs on create and returns it in updates and GET", func() {
+		It("persists PVC configuration on create and returns it in updates and GET", func() {
 			pvcName := "data"
+			pvcsConfig := &api.WorkloadV2UpdateConfigurationPvcsConfig{CleanupOnCompletion: convutils.Ref(true)}
 			accessMode := api.WORKLOADV2UPDATECONFIGURATIONPVCACCESSMODE_READ_WRITE_ONCE
 			pvcs := []api.WorkloadV2UpdateConfigurationPvc{
 				{
@@ -1157,7 +1330,8 @@ var _ = Describe("WorkloadsV2Impl", func() {
 					Priority:  convutils.Ref("high"),
 					Category:  convutils.Ref("train"),
 					Configuration: api.WorkloadV2Configuration{
-						Pvcs: &pvcs,
+						Pvcs:       &pvcs,
+						PvcsConfig: pvcsConfig,
 					},
 				},
 				Manifest: sampleManifest,
@@ -1168,6 +1342,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect(payload.Metadata.Configuration.Pvcs).NotTo(BeNil())
 			Expect(*payload.Metadata.Configuration.Pvcs).To(HaveLen(1))
 			Expect((*payload.Metadata.Configuration.Pvcs)[0].Metadata.Name).To(Equal(pvcName))
+			Expect(payload.Metadata.Configuration.PvcsConfig).To(Equal(pvcsConfig))
 
 			getPayload := getWorkloadForTest(router, randoms, id)
 			Expect(getPayload.Workload.Metadata.Configuration.Pvcs).NotTo(BeNil())
@@ -1175,6 +1350,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect((*getPayload.Workload.Metadata.Configuration.Pvcs)[0].Metadata.Name).To(Equal(pvcName))
 			Expect((*getPayload.Workload.Metadata.Configuration.Pvcs)[0].Spec.AccessModes).To(ConsistOf(accessMode))
 			Expect((*getPayload.Workload.Metadata.Configuration.Pvcs)[0].Spec.Resources.Requests.Storage).To(Equal("1Gi"))
+			Expect(getPayload.Workload.Metadata.Configuration.PvcsConfig).To(Equal(pvcsConfig))
 
 			updates := getUpdatesForTest(router, randoms, 0, 50, emptyClusterReports)
 			Expect(len(updates.Workloads)).To(BeNumerically(">=", 1))
@@ -1191,6 +1367,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect((*update.Configuration.Pvcs)[0].Metadata.Name).To(Equal(pvcName))
 			Expect((*update.Configuration.Pvcs)[0].Spec.AccessModes).To(ConsistOf(accessMode))
 			Expect((*update.Configuration.Pvcs)[0].Spec.Resources.Requests.Storage).To(Equal("1Gi"))
+			Expect(update.Configuration.PvcsConfig).To(Equal(pvcsConfig))
 		})
 
 	})
@@ -2465,12 +2642,19 @@ var _ = Describe("SetWorkloadRunState", func() {
 	}
 
 	Context("suspend", func() {
-		It("should suspend a Running workload and set DesiredPhase=Stopped", func() {
+		It("records an accepted suspend", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
 			id := createRunningJob("job-suspend-1")
+			recorder.reset()
 
 			result := runStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_SUSPEND})
 
 			Expect(result.DesiredPhase).To(Equal(api.DESIREDPHASE_STOPPED))
+			actions := recorder.recorded()
+			Expect(actions).To(HaveLen(1))
+			Expect(actions[0].Action).To(Equal(workloadsApi.WORKLOADACTIONTYPE_SUSPEND))
+			Expect(actions[0].WorkloadID).To(Equal(id))
 		})
 
 		It("should apply spec.suspend=true patch to both manifests", func() {
@@ -2534,17 +2718,21 @@ var _ = Describe("SetWorkloadRunState", func() {
 			Expect(runPolicy["suspend"]).To(Equal(true))
 		})
 
-		It("should reject suspending a workload already in Stopped state", func() {
+		It("does not record a rejected suspend", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
 			id := createRunningJob("job-suspend-dup")
 
 			runStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_SUSPEND})
 
 			// Simulate the cluster reporting the workload as Stopped after the suspend.
 			workloadsMock.SetWorkloadPhase(id, workloadsApi.PHASE_STOPPED)
+			recorder.reset()
 
 			resp := tryRunStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_SUSPEND})
 			Expect(resp.Code).To(Equal(http.StatusBadRequest))
 			Expect(resp.Body.String()).To(ContainSubstring("not permitted"))
+			Expect(recorder.recorded()).To(BeEmpty())
 		})
 
 		It("should reject suspending a workload whose actual phase is Failed", func() {
@@ -2583,15 +2771,22 @@ var _ = Describe("SetWorkloadRunState", func() {
 	})
 
 	Context("resume", func() {
-		It("should resume a Stopped workload and set DesiredPhase=Running", func() {
+		It("records an accepted resume", func() {
+			recorder := &capturingWorkloadActionRecorder{}
+			impl.workloadActionRecorder = recorder
 			id := createRunningJob("job-resume-1")
 
 			runStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_SUSPEND})
 			// Simulate the cluster reporting the workload as Stopped after the suspend.
 			workloadsMock.SetWorkloadPhase(id, workloadsApi.PHASE_STOPPED)
+			recorder.reset()
 			result := runStateForTest(router, randoms, id, api.WorkloadRunStateRequest{Value: api.RUNSTATE_RESUME})
 
 			Expect(result.DesiredPhase).To(Equal(api.DESIREDPHASE_RUNNING))
+			actions := recorder.recorded()
+			Expect(actions).To(HaveLen(1))
+			Expect(actions[0].Action).To(Equal(workloadsApi.WORKLOADACTIONTYPE_RESUME))
+			Expect(actions[0].WorkloadID).To(Equal(id))
 		})
 
 		It("should apply spec.suspend=false patch on resume", func() {

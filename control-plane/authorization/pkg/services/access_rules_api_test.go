@@ -56,7 +56,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 	managementTenant := fmt.Sprintf("%d", testing.ManagementTestTenant)
 	ctxManagement := context.WithValue(setContext(managementTenant, TestUserId, testAdminsGroups), runaictx.CfIsManagementTenant, "true")
 
-	tenantSettings := NewMockTenantSettingsService(map[string]bool{CSPSettingKey: false})
+	tenantSettings := NewMockTenantSettingsService(map[string]bool{})
 
 	clustersClient := cluster_service_client.NewAPIClient(&cluster_service_client.Configuration{
 		Servers: cluster_service_client.ServerConfigurations{
@@ -234,14 +234,15 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		})
 
 		It("Get with filter subjectType", func() {
-			getAccessRulesResponse, err := accessRulesApiService.GetAccessRules(ctx, "APP", []string{}, 0, 0, "", false, "", "", "", "", nil, "")
+			getAccessRulesResponse, err := accessRulesApiService.GetAccessRules(ctx, string(api.SUBJECTTYPE_USER), []string{}, 0, 0, "", false, "", "", "", "", nil, "")
 			Expect(err).To(BeNil())
 			Expect(getAccessRulesResponse.Code).To(Equal(http.StatusOK))
 
 			response := httpResponseBodyToAccessRules(getAccessRulesResponse)
 			accessRules := response.AccessRules
+			Expect(accessRules).ToNot(BeEmpty())
 			for _, accessRule := range accessRules {
-				Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_APP))
+				Expect(accessRule.SubjectType).To(Equal(api.SUBJECTTYPEEXTENDED_USER))
 			}
 
 			getAccessRulesResponse, err = accessRulesApiService.GetAccessRules(ctx, "TYPO", []string{}, 0, 0, "", false, "", "", "", "", nil, "")
@@ -251,113 +252,14 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 			Expect(response.TotalRecords).To(Equal(int32(0)))
 		})
 
-		It("Backward compatibility: filter by 'app' or 'service-account' returns both types", func() {
-			// Create an access rule with app subject type
-			appAccessRuleBody := api.AccessRuleCreationFields{
+		It("Rejects the deprecated app subject type on create with 415", func() {
+			createTestAccessRule(ctx, accessRulesApiService, api.AccessRuleCreationFields{
 				ScopeId:     ProjectId,
 				ScopeType:   api.SCOPETYPE_PROJECT,
-				SubjectId:   "test-app-id",
-				SubjectType: api.SUBJECTTYPE_APP,
+				SubjectId:   "deprecated-app-subject-type",
+				SubjectType: api.SubjectType("app"),
 				RoleId:      createdRoles[0].Id,
-			}
-			createTestAccessRule(ctx, accessRulesApiService, appAccessRuleBody, &createdAccessRules, false, http.StatusCreated)
-
-			// Create an access rule with service-account subject type
-			serviceAccountAccessRuleBody := api.AccessRuleCreationFields{
-				ScopeId:     ProjectId,
-				ScopeType:   api.SCOPETYPE_PROJECT,
-				SubjectId:   "test-service-account-id",
-				SubjectType: api.SUBJECTTYPE_SERVICE_ACCOUNT,
-				RoleId:      createdRoles[0].Id,
-			}
-			createTestAccessRule(ctx, accessRulesApiService, serviceAccountAccessRuleBody, &createdAccessRules, false, http.StatusCreated)
-
-			// Test 1: Filter by 'app' should return both 'app' and 'service-account'
-			getAccessRulesResponse, err := accessRulesApiService.GetAccessRules(ctx, "app", []string{}, 0, 0, "", false, "", "", "", "", nil, "")
-			Expect(err).To(BeNil())
-			Expect(getAccessRulesResponse.Code).To(Equal(http.StatusOK))
-
-			response := httpResponseBodyToAccessRules(getAccessRulesResponse)
-			accessRules := response.AccessRules
-
-			// Verify we have both types in the results
-			hasApp := false
-			hasServiceAccount := false
-			for _, accessRule := range accessRules {
-				if accessRule.SubjectType == api.SUBJECTTYPEEXTENDED_APP {
-					hasApp = true
-				}
-				if accessRule.SubjectType == api.SUBJECTTYPEEXTENDED_SERVICE_ACCOUNT {
-					hasServiceAccount = true
-				}
-			}
-			Expect(hasApp).To(BeTrue(), "Expected to find access rules with 'app' subject type when filtering by 'app'")
-			Expect(hasServiceAccount).To(BeTrue(), "Expected to find access rules with 'service-account' subject type when filtering by 'app'")
-
-			// Test 2: Filter by 'service-account' should also return both types
-			getAccessRulesResponse, err = accessRulesApiService.GetAccessRules(ctx, "service-account", []string{}, 0, 0, "", false, "", "", "", "", nil, "")
-			Expect(err).To(BeNil())
-			Expect(getAccessRulesResponse.Code).To(Equal(http.StatusOK))
-
-			response = httpResponseBodyToAccessRules(getAccessRulesResponse)
-			accessRules = response.AccessRules
-
-			// Verify we have both types in the results
-			hasApp = false
-			hasServiceAccount = false
-			for _, accessRule := range accessRules {
-				if accessRule.SubjectType == api.SUBJECTTYPEEXTENDED_APP {
-					hasApp = true
-				}
-				if accessRule.SubjectType == api.SUBJECTTYPEEXTENDED_SERVICE_ACCOUNT {
-					hasServiceAccount = true
-				}
-			}
-			Expect(hasApp).To(BeTrue(), "Expected to find access rules with 'app' subject type when filtering by 'service-account'")
-			Expect(hasServiceAccount).To(BeTrue(), "Expected to find access rules with 'service-account' subject type when filtering by 'service-account'")
-		})
-
-		It("Backward compatibility: filterBy parameter with subjectType==app", func() {
-			// Create access rules for testing filterBy parameter
-			appAccessRuleBody := api.AccessRuleCreationFields{
-				ScopeId:     ProjectId,
-				ScopeType:   api.SCOPETYPE_PROJECT,
-				SubjectId:   "test-filterby-app-id",
-				SubjectType: api.SUBJECTTYPE_APP,
-				RoleId:      createdRoles[0].Id,
-			}
-			createTestAccessRule(ctx, accessRulesApiService, appAccessRuleBody, &createdAccessRules, false, http.StatusCreated)
-
-			serviceAccountAccessRuleBody := api.AccessRuleCreationFields{
-				ScopeId:     ProjectId,
-				ScopeType:   api.SCOPETYPE_PROJECT,
-				SubjectId:   "test-filterby-service-account-id",
-				SubjectType: api.SUBJECTTYPE_SERVICE_ACCOUNT,
-				RoleId:      createdRoles[0].Id,
-			}
-			createTestAccessRule(ctx, accessRulesApiService, serviceAccountAccessRuleBody, &createdAccessRules, false, http.StatusCreated)
-
-			// Test filterBy with 'app' - should return both types
-			filterByParams := []string{"subjectType==app"}
-			getAccessRulesResponse, err := accessRulesApiService.GetAccessRules(ctx, "", []string{}, 0, 0, "", false, "", "", "", "", filterByParams, "")
-			Expect(err).To(BeNil())
-			Expect(getAccessRulesResponse.Code).To(Equal(http.StatusOK))
-
-			response := httpResponseBodyToAccessRules(getAccessRulesResponse)
-			accessRules := response.AccessRules
-
-			hasApp := false
-			hasServiceAccount := false
-			for _, accessRule := range accessRules {
-				if accessRule.SubjectType == api.SUBJECTTYPEEXTENDED_APP {
-					hasApp = true
-				}
-				if accessRule.SubjectType == api.SUBJECTTYPEEXTENDED_SERVICE_ACCOUNT {
-					hasServiceAccount = true
-				}
-			}
-			Expect(hasApp).To(BeTrue(), "Expected to find access rules with 'app' subject type when using filterBy=app")
-			Expect(hasServiceAccount).To(BeTrue(), "Expected to find access rules with 'service-account' subject type when using filterBy=app")
+			}, &createdAccessRules, true, http.StatusUnsupportedMediaType)
 		})
 
 		It("Get with filter subjectId", func() {
@@ -547,7 +449,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		})
 
 		It("Post should succeed with internal role", func() {
-			Expect(static_roles.ClusterApp.InternalOnly).To(BeTrue())
+			Expect(static_roles.ClusterServiceAccount.InternalOnly).To(BeTrue())
 			metricsScraper := int32(dao.MapStaticRoleNameToRoleId[static_roles.IntegrationMetricsCollector.Name])
 
 			body := api.AccessRuleCreationFields{
@@ -679,13 +581,41 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 		})
 
 		It("Wrong subject type no deletion", func() {
-			deletionResponse, err := internalAccessRulesApiService.DeleteSubjectAccessRules(ctx, string(api.SUBJECTTYPE_APP), createdAccessRules[0].SubjectId, false)
+			deletionResponse, err := internalAccessRulesApiService.DeleteSubjectAccessRules(ctx, string(api.SUBJECTTYPE_SERVICE_ACCOUNT), createdAccessRules[0].SubjectId, false)
 			Expect(err).To(BeNil())
 			Expect(deletionResponse.Code).To(Equal(http.StatusNoContent))
 
 			getAccessRuleResponse, err := accessRulesApiService.GetAccessRule(ctx, createdAccessRules[0].Id)
 			Expect(err).To(BeNil())
 			Expect(getAccessRuleResponse.Code).To(Equal(http.StatusOK))
+		})
+
+		It("Rejects the deprecated app subject type on internal create with 415", func() {
+			createResponse, err := internalAccessRulesApiService.CreateInternalAccessRule(ctx, api.InternalCreateAccessRuleRequest{
+				SubjectId:   "deprecated-app-internal",
+				SubjectType: api.SubjectType("app"),
+				RoleName:    api.ALLOWEDINTERNALCREATEROLES_CLUSTER_SERVICE_ACCOUNT,
+			})
+			Expect(err).To(BeNil())
+			Expect(createResponse.Code).To(Equal(http.StatusUnsupportedMediaType))
+		})
+
+		It("Delete by the deprecated app subject type removes the service-account rules", func() {
+			rule := createTestAccessRule(ctx, accessRulesApiService, api.AccessRuleCreationFields{
+				ScopeId:     ProjectId,
+				ScopeType:   api.SCOPETYPE_PROJECT,
+				SubjectId:   "sa-delete-by-deprecated-app",
+				SubjectType: api.SUBJECTTYPE_SERVICE_ACCOUNT,
+				RoleId:      createdAccessRules[0].RoleId,
+			}, &createdAccessRules, false, http.StatusCreated)
+
+			deletionResponse, err := internalAccessRulesApiService.DeleteSubjectAccessRules(ctx, "app", "sa-delete-by-deprecated-app", false)
+			Expect(err).To(BeNil())
+			Expect(deletionResponse.Code).To(Equal(http.StatusNoContent))
+
+			getResponse, err := accessRulesApiService.GetAccessRule(ctx, rule.Id)
+			Expect(err).To(BeNil())
+			Expect(getResponse.Code).To(Equal(http.StatusNotFound))
 		})
 
 		It("Delete subject access rules", func() {
@@ -786,7 +716,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 				ScopeId:     createdAccessRules[0].ScopeId,
 				ScopeType:   createdAccessRules[0].ScopeType,
 				SubjectId:   TestAppId,
-				SubjectType: api.SUBJECTTYPE_APP,
+				SubjectType: api.SUBJECTTYPE_SERVICE_ACCOUNT,
 				RoleId:      createdAccessRules[0].RoleId,
 			}
 			createTestAccessRule(ctx, accessRulesApiService, accessRuleToCreate2, &createdAccessRules, false, http.StatusCreated)
@@ -1454,12 +1384,12 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 				ScopeId:     createdAccessRules[0].ScopeId,
 				ScopeType:   createdAccessRules[0].ScopeType,
 				SubjectId:   TestGroupId,
-				SubjectType: api.SUBJECTTYPE_APP,
+				SubjectType: api.SUBJECTTYPE_SERVICE_ACCOUNT,
 				RoleId:      createdAccessRules[0].RoleId,
 			}
 			createdAccessRule = createTestAccessRule(ctx, accessRulesApiService, accessRuleToCreate, &createdAccessRules, false, http.StatusCreated)
 
-			getCountAccessRulesResponse, err := accessRulesApiService.CountAccessRules(ctx, false, []string{fmt.Sprintf("subjectType==%s", api.SUBJECTTYPE_APP)}, "")
+			getCountAccessRulesResponse, err := accessRulesApiService.CountAccessRules(ctx, false, []string{fmt.Sprintf("subjectType==%s", api.SUBJECTTYPE_SERVICE_ACCOUNT)}, "")
 			Expect(err).To(BeNil())
 			Expect(getCountAccessRulesResponse.Code).To(Equal(http.StatusOK))
 
@@ -1472,7 +1402,7 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 				ScopeId:     createdAccessRules[0].ScopeId,
 				ScopeType:   createdAccessRules[0].ScopeType,
 				SubjectId:   TestGroupId,
-				SubjectType: api.SUBJECTTYPE_APP,
+				SubjectType: api.SUBJECTTYPE_SERVICE_ACCOUNT,
 				RoleId:      createdAccessRules[0].RoleId,
 			}
 			createdAccessRule = createTestAccessRule(ctx, accessRulesApiService, accessRuleToCreate, &createdAccessRules, false, http.StatusCreated)
@@ -1912,83 +1842,37 @@ func testAccessRulesSearch(ctx context.Context, accessRulesService api.AccessRul
 	Expect(countResponse.Count).To(Equal(int64(len(accessRuleResponse.AccessRules))))
 }
 
-var _ = Describe("Subject type backward compatibility filter tests", func() {
-	Describe("applySubjectTypeFilterBackwardCompatibility", func() {
-		It("should expand subjectType==app to include service-account using OR syntax", func() {
-			input := []string{"subjectType==app"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(ConsistOf("subjectType==app||service-account"))
+var _ = Describe("Legacy subjectType query parameter", func() {
+	Describe("filterByBackwardsCompatibility", func() {
+		It("should convert the legacy subjectType parameter to a filterBy entry", func() {
+			result := filterByBackwardsCompatibility([]string{}, "service-account")
+			Expect(result).To(ConsistOf("subjectType==service-account"))
 		})
 
-		It("should expand subjectType==service-account to include app using OR syntax", func() {
-			input := []string{"subjectType==service-account"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(ConsistOf("subjectType==app||service-account"))
+		It("should keep existing filters and append the legacy parameter", func() {
+			result := filterByBackwardsCompatibility([]string{"scopeType==project"}, "user")
+			Expect(result).To(ConsistOf("scopeType==project", "subjectType==user"))
 		})
 
-		It("should expand subjectType!=app to exclude service-account", func() {
-			input := []string{"subjectType!=app"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(ConsistOf("subjectType!=app", "subjectType!=service-account"))
-		})
-
-		It("should expand subjectType!=service-account to exclude app", func() {
-			input := []string{"subjectType!=service-account"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(ConsistOf("subjectType!=service-account", "subjectType!=app"))
-		})
-
-		It("should handle E2E test case: subjectType!=app,subjectType!=group", func() {
-			input := []string{"subjectType!=app", "subjectType!=group"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(ConsistOf("subjectType!=app", "subjectType!=service-account", "subjectType!=group"))
-		})
-
-		It("should handle multiple != filters excluding all types", func() {
-			input := []string{"subjectType!=user", "subjectType!=service-account", "subjectType!=group"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(ConsistOf("subjectType!=user", "subjectType!=service-account", "subjectType!=app", "subjectType!=group"))
-		})
-
-		It("should not modify subjectType==user", func() {
-			input := []string{"subjectType==user"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(Equal([]string{"subjectType==user"}))
-		})
-
-		It("should not modify subjectType!=user", func() {
-			input := []string{"subjectType!=user"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(Equal([]string{"subjectType!=user"}))
-		})
-
-		It("should keep non-subjectType filters unchanged", func() {
-			input := []string{"scopeType==tenant", "roleId==123"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(Equal([]string{"scopeType==tenant", "roleId==123"}))
-		})
-
-		It("should handle mixed filters correctly", func() {
-			input := []string{"subjectType==app", "scopeType==project"}
-			result := applySubjectTypeFilterBackwardCompatibility(input)
-			Expect(result).To(ConsistOf("subjectType==app||service-account", "scopeType==project"))
+		It("should leave filters unchanged when there is no legacy parameter", func() {
+			result := filterByBackwardsCompatibility([]string{"subjectType!=group"}, "")
+			Expect(result).To(Equal([]string{"subjectType!=group"}))
 		})
 	})
+})
 
-	Describe("filterByBackwardsCompatibility", func() {
-		It("should expand subject type filters", func() {
-			result := filterByBackwardsCompatibility([]string{"subjectType==app"}, "")
-			Expect(result).To(ConsistOf("subjectType==app||service-account"))
-		})
+var _ = Describe("isDeprecatedSubjectType", func() {
+	It("matches only the deprecated app subject type", func() {
+		Expect(isDeprecatedSubjectType(api.SubjectType("app"))).To(BeTrue())
+		Expect(isDeprecatedSubjectType("app")).To(BeTrue())
+		for _, subjectType := range []api.SubjectType{api.SUBJECTTYPE_USER, api.SUBJECTTYPE_SERVICE_ACCOUNT, api.SUBJECTTYPE_GROUP} {
+			Expect(isDeprecatedSubjectType(subjectType)).To(BeFalse())
+		}
+	})
 
-		It("should handle != app filter with backward compatibility", func() {
-			result := filterByBackwardsCompatibility([]string{"subjectType!=app"}, "")
-			Expect(result).To(ConsistOf("subjectType!=app", "subjectType!=service-account"))
-		})
-
-		It("should convert legacy subjectType parameter to filterBy", func() {
-			result := filterByBackwardsCompatibility([]string{}, "app")
-			Expect(result).To(ConsistOf("subjectType==app||service-account"))
-		})
+	It("is reported as 415 Unsupported Media Type pointing at service-account", func() {
+		apiErr := deprecatedSubjectTypeError()
+		Expect(apiErr.Code).To(Equal(int32(http.StatusUnsupportedMediaType)))
+		Expect(apiErr.Message).To(ContainSubstring("service-account"))
 	})
 })

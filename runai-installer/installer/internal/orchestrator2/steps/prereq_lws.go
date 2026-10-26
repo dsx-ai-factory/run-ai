@@ -11,9 +11,11 @@ import (
 )
 
 const (
-	lwsRelease   = "lws"
-	lwsChart     = "lws"
-	lwsNamespace = "lws-system"
+	lwsRelease = "lws"
+	lwsChart   = "lws"
+	// LWSNamespace is where the upstream LWS Helm chart runs its controller; the
+	// Run:ai cluster must be pointed at it.
+	LWSNamespace = "lws-system"
 	lwsRepo      = "oci://registry.k8s.io/lws/charts/lws"
 	lwsSentinel  = "lws-controller-manager"
 )
@@ -25,9 +27,9 @@ func NewLWS(version string, customValues map[string]string, deps orchestrator2.D
 		Version:     version,
 		ReleaseName: lwsRelease,
 		ChartName:   lwsChart,
-		Namespace:   lwsNamespace,
+		Namespace:   LWSNamespace,
 		IsOCI:       true,
 		Values:      actions.MapToValues(customValues),
 	}
-	return newPrereqStep("install-lws", deploymentSentinel(lwsSentinel, lwsNamespace), deps, action)
+	return newPrereqStep("install-lws", deploymentSentinel(lwsSentinel, LWSNamespace), deps, action)
 }

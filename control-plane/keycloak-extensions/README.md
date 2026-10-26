@@ -32,8 +32,9 @@ The service is responsible for:
 - **Theme** (`runai-theme/`) — custom Keycloak login and email templates.
 - **OpenTelemetry agent** — downloaded at build time and shipped in the image.
 - **Sidecar delivery** — at runtime the container copies providers, theme, and
-  agent into shared volumes (`/providers`, `/themes`, `/agent`) via the scripts
-  in `scripts/`, then writes Keycloak config.
+  agent into shared volumes (`/providers`, `/themes`, `/agent`), then writes
+  Keycloak config, via a small statically-linked Go binary (`cmd/main.go` →
+  `internal/keycloakinit`) that runs as the image's `ENTRYPOINT` and exits.
 
 ## Repository layout
 
@@ -48,24 +49,31 @@ The service is responsible for:
 ├── runai-theme/                # Custom Keycloak login + email theme
 │   ├── login/
 │   └── email/
-├── scripts/                    # Runtime copy + keycloak-config scripts
-│   ├── copy-extensions.sh
-│   └── write-keycloak-conf.sh
-├── bin/                        # Build output (jars) — populated by `make build`
-├── Dockerfile                  # Alpine sidecar image
+├── cmd/main.go                 # Go init binary entry point (ENTRYPOINT)
+├── internal/keycloakinit/       # Copy + keycloak-config generation logic + unit tests
+├── go.mod
+├── bin/                        # Build output (jars + Go binaries) — populated by `make build`
+├── Dockerfile                  # Multi-stage, `scratch` runtime image
 └── Makefile
 ```
 
 ## Building and running
 
-This is a **Java / Gradle** service, not a Go service. The Makefile drives Gradle
-inside a `gradle:8.12.0-jdk21` Docker container (`GRADLE_IMAGE`).
+This is a **Java / Gradle and Go** service: the SPI providers/theme payload
+is built with Gradle, and a small Go binary that stages that payload and
+writes `keycloak.conf` at runtime is built alongside it. The Makefile drives
+both — Gradle inside a `gradle:8.12.0-jdk21` Docker container
+(`GRADLE_IMAGE`), Go inside the shared Go builder container.
 
 | Target | Description |
 |--------|-------------|
-| `make build` | Runs Gradle in the container: clears the Gradle cache, downloads the OpenTelemetry Java agent (`v2.29.0`, sha256-verified) into `bin/`, runs `gradle build -p runai-custom-providers`, and copies `runai-custom-providers.jar` to `bin/`. Produces the artifacts the Dockerfile expects. |
-| `make test` | Runs `gradle test -p runai-custom-providers` in the container, then parses the HTML test reports via `scripts/parse_html_report.py` |
-| `make lint` | No-op |
+| `make build` | `build-gradle` then `build-go` |
+| `make build-gradle` | Runs Gradle in the container: clears the Gradle cache, downloads the OpenTelemetry Java agent (`v2.29.0`, sha256-verified) into `bin/`, runs `gradle build -p runai-custom-providers`, and copies `runai-custom-providers.jar` to `bin/`. Produces the artifacts the Dockerfile expects. |
+| `make build-go` | Compiles `cmd/main.go` for amd64 + arm64 into `bin/keycloak-extensions-$ARCH` |
+| `make test` | `test-gradle` then `test-go` |
+| `make test-gradle` | Runs `gradle test -p runai-custom-providers` in the container, then parses the HTML test reports via `scripts/parse_html_report.py` |
+| `make test-go` | Runs the `internal/keycloakinit` unit tests |
+| `make lint` | `lint-go` — golangci-lint against the Go code (the Gradle side has no lint target) |
 | `make validate` | No-op |
 
 The Gradle project (`runai-custom-providers/build.gradle`) targets the Java 21
@@ -75,12 +83,17 @@ JUnit 5, Mockito, and AssertJ.
 
 ### Runtime image (Dockerfile)
 
-The Dockerfile is a minimal `alpine:3.21` image. It creates the extensions
-staging and shared target directories owned by `65532:65532`, copies in the
-built `runai-custom-providers.jar`, the OpenTelemetry agent JAR, the
-`runai-theme/`, and the `scripts/`. It runs as user `65532:65532`, and its
-`CMD` runs `copy-extensions.sh` (copies the payload into the shared volumes)
-then `write-keycloak-conf.sh`.
+The Dockerfile is multi-stage, with a `FROM scratch` final stage — a
+`registry.access.redhat.com/ubi9/ubi-minimal` stage supplies `/etc/passwd`,
+`/etc/group`, and pre-owned/writable `/providers`, `/themes`, `/agent` mount
+points (no CA certs are needed: the binary makes no outbound network calls).
+It copies in the built `runai-custom-providers.jar`, the OpenTelemetry agent
+JAR, the `runai-theme/`, and the compiled `keycloak-extensions-$TARGETARCH`
+binary. It runs as user `65532:65532`, and its `ENTRYPOINT` is that binary,
+which performs the same two steps the old `copy-extensions.sh` +
+`write-keycloak-conf.sh` scripts did (they can't run in `scratch` — there's
+no shell): copy the payload into the shared volumes, then generate
+`/conf/keycloak.conf` from `/opt/keycloak/conf/secrets/*`, and exit.
 
 | Source (image) | Destination (shared volume) | Content |
 |---|---|---|
@@ -95,15 +108,19 @@ then `write-keycloak-conf.sh`.
 
 ```bash
 # Step 1 — Gradle build inside the gradle:8.12.0-jdk21 container:
-make build DOCKERHUB_PROXY=
-# Step 2 — build + load the sidecar image:
+make build-gradle DOCKERHUB_PROXY=
+# Step 2 — Go build (amd64 only, matching the other CP Go services' local-dev step):
+make build-go-amd OS=linux ARCH=amd64 DOCKERHUB_PROXY= GITHUB_TOKEN=
+# Step 3 — build + load the scratch image:
 docker buildx build --platform linux/amd64 --provenance=false --load \
   -t runai-local/keycloak-extensions:0.0.0 .
 ```
 
-`DOCKERHUB_PROXY=` (empty) pulls the `gradle` builder image from Docker Hub. No
-`GITHUB_TOKEN` and no `TARGETARCH` build-arg are involved — it is a Java build
-and the image just packages the resulting JARs. The image tag is **`0.0.0`**
+`DOCKERHUB_PROXY=` (empty) pulls the `gradle`/Go builder images from Docker
+Hub. `GITHUB_TOKEN=` is emptied for the Go step (this module has no private
+dependencies). `ARG TARGETARCH` in the Dockerfile is auto-populated by
+`docker buildx build --platform ...` — no explicit `--build-arg` needed here,
+same as the other `scratch`-based services. The image tag is **`0.0.0`**
 (the control-plane chart appVersion); any other tag breaks the local deploy.
 Image ref: `runai-local/keycloak-extensions:0.0.0`.
 
@@ -114,10 +131,13 @@ Image ref: `runai-local/keycloak-extensions:0.0.0`.
 
 | Target | Description |
 |--------|-------------|
-| `make test` | Runs the JUnit 5 suite for `runai-custom-providers` in the Gradle container and parses the HTML reports |
+| `make test` | `test-gradle` then `test-go` |
+| `make test-gradle` | Runs the JUnit 5 suite for `runai-custom-providers` in the Gradle container and parses the HTML reports |
+| `make test-go` | Runs the table-driven unit tests in `internal/keycloakinit` (copy logic, `keycloak.conf` key transform/generation, and one end-to-end test covering both steps together via `Run()`) |
 
 Within the Gradle project you can also run `gradle test -p runai-custom-providers`
-directly (Java 21 + Gradle 8 required).
+directly (Java 21 + Gradle 8 required). The Go tests run with plain `go test`
+(no Ginkgo — this is a one-shot init binary, not a controller/webhook).
 
 ## Configuration
 

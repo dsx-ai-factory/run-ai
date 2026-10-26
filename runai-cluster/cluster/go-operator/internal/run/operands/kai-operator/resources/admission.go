@@ -14,6 +14,7 @@ import (
 func convertAdmissionConfig() *kaiadmission.Admission {
 	return &kaiadmission.Admission{
 		Service:                            &kaicommon.Service{},
+		ServiceName:                        ptr.To("engine-admission"),
 		GPUSharing:                         ptr.To(true),
 		QueueLabelSelector:                 ptr.To(true),
 		ValidatingWebhookConfigurationName: ptr.To("validating-engine-admission"),

@@ -15,7 +15,7 @@ func TestResolveConfig_NilConf_TakenFromDefaults(t *testing.T) {
 	conf := resolveConfig(nil)
 	require.Equal(t, "16", conf.ImageVersion)
 	require.Equal(t, "postgres", conf.User)
-	require.Equal(t, "postgres", conf.Password)
+	require.Len(t, conf.Password, 32)
 	require.Equal(t, "backend", conf.Name)
 	require.Equal(t, "test", conf.Schema)
 	require.Equal(t, "file:///migrations", conf.MigrationDirPath)
@@ -49,7 +49,7 @@ func TestResolveConfig_Partial_DefaultsFillGaps(t *testing.T) {
 	require.Equal(t, "my_schema", conf.Schema)
 	require.Equal(t, "file:///tmp", conf.MigrationDirPath)
 	require.Equal(t, "postgres", conf.User)
-	require.Equal(t, "postgres", conf.Password)
+	require.Len(t, conf.Password, 32)
 	require.Equal(t, "backend", conf.Name)
 }
 
@@ -70,8 +70,18 @@ func TestResolveConfig_Full_NoOverride(t *testing.T) {
 	require.Equal(t, "file:///tmp", conf.MigrationDirPath)
 }
 
-func TestGenerateEncryptionKey(t *testing.T) {
-	key := generateEncryptionKey()
+func TestResolveConfig_OmittedPassword_UniquePerResolve(t *testing.T) {
+	first := resolveConfig(&IntegdbConfig{Schema: "my_schema"})
+	require.Len(t, first.Password, 32)
+
+	second := resolveConfig(&IntegdbConfig{Schema: "my_schema"})
+	require.Len(t, second.Password, 32)
+
+	require.NotEqual(t, first.Password, second.Password)
+}
+
+func TestGenerateRandomHex(t *testing.T) {
+	key := generateRandomHex()
 	require.Equal(t, 32, len(key))
 }
 

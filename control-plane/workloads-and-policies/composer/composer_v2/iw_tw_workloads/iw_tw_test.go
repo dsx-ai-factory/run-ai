@@ -16,10 +16,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/notifications"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 	k8sObjectsApi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	"github.com/ghodss/yaml"
 	. "github.com/onsi/ginkgo/v2"
@@ -658,6 +658,8 @@ func RunComposerTest(testDetails ComposerTest, basePath string) {
 
 	checkerErr = composer_v2.SetClusterDependentOptions(context.Background(), &options, clusterCapabilities)
 	Expect(checkerErr).To(BeNil(), "failed to set cluster dependent options")
+	// Existing snapshots cover clusters that still embed OAuth2 templates in the image.
+	options.OAuth2ProxyTemplatesSupported = false
 
 	notificationsComposer := notifications.NewNotificationsComposer(
 		testDetails.workloadType,

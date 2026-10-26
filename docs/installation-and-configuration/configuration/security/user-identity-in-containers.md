@@ -23,19 +23,19 @@ NVIDIA Run:ai supports security-related workload configurations to control user 
 
 Administrators can enforce secure defaults across the environment using [Policies](../../../platform-management/policies/policy-yaml-reference.md), ensuring consistent workload behavior aligned with organizational security practices.&#x20;
 
-<Info>
+<Note>
 
 **Note**
 
 If both `privileged` and `allowPrivilegeEscalation` are set to `true`, the `allowPrivilegeEscalation` setting becomes redundant. Enabling `privileged` gives the container full host access, which already includes all privilege escalation capabilities.
 
-</Info>
+</Note>
 
 ## Passing User Identity
 
 ### Passing User Identity from Identity Provider
 
-A best practice is to store the **User Identifier (UID)** and **Group Identifier (GID)** in the organization's directory. NVIDIA Run:ai allows you to pass these values to the container and use them as the container identity. To perform this, you must set up [single sign-on](../../authentication/overview.md) and perform the steps for UID/GID integration.
+A best practice is to store the **User Identifier (UID)** and **Group Identifier (GID)** in the organization's directory. NVIDIA Run:ai allows you to pass these values to the container and use them as the container identity. To perform this, you must set up [single sign-on](../../../platform-management/authentication/overview.md) and perform the steps for UID/GID integration.
 
 ### Passing User Identity via UI
 
@@ -47,13 +47,13 @@ It is possible to explicitly pass user identity when creating an [environment](.
 
 Administrators can enforce secure defaults across the environment using [Policies](../../../platform-management/policies/policy-yaml-reference.md), ensuring consistent workload behavior aligned with organizational security practices.&#x20;
 
-<Info>
+<Note>
 
 **Note**
 
 It is also possible to set the above using the API or CLI.
 
-</Info>
+</Note>
 
 ## Using OpenShift or Gatekeeper to Provide Cluster Level Controls
 
@@ -94,11 +94,11 @@ When containers run as a specific user, the user must have a home directory defi
 
 Since pre-creating a home directory for every possible user is impractical, NVIDIA Run:ai offers the `createHomeDir` / `--create-home-dir` option. When enabled, this flag creates a temporary home directory for the user inside the container at runtime. By default, the directory is created at `/home/<username>`.
 
-<Info>
+<Note>
 
 **Note**
 
 * This home directory is temporary and exists only for the duration of the container's lifecycle. Any data saved in this location will be lost when the container exits.
 * By default, this flag is set to `true` when `--run-as-user` is enabled, and `false` otherwise.
 
-</Info>
+</Note>

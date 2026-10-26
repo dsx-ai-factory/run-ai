@@ -10,13 +10,13 @@ The data sources table can be found under **Workload manager** in the NVIDIA Run
 
 The data sources table provides a list of all the data sources defined in the platform and allows you to manage them.
 
-<Info>
+<Note>
 
 **Note**
 
 **Data & storage** - with **Data sources** and **Data volumes -** is visible only if your administrator has enabled [Data volumes](data-volumes.md)**.**
 
-</Info>
+</Note>
 
 <figure><img src="../../assets/data-sources-new.png" alt=""/><figcaption></figcaption></figure>
 
@@ -111,7 +111,7 @@ NVIDIA Run:ai ensures that data remains consistent and accessible across various
 3. If the scope you selected is at the **cluster** or **department** level, you can choose how volumes are shared across projects within that scope:
    * **Separate volume for each project** (default) - A dedicated volume is created per project. Each project can access only its own allocated storage space.
    * **Shared volume between all projects** - A dedicated volume is created for all projects within the selected scope. This option always creates a new PVC - the **Existing PVC** option is not available. Recommended for collaboration and shared storage access across projects.\
-     Note: A storage class that supports shared volumes must be configured in your cluster. Contact your administrator.
+     Note: A storage class that supports shared volumes must be configured in your cluster. Contact your administrator, who must enable data sharing for the storage class as described in [Enabling Shared Volumes for a Storage Class](#enabling-shared-volumes-for-a-storage-class).
 4. Enter a **name** for the data source. The name must be unique.
 5. Optional: Provide a **description** of the data source
 6. Select PVC:
@@ -149,13 +149,13 @@ After the data source is created, check its status to monitor its proper creatio
 
 The [S3 bucket](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-s3-bucket.html) data source enables the mapping of a remote S3 bucket into the workload's file system. Similar to a PVC, this mapping remains accessible across different workload executions, extending beyond the lifecycle of individual pods. However, unlike PVCs, data stored in an S3 bucket resides remotely, which may lead to decreased performance during the execution of heavy machine learning workloads. As part of the NVIDIA Run:ai connection to the S3 bucket, you can create [credentials](credentials.md) in order to access and map private buckets.
 
-<Info>
+<Note>
 
 **Note**
 
 S3 data sources are not supported for custom inference workloads.
 
-</Info>
+</Note>
 
 1. Select the **cluster** under which to create this data source
 2. Select a [**scope**](overview.md#asset-scope)
@@ -205,6 +205,8 @@ After a private data source is created, check its status to monitor its proper c
 **Host path**
 
 A [Host path](https://kubernetes.io/docs/concepts/storage/volumes/#hostpath) volume is a Kubernetes concept that enables mounting a host path file or a directory on the workload's file system. Like a PVC, the host path volume's data persists across workloads under various scopes. It also enables data serving from the hosting node.
+
+Administrators can restrict the use of host path data sources with a workload policy. See [Policy YAML examples](../../platform-management/policies/policy-yaml-examples.md) and [Security best practices](../../installation-and-configuration/configuration/security/security-best-practices.md).
 
 1. Select the **cluster** under which to create this data source
 2. Select a [**scope**](overview.md#asset-scope)
@@ -259,13 +261,13 @@ After the data source is created, check its status to monitor its proper creatio
 
 </Accordion>
 
-<Info>
+<Note>
 
 **Note**
 
 It is also possible to add data sources directly when creating a specific [workspace](../using-workspaces/running-workspace.md), [training](../using-training/train-models.md) or [inference](../using-inference/nvidia-run-ai-inference-overview.md) workload.
 
-</Info>
+</Note>
 
 ## Copying a Data Source
 
@@ -291,19 +293,27 @@ To delete a data source:
 2. Click **DELETE**
 3. Confirm you want to delete the data source
 
-<Info>
+<Note>
 
 **Note**
 
 It is not possible to delete a data source being used by an existing workload or template.
 
-</Info>
+</Note>
 
 ## Creating PVCs in Advance
 
 Add PVCs in advance to be used when creating a PVC-type data source via the NVIDIA Run:ai UI.
 
 The actions taken by the admin are based on the scope (cluster, department or project) that the admin wants for data source of type PVC. Follow the steps below for each required scope:
+
+<Note>
+
+**Note**
+
+These steps require administrator permissions.
+
+</Note>
 
 ### **Cluster Scope**
 
@@ -312,13 +322,13 @@ The actions taken by the admin are based on the scope (cluster, department or pr
 
 The PVC is now displayed for that scope in the list of existing PVCs.
 
-<Info>
+<Note>
 
 **Note**
 
 This step is also relevant for creating the data source of type PVC via API
 
-</Info>
+</Note>
 
 ### **Department Scope**
 
@@ -332,6 +342,61 @@ The PVC is now displayed for that scope in the list of existing PVCs.
 Locate the PVC in the project's namespace.
 
 The PVC is now displayed for that scope in the list of existing PVCs.
+
+## Enabling Shared Volumes for a Storage Class
+
+The **Shared volume between all projects** option is available only for storage classes that have data sharing enabled. Data sharing is not enabled automatically. An administrator must use the [Storage class configuration](api:main-api:GET/api/v1/storage-class-configuration) API to enable it explicitly for each storage class that should support shared volumes, by setting `permissions.allowDataSharing` to `true`.
+
+<Note>
+
+**Note**
+
+This procedure requires administrator permissions.
+
+</Note>
+
+Replace the following placeholders in the commands below:
+
+* `<COMPANY-URL>` - The link to the NVIDIA Run:ai user interface
+* `<TOKEN>` - A valid [API access token](../../rest-api/how-to-authenticate-to-the-api.md)
+* `<ID>` - The `id` of the existing storage class configuration
+* `<CLUSTER-UUID>` - The UUID of the cluster
+* `<STORAGE-CLASS-NAME>` - The name of the Kubernetes storage class
+
+1. Check whether a storage class configuration exists for the storage class, and whether `allowDataSharing` is enabled:
+
+   ```bash
+   curl -X GET 'https://<COMPANY-URL>/api/v1/storage-class-configuration' \
+     -H 'Authorization: Bearer <TOKEN>' \
+     -H 'Content-Type: application/json'
+   ```
+
+2. If a configuration exists for the storage class but `allowDataSharing` is `false`, copy its `id` and update it:
+
+   ```bash
+   curl -X PATCH 'https://<COMPANY-URL>/api/v1/storage-class-configuration/<ID>' \
+     -H 'Authorization: Bearer <TOKEN>' \
+     -H 'Content-Type: application/json' \
+     -d '{"permissions": {"allowDataSharing": true}}'
+   ```
+
+3. If no configuration exists for the storage class, create one:
+
+   ```bash
+   curl -X POST 'https://<COMPANY-URL>/api/v1/storage-class-configuration' \
+     -H 'Authorization: Bearer <TOKEN>' \
+     -H 'Content-Type: application/json' \
+     -d '{
+       "scopeType": "cluster",
+       "scopeId": "<CLUSTER-UUID>",
+       "name": "<STORAGE-CLASS-NAME>",
+       "permissions": {
+         "allowDataSharing": true
+       }
+     }'
+   ```
+
+Repeat these steps for each storage class that should support shared volumes.
 
 ## Creating ConfigMaps in Advance
 
@@ -360,6 +425,10 @@ The ConfigMap is now displayed for that scope in the list of existing ConfigMaps
 
 The ConfigMap is now displayed for that scope in the list of existing ConfigMaps.
 
+## Using CLI
+
+To view the available actions on data sources, see the data source [CLI v2 reference](../../reference/cli/runai/runai_datasource.md).
+
 ## Using API
 
-To view the available actions, go to the [Data sources](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/datasources) API reference.
+To view the available actions, go to the [Data sources](api:main-api:GET/api/v1/asset/datasource) API reference.

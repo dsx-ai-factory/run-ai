@@ -13,7 +13,7 @@ import (
 	"os"
 	"strings"
 
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	k8sObjectsTracker "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/k8s-objects-tracker"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"

@@ -10,7 +10,7 @@ import (
 	"reflect"
 	"time"
 
-	wclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/scale"
 
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"

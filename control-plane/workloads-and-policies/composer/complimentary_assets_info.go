@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"net/http"
 
+	workloadApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 const (

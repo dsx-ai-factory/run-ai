@@ -18,10 +18,10 @@
   <text x="136" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Kubernetes Cluster</text>
 
   <!-- Control Plane box -->
-  <rect x="72" y="76" width="416" height="80" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
+  <rect x="72" y="76" width="416" height="80" rx="8" fill="#B2D380" stroke="#8BB85B" stroke-width="1.5"/>
   <!-- Left accent bar -->
-  <rect x="72" y="76" width="5" height="80" rx="4" fill="#3B82F6"/>
-  <text x="296" y="111" text-anchor="middle" font-size="14" font-weight="700" fill="#1E3A5F">NVIDIA Run:ai Control Plane</text>
+  <rect x="72" y="76" width="5" height="80" rx="4" fill="#8BB85B"/>
+  <text x="296" y="111" text-anchor="middle" font-size="14" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai Control Plane</text>
   <text x="296" y="133" text-anchor="middle" font-size="12" fill="#64748B">Centralized resource management · workload submission · monitoring</text>
 
   <!-- Divider / connection indicator -->
@@ -30,9 +30,9 @@
   <text x="280" y="174" text-anchor="middle" font-size="9" font-weight="600" fill="#94A3B8">mgmt</text>
 
   <!-- Cluster Services box -->
-  <rect x="72" y="184" width="416" height="80" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
+  <rect x="72" y="184" width="416" height="80" rx="8" fill="#F1F8E9" stroke="#AED581" stroke-width="1.5"/>
   <!-- Left accent bar -->
-  <rect x="72" y="184" width="5" height="80" rx="4" fill="#22C55E"/>
-  <text x="296" y="219" text-anchor="middle" font-size="14" font-weight="700" fill="#14532D">NVIDIA Run:ai Cluster</text>
+  <rect x="72" y="184" width="5" height="80" rx="4" fill="#AED581"/>
+  <text x="296" y="219" text-anchor="middle" font-size="14" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai Cluster</text>
   <text x="296" y="241" text-anchor="middle" font-size="12" fill="#64748B">GPU-aware scheduling · workload management · resource optimization</text>
 </svg>

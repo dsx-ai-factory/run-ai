@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 
 	authorizationClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 )
@@ -24,7 +25,6 @@ const (
 	ObjectsClusterIdColumn    = "cluster_id"
 	ObjectsTenantIdColumn     = "tenant_id"
 	ObjectsSpecColumn         = "spec"
-	ObjectsUniqueConstraint   = "unique_tenant_type_cluster_name_project"
 	ObjectScopeTypeColumn     = "scope_type"
 )
 
@@ -33,7 +33,9 @@ const (
 type ObjectType string
 
 const (
-	ObjectTypeStorageClass = "StorageClass"
+	ObjectTypeStorageClass          = "StorageClass"
+	ObjectTypeDeviceClass           = "DeviceClass"
+	ObjectTypeResourceClaimTemplate = "ResourceClaimTemplate"
 )
 
 // ObjectFilters is a set of filters we can filter by.
@@ -42,7 +44,7 @@ type ObjectFilters struct {
 	Type         string
 	ProjectId    string
 	ClusterId    uuid.UUID
-	DepartmentId uuid.UUID
+	DepartmentId string
 	ScopeType    authorizationClient.ScopeType
 	Name         *string
 }
@@ -61,8 +63,20 @@ func NewObject(filters *ObjectFilters) *Object {
 }
 
 type Object struct {
+	// ID is assigned by BeforeCreate when not already set so services can
+	// correlate upserted rows with issues keyed by resource id (same pattern
+	// the pvcs table uses).
+	ID uuid.UUID `gorm:"primaryKey"`
+
 	ObjectFilters `gorm:"embedded"`
 	Spec          string `gorm:"type:JsonBmap"`
+}
+
+func (s *Object) BeforeCreate(_ *gorm.DB) error {
+	if s.ID == uuid.Nil {
+		s.ID = uuid.New()
+	}
+	return nil
 }
 
 func (s *Object) TableName() string {

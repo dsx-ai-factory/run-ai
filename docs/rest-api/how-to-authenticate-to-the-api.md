@@ -29,14 +29,12 @@ Replace `<COMPANY-URL>` below with:
 
 ```bash
 curl -X POST \
-  'https://<COMPANY-URL>/api/v1/token' \
+  'https://<COMPANY-URL>/api/v2/token' \
   --header 'Accept: */*' \
-  --header 'Content-Type: application/json' \
-  --data-raw '{
-  "grantType":"client_credentials",
-  "clientId":"<CLIENT ID>",
-  "clientSecret" : "<CLIENT SECRET>"
-}'
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode 'grant_type=client_credentials' \
+  --data-urlencode 'client_id=<CLIENT ID>' \
+  --data-urlencode 'client_secret=<CLIENT SECRET>'
 ```
 
 </Tab>
@@ -46,17 +44,16 @@ curl -X POST \
 
 ```python
 import requests
-import json
-reqUrl = "https://<COMPANY-URL>/api/v1/token"
+reqUrl = "https://<COMPANY-URL>/api/v2/token"
 headersList = {
  "Accept": "*/*",
- "Content-Type": "application/json"
+ "Content-Type": "application/x-www-form-urlencoded"
 }
-payload = json.dumps({
-  "grantType":"client_credentials",
-  "clientId":"<CLIENT ID>",
-  "clientSecret" : "<CLIENT SECRET>"
-})
+payload = {
+  "grant_type": "client_credentials",
+  "client_id": "<CLIENT ID>",
+  "client_secret": "<CLIENT SECRET>"
+}
 response = requests.request("POST", reqUrl, data=payload, headers=headersList)
 print(response.text)
 ```
@@ -70,31 +67,26 @@ print(response.text)
 package main
 
 import (
-    "bytes"
-    "encoding/json"
     "fmt"
     "io/ioutil"
     "net/http"
+    "net/url"
+    "strings"
 )
 
 func main() {
-    url := "https://<COMPANY-URL>/api/v1/token"
-    payload := map[string]string{
-        "grantType":    "client_credentials",
-        "clientId":     "<CLIENT ID>",
-        "clientSecret": "<CLIENT SECRET>",
-    }
-    jsonPayload, err := json.Marshal(payload)
-    if err != nil {
-        panic(err)
-    }
+    apiUrl := "https://<COMPANY-URL>/api/v2/token"
+    payload := url.Values{}
+    payload.Set("grant_type", "client_credentials")
+    payload.Set("client_id", "<CLIENT ID>")
+    payload.Set("client_secret", "<CLIENT SECRET>")
 
-    req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
+    req, err := http.NewRequest("POST", apiUrl, strings.NewReader(payload.Encode()))
     if err != nil {
         panic(err)
     }
     req.Header.Set("Accept", "*/*")
-    req.Header.Set("Content-Type", "application/json")
+    req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
     client := &http.Client{}
     resp, err := client.Do(req)
@@ -121,8 +113,10 @@ The API response will look as follows:
 
 ```json
 {
-  "accessToken": "<TOKEN>", 
+  "access_token": "<TOKEN>",
+  "token_type": "Bearer",
+  "expires_in": 3600
 }
 ```
 
-To call NVIDIA Run:ai REST APIs, the application must pass the retrieved `accessToken` as a _Bearer token_ in the Authorization header of your HTTP request.
+To call NVIDIA Run:ai REST APIs, the application must pass the retrieved `access_token` as a _Bearer token_ in the Authorization header of your HTTP request.

@@ -1,0 +1,21 @@
+type: object
+required:
+  - podId
+  - podName
+  - resourceClaims
+properties:
+  podId:
+    type: string
+    format: uuid
+    description: The id of the pod.
+  podName:
+    type: string
+    example: "bert-worker-0"
+  resourceClaims:
+    type: array
+    description: >-
+      The pod's claims that were generated from the resource claim template. A pod
+      usually has one, but may list several when more than one of its claim entries
+      references the same template.
+    items:
+      $ref: './PodResourceClaimBinding.yaml'

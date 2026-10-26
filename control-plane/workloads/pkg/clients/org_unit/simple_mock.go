@@ -11,8 +11,8 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/structs"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/structs"
 )
 
 type SimpleMock struct {

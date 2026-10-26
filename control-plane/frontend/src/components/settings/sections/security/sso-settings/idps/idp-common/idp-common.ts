@@ -12,11 +12,13 @@ export const idpCommon = {
   getSettingsBoxMessages,
   getCertificateExpirationDate,
   iValidCertificateDate,
+  isCertificateExpiringSoon,
   getDefaultScope,
 };
 
 export const DEFAULT_METADATA_FILE_NAME = "metadata.xml";
 export const DEFAULT_METADATA_FILE_TYPE = "application/xml";
+export const CERTIFICATE_EXPIRING_SOON_THRESHOLD_DAYS = 60;
 export const OPENID_SCOPE = "openid";
 export const DEFAULT_SCOPE_OPTIONS: ISelectOption = { label: OPENID_SCOPE, value: OPENID_SCOPE, disable: true };
 export const SCOPE_REGEX = /^([a-zA-Z0-9-._:]+)(\s[a-zA-Z0-9-._:]+)*$/;
@@ -39,6 +41,13 @@ function getCertificateExpirationDate(certificate: string): Promise<Date | null>
 
 function iValidCertificateDate(expirationDate: Date): boolean {
   return dateUtil.differenceBy(TimeUnit.minute, expirationDate as Date, new Date()) > 0;
+}
+
+function isCertificateExpiringSoon(expirationDate: Date): boolean {
+  return (
+    iValidCertificateDate(expirationDate) &&
+    dateUtil.differenceBy(TimeUnit.day, expirationDate, new Date()) <= CERTIFICATE_EXPIRING_SOON_THRESHOLD_DAYS
+  );
 }
 
 function getDefaultScope(scopes: string | string[] | undefined, withOpenId: boolean): Array<string> {

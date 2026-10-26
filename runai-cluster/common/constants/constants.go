@@ -41,6 +41,8 @@ const (
 
 	WorkloadRunnerNameLabel = "run.ai/workload-runner-name"
 
+	WorkloadRunnerUidLabel = "run.ai/workload-runner-uid"
+
 	// EwiStatusAnnotation: set "true" by EWI so cluster-sync skips the wlr phase override.
 	EwiStatusAnnotation = "run.ai/ewi-status"
 

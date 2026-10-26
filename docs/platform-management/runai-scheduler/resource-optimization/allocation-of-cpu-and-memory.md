@@ -17,13 +17,13 @@ The number of CPUs and amount of memory your workload will receive is guaranteed
 * When another workload is submitted, each workload will receive a number of compute and memory proportional to the number requested. For example, if the first workload requests 1 CPU and the second requests 3 CPUs on a node with 40 CPUs, the workloads will receive 10 and 30 CPUs respectively.
 * If CPU compute and memory are not explicitly requested, resources are assigned from the [cluster default](allocation-of-cpu-and-memory.md#cluster-default-resource-settings).
 
-<Info>
+<Note>
 
 **Note**
 
 If your workload temporarily uses more memory than requested and new workloads are scheduled, it may be forced to release memory, potentially resulting in an out of memory (OOM) error.
 
-</Info>
+</Note>
 
 ## Setting CPU Compute and Memory Limits
 
@@ -56,7 +56,7 @@ By default, NVIDIA Run:ai sets the limit to Auto, meaning the workload can use u
 
 ## Setting Cluster Defaults
 
-Administrators can change cluster-wide defaults for CPU and memory requests and/or limits. See [Advanced cluster configurations](../../../installation-and-configuration/post-installation-configuration/cluster-config.md) for more details:
+Administrators can change cluster-wide defaults for CPU and memory requests and/or limits. See [Advanced cluster configurations](../../../installation-and-configuration/configuration/cluster-config.md) for more details:
 
 * **Using Helm** - Set the values under `clusterConfig` in your `values.yaml` file and upgrade the chart.
 * **Using runaiconfig at runtime** - Edit the `runaiconfig` Custom Resource under `spec`.

@@ -79,7 +79,7 @@ func TestCollectImageLocksRejectsConflictingSources(t *testing.T) {
 	}
 }
 
-func TestCollectImageLocksDeduplicatesSharedThirdPartyImage(t *testing.T) {
+func TestCollectImageLocksKeepsSharedThirdPartyImageInEveryLock(t *testing.T) {
 	root := t.TempDir()
 	cluster := imageLockFixture("runai-cluster", "3.0.0", "cluster", "registry.example.com/cluster:3.0.0", "1")
 	controlPlane := imageLockFixture("runai-control-plane", "3.0.0", "control-plane", "registry.example.com/control-plane:3.0.0", "2")
@@ -102,8 +102,19 @@ func TestCollectImageLocksDeduplicatesSharedThirdPartyImage(t *testing.T) {
 	if len(collection.Locks[0].Images) != 2 {
 		t.Fatalf("cluster images = %#v", collection.Locks[0].Images)
 	}
-	if len(collection.Locks[1].Images) != 1 {
+	if len(collection.Locks[1].Images) != 2 {
 		t.Fatalf("control-plane images = %#v", collection.Locks[1].Images)
+	}
+	for _, collected := range collection.Locks {
+		found := false
+		for _, image := range collected.Images {
+			if image == shared {
+				found = true
+			}
+		}
+		if !found {
+			t.Fatalf("%s lost shared image: %#v", collected.Name, collected.Images)
+		}
 	}
 }
 

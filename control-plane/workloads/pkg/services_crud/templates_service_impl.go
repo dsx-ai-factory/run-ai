@@ -23,6 +23,7 @@ import (
 	authorizationClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	authorizationApi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
@@ -31,7 +32,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/google/uuid"
@@ -538,6 +538,14 @@ func (ts *TemplatesService) ListTemplatesUnified(ctx context.Context, workloadTy
 	recordCount := int32(len(response.Entries))
 	if recordCount == limitParam {
 		response.Pagination.NextOffset = float32(offsetParam + recordCount)
+	}
+
+	for i, template := range response.Entries {
+		projected, err := legacyCompatibleTemplate(template)
+		if err != nil {
+			return nil, err
+		}
+		response.Entries[i] = projected
 	}
 
 	return &response, nil

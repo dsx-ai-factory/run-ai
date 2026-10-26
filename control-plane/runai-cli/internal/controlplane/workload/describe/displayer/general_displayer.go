@@ -24,6 +24,7 @@ type General struct {
 	SubmittedBy          *string            `json:"submittedBy,omitempty"`
 	Priority             *string            `json:"priority,omitempty"`
 	Category             string             `json:"category"`
+	Preemptibility       *string            `json:"preemptibility,omitempty"`
 	Topology             *string            `json:"topology,omitempty"`
 	EnvironmentVariables *map[string]string `json:"environmentVariables,omitempty"`
 	Arguments            *string            `json:"arguments,omitempty"`

@@ -20,7 +20,6 @@ type TestingT interface {
 var (
 	TestTenant           uint = 1
 	ManagementTestTenant uint = 2
-	DGXCTestTenant       uint = 3
 	CustomRolesEnabled        = true
 	ClusterVersion            = "2.21.0"
 )
@@ -47,6 +46,5 @@ func CreateTables() {}
 
 func CleanTables() {
 	_, _ = runaidb.DB().Unscoped().Where("1 = 1").Delete(&models.AccessRule{})
-	_, _ = runaidb.DB().Unscoped().Where("1 = 1").Delete(&models.Permission{})
 	_, _ = runaidb.DB().Unscoped().Where("1 = 1").Delete(&models.Role{})
 }

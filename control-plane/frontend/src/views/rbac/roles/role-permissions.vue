@@ -44,42 +44,68 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import type { PropType } from "vue";
-import { ResourceType, type Permission, type RoleV1 } from "@/swagger-models/authorization-client";
+import {
+  ResourceType,
+  type Action,
+  type ResourceTypeGroupId,
+  type Role,
+  type RolePermission,
+} from "@/swagger-models/authorization-client";
 import { RunaiTooltipWrapper } from "@/components/common/runai-tooltip-wrapper";
 import { Actions } from "@/models/roles.model";
 import { excludedResourcesTypes } from "@/models/access-rule.model";
 import { stringUtil } from "@/utils/string.util";
 import { accessRuleUtil } from "@/utils/rbac.util/access-rule.util";
+import { usePermissionStore } from "@/stores/permissions.store";
+
+interface IRolePermissionRow {
+  resourceType: ResourceType;
+  displayName: string;
+  actions: Action[];
+  groupId?: ResourceTypeGroupId;
+}
 
 export default defineComponent({
   components: { RunaiTooltipWrapper },
   props: {
     role: {
-      type: Object as PropType<RoleV1>,
+      type: Object as PropType<Role>,
       required: true,
     },
+  },
+  data() {
+    return {
+      permissionStore: usePermissionStore(),
+    };
   },
   computed: {
     Actions() {
       return Actions;
     },
-    permissions(): Permission[] {
-      return this.role.permissions;
+    permissions(): IRolePermissionRow[] {
+      // Role permissions don't carry their entity group; the current user's permissions list every
+      // resource type with its group, so the group used to order the table rows is taken from there.
+      return this.role.permissions.map((permission: RolePermission) => ({
+        resourceType: permission.resourceType,
+        displayName: permission.displayName || permission.resourceType,
+        actions: permission.actions,
+        groupId: this.permissionStore.resourceTypeMap[permission.resourceType]?.groupId,
+      }));
     },
-    groupAndSortPermissions(): Permission[] {
+    groupAndSortPermissions(): IRolePermissionRow[] {
       const allPermissions = [...this.nonDataSourcePermissions, this.dataSourcePermissions, this.pvcPermission].filter(
         Boolean,
-      ) as Permission[];
+      ) as IRolePermissionRow[];
 
       const filtered = this.filterExcludedResources(allPermissions);
       return accessRuleUtil.sortAndGroupPermissionsByGroupId(filtered);
     },
-    nonDataSourcePermissions(): Permission[] {
+    nonDataSourcePermissions(): IRolePermissionRow[] {
       return this.permissions.filter(
         (p) => p.resourceType !== ResourceType.PvcAssets && !this.dataSources.has(p.resourceType),
       );
     },
-    pvcPermission(): Permission | null {
+    pvcPermission(): IRolePermissionRow | null {
       const pvcPerm = this.permissions.find((p) => p.resourceType === ResourceType.PvcAssets);
       return pvcPerm ? { ...pvcPerm, displayName: "PVC" } : null;
     },
@@ -91,7 +117,7 @@ export default defineComponent({
 
       return new Set(dataSourceResourcesTypes);
     },
-    dataSourcePermissions(): Permission | null {
+    dataSourcePermissions(): IRolePermissionRow | null {
       const dataSourceResMap = {
         [ResourceType.HostPathAssets]: ResourceType.HostPathAssets,
         [ResourceType.CmVolumeAssets]: ResourceType.CmVolumeAssets,
@@ -106,8 +132,8 @@ export default defineComponent({
   },
 
   methods: {
-    filterExcludedResources(permissions: Permission[]): Permission[] {
-      return permissions.filter((p: Permission) => {
+    filterExcludedResources(permissions: IRolePermissionRow[]): IRolePermissionRow[] {
+      return permissions.filter((p: IRolePermissionRow) => {
         return !excludedResourcesTypes.has(p.resourceType);
       });
     },

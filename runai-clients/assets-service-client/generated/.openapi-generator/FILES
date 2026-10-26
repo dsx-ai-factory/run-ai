@@ -19,6 +19,7 @@ api_model_inference.go
 api_nfs.go
 api_pvc.go
 api_registry.go
+api_resource_claim_templates.go
 api_s3.go
 api_secret.go
 api_synchronization.go
@@ -224,6 +225,7 @@ docs/GitRules.md
 docs/GitSecretRef.md
 docs/GitUpdateRequest.md
 docs/GitsRules.md
+docs/GpuComputeMode.md
 docs/GpuRequestType.md
 docs/HealthAPI.md
 docs/HistoryRecord.md
@@ -272,6 +274,10 @@ docs/InternalToolInfo.md
 docs/InternalToolType.md
 docs/InvolvedObject.md
 docs/ItemRules.md
+docs/K8sObjectMeta.md
+docs/K8sObjectSpec.md
+docs/K8sObjectsUpdate.md
+docs/K8sObjectsUpdatesResp.md
 docs/KeyValuePair.md
 docs/Label.md
 docs/MasterSpec.md
@@ -337,6 +343,7 @@ docs/PodAffinityType.md
 docs/PodAffinityTypeOptions.md
 docs/PodAffinityTypeOptionsOptionsInner.md
 docs/PodAffinityTypeRules.md
+docs/PodResourceClaimBinding.md
 docs/PolicyInfo.md
 docs/PolicyRuleEnum.md
 docs/Port.md
@@ -360,6 +367,11 @@ docs/PvcInstance.md
 docs/PvcRules.md
 docs/PvcVolumeMode.md
 docs/PvcsRules.md
+docs/Rct.md
+docs/RctCreationRequest.md
+docs/RctListResponse.md
+docs/RctSpec.md
+docs/RctUpdateRequest.md
 docs/Registry.md
 docs/RegistryAPI.md
 docs/RegistryCreationRequest.md
@@ -370,6 +382,10 @@ docs/RelatedUrl.md
 docs/Repositories.md
 docs/RepositoryTags.md
 docs/RequestInfo.md
+docs/ResourceClaimTemplateWorkload.md
+docs/ResourceClaimTemplateWorkloadPod.md
+docs/ResourceClaimTemplateWorkloadsResponse.md
+docs/ResourceClaimTemplatesAPI.md
 docs/ResponseInfo.md
 docs/RestartPolicy.md
 docs/RestartPolicyOptions.md
@@ -671,6 +687,7 @@ model_git_rules.go
 model_git_secret_ref.go
 model_git_update_request.go
 model_gits_rules.go
+model_gpu_compute_mode.go
 model_gpu_request_type.go
 model_history_record.go
 model_history_record_meta.go
@@ -716,6 +733,10 @@ model_internal_tool_info.go
 model_internal_tool_type.go
 model_involved_object.go
 model_item_rules.go
+model_k8s_object_meta.go
+model_k8s_object_spec.go
+model_k8s_objects_update.go
+model_k8s_objects_updates_resp.go
 model_key_value_pair.go
 model_label.go
 model_master_spec.go
@@ -771,6 +792,7 @@ model_pod_affinity_type.go
 model_pod_affinity_type_options.go
 model_pod_affinity_type_options_options_inner.go
 model_pod_affinity_type_rules.go
+model_pod_resource_claim_binding.go
 model_policy_info.go
 model_policy_rule_enum.go
 model_port.go
@@ -800,6 +822,11 @@ model_pvc_rules.go
 model_pvc_update_request.go
 model_pvc_volume_mode.go
 model_pvcs_rules.go
+model_rct.go
+model_rct_creation_request.go
+model_rct_list_response.go
+model_rct_spec.go
+model_rct_update_request.go
 model_registry.go
 model_registry_creation_request.go
 model_registry_list_response.go
@@ -809,6 +836,9 @@ model_related_url.go
 model_repositories.go
 model_repository_tags.go
 model_request_info.go
+model_resource_claim_template_workload.go
+model_resource_claim_template_workload_pod.go
+model_resource_claim_template_workloads_response.go
 model_response_info.go
 model_restart_policy.go
 model_restart_policy_options.go
@@ -929,6 +959,7 @@ test/api_model_test.go
 test/api_nfs_test.go
 test/api_pvc_test.go
 test/api_registry_test.go
+test/api_resource_claim_templates_test.go
 test/api_s3_test.go
 test/api_secret_test.go
 test/api_synchronization_test.go

@@ -26,7 +26,7 @@ func (e *EnableModelCatalog) Category() string {
 
 func (e *EnableModelCatalog) Description() string {
 	return "Enable instant deployment of Hugging Face models via the Models view or the workload submission form. " +
-		"For more information, see the <a href='https://run-ai-docs.nvidia.com/self-hosted/workloads-in-nvidia-run-ai/using-inference/hugging-face-inference' target='_blank'>Deploy Inference Workloads from Hugging Face</a>"
+		"For more information, see the <a data-doc-key='huggingFaceInference' target='_blank'>Deploy Inference Workloads from Hugging Face</a>"
 }
 
 func (e *EnableModelCatalog) DisplayName() string {

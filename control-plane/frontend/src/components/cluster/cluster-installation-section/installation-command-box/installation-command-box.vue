@@ -74,7 +74,6 @@ export default {
     color: $black-54;
   }
   .tool-tip-dark {
-    // TODO: check why its not working
     background-color: $positive;
     color: $white;
   }

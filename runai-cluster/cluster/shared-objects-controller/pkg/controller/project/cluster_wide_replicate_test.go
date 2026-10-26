@@ -12,14 +12,19 @@ import (
 	. "github.com/onsi/gomega"
 
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	schedulingv2alpha2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v2alpha2"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 )
 
 const (
@@ -364,6 +369,104 @@ var _ = Describe("Cluster-wide Secret replication", func() {
 	})
 })
 
+var _ = Describe("Cluster-wide OAuth2 template ConfigMap replication", func() {
+	var (
+		k8sClient client.Client
+		handler   *ClusterWideReplicatedResourceHandler
+		project   *kaiorg.Project
+		source    *corev1.ConfigMap
+		ctx       context.Context
+	)
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		project = cwTestProject()
+		source = &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: oauth2proxy.ConfigMapName, Namespace: cwTestSchedulerNamespace,
+				Labels: map[string]string{commonconstants.ClusterWideResourceLabel: "true"},
+			},
+			Data: map[string]string{oauth2proxy.TemplateKey: "<html>Run:ai error</html>"},
+		}
+		scheme := scheme_init.Scheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		k8sClient = fake.NewClientBuilder().WithScheme(scheme).
+			WithStatusSubresource(&kaiorg.Project{}).
+			WithObjects(project.DeepCopy(), &corev1.Namespace{
+				ObjectMeta: metav1.ObjectMeta{Name: cwTestProjectNamespace},
+			}).Build()
+		gvkCommon, err := NewClusterWideGVKCommon(ctx, k8sClient,
+			&ClusterWideReplicatorGVKConfig{ClusterWideConfigMaps: true})
+		Expect(err).To(Succeed())
+		handler = NewClusterWideReplicatedResourceHandler(k8sClient, gvkCommon)
+		Expect(k8sClient.Create(ctx, source)).To(Succeed())
+	})
+
+	It("replicates the source to existing and subsequently created project namespaces when reconciled", func() {
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		replica := &corev1.ConfigMap{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: source.Name, Namespace: project.Status.Namespace}, replica)).To(Succeed())
+		Expect(replica.Data).To(Equal(source.Data))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, project.Name))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectIdLabelKey, string(project.UID)))
+		Expect(replica.OwnerReferences).To(BeEmpty())
+
+		newProject := cwTestProject()
+		newProject.Name, newProject.UID, newProject.Status.Namespace = "proj-2", "proj-2-uid", "ns-proj-2"
+		Expect(k8sClient.Create(ctx, newProject)).To(Succeed())
+		Expect(k8sClient.Create(ctx, &corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: newProject.Status.Namespace}})).To(Succeed())
+		Expect(handler.HandleResource(ctx, *newProject)).To(Succeed())
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: source.Name, Namespace: newProject.Status.Namespace}, replica)).To(Succeed())
+		Expect(replica.Data).To(Equal(source.Data))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, newProject.Name))
+	})
+
+	It("propagates source changes on the next project reconcile", func() {
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		source.Data[oauth2proxy.TemplateKey] = "<html>Updated Run:ai error</html>"
+		Expect(k8sClient.Update(ctx, source)).To(Succeed())
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		replica := &corev1.ConfigMap{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: source.Name, Namespace: project.Status.Namespace}, replica)).To(Succeed())
+		Expect(replica.Data).To(Equal(source.Data))
+	})
+
+	It("adopts an ownerless existing copy even when its template already matches", func() {
+		existing := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: source.Name, Namespace: project.Status.Namespace, UID: "existing-template-uid",
+			},
+			Data: source.DeepCopy().Data,
+		}
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		replica := &corev1.ConfigMap{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), replica)).To(Succeed())
+		Expect(replica.UID).To(Equal(existing.UID))
+		Expect(replica.Data).To(Equal(source.Data))
+		Expect(replica.Labels).To(HaveKeyWithValue(commonconstants.ClusterWideResourceLabel, "true"))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, project.Name))
+		Expect(replica.Labels).To(HaveKeyWithValue(replicatedProjectIdLabelKey, string(project.UID)))
+		Expect(replica.OwnerReferences).To(BeEmpty())
+	})
+
+	It("preserves a project template marked as manually overridden", func() {
+		existing := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: source.Name, Namespace: project.Status.Namespace,
+				Labels: map[string]string{ResourceManualOverrideLabel: "true"},
+			},
+			Data: map[string]string{oauth2proxy.TemplateKey: "<html>Project error</html>"},
+		}
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		replica := &corev1.ConfigMap{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), replica)).To(Succeed())
+		Expect(replica.Data).To(Equal(existing.Data))
+		Expect(replica.Labels).NotTo(HaveKey(replicatedProjectNameLabelKey))
+	})
+})
+
 var _ = Describe("PVC inspector helpers", func() {
 	var gvkCommon *ClusterWideGVKCommon
 
@@ -419,6 +522,452 @@ var _ = Describe("PVC inspector helpers", func() {
 		newSecret := &corev1.Secret{Data: map[string][]byte{"new": []byte("v")}}
 		gvkCommon.PreserveImmutableFields(existing, newSecret)
 		Expect(newSecret.Data).To(Equal(map[string][]byte{"new": []byte("v")}))
+	})
+})
+
+// cwRct builds a minimal ResourceClaimTemplate with the single-GPU request the
+// assets-sync agent produces. Callers pass a labels map (scope + asset label)
+// so the different Describes can exercise cluster-wide, department-wide, and
+// non-scoped sources from the same helper. The labels map is cloned so that
+// later per-object label mutations don't leak back into the caller's map.
+func cwRct(name, namespace string, labels map[string]string) *resourcev1.ResourceClaimTemplate {
+	var labelsCopy map[string]string
+	if labels != nil {
+		labelsCopy = make(map[string]string, len(labels))
+		for k, v := range labels {
+			labelsCopy[k] = v
+		}
+	}
+	return &resourcev1.ResourceClaimTemplate{
+		TypeMeta: metav1.TypeMeta{Kind: "ResourceClaimTemplate", APIVersion: resourcev1.SchemeGroupVersion.String()},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+			Labels:    labelsCopy,
+		},
+		Spec: resourcev1.ResourceClaimTemplateSpec{
+			Spec: resourcev1.ResourceClaimSpec{
+				Devices: resourcev1.DeviceClaim{
+					Requests: []resourcev1.DeviceRequest{{
+						Name: "gpu",
+						Exactly: &resourcev1.ExactDeviceRequest{
+							DeviceClassName: "nvidia.com/gpu",
+							Tolerations: []resourcev1.DeviceToleration{{
+								Key:   "nvidia.com/gpu",
+								Value: "present",
+							}},
+						},
+					}},
+				},
+			},
+		},
+	}
+}
+
+// cwRctFullyDefaulted returns a copy of cwRct(...) with the server-side
+// defaults the apiserver would stamp (AllocationMode=ExactCount, Count=1,
+// Toleration.Operator=Equal) already set. Used by the "no churn after
+// defaults" test to simulate what an on-cluster read-back of a replicated
+// RCT looks like.
+func cwRctFullyDefaulted(name, namespace string, labels map[string]string) *resourcev1.ResourceClaimTemplate {
+	rct := cwRct(name, namespace, labels)
+	rct.Spec.Spec.Devices.Requests[0].Exactly.AllocationMode = resourcev1.DeviceAllocationModeExactCount
+	rct.Spec.Spec.Devices.Requests[0].Exactly.Count = 1
+	rct.Spec.Spec.Devices.Requests[0].Exactly.Tolerations[0].Operator = resourcev1.DeviceTolerationOpEqual
+	return rct
+}
+
+var _ = Describe("Cluster-wide ResourceClaimTemplate replication", func() {
+	var (
+		k8sClient client.Client
+		handler   *ClusterWideReplicatedResourceHandler
+		project   *kaiorg.Project
+		ctx       context.Context
+	)
+
+	rctClusterLabels := map[string]string{
+		commonconstants.ClusterWideResourceLabel: "true",
+		commonconstants.RunaiAssetLabel:          ResourceClaimTemplateAssetKind,
+	}
+	rctDep1Labels := map[string]string{
+		commonconstants.DepartmentScopeLabel: cwTestDepartment1,
+		commonconstants.RunaiAssetLabel:      ResourceClaimTemplateAssetKind,
+	}
+	rctDep2Labels := map[string]string{
+		commonconstants.DepartmentScopeLabel: cwTestDepartment2,
+		commonconstants.RunaiAssetLabel:      ResourceClaimTemplateAssetKind,
+	}
+
+	BeforeEach(func() {
+		ctx = context.Background()
+		project = cwTestProject()
+		ns := &corev1.Namespace{
+			ObjectMeta: metav1.ObjectMeta{Name: cwTestProjectNamespace},
+		}
+
+		scheme := scheme_init.Scheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		k8sClient = fake.NewClientBuilder().
+			WithScheme(scheme).
+			WithStatusSubresource(&kaiorg.Project{}).
+			WithObjects(project.DeepCopy(), ns).
+			Build()
+
+		gvkCommon, err := NewClusterWideGVKCommon(ctx, k8sClient,
+			&ClusterWideReplicatorGVKConfig{ClusterWideResourceClaimTemplates: true})
+		Expect(err).To(BeNil())
+		handler = NewClusterWideReplicatedResourceHandler(k8sClient, gvkCommon)
+	})
+
+	It("replicates a cluster-wide RCT into the project namespace with the replicated-project labels", func() {
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		replicated := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "cw-rct", Namespace: cwTestProjectNamespace}, replicated)).To(Succeed())
+		Expect(replicated.Labels).To(HaveKeyWithValue(commonconstants.ClusterWideResourceLabel, "true"))
+		Expect(replicated.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, project.Name))
+		Expect(replicated.Labels).To(HaveKeyWithValue(replicatedProjectIdLabelKey, string(project.UID)))
+		Expect(replicated.Spec).To(Equal(src.Spec))
+	})
+
+	It("replicates a department-wide RCT matching the project's department and ignores other departments", func() {
+		dep1 := cwRct("dep1-rct", cwTestSchedulerNamespace, rctDep1Labels)
+		dep2 := cwRct("dep2-rct", cwTestSchedulerNamespace, rctDep2Labels)
+		Expect(k8sClient.Create(ctx, dep1)).To(Succeed())
+		Expect(k8sClient.Create(ctx, dep2)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "dep1-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).To(Succeed())
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "dep2-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).ToNot(Succeed())
+	})
+
+	It("does not touch a scope-wide-labeled RCT in runai that lacks the asset-sync label (safety filter)", func() {
+		// Carries the cluster-wide scope label but NOT the run.ai/asset
+		// label. The RCT inspector's AdditionalObjectFilter is supposed
+		// to keep it out of the replicated set — otherwise a manually
+		// created RCT in runai would end up in every project.
+		src := cwRct("unmanaged-rct", cwTestSchedulerNamespace,
+			map[string]string{commonconstants.ClusterWideResourceLabel: "true"})
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "unmanaged-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).ToNot(Succeed())
+	})
+
+	It("does not recreate the replica when the only diff is API-server defaults (no churn)", func() {
+		// Source as sent by the user: zero AllocationMode/Count/Operator.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		// Existing replica as it would be read back from the apiserver:
+		// same request, but with server-side defaults populated. Pin a
+		// known UID so a recreate would move it.
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.UID = "existing-stable-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID), "RCT must not churn on a defaults-only diff")
+	})
+
+	It("delete-and-recreates the replica when the source spec actually changes", func() {
+		// Source bumped to 4 GPUs.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Spec.Spec.Devices.Requests[0].Exactly.Count = 4
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		// Existing replica is at the old (Count=1) spec, fully defaulted
+		// as the apiserver would store it.
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.UID = "old-replica-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).NotTo(Equal(existing.UID), "RCT must be re-created when its immutable spec diverges")
+		Expect(after.Spec.Spec.Devices.Requests[0].Exactly.Count).To(BeEquivalentTo(4))
+	})
+
+	It("reconciles managed-metadata drift in place when the RCT spec is unchanged (UID stable)", func() {
+		// Source carries an updated run.ai annotation (as if the agent
+		// bumped UpdateCountAnnotation on resync) and an updated managed
+		// label. Spec is byte-identical modulo API-server defaults.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Annotations = map[string]string{
+			"run.ai/update-count": "7",
+			"foreign-system/x":    "ignored",
+		}
+		src.Labels["run.ai/asset-id"] = "asset-new"
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.Labels["run.ai/asset-id"] = "asset-old"
+		existing.Annotations = map[string]string{
+			"run.ai/update-count": "6",
+			"user-stamped":        "keep-me",
+		}
+		existing.UID = "metadata-reconcile-stable-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID), "RCT must NOT be re-created for a metadata-only diff")
+		Expect(after.Labels).To(HaveKeyWithValue("run.ai/asset-id", "asset-new"))
+		Expect(after.Annotations).To(HaveKeyWithValue("run.ai/update-count", "7"))
+		Expect(after.Annotations).To(HaveKeyWithValue("user-stamped", "keep-me"),
+			"non-run.ai annotations on the replica must survive the metadata reconcile")
+	})
+
+	It("does not issue any Update when spec and managed metadata are already in sync (idempotent)", func() {
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Labels["run.ai/asset-id"] = "asset-1"
+		src.Annotations = map[string]string{"run.ai/update-count": "3"}
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.Labels["run.ai/asset-id"] = "asset-1"
+		existing.Annotations = map[string]string{"run.ai/update-count": "3"}
+		existing.UID = "idempotent-noop-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		resourceVersionBefore := func() string {
+			current := &resourcev1.ResourceClaimTemplate{}
+			Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), current)).To(Succeed())
+			return current.ResourceVersion
+		}()
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID))
+		Expect(after.ResourceVersion).To(Equal(resourceVersionBefore),
+			"a no-op reconcile must not bump resourceVersion with a pointless Update")
+	})
+
+	It("reconciles divergent OwnerReferences in place without churning the UID", func() {
+		// Source has no OwnerReferences; replica has a stale one (e.g.
+		// from a prior version of the controller). Spec is byte-equal
+		// modulo API-server defaults — only metadata diverges. Should
+		// clear the stale ref via in-place Update, not delete-and-recreate.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.OwnerReferences = cwProjectOwnerRef()
+		existing.UID = "owner-ref-reconcile-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID),
+			"RCT must NOT be re-created for an OwnerReferences-only diff")
+		Expect(after.OwnerReferences).To(BeEmpty())
+	})
+
+	It("removes managed run.ai labels/annotations from the replica when they disappear from the source", func() {
+		// Source carries one managed label/annotation; the replica
+		// still has an extra managed pair from a previous reconcile
+		// where the source had them too. Reconcile must strip the
+		// stale managed keys without touching the user-authored ones.
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Labels["run.ai/asset-id"] = "a1"
+		src.Annotations = map[string]string{"run.ai/update-count": "5"}
+		Expect(k8sClient.Create(ctx, src)).To(Succeed())
+
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		existing.Labels["run.ai/asset-id"] = "a1"
+		existing.Labels["run.ai/stale-label"] = "please-remove-me"
+		existing.Annotations = map[string]string{
+			"run.ai/update-count": "5",
+			"run.ai/stale-annot":  "please-remove-me",
+			"user-stamped":        "keep-me",
+		}
+		existing.UID = "stale-managed-keys-uid"
+		Expect(k8sClient.Create(ctx, existing)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		after := &resourcev1.ResourceClaimTemplate{}
+		Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(existing), after)).To(Succeed())
+		Expect(after.UID).To(Equal(existing.UID))
+		Expect(after.Labels).NotTo(HaveKey("run.ai/stale-label"))
+		Expect(after.Labels).To(HaveKeyWithValue(replicatedProjectNameLabelKey, project.Name),
+			"handler-stamped replicated-project labels must survive")
+		Expect(after.Annotations).NotTo(HaveKey("run.ai/stale-annot"))
+		Expect(after.Annotations).To(HaveKeyWithValue("user-stamped", "keep-me"),
+			"non-run.ai annotations must survive")
+	})
+
+	It("returns an error (so the controller retries) when Create fails after the delete-for-recreate", func() {
+		// Simulates the common race: Delete marks the old replica
+		// terminating, immediate Create then fails with AlreadyExists
+		// because the object isn't fully gone yet. We must propagate
+		// the error — swallowing it would leave the project with no
+		// replica until some unrelated event re-enqueues it.
+		scheme := scheme_init.Scheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		src := cwRct("cw-rct", cwTestSchedulerNamespace, rctClusterLabels)
+		src.Spec.Spec.Devices.Requests[0].Exactly.Count = 4
+		existing := cwRctFullyDefaulted("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		existing.Labels[replicatedProjectNameLabelKey] = project.Name
+		existing.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+
+		k8sClientWithRace := fake.NewClientBuilder().
+			WithScheme(scheme).
+			WithStatusSubresource(&kaiorg.Project{}).
+			WithObjects(project.DeepCopy(),
+				&corev1.Namespace{ObjectMeta: metav1.ObjectMeta{Name: cwTestProjectNamespace}},
+				src, existing).
+			WithInterceptorFuncs(interceptor.Funcs{
+				Create: func(ctx context.Context, c client.WithWatch, obj client.Object, opts ...client.CreateOption) error {
+					if _, isRct := obj.(*resourcev1.ResourceClaimTemplate); isRct && obj.GetNamespace() == cwTestProjectNamespace {
+						return apierrors.NewAlreadyExists(
+							schema.GroupResource{Group: resourcev1.SchemeGroupVersion.Group, Resource: "resourceclaimtemplates"},
+							obj.GetName())
+					}
+					return c.Create(ctx, obj, opts...)
+				},
+			}).
+			Build()
+		gvkCommon, err := NewClusterWideGVKCommon(ctx, k8sClientWithRace,
+			&ClusterWideReplicatorGVKConfig{ClusterWideResourceClaimTemplates: true})
+		Expect(err).To(BeNil())
+		racingHandler := NewClusterWideReplicatedResourceHandler(k8sClientWithRace, gvkCommon)
+
+		Expect(racingHandler.HandleResource(ctx, *project)).ToNot(Succeed(),
+			"Create failure after delete-for-recreate must bubble up so controller-runtime retries")
+	})
+
+	It("deletes a replica owned by the project whose source no longer exists, but keeps unlabeled ones", func() {
+		orphan := cwRct("cw-rct", cwTestProjectNamespace, rctClusterLabels)
+		orphan.Labels[replicatedProjectNameLabelKey] = project.Name
+		orphan.Labels[replicatedProjectIdLabelKey] = string(project.UID)
+		orphan.OwnerReferences = cwProjectOwnerRef()
+		Expect(k8sClient.Create(ctx, orphan)).To(Succeed())
+
+		// A hand-authored RCT in the project namespace with no scope
+		// label and no replicated-project label — must not be swept.
+		userRct := cwRct("user-rct", cwTestProjectNamespace, nil)
+		Expect(k8sClient.Create(ctx, userRct)).To(Succeed())
+
+		Expect(handler.HandleResource(ctx, *project)).To(Succeed())
+
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "cw-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).ToNot(Succeed())
+		Expect(k8sClient.Get(ctx, types.NamespacedName{Name: "user-rct", Namespace: cwTestProjectNamespace},
+			&resourcev1.ResourceClaimTemplate{})).To(Succeed())
+	})
+})
+
+var _ = Describe("RCT inspector helpers", func() {
+	var gvkCommon *ClusterWideGVKCommon
+
+	BeforeEach(func() {
+		scheme := scheme_init.Scheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		k8sClient := fake.NewClientBuilder().WithScheme(scheme).Build()
+		var err error
+		gvkCommon, err = NewClusterWideGVKCommon(context.Background(), k8sClient,
+			&ClusterWideReplicatorGVKConfig{ClusterWideResourceClaimTemplates: true})
+		Expect(err).To(BeNil())
+	})
+
+	It("IsSpecImmutable is true for RCT and false for PVC/Secret/ConfigMap", func() {
+		Expect(gvkCommon.IsSpecImmutable(&resourcev1.ResourceClaimTemplate{})).To(BeTrue())
+		Expect(gvkCommon.IsSpecImmutable(&corev1.PersistentVolumeClaim{})).To(BeFalse())
+		Expect(gvkCommon.IsSpecImmutable(&corev1.Secret{})).To(BeFalse())
+		Expect(gvkCommon.IsSpecImmutable(&corev1.ConfigMap{})).To(BeFalse())
+	})
+
+	It("AreEqual treats a defaults-only diff as equal", func() {
+		undefaulted := cwRct("r", "runai", nil)
+		defaulted := cwRctFullyDefaulted("r", "runai", nil)
+		Expect(gvkCommon.AreEqual(context.Background(), undefaulted, defaulted)).To(BeTrue())
+	})
+
+	It("AreEqual flags a real spec diff (Count change)", func() {
+		a := cwRct("r", "runai", nil)
+		b := cwRct("r", "runai", nil)
+		b.Spec.Spec.Devices.Requests[0].Exactly.Count = 4
+		Expect(gvkCommon.AreEqual(context.Background(), a, b)).To(BeFalse())
+	})
+
+	It("IsManagedMetadataDiffers returns false when run.ai labels+annotations already match", func() {
+		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
+		existing.Annotations = map[string]string{"run.ai/update-count": "2"}
+		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
+		new.Annotations = map[string]string{"run.ai/update-count": "2"}
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeFalse())
+	})
+
+	It("IsManagedMetadataDiffers returns true when a run.ai label value differs", func() {
+		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "old"})
+		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "new"})
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
+	})
+
+	It("IsManagedMetadataDiffers returns true when a run.ai annotation on new is missing on existing", func() {
+		existing := cwRct("r", "runai", nil)
+		new := cwRct("r", "runai", nil)
+		new.Annotations = map[string]string{"run.ai/update-count": "9"}
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
+	})
+
+	It("IsManagedMetadataDiffers ignores non-run.ai labels/annotations entirely", func() {
+		existing := cwRct("r", "runai", map[string]string{"foreign/x": "a"})
+		existing.Annotations = map[string]string{"user/notes": "keep"}
+		new := cwRct("r", "runai", map[string]string{"foreign/x": "b"})
+		new.Annotations = map[string]string{"user/notes": "overwrite?"}
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeFalse())
+	})
+
+	It("IsManagedMetadataDiffers returns true when existing has a managed label absent from new", func() {
+		existing := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1", "run.ai/stale": "x"})
+		new := cwRct("r", "runai", map[string]string{"run.ai/asset-id": "a1"})
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
+	})
+
+	It("IsManagedMetadataDiffers returns true when existing has a managed annotation absent from new", func() {
+		existing := cwRct("r", "runai", nil)
+		existing.Annotations = map[string]string{"run.ai/stale": "x"}
+		new := cwRct("r", "runai", nil)
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
+	})
+
+	It("IsManagedMetadataDiffers returns true when OwnerReferences differ", func() {
+		existing := cwRct("r", "runai", nil)
+		existing.OwnerReferences = cwProjectOwnerRef()
+		new := cwRct("r", "runai", nil)
+		Expect(gvkCommon.IsManagedMetadataDiffers(existing, new)).To(BeTrue())
 	})
 })
 

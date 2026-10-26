@@ -19,7 +19,6 @@ allowed_images := {
 # List of Dockerfile paths that are exceptions
 exception_dockerfiles := {
     "runai-cluster/cluster/git-sync/Dockerfile",
-    "runai-cluster/cluster/oauth2-proxy/Dockerfile",
     "control-plane/notifications-service/Dockerfile",
     "control-plane/keycloak-extensions/Dockerfile"
 }

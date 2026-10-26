@@ -1,0 +1,122 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: runai-pod-job
+  labels:
+    app: runai
+webhooks:
+  - name: runai-admission-controller.runai.svc
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    namespaceSelector:
+      matchExpressions:
+        - key: runai/queue
+          operator: Exists
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: runai-admission-controller
+        namespace: runai
+        path: "/mutate-pod"
+    rules:
+      - operations: ["CREATE"]
+        apiGroups: ["*"]
+        apiVersions: ["*"]
+        resources: ["pods"]
+        scope: "Namespaced"
+    reinvocationPolicy: "IfNeeded"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-pod-job
+  labels:
+    app: runai
+webhooks:
+- name: runai-admission-controller.runai.svc
+  admissionReviewVersions: [ "v1" ]
+  sideEffects: None
+  namespaceSelector:
+    matchExpressions:
+    - key: runai/queue
+      operator: Exists
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: runai-admission-controller
+      namespace: runai
+      path: "/validate-pod-job"
+  rules:
+  - operations: ["CREATE"]
+    apiGroups: ["*"]
+    apiVersions: ["*"]
+    resources: ["pods"]
+    scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-training-policy-validation
+  labels:
+    app: runai
+webhooks:
+- name: workload-controller.runai.svc
+  admissionReviewVersions: [ "v1" ]
+  sideEffects: None
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: workload-controller
+      namespace: runai
+      path: "/validate-run-ai-v1-trainingpolicy"
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["*"]
+    apiVersions: ["*"]
+    resources: ["trainingpolicies"]
+    scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-training-workload-validation
+  labels:
+    app: runai
+webhooks:
+- name: workload-controller.runai.svc
+  admissionReviewVersions: [ "v1" ]
+  sideEffects: None
+  failurePolicy: Fail
+  clientConfig:
+    service:
+      name: workload-controller
+      namespace: runai
+      path: "/validate-run-ai-v1-trainingworkload"
+  rules:
+  - operations: ["CREATE", "UPDATE"]
+    apiGroups: ["*"]
+    apiVersions: ["*"]
+    resources: ["trainingworkloads"]
+    scope: "Namespaced"
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: runai-accessrule-validation
+  labels:
+    app: runai
+webhooks:
+  - name: runai-accessrule-controller.runai.svc
+    admissionReviewVersions: [ "v1" ]
+    sideEffects: None
+    failurePolicy: Fail
+    clientConfig:
+      service:
+        name: runai-accessrule-controller
+        namespace: runai
+        path: "/validate-access-rule"
+    rules:
+      - operations: ["UPDATE"]
+        apiGroups: ["run.ai"]
+        apiVersions: ["v1alpha1"]
+        resources: ["accessrules"]

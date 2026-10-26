@@ -37,8 +37,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	setting_pkg "github.com/dsx-ai-factory/run-ai/runai-common-packages/setting"
@@ -104,6 +104,7 @@ var _ = Describe("distributed service validations", func() {
 
 			createPayload := createResponse.Body.(workloadsApi.SupersetWorkload)
 			Expect(createPayload.WorkloadId).NotTo(BeNil())
+			expectWorkloadActions(ctx, createPayload.WorkloadId, "create")
 
 			//  expecting the actual phase to be Creating...
 			createPayload.ActualPhase = convutils.Ref(workloadsApi.PHASE_CREATING)
@@ -645,7 +646,7 @@ var _ = Describe("distributed service validations", func() {
 			createResponse, _ = distributedService.CreateDistributed(ctx, request)
 			Expect(createResponse.Code).To(Equal(http.StatusBadRequest))
 			submissionErr = createResponse.Body.(*workloadsApi.SubmissionErrorV2)
-			Expect(submissionErr.Message).To(ContainSubstring("gpuPortionRequest should not be provided for master replica of MPI workload"))
+			Expect(submissionErr.Message).To(ContainSubstring("gpuMemoryPortionRequest should not be provided for master replica of MPI workload"))
 
 			request.MasterSpec = &api.MasterSpec{
 				Image: convutils.Ref("ubuntu"),
@@ -657,7 +658,7 @@ var _ = Describe("distributed service validations", func() {
 			createResponse, _ = distributedService.CreateDistributed(ctx, request)
 			Expect(createResponse.Code).To(Equal(http.StatusBadRequest))
 			submissionErr = createResponse.Body.(*workloadsApi.SubmissionErrorV2)
-			Expect(submissionErr.Message).To(ContainSubstring("gpuPortionLimit should not be provided for master replica of MPI workload"))
+			Expect(submissionErr.Message).To(ContainSubstring("gpuMemoryPortionLimit should not be provided for master replica of MPI workload"))
 
 			request.MasterSpec = &api.MasterSpec{
 				Image: convutils.Ref("ubuntu"),

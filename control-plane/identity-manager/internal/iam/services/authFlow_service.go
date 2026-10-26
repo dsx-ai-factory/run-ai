@@ -12,7 +12,6 @@ import (
 	authflow "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/auth_flow"
 )
 
-//go:generate mockery --name AuthFlowService --output ./mocks --filename authflow_service.go
 type AuthFlowService interface {
 	CreateAuthFlow(ctx context.Context, realm string, flow models.AuthenticationFlowRepresentation) error
 	GetAuthFlow(ctx context.Context, realm string, flowAlias string) (*models.AuthenticationFlowRepresentation, error)

@@ -9,8 +9,8 @@ import (
 	"fmt"
 	"strings"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	"k8s.io/utils/ptr"
 )
 

@@ -51,6 +51,6 @@ var _ = Describe("Controller certificates", func() {
 
 		_, err := signCertificates(context.Background(), client, signer)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(signer.calls).To(HaveLen(7))
+		Expect(signer.calls).To(HaveLen(6))
 	})
 })

@@ -29,6 +29,7 @@ type UnifiedAssetSyncResponse struct {
 
 	CredentialAssets []api.CredentialsUpdate
 	DatasourceAssets []api.DatasourceUpdate
+	K8sObjectsAssets []api.K8sObjectsUpdate
 }
 
 func (uas *UnifiedAssetSyncResponse) ToCredentials() api.CredentialsUpdatesResp {
@@ -46,6 +47,15 @@ func (uas *UnifiedAssetSyncResponse) ToDatasource() api.DatasourceUpdatesResp {
 		ResponseInfo: uas.ResponseInfo,
 		SystemInfo:   uas.SystemInfo,
 		Assets:       uas.DatasourceAssets,
+	}
+}
+
+func (uas *UnifiedAssetSyncResponse) ToK8sObjects() api.K8sObjectsUpdatesResp {
+	return api.K8sObjectsUpdatesResp{
+		RequestInfo:  uas.RequestInfo,
+		ResponseInfo: uas.ResponseInfo,
+		SystemInfo:   uas.SystemInfo,
+		Assets:       uas.K8sObjectsAssets,
 	}
 }
 
@@ -195,6 +205,23 @@ func (s *SyncApiService) prepareAssetSyncUpdatesResp(ctx context.Context, needTo
 				continue
 			}
 			credentialsUpdate = &update
+		case api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE:
+			// A live k8s-object asset must have an assets_spec row. A deleted
+			// asset may or may not still have one; the cluster agent only
+			// needs the metadata to remove it.
+			if !update.DeletedAt.Valid && update.AssetsSpec == nil {
+				logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("asset %s is missing k8s object spec", update.Id)
+				continue
+			}
+
+			converted, convErr := update.ToK8sObjectsUpdate()
+			if convErr != nil {
+				return nil, convErr
+			}
+
+			toSync = append(toSync, update)
+			syncResponse.K8sObjectsAssets = append(syncResponse.K8sObjectsAssets, converted)
+			continue
 		default:
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("unsupported kind %s for asset %s", update.Kind, update.Id)
 		}

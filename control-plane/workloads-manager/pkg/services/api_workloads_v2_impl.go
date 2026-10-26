@@ -17,6 +17,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/plugins"
@@ -47,11 +49,11 @@ import (
 
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	authApi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/org_unit"
 	workloadsClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/settings"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 const (
@@ -87,27 +89,40 @@ func RegisterSuspendDefCacheStore() {
 }
 
 type WorkloadsV2Impl struct {
-	k8sUtil          *K8sResourceUtil
-	settingsManager  *settings.SettingsManager
-	gvkPluginFactory *plugins.Factory
+	k8sUtil                *K8sResourceUtil
+	settingsManager        *settings.SettingsManager
+	gvkPluginFactory       *plugins.Factory
+	workloadActionRecorder workloadActionRecorder
 }
 
 type CreateWorkloadV2Options struct {
 	DryRun                  bool
 	CheckYamlSubmissionFlag bool
 	TranslatedFromV1        bool
+	RecordAction            bool
+}
+
+// Public v2/YAML and in-process NIM updates use skipAuth=false and recordAction=true.
+// Delegated v1 any-workload updates use skipAuth=true and recordAction=false because workloads already did both.
+type updateWorkloadV2Options struct {
+	skipAuth     bool
+	recordAction bool
 }
 
 func NewWorkloadsV2Impl() *WorkloadsV2Impl {
 	return &WorkloadsV2Impl{
-		k8sUtil:          NewK8sResourceUtil(),
-		settingsManager:  settings.NewSettingsManager(),
-		gvkPluginFactory: plugins.NewFactory(),
+		k8sUtil:                NewK8sResourceUtil(),
+		settingsManager:        settings.NewSettingsManager(),
+		gvkPluginFactory:       plugins.NewFactory(),
+		workloadActionRecorder: newAsyncWorkloadActionRecorder(),
 	}
 }
 
 func (w *WorkloadsV2Impl) CreateWorkloadV2(ctx context.Context, request api.WorkloadV2CreateRequest, checkYamlSubmissionFlag bool) (*api.WorkloadV2, []api.SubmissionErrorV2) {
-	return w.CreateWorkloadV2WithDryRun(ctx, request, CreateWorkloadV2Options{DryRun: false, CheckYamlSubmissionFlag: checkYamlSubmissionFlag})
+	return w.CreateWorkloadV2WithDryRun(ctx, request, CreateWorkloadV2Options{
+		CheckYamlSubmissionFlag: checkYamlSubmissionFlag,
+		RecordAction:            recordAction,
+	})
 }
 
 func (w *WorkloadsV2Impl) DryRunCreateWorkloadV2(ctx context.Context, request api.WorkloadV2CreateRequest) (*api.WorkloadV2, []api.SubmissionErrorV2) {
@@ -207,7 +222,11 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 	mutatedMetadata := w.applyDefaultMutations(request.Metadata, workloadType, priorityNameToValue)
 	mutatedMetadata.Name = name
 
-	configuration, configErr := w.buildConfiguration(ctx, request.Metadata.Configuration, project, workloadType, manifestResourceInfo, mutatedMetadata.Name)
+	networkingProfile := networkingSubmissionProfileForRecord(&models.WorkloadsQueueRecord{
+		TranslatedFromV1: options.TranslatedFromV1,
+		InputRequestPath: middleware.GetRequestPath(ctx),
+	})
+	configuration, configErr := w.buildConfiguration(ctx, request.Metadata.Configuration, project, workloadType, manifestResourceInfo, mutatedMetadata.Name, networkingProfile)
 	if configErr != nil {
 		validationErrors.Add(configErr)
 		return nil, validationErrors.ToSubmissionErrors()
@@ -249,6 +268,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		project,
 		workloadId,
 		trustedConvertedFromNative,
+		nodePoolsKarta(ctx, workloadType, manifestResourceInfo.Version),
 	)
 	if editErr != nil {
 		return nil, SingleError(NewManifestError(fmt.Sprintf("failed to edit manifest: %v", editErr)))
@@ -275,6 +295,14 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 			requestBodyMap = bodyMap
 		}
 	}
+	if requestPath == NimServicesAPIPath {
+		stored, err := gpucompat.LegacyGPUFields(requestBodyMap)
+		if err != nil {
+			return nil, SingleError(NewSubmissionError(http.StatusBadRequest, err.Error(), err))
+		}
+		requestBodyMap = stored
+	}
+
 	qRecord := models.WorkloadsQueueRecord{
 		ID: workloadId,
 
@@ -365,6 +393,9 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 	if dbErr != nil {
 		return nil, SingleError(ToSubmissionErrorV2(dbErr))
 	}
+	if options.RecordAction && !options.DryRun {
+		w.recordAcceptedWorkloadAction(ctx, &qRecord, workloadsApi.WORKLOADACTIONTYPE_CREATE)
+	}
 
 	responsePayload := qRecord.ToWorkloadV2()
 	if !options.TranslatedFromV1 {
@@ -379,7 +410,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 // user credentials, and PVCs (cluster-capability gated) identically.
 func (w *WorkloadsV2Impl) buildConfiguration(ctx context.Context, configParams api.WorkloadV2Configuration,
 	project *orgUnitApi.Project, workloadType *workloadsApi.WorkloadTypeConfig, manifestResourceInfo *ResourceInfo,
-	workloadName string,
+	workloadName string, networkingProfile api.NetworkingSubmissionProfile,
 ) (*models.WorkloadConfiguration, *api.SubmissionErrorV2) {
 	configuration, mnnvlErr := DetermineMNNVLConfiguration(ctx, configParams.Mnnvl, project, project.ClusterId, workloadType, manifestResourceInfo)
 	if mnnvlErr != nil {
@@ -387,7 +418,7 @@ func (w *WorkloadsV2Impl) buildConfiguration(ctx context.Context, configParams a
 	}
 
 	if configParams.Networking != nil {
-		if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, project.ClusterId, workloadName, configParams.Networking); networkingErr != nil {
+		if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, project.ClusterId, workloadName, configParams.Networking, networkingProfile); networkingErr != nil {
 			return nil, networkingErr
 		}
 		configuration.Networking = cloneNetworkingConfig(configParams.Networking)
@@ -627,16 +658,16 @@ func (w *WorkloadsV2Impl) GetWorkloadV2ById(ctx context.Context, workloadId stri
 type RecordModifier func(record *models.WorkloadsQueueRecord)
 
 func (w *WorkloadsV2Impl) UpdateWorkloadV2(ctx context.Context, workloadId string, request api.WorkloadV2UpdateRequest, modifiers ...RecordModifier) (*api.WorkloadV2, *api.Error) {
-	return w.updateWorkloadV2(ctx, workloadId, request, false, modifiers...)
+	return w.updateWorkloadV2(ctx, workloadId, request, updateWorkloadV2Options{recordAction: recordAction}, modifiers...)
 }
 
 func (w *WorkloadsV2Impl) UpdateWorkloadInternal(ctx context.Context, workloadId string, request api.WorkloadV2UpdateRequest) (*api.WorkloadV2, *api.Error) {
 	// The originating typed-V1 API already authorized the request. This trusted path mirrors
 	// CreateWorkloadInternal while retaining the provenance, GVK, and immutability checks below.
-	return w.updateWorkloadV2(ctx, workloadId, request, true)
+	return w.updateWorkloadV2(ctx, workloadId, request, updateWorkloadV2Options{skipAuth: true})
 }
 
-func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId string, request api.WorkloadV2UpdateRequest, skipAuth bool, modifiers ...RecordModifier) (*api.WorkloadV2, *api.Error) {
+func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId string, request api.WorkloadV2UpdateRequest, options updateWorkloadV2Options, modifiers ...RecordModifier) (*api.WorkloadV2, *api.Error) {
 	// Validate manifest
 	manifest, err := w.validateManifest(ctx, request.Manifest, request.ManifestBase64Encoded)
 	if err != nil {
@@ -716,7 +747,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		ProjectId:    *orgUnitApi.NewNullableString(&project.Id),
 	}
 
-	if !skipAuth {
+	if !options.skipAuth {
 		_, authErr := validateCreationAuth(ctx, ancestors, project.Id)
 		if authErr != nil {
 			return nil, authErr
@@ -756,6 +787,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		project,
 		workloadId,
 		qRecord.TranslatedFromV1,
+		nodePoolsKarta(ctx, workloadType, manifestResourceInfo.Version),
 	)
 	if editErr != nil {
 		return nil, api.NewError(http.StatusBadRequest, fmt.Sprintf("failed to edit manifest: %v", editErr), nil)
@@ -796,7 +828,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 	// does send configuration, it fully replaces the previous one, so an explicit empty configuration
 	// clears networking/MNNVL/credentials/PVCs.
 	if request.Metadata.Configuration != nil {
-		configuration, configErr := w.buildConfiguration(ctx, *request.Metadata.Configuration, project, workloadType, manifestResourceInfo, qRecord.Name)
+		configuration, configErr := w.buildConfiguration(ctx, *request.Metadata.Configuration, project, workloadType, manifestResourceInfo, qRecord.Name, networkingSubmissionProfileForRecord(qRecord))
 		if configErr != nil {
 			return nil, SubmissionErrorToApiError(configErr)
 		}
@@ -836,9 +868,12 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 	if dbErr != nil {
 		return nil, dbErr
 	}
+	if options.recordAction {
+		w.recordAcceptedWorkloadAction(ctx, qRecord, workloadsApi.WORKLOADACTIONTYPE_UPDATE)
+	}
 
 	responsePayload := qRecord.ToWorkloadV2()
-	if !skipAuth {
+	if !options.skipAuth {
 		redactWorkloadV2SensitiveValues(&responsePayload)
 	}
 
@@ -867,8 +902,9 @@ func (w *WorkloadsV2Impl) DeleteWorkloadV2(ctx context.Context, workloadId strin
 
 	delErr := dao.DbUpsertWorkload(ctx, qRecord)
 	if delErr != nil {
-		return nil, dbErr
+		return nil, delErr
 	}
+	w.recordAcceptedWorkloadAction(ctx, qRecord, workloadsApi.WORKLOADACTIONTYPE_DELETE)
 
 	notifyErr := workloadsClient.Get().PatchWorkload(ctx, qRecord.ID, workloadsApi.WorkloadPatchFields{
 		Phase: workloadsApi.PHASE_DELETING,
@@ -943,7 +979,7 @@ func (w *WorkloadsV2Impl) ProcessBatch(ctx context.Context, batch api.WorkloadsV
 		}
 
 		for _, id := range batch.Ids {
-			_, runStateErr := w.SetWorkloadRunState(ctx, id, api.WorkloadRunStateRequest{Value: runState})
+			_, runStateErr := w.setWorkloadRunState(ctx, id, api.WorkloadRunStateRequest{Value: runState}, dontRecordAction)
 			if runStateErr != nil {
 				response.Failed = append(response.Failed, api.BatchResponseFailureItem{
 					Id:      id,
@@ -1204,8 +1240,6 @@ func (w *WorkloadsV2Impl) inferProjectFromClusterAndNamespace(ctx context.Contex
 }
 
 // UpdateWorkloadNetworkingConfig updates only the networking configuration of a workload record.
-// Called after UpdateWorkloadV2 when the NIM service serving port changes, so the networking plugin
-// on the cluster receives the updated Ingress/Route spec.
 func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, workloadId string, netCfg *[]api.NetworkingEndpoint) *api.Error {
 	permittedScopes, _ := authClient.ParsePermittedScopes(ctx)
 	qRecord, dbErr := dao.DbGetWorkload(ctx, workloadId, permittedScopes)
@@ -1213,7 +1247,7 @@ func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, wo
 		return dbErr
 	}
 
-	if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, qRecord.ClusterId, qRecord.Name, netCfg); networkingErr != nil {
+	if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, qRecord.ClusterId, qRecord.Name, netCfg, networkingSubmissionProfileForRecord(qRecord)); networkingErr != nil {
 		return SubmissionErrorToApiError(networkingErr)
 	}
 
@@ -1238,9 +1272,12 @@ func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, wo
 	return dao.DbUpsertWorkload(ctx, qRecord)
 }
 
-func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId string, workloadName string, netCfg *[]api.NetworkingEndpoint) *api.SubmissionErrorV2 {
+func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId string, workloadName string, netCfg *[]api.NetworkingEndpoint, profile api.NetworkingSubmissionProfile) *api.SubmissionErrorV2 {
 	if netCfg == nil {
 		return nil
+	}
+	if err := validateNetworkingEndpoints(*netCfg); err != nil {
+		return err
 	}
 
 	capChecker := checker.NewClusterCapabilitiesChecker(clusterId)
@@ -1251,6 +1288,19 @@ func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId strin
 	if !useWorkloadV2Networking {
 		minVersion := checker.MinVersionForSupporting(checker.MinVersionNIMIngressViaWorkloadV2)
 		return NewConfigurationError(fmt.Sprintf("metadata.configuration.networking is supported for cluster version %s and above", minVersion))
+	}
+
+	// Preserve the existing native/NIM compatibility contract. Only caller-supplied
+	// networking requires the newer cluster-side ownership enforcement.
+	if len(*netCfg) > 0 && profile != api.NETWORKINGSUBMISSIONPROFILE_GENERATED_NATIVE && profile != api.NETWORKINGSUBMISSIONPROFILE_GENERATED_NIM {
+		supportsOwnership, capErr := capChecker.ValidateClusterCapability(ctx, checker.MinVersionNetworkingOwnershipEnforcement)
+		if capErr != nil {
+			return NewConfigurationError(fmt.Sprintf("cluster capability check: %v", capErr))
+		}
+		if !supportsOwnership {
+			minVersion := checker.MinVersionForSupporting(checker.MinVersionNetworkingOwnershipEnforcement)
+			return NewConfigurationError(fmt.Sprintf("direct-v2 metadata.configuration.networking requires cluster version %s and above for networking ownership validation", minVersion))
+		}
 	}
 
 	supportsNetworkingEndpoints, capErr := capChecker.ValidateClusterCapability(ctx, checker.MinVersionWorkloadV2NetworkingEndpoints)
@@ -1267,6 +1317,36 @@ func validateWorkloadV2NetworkingForCluster(ctx context.Context, clusterId strin
 		return NewConfigurationError(fmt.Sprintf("metadata.configuration.networking includes values that require cluster version %s and above: %v", minVersion, err))
 	}
 
+	return nil
+}
+
+// validateNetworkingEndpoints rejects malformed endpoint structures before queueing.
+// Generated decoding allows null array entries, and runaihttp's item-count helpers
+// do not enforce bounds on pointer-backed slices.
+func validateNetworkingEndpoints(endpoints []api.NetworkingEndpoint) *api.SubmissionErrorV2 {
+	for i, endpoint := range endpoints {
+		field := fmt.Sprintf("metadata.configuration.networking[%d]", i)
+		hasService := endpoint.Services != nil && len(*endpoint.Services) > 0
+		access := endpoint.ExternalAccess
+		hasExposure := access != nil && (access.Ingress != nil || access.Route != nil || access.HttpRoute != nil)
+		if !hasService && !hasExposure {
+			return NewConfigurationError(field + " must contain a service or externalAccess with an Ingress, Route, or HTTPRoute")
+		}
+		if endpoint.Services == nil {
+			continue
+		}
+		if len(*endpoint.Services) > 1 {
+			return NewConfigurationError(field + ".services must contain at most one service")
+		}
+		for j, service := range *endpoint.Services {
+			switch {
+			case service.Spec == nil && service.Ref == nil:
+				return NewConfigurationError(fmt.Sprintf("%s.services[%d] must contain spec or ref", field, j))
+			case service.Spec != nil && service.Ref != nil:
+				return NewConfigurationError(fmt.Sprintf("%s.services[%d] must not contain both spec and ref", field, j))
+			}
+		}
+	}
 	return nil
 }
 
@@ -1526,8 +1606,13 @@ func validateResumeAllowed(qRecord *models.WorkloadsQueueRecord, actualPhase wor
 	return nil
 }
 
-// SetWorkloadRunState implements PATCH /api/v2/workloads/{id}/runState.
+// SetWorkloadRunState records accepted suspend/resume actions from the public v2 API.
+// ProcessBatch calls setWorkloadRunState with recording disabled because workloads records the original v1 action.
 func (w *WorkloadsV2Impl) SetWorkloadRunState(ctx context.Context, workloadId string, request api.WorkloadRunStateRequest) (*api.WorkloadV2, *api.Error) {
+	return w.setWorkloadRunState(ctx, workloadId, request, recordAction)
+}
+
+func (w *WorkloadsV2Impl) setWorkloadRunState(ctx context.Context, workloadId string, request api.WorkloadRunStateRequest, recordAction bool) (*api.WorkloadV2, *api.Error) {
 	permittedScopes, _ := authClient.ParsePermittedScopes(ctx)
 
 	subjectId, apiErr := runaictx.ParseSubjectId(ctx)
@@ -1539,7 +1624,6 @@ func (w *WorkloadsV2Impl) SetWorkloadRunState(ctx context.Context, workloadId st
 	if dbErr != nil {
 		return nil, dbErr
 	}
-
 	// The stored DesiredPhase only reflects run-state changes made through this API. It does not
 	// capture cluster-driven transitions (e.g. a workload suspended by the runtime-rules or one
 	// that has failed). We therefore consult the actual phase from the workloads service and gate
@@ -1608,6 +1692,13 @@ func (w *WorkloadsV2Impl) SetWorkloadRunState(ctx context.Context, workloadId st
 	if dbErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to persist run-state change for workload %s: %v", workloadId, dbErr.Message)
 		return nil, dbErr
+	}
+	if recordAction {
+		action := workloadsApi.WORKLOADACTIONTYPE_SUSPEND
+		if request.Value == api.RUNSTATE_RESUME {
+			action = workloadsApi.WORKLOADACTIONTYPE_RESUME
+		}
+		w.recordAcceptedWorkloadAction(ctx, qRecord, action)
 	}
 
 	responsePayload := qRecord.ToWorkloadV2()

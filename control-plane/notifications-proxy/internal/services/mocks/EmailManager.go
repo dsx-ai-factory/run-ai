@@ -20,10 +20,19 @@ func NewEmailManager(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *EmailManager {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &EmailManager{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type EmailManager_CreateEmail_Call struct {
 }
 
 // CreateEmail is a helper method to define mock.On call
-//   - ctx
-//   - emailChannel
-func (_e *EmailManager_Expecter) CreateEmail(ctx interface{}, emailChannel interface{}) *EmailManager_CreateEmail_Call {
+//   - ctx context.Context
+//   - emailChannel *email.ChannelConfig
+func (_e *EmailManager_Expecter) CreateEmail(ctx any, emailChannel any) *EmailManager_CreateEmail_Call {
 	return &EmailManager_CreateEmail_Call{Call: _e.mock.On("CreateEmail", ctx, emailChannel)}
 }
 
 func (_c *EmailManager_CreateEmail_Call) Run(run func(ctx context.Context, emailChannel *email.ChannelConfig)) *EmailManager_CreateEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*email.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *email.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(*email.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -121,14 +141,20 @@ type EmailManager_DeleteEmail_Call struct {
 }
 
 // DeleteEmail is a helper method to define mock.On call
-//   - ctx
-func (_e *EmailManager_Expecter) DeleteEmail(ctx interface{}) *EmailManager_DeleteEmail_Call {
+//   - ctx context.Context
+func (_e *EmailManager_Expecter) DeleteEmail(ctx any) *EmailManager_DeleteEmail_Call {
 	return &EmailManager_DeleteEmail_Call{Call: _e.mock.On("DeleteEmail", ctx)}
 }
 
 func (_c *EmailManager_DeleteEmail_Call) Run(run func(ctx context.Context)) *EmailManager_DeleteEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -177,14 +203,20 @@ type EmailManager_GetEmail_Call struct {
 }
 
 // GetEmail is a helper method to define mock.On call
-//   - ctx
-func (_e *EmailManager_Expecter) GetEmail(ctx interface{}) *EmailManager_GetEmail_Call {
+//   - ctx context.Context
+func (_e *EmailManager_Expecter) GetEmail(ctx any) *EmailManager_GetEmail_Call {
 	return &EmailManager_GetEmail_Call{Call: _e.mock.On("GetEmail", ctx)}
 }
 
 func (_c *EmailManager_GetEmail_Call) Run(run func(ctx context.Context)) *EmailManager_GetEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -233,15 +265,26 @@ type EmailManager_PatchEmail_Call struct {
 }
 
 // PatchEmail is a helper method to define mock.On call
-//   - ctx
-//   - emailChannel
-func (_e *EmailManager_Expecter) PatchEmail(ctx interface{}, emailChannel interface{}) *EmailManager_PatchEmail_Call {
+//   - ctx context.Context
+//   - emailChannel *email.ChannelConfig
+func (_e *EmailManager_Expecter) PatchEmail(ctx any, emailChannel any) *EmailManager_PatchEmail_Call {
 	return &EmailManager_PatchEmail_Call{Call: _e.mock.On("PatchEmail", ctx, emailChannel)}
 }
 
 func (_c *EmailManager_PatchEmail_Call) Run(run func(ctx context.Context, emailChannel *email.ChannelConfig)) *EmailManager_PatchEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*email.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *email.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(*email.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -290,15 +333,26 @@ type EmailManager_UpdateEmail_Call struct {
 }
 
 // UpdateEmail is a helper method to define mock.On call
-//   - ctx
-//   - emailChannel
-func (_e *EmailManager_Expecter) UpdateEmail(ctx interface{}, emailChannel interface{}) *EmailManager_UpdateEmail_Call {
+//   - ctx context.Context
+//   - emailChannel *email.ChannelConfig
+func (_e *EmailManager_Expecter) UpdateEmail(ctx any, emailChannel any) *EmailManager_UpdateEmail_Call {
 	return &EmailManager_UpdateEmail_Call{Call: _e.mock.On("UpdateEmail", ctx, emailChannel)}
 }
 
 func (_c *EmailManager_UpdateEmail_Call) Run(run func(ctx context.Context, emailChannel *email.ChannelConfig)) *EmailManager_UpdateEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*email.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *email.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(*email.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -345,15 +399,26 @@ type EmailManager_ValidateEmail_Call struct {
 }
 
 // ValidateEmail is a helper method to define mock.On call
-//   - ctx
-//   - emailChannel
-func (_e *EmailManager_Expecter) ValidateEmail(ctx interface{}, emailChannel interface{}) *EmailManager_ValidateEmail_Call {
+//   - ctx context.Context
+//   - emailChannel *email.ChannelConfig
+func (_e *EmailManager_Expecter) ValidateEmail(ctx any, emailChannel any) *EmailManager_ValidateEmail_Call {
 	return &EmailManager_ValidateEmail_Call{Call: _e.mock.On("ValidateEmail", ctx, emailChannel)}
 }
 
 func (_c *EmailManager_ValidateEmail_Call) Run(run func(ctx context.Context, emailChannel *email.ChannelConfig)) *EmailManager_ValidateEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*email.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *email.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(*email.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

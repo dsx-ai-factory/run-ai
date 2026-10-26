@@ -3,7 +3,7 @@
 ## Requirements
 
 * NVIDIA Run:ai cluster version 2.25 or later.
-* The MCP server image is available on the [NGC catalog](https://catalog.ngc.nvidia.com/orgs/nvidia/runai/containers/runai-mcp-server) with guest access — no NGC account is required to pull it.
+* The MCP server image is available on the [NGC catalog](https://catalog.ngc.nvidia.com/orgs/nvidia/runai/containers/runai-mcp-server) with guest access, no NGC account is required to pull it.
 
 ## Deployment Modes
 

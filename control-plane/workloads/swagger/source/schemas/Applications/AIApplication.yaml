@@ -16,6 +16,8 @@ properties:
   phase:
     type: string
     description: The actual status of the release in the cluster.
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml"
   projectId:
     $ref: "../../../../../infra/openapi/docs/schemas/scopes/ProjectId.yaml"
   projectName:

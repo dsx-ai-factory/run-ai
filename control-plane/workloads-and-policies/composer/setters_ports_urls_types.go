@@ -6,17 +6,18 @@
 package composer
 
 import (
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 type ExposedUrlInfo struct {
-	Items                      map[string]*ExposedUrlInfoItem
-	ServingPortAuthorizedUsers *string
-	WorkloadName               string
-	ProjectName                string
-	IsJupyterOrTensorboard     bool
-	Config                     ClusterStorageConfig
+	Items                         map[string]*ExposedUrlInfoItem
+	ServingPortAuthorizedUsers    *string
+	WorkloadName                  string
+	ProjectName                   string
+	IsJupyterOrTensorboard        bool
+	Config                        ClusterStorageConfig
+	OAuth2ProxyTemplatesSupported bool
 
 	// ResourcePrefix is prepended to networking K8s resource names (Service,
 	// Ingress, ...) for an exposed URL, e.g. "job" → "job-<workloadName>-<nick>".

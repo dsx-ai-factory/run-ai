@@ -1,0 +1,6 @@
+name: scopeType
+in: query
+required: true
+description: The resource scope type to filter by.
+schema:
+  $ref: "../../../schemas/Scopes/ResourceScopeType.yaml"

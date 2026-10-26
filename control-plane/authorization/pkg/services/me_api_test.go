@@ -101,7 +101,7 @@ var _ = Describe("MeApi", Ordered, func() {
 		response, err := internalApiService.CreateInternalAccessRule(ctx, api.InternalCreateAccessRuleRequest{
 			SubjectId:   TestUser2Id,
 			SubjectType: api.SUBJECTTYPE_USER,
-			RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION,
+			RoleName:    api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT,
 		})
 		Expect(err).To(BeNil())
 		Expect(response.Code).To(Equal(http.StatusCreated))

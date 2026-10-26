@@ -1,5 +1,5 @@
 flowmark/bin/
-flowmark/out/
+flowmark/reports/
 flowmark/.env
 linter.json
 cover.out

@@ -14,8 +14,8 @@ import (
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/init_containers"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	pcreds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds"
 	corev1 "k8s.io/api/core/v1"
@@ -28,7 +28,7 @@ import (
 //////////////////////////////////////////////////////////////////////
 
 // serviceTypeOrder is the canonical order in which port Services are emitted.
-// It mirrors the V1 cluster builder (GetPortsPerServiceType) so that the
+// It preserves the legacy cluster service ordering so that the
 // generated Service name suffixes ("0-clusterip", "1-loadbalancer", ...) stay
 // aligned with how the cluster historically numbered them.
 var serviceTypeOrder = []openapi.ServiceType{
@@ -245,7 +245,7 @@ func UrlsToWorkloadRunner(info *composer.ExposedUrlInfo, target any, cookie any)
 				urlSuffix = ""
 				noSuffixUrlGenerated = true
 			}
-			autoUrl, autoErr := init_containers.ComposeAutoExposedURL(
+			autoUrl, autoErr := composer.ComposeAutoExposedURL(
 				info.Config.ClusterDomain(),
 				info.ProjectName,
 				info.WorkloadName,
@@ -303,8 +303,7 @@ func UrlsToWorkloadRunner(info *composer.ExposedUrlInfo, target any, cookie any)
 const runaiHostTrimPrefix = "runai."
 
 // buildExternalAccess builds the per-endpoint ExternalAccess for the cluster's
-// enabled external-access mechanisms, mirroring the V1 cluster builder's
-// dispatch in workload-common/builders/external_url.go::buildIngressOrRoute.
+// enabled external-access mechanisms.
 func buildExternalAccess(config composer.ClusterStorageConfig, serviceName, urlStr string, servicePort int32) (*openapi.ExternalAccess, *workloadsApi.Error) {
 	externalAccess := openapi.NewExternalAccess()
 	ingressEnabled := true

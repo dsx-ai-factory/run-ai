@@ -7,6 +7,8 @@ package selfcheck
 
 import (
 	"context"
+	"fmt"
+	"strings"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/core"
@@ -18,15 +20,31 @@ func (Suite) Name() string {
 	return "selfcheck"
 }
 
-func (Suite) Run(_ context.Context, _ core.Env, cfg core.Config) (core.Section, error) {
+func (Suite) Category() core.Category {
+	return core.CategoryScale
+}
+
+var knownKnobs = []string{"message"}
+
+func (Suite) Knobs() []string {
+	return knownKnobs
+}
+
+func (Suite) Validate(scenario core.Scenario) error {
+	if unknown := scenario.UnknownKnobs(knownKnobs...); len(unknown) > 0 {
+		return fmt.Errorf("unknown knob %q; selfcheck takes only %s", unknown[0], strings.Join(knownKnobs, ", "))
+	}
+	return nil
+}
+
+func (Suite) Run(_ context.Context, _ core.Target, scenario core.Scenario) (core.Section, error) {
 	start := time.Now()
 	time.Sleep(100 * time.Millisecond)
 
 	return core.Section{
-		Category: core.CategoryScale,
 		Metrics: map[string]any{
 			"selfcheck_duration_seconds": time.Since(start).Seconds(),
-			"knobs_received":             cfg.Knobs,
+			"knobs_received":             scenario.Knobs,
 		},
 	}, nil
 }

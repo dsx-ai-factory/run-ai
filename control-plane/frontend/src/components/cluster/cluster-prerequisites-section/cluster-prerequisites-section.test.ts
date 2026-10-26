@@ -58,7 +58,6 @@ describe("cluster-prerequisites-section.vue", () => {
     });
 
     test("emits an update:model-value event when selected distribution changes by the card carousel", async () => {
-      //todo: validate why this test is failing, due to import of DEPARTMENT_ROUTE_NAMES in gpu-allocation-ratio
       await clusterPrereqSectionCmp.find("[aid=vanilla-kubernetes-card]").trigger("click");
       const expectedEmit: IPrerequisites[][] = [
         [{ location: EClusterLocations.CONTROL_PLANE, clusterUrl: "", k8sDistribution: EClusterDistIds.VANILLA }],

@@ -10,11 +10,11 @@ import (
 	"fmt"
 	"strconv"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/filter"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/list"
 	projectcreate "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/project/create"
 	projectlist "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/project/list"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	"k8s.io/utils/ptr"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"

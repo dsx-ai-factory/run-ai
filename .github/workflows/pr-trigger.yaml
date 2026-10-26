@@ -41,7 +41,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
     env:
       BASE_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.base-ref || github.event.pull_request.base.ref || github.event.merge_group.base_ref || 'master' }}
     steps:
@@ -71,13 +70,3 @@ jobs:
               "event":        "${{ github.event_name == 'workflow_dispatch' && 'pull_request' || github.event_name }}",
               "caller_repo":  "${{ github.repository }}"
             }
-
-      - name: Post CI run link to PR
-        if: github.event_name == 'pull_request'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          RUN_URL: https://github.com/run-ai/saas-configuration/actions/runs/${{ steps.dispatch.outputs.runId }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: |
-          gh api repos/${{ github.repository }}/issues/${PR_NUMBER}/comments \
-            -f body="🔗 **CI run:** ${RUN_URL}"

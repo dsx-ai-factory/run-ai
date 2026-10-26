@@ -92,7 +92,8 @@ through the [`Makefile`](Makefile), which includes the shared control-plane make
 | `make purify` | `purify-go` — `go fmt` + `go vet` + `go mod tidy` |
 | `make validate` | `openapi-validate` — validate the OpenAPI spec (yaml + generated code up-to-date + public routes) |
 | `make openapi-lint` | Lint the swagger bundle |
-| `make mockery` / `make validate_mockery` | Install mockery `v2.53.6` (if needed) and regenerate test mocks |
+| `make generate-mocks` / `make generate-mocks-local` | Regenerate test mocks with mockery v3 from `.mockery.yml` (in the Go builder container / without Docker) |
+| `make generate-mocks-client` | Regenerate `pkg/client` mocks from `pkg/client/.mockery.yml` |
 | `make local-deploy` | `openapi-generate-code` + `build-go` + `docker-build-generic` + `docker-push-generic` |
 
 ### Local build (local-dev.sh)
@@ -124,8 +125,7 @@ It takes a single `--build-arg TARGETARCH` (selects `bin/metrics-service-$TARGET
 
 | Target | Description |
 |--------|-------------|
-| `make test` | `build` + `test-ginkgo` (unit tests) + `integration-tests` |
-| `make test-ginkgo` | Run the Ginkgo unit-test suites |
+| `make test` | `build` + `test-go` (unit tests) + `integration-tests` |
 | `make integration-tests` | Build the promtool agent + integration-test binary, then run the full docker-compose suite (abort-on-container-exit, torn down afterwards) |
 | `make integration-tests-debug` | Bring up only the compose `run-setup` profile so tests can be run from an IDE |
 | `make build-integration-tests` | Compile the `integration-tests/tests` test binary and `docker compose build` |

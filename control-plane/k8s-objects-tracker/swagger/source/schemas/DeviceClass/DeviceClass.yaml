@@ -1,0 +1,16 @@
+type: object
+required:
+  - deviceClassName
+properties:
+  clusterId:
+    $ref: "../../../../../infra/openapi/docs/schemas/scopes/ReportingClusterId.yaml"
+  deviceClassName:
+    type: string
+    description: >
+      DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules
+      (lowercase alphanumeric, `-`, and `.`, starting and ending with an
+      alphanumeric character), up to 253 characters.
+    minLength: 1
+    maxLength: 253
+    pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+    example: gpu.nvidia.com

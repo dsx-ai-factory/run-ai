@@ -59,6 +59,8 @@
 
 * `COMPUTE_RESOURCES` (value: `"compute-resources"`)
 
+* `RESOURCE_CLAIM_TEMPLATES` (value: `"resource-claim-templates"`)
+
 * `TEMPLATES` (value: `"templates"`)
 
 * `CREDENTIALS` (value: `"credentials"`)
@@ -74,6 +76,8 @@
 * `SECRET_VOLUME_ASSETS` (value: `"secret-volume-assets"`)
 
 * `STORAGE_CLASS_CONFIGURATION` (value: `"storage-class-configuration"`)
+
+* `DEVICE_CLASSES` (value: `"device-classes"`)
 
 * `ACCESS_KEYS` (value: `"access-keys"`)
 

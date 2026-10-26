@@ -176,11 +176,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        1,
+						Deserved:        ptr.To(float64(1)),
 						Limit:           ptr.To(float64(1)),
 						OverQuotaWeight: ptr.To(float64(1)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -188,11 +188,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        2,
+						Deserved:        ptr.To(float64(2)),
 						Limit:           ptr.To(float64(2)),
 						OverQuotaWeight: ptr.To(float64(2)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -200,11 +200,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        3,
+						Deserved:        ptr.To(float64(3)),
 						Limit:           ptr.To(float64(3)),
 						OverQuotaWeight: ptr.To(float64(3)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 			}
 			request := getProjectResourcesCreateRequest(name1, defaultDepartment1.Id, cluster1Id, resources)
@@ -224,11 +224,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        10,
+						Deserved:        ptr.To(float64(10)),
 						Limit:           ptr.To(float64(10)),
 						OverQuotaWeight: ptr.To(float64(10)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -236,11 +236,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        20,
+						Deserved:        ptr.To(float64(20)),
 						Limit:           ptr.To(float64(20)),
 						OverQuotaWeight: ptr.To(float64(20)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -248,11 +248,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        30,
+						Deserved:        ptr.To(float64(30)),
 						Limit:           ptr.To(float64(30)),
 						OverQuotaWeight: ptr.To(float64(30)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 			}
 			request = getProjectResourcesCreateRequest(name2, defaultDepartment1.Id, cluster1Id, resources)
@@ -272,11 +272,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolNameC2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        11,
+						Deserved:        ptr.To(float64(11)),
 						Limit:           ptr.To(float64(11)),
 						OverQuotaWeight: ptr.To(float64(11)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -284,11 +284,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName1c2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        21,
+						Deserved:        ptr.To(float64(21)),
 						Limit:           ptr.To(float64(21)),
 						OverQuotaWeight: ptr.To(float64(21)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -296,11 +296,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2c2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        31,
+						Deserved:        ptr.To(float64(31)),
 						Limit:           ptr.To(float64(31)),
 						OverQuotaWeight: ptr.To(float64(31)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 			}
 			request = getProjectResourcesCreateRequest(name3, defaultDepartment2.Id, cluster2Id, resources)
@@ -320,7 +320,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolNameC2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        110,
+						Deserved:        ptr.To(float64(110)),
 						Limit:           ptr.To(float64(110)),
 						OverQuotaWeight: ptr.To(float64(110)),
 					},
@@ -331,11 +331,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName1c2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        210,
+						Deserved:        ptr.To(float64(210)),
 						Limit:           ptr.To(float64(210)),
 						OverQuotaWeight: ptr.To(float64(210)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -343,11 +343,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2c2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        310,
+						Deserved:        ptr.To(float64(310)),
 						Limit:           ptr.To(float64(310)),
 						OverQuotaWeight: ptr.To(float64(310)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 			}
 			request = getProjectResourcesCreateRequest(name4, defaultDepartment2.Id, cluster2Id, resources)
@@ -755,11 +755,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        1,
+						Deserved:        ptr.To(float64(1)),
 						Limit:           ptr.To(float64(1)),
 						OverQuotaWeight: ptr.To(float64(1)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -767,11 +767,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        2,
+						Deserved:        ptr.To(float64(2)),
 						Limit:           ptr.To(float64(2)),
 						OverQuotaWeight: ptr.To(float64(2)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -779,11 +779,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        3,
+						Deserved:        ptr.To(float64(3)),
 						Limit:           ptr.To(float64(3)),
 						OverQuotaWeight: ptr.To(float64(3)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 			}
 			request := getDepartmentResourcesCreateRequest(name1, cluster1Id, resources)
@@ -803,11 +803,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        10,
+						Deserved:        ptr.To(float64(10)),
 						Limit:           ptr.To(float64(10)),
 						OverQuotaWeight: ptr.To(float64(10)),
 					},
-					Priority: ptr.To("VeryHigh"),
+					Rank: ptr.To("VeryHigh"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -815,11 +815,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        20,
+						Deserved:        ptr.To(float64(20)),
 						Limit:           ptr.To(float64(20)),
 						OverQuotaWeight: ptr.To(float64(20)),
 					},
-					Priority: ptr.To("Low"),
+					Rank: ptr.To("Low"),
 				},
 				{
 					NodePool: &api.ResourcesNodePool{
@@ -827,11 +827,11 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        30,
+						Deserved:        ptr.To(float64(30)),
 						Limit:           ptr.To(float64(30)),
 						OverQuotaWeight: ptr.To(float64(30)),
 					},
-					Priority: ptr.To("High"),
+					Rank: ptr.To("High"),
 				},
 			}
 			request = getDepartmentResourcesCreateRequest(name2, cluster1Id, resources)
@@ -851,7 +851,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        10,
+						Deserved:        ptr.To(float64(10)),
 						Limit:           ptr.To(float64(10)),
 						OverQuotaWeight: ptr.To(float64(10)),
 					},
@@ -862,7 +862,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        20,
+						Deserved:        ptr.To(float64(20)),
 						Limit:           ptr.To(float64(20)),
 						OverQuotaWeight: ptr.To(float64(20)),
 					},
@@ -873,7 +873,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        30,
+						Deserved:        ptr.To(float64(30)),
 						Limit:           ptr.To(float64(30)),
 						OverQuotaWeight: ptr.To(float64(30)),
 					},
@@ -1050,7 +1050,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        10,
+						Deserved:        ptr.To(float64(10)),
 						Limit:           ptr.To(float64(10)),
 						OverQuotaWeight: ptr.To(float64(5)), // Weight is half of Deserved
 					},
@@ -1070,7 +1070,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        20,
+						Deserved:        ptr.To(float64(20)),
 						Limit:           ptr.To(float64(20)),
 						OverQuotaWeight: ptr.To(float64(8)), // Weight is less than half of Deserved
 					},
@@ -1106,7 +1106,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        15,
+						Deserved:        ptr.To(float64(15)),
 						Limit:           ptr.To(float64(15)),
 						OverQuotaWeight: ptr.To(float64(0)), // Zero weight - should be included in sum as 0
 					},
@@ -1142,7 +1142,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved: -1, // -1 means unlimited/not set - should make entire sum -1
+						Deserved: ptr.To(float64(-1)), // -1 means unlimited/not set - should make entire sum -1
 					},
 				},
 			}
@@ -1171,7 +1171,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName2,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved: 0, // 0 should be included in sum
+						Deserved: ptr.To(float64(0)), // 0 should be included in sum
 					},
 				},
 			}
@@ -1325,7 +1325,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolName,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        5,
+						Deserved:        ptr.To(float64(5)),
 						Limit:           ptr.To(float64(10)),
 						OverQuotaWeight: ptr.To(float64(5)),
 					},
@@ -1336,7 +1336,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        15,
+						Deserved:        ptr.To(float64(15)),
 						Limit:           ptr.To(float64(20)),
 						OverQuotaWeight: ptr.To(float64(15)),
 					},
@@ -1361,7 +1361,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: defaultNodePoolName,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        2,
+						Deserved:        ptr.To(float64(2)),
 						Limit:           ptr.To(float64(5)),
 						OverQuotaWeight: ptr.To(float64(2)),
 					},
@@ -1372,7 +1372,7 @@ var _ = Describe("Project and Department nodepool resources API tests", Ordered,
 						Name: nodePoolName,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        8,
+						Deserved:        ptr.To(float64(8)),
 						Limit:           ptr.To(float64(15)),
 						OverQuotaWeight: ptr.To(float64(8)),
 					},
@@ -1601,7 +1601,7 @@ func getParentDepartmentCreateRequest(clusterId string) api.DepartmentCreationRe
 		ClusterId: clusterId,
 		Resources: []api.ResourcesNullable{{
 			Gpu: api.ResourcesNullableGpu{
-				Deserved: 0,
+				Deserved: ptr.To(float64(0)),
 			},
 		}},
 	}

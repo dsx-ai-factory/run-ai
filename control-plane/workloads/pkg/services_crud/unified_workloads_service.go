@@ -18,6 +18,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/assets"
 	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
@@ -27,11 +29,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	policyApi "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/jinzhu/copier"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 )
 
@@ -348,11 +349,11 @@ func (req UnifiedWorkloadRequest) Exec(ctx context.Context) (*workloadsApi.Unifi
 	spec := workloadsApi.UnifiedSpec{}
 
 	if responseSpec != nil {
-		spec.Worker = *workloadsApi.NewNullableSupersetSpec(responseSpec)
+		spec.Worker = *workloadsApi.NewNullableSupersetSpec(gpucompat.LegacyCompatibleWorkloadSpec(responseSpec))
 		nonEmptySpec = true
 	}
 	if responseMasterSpec != nil {
-		spec.Master = *workloadsApi.NewNullableMasterSpec(responseMasterSpec)
+		spec.Master = *workloadsApi.NewNullableMasterSpec(gpucompat.LegacyCompatibleMasterSpec(responseMasterSpec))
 		nonEmptySpec = true
 	}
 	if sameAsWorker {
@@ -369,6 +370,8 @@ func (req UnifiedWorkloadRequest) Exec(ctx context.Context) (*workloadsApi.Unifi
 }
 
 func (req UnifiedWorkloadRequest) composePolicyInfo(defaults map[string]interface{}, rules map[string]interface{}) (*workloadsApi.UnifiedPolicyInfo, *workloadsApi.Error) {
+	defaults = gpucompat.LegacyCompatibleGPUFields(defaults)
+	rules = gpucompat.LegacyCompatibleGPUPolicy(rules)
 	workerSectionAsMap := make(map[string]interface{})
 	masterSectionAsMap := make(map[string]interface{})
 

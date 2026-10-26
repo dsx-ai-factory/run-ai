@@ -16,7 +16,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/rs/zerolog/log"
 
-	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	runaibackendclient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/metrics"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"

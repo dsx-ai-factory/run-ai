@@ -21,7 +21,7 @@ import (
 	metricsClient "github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client/generated"
 
-	org_unit_service_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
+	org_unit_service_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 )
 
 // QueryMetricsService defines the interface for querying metrics

@@ -154,7 +154,8 @@ func (secretHandler *SecretHandler) HandleSyncEvent(waitGroup *sync.WaitGroup) {
 	secretsByScope := make(map[parsers.ScopeTypeAndId]*k8sobjectstracker.Secrets)
 
 	for _, secret := range secrets {
-		if !util.IsUserExposedCredentialsForRunai(&secret) && !util.IsAssetRelatedResource(&secret.ObjectMeta) {
+		if util.IsPersonalCredentialCopy(&secret.ObjectMeta) ||
+			(!util.IsUserExposedCredentialsForRunai(&secret) && !util.IsAssetRelatedResource(&secret.ObjectMeta)) {
 			continue
 		}
 

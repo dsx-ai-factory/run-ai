@@ -155,14 +155,16 @@ func (c *ServicesConfig) SetDefaults() {
 // served to the cluster (publicly reachable base URL), the upload size limit, and how long an
 // unclaimed chart is retained before cleanup.
 type ChartUploadConfig struct {
-	PublicBaseURL    string `mapstructure:"chart_public_base_url"`
-	MaxUploadBytes   int64  `mapstructure:"chart_max_upload_bytes"`
-	RetentionMinutes int    `mapstructure:"chart_retention_minutes"`
+	PublicBaseURL             string `mapstructure:"chart_public_base_url"`
+	MaxUploadBytes            int64  `mapstructure:"chart_max_upload_bytes"`
+	RetentionMinutes          int    `mapstructure:"chart_retention_minutes"`
+	InspectionCacheTTLSeconds int    `mapstructure:"chart_inspection_cache_ttl_seconds"`
 }
 
 func (c *ChartUploadConfig) SetDefaults() {
 	c.MaxUploadBytes = 10 * 1024 * 1024
 	c.RetentionMinutes = 24 * 60
+	c.InspectionCacheTTLSeconds = 600
 }
 
 type CacheConfig struct {

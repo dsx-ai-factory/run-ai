@@ -50,6 +50,7 @@ runai application delete my-grafana -p team-alpha --force`
 	ValuesFlagUsage             = "Path to a YAML values file for Helm chart overrides"
 	SetFlagUsage                = "Inline key=value overrides (nested keys supported), merged on top of --values"
 	CredentialFlagUsage         = "NGC API key credential asset name for private chart URLs"
+	UserCredentialFlagUsage     = "Treat --credential as a personal credential owned by the current user"
 	SubmitSuccessMsg            = "Creating application %[1]s...\nTo track the application's status, run 'runai application describe %[1]s -p %s'"
 	SubmitExample               = `# Basic: submit from a chart URL
 runai application submit my-grafana -p team-alpha \
@@ -66,9 +67,10 @@ runai application submit my-grafana -p team-alpha \
 	desiredPhaseDeleted  = "deleted"
 	actionStatusDeleting = "deleting"
 
-	attributeNameYes        = "yes"
-	attributeNameChartURL   = "chart-url"
-	attributeNameValues     = "values"
-	attributeNameSet        = "set"
-	attributeNameCredential = "credential"
+	attributeNameYes            = "yes"
+	attributeNameChartURL       = "chart-url"
+	attributeNameValues         = "values"
+	attributeNameSet            = "set"
+	attributeNameCredential     = "credential"
+	attributeNameUserCredential = "user-credential"
 )

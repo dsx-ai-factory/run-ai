@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"net/http"
 
-	workloads "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloads "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaimcp"
@@ -27,13 +27,14 @@ type aiApplicationChartRef struct {
 }
 
 type aiApplicationAuth struct {
-	AssetID string `json:"assetId" jsonschema:"Credential asset ID used to authenticate to a private Helm repository or chart URL."`
+	AssetID        string `json:"assetId"                  jsonschema:"Credential asset ID used to authenticate to a private Helm repository or chart URL."`
+	UserCredential bool   `json:"userCredential,omitempty" jsonschema:"Set to true when assetId identifies a personal credential owned by the caller. Omitted or false means a shared credential."`
 }
 
 type aiApplicationSpec struct {
 	ChartRef     aiApplicationChartRef `json:"chartRef"              jsonschema:"Helm chart origin. Provide exactly one source: repo with chartName and chartVersion, chartURL, or chartId."`
-	Values       map[string]any        `json:"values,omitempty"       jsonschema:"Inline Helm values merged with the chart defaults. Mutually exclusive with valuesBase64."`
-	ValuesBase64 *string               `json:"valuesBase64,omitempty" jsonschema:"Base64-encoded Helm values. Mutually exclusive with values."`
+	Values       map[string]any        `json:"values,omitempty"       jsonschema:"Helm values. Personal credentials use whole-string USERCREDENTIAL:<name>[,generic-secret|,docker-registry]."`
+	ValuesBase64 *string               `json:"valuesBase64,omitempty" jsonschema:"Base64 Helm values. Personal credentials use the same USERCREDENTIAL grammar as values."`
 	Auth         *aiApplicationAuth    `json:"auth,omitempty"         jsonschema:"Authentication for a private Helm chart source."`
 }
 
@@ -55,6 +56,11 @@ func (in submitAIApplicationInput) Validate() error {
 	if in.Spec.ValuesBase64 != nil {
 		if _, err := base64.StdEncoding.DecodeString(*in.Spec.ValuesBase64); err != nil {
 			return fmt.Errorf("spec.valuesBase64 must be valid base64")
+		}
+	}
+	if in.Spec.Auth != nil {
+		if in.Spec.Auth.AssetID == "" {
+			return fmt.Errorf("spec.auth.assetId is required")
 		}
 	}
 	return nil
@@ -82,14 +88,17 @@ func validateAIApplicationChartRef(ref aiApplicationChartRef) error {
 }
 
 type submitAIApplicationOutput struct {
-	ID            string `json:"id,omitempty"          jsonschema:"Created AI application ID."`
-	Name          string `json:"name"                  jsonschema:"AI application name."`
-	ClusterID     string `json:"clusterId"             jsonschema:"Cluster where the AI application is scheduled."`
-	ProjectID     string `json:"projectId"             jsonschema:"Project that owns the AI application."`
-	DesiredPhase  string `json:"desiredPhase,omitempty" jsonschema:"Desired lifecycle phase returned by the API."`
-	Phase         string `json:"phase,omitempty"       jsonschema:"Current Kubernetes or Helm release phase returned by the API."`
-	ActionStatus  string `json:"actionStatus,omitempty" jsonschema:"Current AI application action status, such as creating, deployed, or failed."`
-	ActionMessage string `json:"actionMessage,omitempty" jsonschema:"Message associated with the current AI application action status."`
+	SubmissionAccepted       bool     `json:"submissionAccepted"  jsonschema:"True when the existing submission API call returned a successful HTTP status."`
+	ResponseDetailsAvailable bool     `json:"responseDetailsAvailable" jsonschema:"True when the submission response was decoded and the returned application details are available."`
+	ID                       string   `json:"id,omitempty"          jsonschema:"Created AI application ID, when included in the submission response."`
+	Name                     string   `json:"name"                  jsonschema:"AI application name."`
+	ClusterID                string   `json:"clusterId"             jsonschema:"Cluster where the AI application is scheduled."`
+	ProjectID                string   `json:"projectId"             jsonschema:"Project that owns the AI application."`
+	DesiredPhase             string   `json:"desiredPhase,omitempty" jsonschema:"Desired lifecycle phase returned by the API."`
+	Phase                    string   `json:"phase,omitempty"       jsonschema:"Current Kubernetes or Helm release phase returned by the API."`
+	ActionStatus             string   `json:"actionStatus,omitempty" jsonschema:"Current AI application action status, such as creating, deployed, or failed."`
+	ActionMessage            string   `json:"actionMessage,omitempty" jsonschema:"Message associated with the current AI application action status."`
+	Warnings                 []string `json:"warnings,omitempty" jsonschema:"Non-fatal notes, including when the API accepted submission but its response details could not be decoded."`
 }
 
 func registerSubmitAIApplication(r *runaimcp.Registry, client *runaiclient.Client) {
@@ -98,8 +107,9 @@ func registerSubmitAIApplication(r *runaimcp.Registry, client *runaiclient.Clien
 		Description: "Call when the user asks to submit a new AI application for scheduling from a Helm chart. " +
 			"Provide clusterId, projectId, name, and exactly one chart source: an HTTP/HTTPS/OCI repository with " +
 			"chartName and chartVersion, a direct HTTPS chartURL, or a previously uploaded chartId. " +
-			"The spec can include inline or base64-encoded Helm values and a credential asset for a private chart source. Submission requires confirmation. " +
-			"Returns the created application ID and its desired, action, and release phases. " +
+			"The spec can include inline or base64-encoded Helm values and shared or personal credentials for a private chart source. " +
+			"Personal runtime references must be exact whole strings using USERCREDENTIAL:<name>; NGC references require ,generic-secret or ,docker-registry. Submission requires confirmation. " +
+			"Returns whether the submission was accepted, plus the created application ID and phase fields when the same API response includes them. " +
 			"Do not use this tool to inspect existing applications; use list_ai_applications. " +
 			"Do not use it to submit an individual workload; use submit_workload.",
 		ReadOnly:    false,
@@ -122,7 +132,11 @@ func submitAIApplicationRun(ctx context.Context, client *runaiclient.Client, in 
 	created, httpResp, err := client.Workloads.AIApplicationsAPI.CreateApplication(ctx).
 		AIApplicationCreationRequest(toAIApplicationCreationRequest(in)).Execute()
 	if err != nil {
-		if httpResp != nil && httpResp.StatusCode == http.StatusNoContent {
+		if isSuccessfulHTTPResponse(httpResp) {
+			out.SubmissionAccepted = true
+			if httpResp.StatusCode != http.StatusNoContent {
+				out.Warnings = append(out.Warnings, "submission was accepted, but response details are unavailable because the response body could not be decoded")
+			}
 			return out, nil
 		}
 		mapped := runaimcp.MapHTTPError(httpResp, err)
@@ -133,8 +147,12 @@ func submitAIApplicationRun(ctx context.Context, client *runaiclient.Client, in 
 		}
 		return submitAIApplicationOutput{}, fmt.Errorf("create AI application %q: %w", in.Name, mapped)
 	}
+	out.SubmissionAccepted = isSuccessfulHTTPResponse(httpResp)
 	if created == nil {
-		if httpResp != nil && httpResp.StatusCode == http.StatusNoContent {
+		if isSuccessfulHTTPResponse(httpResp) {
+			if httpResp.StatusCode != http.StatusNoContent {
+				out.Warnings = append(out.Warnings, "submission was accepted, but the response did not include application details")
+			}
 			return out, nil
 		}
 		return submitAIApplicationOutput{}, fmt.Errorf("create AI application %q: nil response; creation outcome is unknown, use list_ai_applications before retrying: %w", in.Name, runaimcp.ErrUpstream)
@@ -150,7 +168,16 @@ func submitAIApplicationRun(ctx context.Context, client *runaiclient.Client, in 
 	out.Phase = created.GetPhase()
 	out.ActionStatus = created.GetActionStatus()
 	out.ActionMessage = created.GetActionMessage()
+	out.ResponseDetailsAvailable = out.ID != "" || out.DesiredPhase != "" || out.Phase != "" ||
+		out.ActionStatus != "" || out.ActionMessage != ""
+	if !out.ResponseDetailsAvailable {
+		out.Warnings = append(out.Warnings, "submission was accepted, but the response did not include application details")
+	}
 	return out, nil
+}
+
+func isSuccessfulHTTPResponse(response *http.Response) bool {
+	return response != nil && response.StatusCode >= http.StatusOK && response.StatusCode < http.StatusMultipleChoices
 }
 
 func toAIApplicationCreationRequest(in submitAIApplicationInput) workloads.AIApplicationCreationRequest {
@@ -180,6 +207,9 @@ func toAIApplicationCreationRequest(in submitAIApplicationInput) workloads.AIApp
 	if in.Spec.Auth != nil {
 		auth := workloads.AIApplicationAuth{}
 		auth.SetAssetId(in.Spec.Auth.AssetID)
+		if in.Spec.Auth.UserCredential {
+			auth.SetUserCredential(true)
+		}
 		spec.SetAuth(auth)
 	}
 	return workloads.AIApplicationCreationRequest{ClusterId: in.ClusterID, ProjectId: in.ProjectID, Name: in.Name, Spec: spec}

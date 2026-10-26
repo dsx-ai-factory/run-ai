@@ -9,10 +9,10 @@ if [ -f .env ]; then
   export $(cat .env | xargs)
 fi
 
-DOCKER_REPO="gcr.io/run-ai-lab/"
+DOCKER_REPO="${DOCKER_REPO:?set DOCKER_REPO to your container registry, e.g. myreg.example.com/myuser}"
 IMAGE_NAME="cluster-sync"
 TAG=${TAG:-"latest"}
-IMAGE_FULL_NAME="${DOCKER_REPO}${IMAGE_NAME}:${TAG}"
+IMAGE_FULL_NAME="${DOCKER_REPO}/${IMAGE_NAME}:${TAG}"
 
 make build-only
 docker build --platform linux/amd64 -t $IMAGE_FULL_NAME `dirname "$0"`/..

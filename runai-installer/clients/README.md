@@ -6,7 +6,7 @@ The service API clients are maintained in their canonical modules:
 
 - `control-plane/authorization/pkg/client/generated`
 - `control-plane/cluster-service/pkg/client/generated`
-- `runai-clients/org-unit-service-client/generated`
+- `control-plane/org-unit-service/pkg/client/generated`
 - `control-plane/identity-manager/pkg/client/generated`
 
 Local `replace` directives keep monorepo builds on the canonical source. Do not add generated API clients to this module.

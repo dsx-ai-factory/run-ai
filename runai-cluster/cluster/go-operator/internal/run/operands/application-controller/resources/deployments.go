@@ -12,6 +12,7 @@ import (
 
 	"k8s.io/utils/ptr"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/secrets"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	outils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
@@ -129,6 +130,12 @@ func handleEnvVars(runaiConfig *runaiv1.RunaiConfig) []v1.EnvVar {
 	config := runaiConfig.Spec.ApplicationController
 	envVars := []v1.EnvVar{
 		{
+			Name: "ALLOWED_SERVICE_ACCOUNTS",
+			Value: fmt.Sprintf("system:serviceaccount:%s:%s,system:serviceaccount:%s:%s",
+				runaiConfig.GetNamespace(), operands.RunaiApplicationControllerName,
+				runaiConfig.GetNamespace(), outils.GetNMCServiceAccountNameOrDefault(runaiConfig, operands.RunaiAgentName)),
+		},
+		{
 			Name:  "K8S_CLIENT_CONFIG_QPS",
 			Value: strconv.Itoa(*config.K8sClientConfig.QPS),
 		},
@@ -147,6 +154,17 @@ func handleEnvVars(runaiConfig *runaiv1.RunaiConfig) []v1.EnvVar {
 		{
 			Name:  "GODEBUG",
 			Value: outils.FipsGodebugValue(runaiConfig, "off"),
+		},
+		{
+			Name: constants.RunaiAdsEncryptionKeyEnvVar,
+			ValueFrom: &v1.EnvVarSource{
+				SecretKeyRef: &v1.SecretKeySelector{
+					LocalObjectReference: v1.LocalObjectReference{
+						Name: constants.RunaiAdsSecretName,
+					},
+					Key: constants.RunaiAdsEncryptionKeyName,
+				},
+			},
 		},
 	}
 	// In headless installs the control-plane URL is the placeholder "headless", which is not a

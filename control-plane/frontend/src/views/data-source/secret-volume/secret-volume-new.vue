@@ -75,7 +75,6 @@ export default defineComponent({
       return this.appStore.isPageLoading;
     },
     allowedCreateScopes(): PermittedScopes {
-      // TODO: change to secret once it's available as ResourceType
       return this.dataSourceStore.dataSourcesActionPermissions[ResourceType.SecretVolumeAssets]?.[Action.Create];
     },
   },

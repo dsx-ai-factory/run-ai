@@ -13,14 +13,14 @@ import (
 	"testing"
 	"time"
 
-	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/common/image-parser"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
+	imageparser "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common/image-parser"
 
+	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/installation/util"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/metrics"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
-	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/scheme-init"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	v1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/common"
@@ -152,6 +152,9 @@ func TestImages(t *testing.T) {
 	t.Setenv("IMG_THIRD_PARTY_GIT_SYNC_REGISTRY", "registry.k8s.io")
 	t.Setenv("IMG_THIRD_PARTY_GIT_SYNC_REPOSITORY", "git-sync/git-sync")
 	t.Setenv("IMG_THIRD_PARTY_GIT_SYNC_TAG", "v4.7.0")
+	t.Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_REGISTRY", "quay.io")
+	t.Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_REPOSITORY", "oauth2-proxy/oauth2-proxy")
+	t.Setenv("IMG_THIRD_PARTY_OAUTH2_PROXY_TAG", "v7.15.4")
 	t.Setenv("IMG_THIRD_PARTY_VALKEY_REGISTRY", "docker.io")
 	t.Setenv("IMG_THIRD_PARTY_VALKEY_REPOSITORY", "valkey/valkey")
 	t.Setenv("IMG_THIRD_PARTY_VALKEY_TAG", "9.0.4")
@@ -197,7 +200,7 @@ func TestImages(t *testing.T) {
 
 func checkNoNewThirdPartyImageInOperator(opImageMap map[string]*common.Image) bool {
 	imageMap := map[string]bool{}
-	for _, name := range []string{"GIT_SYNC", "VALKEY", "WAIT_UBI_MINIMAL"} {
+	for _, name := range []string{"GIT_SYNC", "OAUTH2_PROXY", "VALKEY", "WAIT_UBI_MINIMAL"} {
 		image := common.ThirdPartyImage(name)
 		imageMap[*image.Name+":"+*image.Tag] = true
 	}

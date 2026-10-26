@@ -12,8 +12,6 @@ import (
 )
 
 const (
-	PgRunningPodsAnnotationName  = "runai-running-pods"
-	PgPendingPodsAnnotationName  = "runai-pending-pods"
 	PgUsedNodes                  = "runai-used-nodes"
 	PgRequestedGPUs              = "runai-podgroup-requested-gpus"
 	PgRequestedGPUsMemory        = "runai-podgroup-requested-gpus-memory"
@@ -27,7 +25,6 @@ const (
 
 func SumOwnedPodGroupResources(workloadMetadata *metadata.WorkloadMetadata, ownedPodGroups []kaiv2alpha2.PodGroup) {
 	for _, podGroup := range ownedPodGroups {
-		calcPodCounters(workloadMetadata, podGroup)
 		if resource, exists := podGroup.Status.ResourcesStatus.Requested[clustercommonconstants.NvidiaGpuResourceName]; exists {
 			workloadMetadata.RequestedGPUs += resource.AsApproximateFloat64()
 			workloadMetadata.CurrentRequestedGPUs += resource.AsApproximateFloat64()
@@ -35,14 +32,5 @@ func SumOwnedPodGroupResources(workloadMetadata *metadata.WorkloadMetadata, owne
 		if resource, exists := podGroup.Status.ResourcesStatus.Allocated[clustercommonconstants.NvidiaGpuResourceName]; exists {
 			workloadMetadata.AllocatedGpus += resource.AsApproximateFloat64()
 		}
-	}
-}
-
-func calcPodCounters(workloadMetadata *metadata.WorkloadMetadata, podGroup kaiv2alpha2.PodGroup) {
-	if podGroup.Status.Running > 0 {
-		workloadMetadata.RunningPods += int64(podGroup.Status.Running)
-	}
-	if podGroup.Status.Pending > 0 {
-		workloadMetadata.PendingPods += int64(podGroup.Status.Pending)
 	}
 }

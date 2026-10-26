@@ -3,7 +3,7 @@
     "workloadType": "Training",
     "workloadId": "0586e34b-6c17-419b-9cc6-c091cb4d72f5",
     "workloadName": "my-training-demo-123",
-    "apiUrl": "https://nael-env-001.runailabs.com",
+    "apiUrl": "https://nael-env-001.example.com",
     "files": {
         "workloadList": "workload_list.json",
         "workloadDetailed": "workload_detailed.json",

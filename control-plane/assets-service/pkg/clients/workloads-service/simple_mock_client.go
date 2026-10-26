@@ -9,7 +9,7 @@ import (
 	"context"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 
-	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsServiceClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/google/uuid"
@@ -21,6 +21,11 @@ type SimpleMockClient struct {
 	Workspaces  []workloadsServiceClient.Workspace
 	Trainings   []workloadsServiceClient.Training
 	Distributed []workloadsServiceClient.DistributedWorkload
+
+	// Excluded from serialization: tests snapshot this struct to compare the created workloads.
+	ResourceClaimTemplateWorkloads         *workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse         `json:"-"`
+	ResourceClaimTemplateWorkloadsErr      *workloadsServiceClient.Error                                          `json:"-"`
+	ResourceClaimTemplateWorkloadsRequests []workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest `json:"-"`
 }
 
 func (s *SimpleMockClient) CreateWorkspace(ctx context.Context, request *workloadsServiceClient.WorkspaceCreationRequest) (*workloadsServiceClient.Workspace, *workloadsServiceClient.SubmissionErrorV2) {
@@ -105,6 +110,23 @@ func (s SimpleMockClient) InternalCreateWorkload(ctx context.Context, notificati
 	return nil, nil
 }
 
+// InternalGetResourceClaimTemplateWorkloads records the request and returns the configured response or error.
+// With neither configured it returns an empty list.
+func (s *SimpleMockClient) InternalGetResourceClaimTemplateWorkloads(ctx context.Context,
+	request *workloadsServiceClient.InternalResourceClaimTemplateWorkloadsRequest, offset int32, limit int32,
+) (*workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse, *workloadsServiceClient.Error) {
+	s.ResourceClaimTemplateWorkloadsRequests = append(s.ResourceClaimTemplateWorkloadsRequests, *request)
+	if s.ResourceClaimTemplateWorkloadsErr != nil {
+		return nil, s.ResourceClaimTemplateWorkloadsErr
+	}
+	if s.ResourceClaimTemplateWorkloads != nil {
+		return s.ResourceClaimTemplateWorkloads, nil
+	}
+	return &workloadsServiceClient.ResourceClaimTemplateWorkloadsResponse{
+		Workloads: []workloadsServiceClient.ResourceClaimTemplateWorkload{},
+	}, nil
+}
+
 // SimpleMockClientFactory is the mock factory for testing
 type SimpleMockClientFactory struct {
 	*SimpleMockClient
@@ -187,4 +209,7 @@ func (s *SimpleMockClient) Clear() {
 	s.Workspaces = nil
 	s.Trainings = nil
 	s.Distributed = nil
+	s.ResourceClaimTemplateWorkloads = nil
+	s.ResourceClaimTemplateWorkloadsErr = nil
+	s.ResourceClaimTemplateWorkloadsRequests = nil
 }

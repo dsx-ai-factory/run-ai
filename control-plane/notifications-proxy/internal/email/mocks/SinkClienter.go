@@ -20,10 +20,19 @@ func NewSinkClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *SinkClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &SinkClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,15 +73,26 @@ type SinkClienter_CreateEmail_Call struct {
 }
 
 // CreateEmail is a helper method to define mock.On call
-//   - ctx
-//   - config
-func (_e *SinkClienter_Expecter) CreateEmail(ctx interface{}, config interface{}) *SinkClienter_CreateEmail_Call {
+//   - ctx context.Context
+//   - config email.ChannelConfig
+func (_e *SinkClienter_Expecter) CreateEmail(ctx any, config any) *SinkClienter_CreateEmail_Call {
 	return &SinkClienter_CreateEmail_Call{Call: _e.mock.On("CreateEmail", ctx, config)}
 }
 
 func (_c *SinkClienter_CreateEmail_Call) Run(run func(ctx context.Context, config email.ChannelConfig)) *SinkClienter_CreateEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(email.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 email.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(email.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -110,14 +130,20 @@ type SinkClienter_DeleteEmail_Call struct {
 }
 
 // DeleteEmail is a helper method to define mock.On call
-//   - ctx
-func (_e *SinkClienter_Expecter) DeleteEmail(ctx interface{}) *SinkClienter_DeleteEmail_Call {
+//   - ctx context.Context
+func (_e *SinkClienter_Expecter) DeleteEmail(ctx any) *SinkClienter_DeleteEmail_Call {
 	return &SinkClienter_DeleteEmail_Call{Call: _e.mock.On("DeleteEmail", ctx)}
 }
 
 func (_c *SinkClienter_DeleteEmail_Call) Run(run func(ctx context.Context)) *SinkClienter_DeleteEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -166,14 +192,20 @@ type SinkClienter_GetEmail_Call struct {
 }
 
 // GetEmail is a helper method to define mock.On call
-//   - ctx
-func (_e *SinkClienter_Expecter) GetEmail(ctx interface{}) *SinkClienter_GetEmail_Call {
+//   - ctx context.Context
+func (_e *SinkClienter_Expecter) GetEmail(ctx any) *SinkClienter_GetEmail_Call {
 	return &SinkClienter_GetEmail_Call{Call: _e.mock.On("GetEmail", ctx)}
 }
 
 func (_c *SinkClienter_GetEmail_Call) Run(run func(ctx context.Context)) *SinkClienter_GetEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -222,15 +254,26 @@ type SinkClienter_PatchEmail_Call struct {
 }
 
 // PatchEmail is a helper method to define mock.On call
-//   - ctx
-//   - config
-func (_e *SinkClienter_Expecter) PatchEmail(ctx interface{}, config interface{}) *SinkClienter_PatchEmail_Call {
+//   - ctx context.Context
+//   - config email.ChannelConfig
+func (_e *SinkClienter_Expecter) PatchEmail(ctx any, config any) *SinkClienter_PatchEmail_Call {
 	return &SinkClienter_PatchEmail_Call{Call: _e.mock.On("PatchEmail", ctx, config)}
 }
 
 func (_c *SinkClienter_PatchEmail_Call) Run(run func(ctx context.Context, config email.ChannelConfig)) *SinkClienter_PatchEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(email.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 email.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(email.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -268,15 +311,26 @@ type SinkClienter_UpdateEmail_Call struct {
 }
 
 // UpdateEmail is a helper method to define mock.On call
-//   - ctx
-//   - config
-func (_e *SinkClienter_Expecter) UpdateEmail(ctx interface{}, config interface{}) *SinkClienter_UpdateEmail_Call {
+//   - ctx context.Context
+//   - config email.ChannelConfig
+func (_e *SinkClienter_Expecter) UpdateEmail(ctx any, config any) *SinkClienter_UpdateEmail_Call {
 	return &SinkClienter_UpdateEmail_Call{Call: _e.mock.On("UpdateEmail", ctx, config)}
 }
 
 func (_c *SinkClienter_UpdateEmail_Call) Run(run func(ctx context.Context, config email.ChannelConfig)) *SinkClienter_UpdateEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(email.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 email.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(email.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -323,15 +377,26 @@ type SinkClienter_ValidateEmail_Call struct {
 }
 
 // ValidateEmail is a helper method to define mock.On call
-//   - ctx
-//   - config
-func (_e *SinkClienter_Expecter) ValidateEmail(ctx interface{}, config interface{}) *SinkClienter_ValidateEmail_Call {
+//   - ctx context.Context
+//   - config email.ChannelConfig
+func (_e *SinkClienter_Expecter) ValidateEmail(ctx any, config any) *SinkClienter_ValidateEmail_Call {
 	return &SinkClienter_ValidateEmail_Call{Call: _e.mock.On("ValidateEmail", ctx, config)}
 }
 
 func (_c *SinkClienter_ValidateEmail_Call) Run(run func(ctx context.Context, config email.ChannelConfig)) *SinkClienter_ValidateEmail_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(email.ChannelConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 email.ChannelConfig
+		if args[1] != nil {
+			arg1 = args[1].(email.ChannelConfig)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

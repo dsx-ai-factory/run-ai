@@ -2733,7 +2733,7 @@ paths:
         per-cluster installer service account, scoped to the given cluster.
         Called by cluster-service when generating the cluster install command.
         The token is passed to the Helm hook as
-        --set cluster.bootstrapToken=<token> and used directly as a Bearer token
+        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer token
         to call GET /clusters/{uuid}/control-plane-config — the installer client
         secret never leaves the server.
 
@@ -4150,14 +4150,6 @@ paths:
                 value:
                   grantType: external_token_exchange
                   externalToken: access token from external idp
-              app_token (deprecated):
-                description: Deprecated - Obtain the appID and the appSecret using
-                  applications or access keys endpoints
-                value:
-                  grantType: app_token
-                  appID: appID
-                  appSecret: appSecret
-                x-internal: true
             schema:
               $ref: '#/components/schemas/TokenRequest'
       responses:
@@ -4946,61 +4938,6 @@ paths:
       x-service: identity-manager
       x-test-coverage: not-applicable
       x-no-authorization: true
-  /v1/k8s/auth/oauth/apptoken:
-    post:
-      deprecated: true
-      description: |
-        Retrieve access token for an application.
-        The application token is retrieved from the authorization server.
-        This endpoint is deprecated.  Use /api/v1/token with the grantType parameter set to app_token instead, with AppID and appSecret set accordingly to get an application token
-      operationId: app_token
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AppTokenRequest'
-      responses:
-        "200":
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AppTokenResponse'
-          description: Executed successfully.
-        "400":
-          content:
-            application/json:
-              example:
-                code: 400
-                message: Required parameter is missing
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: Bad request.
-        "500":
-          content:
-            application/json:
-              example:
-                code: 500
-                message: Something went wrong.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-        "503":
-          content:
-            application/json:
-              example:
-                code: 503
-                message: Please try again in few minutes.
-              schema:
-                $ref: '#/components/schemas/Error'
-          description: unexpected error
-      summary: get application token
-      tags:
-      - Tokens
-      x-no-authorization: true
-      x-service: identity-manager
-      x-test-coverage:
-      - src/test/suites/parallel/applicationsV2/applicationsAuth.test.ts
-    x-internal: true
   /internal/realms/{realm}:
     delete:
       operationId: delete_realm
@@ -6287,8 +6224,8 @@ components:
       type: object
     UserChangePasswordRequest:
       example:
-        currentPassword: Abcd!234
-        newPassword: Zxcv!567
+        currentPassword: <current-password>
+        newPassword: <new-password>
       properties:
         currentPassword:
           maxLength: 255
@@ -6733,10 +6670,7 @@ components:
       - exchange_token
       - password
       - external_token_exchange
-      - app_token
       type: string
-      x-enum-internal:
-      - app_token
     TokenRequest:
       example:
         redirectUri: redirectUri
@@ -6745,8 +6679,6 @@ components:
         clientID: clientID
         codeVerifier: codeVerifier
         externalToken: externalToken
-        appID: appID
-        appSecret: appSecret
         clientSecret: clientSecret
         grantType: client_credentials
         refreshToken: refreshToken
@@ -6754,16 +6686,6 @@ components:
       properties:
         grantType:
           $ref: '#/components/schemas/TokenRequestGrantTypeEnum'
-        appID:
-          deprecated: true
-          maxLength: 255
-          type: string
-          x-internal: true
-        appSecret:
-          deprecated: true
-          maxLength: 500
-          type: string
-          x-internal: true
         code:
           maxLength: 2048
           type: string
@@ -7297,39 +7219,6 @@ components:
         reconcilerType:
           $ref: '#/components/schemas/reconcilerType'
       type: object
-    AppTokenRequest:
-      example:
-        name: name
-        id: id
-        secret: secret
-      properties:
-        id:
-          maxLength: 64
-          type: string
-        name:
-          maxLength: 255
-          type: string
-        secret:
-          maxLength: 500
-          type: string
-      required:
-      - id
-      - name
-      - secret
-      type: object
-    AppTokenResponse:
-      example:
-        access_token: access_token
-        id_token: id_token
-      properties:
-        access_token:
-          type: string
-        id_token:
-          type: string
-      required:
-      - access_token
-      - id_token
-      type: object
     ConfigSamlResponse:
       example:
         entity_id: f84d2fcf-8a61-4136-9b75-d06f496ca1f2
@@ -7379,7 +7268,7 @@ components:
       type: object
     change_user_password_200_response:
       example:
-        tempPassword: Abcd!234
+        tempPassword: <temporary-password>
       properties:
         currentPassword:
           type: string

@@ -20,10 +20,19 @@ func NewAuthManagerInterface(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *AuthManagerInterface {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &AuthManagerInterface{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -75,15 +84,26 @@ type AuthManagerInterface_GetTenantIdForSystemScope_Call struct {
 }
 
 // GetTenantIdForSystemScope is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *AuthManagerInterface_Expecter) GetTenantIdForSystemScope(ctx interface{}, tenantId interface{}) *AuthManagerInterface_GetTenantIdForSystemScope_Call {
+//   - ctx context.Context
+//   - tenantId string
+func (_e *AuthManagerInterface_Expecter) GetTenantIdForSystemScope(ctx any, tenantId any) *AuthManagerInterface_GetTenantIdForSystemScope_Call {
 	return &AuthManagerInterface_GetTenantIdForSystemScope_Call{Call: _e.mock.On("GetTenantIdForSystemScope", ctx, tenantId)}
 }
 
 func (_c *AuthManagerInterface_GetTenantIdForSystemScope_Call) Run(run func(ctx context.Context, tenantId string)) *AuthManagerInterface_GetTenantIdForSystemScope_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -130,15 +150,26 @@ type AuthManagerInterface_HandleSystemScopeError_Call struct {
 }
 
 // HandleSystemScopeError is a helper method to define mock.On call
-//   - err
-//   - errMessage
-func (_e *AuthManagerInterface_Expecter) HandleSystemScopeError(err interface{}, errMessage interface{}) *AuthManagerInterface_HandleSystemScopeError_Call {
+//   - err error
+//   - errMessage string
+func (_e *AuthManagerInterface_Expecter) HandleSystemScopeError(err any, errMessage any) *AuthManagerInterface_HandleSystemScopeError_Call {
 	return &AuthManagerInterface_HandleSystemScopeError_Call{Call: _e.mock.On("HandleSystemScopeError", err, errMessage)}
 }
 
 func (_c *AuthManagerInterface_HandleSystemScopeError_Call) Run(run func(err error, errMessage string)) *AuthManagerInterface_HandleSystemScopeError_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(error), args[1].(string))
+		var arg0 error
+		if args[0] != nil {
+			arg0 = args[0].(error)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

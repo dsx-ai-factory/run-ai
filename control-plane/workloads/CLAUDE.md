@@ -26,7 +26,7 @@ Targets come from the service `Makefile` plus the shared includes
 
 ## Key build notes
 
-- Generated code: OpenAPI server stubs are generated (openapi-generator `v7.12.0`) into `internal/generated`. `make build` runs `openapi-build` first; run OpenAPI generation before hand-building and never edit generated dirs. There is no in-repo `pkg/client` — the public Go client is generated to `runai-clients/workloads-client`.
+- Generated code: OpenAPI server stubs are generated (openapi-generator `v7.12.0`) into `internal/generated`. `make build` runs `openapi-build` first; run OpenAPI generation before hand-building and never edit generated dirs. The public Go client is a separate module in `pkg/client`, generated from the same spec.
 - Runtime base image: final image is `FROM scratch`; a `registry.access.redhat.com/ubi9/ubi-minimal` stage supplies `/etc/passwd`, certs (`/etc/ssl`, `/etc/pki`) and a writable `/tmp`. Runs as user `65532:65532`. Bundles SQL migrations (`pkg/database/migrations/up|down`) and the swagger bundle.
 - Build args: `TARGETARCH` (selects `bin/workloads-$TARGETARCH`).
 - Dual run mode: one binary; `job-mode` arg selects the background "workloads-helper" worker (cleaner/watchdog/notify/metrics loops) instead of the HTTP server.

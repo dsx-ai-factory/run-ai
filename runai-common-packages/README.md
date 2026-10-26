@@ -15,8 +15,8 @@ make package-bump-version        # automatic: patch (compatible) or minor (break
 ```
 
 **Requirements:**
-- Must be on `master` branch
-- Local `master` must be up-to-date with `origin/master`
+- Must be on `main` branch
+- Local `main` must be up-to-date with `origin/main`
 
 **Behavior:**
 - Compares **only this package** to its latest `${TAG_FORMAT}/vX.Y.Z` prod tag
@@ -72,8 +72,8 @@ make package-bump-version-dev  # metrics/v1.2.3-dev.0
 make package-bump-version-dev  # metrics/v1.2.3-dev.1 (auto-increments, no prompt)
 make package-bump-version-dev  # metrics/v1.2.3-dev.2 (auto-increments, no prompt)
 
-# 3. After PR is merged to master
-git checkout master
+# 3. After PR is merged to main
+git checkout main
 git pull
 
 # 4. Create production release
@@ -89,7 +89,7 @@ To release a Go package, follow these steps:
 > This is a production release, for a dev release check out [here](#development-release-process)
 
 1. **Tag the Branch**:  
-   To release a package, you need to tag the master branch using the following format:
+   To release a package, you need to tag the main branch using the following format:
 
    ```
    package_folder_name/vX.X.X

@@ -144,6 +144,28 @@ func (c *WorkloadsAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
+		"InternalGetResourceClaimTemplateWorkloads": Route{
+			strings.ToUpper("Post"),
+			"/internal/workloads/resource-claim-templates/workloads",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"workloads",
+						"read",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.InternalGetResourceClaimTemplateWorkloads
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
 		"InternalEnrichOrgUnitRanking": Route{
 			strings.ToUpper("Post"),
 			"/internal/workloads/enrich-ranking",
@@ -196,6 +218,28 @@ func (c *WorkloadsAPIController) Routes() Routes {
 				func(next http.HandlerFunc) http.HandlerFunc {
 					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
 					return c.SyncWorkloads
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
+		"GetWorkloadsSlim": Route{
+			strings.ToUpper("Get"),
+			"/api/v1/workloads/slim",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"workloads",
+						"read",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.GetWorkloadsSlim
 					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
 				},
 			),
@@ -359,6 +403,19 @@ func (c *WorkloadsAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
+		"GetInternalWorkloadsTelemetry": Route{
+			strings.ToUpper("Get"),
+			"/internal/workloads/telemetry",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.GetInternalWorkloadsTelemetry
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
 		"GetWorkloadMetrics": Route{
 			strings.ToUpper("Get"),
 			"/api/v1/workloads/{workloadId}/metrics",
@@ -486,6 +543,28 @@ func (c *WorkloadsAPIController) Routes() Routes {
 				func(next http.HandlerFunc) http.HandlerFunc {
 					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
 					return c.CountWorkloadElements
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
+		"GetWorkloadResourceClaims": Route{
+			strings.ToUpper("Get"),
+			"/api/v1/workloads/{workloadId}/resource-claims",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"workloads",
+						"read",
+						true,
+						"workloadId",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.GetWorkloadResourceClaims
 					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
 				},
 			),
@@ -738,6 +817,124 @@ func (c *WorkloadsAPIController) InternalSyncWorkloads(w http.ResponseWriter, r 
 
 	if result.Code == 207 {
 		// generated from status code: 207
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// InternalGetResourceClaimTemplateWorkloads - List the workloads referencing a resource claim template (Internal API).
+func (c *WorkloadsAPIController) InternalGetResourceClaimTemplateWorkloads(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	var internalResourceClaimTemplateWorkloadsRequestParam InternalResourceClaimTemplateWorkloadsRequest
+	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
+	if readError != nil {
+		// Handle the error
+		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
+		return
+	}
+	jsonReader := bytes.NewReader(payloadBody)
+	d := json.NewDecoder(jsonReader)
+	//d := json.NewDecoder(r.Body)
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+	d.DisallowUnknownFields()
+	if err := d.Decode(&internalResourceClaimTemplateWorkloadsRequestParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
+		return
+	}
+	if err := AssertInternalResourceClaimTemplateWorkloadsRequestRequired(internalResourceClaimTemplateWorkloadsRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	if err := AssertInternalResourceClaimTemplateWorkloadsRequestConstraints(internalResourceClaimTemplateWorkloadsRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	var offsetParam int32
+	if query.Has("offset") {
+		param, err := parseNumericParameter[int32](
+			query.Get("offset"),
+			WithParse[int32](parseInt32),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
+			return
+		}
+
+		offsetParam = param
+	} else {
+	}
+	var limitParam int32
+	if query.Has("limit") {
+		param, err := parseNumericParameter[int32](
+			query.Get("limit"),
+			WithParse[int32](parseInt32),
+			WithMinimum[int32](1),
+			WithMaximum[int32](500),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
+			return
+		}
+
+		limitParam = param
+	} else {
+		var param int32 = 50
+		limitParam = param
+	}
+	result, err := c.service.InternalGetResourceClaimTemplateWorkloads(r.Context(), internalResourceClaimTemplateWorkloadsRequestParam, offsetParam, limitParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
 		acceptHeader := r.Header.Get("Accept")
 		acceptTypes := strings.Split(acceptHeader, ",")
 
@@ -1051,6 +1248,106 @@ func (c *WorkloadsAPIController) SyncWorkloads(w http.ResponseWriter, r *http.Re
 
 	if result.Code == 207 {
 		// generated from status code: 207
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// GetWorkloadsSlim - List workloads, slim.
+func (c *WorkloadsAPIController) GetWorkloadsSlim(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	var offsetParam int32
+	if query.Has("offset") {
+		param, err := parseNumericParameter[int32](
+			query.Get("offset"),
+			WithParse[int32](parseInt32),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
+			return
+		}
+
+		offsetParam = param
+	} else {
+	}
+	var limitParam int32
+	if query.Has("limit") {
+		param, err := parseNumericParameter[int32](
+			query.Get("limit"),
+			WithParse[int32](parseInt32),
+			WithMinimum[int32](1),
+			WithMaximum[int32](500),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
+			return
+		}
+
+		limitParam = param
+	} else {
+		var param int32 = 50
+		limitParam = param
+	}
+	var filterByParam []string
+	if query.Has("filterBy") {
+		filterByParam = strings.Split(query.Get("filterBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(filterByParam) == 1 && filterByParam[0] == "" {
+			filterByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	result, err := c.service.GetWorkloadsSlim(r.Context(), offsetParam, limitParam, filterByParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
 		acceptHeader := r.Header.Get("Accept")
 		acceptTypes := strings.Split(acceptHeader, ",")
 
@@ -1549,7 +1846,16 @@ func (c *WorkloadsAPIController) GetWorkloadsTelemetry(w http.ResponseWriter, r 
 			filterByPhasesParam = append(filterByPhasesParam, paramEnum)
 		}
 	}
-	result, err := c.service.GetWorkloadsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolNameParam, departmentIdParam, projectIdParam, groupByParam, filterByPhasesParam)
+	var filterByParam []string
+	if query.Has("filterBy") {
+		filterByParam = strings.Split(query.Get("filterBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(filterByParam) == 1 && filterByParam[0] == "" {
+			filterByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	result, err := c.service.GetWorkloadsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolNameParam, departmentIdParam, projectIdParam, groupByParam, filterByPhasesParam, filterByParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
@@ -1574,6 +1880,133 @@ func (c *WorkloadsAPIController) GetWorkloadsTelemetry(w http.ResponseWriter, r 
 				contentTypeHandler = nil
 			case "text/csv", "text/*":
 				contentTypeHandler = runaihttp.CreateCsvResponse
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// GetInternalWorkloadsTelemetry - Get the internal workloads telemetry.
+func (c *WorkloadsAPIController) GetInternalWorkloadsTelemetry(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	var telemetryTypeParam WorkloadTelemetryType
+	if query.Has("telemetryType") {
+		param := WorkloadTelemetryType(query.Get("telemetryType"))
+
+		telemetryTypeParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "telemetryType"}, nil, nil)
+		return
+	}
+	var clusterIdParam string
+	if query.Has("clusterId") {
+		param := query.Get("clusterId")
+
+		clusterIdParam = param
+	} else {
+	}
+	var nodepoolNameParam string
+	if query.Has("nodepoolName") {
+		param := query.Get("nodepoolName")
+
+		nodepoolNameParam = param
+	} else {
+	}
+	var departmentIdParam string
+	if query.Has("departmentId") {
+		param := query.Get("departmentId")
+
+		departmentIdParam = param
+	} else {
+	}
+	var projectIdParam string
+	if query.Has("projectId") {
+		param := query.Get("projectId")
+
+		projectIdParam = param
+	} else {
+	}
+	var groupByParam []string
+	if query.Has("groupBy") {
+		groupByParam = strings.Split(query.Get("groupBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(groupByParam) == 1 && groupByParam[0] == "" {
+			groupByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	var filterByPhasesParam []Phase
+	if query.Has("filterByPhases") {
+		paramSplits := strings.Split(query.Get("filterByPhases"), ",")
+		filterByPhasesParam = make([]Phase, 0, len(paramSplits))
+		for _, param := range paramSplits {
+			paramEnum, err := NewPhaseFromValue(param)
+			if err != nil {
+				c.errorHandler(w, r, &ParsingError{Param: "filterByPhases", Err: err}, nil, nil)
+				return
+			}
+			filterByPhasesParam = append(filterByPhasesParam, paramEnum)
+		}
+	}
+	var filterByParam []string
+	if query.Has("filterBy") {
+		filterByParam = strings.Split(query.Get("filterBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(filterByParam) == 1 && filterByParam[0] == "" {
+			filterByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	result, err := c.service.GetInternalWorkloadsTelemetry(r.Context(), telemetryTypeParam, clusterIdParam, nodepoolNameParam, departmentIdParam, projectIdParam, groupByParam, filterByPhasesParam, filterByParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
 			case "application/json", "application/*":
 				contentTypeHandler = EncodeJSONResponse
 			}
@@ -2155,6 +2588,102 @@ func (c *WorkloadsAPIController) CountWorkloadElements(w http.ResponseWriter, r 
 		return
 	}
 	result, err := c.service.CountWorkloadElements(r.Context(), workloadIdParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// GetWorkloadResourceClaims - Get workload resource claims by workload id.
+func (c *WorkloadsAPIController) GetWorkloadResourceClaims(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	workloadIdParam := chi.URLParam(r, "workloadId")
+	if workloadIdParam == "" {
+		c.errorHandler(w, r, &RequiredError{"workloadId"}, nil, nil)
+		return
+	}
+	var offsetParam int32
+	if query.Has("offset") {
+		param, err := parseNumericParameter[int32](
+			query.Get("offset"),
+			WithParse[int32](parseInt32),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
+			return
+		}
+
+		offsetParam = param
+	} else {
+	}
+	var limitParam int32
+	if query.Has("limit") {
+		param, err := parseNumericParameter[int32](
+			query.Get("limit"),
+			WithParse[int32](parseInt32),
+			WithMinimum[int32](1),
+			WithMaximum[int32](500),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
+			return
+		}
+
+		limitParam = param
+	} else {
+		var param int32 = 50
+		limitParam = param
+	}
+	result, err := c.service.GetWorkloadResourceClaims(r.Context(), workloadIdParam, offsetParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

@@ -33,7 +33,7 @@ Targets come from the service `Makefile` plus the shared includes
 
 ## Key build notes
 
-- Generated code: OpenAPI server stubs + Go client are generated (openapi-generator `v7.12.0`, `VERSIONED_CLIENT=true`), and mockery-generated mocks (`make mockery`). `make build` runs `openapi-build` first; run generation before hand-building and never edit generated dirs.
+- Generated code: OpenAPI server stubs + Go client are generated (openapi-generator `v7.12.0`, `VERSIONED_CLIENT=true`), and mockery v3 mocks from `.mockery.yml` (shared targets `make generate-mocks`, or `make generate-mocks-local` without Docker). `make build` runs `openapi-build` first; run generation before hand-building and never edit generated dirs.
 - Runtime base image: final image is `FROM scratch`; a `registry.access.redhat.com/ubi9/ubi-minimal` stage supplies `/etc/passwd`, certs (`/etc/ssl`, `/etc/pki`) and a writable `/tmp`. Runs as user `65532:65532`. Bundles SQL migrations (`pkg/database/migrations/up|down`) and the swagger bundle.
 - Build args: `TARGETARCH` (selects `bin/bff-service-$TARGETARCH`).
 - Build command (what local-dev.sh actually runs for this service): it is in `CP_GO_SERVICES`, so `build_go_service` runs, in two steps:

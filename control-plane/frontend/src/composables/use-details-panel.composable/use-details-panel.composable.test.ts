@@ -7,13 +7,13 @@ import { describe, it, expect } from "vitest";
 import { ref } from "vue";
 import { useDetailsPanel } from "./use-details-panel.composable";
 import type { IDetailsPanelItem, IDetailsPanelSectionDef } from "@/models/details-panel.model";
-import { matchesItem } from "@/utils/details-panel.utils";
+import { matchAnyItem } from "@/utils/details-panel.utils";
 
 function makeSection(id: string, title: string, items: IDetailsPanelItem[]): IDetailsPanelSectionDef {
   return {
     id,
     title,
-    customMatch: (term) => items.some((it) => matchesItem(it, term)),
+    customMatch: (term) => matchAnyItem(items, term),
     data: { items },
   };
 }
@@ -22,7 +22,7 @@ const generalSection = makeSection("general", "General information", [
   { label: "Type", value: "Workspace" },
   { label: "Category", value: "Build" },
   { label: "Project", value: "p-1", link: { text: "p-1", href: "/projects/p-1" } },
-  { label: "Cluster", value: "dima-cluster" },
+  { label: "Cluster", value: "test-cluster" },
 ]);
 
 const computeSection = makeSection("compute", "Compute", [

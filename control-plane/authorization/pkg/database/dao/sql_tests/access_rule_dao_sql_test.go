@@ -308,7 +308,7 @@ var _ = Describe("AccessRule DAO SQL", func() {
 			).Returns(4)
 			mocker.ExpectTransaction().Commit()
 
-			apiErr := dao.DbDeleteScopeAccessRules(context.Background(), false, sqlTestTenantID, string(api.SCOPETYPE_CLUSTER), "cluster-uuid-1", "", nil)
+			apiErr := dao.DbDeleteScopeAccessRules(context.Background(), sqlTestTenantID, string(api.SCOPETYPE_CLUSTER), "cluster-uuid-1", "", nil)
 			Expect(apiErr).To(BeNil())
 		})
 
@@ -322,7 +322,7 @@ var _ = Describe("AccessRule DAO SQL", func() {
 			).Returns(2)
 			mocker.ExpectTransaction().Commit()
 
-			apiErr := dao.DbDeleteScopeAccessRules(context.Background(), false, sqlTestTenantID, string(api.SCOPETYPE_PROJECT), "proj-1", "", nil)
+			apiErr := dao.DbDeleteScopeAccessRules(context.Background(), sqlTestTenantID, string(api.SCOPETYPE_PROJECT), "proj-1", "", nil)
 			Expect(apiErr).To(BeNil())
 		})
 
@@ -336,7 +336,7 @@ var _ = Describe("AccessRule DAO SQL", func() {
 			).ReturnsError(errors.New("delete failed"))
 			mocker.ExpectTransaction().Rollback()
 
-			apiErr := dao.DbDeleteScopeAccessRules(context.Background(), false, sqlTestTenantID, string(api.SCOPETYPE_CLUSTER), "cluster-uuid-1", "", nil)
+			apiErr := dao.DbDeleteScopeAccessRules(context.Background(), sqlTestTenantID, string(api.SCOPETYPE_CLUSTER), "cluster-uuid-1", "", nil)
 			Expect(apiErr).NotTo(BeNil())
 		})
 	})

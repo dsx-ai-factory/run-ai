@@ -16,11 +16,11 @@ import (
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
 	cluster_openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	idm_openapi "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
+	orgunit_openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	tm_client "github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client"
+	wc_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	catalog_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client/generated"
 	dv_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client/generated"
-	orgunit_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	wc_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/internal/generated/pkg/api"

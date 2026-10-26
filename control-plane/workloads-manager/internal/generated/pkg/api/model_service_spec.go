@@ -80,7 +80,7 @@ func AssertServiceSpecConstraints(obj ServiceSpec) error {
 	if minLengthErr := runaihttp.AssertMinLength(obj.Name, "Name", 1); minLengthErr != nil {
 		return &ParsingError{Param: "Name", Err: minLengthErr}
 	}
-	if maxLengthErr := runaihttp.AssertMaxLength(obj.Name, "Name", 253); maxLengthErr != nil {
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Name, "Name", 63); maxLengthErr != nil {
 		return &ParsingError{Param: "Name", Err: maxLengthErr}
 	}
 	//////////////////////// RUNAI END //////////////////////////

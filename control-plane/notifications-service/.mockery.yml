@@ -1,0 +1,75 @@
+dir: '{{.InterfaceDir}}/mocks'
+filename: '{{.InterfaceName}}.go'
+structname: '{{.InterfaceName}}'
+pkgname: mocks
+template: testify
+template-data:
+  unroll-variadic: true
+packages:
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/app:
+    config:
+      dir: '{{.InterfaceDir}}'
+      filename: '{{.InterfaceName}}Mock.go'
+      structname: '{{.InterfaceName}}Mock'
+      pkgname: app
+    interfaces:
+      Cleaner: {}
+      ConfigUpdatesListener: {}
+      ConfigurationProvider: {}
+      RoutesRegister: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/config/advanced:
+    interfaces:
+      ConfigProviderDao: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/config/advanced/http_listener:
+    interfaces:
+      IsHealthyer: {}
+      ListenerDao: {}
+      NotificationKindsDao: {}
+      SinksDao: {}
+      TenantDao: {}
+      UserDao: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/config/advanced/http_listener/encryption:
+    interfaces:
+      EncrypterDecrypterer: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/enrich:
+    interfaces:
+      Factory: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/events:
+    interfaces:
+      EventHandler: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/filter:
+    interfaces:
+      Factory: {}
+      Filter: {}
+      FilteringConfigProvider: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/history:
+    interfaces:
+      EventsCleanerer: {}
+      EventsRepository: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/history/api:
+    interfaces:
+      EventsHistoryServicer: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/listen:
+    interfaces:
+      Factory: {}
+      Listener: {}
+      ListeningConfigProvider: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/notify:
+    interfaces:
+      Factory: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/postgres/configprovider:
+    interfaces:
+      ValidationDao: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/route:
+    interfaces:
+      Route: {}
+      RouteConfigProvider: {}
+      RouterConfigProvider: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/sinks:
+    interfaces:
+      EventDaoer: {}
+      Sinker: {}
+      SlackClienter: {}
+  github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/internal/sinks/smtp:
+    interfaces:
+      SmtpClienter: {}

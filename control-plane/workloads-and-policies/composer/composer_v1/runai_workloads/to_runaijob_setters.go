@@ -11,8 +11,8 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_groups"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	corev1 "k8s.io/api/core/v1"
@@ -678,12 +678,12 @@ func servingPortToServingPortField(src *composer.ServingPortInfo, target any, _ 
 }
 
 func intToRunPolicyBackoffLimit(src *int64, target any, _ any) *workloadsApi.Error {
-	if convutils.Deref(src, 0) != 0 {
+	if src != nil {
 		targetPtr, err := ensureRunPolicyField(target)
 		if err != nil {
 			return err
 		}
-		return nonZeroIntToIntField(src, &((*targetPtr).Values.BackoffLimit), nil)
+		return intToIntField(src, &((*targetPtr).Values.BackoffLimit), nil)
 	}
 	return nil
 }

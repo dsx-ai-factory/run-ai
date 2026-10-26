@@ -12,7 +12,7 @@ import LegacyAccessRuleTransitionModal from "./legacy-access-rule-transition-mod
 import type { ILegacyRoleTransitionRow } from "@/models/legacy-access-rule-transition.model";
 import { accessRuleService } from "@/services/control-plane/rbac/access-rule.service/access-rule.service";
 import { useLegacyAccessRuleStore } from "@/stores/legacy-access-rule.store";
-import type { RoleV1 } from "@/swagger-models/authorization-client/api";
+import type { Role } from "@/swagger-models/authorization-client/api";
 
 vi.mock("@/services/control-plane/rbac/access-rule.service/access-rule.service", () => ({
   accessRuleService: {
@@ -31,7 +31,7 @@ const mockRoles = [
   { id: 1, name: "AI practitioner" },
   { id: 2, name: "Project administrator" },
   { id: 3, name: "Data and storage administrator" },
-] as RoleV1[];
+] as Role[];
 
 const mockRow = (overrides: Partial<ILegacyRoleTransitionRow> = {}): ILegacyRoleTransitionRow => ({
   id: "L1 researcher",

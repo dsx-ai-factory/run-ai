@@ -6,11 +6,11 @@ Learn how to submit and manage a standard AI training job using NVIDIA Run:ai.
 
 <iframe width="700" height="394" src="https://www.youtube.com/embed/A1mkRye5_To" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
 
-<Info>
+<Note>
 **Note**
 
 This video was recorded using NVIDIA Run:ai version 2.25.9. The user interface, features, and workflows may differ in newer releases. For the latest information, refer to the current documentation.
-</Info>
+</Note>
 
 ## What You'll Learn:
 * Configure a standard training workload

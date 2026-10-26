@@ -42,7 +42,7 @@ Headers provide additional information about the request and response. Most API 
 
 ### Authentication
 
-NVIDIA Run:ai API endpoints require authentication. Authentication is performed using **bearer tokens**, which are generated from access keys (client ID and client secret). Unauthenticated requests, or requests with invalid or expired tokens, return a `401 Unauthorized` error. For details on creating access keys and requesting tokens, see [API Access Setup](../about-the-rest-api.md).
+NVIDIA Run:ai API endpoints require authentication. Authentication is performed using **bearer tokens**, which are generated from access keys (client ID and client secret). Unauthenticated requests, or requests with invalid or expired tokens, return a `401 Unauthorized` error. For details on creating access keys and requesting tokens, see [API Access Setup](api-access-setup.md).
 
 ### Parameters
 
@@ -67,7 +67,7 @@ Query parameters modify the behavior of a request and are typically optional. Ex
 Query parameters are appended to the URL:
 
 ```
-v1/authorization/access-rules?limit=100&offset=0&sortBy=name&sortOrder=asc
+/api/v1/authorization/access-rules?limit=100&offset=0&sortBy=name&sortOrder=asc
 ```
 
 #### Body parameters
@@ -99,9 +99,9 @@ Each API response includes:
 
 Status codes indicate whether a request succeeded or failed.
 
-* **2xx** – Request succeeded
-* **4xx** – Client error (authentication, authorization, or request validation)
-* **5xx** – Server or gateway error
+* **2xx** - Request succeeded
+* **4xx** - Client error (authentication, authorization, or request validation)
+* **5xx** - Server or gateway error
 
 For a full list of status codes, see [HTTP Status Codes](../http-status-codes.md).
 

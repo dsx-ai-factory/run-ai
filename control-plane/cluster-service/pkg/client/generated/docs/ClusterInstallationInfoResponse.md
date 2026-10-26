@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **InstallationStr** | **string** |  | 
 **RepositoryName** | **string** |  | 
 **ChartRepoURL** | **string** |  | 
-**BootstrapToken** | **string** | Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set cluster.bootstrapToken&#x3D;&lt;token&gt;.  | 
+**BootstrapToken** | **string** | Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set controlPlane.bootstrapToken&#x3D;&lt;token&gt;.  | 
 **ClientSecret** | Pointer to **NullableString** | Deprecated. Omitted on CP &gt;&#x3D; 3.0. Use bootstrapToken instead. | [optional] 
 
 ## Methods

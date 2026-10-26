@@ -24,8 +24,6 @@ import (
 
 // //////////////////////////// RUNAI ///////////////////////////////
 // \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-//
-//go:generate mockery --name AccessRulesAPI --output ../mocks/
 type AccessRulesAPI interface {
 
 	/*
@@ -96,7 +94,7 @@ type AccessRulesAPI interface {
 	/*
 		CreateAccessRule Create an access rule.
 
-		Use to bind a predefined role to a subject (user, group or application) in a scope.
+		Use to bind a predefined role to a subject (user, group or service account) in a scope.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@return ApiCreateAccessRuleRequest
@@ -926,7 +924,7 @@ func (r ApiCreateAccessRuleRequest) Execute() (*AccessRule, *http.Response, erro
 /*
 CreateAccessRule Create an access rule.
 
-Use to bind a predefined role to a subject (user, group or application) in a scope.
+Use to bind a predefined role to a subject (user, group or service account) in a scope.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiCreateAccessRuleRequest

@@ -23,10 +23,19 @@ func NewMetricStoreService(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MetricStoreService {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MetricStoreService{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -80,15 +89,26 @@ type MetricStoreService_CreateMetricsStoreInfra_Call struct {
 }
 
 // CreateMetricsStoreInfra is a helper method to define mock.On call
-//   - ctx
-//   - request
-func (_e *MetricStoreService_Expecter) CreateMetricsStoreInfra(ctx interface{}, request interface{}) *MetricStoreService_CreateMetricsStoreInfra_Call {
+//   - ctx context.Context
+//   - request *metric_store.MetricStoreInfraCreateRequest
+func (_e *MetricStoreService_Expecter) CreateMetricsStoreInfra(ctx any, request any) *MetricStoreService_CreateMetricsStoreInfra_Call {
 	return &MetricStoreService_CreateMetricsStoreInfra_Call{Call: _e.mock.On("CreateMetricsStoreInfra", ctx, request)}
 }
 
 func (_c *MetricStoreService_CreateMetricsStoreInfra_Call) Run(run func(ctx context.Context, request *metric_store.MetricStoreInfraCreateRequest)) *MetricStoreService_CreateMetricsStoreInfra_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*metric_store.MetricStoreInfraCreateRequest))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *metric_store.MetricStoreInfraCreateRequest
+		if args[1] != nil {
+			arg1 = args[1].(*metric_store.MetricStoreInfraCreateRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -128,15 +148,26 @@ type MetricStoreService_DeleteMetricsStoreInfra_Call struct {
 }
 
 // DeleteMetricsStoreInfra is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *MetricStoreService_Expecter) DeleteMetricsStoreInfra(ctx interface{}, tenantId interface{}) *MetricStoreService_DeleteMetricsStoreInfra_Call {
+//   - ctx context.Context
+//   - tenantId uint
+func (_e *MetricStoreService_Expecter) DeleteMetricsStoreInfra(ctx any, tenantId any) *MetricStoreService_DeleteMetricsStoreInfra_Call {
 	return &MetricStoreService_DeleteMetricsStoreInfra_Call{Call: _e.mock.On("DeleteMetricsStoreInfra", ctx, tenantId)}
 }
 
 func (_c *MetricStoreService_DeleteMetricsStoreInfra_Call) Run(run func(ctx context.Context, tenantId uint)) *MetricStoreService_DeleteMetricsStoreInfra_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -187,15 +218,26 @@ type MetricStoreService_GetTenantExtendedMetricStore_Call struct {
 }
 
 // GetTenantExtendedMetricStore is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *MetricStoreService_Expecter) GetTenantExtendedMetricStore(ctx interface{}, tenantId interface{}) *MetricStoreService_GetTenantExtendedMetricStore_Call {
+//   - ctx context.Context
+//   - tenantId uint
+func (_e *MetricStoreService_Expecter) GetTenantExtendedMetricStore(ctx any, tenantId any) *MetricStoreService_GetTenantExtendedMetricStore_Call {
 	return &MetricStoreService_GetTenantExtendedMetricStore_Call{Call: _e.mock.On("GetTenantExtendedMetricStore", ctx, tenantId)}
 }
 
 func (_c *MetricStoreService_GetTenantExtendedMetricStore_Call) Run(run func(ctx context.Context, tenantId uint)) *MetricStoreService_GetTenantExtendedMetricStore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -246,15 +288,26 @@ type MetricStoreService_GetTenantMetricStore_Call struct {
 }
 
 // GetTenantMetricStore is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *MetricStoreService_Expecter) GetTenantMetricStore(ctx interface{}, tenantId interface{}) *MetricStoreService_GetTenantMetricStore_Call {
+//   - ctx context.Context
+//   - tenantId uint
+func (_e *MetricStoreService_Expecter) GetTenantMetricStore(ctx any, tenantId any) *MetricStoreService_GetTenantMetricStore_Call {
 	return &MetricStoreService_GetTenantMetricStore_Call{Call: _e.mock.On("GetTenantMetricStore", ctx, tenantId)}
 }
 
 func (_c *MetricStoreService_GetTenantMetricStore_Call) Run(run func(ctx context.Context, tenantId uint)) *MetricStoreService_GetTenantMetricStore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(uint))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 uint
+		if args[1] != nil {
+			arg1 = args[1].(uint)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

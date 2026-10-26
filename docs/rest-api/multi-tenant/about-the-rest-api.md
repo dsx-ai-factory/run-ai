@@ -36,4 +36,4 @@ The NVIDIA Run:ai Multi-Tenant REST APIs follow RESTful design principles and us
 
 ## API Lifecycle and Deprecation
 
-NVIDIA Run:ai is committed to providing stable and predictable Multi-Tenant APIs. When an API or field is deprecated, the deprecated version remains supported for two additional released versions. After the deprecation period ends, deprecated APIs or fields are removed from both the codebase and the documentation. For full details, see [NVIDIA Run:ai API Policy](about-the-rest-api.md).
+NVIDIA Run:ai is committed to providing stable and predictable Multi-Tenant APIs. When an API or field is deprecated, the deprecated version remains supported for two additional released versions. After the deprecation period ends, deprecated APIs or fields are removed from both the codebase and the documentation. For full details, see [NVIDIA Run:ai API Policy](../api-policy.md).

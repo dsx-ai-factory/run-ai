@@ -39,6 +39,8 @@
 
 * `NGC_API_KEY` (value: `"ngcApiKey"`)
 
+* `RESOURCE_CLAIM_TEMPLATE` (value: `"resource-claim-template"`)
+
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

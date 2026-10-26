@@ -21,8 +21,7 @@ func (e *LimitQuotaOverSubscription) Category() string {
 
 func (e *LimitQuotaOverSubscription) Description() string {
 	return "Enable to prevent projects' total quota from exceeding the department's quota or being less than the total usage by non-preemptible workloads." +
-		" For more information, see the <a href='https://run-ai-docs.nvidia.com/saas/platform-management/runai-scheduler/scheduling/" +
-		"concepts-and-principles#over-subscription' target='_blank'>Run:ai scheduler guide</a>"
+		" For more information, see the <a data-doc-key='overSubscription' target='_blank'>Run:ai scheduler guide</a>"
 }
 
 func (e *LimitQuotaOverSubscription) DisplayName() string {

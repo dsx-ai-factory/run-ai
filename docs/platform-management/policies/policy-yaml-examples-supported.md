@@ -13,6 +13,7 @@ rules:
     itemSelector: <item-selector>    # optional; only for list-type fields
     selectorParams:                   # optional; required by some selectors
       <param>: <value>
+    allowOverride: <boolean>          # optional; tenant/cluster/department scope only, defaults to false
     enforcements:
       - <enforcement-type>: <value>
 ```
@@ -74,4 +75,19 @@ rules:
     enforcements:
       - set:
           value: 3
+```
+
+## Deployment: Cluster Baseline with Department Override
+
+A cluster-scoped policy that caps CPU limits for all containers, but allows department-scoped policies to override the cap for teams that need more resources.
+
+```yaml
+rules:
+  - field: resourceLimits
+    specSelector: allContainers
+    allowOverride: true
+    enforcements:
+      - set:
+          key: cpu
+          value: "4"
 ```

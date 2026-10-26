@@ -68,7 +68,6 @@ SHARED_PACKAGES_PATH=../../runai-clients
 SHARED_PACKAGES_PATH_ABS=runai-clients
 DOCKER_SOCK_PATH=/var/run/docker.sock
 
-
 ################### OS DEPENDENCY ##########################
 # Build the project
 UNAME_S := $(shell uname -s)
@@ -80,11 +79,9 @@ else
 ARCH?=arm64
 endif
 
-
 ifeq ($(UNAME_S),Linux)
 ECHO_COMMAND=echo -e
 OS?=linux
-
 
 else ifeq ($(UNAME_S),Darwin)
 ECHO_COMMAND=echo
@@ -99,7 +96,11 @@ endif
 ### Targets
 
 ##@ Basic Commands
+# Ensure ~/.gitconfig exists before any container bind-mounts it. Docker creates a
+# root-owned DIRECTORY at the mount source when the path is missing, which then breaks
+# every git command for the user (see DOCKER_GO_BASE_COMMAND in golang.mk).
 git-config-command:
+	@touch ${HOME}/.gitconfig
 ifdef GITHUB_TOKEN
 	echo Creating gitconfig with github token
 	git config --file ${HOME}/.gitconfig url.https://${GITHUB_TOKEN}@github.com/.insteadOf https://github.com/
@@ -113,17 +114,10 @@ help: ## Display this help.
 .PHONY: help
 
 docker-build-generic: git-config-command
-	docker buildx build ${DOCKER_BUILD_ADDITIONAL_ARGS} --build-arg SERVICE_NAME=${SERVICE_NAME} -f ${DOCKERFILE_PATH} -t ${DOCKER_IMAGE_NAME} --platform=linux/amd64 --attest type=sbom --attest type=provenance,mode=max --load .
+	docker buildx build ${DOCKER_BUILD_ADDITIONAL_ARGS} --build-arg SERVICE_NAME=${SERVICE_NAME} --build-arg GO_VERSION=${GO_VERSION} -f ${DOCKERFILE_PATH} -t ${DOCKER_IMAGE_NAME} --platform=linux/amd64 --attest type=sbom --attest type=provenance,mode=max --load .
 .PHONY: docker-build
 
 docker-push-generic:
 	docker push ${DOCKER_IMAGE_NAME}
 .PHONY: push
 
-# Regenerate this component's NOTICE from its resolved dependency graph.
-# Requires go-licenses for Go components: go install github.com/google/go-licenses@latest
-BASE_MAKEFILE_DIR := $(dir $(lastword $(MAKEFILE_LIST)))
-
-notice:
-	@python3 ${BASE_MAKEFILE_DIR}../scripts/generate-notice.py ${CURDIR}
-.PHONY: notice

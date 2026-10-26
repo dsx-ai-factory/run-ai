@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"time"
 
-	workloadclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	workloadcommon "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/common"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/sampler_actions"
 	"github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/scale"

@@ -132,7 +132,7 @@ import {
   ResourceType,
   SubjectType,
   SubjectTypeExtended,
-  type RoleV1,
+  type Role,
   type AccessRule,
   AccessRulesSortFilterFields,
   type AccessRulesBatchCreateResponse,
@@ -233,12 +233,12 @@ const hasCreateAccessRulesPermission = computed(() =>
 
 const subjects = computed<ISelectOption[]>(() => (isSso.value ? subjectTypeOptionsWithSSO : subjectTypeOptions));
 
-const roles = computed<RoleV1[]>(() =>
-  roleStore.roleList.filter((role: RoleV1) => rolesService.isPermittedRole(role, permissionStore.permissionsList)),
+const roles = computed<Role[]>(() =>
+  roleStore.roleList.filter((role: Role) => rolesService.isPermittedRole(role, permissionStore.permissionsList)),
 );
 
 const rolesOptions = computed<ISelectOption[]>(() =>
-  roles.value.map((role: RoleV1) => ({
+  roles.value.map((role: Role) => ({
     label: role.name,
     value: role.id,
     roleStageBadge: role.name, // Pass role name for badge lookup

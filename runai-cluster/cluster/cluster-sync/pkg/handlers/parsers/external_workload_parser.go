@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strconv"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	constants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/getters"
@@ -114,6 +114,10 @@ func workloadNameForSync(workload *v1alpha1.ExternalWorkload) string {
 func (p *WorkloadParser) distributedFrameworkForExternalWorkload(workload *v1alpha1.ExternalWorkload, workloadType string) string {
 	if workload == nil || workloadType != DistributedDisplayType {
 		return ""
+	}
+
+	if framework := distributedFrameworkFromKind(workload.Spec.OriginalWorkloadKind); framework != "" {
+		return framework
 	}
 
 	if framework := distributedFrameworkFromKind(workload.Spec.Type); framework != "" {
@@ -612,6 +616,13 @@ func (p *WorkloadParser) overrideFromWorkloadRunner(
 	// Keep EWI's phase when ewi-status is set; else fall back to the wlr phase.
 	if !ewiStatusSet(externalWorkload) && wlr.Status.Phase != "" {
 		workloadSyncFields.Phase = p.getApiPhase(string(wlr.Status.Phase))
+		// Admission failures are recorded as critical WLR issues; expose their description to the user.
+		for _, issue := range wlr.Status.Issues {
+			if issue.IsCritical && issue.Description != "" {
+				workloadSyncFields.PhaseMessage = ptr.To(issue.Description)
+				break
+			}
+		}
 	}
 
 	// Register the runner as a child so its events join to this workload.

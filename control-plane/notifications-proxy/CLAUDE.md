@@ -18,7 +18,7 @@ Targets come from the service `Makefile` plus the shared includes
 | `build-go-arm` | Same for `arm64` → `bin/notifications-proxy-arm64` |
 | `test` | `build` + `test-go` + `integration-tests` |
 | `test-go` | Runs the Go unit tests in the builder container |
-| `mockery` / `generate_mocks` / `validate_mockery` | Installs mockery `v2.53.5` (if needed) and regenerates test mocks from `.mockery.yml` |
+| `generate-mocks` / `generate-mocks-local` | Shared targets: regenerate test mocks from `.mockery.yml` with mockery v3 (in Docker / without Docker) |
 | `generate-integration-test-smtp-openapi-client` | Regenerates the MailHog SMTP test client from its OpenAPI spec |
 | `build-notifications-service-bin` | Compiles the sibling `notifications-service` binary so the compose stack builds locally |
 | `build-integration-tests` | Builds the `-tags integration` test binary + `docker compose build` |
@@ -32,7 +32,7 @@ Targets come from the service `Makefile` plus the shared includes
 
 ## Key build notes
 
-- Generated code: OpenAPI server stubs (`internal/generated`) + Go client (`pkg/client/generated`) via openapi-generator `v7.12.0`, `VERSIONED_CLIENT=true`; plus mockery `v2.53.5` mocks (`make mockery`). `make build` runs `openapi-build` first; run generation before hand-building and never edit generated dirs.
+- Generated code: OpenAPI server stubs (`internal/generated`) + Go client (`pkg/client/generated`) via openapi-generator `v7.12.0`, `VERSIONED_CLIENT=true`; plus mockery v3 mocks from `.mockery.yml` (`make generate-mocks`, or `make generate-mocks-local` without Docker). `make build` runs `openapi-build` first; run generation before hand-building and never edit generated dirs.
 - Runtime base image: final image is `FROM scratch`; a `registry.access.redhat.com/ubi9/ubi-minimal` stage supplies `/etc/passwd`, `/etc/group`, certs (`/etc/ssl`, `/etc/pki`) and a writable `/tmp`. Runs as user `65532:65532`. Bundles SQL migrations (`internal/database/migrations/up|down`) and the swagger bundle.
 - Build args: `TARGETARCH` (selects `bin/notifications-proxy-$TARGETARCH`).
 - Build command (what local-dev.sh actually runs for this service): it is in `CP_GO_SERVICES`, so `build_go_service` runs, in two steps:

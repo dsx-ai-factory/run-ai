@@ -6,7 +6,7 @@ NVIDIA Run:ai provides [metrics and telemetry](metrics.md) for both physical clu
 
 Users can consume the data based on their permissions:
 
-1. **API** - Access the data programmatically through the [NVIDIA Run:ai API](https://run-ai-docs.nvidia.com/api/2.26/).
+1. **API** - Access the data programmatically through the [NVIDIA Run:ai API](../../rest-api/about-the-rest-api.md).
 2. **CLI** - Use the NVIDIA Run:ai [Command Line Interface](../../reference/cli/install-cli.md) to query and manage the data.
 3. **UI** - Visualize the data through the NVIDIA Run:ai user interface.
 
@@ -19,7 +19,7 @@ Refer to [metrics and telemetry](metrics.md) to see the full list of supported m
 
 ### **CLI**
 
-Use the `list` and `describe` commands to fetch and manage the data. See [CLI reference](../../reference/cli/runai/) for more details.
+Use the `list` and `describe` commands to fetch and manage the data. See [CLI reference](../../reference/cli/runai/runai.md) for more details.
 
 <figure><img src="../../assets/workload-telemetry-describe.png" alt=""/><figcaption><p>Describe a specific workload telemetry</p></figcaption></figure>
 

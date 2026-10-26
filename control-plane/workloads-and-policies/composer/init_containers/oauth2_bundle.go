@@ -7,7 +7,7 @@ package init_containers
 
 import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	corev1 "k8s.io/api/core/v1"
 )
 

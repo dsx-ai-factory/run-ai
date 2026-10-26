@@ -20,7 +20,7 @@ SERVICE_NAME: identity-manager
 PUBSUB_URL: nats://n1:4222
 PUBSUB_REPLICAS: 1
 # Other
-APP_URL: https://localhost.runailabs.com
+APP_URL: https://localhost.example.com
 ACCESS_KEYS_VERSION: v1
 
 AUDIT_ENABLE_PRINT_TO_STDOUT: "false"
@@ -31,7 +31,7 @@ LOGIN_THEME: runai-theme
 MIGRATION_FILES: file:///migrations
 MULTI_TENANCY_ENABLED: "true"
 HOST_HEADER: "FakeHostHeader"
-TENANT_DOMAIN_TEMPLATE: https://localhost.runailabs.com
+TENANT_DOMAIN_TEMPLATE: https://localhost.example.com
 TRACING_ENABLED: "false"
 USE_MOCKS: "true"
 ALLOW_HTTP_IDP_URLS: "true"

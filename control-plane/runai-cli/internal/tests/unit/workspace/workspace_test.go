@@ -20,7 +20,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/workspace"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli/clients"
 
@@ -406,7 +406,8 @@ var _ = Describe("Workspace Test", Ordered, func() {
 				"--large-shm=true",
 				WorkspaceComputeFullName, WorkspaceComputeFullNameImageName), envMap)
 			Expect(err).To(BeNil())
-			Expect(output).To(HavePrefix(fmt.Sprintf(ExpectSuccessMsg, WorkspaceComputeFullName)))
+			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectSuccessMsg, WorkspaceComputeFullName)))
+			Expect(output).To(ContainSubstring("Flag --gpu-portion-request has been deprecated, use --gpu-memory-portion-request for GPU memory fractions, or --gpu-devices-request for whole-GPU counts"))
 			submitSpec, err := clients.GetSpecByWorkspaceName(WorkspaceComputeFullName)
 			Expect(err).To(BeNil())
 			Expect(submitSpec.Image.IsSet()).To(Equal(true))

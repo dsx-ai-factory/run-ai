@@ -145,7 +145,7 @@ func enqueueKubeflowRunaiStatusForPod(ctx context.Context, handler *ExternalWork
 		if ew.Spec.OriginalWorkloadName != jobName || ew.Spec.Group != kubeflowGroup {
 			continue
 		}
-		gvk, ok := gvkFromExternalWorkloadOwner(ew)
+		gvk, ok := resolveChildGVK(ew)
 		if !ok {
 			continue
 		}
@@ -155,9 +155,19 @@ func enqueueKubeflowRunaiStatusForPod(ctx context.Context, handler *ExternalWork
 	}
 }
 
-func gvkFromExternalWorkloadOwner(ew *v1alpha1.ExternalWorkload) (schema.GroupVersionKind, bool) {
+// resolveChildGVK returns the gvk of the workload object the ExternalWorkload describes. The
+// owner reference is the runner for runner-owned workloads, so the spec is the source of truth;
+// ExternalWorkloads written before the kind field still fall back to the owner reference.
+func resolveChildGVK(ew *v1alpha1.ExternalWorkload) (schema.GroupVersionKind, bool) {
 	if ew.Spec.Group == "" || ew.Spec.Version == "" {
 		return schema.GroupVersionKind{}, false
+	}
+	if ew.Spec.OriginalWorkloadKind != "" {
+		return schema.GroupVersionKind{
+			Group:   ew.Spec.Group,
+			Version: ew.Spec.Version,
+			Kind:    ew.Spec.OriginalWorkloadKind,
+		}, true
 	}
 	for _, ownerRef := range ew.OwnerReferences {
 		if ownerRef.Kind == "" {

@@ -223,6 +223,9 @@ const (
 	// MinVersionOfApplicationCreation - the min cluster version that supports create and delete applications API
 	MinVersionOfApplicationCreation
 
+	// MinVersionOfApplicationPersonalCredentials - the min cluster version that supports personal credentials in AI Applications
+	MinVersionOfApplicationPersonalCredentials
+
 	// MinVersionWorkloadsStructureElements - minimum cluster version that supports workload structure elements
 	MinVersionWorkloadsStructureElements
 
@@ -252,6 +255,20 @@ const (
 	// kai.scheduler/container.<name>.gpu-memory.portion.limit) instead of the legacy
 	// RUNAI_GPU_MEMORY_LIMIT / RUNAI_GPU_PORTION_LIMIT container env vars.
 	MinVersionGpuMemoryLimitAnnotations
+
+	// MinVersionResourceClassTemplates - the min cluster version that their agent/cluster sync
+	// supports resource class templates
+	MinVersionResourceClaimTemplates
+
+	// MinVersionNetworkingOwnershipEnforcement - the min cluster version enforcing networking Service and Pod ownership.
+	MinVersionNetworkingOwnershipEnforcement
+	// MinVersionOAuth2ProxyTemplates - the min cluster version that provisions the proxy error-page ConfigMap.
+	MinVersionOAuth2ProxyTemplates
+
+	// MinVersionGpuComputeMode - the first cluster release that installs GPU fractioning
+	// with support for the per-container gpu-compute.mode annotation.
+	MinVersionGpuComputeMode
+
 	// NOTE -> Make sure to add the min version to the map below
 )
 
@@ -319,6 +336,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionTopologyAddress:                           "2.25.0",
 	MinVersionNIMIngressViaWorkloadV2:                   "2.25.0",
 	MinVersionOfApplicationCreation:                     "2.25.0",
+	MinVersionOfApplicationPersonalCredentials:          "3.1.0",
 	MinVersionWorkloadsStructureElements:                "2.25.0",
 	MinVersionOfAnyWorkloadSuspendResume:                "2.26.0",
 	MinVersionWorkloadV2Pvcs:                            "2.26.0",
@@ -329,6 +347,10 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionOfSegmentTopology:                         "2.27.0",
 	MinVersionNoNativeSubmission:                        "3.0.0",
 	MinVersionGpuMemoryLimitAnnotations:                 "3.0.0",
+	MinVersionGpuComputeMode:                            "3.0.14",
+	MinVersionResourceClaimTemplates:                    "3.1.0",
+	MinVersionNetworkingOwnershipEnforcement:            "3.0.0",
+	MinVersionOAuth2ProxyTemplates:                      "3.0.18",
 }
 
 // ClustersCacheConfig is a struct that holds the configuration for the clusters cache.
@@ -422,6 +444,9 @@ func (c *ClusterCapabilitiesChecker) ClusterConfiguration(ctx context.Context) (
 	// force fetch cluster info
 	if clusterInfo.Configuration == nil {
 		clusterInfo, err = c.fetchClusterInfo(ctx)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return clusterInfo.Configuration, nil
 }

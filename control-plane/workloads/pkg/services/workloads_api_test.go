@@ -25,11 +25,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
 	metrics_client "github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	clusterCommonConstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
@@ -1305,6 +1305,79 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 				Expect(workloadsResponse.Next).To(Equal(nextRecord))
 			}
 		})
+		Context("Slim", func() {
+			slimFilter := []string{fmt.Sprintf("clusterId==%s", testing.ClusterUuid1), fmt.Sprintf("name==%s", DefaultWorkloadName)}
+
+			getSlimWorkloads := func(filterBy []string) []api.WorkloadSlim {
+				apiResponse, _ := workloadsService.GetWorkloadsSlim(ctx, 0, 0, filterBy)
+				Expect(apiResponse.Code).To(Equal(http.StatusOK))
+				bytes, err := json.Marshal(apiResponse.Body)
+				Expect(err).To(BeNil())
+				response := api.GetWorkloadsSlimResponse{}
+				Expect(json.Unmarshal(bytes, &response)).To(Succeed())
+				return response.Workloads
+			}
+
+			It("fills the identity fields", func() {
+				workloads := getSlimWorkloads(slimFilter)
+				Expect(workloads).To(HaveLen(3))
+				for _, workload := range workloads {
+					Expect(workload.Name).To(Equal(DefaultWorkloadName))
+					Expect(workload.Type).To(Equal(DefaultType))
+					Expect(workload.ProjectName).To(Equal(DefaultProjectName))
+					Expect(workload.ClusterId).To(Equal(testing.ClusterUuid1))
+					Expect(workload.DistributedFramework).To(BeEmpty())
+				}
+			})
+			It("sorts by id ascending", func() {
+				ids := []string{}
+				for _, workload := range getSlimWorkloads(slimFilter) {
+					ids = append(ids, workload.Id)
+				}
+				Expect(ids).To(Equal([]string{testing.TestUuid1, testing.TestUuid2, testing.TestUuid3}))
+			})
+			It("filters by distributed framework", func() {
+				Expect(getSlimWorkloads(append(slimFilter, "distributedFramework!=PyTorchJob"))).To(HaveLen(3))
+				Expect(getSlimWorkloads(append(slimFilter, "distributedFramework==PyTorchJob"))).To(BeEmpty())
+			})
+			It("returns a workload as soon as it's created", func() {
+				newWorkload := SetupBaseWorkload(testing.TestUuid7, DefaultProjectId, testing.ClusterUuid1)
+				newWorkload.Name = "slim-new-workload"
+				apiResponse, _ := workloadsService.SyncWorkloads(ctx, []string{}, api.WorkloadsSyncRequest{
+					ProjectId: DefaultProjectId,
+					Workloads: []api.WorkloadSyncFields{
+						newWorkload,
+						SetupBaseWorkload(testing.TestUuid1, DefaultProjectId, testing.ClusterUuid1),
+						SetupBaseWorkload(testing.TestUuid2, DefaultProjectId, testing.ClusterUuid1),
+						SetupBaseWorkload(testing.TestUuid3, DefaultProjectId, testing.ClusterUuid1),
+					},
+				})
+				Expect(apiResponse.Code).To(Equal(http.StatusNoContent))
+				createdWorkloadsIds = append(createdWorkloadsIds, testing.TestUuid7)
+
+				workloads := getSlimWorkloads([]string{fmt.Sprintf("clusterId==%s", testing.ClusterUuid1), "name==slim-new-workload"})
+				Expect(workloads).To(HaveLen(1))
+				Expect(workloads[0].Id).To(Equal(testing.TestUuid7))
+			})
+			It("doesn't return deleted workloads", func() {
+				_, err := runaidb.DB().Table(dao.WorkloadsTableName).Where("id = ?", testing.TestUuid3).Update("deleted_at", time.Now())
+				Expect(err).To(BeNil())
+				DeferCleanup(func() {
+					_, err := runaidb.DB().Table(dao.WorkloadsTableName).Where("id = ?", testing.TestUuid3).Update("deleted_at", nil)
+					Expect(err).To(BeNil())
+				})
+
+				workloads := getSlimWorkloads(slimFilter)
+				Expect(workloads).To(HaveLen(2))
+				for _, workload := range workloads {
+					Expect(workload.Id).ToNot(Equal(testing.TestUuid3))
+				}
+			})
+			It("rejects filters on fields that aren't slim fields", func() {
+				apiResponse, _ := workloadsService.GetWorkloadsSlim(ctx, 0, 0, []string{"phase==Running"})
+				Expect(apiResponse.Code).To(Equal(http.StatusBadRequest))
+			})
+		})
 		Describe("Idle GPUs", func() {
 			BeforeEach(func() {
 				_, err := runaidb.DB().Table(dao.WorkloadsTableName).Where("id = ?", id3).
@@ -1968,8 +2041,8 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			baseWorkload.Type = "DynamoGraphDeployment"
 			baseWorkload.ExternalWorkloadName = "external-deployment-" + id
 			baseWorkload.Urls = []string{
-				"https://subdomain1.runailabs.com/path1",
-				"https://subdomain2.runailabs.com:8080/path2",
+				"https://subdomain1.example.com/path1",
+				"https://subdomain2.example.com:8080/path2",
 			}
 
 			apiResponse, _ := workloadsService.SyncWorkloads(ctx, []string{}, api.WorkloadsSyncRequest{
@@ -1988,7 +2061,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 
 			// Validate first connection
 			conn1 := workloadResponse.ExternalConnections[0]
-			Expect(conn1.Url).To(Equal("https://subdomain1.runailabs.com/path1"))
+			Expect(conn1.Url).To(Equal("https://subdomain1.example.com/path1"))
 			Expect(conn1.ConnectionType).To(Equal("ExternalUrl"))
 			Expect(conn1.CorrelationName).To(Equal("url"))
 			Expect(conn1.ExposedUrlSubDomain).ToNot(BeNil())
@@ -1999,7 +2072,7 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 
 			// Validate second connection
 			conn2 := workloadResponse.ExternalConnections[1]
-			Expect(conn2.Url).To(Equal("https://subdomain2.runailabs.com:8080/path2"))
+			Expect(conn2.Url).To(Equal("https://subdomain2.example.com:8080/path2"))
 			Expect(conn2.Name).To(Equal(baseWorkload.Type + "-2")) // Second URL: name with suffix
 			Expect(conn2.ConnectionType).To(Equal("ExternalUrl"))
 			Expect(conn2.CorrelationName).To(Equal("url"))
@@ -2045,8 +2118,8 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 			// Do NOT set ExternalWorkloadName - this is a native workload
 			baseWorkload.ExternalWorkloadName = ""
 			baseWorkload.Urls = []string{
-				"https://native1.runailabs.com/path1",
-				"https://native2.runailabs.com/path2",
+				"https://native1.example.com/path1",
+				"https://native2.example.com/path2",
 			}
 
 			apiResponse, _ := workloadsService.SyncWorkloads(ctx, []string{}, api.WorkloadsSyncRequest{
@@ -2299,18 +2372,19 @@ var _ = Describe("Workloads API tests", Ordered, func() {
 				Workloads: workloads,
 			})
 			Expect(apiResponse.Code).To(Equal(http.StatusNoContent))
-			waitForGetWorkloadsLength(ctx, workloadsService, 3+len(workloads), []string{})
 
 			// Verify the value is preserved by both the list and details APIs.
 			user1Ctx := testing.SetContext(testing.TestTenant, "user1", []string{})
-			apiResponse, _ = workloadsService.GetWorkloads(user1Ctx, false, 0, 0, "", "", []string{fmt.Sprintf("projectId==%s", DefaultProjectId)}, "")
-			Expect(apiResponse.Code).To(Equal(http.StatusOK))
-			workloadsResponse := httpResponseBodyToWorkloadsResponse(apiResponse)
+			Eventually(func(g Gomega) {
+				apiResponse, _ := workloadsService.GetWorkloads(user1Ctx, false, 0, 0, "", "", []string{fmt.Sprintf("projectId==%s", DefaultProjectId)}, "")
+				Expect(apiResponse.Code).To(Equal(http.StatusOK))
+				workloadsResponse := httpResponseBodyToWorkloadsResponse(apiResponse)
+				for i := range workloadsResponse.Workloads {
+					workload := &workloadsResponse.Workloads[i]
+					Expect(workload.ExternalWorkloadName).To(Equal(fmt.Sprintf("ew-training-%s", workload.Id)))
+				}
+			}, TimeoutWhenWaitingForView, IntervalWhenWaitingForView).Should(Succeed())
 
-			for i := range workloadsResponse.Workloads {
-				workload := &workloadsResponse.Workloads[i]
-				Expect(workload.ExternalWorkloadName).To(Equal(fmt.Sprintf("ew-training-%s", workload.Id)))
-			}
 			apiResponse, _ = workloadsService.GetWorkload(user1Ctx, workloads[0].Id)
 			fetchedWorkload, ok := apiResponse.Body.(api.WorkloadDetailed)
 			Expect(ok).To(BeTrue())

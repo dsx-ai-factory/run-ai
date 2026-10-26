@@ -1,0 +1,9 @@
+type: object
+required:
+  - items
+properties:
+  items:
+    type: array
+    maxItems: 1000
+    items:
+      $ref: "./DeviceClass.yaml"

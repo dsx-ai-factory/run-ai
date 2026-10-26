@@ -73,7 +73,7 @@ runai workspace submit -p test -i ubuntu -e name=value -e name2=value2
 ### Requests and Limits
 
 ```shell
-runai workspace submit  -p "project-name" -i runai.jfrog.io/demo/quickstart-demo   --cpu-core-request 0.3 --cpu-core-limit 1 --cpu-memory-request 50M --cpu-memory-limit 1G  --gpu-devices-request 1 --gpu-memory-request 1G
+runai workspace submit -p "project-name" -i nvcr.io/nvidia/pytorch:25.06-py3 --cpu-core-request 0.3 --cpu-core-limit 1 --cpu-memory-request 50M --cpu-memory-limit 1G --gpu-devices-request 1 --gpu-memory-request 1G
 ```
 
 ### Submitting and Attaching to Process
@@ -120,8 +120,8 @@ runai training pytorch bash pytorch-06027b585626 -p "project-name"
 
 ```shell
 
-runai  mpi submit dist1 --workers=2 -g 1 \
-    -i runai.jfrog.io/demo/quickstart-distributed:v0.3.0 -e RUNAI_SLEEP_SECS=60 -p "project-name"
+runai mpi submit dist1 --workers=2 -g 1 \
+    -i ubuntu -p "project-name" --command -- sleep 60
 ```
 
 ### Submitting with PVC

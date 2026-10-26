@@ -14,7 +14,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	wc_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	wc_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/business/providers"
 	"github.com/dsx-ai-factory/run-ai/control-plane/temp-backend-settings/pkg/business/settings"

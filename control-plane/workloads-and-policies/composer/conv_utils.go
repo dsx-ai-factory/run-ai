@@ -10,8 +10,8 @@ import (
 	"strings"
 	"unsafe"
 
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadsManagerApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 )
 
@@ -26,7 +26,9 @@ func NonEmptyStrings(in []string) []string {
 }
 
 type EnumType interface {
-	workloadsApi.ImagePullPolicy |
+	workloadsApi.GpuComputeMode |
+		workloadsManagerApi.GpuComputeMode |
+		workloadsApi.ImagePullPolicy |
 		workloadsApi.SeccompProfileType |
 		workloadsApi.UidGidSource |
 		workloadsApi.DistributedFramework |

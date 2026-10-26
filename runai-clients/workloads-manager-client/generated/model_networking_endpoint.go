@@ -20,7 +20,7 @@ import (
 // checks if the NetworkingEndpoint type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &NetworkingEndpoint{}
 
-// NetworkingEndpoint A single networking endpoint. An endpoint may create or reference one Service and may expose it externally.
+// NetworkingEndpoint A single networking endpoint. Provide a Service, externalAccess containing an Ingress, Route, or HTTPRoute, or both. An endpoint may create or reference at most one Service. Authorization requires externalAccess.
 type NetworkingEndpoint struct {
 	ExternalAccess NullableExternalAccess `json:"externalAccess,omitempty"`
 	// Kubernetes service to create or reference for this endpoint (maximum one).

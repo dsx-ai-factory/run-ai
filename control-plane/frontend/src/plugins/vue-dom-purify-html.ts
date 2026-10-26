@@ -6,6 +6,9 @@
 import VueDOMPurifyHTML from "vue-dompurify-html";
 
 const VueDOMPurifyHTMLOptions = {
+  default: {
+    ADD_ATTR: ["aid"],
+  },
   hooks: {
     // we want to enable open in a new tab when clicking on links
     afterSanitizeAttributes: (currentNode: HTMLElement) => {

@@ -3065,7 +3065,7 @@ export interface DistributedInferenceServingPort {
      */
     'authorizedGroups'?: Array<string> | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof DistributedInferenceServingPort
      */
@@ -3102,7 +3102,7 @@ export interface DistributedInferenceServingPortAccess {
      */
     'authorizedGroups'?: Array<string> | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof DistributedInferenceServingPortAccess
      */
@@ -6688,6 +6688,89 @@ export interface GitsRules {
     'instances'?: ItemRules | null;
 }
 /**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeOptions
+ */
+export interface GpuComputeModeOptions {
+    /**
+     * Limit the permitted values for gpuComputeMode to a given set of values.
+     * @type {Array<GpuComputeModeOptionsOptionsInner>}
+     * @memberof GpuComputeModeOptions
+     */
+    'options'?: Array<GpuComputeModeOptionsOptionsInner> | null;
+}
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeOptionsOptionsInner
+ */
+export interface GpuComputeModeOptionsOptionsInner {
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof GpuComputeModeOptionsOptionsInner
+     */
+    'value': GpuComputeMode | null;
+    /**
+     * Textual description of the value
+     * @type {string}
+     * @memberof GpuComputeModeOptionsOptionsInner
+     */
+    'displayed'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface GpuComputeModeRules
+ */
+export interface GpuComputeModeRules {
+    /**
+     * 
+     * @type {SourceOfRule}
+     * @memberof GpuComputeModeRules
+     */
+    'sourceOfRule'?: SourceOfRule | null;
+    /**
+     * Whether the field is mandatory, default to false.
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'required'?: boolean | null;
+    /**
+     * Whether the value of the field is editable, default to true
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'canEdit'?: boolean | null;
+    /**
+     * Blocks the field to prevent workloads from specifying any value for it.
+     * @type {boolean}
+     * @memberof GpuComputeModeRules
+     */
+    'blocked'?: boolean | null;
+    /**
+     * Limit the permitted values for gpuComputeMode to a given set of values.
+     * @type {Array<GpuComputeModeOptionsOptionsInner>}
+     * @memberof GpuComputeModeRules
+     */
+    'options'?: Array<GpuComputeModeOptionsOptionsInner> | null;
+}
+/**
  * 
  * @export
  * @interface GpuRequestOptions
@@ -9840,6 +9923,12 @@ export interface NimServiceDefaultsAllOfCompute {
      */
     'cpuMemoryRequest'?: string | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof NimServiceDefaultsAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof NimServiceDefaultsAllOfCompute
@@ -9852,21 +9941,35 @@ export interface NimServiceDefaultsAllOfCompute {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof NimServiceDefaultsAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof NimServiceDefaultsAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof NimServiceDefaultsAllOfCompute
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof NimServiceDefaultsAllOfCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof NimServiceDefaultsAllOfCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -10654,6 +10757,12 @@ export interface NimServiceRulesAllOfCompute {
     'cpuMemoryRequest'?: QuantityRules | null;
     /**
      * 
+     * @type {GpuComputeModeRules}
+     * @memberof NimServiceRulesAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeModeRules | null;
+    /**
+     * 
      * @type {IntegerRules}
      * @memberof NimServiceRulesAllOfCompute
      */
@@ -10666,6 +10775,18 @@ export interface NimServiceRulesAllOfCompute {
     'gpuMemoryLimit'?: QuantityRules | null;
     /**
      * 
+     * @type {NumberRules}
+     * @memberof NimServiceRulesAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: NumberRules | null;
+    /**
+     * 
+     * @type {NumberRules}
+     * @memberof NimServiceRulesAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: NumberRules | null;
+    /**
+     * 
      * @type {QuantityRules}
      * @memberof NimServiceRulesAllOfCompute
      */
@@ -10674,14 +10795,16 @@ export interface NimServiceRulesAllOfCompute {
      * 
      * @type {NumberRules}
      * @memberof NimServiceRulesAllOfCompute
+     * @deprecated
      */
-    'gpuPortionLimit'?: NumberRules | null;
+    'gpuPortionLimit'?: NumberRules;
     /**
      * 
      * @type {NumberRules}
      * @memberof NimServiceRulesAllOfCompute
+     * @deprecated
      */
-    'gpuPortionRequest'?: NumberRules | null;
+    'gpuPortionRequest'?: NumberRules;
     /**
      * 
      * @type {GpuRequestRules}
@@ -10758,7 +10881,7 @@ export interface NimServiceServingPort {
      */
     'metricsPort'?: number | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof NimServiceServingPort
      */
@@ -12554,7 +12677,7 @@ export interface PortsRules {
     'instances'?: ItemRules | null;
 }
 /**
- * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+ * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
  * @export
  * @enum {string}
  */
@@ -15673,17 +15796,37 @@ export interface SupersetDefaultsAllOfCompute {
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
      * @type {number}
      * @memberof SupersetDefaultsAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * @type {number}
+     * @memberof SupersetDefaultsAllOfCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
      * @type {number}
      * @memberof SupersetDefaultsAllOfCompute
      */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * @type {number}
+     * @memberof SupersetDefaultsAllOfCompute
+     * @deprecated
+     */
     'gpuPortionRequest'?: number | null;
+    /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof SupersetDefaultsAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
     /**
      * 
      * @type {GpuRequestType}
@@ -15704,7 +15847,7 @@ export interface SupersetDefaultsAllOfCompute {
  */
 export interface SupersetDefaultsAllOfSecurity {
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof SupersetDefaultsAllOfSecurity
      */
@@ -16487,13 +16630,33 @@ export interface SupersetRulesAllOfCompute {
      * @type {NumberRules}
      * @memberof SupersetRulesAllOfCompute
      */
-    'gpuPortionLimit'?: NumberRules | null;
+    'gpuMemoryPortionLimit'?: NumberRules | null;
+    /**
+     * 
+     * @type {SupersetRulesAllOfComputeGpuPortionLimit}
+     * @memberof SupersetRulesAllOfCompute
+     * @deprecated
+     */
+    'gpuPortionLimit'?: SupersetRulesAllOfComputeGpuPortionLimit;
     /**
      * 
      * @type {NumberRules}
      * @memberof SupersetRulesAllOfCompute
      */
-    'gpuPortionRequest'?: NumberRules | null;
+    'gpuMemoryPortionRequest'?: NumberRules | null;
+    /**
+     * 
+     * @type {SupersetRulesAllOfComputeGpuPortionLimit}
+     * @memberof SupersetRulesAllOfCompute
+     * @deprecated
+     */
+    'gpuPortionRequest'?: SupersetRulesAllOfComputeGpuPortionLimit;
+    /**
+     * 
+     * @type {GpuComputeModeRules}
+     * @memberof SupersetRulesAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeModeRules | null;
     /**
      * 
      * @type {GpuRequestRules}
@@ -16506,6 +16669,55 @@ export interface SupersetRulesAllOfCompute {
      * @memberof SupersetRulesAllOfCompute
      */
     'largeShmRequest'?: BooleanRules | null;
+}
+/**
+ * 
+ * @export
+ * @interface SupersetRulesAllOfComputeGpuPortionLimit
+ */
+export interface SupersetRulesAllOfComputeGpuPortionLimit {
+    /**
+     * 
+     * @type {SourceOfRule}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'sourceOfRule'?: SourceOfRule | null;
+    /**
+     * Whether the field is mandatory. default to false.
+     * @type {boolean}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'required'?: boolean | null;
+    /**
+     * Whether the value of the field is editable. default to true
+     * @type {boolean}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'canEdit'?: boolean | null;
+    /**
+     * The minimum value that the field can be assigned to.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'min'?: number | null;
+    /**
+     * The maximum value that the field can be assigned to.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'max'?: number | null;
+    /**
+     * The minimal difference between two values the field can be assigned to. For example, min=2, max=3, step=0.25 implies that the values the field can hold are 2, 2.25, 2.5 and 3.
+     * @type {number}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'step'?: number | null;
+    /**
+     * 
+     * @type {DefaultFromRule}
+     * @memberof SupersetRulesAllOfComputeGpuPortionLimit
+     */
+    'defaultFrom'?: DefaultFromRule | null;
 }
 /**
  * 
@@ -18519,7 +18731,7 @@ export interface TrainingPolicyV2 {
     'effectiveUpdatedAt'?: string;
 }
 /**
- * Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers).
+ * Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).
  * @export
  * @enum {string}
  */

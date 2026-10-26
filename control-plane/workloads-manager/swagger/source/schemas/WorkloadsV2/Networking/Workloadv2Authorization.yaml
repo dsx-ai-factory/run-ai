@@ -1,4 +1,7 @@
 type: object
+description: |-
+  Access control for this networking endpoint. Requires externalAccess.
+  Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
 example:
   forceJsonResponse: false
   authorizationType: authenticatedUsers

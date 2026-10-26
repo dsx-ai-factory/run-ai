@@ -11,13 +11,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadsManagerApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	corev1 "k8s.io/api/core/v1"
@@ -318,6 +320,15 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 			return nil
 		}
 
+		portion, err := gpucompat.ResolveLegacyGPUMemory("Request", src.GpuPortionRequest.Get(), src.GpuMemoryPortionRequest.Get())
+		if err != nil {
+			return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+		}
+		limit, err := gpucompat.ResolveLegacyGPUMemory("Limit", src.GpuPortionLimit.Get(), src.GpuMemoryPortionLimit.Get())
+		if err != nil {
+			return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+		}
+
 		runner := &composer.StepRunner{}
 
 		if target.Resources == nil {
@@ -332,7 +343,7 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 
 			nsc.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(),
 				composer.CastStruct[workloadsManagerApi.GpuRequestType, workloadsApi.GpuRequestType](src.GpuRequestType.Get()),
-				src.GpuPortionRequest.Get(), src.GpuPortionLimit.Get(),
+				portion, limit,
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), gpuSizingInfoSetter,
 				target.Resources, nil, gpuSizingInfo),
 		)
@@ -346,9 +357,27 @@ func (nsc *NimServiceComposer) processComputeFields(ctx context.Context, src *wo
 			if err != nil {
 				return workloadsApi.NewError(err.Code, fmt.Sprintf("compute: failed to validate gpu vendor is nvidia: %v", err.Message))
 			}
+			if src.GpuComputeMode.Get() != nil {
+				version := nsc.clusterInfo.GetVersion()
+				if version == "" {
+					return workloadsApi.NewError(http.StatusBadRequest, "compute.gpuComputeMode: cluster version is unknown")
+				}
+				capabilities, err := checker.NewClusterCapabilitiesCheckerForVersion(version)
+				if err != nil {
+					return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf("cluster version: %v", err))
+				}
+				supported, err := capabilities.ValidateClusterCapability(ctx, checker.MinVersionGpuComputeMode)
+				if err != nil {
+					return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("cluster capability check: %v", err))
+				}
+				nsc.fc.Options.GpuComputeModeSupported = supported
+			}
 		}
 
+		nimService := nimv1alpha1.NIMService{}
+		nimService.Name = nsc.fc.WorkloadName
 		runner.Batch(
+			nsc.fc.ComposeGpuComputeMode(composer.EnumToString(src.GpuComputeMode.Get()), gpuSizingInfo, nimService.GetContainerName(), &target.Annotations, composer.StringToMapString),
 			nsc.composeMemoryLimitEnv(gpuSizingInfo, &target.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			nsc.composePortionLimitEnv(gpuSizingInfo, &target.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			nsc.composeMemoryReqAnnotation(gpuSizingInfo, &target.Annotations, composer.StringToMapString, composer.GpuMemoryAnnotation),
@@ -425,12 +454,16 @@ func (nsc *NimServiceComposer) composeReplicas(src *int32, autoScaling *workload
 	target any, setter composer.FnIntSetter[int32], cookie any,
 ) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
-		if src == nil {
-			return setter(convutils.Ref(defaultReplicas), target, cookie)
+		if autoScaling != nil {
+			if src != nil {
+				return workloadsApi.NewError(http.StatusBadRequest, "autoscaling: replicas is mutually exclusive with autoscaling")
+			}
+			// Leave replicas unset when the operator manages scaling.
+			return nil
 		}
 
-		if autoScaling != nil {
-			return workloadsApi.NewError(http.StatusBadRequest, "autoscaling: replicas is mutually exclusive with autoscaling")
+		if src == nil {
+			return setter(convutils.Ref(defaultReplicas), target, cookie)
 		}
 
 		return setter(src, target, cookie)

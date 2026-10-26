@@ -207,7 +207,7 @@
   <p class="meta">
     Maps every field of the runai control-plane <strong>Inference API</strong> DTO
     (<code>POST /api/v1/workloads/inferences</code>) to where it lands on a <code>WorkloadRunner</code>.
-    Source DTOs live under <code>runai-clients/workloads-client/generated/model_inference_spec_spec.go</code> and its nested model files (<code>model_auto_scaling.go</code>, <code>model_serving_port.go</code>, <code>model_workspace_spec_spec_all_of_compute.go</code>, etc.).
+    Source DTOs live under <code>control-plane/workloads/pkg/client/generated/model_inference_spec_spec.go</code> and its nested model files (<code>model_auto_scaling.go</code>, <code>model_serving_port.go</code>, <code>model_workspace_spec_spec_all_of_compute.go</code>, etc.).
     Companion: <a href="./infw-to-workloadrunner.md">narrative doc</a>,
     <a href="./infw-to-workloadrunner.slides.html">slides</a>.
   </p>
@@ -321,7 +321,7 @@
 <script>
 /* ===== Data =====
  * One row per Inference API field. `src` is file:line under
- * runai-clients/workloads-client/generated/ (the OpenAPI-generated Go models).
+ * control-plane/workloads/pkg/client/generated/ (the OpenAPI-generated Go models).
  * `path` is the JSON field path as a user would write it (camelCase, no `{value:…}` wrapper).
  * `diff` ∈ Easy | Mid | Hard.  `special` flags rows for the special-case filter.
  * `plugin` flags fields handled by a sibling track (storage plugin / personal-creds plugin / CP composer init-container feature).

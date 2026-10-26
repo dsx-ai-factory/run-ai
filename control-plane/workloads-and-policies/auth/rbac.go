@@ -13,11 +13,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	orgUnitClient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	scope "github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo"
 	assets "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	orgUnitClient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
@@ -80,9 +80,12 @@ var resourceTypeOfKind = map[assets.AssetKind]authClient.ResourceType{
 	assets.ASSETKIND_CONFIG_MAP:        authClient.RESOURCETYPE_CM_VOLUME_ASSETS,
 	assets.ASSETKIND_SECRET_VOLUME:     authClient.RESOURCETYPE_SECRET_VOLUME_ASSETS,
 	assets.ASSETKIND_NGC_API_KEY:       authClient.RESOURCETYPE_CREDENTIALS,
-	WorkspaceAsAssetKind:               authClient.RESOURCETYPE_WORKSPACES,
-	TrainingAsAssetKind:                authClient.RESOURCETYPE_TRAININGS,
-	InferenceAsAssetKind:               authClient.RESOURCETYPE_INFERENCES,
+
+	assets.ASSETKIND_RESOURCE_CLAIM_TEMPLATE: authClient.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+
+	WorkspaceAsAssetKind: authClient.RESOURCETYPE_WORKSPACES,
+	TrainingAsAssetKind:  authClient.RESOURCETYPE_TRAININGS,
+	InferenceAsAssetKind: authClient.RESOURCETYPE_INFERENCES,
 }
 
 var TestingAllowCreateSystemScopedAssets = false

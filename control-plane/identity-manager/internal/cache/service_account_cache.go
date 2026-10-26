@@ -11,7 +11,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 )
 
-//go:generate mockery --name ServiceAccountsCache --output ./mocks --filename service_account_cache.go
 type ServiceAccountsCache interface {
 	GetTenantServiceAccountsForRealm(ctx context.Context, realm string, fetchFunc func() (*TenantServiceAccounts, error)) (*TenantServiceAccounts, error)
 	SetTenantServiceAccountsForRealm(ctx context.Context, realm string, accounts TenantServiceAccounts) error

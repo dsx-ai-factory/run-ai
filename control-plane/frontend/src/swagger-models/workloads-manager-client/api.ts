@@ -588,6 +588,20 @@ export interface GetYamlSubmissionValue {
     'enabled'?: boolean | null;
 }
 /**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
+/**
  * Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.
  * @export
  * @enum {string}
@@ -731,7 +745,7 @@ export interface NIMServiceMetadataCreateParams {
     'projectId': string;
 }
 /**
- * A single networking endpoint. An endpoint may create or reference one Service and may expose it externally.
+ * A single networking endpoint. Provide a Service, externalAccess containing an Ingress, Route, or HTTPRoute, or both. An endpoint may create or reference at most one Service. Authorization requires externalAccess.
  * @export
  * @interface NetworkingEndpoint
  */
@@ -750,7 +764,7 @@ export interface NetworkingEndpoint {
     'services'?: Array<NetworkingService> | null;
 }
 /**
- * Service configuration for routing traffic to the workload. Use \'spec\' or \'ref\' (not both).
+ * Service configuration for routing traffic to the workload. Provide exactly one of spec or ref.
  * @export
  * @interface NetworkingService
  */
@@ -952,7 +966,7 @@ export interface NimServiceServingPort {
      */
     'metricsPort'?: number | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof NimServiceServingPort
      */
@@ -1326,6 +1340,12 @@ export interface NimServiceSpecAllOfCompute {
      */
     'cpuMemoryRequest'?: string | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
@@ -1338,21 +1358,35 @@ export interface NimServiceSpecAllOfCompute {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof NimServiceSpecAllOfCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof NimServiceSpecAllOfCompute
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof NimServiceSpecAllOfCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -1441,7 +1475,7 @@ export type PolicyRuleEnum = typeof PolicyRuleEnum[keyof typeof PolicyRuleEnum];
 
 
 /**
- * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+ * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
  * @export
  * @enum {string}
  */
@@ -1726,7 +1760,7 @@ export type ServiceProtocol = typeof ServiceProtocol[keyof typeof ServiceProtoco
 
 
 /**
- * Reference an existing Service.
+ * Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint.
  * @export
  * @interface ServiceRef
  */
@@ -2037,7 +2071,7 @@ export interface WorkloadV2Configuration {
      */
     'mnnvl'?: MnnvlMode | null;
     /**
-     * Networking endpoint configurations for the workload (external access, services with auth). Supported for cluster version 2.25 and above. 
+     * Networking endpoint configurations for the workload (external access, services with auth). Requires cluster version 3.0.0 or later. 
      * @type {Array<NetworkingEndpoint>}
      * @memberof WorkloadV2Configuration
      */
@@ -2447,7 +2481,7 @@ export interface WorkloadV2MetadataUpdateParamsConfiguration {
      */
     'mnnvl'?: MnnvlMode | null;
     /**
-     * Networking endpoint configurations for the workload (external access, services with auth). Supported for cluster version 2.25 and above. 
+     * Networking endpoint configurations for the workload (external access, services with auth). Requires cluster version 3.0.0 or later. 
      * @type {Array<NetworkingEndpoint>}
      * @memberof WorkloadV2MetadataUpdateParamsConfiguration
      */
@@ -2924,7 +2958,7 @@ export interface WorkloadsV2Updates {
     'workloads'?: Array<WorkloadV2Update>;
 }
 /**
- * 
+ * Access control for this networking endpoint. Requires externalAccess. Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
  * @export
  * @interface Workloadv2Authorization
  */

@@ -15,11 +15,11 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/workloadutils"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	trackerApi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
 	policyConstants "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/constants"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
@@ -72,6 +72,7 @@ type FieldsComposerOptions struct {
 	EmptyDirAsVolumeSupported        bool
 	FlexiblePriorityClassesSupported bool
 	GitSyncWithSshKeySupported       bool
+	GpuComputeModeSupported          bool
 	// GpuMemoryLimitAnnotationsSupported is set from checker.MinVersionGpuMemoryLimitAnnotations
 	// (cluster >= 3.0.0). When true, the composer emits the per-container CUDA/KAI GPU
 	// memory-limit annotations (nvidia.com/container.<name>.gpu-memory.limit and
@@ -81,6 +82,7 @@ type FieldsComposerOptions struct {
 	GpuMemoryLimitAnnotationsSupported   bool
 	LauncherCreationPolicySupported      bool
 	NodeAffinitySupported                bool
+	OAuth2ProxyTemplatesSupported        bool
 	PreemptibilitySupported              bool
 	UserCredentialsSupported             bool
 	VolumeDefaultModeSupported           bool
@@ -98,8 +100,10 @@ func OptionsForPolicy() FieldsComposerOptions {
 		FlexiblePriorityClassesSupported:     true,
 		GitSyncWithSshKeySupported:           true,
 		GpuMemoryLimitAnnotationsSupported:   true,
+		GpuComputeModeSupported:              true,
 		LauncherCreationPolicySupported:      true,
 		NodeAffinitySupported:                true,
+		OAuth2ProxyTemplatesSupported:        true,
 		PreemptibilitySupported:              true,
 		UserCredentialsSupported:             true,
 		VolumeDefaultModeSupported:           true,

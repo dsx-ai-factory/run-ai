@@ -51,6 +51,7 @@
               />
               <general-section
                 :workload-form-type="workloadFormType"
+                :single-pod-workload="false"
                 :general-model="generalModel"
                 :support-preemptibility="supportPreemptibility"
                 :support-mnnvl="supportMnnvl"
@@ -645,7 +646,6 @@ const WorkloadYamlNew = defineComponent({
   },
 });
 
-//Dima todo - Type assertion to prevent TS7056 while maintaining type safety -- will be refactored later --hide the annoying warning
 export default WorkloadYamlNew as typeof WorkloadYamlNew & DefineComponent;
 </script>
 

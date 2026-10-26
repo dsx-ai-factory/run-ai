@@ -19,16 +19,15 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
+	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 	events "github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/versions"
-	org_unit_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub"
 )
 
-//go:generate mockery --name ClusterDeleter
 type ClusterDeleter interface {
 	AttemptToGracefullyDeleteCluster(ctx context.Context, cluster *models.Cluster) *api.Error
 	ForceDeleteCluster(ctx context.Context, cluster *models.Cluster) *api.Error

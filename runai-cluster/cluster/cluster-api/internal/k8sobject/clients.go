@@ -9,7 +9,7 @@ import (
 	"context"
 	"net/http"
 
-	workloadsapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // ElementGetter narrows the workloads-client surface so tests don't embed

@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/actions"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/step"
+	pkgvalidation "github.com/dsx-ai-factory/run-ai/runai-installer/installer/pkg/validation"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -233,6 +234,37 @@ func TestResolve_Install_ControlPlaneOnly_NoOptionalSecrets(t *testing.T) {
 		"create-control-plane-namespace",
 		"install-control-plane-chart",
 	}, stepNames(runai.Flows[0]))
+}
+
+func TestBuildFeatureFlows_LWS(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		distribution string
+		steps        []string
+		namespace    string
+	}{
+		{name: "helm off openshift", steps: []string{"install-lws"}, namespace: "lws-system"},
+		{
+			name:         "operatorhub on openshift",
+			distribution: pkgvalidation.KubernetesDistributionOpenShift,
+			steps:        []string{"install-cert-manager-operator", "install-lws-operator", "create-leader-worker-set-operator"},
+			namespace:    "openshift-lws-operator",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			s := fullInstallSpec()
+			s.KubernetesDistribution = tc.distribution
+			s.Features = &spec.Features{LWS: &spec.Dependency{Mode: spec.DependencyModeInstall}}
+
+			flows, _ := buildFeatureFlows(s, orchestrator2.Deps{})
+			require.Len(t, flows, 1)
+			assert.Equal(t, "lws", flows[0].Name)
+			assert.Equal(t, tc.steps, stepNames(flows[0]))
+			assert.Contains(t, clusterExtraValues(s, s.Cluster), "clusterConfig.lws.namespace="+tc.namespace)
+		})
+	}
+
+	assert.NotContains(t, clusterExtraValues(fullInstallSpec(), fullInstallSpec().Cluster), "clusterConfig.lws.namespace=lws-system")
 }
 
 func TestControlPlaneValues_CustomCA(t *testing.T) {

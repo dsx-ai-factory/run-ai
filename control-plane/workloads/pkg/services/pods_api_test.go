@@ -132,6 +132,63 @@ var _ = Describe("Pods API tests", Ordered, func() {
 
 	})
 
+	Context("DRA resource claims", func() {
+		upsertAndGetPod := func(pod api.PodSyncFields) api.Pod {
+			apiResponse, _ := podsService.UpsertPod(ctx, pod.Id, pod)
+			Expect(apiResponse.Code).To(Equal(http.StatusNoContent))
+
+			apiResponse, _ = podsService.GetWorkloadPod(ctx, pod.WorkloadId, pod.Id)
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+			return httpResponseBodyToPod(apiResponse)
+		}
+
+		It("Persists template-generated and standalone claims as reported", func() {
+			claims := []api.PodResourceClaim{
+				{Name: "gpu-unbound", ResourceClaimTemplateName: ptr.To("single-gpu")},
+				{Name: "gpu-bound", ResourceClaimTemplateName: ptr.To("single-gpu"), AllocatedResourceClaimName: ptr.To("dra-pod-gpu-bound-mk4s8")},
+				{Name: "ib", ResourceClaimName: ptr.To("shared-infiniband"), AllocatedResourceClaimName: ptr.To("shared-infiniband")},
+			}
+			pod := SetupBasePod(uuid.NewString(), testing.TestUuid1, DefaultProjectId, testing.ClusterUuid1)
+			pod.ResourceClaims = &claims
+			createdPods = append(createdPods, pod)
+
+			result := upsertAndGetPod(pod)
+			Expect(result.ResourceClaims).NotTo(BeNil())
+			Expect(*result.ResourceClaims).To(Equal(claims))
+		})
+
+		It("Omits resource claims for a pod that reports none", func() {
+			pod := SetupBasePod(uuid.NewString(), testing.TestUuid1, DefaultProjectId, testing.ClusterUuid1)
+			createdPods = append(createdPods, pod)
+
+			result := upsertAndGetPod(pod)
+			Expect(result.ResourceClaims).To(BeNil())
+		})
+
+		It("Overwrites resource claims on re-sync and clears them when no longer reported", func() {
+			pod := SetupBasePod(uuid.NewString(), testing.TestUuid1, DefaultProjectId, testing.ClusterUuid1)
+			createdPods = append(createdPods, pod)
+
+			pod.ResourceClaims = &[]api.PodResourceClaim{
+				{Name: "gpu-1", ResourceClaimTemplateName: ptr.To("single-gpu")},
+			}
+			result := upsertAndGetPod(pod)
+			Expect(*result.ResourceClaims).To(HaveLen(1))
+			Expect((*result.ResourceClaims)[0].AllocatedResourceClaimName).To(BeNil())
+
+			pod.ResourceClaims = &[]api.PodResourceClaim{
+				{Name: "gpu-1", ResourceClaimTemplateName: ptr.To("single-gpu"), AllocatedResourceClaimName: ptr.To("dra-pod-gpu-1-abcde")},
+			}
+			result = upsertAndGetPod(pod)
+			Expect(*result.ResourceClaims).To(HaveLen(1))
+			Expect((*result.ResourceClaims)[0].AllocatedResourceClaimName).To(Equal(ptr.To("dra-pod-gpu-1-abcde")))
+
+			pod.ResourceClaims = nil
+			result = upsertAndGetPod(pod)
+			Expect(result.ResourceClaims).To(BeNil())
+		})
+	})
+
 	Context("Get workload pods", func() {
 		It("Workload with pod", func() {
 			apiResponse, _ := podsService.GetWorkloadPods(ctx, testing.TestUuid1, false, 0, 0, "", "", "", nil)

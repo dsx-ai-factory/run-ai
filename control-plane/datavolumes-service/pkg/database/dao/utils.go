@@ -123,10 +123,10 @@ func getPermittedScopesDbFilter(permittedScopes *authorization_api.PermittedScop
 //	orClause := "(false"
 //
 //	if len(permittedScopes.Departments) > 0 {
-//		orClause = orClause + fmt.Sprintf(" OR %sdepartment_id IN %s", fieldPrefix, dao_utils.ListItemsForQuery(permittedScopes.Departments))
+//		orClause = orClause + fmt.Sprintf(" OR %sdepartment_id IN %s", fieldPrefix, "('" + strings.Join(permittedScopes.Departments, "','") + "')")
 //	}
 //	if len(permittedScopes.Projects) > 0 {
-//		orClause = orClause + fmt.Sprintf(" OR %sproject_id IN %s", fieldPrefix, dao_utils.ListItemsForQuery(permittedScopes.Projects))
+//		orClause = orClause + fmt.Sprintf(" OR %sproject_id IN %s", fieldPrefix, "('" + strings.Join(permittedScopes.Projects, "','") + "')")
 //	}
 //
 //	orClause += ")"
@@ -144,10 +144,10 @@ func getPermittedScopesDbFilter(permittedScopes *authorization_api.PermittedScop
 //	orClause := "(false"
 //
 //	if len(permittedScopesAncestors.Clusters) > 0 {
-//		orClause = orClause + fmt.Sprintf(" OR (scope_type = '%s' AND scope_id IN %s)", string(api.SCOPETYPE_CLUSTER), dao_utils.ListItemsForQuery(permittedScopesAncestors.Clusters))
+//		orClause = orClause + fmt.Sprintf(" OR (scope_type = '%s' AND scope_id IN %s)", string(api.SCOPETYPE_CLUSTER), "('" + strings.Join(permittedScopesAncestors.Clusters, "','") + "')")
 //	}
 //	if len(permittedScopesAncestors.Departments) > 0 {
-//		orClause = orClause + fmt.Sprintf(" OR (scope_type = '%s' AND scope_id IN %s)", string(api.SCOPETYPE_DEPARTMENT), dao_utils.ListItemsForQuery(permittedScopesAncestors.Departments))
+//		orClause = orClause + fmt.Sprintf(" OR (scope_type = '%s' AND scope_id IN %s)", string(api.SCOPETYPE_DEPARTMENT), "('" + strings.Join(permittedScopesAncestors.Departments, "','") + "')")
 //	}
 //
 //	orClause += ")"

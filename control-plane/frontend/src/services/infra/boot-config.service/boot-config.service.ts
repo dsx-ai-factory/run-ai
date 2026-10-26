@@ -14,10 +14,11 @@ export const FALLBACK_BOOT_CONFIG: BootConfig = {
   },
   version: { display: "" },
   docs: {
-    baseUrl: "https://run-ai-docs.nvidia.com/self-hosted",
+    catalogVersion: "v2",
+    baseUrl: "https://docs.nvidia.com/run-ai/self-hosted",
     whatsNew: {
       label: "What's New",
-      url: "https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new",
+      url: "https://docs.nvidia.com/run-ai/self-hosted/documentation/getting-started/whats-new/whats-new",
     },
   },
   support: {
@@ -68,6 +69,9 @@ function isBootConfig(value: unknown): value is BootConfig {
     (candidate.distributionAssets?.profile === "cc" || candidate.distributionAssets?.profile === "ce") &&
     typeof candidate.version?.display === "string" &&
     typeof candidate.docs?.baseUrl === "string" &&
+    (candidate.docs.catalogVersion === undefined ||
+      candidate.docs.catalogVersion === "v1" ||
+      candidate.docs.catalogVersion === "v2") &&
     isSafeBrowserUrl(candidate.docs.baseUrl, false) &&
     typeof candidate.docs?.whatsNew?.label === "string" &&
     typeof candidate.docs?.whatsNew?.url === "string" &&

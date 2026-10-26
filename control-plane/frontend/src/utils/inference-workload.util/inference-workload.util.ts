@@ -1369,7 +1369,6 @@ function setDistributedUIDefaults(
   };
 }
 
-// Moshe: need to write unit tests for this function
 function extractLeaderWorkerSpec(spec: DistributedInferenceLeaderWorkerSpec | undefined | null): IUISuperWorkloadSpec {
   return {
     ...spec,
@@ -1395,7 +1394,6 @@ function getServingPortFieldForDistributed(
   };
 }
 
-// Moshe: need to write unit tests for this function
 function getDistributedInferenceModel(unifiedWorkload: UnifiedWorkload): IUISuperWorkloadCreationRequest {
   const spec = unifiedWorkload.spec?.worker || {};
 

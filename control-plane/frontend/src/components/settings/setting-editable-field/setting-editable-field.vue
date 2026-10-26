@@ -4,7 +4,13 @@
 -->
 
 <template>
-  <div class="setting-editable-field row justify-between no-wrap items-center q-pa-sm q-mt-md">
+  <div
+    :class="[
+      'setting-editable-field',
+      'row justify-between no-wrap items-center q-pa-sm q-mt-md',
+      { 'no-border': hideBorder },
+    ]"
+  >
     <span class="ellipsis col-6" :class="{ 'text-subtitle1': useLargerLabel }">{{ label }}</span>
     <div class="buttons row no-wrap q-gutter-sm" v-if="!hideButtons">
       <slot name="start"></slot>
@@ -82,6 +88,10 @@ export default defineComponent({
       type: Boolean as PropType<boolean>,
       default: false,
     },
+    hideBorder: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
     resourceType: {
       type: String as PropType<keyof typeof ResourceType>,
       default: ResourceType.Settings,
@@ -118,6 +128,11 @@ export default defineComponent({
 <style lang="scss" scoped>
 .setting-editable-field {
   border: 1px solid $black-12;
+
+  &.no-border {
+    border: none;
+    margin-top: 0;
+  }
 }
 .icon {
   color: $black-54;

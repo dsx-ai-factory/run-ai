@@ -6,13 +6,13 @@ Credentials allow users to securely store private authentication secrets, which 
 * **Generic secrets** - A flexible option for storing key/value pairs such as API keys or configuration data. These credentials can be injected into workloads as environment variables.
 * **NGC API key** - Used to securely store the NGC API key for authenticated access to restricted data in the NGC catalog. These credentials can be injected into workloads to access the NGC catalog and as environment variables.
 
-<Info>
+<Note>
 
 **Note**
 
 User credentials will be propagated to all clusters from versions 2.22 onwards.
 
-</Info>
+</Note>
 
 ## Creating a Credential
 

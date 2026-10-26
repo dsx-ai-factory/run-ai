@@ -50,13 +50,13 @@ NVIDIA Run:ai supports multiple native inference workload types to accommodate d
 
 NVIDIA Run:ai supports a broad range of workloads from the ML and Kubernetes ecosystem that are already registered as workload types in the platform and ready to use. These workloads can then be submitted using [via YAML](../submit-via-yaml.md) and managed with the same orchestration, monitoring, and scheduling capabilities as native workloads. See [Supported workload types](../workload-types/supported-workload-types.md) for the full list of supported inference workload types. Key workload types include the following:
 
-* [**NVIDIA NIM Services**](https://docs.nvidia.com/nim-operator/latest/service.html) - NVIDIA NIM workloads are deployed and managed using the NVIDIA NIM Operator and exposed through a dedicated [NVIDIA NIM](https://run-ai-docs.nvidia.com/api/2.26/workloads/nvidia-nim) API. This enables standardized, production-ready deployment of optimized inference services while allowing NVIDIA Run:ai to handle scheduling, resource management, and observability.
+* [**NVIDIA NIM Services**](https://docs.nvidia.com/nim-operator/latest/service.html) - NVIDIA NIM workloads are deployed and managed using the NVIDIA NIM Operator and exposed through a dedicated [NVIDIA NIM](api:main-api:POST/api/v2/workloads/nim-services) API. This enables standardized, production-ready deployment of optimized inference services while allowing NVIDIA Run:ai to handle scheduling, resource management, and observability.
 * [**DynamoGraphDeployment**](https://docs.nvidia.com/dynamo/latest/index.html) - Dynamo workloads are deployed using the NVIDIA Dynamo Operator, which manages graph-based, distributed inference pipelines. NVIDIA Run:ai integrates with the operator to schedule and manage Dynamo-based inference workloads across the cluster.
 * [**LeaderWorkerSet**](https://lws.sigs.k8s.io/docs/overview/) **(LWS)** - A Kubernetes-native abstraction for leader–worker style workloads, commonly used for distributed training and inference. NVIDIA Run:ai schedules and manages LWS workloads while preserving their execution semantics.
 
 ### Extending Inference Workload Support
 
-For emerging ML frameworks, tools, or Kubernetes resources, Karta provides a declarative way to extend platform support. Administrators can register new workload types via the [Workload Types](https://run-ai-docs.nvidia.com/api/2.26/workloads/workload-properties#post-api-v1-workload-types) API, making them available across the organization without requiring platform updates or code changes. Once registered, these workloads can then be submitted using [via YAML](../submit-via-yaml.md) and managed with the same orchestration, monitoring, and scheduling capabilities as native workloads. See [Extending workload support with Karta](../workload-types/extending-workload-support/) for more details.
+For emerging ML frameworks, tools, or Kubernetes resources, Karta provides a declarative way to extend platform support. Administrators can register new workload types via the [Workload Types](api:main-api:POST/api/v1/workload-types) API, making them available across the organization without requiring platform updates or code changes. Once registered, these workloads can then be submitted using [via YAML](../submit-via-yaml.md) and managed with the same orchestration, monitoring, and scheduling capabilities as native workloads. See [Extending workload support with Karta](../workload-types/extending-workload-support/) for more details.
 
 ## Observability and Metrics
 
@@ -74,13 +74,13 @@ NVIDIA Run:ai inference workloads can be deployed as:
 
 ### Deployment Architecture Overview
 
-<Info>
+<Note>
 
 **Note**
 
 The deployment architecture applies to native inference workloads only. The architecture for other workload types and frameworks (e.g., KServe or SeldonDeployment) may differ based on the framework.
 
-</Info>
+</Note>
 
 #### Single-Node Deployment
 

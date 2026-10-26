@@ -12,8 +12,8 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/init_containers"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 func (dinfComposer *DistributedInferenceToLWSComposer) processNetworkingFields(
@@ -111,14 +111,15 @@ func (dinfComposer *DistributedInferenceToLWSComposer) buildAuthProxySidecar(
 		return init_containers.BuildOauth2ProxySidecar(
 			&target.LeaderWorkerSet.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec,
 			init_containers.ServingProxySpec{
-				ContainerPort:    *port,
-				ServingURL:       cookie.servingURL,
-				CookiePrefix:     cookie.serviceName,
-				AuthorizedUsers:  strings.Join(authInfo.AuthorizedUsers, ","),
-				AuthorizedGroups: strings.Join(authInfo.AuthorizedGroups, ","),
-				WorkloadName:     cookie.workloadName,
-				ProjectName:      cookie.projectName,
-				Config:           cookie.config,
+				ContainerPort:                 *port,
+				ServingURL:                    cookie.servingURL,
+				CookiePrefix:                  cookie.serviceName,
+				AuthorizedUsers:               strings.Join(authInfo.AuthorizedUsers, ","),
+				AuthorizedGroups:              strings.Join(authInfo.AuthorizedGroups, ","),
+				WorkloadName:                  cookie.workloadName,
+				ProjectName:                   cookie.projectName,
+				Config:                        cookie.config,
+				OAuth2ProxyTemplatesSupported: dinfComposer.fc.Options.OAuth2ProxyTemplatesSupported,
 			},
 		)
 	}

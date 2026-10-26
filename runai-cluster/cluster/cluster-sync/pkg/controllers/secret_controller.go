@@ -29,6 +29,7 @@ func AddSecretHandlerToCache(backendClient *backendclient.BackendClient, cachedC
 			switch secret := obj.(type) {
 			case *corev1.Secret:
 				return backendClient.IsRunaiBackendAvailable() &&
+					!util.IsPersonalCredentialCopy(&secret.ObjectMeta) &&
 					(util.IsUserExposedCredentialsForRunai(secret) || util.IsAssetRelatedResource(&secret.ObjectMeta)) &&
 					(isRelevantResourceScope(cachedClient, &secret.ObjectMeta) || isUserCredential(secret.ObjectMeta))
 			default:

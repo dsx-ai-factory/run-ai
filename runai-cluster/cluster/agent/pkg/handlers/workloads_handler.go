@@ -19,8 +19,8 @@ import (
 
 	"github.com/hashicorp/go-multierror"
 
+	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/concurrency"
-	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	runaiBackendClient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config"

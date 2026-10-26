@@ -9,7 +9,6 @@ import (
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	sdkglobal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/global"
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -42,6 +41,7 @@ type ClusterStorageConfig interface {
 	CustomCAAuthKey() string
 
 	S3FsImage() string
+	S3FsMountCheckImage() string
 	S3FileSystemResources() (corev1.ResourceRequirements, error)
 	FipsGodebug() string
 	IsCustomCAS3Enabled() bool
@@ -86,6 +86,7 @@ type StaticClusterStorageConfig struct {
 	customCAAuthKey                 string
 
 	s3FsImage             string
+	s3FsMountCheckImage   string
 	s3FileSystemResources configuredResourceRequirements
 	fipsMode              string
 	isCustomCAS3Enabled   bool
@@ -144,7 +145,8 @@ func (c StaticClusterStorageConfig) IsCustomCAAuthEnabled() bool  { return c.isC
 func (c StaticClusterStorageConfig) CustomCAAuthSecret() string   { return c.customCAAuthSecret }
 func (c StaticClusterStorageConfig) CustomCAAuthKey() string      { return c.customCAAuthKey }
 
-func (c StaticClusterStorageConfig) S3FsImage() string { return c.s3FsImage }
+func (c StaticClusterStorageConfig) S3FsImage() string           { return c.s3FsImage }
+func (c StaticClusterStorageConfig) S3FsMountCheckImage() string { return c.s3FsMountCheckImage }
 func (c StaticClusterStorageConfig) S3FileSystemResources() (corev1.ResourceRequirements, error) {
 	return c.s3FileSystemResources.valueOr(corev1.ResourceRequirements{})
 }
@@ -219,7 +221,10 @@ func (c *StaticClusterStorageConfig) SetOauth2ProxySessionStoreType(storeType st
 func (c *StaticClusterStorageConfig) SetOauth2ProxyRedisFQDN(fqdn string) {
 	c.oauth2ProxyRedisFQDN = fqdn
 }
-func (c *StaticClusterStorageConfig) SetS3FsImage(image string)   { c.s3FsImage = image }
+func (c *StaticClusterStorageConfig) SetS3FsImage(image string) { c.s3FsImage = image }
+func (c *StaticClusterStorageConfig) SetS3FsMountCheckImage(image string) {
+	c.s3FsMountCheckImage = image
+}
 func (c *StaticClusterStorageConfig) SetFipsMode(fipsMode string) { c.fipsMode = fipsMode }
 func (c *StaticClusterStorageConfig) SetIsCustomCAS3Enabled(enabled bool) {
 	c.isCustomCAS3Enabled = enabled
@@ -290,6 +295,7 @@ func NewClusterStorageConfigFromCluster(cluster *clustersApi.DisplayedCluster, o
 	if config != nil {
 		cfg.gitSyncImage = config.GetGitSyncImage()
 		cfg.s3FsImage = config.GetS3FileSystemImage()
+		cfg.s3FsMountCheckImage = config.GetS3FileSystemMountCheckImage()
 		cfg.fipsMode = string(config.GetFipsMode())
 		cfg.oauth2ProxyImage = config.GetRunaiOauth2ProxyImage()
 		cfg.gitSyncResources = reportedResourceRequirements(config.GetGitSyncResourcesOk())
@@ -364,7 +370,7 @@ func parseReportedResourceRequirements(reported *clustersApi.ClusterReportedReso
 }
 
 func defaultUsernameLoaderResources() corev1.ResourceRequirements {
-	return workloadbuilders.DefaultUsernameLoaderInitContainerResources()
+	return sdkglobal.DefaultUsernameLoaderInitContainerResources()
 }
 
 func reportedConfig(cluster *clustersApi.DisplayedCluster) *clustersApi.ClusterReportedConfig {

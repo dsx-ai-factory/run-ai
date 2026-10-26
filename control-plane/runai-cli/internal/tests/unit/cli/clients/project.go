@@ -13,6 +13,7 @@ import (
 	nodes "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node"
 
 	clusterOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/nodepool"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/filter"
 	cpmocks "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/autogenerate/mocks/controlplane"
@@ -21,7 +22,6 @@ import (
 	nodepool2 "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/nodepool"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/project"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 	"github.com/golang/mock/gomock"
 	"k8s.io/utils/ptr"
 )
@@ -205,7 +205,7 @@ func MockProject(mockCtrl *gomock.Controller) {
 	nodeTelemetryResponse := getMockTelemetryResponse(map[string]string{NodeName: FreeGpu, OtherNodeName: strconv.Itoa(GpuCount)})
 	mockNodeClient.EXPECT().GetNodesTelemetry(gomock.Any(), ClusterUuid, nodes.RequiredNodeTelemetryTypes).Return(nodeTelemetryResponse, nil).AnyTimes()
 
-	mockNodeClient.EXPECT().GetNodeList(gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
+	mockNodeClient.EXPECT().GetNodeList(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
 
 	departmentList := getMockDepartmentList()
 	mockDepartmentClient.EXPECT().GetDepartmentList(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(departmentList, nil).AnyTimes()

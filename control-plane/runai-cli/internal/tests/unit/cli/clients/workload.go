@@ -29,7 +29,7 @@ import (
 	spec2 "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec/spectype"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workspace"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/golang/mock/gomock"
 	"k8s.io/utils/ptr"
 )
@@ -173,7 +173,7 @@ func MockWorkload(mockCtrl *gomock.Controller, filterList []string) {
 	var emptyStrList []string
 	emptyStrList = append(emptyStrList, "clusterId==uuid-cluster-1")
 	emptyStrList = append(emptyStrList, filterList...)
-	mockWsClient := cpworkloadmocks.NewMockWorkloadClient(mockCtrl)
+	mockWsClient := cpworkloadmocks.NewMockPaginator(mockCtrl)
 	mockWsClient.EXPECT().List(gomock.Any(), gomock.Any(), gomock.Any(), gomock.InAnyOrder(emptyStrList), false).Return(&openapi.GetWorkloads200Response{
 		Next:      nil,
 		Workloads: WorkloadList,
@@ -620,6 +620,6 @@ func generateMockClient(wl *Workload) *cpworkloadmocks.MockWithSuspendableAction
 func getMockNodesService(mockCtrl *gomock.Controller) *nodes.BackendNodeService {
 	mockNodeClient := cpmocks.NewMockNodeClient(mockCtrl)
 	mockNodes := getMockNodeList()
-	mockNodeClient.EXPECT().GetNodeList(gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
+	mockNodeClient.EXPECT().GetNodeList(gomock.Any(), gomock.Any(), gomock.Any(), gomock.Any()).Return(mockNodes, nil).AnyTimes()
 	return nodes.NewBackendNodeService(mockNodeClient)
 }

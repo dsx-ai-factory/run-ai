@@ -6,11 +6,13 @@
 package core
 
 import (
+	"slices"
+	"strings"
 	"testing"
 	"time"
 )
 
-func TestConfigInt(t *testing.T) {
+func TestScenarioInt(t *testing.T) {
 	cases := []struct {
 		name    string
 		knobs   map[string]any
@@ -26,7 +28,7 @@ func TestConfigInt(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := Config{Knobs: tc.knobs}.Int("workloads", 2)
+			got, err := Scenario{Knobs: tc.knobs}.Int("workloads", 2)
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got %d", got)
@@ -40,7 +42,7 @@ func TestConfigInt(t *testing.T) {
 	}
 }
 
-func TestConfigString(t *testing.T) {
+func TestScenarioString(t *testing.T) {
 	cases := []struct {
 		name    string
 		knobs   map[string]any
@@ -55,7 +57,7 @@ func TestConfigString(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := Config{Knobs: tc.knobs}.String("workloadType", "Training")
+			got, err := Scenario{Knobs: tc.knobs}.String("workloadType", "Training")
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got %q", got)
@@ -69,7 +71,7 @@ func TestConfigString(t *testing.T) {
 	}
 }
 
-func TestConfigDuration(t *testing.T) {
+func TestScenarioDuration(t *testing.T) {
 	cases := []struct {
 		name    string
 		knobs   map[string]any
@@ -87,7 +89,7 @@ func TestConfigDuration(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := Config{Knobs: tc.knobs}.Duration("timeout", 2*time.Minute)
+			got, err := Scenario{Knobs: tc.knobs}.Duration("timeout", 2*time.Minute)
 			if tc.wantErr {
 				if err == nil {
 					t.Fatalf("expected error, got %s", got)
@@ -98,5 +100,101 @@ func TestConfigDuration(t *testing.T) {
 				t.Fatalf("got %s (%v), want %s", got, err, tc.want)
 			}
 		})
+	}
+}
+
+func TestScenarioInts(t *testing.T) {
+	cases := []struct {
+		name    string
+		knobs   map[string]any
+		want    []int
+		wantErr string
+	}{
+		{name: "absent uses fallback", knobs: nil, want: []int{1, 2}},
+		{name: "yaml list", knobs: map[string]any{"workloads": []any{100, 250, 500}}, want: []int{100, 250, 500}},
+		{name: "not a list", knobs: map[string]any{"workloads": 100}, wantErr: "must be a list"},
+		{name: "item not a number", knobs: map[string]any{"workloads": []any{100, "many"}}, wantErr: "item 2 must be a whole number"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := (Scenario{Knobs: tc.knobs}).Ints("workloads", []int{1, 2})
+			if tc.wantErr != "" {
+				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+					t.Fatalf("expected error containing %q, got %v", tc.wantErr, err)
+				}
+				return
+			}
+			if err != nil || !slices.Equal(got, tc.want) {
+				t.Fatalf("got %v (%v), want %v", got, err, tc.want)
+			}
+		})
+	}
+}
+
+func TestScenarioMap(t *testing.T) {
+	got, err := (Scenario{Knobs: map[string]any{"slo": map[string]any{"create_to_ew_p90_ms": 5000}}}).Map("slo")
+	if err != nil || got["create_to_ew_p90_ms"] != 5000 {
+		t.Fatalf("got %v (%v)", got, err)
+	}
+	if got, err := (Scenario{}).Map("slo"); err != nil || got != nil {
+		t.Fatalf("absent map must be nil without error, got %v (%v)", got, err)
+	}
+	if _, err := (Scenario{Knobs: map[string]any{"slo": "fast"}}).Map("slo"); err == nil || !strings.Contains(err.Error(), "must be a mapping") {
+		t.Fatalf("expected mapping error, got %v", err)
+	}
+}
+
+func TestNewRunIDIsShortUniqueHex(t *testing.T) {
+	first, err := NewRunID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := NewRunID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first) != 8 || strings.Trim(first, "0123456789abcdef") != "" {
+		t.Fatalf("run id must be 8 lowercase hex characters, got %q", first)
+	}
+	if first == second {
+		t.Fatalf("two run ids must differ, both were %q", first)
+	}
+}
+
+func TestScenarioUnknownKnobs(t *testing.T) {
+	scenario := Scenario{Knobs: map[string]any{"workloads": []any{1}, "workloadTipe": "Training", "slos": nil}}
+
+	got := scenario.UnknownKnobs("workloads", "workloadType", "slo")
+
+	if !slices.Equal(got, []string{"slos", "workloadTipe"}) {
+		t.Fatalf("unknown knobs must be reported sorted, got %v", got)
+	}
+	if got := (Scenario{}).UnknownKnobs("workloads"); len(got) != 0 {
+		t.Fatalf("no knobs means nothing unknown, got %v", got)
+	}
+}
+
+func TestSectionFailAppendsMessages(t *testing.T) {
+	var section Section
+	section.Fail("first")
+	section.Fail("second")
+	if !section.Failed || section.Error != "first; second" {
+		t.Fatalf("messages must be joined in order: %+v", section)
+	}
+}
+
+func TestScenarioIntMap(t *testing.T) {
+	scenario := Scenario{Knobs: map[string]any{"slo": map[string]any{"p90_ms": 5000}, "bad": map[string]any{"p90_ms": "5s"}, "text": "x"}}
+	if values, err := scenario.IntMap("slo"); err != nil || values["p90_ms"] != 5000 {
+		t.Fatalf("whole numbers must be read: %v / %v", values, err)
+	}
+	if values, err := scenario.IntMap("missing"); err != nil || values != nil {
+		t.Fatalf("an absent knob is nil without an error: %v / %v", values, err)
+	}
+	if _, err := scenario.IntMap("bad"); err == nil || !strings.Contains(err.Error(), `entry "p90_ms" must be a whole number`) {
+		t.Fatalf("a non-number entry must be named: %v", err)
+	}
+	if _, err := scenario.IntMap("text"); err == nil || !strings.Contains(err.Error(), "must be a mapping") {
+		t.Fatalf("a scalar knob is not a mapping: %v", err)
 	}
 }

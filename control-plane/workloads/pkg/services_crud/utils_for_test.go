@@ -15,11 +15,13 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	runaictx_http "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx/http"
+	"github.com/google/uuid"
 
 	. "github.com/onsi/gomega"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 )
@@ -30,6 +32,16 @@ func CleanupCrudTable() {
 	gormDb := runaidb.DB()
 	gormDb.Unscoped().Delete(&models_crud.WorkloadSyncUpdate{}, "1 = 1")
 	gormDb.Unscoped().Delete(&models_crud.Workload{}, "1 = 1")
+}
+
+func expectWorkloadActions(ctx context.Context, workloadID string, expected ...string) {
+	records, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(workloadID), 0, 0)
+	Expect(apiErr).To(BeNil())
+	actions := make([]string, 0, len(records))
+	for _, record := range records {
+		actions = append(actions, record.Action)
+	}
+	Expect(actions).To(HaveExactElements(expected))
 }
 
 func RestartCrudUpdateCounter() {

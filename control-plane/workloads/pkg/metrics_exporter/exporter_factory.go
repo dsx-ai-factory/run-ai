@@ -12,12 +12,10 @@ import (
 	metrics_pkg "github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics"
 )
 
-//go:generate mockery --name MetricsExporterer
 type MetricsExporterer interface {
 	Export(ctx context.Context, tenantIds []int32)
 }
 
-//go:generate mockery --name ExporterFactoryer --inpackage --filename mock_exporter_factory.go --structname MockExporterFactoryer
 type ExporterFactoryer interface {
 	CreateExporter(metric *models.ExportableMetric) MetricsExporterer
 }

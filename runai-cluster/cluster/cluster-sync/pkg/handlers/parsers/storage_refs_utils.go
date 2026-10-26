@@ -8,11 +8,11 @@ package parsers
 import (
 	"context"
 
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_groups"
 	field_types "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	cu "github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	"go.uber.org/zap"
 	corev1 "k8s.io/api/core/v1"
@@ -86,7 +86,7 @@ func nativeStorageRefs(workloadName, namespace string, sf field_groups.StorageFi
 		if pvc == nil || ptr.Deref(pvc.Ephemeral, false) {
 			continue
 		}
-		refs = appendStorageRef(refs, v1alpha1.StorageRefKindPVC, builders.GetPvcClaimName(pvc, workloadName, "", idx))
+		refs = appendStorageRef(refs, v1alpha1.StorageRefKindPVC, pvcClaimName(pvc, workloadName, "", idx))
 		idx++
 	}
 
@@ -119,8 +119,7 @@ func nativeStorageRefs(workloadName, namespace string, sf field_groups.StorageFi
 	}
 
 	if imagePullSecrets != nil {
-		names, err := builders.ParseImagePullSecrets(imagePullSecrets.Deref(),
-			builders.WorkloadInfo{Name: workloadName, Namespace: namespace})
+		names, err := parseImagePullSecrets(imagePullSecrets.Deref(), workloadName)
 		if err != nil {
 			zap.S().Warnf("Failed to parse imagePullSecrets for workload <%s/%s>, error: %s",
 				namespace, workloadName, err.Error())

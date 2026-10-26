@@ -61,12 +61,17 @@ func (wd *WorkloadDisplayer) AsTable() error {
 		workersPerReplica = wd.workload.DistributedInference.Workers
 	}
 
+	compute := wd.workload.Compute
+	if wd.workload.Nim != nil {
+		compute.GPUComputeMode = wd.workload.Nim.GpuComputeMode
+	}
+
 	sections := []struct {
 		show    bool
 		section *displayer.Section
 	}{
 		{true, displayer.NewIssuesSection(wd.workload.Issues)},
-		{wd.options.ShowCompute, displayer.NewComputeSection(wd.workload.Compute)},
+		{wd.options.ShowCompute, displayer.NewComputeSection(compute)},
 		{wd.options.ShowStorage, displayer.NewStorageSection(wd.workload.Storage)},
 		{wd.options.ShowNetworks, displayer.NewNetworksSection(wd.workload.Networks)},
 		{true, displayer.NewNetworkTopologySection(wd.workload.NetworkTopology)},
@@ -109,7 +114,7 @@ func (wd *WorkloadDisplayer) DisplayGeneralAndRuntime() {
 		{Name: displayer.FieldSubmittedBy, Value: field.StringOrEmpty(wd.workload.General.SubmittedBy)},
 		{Name: displayer.FieldPriority, Value: field.StringOrEmpty(wd.workload.General.Priority)},
 		{Name: displayer.FieldCategory, Value: wd.workload.General.Category},
-		{Name: displayer.FieldPreemptible, Value: field.BoolOrEmpty(wd.workload.Runtime.Preemptible)},
+		{Name: displayer.FieldPreemptibility, Value: field.CapitalizeFirst(field.StringOrEmpty(wd.workload.General.Preemptibility))},
 		{Name: wd.getCurrentNodePoolFieldName(), Value: strings.Join(wd.workload.Compute.CurrentNodePools, ", ")},
 	}
 

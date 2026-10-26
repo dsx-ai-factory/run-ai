@@ -53,8 +53,28 @@
         @add-idp="addIdp"
         @cancel-edit-idp="cancelEditIdp"
         @edit-mode-changed="onEditModeChanged"
+        @certificate-status="onCertificateStatus"
         ref="samlSettingsEl"
-      />
+      >
+        <template v-if="shouldShowAutoRedirectSSO || shouldShowHelp" #box-footer>
+          <q-separator v-if="shouldShowAutoRedirectSSO" class="idp-card-separator" />
+          <div v-if="shouldShowAutoRedirectSSO" class="row items-center q-my-md q-mx-md">
+            <toggle-setting
+              ref="toggleSetting"
+              @update-setting="updateRedirectSSO"
+              :setting="autoRedirectSetting"
+              emit-only
+              resource-type="SecuritySettings"
+            />
+          </div>
+          <div class="row items-center q-mt-md q-mb-lg q-mx-md" v-if="shouldShowHelp">
+            <span class="text-italic"
+              >For more information, see the
+              <a aid="sso-guide-link" :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
+            >
+          </div>
+        </template>
+      </saml-settings>
       <oidc-settings
         v-if="isOidcIdp"
         :idp="currentIdp"
@@ -83,7 +103,7 @@
       />
     </div>
   </div>
-  <div v-if="shouldShowAutoRedirectSSO" class="q-ml-sm q-mr-sm">
+  <div v-if="!isSamlIdp && shouldShowAutoRedirectSSO" class="q-ml-sm q-mr-sm">
     <q-separator class="q-mt-lg" />
     <div class="row items-center q-my-md">
       <toggle-setting
@@ -96,10 +116,10 @@
     </div>
     <q-separator class="q-mb-md" />
   </div>
-  <div class="row items-center q-my-md" v-if="shouldShowHelp">
+  <div class="row items-center q-my-md" v-if="!isSamlIdp && shouldShowHelp">
     <span class="text-italic"
       >For more information, see the
-      <a :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
+      <a aid="sso-guide-link" :href="DOCS.AUTHENTICATION.OVERVIEW" target="_blank">Single sign-On guide</a></span
     >
   </div>
 </template>
@@ -142,7 +162,7 @@ import { DOCS } from "@/constants/docs";
 export default defineComponent({
   name: "sso-settings",
   components: { ToggleSetting, SettingReadonlyInput, OcpSettings, OidcSettings, SamlSettings, RunaiTooltip, RunaiBtn },
-  emits: ["update:settings"],
+  emits: ["update:settings", "certificate-status"],
   props: {
     settings: {
       type: Object as PropType<SettingsGetResponse | null>,
@@ -252,6 +272,9 @@ export default defineComponent({
     onEditModeChanged(isEditMode: boolean): void {
       this.isEditMode = isEditMode;
     },
+    onCertificateStatus(status: { expired: boolean; expiringSoon: boolean }): void {
+      this.$emit("certificate-status", status);
+    },
     getDefaultIdpConfig(idpType: IdpTypeEnum): Idp | undefined {
       if (!idpType) return undefined;
       return {
@@ -341,6 +364,13 @@ export default defineComponent({
       this.idpNewAlias = "";
     },
   },
+  watch: {
+    isSamlIdp(newValue: boolean): void {
+      if (!newValue) {
+        this.onCertificateStatus({ expired: false, expiringSoon: false });
+      }
+    },
+  },
 });
 </script>
 <style lang="scss" scoped>
@@ -348,5 +378,8 @@ export default defineComponent({
   .idp-button {
     margin-bottom: 20px;
   }
+}
+.idp-card-separator {
+  margin: 0 12px;
 }
 </style>

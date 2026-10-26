@@ -15,15 +15,6 @@
 
 Fixes #
 
-## Kind
-
-<!--
-  Pick exactly one. The label is applied automatically.
-  Options: bug | feature | cleanup | docs | dependency
--->
-
-/kind
-
 ## Checklist
 
 - [ ] Tests added or updated for this change

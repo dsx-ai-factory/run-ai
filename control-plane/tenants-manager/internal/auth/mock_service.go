@@ -57,7 +57,7 @@ func (m MockService) DeleteSubjectAccessRulesExecute(_ authorization_api.ApiDele
 	return &http.Response{StatusCode: http.StatusOK}, nil
 }
 
-func (m MockService) SetAppPermissions(_ context.Context, _ string, _ string, _ authorization_api.InternalCreateAccessRuleRequestScope, _ authorization_api.AllowedInternalCreateRoles) error {
+func (m MockService) SetServiceAccountPermissions(_ context.Context, _ string, _ string, _ authorization_api.InternalCreateAccessRuleRequestScope, _ authorization_api.AllowedInternalCreateRoles) error {
 	return nil
 }
 

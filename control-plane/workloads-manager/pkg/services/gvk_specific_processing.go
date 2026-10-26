@@ -8,7 +8,7 @@ package services
 import (
 	"fmt"
 
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 )
 
 // applyGVKSpecificProcessing applies GVK-specific processing to a manifest

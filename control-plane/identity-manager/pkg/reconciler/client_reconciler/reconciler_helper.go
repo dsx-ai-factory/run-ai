@@ -16,9 +16,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery --name ClientReconcilerHelperInterface
 type ClientReconcilerHelperInterface interface {
 	ReconcileClient(ctx context.Context, realm string, client realm_client.Client) error
+	DeleteClientIfExists(ctx context.Context, realm string, clientID string) error
 }
 
 type ClientReconcilerHelper struct {
@@ -65,6 +65,23 @@ func (rh *ClientReconcilerHelper) ReconcileClient(ctx context.Context, realm str
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to set email scope default for client %s in realm %s: %v", clientID, realm, err)
 			return err
 		}
+	}
+	return nil
+}
+
+func (rh *ClientReconcilerHelper) DeleteClientIfExists(ctx context.Context, realm string, clientID string) error {
+	existsClient, err := rh.iamServices.ClientService.GetClientByClientId(ctx, realm, clientID)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get client %s in realm %s: %v", clientID, realm, err)
+		return err
+	}
+	if existsClient == nil || existsClient.ID == nil {
+		return nil
+	}
+	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Client %s exists in realm %s, deleting", clientID, realm)
+	if err := rh.iamServices.ClientService.DeleteClient(ctx, realm, *existsClient.ID); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete client %s in realm %s: %v", clientID, realm, err)
+		return err
 	}
 	return nil
 }

@@ -9,13 +9,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -23,7 +27,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/patching"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	workloadApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/google/uuid"
 )
@@ -58,6 +61,20 @@ func NewUnifiedRequest(ctx context.Context, workloadType api.WorkloadType, templ
 	copyErr := convutils.CopySpecs(result.template, template)
 	if copyErr != nil {
 		return nil, api.NewError(http.StatusInternalServerError, copyErr.Error(), copyErr)
+	}
+
+	values, inputErr := gojsonq.LoadJson(result.template)
+	if inputErr != nil {
+		return nil, api.NewValidationError(inputErr.Error())
+	}
+	if inputErr := gpucompat.ValidateMemoryRequestInput(values); inputErr != nil {
+		return nil, api.NewValidationError(inputErr.Error())
+	}
+
+	var aliasErr *api.Error
+	result.template, aliasErr = normalizeTemplateGPUMemory(result.template)
+	if aliasErr != nil {
+		return nil, aliasErr
 	}
 
 	return &result, nil
@@ -314,6 +331,14 @@ func (ur *UnifiedRequest) ToDbRecord() (*models_crud.Template, *api.Error) {
 		}
 	}
 
+	for _, spec := range []*dbmodels.JsonBMap{&result.Spec, &result.MasterSpec, &result.CombinedSpec, &result.CombinedMasterSpec} {
+		stored, err := gpucompat.LegacyGPUFields(*spec)
+		if err != nil {
+			return nil, api.NewValidationError(err.Error())
+		}
+		*spec = stored
+	}
+
 	return &result, nil
 }
 
@@ -388,6 +413,12 @@ func NewUnifiedRequestFromRec(rec *models_crud.LoadedTemplate) (*UnifiedRequest,
 
 	if rec.CombinedMasterSpec != nil {
 		result.template.CombinedMasterSpec = rec.CombinedMasterSpec
+	}
+
+	var aliasErr *api.Error
+	result.template, aliasErr = normalizeTemplateGPUMemory(result.template)
+	if aliasErr != nil {
+		return nil, aliasErr
 	}
 
 	return &result, nil
@@ -661,7 +692,11 @@ func (ur *UnifiedRequest) ClearFields(options updateOptions) *api.Error {
 		hasMaster = true
 	}
 
-	clearErr := patching.ClearFields(templateAsJson, options.fieldsToClear, patching.ClearFieldsOptions{})
+	fieldsToClear := make([]string, len(options.fieldsToClear))
+	for i, field := range options.fieldsToClear {
+		fieldsToClear[i] = gpucompat.CanonicalGPUFieldPath(field)
+	}
+	clearErr := patching.ClearFields(templateAsJson, fieldsToClear, patching.ClearFieldsOptions{})
 	if clearErr != nil {
 		return api.NewValidationError(clearErr.Error())
 	}

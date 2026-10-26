@@ -762,7 +762,7 @@ export interface ClusterInstallationInfoResponse {
      */
     'chartRepoURL': string;
     /**
-     * Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set cluster.bootstrapToken=<token>. 
+     * Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>. 
      * @type {string}
      * @memberof ClusterInstallationInfoResponse
      */
@@ -891,6 +891,12 @@ export interface ClusterReportedConfig {
      * @memberof ClusterReportedConfig
      */
     's3FileSystemResources'?: ClusterReportedResourceRequirements | null;
+    /**
+     * The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
+     * @type {string}
+     * @memberof ClusterReportedConfig
+     */
+    's3FileSystemMountCheckImage'?: string | null;
     /**
      * 
      * @type {FipsModeEnum}

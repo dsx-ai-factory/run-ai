@@ -21,6 +21,8 @@ type ClientInterface interface {
 	GetStorageClassesConfigInt(ctx context.Context, clusterId string, storageClassName []string) (map[string]k8sObjectsApi.StorageClassConfiguration, *k8sObjectsApi.Error)
 	// ListSecretsByScope lists all secrets of a given scope, including ancestors, all origins
 	ListSecretsByScope(ctx context.Context, scopeType string, scopeId string) (*k8sObjectsApi.SecretListResponse, *k8sObjectsApi.Error)
+	// ListResourceClaimTemplatesByName lists the templates of the cluster with the given name, across every scope
+	ListResourceClaimTemplatesByName(ctx context.Context, clusterId string, name string, origin string) (*k8sObjectsApi.ResourceClaimTemplates, *k8sObjectsApi.Error)
 }
 
 var once sync.Once

@@ -7,9 +7,11 @@ package workloads
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
@@ -31,6 +33,14 @@ func TestGetWorkloadPodsInput_Validate(t *testing.T) {
 		{"whitespace", getWorkloadPodsInput{WorkloadID: "   "}, true},
 		{"not a uuid", getWorkloadPodsInput{WorkloadID: "wl-1"}, true},
 		{"valid", getWorkloadPodsInput{WorkloadID: validUUID}, false},
+		{"valid max limit and offset", getWorkloadPodsInput{WorkloadID: validUUID, Limit: 500, Offset: 20}, false},
+		{"valid metric limit", getWorkloadPodsInput{WorkloadID: validUUID, Limit: 20, IncludeMetrics: true}, false},
+		{"valid advanced metrics", getWorkloadPodsInput{WorkloadID: validUUID, IncludeMetrics: true, IncludeAdvancedMetrics: true}, false},
+		{"advanced metrics require baseline metrics", getWorkloadPodsInput{WorkloadID: validUUID, IncludeAdvancedMetrics: true}, true},
+		{"metric limit over max", getWorkloadPodsInput{WorkloadID: validUUID, Limit: 21, IncludeMetrics: true}, true},
+		{"negative limit", getWorkloadPodsInput{WorkloadID: validUUID, Limit: -1}, true},
+		{"limit over API max", getWorkloadPodsInput{WorkloadID: validUUID, Limit: 501}, true},
+		{"negative offset", getWorkloadPodsInput{WorkloadID: validUUID, Offset: -1}, true},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -95,9 +105,13 @@ func TestGetWorkloadPodsRun_TrainingHappyPath(t *testing.T) {
 		})
 	})
 
-	var gotMetricTypes string
+	var gotMetricTypes, gotStart, gotEnd string
+	var metricCalls int
 	mux.HandleFunc("/api/v1/workloads/"+validUUID+"/pods/"+validPodID+"/metrics", func(w http.ResponseWriter, r *http.Request) {
+		metricCalls++
 		gotMetricTypes = r.URL.Query().Get("metricType")
+		gotStart = r.URL.Query().Get("start")
+		gotEnd = r.URL.Query().Get("end")
 		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
 			"measurements": []map[string]any{
 				{
@@ -112,7 +126,9 @@ func TestGetWorkloadPodsRun_TrainingHappyPath(t *testing.T) {
 		})
 	})
 
-	out, err := getWorkloadPodsRun(context.Background(), client, getWorkloadPodsInput{WorkloadID: validUUID})
+	out, err := getWorkloadPodsRun(context.Background(), client, getWorkloadPodsInput{
+		WorkloadID: validUUID, IncludeMetrics: true, IncludeAdvancedMetrics: true,
+	})
 	require.NoError(t, err)
 
 	assert.Equal(t, validUUID, out.WorkloadID)
@@ -154,10 +170,71 @@ func TestGetWorkloadPodsRun_TrainingHappyPath(t *testing.T) {
 	assert.Equal(t, "0.50", (*p.Measurements)[0].Values[1].Value)
 	assert.Equal(t, "2026-05-17T15:00:00Z", (*p.Measurements)[0].Values[1].Timestamp)
 
-	assert.Equal(t, "20", gotLimit, "pods fetched with limit=20")
+	assert.Equal(t, "21", gotLimit, "pods fetched with one lookahead record")
 	assert.Equal(t, "0", gotOffset, "pods fetched with offset=0")
 	for _, want := range []string{"GPU_UTILIZATION", "GPU_MEMORY_USAGE_BYTES", "CPU_USAGE_CORES", "CPU_MEMORY_USAGE_BYTES"} {
-		assert.Contains(t, gotMetricTypes, want, "non-inference pod metrics request includes %s", want)
+		assert.Contains(t, gotMetricTypes, want, "combined pod metrics request includes %s", want)
+	}
+	assert.Contains(t, gotMetricTypes, "GPU_SM_ACTIVITY_PER_GPU")
+	assert.NotEmpty(t, gotStart)
+	assert.NotEmpty(t, gotEnd)
+	assert.Equal(t, 1, metricCalls, "supported advanced metrics use one combined request")
+}
+
+func TestGetWorkloadPodsRun_PaginatesAndOmitsMetricsByDefault(t *testing.T) {
+	for _, tc := range []struct {
+		name           string
+		returnedPods   int
+		wantHasMore    bool
+		wantNextOffset int32
+	}{
+		{name: "lookahead pod means more results", returnedPods: 8, wantHasMore: true, wantNextOffset: 27},
+		{name: "exact page has no more results", returnedPods: 7},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client, mux := runaiclienttest.NewServer(t)
+			mux.HandleFunc("/api/v1/workloads/"+validUUID, func(w http.ResponseWriter, _ *http.Request) {
+				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+					"id": validUUID, "name": "t1", "type": "Training", "phase": "Running",
+					"projectName": "p1", "createdAt": "2026-05-17T15:00:00Z", "phaseUpdatedAt": "2026-05-17T15:00:00Z",
+				})
+			})
+			mux.HandleFunc("/api/v1/workloads/"+validUUID+"/pods", func(w http.ResponseWriter, r *http.Request) {
+				assert.Equal(t, "8", r.URL.Query().Get("limit"))
+				assert.Equal(t, "20", r.URL.Query().Get("offset"))
+				pods := make([]map[string]any, tc.returnedPods)
+				for i := range pods {
+					pods[i] = map[string]any{
+						"name": fmt.Sprintf("t1-pod-%d", 20+i), "id": validPodID,
+						"workloadId": validUUID, "clusterId": "c-1", "k8sPhase": "Running",
+						"createdAt": "2026-05-17T15:00:00Z", "k8sPhaseUpdatedAt": "2026-05-17T15:00:00Z",
+						"updatedAt": "2026-05-17T15:00:00Z", "tenantId": 1, "containers": []any{},
+					}
+				}
+				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+					"next": int32(20 + tc.returnedPods),
+					"pods": pods,
+				})
+			})
+
+			metricsCalled := false
+			mux.HandleFunc("/api/v1/workloads/"+validUUID+"/pods/"+validPodID+"/metrics", func(w http.ResponseWriter, _ *http.Request) {
+				metricsCalled = true
+				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"measurements": []any{}})
+			})
+
+			out, err := getWorkloadPodsRun(context.Background(), client, getWorkloadPodsInput{
+				WorkloadID: validUUID,
+				Limit:      7,
+				Offset:     20,
+			})
+			require.NoError(t, err)
+			require.Len(t, out.Pods, 7)
+			assert.Equal(t, tc.wantHasMore, out.HasMore)
+			assert.Equal(t, tc.wantNextOffset, out.NextOffset)
+			assert.Nil(t, out.Pods[0].Measurements)
+			assert.False(t, metricsCalled, "per-pod metrics endpoint must not be called unless includeMetrics is true")
+		})
 	}
 }
 
@@ -214,7 +291,7 @@ func TestGetWorkloadPodsRun_InferenceUsesInferenceVariant(t *testing.T) {
 		})
 	})
 
-	out, err := getWorkloadPodsRun(context.Background(), client, getWorkloadPodsInput{WorkloadID: validUUID})
+	out, err := getWorkloadPodsRun(context.Background(), client, getWorkloadPodsInput{WorkloadID: validUUID, IncludeMetrics: true})
 	require.NoError(t, err)
 
 	assert.Equal(t, "Inference", out.Type)
@@ -309,10 +386,12 @@ func TestGetWorkloadPodsRun_PodMetricsFailureKeepsPodWithNullMeasurements(t *tes
 	var buf strings.Builder
 	ctx := zerolog.New(&buf).WithContext(context.Background())
 
-	out, err := getWorkloadPodsRun(ctx, client, getWorkloadPodsInput{WorkloadID: validUUID})
+	out, err := getWorkloadPodsRun(ctx, client, getWorkloadPodsInput{WorkloadID: validUUID, IncludeMetrics: true})
 	require.NoError(t, err, "per-pod metrics failure must not fail the tool")
 	require.Len(t, out.Pods, 1)
 	assert.Nil(t, out.Pods[0].Measurements, "measurements must be nil when the metrics call failed")
+	require.Len(t, out.Pods[0].MetricWarnings, 1)
+	assert.Contains(t, out.Pods[0].MetricWarnings[0], "resource metrics")
 
 	got := buf.String()
 	for _, want := range []string{
@@ -346,4 +425,143 @@ func TestGetWorkloadPodsRun_EmptyPodsList(t *testing.T) {
 	require.NoError(t, err)
 	assert.NotNil(t, out.Pods, "pods must be a non-nil empty slice")
 	assert.Len(t, out.Pods, 0)
+}
+
+func TestAttachPodMeasurements_AdvancedFailureKeepsBasicMetrics(t *testing.T) {
+	client, mux := runaiclienttest.NewServer(t)
+	var starts, ends []string
+	mux.HandleFunc("/api/v1/workloads/"+validUUID+"/pods/"+validPodID+"/metrics", func(w http.ResponseWriter, r *http.Request) {
+		starts = append(starts, r.URL.Query().Get("start"))
+		ends = append(ends, r.URL.Query().Get("end"))
+		if strings.Contains(r.URL.Query().Get("metricType"), "GPU_SM_ACTIVITY_PER_GPU") {
+			runaiclienttest.WriteJSON(w, http.StatusBadRequest, map[string]any{"message": "Advanced GPU metrics are not enabled"})
+			return
+		}
+		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+			"measurements": []map[string]any{{
+				"type": "GPU_UTILIZATION", "values": []map[string]any{{"value": "0.5", "timestamp": "2026-05-17T15:00:00Z"}},
+			}},
+		})
+	})
+
+	start := time.Date(2026, 5, 17, 14, 50, 0, 0, time.UTC)
+	end := start.Add(10 * time.Minute)
+	entry := podOutput{}
+	attachPodMeasurements(context.Background(), client, validUUID, validPodID, false, true, start, end, &entry)
+
+	require.NotNil(t, entry.Measurements)
+	require.Len(t, *entry.Measurements, 1)
+	assert.Equal(t, "GPU_UTILIZATION", (*entry.Measurements)[0].Type)
+	require.Len(t, entry.MetricWarnings, 1)
+	assert.Contains(t, entry.MetricWarnings[0], "advanced GPU metrics")
+	require.Len(t, starts, 2)
+	assert.Equal(t, starts[0], starts[1])
+	assert.Equal(t, ends[0], ends[1])
+}
+
+func TestAttachPodMeasurements_DefaultSkipsAdvancedMetrics(t *testing.T) {
+	client, mux := runaiclienttest.NewServer(t)
+	var calls int
+	var gotMetricTypes string
+	mux.HandleFunc("/api/v1/workloads/"+validUUID+"/pods/"+validPodID+"/metrics", func(w http.ResponseWriter, r *http.Request) {
+		calls++
+		gotMetricTypes = r.URL.Query().Get("metricType")
+		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"measurements": []any{}})
+	})
+
+	end := time.Date(2026, 5, 17, 15, 0, 0, 0, time.UTC)
+	entry := podOutput{}
+	attachPodMeasurements(context.Background(), client, validUUID, validPodID, false, false, end.Add(-10*time.Minute), end, &entry)
+
+	assert.Equal(t, 1, calls, "includeMetrics without includeAdvancedMetrics makes one baseline request")
+	assert.Contains(t, gotMetricTypes, "GPU_UTILIZATION")
+	assert.NotContains(t, gotMetricTypes, "GPU_SM_ACTIVITY_PER_GPU")
+	require.NotNil(t, entry.Measurements)
+	assert.Empty(t, entry.MetricWarnings)
+}
+
+func TestAttachPodMeasurements_MultiStatusNamesUnavailableMetrics(t *testing.T) {
+	client, mux := runaiclienttest.NewServer(t)
+	mux.HandleFunc("/api/v1/workloads/"+validUUID+"/pods/"+validPodID+"/metrics", func(w http.ResponseWriter, r *http.Request) {
+		if strings.Contains(r.URL.Query().Get("metricType"), "GPU_SM_ACTIVITY_PER_GPU") {
+			runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"measurements": []any{}})
+			return
+		}
+		runaiclienttest.WriteJSON(w, http.StatusMultiStatus, map[string]any{
+			"measurements": []map[string]any{
+				{"type": "GPU_UTILIZATION", "values": []map[string]any{{"value": "0.5", "timestamp": "2026-05-17T15:00:00Z"}}},
+				{"type": "CPU_USAGE_CORES"},
+			},
+		})
+	})
+
+	end := time.Date(2026, 5, 17, 15, 0, 0, 0, time.UTC)
+	entry := podOutput{}
+	attachPodMeasurements(context.Background(), client, validUUID, validPodID, false, false, end.Add(-10*time.Minute), end, &entry)
+
+	require.NotNil(t, entry.Measurements)
+	require.Len(t, *entry.Measurements, 1)
+	assert.Equal(t, "GPU_UTILIZATION", (*entry.Measurements)[0].Type)
+	require.Len(t, entry.MetricWarnings, 1)
+	assert.Contains(t, entry.MetricWarnings[0], "resource metrics were partially retrieved")
+	assert.Contains(t, entry.MetricWarnings[0], "CPU_USAGE_CORES")
+}
+
+func TestGetWorkloadPodsRun_MaxPageUsesOneRecordLookahead(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		hasMore bool
+	}{
+		{name: "exactly 500 pods", hasMore: false},
+		{name: "more than 500 pods", hasMore: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client, mux := runaiclienttest.NewServer(t)
+			mux.HandleFunc("/api/v1/workloads/"+validUUID, func(w http.ResponseWriter, _ *http.Request) {
+				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+					"id": validUUID, "name": "t1", "type": "Training", "phase": "Running",
+					"projectName": "p1", "createdAt": "2026-05-17T15:00:00Z", "phaseUpdatedAt": "2026-05-17T15:00:00Z",
+				})
+			})
+
+			pod := map[string]any{
+				"name": "t1-pod", "id": validPodID, "workloadId": validUUID, "clusterId": "c-1",
+				"k8sPhase": "Running", "createdAt": "2026-05-17T15:00:00Z", "k8sPhaseUpdatedAt": "2026-05-17T15:00:00Z",
+				"updatedAt": "2026-05-17T15:00:00Z", "tenantId": 1, "containers": []any{},
+			}
+			page := make([]map[string]any, podsMaxLimit)
+			for i := range page {
+				page[i] = pod
+			}
+			requests := 0
+			mux.HandleFunc("/api/v1/workloads/"+validUUID+"/pods", func(w http.ResponseWriter, r *http.Request) {
+				requests++
+				switch r.URL.Query().Get("offset") {
+				case "0":
+					assert.Equal(t, "500", r.URL.Query().Get("limit"))
+					runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"pods": page, "next": int32(500)})
+				case "500":
+					assert.Equal(t, "1", r.URL.Query().Get("limit"))
+					lookahead := []map[string]any{}
+					if tc.hasMore {
+						lookahead = append(lookahead, pod)
+					}
+					runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"pods": lookahead})
+				default:
+					t.Fatalf("unexpected offset %q", r.URL.Query().Get("offset"))
+				}
+			})
+
+			out, err := getWorkloadPodsRun(context.Background(), client, getWorkloadPodsInput{WorkloadID: validUUID, Limit: podsMaxLimit})
+			require.NoError(t, err)
+			require.Len(t, out.Pods, int(podsMaxLimit))
+			assert.Equal(t, tc.hasMore, out.HasMore)
+			if tc.hasMore {
+				assert.Equal(t, podsMaxLimit, out.NextOffset)
+			} else {
+				assert.Zero(t, out.NextOffset)
+			}
+			assert.Equal(t, 2, requests)
+		})
+	}
 }

@@ -14,7 +14,7 @@ Over-quota resources are also assigned according to department and project ranks
 
 ### Pod Creation and Grouping
 
-When a workload is submitted, the submitting workload controller creates a single pod or multiple pods (for distributed training workloads or deployment based inference). When the Scheduler gets a submit request with the first pod, it creates a [pod group](concepts-and-principles.md#workloads-and-pod-groups) and a [sub group](concepts-and-principles.md#sub-groups), and allocates all the relevant building blocks of that workload. The next pods of the same workload are attached to the same pod group, either to the same sub-group or to another sub-group within the top pod-group.
+When a workload is submitted, the submitting workload controller creates a single pod or multiple pods (for distributed training workloads or deployment based inference). When the Scheduler gets a submit request with the first pod, it creates a [pod group](concepts-and-principles.md#workloads-and-pod-groups) and a [sub group](concepts-and-principles.md#multi-level-sub-groups), and allocates all the relevant building blocks of that workload. The next pods of the same workload are attached to the same pod group, either to the same sub-group or to another sub-group within the top pod-group.
 
 ### Queue Management
 
@@ -22,13 +22,13 @@ A workload, together with its associated pod group and sub-groups, is placed in 
 
 For each workload considered for scheduling, the Scheduler evaluates the state of the project queue and then the state of the department queue to determine whether the workload is eligible for scheduling, based on available resources within the context of the project, department, and node pool.
 
-If the sum of all project quotas exceeds the quota of their parent department, the Scheduler does not allow non-preemptible workloads to consume resources beyond the department’s quota.
+If the sum of all project quotas exceeds the quota of their parent department, the Scheduler does not allow non-preemptible workloads or the non-preemptible pods of semi-preemptible workloads to consume resources beyond the department’s quota.
 
 ### Resource Binding
 
 The next step in the scheduling process is resource binding. During this step, the Scheduler selects nodes for the pods, assigns each pod to a node (the bind operation), and binds additional pod resources such as storage, ingress, and other required components.
 
-If the pod group has a [gang scheduling](concepts-and-principles.md#gang-scheduling) or [multi-level gang scheduling rule](concepts-and-principles.md#multi-level-gang-scheduling) applied, the Scheduler either allocates and binds all pods together or places all of them in a pending state. If the latter occurs, the Scheduler retries scheduling the entire pod group together in the next scheduling cycle.
+If the pod group has a [gang scheduling](concepts-and-principles.md#gang-scheduling) or [multi-level gang scheduling rule](concepts-and-principles.md#multi-level-gang-scheduling) applied, the Scheduler either allocates and binds at least the min-members number of pods together or places all of them in a pending state. If the latter occurs, the Scheduler retries scheduling the gang together in the next scheduling cycle. Pods above the min-members count are not part of the gang and are scheduled when resources are available.
 
 During this process, the Scheduler updates the status of the pods and their associated pod group and sub-groups. Users can track the workload submission and scheduling process using either the CLI or the NVIDIA Run:ai UI. For more details on submitting and managing workloads, see [Workloads](../../../workloads-in-nvidia-run-ai/workloads.md).
 
@@ -38,7 +38,7 @@ If the Scheduler cannot find sufficient resources to schedule a workload (includ
 
 1. **Consolidation (bin packing)** - The Scheduler first tries to consolidate workloads into smaller number of nodes to make room for the currently scheduled workload.
 2. **Resource rebalancing across queues** - If consolidation does not succeed, the Scheduler attempts to [reclaim resources](concepts-and-principles.md#reclaim-of-resources-between-projects-and-departments) from other queues (projects) that are either over their deserved quota or over their calculated fairshare.
-3. **Preemption within the same queue** - If resources are still unavailable, the Scheduler tries to  preempt [lower priority preemptible workloads](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project) within the same queue (project).
+3. **Preemption within the same queue** - If resources are still unavailable, the Scheduler tries to  preempt lower priority preemptible workloads or the preemptible pods of lower priority semi-preemptible workloads (see [Preemption of Lower Priority Workloads Within a Project](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project)) within the same queue (project).
 
 ### When a Queue Receives Additional Resources
 
@@ -47,7 +47,7 @@ A [scheduling queue](concepts-and-principles.md#scheduling-queue) deserves more 
 1. The queue has workloads that request resources.
 2. The queue has not reached its deserved quota, or, it is already over its deserved quota but below its fairshare (= deserved quota + over quota share of the free resources).
 
-In this situation, the Scheduler attempts to rebalance resources across queues to provide the entitled queue with its deserved resources. If rebalancing does not resolve the resource shortage, the Scheduler tries to preempt [lower priority preemptible workloads](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project) within the same queue (project).
+In this situation, the Scheduler attempts to rebalance resources across queues to provide the entitled queue with its deserved resources. If rebalancing does not resolve the resource shortage, the Scheduler tries to preempt lower priority preemptible workloads or the preemptible pods of lower priority semi-preemptible workloads (see [Preemption of Lower Priority Workloads Within a Project](concepts-and-principles.md#preemption-of-lower-priority-workloads-within-a-project)) within the same queue (project).
 
 ### Scheduling Above Fairshare
 
@@ -60,7 +60,9 @@ For example, a cluster with 10 GPUs and two projects each with quota of 5 GPUs a
 
 ### Consolidation Action
 
-A consolidation action is applied when the Scheduler fails to find sufficient resources (nodes) for the workload currently being scheduled. Consolidation is a process in which the Scheduler evaluates whether re-scheduling other preemptible workloads can free enough resources to allow the current workload to be scheduled successfully.
+A consolidation action is applied when the Scheduler fails to find sufficient resources (nodes) for the workload currently being scheduled. Consolidation is a process in which the Scheduler evaluates whether re-scheduling other preemptible workloads or the preemptible pods of semi-preemptible workloads can free enough resources to allow the current workload to be scheduled successfully.
+
+Those preempted workloads or pods may be in-quota or over-quota.
 
 During consolidation, the Scheduler may preempt workloads from other queues (projects or departments). However, consolidation is performed only if all preempted workloads can be immediately re-scheduled and continue running. To ensure this, the Scheduler simulates different consolidation options in memory. Only if a simulation succeeds, meaning that all workloads, including the currently scheduled workload, can be successfully re-scheduled, does the Scheduler perform the actual consolidation operation.
 
@@ -72,29 +74,29 @@ Reclaim is an inter-project and inter-department resource balancing action that 
 
 This mode of operation means that a lower priority workload submitted in one project (e.g. training) can reclaim resources from a project that runs a higher priority workload (e.g. preemptive workspace) if fairness re-balancing is required.
 
-<Info>
+<Note>
 
 **Note**
 
-Only preemptible workloads can consume over-quota resources, as these workloads are subject to resource reclamation through preemption across projects and departments. The amount of over-quota resources that a project or department can receive depends on its over quota weight, or on its quota when the Over quota weight setting is disabled.
+Only preemptible workloads and the preemptible pods of semi-preemptible workloads can consume over-quota resources, as these workloads are subject to resource reclamation through preemption across projects and departments. The amount of over-quota resources that a project or department can receive depends on its over quota weight, or on its quota when the Over quota weight setting is disabled.
 
 When the Over quota weight setting is disabled, the weight of each project or department is derived directly from its assigned quota. In both cases, over-quota resources are distributed proportionally across scheduling queues based on their relative queue [weight](concepts-and-principles.md#over-quota-weight).
 
 _A scheduling queue is defined per project/node pool or department/node pool._
 
-</Info>
+</Note>
 
 ### Priority Preemption Within a Project
 
-[Higher priority workloads](concepts-and-principles.md#priority-and-preemption) may preempt lower priority preemptible workloads within the same project/node pool queue. For example, in a project that runs a training workload that uses the project within quota (for a certain node pool), a newly submitted workspace within the same project/node pool may stop (preempt) the training workload if there are not enough over quota resources for the project within that node pool to run both workloads (i.e. workspace using in-quota resources and training using over quota resources).
+[Higher priority workloads](concepts-and-principles.md#priority-and-preemption) may preempt lower priority preemptible workloads or the preemptible pods of lower priority semi-preemptible workloads within the same project/node pool queue. For example, in a project that runs a training workload that uses the project within quota (for a certain node pool), a newly submitted workspace within the same project/node pool may stop (preempt) the training workload if there are not enough over quota resources for the project within that node pool to run both workloads (that is, the workspace using in-quota resources and the training workload using over quota resources).
 
-<Info>
+<Note>
 
 **Note**
 
 Workload priority applies only within the same project and does not influence workloads across different projects, where fairness determines precedence.
 
-</Info>
+</Note>
 
 ## Quota, Over Quota, and Fairshare
 
@@ -117,15 +119,15 @@ For example, a workload whose queue is entitled to a certain amount of over-quot
 
 This method represents a short-term fairshare scoring approach. It enables departments and projects to receive a fast response when over-quota resources are required, but it may also result in frequent changes to the state of running over-quota workloads.
 
-Administrators can control the frequency of such changes by configuring a guaranteed min-runtime per node pool. This setting ensures that once a preemptible workload starts running, it effectively behaves as non-preemptible for the duration of the guaranteed min-runtime.
+Administrators can control the frequency of such changes by configuring a guaranteed min-runtime per node pool. This setting ensures that once a preemptible workload, or the preemptible pods of a semi-preemptible workload, start running, they effectively behave as non-preemptible for the duration of the guaranteed min-runtime.
 
-<Info>
+<Note>
 
 **Note**
 
 Setting a guaranteed min-runtime on a node pool that also serves high-priority or interactive/real-time workloads may introduce significant delays for those workloads when they need to run. As a result, such workloads may effectively lose their interactive or real-time characteristics and break their SLA.
 
-</Info>
+</Note>
 
 Below you can find a numerical example of how point-in-time fairshare scoring actually works.
 
@@ -153,11 +155,11 @@ The example below illustrates how fairshare scoring is calculated per project/no
 
       \[(3) / (2 + 3 + 1)] x (20) = (3/6) x 20 = 10 GPUs
   * **Fairshare** = deserved quota + over quota = 6 +10 = 16 GPUs. Similarly, fairshare is also calculated for CPU and CPU memory. The Scheduler can grant a project more resources than its fairshare if the Scheduler finds resources not required by other projects that may deserve those resources.
-* In Project 3, **fairshare** = deserved quota + over quota = 0 +3 = 3 GPUs. Project 3 has no guaranteed quota, but it still has a share of the excess resources in node pool A. The NVIDIA Run:ai Scheduler ensures that Project 3 receives its part of the unused resources for over quota, even if this results in reclaiming resources from other projects and preempting preemptible workloads.
+* In Project 3, **fairshare** = deserved quota + over quota = 0 +3 = 3 GPUs. Project 3 has no guaranteed quota, but it still has a share of the excess resources in node pool A. The NVIDIA Run:ai Scheduler ensures that Project 3 receives its part of the unused resources for over quota, even if this results in reclaiming resources from other projects and preempting preemptible workloads or the preemptible pods of semi-preemptible workloads.
 
 ## Fairshare Balancing
 
-The Scheduler constantly re-calculates the fairshare of each project and department per node pool, represented in the scheduler as queues, resulting in the re-balancing of resources between projects and between departments. This means that a preemptible workload that was granted resources to run in one scheduling cycle, can find itself preempted and go back to pending state while waiting for resources in the next cycle.
+The Scheduler constantly re-calculates the fairshare of each project and department per node pool, represented in the scheduler as queues, resulting in the re-balancing of resources between projects and between departments. This means that a preemptible workload, or the preemptible pods of a semi-preemptible workload, granted resources to run in one scheduling cycle can be preempted and go back to pending state while waiting for resources in the next cycle.
 
 A queue, representing a scheduler-managed object for each project or department per node pool, can be in one of 3 states:
 

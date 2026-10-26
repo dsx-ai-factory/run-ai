@@ -33,6 +33,12 @@ type AssetsToSync struct {
 	AssetsGenericSecret  *GenericSecretRecord  `gorm:"foreignKey:AssetId"`
 	AssetsDockerRegistry *DockerRegistryRecord `gorm:"foreignKey:AssetId"`
 	AssetsNgcApiKey      *NgcApiKeyRecord      `gorm:"foreignKey:AssetId"`
+
+	// AssetsSpec holds the row from the generic assets_spec table used by
+	// k8s-object asset kinds (resource claim templates today). Preloaded via
+	// TablesOfSyncedAssets so the k8s-objects sync endpoint sees the raw
+	// Kubernetes spec alongside the metadata.
+	AssetsSpec *AssetSpecRec `gorm:"foreignKey:AssetId"`
 }
 
 type EmptySpec struct{}
@@ -63,6 +69,32 @@ func (ats *AssetsToSync) ToDatasourceUpdate() api.DatasourceUpdate {
 	}
 
 	return result
+}
+
+// ToK8sObjectsUpdate converts the row into a wire-format update for the
+// k8s-objects sync endpoint. On delete the spec is left as the zero value —
+// the cluster agent identifies the object by name from meta and does not need
+// the full body to remove it (unlike PVC, whose claim name is not the asset
+// name and therefore has to be echoed back).
+func (ats *AssetsToSync) ToK8sObjectsUpdate() (api.K8sObjectsUpdate, *api.Error) {
+	isDeleted := ats.DeletedAt.Valid
+
+	result := api.K8sObjectsUpdate{
+		Meta:        ats.ToAssetMetaSync(),
+		UpdateCount: ats.UpdateCount,
+		IsDeleted:   convutils.Ref(isDeleted),
+	}
+
+	if isDeleted || ats.AssetsSpec == nil {
+		return result, nil
+	}
+
+	if err := FromJsonBMap(ats.AssetsSpec.Spec, &result.Spec); err != nil {
+		return api.K8sObjectsUpdate{}, api.NewError(http.StatusInternalServerError,
+			fmt.Sprintf("failed to decode k8s object spec of %s asset %s: %v", ats.Kind, ats.Id, err), err)
+	}
+
+	return result, nil
 }
 
 func (ats *AssetsToSync) ToCredentialsUpdate(ctx context.Context, tenantKeys *encryption.TenantEncryptionKeys) (*api.CredentialsUpdate, *api.Error) {
@@ -171,6 +203,10 @@ func (ats *AssetsToSync) SpecAsJsonBmap() (JsonBMapFromString, *api.Error) {
 		specAsJson, err = gojsonq.LoadJson(ats.AssetsGenericSecret.GenericSecretSpec)
 	} else if ats.AssetsNgcApiKey != nil {
 		specAsJson, err = gojsonq.LoadJson(ats.AssetsNgcApiKey.NgcApiKeySpec)
+	} else if ats.AssetsSpec != nil {
+		// k8s-object assets store their spec as raw JSON in assets_spec.
+		// Return the map as-is; no re-encoding needed.
+		return ats.AssetsSpec.Spec, nil
 	} else {
 		return nil, api.NewError(http.StatusInternalServerError, fmt.Sprintf("missing spec for %s asset %s", ats.Kind, ats.Id), nil)
 	}

@@ -102,6 +102,10 @@ var DatavolumeAdmin = models.Role{
 			Read:         true,
 		},
 		{
+			ResourceType: api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES,
+			Read:         true,
+		},
+		{
 			ResourceType: api.RESOURCETYPE_TEMPLATES,
 			Read:         true,
 		},

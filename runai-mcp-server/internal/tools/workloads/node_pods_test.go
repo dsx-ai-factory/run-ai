@@ -8,7 +8,9 @@ package workloads
 import (
 	"context"
 	"fmt"
+	"math"
 	"net/http"
+	"reflect"
 	"strings"
 	"sync/atomic"
 	"testing"
@@ -19,6 +21,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaiclient/runaiclienttest"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/runaimcp"
+	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/common"
 )
 
 const (
@@ -42,6 +45,12 @@ func TestGetNodePodsInput_Validate(t *testing.T) {
 		{"nodeName with comma rejected", getNodePodsInput{NodeName: "node-a,node-b"}, true},
 		{"valid nodeName, no cluster", getNodePodsInput{NodeName: nodeName}, false},
 		{"valid nodeName + valid cluster", getNodePodsInput{NodeName: nodeName, ClusterUUID: clusterAUUID}, false},
+		{"valid pagination", getNodePodsInput{NodeName: nodeName, Limit: 25, Offset: 50}, false},
+		{"negative limit", getNodePodsInput{NodeName: nodeName, Limit: -1}, true},
+		{"limit above maximum", getNodePodsInput{NodeName: nodeName, Limit: 201}, true},
+		{"negative offset", getNodePodsInput{NodeName: nodeName, Offset: -1}, true},
+		{"offset and limit overflow", getNodePodsInput{NodeName: nodeName, Limit: 2, Offset: math.MaxInt32 - 1}, true},
+		{"offset and limit at maximum", getNodePodsInput{NodeName: nodeName, Limit: 2, Offset: math.MaxInt32 - 2}, false},
 		{"example invalid cluster UUID abc", getNodePodsInput{NodeName: "runai-cluster-system-0-3", ClusterUUID: "abc"}, true},
 		{"invalid cluster UUID", getNodePodsInput{NodeName: nodeName, ClusterUUID: "not-a-uuid"}, true},
 	}
@@ -82,10 +91,14 @@ func nodePodFixture(name, podID, workloadID, workloadName, clusterID string) map
 func TestGetNodePodsRun_HappyPath_DerivesClusterFromPods(t *testing.T) {
 	client, mux := runaiclienttest.NewServer(t)
 
-	var gotPodFilter, gotPodLimit string
+	var gotPodFilter, gotPodLimit, gotPodOffset, gotPodCompleted, gotPodSortBy, gotPodSortOrder string
 	mux.HandleFunc("/api/v1/workloads/pods", func(w http.ResponseWriter, r *http.Request) {
 		gotPodFilter = r.URL.Query().Get("filterBy")
 		gotPodLimit = r.URL.Query().Get("limit")
+		gotPodOffset = r.URL.Query().Get("offset")
+		gotPodCompleted = r.URL.Query().Get("completed")
+		gotPodSortBy = r.URL.Query().Get("sortBy")
+		gotPodSortOrder = r.URL.Query().Get("sortOrder")
 		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
 			"pods": []map[string]any{
 				nodePodFixture("pod-b", nodePodID2, nodeWorkloadID2, "wl-b", clusterAUUID),
@@ -144,6 +157,10 @@ func TestGetNodePodsRun_HappyPath_DerivesClusterFromPods(t *testing.T) {
 
 	assert.Equal(t, "nodeName=="+nodeName, gotPodFilter, "pods are filtered by nodeName")
 	assert.Equal(t, "500", gotPodLimit, "pods are fetched with limit=500")
+	assert.Equal(t, "0", gotPodOffset, "the complete scan starts at offset=0")
+	assert.Equal(t, "false", gotPodCompleted, "completed pods are excluded")
+	assert.Equal(t, "name", gotPodSortBy)
+	assert.Equal(t, "asc", gotPodSortOrder)
 	assert.Equal(t, "name=="+nodeName+",clusterUuid=="+clusterAUUID, gotNodesFilter, "nodes are filtered server-side by name and cluster")
 	assert.Equal(t, "2", gotNodesLimit, "nodes are fetched with a tight limit since the filter narrows to one")
 
@@ -166,7 +183,8 @@ func TestGetNodePodsRun_HappyPath_DerivesClusterFromPods(t *testing.T) {
 	assert.Equal(t, "wl-b", out.Pods[1].WorkloadName, "upstream workloadName preserved when present")
 	assert.Equal(t, "Workspace", out.Pods[1].WorkloadType, "workloadType still populated by enrichment")
 
-	assert.Nil(t, out.Pods[0].Measurements, "measurements are never populated by this tool")
+	assert.False(t, out.HasMore)
+	assert.Zero(t, out.NextOffset)
 	assert.Equal(t, int32(2), enrichCalls.Load(), "one enrichment call per unique workload id")
 }
 
@@ -220,18 +238,22 @@ func TestGetNodePodsRun_InputClusterMatchesPods_Success(t *testing.T) {
 	require.Len(t, out.Pods, 1)
 }
 
-// Pods past the 10-pod cap must not feed the ambiguity check or enrichment — otherwise a
-// hidden cluster-B pod would hard-fail a result the LLM never sees.
-func TestGetNodePodsRun_AmbiguityIgnoresPodsBeyondCap(t *testing.T) {
+func TestGetNodePodsRun_ExplicitClusterUsesServerPagination(t *testing.T) {
 	client, mux := runaiclienttest.NewServer(t)
 
-	mux.HandleFunc("/api/v1/workloads/pods", func(w http.ResponseWriter, _ *http.Request) {
-		pods := make([]map[string]any, 0, nodePodsCap+1)
-		for i := 1; i <= nodePodsCap; i++ {
+	var podCalls atomic.Int32
+	mux.HandleFunc("/api/v1/workloads/pods", func(w http.ResponseWriter, r *http.Request) {
+		podCalls.Add(1)
+		assert.Equal(t, "20", r.URL.Query().Get("offset"))
+		assert.Equal(t, "6", r.URL.Query().Get("limit"), "one lookahead pod makes hasMore exact")
+		assert.Equal(t, "false", r.URL.Query().Get("completed"))
+		assert.Equal(t, "name", r.URL.Query().Get("sortBy"))
+		assert.Equal(t, "asc", r.URL.Query().Get("sortOrder"))
+		pods := make([]map[string]any, 0, 6)
+		for i := 21; i <= 26; i++ {
 			pods = append(pods, nodePodFixture(fmt.Sprintf("pod-%02d", i), validPodIDFor(i), nodeWorkloadID1, "wl", clusterAUUID))
 		}
-		pods = append(pods, nodePodFixture("pod-99", validPodIDFor(99), nodeWorkloadID2, "wl-b", clusterBUUID))
-		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"pods": pods})
+		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"pods": pods, "next": 26})
 	})
 	mux.HandleFunc("/api/v1/nodes", func(w http.ResponseWriter, _ *http.Request) {
 		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
@@ -246,15 +268,94 @@ func TestGetNodePodsRun_AmbiguityIgnoresPodsBeyondCap(t *testing.T) {
 			"projectName": "p1", "createdAt": "2026-05-17T15:00:00Z", "phaseUpdatedAt": "2026-05-17T15:00:00Z",
 		})
 	})
-	// Cluster-B and workload-2 endpoints intentionally NOT registered — the dropped pod must
-	// drive neither cluster resolution nor enrichment.
 
-	out, err := getNodePodsRun(context.Background(), client, getNodePodsInput{NodeName: nodeName})
-	require.NoError(t, err, "dropped cluster-B pod must not turn this into a multi-cluster error")
-	require.Len(t, out.Pods, nodePodsCap)
-	assert.Equal(t, "pod-01", out.Pods[0].Name)
-	assert.Equal(t, "pod-10", out.Pods[nodePodsCap-1].Name)
-	assert.Equal(t, "pool-default", out.NodePool, "cluster resolved from visible (cluster-A) pods")
+	out, err := getNodePodsRun(context.Background(), client, getNodePodsInput{
+		NodeName: nodeName, ClusterUUID: clusterAUUID, Limit: 5, Offset: 20,
+	})
+	require.NoError(t, err)
+	require.Len(t, out.Pods, 5)
+	assert.Equal(t, "pod-21", out.Pods[0].Name)
+	assert.Equal(t, "pod-25", out.Pods[4].Name)
+	assert.True(t, out.HasMore)
+	assert.Equal(t, int32(25), out.NextOffset)
+	assert.Equal(t, int32(1), podCalls.Load(), "an explicit cluster does not trigger a full-node scan")
+}
+
+func TestFetchNodePodsPage_PreservesServerTieBreakOrderAcrossPages(t *testing.T) {
+	client, mux := runaiclienttest.NewServer(t)
+
+	// ListPods orders this set by name ASC, then id DESC. The secondary order
+	// must be preserved while trimming the lookahead record; re-sorting each
+	// response by id ASC duplicates id 2 and drops id 4 across these two pages.
+	serverOrderedPods := []map[string]any{
+		nodePodFixture("same-name", validPodIDFor(4), nodeWorkloadID1, "wl", clusterAUUID),
+		nodePodFixture("same-name", validPodIDFor(3), nodeWorkloadID1, "wl", clusterAUUID),
+		nodePodFixture("same-name", validPodIDFor(2), nodeWorkloadID1, "wl", clusterAUUID),
+		nodePodFixture("same-name", validPodIDFor(1), nodeWorkloadID1, "wl", clusterAUUID),
+	}
+	mux.HandleFunc("/api/v1/workloads/pods", func(w http.ResponseWriter, r *http.Request) {
+		offset := 0
+		_, err := fmt.Sscanf(r.URL.Query().Get("offset"), "%d", &offset)
+		require.NoError(t, err)
+		limit := 0
+		_, err = fmt.Sscanf(r.URL.Query().Get("limit"), "%d", &limit)
+		require.NoError(t, err)
+		assert.Equal(t, "name", r.URL.Query().Get("sortBy"))
+		assert.Equal(t, "asc", r.URL.Query().Get("sortOrder"))
+
+		end := min(offset+limit, len(serverOrderedPods))
+		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"pods": serverOrderedPods[offset:end]})
+	})
+
+	first, hasMore, nextOffset, err := fetchNodePodsPage(context.Background(), client, nodeName, clusterAUUID, 0, 2)
+	require.NoError(t, err)
+	require.Len(t, first, 2)
+	assert.True(t, hasMore)
+	assert.Equal(t, int32(2), nextOffset)
+
+	second, hasMore, nextOffset, err := fetchNodePodsPage(context.Background(), client, nodeName, clusterAUUID, nextOffset, 2)
+	require.NoError(t, err)
+	require.Len(t, second, 2)
+	assert.False(t, hasMore)
+	assert.Zero(t, nextOffset)
+
+	assert.Equal(t, []string{
+		validPodIDFor(4),
+		validPodIDFor(3),
+		validPodIDFor(2),
+		validPodIDFor(1),
+	}, []string{first[0].Id, first[1].Id, second[0].Id, second[1].Id})
+}
+
+// Cluster resolution must inspect upstream pages beyond the API's 500-pod page
+// size, not only the 10 pods that the MCP response displays by default.
+func TestGetNodePodsRun_AmbiguityDetectedBeyondFirstUpstreamPage(t *testing.T) {
+	client, mux := runaiclienttest.NewServer(t)
+
+	var gotOffsets []string
+	mux.HandleFunc("/api/v1/workloads/pods", func(w http.ResponseWriter, r *http.Request) {
+		offset := r.URL.Query().Get("offset")
+		gotOffsets = append(gotOffsets, offset)
+		if offset == "0" {
+			pods := make([]map[string]any, 0, nodePodsListLimit)
+			for i := 1; i <= int(nodePodsListLimit); i++ {
+				pods = append(pods, nodePodFixture(fmt.Sprintf("pod-%03d", i), validPodIDFor(i), nodeWorkloadID1, "wl", clusterAUUID))
+			}
+			runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"pods": pods, "next": nodePodsListLimit})
+			return
+		}
+		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+			"pods": []map[string]any{
+				nodePodFixture("pod-501", validPodIDFor(501), nodeWorkloadID2, "wl-b", clusterBUUID),
+			},
+		})
+	})
+
+	_, err := getNodePodsRun(context.Background(), client, getNodePodsInput{NodeName: nodeName})
+	require.Error(t, err)
+	assert.ErrorIs(t, err, runaimcp.ErrValidation)
+	assert.Contains(t, err.Error(), "multiple clusters")
+	assert.Equal(t, []string{"0", "500"}, gotOffsets, "cluster resolution follows the upstream cursor")
 }
 
 func TestGetNodePodsRun_AmbiguousCluster_HardError(t *testing.T) {
@@ -295,9 +396,21 @@ func TestGetNodePodsRun_NoPodsAndNoCluster_HardError(t *testing.T) {
 	assert.False(t, calledNodes, "listNodes must not be called when there is no cluster to call against")
 }
 
-func TestGetNodePodsRun_IdleNode_WithClusterUUID_Success(t *testing.T) {
+func TestGetNodePodsRun_IdleNodeInRequestedCluster_IgnoresPodsInOtherCluster(t *testing.T) {
 	client, mux := runaiclienttest.NewServer(t)
-	mux.HandleFunc("/api/v1/workloads/pods", func(w http.ResponseWriter, _ *http.Request) {
+	wantPodFilter := "nodeName==" + nodeName + ",clusterId==" + clusterAUUID
+	var gotPodFilter string
+	mux.HandleFunc("/api/v1/workloads/pods", func(w http.ResponseWriter, r *http.Request) {
+		gotPodFilter = r.URL.Query().Get("filterBy")
+		if gotPodFilter != wantPodFilter {
+			// The node name has a pod in cluster B, but cluster A itself is idle.
+			runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+				"pods": []map[string]any{
+					nodePodFixture("pod-b", nodePodID2, nodeWorkloadID2, "wl-b", clusterBUUID),
+				},
+			})
+			return
+		}
 		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"pods": []any{}})
 	})
 	mux.HandleFunc("/api/v1/nodes", func(w http.ResponseWriter, _ *http.Request) {
@@ -310,6 +423,7 @@ func TestGetNodePodsRun_IdleNode_WithClusterUUID_Success(t *testing.T) {
 
 	out, err := getNodePodsRun(context.Background(), client, getNodePodsInput{NodeName: nodeName, ClusterUUID: clusterAUUID})
 	require.NoError(t, err, "idle node + valid cluster + node verified to exist must succeed")
+	assert.Equal(t, wantPodFilter, gotPodFilter)
 	assert.Equal(t, "pool-default", out.NodePool)
 	assert.Equal(t, "Ready", out.Status)
 	assert.Len(t, out.Pods, 0, "idle node has no pods")
@@ -468,10 +582,10 @@ func TestGetNodePodsRun_ModernGpuTypeSkipsLegacyDecode(t *testing.T) {
 	assert.Equal(t, float64(8), out.GpuInfo.GpuCount)
 }
 
-func TestGetNodePodsRun_PodCapAt10AfterSorting(t *testing.T) {
+func TestGetNodePodsRun_PaginatesAfterSorting(t *testing.T) {
 	client, mux := runaiclienttest.NewServer(t)
 	pods := make([]map[string]any, 0, 12)
-	// Insert in reverse-name order to prove the cap is applied AFTER sorting.
+	// Insert in reverse-name order to prove page boundaries are applied AFTER sorting.
 	for i := 12; i >= 1; i-- {
 		pods = append(pods, nodePodFixture(fmt.Sprintf("pod-%02d", i), validPodIDFor(i), nodeWorkloadID1, "wl", clusterAUUID))
 	}
@@ -495,9 +609,76 @@ func TestGetNodePodsRun_PodCapAt10AfterSorting(t *testing.T) {
 
 	out, err := getNodePodsRun(context.Background(), client, getNodePodsInput{NodeName: nodeName})
 	require.NoError(t, err)
-	require.Len(t, out.Pods, nodePodsCap, "pods are capped at 10 after sorting")
+	require.Len(t, out.Pods, int(nodePodsDefaultLimit), "the default page contains 10 pods")
 	assert.Equal(t, "pod-01", out.Pods[0].Name, "sorted ascending by name")
-	assert.Equal(t, "pod-10", out.Pods[nodePodsCap-1].Name, "tail of the capped slice is the 10th name")
+	assert.Equal(t, "pod-10", out.Pods[nodePodsDefaultLimit-1].Name, "tail of the first page is the 10th name")
+	assert.True(t, out.HasMore)
+	assert.Equal(t, nodePodsDefaultLimit, out.NextOffset)
+
+	next, err := getNodePodsRun(context.Background(), client, getNodePodsInput{
+		NodeName: nodeName,
+		Limit:    nodePodsDefaultLimit,
+		Offset:   out.NextOffset,
+	})
+	require.NoError(t, err)
+	require.Len(t, next.Pods, 2)
+	assert.Equal(t, "pod-11", next.Pods[0].Name)
+	assert.Equal(t, "pod-12", next.Pods[1].Name)
+	assert.False(t, next.HasMore)
+	assert.Zero(t, next.NextOffset)
+}
+
+func TestFetchAllNodePods_MaximumBoundary(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		moreThanMax bool
+	}{
+		{name: "exact maximum succeeds"},
+		{name: "more than maximum fails", moreThanMax: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			client, mux := runaiclienttest.NewServer(t)
+			var gotOffsets []string
+			mux.HandleFunc("/api/v1/workloads/pods", func(w http.ResponseWriter, r *http.Request) {
+				offset := r.URL.Query().Get("offset")
+				gotOffsets = append(gotOffsets, offset)
+				assert.Equal(t, "false", r.URL.Query().Get("completed"))
+				var offsetValue int
+				_, err := fmt.Sscanf(offset, "%d", &offsetValue)
+				require.NoError(t, err)
+				if offsetValue == int(common.MaxPaginatedResults) && !tc.moreThanMax {
+					runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"pods": []any{}})
+					return
+				}
+				pods := make([]map[string]any, 0, nodePodsListLimit)
+				for i := 1; i <= int(nodePodsListLimit); i++ {
+					podNumber := offsetValue + i
+					pods = append(pods, nodePodFixture(fmt.Sprintf("pod-%04d", podNumber), validPodIDFor(podNumber), nodeWorkloadID1, "wl", clusterAUUID))
+				}
+				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
+					"pods": pods,
+					"next": offsetValue + int(nodePodsListLimit),
+				})
+			})
+
+			pods, err := fetchAllNodePods(context.Background(), client, nodeName, "")
+			if tc.moreThanMax {
+				require.Error(t, err)
+				assert.ErrorIs(t, err, runaimcp.ErrUpstream)
+				assert.Contains(t, err.Error(), fmt.Sprintf("maximum supported %d pods", common.MaxPaginatedResults))
+				assert.Contains(t, err.Error(), "refusing to make an incomplete cluster decision")
+			} else {
+				require.NoError(t, err)
+				assert.Len(t, pods, int(common.MaxPaginatedResults))
+			}
+			assert.Equal(t, []string{"0", "500", "1000", "1500", "2000"}, gotOffsets)
+		})
+	}
+}
+
+func TestNodePodOutput_DoesNotExposeMeasurements(t *testing.T) {
+	_, found := reflect.TypeOf(nodePodOutput{}).FieldByName("Measurements")
+	assert.False(t, found, "get_node_pods must not advertise the shared measurements field")
 }
 
 func validPodIDFor(i int) string {

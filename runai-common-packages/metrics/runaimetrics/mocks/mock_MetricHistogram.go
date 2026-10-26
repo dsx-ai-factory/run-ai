@@ -17,10 +17,19 @@ func NewMockMetricHistogram(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockMetricHistogram {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockMetricHistogram{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -50,14 +59,20 @@ type MockMetricHistogram_Observe_Call struct {
 }
 
 // Observe is a helper method to define mock.On call
-//   - value
-func (_e *MockMetricHistogram_Expecter) Observe(value interface{}) *MockMetricHistogram_Observe_Call {
+//   - value float64
+func (_e *MockMetricHistogram_Expecter) Observe(value any) *MockMetricHistogram_Observe_Call {
 	return &MockMetricHistogram_Observe_Call{Call: _e.mock.On("Observe", value)}
 }
 
 func (_c *MockMetricHistogram_Observe_Call) Run(run func(value float64)) *MockMetricHistogram_Observe_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(float64))
+		var arg0 float64
+		if args[0] != nil {
+			arg0 = args[0].(float64)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

@@ -10,7 +10,7 @@ runai mpi submit [flags]
 
 ```
 # Submit a workload
-runai training mpi submit <workload-name> -p <project-name> -i runai.jfrog.io/demo/quickstart-demo
+runai training mpi submit <workload-name> -p <project-name> -i ubuntu
 
 # Submit a workload with arguments
 runai training mpi submit <workload-name> -p <project-name> -i ubuntu -- ls -la

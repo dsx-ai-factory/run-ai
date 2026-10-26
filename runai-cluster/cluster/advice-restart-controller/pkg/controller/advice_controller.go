@@ -10,7 +10,6 @@ import (
 	"fmt"
 	"time"
 
-	mapset "github.com/deckarep/golang-set/v2"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -39,12 +38,12 @@ import (
 const requeueDelay = 30 * time.Second
 
 // nonRestartablePhases are phases where restart should not be triggered
-var nonRestartablePhases = mapset.NewSet(
-	string(dromosv1alpha1.WorkloadRunnerPhaseSuspended),
-	string(dromosv1alpha1.WorkloadRunnerPhaseSuspending),
-	string(dromosv1alpha1.WorkloadRunnerPhaseCompleted),
-	string(dromosv1alpha1.WorkloadRunnerPhaseStopped),
-)
+var nonRestartablePhases = map[string]struct{}{
+	string(dromosv1alpha1.WorkloadRunnerPhaseSuspended):  {},
+	string(dromosv1alpha1.WorkloadRunnerPhaseSuspending): {},
+	string(dromosv1alpha1.WorkloadRunnerPhaseCompleted):  {},
+	string(dromosv1alpha1.WorkloadRunnerPhaseStopped):    {},
+}
 
 const phaseRestarting = string(dromosv1alpha1.WorkloadRunnerPhaseRestarting)
 
@@ -237,7 +236,7 @@ func (c *AdviceController) checkWorkloadEligibility(ctx context.Context, advice 
 		return &ctrl.Result{RequeueAfter: requeueDelay}, nil
 	}
 
-	if nonRestartablePhases.Contains(phase) {
+	if _, ok := nonRestartablePhases[phase]; ok {
 		logger.Info("ignoring advice, workload in non-restartable state",
 			"workload", topOwner.GetName(), "phase", phase)
 		c.emitAdviceIgnoredNonRestartablePhaseEvent(advice, topOwner, phase)

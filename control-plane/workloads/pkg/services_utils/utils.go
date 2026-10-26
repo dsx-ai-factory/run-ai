@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"strconv"
 
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	authClientApi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
@@ -34,17 +34,25 @@ type OrgUnitKey struct {
 // 1. the user is the owner of the workload
 // 2. the user has permissions for the ancestor scope (e.g. the department that contains the given project)
 func CheckWorkloadOwnershipProtection(ctx context.Context, clusterId string, departmentId string, submittedBy string) *api.Error {
-	clusterChecker := checker.NewClusterCapabilitiesChecker(clusterId)
-	clusterConfig, err := clusterChecker.ClusterConfiguration(ctx)
+	clusterConfig, err := checker.NewClusterCapabilitiesChecker(clusterId).ClusterConfiguration(ctx)
 	if err != nil {
 		return api.NewError(http.StatusServiceUnavailable, err.Error(), nil)
 	}
 
+	return CheckWorkloadOwnershipProtectionWithClusterConfig(ctx, clusterConfig, clusterId, departmentId, submittedBy)
+}
+
+// CheckWorkloadOwnershipProtectionWithClusterConfig is CheckWorkloadOwnershipProtection with the cluster configuration
+// already fetched. Reading it is a round trip to the shared cache, so callers that check many workloads fetch it once
+// per cluster instead of once per workload.
+func CheckWorkloadOwnershipProtectionWithClusterConfig(ctx context.Context, clusterConfig *checker.ClusterConfiguration,
+	clusterId string, departmentId string, submittedBy string) *api.Error {
 	// if ownership protection is disabled or the user is the owner of the workload then leave
 	if (!clusterConfig.WorkloadOwnershipProtection) || (submittedBy == *runaictx.GetString(ctx, runaictx.CfSubjectID)) {
 		return nil
 	}
 
+	clusterChecker := checker.NewClusterCapabilitiesChecker(clusterId)
 	clusterSupportsNewOwnershipProtection, err := clusterChecker.ValidateClusterCapability(ctx, checker.MinVersionOfNewWorkloadOwnershipProtection)
 	if err != nil {
 		return api.NewError(http.StatusInternalServerError, err.Error(), nil)

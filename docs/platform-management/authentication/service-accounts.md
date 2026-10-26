@@ -1,16 +1,16 @@
 # Service Accounts (formerly applications)
 
-Service accounts are used for API integrations with NVIDIA Run:ai. A service account contains a client ID and a client secret. With the client credentials, you can obtain an access token as detailed in [API authentication](https://run-ai-docs.nvidia.com/api/2.26/getting-started/how-to-authenticate-to-the-api) and use it within subsequent API calls.
+Service accounts are used for API integrations with NVIDIA Run:ai. A service account contains a client ID and a client secret. With the client credentials, you can obtain an access token as detailed in [API authentication](../../rest-api/how-to-authenticate-to-the-api.md) and use it within subsequent API calls.
 
 Service accounts are assigned with [access rules ](accessrules.md)to manage permissions. For example, service account **ci-pipeline-prod** is assigned with a **Researcher** role in **Cluster: A**.
 
-<Info>
+<Note>
 
 **Note**
 
 You can also create your own access keys for API integrations with NVIDIA Run:ai. See [User access keys](../../settings/user-settings/user-access-keys.md) for more details.
 
-</Info>
+</Note>
 
 ## Service Accounts Table
 
@@ -55,13 +55,13 @@ To create a service account:
    * Click **SAVE RULE**
    * Click **CLOSE**
 
-<Info>
+<Note>
 
 **Note**
 
 The client secret is visible only at the time of creation. It cannot be recovered but can be regenerated.
 
-</Info>
+</Note>
 
 ## Adding an Access Rule to a Service Account
 
@@ -111,4 +111,4 @@ Regenerating a client secret revokes the previous one.
 
 ## Using API
 
-Go to the [Service accounts](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/service-accounts), [Access rules](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/access-rules) API reference to view the available actions.
+Go to the [Service accounts](api:main-api:GET/api/v1/service-accounts), [Access rules](api:main-api:GET/api/v1/authorization/access-rules) API reference to view the available actions.

@@ -389,6 +389,25 @@ func indexOfFirstItemInList[T any](list []T, item T) int {
 	return -1
 }
 
+// GetExternalWorkloadOfWorkloadRunner finds the ExternalWorkload of a runner.
+func GetExternalWorkloadOfWorkloadRunner(ctx context.Context, runnerUID string, namespace string,
+	cachedClient client.Client,
+) (*v1alpha1.ExternalWorkload, error) {
+	externalWorkloads := &v1alpha1.ExternalWorkloadList{}
+	err := cachedClient.List(ctx, externalWorkloads,
+		client.InNamespace(namespace),
+		client.MatchingLabels{clustercommonconstants.WorkloadRunnerUidLabel: runnerUID})
+	if err != nil {
+		return nil, err
+	}
+
+	if len(externalWorkloads.Items) == 0 {
+		return nil, errors.NewNotFound(v1alpha1.Resource("externalworkload"), "")
+	}
+
+	return &externalWorkloads.Items[0], nil
+}
+
 func GetExternalWorkloadOfObject(ctx context.Context, objectId string, namespace string, cachedClient client.Client) (*v1alpha1.ExternalWorkload, error) {
 	externalWorkloadByOriginalFieldSelector :=
 		fields.OneTermEqualSelector(constants.ExternalWorkloadByOriginalUIDIndexerName, objectId)

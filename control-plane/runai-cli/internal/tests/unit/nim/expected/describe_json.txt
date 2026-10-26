@@ -12,6 +12,7 @@
     "submittedBy": "test@example.com",
     "priority": "very-high (150)",
     "category": "Deploy",
+    "preemptibility": "non-preemptible",
     "environmentVariables": {
       "MODEL_NAME": "llama-2-7b",
       "NIM_MODE": "inference"
@@ -57,7 +58,7 @@
       "name": "NIMService",
       "toolType": "NIMService",
       "connectionType": "ExternalUrl",
-      "url": "https://aviados-dev.runailabs.com/test-nim/my-nim-service",
+      "url": "https://aviados-dev.example.com/test-nim/my-nim-service",
       "port": 8080
     }
   ],

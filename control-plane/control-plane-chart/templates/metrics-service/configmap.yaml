@@ -130,10 +130,10 @@ data:
 
 
       runai_in_quota_gpu_hours_per_cluster:
-        cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_cluster{FILTERS}) by (clusterId) - clamp_min(sum(runai_allocated_gpu_count_per_cluster{FILTERS}) by (clusterId) - sum(runai_deserved_gpu_count_per_project{FILTERS}) by (clusterId),0))[RANGE:30s]) / 120
+        cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId) - sum(clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) sum(runai_deserved_gpu_count_per_project{project!="", FILTERS} >= 0) by (clusterId, department, project), 0)) by (clusterId))[RANGE:30s]) / 120
         queries:
-            2.24.0: sum(sum_over_time(runai_allocated_gpu_count_per_cluster:hourly{FILTERS}[RANGE]) - clamp_min((sum_over_time(runai_allocated_gpu_count_per_cluster:hourly{FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{FILTERS}[RANGE])) by(clusterId)), 0)) / 3600
-            2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_cluster{FILTERS}) by (clusterId) - clamp_min(sum(runai_allocated_gpu_count_per_cluster{FILTERS}) by (clusterId) - sum(runai_deserved_gpu_count_per_project{FILTERS}) by (clusterId),0))[RANGE:30s]) / 120
+            2.24.0: (sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE])) by (clusterId) - sum(clamp_min(sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE])) by (clusterId, department, project) - on(clusterId, department, project) sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE]) >= 0) by (clusterId, department, project), 0)) by (clusterId)) / 3600
+            2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId) - sum(clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) sum(runai_deserved_gpu_count_per_project{project!="", FILTERS} >= 0) by (clusterId, department, project), 0)) by (clusterId))[RANGE:30s]) / 120
       runai_in_quota_gpu_hours_per_nodepool:
         cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_nodepool{FILTERS}) by (clusterId, nodepool) - clamp_min(sum(runai_allocated_gpu_count_per_nodepool{FILTERS}) by (clusterId, nodepool) - sum(runai_deserved_gpu_count_per_queue{FILTERS} > 0) by (clusterId, nodepool),0))[RANGE:30s]) / 120
         queries:
@@ -145,17 +145,17 @@ data:
             2.24.0: sum(sum_over_time(runai_allocated_gpu_count_per_department:hourly{FILTERS}[RANGE]) - clamp_min((sum_over_time(runai_allocated_gpu_count_per_department:hourly{FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department)), 0)) by (clusterId, department) / 3600
             2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_department{FILTERS}) by (clusterId, department) - clamp_min(sum(runai_allocated_gpu_count_per_department{FILTERS}) by (clusterId, department) - sum(runai_deserved_gpu_count_per_department{FILTERS}) by (clusterId, department),0))[RANGE:30s]) / 120
       runai_in_quota_gpu_hours_per_project:
-        cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - sum(runai_deserved_gpu_count_per_project{FILTERS}) by (clusterId, department, project),0))[RANGE:30s]) / 120
+        cross_version_query: sum_over_time((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) sum(runai_deserved_gpu_count_per_project{project!="", FILTERS} >= 0) by (clusterId, department, project), 0))[RANGE:30s]) / 120
         queries:
-            2.24.0: sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE]) - clamp_min((sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project)), 0)) by (clusterId, department, project) / 3600
-            2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - sum(runai_deserved_gpu_count_per_project{FILTERS}) by (clusterId, department, project),0))[RANGE:30s]) / 120
+            2.24.0: (sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE])) by (clusterId, department, project) - on(clusterId, department, project) clamp_min(sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE])) by (clusterId, department, project) - on(clusterId, department, project) sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE]) >= 0) by (clusterId, department, project), 0)) / 3600
+            2.18.0: sum_over_time((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) sum(runai_deserved_gpu_count_per_project{project!="", FILTERS} >= 0) by (clusterId, department, project), 0))[RANGE:30s]) / 120
 
 
       runai_over_quota_gpu_hours_per_cluster:
-        cross_version_query: sum_over_time(clamp_min(runai_allocated_gpu_count_per_cluster{FILTERS} - sum by (clusterId)(runai_deserved_gpu_count_per_department{FILTERS}), 0)[RANGE:30s]) / 120
+        cross_version_query: sum_over_time((sum(clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) sum(runai_deserved_gpu_count_per_project{project!="", FILTERS} >= 0) by (clusterId, department, project), 0)) by (clusterId))[RANGE:30s]) / 120
         queries:
-            2.24.0: sum(clamp_min((sum_over_time(runai_allocated_gpu_count_per_cluster:hourly{FILTERS}[RANGE]) - sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{FILTERS}[RANGE])) by(clusterId)), 0)) / 3600
-            2.18.0: sum_over_time(clamp_min(runai_allocated_gpu_count_per_cluster{FILTERS} - sum by (clusterId)(runai_deserved_gpu_count_per_department{FILTERS}), 0)[RANGE:30s]) / 120
+            2.24.0: sum(clamp_min(sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE])) by (clusterId, department, project) - on(clusterId, department, project) sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE]) >= 0) by (clusterId, department, project), 0)) by (clusterId) / 3600
+            2.18.0: sum_over_time((sum(clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) sum(runai_deserved_gpu_count_per_project{project!="", FILTERS} >= 0) by (clusterId, department, project), 0)) by (clusterId))[RANGE:30s]) / 120
       runai_over_quota_gpu_hours_per_nodepool:
         cross_version_query: sum_over_time(clamp_min(sum by (clusterId, nodepool)(runai_allocated_gpu_count_per_nodepool{FILTERS}) - sum by (clusterId, nodepool)(runai_deserved_gpu_count_per_queue{project!="",FILTERS} > -1),0)[RANGE:30s]) / 120
         queries:
@@ -167,10 +167,10 @@ data:
             2.24.0: sum(clamp_min((sum(sum_over_time(runai_allocated_gpu_count_per_department:hourly{FILTERS}[RANGE])) by (clusterId, department) - sum(sum_over_time(runai_deserved_gpu_count_per_department:hourly{FILTERS}[RANGE]) > 0) by (clusterId, department)), 0)) by (clusterId, department) / 3600
             2.18.0: sum_over_time((sum by (department)(runai_allocated_gpu_count_per_department{FILTERS})-clamp_min(sum by (department)(runai_allocated_gpu_count_per_department{FILTERS})-sum by (department)(runai_deserved_gpu_count_per_department > 0),0))[RANGE:30s]) / 120
       runai_over_quota_gpu_hours_per_project:
-        cross_version_query: sum_over_time(sum(((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - sum(runai_deserved_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project)) > 0)) by (clusterId, department, project)[RANGE:30s]) / 120
+        cross_version_query: sum_over_time((clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) sum(runai_deserved_gpu_count_per_project{project!="", FILTERS} >= 0) by (clusterId, department, project), 0))[RANGE:30s]) / 120
         queries:
-            2.24.0: sum(clamp_min((sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{FILTERS}[RANGE])) by (clusterId, department, project) - sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE])) by (clusterId, department, project)), 0)) by (clusterId, department, project) / 3600
-            2.18.0: sum_over_time(sum(((sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - sum(runai_deserved_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project)) > 0)) by (clusterId, department, project)[RANGE:30s]) / 120
+            2.24.0: clamp_min(sum(sum_over_time(runai_allocated_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE])) by (clusterId, department, project) - on(clusterId, department, project) sum(sum_over_time(runai_deserved_gpu_count_per_project:hourly{project!="", FILTERS}[RANGE]) >= 0) by (clusterId, department, project), 0) / 3600
+            2.18.0: sum_over_time((clamp_min(sum(runai_allocated_gpu_count_per_project{project!="", FILTERS}) by (clusterId, department, project) - on(clusterId, department, project) sum(runai_deserved_gpu_count_per_project{project!="", FILTERS} >= 0) by (clusterId, department, project), 0))[RANGE:30s]) / 120
 
       runai_departments_gpu_quota_per_cluster:
         cross_version_query: min(runai_deserved_gpu_count_per_department{FILTERS}<0) by(clusterId) or on(clusterId) sum(runai_deserved_gpu_count_per_department{FILTERS}>=0) by(clusterId)
@@ -278,6 +278,10 @@ data:
         queries:
             2.18.0: avg(runai_wait_time_seconds_per_workload{FILTERS}) by(clusterId)
             2.9.0: avg(runai_pod_group_total_wait_time{FILTERS}) by(clusterId)
+      runai_preempted_pods_count_per_cluster:
+        cross_version_query: sum by (clusterId) (round(increase(runai_total_preemption_attempts{FILTERS}[RANGE])))
+        queries:
+            3.0.0: sum by (clusterId) (round(increase(runai_total_preemption_attempts{FILTERS}[RANGE])))
       runai_gpu_utilization_per_nodepool:
         cross_version_query: runai_gpu_utilization_per_nodepool{FILTERS}
         queries:
@@ -774,7 +778,7 @@ data:
         queries:
             3.0.0: label_replace(histogram_quantile(0.50, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "50", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.95, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "95", "ignored_src_label", ".*") or label_replace(histogram_quantile(0.99, sum by (le, workload_id) (increase(runai_vllm_inter_token_latency_seconds_bucket_per_pod{FILTERS}[5m]))), "quantile_label", "99", "ignored_src_label", ".*")
       runai_pod_count_per_workload:
-        cross_version_query: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1) 
+        cross_version_query: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1)
         queries:
             2.16.0: count by (workload_id) (runai_pod_phase_with_info{phase=~"Running|Pending",detailed_status!="Terminating",FILTER::workload_id::FILTER} == 1)
       runai_running_pod_count_per_workload:
@@ -875,9 +879,9 @@ data:
         queries:
             2.11.0: avg(runai_gpu_utilization_per_node{FILTERS})
       runai_cpu_utilization_per_nodepools:
-        cross_version_query: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100 
+        cross_version_query: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100
         queries:
-            2.16.0: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100 
+            2.16.0: avg(runai_cpu_utilization_per_nodepool{FILTERS}) / 100
       runai_memory_utilization_per_nodepools:
         cross_version_query: avg(runai_memory_utilization_per_nodepool{FILTERS}) / 100
         queries:
@@ -1244,4 +1248,12 @@ data:
         cross_version_query: sum(runai_used_memory_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
         queries:
           2.25.0: sum(runai_used_memory_bytes_per_pod{FILTER::clusterId::FILTER} * on(pod_uuid) group_left(element_id) runai_pod_elements{FILTERS}) by (element_id, clusterId)
+      runai_component_availability:
+        cross_version_query: sum by (clusterId, container) (sum_over_time(kube_pod_container_status_ready{FILTERS}[RANGE])) / sum by (clusterId, container) (count_over_time(kube_pod_container_status_ready{FILTERS}[RANGE]))
+        queries:
+          2.25.0: sum by (clusterId, container) (sum_over_time(kube_pod_container_status_ready{FILTERS}[RANGE])) / sum by (clusterId, container) (count_over_time(kube_pod_container_status_ready{FILTERS}[RANGE]))
+      runai_component_restarts:
+        cross_version_query: round(sum by (clusterId, container) (increase(kube_pod_container_status_restarts_total{FILTERS}[RANGE])))
+        queries:
+          2.25.0: round(sum by (clusterId, container) (increase(kube_pod_container_status_restarts_total{FILTERS}[RANGE])))
   {{- end }}

@@ -16,13 +16,13 @@ The Node pools table can be found under **Resources** in the NVIDIA Run:ai platf
 
 The Node pools table lists all the node pools defined in the NVIDIA Run:ai platform and allows you to manage them.
 
-<Info>
+<Note>
 
 **Note**
 
 By default, the NVIDIA Run:ai platform includes a single node pool named ‘default’. When no other node pool is defined, all existing and new nodes are associated with the ‘default’ node pool. When deleting a node pool, if no other node pool matches any of the nodes’ labels, the node will be included in the default node pool.
 
-</Info>
+</Note>
 
 <figure><img src="../../../assets/nodepools-new.png" alt=""/><figcaption></figcaption></figure>
 
@@ -31,7 +31,7 @@ The Node pools table consists of the following columns:
 | Column                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Node pool                       | The node pool name, set by the administrator during its creation (the node pool name cannot be changed after its creation).                                                                                                                                                                                                                                                                                                                                                                         |
-| Status                          | <p>Node pool status: Creating, Updating, Empty, Ready, Unschedulable, Deleting, Deleted:</p><ul><li>Empty - No nodes are currently included in that node pool.</li><li>Ready - The Scheduler can use this node pool to schedule workloads.</li><li>Unschedulable - The Scheduler cannot use this node pool to schedule workloads.</li></ul><p>The status also includes a status message that provides more details.</p>                                                                             |
+| Status                          | <p>Node pool status: Creating, Updating, Empty, Ready, Unschedulable, Missing Prerequisites, Deleting, Deleted:</p><ul><li>Empty - No nodes are currently included in that node pool.</li><li>Ready - The Scheduler can use this node pool to schedule workloads.</li><li>Unschedulable - The Scheduler cannot use this node pool to schedule workloads.</li><li>Missing Prerequisites - The node pool has [NUMA-aware scheduling](numa-aware-scheduling.md) enabled, and one or more of its nodes are missing a prerequisite for it: the node's NodeResourceTopology data is missing or invalid, or its Topology Manager policy is set to `none`.</li></ul><p>The status also includes a status message that provides more details.</p>                                                                             |
 | <p>Label key<br/>Label value</p> | The node pool controller will use this node-label key-value pair to match nodes into this node pool.                                                                                                                                                                                                                                                                                                                                                                                                |
 | Node(s)                         | List of nodes included in this node pool. Click the field to view details (the details are in the [Nodes](nodes.md) article).                                                                                                                                                                                                                                                                                                                                                                       |
 | Network topology                | The network topology associated with this node pool                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
@@ -45,7 +45,6 @@ The Node pools table consists of the following columns:
 | Total GPU devices               | The total number of GPU devices installed into nodes included in this node pool. For example, a node pool that includes 12 nodes each with 8 GPU devices would show a total number of 96 GPU devices.                                                                                                                                                                                                                                                                                               |
 | Total GPU memory                | The total amount of GPU memory included in this node pool. The total amount of GPU memory installed in nodes included in this node pool. For example, a node pool that includes 12 nodes, each with 8 GPU devices, and each device with 80 GB of memory would show a total memory amount of 7.68 TB.                                                                                                                                                                                                |
 | Allocated GPUs                  | The total allocation of GPU devices in units of GPUs (decimal number). For example, if 3 GPUs are 50% allocated, the field prints out the value 1.50. This value represents the portion of GPU memory consumed by all running pods using this node pool. ‘Allocated GPUs’ can be larger than ‘Projects’ GPU quota’ if over quota is used by workloads, but not larger than GPU devices.                                                                                                             |
-| GPU resource optimization ratio | Shows the Node Level Scheduler mode                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | Total CPU (Cores)               | The number of CPU cores installed on nodes included in this node                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | Total CPU memory                | The total amount of CPU memory installed on nodes using this node pool                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | Allocated CPU (Cores)           | The total allocation of CPU compute in units of Cores (decimal number). This value represents the amount of CPU cores consumed by all running pods using this node pool. ‘Allocated CPUs’ can be larger than ‘Projects’ GPU quota’ if over quota is used by workloads, but not larger than CPUs (Cores).                                                                                                                                                                                            |
@@ -58,13 +57,13 @@ The Node pools table consists of the following columns:
 
 Click one of the values in the Workload(s) column, to view the list of workloads and their parameters.
 
-<Info>
+<Note>
 
 **Note**
 
 This column is only viewable if your role in the NVIDIA Run:ai platform gives you read access to workloads, even if you are allowed to view workloads, you can only view the workloads within your allowed scope. This means, there might be more pods running on this node than appear in the list your are viewing.
 
-</Info>
+</Note>
 
 | Column                        | Description                                                                                                                                                                                |
 | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -117,7 +116,7 @@ To create a new node pool:
    * A node pool is defined by a single key-value pair. You must not use different labels that are set on the same node by different node pools, this situation may lead to unexpected results.
 4. Define **scheduling** configurations:
    * Set the **minimum guaranteed runtime**. The minimum guaranteed runtime is the time that a workload will run before it can be preempted by a higher priority workload. If the workload runs for less than the time you set, it will not be preempted. You can set the value in days, hours, minutes, and seconds. Default is 0.
-   *   **Allow time-based fairshare** - When enabled, the Scheduler adjusts fairshare scores based on each project’s weight and historical resource usage. Historical usage data is not persisted by default. When disabled, the Scheduler uses the default fairshare, where scheduling fairness is based on the project’s current weight and resource usage. For more details, see [Time-based fairshare](../../runai-scheduler/scheduling/concepts-and-principles.md#time-based-fairshare). To persist historical usage data across restarts, enable persistent data at the cluster level. For details, see [Advanced cluster configurations](../../../installation-and-configuration/post-installation-configuration/cluster-config.md#time-based-fairshare).
+   *   **Allow time-based fairshare** - When enabled, the Scheduler adjusts fairshare scores based on each project’s weight and historical resource usage. Historical usage data is not persisted by default. When disabled, the Scheduler uses the default fairshare, where scheduling fairness is based on the project’s current weight and resource usage. For more details, see [Time-based fairshare](../../runai-scheduler/scheduling/concepts-and-principles.md#time-based-fairshare). To persist historical usage data across restarts, enable persistent data at the cluster level. For details, see [Advanced cluster configurations](../../../installation-and-configuration/configuration/cluster-config.md#time-based-fairshare).
 
        * **Historical usage weight** - Sets the weight of historical resource usage in the fairshare calculation. Default is 1.0:
          * **0.0** - Historical usage data is ignored; fairshare is based entirely on current weight.
@@ -126,7 +125,7 @@ To create a new node pool:
          * **Greater than 1.0** - Historical usage has a greater effect on fairshare, making it the dominant factor in the fairshare calculation.
        * **Historical usage window** - Sets the duration of the sliding time window used to calculate historical resource usage. Default is 7 days. Only usage within this window is considered; anything outside the window is no longer counted.
 
-       Administrators can customize additional time-based fairshare configuration parameters at the node pool level using the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API.
+       Administrators can customize additional time-based fairshare configuration parameters at the node pool level using the [Node pools](api:main-api:GET/api/v1/node-pools) API.
    * **NUMA-aware scheduling** - When enabled, the Scheduler places workloads so that GPU, CPU, and CPU memory are allocated within the same NUMA node where possible, minimizing cross-NUMA fragmentation and improving performance. There are cluster prerequisites for enabling this feature. When disabled, the Scheduler places workloads using aggregate node capacity only, without considering NUMA topology. See [Configuring NUMA-Aware Scheduling](../../../platform-management/aiinitiatives/resources/numa-aware-scheduling.md) for more details.
    * Configure the **GPU pods** placement strategy. GPU workloads are workloads that request both GPU and CPU resources.
      * Set the **node placement strategy** - Determines how workloads are distributed across nodes in the node pool:
@@ -205,14 +204,24 @@ Refer to the provider-specific documentation below for guidance on how to config
 2. Click **DELETE**
 3. On the dialog, click **DELETE** to confirm the deletion
 
-<Info>
+<Note>
 
 **Note**
 
 The default node pool cannot be deleted. When deleting a node pool, if no other node pool matches any of the nodes’ labels, the node will be included in the default node pool.
 
-</Info>
+</Note>
 
 ## Using API
 
-To view the available actions, go to the [Node pools](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodepools) API reference.
+To view the available actions, go to the [Node pools](api:main-api:GET/api/v1/node-pools) API reference.
+
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes [Cluster and Infrastructure](../../../agents/tools-reference.md#cluster-and-infrastructure) tools to manage node pools via natural language:
+
+* `list_node_pools` - list a cluster's node pools, their default status, lifecycle phase, and network topology
+* `manage_node_pool` - create, update, or delete a node pool
+
+See [AI Agents](../../../agents/overview.md) for setup.

@@ -29,7 +29,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/helper/validators"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/progressbar/spinner"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	commWorkload "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/completion/workload"
 

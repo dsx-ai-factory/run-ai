@@ -42,6 +42,7 @@ var handlerInitFuncs = []handlers.ResourceHandlerInitFunc{
 	handlers.NewDistributedInferenceWorkloadsHandler,
 	handlers.NewCredentialAssetsHandler,
 	handlers.NewDatasourceAssetsHandler,
+	handlers.NewK8sObjectsHandler,
 	handlers.NewNetworkTopologiesHandler,
 	handlers.NewWorkloadsV2Handler,
 	handlers.NewApplicationsHandler,

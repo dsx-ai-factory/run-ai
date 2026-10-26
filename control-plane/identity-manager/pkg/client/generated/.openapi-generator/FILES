@@ -25,8 +25,6 @@ docs/AccessKeyPostResponse.md
 docs/AccessKeys.md
 docs/AccessKeysAPI.md
 docs/AccessKeysAdministration.md
-docs/AppTokenRequest.md
-docs/AppTokenResponse.md
 docs/AuthConfiguration.md
 docs/BulkUserCreationRequest.md
 docs/BulkUserCreationResponse.md
@@ -123,8 +121,6 @@ model_access_key_creation_request.go
 model_access_key_post_response.go
 model_access_keys.go
 model_access_keys_administration.go
-model_app_token_request.go
-model_app_token_response.go
 model_auth_configuration.go
 model_bulk_user_creation_request.go
 model_bulk_user_creation_response.go

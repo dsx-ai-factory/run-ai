@@ -23,3 +23,12 @@ func TestValidateNoCommas(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "clusterId", "message names the offending field")
 }
+
+func TestValidateFilterValueRejectsFilterSeparators(t *testing.T) {
+	for _, value := range []string{"a,b", "a==b", "a!=b", "a<=b", "a>=b", "a=@b", "a!@b", "a=^b", "a=$b", "a||b"} {
+		t.Run(value, func(t *testing.T) {
+			assert.Error(t, ValidateFilterValue("name", value))
+		})
+	}
+	assert.NoError(t, ValidateFilterValue("name", "shared-cluster"))
+}

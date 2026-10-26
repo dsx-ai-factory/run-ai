@@ -21,10 +21,10 @@
   <text x="286" y="58" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Kubernetes Cluster 1</text>
 
   <!-- Control Plane box inside Cluster 1 -->
-  <rect x="204" y="72" width="272" height="84" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
-  <rect x="204" y="72" width="5" height="84" rx="4" fill="#3B82F6"/>
-  <text x="342" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#1E3A5F">NVIDIA Run:ai</text>
-  <text x="342" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="#1E3A5F">Control Plane</text>
+  <rect x="204" y="72" width="272" height="84" rx="8" fill="#B2D380" stroke="#8BB85B" stroke-width="1.5"/>
+  <rect x="204" y="72" width="5" height="84" rx="4" fill="#8BB85B"/>
+  <text x="342" y="107" text-anchor="middle" font-size="14" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai</text>
+  <text x="342" y="125" text-anchor="middle" font-size="14" font-weight="700" fill="#000000" fill-opacity="0.87">Control Plane</text>
   <text x="342" y="145" text-anchor="middle" font-size="11" fill="#64748B">Manages all connected clusters</text>
 
   <!-- ── TRUNK LINE down from Cluster 1 ── -->
@@ -51,10 +51,10 @@
   <text x="136" y="264" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Kubernetes Cluster 2</text>
 
   <!-- Cluster box in Cluster 2 -->
-  <rect x="56" y="278" width="168" height="116" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
-  <rect x="56" y="278" width="5" height="116" rx="4" fill="#22C55E"/>
-  <text x="141" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">NVIDIA Run:ai</text>
-  <text x="141" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">Cluster</text>
+  <rect x="56" y="278" width="168" height="116" rx="8" fill="#F1F8E9" stroke="#AED581" stroke-width="1.5"/>
+  <rect x="56" y="278" width="5" height="116" rx="4" fill="#AED581"/>
+  <text x="141" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai</text>
+  <text x="141" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">Cluster</text>
   <text x="141" y="357" text-anchor="middle" font-size="11" fill="#64748B">GPU scheduling</text>
   <text x="141" y="373" text-anchor="middle" font-size="11" fill="#64748B">Workload management</text>
 
@@ -65,10 +65,10 @@
   <text x="536" y="264" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">Kubernetes Cluster n</text>
 
   <!-- Cluster box in Cluster n -->
-  <rect x="456" y="278" width="168" height="116" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
-  <rect x="456" y="278" width="5" height="116" rx="4" fill="#22C55E"/>
-  <text x="541" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">NVIDIA Run:ai</text>
-  <text x="541" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">Cluster</text>
+  <rect x="456" y="278" width="168" height="116" rx="8" fill="#F1F8E9" stroke="#AED581" stroke-width="1.5"/>
+  <rect x="456" y="278" width="5" height="116" rx="4" fill="#AED581"/>
+  <text x="541" y="316" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai</text>
+  <text x="541" y="334" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">Cluster</text>
   <text x="541" y="357" text-anchor="middle" font-size="11" fill="#64748B">GPU scheduling</text>
   <text x="541" y="373" text-anchor="middle" font-size="11" fill="#64748B">Workload management</text>
 

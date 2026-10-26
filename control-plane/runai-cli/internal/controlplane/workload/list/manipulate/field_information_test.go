@@ -6,7 +6,7 @@
 package manipulate
 
 import (
-	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"k8s.io/utils/ptr"
@@ -61,7 +61,7 @@ var _ = Describe("ParseWorkloadColumns function", func() {
 				"name", "type", "framework", "status", "project", "category",
 				"priority", "department", "submittedby", "createdat",
 				"totalpendingtimeseconds", "allocatedgpumemory", "allocatedcpucompute",
-				"allocatedcpumemory", "completedat", "urls", "preemptible",
+				"allocatedcpumemory", "completedat", "urls", "preemptible", "preemptibility",
 				"pods", "allocatedgpu",
 			}
 			result, err := ParseWorkloadColumns(allColumnNames)
@@ -199,6 +199,24 @@ var _ = Describe("Extract Functions", func() {
 			extractPreemptibleData(workload, workloadRow)
 
 			Expect(workloadRow.Preemptible).To(BeNil())
+		})
+	})
+
+	Context("extractPreemptibilityData", func() {
+		It("should extract semi-preemptible", func() {
+			workload.Preemptibility = *workloadservice.NewNullableString(ptr.To("semi-preemptible"))
+
+			extractPreemptibilityData(workload, workloadRow)
+
+			Expect(workloadRow.Preemptibility).To(Equal(ptr.To("semi-preemptible")))
+		})
+
+		It("should fall back to the legacy boolean", func() {
+			workload.Preemptible = *workloadservice.NewNullableBool(ptr.To(true))
+
+			extractPreemptibilityData(workload, workloadRow)
+
+			Expect(workloadRow.Preemptibility).To(Equal(ptr.To("preemptible")))
 		})
 	})
 })

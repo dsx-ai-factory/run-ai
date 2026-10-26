@@ -16,8 +16,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/projects"
 	v1 "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services/v1"
-	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
-	workloadsMocks "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/mocks"
+	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	workloadsMocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/mocks"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/utils/ptr"
@@ -82,7 +82,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 			projectApiService = projects.NewProjectApiService(projectDeletionService, &clusterServiceClient, nil)
 		})
 
-		It("test create/get one department without setting priority", func() {
+		It("test create/get one department without setting rank", func() {
 			departmentApiService = departments.NewDepartmentApiService(&clusterServiceClient, nil)
 			request := getDepartmentCreateRequest(createDepartmentName(), clusterId)
 			request.Resources[0].Rank = nil
@@ -96,7 +96,6 @@ var _ = Describe("Department API tests", Ordered, func() {
 			Expect(len(createdDepartment.Resources)).To(Equal(1))
 			resources := createdDepartment.Resources[0]
 			Expect(resources.Rank).To(Equal(ptr.To(services.DefaultResourceRank)))
-			Expect(resources.Priority).To(Equal(ptr.To(services.DefaultResourceRank)))
 
 			getResponse, err := departmentApiService.GetDepartment(ctx, createdDepartment.Id)
 			if err != nil {
@@ -107,7 +106,6 @@ var _ = Describe("Department API tests", Ordered, func() {
 			getDepartment := getResponse.Body.(api.Department)
 			resources = getDepartment.Resources[0]
 			Expect(resources.Rank).To(Equal(ptr.To(services.DefaultResourceRank)))
-			Expect(resources.Priority).To(Equal(ptr.To(services.DefaultResourceRank)))
 
 			_, deleteErr := departmentApiService.DeleteDepartment(ctx, getDepartment.Id)
 			Expect(deleteErr).NotTo(HaveOccurred())
@@ -128,7 +126,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 
 			zeroResources := []api.ResourcesNullable{{
 				NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(defaultNodePoolId), Name: defaultNodePoolName},
-				Gpu:      api.ResourcesNullableGpu{Deserved: 0, Limit: ptr.To(float64(-1))},
+				Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(float64(0)), Limit: ptr.To(float64(-1))},
 				Cpu:      &api.ResourcesCpu{Deserved: ptr.To(float64(0)), Limit: ptr.To(float64(-1))},
 				Memory:   &api.ResourcesMemory{Deserved: ptr.To(float64(0)), Limit: ptr.To(float64(-1)), Units: api.UNITS_MIB},
 			}}
@@ -201,45 +199,12 @@ var _ = Describe("Department API tests", Ordered, func() {
 			Expect(*syncedDept.Resources[0].Memory.OverQuotaWeight).To(Equal(services.MinOverQuotaWeight))
 		})
 
-		It("backwards compatibility test: create/get one department using priority in request", func() {
-			request := getDepartmentCreateRequest(createDepartmentName(), clusterId)
-			request.Resources[0].Rank = nil
-			request.Resources[0].Priority = ptr.To("VeryHigh")
-
-			createResponse, err := departmentApiService.CreateDepartment(ctx, request)
-			if err != nil {
-				Fail("Failed creating department")
-			}
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			createdDepartment := createResponse.Body.(api.Department)
-			defer func() {
-				_, deleteErr := departmentApiService.DeleteDepartment(ctx, createdDepartment.Id)
-				Expect(deleteErr).NotTo(HaveOccurred())
-			}()
-
-			Expect(len(createdDepartment.Resources)).To(Equal(1))
-			resources := createdDepartment.Resources[0]
-			Expect(resources.Rank).To(Equal(ptr.To("VeryHigh")))
-			Expect(resources.Priority).To(Equal(ptr.To("VeryHigh")))
-
-			getResponse, err := departmentApiService.GetDepartment(ctx, createdDepartment.Id)
-			if err != nil {
-				Fail("Failed getting department")
-			}
-			Expect(getResponse.Code).To(Equal(http.StatusOK))
-
-			getDepartment := getResponse.Body.(api.Department)
-			resources = getDepartment.Resources[0]
-			Expect(resources.Rank).To(Equal(ptr.To("VeryHigh")))
-			Expect(resources.Priority).To(Equal(ptr.To("VeryHigh")))
-		})
-
 		It("test create department with unlimited gpu", func() {
 			departmentApiService = departments.NewDepartmentApiService(&clusterServiceClient, nil)
 
 			request := getDepartmentCreateRequest(createDepartmentName(), clusterId)
 			request.Resources[0].Gpu = api.ResourcesNullableGpu{
-				Deserved:        -1,
+				Deserved:        ptr.To(float64(-1)),
 				Limit:           nil,
 				OverQuotaWeight: nil,
 			}
@@ -272,13 +237,12 @@ var _ = Describe("Department API tests", Ordered, func() {
 			resources := created.Resources[0]
 			Expect(resources.NodePool.Id).To(Equal(request.Resources[0].NodePool.Id))
 			Expect(resources.NodePool.Name).To(Equal(request.Resources[0].NodePool.Name))
-			Expect(resources.Gpu.Deserved).To(Equal(request.Resources[0].Gpu.Deserved))
+			Expect(resources.Gpu.Deserved).To(Equal(ptr.Deref(request.Resources[0].Gpu.Deserved, 0)))
 			Expect(resources.Gpu.Limit).To(Equal(request.Resources[0].Gpu.Limit))
 			Expect(resources.Gpu.OverQuotaWeight).To(Equal(request.Resources[0].Gpu.OverQuotaWeight))
 			Expect(resources.Cpu).To(BeNil())
 			Expect(resources.Memory).To(BeNil())
 			Expect(resources.Rank).To(Equal(ptr.To(services.DefaultResourceRank)))
-			Expect(resources.Priority).To(Equal(ptr.To(services.DefaultResourceRank)))
 			Expect(created.CreatedBy).To(Equal(TestUser))
 
 			getResponse, err := departmentApiService.GetDepartment(ctx, created.Id)
@@ -326,7 +290,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 			resources := createdParent.Resources[0]
 			Expect(resources.NodePool.Id).To(Equal(request.Resources[0].NodePool.Id))
 			Expect(resources.NodePool.Name).To(Equal(request.Resources[0].NodePool.Name))
-			Expect(resources.Gpu.Deserved).To(Equal(request.Resources[0].Gpu.Deserved))
+			Expect(resources.Gpu.Deserved).To(Equal(ptr.Deref(request.Resources[0].Gpu.Deserved, 0)))
 			Expect(resources.Gpu.Limit).To(Equal(request.Resources[0].Gpu.Limit))
 			Expect(resources.Gpu.OverQuotaWeight).To(Equal(request.Resources[0].Gpu.OverQuotaWeight))
 			Expect(resources.Cpu).To(Equal(request.Resources[0].Cpu))
@@ -574,15 +538,6 @@ var _ = Describe("Department API tests", Ordered, func() {
 				Fail("Failed creating department")
 			}
 			Expect(createResponse.Code).To(Equal(http.StatusBadRequest))
-
-			request.Resources = []api.ResourcesNullable{{
-				Priority: ptr.To("VeryHigh"),
-			}}
-			createResponse, err = departmentApiService.CreateDepartment(ctx, request)
-			if err != nil {
-				Fail("Failed creating department")
-			}
-			Expect(createResponse.Code).To(Equal(http.StatusBadRequest))
 		})
 	})
 
@@ -742,7 +697,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 				ParentId:  &dep.Id,
 				Resources: []api.ResourcesNullable{{
 					NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(defaultNodePoolId), Name: defaultNodePoolName},
-					Gpu:      api.ResourcesNullableGpu{Deserved: proj1GpuDeserved},
+					Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(proj1GpuDeserved)},
 				}},
 			}
 			proj1Response, err := projectApiService.CreateProject(ctx, proj1Request)
@@ -757,7 +712,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 				ParentId:  &dep.Id,
 				Resources: []api.ResourcesNullable{{
 					NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(defaultNodePoolId), Name: defaultNodePoolName},
-					Gpu:      api.ResourcesNullableGpu{Deserved: proj2GpuDeserved},
+					Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(proj2GpuDeserved)},
 				}},
 			}
 			proj2Response, err := projectApiService.CreateProject(ctx, proj2Request)
@@ -846,7 +801,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 				ParentId:  &dep.Id,
 				Resources: []api.ResourcesNullable{{
 					NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(defaultNodePoolId), Name: defaultNodePoolName},
-					Gpu:      api.ResourcesNullableGpu{Deserved: -1},
+					Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(float64(-1))},
 					Cpu: &api.ResourcesCpu{
 						Deserved: ptr.To(float64(-1)),
 					},
@@ -872,7 +827,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 				ParentId:  &dep.Id,
 				Resources: []api.ResourcesNullable{{
 					NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(defaultNodePoolId), Name: defaultNodePoolName},
-					Gpu:      api.ResourcesNullableGpu{Deserved: proj2GpuDeserved},
+					Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(proj2GpuDeserved)},
 					Cpu: &api.ResourcesCpu{
 						Deserved: ptr.To(proj2CpuDeserved),
 					},
@@ -937,7 +892,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 			updateRequest := getDepartmentUpdateRequest(created)
 			updateRequest.Description = "new description"
 			updateRequest.Resources[0].Gpu = api.ResourcesNullableGpu{
-				Deserved:        -1,
+				Deserved:        ptr.To(float64(-1)),
 				Limit:           nil,
 				OverQuotaWeight: nil,
 			}
@@ -1011,7 +966,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 				},
 				Gpu: api.ResourcesNullableGpu{
 					Limit:           &limit,
-					Deserved:        deserved,
+					Deserved:        ptr.To(deserved),
 					OverQuotaWeight: &oqWeight,
 				},
 			})
@@ -1050,101 +1005,6 @@ var _ = Describe("Department API tests", Ordered, func() {
 				Fail("Failed updating department")
 			}
 			Expect(updateResponse.Code).To(Equal(http.StatusBadRequest))
-		})
-
-		It("backwards compatibility test: update department resources using priority in request", func() {
-			request := getDepartmentCreateRequest(createDepartmentName(), clusterId)
-			createResponse, err := departmentApiService.CreateDepartment(ctx, request)
-			if err != nil {
-				Fail("Failed creating department")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Department)
-			departmentIds = append(departmentIds, created.Id)
-
-			updateResources := getUpdateResources()
-			updateResources[0].Rank = nil
-			updateResources[0].Priority = ptr.To("Low")
-
-			updateResponse, err := departmentApiService.UpdateDepartmentResources(ctx, created.Id, updateResources)
-			if err != nil {
-				Fail("Failed updating department")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedResources := updateResponse.Body.([]api.Resources)
-			updatedRes := findResourceByNodePoolId(updatedResources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
-
-			getResponse, err := departmentApiService.GetDepartment(ctx, created.Id)
-			if err != nil {
-				Fail("Failed getting department")
-			}
-			Expect(getResponse.Code).To(Equal(http.StatusOK))
-			getDepartment := getResponse.Body.(api.Department)
-			getRes := findResourceByNodePoolId(getDepartment.Resources, "1")
-			Expect(getRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), getRes.Rank, "rank")
-			validateRank(ptr.To("Low"), getRes.Priority, "priority")
-		})
-
-		It("backwards compatibility test: update department resources with both rank and priority - rank wins when differs from db", func() {
-			request := getDepartmentCreateRequest(createDepartmentName(), clusterId)
-			createResponse, err := departmentApiService.CreateDepartment(ctx, request)
-			if err != nil {
-				Fail("Failed creating department")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Department)
-			departmentIds = append(departmentIds, created.Id)
-
-			updateResources := getUpdateResources()
-			updateResources[0].Rank = ptr.To("Low")
-			updateResources[0].Priority = ptr.To(services.DefaultResourceRank)
-
-			updateResponse, err := departmentApiService.UpdateDepartmentResources(ctx, created.Id, updateResources)
-			if err != nil {
-				Fail("Failed updating department")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedResources := updateResponse.Body.([]api.Resources)
-			updatedRes := findResourceByNodePoolId(updatedResources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
-		})
-
-		It("backwards compatibility test: update department with both rank and priority - priority wins when differs from db", func() {
-			request := getDepartmentCreateRequest(createDepartmentName(), clusterId)
-			createResponse, err := departmentApiService.CreateDepartment(ctx, request)
-			if err != nil {
-				Fail("Failed creating department")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Department)
-			departmentIds = append(departmentIds, created.Id)
-
-			updateRequest := getDepartmentUpdateRequest(created)
-			updateRequest.Resources[0].Rank = ptr.To(services.DefaultResourceRank)
-			updateRequest.Resources[0].Priority = ptr.To("Low")
-
-			updateResponse, err := departmentApiService.UpdateDepartment(ctx, created.Id, updateRequest)
-			if err != nil {
-				Fail("Failed updating department")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedDepartment := updateResponse.Body.(api.Department)
-			updatedRes := findResourceByNodePoolId(updatedDepartment.Resources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
 		})
 
 		It("test update department not found", func() {
@@ -1238,7 +1098,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 			department1Name := createDepartmentName()
 			request := getDepartmentCreateRequest(department1Name, clusterId)
 			request.Resources[0].Gpu = api.ResourcesNullableGpu{
-				Deserved:        1,
+				Deserved:        ptr.To(float64(1)),
 				Limit:           ptr.To(float64(1)),
 				OverQuotaWeight: ptr.To(float64(1)),
 			}
@@ -1258,7 +1118,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 					Name: nodePoolName1,
 				},
 				Gpu: api.ResourcesNullableGpu{
-					Deserved:        1,
+					Deserved:        ptr.To(float64(1)),
 					Limit:           ptr.To(float64(1)),
 					OverQuotaWeight: ptr.To(float64(1)),
 				},
@@ -1283,7 +1143,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 			department2Name = createDepartmentName()
 			request = getDepartmentCreateRequest(department2Name, clusterId)
 			request.Resources[0].Gpu = api.ResourcesNullableGpu{
-				Deserved:        0,
+				Deserved:        ptr.To(float64(0)),
 				Limit:           ptr.To(float64(0)),
 				OverQuotaWeight: ptr.To(float64(0)),
 			}
@@ -1303,7 +1163,7 @@ var _ = Describe("Department API tests", Ordered, func() {
 					Name: nodePoolName1,
 				},
 				Gpu: api.ResourcesNullableGpu{
-					Deserved:        0,
+					Deserved:        ptr.To(float64(0)),
 					Limit:           ptr.To(float64(0)),
 					OverQuotaWeight: ptr.To(float64(0)),
 				},
@@ -2464,7 +2324,7 @@ func getDepartmentUpdateRequest(department api.Department) api.DepartmentUpdateR
 		resources = append(resources, api.ResourcesNullable{
 			NodePool: department.Resources[i].NodePool,
 			Gpu: api.ResourcesNullableGpu{
-				Deserved:        department.Resources[i].Gpu.Deserved,
+				Deserved:        ptr.To(department.Resources[i].Gpu.Deserved),
 				Limit:           department.Resources[i].Gpu.Limit,
 				OverQuotaWeight: department.Resources[i].Gpu.OverQuotaWeight,
 			},
@@ -2485,7 +2345,7 @@ func getDepartmentUpdateRequestFromListResponse(department api.DepartmentForList
 		resources = append(resources, api.ResourcesNullable{
 			NodePool: department.Resources[i].NodePool,
 			Gpu: api.ResourcesNullableGpu{
-				Deserved:        department.Resources[i].Gpu.Deserved,
+				Deserved:        ptr.To(department.Resources[i].Gpu.Deserved),
 				Limit:           department.Resources[i].Gpu.Limit,
 				OverQuotaWeight: department.Resources[i].Gpu.OverQuotaWeight,
 			},

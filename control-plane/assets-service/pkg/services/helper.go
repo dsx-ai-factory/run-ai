@@ -11,7 +11,10 @@ import (
 	"fmt"
 	"net/http"
 
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
+	"k8s.io/apimachinery/pkg/util/version"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
@@ -25,7 +28,25 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 )
 
-var DefaultCheckerClusterConfig = &checker.ClustersCacheConfig{ExpirationSec: 600, CleanupSec: 10}
+var (
+	DefaultCheckerClusterConfig = &checker.ClustersCacheConfig{ExpirationSec: 600, CleanupSec: 10}
+	MinDraK8sVersion            = version.MustParseGeneric("1.34.0")
+)
+
+var ClusterAndBelow = datastructs.NewSet[api.AssetKind]([]api.AssetKind{
+	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
+}...)
+
+// KindsSupportingFiltering lists the asset kinds whose list APIs use the
+// new scope-hierarchy filtering (the queryapi filterBy + includeAncestors /
+// includeDescendants flags). Only these kinds need the department denormalized
+// onto project-scoped rows. Scoping the denormalization to them keeps the
+// creation behavior of every other kind unchanged and means no backfill
+// migration is required: these kinds are new, so there are no legacy
+// project-scoped rows with a missing department_id.
+var KindsSupportingFiltering = datastructs.NewSet[api.AssetKind]([]api.AssetKind{
+	api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE,
+}...)
 
 func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreationRequest, kind api.AssetKind) *api.Error {
 	if meta == nil {
@@ -35,6 +56,12 @@ func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreation
 	scopeErr := assetsScope.ValidateScopeParameters(meta)
 	if scopeErr != nil {
 		return scopeErr
+	}
+
+	if ClusterAndBelow.Has(kind) {
+		if meta.Scope == api.SCOPE_TENANT || meta.Scope == api.SCOPE_SYSTEM {
+			return api.NewError(http.StatusForbidden, fmt.Sprintf("scope %s is not supported for kind %s", meta.Scope, kind), nil)
+		}
 	}
 
 	if meta.Scope == api.SCOPE_PROJECT || meta.Scope == api.SCOPE_DEPARTMENT {
@@ -61,10 +88,62 @@ func ValidateAssetCreateRequestMeta(ctx context.Context, meta *api.AssetCreation
 		}
 
 		meta.ClusterId = resp.ClusterUuid.Get()
+
+		// Denormalize the department onto project-scoped rows (as workloads and
+		// policies already do) so scope-hierarchy filtering by department can be
+		// a plain column predicate. Only kinds that actually use the new
+		// filtering need this; gating it here leaves every other kind's creation
+		// behavior (and existing rows) untouched.
+		if meta.Scope == api.SCOPE_PROJECT && KindsSupportingFiltering.Has(kind) {
+			meta.DepartmentId = resp.DepartmentId.Get()
+		}
 	}
 
-	if clusterErr := ValidateClusterIdBelongsToTenant(ctx, meta.ClusterId); clusterErr != nil {
-		return clusterErr
+	if meta.ClusterId != nil {
+		clusterInfo, apiErr := cluster.Get().Client().GetClusterMinimalDataById(ctx, *meta.ClusterId)
+		if apiErr != nil {
+			return api.NewError(int(apiErr.GetCode()), "failed to interrogate the cluster", errors.New(apiErr.Message))
+		}
+
+		if clusterErr := ValidateClusterIdBelongsToTenant(ctx, clusterInfo); clusterErr != nil {
+			return clusterErr
+		}
+
+		if kind == api.ASSETKIND_RESOURCE_CLAIM_TEMPLATE {
+			// for RCT we need cluster whose agent/cluster sync support RCT sync
+			clusterCapabilityChecker, err := checker.NewClusterCapabilitiesCheckerForVersion(convutils.Deref(clusterInfo.Version.Get(), "unknown version"))
+			if err != nil {
+				return api.NewError(http.StatusInternalServerError, "failed to create cluster capabilities checker", err)
+			}
+
+			supports, err := clusterCapabilityChecker.ValidateClusterCapability(ctx, checker.MinVersionResourceClaimTemplates)
+			if err != nil {
+				return api.NewError(http.StatusServiceUnavailable, "failed to check cluster capabilities", err)
+			}
+
+			if !supports {
+				return api.NewValidationError(fmt.Sprintf("resource claim templates are not supported for this cluster version %s", convutils.Deref(clusterInfo.Version.Get(), "unknown version")))
+			}
+
+			// and we need k8s version that fully supports DRA
+			platformInfo := clusterInfo.Platform.Get()
+			if platformInfo == nil {
+				return api.NewError(http.StatusServiceUnavailable, "cluster did not report platform information", nil)
+			}
+
+			kubeVer := platformInfo.KubeVersion.Get()
+			if kubeVer == nil {
+				return api.NewError(http.StatusServiceUnavailable, "cluster did not report a kubernetes version", nil)
+			}
+
+			parsed, err := version.ParseGeneric(*kubeVer)
+			if err != nil {
+				return api.NewError(http.StatusServiceUnavailable, fmt.Sprintf("unrecognized kubernetes version %q reported by cluster: %v", *kubeVer, err), nil)
+			}
+			if parsed.LessThan(MinDraK8sVersion) {
+				return api.NewError(http.StatusBadRequest, fmt.Sprintf("resource claim templates require kubernetes >= %s; cluster reports %s", MinDraK8sVersion, *kubeVer), nil)
+			}
+		}
 	}
 
 	if kind == api.ASSETKIND_ENVIRONMENT {
@@ -134,24 +213,15 @@ func safeStrPtr(s *string) string {
 // ValidateClusterIdBelongsToTenant validates that the given clusterId exists and is owned
 // by the tenant of the caller (as derived from the JWT/context).
 //
-// Uses /api/v1/clusters/{clusterUuid}/minimal (clusters-minimal:read) instead of
-// /api/v1/clusters/{uuid} (cluster:read) because asset creators are not guaranteed to
-// have the latter permission.
-//
 // Fails closed: returns 403 Forbidden whenever ownership cannot be confirmed — i.e. when
 // the cluster does not exist, belongs to another tenant, or the cluster service cannot be
 // reached. The same response is used in every failure case to avoid leaking information
 // about foreign clusters or upstream service health.
 // Returns nil when clusterId is nil or empty (no validation is needed for tenant/system scope).
-func ValidateClusterIdBelongsToTenant(ctx context.Context, clusterId *string) *api.Error {
-	if convutils.IsEmptyOrNull(clusterId) {
-		return nil
-	}
-
+func ValidateClusterIdBelongsToTenant(ctx context.Context, clusterInfo *openapi.ClustersMinimalData) *api.Error {
 	callerTenantId := auth.TenantIdOf(ctx)
 
-	minimalCluster, apiErr := cluster.Get().Client().GetClusterMinimalDataById(ctx, *clusterId)
-	if apiErr == nil && minimalCluster.GetTenantId() == callerTenantId {
+	if clusterInfo.GetTenantId() == callerTenantId {
 		return nil
 	}
 

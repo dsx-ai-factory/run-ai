@@ -26,7 +26,6 @@ func InitCacheStores() {
 	}
 }
 
-//go:generate mockery
 type CacheManagerInterface[T any] interface {
 	Get(ctx context.Context, cacheKey string) (*T, error)
 	Set(ctx context.Context, cacheKey string, value T) error

@@ -21,8 +21,7 @@ func (e *ProjectManualOverQuota) Category() string {
 
 func (e *ProjectManualOverQuota) Description() string {
 	return "Enable over quota weight to set what proportion of unused resources a project can get on top of its quota." +
-		" For more information, see the <a href='https://run-ai-docs.nvidia.com/saas/platform-management/" +
-		"runai-scheduler/scheduling/concepts-and-principles#over-quota-weight' target='_blank'>Over quota weight guide</a>"
+		" For more information, see the <a data-doc-key='overQuotaWeight' target='_blank'>Over quota weight guide</a>"
 }
 
 func (e *ProjectManualOverQuota) DisplayName() string {

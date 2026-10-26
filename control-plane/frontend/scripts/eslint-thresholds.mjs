@@ -26,7 +26,7 @@ import { relative } from "path";
 
 // Update these whenever you fix a11y warnings or migrate a component to <script setup>.
 const A11Y_DEFAULT_THRESHOLD = 0;
-const SCRIPT_SETUP_DEFAULT_THRESHOLD = 655;
+const SCRIPT_SETUP_DEFAULT_THRESHOLD = 654;
 
 const SCRIPT_PATH = "control-plane/frontend/scripts/eslint-thresholds.mjs";
 

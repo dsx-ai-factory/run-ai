@@ -330,7 +330,7 @@ func (p *PostUpgradeHook) finalizeResourceManagementMigration(ctx context.Contex
 		// the legacy org units: the agent serves the validate-project webhook that
 		// guards the delete, and the project-controller clears the departments' /
 		// projects' finalizers so the deletes actually complete.
-		for _, name := range []string{hooks.AgentOperandName, hooks.ProjectControllerOperandName} {
+		for _, name := range []string{hooks.AgentOperandName, hooks.ProjectControllerDeploymentName} {
 			if err := waitForDeploymentReady(ctx, resources.LocalClusterClient, name, p.params.OperandDownIntervalMillis, logger); err != nil {
 				return fmt.Errorf("failed waiting for %s before cleanup: %w", name, err)
 			}
@@ -455,10 +455,9 @@ func clearLegacyFinalizers(ctx context.Context, k8sClient client.Client, obj cli
 	logger.Info("Clearing finalizers on legacy "+kindStr, "name", obj.GetName(), "finalizers", obj.GetFinalizers())
 	patch := client.MergeFrom(obj.DeepCopyObject().(client.Object))
 	obj.SetFinalizers(nil)
-	if err := k8sClient.Patch(ctx, obj, patch); err != nil && !apierrors.IsNotFound(err) && !meta.IsNoMatchError(err) {
-		return fmt.Errorf("failed to clear finalizers on legacy %s %q: %w", kindStr, obj.GetName(), err)
-	}
-	return nil
+	return retryLegacyOperation(ctx, obj, kindStr, "clear finalizers on", logger, func(ctx context.Context) error {
+		return k8sClient.Patch(ctx, obj, patch)
+	})
 }
 
 // deleteCRD deletes the named CRD, tolerating a CRD that is already gone or whose

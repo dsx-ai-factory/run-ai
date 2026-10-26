@@ -5,7 +5,7 @@
 # control so decisions are shared across the team.
 version: "1.0"
 project: "runai"
-last_updated: "2026-08-30"
+last_updated: "2026-10-04"
 
 repository_exposure_classification:
   visibility: "Public"
@@ -21,7 +21,7 @@ service_exposure_classification:
   date: "2026-08-02"
 
 accepted_risks:
-  - slug: "s3-sidecar-privileged-user-controlled-image"
+  - slug: "threat-s3-sidecar-privileged-user-controlled-image"
     threat: >-
       runai-cluster/cluster/workload-common/builders/s3.go unconditionally sets
       SecurityContext.Privileged=true on every S3 filesystem sidecar and honors
@@ -44,18 +44,17 @@ accepted_risks:
     triaged_by: "security-team"
     date: "2026-08-23"
 
-  - slug: "device-code-grant-not-supported"
+  - slug: "threat-device-code-grant-not-supported"
     threat: >-
       OAuth 2.0 Device Authorization Grant (device_code, RFC 8628) was evaluated
-      as a login option for runai-cli (see RUN-41724 HLD:
-      https://nvidia.atlassian.net/wiki/spaces/Runai/pages/3806540674) to remove
-      the manual paste-back step in the `runai login sso` / remote-browser flow.
+      as a login option for runai-cli to remove the manual paste-back step in
+      the `runai login sso` / remote-browser flow.
       Won't-do: not implemented. identity-manager keeps
       oauth2.device.authorization.grant.enabled=false unconditionally for every
       client; no per-client-type exception has been introduced.
     severity: "medium"
     reason: >-
-      Rejected due to security tradeoffs documented in the HLD: (1) device codes
+      Rejected due to security tradeoffs: (1) device codes
       are valid ~10 minutes vs. near-instant code exchange in the existing local-
       redirect and remote-browser flows, a materially longer interception window;
       (2) "device code phishing" is a documented real-world attack pattern

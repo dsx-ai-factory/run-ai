@@ -6,12 +6,14 @@
 package testing
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"sort"
 	"strconv"
 	"time"
 
+	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	authorization_utils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
@@ -29,8 +31,8 @@ import (
 
 	clustersOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/mocks"
-	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
-	workloadsMocks "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/mocks"
+	workloadsOpenapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	workloadsMocks "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/mocks"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/utils/ptr"
@@ -179,7 +181,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 			resources := created.Resources[0]
 			Expect(resources.NodePool.Id).To(Equal(request.Resources[0].NodePool.Id))
 			Expect(resources.NodePool.Name).To(Equal(request.Resources[0].NodePool.Name))
-			Expect(resources.Gpu.Deserved).To(Equal(request.Resources[0].Gpu.Deserved))
+			Expect(resources.Gpu.Deserved).To(Equal(ptr.Deref(request.Resources[0].Gpu.Deserved, 0)))
 			Expect(resources.Gpu.Limit).To(Equal(request.Resources[0].Gpu.Limit))
 			Expect(resources.Gpu.OverQuotaWeight).To(Equal(request.Resources[0].Gpu.OverQuotaWeight))
 			Expect(resources.Cpu).To(BeNil())
@@ -255,7 +257,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 			request := getProjectCreateRequest(name, name, departmentId, clusterId)
 			request.Resources = []api.ResourcesNullable{{
 				Gpu: api.ResourcesNullableGpu{
-					Deserved: 0,
+					Deserved: ptr.To(float64(0)),
 				},
 				Rank: ptr.To("VeryHigh"),
 			}}
@@ -313,7 +315,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(getProject.CreatedAt.UnixMilli()).To(Equal(created.CreatedAt.UnixMilli()))
 			Expect(getProject.UpdatedAt.UnixMilli()).To(Equal(created.UpdatedAt.UnixMilli()))
 			Expect(resources.Rank).To(Equal(ptr.To("VeryHigh")))
-			Expect(resources.Priority).To(Equal(ptr.To("VeryHigh")))
 			// Expect(getProject.DefaultNodePools).To(Not(BeNil()))
 		})
 
@@ -351,7 +352,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 
 			zeroResources := []api.ResourcesNullable{{
 				NodePool: &api.ResourcesNodePool{Id: fmt.Sprint(defaultNodePoolId), Name: defaultNodePoolName},
-				Gpu:      api.ResourcesNullableGpu{Deserved: 0, Limit: ptr.To(float64(-1))},
+				Gpu:      api.ResourcesNullableGpu{Deserved: ptr.To(float64(0)), Limit: ptr.To(float64(-1))},
 				Cpu:      &api.ResourcesCpu{Deserved: ptr.To(float64(0)), Limit: ptr.To(float64(-1))},
 				Memory:   &api.ResourcesMemory{Deserved: ptr.To(float64(0)), Limit: ptr.To(float64(-1)), Units: api.UNITS_MIB},
 			}}
@@ -427,55 +428,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(*syncedProj.Resources[0].Memory.OverQuotaWeight).To(Equal(services.MinOverQuotaWeight))
 		})
 
-		It("backwards compatibility test: create/get one project using priority in request", func() {
-			clusterServiceClient = mocks.IClusterClient{}
-			clusterServiceClient.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
-				TenantId: int32(TestTenantId),
-				Uuid:     clusterId,
-				Version:  *clustersOpenapi.NewNullableString(ptr.To(services.ResourcePriorityMinVersion)),
-			}, nil)
-			clusterServiceClient.On("GetNodePoolsMinimalByCluster", mock.Anything, mock.Anything).Return(&clustersOpenapi.GetNodepoolsMinimal200Response{
-				Nodepools: []clustersOpenapi.NodepoolMinimal{
-					{
-						Name:                   defaultNodePoolName,
-						Id:                     fmt.Sprint(defaultNodePoolId),
-						Phase:                  ptr.To(clustersOpenapi.NODEPOOLPHASE_READY),
-						SchedulingCapabilities: NpSchedCapabilitiesDefault(false, false),
-					},
-				},
-			}, nil)
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, departmentId, clusterId)
-			request.Resources = []api.ResourcesNullable{{
-				Gpu: api.ResourcesNullableGpu{
-					Deserved: 0,
-				},
-				Priority: ptr.To("VeryHigh"),
-			}}
-			request.EnforceRunaiScheduler = ptr.To(false)
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Project)
-			projectIds = append(projectIds, created.Id)
-			Expect(len(created.Resources)).To(Equal(1))
-			resources := created.Resources[0]
-			Expect(resources.Rank).To(Equal(ptr.To("VeryHigh")))
-			Expect(resources.Priority).To(Equal(ptr.To("VeryHigh")))
-
-			getResponse, err := projectApiService.GetProject(ctx, created.Id)
-			if err != nil {
-				Fail("Failed getting project")
-			}
-			getProject := getResponse.Body.(api.Project)
-			resources = getProject.Resources[0]
-			Expect(resources.Rank).To(Equal(ptr.To("VeryHigh")))
-			Expect(resources.Priority).To(Equal(ptr.To("VeryHigh")))
-		})
-
 		It("test create project with version below 2.20 with not Normal rank", func() {
 			clusterServiceClient = mocks.IClusterClient{}
 			clusterServiceClient.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
@@ -500,15 +452,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 				Rank: ptr.To("VeryHigh"),
 			}}
 			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-			Expect(createResponse.Code).To(Equal(http.StatusBadRequest))
-
-			request.Resources = []api.ResourcesNullable{{
-				Priority: ptr.To("VeryHigh"),
-			}}
-			createResponse, err = projectApiService.CreateProject(ctx, request)
 			if err != nil {
 				Fail("Failed creating project")
 			}
@@ -569,7 +512,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				name := createProjectName()
 				request := getProjectCreateRequest(name, name, departmentId, clusterId)
 				request.Resources[0].Gpu = api.ResourcesNullableGpu{
-					Deserved:        1,
+					Deserved:        ptr.To(float64(1)),
 					Limit:           ptr.To(float64(-1)),
 					OverQuotaWeight: ptr.To(float64(1)),
 				}
@@ -589,7 +532,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 						Name: nodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        2,
+						Deserved:        ptr.To(float64(2)),
 						Limit:           ptr.To(float64(2)),
 						OverQuotaWeight: ptr.To(float64(2)),
 					},
@@ -642,7 +585,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				name := createProjectName()
 				request := getProjectCreateRequest(name, name, departmentId, clusterId)
 				request.Resources[0].Gpu = api.ResourcesNullableGpu{
-					Deserved:        1,
+					Deserved:        ptr.To(float64(1)),
 					Limit:           ptr.To(float64(-1)),
 					OverQuotaWeight: ptr.To(float64(1)),
 				}
@@ -663,7 +606,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 						Name: nodePoolName1,
 					},
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        2,
+						Deserved:        ptr.To(float64(2)),
 						Limit:           ptr.To(float64(2)),
 						OverQuotaWeight: ptr.To(float64(2)),
 					},
@@ -780,7 +723,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 			resources := created1.Resources[0]
 			Expect(resources.NodePool.Id).To(Equal(request.Resources[0].NodePool.Id))
 			Expect(resources.NodePool.Name).To(Equal(request.Resources[0].NodePool.Name))
-			Expect(resources.Gpu.Deserved).To(Equal(request.Resources[0].Gpu.Deserved))
+			Expect(resources.Gpu.Deserved).To(Equal(ptr.Deref(request.Resources[0].Gpu.Deserved, 0)))
 			Expect(resources.Gpu.Limit).To(Equal(request.Resources[0].Gpu.Limit))
 			Expect(resources.Gpu.OverQuotaWeight).To(Equal(request.Resources[0].Gpu.OverQuotaWeight))
 			Expect(resources.Cpu).To(Equal(request.Resources[0].Cpu))
@@ -1780,6 +1723,95 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(updated.Status.QuotaStatus.AllocatedNonPreemptible.Gpu).To(Equal(float64(1)))
 			Expect(updated.Status.AdditionalStatusData).NotTo(BeNil())
 		})
+
+		It("test update project keeps node pool quota statuses", func() {
+			projectApiService = projects.NewProjectApiService(projectDeletionService, &clusterServiceClient, nil)
+			name := createProjectName()
+			createResponse, err := projectApiService.CreateProject(ctx, getProjectCreateRequest(name, name, departmentId, clusterId))
+			Expect(err).To(BeNil())
+			Expect(createResponse.Code).To(Equal(http.StatusCreated))
+			created := createResponse.Body.(api.Project)
+			projectIds = append(projectIds, created.Id)
+
+			nodePool := created.Resources[0].NodePool
+			nodePoolQuotaStatuses := []api.QuotaStatusNodePool{{
+				NodePoolName:            nodePool.Name,
+				NodePoolId:              nodePool.Id,
+				Allocated:               api.QuotaStatusResource{Gpu: 2, Cpu: 4, Memory: 8000},
+				AllocatedNonPreemptible: api.QuotaStatusResource{Gpu: 1, Cpu: 2, Memory: 4000},
+				Requested:               api.QuotaStatusResource{Gpu: 3, Cpu: 6, Memory: 12000},
+			}}
+			updateStatusResponse, err := projectApiService.UpdateProjectStatus(ctx, api.ProjectStatusUpdateRequest{
+				Id:        created.Id,
+				ClusterId: clusterId,
+				Status: api.ProjectStatus{
+					Phase:                 "Ready",
+					Namespace:             ptr.To(fmt.Sprintf("runai-%s", name)),
+					NodePoolQuotaStatuses: nodePoolQuotaStatuses,
+				},
+			})
+			Expect(err).To(BeNil())
+			Expect(updateStatusResponse.Code).To(Equal(http.StatusOK))
+
+			updateRequest := getProjectUpdateRequest(created)
+			updateRequest.Resources[0].Gpu.Limit = ptr.To(float64(4))
+			updateResponse, err := projectApiService.UpdateProject(ctx, created.Id, updateRequest)
+			Expect(err).To(BeNil())
+			Expect(updateResponse.Code).To(Equal(http.StatusOK))
+			updated := updateResponse.Body.(api.Project)
+			Expect(*updated.Resources[0].Gpu.Limit).To(Equal(float64(4)))
+			Expect(updated.Status.NodePoolQuotaStatuses).To(Equal(nodePoolQuotaStatuses))
+
+			getResponse, err := projectApiService.GetProject(ctx, created.Id)
+			Expect(err).To(BeNil())
+			Expect(getResponse.Body.(api.Project).Status.NodePoolQuotaStatuses).To(Equal(nodePoolQuotaStatuses))
+		})
+
+		It("test update project does not overwrite a status synced during the update", func() {
+			projectApiService = projects.NewProjectApiService(projectDeletionService, &clusterServiceClient, nil)
+			name := createProjectName()
+			createResponse, err := projectApiService.CreateProject(ctx, getProjectCreateRequest(name, name, departmentId, clusterId))
+			Expect(err).To(BeNil())
+			Expect(createResponse.Code).To(Equal(http.StatusCreated))
+			created := createResponse.Body.(api.Project)
+			projectIds = append(projectIds, created.Id)
+
+			nodePool := created.Resources[0].NodePool
+			setNonPreemptibleGpu := func(gpu float64) {
+				response, err := projectApiService.UpdateProjectStatus(ctx, api.ProjectStatusUpdateRequest{
+					Id:        created.Id,
+					ClusterId: clusterId,
+					Status: api.ProjectStatus{
+						Phase:     "Ready",
+						Namespace: ptr.To(fmt.Sprintf("runai-%s", name)),
+						NodePoolQuotaStatuses: []api.QuotaStatusNodePool{{
+							NodePoolName:            nodePool.Name,
+							NodePoolId:              nodePool.Id,
+							AllocatedNonPreemptible: api.QuotaStatusResource{Gpu: gpu},
+						}},
+					},
+				})
+				Expect(err).To(BeNil())
+				Expect(response.Code).To(Equal(http.StatusOK))
+			}
+
+			setNonPreemptibleGpu(1)
+			projectId, err := strconv.ParseInt(created.Id, 10, 64)
+			Expect(err).To(BeNil())
+			staleProject, err := dao.GetProjectById(ctx, projectId, TestTenant, models.SlimVerbosity)
+			Expect(err).To(BeNil())
+			setNonPreemptibleGpu(2)
+
+			staleProject.OrgUnitData.Resources[0].GpuLimit = ptr.To(float64(4))
+			_, err = dao.UpdateProject(ctx, staleProject, false, false)
+			Expect(err).To(BeNil())
+
+			getResponse, err := projectApiService.GetProject(ctx, created.Id)
+			Expect(err).To(BeNil())
+			got := getResponse.Body.(api.Project)
+			Expect(*got.Resources[0].Gpu.Limit).To(Equal(float64(4)))
+			Expect(got.Status.NodePoolQuotaStatuses[0].AllocatedNonPreemptible.Gpu).To(Equal(float64(2)))
+		})
 	})
 
 	Context("test update project resources", func() {
@@ -1849,7 +1881,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				},
 				Gpu: api.ResourcesNullableGpu{
 					Limit:           &limit,
-					Deserved:        deserved,
+					Deserved:        ptr.To(deserved),
 					OverQuotaWeight: &oqWeight,
 				},
 				Rank: ptr.To("Low"),
@@ -1921,7 +1953,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				},
 				Gpu: api.ResourcesNullableGpu{
 					Limit:           &limit,
-					Deserved:        deserved,
+					Deserved:        ptr.To(deserved),
 					OverQuotaWeight: &oqWeight,
 				},
 			})
@@ -1944,7 +1976,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(updateResponse.Code).To(Equal(http.StatusBadRequest))
 
 			updateResources = getUpdateResources()
-			updateResources[0].Gpu.Deserved = 10
+			updateResources[0].Gpu.Deserved = ptr.To(float64(10))
 			updateResponse, err = projectApiService.PatchProjectResources(ctx, created.Id, updateResources)
 			if err != nil {
 				Fail("Failed updating project")
@@ -1965,7 +1997,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				},
 				Gpu: api.ResourcesNullableGpu{
 					Limit:           &limit,
-					Deserved:        deserved,
+					Deserved:        ptr.To(deserved),
 					OverQuotaWeight: &oqWeight,
 				},
 			})
@@ -1997,7 +2029,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				resources = append(resources, api.ResourcesNullable{
 					NodePool: created.Resources[i].NodePool,
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        created.Resources[i].Gpu.Deserved,
+						Deserved:        ptr.To(created.Resources[i].Gpu.Deserved),
 						Limit:           created.Resources[i].Gpu.Limit,
 						OverQuotaWeight: created.Resources[i].Gpu.OverQuotaWeight,
 					},
@@ -2019,104 +2051,6 @@ var _ = Describe("Project API tests", Ordered, func() {
 			Expect(getResponse.Code).To(Equal(http.StatusOK))
 			getProject := getResponse.Body.(api.Project)
 			Expect(string(getProject.Status.Phase)).To(Equal("Ready"))
-		})
-
-		It("backwards compatibility test: update project resources using priority in request", func() {
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, departmentId, clusterId)
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Project)
-			projectIds = append(projectIds, created.Id)
-
-			updateResources := getUpdateResources()
-			updateResources[0].Rank = nil
-			updateResources[0].Priority = ptr.To("Low")
-
-			updateResponse, err := projectApiService.UpdateProjectResources(ctx, created.Id, updateResources)
-			if err != nil {
-				Fail("Failed updating project")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedResources := updateResponse.Body.([]api.Resources)
-			updatedRes := findResourceByNodePoolId(updatedResources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
-
-			getResponse, err := projectApiService.GetProject(ctx, created.Id)
-			if err != nil {
-				Fail("Failed getting project")
-			}
-			Expect(getResponse.Code).To(Equal(http.StatusOK))
-			getProject := getResponse.Body.(api.Project)
-			getRes := findResourceByNodePoolId(getProject.Resources, "1")
-			Expect(getRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), getRes.Rank, "rank")
-			validateRank(ptr.To("Low"), getRes.Priority, "priority")
-		})
-
-		It("backwards compatibility test: update project resources with both rank and priority - rank wins when differs from db", func() {
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, departmentId, clusterId)
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Project)
-			projectIds = append(projectIds, created.Id)
-
-			updateResources := getUpdateResources()
-			updateResources[0].Rank = ptr.To("Low")
-			updateResources[0].Priority = ptr.To(services.DefaultResourceRank)
-
-			updateResponse, err := projectApiService.UpdateProjectResources(ctx, created.Id, updateResources)
-			if err != nil {
-				Fail("Failed updating project")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedResources := updateResponse.Body.([]api.Resources)
-			updatedRes := findResourceByNodePoolId(updatedResources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
-		})
-
-		It("backwards compatibility test: update project with both rank and priority - priority wins when differs from db", func() {
-			name := createProjectName()
-			request := getProjectCreateRequest(name, name, departmentId, clusterId)
-			createResponse, err := projectApiService.CreateProject(ctx, request)
-			if err != nil {
-				Fail("Failed creating project")
-			}
-
-			Expect(createResponse.Code).To(Equal(http.StatusCreated))
-			created := createResponse.Body.(api.Project)
-			projectIds = append(projectIds, created.Id)
-
-			updateRequest := getProjectUpdateRequest(created)
-			updateRequest.Resources[0].Rank = ptr.To(services.DefaultResourceRank)
-			updateRequest.Resources[0].Priority = ptr.To("Low")
-
-			updateResponse, err := projectApiService.UpdateProject(ctx, created.Id, updateRequest)
-			if err != nil {
-				Fail("Failed updating project")
-			}
-			Expect(updateResponse.Code).To(Equal(http.StatusOK))
-
-			updatedProject := updateResponse.Body.(api.Project)
-			updatedRes := findResourceByNodePoolId(updatedProject.Resources, "1")
-			Expect(updatedRes).NotTo(BeNil())
-			validateRank(ptr.To("Low"), updatedRes.Rank, "rank")
-			validateRank(ptr.To("Low"), updatedRes.Priority, "priority")
 		})
 	})
 
@@ -2183,7 +2117,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				},
 				Gpu: api.ResourcesNullableGpu{
 					Limit:           &limit,
-					Deserved:        deserved,
+					Deserved:        ptr.To(deserved),
 					OverQuotaWeight: &oqWeight,
 				},
 				Rank: ptr.To("High"),
@@ -2259,7 +2193,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				},
 				Gpu: api.ResourcesNullableGpu{
 					Limit:           &limit,
-					Deserved:        deserved,
+					Deserved:        ptr.To(deserved),
 					OverQuotaWeight: &oqWeight,
 				},
 				Rank: ptr.To("HighUnknown"),
@@ -2294,7 +2228,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				},
 				Gpu: api.ResourcesNullableGpu{
 					Limit:           &limit,
-					Deserved:        deserved,
+					Deserved:        ptr.To(deserved),
 					OverQuotaWeight: &oqWeight,
 				},
 			})
@@ -2338,7 +2272,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				},
 				Gpu: api.ResourcesNullableGpu{
 					Limit:           &limit,
-					Deserved:        deserved,
+					Deserved:        ptr.To(deserved),
 					OverQuotaWeight: &oqWeight,
 				},
 			})
@@ -2370,7 +2304,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 				resources = append(resources, api.ResourcesNullable{
 					NodePool: created.Resources[i].NodePool,
 					Gpu: api.ResourcesNullableGpu{
-						Deserved:        created.Resources[i].Gpu.Deserved,
+						Deserved:        ptr.To(created.Resources[i].Gpu.Deserved),
 						Limit:           created.Resources[i].Gpu.Limit,
 						OverQuotaWeight: created.Resources[i].Gpu.OverQuotaWeight,
 					},
@@ -2434,7 +2368,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 			updateRequest := getProjectUpdateRequest(created)
 			updateRequest.Description = "new description"
 			updateRequest.Resources[0].Gpu = api.ResourcesNullableGpu{
-				Deserved:        -1,
+				Deserved:        ptr.To(float64(-1)),
 				Limit:           nil,
 				OverQuotaWeight: nil,
 			}
@@ -2505,7 +2439,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 			project1Name := createProjectName()
 			request := getProjectCreateRequest(project1Name, project1Name, departmentId, clusterId)
 			request.Resources[0].Gpu = api.ResourcesNullableGpu{
-				Deserved:        1,
+				Deserved:        ptr.To(float64(1)),
 				Limit:           ptr.To(float64(1)),
 				OverQuotaWeight: ptr.To(float64(1)),
 			}
@@ -2526,7 +2460,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 					Name: nodePoolName1,
 				},
 				Gpu: api.ResourcesNullableGpu{
-					Deserved:        1,
+					Deserved:        ptr.To(float64(1)),
 					Limit:           ptr.To(float64(1)),
 					OverQuotaWeight: ptr.To(float64(1)),
 				},
@@ -2553,7 +2487,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 			project2Name := createProjectName()
 			request = getProjectCreateRequest(project2Name, project2Name, departmentId, clusterId)
 			request.Resources[0].Gpu = api.ResourcesNullableGpu{
-				Deserved:        0,
+				Deserved:        ptr.To(float64(0)),
 				Limit:           ptr.To(float64(0)),
 				OverQuotaWeight: ptr.To(float64(0)),
 			}
@@ -2574,7 +2508,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 					Name: nodePoolName1,
 				},
 				Gpu: api.ResourcesNullableGpu{
-					Deserved:        0,
+					Deserved:        ptr.To(float64(0)),
 					Limit:           ptr.To(float64(0)),
 					OverQuotaWeight: ptr.To(float64(0)),
 				},
@@ -2951,6 +2885,40 @@ var _ = Describe("Project API tests", Ordered, func() {
 			count := countResponse.Body.(api.CountResponse).Count
 			Expect(count).To(Equal(countBefore + 6))
 		})
+
+		It("internal count ignores the caller's permitted scopes", func() {
+			createdIds := []string{}
+			for i := 0; i < 2; i++ {
+				name := createProjectName()
+				createResponse, err := projectApiService.CreateProject(ctx, getProjectCreateRequest(name, name, departmentId, clusterId))
+				Expect(err).To(BeNil())
+				Expect(createResponse.Code).To(Equal(http.StatusCreated))
+				created := createResponse.Body.(api.Project)
+				createdIds = append(createdIds, created.Id)
+				projectIds = append(projectIds, created.Id)
+			}
+
+			unscoped, err := projectApiService.CountProjects(ctx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(unscoped.Code).To(Equal(http.StatusOK))
+			total := unscoped.Body.(api.CountResponse).Count
+			Expect(total).To(BeNumerically(">=", 2))
+
+			limitedCtx := context.WithValue(ctx, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{
+				Projects: []string{createdIds[0]},
+			})
+
+			scoped, err := projectApiService.CountProjects(limitedCtx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(scoped.Code).To(Equal(http.StatusOK))
+			Expect(scoped.Body.(api.CountResponse).Count).To(Equal(int64(1)))
+
+			internal, err := projectApiService.CountInternalProjects(limitedCtx, []string{}, "")
+			Expect(err).To(BeNil())
+			Expect(internal.Code).To(Equal(http.StatusOK))
+			Expect(internal.Body.(api.CountResponse).Count).To(Equal(total))
+		})
+
 	})
 
 	Context("memory units", func() {
@@ -3014,7 +2982,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 					Name: defaultNodePoolName,
 				},
 				Gpu: api.ResourcesNullableGpu{
-					Deserved:        0,
+					Deserved:        ptr.To(float64(0)),
 					Limit:           ptr.To(float64(0)),
 					OverQuotaWeight: ptr.To(float64(0)),
 				},
@@ -3035,7 +3003,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 					Name: nodePoolName1,
 				},
 				Gpu: api.ResourcesNullableGpu{
-					Deserved:        0,
+					Deserved:        ptr.To(float64(0)),
 					Limit:           ptr.To(float64(0)),
 					OverQuotaWeight: ptr.To(float64(0)),
 				},
@@ -3103,7 +3071,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 					Name: defaultNodePoolName,
 				},
 				Gpu: api.ResourcesNullableGpu{
-					Deserved:        0,
+					Deserved:        ptr.To(float64(0)),
 					Limit:           ptr.To(float64(0)),
 					OverQuotaWeight: ptr.To(float64(0)),
 				},
@@ -3124,7 +3092,7 @@ var _ = Describe("Project API tests", Ordered, func() {
 					Name: nodePoolName1,
 				},
 				Gpu: api.ResourcesNullableGpu{
-					Deserved:        0,
+					Deserved:        ptr.To(float64(0)),
 					Limit:           ptr.To(float64(0)),
 					OverQuotaWeight: ptr.To(float64(0)),
 				},
@@ -4535,7 +4503,7 @@ func getProjectUpdateRequest(project api.Project) api.ProjectUpdateRequest {
 		resources = append(resources, api.ResourcesNullable{
 			NodePool: project.Resources[i].NodePool,
 			Gpu: api.ResourcesNullableGpu{
-				Deserved:        project.Resources[i].Gpu.Deserved,
+				Deserved:        ptr.To(project.Resources[i].Gpu.Deserved),
 				Limit:           project.Resources[i].Gpu.Limit,
 				OverQuotaWeight: project.Resources[i].Gpu.OverQuotaWeight,
 			},

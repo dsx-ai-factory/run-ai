@@ -23,10 +23,19 @@ func NewMockManagedOperands(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockManagedOperands {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockManagedOperands{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -234,10 +243,19 @@ func NewMockRunaiBaseReconcilerI(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockRunaiBaseReconcilerI {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockRunaiBaseReconcilerI{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -287,24 +305,50 @@ type MockRunaiBaseReconcilerI_controllerDeferFunction_Call struct {
 }
 
 // controllerDeferFunction is a helper method to define mock.On call
-//   - ctx
-//   - runaiCustomType
-//   - multiErr
-//   - successRes
-//   - errRes
-func (_e *MockRunaiBaseReconcilerI_Expecter) controllerDeferFunction(ctx interface{}, runaiCustomType interface{}, multiErr interface{}, successRes interface{}, errRes interface{}) *MockRunaiBaseReconcilerI_controllerDeferFunction_Call {
+//   - ctx context.Context
+//   - runaiCustomType v1.RunaiCustomTypeI
+//   - multiErr *multi_error.MultiError
+//   - successRes controllerruntime.Result
+//   - errRes controllerruntime.Result
+func (_e *MockRunaiBaseReconcilerI_Expecter) controllerDeferFunction(ctx any, runaiCustomType any, multiErr any, successRes any, errRes any) *MockRunaiBaseReconcilerI_controllerDeferFunction_Call {
 	return &MockRunaiBaseReconcilerI_controllerDeferFunction_Call{Call: _e.mock.On("controllerDeferFunction", ctx, runaiCustomType, multiErr, successRes, errRes)}
 }
 
 func (_c *MockRunaiBaseReconcilerI_controllerDeferFunction_Call) Run(run func(ctx context.Context, runaiCustomType v1.RunaiCustomTypeI, multiErr *multi_error.MultiError, successRes controllerruntime.Result, errRes controllerruntime.Result)) *MockRunaiBaseReconcilerI_controllerDeferFunction_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(v1.RunaiCustomTypeI), args[2].(*multi_error.MultiError), args[3].(controllerruntime.Result), args[4].(controllerruntime.Result))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 v1.RunaiCustomTypeI
+		if args[1] != nil {
+			arg1 = args[1].(v1.RunaiCustomTypeI)
+		}
+		var arg2 *multi_error.MultiError
+		if args[2] != nil {
+			arg2 = args[2].(*multi_error.MultiError)
+		}
+		var arg3 controllerruntime.Result
+		if args[3] != nil {
+			arg3 = args[3].(controllerruntime.Result)
+		}
+		var arg4 controllerruntime.Result
+		if args[4] != nil {
+			arg4 = args[4].(controllerruntime.Result)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
 
-func (_c *MockRunaiBaseReconcilerI_controllerDeferFunction_Call) Return(v controllerruntime.Result, err error) *MockRunaiBaseReconcilerI_controllerDeferFunction_Call {
-	_c.Call.Return(v, err)
+func (_c *MockRunaiBaseReconcilerI_controllerDeferFunction_Call) Return(result controllerruntime.Result, err error) *MockRunaiBaseReconcilerI_controllerDeferFunction_Call {
+	_c.Call.Return(result, err)
 	return _c
 }
 
@@ -336,16 +380,32 @@ type MockRunaiBaseReconcilerI_updateStatus_Call struct {
 }
 
 // updateStatus is a helper method to define mock.On call
-//   - ctx
-//   - runaiCustomType
-//   - multiErr
-func (_e *MockRunaiBaseReconcilerI_Expecter) updateStatus(ctx interface{}, runaiCustomType interface{}, multiErr interface{}) *MockRunaiBaseReconcilerI_updateStatus_Call {
+//   - ctx context.Context
+//   - runaiCustomType v1.RunaiCustomTypeI
+//   - multiErr *multi_error.MultiError
+func (_e *MockRunaiBaseReconcilerI_Expecter) updateStatus(ctx any, runaiCustomType any, multiErr any) *MockRunaiBaseReconcilerI_updateStatus_Call {
 	return &MockRunaiBaseReconcilerI_updateStatus_Call{Call: _e.mock.On("updateStatus", ctx, runaiCustomType, multiErr)}
 }
 
 func (_c *MockRunaiBaseReconcilerI_updateStatus_Call) Run(run func(ctx context.Context, runaiCustomType v1.RunaiCustomTypeI, multiErr *multi_error.MultiError)) *MockRunaiBaseReconcilerI_updateStatus_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(v1.RunaiCustomTypeI), args[2].(*multi_error.MultiError))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 v1.RunaiCustomTypeI
+		if args[1] != nil {
+			arg1 = args[1].(v1.RunaiCustomTypeI)
+		}
+		var arg2 *multi_error.MultiError
+		if args[2] != nil {
+			arg2 = args[2].(*multi_error.MultiError)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

@@ -24,7 +24,9 @@ const (
 type ExternalWorkloadSpec struct {
 	OriginalWorkloadUID  types.UID `json:"originalWorkloadUID,omitempty" protobuf:"bytes,1,opt,name=originalWorkloadUID,casttype=k8s.io/kubernetes/pkg/types.UID"`
 	OriginalWorkloadName string    `json:"originalWorkloadName,omitempty" protobuf:"bytes,2,opt,name=originalWorkloadName"`
-	// the type of the workload - usually the k8s object's kind
+	OriginalWorkloadKind string    `json:"originalWorkloadKind,omitempty" protobuf:"bytes,23,opt,name=originalWorkloadKind"`
+
+	// the type of the workload - usually the k8s object's kind, may hold the "logical" legacy type instead
 	Type    string `json:"type,omitempty" protobuf:"bytes,3,opt,name=type"`
 	Group   string `json:"group,omitempty" protobuf:"bytes,4,opt,name=group"`
 	Version string `json:"version,omitempty" protobuf:"bytes,20,opt,name=version"`

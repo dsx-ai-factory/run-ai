@@ -13,11 +13,16 @@ import (
 	"net/url"
 	"strings"
 
+	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
+	openshiftv1 "github.com/openshift/api/route/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -180,6 +185,11 @@ func nimServingPortToNetworkingConfig(workloadName string, sp *api.NimServiceSer
 		endpoint.ExternalAccess = externalAccess
 	}
 
+	// Without an exposure URL or authorization, the operator's Service needs no plugin endpoint.
+	if endpoint.Services == nil && endpoint.ExternalAccess == nil {
+		return nil, nil
+	}
+
 	return &[]api.NetworkingEndpoint{endpoint}, nil
 }
 
@@ -240,7 +250,10 @@ func nimServingPortToExternalAccess(sp *api.NimServiceServingPort, serviceName s
 
 	if ingressRouteEnabled {
 		if info.UseOpenShiftRoute {
-			ea.Route = buildOpenShiftRouteMap(host, path)
+			ea.Route, err = buildOpenShiftRouteMap(host, path, serviceName, hasAuth)
+			if err != nil {
+				return nil, api.NewError(http.StatusInternalServerError, "failed to build NIM OpenShift Route", err)
+			}
 		} else {
 			ingressEA := buildIngressExternalAccess(host, path, resolveProtocol(sp), info.IngressClass, serviceName, servicePort, hasAuth)
 			if ingressEA != nil {
@@ -421,16 +434,36 @@ func buildHTTPRouteExternalAccess(host, path string, _ api.ServingPortExposedPro
 	return &api.ExternalAccess{HttpRoute: &httpRoute}
 }
 
-func buildOpenShiftRouteMap(host, path string) *map[string]interface{} {
-	route := map[string]interface{}{
-		"apiVersion": constants.RouteV1,
-		"kind":       constants.KindRoute,
-		"spec": map[string]interface{}{
-			"host": host,
-			"path": path,
+func buildOpenShiftRouteMap(host, path, serviceName string, hasAuth bool) (*map[string]interface{}, error) {
+	route := &openshiftv1.Route{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: constants.RouteV1,
+			Kind:       constants.KindRoute,
+		},
+		Spec: openshiftv1.RouteSpec{
+			Host: host,
+			Path: path,
+			To: openshiftv1.RouteTargetReference{
+				Kind: constants.KindService,
+				Name: serviceName,
+			},
 		},
 	}
-	return &route
+	// Authenticated Routes are redirected to a single-port auth proxy by the plugin,
+	// which rewrites the backend Service but leaves the Route's port unchanged.
+	if !hasAuth {
+		route.Spec.Port = &openshiftv1.RoutePort{TargetPort: intstr.FromString(nimv1alpha1.DefaultNamedPortAPI)}
+	}
+
+	var routeMap map[string]interface{}
+	if err := convutils.CopySpecs(&routeMap, route); err != nil {
+		return nil, fmt.Errorf("convert OpenShift Route to networking configuration: %w", err)
+	}
+	// Omit fields that the typed API serializes even when unset.
+	delete(routeMap, "metadata")
+	delete(routeMap, "status")
+	unstructured.RemoveNestedField(routeMap, "spec", "to", "weight")
+	return &routeMap, nil
 }
 
 func pathRewriteAnnotations(ingressClass string) map[string]string {

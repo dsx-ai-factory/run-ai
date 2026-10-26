@@ -81,6 +81,7 @@ var _ = Describe("NetworkTopologiesApiService", Ordered, func() {
 				ctx = addSubjectToCtx(ctx, testSubjectId)
 				// Create test network topology in database
 				name := fmt.Sprintf("%s-2", testNetworkTopologyName)
+				testNow := time.Now()
 				createRequest := api.NetworkTopologyCreateRequest{
 					Name:      name,
 					Levels:    testNetworkTopologyLevels,
@@ -91,7 +92,6 @@ var _ = Describe("NetworkTopologiesApiService", Ordered, func() {
 				Expect(createResponse.Code).To(Equal(http.StatusCreated))
 
 				// Call the service method
-				testNow := time.Now()
 				response, err := networkTopologiesApiService.GetNetworkTopologies(ctx, []string{})
 
 				// Verify response

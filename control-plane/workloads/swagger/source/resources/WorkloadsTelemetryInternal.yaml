@@ -1,0 +1,43 @@
+get:
+  summary: Get the internal workloads telemetry.
+  operationId: get_internal_workloads_telemetry
+  description: |
+    Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.
+
+    Telemetry Types:
+    - WORKLOADS_COUNT: Count of workloads
+    - GPU_ALLOCATION: GPU allocation metrics
+    - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+      For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+    - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
+  x-internal: true
+  x-no-authorization: true
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+  tags:
+    - Workloads
+  parameters:
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/FilterByCluster.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/FilterByNodepoolName.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/FilterByDepartment.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/FilterByProject.yaml'
+    - $ref: '../parameters/query/TelemetryGroupBy.yaml'
+    - $ref: '../parameters/query/TelemetryType.yaml'
+    - $ref: '../parameters/query/FilterByPhases.yaml'
+    - $ref: '../parameters/query/TelemetryFilterBy.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../../../../infra/openapi/docs/schemas/metrics/TelemetryResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -10,7 +10,7 @@ runai workspace submit [flags]
 
 ```
 # Submit a workload
-runai workspace submit <workload-name> -p <project-name> -i runai.jfrog.io/demo/quickstart-demo
+runai workspace submit <workload-name> -p <project-name> -i ubuntu
 
 # Submit a workload with arguments
 runai workspace submit <workload-name> -p <project-name> -i ubuntu -- ls -la

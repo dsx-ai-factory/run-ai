@@ -110,6 +110,12 @@ var (
 		extractFunc: extractPreemptibleData,
 		formatFunc:  formatPreemptibleValue,
 	}
+	PreemptibilityField = FieldInformation{
+		columnTitle: "Preemptibility",
+		columnWidth: DefaultWidthPreemptible,
+		extractFunc: extractPreemptibilityData,
+		formatFunc:  formatPreemptibilityValue,
+	}
 	PodsField = FieldInformation{
 		columnTitle: "Running/Req. Pods",
 		columnWidth: DefaultWidthMemoryAllocation,

@@ -15,7 +15,7 @@ Releases follow a minor-version cadence aligned with the versions tracked in [Su
 
 ## Tags
 
-- Release tags use the pattern `X.Y.Z` (or `X.Y.Z-saas.N` for SaaS-configuration releases); see [`.github/workflows/tag-trigger.yaml`](.github/workflows/tag-trigger.yaml).
+- Release tags use the pattern `X.Y.Z`; see [`.github/workflows/tag-trigger.yaml`](.github/workflows/tag-trigger.yaml).
 - Tags **must** be created via a [GitHub Release](https://github.com/dsx-ai-factory/run-ai/releases), not pushed directly: the tag lane looks up the release's `target_commitish` and fails the run if no matching GitHub Release exists.
 - Tags must target a release branch, not `main`/`master`. Releasing directly from `main`/`master` is rejected by CI.
 

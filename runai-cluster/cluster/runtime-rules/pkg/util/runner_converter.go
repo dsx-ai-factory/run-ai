@@ -139,21 +139,20 @@ func parseTemplate(raw []byte) (*unstructured.Unstructured, error) {
 }
 
 // templateHasGpu detects GPU presence on the embedded template. Fractional
-// GPUs are stamped as annotations by workload-common/builders/gpus.go; whole
-// GPUs carry no such annotation and appear only as a resource request in the
-// pod spec, so we also walk the template for a GPU resource.
+// GPUs are stamped as annotations on the pod template metadata (e.g.
+// spec.template.metadata.annotations for a Job), not on the top-level object;
+// whole GPUs carry no such annotation and appear only as a resource request in
+// the pod spec. The pod template sits at a different path per Kind, so both
+// signals are found by a single Kind-agnostic walk.
 func templateHasGpu(obj *unstructured.Unstructured) bool {
-	annotations := obj.GetAnnotations()
-	for _, key := range []string{
-		commonconstants.AnnotationGpuFraction,
-		commonconstants.AnnotationGpuFractionDevices,
-		commonconstants.AnnotationGpuMemory,
-	} {
-		if v, ok := annotations[key]; ok && v != "" {
-			return true
-		}
-	}
-	return templateRequestsGpuResource(obj.Object)
+	return templateRequestsGpu(obj.Object)
+}
+
+// partialGpuAnnotations mark a fractional or GPU-memory request.
+var partialGpuAnnotations = []string{
+	commonconstants.AnnotationGpuFraction,
+	commonconstants.AnnotationGpuFractionDevices,
+	commonconstants.AnnotationGpuMemory,
 }
 
 // gpuResourceNames are whole-GPU resource requests that carry no partial annotation.
@@ -163,27 +162,43 @@ var gpuResourceNames = []string{
 	commonconstants.GpuResourceName,
 }
 
-// templateRequestsGpuResource walks the template for a positive GPU resource
-// request (e.g. nvidia.com/gpu). Kind-agnostic: the resource keys only appear
-// in container resource maps, wherever the pod spec sits for a given Kind.
-func templateRequestsGpuResource(node any) bool {
+// templateRequestsGpu walks the template for a partial-GPU annotation in any
+// metadata.annotations map, or a positive GPU resource request (e.g.
+// nvidia.com/gpu) in any container resource map.
+func templateRequestsGpu(node any) bool {
 	switch v := node.(type) {
 	case map[string]any:
+		if hasPartialGpuAnnotation(v["annotations"]) {
+			return true
+		}
 		for _, name := range gpuResourceNames {
 			if isPositiveQuantity(v[name]) {
 				return true
 			}
 		}
 		for _, child := range v {
-			if templateRequestsGpuResource(child) {
+			if templateRequestsGpu(child) {
 				return true
 			}
 		}
 	case []any:
 		for _, child := range v {
-			if templateRequestsGpuResource(child) {
+			if templateRequestsGpu(child) {
 				return true
 			}
+		}
+	}
+	return false
+}
+
+func hasPartialGpuAnnotation(val any) bool {
+	annotations, ok := val.(map[string]any)
+	if !ok {
+		return false
+	}
+	for _, key := range partialGpuAnnotations {
+		if s, ok := annotations[key].(string); ok && s != "" {
+			return true
 		}
 	}
 	return false

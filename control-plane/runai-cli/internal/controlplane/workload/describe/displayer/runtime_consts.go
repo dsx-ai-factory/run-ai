@@ -8,6 +8,7 @@ package displayer
 const (
 	// Field names
 	FieldPreemptible               = "Preemptible"
+	FieldPreemptibility            = "Preemptibility"
 	FieldImageSingular             = "Image"
 	FieldImagePlural               = "Images"
 	FieldRequestedNodePoolSingular = "Requested Node Pool"

@@ -20,7 +20,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/versions"
@@ -58,7 +57,7 @@ func (s *RolesApiService) GetRole(ctx context.Context, roleId int32) (api.ImplRe
 		return NewErrorResponse(api.NewError(http.StatusBadRequest, err.Error(), err)), nil
 	}
 
-	role, apiErr := dao.DbGetRoleById(ctx, tenantId, uint(roleId), convutils.Ref(s.TenantSettings.IsDGXCManaged(ctx)))
+	role, apiErr := dao.DbGetRoleById(ctx, tenantId, uint(roleId))
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
@@ -84,7 +83,7 @@ func (s *RolesApiService) GetRoles(ctx context.Context, limit int32, offset int3
 		return ErrorToApiError(sortError, http.StatusBadRequest), nil
 	}
 
-	roles, apiErr := dao.DbGetRoles(ctx, tenantId, s.TenantSettings.IsDGXCManaged(ctx), limit, offset, sortOrder, sortColumn, filters, search, includeInternal)
+	roles, apiErr := dao.DbGetRoles(ctx, tenantId, limit, offset, sortOrder, sortColumn, filters, search, includeInternal)
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
@@ -125,7 +124,7 @@ func (s *RolesApiService) enableDisableRole(ctx context.Context, roleId int32, s
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
-	existingRole, apiErr := dao.DbGetRoleById(ctx, tenantId, uint(roleId), nil)
+	existingRole, apiErr := dao.DbGetRoleById(ctx, tenantId, uint(roleId))
 	if apiErr != nil {
 		return NewErrorResponse(apiErr), nil
 	}
@@ -199,7 +198,7 @@ func validateSystemScopeRolePermissions(ctx context.Context, tenantId string, ro
 	}
 
 	if role == nil {
-		role, apiErr = dao.DbGetRoleById(ctx, tenantId, roleId, nil)
+		role, apiErr = dao.DbGetRoleById(ctx, tenantId, roleId)
 		if apiErr != nil {
 			return apiErr
 		}
@@ -434,7 +433,7 @@ func validateKubernetesPermissions(ctx context.Context, kubernetesPermissions ap
 		if err != nil {
 			return api.NewError(http.StatusBadRequest, "KubernetesPermissions predefined role id invalid", nil)
 		}
-		predefinedRole, apiErr := dao.DbGetRoleById(ctx, tenantId, uint(intValue), nil)
+		predefinedRole, apiErr := dao.DbGetRoleById(ctx, tenantId, uint(intValue))
 		if apiErr != nil {
 			return apiErr
 		}
@@ -695,7 +694,7 @@ func (s *RolesApiService) DeleteRole(ctx context.Context, roleId int32) (api.Imp
 func canEditRole(ctx context.Context, tenantId string, roleId uint) *api.Error {
 	permittedScopes, exists := authorization_utils.GetPermittedScopesFromCtx(ctx)
 	if permittedScopes != nil && exists && (permittedScopes.System == nil || !*permittedScopes.System) {
-		role, apiErr := dao.DbGetRoleById(ctx, tenantId, roleId, nil)
+		role, apiErr := dao.DbGetRoleById(ctx, tenantId, roleId)
 		if apiErr != nil {
 			return apiErr
 		}
@@ -714,38 +713,4 @@ func canEditRole(ctx context.Context, tenantId string, roleId uint) *api.Error {
 	}
 
 	return nil
-}
-
-// GetRoleV1 - Get role
-func (s *RolesApiService) GetRoleV1(ctx context.Context, roleId int32) (api.ImplResponse, error) {
-	tenantId, err := runaictx.ParseTenantId(ctx)
-	if err != nil {
-		return NewErrorResponse(api.NewError(http.StatusBadRequest, err.Error(), err)), nil
-	}
-
-	role, apiErr := dao.DbGetRoleById(ctx, tenantId, uint(roleId), convutils.Ref(s.TenantSettings.IsDGXCManaged(ctx)))
-	if apiErr != nil {
-		return NewErrorResponse(apiErr), nil
-	}
-
-	return api.Response(http.StatusOK, RoleDaoToV1Api(role)), nil
-}
-
-// GetRolesV1 - Get roles list
-func (s *RolesApiService) GetRolesV1(ctx context.Context, includeInternal bool) (api.ImplResponse, error) {
-	tenantId, err := runaictx.ParseTenantId(ctx)
-	if err != nil {
-		return NewErrorResponse(api.NewError(http.StatusBadRequest, err.Error(), err)), nil
-	}
-
-	roles, apiErr := dao.DbGetRoles(ctx, tenantId, s.TenantSettings.IsDGXCManaged(ctx), 0, 0, "", "", nil, "", includeInternal)
-	if apiErr != nil {
-		return NewErrorResponse(apiErr), nil
-	}
-
-	resultRoles := []api.RoleV1{}
-	for _, role := range *roles {
-		resultRoles = append(resultRoles, RoleDaoToV1Api(&role))
-	}
-	return api.Response(http.StatusOK, resultRoles), nil
 }

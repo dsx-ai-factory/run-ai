@@ -28,7 +28,7 @@ var _ = Describe("ColumnsFlagCompletion", func() {
 			Expect(directive).To(Equal(cobra.ShellCompDirectiveNoSpace))
 			Expect(completions).To(HaveLen(len(manipulate.ColumnMap)))
 			// Verify it contains expected columns
-			Expect(completions).To(ContainElements("Name", "Type", "Status", "Project", "Framework", "Category", "Priority", "Department", "SubmittedBy", "CreatedAt", "TotalPendingTimeSeconds", "AllocatedGPUMemory", "AllocatedCPUCompute", "AllocatedCPUMemory", "CompletedAt", "Preemptible", "Pods", "AllocatedGPU", "URLs"))
+			Expect(completions).To(ContainElements("Name", "Type", "Status", "Project", "Framework", "Category", "Priority", "Department", "SubmittedBy", "CreatedAt", "TotalPendingTimeSeconds", "AllocatedGPUMemory", "AllocatedCPUCompute", "AllocatedCPUMemory", "CompletedAt", "Preemptible", "Preemptibility", "Pods", "AllocatedGPU", "URLs"))
 		})
 	})
 

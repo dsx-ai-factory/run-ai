@@ -14,9 +14,9 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -93,7 +93,7 @@ func BuildOAuth2ProxyContainers(info *composer.ExposedUrlInfo) ([]corev1.Contain
 				urlSuffix = ""
 				noSuffixUrlGenerated = true
 			}
-			parsedUrl, parseErr = composeAutoExposedUrl(cfg.ClusterDomain(), info.ProjectName, info.WorkloadName, urlSuffix, cfg.SubdomainSupportEnabled())
+			parsedUrl, parseErr = composer.ComposeAutoExposedURL(cfg.ClusterDomain(), info.ProjectName, info.WorkloadName, urlSuffix, cfg.SubdomainSupportEnabled())
 		} else {
 			parsedUrl, parseErr = url.Parse(item.Url)
 		}
@@ -145,7 +145,7 @@ func BuildOAuth2ProxyContainers(info *composer.ExposedUrlInfo) ([]corev1.Contain
 			"--cookie-samesite=lax",
 			"--skip-jwt-bearer-tokens=true",
 			fmt.Sprintf("--extra-jwt-issuers=%s=runai", oidcIssuerUrl),
-			"--custom-templates-dir=/usr/share/oauth2-proxy",
+			"--custom-templates-dir=" + oauth2proxy.TemplatesPath,
 			"--pass-authorization-header=false",
 			fmt.Sprintf("--cookie-name=%s", cookiePrefix),
 		}
@@ -187,6 +187,11 @@ func BuildOAuth2ProxyContainers(info *composer.ExposedUrlInfo) ([]corev1.Contain
 
 		volumeMounts := []corev1.VolumeMount{
 			{Name: oauth2AuthVolumeName, MountPath: oauth2AuthVolumePath},
+		}
+		if info.OAuth2ProxyTemplatesSupported {
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name: oauth2proxy.VolumeName, MountPath: oauth2proxy.TemplatesPath, ReadOnly: true,
+			})
 		}
 		if cfg.IsCustomCAAuthEnabled() {
 			volumeMounts = append(volumeMounts, oauth2CAVolumeMount(cfg))
@@ -244,6 +249,16 @@ func BuildOAuth2ProxyVolumes(info *composer.ExposedUrlInfo) []corev1.Volume {
 		Name:         oauth2AuthVolumeName,
 		VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 	})
+	if info.OAuth2ProxyTemplatesSupported {
+		result = append(result, corev1.Volume{
+			Name: oauth2proxy.VolumeName,
+			VolumeSource: corev1.VolumeSource{ConfigMap: &corev1.ConfigMapVolumeSource{
+				LocalObjectReference: corev1.LocalObjectReference{Name: oauth2proxy.ConfigMapName},
+				Items:                []corev1.KeyToPath{{Key: oauth2proxy.TemplateKey, Path: oauth2proxy.TemplateKey}},
+				Optional:             convutils.Ref(true),
+			}},
+		})
+	}
 
 	if info.Config.IsCustomCAAuthEnabled() {
 		result = append(result, oauth2CAVolume(info.Config))
@@ -274,49 +289,6 @@ func oauth2CAVolume(cfg composer.ClusterStorageConfig) corev1.Volume {
 			},
 		},
 	}
-}
-
-// composeAutoExposedUrl returns the auto-generated URL for an exposed URL that
-// has no custom URL set. We deliberately delegate to the cluster's shared
-// builder (workload-common/builders) so the V2 composer, the V1 cluster builder
-// and the notification's connections-pre-processor all derive the URL from a
-// single source of truth.
-//
-// TODO: when the workload-common/builders package is removed, inline the
-// builder's logic here. The original implementation was:
-//
-//	parsed, err := url.Parse(clusterDomain)
-//	if err != nil || parsed == nil { return nil, ... }
-//	if subdomainSupported {
-//		subdomain := projectName + "-" + workloadName
-//		if suffix != "" { subdomain += "-" + suffix }
-//		parsed.Host = subdomain + "." + parsed.Host
-//	} else {
-//		path := "/" + projectName + "/" + workloadName
-//		if suffix != "" { path += "/" + suffix }
-//		if parsed.Path != "" { path += "/" + parsed.Path }
-//		parsed.Path = path
-//	}
-//	if parsed.Path == "" { parsed.Path = "/" }
-//	return parsed, nil
-func composeAutoExposedUrl(clusterDomain, projectName, workloadName, suffix string, subdomainSupported bool) (*url.URL, error) {
-	parsed, err := builders.ComposeExposedUrl(suffix, workloadName, projectName, clusterDomain, builders.ComposeUrlOptions{
-		SubdomainSupported: subdomainSupported,
-	})
-	if err != nil {
-		return nil, err
-	}
-	if parsed == nil {
-		return nil, fmt.Errorf("ComposeExposedUrl returned nil URL for workload=%q project=%q suffix=%q domain=%q",
-			workloadName, projectName, suffix, clusterDomain)
-	}
-	stdUrl := url.URL(*parsed)
-	return &stdUrl, nil
-}
-
-// ComposeAutoExposedURL exposes the shared V1-compatible URL generation to typed V2 composers.
-func ComposeAutoExposedURL(clusterDomain, projectName, workloadName, suffix string, subdomainSupported bool) (*url.URL, error) {
-	return composeAutoExposedUrl(clusterDomain, projectName, workloadName, suffix, subdomainSupported)
 }
 
 func oauth2PathSuffixes(path string) (redirectSuffix, proxyPrefixSuffix string) {

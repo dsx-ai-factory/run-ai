@@ -65,37 +65,36 @@ Click one of the values in the Workload(s) column to view the list of workloads 
 
 When installing NVIDIA Run:ai, you automatically get the environments created by NVIDIA Run:ai to ease up the onboarding process and support different use cases out of the box. These environments are created at the [scope](overview.md#asset-scope) of the account.
 
-<Info>
+<Note>
 
 **Note**
 
 The environments listed below are available based on your cluster settings. Some environments, such as vscode and rstudio, are only available in clusters with [host-based routing](../../installation-and-configuration/configuration/networking/external-access-to-containers.md#host-based-routing).
 
-</Info>
+</Note>
 
 | Environment                                                                                     | Image                                              | Description                                                                                                                                                                            |
 | ----------------------------------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [bio-nemo](https://catalog.ngc.nvidia.com/orgs/nvidia/teams/clara/containers/bionemo-framework) | `nvcr.io/nvidia/clara/bionemo-framework:2.5`       | A framework developed by NVIDIA for large-scale biomolecular models, optimized to support drug discovery, genomics, and protein structure prediction                                   |
-| chatbot-ui                                                                                      | `runai.jfrog.io/core-llm/llm-app`                  | A user interface for interacting with chat-based AI models, often used for testing and deploying chatbot applications                                                                  |
-| jupyter-lab / jupyter-scipy                                                                     | `jupyter/scipy-notebook`                           | An interactive development environment for Jupyter notebooks, code, and data visualization                                                                                             |
-| jupyter-tensorboard                                                                             | `gcr.io/run-ai-demo/jupyter-tensorboar`d           | An integrated combination of the interactive Jupyter development environment and TensorFlow's visualization toolkit for monitoring and analyzing ML models                             |
-| llm-server                                                                                      | `runai.jfrog.io/core-llm/runai-vllm:v0.6.4-0.10.0` | A vLLM-based server that hosts and serves large language models for inference, enabling API-based access to AI models                                                                  |
-| [nemo](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/nemo/tags)                         | `nvcr.io/nvidia/nemo:25.02`                        | A framework for training and deploying LLMs and generative AI developed by NVIDIA with automated data processing, model training techniques, and flexible deployment options           |
-| [pytorch](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch)                        | `nvcr.io/nvidia/pytorch:25.02-py3`                 | An integrated deep learning framework accelerated by NVIDIA, built for dynamic training and seamless compatibility with Python tools like NumPy and SciPy                              |
-| rstudio                                                                                         | `rocker/rstudio:4`                                 | An integrated development environment (IDE) for R, commonly used for statistical computing and data analysis                                                                           |
-| tensorboard / tensorboad-tensorflow                                                             | `tensorflow/tensorflow:latest`                     | A visualization toolkit for TensorFlow that helps users monitor and analyze ML models, displaying various metrics and model architecture                                               |
+| gpt2 | `ghcr.io/huggingface/text-generation-inference:3.3.6-intel-cpu` | A lightweight GPT-2 text generation server that runs on CPU, useful for trying out inference workloads |
+| huggingface-chat-ui | `ghcr.io/run-ai/chat-ui-db:0.20` | A chat interface for interacting with LLMs, using unique subdomains for each workspace. Requires wildcard DNS support |
+| jupyter-scipy | `jupyter/scipy-notebook`                           | An interactive development environment for Jupyter notebooks, code, and data visualization                                                                                             |
+| jupyter-tensorboard                                                                             | `nvcr.io/nvidia/pytorch:26.09-py3`                 | An integrated combination of the interactive Jupyter development environment and TensorFlow's visualization toolkit for monitoring and analyzing ML models                             |
+| llm-server                                                                                      | `vllm/vllm-openai:v0.6.4`                          | A vLLM-based server that hosts and serves large language models for inference, enabling API-based access to AI models                                                                  |
+| openwebui | `ghcr.io/open-webui/open-webui:v0.6.42` | A feature-rich web interface for LLM interactions with RAG support, model management, and user authentication. Supports OpenAI API compatible endpoints |
+| rstudio                                                                                         | `rocker/rstudio`                                 | An integrated development environment (IDE) for R, commonly used for statistical computing and data analysis                                                                           |
+| tensorboard-tensorflow | `tensorflow/tensorflow:2.20.0`                     | A visualization toolkit for TensorFlow that helps users monitor and analyze ML models, displaying various metrics and model architecture                                               |
 | vscode                                                                                          | `ghcr.io/coder/code-server`                        | A fast, lightweight code editor with powerful features like intelligent code completion, debugging, Git integration, and extensions, ideal for web development, data science, and more |
 
 ## Adding a New Environment
 
-<Info>
+<Note>
 
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
 * To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
-</Info>
+</Note>
 
 Environment creation is limited to [specific roles](overview.md#who-can-create-an-asset)
 
@@ -175,13 +174,13 @@ To add a new environment:
 16. Optional: Select **Linux capabilities** - Grant certain privileges to a container without granting all the privileges of the root user.
 17. Click **CREATE ENVIRONMENT**
 
-<Info>
+<Note>
 
 **Note**
 
 It is also possible to add environments directly when creating a specific [workspace](../using-workspaces/running-workspace.md), [training](../using-training/train-models.md) or [inference](../using-inference/nvidia-run-ai-inference-overview.md) workload.
 
-</Info>
+</Note>
 
 ## Editing an Environment
 
@@ -191,14 +190,14 @@ To edit an existing environment:
 2. Click **Edit**
 3. Update the environment and click **SAVE ENVIRONMENT**
 
-<Info>
+<Note>
 
 **Note**
 
 * The already bound workload that is using this asset will not be affected.
 * llm-server and chatbot-ui environments cannot be edited.
 
-</Info>
+</Note>
 
 ## Copying an Environment
 
@@ -217,14 +216,18 @@ To delete an environment:
 2. Click **DELETE**
 3. On the dialog, click **DELETE** to confirm
 
-<Info>
+<Note>
 
 **Note**
 
 The already bound workload that is using this asset will not be affected.
 
-</Info>
+</Note>
+
+## Using CLI
+
+To view the available actions on environments, see the environment [CLI v2 reference](../../reference/cli/runai/runai_environment.md).
 
 ## Using API
 
-Go to the [Environment](https://run-ai-docs.nvidia.com/api/2.26/workload-assets/environment) API reference to view the available actions
+Go to the [Environment](api:main-api:GET/api/v1/asset/environment) API reference to view the available actions

@@ -10,6 +10,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/completion/template"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/project"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cli/structs"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cmdtxn"
 	commonconfig "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
@@ -151,7 +152,7 @@ func setPaginationParams(params *list.GetListParams) error {
 
 	// Handle next-token for pagination continuation
 	if listOptions.Page.NextToken.IsSet() {
-		offset, err := list.NextTokenToOffset(&listOptions.Page.NextToken)
+		offset, err := structs.NextTokenToOffset(&listOptions.Page.NextToken)
 		if err != nil {
 			return fmt.Errorf("invalid next token: %w", err)
 		}

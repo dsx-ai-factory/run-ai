@@ -6,7 +6,7 @@
 package parsers
 
 import (
-	swagger "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	swagger "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	global_consts "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	schedulingv1 "k8s.io/api/scheduling/v1"
 	"k8s.io/utils/ptr"

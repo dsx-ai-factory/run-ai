@@ -97,7 +97,7 @@ func allTransformTestCases() []transformTestCase {
 			setting:     &settings.EnablePolicies{Enabled: true},
 			enabled:     true,
 			displayName: "Policies",
-			description: "Enable to impose restrictions and default values on workloads' fields. For more information, see the Policies guide",
+			description: "Enable to impose restrictions and default values on workloads' fields. For more information, see the <a data-doc-key='policies' target='_blank'>Policies guide</a>",
 			stage:       "GA",
 		},
 		{
@@ -113,7 +113,7 @@ func allTransformTestCases() []transformTestCase {
 			setting:     &settings.EnableTemplatesV2{Enabled: true},
 			enabled:     true,
 			displayName: "Flexible workload templates",
-			description: "Enable to create workload templates via the new flexible form. For more information, see the Workload Templates guide",
+			description: "Enable to create workload templates via the new flexible form. For more information, see the <a data-doc-key='workloadTemplates' target='_blank'>Workload Templates guide</a>",
 			stage:       "GA",
 		},
 		{
@@ -129,7 +129,7 @@ func allTransformTestCases() []transformTestCase {
 			setting:     &settings.GpuOverProvisioning{Enabled: true},
 			enabled:     true,
 			displayName: "GPU resource optimization",
-			description: "Enable to set a GPU memory limit for workloads. To enable this on each Run:ai cluster, see the Dynamic GPU fractions guide",
+			description: "Enable to set a GPU memory limit for workloads. To enable this on each Run:ai cluster, see the <a data-doc-key='dynamicFractions' target='_blank'>Dynamic GPU fractions guide</a>",
 			stage:       "Beta",
 		},
 	}

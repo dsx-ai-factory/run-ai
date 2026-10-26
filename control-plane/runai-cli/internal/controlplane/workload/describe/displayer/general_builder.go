@@ -78,6 +78,11 @@ func (b *GeneralBuilder) Priority(priority string) *GeneralBuilder {
 	return b
 }
 
+func (b *GeneralBuilder) Preemptibility(preemptibility string) *GeneralBuilder {
+	b.general.Preemptibility = &preemptibility
+	return b
+}
+
 func (b *GeneralBuilder) Category(category string) *GeneralBuilder {
 	b.general.Category = category
 	return b

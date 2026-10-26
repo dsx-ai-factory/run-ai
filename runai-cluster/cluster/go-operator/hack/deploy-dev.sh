@@ -5,17 +5,17 @@
 
 # need to docker login first
 
+if [ -f .env ]; then
+  export $(cat .env | xargs)
+fi
+
 dockerTagName=${IMAGE_NAME:-"runai-developer"} # You can also put it in the git ignored .env
-dockerRepo="gcr.io/run-ai-lab/go-operator"
+dockerRepo="${DOCKER_REPO:?set DOCKER_REPO to your container registry, e.g. myreg.example.com/myuser}/go-operator"
 DEBUG=
 
 if [[ $* == *-d* ]]; then
   echo "Building debug image"
   DEBUG=1
-fi
-
-if [ -f .env ]; then
-  export $(cat .env | xargs)
 fi
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )" &&

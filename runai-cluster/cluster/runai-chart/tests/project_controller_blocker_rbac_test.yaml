@@ -4,10 +4,13 @@ templates:
   - templates/clusterroles/base.yaml
 
 tests:
-  - it: should watch blockers that have active project-controller watches
+  # KRM grants nothing for delete-blocker kinds, and a blocker the controller
+  # cannot list is an error that blocks project deletion outright, so every kind
+  # in runaiDeletionBlockers needs get, list and watch here.
+  - it: should grant get, list and watch on every blocker kind
     documentSelector:
       path: rules[0].resources[0]
-      value: projects
+      value: trainingworkloads
     asserts:
       - isKind:
           of: ClusterRole
@@ -25,30 +28,34 @@ tests:
               - inferenceworkloads
               - distributedworkloads
               - externalworkloads
-              - datavolumes
+              - distributedinferenceworkloads
+              - runaijobs
               - workloadrunners
+              - datavolumes
+            verbs:
+              - get
+              - list
+              - watch
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - ""
+            resources:
+              - secrets
+              - persistentvolumeclaims
             verbs:
               - get
               - list
               - watch
 
-  - it: should only list legacy blockers that are checked during deletion
+  # KRM's service account is not named the same as the one the Run:ai
+  # project-controller used, so the binding has to name KRM's.
+  - it: should bind the blocker grants to KRM's service account
     documentSelector:
-      path: rules[0].resources[0]
-      value: projects
+      path: roleRef.name
+      value: runai-project-controller
     asserts:
-      - isKind:
-          of: ClusterRole
       - equal:
-          path: metadata.name
-          value: runai-project-controller
-      - contains:
-          path: rules
-          content:
-            apiGroups:
-              - run.ai
-            resources:
-              - distributedinferenceworkloads
-              - runaijobs
-            verbs:
-              - list
+          path: subjects[0].name
+          value: project-controller

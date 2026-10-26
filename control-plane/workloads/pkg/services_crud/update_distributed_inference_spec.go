@@ -14,17 +14,19 @@ import (
 	"sort"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/runai_workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/conjungo"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	dinfwv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
@@ -178,7 +180,9 @@ func UpdateDistributedInferenceSpec(ctx context.Context, workloadId string, tena
 		if persistErr != nil {
 			return api.Response(int(persistErr.Code), persistErr), nil
 		}
+		acceptedAt := time.Now().UTC()
 		sanitizeWorkloadResponse(ctx, response)
+		recordWorkloadResponseAction(ctx, *response, api.WORKLOADACTIONTYPE_UPDATE, acceptedAt)
 
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully updated distributed inference spec for workload id: <%s> name: <%s> in project id: <%s>", workloadId, nativeWorkload.Name, nativeWorkload.ProjectId)
 		return api.Response(http.StatusAccepted, *response), nil
@@ -218,6 +222,7 @@ func UpdateDistributedInferenceSpec(ctx context.Context, workloadId string, tena
 	if updateErr != nil {
 		return api.Response(int(updateErr.Code), updateErr), nil
 	}
+	acceptedAt := time.Now().UTC()
 
 	// Write the merged spec back so subsequent updates / make-a-copy see it (best-effort):
 	// the workload update already succeeded in workloads-manager, so a snapshot failure must
@@ -234,6 +239,7 @@ func UpdateDistributedInferenceSpec(ctx context.Context, workloadId string, tena
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully updated distributed inference spec via workload-runner for workload id: <%s>", workloadId)
 	sanitizeWorkloadResponse(ctx, &response)
+	recordWorkloadResponseAction(ctx, response, api.WORKLOADACTIONTYPE_UPDATE, acceptedAt)
 	return api.Response(http.StatusAccepted, response), nil
 }
 
@@ -254,13 +260,17 @@ func composeDistributedInferenceUpdateNative(
 	workload *models_crud.Workload,
 	options composer.FieldsComposerOptions,
 ) (composer.WorkloadRequirements, *workloadsApi.SubmissionErrorV2) {
+	if err := validateNativeGpuMode(workload.Spec); err != nil {
+		return composer.WorkloadRequirements{}, err
+	}
+
 	dInfComposer := runai_workloads.NewDinfWorkloadComposer(
 		workload.Name,
 		workload.CreatedBy,
 		nil,
 		options)
 
-	composerErr := dInfComposer.Compose(ctx, workload.Spec, &dinfwv1.DistributedInferenceWorkload{})
+	composerErr := dInfComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(workload.Spec), &dinfwv1.DistributedInferenceWorkload{})
 	if composerErr != nil {
 		return composer.WorkloadRequirements{}, NewSubmissionErrorWithDetails(composerErr.Code, composerErr.Message, composerErr.Details)
 	}

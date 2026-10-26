@@ -74,8 +74,6 @@ Override knobs (all `?=`):
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `DOCKER_TAG` | `0.0.0-dev` | Image tag. |
-| `DOCKER_REPO_BASE` | `runai.jfrog.io/cp-containers-lab` | Image registry prefix. |
-| `DOCKERHUB_PROXY` | `runai.jfrog.io/dockerhub/` | Public-image proxy. Set empty to pull straight from Docker Hub on environments without `runai.jfrog.io` auth. |
 | `DOCKER_WORK_DIR` | `/local/control-plane/${SERVICE_NAME}` | Container working directory. |
 | `ARCH` | `arm64` on Apple Silicon, else `amd64` | Build architecture. |
 | `OS` | `linux` or `darwin` | Build OS. |
@@ -165,14 +163,12 @@ Override knobs of note:
 Git tag bump and validation for versioned Go modules. `TAG_FORMAT` is the tag
 prefix (`$(TAG_FORMAT)/vX.Y.Z` prod, `-dev.N` dev).
 
-- `client-bump-version(-dev)` — legacy patch-only bump for generated clients.
+- `client-bump-version(-dev)` — run from the service that owns the client.
 - `package-bump-version(-dev)` — `runai-common-packages/*` and
-  `runai-application-packages/*` only; auto patch/minor via `apidiff`,
-  confirms before tagging.
+  `runai-application-packages/*`.
+- Both share one flow: auto patch/minor via `apidiff`, confirms before tagging.
 - `check-breaking-changes` — preview the `apidiff` verdict, no tagging.
 - `validate` / `validate-imports` — go.mod replace / `-dev` client checks.
-
-No `?=` knobs; everything derives from `SERVICE_NAME` and git tag state.
 
 ### `mirrord.mk`
 
@@ -228,8 +224,6 @@ reference for the reconciliation PRs (2..5).
 
 | Concern | `control-plane/infra/makefile/` | `runai-cluster/common/build/makefile/` |
 |---------|----------------------------------|-----------------------------------------|
-| Image registry | `DOCKER_REPO_BASE?=runai.jfrog.io/cp-containers-lab` | `DOCKER_REPO_BASE?=runai.jfrog.io/op-containers-${ENVIRONMENT}` (with `ENVIRONMENT?=lab`) |
-| Public-image proxy | `DOCKERHUB_PROXY?=runai.jfrog.io/dockerhub/`, threaded into every Docker image reference | Not set; references like `node:${NODEJS_VERSION}`, `debian:12.1-slim` resolve directly |
 | Container working dir | `DOCKER_WORK_DIR?=/local/control-plane/${SERVICE_NAME}` | `DOCKER_WORK_DIR?=/local/runai-cluster/${SUB_DIR}/${SERVICE_NAME}` (requires `SUB_DIR`) |
 | Workspace mount | `-v "${PWD}/../../:/local"` | `-v "${PWD}/../../../:/local:z"` (3 levels up, with `:z` SELinux label) |
 | Privileged command | `DOCKER_COMMAND_PRIVILEGED` defined | `DOCKER_COMMAND_PRIVILEGED` defined (same shape, with `:z` mount + `runai-cluster` path) |

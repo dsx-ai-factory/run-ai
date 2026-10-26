@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/plugin/framework"
@@ -137,7 +138,7 @@ func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
 	bldr = bldr.
 		Watches(&dromosv1alpha1.WorkloadRunner{},
 			handler.EnqueueRequestsFromMapFunc(mapWorkloadRunnerToSelf),
-			builder.WithPredicates(endpointAnnotationChangedPredicate())).
+			builder.WithPredicates(networkingAnnotationsChangedPredicate())).
 		Watches(&appsv1.Deployment{}, ownedEnqueue).
 		Watches(&appsv1.ReplicaSet{}, ownedEnqueue,
 			builder.OnlyMetadata, builder.WithPredicates(ownerReferencesChangedPredicate())).
@@ -192,7 +193,7 @@ func podDependencyChangedPredicate() predicate.Predicate {
 	}
 }
 
-func endpointAnnotationChangedPredicate() predicate.Predicate {
+func networkingAnnotationsChangedPredicate() predicate.Predicate {
 	return predicate.Funcs{
 		CreateFunc: func(_ event.CreateEvent) bool {
 			return false
@@ -204,7 +205,8 @@ func endpointAnnotationChangedPredicate() predicate.Predicate {
 			if e.ObjectOld == nil || e.ObjectNew == nil {
 				return false
 			}
-			return annotationValueChanged(e.ObjectOld, e.ObjectNew, endpoints.Annotation)
+			return annotationValueChanged(e.ObjectOld, e.ObjectNew, endpoints.Annotation) ||
+				annotationValueChanged(e.ObjectOld, e.ObjectNew, constants.NetworkingSubmissionProfileAnnotation)
 		},
 		GenericFunc: func(_ event.GenericEvent) bool {
 			return false

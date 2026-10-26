@@ -12,7 +12,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/utils"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/inference"
 
@@ -372,7 +372,7 @@ var _ = Describe("Inference Test", Ordered, func() {
 				"--large-shm=true",
 				InferenceComputeFullName, InferenceComputeFullNameImageName, InferenceServingPort), envMap)
 			Expect(err).To(BeNil())
-			Expect(output).To(HavePrefix(fmt.Sprintf(ExpectSuccessMsg, InferenceComputeFullName)))
+			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectSuccessMsg, InferenceComputeFullName)))
 			submitSpec, err := clients.GetSpecByInferenceName(InferenceComputeFullName)
 			Expect(err).To(BeNil())
 			Expect(submitSpec.Image.IsSet()).To(Equal(true))

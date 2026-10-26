@@ -1623,11 +1623,20 @@ components:
       type: object
     BootConfigDocs:
       example:
+        catalogVersion: v1
         baseUrl: https://run-ai-docs.nvidia.com/self-hosted
         whatsNew:
           label: What's New in 2.25
           url: https://run-ai-docs.nvidia.com/self-hosted/getting-started/whats-new/whats-new-2-25
       properties:
+        catalogVersion:
+          default: v1
+          description: Documentation path catalog. Defaults to v1 when omitted by
+            an older server.
+          enum:
+          - v1
+          - v2
+          type: string
         baseUrl:
           description: Base URL used to resolve documentation links.
           example: https://run-ai-docs.nvidia.com/self-hosted
@@ -1689,6 +1698,7 @@ components:
         capabilities:
           showsClusterLocationStep: true
         docs:
+          catalogVersion: v1
           baseUrl: https://run-ai-docs.nvidia.com/self-hosted
           whatsNew:
             label: What's New in 2.25

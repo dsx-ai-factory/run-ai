@@ -18,13 +18,13 @@ The Python client is not covered under standard NVIDIA Run:ai product support.
   * To create organization-level service accounts, see [Service accounts](../../platform-management/authentication/service-accounts.md)
   * To create user-level access keys, see [User access keys](../../settings/user-settings/user-access-keys.md)
 
-<Info>
+<Note>
 
 **Note**
 
 Ensure your token has the required [role and scope](../../platform-management/authentication/accessrules.md) permissions for your intended API operations. API calls will fail with a 403 error if the token lacks sufficient role or scope.
 
-</Info>
+</Note>
 
 ## Installation
 

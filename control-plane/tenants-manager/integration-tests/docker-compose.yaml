@@ -3,7 +3,7 @@ services:
   postgres:
     profiles:
       - localdebug
-    image: postgres:18.4
+    image: postgres:18.6
     container_name: postgres
     environment:
       POSTGRES_DB: postgres
@@ -24,7 +24,7 @@ services:
     profiles:
       - nats-setup
       - localdebug
-    image: nats:2.14.3-alpine
+    image: nats:2.15.0-alpine
     command: --user user --pass abc123  --name N1 --js -m 8222  -p 4222
     ports:
     - 4222:4222

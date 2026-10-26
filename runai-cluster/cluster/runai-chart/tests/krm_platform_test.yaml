@@ -1,0 +1,88 @@
+suite: Test KRM FIPS and OpenShift wiring
+
+templates:
+  - charts/kai-resource-management/templates/krm-config.yaml
+  - charts/kai-resource-management/templates/pod-group-assigner/webhook.yaml
+  - charts/kai-resource-management/templates/krm-operator/deployment.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
+
+tests:
+  # On OpenShift the platform mints the serving cert, so KRM renders no Secret
+  # and annotates the webhook instead. openShift.mode does not reach the
+  # subchart, so this knob is what carries an overridden autodetect.
+  - it: should mint its own serving cert off OpenShift
+    template: charts/kai-resource-management/templates/pod-group-assigner/webhook.yaml
+    asserts:
+      - hasDocuments:
+          count: 2
+      - isKind:
+          of: Secret
+        documentIndex: 0
+
+  - it: should defer to OpenShift cert injection when openshift is set
+    set:
+      kai-resource-management.openshift: true
+    template: charts/kai-resource-management/templates/pod-group-assigner/webhook.yaml
+    asserts:
+      - hasDocuments:
+          count: 1
+      - isKind:
+          of: MutatingWebhookConfiguration
+      - equal:
+          path: metadata.annotations["service.beta.openshift.io/inject-cabundle"]
+          value: "true"
+
+  # Helm shares global.* into subcharts, and since KAI v0.18 the scheduler reads
+  # the same fipsMode key, so this one value is the whole story: no second
+  # scheduler-side flag to keep in step.
+  - it: should carry fipsMode to the scheduler without a second flag
+    template: charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
+    set:
+      global.fipsMode: "on"
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: -fips$
+
+  # Neither operator's operand pods are rendered by this chart: each operator
+  # deploys them from its own MS_TAG, which kai/v1/common.Image reads. So the
+  # tag on these two env vars is what decides whether the scheduler and the
+  # KRM controllers run FIPS images at all.
+  - it: should hand both operators a -fips operand tag under fipsMode only
+    templates:
+      - charts/kai-resource-management/templates/krm-operator/deployment.yaml
+      - charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
+    set:
+      global.fipsMode: "only"
+    asserts:
+      - matchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: -fips$
+      - matchRegex:
+          path: spec.template.spec.containers[0].env[?(@.name=="MS_TAG")].value
+          pattern: -fips$
+
+  - it: should run the KRM operator itself in the requested mode
+    template: charts/kai-resource-management/templates/krm-operator/deployment.yaml
+    set:
+      global.fipsMode: "only"
+    asserts:
+      # tlsmlkem=0 rides along under "only": the default TLS curve calls plain
+      # X25519 internally, which fails every client-go handshake under fips140=only.
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: GODEBUG
+            value: "fips140=only,tlsmlkem=0"
+
+  - it: should leave both operators on ordinary images by default
+    templates:
+      - charts/kai-resource-management/templates/krm-operator/deployment.yaml
+      - charts/kai-resource-management/charts/kai-scheduler/templates/services/operator.yaml
+    asserts:
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].image
+          pattern: -fips$
+      - notMatchRegex:
+          path: spec.template.spec.containers[0].env[?(@.name=="MS_TAG")].value
+          pattern: -fips$

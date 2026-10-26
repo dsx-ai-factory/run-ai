@@ -37,7 +37,7 @@ export default defineComponent({
         value: this.applicationSubmissionSetting.enabled ? "true" : "false",
         label: "AI application submission",
         description:
-          "Enable to deploy agentic AI application stacks from the NGC catalog or Helm repositories, with resource overrides for multi-component pipelines. For more information, see the <a href='https://run-ai-docs.nvidia.com/self-hosted/ai-applications/ai-applications' target='_blank' rel='noopener noreferrer'>AI Applications guide</a>.",
+          "Enable to deploy agentic AI application stacks from the NGC catalog or Helm repositories, with resource overrides for multi-component pipelines. For more information, see the <a aid='ai-applications-guide-link' data-doc-key='aiApplications' target='_blank' rel='noopener noreferrer'>AI Applications guide</a>.",
         stage: AlphaStage,
       };
     },

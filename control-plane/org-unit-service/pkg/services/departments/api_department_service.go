@@ -21,7 +21,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/overtime_metrics_writer"
 
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
-	workloads_client "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client"
+	workloads_client "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client"
 
 	"github.com/google/uuid"
 
@@ -577,12 +577,10 @@ func (s *DepartmentApiService) UpdateDepartmentResources(ctx context.Context, de
 	}
 
 	originalResourcesNodePoolToId := make(map[string]uuid.UUID)
-	originalResourcesNodePoolIdToRank := make(map[string]string)
 	for _, originalResources := range department.OrgUnitData.Resources {
 		originalResourcesNodePoolToId[originalResources.NodePoolId] = originalResources.ID
-		originalResourcesNodePoolIdToRank[originalResources.NodePoolId] = ptr.Deref(originalResources.Rank, models.DefaultResourceRank)
 	}
-	newResources, err := services.ApiResourcesToModel(ctx, resources, true, nodePools, true, originalResourcesNodePoolToId, originalResourcesNodePoolIdToRank)
+	newResources, err := services.ApiResourcesToModel(ctx, resources, true, nodePools, true, originalResourcesNodePoolToId)
 	if err != nil {
 		errResponse := services.HandleError(err, http.StatusServiceUnavailable, "failed to map resources to model")
 		return errResponse, nil
@@ -690,12 +688,10 @@ func (s *DepartmentApiService) patchDepartmentResources(
 	}
 
 	originalResourcesNodePoolToId := make(map[string]uuid.UUID)
-	originalResourcesNodePoolIdToRank := make(map[string]string)
 	for _, originalResources := range department.OrgUnitData.Resources {
 		originalResourcesNodePoolToId[originalResources.NodePoolId] = originalResources.ID
-		originalResourcesNodePoolIdToRank[originalResources.NodePoolId] = ptr.Deref(originalResources.Rank, models.DefaultResourceRank)
 	}
-	newResources, err := services.ApiResourcesToModel(ctx, resources, true, nodePools, false, originalResourcesNodePoolToId, originalResourcesNodePoolIdToRank)
+	newResources, err := services.ApiResourcesToModel(ctx, resources, true, nodePools, false, originalResourcesNodePoolToId)
 	if err != nil {
 		return nil, "", api.NewError(http.StatusInternalServerError, "failed to map resources to model", err)
 	}
@@ -742,15 +738,14 @@ func (s *DepartmentApiService) patchDepartmentNodePoolResources(
 		return nil, "", apiErr
 	}
 
-	err = services.ValidateNodePoolResourcesPatchRequest(ctx, patchRequest, nodePools)
+	convertedResources := services.ConvertNodePoolResourcesPatchRequest(patchRequest, departmentNodePoolResources.GpuDeserved)
+	err = services.ValidateNodePoolResourcesPatchRequest(ctx, convertedResources, nodePools)
 	if err != nil {
 		return nil, "", api.NewError(http.StatusBadRequest, fmt.Sprintf("patch department resources validation failed: %s", err.Error()), err)
 	}
 
-	// convert for over-quota validation
-	convertedResources := []api.ResourcesNullable{services.ConvertNodePoolResourcesPatchRequest(patchRequest)}
 	orgUnitResources := []models.Resources{departmentNodePoolResources.ToResources()}
-	patchedResources, err := services.MapNodePoolPatchResourcesRequestToModel(ctx, convertedResources, orgUnitResources, nodePools, []api.NodePoolResourcesPatchRequest{patchRequest})
+	patchedResources, err := services.MapNodePoolPatchResourcesRequestToModel(ctx, []api.ResourcesNullable{convertedResources}, orgUnitResources, nodePools, []api.NodePoolResourcesPatchRequest{patchRequest})
 	if err != nil {
 		return nil, "", api.NewError(http.StatusInternalServerError, "failed to map resources to model", err)
 	}

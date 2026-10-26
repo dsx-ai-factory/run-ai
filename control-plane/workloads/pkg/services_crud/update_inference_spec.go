@@ -14,18 +14,20 @@ import (
 	"sort"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	authorization_client "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/runai_workloads"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/workloadutils"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/conjungo"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	workloadMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
@@ -205,7 +207,9 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 			persistErr = redactSensitiveValuesFromResponse(persistErr, sensitiveRequestValues)
 			return api.Response(int(persistErr.Code), persistErr), nil
 		}
+		acceptedAt := time.Now().UTC()
 		sanitizeWorkloadResponse(ctx, response)
+		recordWorkloadResponseAction(ctx, *response, api.WORKLOADACTIONTYPE_UPDATE, acceptedAt)
 
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully updated inference spec for workload id: <%s> name: <%s> in project id: <%s>", workloadId, nativeWorkload.Name, nativeWorkload.ProjectId)
 		return api.Response(http.StatusAccepted, *response), nil
@@ -265,6 +269,7 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		updateErr = redactSensitiveValuesFromResponse(updateErr, sensitiveRequestValues)
 		return api.Response(int(updateErr.Code), updateErr), nil
 	}
+	acceptedAt := time.Now().UTC()
 
 	// Write the merged spec back so subsequent updates / make-a-copy see it (best-effort):
 	// the workload update already succeeded in workloads-manager, so a snapshot failure must
@@ -280,6 +285,7 @@ func UpdateInferenceSpec(ctx context.Context, workloadId string, tenantSettingsC
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to write back V2 snapshot for workload %s: %v", workloadId, wbErr.Message)
 	}
 	sanitizeWorkloadResponse(ctx, &response)
+	recordWorkloadResponseAction(ctx, response, api.WORKLOADACTIONTYPE_UPDATE, acceptedAt)
 
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Successfully updated inference spec via workload-runner for workload id: <%s>", workloadId)
 	return api.Response(http.StatusAccepted, response), nil
@@ -291,6 +297,10 @@ func composeInferenceUpdateNative(
 	workload *models_crud.Workload,
 	options composer.FieldsComposerOptions,
 ) (composer.WorkloadRequirements, *workloadsApi.SubmissionErrorV2) {
+	if err := validateNativeGpuMode(workload.Spec); err != nil {
+		return composer.WorkloadRequirements{}, err
+	}
+
 	jobSpecComposer := runai_workloads.NewSupersetToJobSpecComposer(
 		Inference,
 		workload.Name,
@@ -299,7 +309,7 @@ func composeInferenceUpdateNative(
 		nil,
 		options)
 
-	composerErr := jobSpecComposer.Compose(ctx, workload.Spec, &jobs.JobSpec{})()
+	composerErr := jobSpecComposer.Compose(ctx, gpucompat.LegacyWorkloadSpec(workload.Spec), &jobs.JobSpec{})()
 	if composerErr != nil {
 		return composer.WorkloadRequirements{}, NewSubmissionErrorWithDetails(composerErr.Code, composerErr.Message, composerErr.Details)
 	}
@@ -333,6 +343,18 @@ func mergeUpdateSpecIntoFullSpec(ctx context.Context, fullSpec *workloadsApi.Sup
 	}
 
 	fullSpecAsMap, err := gojsonq.LoadJson(*fullSpec)
+	if err != nil {
+		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+	}
+
+	if err := gpucompat.ValidateMemoryRequestInput(updateSpecAsMap); err != nil {
+		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+	}
+	updateSpecAsMap, err = gpucompat.NormalizeLegacyGPUFields(updateSpecAsMap)
+	if err != nil {
+		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+	}
+	fullSpecAsMap, err = gpucompat.NormalizeLegacyGPUFields(fullSpecAsMap)
 	if err != nil {
 		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
 	}

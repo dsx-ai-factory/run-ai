@@ -1,0 +1,40 @@
+get:
+  summary: Get workload resource claims by workload id.
+  description: >
+    Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped
+    per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was
+    generated from a ResourceClaimTemplate, the template it came from. Only pods that
+    reference at least one claim are listed.
+  operationId: get_workload_resource_claims
+  x-service: workloads
+  x-test-coverage:
+    - control-plane/workloads/pkg/services/resource_claims_api_test.go
+  x-authorize:
+    resource-type: workloads
+    action: read
+    resource-id: workloadId
+  tags:
+    - Workloads
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml"
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/Workloads/WorkloadResourceClaimsResponse.yaml'
+    400:
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+suite: load-ttj
+workloadType: Workspace
+users: 50
+spawnRate: 5
+rate: 4
+duration: 5m
+image: registry.k8s.io/pause:3.9
+timeout: 10m
+slo:
+  api_accepted_p90_ms: 500
+  cluster_synced_p90_ms: 10000
+  pod_created_p90_ms: 5000
+  ttj_p90_ms: 12000
+  failed_count: 2

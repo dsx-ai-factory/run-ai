@@ -975,11 +975,11 @@ function getProjectListFilters(filterBy: IFilterBy): IPaginationFilter {
     EOrgUnitOverTimeColumnName.AverageGpuMemoryUtilization,
   ];
   const filters: IPaginationFilter = filterService.mapColumnsFilterToFilterParams(filterBy, validFilterFields, true);
-  // @ts-ignore TODO: fix this
+  // @ts-ignore
   const gpuAllocationTimeframe = (filterBy as IProjectTableFilterBy).avgGpuAllocationTimeframe;
-  // @ts-ignore TODO: fix this
+  // @ts-ignore
   const gpuUtilizationTimeframe = (filterBy as IProjectTableFilterBy).avgGpuUtilizationTimeframe;
-  // @ts-ignore TODO: fix this
+  // @ts-ignore
   const gpuMemoryUtilizationTimeframe = (filterBy as IProjectTableFilterBy).avgGpuMemoryUtilizationTimeframe;
 
   return _replaceOverTimeFilterKey(
@@ -999,11 +999,11 @@ function getDepartmentListFilters(filterBy: IFilterBy): IPaginationFilter {
     EOrgUnitOverTimeColumnName.AverageGpuMemoryUtilization,
   ];
   const filters: IPaginationFilter = filterService.mapColumnsFilterToFilterParams(filterBy, validFilterFields);
-  // @ts-ignore TODO: fix this
+  // @ts-ignore
   const gpuAllocationTimeframe = (filterBy as IDepartmentTableFilterBy).avgGpuAllocationTimeframe;
-  // @ts-ignore TODO: fix this
+  // @ts-ignore
   const gpuUtilizationTimeframe = (filterBy as IDepartmentTableFilterBy).avgGpuUtilizationTimeframe;
-  // @ts-ignore TODO: fix this
+  // @ts-ignore
   const avgGpuMemoryUtilizationTimeframe = (filterBy as IDepartmentTableFilterBy).avgGpuMemoryUtilizationTimeframe;
 
   return _replaceOverTimeFilterKey(

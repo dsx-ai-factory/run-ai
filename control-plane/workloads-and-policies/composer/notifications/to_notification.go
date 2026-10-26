@@ -11,12 +11,15 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
+	legacyconnections "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/connections"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 )
@@ -106,11 +109,15 @@ func nativeWorkloadGroupVersion(workloadType string) (*string, *string) {
 // (iw/tw/dw/infw).
 func (nsw *NotificationsComposer) WithConnectionsPreProcessor(projectName string, resourceNamePrefix string) *NotificationsComposer {
 	nsw.connectionsPreProcessor = &composer.ConnectionsPreProcessor{
-		WorkloadType:                  workloadsApi.WorkloadType(nsw.Output.Type),
 		WorkloadName:                  nsw.Output.Name,
 		ProjectName:                   projectName,
 		ResourceNamePrefix:            resourceNamePrefix,
 		WorkloadV2NetworkingSupported: nsw.fc.Options.WorkloadV2NetworkingSupported,
+	}
+	if resourceNamePrefix == "" {
+		nsw.connectionsPreProcessor.PortResourceNames = func(ports *field_types.PortsField) map[string]composer.ServiceAndPortName {
+			return legacyconnections.PortResourceNames(workloadsApi.WorkloadType(nsw.Output.Type), nsw.Output.Name, ports)
+		}
 	}
 
 	return nsw
@@ -230,6 +237,12 @@ func (nsw *NotificationsComposer) ComposeCompute(ctx context.Context,
 			return nil
 		}
 
+		canonical, err := gpucompat.NormalizeLegacyWorkloadCompute(src)
+		if err != nil {
+			return workloadsApi.NewError(400, err.Error())
+		}
+		src = canonical
+
 		if !nsw.Output.RequestedResources.IsSet() {
 			return nil
 		}
@@ -242,7 +255,7 @@ func (nsw *NotificationsComposer) ComposeCompute(ctx context.Context,
 			nsw.fc.ComposeCpuCoreRequest(src.CpuCoreRequest.Get(), &nsw.Output.RequestedResources.Get().Cpu, nonZeroFloatToResourcesCore, nil),
 			nsw.fc.ComposeCpuMemoryRequest(src.CpuMemoryRequest.Get(), &nsw.Output.RequestedResources.Get().CpuMemory, nonEmptyStringToResourcesQuantity, nil),
 			nsw.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(), src.GpuRequestType.Get(),
-				src.GpuPortionRequest.Get(), src.GpuPortionLimit.Get(),
+				src.GpuMemoryPortionRequest.Get(), src.GpuMemoryPortionLimit.Get(),
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), gpuRequestedResourcesSetter, &nsw.Output.RequestedResources, nil, &sizingInfo),
 		)
 

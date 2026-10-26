@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path/filepath"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -59,10 +60,44 @@ var _ = Describe("Downloader control-plane chart branch", func() {
 			path, err := d.Download()
 
 			Expect(err).NotTo(HaveOccurred())
+			DeferCleanup(d.Cleanup)
 			Expect(path).To(HaveSuffix(".tgz"))
 			content, readErr := os.ReadFile(path)
 			Expect(readErr).NotTo(HaveOccurred())
 			Expect(content).To(Equal(chartBytes))
+
+			destDir := filepath.Dir(path)
+			Expect(filepath.Base(destDir)).To(HavePrefix(ChartsDirName + "-"))
+			dirInfo, statErr := os.Stat(destDir)
+			Expect(statErr).NotTo(HaveOccurred())
+			Expect(dirInfo.Mode().Perm()).To(Equal(os.FileMode(0o700)))
+
+			Expect(d.Cleanup()).To(Succeed())
+			Expect(destDir).NotTo(BeADirectory())
+		})
+
+		It("removes the temp dir when the chart body is cut short", func() {
+			tempRoot := GinkgoT().TempDir()
+			GinkgoT().Setenv("TMPDIR", tempRoot)
+
+			server := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Length", "100")
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write([]byte("partial"))
+			}))
+			defer server.Close()
+
+			d := &Downloader{
+				ChartUrl:                 server.URL + "/chart.tgz",
+				RequiresControlPlaneAuth: true,
+				ChartAuthClient:          server.Client(),
+			}
+
+			_, err := d.Download()
+
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("write control-plane chart temp file"))
+			Expect(os.ReadDir(tempRoot)).To(BeEmpty())
 		})
 
 		It("fails on a non-200 response", func() {

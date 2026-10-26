@@ -28,7 +28,7 @@
     "gpu": 0.0
   },
   "category": "Deploy",
-  "urls": ["https://test-cluster.runailabs.com/testnim/mynim-multi"],
+  "urls": ["https://test-cluster.example.com/testnim/mynim-multi"],
   "environments": [
     {
       "name": "NIMService",
@@ -38,7 +38,7 @@
           "toolType": "NIMService",
           "connectionType": "ExternalUrl",
           "containerPort": 8080,
-          "url": "https://test-cluster.runailabs.com/testnim/mynim-multi"
+          "url": "https://test-cluster.example.com/testnim/mynim-multi"
         }
       ]
     }

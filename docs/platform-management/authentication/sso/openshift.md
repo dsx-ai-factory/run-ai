@@ -11,7 +11,7 @@ Before starting, make sure you have the following available from your OpenShift 
 * [OpenShift OAuth client](https://docs.openshift.com/container-platform/4.16/authentication/configuring-oauth-clients.html#oauth-register-additional-client_configuring-oauth-clients):
   * ClientID - The ID used to identify the client with the Authorization Server.
   * Client Secret - A secret password that only the Client and Authorization Server know.
-* Base URL - The OpenShift API Server endpoint (for example, [https://api.\<cluster-url>:6443](https://api.noa-ocp.runailabs.com:6443/))
+* Base URL - The OpenShift API Server endpoint (for example, [https://api.\<cluster-url>:6443](https://api.cluster.example.com:6443/))
 
 ## Setup
 
@@ -64,13 +64,13 @@ You can remove the identity provider configuration:
 3. On the identity provider card, click **Remove identity provider**
 4. In the dialog, click **REMOVE** to confirm
 
-<Info>
+<Note>
 
 **Note**
 
 To avoid losing access, removing the identity provider must be carried out by a local user.
 
-</Info>
+</Note>
 
 ## Troubleshooting
 

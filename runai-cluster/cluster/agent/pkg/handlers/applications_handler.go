@@ -8,18 +8,22 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
 
+	workloads_openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloads_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	runaiBackendClient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/backend-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config"
 	configmaps "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/config-maps"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/metrics"
 	clusterCommonConstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds"
 	runv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	runaiv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2"
 	schedv2alpha2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/scheduling/v2alpha2"
@@ -38,7 +42,11 @@ import (
 const (
 	applicationDesiredPhaseDeleted     = "deleted"
 	annotationApplicationUpdateCounter = "run.ai/application-update-counter"
+	userCredentialPlaceholderPrefix    = "USERCREDENTIAL:" //nolint:gosec // Protocol marker, not a credential.
+	helmOCIURLPrefix                   = "oci://"
 )
+
+var errNoMatchingSecret = errors.New("no matching secret found")
 
 type applicationProjectInfo struct {
 	namespace      string
@@ -273,18 +281,27 @@ func (h *ApplicationsHandler) convertToApplication(ctx context.Context, projInfo
 	}
 
 	if item.Spec != nil {
-		helmSpec, err := h.convertHelmSpec(ctx, projInfo.namespace, item.Spec, item.GetRequiresControlPlaneAuth())
+		helmSpec, credentials, err := h.convertHelmSpec(ctx, item.GetName(), projInfo.namespace, item.Spec, item.GetRequiresControlPlaneAuth())
 		if err != nil {
 			return nil, fmt.Errorf("failed to convert helm spec for application %s: %w", item.GetName(), err)
 		}
 		app.Spec.Helm = helmSpec
+		if err := personalcreds.Set(app, credentials); err != nil {
+			return nil, fmt.Errorf("failed to set personal credentials annotation: %w", err)
+		}
 	}
 
 	return app, nil
 }
 
-func (h *ApplicationsHandler) convertHelmSpec(ctx context.Context, namespace string, spec *workloads_openapi.AIApplicationSpec, requiresControlPlaneAuth bool) (*runv1alpha1.HelmSpec, error) {
+func (h *ApplicationsHandler) convertHelmSpec(
+	ctx context.Context,
+	applicationName, namespace string,
+	spec *workloads_openapi.AIApplicationSpec,
+	requiresControlPlaneAuth bool,
+) (*runv1alpha1.HelmSpec, []personalcreds.Cred, error) {
 	helmSpec := &runv1alpha1.HelmSpec{}
+	credentialSources := datastructs.NewSet[string]()
 
 	chartRef := spec.ChartRef
 	if chartRef.GetChartURL() != "" {
@@ -301,9 +318,13 @@ func (h *ApplicationsHandler) convertHelmSpec(ctx context.Context, namespace str
 	if len(spec.Values) > 0 {
 		helmValues := make(map[string]apiextensionsv1.JSON, len(spec.Values))
 		for key, val := range spec.Values {
-			raw, err := json.Marshal(val)
+			rewritten, err := rewritePersonalCredentialPlaceholders(val, applicationName, credentialSources)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert Helm values for key '%s': %v", key, err)
+				return nil, nil, fmt.Errorf("failed to rewrite Helm values for key '%s': %w", key, err)
+			}
+			raw, err := json.Marshal(rewritten)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to convert Helm values for key '%s': %v", key, err)
 			}
 			helmValues[key] = apiextensionsv1.JSON{Raw: raw}
 		}
@@ -312,9 +333,22 @@ func (h *ApplicationsHandler) convertHelmSpec(ctx context.Context, namespace str
 
 	auth := spec.Auth
 	if auth != nil && auth.GetAssetId() != "" {
-		secretName, err := h.resolveSecretNameFromAssetId(ctx, namespace, auth.GetAssetId(), preferredHelmAuthSecretKind(chartRef.GetRepo()))
-		if err != nil {
-			return nil, fmt.Errorf("failed to resolve secret for asset %s in namespace %s: %w", auth.GetAssetId(), namespace, err)
+		preferredKind := preferredHelmAuthSecretKind(chartRef.GetRepo(), "")
+		var secretName string
+		if auth.GetUserCredential() {
+			preferredKind = preferredHelmAuthSecretKind(chartRef.GetRepo(), chartRef.GetChartURL())
+			sourceName, err := h.resolvePersonalSecretNameFromAssetId(ctx, auth.GetAssetId(), preferredKind)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to resolve personal chart authentication: %w", err)
+			}
+			credentialSources.Add(sourceName)
+			secretName = personalcreds.DestName(applicationName, sourceName)
+		} else {
+			var err error
+			secretName, err = h.resolveSecretNameFromAssetId(ctx, namespace, auth.GetAssetId(), preferredKind)
+			if err != nil {
+				return nil, nil, fmt.Errorf("failed to resolve secret for asset %s in namespace %s: %w", auth.GetAssetId(), namespace, err)
+			}
 		}
 		helmSpec.Auth = &runv1alpha1.HelmAuthSpec{
 			SecretRef: &runv1alpha1.SecretReference{
@@ -323,32 +357,110 @@ func (h *ApplicationsHandler) convertHelmSpec(ctx context.Context, namespace str
 		}
 	}
 
-	return helmSpec, nil
+	for sourceName := range credentialSources {
+		if err := h.validatePersonalCredentialSource(ctx, sourceName); err != nil {
+			return nil, nil, fmt.Errorf("invalid personal credential source: %w", err)
+		}
+	}
+
+	credentials := make([]personalcreds.Cred, 0, len(credentialSources))
+	sourceNames := credentialSources.Keys()
+	sort.Strings(sourceNames)
+	for _, sourceName := range sourceNames {
+		credentials = append(credentials, personalcreds.Cred{SourceSecret: sourceName})
+	}
+	return helmSpec, credentials, nil
 }
 
-func preferredHelmAuthSecretKind(repository string) string {
-	if strings.HasPrefix(repository, "oci://") {
+func rewritePersonalCredentialPlaceholders(value interface{}, applicationName string, sources datastructs.Set[string]) (interface{}, error) {
+	switch typed := value.(type) {
+	case string:
+		if !strings.HasPrefix(typed, userCredentialPlaceholderPrefix) {
+			return typed, nil
+		}
+		sourceName := strings.TrimPrefix(typed, userCredentialPlaceholderPrefix)
+		if sourceName == "" {
+			return nil, fmt.Errorf("personal credential placeholder has an empty source")
+		}
+		sources.Add(sourceName)
+		return personalcreds.DestName(applicationName, sourceName), nil
+	case map[string]interface{}:
+		rewritten := make(map[string]interface{}, len(typed))
+		for key, child := range typed {
+			value, err := rewritePersonalCredentialPlaceholders(child, applicationName, sources)
+			if err != nil {
+				return nil, err
+			}
+			rewritten[key] = value
+		}
+		return rewritten, nil
+	case []interface{}:
+		rewritten := make([]interface{}, len(typed))
+		for idx, child := range typed {
+			value, err := rewritePersonalCredentialPlaceholders(child, applicationName, sources)
+			if err != nil {
+				return nil, err
+			}
+			rewritten[idx] = value
+		}
+		return rewritten, nil
+	default:
+		return value, nil
+	}
+}
+
+func preferredHelmAuthSecretKind(repository, chartURL string) string {
+	if strings.HasPrefix(repository, helmOCIURLPrefix) || strings.HasPrefix(chartURL, helmOCIURLPrefix) {
 		return dockerRegistryKindLabel
 	}
 	return genericSecretKindLabel
 }
 
 func (h *ApplicationsHandler) resolveSecretNameFromAssetId(ctx context.Context, namespace string, assetId string, preferredKind ...string) (string, error) {
-	secretList := &corev1.SecretList{}
-	labelSelector := labels.SelectorFromSet(labels.Set{
+	secretName, err := resolveSecretName(ctx, h.cachedClient, namespace, labels.Set{
 		assetIdLabel: assetId,
-	})
-
-	err := h.cachedClient.List(ctx, secretList, &client.ListOptions{
-		Namespace:     namespace,
-		LabelSelector: labelSelector,
-	})
-	if err != nil {
-		return "", fmt.Errorf("failed to list secrets with label %s=%s in namespace %s: %w", assetIdLabel, assetId, namespace, err)
-	}
-
-	if len(secretList.Items) == 0 {
+	}, preferredKind...)
+	switch {
+	case errors.Is(err, errNoMatchingSecret):
 		return "", fmt.Errorf("no secret found with label %s=%s in namespace %s", assetIdLabel, assetId, namespace)
+	case err != nil:
+		return "", fmt.Errorf("failed to list secrets with label %s=%s in namespace %s: %w", assetIdLabel, assetId, namespace, err)
+	default:
+		return secretName, nil
+	}
+}
+
+func (h *ApplicationsHandler) resolvePersonalSecretNameFromAssetId(ctx context.Context, assetId, preferredKind string) (string, error) {
+	secretName, err := resolveSecretName(ctx, h.runaiClient, clusterCommonConstants.NamespaceRunAi, labels.Set{
+		assetIdLabel:         assetId,
+		userCredentialsLabel: boolTrueAsString,
+	}, preferredKind)
+	switch {
+	case errors.Is(err, errNoMatchingSecret):
+		return "", fmt.Errorf("no personal credential source found")
+	case err != nil:
+		return "", fmt.Errorf("failed to list personal credential sources: %w", err)
+	default:
+		return secretName, nil
+	}
+}
+
+func resolveSecretName(
+	ctx context.Context,
+	reader client.Reader,
+	namespace string,
+	matchLabels labels.Set,
+	preferredKind ...string,
+) (string, error) {
+	secretList := &corev1.SecretList{}
+	if err := reader.List(ctx, secretList, &client.ListOptions{
+		Namespace:     namespace,
+		LabelSelector: labels.SelectorFromSet(matchLabels),
+	}); err != nil {
+		return "", err
+	}
+	if len(secretList.Items) == 0 {
+		return "", errNoMatchingSecret
 	}
 
 	if len(preferredKind) > 0 && preferredKind[0] != "" {
@@ -360,6 +472,20 @@ func (h *ApplicationsHandler) resolveSecretNameFromAssetId(ctx context.Context, 
 	}
 
 	return secretList.Items[0].Name, nil
+}
+
+func (h *ApplicationsHandler) validatePersonalCredentialSource(ctx context.Context, sourceName string) error {
+	source := &corev1.Secret{}
+	if err := h.runaiClient.Get(ctx, types.NamespacedName{
+		Namespace: clusterCommonConstants.NamespaceRunAi,
+		Name:      sourceName,
+	}, source); err != nil {
+		return fmt.Errorf("source is unavailable: %w", err)
+	}
+	if source.Labels[userCredentialsLabel] != boolTrueAsString {
+		return fmt.Errorf("source is not labelled as a personal credential")
+	}
+	return nil
 }
 
 func (h *ApplicationsHandler) getBackendApplications() (*workloads_openapi.AIApplicationSyncResponse, error) {

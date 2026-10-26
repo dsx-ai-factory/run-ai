@@ -7,12 +7,9 @@ package services
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
-	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/google/uuid"
 
 	"net/http"
@@ -25,16 +22,12 @@ import (
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/test"
 )
 
-const (
-	minimalsResourceTypeMigrationVersion = "02240009_add_minimal_resource_permissions"
-)
-
 var _ = Describe("Permissions sets API tests", Ordered, func() {
 	tenantId := fmt.Sprintf("%d", testing.TestTenant)
 	ctx := setContext(tenantId, TestUserId, []string{dao.SuperAdmins})
 	PermissionSetMap := map[string]uuid.UUID{}
 	permissionSetLength := 57
-	workspaceEditPermissionsLen := 20
+	workspaceEditPermissionsLen := 22
 
 	permissionsApiService := NewPermissionsApiService()
 
@@ -162,29 +155,42 @@ var _ = Describe("Permissions sets API tests", Ordered, func() {
 			{resourceType: api.RESOURCETYPE_CLUSTERS_MINIMAL, read: true},
 			{resourceType: api.RESOURCETYPE_NODEPOOLS_MINIMAL, read: true},
 		}
-		granularSet := func(ps models.PermissionSet, resourceType api.ResourceType, editable bool) (models.PermissionSet, []expectedPermission) {
-			return ps, append([]expectedPermission{
-				{resourceType: resourceType, create: editable, read: true, update: editable, delete: editable},
-			}, minimals...)
+		// granularSet builds the expected shape of an asset-granular permission
+		// set: one or more primary asset resource types (all sharing the same
+		// editability), followed by the cluster/nodepool minimals. Compute
+		// resources and resource-claim-templates are managed as a paired asset
+		// grant, so ComputeResourcesOnly{Read,Edit} declares both primaries.
+		granularSet := func(ps models.PermissionSet, resourceTypes []api.ResourceType, editable bool) (models.PermissionSet, []expectedPermission) {
+			primaries := make([]expectedPermission, 0, len(resourceTypes))
+			for _, rt := range resourceTypes {
+				primaries = append(primaries, expectedPermission{
+					resourceType: rt,
+					create:       editable,
+					read:         true,
+					update:       editable,
+					delete:       editable,
+				})
+			}
+			return ps, append(primaries, minimals...)
 		}
 
 		granularSets := map[string][]expectedPermission{}
 		granularDefinitions := []models.PermissionSet{}
 		for _, entry := range []struct {
-			ps           models.PermissionSet
-			resourceType api.ResourceType
-			editable     bool
+			ps            models.PermissionSet
+			resourceTypes []api.ResourceType
+			editable      bool
 		}{
-			{static_permission_sets.TemplatesOnlyRead, api.RESOURCETYPE_TEMPLATES, false},
-			{static_permission_sets.TemplatesOnlyEdit, api.RESOURCETYPE_TEMPLATES, true},
-			{static_permission_sets.EnvironmentsOnlyRead, api.RESOURCETYPE_ENVIRONMENTS, false},
-			{static_permission_sets.EnvironmentsOnlyEdit, api.RESOURCETYPE_ENVIRONMENTS, true},
-			{static_permission_sets.ComputeResourcesOnlyRead, api.RESOURCETYPE_COMPUTE_RESOURCES, false},
-			{static_permission_sets.ComputeResourcesOnlyEdit, api.RESOURCETYPE_COMPUTE_RESOURCES, true},
-			{static_permission_sets.CredentialsOnlyRead, api.RESOURCETYPE_CREDENTIALS, false},
-			{static_permission_sets.CredentialsOnlyEdit, api.RESOURCETYPE_CREDENTIALS, true},
+			{static_permission_sets.TemplatesOnlyRead, []api.ResourceType{api.RESOURCETYPE_TEMPLATES}, false},
+			{static_permission_sets.TemplatesOnlyEdit, []api.ResourceType{api.RESOURCETYPE_TEMPLATES}, true},
+			{static_permission_sets.EnvironmentsOnlyRead, []api.ResourceType{api.RESOURCETYPE_ENVIRONMENTS}, false},
+			{static_permission_sets.EnvironmentsOnlyEdit, []api.ResourceType{api.RESOURCETYPE_ENVIRONMENTS}, true},
+			{static_permission_sets.ComputeResourcesOnlyRead, []api.ResourceType{api.RESOURCETYPE_COMPUTE_RESOURCES, api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES}, false},
+			{static_permission_sets.ComputeResourcesOnlyEdit, []api.ResourceType{api.RESOURCETYPE_COMPUTE_RESOURCES, api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES}, true},
+			{static_permission_sets.CredentialsOnlyRead, []api.ResourceType{api.RESOURCETYPE_CREDENTIALS}, false},
+			{static_permission_sets.CredentialsOnlyEdit, []api.ResourceType{api.RESOURCETYPE_CREDENTIALS}, true},
 		} {
-			ps, expected := granularSet(entry.ps, entry.resourceType, entry.editable)
+			ps, expected := granularSet(entry.ps, entry.resourceTypes, entry.editable)
 			granularSets[ps.Name] = expected
 			granularDefinitions = append(granularDefinitions, ps)
 		}
@@ -218,195 +224,8 @@ var _ = Describe("Permissions sets API tests", Ordered, func() {
 		})
 
 		It("leaves the bundled templates sets untouched", func() {
-			Expect(static_permission_sets.TemplatesRead.Permissions).To(HaveLen(13))
-			Expect(static_permission_sets.TemplatesEdit.Permissions).To(HaveLen(13))
-		})
-	})
-
-	Context("Migration 02240009 - add minimal resource permissions", func() {
-		It("validates migration adds minimal permissions to custom roles with cluster/nodepool read access", func() {
-			// Create several custom roles without minimal permissions but with cluster/nodepool read permissions
-			customRoles := []struct {
-				name        string
-				description string
-				permissions []models.Permission
-			}{
-				{
-					name:        "Test Role With Cluster Read",
-					description: "Role with cluster read permission but no clusters-minimal",
-					permissions: []models.Permission{
-						{ResourceType: api.RESOURCETYPE_CLUSTER, Read: true},
-						{ResourceType: api.RESOURCETYPE_PROJECT, Read: true, Create: true},
-					},
-				},
-				{
-					name:        "Test Role With NodePools Read",
-					description: "Role with nodepools read permission but no nodepools-minimal",
-					permissions: []models.Permission{
-						{ResourceType: api.RESOURCETYPE_NODEPOOLS, Read: true},
-						{ResourceType: api.RESOURCETYPE_WORKLOADS, Read: true},
-					},
-				},
-				{
-					name:        "Test Role With Both Cluster And NodePools",
-					description: "Role with both cluster and nodepools read permissions",
-					permissions: []models.Permission{
-						{ResourceType: api.RESOURCETYPE_CLUSTER, Read: true, Update: true},
-						{ResourceType: api.RESOURCETYPE_NODEPOOLS, Read: true, Create: true},
-						{ResourceType: api.RESOURCETYPE_DEPARTMENT, Read: true},
-					},
-				},
-				{
-					name:        "Test Role With Existing Clusters Minimal",
-					description: "Role with cluster read and already has clusters-minimal - should not create duplicate",
-					permissions: []models.Permission{
-						{ResourceType: api.RESOURCETYPE_CLUSTER, Read: true},
-						{ResourceType: api.RESOURCETYPE_CLUSTERS_MINIMAL, Read: true},
-						{ResourceType: api.RESOURCETYPE_PROJECT, Read: true},
-					},
-				},
-			}
-
-			// Create the test roles in the database
-			createdRoleIds := []uint{}
-			for _, roleSpec := range customRoles {
-				role := models.Role{
-					Name:        roleSpec.name,
-					Description: roleSpec.description,
-					Custom:      true,
-					ScopeType:   models.ROLE_SCOPE_TENANT,
-					Enabled:     true,
-				}
-
-				// Add permissions
-				for _, perm := range roleSpec.permissions {
-					permission := perm
-					permission.RoleID = 0 // Will be set by GORM
-					role.Permissions = append(role.Permissions, &permission)
-				}
-
-				// Create role in DB
-				_, err := runaidb.DB().Create(&role)
-				Expect(err).To(BeNil())
-				createdRoleIds = append(createdRoleIds, role.ID)
-			}
-
-			// Verify minimal permissions DO NOT exist before migration (except for role that already has it)
-			for idx, roleId := range createdRoleIds {
-				var permissions []models.Permission
-				err := runaidb.DB().Where("role_id = ?", roleId).Find(&permissions)
-				Expect(err).To(BeNil())
-
-				hasClustersMinimal := false
-				hasNodePoolsMinimal := false
-				hasCluster := false
-				hasNodePools := false
-				clustersMinimalCount := 0
-
-				for _, perm := range permissions {
-					switch perm.ResourceType {
-					case api.RESOURCETYPE_CLUSTER:
-						hasCluster = true
-					case api.RESOURCETYPE_CLUSTERS_MINIMAL:
-						hasClustersMinimal = true
-						clustersMinimalCount++
-					case api.RESOURCETYPE_NODEPOOLS:
-						hasNodePools = true
-					case api.RESOURCETYPE_NODEPOOLS_MINIMAL:
-						hasNodePoolsMinimal = true
-					}
-				}
-
-				// Validate based on what the role should have
-				if idx == 0 { // First role: has cluster
-					Expect(hasCluster).To(BeTrue(), fmt.Sprintf("Role %s should have CLUSTER permission", customRoles[idx].name))
-					Expect(hasClustersMinimal).To(BeFalse(), fmt.Sprintf("Role %s should NOT have CLUSTERS_MINIMAL before migration", customRoles[idx].name))
-				} else if idx == 1 { // Second role: has nodepools
-					Expect(hasNodePools).To(BeTrue(), fmt.Sprintf("Role %s should have NODEPOOLS permission", customRoles[idx].name))
-					Expect(hasNodePoolsMinimal).To(BeFalse(), fmt.Sprintf("Role %s should NOT have NODEPOOLS_MINIMAL before migration", customRoles[idx].name))
-				} else if idx == 2 { // Third role: has both
-					Expect(hasCluster).To(BeTrue(), fmt.Sprintf("Role %s should have CLUSTER permission", customRoles[idx].name))
-					Expect(hasNodePools).To(BeTrue(), fmt.Sprintf("Role %s should have NODEPOOLS permission", customRoles[idx].name))
-					Expect(hasClustersMinimal).To(BeFalse(), fmt.Sprintf("Role %s should NOT have CLUSTERS_MINIMAL before migration", customRoles[idx].name))
-					Expect(hasNodePoolsMinimal).To(BeFalse(), fmt.Sprintf("Role %s should NOT have NODEPOOLS_MINIMAL before migration", customRoles[idx].name))
-				} else if idx == 3 { // Fourth role: already has clusters-minimal
-					Expect(hasCluster).To(BeTrue(), fmt.Sprintf("Role %s should have CLUSTER permission", customRoles[idx].name))
-					Expect(hasClustersMinimal).To(BeTrue(), fmt.Sprintf("Role %s should already have CLUSTERS_MINIMAL before migration", customRoles[idx].name))
-					Expect(clustersMinimalCount).To(Equal(1), fmt.Sprintf("Role %s should have exactly 1 CLUSTERS_MINIMAL permission before migration", customRoles[idx].name))
-				}
-			}
-
-			// Load and execute the migration UP SQL file
-			migrationUpFile := fmt.Sprintf("%s.up.sql", minimalsResourceTypeMigrationVersion)
-			migrationUpPath := filepath.Join("..", "database", "migrations", "up", migrationUpFile)
-			migrationUpSQL, err := os.ReadFile(migrationUpPath)
-			Expect(err).To(BeNil(), fmt.Sprintf("Failed to read migration up file: %v", err))
-
-			_, err = runaidb.DB().Exec(string(migrationUpSQL))
-			Expect(err).To(BeNil(), fmt.Sprintf("Failed to execute migration up: %v", err))
-
-			// Verify minimal permissions now EXIST after migration
-			for idx, roleId := range createdRoleIds {
-				var permissions []models.Permission
-				err := runaidb.DB().Where("role_id = ?", roleId).Find(&permissions)
-				Expect(err).To(BeNil())
-
-				hasClustersMinimal := false
-				hasNodePoolsMinimal := false
-				hasCluster := false
-				hasNodePools := false
-				clustersMinimalCount := 0
-				nodePoolsMinimalCount := 0
-
-				for _, perm := range permissions {
-					switch perm.ResourceType {
-					case api.RESOURCETYPE_CLUSTER:
-						hasCluster = true
-					case api.RESOURCETYPE_CLUSTERS_MINIMAL:
-						hasClustersMinimal = true
-						clustersMinimalCount++
-						// Validate it has read permission
-						Expect(perm.Read).To(BeTrue(), fmt.Sprintf("CLUSTERS_MINIMAL for role %s should have read=true", customRoles[idx].name))
-						Expect(perm.Create).To(BeFalse())
-						Expect(perm.Update).To(BeFalse())
-						Expect(perm.Delete).To(BeFalse())
-						Expect(perm.Sync).To(BeFalse())
-					case api.RESOURCETYPE_NODEPOOLS:
-						hasNodePools = true
-					case api.RESOURCETYPE_NODEPOOLS_MINIMAL:
-						hasNodePoolsMinimal = true
-						nodePoolsMinimalCount++
-						// Validate it has read permission
-						Expect(perm.Read).To(BeTrue(), fmt.Sprintf("NODEPOOLS_MINIMAL for role %s should have read=true", customRoles[idx].name))
-						Expect(perm.Create).To(BeFalse())
-						Expect(perm.Update).To(BeFalse())
-						Expect(perm.Delete).To(BeFalse())
-						Expect(perm.Sync).To(BeFalse())
-					}
-				}
-
-				// Validate based on what the role should have after migration
-				if idx == 0 { // First role: has cluster, should now have clusters-minimal
-					Expect(hasCluster).To(BeTrue())
-					Expect(hasClustersMinimal).To(BeTrue(), fmt.Sprintf("Role %s should have CLUSTERS_MINIMAL after migration", customRoles[idx].name))
-					Expect(clustersMinimalCount).To(Equal(1), fmt.Sprintf("Role %s should have exactly 1 CLUSTERS_MINIMAL after migration", customRoles[idx].name))
-				} else if idx == 1 { // Second role: has nodepools, should now have nodepools-minimal
-					Expect(hasNodePools).To(BeTrue())
-					Expect(hasNodePoolsMinimal).To(BeTrue(), fmt.Sprintf("Role %s should have NODEPOOLS_MINIMAL after migration", customRoles[idx].name))
-					Expect(nodePoolsMinimalCount).To(Equal(1), fmt.Sprintf("Role %s should have exactly 1 NODEPOOLS_MINIMAL after migration", customRoles[idx].name))
-				} else if idx == 2 { // Third role: has both, should now have both minimal
-					Expect(hasCluster).To(BeTrue())
-					Expect(hasNodePools).To(BeTrue())
-					Expect(hasClustersMinimal).To(BeTrue(), fmt.Sprintf("Role %s should have CLUSTERS_MINIMAL after migration", customRoles[idx].name))
-					Expect(hasNodePoolsMinimal).To(BeTrue(), fmt.Sprintf("Role %s should have NODEPOOLS_MINIMAL after migration", customRoles[idx].name))
-					Expect(clustersMinimalCount).To(Equal(1), fmt.Sprintf("Role %s should have exactly 1 CLUSTERS_MINIMAL after migration", customRoles[idx].name))
-					Expect(nodePoolsMinimalCount).To(Equal(1), fmt.Sprintf("Role %s should have exactly 1 NODEPOOLS_MINIMAL after migration", customRoles[idx].name))
-				} else if idx == 3 { // Fourth role: already had clusters-minimal, should still have exactly 1
-					Expect(hasCluster).To(BeTrue())
-					Expect(hasClustersMinimal).To(BeTrue(), fmt.Sprintf("Role %s should still have CLUSTERS_MINIMAL after migration", customRoles[idx].name))
-					Expect(clustersMinimalCount).To(Equal(1), fmt.Sprintf("Role %s should still have exactly 1 CLUSTERS_MINIMAL after migration (no duplicate created)", customRoles[idx].name))
-				}
-			}
+			Expect(static_permission_sets.TemplatesRead.Permissions).To(HaveLen(14))
+			Expect(static_permission_sets.TemplatesEdit.Permissions).To(HaveLen(14))
 		})
 	})
 })

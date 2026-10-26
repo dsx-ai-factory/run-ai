@@ -170,6 +170,11 @@ export default defineComponent({
       type: String as PropType<string>,
       required: false,
     },
+    personalCredentialsMinClusterVersion: {
+      type: String as PropType<string>,
+      required: false,
+      default: MIN_CLUSTER_VERSION_FOR_USER_CREDENTIALS,
+    },
     scopeModel: {
       type: Object as PropType<IScopeModel>,
       required: false,
@@ -459,7 +464,7 @@ export default defineComponent({
       if (
         !this.sourceSelectConfig.hidden &&
         (this.sourceSelectConfig.showPersonalCredentialsOption ?? true) &&
-        this.clusterStore.isClusterVersionSufficient(this.clusterId || null, MIN_CLUSTER_VERSION_FOR_USER_CREDENTIALS)
+        this.clusterStore.isClusterVersionSufficient(this.clusterId || null, this.personalCredentialsMinClusterVersion)
       ) {
         this.credentialSourceOptions.push({
           value: ERunaiCredentialSource.MyCredentials,

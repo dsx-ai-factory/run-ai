@@ -79,7 +79,7 @@ All URIs are relative to *http://localhost:8080*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
-*AccessRulesApi* | [**CreateAccessRule**](docs/AccessRulesApi.md#createaccessrule) | **Post** /api/v1/authorization/access-rules | Create an access rule. Bind a predefined role to a subject (user, group or app) in some scope.
+*AccessRulesApi* | [**CreateAccessRule**](docs/AccessRulesApi.md#createaccessrule) | **Post** /api/v1/authorization/access-rules | Create an access rule. Bind a predefined role to a subject (user, group or service account) in some scope.
 *AccessRulesApi* | [**DeleteAccessRule**](docs/AccessRulesApi.md#deleteaccessrule) | **Delete** /api/v1/authorization/access-rules/{accessRuleId} | Delete access rule. This operation will delete the subject permissions that assigned to it by this access rule.
 *AccessRulesApi* | [**GetAccessRule**](docs/AccessRulesApi.md#getaccessrule) | **Get** /api/v1/authorization/access-rules/{accessRuleId} | Get access rule.
 *AccessRulesApi* | [**GetAccessRules**](docs/AccessRulesApi.md#getaccessrules) | **Get** /api/v1/authorization/access-rules | List access rules.

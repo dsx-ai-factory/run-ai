@@ -7,6 +7,7 @@ package services_crud
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -34,9 +35,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
 	policyService "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	clusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	. "github.com/onsi/ginkgo/v2"
@@ -839,6 +840,41 @@ var _ = Describe("policy compliance validations", func() {
 				},
 			})
 		})
+
+		DescribeTable("resolves replica defaultFrom rules during distributed inference creation",
+			func(requestField string) {
+				policyRules = policyService.DistributedInferenceRulesV2{}
+				Expect(json.Unmarshal([]byte(`{
+					"leader":{"compute":{"cpuCoreRequest":{"defaultFrom":{"field":"compute.gpuPortionRequest","factor":8}}}},
+					"worker":{"compute":{"cpuCoreRequest":{"defaultFrom":{"field":"compute.gpuPortionRequest","factor":8}}}}
+				}`), &policyRules)).To(Succeed())
+				policies.SetMock(policies.SimpleMockClientFactory{
+					SimpleMockClient: policies.SimpleMockClient{
+						EffectiveUpdatedAt: time.Now(),
+						EffectiveDistributedInferencePolicyV2: &policyService.DistributedInferencePolicyDefaultsAndRulesV2{
+							Defaults: *policyService.NewNullableDistributedInferenceDefaultsV2(&policyDefaults),
+							Rules:    *policyService.NewNullableDistributedInferenceRulesV2(&policyRules),
+						},
+					},
+				})
+				var spec api.DistributedInferenceSpecSpec
+				Expect(json.Unmarshal([]byte(fmt.Sprintf(`{
+					"workers":1,
+					"leader":{"image":"ubuntu","compute":{"gpuRequestType":"portion",%q:0.25}},
+					"worker":{"image":"ubuntu","compute":{"gpuRequestType":"portion",%q:0.5}}
+				}`, requestField, requestField)), &spec)).To(Succeed())
+				response, err := distributedInferencesService.CreateDistributedInference(ctx, api.DistributedInferenceCreationRequest{
+					Name: "test-dinf-default-from", ProjectId: randoms.ProjectIdStr, ClusterId: randoms.ClusterId, Spec: spec,
+				})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response.Code).To(Equal(http.StatusAccepted), "%+v", response.Body)
+				workload := response.Body.(workloadsApi.SupersetWorkload)
+				Expect(workload.Spec.Leader.Get().Compute.Get().GetCpuCoreRequest()).To(Equal(2.0))
+				Expect(workload.Spec.Worker.Get().Compute.Get().GetCpuCoreRequest()).To(Equal(4.0))
+			},
+			Entry("legacy GPU portion", "gpuPortionRequest"),
+			Entry("new GPU memory portion", "gpuMemoryPortionRequest"),
+		)
 
 		Context("distributed inference worker section handling", func() {
 			It("should not set worker spec when workers field is not sent", func() {

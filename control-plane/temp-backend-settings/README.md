@@ -126,7 +126,8 @@ and `openapi.mk`).
 | `make build-go` | `build-go-amd` + `build-go-arm` |
 | `make build-go-amd` | Compile `cmd/main.go` for `GOOS=linux GOARCH=amd64` (FIPS `GOFIPS140=v1.0.0`) in the Go builder container → `bin/temp-backend-settings-amd64` |
 | `make build-go-arm` | Same for `arm64` → `bin/temp-backend-settings-arm64` |
-| `make mockery` | Install mockery `v3.2.5` (if needed) and regenerate test mocks (`.mockery.yml`) |
+| `make generate-mocks` / `make generate-mocks-local` | Regenerate test mocks from `.mockery.yml` with the shared mockery v3 setup (in Docker / without Docker) |
+| `make generate-mocks-client` | Regenerate `pkg/client` mocks from `pkg/client/.mockery.yml` |
 | `make purify` | `purify-go` — `go fmt` + `go vet` + `go mod tidy` |
 | `make validate` | `openapi-validate` — validate spec + generated code are up to date |
 | `make openapi-lint` | Lint the swagger bundle |

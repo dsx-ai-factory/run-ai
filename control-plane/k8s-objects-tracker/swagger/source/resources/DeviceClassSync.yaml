@@ -1,0 +1,37 @@
+post:
+  summary: Sync cluster Device Classes
+  description: Use to sync cluster device classes
+  operationId: sync_device_class
+  x-authorize:
+    resource-type: device-classes
+    action: sync
+  x-service: k8s-objects-tracker
+  x-audit: false
+  x-internal: true
+  x-test-coverage:
+    - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  parameters:
+    - $ref: "../../../../infra/openapi/docs/parameters/query/mandatory/ClusterIdRequired.yaml"
+  tags:
+    - Device Classes
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/DeviceClass/DeviceClasses.yaml'
+  responses:
+    200:
+      description: Executed successfully.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/DeviceClass/DeviceClasses.yaml'
+    401:
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    500:
+      $ref: '../../../../infra/openapi/docs/responses/500InternalServerError.yaml'
+    503:
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

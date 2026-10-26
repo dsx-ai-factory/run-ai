@@ -19,10 +19,19 @@ func NewCacheManagerInterface[T any](t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *CacheManagerInterface[T] {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &CacheManagerInterface[T]{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -63,15 +72,26 @@ type CacheManagerInterface_Delete_Call[T any] struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx
-//   - cacheKey
-func (_e *CacheManagerInterface_Expecter[T]) Delete(ctx interface{}, cacheKey interface{}) *CacheManagerInterface_Delete_Call[T] {
+//   - ctx context.Context
+//   - cacheKey string
+func (_e *CacheManagerInterface_Expecter[T]) Delete(ctx any, cacheKey any) *CacheManagerInterface_Delete_Call[T] {
 	return &CacheManagerInterface_Delete_Call[T]{Call: _e.mock.On("Delete", ctx, cacheKey)}
 }
 
 func (_c *CacheManagerInterface_Delete_Call[T]) Run(run func(ctx context.Context, cacheKey string)) *CacheManagerInterface_Delete_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -120,15 +140,26 @@ type CacheManagerInterface_Get_Call[T any] struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-//   - cacheKey
-func (_e *CacheManagerInterface_Expecter[T]) Get(ctx interface{}, cacheKey interface{}) *CacheManagerInterface_Get_Call[T] {
+//   - ctx context.Context
+//   - cacheKey string
+func (_e *CacheManagerInterface_Expecter[T]) Get(ctx any, cacheKey any) *CacheManagerInterface_Get_Call[T] {
 	return &CacheManagerInterface_Get_Call[T]{Call: _e.mock.On("Get", ctx, cacheKey)}
 }
 
 func (_c *CacheManagerInterface_Get_Call[T]) Run(run func(ctx context.Context, cacheKey string)) *CacheManagerInterface_Get_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -177,16 +208,32 @@ type CacheManagerInterface_GetOrFetch_Call[T any] struct {
 }
 
 // GetOrFetch is a helper method to define mock.On call
-//   - ctx
-//   - key
-//   - fetchFunc
-func (_e *CacheManagerInterface_Expecter[T]) GetOrFetch(ctx interface{}, key interface{}, fetchFunc interface{}) *CacheManagerInterface_GetOrFetch_Call[T] {
+//   - ctx context.Context
+//   - key string
+//   - fetchFunc func() (*T, error)
+func (_e *CacheManagerInterface_Expecter[T]) GetOrFetch(ctx any, key any, fetchFunc any) *CacheManagerInterface_GetOrFetch_Call[T] {
 	return &CacheManagerInterface_GetOrFetch_Call[T]{Call: _e.mock.On("GetOrFetch", ctx, key, fetchFunc)}
 }
 
 func (_c *CacheManagerInterface_GetOrFetch_Call[T]) Run(run func(ctx context.Context, key string, fetchFunc func() (*T, error))) *CacheManagerInterface_GetOrFetch_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(func() (*T, error)))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 func() (*T, error)
+		if args[2] != nil {
+			arg2 = args[2].(func() (*T, error))
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -224,16 +271,32 @@ type CacheManagerInterface_Set_Call[T any] struct {
 }
 
 // Set is a helper method to define mock.On call
-//   - ctx
-//   - cacheKey
-//   - value
-func (_e *CacheManagerInterface_Expecter[T]) Set(ctx interface{}, cacheKey interface{}, value interface{}) *CacheManagerInterface_Set_Call[T] {
+//   - ctx context.Context
+//   - cacheKey string
+//   - value T
+func (_e *CacheManagerInterface_Expecter[T]) Set(ctx any, cacheKey any, value any) *CacheManagerInterface_Set_Call[T] {
 	return &CacheManagerInterface_Set_Call[T]{Call: _e.mock.On("Set", ctx, cacheKey, value)}
 }
 
 func (_c *CacheManagerInterface_Set_Call[T]) Run(run func(ctx context.Context, cacheKey string, value T)) *CacheManagerInterface_Set_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(T))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 T
+		if args[2] != nil {
+			arg2 = args[2].(T)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

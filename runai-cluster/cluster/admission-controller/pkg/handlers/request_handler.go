@@ -12,6 +12,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"k8s.io/api/admission/v1beta1"
 	"k8s.io/client-go/kubernetes"
@@ -101,6 +102,11 @@ func handleRequest(w http.ResponseWriter, r *http.Request, handler Handler) {
 	applyAdmissionResultToResponse(w, result)
 }
 
+func sanitizeForLog(err error) string {
+	replacer := strings.NewReplacer("\n", "", "\r", "")
+	return replacer.Replace(err.Error())
+}
+
 func extractAdmissionReviewFromRequest(w http.ResponseWriter, r *http.Request) (v1beta1.AdmissionReview, error) {
 	// read the body / request
 	body, err := io.ReadAll(r.Body)
@@ -111,7 +117,7 @@ func extractAdmissionReviewFromRequest(w http.ResponseWriter, r *http.Request) (
 		}
 	}(r.Body)
 	if err != nil {
-		log.Println(err)
+		log.Println(sanitizeForLog(err))
 		w.WriteHeader(http.StatusInternalServerError)
 		fmt.Fprintf(w, "%s", err)
 		return v1beta1.AdmissionReview{}, err

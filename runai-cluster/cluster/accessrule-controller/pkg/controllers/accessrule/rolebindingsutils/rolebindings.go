@@ -34,11 +34,7 @@ const (
 )
 
 var (
-	TrueRef          = true
-	RoleNamesMapping = map[string]string{
-		"application-administrator": "editor",
-		"cloud-support":             "viewer",
-	}
+	TrueRef = true
 )
 
 func getRoleBindingObject(
@@ -112,19 +108,17 @@ func subjectNameForAccessRule(accessRule *v1alpha1.AccessRule) string {
 }
 
 func GetSubjectKind(subjectType v1alpha1.AccessRuleSubjectType) string {
-	if subjectType == v1alpha1.UserSubject ||
-		subjectType == v1alpha1.AppSubject ||
-		subjectType == v1alpha1.ServiceAccountSubject {
+	switch subjectType {
+	case v1alpha1.UserSubject, v1alpha1.ServiceAccountSubject:
 		return UserKind
+	default:
+		return GroupKind
 	}
-	// group and all-authenticated-users both bind as a Kubernetes Group
-	return GroupKind
 }
 
 func GetClusterRoleBindingName(roleName string) string {
 	result := strings.ReplaceAll(roleName, " ", "-")
 	result = strings.ToLower(result)
-	result = getRoleNameForRoleBinding(result)
 	return fmt.Sprintf("%s-%s", allRolesRunaiPrefix, result)
 }
 
@@ -161,12 +155,4 @@ func GetAccessRuleAddedSubjectLabelKey(accessRule *v1alpha1.AccessRule, projectR
 		result = fmt.Sprintf("%s%s", result, labelSuffixIfNeeded)
 	}
 	return result
-}
-
-func getRoleNameForRoleBinding(roleName string) string {
-	if mappedToName, exists := RoleNamesMapping[roleName]; exists {
-		return mappedToName
-	}
-
-	return roleName
 }

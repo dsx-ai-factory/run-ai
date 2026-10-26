@@ -7,15 +7,17 @@ package services_crud
 
 import (
 	"context"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"net/http"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 
 	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
-	workloadApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 func CreateInference(ctx context.Context, tenantSettingsClient clients.TenantSettingsClient, request api.InferenceCreationRequest) (api.ImplResponse, error) {
@@ -57,6 +59,11 @@ func CreateInference(ctx context.Context, tenantSettingsClient clients.TenantSet
 
 	sanitizeWorkloadResponse(ctx, &createWorkloadParams.Response)
 
+	recordWorkloadCreate(ctx, &createWorkloadParams)
+	createWorkloadParams.Response.Spec = gpucompat.LegacyCompatibleWorkloadSpec(createWorkloadParams.Response.Spec)
+	if createWorkloadParams.Response.MasterSpec.Get() != nil {
+		createWorkloadParams.Response.MasterSpec.Set(gpucompat.LegacyCompatibleMasterSpec(createWorkloadParams.Response.MasterSpec.Get()))
+	}
 	return api.Response(http.StatusAccepted, createWorkloadParams.Response), nil
 }
 

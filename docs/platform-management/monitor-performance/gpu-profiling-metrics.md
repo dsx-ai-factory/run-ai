@@ -114,7 +114,7 @@ The **DCGM Exporter** is responsible for exposing GPU performance metrics to Pro
 
 ## Enabling NVIDIA Run:ai Metric Aggregation
 
-Enable NVIDIA Run:ai to create enriched metrics from the DCGM profiling data. This configures Prometheus recording rules that aggregate raw DCGM metrics per pod, workload, and node. See [Advanced cluster configurations](../../installation-and-configuration/post-installation-configuration/cluster-config.md#prometheus) for more details.
+Enable NVIDIA Run:ai to create enriched metrics from the DCGM profiling data. This configures Prometheus recording rules that aggregate raw DCGM metrics per pod, workload, and node. See [Advanced cluster configurations](../../installation-and-configuration/configuration/cluster-config.md#prometheus) for more details.
 
 *   **Using Helm** - Set the following value in your `values.yaml` file under `clusterConfig` and upgrade the chart:
 
@@ -186,8 +186,8 @@ kubectl get pods -n gpu-operator -l app=nvidia-dcgm-exporter
 
 <Tab title="API">
 
-* Workloads - To view the GPU profiling metrics per pod, refer to the [Pods](https://run-ai-docs.nvidia.com/api/2.26/workloads/pods) API
-* Nodes - To view the GPU profiling metrics for nodes, refer to the [Nodes](https://run-ai-docs.nvidia.com/api/2.26/organizations/nodes) API
+* Workloads - To view the GPU profiling metrics per pod, refer to the [Pods](api:main-api:GET/api/v1/workloads/pods) API
+* Nodes - To view the GPU profiling metrics for nodes, refer to the [Nodes](api:main-api:GET/api/v1/nodes) API
 
 </Tab>
 

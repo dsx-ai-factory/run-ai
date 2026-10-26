@@ -6,8 +6,17 @@
 package services_crud
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	workloadsMgrClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/workloads_mgr"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services"
+	workloads_mgr_api "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
+	"github.com/google/uuid"
 	"net/http"
+	"net/http/httptest"
 	"time"
 
 	clientsclusterservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
@@ -29,10 +38,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao"
-	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services"
 	testing "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -113,6 +121,101 @@ var _ = Describe("workspaces service validations", func() {
 		testing.CleanTables()
 	})
 
+	It("records public HTTP workspace actions and retains them after deletion", func() {
+		const subject = "history-service-account"
+		const subjectType = "ServiceAccount"
+		requestCtx := context.WithValue(ctx, runaictx.CfSubjectID, subject)
+		requestCtx = context.WithValue(requestCtx, runaictx.CfSubjectType, subjectType)
+		router := api.NewRouter(api.NewWorkspacesAPIController(workspacesService), api.NewWorkloadActionsAPIController(services.NewWorkloadActionsService()))
+		body, err := json.Marshal(createWorkspaceRequest("http-workspace", randoms.ProjectIdStr, randoms.ClusterId, "", ""))
+		Expect(err).NotTo(HaveOccurred())
+		request := httptest.NewRequest(http.MethodPost, "/api/v1/workloads/workspaces", bytes.NewReader(body)).WithContext(requestCtx)
+		request.Header.Set("Content-Type", "application/json")
+		response := httptest.NewRecorder()
+		router.ServeHTTP(response, request)
+		Expect(response.Code).To(Equal(http.StatusAccepted), response.Body.String())
+		var created workloadsApi.SupersetWorkload
+		Expect(json.Unmarshal(response.Body.Bytes(), &created)).To(Succeed())
+		id := uuid.MustParse(created.WorkloadId)
+		_, err = runaidb.DB().Table("workloads").Where("id = ?", id).Update("phase", string(api.PHASE_RUNNING))
+		Expect(err).NotTo(HaveOccurred())
+		for _, action := range []string{"suspend", "resume", "delete"} {
+			method, path := http.MethodPost, "/api/v1/workloads/workspaces/"+id.String()+"/"+action
+			if action == "resume" {
+				_, err = runaidb.DB().Table("workloads").Where("id = ?", id).Update("phase", string(api.PHASE_STOPPED))
+				Expect(err).NotTo(HaveOccurred())
+			}
+			if action == "delete" {
+				method, path = http.MethodDelete, "/api/v1/workloads/workspaces/"+id.String()
+			}
+			response = httptest.NewRecorder()
+			router.ServeHTTP(response, httptest.NewRequest(method, path, nil).WithContext(requestCtx))
+			Expect(response.Code).To(Equal(http.StatusAccepted), response.Body.String())
+		}
+		readHistory := func() api.GetWorkloadActionsResponse {
+			response = httptest.NewRecorder()
+			router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/api/v1/workloads/"+id.String()+"/actions", nil).WithContext(requestCtx))
+			Expect(response.Code).To(Equal(http.StatusOK), response.Body.String())
+			var page api.GetWorkloadActionsResponse
+			Expect(json.Unmarshal(response.Body.Bytes(), &page)).To(Succeed())
+			return page
+		}
+		page := readHistory()
+		Expect(page.Actions).To(HaveLen(4))
+		actions := make([]api.WorkloadActionType, 0, len(page.Actions))
+		for _, action := range page.Actions {
+			actions = append(actions, action.Action)
+			Expect(action.Subject).To(Equal(subject))
+			Expect(action.SubjectType).To(Equal(subjectType))
+			Expect(action.AcceptedAt.IsZero()).To(BeFalse())
+		}
+		Expect(actions).To(ConsistOf(
+			api.WorkloadActionType("create"),
+			api.WorkloadActionType("suspend"),
+			api.WorkloadActionType("resume"),
+			api.WorkloadActionType("delete"),
+		))
+	})
+
+	It("records a manager-backed workspace create with the manager-assigned ID", func() {
+		original := anyWorkloadSubmitters[Workspace]
+		DeferCleanup(func() { anyWorkloadSubmitters[Workspace] = original })
+		anyWorkloadSubmitters[Workspace] = &fakeAnyWorkloadSubmitter{methods: SubmissionMethods{AnyWorkload: true}, submission: &Submission{}}
+		id := uuid.NewString()
+		workloadsMgrClient.SetMock(&workloadsMgrMock{createResponse: &workloads_mgr_api.WorkloadV2{DesiredPhase: workloads_mgr_api.DESIREDPHASE_RUNNING, Metadata: workloads_mgr_api.WorkloadV2Metadata{Id: id, Name: "manager-normalized-workspace", ProjectId: randoms.ProjectIdStr, ClusterId: randoms.ClusterId}}})
+		response, err := workspacesService.CreateWorkspace(ctx, *createWorkspaceRequest("manager-workspace", randoms.ProjectIdStr, randoms.ClusterId, "", ""))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusAccepted))
+		created := response.Body.(workloadsApi.SupersetWorkload)
+		Expect(created.WorkloadId).To(Equal(id))
+		Expect(created.Name).To(Equal("manager-workspace"))
+		rows, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(id), 0, 0)
+		Expect(apiErr).To(BeNil())
+		Expect(rows).To(HaveLen(1))
+		Expect(rows[0].Action).To(Equal("create"))
+		Expect(rows[0].WorkloadName).To(Equal("manager-workspace"))
+	})
+
+	It("keeps an accepted create successful when history persistence fails", func() {
+		_, err := runaidb.DB().Exec("ALTER TABLE workloads_action_history RENAME TO unavailable_action_history")
+		Expect(err).NotTo(HaveOccurred())
+		DeferCleanup(func() {
+			_, err := runaidb.DB().Exec("ALTER TABLE unavailable_action_history RENAME TO workloads_action_history")
+			Expect(err).NotTo(HaveOccurred())
+		})
+		response, err := workspacesService.CreateWorkspace(ctx, *createWorkspaceRequest("history-unavailable", randoms.ProjectIdStr, randoms.ClusterId, "", ""))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusAccepted))
+	})
+
+	It("does not record a rejected workspace create", func() {
+		response, err := workspacesService.CreateWorkspace(ctx, *createWorkspaceRequest("bad-workspace", randoms.ProjectIdStr, randoms.ClusterId, "unknown-priority", ""))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(response.Code).To(Equal(http.StatusBadRequest))
+		var count int64
+		Expect(runaidb.DB().Table("workloads_action_history").Where("tenant_id = ?", randoms.TenantId).Count(&count)).To(Succeed())
+		Expect(count).To(BeZero())
+	})
 	Context("create", func() {
 		It("get should be sensitive to workload type", func() {
 
@@ -126,6 +229,14 @@ var _ = Describe("workspaces service validations", func() {
 
 			createPayload := createResponse.Body.(workloadsApi.SupersetWorkload)
 			Expect(createPayload.WorkloadId).NotTo(BeNil())
+			actions, _, actionErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(createPayload.WorkloadId), 0, 0)
+			Expect(actionErr).To(BeNil())
+			Expect(actions).To(HaveLen(1))
+			Expect(actions[0].Action).To(Equal("create"))
+			Expect(actions[0].Subject).To(Equal(testing.TestUser))
+			Expect(actions[0].SubjectType).To(Equal("user"))
+			Expect(actions[0].WorkloadName).To(Equal(createPayload.Name))
+			Expect(actions[0].ProjectID).To(Equal(randoms.ProjectIdStr))
 
 			//  expecting the actual phase to be Creating...
 			createPayload.ActualPhase = convutils.Ref(workloadsApi.PHASE_CREATING)

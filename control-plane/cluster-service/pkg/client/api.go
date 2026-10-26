@@ -28,7 +28,6 @@ const (
 	TopologyLabelsStoreName   = "clusters-client-topology-labels"
 )
 
-//go:generate mockery --name IClusterExternalClient
 type IClusterExternalClient interface {
 	GetClusterInternalConfig(ctx context.Context, clusterUUID string) (*openapi.GetInternalClusterConfigResponse, error)
 	GetClusterControlPlaneConfig(ctx context.Context, clusterUUID string) (*openapi.ClusterControlPlaneConfig, error)
@@ -46,7 +45,6 @@ type IClusterExternalClient interface {
 	GetNodeInternal(ctx context.Context, clusterUuid string, nodeName string) (*openapi.NodeInternal, *http.Response, error)
 }
 
-//go:generate mockery --name IClusterClient
 type IClusterClient interface {
 	IClusterExternalClient
 	GetNodePoolsMinimalForTenants(ctx context.Context, tenantIds []string) (*openapi.GetNodepoolsMinimalInternal200Response, error)

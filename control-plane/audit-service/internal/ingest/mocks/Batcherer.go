@@ -17,10 +17,19 @@ func NewBatcherer[T any](t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Batcherer[T] {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Batcherer[T]{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -61,14 +70,20 @@ type Batcherer_Add_Call[T any] struct {
 }
 
 // Add is a helper method to define mock.On call
-//   - item
-func (_e *Batcherer_Expecter[T]) Add(item interface{}) *Batcherer_Add_Call[T] {
+//   - item *T
+func (_e *Batcherer_Expecter[T]) Add(item any) *Batcherer_Add_Call[T] {
 	return &Batcherer_Add_Call[T]{Call: _e.mock.On("Add", item)}
 }
 
 func (_c *Batcherer_Add_Call[T]) Run(run func(item *T)) *Batcherer_Add_Call[T] {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*T))
+		var arg0 *T
+		if args[0] != nil {
+			arg0 = args[0].(*T)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

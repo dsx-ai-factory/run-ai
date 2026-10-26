@@ -6,6 +6,7 @@
 package application
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/filter"
@@ -14,10 +15,11 @@ import (
 	applist "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/application/list"
 	credclient "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/credential/client"
 	credlist "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/credential/list"
+	mycredclient "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/mycredential/client"
 	projectservice "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/project"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/transaction"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	assetsopenapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 const (
@@ -30,10 +32,13 @@ const (
 )
 
 var (
-	lister           applist.AIApplicationLister
-	deleter          applist.AIApplicationDeleter
-	creator          applist.AIApplicationCreator
-	credentialLister credlist.Lister
+	lister                    applist.AIApplicationLister
+	deleter                   applist.AIApplicationDeleter
+	creator                   applist.AIApplicationCreator
+	credentialLister          credlist.Lister
+	privateCredentialResolver interface {
+		GetPrivateCredentialAssetId(ctx context.Context, name, typeFilter string) (string, error)
+	}
 )
 
 func SetLister(l applist.AIApplicationLister) {
@@ -50,6 +55,12 @@ func SetCreator(c applist.AIApplicationCreator) {
 
 func SetCredentialLister(cl credlist.Lister) {
 	credentialLister = cl
+}
+
+func SetPrivateCredentialResolver(resolver interface {
+	GetPrivateCredentialAssetId(ctx context.Context, name, typeFilter string) (string, error)
+}) {
+	privateCredentialResolver = resolver
 }
 
 func getAIApplicationListService(domain, token string) (*applist.AIApplicationService, error) {
@@ -174,4 +185,16 @@ func ResolveCredentialAssetId(txn *transaction.Txn, domain, token, credentialNam
 	default:
 		return "", fmt.Errorf(errCredentialAmbiguous, credentialName)
 	}
+}
+
+func ResolvePrivateCredentialAssetId(txn *transaction.Txn, domain, token, credentialName string) (string, error) {
+	resolver := privateCredentialResolver
+	if resolver == nil {
+		var err error
+		resolver, err = mycredclient.NewClient(domain, token)
+		if err != nil {
+			return "", err
+		}
+	}
+	return resolver.GetPrivateCredentialAssetId(txn.GetCtx(), credentialName, chartAuthCredentialKind)
 }

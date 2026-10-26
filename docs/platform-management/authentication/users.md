@@ -9,13 +9,13 @@ The Users table can be found under **Access** in the NVIDIA Run:ai platform.
 The users table provides a list of all the users in the platform.\
 You can manage users and user permissions (access rules) for both local and [SSO users](overview.md#single-sign-on-sso).
 
-<Info>
+<Note>
 
 **Single Sign-On Users**
 
 SSO users are managed by the identity provider and appear once they have signed in to NVIDIA Run:ai.
 
-</Info>
+</Note>
 
 <figure><img src="../../assets/users-new.png" alt=""/><figcaption></figcaption></figure>
 
@@ -59,13 +59,13 @@ To create a local user:
    * Click **SAVE RULE**
    * Click **CLOSE**
 
-<Info>
+<Note>
 
 **Note**
 
 The temporary password is visible only at the time of user’s creation and must be changed after the first sign-in.
 
-</Info>
+</Note>
 
 ## Editing a User
 
@@ -118,14 +118,14 @@ To reset a user’s password:
 2. Click **DELETE**
 3. In the dialog, click **DELETE** to confirm
 
-<Info>
+<Note>
 
 **Note**
 
 To ensure administrative operations are always available, at least one local user with System Administrator role should exist.
 
-</Info>
+</Note>
 
 ## Using API
 
-Go to the [Users](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/users), [Access rules](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/access-rules) API reference to view the available actions.
+Go to the [Users](api:main-api:GET/api/v1/users), [Access rules](api:main-api:GET/api/v1/authorization/access-rules) API reference to view the available actions.

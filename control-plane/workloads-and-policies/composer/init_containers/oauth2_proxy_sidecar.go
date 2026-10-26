@@ -10,8 +10,8 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	corev1 "k8s.io/api/core/v1"
 )
 
@@ -40,9 +40,10 @@ type ServingProxySpec struct {
 
 	// Required — used by BuildOAuth2Proxy* helpers for naming/labeling and
 	// cluster-config lookups.
-	WorkloadName string
-	ProjectName  string
-	Config       composer.ClusterStorageConfig
+	WorkloadName                  string
+	ProjectName                   string
+	Config                        composer.ClusterStorageConfig
+	OAuth2ProxyTemplatesSupported bool
 
 	// Optional. When non-nil, the caller's exposed-URL items are merged into
 	// the same info map alongside the serving-port item; each merged item is
@@ -119,10 +120,11 @@ func BuildOauth2ProxySidecar(podSpec *corev1.PodSpec, spec ServingProxySpec) *wo
 		}
 	}
 	info := &composer.ExposedUrlInfo{
-		Items:        items,
-		WorkloadName: spec.WorkloadName,
-		ProjectName:  spec.ProjectName,
-		Config:       spec.Config,
+		Items:                         items,
+		WorkloadName:                  spec.WorkloadName,
+		ProjectName:                   spec.ProjectName,
+		Config:                        spec.Config,
+		OAuth2ProxyTemplatesSupported: spec.OAuth2ProxyTemplatesSupported,
 	}
 	if spec.ExposedURLInfo != nil {
 		info.ResourcePrefix = spec.ExposedURLInfo.ResourcePrefix

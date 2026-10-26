@@ -22,14 +22,12 @@ const (
 	namespace                             = "runai"
 	admissionControllerSecretName         = "runai-tls-secret"
 	anyworkloadControllerSecretName       = "runai-anyworkload-controller-tls-secret"
-	podGroupAssignerSecretName            = "runai-pod-group-assigner-tls-secret"        /* #nosec */
 	accessruleControllerSecretName        = "runai-accessrule-controller-tls-secret"     /* #nosec */
 	agentSecretName                       = "runai-agent-tls-secret"                     /* #nosec */
 	applicationControllerSecretName       = "application-controller-tls-secret"          /* #nosec */
 	adviceRestartControllerSecretName     = "runai-advice-restart-controller-tls-secret" /* #nosec */
 	admissionControllerServiceName        = "runai-admission-controller"
 	anyworkloadControllerServiceName      = "anyworkload-controller"
-	podGroupAssignerServiceName           = "pod-group-assigner"
 	accessruleControllerServiceName       = "accessrule-controller"
 	agentServiceName                      = "runai-agent"
 	adviceRestartControllerServiceName    = "advice-restart-controller"
@@ -37,7 +35,6 @@ const (
 	applicationControllerServiceName      = "application-controller"
 	adviceRestartControllerDeploymentName = adviceRestartControllerServiceName
 	anyworkloadControllerDeploymentName   = anyworkloadControllerServiceName
-	podGroupAssignerDeploymentName        = podGroupAssignerServiceName
 	accessruleControllerDeploymentName    = accessruleControllerServiceName
 	applicationControllerDeploymentName   = applicationControllerServiceName
 	agentDeploymentName                   = agentServiceName
@@ -103,14 +100,6 @@ func signCertificates(ctx context.Context, client kubernetes.Interface, certSign
 	}
 	log.Printf("Signed certificate for anyworkload controller")
 
-	if webhookCertificates.PodGroupAssignerCertificateDetails, err = certSigner.Sign(
-		ctx, podGroupAssignerServiceName, podGroupAssignerSecretName, namespace, true,
-	); err != nil {
-		log.Printf("Failed to sign certificate for pod-group-assigner: %v", err)
-		return webhookCertificates, err
-	}
-	log.Printf("Signed certificate for pod-group-assigner")
-
 	if webhookCertificates.AccessruleControllerCertificateDetails, err = certSigner.Sign(
 		ctx, accessruleControllerServiceName, accessruleControllerSecretName, namespace, true,
 	); err != nil {
@@ -151,12 +140,6 @@ func signCertificates(ctx context.Context, client kubernetes.Interface, certSign
 
 	log.Printf("Restarting anyworkload-controller")
 	if err = rolloutRestartDeployment(ctx, client, anyworkloadControllerDeploymentName, namespace); err != nil {
-		log.Printf("Failed to restart deployment: %v", err)
-		return webhookCertificates, err
-	}
-
-	log.Printf("Restarting pod-group-assigner")
-	if err = rolloutRestartDeployment(ctx, client, podGroupAssignerDeploymentName, namespace); err != nil {
 		log.Printf("Failed to restart deployment: %v", err)
 		return webhookCertificates, err
 	}

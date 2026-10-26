@@ -51,16 +51,16 @@
   <line x1="470" y1="268" x2="470" y2="292" stroke="#64748B" stroke-width="1.5" marker-end="url(#arr)"/>
 
   <!-- ── CONTROL PLANE (left) ── -->
-  <rect x="72" y="292" width="256" height="76" rx="8" fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.5"/>
-  <rect x="72" y="292" width="5" height="76" rx="4" fill="#3B82F6"/>
-  <text x="201" y="322" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A5F">NVIDIA Run:ai</text>
-  <text x="201" y="340" text-anchor="middle" font-size="13" font-weight="700" fill="#1E3A5F">Control Plane</text>
+  <rect x="72" y="292" width="256" height="76" rx="8" fill="#B2D380" stroke="#8BB85B" stroke-width="1.5"/>
+  <rect x="72" y="292" width="5" height="76" rx="4" fill="#8BB85B"/>
+  <text x="201" y="322" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai</text>
+  <text x="201" y="340" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">Control Plane</text>
   <text x="201" y="358" text-anchor="middle" font-size="10" fill="#64748B">Resource management · UI · API</text>
 
   <!-- ── RUN:AI CLUSTER (right) ── -->
-  <rect x="352" y="292" width="256" height="204" rx="8" fill="#F0FDF4" stroke="#22C55E" stroke-width="1.5"/>
-  <rect x="352" y="292" width="5" height="204" rx="4" fill="#22C55E"/>
-  <text x="481" y="318" text-anchor="middle" font-size="13" font-weight="700" fill="#14532D">NVIDIA Run:ai Cluster</text>
+  <rect x="352" y="292" width="256" height="204" rx="8" fill="#F1F8E9" stroke="#AED581" stroke-width="1.5"/>
+  <rect x="352" y="292" width="5" height="204" rx="4" fill="#AED581"/>
+  <text x="481" y="318" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai Cluster</text>
 
   <!-- Workloads sub-box -->
   <rect x="372" y="332" width="216" height="64" rx="6" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.5"/>

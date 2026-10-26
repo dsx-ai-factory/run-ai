@@ -48,13 +48,14 @@ func validateExposureServiceOwnership(
 
 	errs := make([]error, 0)
 	backends := make([]serviceBackend, 0)
+	constraints := configuredRoutingConstraints()
 	for _, exposure := range exposures {
 		if isNilClientObject(exposure) {
 			errs = append(errs, ownershipViolationf("exposure object is nil"))
 			continue
 		}
 		extracted, err := exposureServiceBackends(exposure)
-		errs = append(errs, err)
+		errs = append(errs, err, validateExposureExtensions(runner, exposure, constraints))
 		backends = append(backends, extracted...)
 
 		namespace, supported := exposureObjectNamespace(exposure)

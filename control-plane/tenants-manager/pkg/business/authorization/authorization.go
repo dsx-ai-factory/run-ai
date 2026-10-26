@@ -17,7 +17,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
-//go:generate mockery
 type AuthManagerInterface interface {
 	GetTenantIdForSystemScope(ctx context.Context, tenantId string) (*string, error)
 	HandleSystemScopeError(err error, errMessage string) (api.ImplResponse, error)

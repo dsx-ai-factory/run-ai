@@ -49,3 +49,35 @@ func (m *JsonBMapFromString) Scan(value interface{}) error {
 	*m = tmpMap
 	return nil
 }
+
+// ToJsonBMap converts an arbitrary JSON-marshalable value into the map-shaped
+// storage representation used by jsonb columns backed by JsonBMapFromString.
+// Round-tripping through JSON is intentional: it normalizes typed structs,
+// pointers, and any existing map into the exact `map[string]any` shape the
+// storage layer stores.
+func ToJsonBMap(v any) (JsonBMapFromString, error) {
+	bytes, err := json.Marshal(v)
+	if err != nil {
+		return nil, fmt.Errorf("marshal value to json: %w", err)
+	}
+	var m JsonBMapFromString
+	if err := json.Unmarshal(bytes, &m); err != nil {
+		return nil, fmt.Errorf("unmarshal json into JsonBMapFromString: %w", err)
+	}
+	return m, nil
+}
+
+// FromJsonBMap is the inverse of ToJsonBMap: it materializes the caller's
+// typed destination from the map-shaped stored value via a JSON round-trip.
+// Used by per-kind read DAOs to unmarshal a stored spec into its typed
+// swagger struct.
+func FromJsonBMap(m JsonBMapFromString, out any) error {
+	bytes, err := json.Marshal(m)
+	if err != nil {
+		return fmt.Errorf("marshal JsonBMapFromString to json: %w", err)
+	}
+	if err := json.Unmarshal(bytes, out); err != nil {
+		return fmt.Errorf("unmarshal json into %T: %w", out, err)
+	}
+	return nil
+}

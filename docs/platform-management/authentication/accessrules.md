@@ -8,13 +8,13 @@ The Access rules table can be found under **Access** in the NVIDIA Run:ai platfo
 
 The Access rules table provides a list of all the access rules defined in the platform and allows you to manage them.
 
-<Info>
+<Note>
 
 **Flexible management**
 
 It is also possible to manage access rules directly for a specific [user](users.md), [service account](service-accounts.md), [project](../../platform-management/aiinitiatives/organization/projects.md), or [department](../../platform-management/aiinitiatives/organization/departments.md).
 
-</Info>
+</Note>
 
 <figure><img src="../../assets/access-rules-new.png" alt=""/><figcaption></figcaption></figure>
 
@@ -85,13 +85,13 @@ To transition access rules:
 3. For each legacy role listed, select a **new role**. For some legacy roles, NVIDIA Run:ai pre-selects a recommended replacement, which you can change.
 4. Click **TRANSITION ACCESS RULES** to confirm
 
-<Info>
+<Note>
 
 **Required permissions**
 
 Your role must include the **Create**, **Read**, **Update**, and **Delete** permissions on the **Access rules** resource.
 
-</Info>
+</Note>
 
 ## Viewing Your User Access Rule
 
@@ -104,4 +104,4 @@ The list of assigned roles and scopes will be displayed.
 
 ## Using API
 
-Go to the [Access rules](https://run-ai-docs.nvidia.com/api/2.26/authentication-and-authorization/access-rules) API reference to view the available actions.
+Go to the [Access rules](api:main-api:GET/api/v1/authorization/access-rules) API reference to view the available actions.

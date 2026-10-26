@@ -13,11 +13,13 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
+	"k8s.io/utils/ptr"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 	smocks "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/mocks/pkg/services"
 	clients_local "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clients"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
+	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
 )
 
 var _ = Describe("stripUnsupportedSchedulingFields", func() {
@@ -107,5 +109,23 @@ var _ = Describe("stripUnsupportedSchedulingFields", func() {
 			Expect(err.Error()).To(ContainSubstring("failed to check cluster support for gpuPodsPlacementStrategy.device"))
 			Expect(errors.Is(err, dao.ErrClusterNotFound)).To(BeFalse())
 		})
+	})
+})
+
+var _ = Describe("validateSchedulingCapabilities on update and patch", func() {
+	conflicting := api.NodepoolUpdateFields{
+		SchedulingCapabilities: api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(true)},
+	}
+
+	It("refuses cpuQuota on with quota off in a PUT that sends only capabilities", func() {
+		checker := smocks.NewClusterCapabilityChecker(GinkgoT())
+		err := validateUpdateParams(context.Background(), conflicting, checker)
+		Expect(err).To(MatchError(ContainSubstring("CpuQuota can only be enabled when SchedulingCapabilities.Quota is enabled")))
+	})
+
+	It("refuses cpuQuota on with quota off in a PATCH that sends only capabilities", func() {
+		checker := smocks.NewClusterCapabilityChecker(GinkgoT())
+		err := validatePatchParams(context.Background(), models.Nodepool{}, conflicting, checker)
+		Expect(err).To(MatchError(ContainSubstring("CpuQuota can only be enabled when SchedulingCapabilities.Quota is enabled")))
 	})
 })

@@ -107,7 +107,7 @@ control-plane/identity-manager/pkg/client/v1.0.0-dev.0
 ```
 
 Development versions are intended **only** for use in feature branches.
-**It is strictly prohibited to merge a pull request into `master` that
+**It is strictly prohibited to merge a pull request into `main` that
 references a development version of the client.** CI will fail any such pull
 request to enforce this policy.
 
@@ -115,7 +115,7 @@ request to enforce this policy.
 
 To publish a production release of the client:
 
-1. Merge all relevant client changes into `master`.
+1. Merge all relevant client changes into `main`.
 2. From the service's main directory run:
 
    ```

@@ -53,6 +53,12 @@ const (
 	// rather than scaling the Deployment directly (which go-operator would revert).
 	ProjectControllerOperandName = "runai-project-controller"
 
+	// ProjectControllerDeploymentName is KRM's name for the project-controller. It
+	// serves as both the Deployment the migration waits to be ready before the
+	// cleanup and the app-label prefix of its pods, since KRM labels a Deployment's
+	// pods with the Deployment's own name.
+	ProjectControllerDeploymentName = "project-controller"
+
 	// AgentOperandName is the app-label prefix of the runai-agent pods the
 	// migration waits to disappear after disabling it. Like the project-controller
 	// it is owned and scaled by go-operator from RunaiConfig, so the migration
@@ -60,10 +66,11 @@ const (
 	// Deployment directly (which go-operator would revert).
 	AgentOperandName = "runai-agent"
 
-	// NodePoolControllerOperandName is the app-label prefix of the legacy
-	// nodepool-controller pods. It owns the SchedulingShards being re-parented, so
-	// the migration takes it down (via RunaiConfig, like the others) to keep it from
-	// re-stamping the old ownership.
+	// NodePoolControllerOperandName is the app-label prefix of the nodepool-controller
+	// pods. KRM happens to use the same name the Run:ai build did, so unlike the
+	// project-controller this one matches both pre-KRM and KRM clusters. It owns the
+	// SchedulingShards being re-parented, so the migration takes it down (via
+	// RunaiConfig, like the others) to keep it from re-stamping the old ownership.
 	NodePoolControllerOperandName = "nodepool-controller"
 )
 

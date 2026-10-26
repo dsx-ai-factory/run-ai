@@ -22,7 +22,7 @@ for every affected service. Follow the steps below.
 
 ```bash
 REPO_ROOT=$(git rev-parse --show-toplevel)
-BASE=$(git merge-base origin/master HEAD)
+BASE=$(git merge-base origin/main HEAD)
 git diff --name-only "$BASE"...HEAD | grep '^build/makefile/.*\.mk$'
 ```
 
@@ -34,7 +34,7 @@ Only regenerate if Make targets were added, removed, or renamed. Internal variab
 (`:=`, `?=`, `+=` lines) do not require doc updates.
 
 ```bash
-BASE=$(git merge-base origin/master HEAD)
+BASE=$(git merge-base origin/main HEAD)
 for MK_FILE in $(git diff --name-only "$BASE"...HEAD | grep '^build/makefile/.*\.mk$'); do
   git diff "$BASE"...HEAD -- "$MK_FILE" \
     | grep -E '^[+-][a-zA-Z_][a-zA-Z0-9_-]*[[:space:]]*:([^=]|$)' \

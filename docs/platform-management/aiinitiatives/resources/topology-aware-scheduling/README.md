@@ -4,13 +4,13 @@ Topology-aware scheduling in NVIDIA Run:ai optimizes the placement of workloads 
 
 Kubernetes represents hierarchical network structures, such as racks, blocks, or NVLink domains, using node labels. These labels describe where each node resides in the cluster's network topology. The [NVIDIA Run:ai Scheduler](../../../runai-scheduler/scheduling/concepts-and-principles.md) uses this topology information to keep workloads on nodes that minimize latency and maximize bandwidth availability.
 
-<Info>
+<Note>
 
 **Note**
 
 For guidance on using topology-aware scheduling with GB200 and Multi-Node NVLink (MNNVL) systems, see [Using GB200 and Multi-Node NVLink Domains](../using-gb200.md).
 
-</Info>
+</Note>
 
 ## Benefits of Network Topology-Aware Scheduling
 
@@ -69,19 +69,19 @@ The two scopes are not mutually exclusive. A common pattern is to combine them: 
 
 ## Topology Constraints Visibility
 
-The topology name, applied topology constraints, and actual topology placement, whether applied automatically by NVIDIA Run:ai or defined manually, are exposed through the [Workloads](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads) API for native and supported workload types. For native workloads, this information is also visible in the workload [Details](../../../../workloads-in-nvidia-run-ai/workloads.md#show-hide-details) view in the UI.
+The topology name, applied topology constraints, and actual topology placement, whether applied automatically by NVIDIA Run:ai or defined manually, are exposed through the [Workloads](api:main-api:GET/api/v1/workloads) API for native and supported workload types. For native workloads, this information is also visible in the workload [Details](../../../../workloads-in-nvidia-run-ai/workloads.md#show-hide-details) view in the UI.
 
-<Info>
+<Note>
 
 **Note**
 
 This visibility applies to workload-based placement only. Segment-based constraints and per-segment actual placement are not currently exposed through the API or UI.
 
-</Info>
+</Note>
 
 * **Topology name** - The name of the topology applied to the workload.
 * **Topology levels** - Each configured topology level with its constraint type (Required or Preferred) and the level at which pods were actually placed. When the constraint is met, pods are placed according to the topology, ensuring optimal pod-to-pod communication and performance. When a Preferred constraint is not met, pods may be placed farther apart than preferred, which can impact communication latency and performance.
-* **Actual placement** - The topology label level and value where the workload pods were actually placed (for example, `network.topology.nvidia.com/zone (us-central)`). Actual placement is reported even when no topology constraints were applied to the workload, so you can always see where pods landed in the network hierarchy. For multi-component workloads such as Dynamo over Grove, the [Workloads](https://run-ai-docs.nvidia.com/api/2.26/workloads/workloads) API also returns the actual placement per workload element, so you can verify where each element's pods were placed.
+* **Actual placement** - The topology label level and value where the workload pods were actually placed (for example, `network.topology.nvidia.com/zone (us-central)`). Actual placement is reported even when no topology constraints were applied to the workload, so you can always see where pods landed in the network hierarchy. For multi-component workloads such as Dynamo over Grove, the [Workloads](api:main-api:GET/api/v1/workloads) API also returns the actual placement per workload element, so you can verify where each element's pods were placed.
 
 ## Pod Affinity vs. Topology-Aware Scheduling
 
@@ -96,7 +96,7 @@ In the example, two workloads (Workload 1 requiring 12 nodes and Workload 2 requ
 
 ## Using API
 
-To view the available actions, go to the [Network Topologies](https://run-ai-docs.nvidia.com/api/2.26/organizations/network-topologies) API reference.
+To view the available actions, go to the [Network Topologies](api:main-api:GET/api/v1/network-topologies) API reference.
 
 ## Known Limitations
 

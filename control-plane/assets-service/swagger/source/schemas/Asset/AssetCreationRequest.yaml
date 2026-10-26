@@ -3,7 +3,8 @@ allOf:
   - $ref: "./AssetCreationFields.yaml"
 example:
   name: my-asset
-  scope: tenant
+  scope: project
+  projectId: 4500001
   workloadSupportedTypes:
     workspace: false
     training: false

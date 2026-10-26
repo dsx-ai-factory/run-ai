@@ -72,11 +72,12 @@ runai training mpi submit <workload-name> -p <project-name> -i ubuntu --master-c
       --extended-resource stringArray                       Request access to a Kubernetes extended resource. Format: resource_name=quantity.
       --external-url stringArray                            Expose a URL from the workload container. Format: container=PORT,url=https://external.runai.com,authusers=user1,authgroups=group1.
       --git-sync stringArray                                Mount a Git repository into the container. Format: name=NAME,repository=REPO,path=PATH,secret=SECRET,rev=REVISION.
+      --gpu-compute-mode string                             GPU compute sharing mode. Valid values: time-slicing, sm-sharing. Requires cluster version 3.0.14+.
   -g, --gpu-devices-request positiveInt                     Number of GPU devices to allocate for the workload (e.g. 1, 2).
       --gpu-memory-limit string                             Maximum GPU memory to allocate (e.g. 1G, 500M).
+      --gpu-memory-portion-limit positiveFloat              Maximum GPU memory fraction allowed per device (between 0 and 1).
+      --gpu-memory-portion-request positiveFloat            GPU memory fraction to allocate per device (between 0 and 1, e.g. 0.5).
       --gpu-memory-request string                           Amount of GPU memory to allocate (e.g. 1G, 500M).
-      --gpu-portion-limit positiveFloat                     Maximum GPU fraction allowed for the workload (between 0 and 1).
-      --gpu-portion-request positiveFloat                   Fraction of a GPU to allocate (between 0 and 1, e.g. 0.5).
       --gpu-request-type string                             Type of GPU request: portion, memory
   -h, --help                                                help for submit
       --host-ipc                                            Enable host IPC for the container. Default: false.
@@ -106,7 +107,7 @@ runai training mpi submit <workload-name> -p <project-name> -i ubuntu --master-c
       --node-type string                                    Enforce node type affinity by setting a node-type label.
       --pod-running-timeout duration                        Timeout for pod to reach running state (e.g. 5s, 2m, 3h).
       --port stringArray                                    Expose ports from the workload container. Format: service-type=NodePort,container=80,external=8080.
-      --preemptibility preemptibility                       Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
+      --preemptibility preemptibility                       Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, semi-preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
       --preferred-pod-topology-key string                   If possible, schedule all pods of this workload within the same topology domain defined by a Kubernetes node label key. Format: KEY.
       --priority string                                     Sets the workload’s scheduling priority. Valid values: very-low, low, medium-low, medium, medium-high, high, very-high. 
                                                             Overrides the default priority for the workload type. Changing priority does not update preemptibility automatically.

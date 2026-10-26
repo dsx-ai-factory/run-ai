@@ -57,7 +57,7 @@ export const WorkloadStatusWidgetMock = {
         {
           key: "ProjectId",
           value: "3",
-          name: "lemur",
+          name: "viper",
         },
         {
           key: "Phase",
@@ -71,7 +71,7 @@ export const WorkloadStatusWidgetMock = {
         {
           key: "ProjectId",
           value: "3",
-          name: "lemur",
+          name: "viper",
         },
         {
           key: "Phase",

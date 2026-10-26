@@ -12,9 +12,7 @@ const (
 	MaxLimit            int32 = 200
 	UpstreamPageSize    int32 = 200
 	MaxPaginatedResults int32 = 2000
-	// MaxAPIFilters mirrors dao_utils.LimitFilterOrCount without importing
-	// dao-utils, which would pull database dependencies into the MCP server.
-	MaxAPIFilters = 10
+	MaxAPIFilters             = 10
 )
 
 func ValidatePagination(limit, offset int32) error {
@@ -35,18 +33,22 @@ func EffectiveLimit(limit int32) int32 {
 }
 
 func Paginate[T any](items []T, offset, limit int32) ([]T, bool, int32) {
-	total := int32(len(items))
-	start := offset
+	total := int64(len(items))
+	start := max(int64(offset), 0)
 	if start > total {
 		start = total
 	}
-	end := start + limit
+	pageSize := max(0, int64(limit))
+	if pageSize < 0 {
+		pageSize = 0
+	}
+	end := start + pageSize
 	if end > total {
 		end = total
 	}
 	page := items[start:end]
 	if end < total {
-		return page, true, end
+		return page, true, int32(end)
 	}
 	return page, false, 0
 }

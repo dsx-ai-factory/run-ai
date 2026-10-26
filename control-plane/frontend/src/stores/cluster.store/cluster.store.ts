@@ -183,7 +183,6 @@ export const useClusterStore = defineStore("Cluster", {
       }
 
       try {
-        // Sphinx:TODO: do we really need this logic here? or move it to the relevant services
         const domain = this.selectedCluster.domain || "";
         clusterApiServiceOld.setBaseURL(domain);
         clusterApi.setBaseUrl(domain);

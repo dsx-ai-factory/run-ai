@@ -7,7 +7,7 @@ package handlers
 
 import (
 	"encoding/json"
-	orgUnitApi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgUnitApi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/common"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/resourcing"
 	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"

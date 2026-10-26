@@ -86,8 +86,8 @@ and orchestrated through the [`Makefile`](Makefile), which inherits the shared
 | `make purify` | `purify-go` — `go fmt` + `go vet` + `go mod tidy` |
 | `make validate` | `openapi-validate` — validate the OpenAPI spec |
 | `make openapi-lint` | Lint the built swagger bundle |
-| `make generate_mocks` | Install pinned mockery (`v3.2.5`) if needed and regenerate mocks |
-| `make validate_mockery` | Ensure the mockery binary is the pinned version |
+| `make generate-mocks` / `make generate-mocks-local` | Regenerate the service mocks from `.mockery.yml` with mockery v3 (in Docker / without Docker) |
+| `make generate-mocks-client` | Regenerate the `pkg/client` mocks from `pkg/client/.mockery.yml` |
 | `make build-integration-tests` | Compile the integration test binary + `docker compose build` |
 | `make integration-tests` | Run the full docker-compose integration suite (abort-on-container-exit) |
 | `make integration-tests-debug` | Bring up the compose stack without the tests container (run tests from the IDE) |

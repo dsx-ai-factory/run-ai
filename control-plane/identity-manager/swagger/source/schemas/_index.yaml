@@ -81,10 +81,6 @@ TokenRequest:
   $ref: "./Tokens/TokenRequest.yaml"
 TokenResponse:
   $ref: "./Tokens/TokenResponse.yaml"
-AppTokenRequest:
-  $ref: "./Tokens/AppTokenRequest.yaml"
-AppTokenResponse:
-  $ref: "./Tokens/AppTokenResponse.yaml"
 OAuth2TokenResponse:
   $ref: "./Tokens/OAuth2TokenResponse.yaml"
 OAuth2Error:

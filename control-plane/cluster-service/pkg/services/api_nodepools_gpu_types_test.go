@@ -18,7 +18,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/services"
-	org_unit_service_client_mock "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/mocks"
+	org_unit_service_client_mock "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"

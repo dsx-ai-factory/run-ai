@@ -1,0 +1,15 @@
+type: object
+required:
+  - meta
+  - updateCount
+properties:
+  meta:
+    $ref: "../Asset/AssetMetaForSync.yaml"
+  updateCount:
+    $ref: "../../../../../infra/openapi/docs/schemas/sync/UpdateCount.yaml"
+  isDeleted:
+    description: the asset has been deleted
+    type: boolean
+    nullable: true
+  spec:
+    $ref: "./K8sObjectSpec.yaml"

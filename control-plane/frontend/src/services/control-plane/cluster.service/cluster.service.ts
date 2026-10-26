@@ -64,6 +64,7 @@ export const clusterService = {
   getLatestClusterVersion,
   getClusterByUuid,
   getNetworkTopologies,
+  getNetworkTopologyLevelsByName,
   getNetworkTopologyCount,
   createNetworkTopology,
   deleteNetworkTopology,
@@ -429,6 +430,30 @@ async function getNetworkTopologies(filterBy?: Array<string>): Promise<NetworkTo
   try {
     const response = await clusterServiceApi.networkTopologiesApi.getNetworkTopologies(filterBy);
     return response.data.networkTopologies || [];
+  } catch (err: unknown) {
+    throw httpService.handleHttpError(err);
+  }
+}
+
+// The network topologies endpoint has no generated filter/sort-field enum (unlike e.g.
+// NodepoolSortFilterFields) — these field names aren't in the OpenAPI spec, so they're
+// declared locally instead.
+enum ENetworkTopologyFilterField {
+  Name = "name",
+  ClusterId = "clusterId",
+}
+
+/**
+ * Fetches the ordered level list for a single named network topology, scoped to a cluster.
+ * Assumes name+clusterId identifies at most one topology.
+ */
+async function getNetworkTopologyLevelsByName(name: string, clusterId: string): Promise<string[]> {
+  try {
+    const topologies = await getNetworkTopologies([
+      filterUtil.getEqualsFilterString(ENetworkTopologyFilterField.Name, name),
+      filterUtil.getEqualsFilterString(ENetworkTopologyFilterField.ClusterId, clusterId),
+    ]);
+    return topologies[0]?.levels ?? [];
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }

@@ -12,11 +12,11 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	trackerApi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
 )
@@ -113,7 +113,7 @@ func (jsw *JobSpecComposer) Compose(ctx context.Context, src *workloadsApi.Super
 			jsw.fc.ComposePreemptibility(ctx, src.Preemptibility.Get(), &target.Preemptibility, stringToStringField, nil),
 			jsw.fc.ComposeAutoDeletionAfterTermination(src.AutoDeletionTimeAfterCompletionSeconds.Get(), &target.AutoDeletionTimeAfterCompletionSeconds, intToIntField, nil),
 			jsw.fc.CopyBoolean(src.TerminateAfterPreemption.Get(), &target.TerminateAfterPreemption, boolToBoolField, nil),
-			jsw.fc.CopyInt(src.BackoffLimit.Get(), &target.BackoffLimit, nonZeroIntToIntField, nil),
+			jsw.fc.CopyInt(src.BackoffLimit.Get(), &target.BackoffLimit, intToIntField, nil),
 			jsw.fc.CopyInt(src.Completions.Get(), &target.Completions, nonZeroIntToIntField, nil),
 			jsw.fc.ComposeParallelism(src.Parallelism.Get(), src.Completions.Get(), &target.Parallelism, nonZeroIntToIntField, nil),
 			jsw.fc.ComposeTerminationGracePeriod(ctx, src.TerminationGracePeriodSeconds.Get(), &target.TerminationGracePeriodSeconds, nonZeroIntToIntField, nil),

@@ -14,8 +14,8 @@ import (
 	"testing"
 
 	clusterclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
-	workloadclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
+	workloadclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"
 )
@@ -190,30 +190,6 @@ func assertLabels(t *testing.T, got []workloadclient.Label, want ...string) {
 	}
 }
 
-func TestDeploymentObject(t *testing.T) {
-	userLabels := map[string]string{"flowmark": "scenario-1"}
-	spec := DeploymentSpec{Name: "dep-1", Namespace: "runai-flowmark-a", Image: "nginx", Replicas: 3, Labels: userLabels}
-
-	deployment := deploymentObject(spec)
-
-	if deployment.Name != "dep-1" || deployment.Namespace != "runai-flowmark-a" || *deployment.Spec.Replicas != 3 {
-		t.Fatalf("metadata mismatch: %+v", deployment.ObjectMeta)
-	}
-	if deployment.Spec.Template.Spec.Containers[0].Image != "nginx" {
-		t.Fatalf("image: %v", deployment.Spec.Template.Spec.Containers)
-	}
-	podLabels := deployment.Spec.Template.Labels
-	if podLabels["app"] != "dep-1" || deployment.Spec.Selector.MatchLabels["app"] != "dep-1" {
-		t.Fatalf("selector must match pod labels: %v / %v", deployment.Spec.Selector.MatchLabels, podLabels)
-	}
-	if podLabels["flowmark"] != "scenario-1" {
-		t.Fatalf("user labels must reach the pods: %v", podLabels)
-	}
-	if _, mutated := userLabels["app"]; mutated {
-		t.Fatal("caller's label map must not be mutated")
-	}
-}
-
 func TestClusterID(t *testing.T) {
 	cases := []struct {
 		name     string
@@ -242,15 +218,15 @@ func TestClusterID(t *testing.T) {
 				Servers: clusterclient.ServerConfigurations{{URL: server.URL}},
 			})}
 
-			got, err := ClusterID(context.Background(), clients, tc.pick)
+			got, err := clients.Cluster(context.Background(), tc.pick)
 			if tc.wantErr != "" {
 				if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
 					t.Fatalf("expected error containing %q, got %v", tc.wantErr, err)
 				}
 				return
 			}
-			if err != nil || got != tc.want {
-				t.Fatalf("got %q (%v), want %q", got, err, tc.want)
+			if err != nil || got.Uuid != tc.want {
+				t.Fatalf("got %q (%v), want %q", got.Uuid, err, tc.want)
 			}
 		})
 	}

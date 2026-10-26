@@ -38,6 +38,9 @@ navigation:
         path: ../../docs/getting-started/whats-new/deprecation-notifications.md
     - page: Support, Lifecycle, and Deprecation Policy
       path: ../../docs/getting-started/product-support-policy.md
+    - page: Quick Start Guide
+      path: ../../docs/getting-started/quick-start-guide.md
+      hidden: true
   - section: Installation and Configuration
     contents:
     - page: Overview
@@ -53,43 +56,62 @@ navigation:
         path: ../../docs/installation-and-configuration/system-requirements/infrastructure-requirements.md
       - page: Networking Setup
         path: ../../docs/installation-and-configuration/system-requirements/networking-setup.md
+      - section: Third-Party Services
+        slug: third-party-services
+        contents:
+        - page: Standard Third-Party Services
+          path: ../../docs/installation-and-configuration/system-requirements/third-party-services.md
+        - page: Gov-Ready Third-Party Services
+          path: ../../docs/installation-and-configuration/system-requirements/gov-ready-third-party-services.md
       - page: External Access to Critical Services
         path: ../../docs/installation-and-configuration/system-requirements/external-access-to-critical-services.md
-      - page: Third-Party Services
-        path: ../../docs/installation-and-configuration/system-requirements/third-party-services.md
     - section: Installation
       slug: install
       contents:
+      - page: Gov-Ready Installation
+        path: ../../docs/installation-and-configuration/installation/gov-ready-installation.md
       - section: Guided Installation (Recommended)
         slug: guided-installation
         path: ../../docs/installation-and-configuration/installation/guided-installation/README.md
         contents:
-        - page: Same-Cluster Installation
-          path: ../../docs/installation-and-configuration/installation/guided-installation/same-cluster-installation.md
-        - page: Multi-Cluster Installation
-          path: ../../docs/installation-and-configuration/installation/guided-installation/multi-cluster-installation.md
+        - section: Connected Installation
+          contents:
+          - page: Preparations
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected/preparations.md
+          - page: Same-Cluster Installation
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected/same-cluster.md
+          - page: Multi-Cluster Installation
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected/multi-cluster.md
+          - page: Configuration Templates
+            path: ../../docs/installation-and-configuration/installation/guided-installation/connected/templates.md
+        - section: Air-Gapped Installation
+          contents:
+          - page: Preparations
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped/preparations.md
+          - page: Same-Cluster Installation
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped/same-cluster.md
+          - page: Multi-Cluster Installation
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped/multi-cluster.md
+          - page: Configuration Templates
+            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped/templates.md
         - page: Configuration Reference
           path: ../../docs/installation-and-configuration/installation/guided-installation/configuration-reference.md
-        - section: Configuration Templates
-          contents:
-          - page: Connected Templates
-            path: ../../docs/installation-and-configuration/installation/guided-installation/connected.md
-          - page: Air-Gapped Templates
-            path: ../../docs/installation-and-configuration/installation/guided-installation/air-gapped.md
         - page: Prerequisites and Features
           path: ../../docs/installation-and-configuration/installation/guided-installation/prerequisites-and-features.md
+        - page: Command Reference and Troubleshooting
+          path: ../../docs/installation-and-configuration/installation/guided-installation/command-reference.md
       - section: Manual Helm
         contents:
-        - page: Control Plane System Requirements
-          path: ../../docs/installation-and-configuration/installation/install-using-helm/cp-system-requirements.md
         - page: Preparations
           path: ../../docs/installation-and-configuration/installation/install-using-helm/preparations.md
+        - page: Prerequisites and Features
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/prerequisites-and-features.md
         - page: Install the Control Plane
           path: ../../docs/installation-and-configuration/installation/install-using-helm/install-control-plane.md
-        - page: Cluster System Requirements
-          path: ../../docs/installation-and-configuration/installation/install-using-helm/system-requirements.md
         - page: Install the Cluster
           path: ../../docs/installation-and-configuration/installation/install-using-helm/helm-install.md
+        - page: Uninstall
+          path: ../../docs/installation-and-configuration/installation/install-using-helm/uninstall.md
       - page: Base Command Manager (BCM)
         slug: bcm-install
         path: ../../docs/installation-and-configuration/installation/bcm-install.md
@@ -99,9 +121,9 @@ navigation:
       contents:
       - page: Node Roles
         path: ../../docs/installation-and-configuration/configuration/node-roles.md
-      - page: Control Plane Configuration
+      - page: Advanced Control Plane Configuration
         path: ../../docs/installation-and-configuration/configuration/control-plane-config.md
-      - page: Cluster Configuration
+      - page: Advanced Cluster Configuration
         path: ../../docs/installation-and-configuration/configuration/cluster-config.md
       - page: Cluster Authentication
         path: ../../docs/installation-and-configuration/configuration/cluster-authentication.md
@@ -137,7 +159,7 @@ navigation:
       contents:
       - page: Clusters
         path: ../../docs/installation-and-configuration/operations/clusters.md
-      - page: Scaling
+      - page: NVIDIA Run:ai at Scale
         path: ../../docs/installation-and-configuration/operations/scaling.md
       - page: High Availability
         path: ../../docs/installation-and-configuration/operations/high-availability.md
@@ -161,13 +183,16 @@ navigation:
           path: ../../docs/installation-and-configuration/operations/observability/event-history.md
     - section: Upgrade
       contents:
-      - page: Upgrade via Helm
-        path: ../../docs/installation-and-configuration/upgrade/helm.md
-    - section: Troubleshooting
-      slug: troubleshoot
-      contents:
-      - page: What Gets Deployed
-        path: ../../docs/installation-and-configuration/troubleshooting/what-gets-deployed.md
+      - page: Plan the Upgrade
+        path: ../../docs/installation-and-configuration/upgrade/plan-the-upgrade.md
+      - page: Back Up Before Upgrading
+        path: ../../docs/installation-and-configuration/upgrade/backup-before-upgrading.md
+      - page: Migrate GPU Fractions
+        path: ../../docs/installation-and-configuration/upgrade/migrate-gpu-fractions.md
+      - page: Upgrade NVIDIA Run:ai
+        path: ../../docs/installation-and-configuration/upgrade/upgrade.md
+      - page: Migrate Legacy Workloads
+        path: ../../docs/installation-and-configuration/upgrade/migrate-legacy-workloads.md
   - section: Platform Management
     contents:
     - section: Authentication and Authorization
@@ -189,17 +214,18 @@ navigation:
         - page: Set Up SSO with OpenShift
           slug: openshift
           path: ../../docs/platform-management/authentication/sso/openshift.md
-      - page: Permissions
-        path: ../../docs/platform-management/authentication/permissions.md
-      - page: Roles
+      - section: Roles
         path: ../../docs/platform-management/authentication/roles.md
+        contents:
+        - page: Permissions
+          path: ../../docs/platform-management/authentication/permissions.md
+        - page: Role to ClusterRole Mapping
+          path: ../../docs/platform-management/authentication/role-clusterrole-mapping.md
       - page: Service Accounts (formerly applications)
         slug: service-accounts
         path: ../../docs/platform-management/authentication/service-accounts.md
       - page: Access Rules
         path: ../../docs/platform-management/authentication/accessrules.md
-      - page: Cluster Authentication
-        path: ../../docs/platform-management/authentication/cluster-authentication.md
     - section: Manage AI Initiatives
       contents:
       - page: Adapting AI Initiatives to Your Organization
@@ -231,7 +257,8 @@ navigation:
           - page: Segment-Based Topology Placement
             path: ../../docs/platform-management/aiinitiatives/resources/topology-aware-scheduling/segment-based-topology-placement.md
         - page: Enabling Spectrum-X Networking for NVIDIA Run:ai Workloads
-          path: ../../docs/platform-management/aiinitiatives/resources/enabling-spectrum-x-networking-for-nvidia-run-ai-workloads.md
+          slug: spectrum-x-networking
+          path: ../../docs/platform-management/aiinitiatives/resources/spectrum-x-networking.md
         - page: Configuring NUMA-Aware Scheduling
           slug: numa-aware-scheduling
           path: ../../docs/platform-management/aiinitiatives/resources/numa-aware-scheduling.md
@@ -253,6 +280,9 @@ navigation:
         - page: Workload Priority and Preemption
           slug: workload-priority-control
           path: ../../docs/platform-management/runai-scheduler/scheduling/workload-priority-control.md
+        - page: Background Workloads
+          slug: background-workloads
+          path: ../../docs/platform-management/runai-scheduler/scheduling/background-workloads.md
         - section: Quick Starts
           contents:
           - page: Over Quota, Fairness and Preemption
@@ -260,35 +290,32 @@ navigation:
             path: ../../docs/platform-management/runai-scheduler/scheduling/quick-starts/over-quota.md
       - section: Resource Optimization
         contents:
-        - page: GPU Fractions
-          slug: fractions
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/fractions.md
-        - page: Dynamic GPU Fractions
-          slug: dynamic-fractions
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-fractions.md
-        - page: Optimize Performance with Node Level Scheduler
-          slug: node-level-scheduler
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/node-level-scheduler.md
-        - page: GPU Time-Slicing
-          slug: time-slicing
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/time-slicing.md
-        - page: GPU Memory Swap
-          slug: memory-swap
-          path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-swap.md
+        - section: GPU Fractions
+          slug: gpu-fractions
+          contents:
+          - page: GPU Memory Fractions
+            slug: memory-fractions
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/memory-fractions.md
+          - page: Dynamic GPU Memory Fractions
+            slug: dynamic-memory-fractions
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/dynamic-memory-fractions.md
+          - page: GPU Compute Modes
+            slug: compute-modes
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/compute-modes.md
         - page: CPU Compute and Memory Allocation
           slug: allocation-of-cpu-and-memory
           path: ../../docs/platform-management/runai-scheduler/resource-optimization/allocation-of-cpu-and-memory.md
         - section: Quick Starts
           contents:
-          - page: Launching Workloads with GPU Fractions
+          - page: Launching Workloads with GPU Memory Fractions
             slug: gpu-fractions-quickstart
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-fractions-quickstart.md
-          - page: Launching Workloads with Dynamic GPU Fractions
+          - page: Launching Workloads with Dynamic GPU Memory Fractions
             slug: dynamic-gpu-fractions-quickstart
             path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/dynamic-gpu-fractions-quickstart.md
-          - page: Launching Workloads with GPU Memory Swap
-            slug: gpu-memory-swap-quickstart
-            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/gpu-memory-swap-quickstart.md
+          - page: Launching Workloads with GPU Compute Modes
+            slug: compute-modes-quickstart
+            path: ../../docs/platform-management/runai-scheduler/resource-optimization/quick-starts/compute-modes-quickstart.md
     - section: Policies
       contents:
       - page: Policies and Rules
@@ -442,6 +469,7 @@ navigation:
       slug: using-inference
       contents:
       - page: NVIDIA Run:ai Inference Overview
+        slug: inference-overview
         path: ../../docs/workloads-in-nvidia-run-ai/using-inference/nvidia-run-ai-inference-overview.md
       - page: Deploy Inference Workloads with NVIDIA NIM
         slug: nim-inference
@@ -471,6 +499,7 @@ navigation:
     - page: Introduction to AI Applications
       path: ../../docs/ai-applications/introduction-to-ai-applications.md
     - page: AI Applications
+      slug: submit-ai-applications
       path: ../../docs/ai-applications/ai-applications.md
   - section: Tutorials
     contents:
@@ -482,6 +511,9 @@ navigation:
       - page: Validating GPU Cluster Communication with NCCL Tests
         slug: nccl-tests
         path: ../../docs/tutorials/training-tutorials/nccl-tests.md
+      - page: Deploying a Slurm Cluster with Slinky
+        slug: deploying-slurm
+        path: ../../docs/tutorials/training-tutorials/deploying-slurm.md
     - section: Inference Tutorials
       contents:
       - page: NVIDIA NIM Distributed Inference Deployment
@@ -504,6 +536,11 @@ navigation:
       - page: RAG Blueprint Deployment from NGC Catalog
         slug: rag-blueprint-deployment
         path: ../../docs/tutorials/blueprint-tutorials/rag-blueprint-deployment.md
+    - section: Agent Tutorials
+      contents:
+      - page: Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
+        slug: openshell-on-runai
+        path: ../../docs/tutorials/agent-tutorials/openshell-on-runai.md
   - section: Agents
     contents:
     - page: Overview
@@ -520,9 +557,10 @@ navigation:
       path: ../../docs/agents/agent-skills.md
   - section: Development
     contents:
-    - link: Local Development
-      href: https://github.com/dsx-ai-factory/run-ai/blob/master/local-dev.md
-      target: _blank
+    - page: Local Development
+      path: ../../local-dev.md
+    - page: Contributing
+      path: ../../CONTRIBUTING.md
     - page: Service Reference
       path: ../../docs/developer/services.md
     - page: CRD Reference
@@ -570,8 +608,12 @@ navigation:
         path: ../../docs/resources/videos/create-and-reuse-workload-templates.md
       - page: Monitor GPU Usage and Platform Health
         path: ../../docs/resources/videos/monitor-gpu-usage-and-platform-health.md
-    - page: Blogs
+    - section: Blogs
       path: ../../docs/resources/blogs.md
+      contents:
+      - page: Numa-Aware Scheduling in NVIDIA Run:ai
+        path: ../../docs/resources/blogs/numa-aware-scheduling-in-nvidia-run-ai.md
+        hidden: true
     - page: NVIDIA On-Demand Sessions
       path: ../../docs/resources/nvidia-on-demand-sessions.md
 
@@ -604,84 +646,126 @@ navigation:
       layout:
       - section: Organizations
         contents:
-        - clusters
-        - departments
+        - clusters:
+            summary: ../../docs/rest-api/self-hosted/tags/clusters.md
+        - departments:
+            summary: ../../docs/rest-api/self-hosted/tags/departments.md
         - reports
-        - nodePools
-        - nodes
-        - projects
+        - nodePools:
+            summary: ../../docs/rest-api/self-hosted/tags/node-pools.md
+        - nodes:
+            summary: ../../docs/rest-api/self-hosted/tags/nodes.md
+        - projects:
+            summary: ../../docs/rest-api/self-hosted/tags/projects.md
         - logo
         - researcherCommandLineInterface
         - researcherCommandLineInterfaceDeprecated
-        - networkTopologies
+        - networkTopologies:
+            summary: ../../docs/rest-api/self-hosted/tags/network-topologies.md
       - section: Authentication and Authorization
         contents:
-        - accessKeys
-        - accessRules
-        - permissions
-        - applications
-        - serviceAccounts
-        - roles
-        - tokens
+        - accessKeys:
+            summary: ../../docs/rest-api/self-hosted/tags/access-keys.md
+        - accessRules:
+            summary: ../../docs/rest-api/self-hosted/tags/access-rules.md
+        - permissions:
+            summary: ../../docs/rest-api/self-hosted/tags/permissions.md
+        - serviceAccounts:
+            summary: ../../docs/rest-api/self-hosted/tags/service-accounts.md
+        - roles:
+            summary: ../../docs/rest-api/self-hosted/tags/roles.md
+        - tokens:
+            summary: ../../docs/rest-api/self-hosted/tags/tokens.md
         - users
-        - userApplications
         - idps
-        - me
-        - settings
+        - me:
+            summary: ../../docs/rest-api/self-hosted/tags/me.md
+        - settings:
+            summary: ../../docs/rest-api/self-hosted/tags/settings.md
         - orgUnit
       - section: Audit
         contents:
-        - auditLogs
+        - auditLogs:
+            summary: ../../docs/rest-api/self-hosted/tags/audit-logs.md
       - section: Datavolumes
         contents:
-        - datavolumesApi
+        - datavolumes
       - section: Workloads
+        summary: ../../docs/rest-api/self-hosted/tags/workloads.md
         contents:
-        - events
-        - pods
-        - workloadsApi
-        - workloadsV2
-        - nvidiaNim
-        - workspaces
-        - trainings
-        - inferences
-        - revisions
-        - distributed
+        - events:
+            summary: ../../docs/rest-api/self-hosted/tags/events.md
+        - pods:
+            summary: ../../docs/rest-api/self-hosted/tags/pods.md
+        - workloads
+        - workloadsV2:
+            summary: ../../docs/rest-api/self-hosted/tags/workloads-v2.md
+        - nvidiaNim:
+            summary: ../../docs/rest-api/self-hosted/tags/nvidia-nim.md
+        - workspaces:
+            summary: ../../docs/rest-api/self-hosted/tags/workspaces.md
+        - trainings:
+            summary: ../../docs/rest-api/self-hosted/tags/trainings.md
+        - inferences:
+            summary: ../../docs/rest-api/self-hosted/tags/inferences.md
+        - revisions:
+            summary: ../../docs/rest-api/self-hosted/tags/revisions.md
+        - distributed:
+            summary: ../../docs/rest-api/self-hosted/tags/distributed.md
         - workloadsBatch
-        - workloadProperties
-        - workloadTemplates
-        - distributedInferences
+        - workloadProperties:
+            summary: ../../docs/rest-api/self-hosted/tags/workload-properties.md
+        - workloadTemplates:
+            summary: ../../docs/rest-api/self-hosted/tags/workload-templates.md
+        - distributedInferences:
+            summary: ../../docs/rest-api/self-hosted/tags/distributed-inferences.md
       - section: Workload assets
         contents:
-        - compute
-        - credentials
+        - compute:
+            summary: ../../docs/rest-api/self-hosted/tags/compute.md
+        - credentials:
+            summary: ../../docs/rest-api/self-hosted/tags/credentials.md
         - datasources
-        - environment
+        - environment:
+            summary: ../../docs/rest-api/self-hosted/tags/environment.md
         - storageClasses
         - storageClassConfiguration
-        - git
-        - hostPath
-        - nfs
-        - pvc
-        - registry
-        - s3
-        - configMap
-        - secret
-        - template
+        - git:
+            summary: ../../docs/rest-api/self-hosted/tags/git.md
+        - hostPath:
+            summary: ../../docs/rest-api/self-hosted/tags/host-path.md
+        - nfs:
+            summary: ../../docs/rest-api/self-hosted/tags/nfs.md
+        - pvc:
+            summary: ../../docs/rest-api/self-hosted/tags/pvc.md
+        - registry:
+            summary: ../../docs/rest-api/self-hosted/tags/registry.md
+        - s3:
+            summary: ../../docs/rest-api/self-hosted/tags/s3.md
+        - configMap:
+            summary: ../../docs/rest-api/self-hosted/tags/config-map.md
+        - secret:
+            summary: ../../docs/rest-api/self-hosted/tags/secret.md
+        - template:
+            summary: ../../docs/rest-api/self-hosted/tags/template.md
       - section: Policies
         contents:
-        - policy
+        - policy:
+            summary: ../../docs/rest-api/self-hosted/tags/policy.md
       - section: Notifications
         contents:
         - notificationState
         - notificationTypes
-        - notificationChannels
-        - slack
-        - email
-        - subscriptions
-      - section: AI Applications
-        contents:
-        - aiApplicationsApi
+        - notificationChannels:
+            summary: ../../docs/rest-api/self-hosted/tags/notification-channels.md
+        - slack:
+            summary: ../../docs/rest-api/self-hosted/tags/slack.md
+        - email:
+            summary: ../../docs/rest-api/self-hosted/tags/email.md
+        - subscriptions:
+            summary: ../../docs/rest-api/self-hosted/tags/subscriptions.md
+      - ai-applications:
+          summary: ../../docs/rest-api/self-hosted/tags/ai-applications.md
     - section: API Guides
       contents:
       - page: Interacting with Workloads Using the Cluster API

@@ -53,6 +53,12 @@ func TestSubmitAIApplicationInputValidate(t *testing.T) {
 			in.Spec.ChartRef = aiApplicationChartRef{ChartID: testApplicationID}
 		}},
 		{name: "values base64", mutate: func(in *submitAIApplicationInput) { in.Spec.ValuesBase64 = &encodedValues }},
+		{name: "shared chart credential", mutate: func(in *submitAIApplicationInput) {
+			in.Spec.Auth = &aiApplicationAuth{AssetID: testApplicationID}
+		}},
+		{name: "personal chart credential", mutate: func(in *submitAIApplicationInput) {
+			in.Spec.Auth = &aiApplicationAuth{AssetID: testApplicationID, UserCredential: true}
+		}},
 		{name: "missing source", mutate: func(in *submitAIApplicationInput) { in.Spec.ChartRef = aiApplicationChartRef{} }, wantErr: "exactly one source"},
 		{name: "multiple sources", mutate: func(in *submitAIApplicationInput) { in.Spec.ChartRef.ChartID = testApplicationID }, wantErr: "exactly one source"},
 		{name: "partial repository", mutate: func(in *submitAIApplicationInput) {
@@ -63,6 +69,9 @@ func TestSubmitAIApplicationInputValidate(t *testing.T) {
 			in.Spec.ValuesBase64 = &encodedValues
 		}, wantErr: "mutually exclusive"},
 		{name: "invalid base64", mutate: func(in *submitAIApplicationInput) { invalid := "%%%"; in.Spec.ValuesBase64 = &invalid }, wantErr: "valid base64"},
+		{name: "missing auth asset", mutate: func(in *submitAIApplicationInput) {
+			in.Spec.Auth = &aiApplicationAuth{UserCredential: true}
+		}, wantErr: "assetId is required"},
 	}
 
 	for _, tt := range tests {
@@ -96,7 +105,7 @@ func TestListAIApplications(t *testing.T) {
 			"applications": []map[string]any{{
 				"id": testApplicationID, "name": "nemo-app", "phase": "Running",
 				"actionStatus": "deployed", "actionMessage": "application is ready",
-				"projectId": testProjectID, "projectName": "team-a", "createdAt": "2026-08-20T09:00:00Z",
+				"clusterId": testClusterID, "projectId": testProjectID, "projectName": "team-a", "createdAt": "2026-08-20T09:00:00Z",
 			}},
 		})
 	})
@@ -108,6 +117,7 @@ func TestListAIApplications(t *testing.T) {
 	require.NoError(t, err)
 	require.Len(t, out.Applications, 1)
 	assert.Equal(t, testApplicationID, out.Applications[0].ID)
+	assert.Equal(t, testClusterID, out.Applications[0].ClusterID)
 	assert.Equal(t, "Running", out.Applications[0].Phase)
 	assert.Equal(t, "deployed", out.Applications[0].ActionStatus)
 	assert.Equal(t, "application is ready", out.Applications[0].ActionMessage)
@@ -142,6 +152,9 @@ func TestSubmitAIApplicationCreatesAfterConfirmation(t *testing.T) {
 		assert.Equal(t, "nemo-app", body["name"])
 		assert.Equal(t, testClusterID, body["clusterId"])
 		assert.Equal(t, testProjectID, body["projectId"])
+		spec := body["spec"].(map[string]any)
+		auth := spec["auth"].(map[string]any)
+		assert.Equal(t, true, auth["userCredential"])
 		runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{
 			"id": testApplicationID, "name": "nemo-app", "projectId": testProjectID,
 			"desiredPhase": "deployed", "phase": "Pending", "actionStatus": "creating",
@@ -151,8 +164,11 @@ func TestSubmitAIApplicationCreatesAfterConfirmation(t *testing.T) {
 	in := validSubmitInput()
 	in.Confirm = true
 	in.Spec.Values = map[string]any{"password": "do-not-return"}
+	in.Spec.Auth = &aiApplicationAuth{AssetID: testApplicationID, UserCredential: true}
 	out, err := submitAIApplicationRun(context.Background(), client, in)
 	require.NoError(t, err)
+	assert.True(t, out.SubmissionAccepted)
+	assert.True(t, out.ResponseDetailsAvailable)
 	assert.Equal(t, testApplicationID, out.ID)
 	assert.Equal(t, "Pending", out.Phase)
 	assert.Equal(t, "creating", out.ActionStatus)
@@ -174,17 +190,47 @@ func TestSubmitAIApplicationRequiresConfirmationBeforeCreate(t *testing.T) {
 	assert.False(t, createCalled)
 }
 
-func TestSubmitAIApplicationAcceptsNoContentSuccess(t *testing.T) {
-	client, mux := runaiclienttest.NewServer(t)
-	mux.HandleFunc("/api/v1/ai-applications", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	})
+func TestSubmitAIApplicationAcceptedResponseVariants(t *testing.T) {
+	tests := []struct {
+		name        string
+		status      int
+		body        string
+		wantWarning string
+	}{
+		{name: "no content", status: http.StatusNoContent},
+		{name: "malformed response", status: http.StatusOK, body: `{"id":`, wantWarning: "response details are unavailable"},
+		{name: "empty response", status: http.StatusOK, body: `{}`, wantWarning: "did not include application details"},
+	}
 
-	in := validSubmitInput()
-	in.Confirm = true
-	out, err := submitAIApplicationRun(context.Background(), client, in)
-	require.NoError(t, err)
-	assert.Empty(t, out.ID)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			client, mux := runaiclienttest.NewServer(t)
+			requests := 0
+			mux.HandleFunc("/api/v1/ai-applications", func(w http.ResponseWriter, _ *http.Request) {
+				requests++
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(tt.status)
+				if tt.body != "" {
+					_, _ = w.Write([]byte(tt.body))
+				}
+			})
+
+			in := validSubmitInput()
+			in.Confirm = true
+			out, err := submitAIApplicationRun(context.Background(), client, in)
+			require.NoError(t, err)
+			assert.True(t, out.SubmissionAccepted)
+			assert.False(t, out.ResponseDetailsAvailable)
+			assert.Empty(t, out.ID)
+			if tt.wantWarning == "" {
+				assert.Empty(t, out.Warnings)
+			} else {
+				require.Len(t, out.Warnings, 1)
+				assert.Contains(t, out.Warnings[0], tt.wantWarning)
+			}
+			assert.Equal(t, 1, requests, "must not make a follow-up API call")
+		})
+	}
 }
 
 func TestSubmitAIApplicationTreatsServerErrorAsUnknownOutcome(t *testing.T) {

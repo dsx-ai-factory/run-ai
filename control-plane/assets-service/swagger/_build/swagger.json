@@ -613,6 +613,373 @@
         }
       }
     },
+    "/api/v1/k8s-objects/resource-claim-templates": {
+      "get": {
+        "summary": "List resource claim templates.",
+        "description": "Use to retrieve a list of resource claim templates.",
+        "operationId": "list_rcts",
+        "x-no-authorization": true,
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go",
+          "control-plane/assets-service/pkg/services/api_agent_sync_test.go"
+        ],
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/SortOrder"
+          },
+          {
+            "$ref": "#/components/parameters/RctsSort"
+          },
+          {
+            "$ref": "#/components/parameters/RctsFilter"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeAncestors"
+          },
+          {
+            "$ref": "#/components/parameters/includeDescendants"
+          },
+          {
+            "$ref": "#/components/parameters/IncludeStatus"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RctListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create resource claim template.",
+        "description": "Use to create a resource claim template and synchronize it to the cluster.",
+        "operationId": "create_rct",
+        "x-no-authorization": true,
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+        ],
+        "x-audit": true,
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RctCreationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request accepted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rct"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "409": {
+            "$ref": "#/components/responses/409Conflict"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/k8s-objects/resource-claim-templates/{AssetId}": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AssetId"
+        }
+      ],
+      "get": {
+        "summary": "Retrieve a resource claim template.",
+        "description": "Use to retrieve the details of a resource claim template by id.",
+        "operationId": "get_rct_by_id",
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "read"
+        },
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go",
+          "control-plane/assets-service/pkg/services/api_agent_sync_test.go"
+        ],
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IncludeStatus"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rct"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a resource claim template.",
+        "description": "Use to update the details of a resource claim template by id.",
+        "operationId": "update_rct_by_id",
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "update"
+        },
+        "x-audit": true,
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RctUpdateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Request accepted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Rct"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "default": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a resource claim template.",
+        "description": "Use to delete a resource claim template, by id.",
+        "operationId": "delete_rct_by_id",
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+        ],
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "delete"
+        },
+        "x-audit": true,
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "responses": {
+          "202": {
+            "$ref": "#/components/responses/202Accepted"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AssetId"
+        }
+      ],
+      "get": {
+        "summary": "List the workloads using a resource claim template.",
+        "description": "Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.",
+        "operationId": "get_rct_workloads",
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "read"
+        },
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+        ],
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaimTemplateWorkloadsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
+    "/api/v1/k8s-objects/updates": {
+      "post": {
+        "summary": "Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.",
+        "operationId": "k8s_objects_sync_updates",
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_agent_sync_test.go\""
+        ],
+        "x-internal": true,
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "sync"
+        },
+        "tags": [
+          "Synchronization"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ClusterIdRequired"
+          },
+          {
+            "$ref": "#/components/parameters/SyncAfter"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClusterSyncReport"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/K8sObjectsUpdatesResp"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/asset/credentials": {
       "get": {
         "summary": "List credentials.",
@@ -5806,7 +6173,7 @@
         "operationId": "create_inference",
         "x-service": "assets-service",
         "x-test-coverage": [
-          "e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts"
+          "e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts"
         ],
         "x-no-authorization": true,
         "x-internal": true,
@@ -5857,7 +6224,7 @@
         "x-internal": true,
         "x-service": "assets-service",
         "x-test-coverage": [
-          "e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts"
+          "e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts"
         ],
         "tags": [
           "Inferences"
@@ -7298,7 +7665,8 @@
           "config-map",
           "secret-volume",
           "data-volume",
-          "ngcApiKey"
+          "ngcApiKey",
+          "resource-claim-template"
         ]
       },
       "UpdateCount": {
@@ -7388,7 +7756,8 @@
         ],
         "example": {
           "name": "my-asset",
-          "scope": "tenant",
+          "scope": "project",
+          "projectId": 4500001,
           "id": "a418ed33-9399-48c0-a890-122cadd13bfd",
           "kind": "s3",
           "createdBy": "test@run.ai",
@@ -7856,7 +8225,8 @@
         ],
         "example": {
           "name": "my-asset",
-          "scope": "tenant",
+          "scope": "project",
+          "projectId": 4500001,
           "workloadSupportedTypes": {
             "workspace": false,
             "training": false,
@@ -8005,6 +8375,16 @@
         "maxItems": 1000,
         "nullable": true
       },
+      "GpuComputeMode": {
+        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.",
+        "type": "string",
+        "minLength": 1,
+        "enum": [
+          "time-slicing",
+          "sm-sharing"
+        ],
+        "nullable": true
+      },
       "GpuDevicesRequest": {
         "description": "Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.",
         "type": "integer",
@@ -8021,6 +8401,25 @@
         "example": "10M",
         "nullable": true
       },
+      "GpuMemoryPortionLimit": {
+        "description": "Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.",
+        "type": "number",
+        "format": "double",
+        "example": 0.5,
+        "nullable": true,
+        "minimum": 0,
+        "x-gorm-ignore": true
+      },
+      "GpuMemoryPortionRequest": {
+        "description": "GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.",
+        "type": "number",
+        "format": "double",
+        "example": 0.5,
+        "nullable": true,
+        "minimum": 0,
+        "maximum": 1,
+        "x-gorm-ignore": true
+      },
       "GpuMemoryRequest": {
         "description": "Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.",
         "type": "string",
@@ -8030,20 +8429,22 @@
         "nullable": true
       },
       "GpuPortionLimit": {
-        "description": "Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.",
+        "description": "Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.",
         "type": "number",
         "format": "double",
         "example": 0.5,
         "nullable": true,
-        "minimum": 0
+        "minimum": 0,
+        "deprecated": true
       },
       "GpuPortionRequest": {
-        "description": "Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.",
+        "description": "Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.",
         "type": "number",
         "format": "double",
         "example": 0.5,
         "nullable": true,
-        "minimum": 0
+        "minimum": 0,
+        "deprecated": true
       },
       "GpuRequestType": {
         "description": "Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.",
@@ -8078,11 +8479,20 @@
           "extendedResources": {
             "$ref": "#/components/schemas/ExtendedResources"
           },
+          "gpuComputeMode": {
+            "$ref": "#/components/schemas/GpuComputeMode"
+          },
           "gpuDevicesRequest": {
             "$ref": "#/components/schemas/GpuDevicesRequest"
           },
           "gpuMemoryLimit": {
             "$ref": "#/components/schemas/GpuMemoryLimit"
+          },
+          "gpuMemoryPortionLimit": {
+            "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+          },
+          "gpuMemoryPortionRequest": {
+            "$ref": "#/components/schemas/GpuMemoryPortionRequest"
           },
           "gpuMemoryRequest": {
             "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -8175,6 +8585,505 @@
             ],
             "nullable": true,
             "type": "object"
+          }
+        }
+      },
+      "K8sObjectMeta": {
+        "description": "Metadata of the Kubernetes resource that is created by this k8sObject",
+        "type": "object",
+        "nullable": true,
+        "properties": {
+          "annotations": {
+            "type": "object",
+            "nullable": true,
+            "description": "Free-form annotations attached to the resource. Keys must conform\nto Kubernetes qualified-name syntax\n(https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set):\nan optional DNS-subdomain prefix (≤253 chars) followed by \"/\" and a\nrequired name component ([A-Za-z0-9] with `.`, `_`, `-` allowed\ninside, ≤63 chars). Key syntax is enforced at runtime on both\ncreate and update; annotation values have no format constraint\nbeyond the length limit below.\n",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 10000
+            },
+            "maxProperties": 1000,
+            "example": {
+              "example.com/owner": "team-a",
+              "example.com/version": "1.0"
+            }
+          },
+          "labels": {
+            "type": "object",
+            "nullable": true,
+            "description": "Free-form labels attached to the resource. Keys and values must\nconform to Kubernetes label syntax\n(https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set):\nkeys are qualified names (optional DNS-subdomain prefix ≤253 chars\n+ \"/\" + name component ≤63 chars); values are ≤63 chars matching\nthe same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are\nallowed). Key syntax is validated at runtime; the value pattern\nbelow is enforced by the schema as well as at runtime.\n",
+            "additionalProperties": {
+              "type": "string",
+              "maxLength": 63,
+              "pattern": "^([A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?)?$"
+            },
+            "maxProperties": 1000,
+            "example": {
+              "app": "my-app"
+            }
+          }
+        }
+      },
+      "K8sObjectSpec": {
+        "description": "Common shape for k8s-object asset specs: the raw Kubernetes object\nmetadata (labels/annotations) and the raw Kubernetes object spec.\nShared between the k8s-object CRUD APIs (e.g. RctSpec) and the\ncluster-facing k8s-objects sync API (K8sObjectsUpdate).\n",
+        "type": "object",
+        "required": [
+          "objectSpec"
+        ],
+        "properties": {
+          "objectMeta": {
+            "$ref": "#/components/schemas/K8sObjectMeta"
+          },
+          "objectSpec": {
+            "description": "The raw Kubernetes spec of the object.",
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "RctSpec": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/K8sObjectSpec"
+          }
+        ]
+      },
+      "AssetSyncStatusEnum": {
+        "type": "string",
+        "enum": [
+          "Creating",
+          "Deleting",
+          "Failed",
+          "Deletion failed",
+          "Issues found",
+          "No issues found",
+          "No status",
+          "Updating"
+        ]
+      },
+      "ScopeId": {
+        "type": "string",
+        "description": "The id of the cluster, department or project, depending on the scope type."
+      },
+      "ScopeType": {
+        "type": "string",
+        "enum": [
+          "system",
+          "tenant",
+          "cluster",
+          "department",
+          "project"
+        ]
+      },
+      "AssetClusterStatusIssueEnum": {
+        "type": "string",
+        "enum": [
+          "ReplicationError",
+          "LostPhase",
+          "NotCreated"
+        ]
+      },
+      "AssetClusterStatusIssue": {
+        "type": "object",
+        "required": [
+          "scopeId",
+          "scopeType",
+          "issue"
+        ],
+        "properties": {
+          "scopeId": {
+            "$ref": "#/components/schemas/ScopeId"
+          },
+          "scopeType": {
+            "$ref": "#/components/schemas/ScopeType"
+          },
+          "issue": {
+            "$ref": "#/components/schemas/AssetClusterStatusIssueEnum"
+          }
+        }
+      },
+      "AssetClusterStatusIssues": {
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/AssetClusterStatusIssue"
+        }
+      },
+      "AssetClusterStatusInfo": {
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/AssetSyncStatusEnum"
+          },
+          "issues": {
+            "$ref": "#/components/schemas/AssetClusterStatusIssues"
+          },
+          "message": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "nullable": true,
+        "type": "object"
+      },
+      "Rct": {
+        "type": "object",
+        "required": [
+          "meta",
+          "spec"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/AssetMeta"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/RctSpec"
+          },
+          "status": {
+            "$ref": "#/components/schemas/AssetClusterStatusInfo"
+          }
+        }
+      },
+      "RctListResponse": {
+        "type": "object",
+        "required": [
+          "entries"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Offset for the next page of results. Present only when there are more entries beyond the current page (i.e., the number of returned entries equals the limit).\n"
+          },
+          "entries": {
+            "type": "array",
+            "maxItems": 500,
+            "items": {
+              "$ref": "#/components/schemas/Rct"
+            }
+          }
+        },
+        "example": {
+          "entries": [
+            {
+              "meta": {
+                "id": "a418ed33-9399-48c0-a890-122cadd13bfd",
+                "name": "my-rct",
+                "kind": "resource-claim-template",
+                "scope": "project",
+                "projectId": 4500001,
+                "createdBy": "test@run.ai",
+                "createdAt": "2026-01-01T00:00:00Z",
+                "updatedBy": "test@run.ai",
+                "updatedAt": "2026-01-01T00:00:00Z"
+              },
+              "spec": {
+                "objectMeta": {
+                  "labels": {
+                    "app": "my-app"
+                  }
+                },
+                "objectSpec": {
+                  "devices": {
+                    "requests": [
+                      {
+                        "name": "gpu",
+                        "exactly": {
+                          "deviceClassName": "gpu.nvidia.com",
+                          "count": 1,
+                          "allocationMode": "ExactCount"
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "RctCreationRequest": {
+        "type": "object",
+        "required": [
+          "meta",
+          "spec"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/AssetCreationRequest"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/RctSpec"
+          }
+        }
+      },
+      "RctUpdateRequest": {
+        "type": "object",
+        "required": [
+          "meta",
+          "spec"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/AssetUpdateRequest"
+          },
+          "spec": {
+            "$ref": "#/components/schemas/RctSpec"
+          }
+        }
+      },
+      "ReportedWorkloadType": {
+        "description": "The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.",
+        "type": "string",
+        "example": "Training"
+      },
+      "ProjectId": {
+        "description": "The id of the project.",
+        "type": "string",
+        "example": 1,
+        "pattern": ".*"
+      },
+      "PodResourceClaimBinding": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.",
+            "example": "gpu-1"
+          },
+          "claimName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.",
+            "example": "bert-worker-0-gpu-1-mk4s8"
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkloadPod": {
+        "type": "object",
+        "required": [
+          "podId",
+          "podName",
+          "resourceClaims"
+        ],
+        "properties": {
+          "podId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of the pod."
+          },
+          "podName": {
+            "type": "string",
+            "example": "bert-worker-0"
+          },
+          "resourceClaims": {
+            "type": "array",
+            "description": "The pod's claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.",
+            "items": {
+              "$ref": "#/components/schemas/PodResourceClaimBinding"
+            }
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkload": {
+        "type": "object",
+        "required": [
+          "workloadId",
+          "name",
+          "type",
+          "projectId",
+          "pods"
+        ],
+        "properties": {
+          "workloadId": {
+            "$ref": "#/components/schemas/WorkloadId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/WorkloadName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ReportedWorkloadType"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "pods": {
+            "type": "array",
+            "description": "The pods of the workload that reference the resource claim template.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplateWorkloadPod"
+            }
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkloadsResponse": {
+        "type": "object",
+        "required": [
+          "workloads"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit).\n"
+          },
+          "workloads": {
+            "type": "array",
+            "description": "The workloads whose pods currently reference the resource claim template.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplateWorkload"
+            }
+          }
+        }
+      },
+      "ClusterSyncReportUpdate": {
+        "description": "success/failure report of a single update attempt of the cluster",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "a unique id of the entity being updated (asset, workload, policy, etc)."
+          },
+          "updateCount": {
+            "$ref": "#/components/schemas/UpdateCount"
+          },
+          "updateAttemptTime": {
+            "description": "the time in which the cluster attempted the update.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-06-06T12:09:18.211Z"
+          },
+          "message": {
+            "description": "optional failure message for the case that the update has failed. should be sent null if the update was successful.",
+            "type": "string",
+            "example": "mandatory image was not provided.",
+            "nullable": true
+          }
+        }
+      },
+      "ClusterSyncReport": {
+        "description": "allow cluster to report about success/failures of sync updates",
+        "properties": {
+          "updates": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClusterSyncReportUpdate"
+            }
+          }
+        }
+      },
+      "RequestInfo": {
+        "required": [
+          "afterUpdate"
+        ],
+        "description": "value that the agent sent to the afterUpdate query parameter.",
+        "properties": {
+          "afterUpdate": {
+            "$ref": "#/components/schemas/UpdateCount"
+          }
+        }
+      },
+      "ResponseInfo": {
+        "description": "The lowest and highest update counts included in this bulk of updates. for example, it is possible that agent requester for afterUpdate=10 and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.",
+        "properties": {
+          "lowestUpdate": {
+            "$ref": "#/components/schemas/UpdateCount"
+          },
+          "highestUpdate": {
+            "$ref": "#/components/schemas/UpdateCount"
+          }
+        }
+      },
+      "SystemInfo": {
+        "description": "the highest update count that was assigned to the data being synchronized. for example, it is possible that the agent sent afterUpdate=12 and received a bulk containing only four updates (13, 15, 18, 19) but in the system there is already update 21 which was not included in this bulk and can be received in the following bulk.",
+        "properties": {
+          "highestUpdate": {
+            "$ref": "#/components/schemas/UpdateCount"
+          }
+        }
+      },
+      "AssetMetaForSync": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/AssetCreationFields"
+          },
+          {
+            "$ref": "#/components/schemas/AssetUpdatableFields"
+          },
+          {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "$ref": "#/components/schemas/AssetId"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "$ref": "#/components/schemas/AssetKind"
+              }
+            }
+          },
+          {
+            "type": "object",
+            "properties": {
+              "prevName": {
+                "$ref": "#/components/schemas/AssetName"
+              }
+            }
+          }
+        ]
+      },
+      "K8sObjectsUpdate": {
+        "type": "object",
+        "required": [
+          "meta",
+          "updateCount"
+        ],
+        "properties": {
+          "meta": {
+            "$ref": "#/components/schemas/AssetMetaForSync"
+          },
+          "updateCount": {
+            "$ref": "#/components/schemas/UpdateCount"
+          },
+          "isDeleted": {
+            "description": "the asset has been deleted",
+            "type": "boolean",
+            "nullable": true
+          },
+          "spec": {
+            "$ref": "#/components/schemas/K8sObjectSpec"
+          }
+        }
+      },
+      "K8sObjectsUpdatesResp": {
+        "type": "object",
+        "properties": {
+          "requestInfo": {
+            "$ref": "#/components/schemas/RequestInfo"
+          },
+          "responseInfo": {
+            "$ref": "#/components/schemas/ResponseInfo"
+          },
+          "systemInfo": {
+            "$ref": "#/components/schemas/SystemInfo"
+          },
+          "assets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/K8sObjectsUpdate"
+            }
           }
         }
       },
@@ -8412,84 +9321,6 @@
           }
         }
       },
-      "AssetSyncStatusEnum": {
-        "type": "string",
-        "enum": [
-          "Creating",
-          "Deleting",
-          "Failed",
-          "Deletion failed",
-          "Issues found",
-          "No issues found",
-          "No status",
-          "Updating"
-        ]
-      },
-      "ScopeId": {
-        "type": "string",
-        "description": "The id of the cluster, department or project, depending on the scope type."
-      },
-      "ScopeType": {
-        "type": "string",
-        "enum": [
-          "system",
-          "tenant",
-          "cluster",
-          "department",
-          "project"
-        ]
-      },
-      "AssetClusterStatusIssueEnum": {
-        "type": "string",
-        "enum": [
-          "ReplicationError",
-          "LostPhase",
-          "NotCreated"
-        ]
-      },
-      "AssetClusterStatusIssue": {
-        "type": "object",
-        "required": [
-          "scopeId",
-          "scopeType",
-          "issue"
-        ],
-        "properties": {
-          "scopeId": {
-            "$ref": "#/components/schemas/ScopeId"
-          },
-          "scopeType": {
-            "$ref": "#/components/schemas/ScopeType"
-          },
-          "issue": {
-            "$ref": "#/components/schemas/AssetClusterStatusIssueEnum"
-          }
-        }
-      },
-      "AssetClusterStatusIssues": {
-        "type": "array",
-        "items": {
-          "$ref": "#/components/schemas/AssetClusterStatusIssue"
-        }
-      },
-      "AssetClusterStatusInfo": {
-        "properties": {
-          "status": {
-            "$ref": "#/components/schemas/AssetSyncStatusEnum"
-          },
-          "issues": {
-            "$ref": "#/components/schemas/AssetClusterStatusIssues"
-          },
-          "message": {
-            "type": "string"
-          },
-          "url": {
-            "type": "string"
-          }
-        },
-        "nullable": true,
-        "type": "object"
-      },
       "ClusterResourceInfo": {
         "properties": {
           "name": {
@@ -8550,112 +9381,6 @@
             }
           }
         }
-      },
-      "ClusterSyncReportUpdate": {
-        "description": "success/failure report of a single update attempt of the cluster",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "description": "a unique id of the entity being updated (asset, workload, policy, etc)."
-          },
-          "updateCount": {
-            "$ref": "#/components/schemas/UpdateCount"
-          },
-          "updateAttemptTime": {
-            "description": "the time in which the cluster attempted the update.",
-            "type": "string",
-            "format": "date-time",
-            "example": "2024-06-06T12:09:18.211Z"
-          },
-          "message": {
-            "description": "optional failure message for the case that the update has failed. should be sent null if the update was successful.",
-            "type": "string",
-            "example": "mandatory image was not provided.",
-            "nullable": true
-          }
-        }
-      },
-      "ClusterSyncReport": {
-        "description": "allow cluster to report about success/failures of sync updates",
-        "properties": {
-          "updates": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ClusterSyncReportUpdate"
-            }
-          }
-        }
-      },
-      "RequestInfo": {
-        "required": [
-          "afterUpdate"
-        ],
-        "description": "value that the agent sent to the afterUpdate query parameter.",
-        "properties": {
-          "afterUpdate": {
-            "$ref": "#/components/schemas/UpdateCount"
-          }
-        }
-      },
-      "ResponseInfo": {
-        "description": "The lowest and highest update counts included in this bulk of updates. for example, it is possible that agent requester for afterUpdate=10 and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.",
-        "properties": {
-          "lowestUpdate": {
-            "$ref": "#/components/schemas/UpdateCount"
-          },
-          "highestUpdate": {
-            "$ref": "#/components/schemas/UpdateCount"
-          }
-        }
-      },
-      "SystemInfo": {
-        "description": "the highest update count that was assigned to the data being synchronized. for example, it is possible that the agent sent afterUpdate=12 and received a bulk containing only four updates (13, 15, 18, 19) but in the system there is already update 21 which was not included in this bulk and can be received in the following bulk.",
-        "properties": {
-          "highestUpdate": {
-            "$ref": "#/components/schemas/UpdateCount"
-          }
-        }
-      },
-      "AssetMetaForSync": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/AssetCreationFields"
-          },
-          {
-            "$ref": "#/components/schemas/AssetUpdatableFields"
-          },
-          {
-            "type": "object",
-            "required": [
-              "id"
-            ],
-            "properties": {
-              "id": {
-                "$ref": "#/components/schemas/AssetId"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "required": [
-              "kind"
-            ],
-            "properties": {
-              "kind": {
-                "$ref": "#/components/schemas/AssetKind"
-              }
-            }
-          },
-          {
-            "type": "object",
-            "properties": {
-              "prevName": {
-                "$ref": "#/components/schemas/AssetName"
-              }
-            }
-          }
-        ]
       },
       "CredentialsUpdate": {
         "type": "object",
@@ -9348,7 +10073,7 @@
         "type": "object"
       },
       "AllowPrivilegeEscalation": {
-        "description": "Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers",
+        "description": "Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)",
         "type": "boolean",
         "example": false,
         "nullable": true
@@ -9582,7 +10307,7 @@
         "nullable": true
       },
       "UidGidSource": {
-        "description": "Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers).",
+        "description": "Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).",
         "type": "string",
         "enum": [
           "fromTheImage",
@@ -11469,7 +12194,7 @@
         "nullable": true
       },
       "Preemptibility": {
-        "description": "Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.",
+        "description": "Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.",
         "type": "string",
         "minLength": 1,
         "enum": [
@@ -12519,12 +13244,6 @@
             "$ref": "#/components/schemas/ComplianceIssuesV2"
           }
         ]
-      },
-      "ProjectId": {
-        "description": "The id of the project.",
-        "type": "string",
-        "example": 1,
-        "pattern": ".*"
       },
       "DepartmentId": {
         "description": "The id of the department.",
@@ -15183,11 +15902,20 @@
               "extendedResources": {
                 "$ref": "#/components/schemas/ExtendedResources"
               },
+              "gpuComputeMode": {
+                "$ref": "#/components/schemas/GpuComputeMode"
+              },
               "gpuDevicesRequest": {
                 "$ref": "#/components/schemas/GpuDevicesRequest"
               },
               "gpuMemoryLimit": {
                 "$ref": "#/components/schemas/GpuMemoryLimit"
+              },
+              "gpuMemoryPortionLimit": {
+                "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+              },
+              "gpuMemoryPortionRequest": {
+                "$ref": "#/components/schemas/GpuMemoryPortionRequest"
               },
               "gpuMemoryRequest": {
                 "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -15373,7 +16101,7 @@
             "nullable": true
           },
           "exposeExternally": {
-            "description": "Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.",
+            "description": "Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.",
             "type": "boolean",
             "nullable": true,
             "default": true
@@ -16190,11 +16918,20 @@
                   "extendedResources": {
                     "$ref": "#/components/schemas/ExtendedResources"
                   },
+                  "gpuComputeMode": {
+                    "$ref": "#/components/schemas/GpuComputeMode"
+                  },
                   "gpuDevicesRequest": {
                     "$ref": "#/components/schemas/GpuDevicesRequest"
                   },
                   "gpuMemoryLimit": {
                     "$ref": "#/components/schemas/GpuMemoryLimit"
+                  },
+                  "gpuMemoryPortionLimit": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+                  },
+                  "gpuMemoryPortionRequest": {
+                    "$ref": "#/components/schemas/GpuMemoryPortionRequest"
                   },
                   "gpuMemoryRequest": {
                     "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -16469,11 +17206,20 @@
               "extendedResources": {
                 "$ref": "#/components/schemas/ExtendedResources"
               },
+              "gpuComputeMode": {
+                "$ref": "#/components/schemas/GpuComputeMode"
+              },
               "gpuDevicesRequest": {
                 "$ref": "#/components/schemas/GpuDevicesRequest"
               },
               "gpuMemoryLimit": {
                 "$ref": "#/components/schemas/GpuMemoryLimit"
+              },
+              "gpuMemoryPortionLimit": {
+                "$ref": "#/components/schemas/GpuMemoryPortionLimit"
+              },
+              "gpuMemoryPortionRequest": {
+                "$ref": "#/components/schemas/GpuMemoryPortionRequest"
               },
               "gpuMemoryRequest": {
                 "$ref": "#/components/schemas/GpuMemoryRequest"
@@ -16938,6 +17684,93 @@
           "minLength": 1
         }
       },
+      "Offset": {
+        "name": "offset",
+        "in": "query",
+        "required": false,
+        "description": "The offset of the first item returned in the collection.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "example": 100
+        }
+      },
+      "Limit": {
+        "name": "limit",
+        "in": "query",
+        "required": false,
+        "description": "The maximum number of entries to return.",
+        "schema": {
+          "type": "integer",
+          "format": "int32",
+          "default": 50,
+          "minimum": 1,
+          "maximum": 500
+        }
+      },
+      "SortOrder": {
+        "name": "sortOrder",
+        "in": "query",
+        "required": false,
+        "description": "Sort results in descending or ascending order.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "asc",
+            "desc"
+          ],
+          "default": "asc"
+        }
+      },
+      "RctsSort": {
+        "name": "sortBy",
+        "in": "query",
+        "required": false,
+        "description": "Sort results by parameter.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "name",
+            "clusterId",
+            "departmentId",
+            "projectId",
+            "description",
+            "createdAt",
+            "createdBy",
+            "updatedAt",
+            "updatedBy"
+          ]
+        }
+      },
+      "RctsFilter": {
+        "name": "filterBy",
+        "in": "query",
+        "required": false,
+        "description": "Filter results by a parameter. Use the format field-name operator value. Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal, `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^` Starts with and `=$` Ends with. Dates are in ISO 8601 timestamp format and available for operators `==`, `!=`, `<=` and `>=`. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.",
+        "schema": {
+          "type": "array",
+          "maxItems": 10,
+          "items": {
+            "type": "string",
+            "pattern": "^(name|clusterId|departmentId|projectId|description|createdAt|createdBy|updatedAt|updatedBy)(==|!=|<=|>=|=@|!@|=\\^|=\\$).+$"
+          },
+          "example": [
+            "name=@gpu",
+            "clusterId==11111111-1111-1111-1111-111111111111"
+          ]
+        },
+        "explode": false
+      },
+      "IncludeAncestors": {
+        "name": "includeAncestors",
+        "in": "query",
+        "required": false,
+        "description": "When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors=true to also include resource claim templates from the anchor's ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.",
+        "schema": {
+          "type": "boolean",
+          "default": true
+        }
+      },
       "IncludeStatus": {
         "name": "statusInfo",
         "in": "query",
@@ -16945,6 +17778,28 @@
         "description": "Whether the query should include asset status information as part of the response.",
         "schema": {
           "type": "boolean"
+        }
+      },
+      "ClusterIdRequired": {
+        "name": "clusterId",
+        "in": "query",
+        "description": "The id of the cluster",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "format": "uuid",
+          "example": "d73a738f-fab3-430a-8fa3-5241493d7128"
+        }
+      },
+      "SyncAfter": {
+        "name": "after",
+        "description": "search for updates with update counter greater than the value passed for this parameter",
+        "in": "query",
+        "required": false,
+        "schema": {
+          "type": "integer",
+          "format": "int64",
+          "example": 123
         }
       },
       "PrivateOnly": {
@@ -16982,28 +17837,6 @@
             "genericSecret",
             "ngcApiKey"
           ]
-        }
-      },
-      "ClusterIdRequired": {
-        "name": "clusterId",
-        "in": "query",
-        "description": "The id of the cluster",
-        "required": true,
-        "schema": {
-          "type": "string",
-          "format": "uuid",
-          "example": "d73a738f-fab3-430a-8fa3-5241493d7128"
-        }
-      },
-      "SyncAfter": {
-        "name": "after",
-        "description": "search for updates with update counter greater than the value passed for this parameter",
-        "in": "query",
-        "required": false,
-        "schema": {
-          "type": "integer",
-          "format": "int64",
-          "example": 123
         }
       },
       "SearchName": {
@@ -17126,30 +17959,6 @@
         "description": "Whether the query should include data volume usage information as part of the response.",
         "schema": {
           "type": "boolean"
-        }
-      },
-      "Offset": {
-        "name": "offset",
-        "in": "query",
-        "required": false,
-        "description": "The offset of the first item returned in the collection.",
-        "schema": {
-          "type": "integer",
-          "format": "int32",
-          "example": 100
-        }
-      },
-      "Limit": {
-        "name": "limit",
-        "in": "query",
-        "required": false,
-        "description": "The maximum number of entries to return.",
-        "schema": {
-          "type": "integer",
-          "format": "int32",
-          "default": 50,
-          "minimum": 1,
-          "maximum": 500
         }
       },
       "ClusterUuid": {

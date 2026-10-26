@@ -86,7 +86,7 @@ manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and Cust
 	$(CONTROLLER_GEN) rbac:roleName=runai-operator crd:allowDangerousTypes=true,generateEmbeddedObjectMeta=true webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
-generate: mockery controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+generate: generate-mocks-local controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	@echo "**********************************************************"
 	@echo "*  NOTE!                                                 *"
 	@echo "*  This generates *go-operator* related code only.    	 *"
@@ -95,7 +95,6 @@ generate: mockery controller-gen ## Generate code containing DeepCopy, DeepCopyI
 	@echo "*  instead.                                              *"
 	@echo "**********************************************************"
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
-	$(MOCKERY)
 
 .PHONY: generate-client
 generate-client: manifests ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
@@ -145,7 +144,7 @@ test-envtest: manifests generate envtest ## Run tests.
 lint: lint-go ## Run linter.
 
 .PHONY: validate
-validate: purify-go
+validate: purify-go validate-mockery
 
 ##@ Build
 .PHONY: build

@@ -167,6 +167,12 @@ Class | Method | HTTP request | Description
 *RegistryAPI* | [**GetRepositoryTags**](docs/RegistryAPI.md#getrepositorytags) | **Get** /api/v1/asset/registries/{AssetId}/repositories/tags | Get the repositories tags in the registry.
 *RegistryAPI* | [**ListRegistries**](docs/RegistryAPI.md#listregistries) | **Get** /api/v1/asset/registries | Get registries.
 *RegistryAPI* | [**UpdateRegistry**](docs/RegistryAPI.md#updateregistry) | **Put** /api/v1/asset/registries/{AssetId} | Update a registry asset.
+*ResourceClaimTemplatesAPI* | [**CreateRct**](docs/ResourceClaimTemplatesAPI.md#createrct) | **Post** /api/v1/k8s-objects/resource-claim-templates | Create resource claim template.
+*ResourceClaimTemplatesAPI* | [**DeleteRctById**](docs/ResourceClaimTemplatesAPI.md#deleterctbyid) | **Delete** /api/v1/k8s-objects/resource-claim-templates/{AssetId} | Delete a resource claim template.
+*ResourceClaimTemplatesAPI* | [**GetRctById**](docs/ResourceClaimTemplatesAPI.md#getrctbyid) | **Get** /api/v1/k8s-objects/resource-claim-templates/{AssetId} | Retrieve a resource claim template.
+*ResourceClaimTemplatesAPI* | [**GetRctWorkloads**](docs/ResourceClaimTemplatesAPI.md#getrctworkloads) | **Get** /api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads | List the workloads using a resource claim template.
+*ResourceClaimTemplatesAPI* | [**ListRcts**](docs/ResourceClaimTemplatesAPI.md#listrcts) | **Get** /api/v1/k8s-objects/resource-claim-templates | List resource claim templates.
+*ResourceClaimTemplatesAPI* | [**UpdateRctById**](docs/ResourceClaimTemplatesAPI.md#updaterctbyid) | **Put** /api/v1/k8s-objects/resource-claim-templates/{AssetId} | Update a resource claim template.
 *S3API* | [**CreateS3Asset**](docs/S3API.md#creates3asset) | **Post** /api/v1/asset/datasource/s3 | Create an S3 asset.
 *S3API* | [**DeleteS3AssetById**](docs/S3API.md#deletes3assetbyid) | **Delete** /api/v1/asset/datasource/s3/{AssetId} | Delete an S3 asset.
 *S3API* | [**GetS3AssetById**](docs/S3API.md#gets3assetbyid) | **Get** /api/v1/asset/datasource/s3/{AssetId} | Get an S3 asset.
@@ -179,6 +185,7 @@ Class | Method | HTTP request | Description
 *SecretAPI* | [**UpdateSecretAssetById**](docs/SecretAPI.md#updatesecretassetbyid) | **Put** /api/v1/asset/datasource/secrets/{AssetId} | Update a Secret asset.
 *SynchronizationAPI* | [**CredentialsSyncUpdates**](docs/SynchronizationAPI.md#credentialssyncupdates) | **Post** /api/v1/asset/credentials/updates | Allow cluster to request a list of updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
 *SynchronizationAPI* | [**DatasourceSyncUpdates**](docs/SynchronizationAPI.md#datasourcesyncupdates) | **Post** /api/v1/asset/datasource/updates | Allow cluster to request a list of updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+*SynchronizationAPI* | [**K8sObjectsSyncUpdates**](docs/SynchronizationAPI.md#k8sobjectssyncupdates) | **Post** /api/v1/k8s-objects/updates | Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
 *SynchronizationAPI* | [**ListAssetsById**](docs/SynchronizationAPI.md#listassetsbyid) | **Get** /api/v1/asset | List assets by their ids
 *SynchronizationAPI* | [**SyncAssetsResourcesIds**](docs/SynchronizationAPI.md#syncassetsresourcesids) | **Post** /api/v1/asset/sync/asset-resources-ids | Sync asset resources ids.
 *SynchronizationAPI* | [**SyncValidate**](docs/SynchronizationAPI.md#syncvalidate) | **Post** /api/v1/asset/sync/validate | Validate assets sync.
@@ -400,6 +407,7 @@ Class | Method | HTTP request | Description
  - [GitSecretRef](docs/GitSecretRef.md)
  - [GitUpdateRequest](docs/GitUpdateRequest.md)
  - [GitsRules](docs/GitsRules.md)
+ - [GpuComputeMode](docs/GpuComputeMode.md)
  - [GpuRequestType](docs/GpuRequestType.md)
  - [HistoryRecord](docs/HistoryRecord.md)
  - [HistoryRecordMeta](docs/HistoryRecordMeta.md)
@@ -445,6 +453,10 @@ Class | Method | HTTP request | Description
  - [InternalToolType](docs/InternalToolType.md)
  - [InvolvedObject](docs/InvolvedObject.md)
  - [ItemRules](docs/ItemRules.md)
+ - [K8sObjectMeta](docs/K8sObjectMeta.md)
+ - [K8sObjectSpec](docs/K8sObjectSpec.md)
+ - [K8sObjectsUpdate](docs/K8sObjectsUpdate.md)
+ - [K8sObjectsUpdatesResp](docs/K8sObjectsUpdatesResp.md)
  - [KeyValuePair](docs/KeyValuePair.md)
  - [Label](docs/Label.md)
  - [MasterSpec](docs/MasterSpec.md)
@@ -506,6 +518,7 @@ Class | Method | HTTP request | Description
  - [PodAffinityTypeOptions](docs/PodAffinityTypeOptions.md)
  - [PodAffinityTypeOptionsOptionsInner](docs/PodAffinityTypeOptionsOptionsInner.md)
  - [PodAffinityTypeRules](docs/PodAffinityTypeRules.md)
+ - [PodResourceClaimBinding](docs/PodResourceClaimBinding.md)
  - [PolicyInfo](docs/PolicyInfo.md)
  - [PolicyRuleEnum](docs/PolicyRuleEnum.md)
  - [Port](docs/Port.md)
@@ -529,6 +542,11 @@ Class | Method | HTTP request | Description
  - [PvcRules](docs/PvcRules.md)
  - [PvcVolumeMode](docs/PvcVolumeMode.md)
  - [PvcsRules](docs/PvcsRules.md)
+ - [Rct](docs/Rct.md)
+ - [RctCreationRequest](docs/RctCreationRequest.md)
+ - [RctListResponse](docs/RctListResponse.md)
+ - [RctSpec](docs/RctSpec.md)
+ - [RctUpdateRequest](docs/RctUpdateRequest.md)
  - [Registry](docs/Registry.md)
  - [RegistryCreationRequest](docs/RegistryCreationRequest.md)
  - [RegistryListResponse](docs/RegistryListResponse.md)
@@ -538,6 +556,9 @@ Class | Method | HTTP request | Description
  - [Repositories](docs/Repositories.md)
  - [RepositoryTags](docs/RepositoryTags.md)
  - [RequestInfo](docs/RequestInfo.md)
+ - [ResourceClaimTemplateWorkload](docs/ResourceClaimTemplateWorkload.md)
+ - [ResourceClaimTemplateWorkloadPod](docs/ResourceClaimTemplateWorkloadPod.md)
+ - [ResourceClaimTemplateWorkloadsResponse](docs/ResourceClaimTemplateWorkloadsResponse.md)
  - [ResponseInfo](docs/ResponseInfo.md)
  - [RestartPolicy](docs/RestartPolicy.md)
  - [RestartPolicyOptions](docs/RestartPolicyOptions.md)

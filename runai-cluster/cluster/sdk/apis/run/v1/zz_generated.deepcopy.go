@@ -27,6 +27,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/init-ca"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/kai-operator"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/knative"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/krm-operator"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/limit-range"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/lws"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/metrics-exporter"
@@ -496,6 +497,11 @@ func (in *PublicConfiguration) DeepCopyInto(out *PublicConfiguration) {
 	}
 	if in.S3FileSystemImage != nil {
 		in, out := &in.S3FileSystemImage, &out.S3FileSystemImage
+		*out = new(string)
+		**out = **in
+	}
+	if in.S3FileSystemMountCheckImage != nil {
+		in, out := &in.S3FileSystemMountCheckImage, &out.S3FileSystemMountCheckImage
 		*out = new(string)
 		**out = **in
 	}
@@ -1073,6 +1079,11 @@ func (in *RunaiConfigSpec) DeepCopyInto(out *RunaiConfigSpec) {
 	if in.NodeExporter != nil {
 		in, out := &in.NodeExporter, &out.NodeExporter
 		*out = new(runai_node_exporter.NodeExporter)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.KRMOperator != nil {
+		in, out := &in.KRMOperator, &out.KRMOperator
+		*out = new(krm_operator.KRMOperator)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.KAIOperator != nil {

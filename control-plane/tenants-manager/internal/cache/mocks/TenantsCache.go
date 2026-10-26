@@ -20,10 +20,19 @@ func NewTenantsCache(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *TenantsCache {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &TenantsCache{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,15 +73,26 @@ type TenantsCache_DeleteTenant_Call struct {
 }
 
 // DeleteTenant is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *TenantsCache_Expecter) DeleteTenant(ctx interface{}, tenantId interface{}) *TenantsCache_DeleteTenant_Call {
+//   - ctx context.Context
+//   - tenantId int32
+func (_e *TenantsCache_Expecter) DeleteTenant(ctx any, tenantId any) *TenantsCache_DeleteTenant_Call {
 	return &TenantsCache_DeleteTenant_Call{Call: _e.mock.On("DeleteTenant", ctx, tenantId)}
 }
 
 func (_c *TenantsCache_DeleteTenant_Call) Run(run func(ctx context.Context, tenantId int32)) *TenantsCache_DeleteTenant_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -121,16 +141,32 @@ type TenantsCache_GetTenant_Call struct {
 }
 
 // GetTenant is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - fetchFunc
-func (_e *TenantsCache_Expecter) GetTenant(ctx interface{}, tenantId interface{}, fetchFunc interface{}) *TenantsCache_GetTenant_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - fetchFunc func() (*models.Tenant, error)
+func (_e *TenantsCache_Expecter) GetTenant(ctx any, tenantId any, fetchFunc any) *TenantsCache_GetTenant_Call {
 	return &TenantsCache_GetTenant_Call{Call: _e.mock.On("GetTenant", ctx, tenantId, fetchFunc)}
 }
 
 func (_c *TenantsCache_GetTenant_Call) Run(run func(ctx context.Context, tenantId int32, fetchFunc func() (*models.Tenant, error))) *TenantsCache_GetTenant_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(func() (*models.Tenant, error)))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 func() (*models.Tenant, error)
+		if args[2] != nil {
+			arg2 = args[2].(func() (*models.Tenant, error))
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -168,16 +204,32 @@ type TenantsCache_SetTenant_Call struct {
 }
 
 // SetTenant is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - tenant
-func (_e *TenantsCache_Expecter) SetTenant(ctx interface{}, tenantId interface{}, tenant interface{}) *TenantsCache_SetTenant_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - tenant models.Tenant
+func (_e *TenantsCache_Expecter) SetTenant(ctx any, tenantId any, tenant any) *TenantsCache_SetTenant_Call {
 	return &TenantsCache_SetTenant_Call{Call: _e.mock.On("SetTenant", ctx, tenantId, tenant)}
 }
 
 func (_c *TenantsCache_SetTenant_Call) Run(run func(ctx context.Context, tenantId int32, tenant models.Tenant)) *TenantsCache_SetTenant_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(models.Tenant))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 models.Tenant
+		if args[2] != nil {
+			arg2 = args[2].(models.Tenant)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

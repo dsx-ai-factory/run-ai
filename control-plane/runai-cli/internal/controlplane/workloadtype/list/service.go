@@ -10,7 +10,7 @@ import (
 	"fmt"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/filter"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 const (

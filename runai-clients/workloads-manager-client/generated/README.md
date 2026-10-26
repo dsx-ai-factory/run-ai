@@ -125,6 +125,7 @@ Class | Method | HTTP request | Description
  - [GVK](docs/GVK.md)
  - [GetYamlSubmission](docs/GetYamlSubmission.md)
  - [GetYamlSubmissionValue](docs/GetYamlSubmissionValue.md)
+ - [GpuComputeMode](docs/GpuComputeMode.md)
  - [GpuRequestType](docs/GpuRequestType.md)
  - [ImagePullPolicy](docs/ImagePullPolicy.md)
  - [ImagePullSecret](docs/ImagePullSecret.md)

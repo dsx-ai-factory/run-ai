@@ -81,7 +81,7 @@ and bundled into [`swagger/_build/swagger.yaml`](swagger/_build/swagger.yaml).
 ```
 
 The versioned Go **client** for this service lives in a separate module,
-[`runai-clients/org-unit-service-client`](../../runai-clients/org-unit-service-client),
+[`control-plane/org-unit-service/pkg/client`](pkg/client),
 not under `pkg/client/`.
 
 ## Building and running
@@ -203,7 +203,7 @@ cleaner_enabled:          true
 cleaner_interval_hours:   24
 soft_deleted_days_to_live: 30
 
-# Database (shared dao-utils keys; db_user / db_password are secrets)
+# Database (shared runaidb keys; db_user / db_password are secrets)
 db_host: ""
 db_port: ""
 db_name: ""
@@ -211,8 +211,8 @@ db_schema: org_unit_service
 db_user: ""
 db_password: ""
 db_ssl_mode: ""
-max_connections: 0
-migration_files: ""
+db_max_connections: 0
+db_migration_files: ""
 ```
 
 Top-level sections:
@@ -228,8 +228,8 @@ Top-level sections:
 - **DBCleanerConfig** — whether the DB cleaner runs, how often, and the retention
   window before soft-deleted rows are hard-deleted.
 - **Database** — connection, pool and migration settings, provided through the
-  shared `dao-utils` config (`db_host`, `db_port`, `db_name`, `db_schema`,
-  `db_user`, `db_password`, `db_ssl_mode`, `max_connections`, …). `db_user` and
+  shared `runaidb` config (`db_host`, `db_port`, `db_name`, `db_schema`,
+  `db_user`, `db_password`, `db_ssl_mode`, `db_max_connections`, …). `db_user` and
   `db_password` are treated as secrets. The service's schema is
   `org_unit_service` and migrations ship in `pkg/database/migrations/{up,down}`.
 
@@ -249,7 +249,7 @@ bundled spec are up to date.
 ## Go client
 
 Other Run:AI services consume org-unit-service through the versioned Go client in
-the separate [`runai-clients/org-unit-service-client`](../../runai-clients/org-unit-service-client)
+the separate [`control-plane/org-unit-service/pkg/client`](pkg/client)
 module (generated from this service's OpenAPI spec). `cmd/main.go` itself imports
 the sibling clients it depends on (tenants-manager, cluster-service, workloads,
 datavolumes, authorization, audit).

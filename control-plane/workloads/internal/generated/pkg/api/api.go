@@ -35,6 +35,7 @@ type AIApplicationsAPIRouter interface {
 	ListApplications(http.ResponseWriter, *http.Request)
 	CreateApplication(http.ResponseWriter, *http.Request)
 	UploadApplicationChart(http.ResponseWriter, *http.Request)
+	InspectApplicationChart(http.ResponseWriter, *http.Request)
 	DownloadApplicationChart(http.ResponseWriter, *http.Request)
 	CountApplications(http.ResponseWriter, *http.Request)
 	GetApplication(http.ResponseWriter, *http.Request)
@@ -181,6 +182,14 @@ type UnifiedAPIRouter interface {
 	GetUnifiedWorkload(http.ResponseWriter, *http.Request)
 }
 
+// WorkloadActionsAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadActionsAPI
+// The WorkloadActionsAPIRouter implementation should parse necessary information from the http request,
+// pass the data to a WorkloadActionsAPIServicer to perform the required actions, then write the service results to the http response.
+type WorkloadActionsAPIRouter interface {
+	GetWorkloadActionsHistory(http.ResponseWriter, *http.Request)
+	InternalCreateWorkloadActions(http.ResponseWriter, *http.Request)
+}
+
 // WorkloadPropertiesAPIRouter defines the required methods for binding the api requests to a responses for the WorkloadPropertiesAPI
 // The WorkloadPropertiesAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a WorkloadPropertiesAPIServicer to perform the required actions, then write the service results to the http response.
@@ -248,9 +257,11 @@ type WorkloadTemplatesAPIRouter interface {
 type WorkloadsAPIRouter interface {
 	InternalCreateWorkload(http.ResponseWriter, *http.Request)
 	InternalSyncWorkloads(http.ResponseWriter, *http.Request)
+	InternalGetResourceClaimTemplateWorkloads(http.ResponseWriter, *http.Request)
 	InternalEnrichOrgUnitRanking(http.ResponseWriter, *http.Request)
 	GetWorkloads(http.ResponseWriter, *http.Request)
 	SyncWorkloads(http.ResponseWriter, *http.Request)
+	GetWorkloadsSlim(http.ResponseWriter, *http.Request)
 	GetWorkloadAncestors(http.ResponseWriter, *http.Request)
 	GetWorkload(http.ResponseWriter, *http.Request)
 	UpsertWorkload(http.ResponseWriter, *http.Request)
@@ -259,12 +270,14 @@ type WorkloadsAPIRouter interface {
 	InternalPatchWorkloadPhase(http.ResponseWriter, *http.Request)
 	CountWorkloads(http.ResponseWriter, *http.Request)
 	GetWorkloadsTelemetry(http.ResponseWriter, *http.Request)
+	GetInternalWorkloadsTelemetry(http.ResponseWriter, *http.Request)
 	GetWorkloadMetrics(http.ResponseWriter, *http.Request)
 	GetWorkloadEndpoints(http.ResponseWriter, *http.Request)
 	GetWorkloadElements(http.ResponseWriter, *http.Request)
 	GetWorkloadElement(http.ResponseWriter, *http.Request)
 	GetWorkloadElementMetrics(http.ResponseWriter, *http.Request)
 	CountWorkloadElements(http.ResponseWriter, *http.Request)
+	GetWorkloadResourceClaims(http.ResponseWriter, *http.Request)
 	SyncJobsBackwards(http.ResponseWriter, *http.Request)
 	SyncPodsBackwards(http.ResponseWriter, *http.Request)
 	SyncPodgroupsBackwards(http.ResponseWriter, *http.Request)
@@ -300,6 +313,7 @@ type AIApplicationsAPIServicer interface {
 	ListApplications(context.Context, AiApplicationVerbosity, int32, int32, string, AiApplicationsSortFilterFields, []string, string) (ImplResponse, error)
 	CreateApplication(context.Context, AiApplicationCreationRequest) (ImplResponse, error)
 	UploadApplicationChart(context.Context, *os.File) (ImplResponse, error)
+	InspectApplicationChart(context.Context, AiApplicationChartInspectionRequest) (ImplResponse, error)
 	DownloadApplicationChart(context.Context, string) (ImplResponse, error)
 	CountApplications(context.Context, []string, string) (ImplResponse, error)
 	GetApplication(context.Context, string) (ImplResponse, error)
@@ -459,6 +473,15 @@ type UnifiedAPIServicer interface {
 	GetUnifiedWorkload(context.Context, UnifiedWorkloadRequest) (ImplResponse, error)
 }
 
+// WorkloadActionsAPIServicer defines the api actions for the WorkloadActionsAPI service
+// This interface intended to stay up to date with the openapi yaml used to generate it,
+// while the service implementation can be ignored with the .openapi-generator-ignore file
+// and updated with the logic required for the API.
+type WorkloadActionsAPIServicer interface {
+	GetWorkloadActionsHistory(context.Context, string, int32, int32) (ImplResponse, error)
+	InternalCreateWorkloadActions(context.Context, CreateWorkloadActionsRequest) (ImplResponse, error)
+}
+
 // WorkloadPropertiesAPIServicer defines the api actions for the WorkloadPropertiesAPI service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
@@ -529,9 +552,11 @@ type WorkloadTemplatesAPIServicer interface {
 type WorkloadsAPIServicer interface {
 	InternalCreateWorkload(context.Context, WorkloadCreationFields) (ImplResponse, error)
 	InternalSyncWorkloads(context.Context, []string, InternalWorkloadsSyncRequest) (ImplResponse, error)
+	InternalGetResourceClaimTemplateWorkloads(context.Context, InternalResourceClaimTemplateWorkloadsRequest, int32, int32) (ImplResponse, error)
 	InternalEnrichOrgUnitRanking(context.Context, InternalEnrichOrgUnitRankingRequest) (ImplResponse, error)
 	GetWorkloads(context.Context, bool, int32, int32, string, string, []string, string) (ImplResponse, error)
 	SyncWorkloads(context.Context, []string, WorkloadsSyncRequest) (ImplResponse, error)
+	GetWorkloadsSlim(context.Context, int32, int32, []string) (ImplResponse, error)
 	GetWorkloadAncestors(context.Context, string) (ImplResponse, error)
 	GetWorkload(context.Context, string) (ImplResponse, error)
 	UpsertWorkload(context.Context, string, WorkloadSyncFields) (ImplResponse, error)
@@ -539,13 +564,15 @@ type WorkloadsAPIServicer interface {
 	PatchWorkloadPhase(context.Context, string, WorkloadPatchFields) (ImplResponse, error)
 	InternalPatchWorkloadPhase(context.Context, string, WorkloadPatchFields) (ImplResponse, error)
 	CountWorkloads(context.Context, bool, []string, string, bool) (ImplResponse, error)
-	GetWorkloadsTelemetry(context.Context, WorkloadTelemetryType, string, string, string, string, []string, []Phase) (ImplResponse, error)
+	GetWorkloadsTelemetry(context.Context, WorkloadTelemetryType, string, string, string, string, []string, []Phase, []string) (ImplResponse, error)
+	GetInternalWorkloadsTelemetry(context.Context, WorkloadTelemetryType, string, string, string, string, []string, []Phase, []string) (ImplResponse, error)
 	GetWorkloadMetrics(context.Context, string, []WorkloadMetricType, time.Time, time.Time, int32) (ImplResponse, error)
 	GetWorkloadEndpoints(context.Context, string) (ImplResponse, error)
 	GetWorkloadElements(context.Context, string, int32, int32) (ImplResponse, error)
 	GetWorkloadElement(context.Context, string, string) (ImplResponse, error)
 	GetWorkloadElementMetrics(context.Context, string, string, []ElementMetricType, time.Time, time.Time, int32) (ImplResponse, error)
 	CountWorkloadElements(context.Context, string) (ImplResponse, error)
+	GetWorkloadResourceClaims(context.Context, string, int32, int32) (ImplResponse, error)
 	SyncJobsBackwards(context.Context, string, SyncJobsBackwardsRequest) (ImplResponse, error)
 	SyncPodsBackwards(context.Context, string, SyncJobsBackwardsRequest) (ImplResponse, error)
 	SyncPodgroupsBackwards(context.Context, string, string, SyncJobsBackwardsRequest) (ImplResponse, error)

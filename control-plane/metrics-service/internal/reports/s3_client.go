@@ -26,7 +26,7 @@ func NewS3Client() (S3Deleter, error) {
 	}
 
 	return S3Client{
-		s3Client: &client,
+		s3Client: client,
 	}, nil
 }
 

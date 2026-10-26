@@ -108,6 +108,27 @@ var _ = Describe("Application Submit Test", Ordered, func() {
 			request := clients.LastAIApplicationCreationRequest
 			Expect(request.Spec.Auth).NotTo(BeNil())
 			Expect(request.Spec.Auth.GetAssetId()).To(Equal(clients.CredentialAssetID))
+			Expect(request.Spec.Auth.GetUserCredential()).To(BeFalse())
+		})
+
+		It("resolves my-credentials through the private credential lookup", func() {
+			_, err := cli.RunCommand(fmt.Sprintf(
+				"application submit my-app-personal -p %s --chart-url %s --credential %s --user-credential",
+				clients.ProjectOneName, chartURL, clients.PrivateCredentialName), envMap)
+			Expect(err).To(BeNil())
+
+			request := clients.LastAIApplicationCreationRequest
+			Expect(request.Spec.Auth).NotTo(BeNil())
+			Expect(request.Spec.Auth.GetAssetId()).To(Equal(clients.PrivateCredentialAssetID))
+			Expect(request.Spec.Auth.GetUserCredential()).To(BeTrue())
+		})
+
+		It("requires a credential with the user-credential flag", func() {
+			output, err := cli.RunCommand(fmt.Sprintf(
+				"application submit my-app-source -p %s --chart-url %s --user-credential",
+				clients.ProjectOneName, chartURL), envMap)
+			Expect(err).ToNot(BeNil())
+			Expect(output).To(ContainSubstring("--user-credential requires --credential"))
 		})
 
 		It("submit with an unknown credential fails with a not-found error", func() {

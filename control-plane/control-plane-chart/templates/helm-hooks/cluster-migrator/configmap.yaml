@@ -8,7 +8,6 @@ data:
   LOG_LEVEL: {{ $top.Values.clusterMigrator.config.logLevel | quote }}
   SERVICE_NAME: {{ $top.Values.clusterMigrator.name | quote }}
   DB_MIGRATION_VERSION: {{ $top.Values.clusterMigrator.config.migrationVersion | quote }}
-  DB_MIGRATION_TYPE: {{ $top.Values.clusterMigrator.config.migrationType | quote }}
   DB_MIGRATION_AUTO: "false"
   DB_USE_SERVICE_SESSION: "false"
   DB_NAME: {{ $top.Values.clusterMigrator.config.dbName | default $top.Values.global.postgresql.auth.database | quote }}

@@ -21,10 +21,19 @@ func NewIPolicyExternalClient(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *IPolicyExternalClient {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &IPolicyExternalClient{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -76,16 +85,32 @@ type IPolicyExternalClient_GetAssetChangedHook_Call struct {
 }
 
 // GetAssetChangedHook is a helper method to define mock.On call
-//   - ctx
-//   - assetId
-//   - notification
-func (_e *IPolicyExternalClient_Expecter) GetAssetChangedHook(ctx interface{}, assetId interface{}, notification interface{}) *IPolicyExternalClient_GetAssetChangedHook_Call {
+//   - ctx context.Context
+//   - assetId string
+//   - notification *openapi.AssetChangeNotification
+func (_e *IPolicyExternalClient_Expecter) GetAssetChangedHook(ctx any, assetId any, notification any) *IPolicyExternalClient_GetAssetChangedHook_Call {
 	return &IPolicyExternalClient_GetAssetChangedHook_Call{Call: _e.mock.On("GetAssetChangedHook", ctx, assetId, notification)}
 }
 
 func (_c *IPolicyExternalClient_GetAssetChangedHook_Call) Run(run func(ctx context.Context, assetId string, notification *openapi.AssetChangeNotification)) *IPolicyExternalClient_GetAssetChangedHook_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*openapi.AssetChangeNotification))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *openapi.AssetChangeNotification
+		if args[2] != nil {
+			arg2 = args[2].(*openapi.AssetChangeNotification)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -142,19 +167,50 @@ type IPolicyExternalClient_GetDistributedInferencePolicy_Call struct {
 }
 
 // GetDistributedInferencePolicy is a helper method to define mock.On call
-//   - ctx
-//   - scope
-//   - clusterId
-//   - departmentId
-//   - projectId
-//   - noCreationMode
-func (_e *IPolicyExternalClient_Expecter) GetDistributedInferencePolicy(ctx interface{}, scope interface{}, clusterId interface{}, departmentId interface{}, projectId interface{}, noCreationMode interface{}) *IPolicyExternalClient_GetDistributedInferencePolicy_Call {
+//   - ctx context.Context
+//   - scope string
+//   - clusterId *string
+//   - departmentId *string
+//   - projectId *string
+//   - noCreationMode bool
+func (_e *IPolicyExternalClient_Expecter) GetDistributedInferencePolicy(ctx any, scope any, clusterId any, departmentId any, projectId any, noCreationMode any) *IPolicyExternalClient_GetDistributedInferencePolicy_Call {
 	return &IPolicyExternalClient_GetDistributedInferencePolicy_Call{Call: _e.mock.On("GetDistributedInferencePolicy", ctx, scope, clusterId, departmentId, projectId, noCreationMode)}
 }
 
 func (_c *IPolicyExternalClient_GetDistributedInferencePolicy_Call) Run(run func(ctx context.Context, scope string, clusterId *string, departmentId *string, projectId *string, noCreationMode bool)) *IPolicyExternalClient_GetDistributedInferencePolicy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string), args[4].(*string), args[5].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		var arg3 *string
+		if args[3] != nil {
+			arg3 = args[3].(*string)
+		}
+		var arg4 *string
+		if args[4] != nil {
+			arg4 = args[4].(*string)
+		}
+		var arg5 bool
+		if args[5] != nil {
+			arg5 = args[5].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+		)
 	})
 	return _c
 }
@@ -211,19 +267,50 @@ type IPolicyExternalClient_GetDistributedPolicy_Call struct {
 }
 
 // GetDistributedPolicy is a helper method to define mock.On call
-//   - ctx
-//   - scope
-//   - clusterId
-//   - departmentId
-//   - projectId
-//   - noCreationMode
-func (_e *IPolicyExternalClient_Expecter) GetDistributedPolicy(ctx interface{}, scope interface{}, clusterId interface{}, departmentId interface{}, projectId interface{}, noCreationMode interface{}) *IPolicyExternalClient_GetDistributedPolicy_Call {
+//   - ctx context.Context
+//   - scope string
+//   - clusterId *string
+//   - departmentId *string
+//   - projectId *string
+//   - noCreationMode bool
+func (_e *IPolicyExternalClient_Expecter) GetDistributedPolicy(ctx any, scope any, clusterId any, departmentId any, projectId any, noCreationMode any) *IPolicyExternalClient_GetDistributedPolicy_Call {
 	return &IPolicyExternalClient_GetDistributedPolicy_Call{Call: _e.mock.On("GetDistributedPolicy", ctx, scope, clusterId, departmentId, projectId, noCreationMode)}
 }
 
 func (_c *IPolicyExternalClient_GetDistributedPolicy_Call) Run(run func(ctx context.Context, scope string, clusterId *string, departmentId *string, projectId *string, noCreationMode bool)) *IPolicyExternalClient_GetDistributedPolicy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string), args[4].(*string), args[5].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		var arg3 *string
+		if args[3] != nil {
+			arg3 = args[3].(*string)
+		}
+		var arg4 *string
+		if args[4] != nil {
+			arg4 = args[4].(*string)
+		}
+		var arg5 bool
+		if args[5] != nil {
+			arg5 = args[5].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+		)
 	})
 	return _c
 }
@@ -280,19 +367,50 @@ type IPolicyExternalClient_GetInferencePolicy_Call struct {
 }
 
 // GetInferencePolicy is a helper method to define mock.On call
-//   - ctx
-//   - scope
-//   - clusterId
-//   - departmentId
-//   - projectId
-//   - noCreationMode
-func (_e *IPolicyExternalClient_Expecter) GetInferencePolicy(ctx interface{}, scope interface{}, clusterId interface{}, departmentId interface{}, projectId interface{}, noCreationMode interface{}) *IPolicyExternalClient_GetInferencePolicy_Call {
+//   - ctx context.Context
+//   - scope string
+//   - clusterId *string
+//   - departmentId *string
+//   - projectId *string
+//   - noCreationMode bool
+func (_e *IPolicyExternalClient_Expecter) GetInferencePolicy(ctx any, scope any, clusterId any, departmentId any, projectId any, noCreationMode any) *IPolicyExternalClient_GetInferencePolicy_Call {
 	return &IPolicyExternalClient_GetInferencePolicy_Call{Call: _e.mock.On("GetInferencePolicy", ctx, scope, clusterId, departmentId, projectId, noCreationMode)}
 }
 
 func (_c *IPolicyExternalClient_GetInferencePolicy_Call) Run(run func(ctx context.Context, scope string, clusterId *string, departmentId *string, projectId *string, noCreationMode bool)) *IPolicyExternalClient_GetInferencePolicy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string), args[4].(*string), args[5].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		var arg3 *string
+		if args[3] != nil {
+			arg3 = args[3].(*string)
+		}
+		var arg4 *string
+		if args[4] != nil {
+			arg4 = args[4].(*string)
+		}
+		var arg5 bool
+		if args[5] != nil {
+			arg5 = args[5].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+		)
 	})
 	return _c
 }
@@ -349,19 +467,50 @@ type IPolicyExternalClient_GetNimServicePolicy_Call struct {
 }
 
 // GetNimServicePolicy is a helper method to define mock.On call
-//   - ctx
-//   - scope
-//   - clusterId
-//   - departmentId
-//   - projectId
-//   - noCreationMode
-func (_e *IPolicyExternalClient_Expecter) GetNimServicePolicy(ctx interface{}, scope interface{}, clusterId interface{}, departmentId interface{}, projectId interface{}, noCreationMode interface{}) *IPolicyExternalClient_GetNimServicePolicy_Call {
+//   - ctx context.Context
+//   - scope string
+//   - clusterId *string
+//   - departmentId *string
+//   - projectId *string
+//   - noCreationMode bool
+func (_e *IPolicyExternalClient_Expecter) GetNimServicePolicy(ctx any, scope any, clusterId any, departmentId any, projectId any, noCreationMode any) *IPolicyExternalClient_GetNimServicePolicy_Call {
 	return &IPolicyExternalClient_GetNimServicePolicy_Call{Call: _e.mock.On("GetNimServicePolicy", ctx, scope, clusterId, departmentId, projectId, noCreationMode)}
 }
 
 func (_c *IPolicyExternalClient_GetNimServicePolicy_Call) Run(run func(ctx context.Context, scope string, clusterId *string, departmentId *string, projectId *string, noCreationMode bool)) *IPolicyExternalClient_GetNimServicePolicy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string), args[4].(*string), args[5].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		var arg3 *string
+		if args[3] != nil {
+			arg3 = args[3].(*string)
+		}
+		var arg4 *string
+		if args[4] != nil {
+			arg4 = args[4].(*string)
+		}
+		var arg5 bool
+		if args[5] != nil {
+			arg5 = args[5].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+		)
 	})
 	return _c
 }
@@ -418,19 +567,50 @@ type IPolicyExternalClient_GetTrainingPolicy_Call struct {
 }
 
 // GetTrainingPolicy is a helper method to define mock.On call
-//   - ctx
-//   - scope
-//   - clusterId
-//   - departmentId
-//   - projectId
-//   - noCreationMode
-func (_e *IPolicyExternalClient_Expecter) GetTrainingPolicy(ctx interface{}, scope interface{}, clusterId interface{}, departmentId interface{}, projectId interface{}, noCreationMode interface{}) *IPolicyExternalClient_GetTrainingPolicy_Call {
+//   - ctx context.Context
+//   - scope string
+//   - clusterId *string
+//   - departmentId *string
+//   - projectId *string
+//   - noCreationMode bool
+func (_e *IPolicyExternalClient_Expecter) GetTrainingPolicy(ctx any, scope any, clusterId any, departmentId any, projectId any, noCreationMode any) *IPolicyExternalClient_GetTrainingPolicy_Call {
 	return &IPolicyExternalClient_GetTrainingPolicy_Call{Call: _e.mock.On("GetTrainingPolicy", ctx, scope, clusterId, departmentId, projectId, noCreationMode)}
 }
 
 func (_c *IPolicyExternalClient_GetTrainingPolicy_Call) Run(run func(ctx context.Context, scope string, clusterId *string, departmentId *string, projectId *string, noCreationMode bool)) *IPolicyExternalClient_GetTrainingPolicy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string), args[4].(*string), args[5].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		var arg3 *string
+		if args[3] != nil {
+			arg3 = args[3].(*string)
+		}
+		var arg4 *string
+		if args[4] != nil {
+			arg4 = args[4].(*string)
+		}
+		var arg5 bool
+		if args[5] != nil {
+			arg5 = args[5].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+		)
 	})
 	return _c
 }
@@ -487,19 +667,50 @@ type IPolicyExternalClient_GetWorkspacePolicy_Call struct {
 }
 
 // GetWorkspacePolicy is a helper method to define mock.On call
-//   - ctx
-//   - scope
-//   - clusterId
-//   - departmentId
-//   - projectId
-//   - noCreationMode
-func (_e *IPolicyExternalClient_Expecter) GetWorkspacePolicy(ctx interface{}, scope interface{}, clusterId interface{}, departmentId interface{}, projectId interface{}, noCreationMode interface{}) *IPolicyExternalClient_GetWorkspacePolicy_Call {
+//   - ctx context.Context
+//   - scope string
+//   - clusterId *string
+//   - departmentId *string
+//   - projectId *string
+//   - noCreationMode bool
+func (_e *IPolicyExternalClient_Expecter) GetWorkspacePolicy(ctx any, scope any, clusterId any, departmentId any, projectId any, noCreationMode any) *IPolicyExternalClient_GetWorkspacePolicy_Call {
 	return &IPolicyExternalClient_GetWorkspacePolicy_Call{Call: _e.mock.On("GetWorkspacePolicy", ctx, scope, clusterId, departmentId, projectId, noCreationMode)}
 }
 
 func (_c *IPolicyExternalClient_GetWorkspacePolicy_Call) Run(run func(ctx context.Context, scope string, clusterId *string, departmentId *string, projectId *string, noCreationMode bool)) *IPolicyExternalClient_GetWorkspacePolicy_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(*string), args[3].(*string), args[4].(*string), args[5].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		var arg3 *string
+		if args[3] != nil {
+			arg3 = args[3].(*string)
+		}
+		var arg4 *string
+		if args[4] != nil {
+			arg4 = args[4].(*string)
+		}
+		var arg5 bool
+		if args[5] != nil {
+			arg5 = args[5].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+			arg5,
+		)
 	})
 	return _c
 }
@@ -556,17 +767,38 @@ type IPolicyExternalClient_SyncDistributedPolicies_Call struct {
 }
 
 // SyncDistributedPolicies is a helper method to define mock.On call
-//   - ctx
-//   - clusterId
-//   - after
-//   - syncReport
-func (_e *IPolicyExternalClient_Expecter) SyncDistributedPolicies(ctx interface{}, clusterId interface{}, after interface{}, syncReport interface{}) *IPolicyExternalClient_SyncDistributedPolicies_Call {
+//   - ctx context.Context
+//   - clusterId string
+//   - after int64
+//   - syncReport *openapi.ClusterSyncReport
+func (_e *IPolicyExternalClient_Expecter) SyncDistributedPolicies(ctx any, clusterId any, after any, syncReport any) *IPolicyExternalClient_SyncDistributedPolicies_Call {
 	return &IPolicyExternalClient_SyncDistributedPolicies_Call{Call: _e.mock.On("SyncDistributedPolicies", ctx, clusterId, after, syncReport)}
 }
 
 func (_c *IPolicyExternalClient_SyncDistributedPolicies_Call) Run(run func(ctx context.Context, clusterId string, after int64, syncReport *openapi.ClusterSyncReport)) *IPolicyExternalClient_SyncDistributedPolicies_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(int64), args[3].(*openapi.ClusterSyncReport))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 *openapi.ClusterSyncReport
+		if args[3] != nil {
+			arg3 = args[3].(*openapi.ClusterSyncReport)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -623,17 +855,38 @@ type IPolicyExternalClient_SyncInferencePolicies_Call struct {
 }
 
 // SyncInferencePolicies is a helper method to define mock.On call
-//   - ctx
-//   - clusterId
-//   - after
-//   - syncReport
-func (_e *IPolicyExternalClient_Expecter) SyncInferencePolicies(ctx interface{}, clusterId interface{}, after interface{}, syncReport interface{}) *IPolicyExternalClient_SyncInferencePolicies_Call {
+//   - ctx context.Context
+//   - clusterId string
+//   - after int64
+//   - syncReport *openapi.ClusterSyncReport
+func (_e *IPolicyExternalClient_Expecter) SyncInferencePolicies(ctx any, clusterId any, after any, syncReport any) *IPolicyExternalClient_SyncInferencePolicies_Call {
 	return &IPolicyExternalClient_SyncInferencePolicies_Call{Call: _e.mock.On("SyncInferencePolicies", ctx, clusterId, after, syncReport)}
 }
 
 func (_c *IPolicyExternalClient_SyncInferencePolicies_Call) Run(run func(ctx context.Context, clusterId string, after int64, syncReport *openapi.ClusterSyncReport)) *IPolicyExternalClient_SyncInferencePolicies_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(int64), args[3].(*openapi.ClusterSyncReport))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 *openapi.ClusterSyncReport
+		if args[3] != nil {
+			arg3 = args[3].(*openapi.ClusterSyncReport)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -690,17 +943,38 @@ type IPolicyExternalClient_SyncTrainingPolicies_Call struct {
 }
 
 // SyncTrainingPolicies is a helper method to define mock.On call
-//   - ctx
-//   - clusterId
-//   - after
-//   - syncReport
-func (_e *IPolicyExternalClient_Expecter) SyncTrainingPolicies(ctx interface{}, clusterId interface{}, after interface{}, syncReport interface{}) *IPolicyExternalClient_SyncTrainingPolicies_Call {
+//   - ctx context.Context
+//   - clusterId string
+//   - after int64
+//   - syncReport *openapi.ClusterSyncReport
+func (_e *IPolicyExternalClient_Expecter) SyncTrainingPolicies(ctx any, clusterId any, after any, syncReport any) *IPolicyExternalClient_SyncTrainingPolicies_Call {
 	return &IPolicyExternalClient_SyncTrainingPolicies_Call{Call: _e.mock.On("SyncTrainingPolicies", ctx, clusterId, after, syncReport)}
 }
 
 func (_c *IPolicyExternalClient_SyncTrainingPolicies_Call) Run(run func(ctx context.Context, clusterId string, after int64, syncReport *openapi.ClusterSyncReport)) *IPolicyExternalClient_SyncTrainingPolicies_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(int64), args[3].(*openapi.ClusterSyncReport))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 *openapi.ClusterSyncReport
+		if args[3] != nil {
+			arg3 = args[3].(*openapi.ClusterSyncReport)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -757,17 +1031,38 @@ type IPolicyExternalClient_SyncWorkspacePolicies_Call struct {
 }
 
 // SyncWorkspacePolicies is a helper method to define mock.On call
-//   - ctx
-//   - clusterId
-//   - after
-//   - syncReport
-func (_e *IPolicyExternalClient_Expecter) SyncWorkspacePolicies(ctx interface{}, clusterId interface{}, after interface{}, syncReport interface{}) *IPolicyExternalClient_SyncWorkspacePolicies_Call {
+//   - ctx context.Context
+//   - clusterId string
+//   - after int64
+//   - syncReport *openapi.ClusterSyncReport
+func (_e *IPolicyExternalClient_Expecter) SyncWorkspacePolicies(ctx any, clusterId any, after any, syncReport any) *IPolicyExternalClient_SyncWorkspacePolicies_Call {
 	return &IPolicyExternalClient_SyncWorkspacePolicies_Call{Call: _e.mock.On("SyncWorkspacePolicies", ctx, clusterId, after, syncReport)}
 }
 
 func (_c *IPolicyExternalClient_SyncWorkspacePolicies_Call) Run(run func(ctx context.Context, clusterId string, after int64, syncReport *openapi.ClusterSyncReport)) *IPolicyExternalClient_SyncWorkspacePolicies_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(int64), args[3].(*openapi.ClusterSyncReport))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 int64
+		if args[2] != nil {
+			arg2 = args[2].(int64)
+		}
+		var arg3 *openapi.ClusterSyncReport
+		if args[3] != nil {
+			arg3 = args[3].(*openapi.ClusterSyncReport)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -816,15 +1111,26 @@ type IPolicyExternalClient_UpdateSyncStatusDistributed_Call struct {
 }
 
 // UpdateSyncStatusDistributed is a helper method to define mock.On call
-//   - ctx
-//   - syncStatus
-func (_e *IPolicyExternalClient_Expecter) UpdateSyncStatusDistributed(ctx interface{}, syncStatus interface{}) *IPolicyExternalClient_UpdateSyncStatusDistributed_Call {
+//   - ctx context.Context
+//   - syncStatus openapi.SyncStatusUpdate
+func (_e *IPolicyExternalClient_Expecter) UpdateSyncStatusDistributed(ctx any, syncStatus any) *IPolicyExternalClient_UpdateSyncStatusDistributed_Call {
 	return &IPolicyExternalClient_UpdateSyncStatusDistributed_Call{Call: _e.mock.On("UpdateSyncStatusDistributed", ctx, syncStatus)}
 }
 
 func (_c *IPolicyExternalClient_UpdateSyncStatusDistributed_Call) Run(run func(ctx context.Context, syncStatus openapi.SyncStatusUpdate)) *IPolicyExternalClient_UpdateSyncStatusDistributed_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(openapi.SyncStatusUpdate))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.SyncStatusUpdate
+		if args[1] != nil {
+			arg1 = args[1].(openapi.SyncStatusUpdate)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -873,15 +1179,26 @@ type IPolicyExternalClient_UpdateSyncStatusInference_Call struct {
 }
 
 // UpdateSyncStatusInference is a helper method to define mock.On call
-//   - ctx
-//   - syncStatus
-func (_e *IPolicyExternalClient_Expecter) UpdateSyncStatusInference(ctx interface{}, syncStatus interface{}) *IPolicyExternalClient_UpdateSyncStatusInference_Call {
+//   - ctx context.Context
+//   - syncStatus openapi.SyncStatusUpdate
+func (_e *IPolicyExternalClient_Expecter) UpdateSyncStatusInference(ctx any, syncStatus any) *IPolicyExternalClient_UpdateSyncStatusInference_Call {
 	return &IPolicyExternalClient_UpdateSyncStatusInference_Call{Call: _e.mock.On("UpdateSyncStatusInference", ctx, syncStatus)}
 }
 
 func (_c *IPolicyExternalClient_UpdateSyncStatusInference_Call) Run(run func(ctx context.Context, syncStatus openapi.SyncStatusUpdate)) *IPolicyExternalClient_UpdateSyncStatusInference_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(openapi.SyncStatusUpdate))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.SyncStatusUpdate
+		if args[1] != nil {
+			arg1 = args[1].(openapi.SyncStatusUpdate)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -930,15 +1247,26 @@ type IPolicyExternalClient_UpdateSyncStatusTraining_Call struct {
 }
 
 // UpdateSyncStatusTraining is a helper method to define mock.On call
-//   - ctx
-//   - syncStatus
-func (_e *IPolicyExternalClient_Expecter) UpdateSyncStatusTraining(ctx interface{}, syncStatus interface{}) *IPolicyExternalClient_UpdateSyncStatusTraining_Call {
+//   - ctx context.Context
+//   - syncStatus openapi.SyncStatusUpdate
+func (_e *IPolicyExternalClient_Expecter) UpdateSyncStatusTraining(ctx any, syncStatus any) *IPolicyExternalClient_UpdateSyncStatusTraining_Call {
 	return &IPolicyExternalClient_UpdateSyncStatusTraining_Call{Call: _e.mock.On("UpdateSyncStatusTraining", ctx, syncStatus)}
 }
 
 func (_c *IPolicyExternalClient_UpdateSyncStatusTraining_Call) Run(run func(ctx context.Context, syncStatus openapi.SyncStatusUpdate)) *IPolicyExternalClient_UpdateSyncStatusTraining_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(openapi.SyncStatusUpdate))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.SyncStatusUpdate
+		if args[1] != nil {
+			arg1 = args[1].(openapi.SyncStatusUpdate)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -987,15 +1315,26 @@ type IPolicyExternalClient_UpdateSyncStatusWorkspace_Call struct {
 }
 
 // UpdateSyncStatusWorkspace is a helper method to define mock.On call
-//   - ctx
-//   - syncStatus
-func (_e *IPolicyExternalClient_Expecter) UpdateSyncStatusWorkspace(ctx interface{}, syncStatus interface{}) *IPolicyExternalClient_UpdateSyncStatusWorkspace_Call {
+//   - ctx context.Context
+//   - syncStatus openapi.SyncStatusUpdate
+func (_e *IPolicyExternalClient_Expecter) UpdateSyncStatusWorkspace(ctx any, syncStatus any) *IPolicyExternalClient_UpdateSyncStatusWorkspace_Call {
 	return &IPolicyExternalClient_UpdateSyncStatusWorkspace_Call{Call: _e.mock.On("UpdateSyncStatusWorkspace", ctx, syncStatus)}
 }
 
 func (_c *IPolicyExternalClient_UpdateSyncStatusWorkspace_Call) Run(run func(ctx context.Context, syncStatus openapi.SyncStatusUpdate)) *IPolicyExternalClient_UpdateSyncStatusWorkspace_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(openapi.SyncStatusUpdate))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 openapi.SyncStatusUpdate
+		if args[1] != nil {
+			arg1 = args[1].(openapi.SyncStatusUpdate)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

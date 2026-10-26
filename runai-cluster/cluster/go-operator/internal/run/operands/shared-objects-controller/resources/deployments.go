@@ -113,8 +113,8 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 					{
 						Name:  "GODEBUG",
 						Value: outils.FipsGodebugValue(d.runaiConfig, "off"),
-          },
-          {
+					},
+					{
 						Name:  "CREATE_SERVICE_MONITORS",
 						Value: strconv.FormatBool(*projectControllerConfig.CreateServiceMonitors),
 					},
@@ -129,6 +129,10 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 					{
 						Name:  "CLUSTER_WIDE_CONFIG_MAPS",
 						Value: strconv.FormatBool(*projectControllerConfig.ClusterWideConfigMap),
+					},
+					{
+						Name:  "CLUSTER_WIDE_RESOURCE_CLAIM_TEMPLATES",
+						Value: strconv.FormatBool(*projectControllerConfig.ClusterWideResourceClaimTemplate),
 					},
 				},
 				Args: func() []string {

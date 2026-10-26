@@ -6,7 +6,7 @@
 package orgunit
 
 import (
-	org_unit_service_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client"
+	org_unit_service_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
 )
 
 type FactoryInterface interface {

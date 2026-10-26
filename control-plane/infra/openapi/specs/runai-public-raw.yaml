@@ -24,20 +24,16 @@ info:
     access rules.
 
     To assign access rules to the service account, see [Create access
-    rules](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/accessrules#create-or-delete-rules).
+    rules](/run-ai/self-hosted/documentation/platform-management/authentication/access-rules).
 
     Make sure you assign the correct rules to your service account. Use the
-    [Roles](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/roles)
+    [Roles](/run-ai/self-hosted/documentation/platform-management/authentication/roles)
     to assign the correct access rules.
 
 
     To get your access token, follow the instructions in [Request a
-    token](https://run-ai-docs.nvidia.com/self-hosted/latest/reference/api/rest-auth/#request-an-api-token).
+    token](/run-ai/self-hosted/reference/rest-api/getting-started/how-to-authenticate-to-the-api#request-an-api-token).
   title: 'NVIDIA Run:ai'
-  x-logo:
-    url: ./runai-logo-api.png
-    altText: 'NVIDIA Run:ai'
-    href: 'https://run.ai'
   license:
     name: 'NVIDIA Run:ai'
     url: >-
@@ -47,471 +43,64 @@ servers:
 security:
   - bearerAuth: []
 tags:
-  - name: Organizations
-  - name: Authentication and Authorization
-  - name: Audit
-  - name: Datavolumes
-  - name: Workloads
-  - name: Workload assets
-  - name: Policies
-  - name: Notifications
-  - name: AI Applications
   - name: Clusters
-    x-parent: Organizations
-    description: >-
-      Use these endpoints to create, manage and delete NVIDIA Run:ai Kubernetes
-      clusters.
   - name: Departments
-    x-parent: Organizations
-    description: >
-      Departments, in the hierarchy of resource allocation, are above Projects.
-      A Department can contain multiple Projects, and has its own quotas. 
-
-      A Department's quota supersedes the total of the Project quotas in the
-      Department, so tt is recommended 
-
-      that a Department's quota be the total, or more than of all the Project
-      quotas in the Department. 
-
-      For further information see, [Working with
-      Departments](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/departments).
   - name: Reports
-    x-parent: Organizations
   - name: NodePools
-    x-parent: Organizations
-    description: >
-      Node pools assist in managing heterogeneous resources effectively. 
-
-      A node pool is a set of nodes grouped into a bucket of resources using a
-      predefined (for example, GPU-Type) or 
-
-      administrator-defined label (for example, key & value). 
-
-      For more information, see [Node
-      Pools](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/resources/node-pools/#introduction).
   - name: Nodes
-    x-parent: Organizations
-    description: >
-      Nodes are worker machines in Kubernetes and may be either a virtual or a
-      physical machine, depending on the cluster. 
-
-      Each Node is managed by the NVIDIA Run:ai control plane. For more
-      information, see
-      [Nodes](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/resources/nodes).
   - name: Projects
-    x-parent: Organizations
-    description: >
-      Projects implement resource allocation policies and create segregation
-      between 
-
-      different initiatives. It can represent a team, an individual, or an
-      initiative that 
-
-      shares resources or has a specific resources budget (quota). 
-
-      See
-      [Projects](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects) 
-
-      for more information.
   - name: Logo
-    x-parent: Organizations
-    description: Use to manage tenant logo files.
   - name: Researcher Command Line Interface
-    x-parent: Organizations
   - name: Researcher Command Line Interface Deprecated
-    x-parent: Organizations
   - name: Network Topologies
-    x-parent: Organizations
-    description: >-
-      The Network Topologies API enables administrators to reflect the
-      hierarchical network topology connectivity of nodes in a data center, such
-      as racks, blocks, and other organizational units, to improve pod
-      scheduling decisions for communication-intensive AI/ML workloads. To
-      support topology-aware scheduling, this API allows administrators to
-      define a multi-level network topology element using ordered Kubernetes
-      node labels that represent the network connectivity of nodes in the data
-      center. Nodes are labeled with the same key-value pairs labels that
-      represent their location in the data center network. These labels are used
-      by the NVIDIA Run:ai Scheduler to prefer scheduling pods on nodes that are
-      "closer" to each other, minimizing communication overhead and optimizing
-      workload performance.
   - name: Access Keys
-    x-parent: Authentication and Authorization
-    description: >
-      Access Keys allow users to authenticate and interact programmatically with
-      the NVIDIA Run:ai API.
-
-      Each access key consists of a client ID and secret that can be used to
-      obtain authentication tokens.
-
-      Access keys can be managed by individual users for their own use, or by
-      administrators for organization-wide access.
-
-      For more information, see [Access
-      control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).
   - name: Access rules
-    x-parent: Authentication and Authorization
-    description: >
-      Access rules provide user authorization to system resources and entities.
-
-      It is managed using Role-based access control (RBAC) which is a
-      policy-neutral 
-
-      access control mechanism defined around roles and privileges. 
-
-      The components of RBAC make it simple to manage access to system resources
-      and entities.
-
-      For more information, see [Access
-      control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).
   - name: Service Accounts
-    x-parent: Authentication and Authorization
-    description: >
-      Service accounts enable programmatic access to the NVIDIA Run:ai API,
-      allowing applications or automated systems to authenticate and interact
-      securely. 
-
-      Each service account is associated with an access key which includes a
-      client ID and secret used to generate access token. 
-
-      Service accounts can be managed organization-wide or with a defined scope.
   - name: Roles
-    x-parent: Authentication and Authorization
-    description: >
-      The Roles API allows administrators to define and manage roles within the
-      NVIDIA Run:ai platform. 
-
-      A role represents a collection of permission sets that determine what
-      actions can be performed across NVIDIA Run:ai resources.
-
-      NVIDIA Run:ai provides a list of predefined roles that cover common
-      operational needs, such as managing workloads, projects, or data and
-      storage. 
-
-      Administrators can also use this API to create custom roles by combining
-      specific permission sets to match their organization's access model.
   - name: Tokens
-    x-parent: Authentication and Authorization
-    description: |
-      Use tokens to facilitate authentication to the NVIDIA Run:ai API. 
-      The API server must be configured to use the NVIDIA Run:ai identity 
-      service to validate authentication tokens.
   - name: Users
-    x-parent: Authentication and Authorization
   - name: Idps
-    x-parent: Authentication and Authorization
   - name: Me
-    x-parent: Authentication and Authorization
-    description: >
-      "Me" returns the authenticated user's permissions within the system. 
-
-      It provides a comprehensive view of access rules (roles, subjects and
-      scope) assigned to the current user.
-
-      For more information see [Access
-      control](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/authentication/overview/#role-based-access-control).
   - name: Events
-    x-parent: Workloads
-    description: >-
-      Workload events that occurred while the workload was running. Use to
-      diagnose issue around workload scheduling.
   - name: Pods
-    x-parent: Workloads
-    description: 'Retrieve data about workload pods from your NVIDIA Run:ai platform.'
+  - name: Workloads
   - name: Workloads V2
-    x-parent: Workloads
-    description: >
-      The Workloads V2 API allows you to create, retrieve, and delete workloads
-      that originate from third-party ML frameworks, tools, or the broader
-      Kubernetes ecosystem. These workloads are registered in the platform
-      through the Workload Types API, some are already registered in NVIDIA
-      Run:ai, while others can be added by administrators.
-
-      Each submission combines the user's Kubernetes manifest with NVIDIA Run:ai
-      scheduling metadata, enabling consistent orchestration, monitoring, and
-      governance. See [Extending workload
-      support](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/workload-types/extending-workload-support)
-      for more details.
   - name: NVIDIA NIM
-    x-parent: Workloads
-    description: >
-      The NVIDIA NIM API provides endpoints to create and manage workloads that
-      deploy NVIDIA Inference Microservices (NIM) through the NIM Operator.
-      These workloads package optimized NVIDIA model servers and run as managed
-      services on the NVIDIA Run:ai platform.
-
-      Each request includes NVIDIA Run:ai scheduling metadata (for example,
-      project, priority, and category) and a NIM service specification that
-      defines the container image, compute resources, environment variables,
-      storage, and networking configuration. Once submitted, NVIDIA Run:ai
-      handles scheduling, orchestration, and lifecycle management of the NIM
-      service to ensure reliable and efficient model serving.
   - name: Workspaces
-    x-parent: Workloads
-    description: >
-      A Workspace is a simplified tool for researchers to conduct experiments,
-      build AI models, access standard MLOps tools, and collaborate with their
-      peers.
-
-      Workspaces abstract complex concepts related to running containerized
-      workloads in a Kubernetes environment and are built from predefined setups
-      that include
-
-      networking, storage, secrets and other resources. All the setup and
-      configurations for research, including container 
-
-      images, data sets, resource requests, as well as all tools are included.
-      for the research, in a single place. 
-
-      It answers the research needs while ensuring infrastructure owners keep
-      control and allocation efficiency.
-
-      A workspace is associated with a specific NVIDIA Run:ai project and you
-      can have multiple workspaces under a specific project. 
-
-      For more information, see
-      [Workspaces](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/using-workspaces/running-workspace).
   - name: Trainings
-    x-parent: Workloads
-    description: >
-      Trainings are dedicated workloads that are specifically used for training
-      models. 
-
-      They are by design preemptible workloads because they are used in
-      unattended sessions where the  
-
-      scientists and researchers do not need to be present. These workloads are
-      allowed to utilize 
-
-      resources over the project's quota.      
   - name: Inferences
-    x-parent: Workloads
-    description: >-
-      Inference workloads deploy trained models into a production environment to
-      generate predictions from live data. These workloads are prioritized over
-      Trainings and Workspaces during scheduling. NVIDIA Run:ai Inference
-      workloads support auto-scaling to maintain service-level agreements (SLAs)
-      by dynamically adjusting resources as demand changes.
   - name: Revisions
-    x-parent: Workloads
-    description: >-
-      Revisions are associated with an inference workload and represent a
-      snapshot of its configuration. A revision is created on each change to the
-      inference workload.
   - name: Distributed
-    x-parent: Workloads
-    description: >
-      Distributed Training, is the ability to split the training of a model
-      among multiple processors. 
-
-      It is often a necessity when multi-GPU training no longer applies; 
-
-      typically when you require more GPUs than exist on a single node. 
-
-      Each such split is a pod (see definition above). NVIDIA Run:ai spawns an
-      additional launcher process that manages and 
-
-      coordinates the other worker pods. For more information, see [Distributed
-      training](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/using-training/distributed-training/distributed-training-models).
   - name: Workloads batch
-    x-parent: Workloads
   - name: Workload properties
-    x-parent: Workloads
-    description: >
-      Workload properties define the behavioral and scheduling characteristics
-      of a workload submitted to the NVIDIA Run:ai platform. These properties
-      such as type, category, and priority determine how workloads are
-      classified, monitored, and scheduled.
-
-      - Type - Defines the functional behavior of a workload, such as training
-      or inference, and serves as the foundation for how it is classified within
-      the platform. Each workload type includes a default category (used for
-      monitoring) and a default priority (used for scheduling within a project).
-
-      - Category - Represents the role or purpose of a workload, such as  Build,
-      Train, Deploy. Each workload type is assigned a default category to ensure
-      consistent classification across the platform for monitoring purposes. See
-      [Monitor workloads by
-      category](https://run-ai-docs.nvidia.com/saas/platform-management/monitor-performance/workload-categories).
-
-      - Priority - Determines the scheduling order of workloads within a project
-      and whether a workload can be preempted. Higher-priority workloads are
-      scheduled first and may become non-preemptible, preventing interruption by
-      lower-priority workloads. See [Workload priority
-      control](https://run-ai-docs.nvidia.com/saas/platform-management/runai-scheduler/scheduling/workload-priority-control).
   - name: Workload templates
-    x-parent: Workloads
-    description: >
-      This set of endpoints manages workload templates used to define reusable
-      workload configurations across various workload types in the NVIDIA Run:ai
-      platform. 
-
-      Templates help standardize workload definitions for consistent submission
-      and resource usage across projects and users.
   - name: Distributed Inferences
-    x-parent: Workloads
-    description: >
-      Distributed inference enables running inference workloads across multiple
-      pods, typically to scale model serving beyond a single container or node.
-      This approach is useful when a single instance cannot meet resource
-      requirements.NVIDIA Run:ai supports this model using Leader Worker Set
-      (LWS). 
-
-      Each pod plays a specific role, either as a leader or worker, and together
-      they form a coordinated service. NVIDIA Run:ai manages the orchestration
-      and configuration of these pods to ensure efficient and scalable inference
-      execution
   - name: Permissions
-    x-parent: Authentication and Authorization
-    description: >
-      Permissions define the actions that users can perform on specific
-      resources within the NVIDIA Run:ai platform. 
-
-      Each permission consists of a resource type and an allowed action. 
-
-      The Permission Sets API provides a catalog of all available permission
-      sets in the NVIDIA Run:ai platform. 
-
-      Each permission set is a predefined collection of permissions that
-      represent the permissions required for a role to perform specific
-      operations. 
-
-      Permission sets serve as the building blocks for roles and are used in
-      both NVIDIA Run:ai predefined roles and custom roles defined through the
-      [Roles API](#tag/Roles).
   - name: Settings
-    x-parent: Organizations
-    description: |
-      View and manage configuration settings for your organization.
   - name: Org unit
-    x-parent: Authentication and Authorization
-    description: Org unit.
   - name: AuditLogs
-    x-parent: Audit
-    description: >-
-      The audit log provides audit trail information for user activity, changes
-      to business objects and other important information. For more information,
-      see [Audit
-      log](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/procedures/event-history).
+  - name: Datavolumes
   - name: Compute
-    x-parent: Workload assets
-    description: >
-      A compute resource is a building block that represents compute resources
-      such as GPUs, CPU cores, and CPU memory.
-
-      The compute resources may consist of multiple physical resources, for
-      example, 0.5 GPU, 8 cores and 200 Megabytes of CPU memory. 
-
-      A compute resource is available to a scope and and all of the
-      organizational units within that scope. 
-
-
-      For more information, see [Compute
-      resource](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/assets/compute-resources).
   - name: Credentials
-    x-parent: Workload assets
-    description: >-
-      Credentials are used to unlock protected resources such as applications,
-      containers, and other assets. For more information, see
-      [Credentials](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/assets/credentials).
   - name: Datasources
-    x-parent: Workload assets
-    description: Data source assets.
   - name: Environment
-    x-parent: Workload assets
-    description: >
-      An environment resource designates the container image, the image pull
-      policy, working directory, security parameters, and others. 
-
-      It exposes all the necessary tools (open source, 3rd party, or custom
-      tools) along 
-
-      with their connection interfaces including external node port and the
-      container ports.
-
-      You can also specify a standard, distributed, or inference workload
-      architecture for the environment.
-
-      An environment is a mandatory building block for the creation of a
-      workload.
-
-      For more information, see
-      [Environments](https://run-ai-docs.nvidia.com/self-hosted/latest/workloads-in-nvidia-run-ai/assets/environments).
   - name: Git
-    x-parent: Workload assets
-    description: >-
-      Use Git as a data source location for data sets that are relevant to the
-      workload being submitted.
   - name: HostPath
-    x-parent: Workload assets
-    description: >-
-      Use a HostPath as a data source location for data sets that are relevant
-      to the workload being submitted.
   - name: NFS
-    x-parent: Workload assets
-    description: >-
-      Use NFS as a data source location for data sets that are relevant to the
-      workload being submitted.
   - name: PVC
-    x-parent: Workload assets
-    description: >-
-      Use a PVC as a data source location for data sets that are relevant to the
-      workload being submitted.
   - name: Registry
-    x-parent: Workload assets
-    description: >-
-      Use an images registry to enable the listting of repositories and tags
-      that can be used as a data source location for data sets that are relevant
-      to the workload being submitted.
   - name: S3
-    x-parent: Workload assets
-    description: >-
-      Use an S3 simple storage service as a data source location for data sets
-      that are relevant to the workload being submitted.
   - name: ConfigMap
-    x-parent: Workload assets
-    description: >-
-      Use a ConfigMap as a data source location for data sets that are relevant
-      to the workload being submitted.
   - name: Secret
-    x-parent: Workload assets
-    description: >-
-      Use a credentials as a data source location for data sets that are
-      relevant to the workload being submitted.
   - name: Template
-    x-parent: Workload assets
-    description: >-
-      Templates are a pre-set configuration used to quickly configure and submit
-      workloads using existing assets.
   - name: Policy
-    x-parent: Policies
-    description: >
-      Policies allow administrators to impose restrictions and set default
-      values for researcher workloads. 
-
-      Restrictions and default values can be placed on CPUs, GPUs, and other
-      resources or entities. 
-
-      For more information, see
-      [Policies](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/policies/#introduction).
   - name: Notification State
-    x-parent: Notifications
-    description: Use to manage notification state.
   - name: Notification Types
-    x-parent: Notifications
-    description: Use to get notification types.
   - name: NotificationChannels
-    x-parent: Notifications
-    description: Notification Channels are the medium through which notifications are sent.
   - name: Slack
-    x-parent: Notifications
-    description: Configure Slack notifications for your organization.
   - name: Email
-    x-parent: Notifications
-    description: Configure Email notifications for your organization.
   - name: Subscriptions
-    x-parent: Notifications
-    description: Use to manage notifications subscriptions.
+  - name: AI Applications
   - name: Synchronization
     description: >-
       Internal interface for synchronizing assets between the clusters and the
@@ -3378,6 +2967,38 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/org-unit/projects/count:
+    x-internal: true
+    get:
+      summary: Count internal projects
+      operationId: count_internal_projects
+      x-internal: true
+      x-no-authorization: true
+      x-service: org-unit-service
+      x-test-coverage:
+        - control-plane/org-unit-service/pkg/test/project_api_test.go
+      description: |
+        Internal endpoint to count projects by the given query parameters
+      tags:
+        - Projects
+      parameters:
+        - $ref: '#/components/parameters/ProjectsFilterBy'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /internal/org-unit/names:
     x-internal: true
     get:
@@ -4225,8 +3846,12 @@ paths:
       operationId: patch_department_resources
       x-service: org-unit-service
       description: >-
-        Partial updates to specific items in the list. Should be used for update
-        one or more attributes of an item without modifying the entire resource.
+        Updates the resources of the node pools in the request. Node pools that
+        are not in the request stay unchanged. Each node pool in the request is
+        replaced as a whole. GPU deserved is required for node pools with quota
+        enabled, and other omitted fields are set to their defaults. To change
+        only part of a node pool, for example only its rank, use the node pool
+        resources batch patch.
       x-test-coverage:
         - control-plane/org-unit-service/pkg/test/department_api_test.go
       x-authorize:
@@ -4695,8 +4320,12 @@ paths:
       operationId: patch_project_resources
       x-service: org-unit-service
       description: >-
-        Partial updates to specific items in the list. Should be used for update
-        one or more attributes of an item without modifying the entire resource.
+        Updates the resources of the node pools in the request. Node pools that
+        are not in the request stay unchanged. Each node pool in the request is
+        replaced as a whole. GPU deserved is required for node pools with quota
+        enabled, and other omitted fields are set to their defaults. To change
+        only part of a node pool, for example only its rank, use the node pool
+        resources batch patch.
       x-test-coverage:
         - control-plane/org-unit-service/pkg/test/project_api_test.go
       x-authorize:
@@ -9089,7 +8718,7 @@ paths:
       x-service: assets-service
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-no-authorization: true
       x-internal: true
       tags:
@@ -9126,7 +8755,7 @@ paths:
       x-service: assets-service
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       tags:
         - Inferences
       parameters:
@@ -13677,88 +13306,6 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/authorization/roles:
-    x-scope:
-      - system
-      - tenant
-    get:
-      summary: Get a list of roles.
-      description: >-
-        Use to retrieve a list of roles. This endpoint is deprecated and will be
-        removed in a future release. Use GET /api/v2/authorization/roles
-        instead.
-      operationId: get_roles_v1
-      deprecated: true
-      x-service: authorization
-      x-test-coverage:
-        - >-
-          e2e/src/test/suites/advancedSuite/permissions/applicationAggregatedApi.test.ts
-        - e2e/src/test/suites/advancedSuite/permissions/accessRulesApi.test.ts
-      x-authorize:
-        resource-type: roles
-        action: read
-      tags:
-        - Roles
-      parameters:
-        - $ref: '#/components/parameters/IncludeInternal'
-      responses:
-        '200':
-          description: Executed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RolesV1'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  '/api/v1/authorization/roles/{roleIdPath}':
-    x-scope:
-      - system
-      - tenant
-    get:
-      summary: Get a role by id.
-      description: >-
-        Retrieve the details of a role by id. This endpoint is deprecated and
-        will be removed in a future release. Use GET
-        /api/v2/authorization/roles/{roleIdPath} instead.
-      operationId: get_role_v1
-      deprecated: true
-      x-service: authorization
-      x-test-coverage:
-        - control-plane/authorization/pkg/services/role_api_test.go
-      x-authorize:
-        resource-type: roles
-        action: read
-      tags:
-        - Roles
-      parameters:
-        - $ref: '#/components/parameters/RoleIdPath'
-      responses:
-        '200':
-          description: Executed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RoleV1'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '404':
-          $ref: '#/components/responses/404NotFound'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v2/authorization/roles:
     x-scope:
       - system
@@ -14167,8 +13714,8 @@ paths:
     post:
       summary: Create an access rule.
       description: >-
-        Use to bind a predefined role to a subject (user, group or application)
-        in a scope.
+        Use to bind a predefined role to a subject (user, group or service
+        account) in a scope.
       operationId: create_access_rule
       x-service: authorization
       x-test-coverage:
@@ -15163,9 +14710,6 @@ paths:
               $ref: '#/components/schemas/UpdateAuthorizationSettingByKeyRequest'
             examples:
               enableScopedAuthorization:
-                value:
-                  enabled: false
-              tenantIsCspManaged:
                 value:
                   enabled: false
       responses:
@@ -16256,7 +15800,7 @@ paths:
                   newPassword:
                     type: string
                 example:
-                  tempPassword: Abcd!234
+                  tempPassword: <temporary-password>
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -16530,17 +16074,27 @@ paths:
     x-internal: true
     post:
       summary: Mint a short-lived bootstrap JWT for the installer service account.
-      description: |
+      description: >
         Returns a 2-hour Keycloak access token for the cluster's dedicated
+
         per-cluster installer service account, scoped to the given cluster.
+
         Called by cluster-service when generating the cluster install command.
+
         The token is passed to the Helm hook as
-        --set cluster.bootstrapToken=<token> and used directly as a Bearer token
+
+        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer
+        token
+
         to call GET /clusters/{uuid}/control-plane-config — the installer client
+
         secret never leaves the server.
 
+
         The per-cluster installer client is resolved (and, if needed,
+
         self-healed by creating it) internally, so callers only need to say
+
         which cluster the token is for.
       x-service: identity-manager
       x-test-coverage: not-applicable
@@ -17226,15 +16780,6 @@ paths:
                 value:
                   grantType: external_token_exchange
                   externalToken: access token from external idp
-              app_token (deprecated):
-                x-internal: true
-                value:
-                  grantType: app_token
-                  appID: appID
-                  appSecret: appSecret
-                description: >-
-                  Deprecated - Obtain the appID and the appSecret using
-                  applications or access keys endpoints
       responses:
         '200':
           description: Executed successfully.
@@ -17766,44 +17311,6 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /v1/k8s/auth/oauth/apptoken:
-    x-internal: true
-    post:
-      deprecated: true
-      tags:
-        - Tokens
-      x-no-authorization: true
-      summary: get application token
-      x-service: identity-manager
-      x-test-coverage:
-        - src/test/suites/parallel/applicationsV2/applicationsAuth.test.ts
-      description: >
-        Retrieve access token for an application.
-
-        The application token is retrieved from the authorization server.
-
-        This endpoint is deprecated.  Use /api/v1/token with the grantType
-        parameter set to app_token instead, with AppID and appSecret set
-        accordingly to get an application token
-      operationId: app_token
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AppTokenRequest'
-      responses:
-        '200':
-          description: Executed successfully.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AppTokenResponse'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   '/internal/realms/{realm}':
     delete:
       summary: delete realm
@@ -17821,6 +17328,46 @@ paths:
       responses:
         '200':
           description: realm successfully deleted
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  '/api/v1/workloads/{workloadId}/actions':
+    get:
+      summary: Get workload action history.
+      description: >-
+        Returns accepted workload actions. History remains available after a
+        workload is deleted and is removed when the workload is permanently
+        removed from the system.
+      operationId: get_workload_actions_history
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workload_actions_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
+      tags:
+        - WorkloadActions
+      parameters:
+        - $ref: '#/components/parameters/WorkloadId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadActionsResponse'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -17894,6 +17441,38 @@ paths:
           $ref: '#/components/responses/400BadRequest'
         '409':
           $ref: '#/components/responses/409Conflict'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/workloads/actions:
+    post:
+      summary: Store workload actions.
+      description: >-
+        Records workload actions accepted by workloads-manager, using the
+        authenticated request context to identify who performed them and the
+        supplied timestamp to record when they were accepted.
+      operationId: internal_create_workload_actions
+      x-service: workloads
+      x-internal: true
+      x-no-authorization: true
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workload_actions_api_test.go
+      tags:
+        - WorkloadActions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkloadActionsRequest'
+      responses:
+        '204':
+          description: Actions stored successfully.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '412':
+          $ref: '#/components/responses/412PreconditionFailed'
         '500':
           $ref: '#/components/responses/500InternalServerError'
         '503':
@@ -18039,6 +17618,53 @@ paths:
           $ref: '#/components/responses/403Forbidden'
         '404':
           $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/workloads/resource-claim-templates/workloads:
+    post:
+      x-internal: true
+      summary: List the workloads referencing a resource claim template (Internal API).
+      description: >
+        Lists the workloads in the given scope whose pods reference the
+        ResourceClaimTemplate with the given name, with the pods that use it and
+        the ResourceClaim each pod is bound to. Standalone ResourceClaims are
+        never included. Results are limited to the workloads the caller is
+        permitted to read. Used by assets-service to serve the workloads view of
+        a managed resource claim template.
+      operationId: internal_get_resource_claim_template_workloads
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/resource_claims_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: >-
+                #/components/schemas/InternalResourceClaimTemplateWorkloadsRequest
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplateWorkloadsResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
         '500':
           $ref: '#/components/responses/500InternalServerError'
         '503':
@@ -18227,6 +17853,46 @@ paths:
                     items:
                       type: string
                       format: uuid
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/workloads/slim:
+    get:
+      x-internal: true
+      summary: 'List workloads, slim.'
+      description: >
+        Retrieve a list of active workloads with only their identity fields,
+        sorted by id in ascending order.
+
+        Workloads are read from the workloads table directly instead of the
+        workloads view, so newly created workloads are returned immediately.
+      operationId: get_workloads_slim
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workloads_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/WorkloadsSlimFilter'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetWorkloadsSlimResponse'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -18504,6 +18170,7 @@ paths:
         - $ref: '#/components/parameters/TelemetryGroupBy1'
         - $ref: '#/components/parameters/TelemetryType2'
         - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
       responses:
         '200':
           description: Executed successfully.
@@ -18522,6 +18189,58 @@ paths:
           $ref: '#/components/responses/404NotFound'
         '500':
           $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /internal/workloads/telemetry:
+    x-internal: true
+    get:
+      summary: Get the internal workloads telemetry.
+      operationId: get_internal_workloads_telemetry
+      description: >
+        Internal endpoint to retrieve workload data by telemetry type.
+        Optionally filter by specific workload phases.
+
+
+        Telemetry Types:
+
+        - WORKLOADS_COUNT: Count of workloads
+
+        - GPU_ALLOCATION: GPU allocation metrics
+
+        - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current
+        pending time (time since entering Pending phase).
+          For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
+        - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across
+        workloads
+      x-internal: true
+      x-no-authorization: true
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/workloads_api_telemetry_test.go
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/FilterByCluster'
+        - $ref: '#/components/parameters/FilterByNodepoolName'
+        - $ref: '#/components/parameters/FilterByDepartment'
+        - $ref: '#/components/parameters/FilterByProject'
+        - $ref: '#/components/parameters/TelemetryGroupBy1'
+        - $ref: '#/components/parameters/TelemetryType2'
+        - $ref: '#/components/parameters/FilterByPhases'
+        - $ref: '#/components/parameters/TelemetryFilterBy'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TelemetryResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/workloads/podgroups/sync:
@@ -19990,7 +19709,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20027,7 +19746,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/distributed/dinfLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/distributed/dinfLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20136,7 +19855,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -20173,7 +19892,7 @@ paths:
       x-service: workloads
       x-test-coverage:
         - >-
-          e2e/src/test/suites/playwright/parallel/lemur/inference/inferenceLifecycle.test.ts
+          e2e/src/test/suites/playwright/parallel/viper/inference/inferenceLifecycle.test.ts
       x-authorize:
         resource-type: inferences
         action: sync
@@ -22176,6 +21895,48 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  '/api/v1/workloads/{workloadId}/resource-claims':
+    get:
+      summary: Get workload resource claims by workload id.
+      description: >
+        Retrieve the Dynamic Resource Allocation (DRA) claims used by the
+        workload, grouped per pod. Each claim carries the ResourceClaim bound to
+        the pod and, when the claim was generated from a ResourceClaimTemplate,
+        the template it came from. Only pods that reference at least one claim
+        are listed.
+      operationId: get_workload_resource_claims
+      x-service: workloads
+      x-test-coverage:
+        - control-plane/workloads/pkg/services/resource_claims_api_test.go
+      x-authorize:
+        resource-type: workloads
+        action: read
+        resource-id: workloadId
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/WorkloadId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadResourceClaimsResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/workload-categories:
     get:
       summary: List workload categories.
@@ -23025,6 +22786,87 @@ paths:
           $ref: '#/components/responses/401Unauthorized'
         '403':
           $ref: '#/components/responses/403Forbidden'
+  /api/v1/ai-applications/charts/inspect:
+    x-internal: true
+    post:
+      summary: Inspect a Helm chart questions declaration.
+      description: >
+        Download or read the selected chart archive and inspect its root
+        questions.yaml or questions.yml declaration
+
+        in the control plane. Uploaded charts reference an archive already
+        stored by the chart upload API.
+
+        The response contains normalized question metadata and diagnostics; it
+        does not contain the
+
+        complete chart defaults or credential values. Missing or unusable
+        questions declarations return
+
+        a successful response so callers can offer raw YAML configuration.
+        Download, authentication,
+
+        and invalid archive failures return an error and are not reported as
+        absent questions.
+
+        Archives containing both root declaration filenames are rejected as
+        ambiguous.
+      operationId: inspect_application_chart
+      x-service: workloads
+      x-test-coverage:
+        - >-
+          control-plane/workloads/pkg/services/ai_applications_chart_inspection_unit_test.go
+        - >-
+          control-plane/workloads/pkg/services/ai_applications_chart_inspection_http_test.go
+      x-authorize:
+        resource-type: applications
+        action: create
+      tags:
+        - AI Applications
+      requestBody:
+        description: >-
+          Chart source selection and optional saved credential reference, up to
+          64 KiB of JSON.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIApplicationChartInspectionRequest'
+      responses:
+        '200':
+          description: >-
+            Chart inspected, including absent or unusable questions
+            declarations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIApplicationChartInspectionResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '408':
+          description: The chart inspection request was cancelled or exceeded its deadline.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '413':
+          $ref: '#/components/responses/413RequestEntityTooLarge'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          description: >-
+            The upstream chart source is unavailable or inspection capacity is
+            exhausted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   '/api/v1/ai-applications/charts/{chartId}/content':
     x-internal: true
     get:
@@ -28104,6 +27946,12 @@ components:
           example: 'gcr.io/runai/goofys:v0.24.0'
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          type: string
+          nullable: true
+          description: >-
+            The exact S3 image reference that supports goofys --ready-file and
+            --check-ready. Omitted when support is unknown or disabled.
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:
@@ -30049,7 +29897,7 @@ components:
           type: string
           description: |
             Short-lived JWT (2h TTL) for the installer service account.
-            Pass to the Helm hook via --set cluster.bootstrapToken=<token>.
+            Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>.
         clientSecret:
           type: string
           deprecated: true
@@ -30058,7 +29906,8 @@ components:
       example:
         installationStr: >-
           helm upgrade -i runai-cluster runai/runai-cluster -n runai --set
-          cluster.uid=... --set cluster.bootstrapToken=<installer-bootstrap-jwt>
+          cluster.uid=... --set
+          controlPlane.bootstrapToken=<installer-bootstrap-jwt>
         repositoryName: runai
         chartRepoURL: 'https://charts.example.com'
         bootstrapToken: <installer-bootstrap-jwt>
@@ -31572,7 +31421,7 @@ components:
             rank in a node pool, resources are distributed proportionally based
             on their weights. Valid values: 1–20. Requires over-quota weight to
             be enabled. When enabled, the default is 2. See [GPU over
-            quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota)
+            quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects)
             for more details.
           nullable: true
           example: 2
@@ -31601,7 +31450,7 @@ components:
             rank in a node pool, resources are distributed proportionally based
             on their weights. Valid values: 1–20. Requires over-quota weight to
             be enabled. When enabled, the default is 2. See [GPU over
-            quota](https://run-ai-docs.nvidia.com/self-hosted/latest/platform-management/aiinitiatives/organization/projects#gpu-over-quota)
+            quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects)
             for more details.
           nullable: true
           example: 2
@@ -31639,7 +31488,7 @@ components:
             - description: >-
                 Defines the GPU quota assignment, maximum GPU device allocation,
                 and weight assigned that determines the fairshare of over-quota
-                resources.
+                resources. For node pools with quota disabled, deserved is 0.
         cpu:
           type: object
           nullable: true
@@ -31673,14 +31522,6 @@ components:
             will be scheduled before all workloads in rank "Medium".
           default: MediumLow
           example: High
-        priority:
-          deprecated: true
-          description: >-
-            Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          type: string
-          nullable: true
-          example: Normal
     DepartmentForList:
       allOf:
         - $ref: '#/components/schemas/DataDepartmentFields'
@@ -31723,6 +31564,39 @@ components:
               items:
                 $ref: '#/components/schemas/Resources'
               description: Resources assigned to this Organization per Node Pool
+    GpuResourceRequest:
+      properties:
+        deserved:
+          type: number
+          format: double
+          description: >-
+            The GPU quota assigned to this org-unit. Required for node pools
+            with quota enabled. For node pools with quota disabled, it must be 0
+            or omitted.
+          example: 1000
+          x-go-pointer: true
+        limit:
+          type: number
+          format: double
+          description: >-
+            The maximum GPU device allocation the org-unit can get from this
+            node pool, representing the maximum sum of assigned quota and
+            over-quota GPUs. Set to null for unlimited.
+          nullable: true
+          example: 0
+        overQuotaWeight:
+          type: number
+          format: double
+          description: >
+            The weight assigned to determine the org-unit's share of over-quota
+            resources within its rank. When multiple org-units share the same
+            rank in a node pool, resources are distributed proportionally based
+            on their weights. Valid values: 1–20. Requires over-quota weight to
+            be enabled. When enabled, the default is 2. See [GPU over
+            quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects)
+            for more details.
+          nullable: true
+          example: 2
     ResourcesNullable:
       properties:
         nodePool:
@@ -31742,11 +31616,13 @@ components:
           nullable: true
         gpu:
           allOf:
-            - $ref: '#/components/schemas/NonNullResource'
+            - $ref: '#/components/schemas/GpuResourceRequest'
             - description: >-
                 Defines the GPU quota assignment, maximum GPU device allocation,
                 and weight assigned that determines the fairshare of over-quota
-                resources.
+                resources. Required for node pools with quota enabled. For node
+                pools with quota disabled, deserved must be 0 or omitted and
+                limit must be -1, null or omitted.
         cpu:
           type: object
           nullable: true
@@ -31780,14 +31656,6 @@ components:
             will be scheduled before all workloads in rank "Medium".
           default: MediumLow
           example: High
-        priority:
-          deprecated: true
-          description: >-
-            Deprecated. Use rank instead. The scheduling priority for workloads
-            in this node pool.
-          type: string
-          nullable: true
-          example: Normal
     DepartmentCreationRequest:
       allOf:
         - $ref: '#/components/schemas/DataDepartmentFields'
@@ -32760,7 +32628,9 @@ components:
             - description: >-
                 Defines the GPU quota assignment, maximum GPU device allocation,
                 and weight assigned that determines the fairshare of over-quota
-                resources.
+                resources. Optional. If omitted, the GPU values stay unchanged.
+                For node pools with quota disabled, deserved must be 0 or
+                omitted and limit must be -1, null or omitted.
         cpu:
           type: object
           nullable: true
@@ -34592,6 +34462,7 @@ components:
         - secret-volume
         - data-volume
         - ngcApiKey
+        - resource-claim-template
     UpdateCount:
       description: the value of an update counter of a data in the system.
       type: integer
@@ -34661,7 +34532,8 @@ components:
         - $ref: '#/components/schemas/AssetReadOnlyFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         id: a418ed33-9399-48c0-a890-122cadd13bfd
         kind: s3
         createdBy: test@run.ai
@@ -35002,7 +34874,8 @@ components:
         - $ref: '#/components/schemas/AssetCreationFields'
       example:
         name: my-asset
-        scope: tenant
+        scope: project
+        projectId: 4500001
         workloadSupportedTypes:
           workspace: false
           training: false
@@ -35118,6 +34991,17 @@ components:
         $ref: '#/components/schemas/ExtendedResource'
       maxItems: 1000
       nullable: true
+    GpuComputeMode:
+      description: >-
+        GPU compute sharing mode. Policy and template defaults apply before the
+        built-in time-slicing fallback. Explicit modes require Run:ai cluster
+        version 3.0.14 or later.
+      type: string
+      minLength: 1
+      enum:
+        - time-slicing
+        - sm-sharing
+      nullable: true
     GpuDevicesRequest:
       description: >-
         Requested number of GPU devices. Currently if more than one device is
@@ -35138,6 +35022,27 @@ components:
       maxLength: 63
       example: 10M
       nullable: true
+    GpuMemoryPortionLimit:
+      description: >-
+        Maximum GPU memory fraction consumed per GPU device. Must be no less
+        than gpuMemoryPortionRequest.
+      type: number
+      format: double
+      example: 0.5
+      nullable: true
+      minimum: 0
+      x-gorm-ignore: true
+    GpuMemoryPortionRequest:
+      description: >-
+        GPU memory fraction to allocate per GPU device, between 0 and 1.
+        Required when gpuRequestType is portion.
+      type: number
+      format: double
+      example: 0.5
+      nullable: true
+      minimum: 0
+      maximum: 1
+      x-gorm-ignore: true
     GpuMemoryRequest:
       description: >-
         Required if and only if gpuRequestType is memory. States the GPU memory
@@ -35151,24 +35056,27 @@ components:
       nullable: true
     GpuPortionLimit:
       description: >-
-        Limitations on the portion consumed by the workload, per GPU device. The
-        system guarantees The gpuPotionLimit must be no less than the
-        gpuPortionRequest.
+        Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the
+        portion consumed by the workload, per GPU device. The system guarantees
+        The gpuPotionLimit must be no less than the gpuPortionRequest.
       type: number
       format: double
       example: 0.5
       nullable: true
       minimum: 0
+      deprecated: true
     GpuPortionRequest:
       description: >-
-        Required if and only if gpuRequestType is portion. States the portion of
-        the GPU to allocate for the created workload, per GPU device, between 0
-        and 1. The default is no allocated GPUs.
+        Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if
+        gpuRequestType is portion. States the portion of the GPU to allocate for
+        the created workload, per GPU device, between 0 and 1. The default is no
+        allocated GPUs.
       type: number
       format: double
       example: 0.5
       nullable: true
       minimum: 0
+      deprecated: true
     GpuRequestType:
       description: >-
         Sets the unit type for GPU resources requests. Stated in terms of
@@ -35201,10 +35109,16 @@ components:
           $ref: '#/components/schemas/CpuMemoryRequest'
         extendedResources:
           $ref: '#/components/schemas/ExtendedResources'
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuDevicesRequest:
           $ref: '#/components/schemas/GpuDevicesRequest'
         gpuMemoryLimit:
           $ref: '#/components/schemas/GpuMemoryLimit'
+        gpuMemoryPortionLimit:
+          $ref: '#/components/schemas/GpuMemoryPortionLimit'
+        gpuMemoryPortionRequest:
+          $ref: '#/components/schemas/GpuMemoryPortionRequest'
         gpuMemoryRequest:
           $ref: '#/components/schemas/GpuMemoryRequest'
         gpuPortionLimit:
@@ -35263,6 +35177,402 @@ components:
             - $ref: '#/components/schemas/ComputeAssetSpec'
           nullable: true
           type: object
+    K8sObjectMeta:
+      description: Metadata of the Kubernetes resource that is created by this k8sObject
+      type: object
+      nullable: true
+      properties:
+        annotations:
+          type: object
+          nullable: true
+          description: >
+            Free-form annotations attached to the resource. Keys must conform
+
+            to Kubernetes qualified-name syntax
+
+            (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set):
+
+            an optional DNS-subdomain prefix (≤253 chars) followed by "/" and a
+
+            required name component ([A-Za-z0-9] with `.`, `_`, `-` allowed
+
+            inside, ≤63 chars). Key syntax is enforced at runtime on both
+
+            create and update; annotation values have no format constraint
+
+            beyond the length limit below.
+          additionalProperties:
+            type: string
+            maxLength: 10000
+          maxProperties: 1000
+          example:
+            example.com/owner: team-a
+            example.com/version: '1.0'
+        labels:
+          type: object
+          nullable: true
+          description: >
+            Free-form labels attached to the resource. Keys and values must
+
+            conform to Kubernetes label syntax
+
+            (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set):
+
+            keys are qualified names (optional DNS-subdomain prefix ≤253 chars
+
+            + "/" + name component ≤63 chars); values are ≤63 chars matching
+
+            the same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are
+
+            allowed). Key syntax is validated at runtime; the value pattern
+
+            below is enforced by the schema as well as at runtime.
+          additionalProperties:
+            type: string
+            maxLength: 63
+            pattern: '^([A-Za-z0-9]([-A-Za-z0-9_.]*[A-Za-z0-9])?)?$'
+          maxProperties: 1000
+          example:
+            app: my-app
+    K8sObjectSpec:
+      description: |
+        Common shape for k8s-object asset specs: the raw Kubernetes object
+        metadata (labels/annotations) and the raw Kubernetes object spec.
+        Shared between the k8s-object CRUD APIs (e.g. RctSpec) and the
+        cluster-facing k8s-objects sync API (K8sObjectsUpdate).
+      type: object
+      required:
+        - objectSpec
+      properties:
+        objectMeta:
+          $ref: '#/components/schemas/K8sObjectMeta'
+        objectSpec:
+          description: The raw Kubernetes spec of the object.
+          type: object
+          additionalProperties: true
+    RctSpec:
+      allOf:
+        - $ref: '#/components/schemas/K8sObjectSpec'
+    AssetSyncStatusEnum:
+      type: string
+      enum:
+        - Creating
+        - Deleting
+        - Failed
+        - Deletion failed
+        - Issues found
+        - No issues found
+        - No status
+        - Updating
+    ScopeId:
+      type: string
+      description: >-
+        The id of the cluster, department or project, depending on the scope
+        type.
+    AssetClusterStatusIssueEnum:
+      type: string
+      enum:
+        - ReplicationError
+        - LostPhase
+        - NotCreated
+    AssetClusterStatusIssue:
+      type: object
+      required:
+        - scopeId
+        - scopeType
+        - issue
+      properties:
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        issue:
+          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
+    AssetClusterStatusIssues:
+      type: array
+      items:
+        $ref: '#/components/schemas/AssetClusterStatusIssue'
+    AssetClusterStatusInfo:
+      properties:
+        status:
+          $ref: '#/components/schemas/AssetSyncStatusEnum'
+        issues:
+          $ref: '#/components/schemas/AssetClusterStatusIssues'
+        message:
+          type: string
+        url:
+          type: string
+      nullable: true
+      type: object
+    Rct:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetMeta'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+        status:
+          $ref: '#/components/schemas/AssetClusterStatusInfo'
+    RctListResponse:
+      type: object
+      required:
+        - entries
+      properties:
+        next:
+          type: integer
+          format: int32
+          description: >
+            Offset for the next page of results. Present only when there are
+            more entries beyond the current page (i.e., the number of returned
+            entries equals the limit).
+        entries:
+          type: array
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/Rct'
+      example:
+        entries:
+          - meta:
+              id: a418ed33-9399-48c0-a890-122cadd13bfd
+              name: my-rct
+              kind: resource-claim-template
+              scope: project
+              projectId: 4500001
+              createdBy: test@run.ai
+              createdAt: '2026-01-01T00:00:00Z'
+              updatedBy: test@run.ai
+              updatedAt: '2026-01-01T00:00:00Z'
+            spec:
+              objectMeta:
+                labels:
+                  app: my-app
+              objectSpec:
+                devices:
+                  requests:
+                    - name: gpu
+                      exactly:
+                        deviceClassName: gpu.nvidia.com
+                        count: 1
+                        allocationMode: ExactCount
+    RctCreationRequest:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetCreationRequest'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+    RctUpdateRequest:
+      type: object
+      required:
+        - meta
+        - spec
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetUpdateRequest'
+        spec:
+          $ref: '#/components/schemas/RctSpec'
+    ReportedWorkloadType:
+      description: >-
+        The type of the workload. Any workload type the cluster reports, not
+        only the NVIDIA Run:ai native ones.
+      type: string
+      example: Training
+    PodResourceClaimBinding:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: >-
+            Pod-local name of the claim entry, as listed in
+            `pod.spec.resourceClaims[].name` and referenced by containers in
+            `resources.claims`.
+          example: gpu-1
+        claimName:
+          type: string
+          nullable: true
+          description: >-
+            Name of the ResourceClaim bound to the pod for this entry. For a
+            claim generated from a template, this is null until Kubernetes
+            creates and binds the claim.
+          example: bert-worker-0-gpu-1-mk4s8
+    ResourceClaimTemplateWorkloadPod:
+      type: object
+      required:
+        - podId
+        - podName
+        - resourceClaims
+      properties:
+        podId:
+          type: string
+          format: uuid
+          description: The id of the pod.
+        podName:
+          type: string
+          example: bert-worker-0
+        resourceClaims:
+          type: array
+          description: >-
+            The pod's claims that were generated from the resource claim
+            template. A pod usually has one, but may list several when more than
+            one of its claim entries references the same template.
+          items:
+            $ref: '#/components/schemas/PodResourceClaimBinding'
+    ResourceClaimTemplateWorkload:
+      type: object
+      required:
+        - workloadId
+        - name
+        - type
+        - projectId
+        - pods
+      properties:
+        workloadId:
+          $ref: '#/components/schemas/WorkloadId'
+        name:
+          $ref: '#/components/schemas/WorkloadName'
+        type:
+          $ref: '#/components/schemas/ReportedWorkloadType'
+        projectId:
+          $ref: '#/components/schemas/ProjectId'
+        pods:
+          type: array
+          description: The pods of the workload that reference the resource claim template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkloadPod'
+    ResourceClaimTemplateWorkloadsResponse:
+      type: object
+      required:
+        - workloads
+      properties:
+        next:
+          type: integer
+          format: int32
+          description: >
+            Offset for the next page of results. Present only when there are
+            more workloads beyond the current page (i.e., the number of returned
+            workloads equals the limit).
+        workloads:
+          type: array
+          description: >-
+            The workloads whose pods currently reference the resource claim
+            template.
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplateWorkload'
+    ClusterSyncReportUpdate:
+      description: success/failure report of a single update attempt of the cluster
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: >-
+            a unique id of the entity being updated (asset, workload, policy,
+            etc).
+        updateCount:
+          $ref: '#/components/schemas/UpdateCount'
+        updateAttemptTime:
+          description: the time in which the cluster attempted the update.
+          type: string
+          format: date-time
+          example: '2024-06-06T12:09:18.211Z'
+        message:
+          description: >-
+            optional failure message for the case that the update has failed.
+            should be sent null if the update was successful.
+          type: string
+          example: mandatory image was not provided.
+          nullable: true
+    ClusterSyncReport:
+      description: allow cluster to report about success/failures of sync updates
+      properties:
+        updates:
+          type: array
+          items:
+            $ref: '#/components/schemas/ClusterSyncReportUpdate'
+    RequestInfo:
+      required:
+        - afterUpdate
+      description: value that the agent sent to the afterUpdate query parameter.
+      properties:
+        afterUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    ResponseInfo:
+      description: >-
+        The lowest and highest update counts included in this bulk of updates.
+        for example, it is possible that agent requester for afterUpdate=10 and
+        received a bulk of four updates - 12, 13, 16, 18. in this case
+        lowestUpdate=12, highestUpdate=18.
+      properties:
+        lowestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+        highestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    SystemInfo:
+      description: >-
+        the highest update count that was assigned to the data being
+        synchronized. for example, it is possible that the agent sent
+        afterUpdate=12 and received a bulk containing only four updates (13, 15,
+        18, 19) but in the system there is already update 21 which was not
+        included in this bulk and can be received in the following bulk.
+      properties:
+        highestUpdate:
+          $ref: '#/components/schemas/UpdateCount'
+    AssetMetaForSync:
+      allOf:
+        - $ref: '#/components/schemas/AssetCreationFields'
+        - $ref: '#/components/schemas/AssetUpdatableFields'
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              $ref: '#/components/schemas/AssetId'
+        - type: object
+          required:
+            - kind
+          properties:
+            kind:
+              $ref: '#/components/schemas/AssetKind'
+        - type: object
+          properties:
+            prevName:
+              $ref: '#/components/schemas/AssetName'
+    K8sObjectsUpdate:
+      type: object
+      required:
+        - meta
+        - updateCount
+      properties:
+        meta:
+          $ref: '#/components/schemas/AssetMetaForSync'
+        updateCount:
+          $ref: '#/components/schemas/UpdateCount'
+        isDeleted:
+          description: the asset has been deleted
+          type: boolean
+          nullable: true
+        spec:
+          $ref: '#/components/schemas/K8sObjectSpec'
+    K8sObjectsUpdatesResp:
+      type: object
+      properties:
+        requestInfo:
+          $ref: '#/components/schemas/RequestInfo'
+        responseInfo:
+          $ref: '#/components/schemas/ResponseInfo'
+        systemInfo:
+          $ref: '#/components/schemas/SystemInfo'
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/K8sObjectsUpdate'
     AccessKeyCreationSpec:
       properties:
         existingSecretName:
@@ -35436,57 +35746,6 @@ components:
           type: object
           allOf:
             - $ref: '#/components/schemas/NgcApiKeySpec'
-    AssetSyncStatusEnum:
-      type: string
-      enum:
-        - Creating
-        - Deleting
-        - Failed
-        - Deletion failed
-        - Issues found
-        - No issues found
-        - No status
-        - Updating
-    ScopeId:
-      type: string
-      description: >-
-        The id of the cluster, department or project, depending on the scope
-        type.
-    AssetClusterStatusIssueEnum:
-      type: string
-      enum:
-        - ReplicationError
-        - LostPhase
-        - NotCreated
-    AssetClusterStatusIssue:
-      type: object
-      required:
-        - scopeId
-        - scopeType
-        - issue
-      properties:
-        scopeId:
-          $ref: '#/components/schemas/ScopeId'
-        scopeType:
-          $ref: '#/components/schemas/ScopeType'
-        issue:
-          $ref: '#/components/schemas/AssetClusterStatusIssueEnum'
-    AssetClusterStatusIssues:
-      type: array
-      items:
-        $ref: '#/components/schemas/AssetClusterStatusIssue'
-    AssetClusterStatusInfo:
-      properties:
-        status:
-          $ref: '#/components/schemas/AssetSyncStatusEnum'
-        issues:
-          $ref: '#/components/schemas/AssetClusterStatusIssues'
-        message:
-          type: string
-        url:
-          type: string
-      nullable: true
-      type: object
     ClusterResourceInfo:
       properties:
         name:
@@ -35528,84 +35787,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CredentialsListResponseEntry'
-    ClusterSyncReportUpdate:
-      description: success/failure report of a single update attempt of the cluster
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: >-
-            a unique id of the entity being updated (asset, workload, policy,
-            etc).
-        updateCount:
-          $ref: '#/components/schemas/UpdateCount'
-        updateAttemptTime:
-          description: the time in which the cluster attempted the update.
-          type: string
-          format: date-time
-          example: '2024-06-06T12:09:18.211Z'
-        message:
-          description: >-
-            optional failure message for the case that the update has failed.
-            should be sent null if the update was successful.
-          type: string
-          example: mandatory image was not provided.
-          nullable: true
-    ClusterSyncReport:
-      description: allow cluster to report about success/failures of sync updates
-      properties:
-        updates:
-          type: array
-          items:
-            $ref: '#/components/schemas/ClusterSyncReportUpdate'
-    RequestInfo:
-      required:
-        - afterUpdate
-      description: value that the agent sent to the afterUpdate query parameter.
-      properties:
-        afterUpdate:
-          $ref: '#/components/schemas/UpdateCount'
-    ResponseInfo:
-      description: >-
-        The lowest and highest update counts included in this bulk of updates.
-        for example, it is possible that agent requester for afterUpdate=10 and
-        received a bulk of four updates - 12, 13, 16, 18. in this case
-        lowestUpdate=12, highestUpdate=18.
-      properties:
-        lowestUpdate:
-          $ref: '#/components/schemas/UpdateCount'
-        highestUpdate:
-          $ref: '#/components/schemas/UpdateCount'
-    SystemInfo:
-      description: >-
-        the highest update count that was assigned to the data being
-        synchronized. for example, it is possible that the agent sent
-        afterUpdate=12 and received a bulk containing only four updates (13, 15,
-        18, 19) but in the system there is already update 21 which was not
-        included in this bulk and can be received in the following bulk.
-      properties:
-        highestUpdate:
-          $ref: '#/components/schemas/UpdateCount'
-    AssetMetaForSync:
-      allOf:
-        - $ref: '#/components/schemas/AssetCreationFields'
-        - $ref: '#/components/schemas/AssetUpdatableFields'
-        - type: object
-          required:
-            - id
-          properties:
-            id:
-              $ref: '#/components/schemas/AssetId'
-        - type: object
-          required:
-            - kind
-          properties:
-            kind:
-              $ref: '#/components/schemas/AssetKind'
-        - type: object
-          properties:
-            prevName:
-              $ref: '#/components/schemas/AssetName'
     CredentialsUpdate:
       type: object
       required:
@@ -36110,8 +36291,8 @@ components:
       description: >-
         Allow the container running the workload and all launched processes to
         gain additional privileges after the workload starts. For more
-        information consult the User Identity in Container guide at
-        https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+        information consult the [User Identity in Container
+        guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
       type: boolean
       example: false
       nullable: true
@@ -36337,7 +36518,7 @@ components:
         are automatically taken from the identity provider (IdP) token
         (available only in SSO-enabled installations). For more information, see
         [User
-        Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers).
+        Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).
       type: string
       enum:
         - fromTheImage
@@ -37849,9 +38030,14 @@ components:
       description: >-
         Specifies whether the workload can be preempted by higher-priority
         workloads. Valid values are preemptible, semi-preemptible and
-        non-preemptible. If explicitly set, this value takes precedence. If not
-        set, the system derives the preemptibility from the priorityClassName
-        field, ensuring backward compatibility. Each workload type has a default
+        non-preemptible. Semi-preemptible is intended for multi-pod workloads.
+        Replicas up to the configured minimum are non-preemptible, while
+        replicas above that minimum are preemptible. On single-pod workloads
+        with a fixed replica count of one, semi-preemptible behaves as
+        non-preemptible. The API continues to accept semi-preemptible for these
+        workloads. If explicitly set, this value takes precedence. If not set,
+        the system derives the preemptibility from the priorityClassName field,
+        ensuring backward compatibility. Each workload type has a default
         preemptibility. To view the default preemptibility for each workload
         type, use the GET /workload-types endpoint.
       type: string
@@ -40589,10 +40775,16 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
               $ref: '#/components/schemas/GpuMemoryLimit'
+            gpuMemoryPortionLimit:
+              $ref: '#/components/schemas/GpuMemoryPortionLimit'
+            gpuMemoryPortionRequest:
+              $ref: '#/components/schemas/GpuMemoryPortionRequest'
             gpuMemoryRequest:
               $ref: '#/components/schemas/GpuMemoryRequest'
             gpuPortionLimit:
@@ -40759,7 +40951,7 @@ components:
             accessible outside the cluster. If set to true, the endpoint will be
             exposed externally. To enable external access, your administrator
             must configure the cluster as described in the [inference
-            requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference).
+            requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate).
             section.
           type: boolean
           nullable: true
@@ -41464,10 +41656,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -41674,10 +41872,16 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
               $ref: '#/components/schemas/GpuMemoryLimit'
+            gpuMemoryPortionLimit:
+              $ref: '#/components/schemas/GpuMemoryPortionLimit'
+            gpuMemoryPortionRequest:
+              $ref: '#/components/schemas/GpuMemoryPortionRequest'
             gpuMemoryRequest:
               $ref: '#/components/schemas/GpuMemoryRequest'
             gpuPortionLimit:
@@ -42104,10 +42308,16 @@ components:
           $ref: '#/components/schemas/GpuMemoryLimit'
         gpuMemoryRequest:
           $ref: '#/components/schemas/GpuMemoryRequest'
+        gpuMemoryPortionLimit:
+          $ref: '#/components/schemas/GpuMemoryPortionLimit'
         gpuPortionLimit:
           $ref: '#/components/schemas/GpuPortionLimit'
+        gpuMemoryPortionRequest:
+          $ref: '#/components/schemas/GpuMemoryPortionRequest'
         gpuPortionRequest:
           $ref: '#/components/schemas/GpuPortionRequest'
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestType'
         largeShmRequest:
@@ -42560,6 +42770,33 @@ components:
           $ref: '#/components/schemas/ItemRules'
       nullable: true
       type: object
+    GpuComputeModeOptions:
+      properties:
+        options:
+          description: >-
+            Limit the permitted values for gpuComputeMode to a given set of
+            values.
+          type: array
+          items:
+            required:
+              - value
+            properties:
+              value:
+                $ref: '#/components/schemas/GpuComputeMode'
+              displayed:
+                description: Textual description of the value
+                type: string
+                nullable: true
+                pattern: .*
+          nullable: true
+      nullable: true
+      type: object
+    GpuComputeModeRules:
+      allOf:
+        - $ref: '#/components/schemas/StringRulesCommon'
+        - $ref: '#/components/schemas/GpuComputeModeOptions'
+      nullable: true
+      type: object
     GpuRequestOptions:
       properties:
         options:
@@ -42605,10 +42842,20 @@ components:
           $ref: '#/components/schemas/QuantityRules'
         gpuMemoryRequest:
           $ref: '#/components/schemas/QuantityRules'
+        gpuMemoryPortionLimit:
+          $ref: '#/components/schemas/NumberRules'
         gpuPortionLimit:
+          allOf:
+            - $ref: '#/components/schemas/NumberRules'
+          deprecated: true
+        gpuMemoryPortionRequest:
           $ref: '#/components/schemas/NumberRules'
         gpuPortionRequest:
-          $ref: '#/components/schemas/NumberRules'
+          allOf:
+            - $ref: '#/components/schemas/NumberRules'
+          deprecated: true
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeModeRules'
         gpuRequestType:
           $ref: '#/components/schemas/GpuRequestRules'
         largeShmRequest:
@@ -44852,7 +45099,7 @@ components:
         outside the cluster. If set to true, the endpoint will be exposed
         externally. To enable external access, your administrator must configure
         the cluster as described in the [inference
-        requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference).
+        requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate).
         section.
       type: boolean
       nullable: true
@@ -44987,10 +45234,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryLimit'
                 cpuMemoryRequest:
                   $ref: '#/components/schemas/CpuMemoryRequest'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -45189,16 +45442,26 @@ components:
                   $ref: '#/components/schemas/QuantityRules'
                 cpuMemoryRequest:
                   $ref: '#/components/schemas/QuantityRules'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeModeRules'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/IntegerRules'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/QuantityRules'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/NumberRules'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/NumberRules'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/QuantityRules'
                 gpuPortionLimit:
-                  $ref: '#/components/schemas/NumberRules'
+                  allOf:
+                    - $ref: '#/components/schemas/NumberRules'
+                  deprecated: true
                 gpuPortionRequest:
-                  $ref: '#/components/schemas/NumberRules'
+                  allOf:
+                    - $ref: '#/components/schemas/NumberRules'
+                  deprecated: true
                 gpuRequestType:
                   $ref: '#/components/schemas/GpuRequestRules'
               type: object
@@ -47418,16 +47681,18 @@ components:
       items:
         $ref: '#/components/schemas/V1StorageClass'
       x-schema-name: StorageClasses
+    ReportingClusterId:
+      type: string
+      format: uuid
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
     StorageClass:
       type: object
       required:
         - storage_class_name
       properties:
         cluster_id:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storage_class_name:
           type: string
           description: Storage class name
@@ -47793,10 +48058,7 @@ components:
         - spec
       properties:
         clusterId:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string
           description: Storage class name
@@ -47816,6 +48078,97 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StorageClassV2'
+    DeviceClass:
+      type: object
+      required:
+        - deviceClassName
+      properties:
+        clusterId:
+          $ref: '#/components/schemas/ReportingClusterId'
+        deviceClassName:
+          type: string
+          description: >
+            DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules
+            (lowercase alphanumeric, `-`, and `.`, starting and ending with an
+            alphanumeric character), up to 253 characters.
+          minLength: 1
+          maxLength: 253
+          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+          example: gpu.nvidia.com
+    DeviceClasses:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/DeviceClass'
+    ResourceClaimTemplateName:
+      type: string
+      description: >
+        ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain
+        rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an
+        alphanumeric character), up to 253 characters.
+      minLength: 1
+      maxLength: 253
+      pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+      example: rct-gpu-1
+    ResourceScopeType:
+      description: The scope type the resource is defined at.
+      type: string
+      enum:
+        - cluster
+        - department
+        - project
+    ResourceClaimTemplate:
+      type: object
+      required:
+        - name
+        - namespace
+        - scopeType
+        - scopeId
+      properties:
+        name:
+          $ref: '#/components/schemas/ResourceClaimTemplateName'
+        namespace:
+          type: string
+          description: the namespace the ResourceClaimTemplate lives in
+          minLength: 1
+          maxLength: 253
+          example: runai
+        scopeType:
+          $ref: '#/components/schemas/ResourceScopeType'
+        scopeId:
+          type: string
+          minLength: 1
+          description: >
+            Scope identifier. For cluster scope the scopeId must equal the
+            clusterId query parameter (the request is rejected otherwise). For
+            department scope send the department id; for project scope send the
+            project id.
+        origin:
+          $ref: '#/components/schemas/Origin'
+        assetId:
+          type: string
+          description: >
+            Control-plane asset id this template was created from. Present only
+            when origin is "assets". Allows the control plane to join tracker
+            rows back to the originating asset record.
+          nullable: true
+        issues:
+          $ref: '#/components/schemas/Issues'
+    ResourceClaimTemplates:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplate'
     ScopeClusterId:
       description: The ID of the cluster.
       type: string
@@ -47932,6 +48285,7 @@ components:
         - pvc
         - secret
         - config-map
+        - resource-claim-template
     ClusterObjectIssueType:
       type: string
       enum:
@@ -47986,175 +48340,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ClusterObjectStatus'
-    ResourceType:
-      type: string
-      description: >
-        Resource type enum for authorization. 
-
-
-        Note: The 'apps' resource type is DEPRECATED. Please use
-        'service-account' instead for managing service accounts.
-      enum:
-        - department
-        - tenant
-        - project
-        - cluster
-        - cluster-config
-        - nodepools
-        - nodes
-        - settings
-        - security-settings
-        - notification-settings
-        - branding-settings
-        - users
-        - apps
-        - service-account
-        - roles
-        - access_rules
-        - workloads
-        - applications
-        - workspaces
-        - trainings
-        - inferences
-        - environments
-        - pvc-assets
-        - git-assets
-        - host-path-assets
-        - nfs-assets
-        - s3-assets
-        - compute-resources
-        - templates
-        - credentials
-        - events-history
-        - policies
-        - cm-volume-assets
-        - datavolumes
-        - secret-volume-assets
-        - storage-class-configuration
-        - access-keys
-        - workload-properties
-        - network-topologies
-        - registries
-        - workload-integration-metrics
-        - nodepools-minimal
-        - clusters-minimal
-        - users-minimal
-    ResourceTypeGroupId:
-      type: string
-      enum:
-        - organization
-        - physical-resource
-        - iam
-        - workload
-        - workload-asset
-    Action:
-      type: string
-      enum:
-        - create
-        - read
-        - update
-        - delete
-        - sync
-    Permission:
-      type: object
-      required:
-        - resourceType
-        - actions
-        - groupId
-        - displayName
-      properties:
-        resourceType:
-          $ref: '#/components/schemas/ResourceType'
-        displayName:
-          type: string
-          example: Projects
-        groupId:
-          $ref: '#/components/schemas/ResourceTypeGroupId'
-        actions:
-          type: array
-          items:
-            $ref: '#/components/schemas/Action'
-    Permissions:
-      type: array
-      items:
-        $ref: '#/components/schemas/Permission'
-      x-schema-name: Permissions
-    KubernetesPermissions:
-      type: object
-      properties:
-        predefinedRole:
-          type: string
-          description: >-
-            The ID of an NVIDIA Run:ai predefined role. The custom role will
-            include the mapped Kubernetes ClusterRole and its permissions.
-          example: '12'
-          nullable: true
-    RoleV1:
-      type: object
-      required:
-        - name
-        - description
-        - permissions
-        - id
-        - createdAt
-        - updatedAt
-        - createdBy
-        - custom
-        - effectiveEnabled
-      properties:
-        id:
-          type: integer
-          format: int32
-          example: 32
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-        deletedAt:
-          type: string
-          nullable: true
-          format: date-time
-        createdBy:
-          type: string
-          example: user@run.ai
-        custom:
-          type: boolean
-        effectiveEnabled:
-          type: boolean
-          default: true
-        permissions:
-          $ref: '#/components/schemas/Permissions'
-        name:
-          type: string
-          example: admin
-        description:
-          type: string
-          example: can manage all resources
-        scopeType:
-          type: string
-          default: tenant
-          x-internal: true
-          x-csp: true
-          enum:
-            - system
-            - tenant
-        scopeId:
-          type: string
-          x-internal: true
-          x-csp: true
-          nullable: true
-        enabled:
-          type: boolean
-          default: true
-          nullable: true
-        kubernetesPermissions:
-          $ref: '#/components/schemas/KubernetesPermissions'
-    RolesV1:
-      type: array
-      items:
-        $ref: '#/components/schemas/RoleV1'
     RolesSortFilterFields:
       type: string
       enum:
@@ -48177,6 +48362,16 @@ components:
           type: string
           description: The name of the permission set.
           example: test
+    KubernetesPermissions:
+      type: object
+      properties:
+        predefinedRole:
+          type: string
+          description: >-
+            The ID of an NVIDIA Run:ai predefined role. The custom role will
+            include the mapped Kubernetes ClusterRole and its permissions.
+          example: '12'
+          nullable: true
     RoleCreationFields:
       type: object
       required:
@@ -48229,6 +48424,61 @@ components:
           description: >-
             Defines the Kubernetes cluster permissions associated with this
             role.
+    ResourceType:
+      type: string
+      description: >
+        Resource type enum for authorization. 
+
+
+        Note: The 'apps' resource type is DEPRECATED. Please use
+        'service-account' instead for managing service accounts.
+      enum:
+        - department
+        - tenant
+        - project
+        - cluster
+        - cluster-config
+        - nodepools
+        - nodes
+        - settings
+        - security-settings
+        - notification-settings
+        - branding-settings
+        - users
+        - apps
+        - service-account
+        - roles
+        - access_rules
+        - workloads
+        - applications
+        - workspaces
+        - trainings
+        - inferences
+        - environments
+        - pvc-assets
+        - git-assets
+        - host-path-assets
+        - nfs-assets
+        - s3-assets
+        - compute-resources
+        - resource-claim-templates
+        - templates
+        - credentials
+        - events-history
+        - policies
+        - cm-volume-assets
+        - datavolumes
+        - secret-volume-assets
+        - storage-class-configuration
+        - device-classes
+        - access-keys
+        - workload-properties
+        - network-topologies
+        - registries
+        - workload-integration-metrics
+        - nodepools-minimal
+        - clusters-minimal
+        - users-minimal
     PermissionAction:
       type: string
       enum:
@@ -48322,6 +48572,22 @@ components:
       items:
         $ref: '#/components/schemas/Role'
       x-schema-name: Roles
+    ResourceTypeGroupId:
+      type: string
+      enum:
+        - organization
+        - physical-resource
+        - iam
+        - workload
+        - workload-asset
+    Action:
+      type: string
+      enum:
+        - create
+        - read
+        - update
+        - delete
+        - sync
     PostPermission:
       type: object
       required:
@@ -48426,7 +48692,9 @@ components:
         subjectId:
           type: string
           example: user@run.ai
-          description: 'The unique identifier of the subject (e.g., user, group, or app).'
+          description: >-
+            The unique identifier of the subject (e.g., user, group, or service
+            account).
         roleId:
           type: integer
           format: int32
@@ -48454,8 +48722,8 @@ components:
         user and service account.
 
 
-        Note: The 'app' subject type is DEPRECATED. Please use 'service-account'
-        instead for service accounts.
+        Note: The 'app' subject type is DEPRECATED and is no longer returned.
+        Please use 'service-account' instead for service accounts.
       enum:
         - user
         - app
@@ -48561,8 +48829,11 @@ components:
         Subject type enum for access rules.
 
 
-        Note: The 'app' subject type is DEPRECATED. Please use 'service-account'
-        instead for service accounts.
+        Note: The 'app' subject type is DEPRECATED and no longer supported.
+        Please use 'service-account' instead for service accounts.
+
+        Requests that create an access rule with 'app' are rejected with 415
+        Unsupported Media Type.
       enum:
         - user
         - app
@@ -48745,14 +49016,16 @@ components:
         properties:
           subjectId:
             type: string
-            description: 'The unique identifier of the subject e.g., user, group, or app).'
+            description: >-
+              The unique identifier of the subject e.g., user, group, or service
+              account).
             example: user@run.ai
           subjectType:
             allOf:
               - $ref: '#/components/schemas/SubjectType'
               - description: >-
                   The subject assigned to the access rule. Valid values: user,
-                  group, app.
+                  group, service-account.
     AccessRuleScopes:
       type: array
       description: scopes for the access rules. must have at least one value
@@ -48952,6 +49225,30 @@ components:
             access rule (still alive) and the failure reason.
           items:
             $ref: '#/components/schemas/AccessRulesMigrateDeprecatedFailureItem'
+    Permission:
+      type: object
+      required:
+        - resourceType
+        - actions
+        - groupId
+        - displayName
+      properties:
+        resourceType:
+          $ref: '#/components/schemas/ResourceType'
+        displayName:
+          type: string
+          example: Projects
+        groupId:
+          $ref: '#/components/schemas/ResourceTypeGroupId'
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Action'
+    Permissions:
+      type: array
+      items:
+        $ref: '#/components/schemas/Permission'
+      x-schema-name: Permissions
     PermittedScopes:
       type: object
       properties:
@@ -49054,8 +49351,8 @@ components:
       type: string
       enum:
         - System administrator
-        - Cluster application
-        - Installer application
+        - Cluster service account
+        - Installer service account
         - Cloud operator
     InternalCreateAccessRuleRequest:
       type: object
@@ -49094,26 +49391,15 @@ components:
           nullable: true
       example:
         enabled: false
-    TenantIsCspManagedSetting:
-      type: object
-      properties:
-        enabled:
-          type: boolean
-          nullable: true
-      example:
-        enabled: false
     AuthorizationSettingsGetResponse:
       type: object
       properties:
         enableScopedAuthorization:
           $ref: '#/components/schemas/EnableScopedAuthorizationSetting'
-        tenantIsCspManaged:
-          $ref: '#/components/schemas/TenantIsCspManagedSetting'
     AuthorizationSettingsKeyEnum:
       type: string
       enum:
         - enableScopedAuthorization
-        - tenantIsCspManaged
     UpdateAuthorizationSettingByKeyRequest:
       type: object
       properties:
@@ -49787,8 +50073,8 @@ components:
           minLength: 8
           maxLength: 255
       example:
-        currentPassword: Abcd!234
-        newPassword: Zxcv!567
+        currentPassword: <current-password>
+        newPassword: <new-password>
     InternalUserCreationRequest:
       type: object
       required:
@@ -50234,30 +50520,17 @@ components:
           - 'https://url1'
           - 'https://url2'
     TokenRequestGrantTypeEnum:
-      x-enum-internal:
-        - app_token
       enum:
         - client_credentials
         - refresh_token
         - exchange_token
         - password
         - external_token_exchange
-        - app_token
     TokenRequest:
       type: object
       properties:
         grantType:
           $ref: '#/components/schemas/TokenRequestGrantTypeEnum'
-        appID:
-          deprecated: true
-          x-internal: true
-          type: string
-          maxLength: 255
-        appSecret:
-          deprecated: true
-          x-internal: true
-          type: string
-          maxLength: 500
         code:
           type: string
           maxLength: 2048
@@ -50722,32 +50995,6 @@ components:
       example:
         force: true
         reconcilerType: clients
-    AppTokenRequest:
-      type: object
-      required:
-        - id
-        - name
-        - secret
-      properties:
-        id:
-          type: string
-          maxLength: 64
-        name:
-          type: string
-          maxLength: 255
-        secret:
-          type: string
-          maxLength: 500
-    AppTokenResponse:
-      type: object
-      required:
-        - access_token
-        - id_token
-      properties:
-        access_token:
-          type: string
-        id_token:
-          type: string
     ConfigSamlResponse:
       type: object
       required:
@@ -50765,6 +51012,74 @@ components:
       $ref: '#/components/schemas/IdpResources'
     UserGroups:
       $ref: '#/components/schemas/Groups'
+    WorkloadActionId:
+      description: A unique ID of the workload action-history record.
+      type: string
+      format: uuid
+      example: 497f6eca-6276-4993-bfeb-53cbbbba6f08
+    WorkloadActionSubject:
+      description: The authenticated subject that performed the workload action.
+      type: string
+      example: user@run.ai
+    WorkloadActionSubjectType:
+      description: >-
+        The authenticated subject type, preserved as provided by the identity
+        context. Examples include user, service-account, and app, with casing
+        determined by the identity provider.
+      type: string
+      example: user
+    WorkloadActionType:
+      type: string
+      enum:
+        - create
+        - update
+        - delete
+        - suspend
+        - resume
+    WorkloadActionAcceptedAt:
+      description: The time when the workload action was accepted.
+      type: string
+      format: date-time
+      example: '2026-01-01T03:49:52.531Z'
+    WorkloadActionRecord:
+      type: object
+      required:
+        - id
+        - workloadId
+        - workloadName
+        - subject
+        - subjectType
+        - action
+        - acceptedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/WorkloadActionId'
+        workloadId:
+          $ref: '#/components/schemas/WorkloadId'
+        workloadName:
+          $ref: '#/components/schemas/WorkloadName'
+        subject:
+          $ref: '#/components/schemas/WorkloadActionSubject'
+        subjectType:
+          $ref: '#/components/schemas/WorkloadActionSubjectType'
+        action:
+          $ref: '#/components/schemas/WorkloadActionType'
+        acceptedAt:
+          $ref: '#/components/schemas/WorkloadActionAcceptedAt'
+    GetWorkloadActionsResponse:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/WorkloadActionRecord'
+        next:
+          type: integer
+          format: int32
+          example: 50
     RequestResourceCores:
       type: object
       properties:
@@ -51646,6 +51961,39 @@ components:
           $ref: '#/components/schemas/WorkloadNodeAffinities'
         kubernetesRef:
           $ref: '#/components/schemas/WorkloadKubernetesRef'
+    WorkloadActionRecordInput:
+      type: object
+      required:
+        - id
+        - clusterId
+        - workloadId
+        - workloadName
+        - action
+        - acceptedAt
+      properties:
+        id:
+          $ref: '#/components/schemas/WorkloadActionId'
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+        workloadId:
+          $ref: '#/components/schemas/WorkloadId'
+        workloadName:
+          $ref: '#/components/schemas/WorkloadName'
+        action:
+          $ref: '#/components/schemas/WorkloadActionType'
+        acceptedAt:
+          $ref: '#/components/schemas/WorkloadActionAcceptedAt'
+    CreateWorkloadActionsRequest:
+      type: object
+      required:
+        - actions
+      properties:
+        actions:
+          type: array
+          minItems: 1
+          maxItems: 500
+          items:
+            $ref: '#/components/schemas/WorkloadActionRecordInput'
     WorkloadNetworkStatus:
       type: object
       properties:
@@ -52295,6 +52643,49 @@ components:
             and 3 representing progressively nested elements.
           minimum: 1
           maximum: 3
+    PodResourceClaim:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: >-
+            Pod-local name of the claim entry (DNS_LABEL). Mirrors
+            `pod.spec.resourceClaims[].name` and the key used by
+            `pod.status.resourceClaimStatuses[].name` to publish the bound
+            claim.
+          example: gpu-1
+        resourceClaimTemplateName:
+          type: string
+          nullable: true
+          description: >-
+            Name of the referenced `ResourceClaimTemplate` in the pod's
+            namespace, when the claim entry was created from a template.
+            Mutually exclusive with `resourceClaimName`. Mirrors
+            `pod.spec.resourceClaims[].resourceClaimTemplateName`.
+          example: single-gpu
+        resourceClaimName:
+          type: string
+          nullable: true
+          description: >-
+            Name of a standalone `ResourceClaim` that the pod references
+            directly, when the claim entry is not created from a template.
+            Mutually exclusive with `resourceClaimTemplateName`. Mirrors
+            `pod.spec.resourceClaims[].resourceClaimName`.
+          example: shared-infiniband
+        allocatedResourceClaimName:
+          type: string
+          nullable: true
+          description: >-
+            Name of the actual `ResourceClaim` bound to the pod for this entry.
+            For a template-generated entry this is populated from
+            `pod.status.resourceClaimStatuses[].resourceClaimName` once
+            Kubernetes publishes it, and is null until then. For a standalone
+            entry it equals `resourceClaimName` and is populated immediately.
+            This is the field the forward-view API surfaces as the "actual"
+            bound claim.
+          example: dra-gpu-test-gpu-1-mk4s8
     PodSyncFields:
       type: object
       required:
@@ -52384,6 +52775,18 @@ components:
           description: >-
             The workload structure elements this pod belongs to, ordered by
             hierarchy level.
+        resourceClaims:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/PodResourceClaim'
+          description: >-
+            Per-pod DRA usage reported as-is from the cluster. One entry per
+            `pod.spec.resourceClaims[]` member — either a reference to a
+            `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched
+            with the actual bound `ResourceClaim` name once published in
+            `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution
+            against the k8s-object store happens at API read time, not here.
     InternalPodsSyncRequest:
       type: object
       required:
@@ -52402,6 +52805,22 @@ components:
         networkTopologyLabelValues:
           $ref: '#/components/schemas/NetworkTopologyLabelValuesOptional'
       description: Request to update pods on a specific node in a cluster
+    InternalResourceClaimTemplateWorkloadsRequest:
+      type: object
+      required:
+        - name
+        - scopeType
+        - scopeId
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: 'The name of the ResourceClaimTemplate, as referenced by pods.'
+          example: single-gpu
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
     InternalEnrichOrgUnitRankingRequest:
       type: object
       required:
@@ -52506,6 +52925,44 @@ components:
           items:
             type: string
             format: uuid
+    WorkloadSlim:
+      type: object
+      description: A workload as returned by GET /api/v1/workloads/slim.
+      required:
+        - id
+        - name
+        - projectName
+        - clusterId
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: very-important-job
+        type:
+          type: string
+        projectName:
+          type: string
+          example: proj-1
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+        distributedFramework:
+          type: string
+          example: Pytorch
+    GetWorkloadsSlimResponse:
+      type: object
+      description: The response of GET /api/v1/workloads/slim.
+      required:
+        - workloads
+      properties:
+        next:
+          type: integer
+          example: 1
+        workloads:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkloadSlim'
     PendingSchedulingMessage:
       type: object
       required:
@@ -53000,10 +53457,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -53150,10 +53613,16 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
               $ref: '#/components/schemas/GpuMemoryLimit'
+            gpuMemoryPortionLimit:
+              $ref: '#/components/schemas/GpuMemoryPortionLimit'
+            gpuMemoryPortionRequest:
+              $ref: '#/components/schemas/GpuMemoryPortionRequest'
             gpuMemoryRequest:
               $ref: '#/components/schemas/GpuMemoryRequest'
             gpuPortionLimit:
@@ -53293,10 +53762,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -53455,10 +53930,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -53781,10 +54262,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -53929,10 +54416,16 @@ components:
                       $ref: '#/components/schemas/CpuMemoryRequest'
                     extendedResources:
                       $ref: '#/components/schemas/ExtendedResources'
+                    gpuComputeMode:
+                      $ref: '#/components/schemas/GpuComputeMode'
                     gpuDevicesRequest:
                       $ref: '#/components/schemas/GpuDevicesRequest'
                     gpuMemoryLimit:
                       $ref: '#/components/schemas/GpuMemoryLimit'
+                    gpuMemoryPortionLimit:
+                      $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                    gpuMemoryPortionRequest:
+                      $ref: '#/components/schemas/GpuMemoryPortionRequest'
                     gpuMemoryRequest:
                       $ref: '#/components/schemas/GpuMemoryRequest'
                     gpuPortionLimit:
@@ -54352,10 +54845,16 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
               $ref: '#/components/schemas/GpuMemoryLimit'
+            gpuMemoryPortionLimit:
+              $ref: '#/components/schemas/GpuMemoryPortionLimit'
+            gpuMemoryPortionRequest:
+              $ref: '#/components/schemas/GpuMemoryPortionRequest'
             gpuMemoryRequest:
               $ref: '#/components/schemas/GpuMemoryRequest'
             gpuPortionLimit:
@@ -54555,10 +55054,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -54821,10 +55326,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -55013,10 +55524,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -55242,10 +55759,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryRequest'
                 extendedResources:
                   $ref: '#/components/schemas/ExtendedResources'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -55412,10 +55935,16 @@ components:
               $ref: '#/components/schemas/CpuMemoryRequest'
             extendedResources:
               $ref: '#/components/schemas/ExtendedResources'
+            gpuComputeMode:
+              $ref: '#/components/schemas/GpuComputeMode'
             gpuDevicesRequest:
               $ref: '#/components/schemas/GpuDevicesRequest'
             gpuMemoryLimit:
               $ref: '#/components/schemas/GpuMemoryLimit'
+            gpuMemoryPortionLimit:
+              $ref: '#/components/schemas/GpuMemoryPortionLimit'
+            gpuMemoryPortionRequest:
+              $ref: '#/components/schemas/GpuMemoryPortionRequest'
             gpuMemoryRequest:
               $ref: '#/components/schemas/GpuMemoryRequest'
             gpuPortionLimit:
@@ -55756,6 +56285,85 @@ components:
         - CPU_MEMORY_USAGE_BYTES
         - CPU_MEMORY_REQUEST_BYTES
         - CPU_MEMORY_LIMIT_BYTES
+    ResourceClaimTemplateRef:
+      description: >-
+        The ResourceClaimTemplate the claim was generated from. Absent for a
+        standalone ResourceClaim that the pod references directly.
+      nullable: true
+      type: object
+      required:
+        - name
+        - managed
+      properties:
+        name:
+          type: string
+          description: Name of the ResourceClaimTemplate in the pod's namespace.
+          example: single-gpu
+        managed:
+          type: boolean
+          description: >-
+            Whether the template is managed by NVIDIA Run:ai (created through
+            the resource claim templates API) rather than created directly in
+            the cluster.
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: >-
+            The id of the managed resource claim template. Null for an unmanaged
+            template.
+    WorkloadResourceClaim:
+      allOf:
+        - $ref: '#/components/schemas/PodResourceClaimBinding'
+        - type: object
+          properties:
+            template:
+              $ref: '#/components/schemas/ResourceClaimTemplateRef'
+    WorkloadPodResourceClaims:
+      type: object
+      required:
+        - podId
+        - podName
+        - resourceClaims
+      properties:
+        podId:
+          type: string
+          format: uuid
+          description: The id of the pod.
+        podName:
+          type: string
+          example: bert-worker-0
+        task:
+          type: string
+          nullable: true
+          description: >-
+            Identifies the function of the pod within a distributed workload
+            (for example, leader, worker, or master).
+          example: worker
+        resourceClaims:
+          type: array
+          description: >-
+            The claims the pod references, in the order they appear in
+            `pod.spec.resourceClaims`.
+          items:
+            $ref: '#/components/schemas/WorkloadResourceClaim'
+    WorkloadResourceClaimsResponse:
+      type: object
+      required:
+        - pods
+      properties:
+        next:
+          type: integer
+          format: int32
+          description: >
+            Offset for the next page of results. Present only when there are
+            more pods beyond the current page (i.e., the number of returned pods
+            equals the limit).
+        pods:
+          type: array
+          description: The pods of the workload that reference at least one claim.
+          items:
+            $ref: '#/components/schemas/WorkloadPodResourceClaims'
     WorkloadCategory:
       type: object
       required:
@@ -56360,17 +56968,15 @@ components:
         and `version`.
       maxLength: 250
       example: 'https://charts.bitnami.com/bitnami'
-    AIApplicationChartName:
+    ChartName:
       type: string
-      description: >-
-        The name of the chart within the specified repository. This corresponds
-        to the chart’s directory name.
       maxLength: 250
+      description: Helm chart name.
       example: redis
-    AIApplicationChartVersion:
+    ChartVersion:
       type: string
-      description: The specific Semantic Version (SemVer) of the chart to deploy.
       maxLength: 50
+      description: Helm chart version.
       example: 17.3.17
     AIApplicationChartUrl:
       type: string
@@ -56407,9 +57013,9 @@ components:
         repo:
           $ref: '#/components/schemas/AIApplicationChartRepo'
         chartName:
-          $ref: '#/components/schemas/AIApplicationChartName'
+          $ref: '#/components/schemas/ChartName'
         chartVersion:
-          $ref: '#/components/schemas/AIApplicationChartVersion'
+          $ref: '#/components/schemas/ChartVersion'
         chartURL:
           $ref: '#/components/schemas/AIApplicationChartUrl'
         chartId:
@@ -56421,6 +57027,13 @@ components:
         repository or chart URL. This is used when the chart source requires
         credentials.
       properties:
+        userCredential:
+          type: boolean
+          nullable: true
+          description: >-
+            Indicates whether the asset is a user credential owned by the
+            caller. When omitted or false, the asset is treated as a shared
+            credential.
         assetId:
           type: string
           description: The ID of the asset to use for authentication.
@@ -56434,16 +57047,35 @@ components:
           $ref: '#/components/schemas/AIApplicationSpecChartRef'
         values:
           type: object
-          description: >-
+          description: >
             Inline Helm values used to override the Helm chart’s default
             configuration. These values are merged with the Helm chart’s
             `values.yaml`. This field is mutually exclusive with `valuesBase64`.
+
+
+            A complete string value can reference a personal credential using
+            `USERCREDENTIAL:<name>`. Generic secret and Docker registry
+            credentials use that form. NGC credentials require an explicit
+            representation: `USERCREDENTIAL:<name>,generic-secret` or
+            `USERCREDENTIAL:<name>,docker-registry`. Embedded or partial
+            placeholders are not supported. The resolved value is a Kubernetes
+            Secret name, never credential plaintext.
           additionalProperties: true
         valuesBase64:
           type: string
-          description: >-
+          description: >
             Base64-encoded Helm values used to override the Helm chart’s default
-            configuration. This field is mutually exclusive with `values`.
+            configuration. This field is mutually exclusive with `values`. When
+            the decoded content contains personal credential references, it must
+            be a YAML object.
+
+
+            String values support the same exact personal credential placeholder
+            grammar as `values`: `USERCREDENTIAL:<name>` for generic secret and
+            Docker registry credentials, or
+            `USERCREDENTIAL:<name>,generic-secret` and
+            `USERCREDENTIAL:<name>,docker-registry` for NGC credentials.
+            Embedded or partial placeholders are not supported.
           format: byte
         auth:
           $ref: '#/components/schemas/AIApplicationAuth'
@@ -56466,6 +57098,8 @@ components:
         phase:
           type: string
           description: The actual status of the release in the cluster.
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
         projectId:
           $ref: '#/components/schemas/ProjectId'
         projectName:
@@ -56555,6 +57189,129 @@ components:
       properties:
         chartId:
           $ref: '#/components/schemas/AIApplicationChartId'
+    AIApplicationChartInspectionRequest:
+      type: object
+      required:
+        - chartRef
+      description: >
+        Select exactly one chart source: chartId for an existing uploaded
+        archive, chartURL for a direct
+
+        archive URL, or repo with chartName and an exact chartVersion. Sources
+        cannot be combined.
+
+        Inspection of a repository chart requires an explicit version;
+        latest-version selection
+
+        is not supported. Authentication uses the caller-accessible personal or
+        shared credential asset.
+      properties:
+        chartRef:
+          $ref: '#/components/schemas/AIApplicationSpecChartRef'
+        auth:
+          $ref: '#/components/schemas/AIApplicationAuth'
+    AIApplicationChartQuestionsStatus:
+      type: string
+      enum:
+        - absent
+        - usable
+        - unusable
+      description: >
+        Absent means neither root questions.yaml nor questions.yml exists.
+        Usable means the entire declaration is
+
+        usable after supported normalization. Unusable means declaration
+        validation failed;
+
+        questions and groups are empty and warnings explain the failure. An
+        unusable declaration
+
+        does not block raw YAML configuration or deployment.
+    AIApplicationChartInspectionWarning:
+      type: object
+      required:
+        - code
+        - message
+        - path
+      properties:
+        code:
+          type: string
+          description: Stable machine-readable diagnostic identifier.
+        message:
+          type: string
+          description: Explanation of the problem and available recovery.
+        path:
+          type: string
+          description: >-
+            Location within the declaration, or an empty string for a
+            document-wide diagnostic.
+    AIApplicationChartInspectionResponse:
+      type: object
+      required:
+        - chartName
+        - chartVersion
+        - archiveSHA256
+        - hasQuestions
+        - questionsStatus
+        - groups
+        - questions
+        - warnings
+      properties:
+        chartName:
+          $ref: '#/components/schemas/ChartName'
+        chartVersion:
+          $ref: '#/components/schemas/ChartVersion'
+        archiveSHA256:
+          type: string
+          description: >-
+            Lowercase hexadecimal SHA-256 digest of the exact inspected archive
+            bytes.
+        hasQuestions:
+          type: boolean
+          description: >-
+            Whether the chart contains a root questions.yaml or questions.yml
+            file, including an unusable file.
+        questionsStatus:
+          $ref: '#/components/schemas/AIApplicationChartQuestionsStatus'
+        groups:
+          type: array
+          description: >-
+            Normalized group declarations in author order; empty for absent or
+            unusable declarations.
+          items:
+            type: object
+            additionalProperties: true
+        questions:
+          type: array
+          description: >
+            Normalized root questions in author order. Each question preserves
+            supported declared
+
+            metadata and may contain recursive subquestions through four child
+            levels (five levels total), with roots at
+
+            depth zero. Supported compatibility forms are normalized. Unknown
+            question types become
+
+            string with a warning; unsupported optional properties are ignored
+            with a warning. Invalid
+
+            mandatory metadata, bindings, options, defaults, conditions, or
+            excessive nesting make the
+
+            entire declaration unusable. Credential and Secret question types
+            are not supported.
+
+            This response contains no raw declaration YAML or complete
+            values.yaml defaults.
+          items:
+            type: object
+            additionalProperties: true
+        warnings:
+          type: array
+          description: Diagnostics for recoverable metadata and unusable declarations.
+          items:
+            $ref: '#/components/schemas/AIApplicationChartInspectionWarning'
     AIApplicationSyncResource:
       type: object
       properties:
@@ -56977,7 +57734,6 @@ components:
     ServicePort:
       type: object
       description: Service port specification.
-      nullable: true
       properties:
         name:
           description: The Service port name.
@@ -57023,7 +57779,7 @@ components:
           description: The Kubernetes Service name.
           type: string
           minLength: 1
-          maxLength: 253
+          maxLength: 63
           example: workload-service
         type:
           description: Kubernetes service type that determines how the service is exposed.
@@ -57058,14 +57814,16 @@ components:
         - ports
     ServiceRef:
       type: object
-      description: Reference an existing Service.
+      description: >-
+        Reference an existing Service. Requires authorization on the service and
+        externalAccess on the endpoint.
       nullable: true
       properties:
         name:
           description: The name of the existing Kubernetes Service.
           type: string
           minLength: 1
-          maxLength: 253
+          maxLength: 63
           example: existing-service
         port:
           description: The port on the existing Service to route traffic to.
@@ -57090,6 +57848,11 @@ components:
           $ref: '#/components/schemas/AuthorizedGroups'
     Workloadv2Authorization:
       type: object
+      description: >-
+        Access control for this networking endpoint. Requires externalAccess.
+
+        Only the access list selected by authorizationType may be nonempty;
+        authenticatedUsers requires both lists to be empty.
       example:
         forceJsonResponse: false
         authorizationType: authenticatedUsers
@@ -57106,9 +57869,8 @@ components:
     NetworkingService:
       type: object
       description: >-
-        Service configuration for routing traffic to the workload. Use 'spec' or
-        'ref' (not both).
-      nullable: true
+        Service configuration for routing traffic to the workload. Provide
+        exactly one of spec or ref.
       properties:
         spec:
           description: >-
@@ -57121,14 +57883,18 @@ components:
             `spec`.
           $ref: '#/components/schemas/ServiceRef'
         authorization:
-          description: Access control configuration for traffic through this endpoint.
+          description: >-
+            Access control configuration for traffic through this endpoint.
+            Required when using ref. Requires externalAccess on the endpoint.
           $ref: '#/components/schemas/Workloadv2Authorization'
     NetworkingEndpoint:
       type: object
       description: >-
-        A single networking endpoint. An endpoint may create or reference one
-        Service and may expose it externally.
-      nullable: true
+        A single networking endpoint. Provide a Service, externalAccess
+        containing an Ingress, Route, or HTTPRoute, or both.
+
+        An endpoint may create or reference at most one Service. Authorization
+        requires externalAccess.
       properties:
         externalAccess:
           description: >-
@@ -57150,7 +57916,7 @@ components:
         Networking endpoint configurations for the workload (external access,
         services with auth).
 
-        Supported for cluster version 2.25 and above.
+        Requires cluster version 3.0.0 or later.
       nullable: true
       maxItems: 1000
       items:
@@ -57299,6 +58065,7 @@ components:
           nullable: true
           example: standard
         volumeMode:
+          type: string
           allOf:
             - $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode'
           nullable: true
@@ -57349,12 +58116,10 @@ components:
           type: string
           nullable: true
         networking:
-          x-internal: true
           $ref: '#/components/schemas/NetworkingConfiguration'
         userCredentials:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials'
         pvcs:
-          x-internal: true
           type: array
           nullable: true
           maxItems: 1000
@@ -57362,7 +58127,6 @@ components:
           items:
             $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvc'
         pvcsConfig:
-          x-internal: true
           nullable: true
           description: >-
             Configuration applied to PVCs that are created and reconciled
@@ -57899,10 +58663,16 @@ components:
                   $ref: '#/components/schemas/CpuMemoryLimit'
                 cpuMemoryRequest:
                   $ref: '#/components/schemas/CpuMemoryRequest'
+                gpuComputeMode:
+                  $ref: '#/components/schemas/GpuComputeMode'
                 gpuDevicesRequest:
                   $ref: '#/components/schemas/GpuDevicesRequest'
                 gpuMemoryLimit:
                   $ref: '#/components/schemas/GpuMemoryLimit'
+                gpuMemoryPortionLimit:
+                  $ref: '#/components/schemas/GpuMemoryPortionLimit'
+                gpuMemoryPortionRequest:
+                  $ref: '#/components/schemas/GpuMemoryPortionRequest'
                 gpuMemoryRequest:
                   $ref: '#/components/schemas/GpuMemoryRequest'
                 gpuPortionLimit:
@@ -59680,6 +60450,15 @@ components:
         - baseUrl
         - whatsNew
       properties:
+        catalogVersion:
+          type: string
+          enum:
+            - v1
+            - v2
+          default: v1
+          description: >-
+            Documentation path catalog. Defaults to v1 when omitted by an older
+            server.
         baseUrl:
           type: string
           description: Base URL used to resolve documentation links.
@@ -60954,6 +61733,26 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryTypeInternal'
+    ProjectsFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are == Equals, != Not equals, <= Less than or equal, >=
+        Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
+        and =$ Ends with. Dates are in ISO 8601 timestamp format and available
+        for operators ==, !=, <= and >=.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: >-
+            ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name!=some-name
+      explode: false
     OrgUnitType:
       in: query
       required: true
@@ -61119,26 +61918,6 @@ components:
       description: specifies what data to request
       schema:
         $ref: '#/components/schemas/OrgUnitTelemetryType'
-    ProjectsFilterBy:
-      name: filterBy
-      in: query
-      required: false
-      description: >-
-        Filter results by a parameter. Use the format field-name operator value.
-        Operators are == Equals, != Not equals, <= Less than or equal, >=
-        Greater than or equal, =@ contains, !@ Does not contains, =^ Starts with
-        and =$ Ends with. Dates are in ISO 8601 timestamp format and available
-        for operators ==, !=, <= and >=.
-      schema:
-        type: array
-        maxItems: 10
-        items:
-          type: string
-          pattern: >-
-            ^(name|clusterId|departmentId|parentId|parentName|phase|totalGpuQuota|gpuAllocated|createdAt|avgGpuAllocation24h|avgGpuUtilization24h|avgGpuMemoryUtilization24h|avgGpuAllocation7d|avgGpuUtilization7d|avgGpuMemoryUtilization7d|avgGpuAllocation30d|avgGpuUtilization30d|avgGpuMemoryUtilization30d)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
-        example:
-          - name!=some-name
-      explode: false
     ProjectsSortBy:
       name: sortBy
       in: query
@@ -61595,6 +62374,61 @@ components:
         type: string
         format: uuid
         minLength: 1
+    RctsSort:
+      name: sortBy
+      in: query
+      required: false
+      description: Sort results by parameter.
+      schema:
+        type: string
+        enum:
+          - name
+          - clusterId
+          - departmentId
+          - projectId
+          - description
+          - createdAt
+          - createdBy
+          - updatedAt
+          - updatedBy
+    RctsFilter:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,
+        `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^`
+        Starts with and `=$` Ends with. Dates are in ISO 8601 timestamp format
+        and available for operators `==`, `!=`, `<=` and `>=`. At most one scope
+        anchor (clusterId, departmentId or projectId) may be provided. The
+        anchor is combined with includeAncestors / includeDescendants to
+        determine which scopes of the hierarchy are returned.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: >-
+            ^(name|clusterId|departmentId|projectId|description|createdAt|createdBy|updatedAt|updatedBy)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name=@gpu
+          - clusterId==11111111-1111-1111-1111-111111111111
+      explode: false
+    IncludeAncestors:
+      name: includeAncestors
+      in: query
+      required: false
+      description: >-
+        When a scope anchor (clusterId, departmentId or projectId) is provided,
+        set includeAncestors=true to also include resource claim templates from
+        the anchor's ancestor scopes (for example, for a project: its parent
+        department and cluster, as well as tenant and system scoped templates).
+        Defaults to true to preserve the backward-compatible scope-usability
+        behavior.
+      schema:
+        type: boolean
+        default: true
     IncludeStatus:
       name: statusInfo
       in: query
@@ -61604,6 +62438,17 @@ components:
         response.
       schema:
         type: boolean
+    SyncAfter:
+      name: after
+      description: >-
+        search for updates with update counter greater than the value passed for
+        this parameter
+      in: query
+      required: false
+      schema:
+        type: integer
+        format: int64
+        example: 123
     PrivateOnly:
       name: privateOnly
       in: query
@@ -61640,17 +62485,6 @@ components:
           - password
           - genericSecret
           - ngcApiKey
-    SyncAfter:
-      name: after
-      description: >-
-        search for updates with update counter greater than the value passed for
-        this parameter
-      in: query
-      required: false
-      schema:
-        type: integer
-        format: int64
-        example: 123
     SearchName:
       name: searchName
       in: query
@@ -62143,6 +62977,22 @@ components:
       schema:
         type: string
       required: true
+    ResourceScopeType:
+      name: scopeType
+      in: query
+      required: true
+      description: The resource scope type to filter by.
+      schema:
+        $ref: '#/components/schemas/ResourceScopeType'
+    ScopeIdRequired:
+      name: scopeId
+      in: query
+      required: true
+      description: The scope resource id that identifies the row.
+      schema:
+        type: string
+        minLength: 1
+        example: '2'
     StorageClassConfigurationFilterBy:
       name: filterBy
       in: query
@@ -62205,25 +63055,6 @@ components:
       $ref: '#/components/parameters/ScopeId1'
     origin:
       $ref: '#/components/parameters/originFilter'
-    IncludeInternal:
-      name: includeInternal
-      in: query
-      required: false
-      x-internal: true
-      schema:
-        type: boolean
-        example: false
-        default: false
-    RoleIdPath:
-      name: roleIdPath
-      in: path
-      required: true
-      description: The ID of the role
-      example: 32
-      schema:
-        type: integer
-        format: int32
-        minimum: 0
     RolesSort:
       name: sortBy
       in: query
@@ -62252,6 +63083,25 @@ components:
         - name!=some-access-rule-name
         - 'createdAt>=2023-01-01T00:00:00Z'
       explode: false
+    IncludeInternal:
+      name: includeInternal
+      in: query
+      required: false
+      x-internal: true
+      schema:
+        type: boolean
+        example: false
+        default: false
+    RoleIdPath:
+      name: roleIdPath
+      in: path
+      required: true
+      description: The ID of the role
+      example: 32
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
     PermissionSetId:
       name: permissionSetId
       in: path
@@ -62691,6 +63541,26 @@ components:
           - guaranteedRuntimeEndsAt
           - aiApplicationId
           - aiApplicationName
+    WorkloadsSlimFilter:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are `==` Equals, `!=` Not equals, `<=` Less than or equal,
+        `>=` Greater than or equal, `=@` contains, `!@` Does not contain, `=^`
+        Starts with and `=$` Ends with.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: >-
+            ^(type|name|clusterId|projectName|distributedFramework)(==|!=|<=|>=|=@|!@|=\^|=\$).+$
+        example:
+          - name==some-workload-name
+          - projectName==proj-1
+      explode: false
     Precise:
       name: precise
       in: query
@@ -62720,6 +63590,7 @@ components:
             - RequestedNodepools
             - Phase
             - Category
+            - Source
     TelemetryType2:
       name: telemetryType
       in: query
@@ -62743,6 +63614,25 @@ components:
         example:
           - Running
           - Failed
+    TelemetryFilterBy:
+      name: filterBy
+      in: query
+      required: false
+      description: >-
+        Filter results by a parameter. Use the format field-name operator value.
+        Operators are == Equals, != Not equals, <= Less than or equal, >=
+        Greater than or equal. Dates are in ISO 8601 timestamp format.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          maxLength: 1000
+          pattern: ^(createdAt|phaseUpdatedAt)(==|!=|<=|>=).+$
+        example:
+          - 'createdAt>=2026-09-01T00:00:00Z'
+          - 'createdAt<=2026-09-02T00:00:00Z'
+      explode: false
     PodsSort:
       name: sortBy
       in: query
@@ -63533,82 +64423,3 @@ components:
         text: PRODUCTION ENVIRONMENT
         backgroundColor: '#D32F2F'
         fontColor: '#FFFFFF'
-x-tagGroups:
-  - name: Organizations
-    tags:
-      - Settings
-      - Clusters
-      - Departments
-      - Reports
-      - NodePools
-      - Nodes
-      - Projects
-      - Logo
-      - Researcher Command Line Interface
-      - Researcher Command Line Interface Deprecated
-      - Network Topologies
-  - name: Authentication and Authorization
-    tags:
-      - Access Keys
-      - Access rules
-      - Permissions
-      - Service Accounts
-      - Roles
-      - Tokens
-      - Users
-      - Idps
-      - Me
-      - Org unit
-  - name: Audit
-    tags:
-      - AuditLogs
-  - name: Datavolumes
-    tags:
-      - Datavolumes
-  - name: Workloads
-    tags:
-      - Events
-      - Pods
-      - Workloads
-      - Workloads V2
-      - NVIDIA NIM
-      - Workspaces
-      - Trainings
-      - Inferences
-      - Revisions
-      - Distributed
-      - Workloads batch
-      - Workload properties
-      - Workload templates
-      - Distributed Inferences
-  - name: Workload assets
-    tags:
-      - Compute
-      - Credentials
-      - Datasources
-      - Environment
-      - Storage Classes
-      - Storage Class Configuration
-      - Git
-      - HostPath
-      - NFS
-      - PVC
-      - Registry
-      - S3
-      - ConfigMap
-      - Secret
-      - Template
-  - name: Policies
-    tags:
-      - Policy
-  - name: Notifications
-    tags:
-      - Notification State
-      - Notification Types
-      - NotificationChannels
-      - Slack
-      - Email
-      - Subscriptions
-  - name: AI Applications
-    tags:
-      - AI Applications

@@ -21,7 +21,6 @@ import (
 	org_cache "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/cache"
 	"github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
@@ -59,10 +58,12 @@ var ResourceTypesDisplayName = map[api.ResourceType]string{
 	api.RESOURCETYPE_CM_VOLUME_ASSETS:             "Data sources",
 	api.RESOURCETYPE_SECRET_VOLUME_ASSETS:         "Data sources",
 	api.RESOURCETYPE_COMPUTE_RESOURCES:            "Compute resources",
+	api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES:     "Resource claim templates",
 	api.RESOURCETYPE_TEMPLATES:                    "Templates",
 	api.RESOURCETYPE_CREDENTIALS:                  "Credentials",
 	api.RESOURCETYPE_DATAVOLUMES:                  "Data volumes",
 	api.RESOURCETYPE_STORAGE_CLASS_CONFIGURATION:  "Storage class configuration",
+	api.RESOURCETYPE_DEVICE_CLASSES:               "Device classes",
 	api.RESOURCETYPE_ACCESS_KEYS:                  "Access Keys",
 	api.RESOURCETYPE_WORKLOAD_PROPERTIES:          "Workload properties",
 	api.RESOURCETYPE_NETWORK_TOPOLOGIES:           "Network topologies",
@@ -113,10 +114,12 @@ var ResourceTypesGroupId = map[api.ResourceType]api.ResourceTypeGroupId{
 	api.RESOURCETYPE_CM_VOLUME_ASSETS:             api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_SECRET_VOLUME_ASSETS:         api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_COMPUTE_RESOURCES:            api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
+	api.RESOURCETYPE_RESOURCE_CLAIM_TEMPLATES:     api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_TEMPLATES:                    api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_CREDENTIALS:                  api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_DATAVOLUMES:                  api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_STORAGE_CLASS_CONFIGURATION:  api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
+	api.RESOURCETYPE_DEVICE_CLASSES:               api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 	api.RESOURCETYPE_REGISTRIES:                   api.RESOURCETYPEGROUPID_WORKLOAD_ASSET,
 }
 
@@ -146,33 +149,6 @@ func RoleDaoToApi(role *models.Role) api.Role {
 		Custom:                role.Custom,
 		EffectiveEnabled:      effectiveEnable,
 		Deprecated:            role.Deprecated,
-	}
-}
-
-func RoleDaoToV1Api(role *models.Role) api.RoleV1 {
-	k8sPermissions := api.KubernetesPermissions{}
-	if role.ClusterRolePredefinedId != nil {
-		k8sPermissions.PredefinedRole = ptr.To(fmt.Sprintf("%d", *role.ClusterRolePredefinedId))
-	}
-	effectiveEnable := role.Enabled
-	if role.EffectiveEnabled != nil {
-		effectiveEnable = *role.EffectiveEnabled
-	}
-	permissions := PermissionsSetDaoToPermissionApi(role.PermissionSets)
-	return api.RoleV1{
-		Name:                  role.Name,
-		Description:           role.Description,
-		Permissions:           permissions,
-		ScopeType:             string(role.ScopeType),
-		ScopeId:               role.ScopeId,
-		Enabled:               ptr.To(role.Enabled),
-		KubernetesPermissions: k8sPermissions,
-		Id:                    int32(role.ID),
-		CreatedAt:             role.CreatedAt,
-		UpdatedAt:             role.UpdatedAt,
-		CreatedBy:             role.CreatedBy,
-		Custom:                role.Custom,
-		EffectiveEnabled:      effectiveEnable,
 	}
 }
 
@@ -354,46 +330,6 @@ func RolePermissionsDaoToApi(permissions []*models.RolePermission) []api.Permiss
 	}
 	result = addMissingResourceTypesV1(result)
 	return result
-}
-
-func PermissionsSetDaoToPermissionApi(permissionSets *[]models.PermissionSet) []api.Permission {
-	apiPermissions := []api.Permission{}
-	apiPermissionsMap := map[string]api.Permission{}
-	for _, ps := range *permissionSets {
-		for _, permission := range ps.Permissions {
-			// Filtering out unknown resource types.
-			// This case could happen when running in gradual rollout and the new code adds a new resource type but the old services are getting it from the DB but cant parse it into the enum
-			if !api.ResourceType.IsValid(permission.ResourceType) {
-				continue
-			}
-
-			apiPermission, found := apiPermissionsMap[string(permission.ResourceType)]
-			if !found {
-				apiPermission = api.Permission{
-					ResourceType: permission.ResourceType,
-					DisplayName:  GetResourceTypeDisplayName(permission.ResourceType),
-					GroupId:      GetResourceTypeGroupId(permission.ResourceType),
-					Actions:      []api.Action{},
-				}
-			}
-
-			actions := apiPermission.Actions
-			actions = AppendAction(actions, permission.Create, api.ACTION_CREATE)
-			actions = AppendAction(actions, permission.Read, api.ACTION_READ)
-			actions = AppendAction(actions, permission.Update, api.ACTION_UPDATE)
-			actions = AppendAction(actions, permission.Delete, api.ACTION_DELETE)
-			apiPermission.Actions = actions
-
-			apiPermissionsMap[string(permission.ResourceType)] = apiPermission
-		}
-	}
-	for _, apiPermission := range apiPermissionsMap {
-		apiPermissions = append(apiPermissions, apiPermission)
-	}
-
-	apiPermissions = addMissingResourceTypesV1(apiPermissions)
-
-	return apiPermissions
 }
 
 func PermissionsSetDaoToRolePermApi(permissionSets *[]models.PermissionSet) ([]api.RolePermissionSet, []api.RolePermission) {
@@ -644,13 +580,15 @@ func (s *SyncSlice[T]) GetAll() []T {
 	return append([]T(nil), s.items...)
 }
 
-// shouldMapServiceAccountToApp returns true if service-account should be mapped to app for this cluster
-func shouldMapServiceAccountToApp(ctx context.Context, clusterId string) bool {
-	if clusterId == "" {
-		return false
-	}
+// deprecatedSubjectTypeApp stays in the API enums so the spec keeps accepting it (removing an enum value is a breaking
+// API change), but it is no longer a supported subject type.
+const deprecatedSubjectTypeApp = "app"
 
-	capabilitiesChecker := checker.NewClusterCapabilitiesChecker(clusterId)
-	supported, _ := capabilitiesChecker.ValidateClusterCapability(ctx, checker.MinVersionOfServiceAccountInGetAccessRulesApi)
-	return !supported
+func isDeprecatedSubjectType[T ~string](subjectType T) bool {
+	return string(subjectType) == deprecatedSubjectTypeApp
+}
+
+func deprecatedSubjectTypeError() *api.Error {
+	return api.NewError(http.StatusUnsupportedMediaType,
+		fmt.Sprintf("subjectType %q is no longer supported: use %q", deprecatedSubjectTypeApp, api.SUBJECTTYPE_SERVICE_ACCOUNT), nil)
 }

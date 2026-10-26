@@ -80,7 +80,7 @@ spec:
 
 Dynamo disaggregated inference workloads require per-component topology-aware scheduling, since applying a single topology constraint across all pods can lead to suboptimal placement. NVIDIA Run:ai supports hierarchical, multi-component topology-aware scheduling for Dynamo over Grove workloads, enforcing constraints at both the workload (Deployment) and component (Service) levels.
 
-<Info>
+<Note>
 
 **Note**
 
@@ -88,12 +88,12 @@ Support for multiple topologies in the same cluster requires Dynamo 1.1.0 and Gr
 
 In earlier versions, only a single cluster-wide topology is supported - using multiple topologies in those versions may result in scheduling mismatches.
 
-</Info>
+</Note>
 
 Grove manages topologies independently and exposes them as the mechanism for requesting topology constraints in the Dynamo workload spec.
 
-* **Administrator setup** - For each topology defined in NVIDIA Run:ai, the administrator creates a matching topology in Grove and references it to its corresponding KAI topology. Once linked, NVIDIA Run:ai surfaces the Grove topology name and levels to users through the [Network Topologies](https://run-ai-docs.nvidia.com/api/2.26/organizations/network-topologies) API, without requiring them to understand the underlying Grove topology configuration.
-* **Workload submission** - When submitting a Dynamo workload, the user selects the topology that matches the node pool on which the workload will run. If only a single topology exists in the cluster, it is always used. The Grove topology is surfaced through the [Network Topologies](https://run-ai-docs.nvidia.com/api/2.26/organizations/network-topologies) API, allowing users to identify the correct topology for their target node pool.
+* **Administrator setup** - For each topology defined in NVIDIA Run:ai, the administrator creates a matching topology in Grove and references it to its corresponding KAI topology. Once linked, NVIDIA Run:ai surfaces the Grove topology name and levels to users through the [Network Topologies](api:main-api:GET/api/v1/network-topologies) API, without requiring them to understand the underlying Grove topology configuration.
+* **Workload submission** - When submitting a Dynamo workload, the user selects the topology that matches the node pool on which the workload will run. If only a single topology exists in the cluster, it is always used. The Grove topology is surfaced through the [Network Topologies](api:main-api:GET/api/v1/network-topologies) API, allowing users to identify the correct topology for their target node pool.
 * **Scheduling** - The NVIDIA Run:ai Scheduler enforces the topology constraints at both the workload (Deployment) and component (Service) levels.
 
 If there is no matching topology for the required node pool, a mismatch can occur between what the user requests, what the Scheduler places, and what is visible on the workload. See [Topology constraints visibility](README.md#topology-constraints-visibility) for more details.

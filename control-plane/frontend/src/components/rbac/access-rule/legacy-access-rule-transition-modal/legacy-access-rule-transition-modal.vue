@@ -66,7 +66,7 @@
 import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useQuasar } from "quasar";
-import type { RoleV1 } from "@/swagger-models/authorization-client/api";
+import type { Role } from "@/swagger-models/authorization-client/api";
 import type { ILegacyRoleTransitionRow } from "@/models/legacy-access-rule-transition.model";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import { RunaiBtn } from "@/components/common/runai-btn";
@@ -81,7 +81,7 @@ import { ErrorAlert } from "@/utils/error-alert.util";
 defineOptions({ name: "legacy-access-rule-transition-modal" });
 
 const props = defineProps<{
-  availableRoles: RoleV1[];
+  availableRoles: Role[];
 }>();
 
 const emit = defineEmits<{

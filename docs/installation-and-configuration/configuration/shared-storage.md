@@ -11,21 +11,21 @@ When implementing shared storage in Kubernetes, there are two primary approaches
 * Utilizing the [Kubernetes Storage Classes](https://kubernetes.io/docs/concepts/storage/storage-classes/) of your storage provider (Recommended)
 * Using a direct NFS (Network File System) mount
 
-NVIDIA Run:ai [Data Sources](../../workloads-in-nvidia-run-ai/workload-assets/datasources/README.md) support both direct NFS mount and Kubernetes Storage Classes.
+NVIDIA Run:ai [Data Sources](../../workloads-in-nvidia-run-ai/workload-assets/datasources.md) support both direct NFS mount and Kubernetes Storage Classes.
 
 ### Kubernetes Storage Classes
 
 Storage classes in Kubernetes defines how storage is provisioned and managed. This allows you to select storage types optimized for AI workloads. For example, you can choose storage with high IOPS (Input/Output Operations Per Second) for rapid data access during intensive training sessions, or tiered storage options to balance cost and performance-based on your organization’s requirements. This approach supports dynamic provisioning, enabling storage to be allocated on-demand as required by your applications.
 
-NVIDIA Run:ai data sources such as [Persistent Volume Claims (PVC)](../../workloads-in-nvidia-run-ai/workload-assets/datasources/README.md#pvc) and [Data Volumes](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) leverage storage class to manage and allocate storage efficiently. This ensures that the most suitable storage option is always accessible, contributing to the efficiency and performance of AI workloads.
+NVIDIA Run:ai data sources such as [Persistent Volume Claims (PVC)](../../workloads-in-nvidia-run-ai/workload-assets/datasources.md) and [Data Volumes](../../workloads-in-nvidia-run-ai/workload-assets/data-volumes.md) leverage storage class to manage and allocate storage efficiently. This ensures that the most suitable storage option is always accessible, contributing to the efficiency and performance of AI workloads.
 
-<Info>
+<Note>
 
 **Note**
 
 NVIDIA Run:ai lists all available storage classes in the Kubernetes cluster, making it easy for users to select the appropriate storage. Additionally, [policies](../../platform-management/policies/policies-and-rules.md) can be set to restrict or enforce the use of specific storage classes, to help maintain compliance with organizational standards and optimize resource utilization.
 
-</Info>
+</Note>
 
 ### Direct NFS Mount
 

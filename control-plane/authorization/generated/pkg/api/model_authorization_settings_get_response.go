@@ -26,19 +26,11 @@ type AuthorizationSettingsGetResponse struct {
 	//EnableScopedAuthorization EnableScopedAuthorizationSetting `json:"enableScopedAuthorization,omitempty"`
 	EnableScopedAuthorization EnableScopedAuthorizationSetting `json:"enableScopedAuthorization,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//TenantIsCspManaged TenantIsCspManagedSetting `json:"tenantIsCspManaged,omitempty"`
-	TenantIsCspManaged TenantIsCspManagedSetting `json:"tenantIsCspManaged,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertAuthorizationSettingsGetResponseRequired checks if the required fields are not zero-ed
 func AssertAuthorizationSettingsGetResponseRequired(obj AuthorizationSettingsGetResponse) error {
 	if err := AssertEnableScopedAuthorizationSettingRequired(obj.EnableScopedAuthorization); err != nil {
-		return err
-	}
-	if err := AssertTenantIsCspManagedSettingRequired(obj.TenantIsCspManaged); err != nil {
 		return err
 	}
 	return nil
@@ -52,14 +44,6 @@ func AssertAuthorizationSettingsGetResponseConstraints(obj AuthorizationSettings
 
 	//////////////////////// RUNAI END //////////////////////////
 	if err := AssertEnableScopedAuthorizationSettingConstraints(obj.EnableScopedAuthorization); err != nil {
-		return err
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertTenantIsCspManagedSettingConstraints(obj.TenantIsCspManaged); err != nil {
 		return err
 	}
 	return nil

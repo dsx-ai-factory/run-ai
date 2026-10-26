@@ -19,11 +19,6 @@ import (
 )
 
 var _ = Describe("Init CA Operand", func() {
-	AfterEach(func() {
-		runaiConfig.Spec.PodGroupAssigner.Enabled = ptr.To[bool](true)
-		EventuallyUpdateResource(kc.New(k8s, k8s, nil), runaiConfig)
-	})
-
 	Context("Resources", func() {
 		It("should have resources", func() {
 			resources, err := init_ca.Operand().ResourcesForRunaiConfig(apiCtx,
@@ -60,24 +55,6 @@ var _ = Describe("Init CA Operand", func() {
 				}
 
 				return reCreated
-			}).Should(BeTrue())
-		})
-
-		It("should have pod-group-assigner webhook in configmap if needed", func() {
-			runaiConfig.Spec.PodGroupAssigner.Enabled = ptr.To[bool](true)
-			EventuallyUpdateResource(kc.New(k8s, k8s, nil), runaiConfig)
-
-			EventuallyWithTimeout(func() bool {
-				cm, err := resources.ConfigMapForRunaiConfig(apiCtx, kc.New(k8s, k8s, nil), runaiConfig)
-				ExpectNoErr(err)
-				Expect(cm).NotTo(BeNil())
-
-				configMap := &corev1.ConfigMap{}
-				err = k8s.Get(apiCtx, NamespacedNameFor(cm), configMap)
-				ExpectNoErr(err)
-				Expect(configMap).NotTo(BeNil())
-
-				return strings.Contains(configMap.Data["webhooks.yaml"], "pod-group-assigner")
 			}).Should(BeTrue())
 		})
 

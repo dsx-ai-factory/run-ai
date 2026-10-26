@@ -28,6 +28,8 @@ const (
 	eventsDeleteQuery = "DELETE FROM events WHERE " +
 		"NOT EXISTS (SELECT 1 FROM workloads WHERE workloads.id = events.involved_object_uid ) AND " +
 		"NOT EXISTS (SELECT 1 FROM workloads_children WHERE workloads_children.child_id = events.involved_object_uid);"
+	workloadActionsDeleteQuery = "DELETE FROM workloads_action_history AS wah WHERE " +
+		"NOT EXISTS (SELECT 1 FROM workloads WHERE workloads.tenant_id = wah.tenant_id AND workloads.id = wah.workload_id);"
 	workloadsViewRefreshQuery        = "REFRESH MATERIALIZED VIEW CONCURRENTLY workloads_materialized_view WITH DATA"
 	workloadsPartialViewRefreshQuery = "REFRESH MATERIALIZED VIEW CONCURRENTLY workloads_partial_materialized_view WITH DATA"
 
@@ -48,7 +50,7 @@ func InitGoRoutines(stopCh <-chan struct{}) {
 	serverConf := runai_config.Get[*config.ServerConfig]()
 	chartUploadConf := runai_config.Get[*config.ChartUploadConfig]()
 
-	cleanupQueries := []string{getWorkloadsDeleteQuery(dbCleanerConf), eventsDeleteQuery}
+	cleanupQueries := []string{getWorkloadsDeleteQuery(dbCleanerConf), workloadActionsDeleteQuery, eventsDeleteQuery}
 	// A non-positive retention would reap every staged chart on the next run (0 => older than now,
 	// negative => a future cutoff), so treat <=0 as "cleanup disabled", matching InitRefresher below.
 	if chartUploadConf.RetentionMinutes > 0 {

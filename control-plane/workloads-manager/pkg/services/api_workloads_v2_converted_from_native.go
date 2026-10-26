@@ -9,7 +9,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 
 	manifestconstants "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/constants"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 // ConvertedFromNativeLabel marks a workload that was created via the v1 native API

@@ -36,7 +36,7 @@ import (
 	idm_client "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/mocks"
 	metrics_client "github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client/generated"
-	org_unit_client "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/mocks"
+	org_unit_client "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	setting_pkg "github.com/dsx-ai-factory/run-ai/runai-common-packages/setting"

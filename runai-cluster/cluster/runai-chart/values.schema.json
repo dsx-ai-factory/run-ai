@@ -343,6 +343,9 @@
         "s3FileSystemImage": {
           "$ref": "#/$defs/Image"
         },
+        "s3FileSystemMountCheckEnabled": {
+          "type": "boolean"
+        },
         "runaiOauth2ProxyImage": {
           "$ref": "#/$defs/Image"
         },
@@ -2120,6 +2123,14 @@
       },
       "type": "object"
     },
+    "KRMOperator": {
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
     "KeyToPath": {
       "properties": {
         "key": {
@@ -3430,6 +3441,9 @@
         "clusterWidePvc": {
           "type": "boolean"
         },
+        "clusterWideResourceClaimTemplate": {
+          "type": "boolean"
+        },
         "limitRange": {
           "type": "boolean"
         },
@@ -4357,6 +4371,9 @@
         },
         "runai-node-exporter": {
           "$ref": "#/$defs/NodeExporter"
+        },
+        "krm-operator": {
+          "$ref": "#/$defs/KRMOperator"
         },
         "kai-operator": {
           "$ref": "#/$defs/KAIOperator"

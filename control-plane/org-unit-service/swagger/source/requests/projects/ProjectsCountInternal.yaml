@@ -1,0 +1,30 @@
+get:
+  summary: Count internal projects
+  operationId: count_internal_projects
+  x-internal: true
+  x-no-authorization: true
+  x-service: org-unit-service
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/test/project_api_test.go
+  description: |
+    Internal endpoint to count projects by the given query parameters
+  tags:
+    - Projects
+  parameters:
+    - $ref: "../../parameters/ProjectsFilterBy.yaml"
+    - $ref: '../../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
+  responses:
+    200:
+      description: ok
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/CountResponse.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

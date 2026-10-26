@@ -7,10 +7,10 @@ package profiling
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/pprof"
 	"os"
-
-	"github.com/gin-contrib/pprof"
-	"github.com/gin-gonic/gin"
+	"time"
 )
 
 // To use in cluster:
@@ -20,14 +20,18 @@ import (
 // -> and then wait a little bit and it will open a window in the browser
 
 func RegisterProfiler(port string) {
-	router := gin.Default()
-	err := router.SetTrustedProxies(nil)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", err)
-		return
+	mux := http.NewServeMux()
+	mux.HandleFunc("/debug/pprof/", pprof.Index)
+	mux.HandleFunc("/debug/pprof/cmdline", pprof.Cmdline)
+	mux.HandleFunc("/debug/pprof/profile", pprof.Profile)
+	mux.HandleFunc("/debug/pprof/symbol", pprof.Symbol)
+	mux.HandleFunc("/debug/pprof/trace", pprof.Trace)
+	server := &http.Server{
+		Addr:              fmt.Sprintf(":%v", port),
+		Handler:           mux,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
-	pprof.Register(router)
-	err = router.Run(fmt.Sprintf(":%v", port))
+	err := server.ListenAndServe()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", err)
 	}

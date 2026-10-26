@@ -4,13 +4,13 @@ This section explains the procedure to manage templates.
 
 A template is a pre-set configuration that is used to quickly configure and submit workloads using existing assets. A template consists of all the assets a workload needs, allowing researchers to submit a workload in a single click, or make subtle adjustments to differentiate them from each other.
 
-<Info>
+<Note>
 
 **Note**
 
 Legacy workspace templates are deprecated and will be removed in a future release.
 
-</Info>
+</Note>
 
 ## Workspace Templates Table
 
@@ -84,4 +84,4 @@ To delete a template:
 
 ## Using API
 
-Go to the [Workload template](https://app.run.ai/api/docs#tag/Template) API reference to view the available actions.
+Go to the [Workload template](api:main-api:GET/api/v1/asset/workload-template) API reference to view the available actions.

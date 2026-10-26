@@ -6,7 +6,7 @@
 package submit
 
 import (
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 type CreationOptions struct {
@@ -16,6 +16,7 @@ type CreationOptions struct {
 	ChartURL          string
 	Values            map[string]interface{}
 	CredentialAssetId string
+	UserCredential    bool
 }
 
 func BuildCreationRequest(options CreationOptions) openapi.AIApplicationCreationRequest {
@@ -28,6 +29,9 @@ func BuildCreationRequest(options CreationOptions) openapi.AIApplicationCreation
 
 	if options.CredentialAssetId != "" {
 		spec.Auth = &openapi.AIApplicationAuth{AssetId: &options.CredentialAssetId}
+		if options.UserCredential {
+			spec.Auth.SetUserCredential(true)
+		}
 	}
 
 	return openapi.AIApplicationCreationRequest{

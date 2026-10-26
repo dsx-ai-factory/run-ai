@@ -14,24 +14,24 @@ runai project create research-team-a --resources gpu-deserved=2
 
 # Project with Single Nodepool
 runai project create ml-team \
-  --resources nodepool=gpu-pool,gpu-deserved=2,gpu-limit=4,priority=High \
+  --resources nodepool=gpu-pool,gpu-deserved=2,gpu-limit=4,rank=High \
   --description "Machine Learning Team Project"
 
 # Project with Multiple Nodepools
 runai project create data-science \
-  --resources nodepool=gpu-pool-a,gpu-deserved=2,gpu-limit=4,priority=High \
-  --resources nodepool=gpu-pool-b,gpu-deserved=1,gpu-limit=2,priority=Medium \
+  --resources nodepool=gpu-pool-a,gpu-deserved=2,gpu-limit=4,rank=High \
+  --resources nodepool=gpu-pool-b,gpu-deserved=1,gpu-limit=2,rank=Medium \
   --description "Data Science Team Project"
 
 # Project with Custom Namespace
 runai project create research \
-  --resources nodepool=gpu-pool,gpu-deserved=1,gpu-limit=2,priority=Medium \
+  --resources nodepool=gpu-pool,gpu-deserved=1,gpu-limit=2,rank=Medium \
   --namespace research-ns \
   --description "Research Team Project"
 
 # Project with Over-Quota
 runai project create over-quota \
-  --resources gpu-deserved=5,gpu-limit=10,priority=Medium
+  --resources gpu-deserved=5,gpu-limit=10,rank=Medium
 
 # Project with Unlimited Over-Quota
 runai project create unlimited-over-quota \
@@ -45,7 +45,7 @@ runai project create unlimited-over-quota \
       --description string    Description for the project
   -h, --help                  help for create
       --namespace string      Namespace for the project
-      --resources resources   Resources for the project (can be specified multiple times). Format: nodepool=<name>,gpu-deserved=<num>,gpu-limit=<num>,priority=<level>
+      --resources resources   Resources for the project (can be specified multiple times). Format: nodepool=<name>,gpu-deserved=<num>,gpu-limit=<num>,rank=<level> (priority=<level> is accepted as an alias for rank)
 ```
 
 ### Options inherited from parent commands

@@ -6,7 +6,7 @@
 package composer
 
 import (
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 )
 
 func IsMainNode(replicaType *workloadsApi.ReplicaType) bool {

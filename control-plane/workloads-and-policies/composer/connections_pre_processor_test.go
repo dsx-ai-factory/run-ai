@@ -8,9 +8,9 @@ package composer
 import (
 	"strings"
 
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -18,6 +18,28 @@ import (
 )
 
 var _ = Describe("ConnectionsPreProcessor", func() {
+
+	It("assigns the suffix-free URL to the first automatic URL after custom and empty items", func() {
+		cp := &ConnectionsPreProcessor{WorkloadName: "job", ProjectName: "team"}
+		urls := field_types.NewExposedUrlField(map[string]field_types.ExposedUrlItemAndRules{
+			"a-custom": {Value: &field_types.ExposedUrlItemValue{CustomUrl: convutils.Ref(true), Url: convutils.Ref("https://custom.example.com/path")}},
+			"b-empty":  {},
+			"c-first":  {Value: &field_types.ExposedUrlItemValue{}},
+			"d-second": {Value: &field_types.ExposedUrlItemValue{}},
+		})
+		connections := []workloadsApi.Connection{}
+		for _, nick := range []string{"d-second", "c-first"} {
+			connections = append(connections, workloadsApi.Connection{
+				ConnectionType: string(openapi.INTERNALCONNECTIONTYPE_EXTERNAL_URL), CorrelationName: convutils.Ref(nick),
+			})
+		}
+		cp.HandleExposedUrls(connections, urls, nil, nil)
+		Expect(connections[0].GetExposedUrlPath()).To(Equal("/team/job/d-second"))
+		Expect(connections[0].GetExposedUrlSubDomain()).To(Equal("team-job-d-second"))
+		Expect(connections[1].GetExposedUrlPath()).To(Equal("/team/job"))
+		Expect(connections[1].GetExposedUrlSubDomain()).To(Equal("team-job"))
+	})
+
 	Describe("ComposeNetworkingResourceName", func() {
 		It("keeps networking resource names within the Kubernetes limit", func() {
 			name := ComposeNetworkingResourceName(

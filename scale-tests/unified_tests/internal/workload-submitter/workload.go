@@ -12,7 +12,7 @@ import (
 	"sort"
 	"strings"
 
-	workloadclient "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadclient "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	nodepools "github.com/dsx-ai-factory/run-ai/scale-tests/unified_tests/internal/node-pools"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

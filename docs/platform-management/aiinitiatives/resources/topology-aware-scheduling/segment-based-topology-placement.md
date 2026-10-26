@@ -2,13 +2,13 @@
 
 For distributed training workloads, you can divide worker pods into fixed-size topology-aware segments, with each segment independently co-located within the same topology level. This is useful for workloads where groups of workers communicate more frequently within the group than across groups - for example, tensor-parallel training jobs where intra-group communication benefits from tight locality. Segment-based placement can be combined with [workload-based placement](workload-level-topology.md) on the same workload; see [Combining Workload-Based and Segment-Based Placement](#combining-workload-based-and-segment-based-placement) below.
 
-<Info>
+<Note>
 
 **Note**
 
 Segment-based placement is currently supported for the PyTorch framework (native distributed training workloads), PyTorchJob, and LeaderWorkerSet (LWS) ([supported workload types](../../../../workloads-in-nvidia-run-ai/workload-types/supported-workload-types.md)).
 
-</Info>
+</Note>
 
 ## Automatic Segment-Based Placement
 

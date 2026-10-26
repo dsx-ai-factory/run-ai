@@ -354,7 +354,6 @@ describe("org-unit-util", () => {
           },
         ],
       };
-      // TODO: fix this
       const filters = orgUnitUtil.getProjectListFilters(filterBy as IProjectTableFilterBy);
       expect(filters.sortBy).toBe(ProjectFilterSortFields.Name);
       expect(filters.filterBy).toStrictEqual(["avgGpuAllocation24h==2", "avgGpuUtilization30d==5"]);

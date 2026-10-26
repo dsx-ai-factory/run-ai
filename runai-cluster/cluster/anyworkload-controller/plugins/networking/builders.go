@@ -8,7 +8,7 @@ package networking
 import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
-	workloadbuilders "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	openshiftv1 "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -81,7 +81,7 @@ func composeAuthProxyDeployment(
 }
 
 func (p *Plugin) buildAuthProxyVolumes() []corev1.Volume {
-	return workloadbuilders.ComposeAuthProxyVolumes()
+	return ComposeAuthProxyVolumes()
 }
 
 func (p *Plugin) buildAuthProxyInitContainers(config *dromosv1alpha1.NetworkingConfig, nick string) ([]corev1.Container, error) {
@@ -94,7 +94,7 @@ func (p *Plugin) buildAuthProxyInitContainers(config *dromosv1alpha1.NetworkingC
 		return nil, nil
 	}
 
-	initContainer, err := workloadbuilders.BuildUsernameLoaderInitContainerWithError(auth.AuthorizedUsers, nick)
+	initContainer, err := BuildUsernameLoaderInitContainerWithError(auth.AuthorizedUsers, nick)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func buildOAuth2ProxyContainerFromAuth(
 	authorizedUsers, authorizedGroups *string,
 	forceJsonResponse bool,
 ) (*corev1.Container, error) {
-	cfg := workloadbuilders.OAuth2ProxyConfig{
+	cfg := OAuth2ProxyConfig{
 		ContainerName:              OAuth2ProxyContainerName,
 		UpstreamURL:                upstreamURL,
 		ExternalHost:               externalHost,
@@ -149,7 +149,7 @@ func buildOAuth2ProxyContainerFromAuth(
 		EnableSidecarRestartPolicy: false,
 		ReverseProxy:               true,
 	}
-	return workloadbuilders.BuildOAuth2ProxyContainer(cfg)
+	return BuildOAuth2ProxyContainer(cfg)
 }
 
 func (p *Plugin) buildAuthProxyService(
@@ -198,8 +198,8 @@ func (p *Plugin) buildWorkloadService(
 		APIVersion: constants.CoreV1,
 		Kind:       constants.KindService,
 	}
-	svc.Namespace = runner.Namespace
-	svc.Name = getResourceName(svc.Name, runner)
+	svc.ObjectMeta = networkingObjectMeta(svc.ObjectMeta, runner)
+	svc.Status = corev1.ServiceStatus{}
 	return svc
 }
 
@@ -214,8 +214,8 @@ func (p *Plugin) buildIngress(
 		APIVersion: constants.NetworkingV1,
 		Kind:       constants.KindIngress,
 	}
-	ingress.Namespace = runner.Namespace
-	ingress.Name = getResourceName(ingress.Name, runner)
+	ingress.ObjectMeta = networkingObjectMeta(ingress.ObjectMeta, runner)
+	ingress.Status = networkingv1.IngressStatus{}
 
 	if backendServiceName != "" {
 		for i := range ingress.Spec.Rules {
@@ -234,7 +234,7 @@ func (p *Plugin) buildIngress(
 		}
 	}
 
-	return workloadbuilders.EnrichIngressWithDefaults(ingress)
+	return EnrichIngressWithDefaults(ingress)
 }
 
 func (p *Plugin) buildRoute(
@@ -247,8 +247,8 @@ func (p *Plugin) buildRoute(
 		APIVersion: constants.RouteV1,
 		Kind:       constants.KindRoute,
 	}
-	route.Namespace = runner.Namespace
-	route.Name = getResourceName(route.Name, runner)
+	route.ObjectMeta = networkingObjectMeta(route.ObjectMeta, runner)
+	route.Status = openshiftv1.RouteStatus{}
 
 	if backendServiceName != "" {
 		route.Spec.To = openshiftv1.RouteTargetReference{
@@ -257,7 +257,7 @@ func (p *Plugin) buildRoute(
 		}
 	}
 
-	route = workloadbuilders.EnrichRouteWithDefaults(route)
+	route = EnrichRouteWithDefaults(route)
 
 	return route
 }
@@ -273,8 +273,8 @@ func (p *Plugin) buildHTTPRoute(
 		APIVersion: constants.GatewayV1,
 		Kind:       constants.KindHTTPRoute,
 	}
-	httpRoute.Namespace = runner.Namespace
-	httpRoute.Name = getResourceName(httpRoute.Name, runner)
+	httpRoute.ObjectMeta = networkingObjectMeta(httpRoute.ObjectMeta, runner)
+	httpRoute.Status = gatewayv1.HTTPRouteStatus{}
 
 	if backendServiceName != "" {
 		port := gatewayv1.PortNumber(backendServicePort)
@@ -291,4 +291,17 @@ func (p *Plugin) buildHTTPRoute(
 	}
 
 	return httpRoute
+}
+
+// The caller supplies networking intent, not Kubernetes lifecycle state.
+// The input metadata has already been deep-copied by each builder. Annotation
+// checks run before apply for restricted submission profiles; ownership is set
+// by setOwnerAndApply.
+func networkingObjectMeta(metadata metav1.ObjectMeta, runner *dromosv1alpha1.WorkloadRunner) metav1.ObjectMeta {
+	return metav1.ObjectMeta{
+		Name:        getResourceName(metadata.Name, runner),
+		Namespace:   runner.Namespace,
+		Labels:      metadata.Labels,
+		Annotations: metadata.Annotations,
+	}
 }

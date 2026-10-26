@@ -9,14 +9,18 @@ runai node list [flags]
 ### Options
 
 ```
-      --columns strings       Specify which columns to display (comma-separated list)
-  -h, --help                  help for list
-      --json                  Output structure JSON
-      --no-headers            Output structure table without headers
-      --raw                   Return the unprocessed response from the API call
-      --set-default-columns   [Experimental] Set the columns flag value to the default output
-      --table                 Output structure table
-      --yaml                  Output structure YAML
+      --columns strings         Specify which columns to display (comma-separated list)
+  -h, --help                    help for list
+      --json                    Output structure JSON
+      --max-items int32         set the max number of items to return, default is all of the items
+      --next-token next_token   set the token for requesting the next page
+      --no-headers              Output structure table without headers
+      --no-pagination           return a single page instead of full list, by default set to false
+      --page-size int32         set the single page size (max 500) (default 100)
+      --raw                     Return the unprocessed response from the API call
+      --set-default-columns     [Experimental] Set the columns flag value to the default output
+      --table                   Output structure table
+      --yaml                    Output structure YAML
 ```
 
 ### Options inherited from parent commands

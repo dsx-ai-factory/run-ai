@@ -105,7 +105,6 @@ export default defineComponent({
   watch: {
     clusterId: {
       handler(clusterId: string): void {
-        //Viper:TODO - we need to remove this line and setSelectedClusterById only upon form submit
         this.clusterStore.setSelectedClusterById(clusterId);
       },
     },

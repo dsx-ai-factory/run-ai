@@ -237,7 +237,6 @@ export default defineComponent({
     },
     prepareEnvironmentForUpdateRequest(environment: IUIEnvironmentAsset): EnvironmentUpdateRequest {
       const environmentForApi: EnvironmentUpdateRequest = {
-        // TODO: when api supports add scope and workloadSupportedTypes to update request
         meta: {
           name: environment.meta.name,
           description: environment.meta.description,

@@ -19,10 +19,19 @@ func NewDBInitializer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *DBInitializer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &DBInitializer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -74,14 +83,20 @@ type DBInitializer_InitializeDB_Call struct {
 }
 
 // InitializeDB is a helper method to define mock.On call
-//   - conf
-func (_e *DBInitializer_Expecter) InitializeDB(conf interface{}) *DBInitializer_InitializeDB_Call {
+//   - conf *config.Config
+func (_e *DBInitializer_Expecter) InitializeDB(conf any) *DBInitializer_InitializeDB_Call {
 	return &DBInitializer_InitializeDB_Call{Call: _e.mock.On("InitializeDB", conf)}
 }
 
 func (_c *DBInitializer_InitializeDB_Call) Run(run func(conf *config.Config)) *DBInitializer_InitializeDB_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*config.Config))
+		var arg0 *config.Config
+		if args[0] != nil {
+			arg0 = args[0].(*config.Config)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -130,14 +145,20 @@ type DBInitializer_InitializeReadDB_Call struct {
 }
 
 // InitializeReadDB is a helper method to define mock.On call
-//   - conf
-func (_e *DBInitializer_Expecter) InitializeReadDB(conf interface{}) *DBInitializer_InitializeReadDB_Call {
+//   - conf *config.Config
+func (_e *DBInitializer_Expecter) InitializeReadDB(conf any) *DBInitializer_InitializeReadDB_Call {
 	return &DBInitializer_InitializeReadDB_Call{Call: _e.mock.On("InitializeReadDB", conf)}
 }
 
 func (_c *DBInitializer_InitializeReadDB_Call) Run(run func(conf *config.Config)) *DBInitializer_InitializeReadDB_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*config.Config))
+		var arg0 *config.Config
+		if args[0] != nil {
+			arg0 = args[0].(*config.Config)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

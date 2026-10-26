@@ -9,7 +9,6 @@ import "encoding/json"
 
 const (
 	GrantTypeRefreshToken  = "refresh_token"
-	GrantTypeAppToken      = "app_token"
 	GrantTypeExchangeToken = "exchange_token"
 	GrantTypeUserPassword  = "password"
 )

@@ -6,8 +6,8 @@
 package source
 
 import (
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	karta "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	"k8s.io/utils/ptr"
 )

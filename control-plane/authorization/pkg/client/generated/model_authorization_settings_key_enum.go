@@ -24,13 +24,11 @@ type AuthorizationSettingsKeyEnum string
 // List of AuthorizationSettingsKeyEnum
 const (
 	AUTHORIZATIONSETTINGSKEYENUM_ENABLE_SCOPED_AUTHORIZATION AuthorizationSettingsKeyEnum = "enableScopedAuthorization"
-	AUTHORIZATIONSETTINGSKEYENUM_TENANT_IS_CSP_MANAGED       AuthorizationSettingsKeyEnum = "tenantIsCspManaged"
 )
 
 // All allowed values of AuthorizationSettingsKeyEnum enum
 var AllowedAuthorizationSettingsKeyEnumEnumValues = []AuthorizationSettingsKeyEnum{
 	"enableScopedAuthorization",
-	"tenantIsCspManaged",
 }
 
 func (v *AuthorizationSettingsKeyEnum) UnmarshalJSON(src []byte) error {

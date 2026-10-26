@@ -95,6 +95,117 @@ var _ = Describe("ConfigMaps", func() {
 			BeforeEach(func() {
 				runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor = runv1_internal.KubernetesFlavorOpenShift
 			})
+			It("preserves configuration outside RunAI remote writes", func() {
+				originalConfig := `
+futureTopLevel:
+  setting: preserved
+nodeExporter:
+  collectors:
+    netdev:
+      enabled: true
+prometheusK8s:
+  futureSetting:
+    enabled: true
+  logLevel: debug
+  remoteWrite:
+    - name: customer
+      url: https://customer.example.com
+      futureOption:
+        enabled: true
+`
+				fakeKubeClient = fake.NewClientBuilder().WithObjects(&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "cluster-monitoring-config",
+						Namespace: consts.OpenshiftMonitoringNamespace,
+					},
+					Data: map[string]string{"config.yaml": originalConfig},
+				}).Build()
+
+				result, err := resources.NewConfigMap(operandName, fakeKubeClient, runaiConfig).Object(context.Background())
+				Expect(err).NotTo(HaveOccurred())
+
+				configMap, ok := result.(*v1.ConfigMap)
+				Expect(ok).To(BeTrue())
+				clusterMonitoringConfig := getUnstructuredClusterMonitoringConfig(configMap)
+				originalClusterMonitoringConfig := getUnstructuredClusterMonitoringConfig(&v1.ConfigMap{
+					Data: map[string]string{"config.yaml": originalConfig},
+				})
+
+				Expect(clusterMonitoringConfig["futureTopLevel"]).To(Equal(originalClusterMonitoringConfig["futureTopLevel"]))
+				Expect(clusterMonitoringConfig["nodeExporter"]).To(Equal(originalClusterMonitoringConfig["nodeExporter"]))
+
+				nodeExporter := clusterMonitoringConfig["nodeExporter"].(map[string]interface{})
+				collectors := nodeExporter["collectors"].(map[string]interface{})
+				Expect(collectors).NotTo(HaveKey("softirqs"))
+
+				prometheusK8s := clusterMonitoringConfig["prometheusK8s"].(map[string]interface{})
+				originalPrometheusK8s := originalClusterMonitoringConfig["prometheusK8s"].(map[string]interface{})
+				Expect(prometheusK8s["futureSetting"]).To(Equal(originalPrometheusK8s["futureSetting"]))
+				Expect(prometheusK8s["logLevel"]).To(Equal(originalPrometheusK8s["logLevel"]))
+
+				remoteWrites := prometheusK8s["remoteWrite"].([]interface{})
+				Expect(remoteWrites).To(HaveLen(3))
+				Expect(remoteWrites[0]).To(Equal(originalPrometheusK8s["remoteWrite"].([]interface{})[0]))
+			})
+
+			It("removes only RunAI remote writes when built-in Prometheus is disabled", func() {
+				runaiConfig.Spec.Prometheus.Openshift.UseBuiltInPrometheus = ptr.To(false)
+				originalConfig := `
+prometheusK8s:
+  futureSetting: preserved
+  remoteWrite:
+    - name: customer
+      url: https://customer.example.com
+      futureOption: preserved
+    - name: runai
+      url: https://runai.example.com
+    - name: applicative_runai
+      url: https://applicative-runai.example.com
+`
+				fakeKubeClient = fake.NewClientBuilder().WithObjects(&v1.ConfigMap{
+					ObjectMeta: metav1.ObjectMeta{
+						Name:      "cluster-monitoring-config",
+						Namespace: consts.OpenshiftMonitoringNamespace,
+					},
+					Data: map[string]string{"config.yaml": originalConfig},
+				}).Build()
+
+				result, err := resources.NewConfigMap(operandName, fakeKubeClient, runaiConfig).Object(context.Background())
+				Expect(err).NotTo(HaveOccurred())
+
+				configMap, ok := result.(*v1.ConfigMap)
+				Expect(ok).To(BeTrue())
+				clusterMonitoringConfig := getUnstructuredClusterMonitoringConfig(configMap)
+				prometheusK8s := clusterMonitoringConfig["prometheusK8s"].(map[string]interface{})
+				Expect(prometheusK8s["futureSetting"]).To(Equal("preserved"))
+
+				remoteWrites := prometheusK8s["remoteWrite"].([]interface{})
+				Expect(remoteWrites).To(HaveLen(1))
+				Expect(remoteWrites[0]).To(Equal(map[string]interface{}{
+					"name":         "customer",
+					"url":          "https://customer.example.com",
+					"futureOption": "preserved",
+				}))
+			})
+
+			DescribeTable("rejects malformed monitoring configuration",
+				func(config string) {
+					fakeKubeClient = fake.NewClientBuilder().WithObjects(&v1.ConfigMap{
+						ObjectMeta: metav1.ObjectMeta{
+							Name:      "cluster-monitoring-config",
+							Namespace: consts.OpenshiftMonitoringNamespace,
+						},
+						Data: map[string]string{"config.yaml": config},
+					}).Build()
+
+					_, err := resources.NewConfigMap(operandName, fakeKubeClient, runaiConfig).Object(context.Background())
+					Expect(err).To(HaveOccurred())
+				},
+				Entry("non-object prometheusK8s", "prometheusK8s: invalid"),
+				Entry("non-array remoteWrite", "prometheusK8s:\n  remoteWrite: invalid"),
+				Entry("non-object remoteWrite entry", "prometheusK8s:\n  remoteWrite:\n    - invalid"),
+			)
+
 			When("labels are set", func() {
 				It("check runai_replica", func() {
 					runaiConfig.SetDefaultsWhereNeeded()
@@ -212,6 +323,16 @@ func getClusterMonitoringConfig(configMap *v1.ConfigMap) *manifests.ClusterMonit
 
 	clusterMonitoringConfig := &manifests.ClusterMonitoringConfiguration{}
 	err := yaml.Unmarshal([]byte(configMap.Data["config.yaml"]), clusterMonitoringConfig)
+	Expect(err).NotTo(HaveOccurred())
+
+	return clusterMonitoringConfig
+}
+
+func getUnstructuredClusterMonitoringConfig(configMap *v1.ConfigMap) map[string]interface{} {
+	ginkgo.GinkgoHelper()
+
+	clusterMonitoringConfig := map[string]interface{}{}
+	err := yaml.Unmarshal([]byte(configMap.Data["config.yaml"]), &clusterMonitoringConfig)
 	Expect(err).NotTo(HaveOccurred())
 
 	return clusterMonitoringConfig

@@ -28,9 +28,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
 	utils2 "github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/utils"
+	workloadsService "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	policyconstants "github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client/constants"
-	workloadsService "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
@@ -194,7 +194,7 @@ func TranslateToFlatWorkload(ctx context.Context, workloadType string, workloadA
 
 			if requestTypePortion && workloadAsset.AssetsCompute.GpuPortionRequest == nil {
 				if workloadAsset.AssetsCompute.GpuDevicesRequest == nil {
-					return nil, nil, api.NewError(http.StatusBadRequest, "gpuPortionRequest must be provided for fractional workload of type 'portion'", nil)
+					return nil, nil, api.NewError(http.StatusBadRequest, "gpuMemoryPortionRequest (deprecated alias: gpuPortionRequest) must be provided for fractional workload of type 'portion'", nil)
 				}
 				if *workloadAsset.AssetsCompute.GpuDevicesRequest != 0 && *workloadAsset.AssetsCompute.GpuDevicesRequest != 1 {
 					return nil, nil, api.NewError(http.StatusBadRequest, "gpuDeviceRequest can be 0 or 1 for workload of type 'portion'", nil)

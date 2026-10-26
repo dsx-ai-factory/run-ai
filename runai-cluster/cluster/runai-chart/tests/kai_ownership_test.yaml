@@ -1,13 +1,13 @@
 suite: Test RunAI-owned KAI resources
 
 templates:
-  - charts/kai-scheduler/templates/default-queue.yaml
-  - charts/kai-scheduler/templates/default-shard.yaml
-  - charts/kai-scheduler/templates/hooks/post/kai-config-deployer/job.yaml
-  - charts/kai-scheduler/templates/priorityclasses/build-preemptible.yaml
-  - charts/kai-scheduler/templates/priorityclasses/build.yaml
-  - charts/kai-scheduler/templates/priorityclasses/inference.yaml
-  - charts/kai-scheduler/templates/priorityclasses/train.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/default-queue.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/default-shard.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/hooks/post/kai-config-deployer/job.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/priorityclasses/build-preemptible.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/priorityclasses/build.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/priorityclasses/inference.yaml
+  - charts/kai-resource-management/charts/kai-scheduler/templates/priorityclasses/train.yaml
 
 tests:
   - it: should not render KAI chart-owned queues, shards, Config deployer, or priority classes

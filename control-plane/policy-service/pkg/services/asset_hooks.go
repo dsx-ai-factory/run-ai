@@ -15,11 +15,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/scopes"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/tree"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	async_events "github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"golang.org/x/exp/maps"
 

@@ -193,9 +193,9 @@ The registered configuration sections and their notable keys/defaults:
 | ApplicationMetricStore | `application_metric_store_write_url` / `_username` / `_password` / `_headers` / `application_metric_store_label` | `label=applicative_runai` |
 | ImagePullSecret | `image_pull_secret_enabled`, `static_image_pull_secret` (secret) | — |
 
-The service also registers the shared **database** config (from the `dao-utils`
+The service also registers the shared **database** config (from the `runaidb`
 package, schema `cluster_service`) and the **authorization client** config.
-Database connection settings therefore follow the shared `dao-utils` env
+Database connection settings therefore follow the shared `runaidb` env
 conventions rather than being declared in this repo.
 
 ## OpenAPI and code generation
@@ -225,7 +225,7 @@ Other Run:ai services consume Cluster Service through the versioned Go client at
 [`pkg/client/README.md`](pkg/client/README.md) for the full usage and versioning
 policy, including the `make client-bump-version` (production) and
 `make client-bump-version-dev` (feature-branch) workflow. Dev-versioned
-references may not be merged to `master` — CI enforces this.
+references may not be merged to `main` — CI enforces this.
 
 ## Further reading
 

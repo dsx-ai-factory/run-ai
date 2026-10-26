@@ -36,6 +36,18 @@ rules:
       - patch
       - update
   - apiGroups:
+      - resource.k8s.io
+    resources:
+      - resourceclaimtemplates
+    verbs:
+      - create
+      - delete
+      - get
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
       - ""
     resourceNames:
       - default
@@ -141,6 +153,14 @@ rules:
       - configmaps
       - persistentvolumeclaims
       - serviceaccounts
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - resource.k8s.io
+    resources:
+      - resourceclaimtemplates
     verbs:
       - get
       - list

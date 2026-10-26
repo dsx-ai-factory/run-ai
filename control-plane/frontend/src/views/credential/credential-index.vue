@@ -403,7 +403,6 @@ export default defineComponent({
         this.renaming = true;
         const credentialToUpdate = {
           meta: {
-            // TODO: uncomment when rename is possbiel
             // name: changes.name,
             description: changes.description,
           },

@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/stretchr/testify/require"
 )
@@ -82,7 +82,7 @@ func newNIMLabel(name, value string, exclude bool) workloadsApi.Label {
 }
 
 func TestComposePropagatesNIMIdentityForDistributedInference(t *testing.T) {
-	spec := newDistributedInferenceSpec("gcr.io/run-ai-lab/nim-cpu:latest")
+	spec := newDistributedInferenceSpec("registry.example.com/nim-cpu:latest")
 	leader := spec.Leader.Get()
 	leader.SetLabels([]workloadsApi.Label{newNIMLabel(constants.LabelNIMWorkload, "true", false)})
 

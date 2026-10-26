@@ -3,6 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+// 3.1
+export const MIN_CLUSTER_VERSION_FOR_AI_APPLICATION_PERSONAL_CREDENTIALS = "3.1";
+
 // 3.0
 export const MIN_CLUSTER_VERSION_FOR_VLLM_METRICS = "3.0";
 export const MIN_CLUSTER_VERSION_FOR_SEMI_PREEMPTIBILITY = "3.0";

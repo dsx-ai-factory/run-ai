@@ -6,8 +6,8 @@
 package parsers
 
 import (
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	assets_openapi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	corev1 "k8s.io/api/core/v1"

@@ -197,6 +197,7 @@ assetsService:
   exposedRules:
     - PathPrefix(`/api/v1/asset`)
     - PathPrefix(`/api/v2/asset`)
+    - PathPrefix(`/api/v1/k8s-objects`)
     - PathPrefix(`/api/v1/workload`)
     - PathPrefix(`/api/v1/workspace`)
     - PathPrefix(`/api/v2/workspace`)
@@ -596,22 +597,18 @@ identityManager:
   name: identity-manager
   exposedRules:
     - PathPrefix(`/api/v1/users`)
-    - PathPrefix(`/api/v1/apps`)
     - PathPrefix(`/api/v1/service-accounts`)
     - PathPrefix(`/api/v1/idps`)
     - PathPrefix(`/api/v1/me`)
     - PathPrefix(`/api/v1/security/settings`)
     - PathPrefix(`/api/v1/access-keys`)
-    - PathPrefix(`/api/v1/user-applications`)
     - PathPrefix(`/api/v1/administration/access-keys`)
-    - PathPrefix(`/api/v1/administration/user-applications`)
     - PathPrefix(`/api/v1/logout`)
   exposedRulesUnauthenticated:
     - Path(`/api/v1/token`)
     - Path(`/api/v2/token`)
     - Path(`/.well-known/openid-configuration`)
     - Path(`/.well-known/oauth-authorization-server`)
-    - Path(`/v1/k8s/auth/oauth/apptoken`)
     - Path(`/api/v1/login`)
   exposedRulesUnauthenticatedWithHostname:
     - Path(`/api/v1/config`)
@@ -2207,7 +2204,7 @@ clusterService:
         # Inclusive
         # Defaults to the chart's app version
         max: ''
-      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai
+      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai-oss
       helmRegistryUsername: ''
       helmRegistryPasswordPlaceholder: ''
     maxWaitForClusterRemoteConfigStatusUpdate: 5m
@@ -2240,6 +2237,8 @@ k8sObjectsTracker:
     - PathPrefix(`/api/v1/config-maps`)
     - PathPrefix(`/api/v1/storage-class`)
     - PathPrefix(`/api/v2/storage-class`)
+    - PathPrefix(`/api/v1/device-classes`)
+    - PathPrefix(`/api/v1/resource-claim-templates`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/storage-classes.*`) # legacy
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/(namespace:[^/]+)/pvcs`)
     - PathRegexp(`^/v1/k8s/clusters/([a-fA-F0-9]{8})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{4})-([a-fA-F0-9]{12})/(namespace:[^/]+)/secrets`)
@@ -2954,94 +2953,11 @@ traefik:
     interval: 30s
     scrapeTimeout: 30s
 
-# When set, /api/docs and /redoc/* paths redirect to this external URL (used in SaaS).
-# Leave empty for self-hosted (no API docs endpoint served).
-redoc:
-  docsSite:
-    url: ""
-
 # When enabled, the chart fails to render if the release namespace is not labeled
 # istio-injection=disabled. Run the following before installing/upgrading:
 #   kubectl label namespace <release-namespace> istio-injection=disabled
 disableIstioSidecarInjection:
   enabled: false
-
-authorizationMigrator:
-  name: authorization-migrator
-  argoRollouts: false
-
-  image:
-    repository: authorization-migrator
-    pullPolicy: Always
-
-  env:
-  - name: SECRETS_MOUNT_PATH
-    value: '{{ .Values.authorizationMigrator.config.secretsMountPath }}'
-
-  envFrom:
-    - configMapRef:
-        name: runai-backend-authorization-migrator
-
-  volumes:
-    - name: db-password
-      projected:
-        sources:
-          - secret:
-              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
-                  path: DB_PASSWORD
-    - name: runai-service-config
-      projected:
-        sources:
-          - secret:
-              name: runai-backend-authorization-migrator
-          - secret:
-              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
-                  path: DB_PASSWORD
-          - secret:
-              name: '{{ include "control-plane.keycloakx.password.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.keycloakx.password.secret.key" . }}'
-                  path: KEYCLOAK_ADMIN_PASSWORD
-
-  volumeMounts:
-    - mountPath: '{{ .Values.authorizationMigrator.config.secretsMountPath }}'
-      name: runai-service-config
-
-  config:
-    logLevel: Info
-    migrationVersion: v1
-    secretsMountPath: /etc/secrets
-    dbSchemaTarget: authorization
-    dbSchemaSourceTenants: tenants_manager
-
-  annotations:
-    helm.sh/hook: post-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation
-
-  podAnnotations: {}
-
-  podSecurityContext: {}
-
-  securityContext:
-    allowPrivilegeEscalation: false
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
-    capabilities:
-      drop:
-        - ALL
-
-  resources:
-    limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 250m
-      memory: 256Mi
 
 clusterMigrator:
   name: cluster-migrator
@@ -3087,8 +3003,6 @@ clusterMigrator:
   config:
     logLevel: Info
     migrationVersion: v1
-    #   migrationType could be "clusters", "nodepools", "nodepool_system_settings" or "all". default "clusters"
-    migrationType: all
     tenantsToMigrate: ''
     tenantsToNotMigrate: ''
     markCompleted: true
@@ -3397,6 +3311,7 @@ workloads:
     # (CHART_RETENTION_MINUTES). Charts referenced by an already-deployed application
     # are removed regardless; this bounds abandoned/unclaimed uploads. Default 24h.
     chartRetentionMinutes: 1440
+    chartInspectionCacheTTLSeconds: 600
     server:
       writeTimeout: 2m
       readTimeout: 2m
@@ -4216,99 +4131,6 @@ workloadsManager:
     clusterCacheCleanupSeconds: 1200
     suspendDefCacheTTLSeconds: 300
 
-orgUnitsMigrator:
-  name: org-units-migrator
-  argoRollouts: false
-
-  image:
-    repository: org-units-migrator
-    pullPolicy: Always
-
-  env:
-    - name: SECRETS_MOUNT_PATH
-      value: '{{ .Values.orgUnitsMigrator.config.secretsMountPath }}'
-
-  envFrom:
-    - configMapRef:
-        name: runai-backend-org-units-migrator
-
-  volumes:
-    - name: db-password
-      projected:
-        sources:
-          - secret:
-              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
-                  path: DB_PASSWORD
-    - name: runai-service-config
-      projected:
-        sources:
-          - secret:
-              name: runai-backend-org-units-migrator
-          - secret:
-              name: '{{ include "control-plane.postgresql.password.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.postgresql.password.secret.key" . }}'
-                  path: DB_PASSWORD
-          - secret:
-              name: '{{ include "control-plane.pubsub.password.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.pubsub.password.secret.key" . }}'
-                  path: PUBSUB_PASSWORD
-          - secret:
-              name: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.pubsub.additional-subscriber.password.secret.key" . }}'
-                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_PASSWORD
-          - secret:
-              name: '{{ include "control-plane.pubsub.user.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.pubsub.user.secret.key" . }}'
-                  path: PUBSUB_USER
-          - secret:
-              name: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.name" . }}'
-              items:
-                - key: '{{ include "control-plane.pubsub.additional-subscriber.user.secret.key" . }}'
-                  path: PUBSUB_ADDITIONAL_SUBSCRIBER_USER
-
-  volumeMounts:
-    - mountPath: '{{ .Values.orgUnitsMigrator.config.secretsMountPath }}'
-      name: runai-service-config
-
-  config:
-    logLevel: Info
-    migrationVersion: v1
-    tenantsToMigrate: ''
-    tenantsToNotMigrate: ''
-    markCompleted: true
-    secretsMountPath: /etc/secrets
-
-  annotations:
-    helm.sh/hook: post-upgrade
-    helm.sh/hook-delete-policy: before-hook-creation
-
-  podAnnotations: {}
-
-  podSecurityContext: {}
-
-  securityContext:
-    allowPrivilegeEscalation: false
-    runAsNonRoot: true
-    seccompProfile:
-      type: RuntimeDefault
-    capabilities:
-      drop:
-        - ALL
-
-  resources:
-    limits:
-      cpu: 100m
-      memory: 100Mi
-    requests:
-      cpu: 50m
-      memory: 50Mi
-
 unleashEdge:
   name: unleash-edge
   nameOverride: unleash-edge
@@ -4720,10 +4542,11 @@ bffService:
     distributionAssets:
       profile: cc
     docs:
-      baseUrl: https://run-ai-docs.nvidia.com/self-hosted
+      catalogVersion: v2
+      baseUrl: https://docs.nvidia.com/run-ai/self-hosted
       versioned: true
       whatsNew:
-        urlTemplate: "{docsBaseUrl}/getting-started/whats-new/whats-new"
+        urlTemplate: "{docsBaseUrl}/documentation/getting-started/whats-new/whats-new"
     support:
       url: ""
       label: ""
@@ -5049,7 +4872,7 @@ telemetryService:
     host: '{{ .Values.global.postgresql.auth.host }}'
     port: '{{ .Values.global.postgresql.auth.port }}'
     name: '{{ .Values.global.postgresql.auth.database }}'
-    schema: diagnostics # existing production data; not renamed with the service
+    schema: telemetry
     sslMode: '{{ .Values.global.postgresql.auth.dbSslMode }}'
     migrationFiles: file:///migrations
     user: '{{ .Values.global.postgresql.auth.username }}'

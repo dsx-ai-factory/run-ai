@@ -74,8 +74,8 @@ jobs:
           # artifact-metadata.json — the same file the OSS/v4 pipelines use to
           # identify services. Only emit dirs whose artifact_type is buildable
           # (container | go | cli | helm). Types like "none", "workflow", "github",
-          # or "" indicate non-buildable dirs (e2e, air-gap, build/makefile, etc.)
-          # that have no CI targets to run in a fork PR.
+          # or "" indicate non-buildable dirs (e2e, air-gap, etc.) that have no CI
+          # targets to run in a fork PR.
           is_buildable() {
             local meta="$1/artifact-metadata.json"
             [ -f "$meta" ] || return 1
@@ -87,21 +87,49 @@ jobs:
             esac
           }
 
-          services=$(
+          # A dir with "force_build_all": true (e.g. build/makefile, which ~all service
+          # Makefiles include) is shared tooling: a change there can break any service,
+          # so select every buildable service instead of none.
+          selected=$(
             while read -r f; do
               [ -z "$f" ] && continue
               dir=$(dirname "$f")
               while :; do
                 if [ -f "$dir/artifact-metadata.json" ]; then
-                  is_buildable "$dir" && echo "$dir"
+                  if jq -e '.force_build_all == true' "$dir/artifact-metadata.json" >/dev/null 2>&1; then
+                    echo "FORCE_ALL:$dir"
+                  elif is_buildable "$dir"; then
+                    echo "$dir"
+                  fi
                   break
                 fi
                 [ "$dir" = "." ] && break
                 [ "$dir" = "/" ] && break
                 dir=$(dirname "$dir")
               done
-            done <<< "$all_changed" | sort -u | jq -R . | jq -sc .
+            done <<< "$all_changed" | sort -u
           )
+          force_all_from=$(grep '^FORCE_ALL:' <<< "$selected" | cut -d: -f2- | paste -sd, - || true)
+
+          if [ -n "$force_all_from" ]; then
+            echo "::notice::Shared tooling changed (${force_all_from}) — selecting all buildable services"
+            selected=$(
+              git ls-files '*artifact-metadata.json' | while read -r meta; do
+                dir=$(dirname "$meta")
+                if is_buildable "$dir"; then echo "$dir"; fi
+              done | sort -u
+            )
+          fi
+
+          services=$(grep -v '^FORCE_ALL:' <<< "$selected" | grep -v '^$' | jq -R . | jq -sc . || true)
+
+          # GitHub rejects a matrix with more than 256 jobs; fail loudly rather than
+          # letting the targets/docker-validate jobs error out with a vaguer message.
+          count=$(jq 'length' <<< "${services:-[]}")
+          if [ "$count" -gt 256 ]; then
+            echo "::error::${count} services selected, over GitHub's 256-job matrix limit"
+            exit 1
+          fi
 
           echo "services=${services:-[]}" >> "$GITHUB_OUTPUT"
           echo "Changed files:"

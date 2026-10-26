@@ -13,8 +13,8 @@ import (
 	instancecfg "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
 	"go.uber.org/zap"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	clierrors "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/errors"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
 )
 
 const logMsg = "GetDepartmentList"

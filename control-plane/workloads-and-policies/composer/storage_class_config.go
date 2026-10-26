@@ -10,11 +10,11 @@ import (
 	"net/http"
 	"regexp"
 
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	k8sObjectsService "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client"
 	k8sObjectsApi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 

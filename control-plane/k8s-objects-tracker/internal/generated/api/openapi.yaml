@@ -5917,6 +5917,830 @@ paths:
       x-audit: false
       x-test-coverage:
       - k8s-objects-tracker/pkg/services/api_storage_classes_service_test.go
+  /api/v1/device-classes:
+    delete:
+      operationId: deleteDeviceClass
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: filter by name
+        explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: delete a Device Class
+      tags:
+      - Device Classes
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-authorize:
+        resource-type: device-classes
+        action: delete
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+    get:
+      operationId: get_device_classes
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: filter by name
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClasses'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: get device classes for a given cluster
+      tags:
+      - Device Classes
+      x-audit: false
+      x-authorize:
+        resource-type: device-classes
+        action: read
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+    post:
+      operationId: createDeviceClass
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClass'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClass'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: create a Device Class
+      tags:
+      - Device Classes
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+    put:
+      operationId: updateDeviceClass
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClass'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClass'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: update a Device Class
+      tags:
+      - Device Classes
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  /api/v1/device-classes/sync:
+    post:
+      description: Use to sync cluster device classes
+      operationId: sync_device_class
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClasses'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClasses'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Sync cluster Device Classes
+      tags:
+      - Device Classes
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+  /api/v1/resource-claim-templates:
+    delete:
+      operationId: deleteResourceClaimTemplate
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: The resource scope type to filter by.
+        explode: true
+        in: query
+        name: scopeType
+        required: true
+        schema:
+          $ref: '#/components/schemas/ResourceScopeType'
+        style: form
+      - description: The scope resource id that identifies the row.
+        explode: true
+        in: query
+        name: scopeId
+        required: true
+        schema:
+          example: "2"
+          minLength: 1
+          type: string
+        style: form
+      - description: filter by name
+        explode: true
+        in: query
+        name: name
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "204":
+          description: No Content.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: delete a Resource Claim Template
+      tags:
+      - Resource Claim Templates
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: delete
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+    get:
+      operationId: list_resource_claim_templates
+      parameters:
+      - description: The type of resource we want to filter by.
+        explode: true
+        in: query
+        name: scopeType
+        required: false
+        schema:
+          example: project
+          type: string
+        style: form
+      - description: filter by scope id
+        explode: true
+        in: query
+        name: scopeId
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: filter by name
+        explode: true
+        in: query
+        name: name
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter using the Universally Unique Identifier (UUID) of the
+          cluster.
+        explode: true
+        in: query
+        name: clusterId
+        required: false
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      - description: "filter by the origin of the resource. by default, we have to\
+          \ list only customer existing resources (to preserve backward compatibility)\
+          \ to list both existing pvc and assets related pvcs use 'all'."
+        explode: true
+        in: query
+        name: origin
+        required: false
+        schema:
+          enum:
+          - all
+          - assets
+          - existing
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplates'
+          description: Executed successfully.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: list details of ResourceClaimTemplates
+      tags:
+      - Resource Claim Templates
+      x-no-authorization: true
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+    post:
+      operationId: createResourceClaimTemplate
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplate'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplate'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: create a Resource Claim Template
+      tags:
+      - Resource Claim Templates
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+    put:
+      operationId: updateResourceClaimTemplate
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplate'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplate'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: update a Resource Claim Template
+      tags:
+      - Resource Claim Templates
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+  /api/v1/resource-claim-templates/sync:
+    post:
+      description: |
+        Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists.
+      operationId: syncResourceClaimTemplates
+      parameters:
+      - description: The id of the cluster
+        explode: true
+        in: query
+        name: clusterId
+        required: true
+        schema:
+          example: d73a738f-fab3-430a-8fa3-5241493d7128
+          format: uuid
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplates'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplates'
+          description: Executed successfully.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: sync the full set of ResourceClaimTemplates observed in a cluster
+      tags:
+      - Resource Claim Templates
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+      - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
   /api/v1/storage-class-configuration:
     get:
       description: Retrieves a list of storage class configurations defined in the
@@ -6884,6 +7708,26 @@ components:
       schema:
         type: string
       style: form
+    ResourceScopeType:
+      description: The resource scope type to filter by.
+      explode: true
+      in: query
+      name: scopeType
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceScopeType'
+      style: form
+    ScopeIdRequired:
+      description: The scope resource id that identifies the row.
+      explode: true
+      in: query
+      name: scopeId
+      required: true
+      schema:
+        example: "2"
+        minLength: 1
+        type: string
+      style: form
     StorageClassConfigurationFilterBy:
       description: "Filter results by a parameter. Use the format field-name operator\
         \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
@@ -7790,6 +8634,11 @@ components:
         $ref: '#/components/schemas/V1StorageClass'
       type: array
       x-schema-name: StorageClasses
+    ReportingClusterId:
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
+      format: uuid
+      type: string
     StorageClass:
       example:
         cluster_id: 550e8400-e29b-41d4-a716-446655440000
@@ -8528,6 +9377,185 @@ components:
       required:
       - items
       type: object
+    DeviceClass:
+      example:
+        deviceClassName: gpu.nvidia.com
+        clusterId: 550e8400-e29b-41d4-a716-446655440000
+      properties:
+        clusterId:
+          description: Cluster ID which has sent the resource info
+          example: 550e8400-e29b-41d4-a716-446655440000
+          format: uuid
+          type: string
+        deviceClassName:
+          description: |
+            DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+          example: gpu.nvidia.com
+          maxLength: 253
+          minLength: 1
+          pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+          type: string
+      required:
+      - deviceClassName
+      type: object
+    DeviceClasses:
+      example:
+        items:
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+        - deviceClassName: gpu.nvidia.com
+          clusterId: 550e8400-e29b-41d4-a716-446655440000
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/DeviceClass'
+          maxItems: 1000
+          type: array
+      required:
+      - items
+      type: object
+    ResourceClaimTemplateName:
+      description: |
+        ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+      example: rct-gpu-1
+      maxLength: 253
+      minLength: 1
+      pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+      type: string
+    ResourceScopeType:
+      description: The scope type the resource is defined at.
+      enum:
+      - cluster
+      - department
+      - project
+      type: string
+    ResourceClaimTemplate:
+      example:
+        scopeId: scopeId
+        scopeType: cluster
+        assetId: assetId
+        origin: assets
+        name: rct-gpu-1
+        namespace: runai
+        issues:
+        - issue: issue
+          namespace: namespace
+        - issue: issue
+          namespace: namespace
+      properties:
+        name:
+          description: |
+            ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+          example: rct-gpu-1
+          maxLength: 253
+          minLength: 1
+          pattern: "^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"
+          type: string
+        namespace:
+          description: the namespace the ResourceClaimTemplate lives in
+          example: runai
+          maxLength: 253
+          minLength: 1
+          type: string
+        scopeType:
+          $ref: '#/components/schemas/ResourceScopeType'
+        scopeId:
+          description: |
+            Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.
+          minLength: 1
+          type: string
+        origin:
+          $ref: '#/components/schemas/Origin'
+        assetId:
+          description: |
+            Control-plane asset id this template was created from. Present only when origin is "assets". Allows the control plane to join tracker rows back to the originating asset record.
+          nullable: true
+          type: string
+        issues:
+          description: list of issues that was found while syncing the resource to
+            the cluster
+          items:
+            $ref: '#/components/schemas/Issue'
+          type: array
+      required:
+      - name
+      - namespace
+      - scopeId
+      - scopeType
+      type: object
+    ResourceClaimTemplates:
+      example:
+        items:
+        - scopeId: scopeId
+          scopeType: cluster
+          assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+        - scopeId: scopeId
+          scopeType: cluster
+          assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+        - scopeId: scopeId
+          scopeType: cluster
+          assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+        - scopeId: scopeId
+          scopeType: cluster
+          assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+        - scopeId: scopeId
+          scopeType: cluster
+          assetId: assetId
+          origin: assets
+          name: rct-gpu-1
+          namespace: runai
+          issues:
+          - issue: issue
+            namespace: namespace
+          - issue: issue
+            namespace: namespace
+      properties:
+        items:
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplate'
+          maxItems: 10000
+          type: array
+      required:
+      - items
+      type: object
     TenantId:
       description: The id of the tenant.
       example: 1001
@@ -9019,6 +10047,7 @@ components:
       - pvc
       - secret
       - config-map
+      - resource-claim-template
       type: string
     ClusterObjectIssueType:
       enum:

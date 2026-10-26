@@ -101,7 +101,7 @@ func (h *NumaNodeHandler) ShouldSyncNumaNode(nodeName string) (bool, error) {
 		}
 		return false, err
 	}
-	return isNumaEnabled(nodePool), nil
+	return IsNumaEnabled(nodePool), nil
 }
 
 func (h *NumaNodeHandler) getNodePoolName(nodeName string) (string, error) {
@@ -216,7 +216,7 @@ func (h *NumaNodeHandler) getNodepoolNameToNumaEnabled() (map[string]bool, error
 	}
 	nodepoolNameToNumaEnabled := make(map[string]bool, len(nodePoolList.Items))
 	for i := range nodePoolList.Items {
-		nodepoolNameToNumaEnabled[nodePoolList.Items[i].Name] = isNumaEnabled(&nodePoolList.Items[i])
+		nodepoolNameToNumaEnabled[nodePoolList.Items[i].Name] = IsNumaEnabled(&nodePoolList.Items[i])
 	}
 	return nodepoolNameToNumaEnabled, nil
 }
@@ -315,8 +315,8 @@ func nodePoolNameForNode(node *corev1.Node) string {
 	return nodePoolName
 }
 
-// isNumaEnabled mirrors nodepool-controller's NUMA plugin check.
-func isNumaEnabled(nodePool *kainodepool.NodePool) bool {
+// IsNumaEnabled mirrors nodepool-controller's NUMA plugin check.
+func IsNumaEnabled(nodePool *kainodepool.NodePool) bool {
 	config := nodePool.Spec.SchedulingShardConfig
 	if config == nil {
 		return false

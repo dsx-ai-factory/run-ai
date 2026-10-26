@@ -29,16 +29,6 @@
         />
       </div>
     </div>
-    <div class="col-12 q-mb-lg">
-      <div v-if="hasIdpAttributes">Use the following if required by the identity provider</div>
-      <setting-readable-field label="Redirect URL" v-if="idp?.redirectUri">
-        <div class="row no-wrap items-center">
-          <div class="col-9 q-pt-md q-pl-md">
-            {{ idp.redirectUri }}
-          </div>
-        </div>
-      </setting-readable-field>
-    </div>
     <div class="col-12 q-my-lg">
       <idp-scope v-if="isEditMode" :scopes="sourceOidcSettings.scopes" idp-name="OIDC" @update-scope="updateScope" />
     </div>
@@ -52,19 +42,30 @@
       >
     </div>
   </setting-wrapper-box>
-  <setting-editable-field
-    v-else
-    resource-type="SecuritySettings"
-    @edit="onEdit"
-    @delete="onRemove"
-    :delete-disabled="isSSOUser"
-    :delete-tool-tip="settingBoxMessages.removeToolTip"
-    :edit-tool-tip="settingBoxMessages.editToolTip"
-    :label="settingBoxMessages.headerTitle"
-    :delete-sub-title="settingBoxMessages.confirmRemoveSubTitle"
-    use-larger-label
-  >
-  </setting-editable-field>
+  <div v-else>
+    <setting-editable-field
+      resource-type="SecuritySettings"
+      @edit="onEdit"
+      @delete="onRemove"
+      :delete-disabled="isSSOUser"
+      :delete-tool-tip="settingBoxMessages.removeToolTip"
+      :edit-tool-tip="settingBoxMessages.editToolTip"
+      :label="settingBoxMessages.headerTitle"
+      :delete-sub-title="settingBoxMessages.confirmRemoveSubTitle"
+      use-larger-label
+    >
+    </setting-editable-field>
+    <div v-if="hasIdpAttributes" class="redirect-url-field">
+      <div>Use the following if required by the identity provider</div>
+      <setting-readable-field label="Redirect URL">
+        <div class="row no-wrap items-center">
+          <div class="col-9 q-pt-md q-pl-md">
+            {{ idp?.redirectUri }}
+          </div>
+        </div>
+      </setting-readable-field>
+    </div>
+  </div>
 </template>
 
 <script lang="ts">
@@ -248,3 +249,8 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="scss" scoped>
+.redirect-url-field {
+  margin-top: 12px;
+}
+</style>

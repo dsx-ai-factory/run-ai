@@ -7,8 +7,6 @@ include ../../build/makefile/index.mk
 # Change for every new service
 SERVICE_NAME=metrics-service
 
-MOCKERY := ${BIN_DIR}/mockery
-
 OPENAPI_GENERATOR_VERSION_SERVER=v7.12.0
 OPENAPI_GENERATOR_VERSION_CLIENT_GO=v7.12.0
 
@@ -19,13 +17,13 @@ SHARED_PACKAGES_PATH=pkg
 OPENAPI_CLIENT_NAME_GO=client
 SHARED_PACKAGES_PATH_ABS=control-plane/metrics-service/pkg
 
-test: build  test-ginkgo integration-tests ## Run unit and integration tests
+test: build  test-go integration-tests ## Run unit and integration tests
 .PHONY: test
 
 lint: lint-go ## Run linter.
 .PHONY: lint
 
-validate: openapi-validate ## Run validate.
+validate: openapi-validate validate-mockery ## Run validate.
 .PHONY: validate
 
 purify: purify-go ## Purify the code.

@@ -71,6 +71,10 @@ const (
 	TableNameAssetsSecretVolume         = "assets_secret_volume"
 	SecretVolumeColumnCredentialAssetId = "credential_asset_id" //nolint:gosec
 
+	// TableNameAssetsSpec is the generic spec table. it stores the spec as
+	// JSON keyed by asset_id, so many assets can share it.
+	TableNameAssetsSpec = "assets_spec"
+
 	TableNameModel = "assets_model"
 
 	TableNameTenantSettings = "tenant_settings"
@@ -136,6 +140,7 @@ var TableToClean = map[string]string{
 	TableNameAssetsRegistry:         AssetIdColumnName,
 	TableNameAssetsS3:               AssetIdColumnName,
 	TableNameAssetsSecretVolume:     AssetIdColumnName,
+	TableNameAssetsSpec:             AssetIdColumnName,
 	TableNameWorkloadSupportedTypes: AssetIdColumnName,
 	TableNameLastUsedByWorkload:     AssetIdColumnName,
 	TableNamePolicyCompliance:       AssetIdColumnName,
@@ -163,6 +168,7 @@ var TablesOfSyncedAssets = []string{
 	TableNameAssetsGenericSecret,
 	TableNameAssetsDockerRegistry,
 	TableNameAssetsNgcApiKey,
+	TableNameAssetsSpec,
 }
 
 var TableOfCredentials = []string{

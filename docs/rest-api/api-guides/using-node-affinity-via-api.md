@@ -8,13 +8,13 @@ You can use the `nodeAffinity` field within your workload specifications (`spec.
 
 When a workload with a node affinity specification is submitted, the [NVIDIA Run:ai Scheduler](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md) evaluates these constraints alongside other scheduling factors such as resource availability and fairness policies.
 
-<Info>
+<Note>
 
 **Note**
 
 Preferred node affinity is not supported.
 
-</Info>
+</Note>
 
 ## Supported Features
 
@@ -38,7 +38,7 @@ When submitting a workload, include the `nodeAffinityRequired` field in the API 
 **Example:**
 
 ```bash
-curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \ 
+curl -L 'https://<COMPANY-URL>/api/v1/workloads/workspaces' \
 -H 'Authorization: Bearer <API-TOKEN>' \
 -H 'Content-Type: application/json' \
 -d '{

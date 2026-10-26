@@ -38,14 +38,14 @@ You can create a new workload using either the **Flexible** or **Original** subm
 * **Load from an existing setup** - You can select an existing setup to populate the workload form with predefined values. While the Original submission form also allows you to select an existing setup, with the Flexible submission you can customize any of the populated fields for a one-time configuration. These changes will apply only to this workload and will not modify the original setup. If needed, you can reset the configuration to the original setup at any time.
 * **Provide your own settings** - Manually fill in the workload configuration fields. This is a one-time setup that applies only to the current workload and will not be saved for future use.
 
-<Info>
+<Note>
 
 **Note**
 
 * Flexible workload submission is enabled by default. If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload submission.
 * The Original submission form will be deprecated in a future release.
 
-</Info>
+</Note>
 
 ## Creating a Standard Training Workload
 
@@ -59,19 +59,19 @@ You can create a new workload using either the **Flexible** or **Original** subm
      * Click **CREATE TRAINING** to launch immediately using the template settings.
      *   Click **Advanced setup** to open the full workload form with fields populated by the template. You can adjust the predefined configuration values before submitting. Any changes you make will apply only to the workload and will not be saved back to the original template.
 
-         <Info><p><strong>Note</strong></p><p>You cannot create a workload directly from a template if the template does not include all mandatory fields or if an organizational policy restricts the use of certain fields within that template.</p></Info>
+         <Note><p><strong>Note</strong></p><p>You cannot create a workload directly from a template if the template does not include all mandatory fields or if an organizational policy restricts the use of certain fields within that template.</p></Note>
 6. Enter a unique **name** for the workload. If the name already exists in the project, you will be requested to submit a different name.
 
 ### Setting Up an Environment
 
-<Info>
+<Note>
 
 **Note**
 
 * NGC catalog is disabled by default. If unavailable, your administrator must enable it under **General settings** → Workloads → NGC catalog.
 * To select an image from the NGC private registry**,** your administrator must configure it under **General settings** → Workloads → NGC private registry.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -160,13 +160,13 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 ### Setting Up Compute Resources
 
-<Info>
+<Note>
 
 **Note**
 
 GPU memory limit is disabled by default. If unavailable, your administrator must enable it under **General settings** → Resources → GPU resource optimization.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -226,14 +226,14 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 ### Setting Up Data & Storage
 
-<Info>
+<Note>
 
 **Note**
 
 * Data volumes is enabled by default and applies only to flexible workload submission (enabled by default). If unavailable, contact your administrator to enable it under **General Settings** → Workloads → Data volumes.
 * If Data volumes is not enabled, **Data & storage** appears as **Data sources** only, and no data volumes will be available.
 
-</Info>
+</Note>
 
 <Tabs>
 
@@ -249,13 +249,13 @@ Manually configure the settings below as needed. The changes will apply to this 
 
 **Configure data sources for a one-time configuration**
 
-<Info>
+<Note>
 
 **Note**
 
 [PVCs](../workload-assets/data-volumes.md), [Secrets](../workload-assets/credentials.md), [ConfigMaps](../workload-assets/environments.md) and [Data volumes](../workload-assets/data-volumes.md) cannot be added as a one-time configuration.
 
-</Info>
+</Note>
 
 1. Click the **➕** icon and choose the data source from the dropdown menu. You can add multiple data sources.
 2. Once selected, set the **data origin** according to the required fields and enter the **container path** to set the **data target location**.
@@ -297,13 +297,13 @@ Select **Volume** to allocate a storage space to your workspace that is persiste
 2. Optional: Select an existing **data source**. Modify the data target location if needed.
 3. To add a new data source, click **+ NEW DATA SOURCE**. For a step-by-step guide, see [Data sources](../workload-assets/overview.md). Once created, it will be automatically selected.
 
-<Info>
+<Note>
 
 **Note**
 
 If there are connectivity issues with the cluster or problems during data source creation, the data source may not appear in the list.
 
-</Info>
+</Note>
 
 </Tab>
 
@@ -311,21 +311,22 @@ If there are connectivity issues with the cluster or problems during data source
 
 ### Setting Up General Settings
 
-<Info>
+<Note>
 
 **Note**
 
 The following general settings are optional.
 
-</Info>
+</Note>
 
 <Tabs>
 
 <Tab title="Flexible">
 
-1. Set whether the workload may be interrupted by selecting **Preemptible** or **Non-preemptible**:
-   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
+1. Set whether the workload may be interrupted by selecting **Preemptible**, **Semi-preemptible**, or **Non-preemptible**:
    * Preemptible workloads may be interrupted if resources are needed for higher-priority workloads.
+   * Semi-preemptible workloads guarantee their minimum required replicas run without interruption, while any replicas beyond that minimum behave as preemptible replicas.
+   * Non-preemptible workloads use the project's available GPU quota and will not be interrupted once they start running.
 2. Set the **workload priority**. Choose the appropriate priority level for the workload. Higher-priority workloads are scheduled before lower-priority ones.
 3. Set the **grace period** for workload preemption. This is a buffer that allows a preempted workload to reach a safe checkpoint before it is forcibly preempted. Enter a timeframe between 0 sec and 5 min.
 4. Set the **number of runs** the workload must finish to be considered complete. Multiple runs enhance the reliability and validity of the training results.
@@ -362,8 +363,12 @@ After the training workload is created, it is added to the [Workloads](../worklo
 
 ## Using CLI
 
-To view the available actions, see the training workload [CLI v2 reference](../../reference/cli/runai/).
+To view the available actions, see the training workload [CLI v2 reference](../../reference/cli/runai/runai_training.md).
 
 ## Using API
 
-To view the available actions, see the [Trainings workload](https://run-ai-docs.nvidia.com/api/2.26/workloads/trainings) API reference.
+To view the available actions, see the [Trainings workload](api:main-api:POST/api/v1/workloads/trainings) API reference.
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes the [`submit_workload`](../../agents/tools-reference.md#workloads) tool to submit a new workload via natural language. See [AI Agents](../../agents/overview.md) for setup.

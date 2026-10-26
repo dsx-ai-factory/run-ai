@@ -84,7 +84,10 @@ services:
   slack-mock:
     profiles:
       - slack
-    build: ./slack
+    build:
+      context: ./slack
+      args:
+        GO_ALPINE_VERSION: ${GO_ALPINE_VERSION:?set by make}
     ports:
       - "3000:3000"
     expose:

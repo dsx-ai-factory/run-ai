@@ -79,7 +79,7 @@ validate_mocks() {
 
 validate_version() {
   echo "Checking for version differences"
-  HEAD_REF="origin/master"
+  HEAD_REF="origin/main"
   # Differentiate when tests are being run locally or by GitHub Actions and inside a PR
   if [ "${GITHUB_ACTIONS}" = "true" ]; then
     if [ -n "${GITHUB_BASE_REF}" ]; then

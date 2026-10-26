@@ -617,7 +617,8 @@ export const AssetKind = {
     ConfigMap: 'config-map',
     SecretVolume: 'secret-volume',
     DataVolume: 'data-volume',
-    NgcApiKey: 'ngcApiKey'
+    NgcApiKey: 'ngcApiKey',
+    ResourceClaimTemplate: 'resource-claim-template'
 } as const;
 
 export type AssetKind = typeof AssetKind[keyof typeof AssetKind];
@@ -2247,6 +2248,12 @@ export interface ComputeAssetSpec {
      */
     'extendedResources'?: Array<ExtendedResource> | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof ComputeAssetSpec
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof ComputeAssetSpec
@@ -2259,21 +2266,35 @@ export interface ComputeAssetSpec {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof ComputeAssetSpec
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof ComputeAssetSpec
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof ComputeAssetSpec
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof ComputeAssetSpec
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof ComputeAssetSpec
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -2345,6 +2366,12 @@ export interface ComputeCreationRequestSpec {
      */
     'extendedResources'?: Array<ExtendedResource> | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof ComputeCreationRequestSpec
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof ComputeCreationRequestSpec
@@ -2357,21 +2384,35 @@ export interface ComputeCreationRequestSpec {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof ComputeCreationRequestSpec
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof ComputeCreationRequestSpec
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof ComputeCreationRequestSpec
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof ComputeCreationRequestSpec
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof ComputeCreationRequestSpec
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -4670,6 +4711,12 @@ export interface DistributedInferenceLeaderWorkerSpecCompute {
      */
     'extendedResources'?: Array<ExtendedResource> | null;
     /**
+     * 
+     * @type {GpuComputeMode}
+     * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     */
+    'gpuComputeMode'?: GpuComputeMode | null;
+    /**
      * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
      * @type {number}
      * @memberof DistributedInferenceLeaderWorkerSpecCompute
@@ -4682,21 +4729,35 @@ export interface DistributedInferenceLeaderWorkerSpecCompute {
      */
     'gpuMemoryLimit'?: string | null;
     /**
+     * Maximum GPU memory fraction consumed per GPU device. Must be no less than gpuMemoryPortionRequest.
+     * @type {number}
+     * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     */
+    'gpuMemoryPortionLimit'?: number | null;
+    /**
+     * GPU memory fraction to allocate per GPU device, between 0 and 1. Required when gpuRequestType is portion.
+     * @type {number}
+     * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     */
+    'gpuMemoryPortionRequest'?: number | null;
+    /**
      * Required if and only if gpuRequestType is memory. States the GPU memory to allocate for the created workload, per GPU device. Note that the workload will not be scheduled unless the system can guarantee this amount of GPU memory to the workload.
      * @type {string}
      * @memberof DistributedInferenceLeaderWorkerSpecCompute
      */
     'gpuMemoryRequest'?: string | null;
     /**
-     * Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
+     * Deprecated. Use gpuMemoryPortionLimit instead. Limitations on the portion consumed by the workload, per GPU device. The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest.
      * @type {number}
      * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     * @deprecated
      */
     'gpuPortionLimit'?: number | null;
     /**
-     * Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
+     * Deprecated. Use gpuMemoryPortionRequest instead. Required if and only if gpuRequestType is portion. States the portion of the GPU to allocate for the created workload, per GPU device, between 0 and 1. The default is no allocated GPUs.
      * @type {number}
      * @memberof DistributedInferenceLeaderWorkerSpecCompute
+     * @deprecated
      */
     'gpuPortionRequest'?: number | null;
     /**
@@ -4880,7 +4941,7 @@ export interface DistributedInferenceServingPort {
      */
     'authorizedGroups'?: Array<string> | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof DistributedInferenceServingPort
      */
@@ -4917,7 +4978,7 @@ export interface DistributedInferenceServingPortAccess {
      */
     'authorizedGroups'?: Array<string> | null;
     /**
-     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+     * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
      * @type {boolean}
      * @memberof DistributedInferenceServingPortAccess
      */
@@ -5613,7 +5674,7 @@ export interface EnvironmentAssetSpec {
      */
     'supplementalGroups'?: string | null;
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof EnvironmentAssetSpec
      */
@@ -6765,6 +6826,20 @@ export interface GitsRules {
      */
     'instances'?: ItemRules | null;
 }
+/**
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
+ * @export
+ * @enum {string}
+ */
+
+export const GpuComputeMode = {
+    TimeSlicing: 'time-slicing',
+    SmSharing: 'sm-sharing'
+} as const;
+
+export type GpuComputeMode = typeof GpuComputeMode[keyof typeof GpuComputeMode];
+
+
 /**
  * Sets the unit type for GPU resources requests. Stated in terms of portion or memory. Sets the unit type for other GPU request fields. If `gpuDevicesRequest > 1`, only `portion` is supported. If `gpuDeviceRequest = 1`, the request type can be stated as `portion` or `memory`.
  * @export
@@ -7982,6 +8057,106 @@ export interface ItemRules {
     'locked'?: Array<string>;
 }
 /**
+ * Metadata of the Kubernetes resource that is created by this k8sObject
+ * @export
+ * @interface K8sObjectMeta
+ */
+export interface K8sObjectMeta {
+    /**
+     * Free-form annotations attached to the resource. Keys must conform to Kubernetes qualified-name syntax (https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set): an optional DNS-subdomain prefix (≤253 chars) followed by \"/\" and a required name component ([A-Za-z0-9] with `.`, `_`, `-` allowed inside, ≤63 chars). Key syntax is enforced at runtime on both create and update; annotation values have no format constraint beyond the length limit below. 
+     * @type {{ [key: string]: string; }}
+     * @memberof K8sObjectMeta
+     */
+    'annotations'?: { [key: string]: string; } | null;
+    /**
+     * Free-form labels attached to the resource. Keys and values must conform to Kubernetes label syntax (https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#syntax-and-character-set): keys are qualified names (optional DNS-subdomain prefix ≤253 chars + \"/\" + name component ≤63 chars); values are ≤63 chars matching the same [A-Za-z0-9]/`.`/`_`/`-` character set (empty values are allowed). Key syntax is validated at runtime; the value pattern below is enforced by the schema as well as at runtime. 
+     * @type {{ [key: string]: string; }}
+     * @memberof K8sObjectMeta
+     */
+    'labels'?: { [key: string]: string; } | null;
+}
+/**
+ * Common shape for k8s-object asset specs: the raw Kubernetes object metadata (labels/annotations) and the raw Kubernetes object spec. Shared between the k8s-object CRUD APIs (e.g. RctSpec) and the cluster-facing k8s-objects sync API (K8sObjectsUpdate). 
+ * @export
+ * @interface K8sObjectSpec
+ */
+export interface K8sObjectSpec {
+    /**
+     * 
+     * @type {K8sObjectMeta}
+     * @memberof K8sObjectSpec
+     */
+    'objectMeta'?: K8sObjectMeta | null;
+    /**
+     * The raw Kubernetes spec of the object.
+     * @type {{ [key: string]: any; }}
+     * @memberof K8sObjectSpec
+     */
+    'objectSpec': { [key: string]: any; };
+}
+/**
+ * 
+ * @export
+ * @interface K8sObjectsUpdate
+ */
+export interface K8sObjectsUpdate {
+    /**
+     * 
+     * @type {AssetMetaForSync}
+     * @memberof K8sObjectsUpdate
+     */
+    'meta': AssetMetaForSync;
+    /**
+     * the value of an update counter of a data in the system.
+     * @type {number}
+     * @memberof K8sObjectsUpdate
+     */
+    'updateCount': number;
+    /**
+     * the asset has been deleted
+     * @type {boolean}
+     * @memberof K8sObjectsUpdate
+     */
+    'isDeleted'?: boolean | null;
+    /**
+     * 
+     * @type {K8sObjectSpec}
+     * @memberof K8sObjectsUpdate
+     */
+    'spec'?: K8sObjectSpec;
+}
+/**
+ * 
+ * @export
+ * @interface K8sObjectsUpdatesResp
+ */
+export interface K8sObjectsUpdatesResp {
+    /**
+     * 
+     * @type {RequestInfo}
+     * @memberof K8sObjectsUpdatesResp
+     */
+    'requestInfo'?: RequestInfo;
+    /**
+     * 
+     * @type {ResponseInfo}
+     * @memberof K8sObjectsUpdatesResp
+     */
+    'responseInfo'?: ResponseInfo;
+    /**
+     * 
+     * @type {SystemInfo}
+     * @memberof K8sObjectsUpdatesResp
+     */
+    'systemInfo'?: SystemInfo;
+    /**
+     * 
+     * @type {Array<K8sObjectsUpdate>}
+     * @memberof K8sObjectsUpdatesResp
+     */
+    'assets'?: Array<K8sObjectsUpdate>;
+}
+/**
  * Details of key-value pair to be stored in the credential.
  * @export
  * @interface KeyValuePair
@@ -9052,7 +9227,7 @@ export interface NodeSelectorTerm {
  */
 export interface NonOverridableSpecFields {
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof NonOverridableSpecFields
      */
@@ -9167,7 +9342,7 @@ export interface NonOverridableSpecFields {
  */
 export interface NonOverridableSpecFieldsAllOf {
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof NonOverridableSpecFieldsAllOf
      */
@@ -9867,6 +10042,25 @@ export interface PodAffinityTypeRules {
 /**
  * 
  * @export
+ * @interface PodResourceClaimBinding
+ */
+export interface PodResourceClaimBinding {
+    /**
+     * Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'name': string;
+    /**
+     * Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'claimName'?: string | null;
+}
+/**
+ * 
+ * @export
  * @interface PolicyInfo
  */
 export interface PolicyInfo {
@@ -9995,7 +10189,7 @@ export type PortServiceType = typeof PortServiceType[keyof typeof PortServiceTyp
 
 
 /**
- * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+ * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
  * @export
  * @enum {string}
  */
@@ -10500,6 +10694,107 @@ export interface PvcsRules {
 /**
  * 
  * @export
+ * @interface Rct
+ */
+export interface Rct {
+    /**
+     * 
+     * @type {AssetMeta}
+     * @memberof Rct
+     */
+    'meta': AssetMeta;
+    /**
+     * 
+     * @type {RctSpec}
+     * @memberof Rct
+     */
+    'spec': RctSpec;
+    /**
+     * 
+     * @type {AssetClusterStatusInfo}
+     * @memberof Rct
+     */
+    'status'?: AssetClusterStatusInfo | null;
+}
+/**
+ * 
+ * @export
+ * @interface RctCreationRequest
+ */
+export interface RctCreationRequest {
+    /**
+     * 
+     * @type {AssetCreationRequest}
+     * @memberof RctCreationRequest
+     */
+    'meta': AssetCreationRequest;
+    /**
+     * 
+     * @type {RctSpec}
+     * @memberof RctCreationRequest
+     */
+    'spec': RctSpec;
+}
+/**
+ * 
+ * @export
+ * @interface RctListResponse
+ */
+export interface RctListResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more entries beyond the current page (i.e., the number of returned entries equals the limit). 
+     * @type {number}
+     * @memberof RctListResponse
+     */
+    'next'?: number;
+    /**
+     * 
+     * @type {Array<Rct>}
+     * @memberof RctListResponse
+     */
+    'entries': Array<Rct>;
+}
+/**
+ * 
+ * @export
+ * @interface RctSpec
+ */
+export interface RctSpec {
+    /**
+     * 
+     * @type {K8sObjectMeta}
+     * @memberof RctSpec
+     */
+    'objectMeta'?: K8sObjectMeta | null;
+    /**
+     * The raw Kubernetes spec of the object.
+     * @type {{ [key: string]: any; }}
+     * @memberof RctSpec
+     */
+    'objectSpec': { [key: string]: any; };
+}
+/**
+ * 
+ * @export
+ * @interface RctUpdateRequest
+ */
+export interface RctUpdateRequest {
+    /**
+     * 
+     * @type {AssetUpdateRequest}
+     * @memberof RctUpdateRequest
+     */
+    'meta': AssetUpdateRequest;
+    /**
+     * 
+     * @type {RctSpec}
+     * @memberof RctUpdateRequest
+     */
+    'spec': RctSpec;
+}
+/**
+ * 
+ * @export
  * @interface Registry
  */
 export interface Registry {
@@ -10667,6 +10962,87 @@ export interface RequestInfo {
      * @memberof RequestInfo
      */
     'afterUpdate': number;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkload
+ */
+export interface ResourceClaimTemplateWorkload {
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'workloadId': string;
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'name': string;
+    /**
+     * The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'type': string;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'projectId': string;
+    /**
+     * The pods of the workload that reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkloadPod>}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'pods': Array<ResourceClaimTemplateWorkloadPod>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadPod
+ */
+export interface ResourceClaimTemplateWorkloadPod {
+    /**
+     * The id of the pod.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podName': string;
+    /**
+     * The pod\'s claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.
+     * @type {Array<PodResourceClaimBinding>}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'resourceClaims': Array<PodResourceClaimBinding>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadsResponse
+ */
+export interface ResourceClaimTemplateWorkloadsResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit). 
+     * @type {number}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'next'?: number;
+    /**
+     * The workloads whose pods currently reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkload>}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'workloads': Array<ResourceClaimTemplateWorkload>;
 }
 /**
  * The lowest and highest update counts included in this bulk of updates. for example, it is possible that agent requester for afterUpdate=10 and received a bulk of four updates - 12, 13, 16, 18. in this case lowestUpdate=12, highestUpdate=18.
@@ -13302,7 +13678,7 @@ export interface SupersetSpecAllOf {
  */
 export interface SupersetSpecAllOfSecurity {
     /**
-     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers
+     * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
      * @type {boolean}
      * @memberof SupersetSpecAllOfSecurity
      */
@@ -14027,7 +14403,7 @@ export interface TrainingV2 {
     'distributed'?: DistributedData | null;
 }
 /**
- * Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers).
+ * Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).
  * @export
  * @enum {string}
  */
@@ -23544,6 +23920,558 @@ export class RegistryApi extends BaseAPI {
 
 
 /**
+ * ResourceClaimTemplatesApi - axios parameter creator
+ * @export
+ */
+export const ResourceClaimTemplatesApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Use to create a resource claim template and synchronize it to the cluster.
+         * @summary Create resource claim template.
+         * @param {RctCreationRequest} [rctCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRct: async (rctCreationRequest?: RctCreationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(rctCreationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to delete a resource claim template, by id.
+         * @summary Delete a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRctById: async (assetId: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('deleteRctById', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'DELETE', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to retrieve the details of a resource claim template by id.
+         * @summary Retrieve a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctById: async (assetId: string, statusInfo?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getRctById', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (statusInfo !== undefined) {
+                localVarQueryParameter['statusInfo'] = statusInfo;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctWorkloads: async (assetId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('getRctWorkloads', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to retrieve a list of resource claim templates.
+         * @summary List resource claim templates.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
+         * @param {'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'} [sortBy] Sort results by parameter.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+         * @param {boolean} [includeAncestors] When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor\&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+         * @param {boolean} [includeDescendants] Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRcts: async (offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy', filterBy?: Array<string>, includeAncestors?: boolean, includeDescendants?: boolean, statusInfo?: boolean, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (sortOrder !== undefined) {
+                localVarQueryParameter['sortOrder'] = sortOrder;
+            }
+
+            if (sortBy !== undefined) {
+                localVarQueryParameter['sortBy'] = sortBy;
+            }
+
+            if (filterBy) {
+                localVarQueryParameter['filterBy'] = filterBy.join(COLLECTION_FORMATS.csv);
+            }
+
+            if (includeAncestors !== undefined) {
+                localVarQueryParameter['includeAncestors'] = includeAncestors;
+            }
+
+            if (includeDescendants !== undefined) {
+                localVarQueryParameter['includeDescendants'] = includeDescendants;
+            }
+
+            if (statusInfo !== undefined) {
+                localVarQueryParameter['statusInfo'] = statusInfo;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Use to update the details of a resource claim template by id.
+         * @summary Update a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {RctUpdateRequest} [rctUpdateRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRctById: async (assetId: string, rctUpdateRequest?: RctUpdateRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'assetId' is not null or undefined
+            assertParamExists('updateRctById', 'assetId', assetId)
+            const localVarPath = `/api/v1/k8s-objects/resource-claim-templates/{AssetId}`
+                .replace(`{${"AssetId"}}`, encodeURIComponent(String(assetId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'PUT', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(rctUpdateRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * ResourceClaimTemplatesApi - functional programming interface
+ * @export
+ */
+export const ResourceClaimTemplatesApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = ResourceClaimTemplatesApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Use to create a resource claim template and synchronize it to the cluster.
+         * @summary Create resource claim template.
+         * @param {RctCreationRequest} [rctCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async createRct(rctCreationRequest?: RctCreationRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Rct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.createRct(rctCreationRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to delete a resource claim template, by id.
+         * @summary Delete a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async deleteRctById(assetId: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<HttpResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.deleteRctById(assetId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to retrieve the details of a resource claim template by id.
+         * @summary Retrieve a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRctById(assetId: string, statusInfo?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Rct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRctById(assetId, statusInfo, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplateWorkloadsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getRctWorkloads(assetId, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to retrieve a list of resource claim templates.
+         * @summary List resource claim templates.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
+         * @param {'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'} [sortBy] Sort results by parameter.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+         * @param {boolean} [includeAncestors] When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor\&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+         * @param {boolean} [includeDescendants] Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async listRcts(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy', filterBy?: Array<string>, includeAncestors?: boolean, includeDescendants?: boolean, statusInfo?: boolean, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<RctListResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.listRcts(offset, limit, sortOrder, sortBy, filterBy, includeAncestors, includeDescendants, statusInfo, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Use to update the details of a resource claim template by id.
+         * @summary Update a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {RctUpdateRequest} [rctUpdateRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async updateRctById(assetId: string, rctUpdateRequest?: RctUpdateRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Rct>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.updateRctById(assetId, rctUpdateRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * ResourceClaimTemplatesApi - factory interface
+ * @export
+ */
+export const ResourceClaimTemplatesApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = ResourceClaimTemplatesApiFp(configuration)
+    return {
+        /**
+         * Use to create a resource claim template and synchronize it to the cluster.
+         * @summary Create resource claim template.
+         * @param {RctCreationRequest} [rctCreationRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        createRct(rctCreationRequest?: RctCreationRequest, options?: any): AxiosPromise<Rct> {
+            return localVarFp.createRct(rctCreationRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to delete a resource claim template, by id.
+         * @summary Delete a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        deleteRctById(assetId: string, options?: any): AxiosPromise<HttpResponse> {
+            return localVarFp.deleteRctById(assetId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to retrieve the details of a resource claim template by id.
+         * @summary Retrieve a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctById(assetId: string, statusInfo?: boolean, options?: any): AxiosPromise<Rct> {
+            return localVarFp.getRctById(assetId, statusInfo, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+         * @summary List the workloads using a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: any): AxiosPromise<ResourceClaimTemplateWorkloadsResponse> {
+            return localVarFp.getRctWorkloads(assetId, offset, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to retrieve a list of resource claim templates.
+         * @summary List resource claim templates.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
+         * @param {'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'} [sortBy] Sort results by parameter.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+         * @param {boolean} [includeAncestors] When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor\&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+         * @param {boolean} [includeDescendants] Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
+         * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        listRcts(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy', filterBy?: Array<string>, includeAncestors?: boolean, includeDescendants?: boolean, statusInfo?: boolean, options?: any): AxiosPromise<RctListResponse> {
+            return localVarFp.listRcts(offset, limit, sortOrder, sortBy, filterBy, includeAncestors, includeDescendants, statusInfo, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Use to update the details of a resource claim template by id.
+         * @summary Update a resource claim template.
+         * @param {string} assetId Unique identifier of the asset.
+         * @param {RctUpdateRequest} [rctUpdateRequest] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        updateRctById(assetId: string, rctUpdateRequest?: RctUpdateRequest, options?: any): AxiosPromise<Rct> {
+            return localVarFp.updateRctById(assetId, rctUpdateRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * ResourceClaimTemplatesApi - object-oriented interface
+ * @export
+ * @class ResourceClaimTemplatesApi
+ * @extends {BaseAPI}
+ */
+export class ResourceClaimTemplatesApi extends BaseAPI {
+    /**
+     * Use to create a resource claim template and synchronize it to the cluster.
+     * @summary Create resource claim template.
+     * @param {RctCreationRequest} [rctCreationRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public createRct(rctCreationRequest?: RctCreationRequest, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).createRct(rctCreationRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to delete a resource claim template, by id.
+     * @summary Delete a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public deleteRctById(assetId: string, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).deleteRctById(assetId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to retrieve the details of a resource claim template by id.
+     * @summary Retrieve a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public getRctById(assetId: string, statusInfo?: boolean, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).getRctById(assetId, statusInfo, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.
+     * @summary List the workloads using a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public getRctWorkloads(assetId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).getRctWorkloads(assetId, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to retrieve a list of resource claim templates.
+     * @summary List resource claim templates.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {'asc' | 'desc'} [sortOrder] Sort results in descending or ascending order.
+     * @param {'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'} [sortBy] Sort results by parameter.
+     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with. Dates are in ISO 8601 timestamp format and available for operators &#x60;&#x3D;&#x3D;&#x60;, &#x60;!&#x3D;&#x60;, &#x60;&lt;&#x3D;&#x60; and &#x60;&gt;&#x3D;&#x60;. At most one scope anchor (clusterId, departmentId or projectId) may be provided. The anchor is combined with includeAncestors / includeDescendants to determine which scopes of the hierarchy are returned.
+     * @param {boolean} [includeAncestors] When a scope anchor (clusterId, departmentId or projectId) is provided, set includeAncestors&#x3D;true to also include resource claim templates from the anchor\&#39;s ancestor scopes (for example, for a project: its parent department and cluster, as well as tenant and system scoped templates). Defaults to true to preserve the backward-compatible scope-usability behavior.
+     * @param {boolean} [includeDescendants] Indicates whether to include assets from all descendant scopes under the specified scope. When set to true, and a specific scope identifier (for example, clusterId) is provided, the query also returns assets from all nested scopes within it (for example, departments and projects).  Mutually exclusive with scope.
+     * @param {boolean} [statusInfo] Whether the query should include asset status information as part of the response.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public listRcts(offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'name' | 'clusterId' | 'departmentId' | 'projectId' | 'description' | 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy', filterBy?: Array<string>, includeAncestors?: boolean, includeDescendants?: boolean, statusInfo?: boolean, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).listRcts(offset, limit, sortOrder, sortBy, filterBy, includeAncestors, includeDescendants, statusInfo, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Use to update the details of a resource claim template by id.
+     * @summary Update a resource claim template.
+     * @param {string} assetId Unique identifier of the asset.
+     * @param {RctUpdateRequest} [rctUpdateRequest] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof ResourceClaimTemplatesApi
+     */
+    public updateRctById(assetId: string, rctUpdateRequest?: RctUpdateRequest, options?: AxiosRequestConfig) {
+        return ResourceClaimTemplatesApiFp(this.configuration).updateRctById(assetId, rctUpdateRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
  * S3Api - axios parameter creator
  * @export
  */
@@ -24692,6 +25620,56 @@ export const SynchronizationApiAxiosParamCreator = function (configuration?: Con
             };
         },
         /**
+         * 
+         * @summary Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+         * @param {string} clusterId The id of the cluster
+         * @param {number} [after] search for updates with update counter greater than the value passed for this parameter
+         * @param {ClusterSyncReport} [clusterSyncReport] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        k8sObjectsSyncUpdates: async (clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'clusterId' is not null or undefined
+            assertParamExists('k8sObjectsSyncUpdates', 'clusterId', clusterId)
+            const localVarPath = `/api/v1/k8s-objects/updates`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (clusterId !== undefined) {
+                localVarQueryParameter['clusterId'] = clusterId;
+            }
+
+            if (after !== undefined) {
+                localVarQueryParameter['after'] = after;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(clusterSyncReport, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Returns a list of assets.
          * @summary List assets by their ids
          * @param {string} id comma seperated list of asset ids
@@ -24846,6 +25824,19 @@ export const SynchronizationApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * 
+         * @summary Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+         * @param {string} clusterId The id of the cluster
+         * @param {number} [after] search for updates with update counter greater than the value passed for this parameter
+         * @param {ClusterSyncReport} [clusterSyncReport] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async k8sObjectsSyncUpdates(clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<K8sObjectsUpdatesResp>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.k8sObjectsSyncUpdates(clusterId, after, clusterSyncReport, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Returns a list of assets.
          * @summary List assets by their ids
          * @param {string} id comma seperated list of asset ids
@@ -24914,6 +25905,18 @@ export const SynchronizationApiFactory = function (configuration?: Configuration
             return localVarFp.datasourceSyncUpdates(clusterId, after, clusterSyncReport, options).then((request) => request(axios, basePath));
         },
         /**
+         * 
+         * @summary Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+         * @param {string} clusterId The id of the cluster
+         * @param {number} [after] search for updates with update counter greater than the value passed for this parameter
+         * @param {ClusterSyncReport} [clusterSyncReport] 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        k8sObjectsSyncUpdates(clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options?: any): AxiosPromise<K8sObjectsUpdatesResp> {
+            return localVarFp.k8sObjectsSyncUpdates(clusterId, after, clusterSyncReport, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Returns a list of assets.
          * @summary List assets by their ids
          * @param {string} id comma seperated list of asset ids
@@ -24980,6 +25983,20 @@ export class SynchronizationApi extends BaseAPI {
      */
     public datasourceSyncUpdates(clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options?: AxiosRequestConfig) {
         return SynchronizationApiFp(this.configuration).datasourceSyncUpdates(clusterId, after, clusterSyncReport, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * 
+     * @summary Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.
+     * @param {string} clusterId The id of the cluster
+     * @param {number} [after] search for updates with update counter greater than the value passed for this parameter
+     * @param {ClusterSyncReport} [clusterSyncReport] 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof SynchronizationApi
+     */
+    public k8sObjectsSyncUpdates(clusterId: string, after?: number, clusterSyncReport?: ClusterSyncReport, options?: AxiosRequestConfig) {
+        return SynchronizationApiFp(this.configuration).k8sObjectsSyncUpdates(clusterId, after, clusterSyncReport, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

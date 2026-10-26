@@ -2,13 +2,13 @@
 
 This section explains the procedure for installing and configuring the researcher Command Line Interface.
 
-<Info>
+<Note>
 
 **Note**
 
 This section refers to CLI v2 only. CLI v1 is supported for clusters below 2.18 only.
 
-</Info>
+</Note>
 
 ## Prerequisites
 

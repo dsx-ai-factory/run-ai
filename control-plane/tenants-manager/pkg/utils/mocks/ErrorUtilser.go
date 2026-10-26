@@ -20,10 +20,19 @@ func NewErrorUtilser(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *ErrorUtilser {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &ErrorUtilser{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -66,15 +75,26 @@ type ErrorUtilser_BusinessErrorToApiErr_Call struct {
 }
 
 // BusinessErrorToApiErr is a helper method to define mock.On call
-//   - err
-//   - entity
-func (_e *ErrorUtilser_Expecter) BusinessErrorToApiErr(err interface{}, entity interface{}) *ErrorUtilser_BusinessErrorToApiErr_Call {
+//   - err *errors.BusinessError
+//   - entity errors.Entity
+func (_e *ErrorUtilser_Expecter) BusinessErrorToApiErr(err any, entity any) *ErrorUtilser_BusinessErrorToApiErr_Call {
 	return &ErrorUtilser_BusinessErrorToApiErr_Call{Call: _e.mock.On("BusinessErrorToApiErr", err, entity)}
 }
 
 func (_c *ErrorUtilser_BusinessErrorToApiErr_Call) Run(run func(err *errors.BusinessError, entity errors.Entity)) *ErrorUtilser_BusinessErrorToApiErr_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*errors.BusinessError), args[1].(errors.Entity))
+		var arg0 *errors.BusinessError
+		if args[0] != nil {
+			arg0 = args[0].(*errors.BusinessError)
+		}
+		var arg1 errors.Entity
+		if args[1] != nil {
+			arg1 = args[1].(errors.Entity)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -114,15 +134,26 @@ type ErrorUtilser_ErrorToApiError_Call struct {
 }
 
 // ErrorToApiError is a helper method to define mock.On call
-//   - err
-//   - statusCode
-func (_e *ErrorUtilser_Expecter) ErrorToApiError(err interface{}, statusCode interface{}) *ErrorUtilser_ErrorToApiError_Call {
+//   - err error
+//   - statusCode int32
+func (_e *ErrorUtilser_Expecter) ErrorToApiError(err any, statusCode any) *ErrorUtilser_ErrorToApiError_Call {
 	return &ErrorUtilser_ErrorToApiError_Call{Call: _e.mock.On("ErrorToApiError", err, statusCode)}
 }
 
 func (_c *ErrorUtilser_ErrorToApiError_Call) Run(run func(err error, statusCode int32)) *ErrorUtilser_ErrorToApiError_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(error), args[1].(int32))
+		var arg0 error
+		if args[0] != nil {
+			arg0 = args[0].(error)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -162,14 +193,20 @@ type ErrorUtilser_GetTenantErrorToResponseFromSubEntity_Call struct {
 }
 
 // GetTenantErrorToResponseFromSubEntity is a helper method to define mock.On call
-//   - err
-func (_e *ErrorUtilser_Expecter) GetTenantErrorToResponseFromSubEntity(err interface{}) *ErrorUtilser_GetTenantErrorToResponseFromSubEntity_Call {
+//   - err *dao.DaoError
+func (_e *ErrorUtilser_Expecter) GetTenantErrorToResponseFromSubEntity(err any) *ErrorUtilser_GetTenantErrorToResponseFromSubEntity_Call {
 	return &ErrorUtilser_GetTenantErrorToResponseFromSubEntity_Call{Call: _e.mock.On("GetTenantErrorToResponseFromSubEntity", err)}
 }
 
 func (_c *ErrorUtilser_GetTenantErrorToResponseFromSubEntity_Call) Run(run func(err *dao.DaoError)) *ErrorUtilser_GetTenantErrorToResponseFromSubEntity_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*dao.DaoError))
+		var arg0 *dao.DaoError
+		if args[0] != nil {
+			arg0 = args[0].(*dao.DaoError)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -209,14 +246,20 @@ type ErrorUtilser_TenantErrorToResponse_Call struct {
 }
 
 // TenantErrorToResponse is a helper method to define mock.On call
-//   - err
-func (_e *ErrorUtilser_Expecter) TenantErrorToResponse(err interface{}) *ErrorUtilser_TenantErrorToResponse_Call {
+//   - err *dao.DaoError
+func (_e *ErrorUtilser_Expecter) TenantErrorToResponse(err any) *ErrorUtilser_TenantErrorToResponse_Call {
 	return &ErrorUtilser_TenantErrorToResponse_Call{Call: _e.mock.On("TenantErrorToResponse", err)}
 }
 
 func (_c *ErrorUtilser_TenantErrorToResponse_Call) Run(run func(err *dao.DaoError)) *ErrorUtilser_TenantErrorToResponse_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(*dao.DaoError))
+		var arg0 *dao.DaoError
+		if args[0] != nil {
+			arg0 = args[0].(*dao.DaoError)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

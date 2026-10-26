@@ -1,6 +1,5 @@
 type: object
 description: Service port specification.
-nullable: true
 properties:
   name:
     description: The Service port name.

@@ -37,7 +37,7 @@ import (
 	authorizationapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	authorizationUtils "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/helpers"
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/mocks"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/mocks"
 )
 
 const (

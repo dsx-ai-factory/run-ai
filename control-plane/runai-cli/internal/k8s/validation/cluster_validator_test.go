@@ -84,8 +84,8 @@ var _ = Describe("ClusterValidator", Ordered, func() {
 	Describe("ValidateClusterIdentity", func() {
 		Context("when cluster domain and server URL hosts match", func() {
 			It("should return true with no error", func() {
-				mockKubeClient.EXPECT().GetServerUrl(ctx).Return("http://localhost.runailabs.com:123")
-				err := config.GetInstance().SetCluster("", "", "http://localhost.runailabs.com")
+				mockKubeClient.EXPECT().GetServerUrl(ctx).Return("http://localhost.example.com:123")
+				err := config.GetInstance().SetCluster("", "", "http://localhost.example.com")
 				fmt.Printf("err: %v\n", err)
 				Expect(err).To(BeNil())
 
@@ -95,8 +95,8 @@ var _ = Describe("ClusterValidator", Ordered, func() {
 			})
 
 			It("should handle URLs with different paths but same host", func() {
-				mockKubeClient.EXPECT().GetServerUrl(ctx).Return("http://localhost.runailabs.com/different/path")
-				err := config.GetInstance().SetCluster("", "", "http://localhost.runailabs.com/abc/def")
+				mockKubeClient.EXPECT().GetServerUrl(ctx).Return("http://localhost.example.com/different/path")
+				err := config.GetInstance().SetCluster("", "", "http://localhost.example.com/abc/def")
 				fmt.Printf("err: %v\n", err)
 				Expect(err).To(BeNil())
 
@@ -109,7 +109,7 @@ var _ = Describe("ClusterValidator", Ordered, func() {
 		Context("when cluster domain and server URL hosts do not match", func() {
 			It("should return false with no error", func() {
 				mockKubeClient.EXPECT().GetServerUrl(ctx).Return("http://different-host.com:123")
-				config.GetInstance().SetCluster("", "", "http://localhost.runailabs.com")
+				config.GetInstance().SetCluster("", "", "http://localhost.example.com")
 				isValid, err := validator.ValidateClusterIdentity(ctx)
 				Expect(err).To(BeNil())
 				Expect(isValid).To(BeFalse())

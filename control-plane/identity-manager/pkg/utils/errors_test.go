@@ -7,6 +7,7 @@ package utils
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"testing"
@@ -42,6 +43,35 @@ func TestHandleError_InternalServerError(t *testing.T) {
 	resp, err := HandleError(context.Background(), "user", "id", "idValue", fmt.Errorf("500"), "defaultLog")
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusInternalServerError, resp.Code)
+}
+
+func TestGetHttpStatusCodeAndMessage_Error(t *testing.T) {
+	code, message := GetHttpStatusCodeAndMessage(Error{Code: http.StatusBadRequest, Message: "failed to decode base64 string"})
+	assert.Equal(t, http.StatusBadRequest, code)
+	assert.Equal(t, "bad request", message)
+}
+
+// Callers wrap Error with the underlying cause so the log keeps the detail, so
+// the code has to stay reachable through the wrapping.
+func TestGetHttpStatusCodeAndMessage_WrappedError(t *testing.T) {
+	wrapped := fmt.Errorf("%w:%w",
+		Error{Code: http.StatusBadRequest, Message: "failed to decode base64 string"},
+		errors.New("illegal base64 data at input byte 3"))
+	code, message := GetHttpStatusCodeAndMessage(wrapped)
+	assert.Equal(t, http.StatusBadRequest, code)
+	assert.Equal(t, "bad request", message)
+}
+
+func TestGetHttpStatusCodeAndMessage_Sentinel(t *testing.T) {
+	code, message := GetHttpStatusCodeAndMessage(fmt.Errorf("metadata is unparseable: %w", ErrInvalidInput))
+	assert.Equal(t, http.StatusBadRequest, code)
+	assert.Equal(t, "bad request", message)
+}
+
+func TestGetHttpStatusCodeAndMessage_UnrecognizedError(t *testing.T) {
+	code, message := GetHttpStatusCodeAndMessage(errors.New("something went wrong"))
+	assert.Equal(t, http.StatusInternalServerError, code)
+	assert.Equal(t, "internal server error", message)
 }
 
 func getError(code int) error {

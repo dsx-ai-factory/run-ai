@@ -204,6 +204,7 @@
             :itemize-defaults="generalSectionItemizeDefaults"
             :workload-priority-data="workloadPriorityData"
             :support-preemptibility="features.supportPreemptibility"
+            :single-pod-workload="isSinglePodWorkload"
             @general-model-changed="handleGeneralModelChanged"
             :show-request-timeout="features.showRequestTimeout"
           />
@@ -552,6 +553,11 @@ const InferenceSubmitForm = defineComponent({
         annotations: this.policy?.policyData.defaults?.annotations || undefined,
         labels: this.policy?.policyData.defaults?.labels || undefined,
       };
+    },
+    isSinglePodWorkload(): boolean {
+      return (
+        this.modelValue.spec?.autoscaling?.minReplicas === 1 && this.modelValue.spec?.autoscaling?.maxReplicas === 1
+      );
     },
     workloadPriorityData(): IWorkloadPriorityData {
       const totalGpuRequest = workloadHybridUtil.calculateTotalGpuRequest({

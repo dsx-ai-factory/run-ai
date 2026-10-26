@@ -12,6 +12,7 @@ import (
 	"testing"
 	"time"
 
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/go_migrations/ri/source"
@@ -19,7 +20,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models"
 	testingutils "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/test"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/google/uuid"

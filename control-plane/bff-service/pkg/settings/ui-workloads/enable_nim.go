@@ -26,7 +26,7 @@ func (e *EnableNIM) Category() string {
 
 func (e *EnableNIM) Description() string {
 	return "Enable instant deployment of NIM models via the workload submission form. " +
-		"For more information, see the <a href='https://run-ai-docs.nvidia.com/self-hosted/workloads-in-nvidia-run-ai/using-inference/nim-inference' target='_blank'>Deploy Inference Workloads with NVIDIA NIM</a>"
+		"For more information, see the <a data-doc-key='nimInference' target='_blank'>Deploy Inference Workloads with NVIDIA NIM</a>"
 }
 
 func (e *EnableNIM) DisplayName() string {

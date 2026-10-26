@@ -21,10 +21,19 @@ func NewMockObservableCacheClienter(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockObservableCacheClienter {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockObservableCacheClienter{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -65,15 +74,26 @@ type MockObservableCacheClienter_ClearStore_Call struct {
 }
 
 // ClearStore is a helper method to define mock.On call
-//   - ctx
-//   - storeName
-func (_e *MockObservableCacheClienter_Expecter) ClearStore(ctx interface{}, storeName interface{}) *MockObservableCacheClienter_ClearStore_Call {
+//   - ctx context.Context
+//   - storeName string
+func (_e *MockObservableCacheClienter_Expecter) ClearStore(ctx any, storeName any) *MockObservableCacheClienter_ClearStore_Call {
 	return &MockObservableCacheClienter_ClearStore_Call{Call: _e.mock.On("ClearStore", ctx, storeName)}
 }
 
 func (_c *MockObservableCacheClienter_ClearStore_Call) Run(run func(ctx context.Context, storeName string)) *MockObservableCacheClienter_ClearStore_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -155,16 +175,32 @@ type MockObservableCacheClienter_Delete_Call struct {
 }
 
 // Delete is a helper method to define mock.On call
-//   - ctx
-//   - storeName
-//   - key
-func (_e *MockObservableCacheClienter_Expecter) Delete(ctx interface{}, storeName interface{}, key interface{}) *MockObservableCacheClienter_Delete_Call {
+//   - ctx context.Context
+//   - storeName string
+//   - key string
+func (_e *MockObservableCacheClienter_Expecter) Delete(ctx any, storeName any, key any) *MockObservableCacheClienter_Delete_Call {
 	return &MockObservableCacheClienter_Delete_Call{Call: _e.mock.On("Delete", ctx, storeName, key)}
 }
 
 func (_c *MockObservableCacheClienter_Delete_Call) Run(run func(ctx context.Context, storeName string, key string)) *MockObservableCacheClienter_Delete_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -202,17 +238,38 @@ type MockObservableCacheClienter_DeleteIf_Call struct {
 }
 
 // DeleteIf is a helper method to define mock.On call
-//   - ctx
-//   - storeName
-//   - key
-//   - cond
-func (_e *MockObservableCacheClienter_Expecter) DeleteIf(ctx interface{}, storeName interface{}, key interface{}, cond interface{}) *MockObservableCacheClienter_DeleteIf_Call {
+//   - ctx context.Context
+//   - storeName string
+//   - key string
+//   - cond func(val []byte) bool
+func (_e *MockObservableCacheClienter_Expecter) DeleteIf(ctx any, storeName any, key any, cond any) *MockObservableCacheClienter_DeleteIf_Call {
 	return &MockObservableCacheClienter_DeleteIf_Call{Call: _e.mock.On("DeleteIf", ctx, storeName, key, cond)}
 }
 
 func (_c *MockObservableCacheClienter_DeleteIf_Call) Run(run func(ctx context.Context, storeName string, key string, cond func(val []byte) bool)) *MockObservableCacheClienter_DeleteIf_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].(func(val []byte) bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 func(val []byte) bool
+		if args[3] != nil {
+			arg3 = args[3].(func(val []byte) bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -261,16 +318,32 @@ type MockObservableCacheClienter_Get_Call struct {
 }
 
 // Get is a helper method to define mock.On call
-//   - ctx
-//   - storeName
-//   - key
-func (_e *MockObservableCacheClienter_Expecter) Get(ctx interface{}, storeName interface{}, key interface{}) *MockObservableCacheClienter_Get_Call {
+//   - ctx context.Context
+//   - storeName string
+//   - key string
+func (_e *MockObservableCacheClienter_Expecter) Get(ctx any, storeName any, key any) *MockObservableCacheClienter_Get_Call {
 	return &MockObservableCacheClienter_Get_Call{Call: _e.mock.On("Get", ctx, storeName, key)}
 }
 
 func (_c *MockObservableCacheClienter_Get_Call) Run(run func(ctx context.Context, storeName string, key string)) *MockObservableCacheClienter_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -361,14 +434,20 @@ type MockObservableCacheClienter_RetrieveLength_Call struct {
 }
 
 // RetrieveLength is a helper method to define mock.On call
-//   - storeName
-func (_e *MockObservableCacheClienter_Expecter) RetrieveLength(storeName interface{}) *MockObservableCacheClienter_RetrieveLength_Call {
+//   - storeName string
+func (_e *MockObservableCacheClienter_Expecter) RetrieveLength(storeName any) *MockObservableCacheClienter_RetrieveLength_Call {
 	return &MockObservableCacheClienter_RetrieveLength_Call{Call: _e.mock.On("RetrieveLength", storeName)}
 }
 
 func (_c *MockObservableCacheClienter_RetrieveLength_Call) Run(run func(storeName string)) *MockObservableCacheClienter_RetrieveLength_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -415,14 +494,20 @@ type MockObservableCacheClienter_RetrieveMemory_Call struct {
 }
 
 // RetrieveMemory is a helper method to define mock.On call
-//   - storeName
-func (_e *MockObservableCacheClienter_Expecter) RetrieveMemory(storeName interface{}) *MockObservableCacheClienter_RetrieveMemory_Call {
+//   - storeName string
+func (_e *MockObservableCacheClienter_Expecter) RetrieveMemory(storeName any) *MockObservableCacheClienter_RetrieveMemory_Call {
 	return &MockObservableCacheClienter_RetrieveMemory_Call{Call: _e.mock.On("RetrieveMemory", storeName)}
 }
 
 func (_c *MockObservableCacheClienter_RetrieveMemory_Call) Run(run func(storeName string)) *MockObservableCacheClienter_RetrieveMemory_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(string))
+		var arg0 string
+		if args[0] != nil {
+			arg0 = args[0].(string)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }
@@ -460,17 +545,38 @@ type MockObservableCacheClienter_Set_Call struct {
 }
 
 // Set is a helper method to define mock.On call
-//   - ctx
-//   - storeName
-//   - key
-//   - val
-func (_e *MockObservableCacheClienter_Expecter) Set(ctx interface{}, storeName interface{}, key interface{}, val interface{}) *MockObservableCacheClienter_Set_Call {
+//   - ctx context.Context
+//   - storeName string
+//   - key string
+//   - val []byte
+func (_e *MockObservableCacheClienter_Expecter) Set(ctx any, storeName any, key any, val any) *MockObservableCacheClienter_Set_Call {
 	return &MockObservableCacheClienter_Set_Call{Call: _e.mock.On("Set", ctx, storeName, key, val)}
 }
 
 func (_c *MockObservableCacheClienter_Set_Call) Run(run func(ctx context.Context, storeName string, key string, val []byte)) *MockObservableCacheClienter_Set_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].([]byte))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 []byte
+		if args[3] != nil {
+			arg3 = args[3].([]byte)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+		)
 	})
 	return _c
 }
@@ -517,18 +623,44 @@ type MockObservableCacheClienter_SetIfAbsent_Call struct {
 }
 
 // SetIfAbsent is a helper method to define mock.On call
-//   - ctx
-//   - storeName
-//   - key
-//   - val
-//   - ttl
-func (_e *MockObservableCacheClienter_Expecter) SetIfAbsent(ctx interface{}, storeName interface{}, key interface{}, val interface{}, ttl interface{}) *MockObservableCacheClienter_SetIfAbsent_Call {
+//   - ctx context.Context
+//   - storeName string
+//   - key string
+//   - val []byte
+//   - ttl *time.Duration
+func (_e *MockObservableCacheClienter_Expecter) SetIfAbsent(ctx any, storeName any, key any, val any, ttl any) *MockObservableCacheClienter_SetIfAbsent_Call {
 	return &MockObservableCacheClienter_SetIfAbsent_Call{Call: _e.mock.On("SetIfAbsent", ctx, storeName, key, val, ttl)}
 }
 
 func (_c *MockObservableCacheClienter_SetIfAbsent_Call) Run(run func(ctx context.Context, storeName string, key string, val []byte, ttl *time.Duration)) *MockObservableCacheClienter_SetIfAbsent_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(string), args[3].([]byte), args[4].(*time.Duration))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 string
+		if args[2] != nil {
+			arg2 = args[2].(string)
+		}
+		var arg3 []byte
+		if args[3] != nil {
+			arg3 = args[3].([]byte)
+		}
+		var arg4 *time.Duration
+		if args[4] != nil {
+			arg4 = args[4].(*time.Duration)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+			arg3,
+			arg4,
+		)
 	})
 	return _c
 }
@@ -566,14 +698,20 @@ type MockObservableCacheClienter_Store_Call struct {
 }
 
 // Store is a helper method to define mock.On call
-//   - storeConfig
-func (_e *MockObservableCacheClienter_Expecter) Store(storeConfig interface{}) *MockObservableCacheClienter_Store_Call {
+//   - storeConfig options.Store
+func (_e *MockObservableCacheClienter_Expecter) Store(storeConfig any) *MockObservableCacheClienter_Store_Call {
 	return &MockObservableCacheClienter_Store_Call{Call: _e.mock.On("Store", storeConfig)}
 }
 
 func (_c *MockObservableCacheClienter_Store_Call) Run(run func(storeConfig options.Store)) *MockObservableCacheClienter_Store_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(options.Store))
+		var arg0 options.Store
+		if args[0] != nil {
+			arg0 = args[0].(options.Store)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

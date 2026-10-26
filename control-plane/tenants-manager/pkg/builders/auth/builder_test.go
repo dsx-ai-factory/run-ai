@@ -28,7 +28,7 @@ import (
 func getExistingClients() []idmopenapi.Client {
 	return []idmopenapi.Client{
 		*idmopenapi.NewClient(AgentClientName+NAME, "agentClientName", "agentSecret"),
-		*idmopenapi.NewClient(InstallerClientName, "installerClientName", "installerSecret"),
+		*idmopenapi.NewClient(AgentClientName+NAME+"-2", "agentClientName2", "agentSecret2"),
 	}
 }
 
@@ -152,7 +152,7 @@ func TestGetFirstUserRoleAndScope_CloudOperator(t *testing.T) {
 }
 
 func TestGetFirstUserRoleAndScope_UnspportedRole(t *testing.T) {
-	scope := getScopeByRole(authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION)
+	scope := getScopeByRole(authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT)
 	assert.Equal(t, authorization_api.SCOPETYPE_TENANT, scope)
 }
 

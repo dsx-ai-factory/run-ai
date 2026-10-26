@@ -17,6 +17,9 @@ export enum EMetricsType {
 }
 
 export const NrtHealthyConditionType = "MissingNrtHealthyPrerequisite";
+export const GpuFractioningConditionType = "MissingGpuFractioningPrerequisite";
+export const GpuFractioningNotManagedReason = "NotManaged";
+export const GpuFractioningNotManagedPrerequisite = "The node is not covered by the GPU fractioning operator.";
 export const NodeStatusMap: Record<NodeStatusEnum, IStatusColOptions> = {
   [NodeStatusEnum.Ready]: {
     status: NodeStatusEnum.Ready,
@@ -84,6 +87,11 @@ export const NodeConditionMap: Record<string, NodeStatusConditionDetails> = {
     type: "NodeNotReady",
     reason: "Node not ready",
     message: "Node not ready.",
+  },
+  [GpuFractioningConditionType]: {
+    type: GpuFractioningConditionType,
+    reason: "Missing GPU fractioning prerequisites",
+    message: "The GPU fractioning operator did not report a reason.",
   },
 };
 export interface INode {

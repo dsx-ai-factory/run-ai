@@ -24,7 +24,7 @@ func TestLiveEnvironment(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
 	defer cancel()
 
-	env := core.Env{
+	target := core.Target{
 		KubeconfigPath:  os.Getenv("KUBECONFIG"),
 		ControlPlaneURL: os.Getenv("FLOWMARK_CP_URL"),
 		Username:        os.Getenv("FLOWMARK_CP_USER"),
@@ -32,7 +32,7 @@ func TestLiveEnvironment(t *testing.T) {
 		Token:           os.Getenv("FLOWMARK_CP_TOKEN"),
 	}
 
-	clients, err := New(ctx, env)
+	clients, err := New(ctx, target)
 	if err != nil {
 		t.Fatalf("New: %v", err)
 	}

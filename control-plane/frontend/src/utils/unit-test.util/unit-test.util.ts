@@ -34,7 +34,7 @@ export const unitTestUtil = {
 const MOCK_CLUSTERS: DisplayedCluster[] = [
   {
     createdAt: "2023-06-14T11:19:48.755Z",
-    domain: "https://dev-some-sh-no-cluster.runailabs.com",
+    domain: "https://test.example.com",
     name: "some-test",
     tenantId: 1,
     uuid: "cfd445af-bf35-483b-a742-7603165205b1",

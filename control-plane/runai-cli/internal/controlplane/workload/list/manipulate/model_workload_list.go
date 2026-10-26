@@ -8,7 +8,7 @@ package manipulate
 import (
 	"time"
 
-	workloadservice "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	workloadservice "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"k8s.io/utils/ptr"
 )
 
@@ -32,6 +32,7 @@ type Brief struct {
 	Phase                *workloadservice.Phase         `json:"phase,omitempty"`
 	Project              string                         `json:"projectName"`
 	Preemptible          *bool                          `json:"preemptible,omitempty"`
+	Preemptibility       *string                        `json:"preemptibility,omitempty"`
 	RunningPods          int32                          `json:"runningPods"`
 	RequestedPods        *workloadservice.RequestedPods `json:"requestedPods,omitempty"`
 	AllocatedResources   *AllocatedResources            `json:"allocatedResources,omitempty"`
@@ -45,6 +46,7 @@ type WorkloadsAlignedRow struct {
 	Status                  *workloadservice.Phase `json:"status,omitempty" yaml:"status,omitempty"`
 	Project                 string                 `json:"projectName,omitempty"`
 	Preemptible             *bool                  `json:"preemptible,omitempty" yaml:"preemptible,omitempty"`
+	Preemptibility          *string                `json:"preemptibility,omitempty" yaml:"preemptibility,omitempty"`
 	Pods                    *Pods                  `json:"pods,omitempty" yaml:"pods,omitempty"`
 	GpuAllocation           float64                `json:"gpuAllocation,omitempty" yaml:"gpuAllocation,omitempty"`
 	Category                string                 `json:"category,omitempty" yaml:"category,omitempty"`
@@ -64,6 +66,7 @@ type WorkloadsAlignedRow struct {
 }
 
 func newBriefFromWorkload(workload workloadservice.Workload, deleted bool) Brief {
+	preemptibility := getPreemptibility(&workload)
 	brief := Brief{
 		Id:                   workload.Id,
 		Name:                 workload.Name,
@@ -71,6 +74,7 @@ func newBriefFromWorkload(workload workloadservice.Workload, deleted bool) Brief
 		Phase:                nil, // Will be set below if not deleted
 		Project:              workload.ProjectName,
 		Preemptible:          workload.Preemptible.Get(),
+		Preemptibility:       preemptibility,
 		RunningPods:          workload.RunningPods,
 		RequestedPods:        workload.RequestedPods,
 		DistributedFramework: workload.DistributedFramework,

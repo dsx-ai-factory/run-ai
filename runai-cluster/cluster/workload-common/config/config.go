@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/global"
 	corev1 "k8s.io/api/core/v1"
 )
@@ -45,6 +46,7 @@ const (
 	EnvVarOauth2ProxyOidcIssuerUrl = "OAUTH2_PROXY_OIDC_ISSUER_URL"
 
 	EnvVarOauth2ProxyUsernameLoaderImage = "RUNAI_OAUTH2_PROXY_USERNAME_LOADER_IMAGE"
+	EnvVarOauth2ProxyTemplatesEnabled    = oauth2proxy.TemplatesEnabledEnvVar
 	EnvVarOauth2ProxyResources           = constants.OAuth2ProxyResourcesEnvVar
 	EnvVarUsernameLoaderResources        = constants.UsernameLoaderResourcesEnvVar
 	EnvVarGitSyncResources               = constants.GitSyncResourcesEnvVar
@@ -92,6 +94,10 @@ func GatewayNamespace() string {
 
 func SubdomainSupportEnabled() bool {
 	return strings.ToLower(os.Getenv(EnvVarSubdomainSupport)) == "true"
+}
+
+func OAuth2ProxyTemplatesEnabled() bool {
+	return strings.ToLower(os.Getenv(EnvVarOauth2ProxyTemplatesEnabled)) == "true"
 }
 
 // ParseWorkloadInjectedContainerResources parses an injected-container resource

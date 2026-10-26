@@ -14,18 +14,17 @@ import (
 )
 
 type RolePermission struct {
-	ID                     uuid.UUID
-	CreatedAt              time.Time
-	UpdatedAt              time.Time
-	ResourceType           api.ResourceType `gorm:"primarykey;index"`
-	PermissionSetID        uuid.UUID        `gorm:"primarykey"`
-	Create                 bool
-	Read                   bool
-	Update                 bool
-	Delete                 bool
-	Sync                   bool
-	ReadOnlyForDGXCManaged bool `gorm:"-"`
-	ReadOnlyForCSP         bool `gorm:"-"`
+	ID              uuid.UUID
+	CreatedAt       time.Time
+	UpdatedAt       time.Time
+	ResourceType    api.ResourceType `gorm:"primarykey;index"`
+	PermissionSetID uuid.UUID        `gorm:"primarykey"`
+	Create          bool
+	Read            bool
+	Update          bool
+	Delete          bool
+	Sync            bool
+	ReadOnlyForCSP  bool `gorm:"-"`
 }
 
 func (rp *RolePermission) BeforeCreate(tx *gorm.DB) (err error) {

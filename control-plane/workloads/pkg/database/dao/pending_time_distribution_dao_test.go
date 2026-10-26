@@ -97,7 +97,7 @@ var _ = Describe("DbGetPendingTimeDistribution", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(ptdP95Select).ReturnsError(errors.New("boom"))
 
-		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "", "", "", nil, nil)
+		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "", "", "", nil, nil, nil)
 
 		Expect(values).To(BeNil())
 		Expect(apiErr).ToNot(BeNil())
@@ -108,7 +108,7 @@ var _ = Describe("DbGetPendingTimeDistribution", func() {
 		m.ExpectQuery(ptdP95Select).Returns([]ptdP95Row{{P95Pending: 0}})
 		m.ExpectQuery(ptdBucketsSelect).ReturnsError(errors.New("boom"))
 
-		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "", "", "", nil, nil)
+		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "", "", "", nil, nil, nil)
 
 		Expect(values).To(BeNil())
 		Expect(apiErr).ToNot(BeNil())
@@ -119,7 +119,7 @@ var _ = Describe("DbGetPendingTimeDistribution", func() {
 		m.ExpectQuery(ptdP95Select).Returns([]ptdP95Row{{P95Pending: 0}})
 		m.ExpectQuery(ptdBucketsSelect).Returns([]ptdBucketCountsRow{})
 
-		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "", "", "", nil, nil)
+		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "", "", "", nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(4))
@@ -137,7 +137,7 @@ var _ = Describe("DbGetPendingTimeDistribution", func() {
 		m.ExpectQuery(ptdP95Select).Returns([]ptdP95Row{{P95Pending: 0}})
 		m.ExpectQuery(ptdBucketsSelect).Returns([]ptdBucketCountsRow{{Bucket1: 5, Bucket2: 3, Bucket3: 0, Bucket4: 2}})
 
-		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "", "", "", nil, nil)
+		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "", "", "", nil, nil, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(4))
@@ -156,7 +156,7 @@ var _ = Describe("DbGetPendingTimeDistribution", func() {
 		}})
 
 		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "c1", "np1", "d1", "p1", ptdScopes(),
-			[][]string{{"cluster_id", "cluster_name"}})
+			[][]string{{"cluster_id", "cluster_name"}}, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(4))
@@ -175,7 +175,7 @@ var _ = Describe("DbGetPendingTimeDistribution", func() {
 			Bucket1: 1, Bucket2: 1, Bucket3: 1, Bucket4: 1, ProjectId: "p1",
 		}})
 
-		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "", "", "", "", nil, [][]string{{"project_id"}})
+		values, apiErr := ptdDao().DbGetPendingTimeDistribution(testCtx(1), 1, "", "", "", "", nil, [][]string{{"project_id"}}, nil)
 
 		Expect(apiErr).To(BeNil())
 		Expect(*values).To(HaveLen(4))

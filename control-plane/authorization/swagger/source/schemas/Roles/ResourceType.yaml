@@ -32,6 +32,7 @@ enum:
   - nfs-assets
   - s3-assets
   - compute-resources
+  - resource-claim-templates
   - templates
   - credentials
   - events-history
@@ -40,6 +41,7 @@ enum:
   - datavolumes
   - secret-volume-assets
   - storage-class-configuration
+  - device-classes
   - access-keys
   - workload-properties
   - network-topologies

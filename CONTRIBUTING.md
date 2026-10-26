@@ -9,6 +9,7 @@ By participating, you agree to abide by our [Code of Conduct](CODE_OF_CONDUCT.md
 ## Ways to Contribute
 
 - **You want to report a bug, feature idea, or documentation issue** - File a [GitHub issue](https://github.com/dsx-ai-factory/run-ai/issues/new/choose) using the appropriate template. Maintainers will triage and label it.
+- **You want to ask a usage question** - Start a [Discussion](https://github.com/dsx-ai-factory/run-ai/discussions). Questions are not filed as issues, so the issue tracker stays a list of defects and requests.
 - **You want to propose a new feature and implement it** - File a feature-request issue describing your intended feature, and discuss the design there. Once the plan looks good, implement it following the Contribution Workflow below.
 - **You want to implement a feature or bug fix for an outstanding issue** - Pick up an issue labelled `good first issue` or `help wanted`, comment to claim it, then follow the Contribution Workflow below.
 
@@ -86,7 +87,7 @@ Run the changed service's own Makefile targets before opening the PR: this mirro
 
 ```bash
 cd control-plane/assets-service   # whichever service(s) you touched
-make build test lint
+make build test lint validate
 ```
 
 ### Step 5: Sign Off Your Commits
@@ -105,8 +106,7 @@ git push origin your-branch-name
 
 - Open the PR against `main` (preferred) or the release branch (`release-3.0`).
 - Fill in the PR template.
-- Reference the issue with `Fixes #123`.
-- Add a `/kind` line.
+- Reference the issue with `Fixes #123`. The `PR links an approved issue` check requires exactly one linked issue that is open and labelled `issue/approved` by a maintainer; for a PR into a release branch, link it from the issue's "Development" panel, as GitHub ignores closing keywords there.
 
 ### Step 7: Wait for CI
 
@@ -122,7 +122,7 @@ A maintainer approval plus a green `Validate Successful Run` status are both req
 
 - Documentation source lives under [`docs/`](docs/), published via the Fern navigation config in [`fern/`](fern/).
 - Read [Documentation Agent Guide](docs/AGENTS.md) before editing, creating, or reviewing any page.
-- Run `fern docs dev` before opening the PR, and `fern check` if you changed an OpenAPI spec.
+- Run `fern docs dev` before opening the PR, and `fern check` if you changed an OpenAPI spec. Run `tools/materialize-fern-versions.sh --fetch` first: older supported versions are built from their release branch (see [Versioned Docs](fern/VERSIONING.md)).
 
 ---
 
@@ -175,7 +175,7 @@ Then run whichever language-level checks apply. These mirror the corresponding j
 | JS/TS | `npx eslint <files>` | `js-lint` in `pr-checks.yaml` |
 | Helm charts | `helm dependency update control-plane/control-plane-chart`<br>`helm lint control-plane/control-plane-chart`<br>`helm template control-plane/control-plane-chart > /dev/null` | `helm` in `pr-checks.yaml` |
 | GitHub Actions workflows | `actionlint` | `actionlint.yaml` |
-| `docs/` or `fern/` | `fern check`<br>`python3 ./tools/check-fern-nav.py fern` | `fern-docs-ci.yaml` |
+| `docs/` or `fern/` | `tools/materialize-fern-versions.sh --fetch`<br>`fern check`<br>`python3 ./tools/check-fern-nav.py fern` | `fern-docs-ci.yaml` |
 | `CODEOWNERS` | `make validate` (from the repo root) | — not run in CI; local check only |
 
 The root `Makefile`'s `validate` target is real: it runs [`validate-codeowners.py`](.github/scripts/validate-codeowners.py) against `CODEOWNERS`. Its `build`, `test`, and `lint` targets are placeholders that only echo `NA`; run those per-service instead, as shown above.
@@ -205,7 +205,7 @@ Start with an issue describing the extension point you intend to use, so maintai
 ## Code Review
 
 - Branch protection requires **at least one approval** and a green `Validate Successful Run` check before merge.
-- `CODEOWNERS` files at the root and under `.github/` and `docs/` automatically request review from the right team for each affected path.
+- A `CODEOWNERS` file at the root automatically requests review from the right team for each affected path.
 - For non-trivial changes, expect more than one reviewer to weigh in: this is a team norm, not a tool gate. Be patient and responsive.
 
 ---
@@ -330,7 +330,8 @@ Reports made in bad faith, for example to retaliate against, harass, or silence 
 
 ## Getting Help
 
-- [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) - Bugs, feature requests, documentation issues, usage questions
+- [GitHub Discussions](https://github.com/dsx-ai-factory/run-ai/discussions) - Usage questions and design conversations
+- [GitHub Issues](https://github.com/dsx-ai-factory/run-ai/issues) - Bugs, feature requests, documentation issues
 - [Security](SECURITY.md) - Private vulnerability reports
 - [Support](SUPPORT.md) - Which versions are supported
 

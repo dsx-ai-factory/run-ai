@@ -11,8 +11,8 @@ import (
 	"reflect"
 	"strings"
 
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 func ValidateSetOfValues(src *string, validValues datastructs.Set[string], fieldName string) *workloadsApi.Error {

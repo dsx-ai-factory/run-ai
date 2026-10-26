@@ -24,7 +24,7 @@ var dummyServiceRef = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// ServiceRef - Reference an existing Service.
+// ServiceRef - Reference an existing Service. Requires authorization on the service and externalAccess on the endpoint.
 type ServiceRef struct {
 
 	// The name of the existing Kubernetes Service.
@@ -61,7 +61,7 @@ func AssertServiceRefConstraints(obj ServiceRef) error {
 	if minLengthErr := runaihttp.AssertMinLength(obj.Name, "Name", 1); minLengthErr != nil {
 		return &ParsingError{Param: "Name", Err: minLengthErr}
 	}
-	if maxLengthErr := runaihttp.AssertMaxLength(obj.Name, "Name", 253); maxLengthErr != nil {
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Name, "Name", 63); maxLengthErr != nil {
 		return &ParsingError{Param: "Name", Err: maxLengthErr}
 	}
 	//////////////////////// RUNAI END //////////////////////////

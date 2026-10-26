@@ -16,8 +16,10 @@ import (
 )
 
 type AppStatus struct {
-	operation *v1alpha1.ActionStatus // the status of an action that is running (install, upgrade or uninatall)
-	status    *v1alpha1.HelmStatus   // the status from the helm itself
+	operation   *v1alpha1.ActionStatus // the status of an action that is running (install, upgrade or uninatall)
+	status      *v1alpha1.HelmStatus   // the status from the helm itself
+	clearError  bool
+	resetAction bool
 }
 
 const (
@@ -149,10 +151,32 @@ func (as *AppStatus) WithError(err error) *AppStatus {
 	return as
 }
 
+func (as *AppStatus) ActionFailedWithoutTask(action, message string) *AppStatus {
+	as.operation.Type = action
+	as.operation.Phase = ActionFailed
+	as.operation.CompletedAt = metav1.Now()
+	as.operation.Message = message
+	return as
+}
+
+func (as *AppStatus) ClearError() *AppStatus {
+	as.clearError = true
+	return as
+}
+
+func (as *AppStatus) ResetAction() *AppStatus {
+	as.resetAction = true
+	return as
+}
+
 // ApplyOnApplication applies everything we know -> to the status of the application resource
 func (as *AppStatus) ApplyOnApplication(app *v1alpha1.Application) bool {
 	var changed bool
 
+	if as.resetAction && app.Status.ActionStatus != nil {
+		app.Status.ActionStatus = nil
+		changed = true
+	}
 	if as.operation != nil {
 		if app.Status.ActionStatus == nil {
 			app.Status.ActionStatus = &v1alpha1.ActionStatus{}
@@ -204,6 +228,10 @@ func (as *AppStatus) ApplyOnApplication(app *v1alpha1.Application) bool {
 
 		if as.status.Error != "" && app.Status.HelmStatus.Error != as.status.Error {
 			app.Status.HelmStatus.Error = as.status.Error
+			changed = true
+		}
+		if as.clearError && app.Status.HelmStatus.Error != "" {
+			app.Status.HelmStatus.Error = ""
 			changed = true
 		}
 

@@ -37,8 +37,6 @@ func Test_sumOwnedPodGroupResources(t *testing.T) {
 				[]kaiv2alpha2.PodGroup{
 					{
 						Status: kaiv2alpha2.PodGroupStatus{
-							Running: 1,
-							Pending: 1,
 							ResourcesStatus: kaiv2alpha2.PodGroupResourcesStatus{
 								Requested: v1.ResourceList{
 									clustercommonconstants.NvidiaGpuResourceName: resource.MustParse("0.5"),
@@ -53,8 +51,6 @@ func Test_sumOwnedPodGroupResources(t *testing.T) {
 			},
 			expected{
 				&metadata.WorkloadMetadata{
-					RunningPods:          1,
-					PendingPods:          1,
 					RequestedGPUs:        0.5,
 					CurrentRequestedGPUs: 0.5,
 					AllocatedGpus:        0.25,
@@ -68,8 +64,6 @@ func Test_sumOwnedPodGroupResources(t *testing.T) {
 				[]kaiv2alpha2.PodGroup{
 					{
 						Status: kaiv2alpha2.PodGroupStatus{
-							Running: 1,
-							Pending: 1,
 							ResourcesStatus: kaiv2alpha2.PodGroupResourcesStatus{
 								Requested: v1.ResourceList{
 									clustercommonconstants.NvidiaGpuResourceName: resource.MustParse("0.5"),
@@ -82,8 +76,6 @@ func Test_sumOwnedPodGroupResources(t *testing.T) {
 					},
 					{
 						Status: kaiv2alpha2.PodGroupStatus{
-							Running: 2,
-							Pending: 0,
 							ResourcesStatus: kaiv2alpha2.PodGroupResourcesStatus{
 								Requested: v1.ResourceList{
 									clustercommonconstants.NvidiaGpuResourceName: resource.MustParse("1"),
@@ -98,8 +90,6 @@ func Test_sumOwnedPodGroupResources(t *testing.T) {
 			},
 			expected{
 				&metadata.WorkloadMetadata{
-					RunningPods:          3,
-					PendingPods:          1,
 					RequestedGPUs:        1.5,
 					CurrentRequestedGPUs: 1.5,
 					AllocatedGpus:        1.25,

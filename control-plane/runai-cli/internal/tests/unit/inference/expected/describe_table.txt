@@ -10,7 +10,7 @@ Department:                         default
 Submitted By:                       test@example.com
 Priority:                           very-high (150)
 Category:                           Deploy
-Preemptible:                        false
+Preemptibility:                     Non-preemptible
 Requested Node Pool:                default
 Image:                              vllm/vllm-openai:latest
 Image Pull Policy:                  Always

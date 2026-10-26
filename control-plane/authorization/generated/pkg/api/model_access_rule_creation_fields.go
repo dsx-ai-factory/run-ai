@@ -22,7 +22,7 @@ var dummyAccessRuleCreationFields = runaihttp.AssertPattern
 
 type AccessRuleCreationFields struct {
 
-	// The unique identifier of the subject (e.g., user, group, or app).
+	// The unique identifier of the subject (e.g., user, group, or service account).
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//SubjectId string `json:"subjectId"`
 	SubjectId string `json:"subjectId" gorm:"not null;"`

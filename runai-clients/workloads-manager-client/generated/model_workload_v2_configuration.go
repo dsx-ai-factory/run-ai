@@ -23,7 +23,7 @@ var _ MappedNullable = &WorkloadV2Configuration{}
 // WorkloadV2Configuration Specifies the features configuration to apply to a workload.
 type WorkloadV2Configuration struct {
 	Mnnvl NullableMnnvlMode `json:"mnnvl,omitempty"`
-	// Networking endpoint configurations for the workload (external access, services with auth). Supported for cluster version 2.25 and above.
+	// Networking endpoint configurations for the workload (external access, services with auth). Requires cluster version 3.0.0 or later.
 	Networking      []NetworkingEndpoint                                 `json:"networking,omitempty"`
 	UserCredentials NullableWorkloadV2UpdateConfigurationUserCredentials `json:"userCredentials,omitempty"`
 	// PVCs to create and reconcile alongside the workload.

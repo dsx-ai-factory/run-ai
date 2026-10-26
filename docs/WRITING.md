@@ -85,12 +85,11 @@ Never use plain text for callouts or warnings. Every note, tip, warning, or
 important callout must use a Fern component — not bold text, blockquotes, or
 any other markdown construct.
 
-- `<Info>` — notes and supplemental information; open body with **Note**
+- `<Note>` — notes, supplemental information, and short informational
+  callouts; open body with **Note**; typically a single sentence, but a
+  brief bulleted list is acceptable for grouped short facts
 - `<Warning>` — caveats, prerequisites, breaking changes; use **Important**,
   **Prerequisite**, **Warning**, or **Breaking change from version X.Y:**
-- `<Callout intent="info">` — short informational notes; typically a
-  single sentence, but a brief bulleted list is acceptable for grouped
-  short facts
 - `<Accordion title="...">` — optional detail most readers can skip
 - `<Tabs>` / `<Tab title="...">` — steps that differ by interface; standard
   titles are `UI`, `CLI v2`, `API`
@@ -106,3 +105,11 @@ any other markdown construct.
 - Use descriptive link text that names the destination. Do not use raw URLs
   in running text or generic link text such as "click here" or "read more."
 - UI navigation paths: bold element names and use → as the separator.
+- Linking to installation content (a prerequisite, a feature, a
+  configuration step) from outside
+  `docs/installation-and-configuration/installation/`: default to the Guided
+  Installation page (`guided-installation/prerequisites-and-features.md`,
+  etc.). Only link to `install-using-helm/` when the content is genuinely
+  Helm-specific with no Guided equivalent — see
+  `docs/.agents/skills/runai-docs-installation/SKILL.md` for how the two
+  install paths differ.

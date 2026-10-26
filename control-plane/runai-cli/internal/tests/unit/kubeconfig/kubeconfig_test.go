@@ -42,7 +42,7 @@ clusters:
   name: docker-desktop
 - cluster:
     certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCi0tLS0tRU5EIENFUlRJRklDQVRFLS0tLS0K
-    server: https://fox-demo.runailabs.com:6443
+    server: https://fox-demo.example.com:6443
   name: fox-demo
 contexts:
 - context:
@@ -73,9 +73,9 @@ users:
         airgapped: "true"
         auth-flow: remote-browser
         client-id: runai-cli
-        idp-issuer-url: https://fox-demo.runailabs.com/auth/realms/runai
+        idp-issuer-url: https://fox-demo.example.com/auth/realms/runai
         realm: runai
-        redirect-uri: https://fox-demo.runailabs.com/oauth-code
+        redirect-uri: https://fox-demo.example.com/oauth-code
       name: oidc`
 )
 
@@ -189,7 +189,7 @@ var _ = Describe("KubeConfig Test", Ordered, func() {
 			})
 
 			It("kubeconfig set with cluster validation - match error", func() {
-				mockKubeClient.EXPECT().GetServerUrl(gomock.Any()).Return("https://fox-demo.runailabs.com:6443").AnyTimes()
+				mockKubeClient.EXPECT().GetServerUrl(gomock.Any()).Return("https://fox-demo.example.com:6443").AnyTimes()
 
 				err = clients.ClusterSet(envMap)
 				f, err := os.OpenFile(kubeFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
@@ -199,12 +199,12 @@ var _ = Describe("KubeConfig Test", Ordered, func() {
 				Expect(err).To(BeNil())
 				output, err := cli.RunCommand("kubeconfig set", envMap)
 				Expect(err).ToNot(BeNil())
-				Expect(output).To(HavePrefix("Error: Cluster domain mismatch\nConfigured cluster domain: http://localhost.runailabs.com/\nKubernetes cluster domain: https://fox-demo.runailabs.com:6443"))
+				Expect(output).To(HavePrefix("Error: Cluster domain mismatch\nConfigured cluster domain: http://localhost.example.com/\nKubernetes cluster domain: https://fox-demo.example.com:6443"))
 				Expect(output).To(ContainSubstring("The cluster URL in your kubeconfig does not match the cluster URL configured in the Run:ai CLI"))
 			})
 
 			It("kubeconfig set with cluster validation - matches - success", func() {
-				mockKubeClient.EXPECT().GetServerUrl(gomock.Any()).Return("http://localhost.runailabs.com:6443").AnyTimes()
+				mockKubeClient.EXPECT().GetServerUrl(gomock.Any()).Return("http://localhost.example.com:6443").AnyTimes()
 
 				_ = clients.ClusterSet(envMap)
 				f, err := os.OpenFile(kubeFile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)

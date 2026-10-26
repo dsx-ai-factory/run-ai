@@ -23,3 +23,12 @@ lint: lint-go
 validate:
 	# no op
 .PHONY: validate
+
+SCENARIO ?=
+WORKLOADS ?=
+
+run:
+	@set -a; [ -f .env ] && . ./.env; set +a; \
+	go run ./cmd/flowmark --scenarios ./scenarios --output ./reports \
+		$(if $(SCENARIO),--only $(SCENARIO)) $(if $(WORKLOADS),--workloads $(WORKLOADS))
+.PHONY: run

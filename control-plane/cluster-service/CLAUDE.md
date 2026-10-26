@@ -39,7 +39,7 @@ Targets come from the service `Makefile` plus the shared includes
      (`DOCKERHUB_PROXY=` pulls the Go builder image from Docker Hub; `GITHUB_TOKEN=` is emptied in the make call — the private-module token is applied elsewhere.)
   2. Build + load the image: `docker buildx build --platform linux/amd64 --provenance=false --load --build-arg TARGETARCH=amd64 -t runai-local/cluster-service:0.0.0 .`
      Image ref: `runai-local/cluster-service:0.0.0` (tag `0.0.0` — the CP chart appVersion; any other tag breaks the local deploy).
-- Config: config-driven via registered structs in `pkg/config` (schema `cluster_service`); any config key is overridable by its uppercase env-var equivalent. Also registers the shared `dao-utils` database config and the authorization-client config. Do not hand-invent config keys — read `pkg/config/types.go`.
+- Config: config-driven via registered structs in `pkg/config` (schema `cluster_service`); any config key is overridable by its uppercase env-var equivalent. Also registers the shared `runaidb` database config and the authorization-client config. Do not hand-invent config keys — read `pkg/config/types.go`.
 - Tests: Ginkgo suites; DB-backed suites (`pkg/test`, `pkg/database`) require a container runtime. No docker-compose integration-test target exists for this service.
 
 ## local-dev.sh iteration

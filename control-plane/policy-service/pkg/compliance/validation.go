@@ -9,12 +9,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v1/runai_workloads"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/utils"
-
-	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	dinfwv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
@@ -23,10 +24,10 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbmodel"
 	policyCompliance "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/policy_compliance"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/validation"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 const (
@@ -178,7 +179,11 @@ func validateRulesConsistency(policyRules map[string]interface{}, complianceErro
 func ValidateEffectivePolicy(ctx context.Context, workloadType string, _ map[string]interface{}, policyDefaults map[string]interface{}) *workloadsApi.Error {
 	options := composer.OptionsForPolicy()
 
-	rearrangedPolicy := utils.MapMe(FlattenInstances(policyDefaults))
+	legacyDefaults, err := gpucompat.LegacyGPUFields(policyDefaults)
+	if err != nil {
+		return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+	}
+	rearrangedPolicy := utils.MapMe(FlattenInstances(legacyDefaults))
 
 	switch workloadType {
 	case workloadTypeDistributedInference:

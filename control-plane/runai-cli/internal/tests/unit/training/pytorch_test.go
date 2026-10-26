@@ -21,7 +21,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/tests/unit/cli/clients"
-	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
+	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
@@ -283,7 +283,7 @@ var _ = Describe("PyTorch Training Test", Ordered, func() {
 				"--large-shm=true",
 				PyTorchComputeFullName, PyTorchComputeFullImageName), envMap)
 			Expect(err).To(BeNil())
-			Expect(output).To(HavePrefix(fmt.Sprintf(ExpectDistSuccessMsg, PyTorchComputeFullName)))
+			Expect(output).To(ContainSubstring(fmt.Sprintf(ExpectDistSuccessMsg, PyTorchComputeFullName)))
 
 			submitSpec, err := clients.GetSpecByDistributedName(PyTorchComputeFullName)
 			Expect(err).To(BeNil())
@@ -482,7 +482,8 @@ var _ = Describe("PyTorch Training Test", Ordered, func() {
 			output, err := cli.RunCommand("training pytorch submit --help", envMap)
 			Expect(err).To(BeNil())
 
-			computeFlags := []string{CpuCoreLimit, CpuCoreRequest, CpuMemoryLimit, CpuMemoryRequest, ExtendedResource, GpuDevicesRequest, GpuMemoryLimit, GpuMemoryRequest, GpuPortionLimit, GpuPortionRequest,
+			computeFlags := []string{CpuCoreLimit, CpuCoreRequest, CpuMemoryLimit, CpuMemoryRequest, ExtendedResource, GpuDevicesRequest, GpuMemoryLimit, GpuMemoryRequest,
+				GpuMemoryPortionLimit, GpuMemoryPortionRequest, GpuComputeMode,
 				GpuRequestType, LargeShm, MasterExtendedResource}
 			for _, flag := range computeFlags {
 				Expect(output).To(ContainSubstring(flag), "Compute flag %s should be present in help output", flag)

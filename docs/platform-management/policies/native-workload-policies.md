@@ -2,7 +2,7 @@
 
 This guide explains the structure and procedures for managing policies for [NVIDIA Run:ai native workloads](../../workloads-in-nvidia-run-ai/workload-types/native-workloads.md).
 
-<Info>
+<Note>
 
 **Note**
 
@@ -10,9 +10,8 @@ This guide explains the structure and procedures for managing policies for [NVID
 * Starting from version 2.23, the creation and editing of control plane policies are no longer synchronized to the cluster. This ensures that new policy features function correctly and prevents conflicts with outdated cluster policies.
   * For cluster versions 2.21 and above, changes to control plane policies do not affect existing cluster policies, because workload policies are stored and enforced only in the control plane. Existing cluster policies impact only workloads submitted directly to the cluster, and administrators may choose to keep or manually delete these older cluster policies.
   * For cluster versions 2.18 to 2.20, policies in the cluster affect both control plane and cluster-submitted workloads. When a policy is created or edited in the control plane, the corresponding or effective policy in the cluster is automatically removed to avoid conflicts. Administrator acknowledgment is required before this change takes effect.
-  * To enforce policies directly on the cluster in order to prevent direct workload submission, or for more information, please contact [NVIDIA Run:ai Support](https://www.nvidia.com/en-eu/support/enterprise/#contact-us).
 
-</Info>
+</Note>
 
 ## Workload Policies Table
 
@@ -104,13 +103,13 @@ To view a policy:
    * **Source**\
      The origin of the applied policy (cluster, department or project)
 
-<Info>
+<Note>
 
 **Note**
 
 Some of the rules and defaults may be derived from policies of a parent cluster and/or department. You can see the source of each rule in the policy form. For more information, check the [Scope of effectiveness documentation](policies-and-rules.md#scope-of-effectiveness).
 
-</Info>
+</Note>
 
 ## Deleting a Policy
 
@@ -120,4 +119,4 @@ Some of the rules and defaults may be derived from policies of a parent cluster 
 
 ## Using API
 
-Go to the [Policies](https://run-ai-docs.nvidia.com/api/2.26/policies/policy) API reference to view the available actions.
+Go to the [Policies](api:main-api:GET/api/v2/policy) API reference to view the available actions.

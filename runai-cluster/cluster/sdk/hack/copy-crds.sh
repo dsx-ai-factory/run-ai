@@ -31,10 +31,7 @@ for destination in "${crdsNotNeededForChartRenderingDestinations[@]}"; do
     cp config/crd/bases/run.ai_remoteconfigsyncs.yaml "$destination"/run.ai_remoteconfigsyncs.yaml
     cp config/crd/bases/run.ai_managednodesconfigs.yaml "$destination"/run.ai_managednodesconfigs.yaml
 
-    cp config/crd/bases/kai.resources_projects.yaml "$destination"/kai.resources_projects.yaml
-    cp config/crd/bases/kai.resources_departments.yaml "$destination"/kai.resources_departments.yaml
-    cp config/crd/bases/kai.resources_nodepools.yaml "$destination"/kai.resources_nodepools.yaml
-    cp config/crd/bases/kai.resources_managednodesconfigs.yaml "$destination"/kai.resources_managednodesconfigs.yaml
+    # The kai.resources CRDs are shipped by the KRM chart, not from here.
     cp config/crd/bases/run.ai_nodepools.yaml "$destination"/run_ai_nodepool.yaml
     cp config/crd/bases/run.ai_applications.yaml "$destination"/run_ai_application.yaml
     cp config/crd/bases/run.ai_accessrules.yaml "$destination"/run_ai_accessrule.yaml

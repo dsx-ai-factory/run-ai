@@ -1,0 +1,2 @@
+allOf:
+  - $ref: "../K8sObject/K8sObjectSpec.yaml"

@@ -24,10 +24,19 @@ func NewTenantProvider(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *TenantProvider {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &TenantProvider{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -81,15 +90,26 @@ type TenantProvider_CreateTenant_Call struct {
 }
 
 // CreateTenant is a helper method to define mock.On call
-//   - ctx
-//   - tenantCreationRequest
-func (_e *TenantProvider_Expecter) CreateTenant(ctx interface{}, tenantCreationRequest interface{}) *TenantProvider_CreateTenant_Call {
+//   - ctx context.Context
+//   - tenantCreationRequest api.TenantCreationRequest
+func (_e *TenantProvider_Expecter) CreateTenant(ctx any, tenantCreationRequest any) *TenantProvider_CreateTenant_Call {
 	return &TenantProvider_CreateTenant_Call{Call: _e.mock.On("CreateTenant", ctx, tenantCreationRequest)}
 }
 
 func (_c *TenantProvider_CreateTenant_Call) Run(run func(ctx context.Context, tenantCreationRequest api.TenantCreationRequest)) *TenantProvider_CreateTenant_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(api.TenantCreationRequest))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 api.TenantCreationRequest
+		if args[1] != nil {
+			arg1 = args[1].(api.TenantCreationRequest)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -140,16 +160,32 @@ type TenantProvider_DeleteTenantById_Call struct {
 }
 
 // DeleteTenantById is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - isHardDelete
-func (_e *TenantProvider_Expecter) DeleteTenantById(ctx interface{}, tenantId interface{}, isHardDelete interface{}) *TenantProvider_DeleteTenantById_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - isHardDelete bool
+func (_e *TenantProvider_Expecter) DeleteTenantById(ctx any, tenantId any, isHardDelete any) *TenantProvider_DeleteTenantById_Call {
 	return &TenantProvider_DeleteTenantById_Call{Call: _e.mock.On("DeleteTenantById", ctx, tenantId, isHardDelete)}
 }
 
 func (_c *TenantProvider_DeleteTenantById_Call) Run(run func(ctx context.Context, tenantId int32, isHardDelete bool)) *TenantProvider_DeleteTenantById_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(bool))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 bool
+		if args[2] != nil {
+			arg2 = args[2].(bool)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -200,16 +236,32 @@ type TenantProvider_GetAllTenants_Call struct {
 }
 
 // GetAllTenants is a helper method to define mock.On call
-//   - ctx
-//   - permittedScopes
-//   - filters
-func (_e *TenantProvider_Expecter) GetAllTenants(ctx interface{}, permittedScopes interface{}, filters interface{}) *TenantProvider_GetAllTenants_Call {
+//   - ctx context.Context
+//   - permittedScopes *openapi.PermittedScopes
+//   - filters *dao.TenantFilters
+func (_e *TenantProvider_Expecter) GetAllTenants(ctx any, permittedScopes any, filters any) *TenantProvider_GetAllTenants_Call {
 	return &TenantProvider_GetAllTenants_Call{Call: _e.mock.On("GetAllTenants", ctx, permittedScopes, filters)}
 }
 
 func (_c *TenantProvider_GetAllTenants_Call) Run(run func(ctx context.Context, permittedScopes *openapi.PermittedScopes, filters *dao.TenantFilters)) *TenantProvider_GetAllTenants_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*openapi.PermittedScopes), args[2].(*dao.TenantFilters))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *openapi.PermittedScopes
+		if args[1] != nil {
+			arg1 = args[1].(*openapi.PermittedScopes)
+		}
+		var arg2 *dao.TenantFilters
+		if args[2] != nil {
+			arg2 = args[2].(*dao.TenantFilters)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -260,15 +312,26 @@ type TenantProvider_GetTenantById_Call struct {
 }
 
 // GetTenantById is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-func (_e *TenantProvider_Expecter) GetTenantById(ctx interface{}, tenantId interface{}) *TenantProvider_GetTenantById_Call {
+//   - ctx context.Context
+//   - tenantId int32
+func (_e *TenantProvider_Expecter) GetTenantById(ctx any, tenantId any) *TenantProvider_GetTenantById_Call {
 	return &TenantProvider_GetTenantById_Call{Call: _e.mock.On("GetTenantById", ctx, tenantId)}
 }
 
 func (_c *TenantProvider_GetTenantById_Call) Run(run func(ctx context.Context, tenantId int32)) *TenantProvider_GetTenantById_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -319,15 +382,26 @@ type TenantProvider_GetTenantByName_Call struct {
 }
 
 // GetTenantByName is a helper method to define mock.On call
-//   - ctx
-//   - name
-func (_e *TenantProvider_Expecter) GetTenantByName(ctx interface{}, name interface{}) *TenantProvider_GetTenantByName_Call {
+//   - ctx context.Context
+//   - name string
+func (_e *TenantProvider_Expecter) GetTenantByName(ctx any, name any) *TenantProvider_GetTenantByName_Call {
 	return &TenantProvider_GetTenantByName_Call{Call: _e.mock.On("GetTenantByName", ctx, name)}
 }
 
 func (_c *TenantProvider_GetTenantByName_Call) Run(run func(ctx context.Context, name string)) *TenantProvider_GetTenantByName_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -367,16 +441,32 @@ type TenantProvider_RequeueProvision_Call struct {
 }
 
 // RequeueProvision is a helper method to define mock.On call
-//   - ctx
-//   - tenant1
-//   - cfg
-func (_e *TenantProvider_Expecter) RequeueProvision(ctx interface{}, tenant1 interface{}, cfg interface{}) *TenantProvider_RequeueProvision_Call {
+//   - ctx context.Context
+//   - tenant1 *models.Tenant
+//   - cfg tenant.ProvisionConfig
+func (_e *TenantProvider_Expecter) RequeueProvision(ctx any, tenant1 any, cfg any) *TenantProvider_RequeueProvision_Call {
 	return &TenantProvider_RequeueProvision_Call{Call: _e.mock.On("RequeueProvision", ctx, tenant1, cfg)}
 }
 
 func (_c *TenantProvider_RequeueProvision_Call) Run(run func(ctx context.Context, tenant1 *models.Tenant, cfg tenant.ProvisionConfig)) *TenantProvider_RequeueProvision_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(*models.Tenant), args[2].(tenant.ProvisionConfig))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 *models.Tenant
+		if args[1] != nil {
+			arg1 = args[1].(*models.Tenant)
+		}
+		var arg2 tenant.ProvisionConfig
+		if args[2] != nil {
+			arg2 = args[2].(tenant.ProvisionConfig)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }
@@ -427,16 +517,32 @@ type TenantProvider_UpdateTenantAlias_Call struct {
 }
 
 // UpdateTenantAlias is a helper method to define mock.On call
-//   - ctx
-//   - tenantId
-//   - alias
-func (_e *TenantProvider_Expecter) UpdateTenantAlias(ctx interface{}, tenantId interface{}, alias interface{}) *TenantProvider_UpdateTenantAlias_Call {
+//   - ctx context.Context
+//   - tenantId int32
+//   - alias *string
+func (_e *TenantProvider_Expecter) UpdateTenantAlias(ctx any, tenantId any, alias any) *TenantProvider_UpdateTenantAlias_Call {
 	return &TenantProvider_UpdateTenantAlias_Call{Call: _e.mock.On("UpdateTenantAlias", ctx, tenantId, alias)}
 }
 
 func (_c *TenantProvider_UpdateTenantAlias_Call) Run(run func(ctx context.Context, tenantId int32, alias *string)) *TenantProvider_UpdateTenantAlias_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int32), args[2].(*string))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 int32
+		if args[1] != nil {
+			arg1 = args[1].(int32)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
 	})
 	return _c
 }

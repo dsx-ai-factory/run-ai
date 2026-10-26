@@ -20,7 +20,7 @@ import (
 // checks if the NetworkingService type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &NetworkingService{}
 
-// NetworkingService Service configuration for routing traffic to the workload. Use 'spec' or 'ref' (not both).
+// NetworkingService Service configuration for routing traffic to the workload. Provide exactly one of spec or ref.
 type NetworkingService struct {
 	Spec          NullableServiceSpec             `json:"spec,omitempty"`
 	Ref           NullableServiceRef              `json:"ref,omitempty"`

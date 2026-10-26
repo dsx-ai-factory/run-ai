@@ -13,8 +13,8 @@ import (
 	. "github.com/onsi/gomega"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/runtime-rules/pkg/frameworks"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/controller"
 	kfv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -70,10 +70,10 @@ var _ = Describe("Validation Test Suite", func() {
 	})
 })
 
-func getTestFrameworksStatus() map[string]controller.DistributedJobFrameworksStatus {
-	enabledFrameworks := make(map[string]controller.DistributedJobFrameworksStatus)
-	enabledFrameworks[constants.KindTFJob] = controller.DistributedJobFrameworksStatus{JobObject: &kfv1.TFJob{}, SuspendEnabled: true}
-	enabledFrameworks[constants.KindPyTorchJob] = controller.DistributedJobFrameworksStatus{JobObject: &kfv1.PyTorchJob{}, SuspendEnabled: false}
+func getTestFrameworksStatus() map[string]frameworks.DistributedJobFrameworksStatus {
+	enabledFrameworks := make(map[string]frameworks.DistributedJobFrameworksStatus)
+	enabledFrameworks[constants.KindTFJob] = frameworks.DistributedJobFrameworksStatus{JobObject: &kfv1.TFJob{}, SuspendEnabled: true}
+	enabledFrameworks[constants.KindPyTorchJob] = frameworks.DistributedJobFrameworksStatus{JobObject: &kfv1.PyTorchJob{}, SuspendEnabled: false}
 
 	return enabledFrameworks
 }

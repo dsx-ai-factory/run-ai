@@ -6,8 +6,6 @@
 package init_containers
 
 import (
-	"context"
-
 	clustersApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	. "github.com/onsi/ginkgo/v2"
@@ -16,7 +14,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_groups"
 	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/builders"
+
 	featuregate "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common/feature-gate"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -24,6 +22,58 @@ import (
 )
 
 var _ = Describe("BuildS3InitContainers", func() {
+	It("gates every S3 mount using readiness support advertised for the exact image", func() {
+		cfg := s3TestConfig().(composer.StaticClusterStorageConfig)
+		cfg.SetS3FsMountCheckImage(cfg.S3FsImage())
+		info := &composer.S3Info{Config: cfg, Items: map[string]*composer.S3Item{
+			"first":  {Bucket: "first", Path: "/data set"},
+			"second": {Bucket: "second", Path: "/second"},
+			"third":  {Bucket: "third", Path: "data"},
+		}}
+		containers, err := BuildS3InitContainers(info)
+		Expect(err).To(BeNil())
+		Expect(containers).To(HaveLen(3))
+		for i, key := range []string{"first", "second", "third"} {
+			item := info.Items[key]
+			Expect(containers[i].Command[len(containers[i].Command)-4:]).To(Equal([]string{"--ready-file", "/runai-goofys-ready", item.Bucket, item.Path}))
+			Expect(containers[i].RestartPolicy).To(Equal(ptr.To(corev1.ContainerRestartPolicyAlways)))
+			Expect(containers[i].StartupProbe).NotTo(BeNil())
+			Expect(containers[i].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys-ready", item.Path}))
+			Expect(containers[i].StartupProbe.PeriodSeconds).To(Equal(int32(2)))
+			Expect(containers[i].StartupProbe.TimeoutSeconds).To(Equal(int32(2)))
+			Expect(containers[i].StartupProbe.FailureThreshold).To(Equal(int32(150)))
+		}
+	})
+
+	DescribeTable("keeps legacy behavior when readiness support is unavailable",
+		func(advertised string) {
+			cfg := s3TestConfig().(composer.StaticClusterStorageConfig)
+			cfg.SetS3FsMountCheckImage(advertised)
+			containers, err := BuildS3InitContainers(&composer.S3Info{Config: cfg,
+				Items: map[string]*composer.S3Item{"s3": {Bucket: "bucket", Path: "/storage"}},
+			})
+			Expect(err).To(BeNil())
+			Expect(containers[0].StartupProbe).To(BeNil())
+			Expect(containers[0].Command).NotTo(ContainElement("--ready-file"))
+		},
+		Entry("older cluster without a capability", ""),
+		Entry("stale capability for a different image", "goofys:older"),
+	)
+
+	It("uses a capability reported by the cluster for a custom image", func() {
+		config := clustersApi.ClusterReportedConfig{}
+		config.SetS3FileSystemImage("custom.example/goofys:with-readiness")
+		config.SetS3FileSystemMountCheckImage("custom.example/goofys:with-readiness")
+		containers, err := BuildS3InitContainers(&composer.S3Info{
+			Config: composer.NewClusterStorageConfigFromCluster(composer.ClusterWithConfig(config)),
+			Items:  map[string]*composer.S3Item{"s3": {Bucket: "bucket", Path: "/storage"}},
+		})
+		Expect(err).To(BeNil())
+		Expect(containers[0].StartupProbe).NotTo(BeNil())
+		Expect(containers[0].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys-ready", "/storage"}))
+		Expect(containers[0].Command).To(ContainElement("--ready-file"))
+	})
+
 	It("should emit secret-backed credential env and a goofys command with endpoint, bucket and path", func() {
 		info := &composer.S3Info{
 			Config: s3TestConfig(),
@@ -299,14 +349,12 @@ func s3InfoFromWorkloadFields(wf *field_groups.WorkloadFields, cfg composer.Clus
 
 var _ = Describe("BuildS3InitContainers parity with the cluster builder", func() {
 	var (
-		ctx    context.Context
 		wf     *field_groups.WorkloadFields
 		cfg    composer.ClusterStorageConfig
 		fgPrev bool
 	)
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		for _, name := range s3ParityEnvVars {
 			GinkgoT().Setenv(name, "")
 		}
@@ -327,7 +375,7 @@ var _ = Describe("BuildS3InitContainers parity with the cluster builder", func()
 
 	expectParity := func() {
 		GinkgoHelper()
-		clusterOut := builders.GetS3container(ctx, wf)
+		clusterOut := legacyOutput[[]corev1.Container]("GetS3container")
 		cpOut, err := BuildS3InitContainers(s3InfoFromWorkloadFields(wf, cfg))
 		Expect(err).To(BeNil())
 		Expect(cpOut).To(Equal(clusterOut))
@@ -335,7 +383,7 @@ var _ = Describe("BuildS3InitContainers parity with the cluster builder", func()
 
 	Context("no buckets", func() {
 		It("should produce nothing on both sides when there are no s3 buckets", func() {
-			clusterOut := builders.GetS3container(ctx, wf)
+			clusterOut := legacyOutput[[]corev1.Container]("GetS3container")
 			cpOut, err := BuildS3InitContainers(s3InfoFromWorkloadFields(wf, cfg))
 			Expect(err).To(BeNil())
 			Expect(clusterOut).To(BeEmpty())
@@ -495,7 +543,7 @@ var _ = Describe("BuildS3InitContainers parity with the cluster builder", func()
 			addS3Bucket(wf, "s3-0", &flds.S3bucketItemValue{
 				Bucket: ptr.To("b"), Path: ptr.To("/p"), Image: ptr.To("custom-goofys:override"),
 			})
-			clusterOut := builders.GetS3container(ctx, wf)
+			clusterOut := legacyOutput[[]corev1.Container]("GetS3container")
 			cpOut, err := BuildS3InitContainers(s3InfoFromWorkloadFields(wf, cfg))
 			Expect(err).To(BeNil())
 			Expect(clusterOut[0].Image).To(Equal("custom-goofys:override"))
@@ -509,13 +557,11 @@ var _ = Describe("BuildS3InitContainers parity with the cluster builder", func()
 
 var _ = Describe("BuildS3Volumes and BuildS3MainVolumeMounts parity with the cluster builder", func() {
 	var (
-		ctx context.Context
 		wf  *field_groups.WorkloadFields
 		cfg composer.ClusterStorageConfig
 	)
 
 	BeforeEach(func() {
-		ctx = context.Background()
 		for _, name := range s3ParityEnvVars {
 			GinkgoT().Setenv(name, "")
 		}
@@ -529,8 +575,8 @@ var _ = Describe("BuildS3Volumes and BuildS3MainVolumeMounts parity with the clu
 	expectVolumeAndMountParity := func() {
 		GinkgoHelper()
 		info := s3InfoFromWorkloadFields(wf, cfg)
-		Expect(BuildS3Volumes(info)).To(Equal(builders.GetS3Volumes(ctx, &wf.StorageFields)))
-		Expect(BuildS3MainVolumeMounts(info)).To(Equal(builders.GetS3VolumeMounts(ctx, &wf.StorageFields)))
+		Expect(BuildS3Volumes(info)).To(Equal(legacyOutput[[]corev1.Volume]("GetS3Volumes")))
+		Expect(BuildS3MainVolumeMounts(info)).To(Equal(legacyOutput[[]corev1.VolumeMount]("GetS3VolumeMounts")))
 	}
 
 	It("single bucket", func() {

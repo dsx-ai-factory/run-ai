@@ -12,7 +12,7 @@ import (
 	"time"
 
 	clusterclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	orgunitclient "github.com/dsx-ai-factory/run-ai/runai-clients/org-unit-service-client/generated"
+	orgunitclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client/generated"
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/dsx-ai-factory/run-ai/scale-load/flowmark/internal/client"

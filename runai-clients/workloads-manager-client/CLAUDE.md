@@ -14,7 +14,7 @@
 | validate | No-op |
 | test | Runs `test-go` — Go unit tests in the shared build container |
 | generate-mocks | Regenerates `mocks/` via mockery |
-| client-bump-version | Tag a prod release `runai-clients/workloads-manager-client/vX.Y.Z` (from synced master) |
+| client-bump-version | Tag a prod release `runai-clients/workloads-manager-client/vX.Y.Z` (from synced main) |
 | client-bump-version-dev | Tag a `-dev` release from a feature branch |
 
 ## Key build notes

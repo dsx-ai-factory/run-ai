@@ -36,8 +36,9 @@
           :key="credentialSelectorKey"
           v-model="credentialSelectorModel"
           :cluster-id="props.clusterId"
+          :personal-credentials-min-cluster-version="MIN_CLUSTER_VERSION_FOR_AI_APPLICATION_PERSONAL_CREDENTIALS"
           :scope-model="scopeModel"
-          :source-select-config="sharedSecretSourceSelectConfig"
+          :source-select-config="credentialSourceSelectConfig"
           :type-select-config="ngcApiKeyTypeSelectConfig"
           :credential-select-config="{ showCreateNewBtn: true }"
           @update:model-value="handleCredentialChange"
@@ -79,21 +80,33 @@
       </runai-section>
     </template>
 
-    <runai-section
-      v-else-if="selectedSource === 'custom-url'"
-      class="q-mt-lg"
-      title="Set the URL of your application's Helm chart"
-    >
-      <q-input
-        dense
-        label="Chart URL"
-        :rules="[validationRules.validateChartUrlFormat]"
-        no-error-icon
-        :model-value="props.chartRef.chartURL"
-        @update:model-value="updateChartRef({ chartURL: String($event ?? '') })"
-        placeholder="e.g., https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz "
-      />
-    </runai-section>
+    <template v-else-if="selectedSource === 'custom-url'">
+      <runai-section class="q-mt-lg" title="Set the URL of your application's Helm chart">
+        <q-input
+          dense
+          label="Chart URL"
+          :rules="[validationRules.validateChartUrlFormat]"
+          no-error-icon
+          :model-value="props.chartRef.chartURL"
+          @update:model-value="handleChartURLChange(String($event ?? ''))"
+          placeholder="e.g., https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz "
+        />
+      </runai-section>
+
+      <runai-section class="q-mt-md" title="Set repository credentials (optional)">
+        <runai-credential-selector-by-source
+          :key="credentialSelectorKey"
+          v-model="credentialSelectorModel"
+          :cluster-id="props.clusterId"
+          :personal-credentials-min-cluster-version="MIN_CLUSTER_VERSION_FOR_AI_APPLICATION_PERSONAL_CREDENTIALS"
+          :scope-model="scopeModel"
+          :source-select-config="credentialSourceSelectConfig"
+          :type-select-config="customUrlTypeSelectConfig"
+          :credential-select-config="{ required: false, showCreateNewBtn: true }"
+          @update:model-value="handleCredentialChange"
+        />
+      </runai-section>
+    </template>
 
     <runai-section
       v-else-if="selectedSource === 'upload-file'"
@@ -113,7 +126,7 @@
     <runai-section
       class="q-mt-md"
       title="Set application overrides"
-      tooltip-text="To override specific parameters in your Helm chart, enter the corresponding key-value pairs in YAML format. These will replace the defaults in your values.yaml."
+      tooltip-text="Enter Helm overrides in YAML. To reference personal credentials, use an entire string value: USERCREDENTIAL:<name>. For NGC credentials, append ,generic-secret or ,docker-registry."
     >
       <runai-editor
         ref="yamlEditorRef"
@@ -151,6 +164,7 @@ import { catalogService } from "@/services/control-plane/catalog.service/catalog
 import { aiApplicationService } from "@/services/cluster/ai-application.service/ai-application.service";
 import { alertUtil } from "@/utils/alert.util/alert.util";
 import { HttpErrorResponse } from "@/models/http-response.model";
+import { MIN_CLUSTER_VERSION_FOR_AI_APPLICATION_PERSONAL_CREDENTIALS } from "@/common/version.constant";
 import {
   ERunaiCredentialSource,
   ERunaiCredentialType,
@@ -187,8 +201,14 @@ function updateChartRef(partial: Partial<AIApplicationSpecChartRef>): void {
   emit("update:chartRef", { ...props.chartRef, ...partial });
 }
 
-function updateAuth(assetId?: string): void {
-  emit("update:auth", assetId ? { assetId } : undefined);
+function updateAuth(assetId?: string, source?: ERunaiCredentialSource): void {
+  const auth: AIApplicationAuth | undefined = assetId
+    ? {
+        assetId,
+        ...(source === ERunaiCredentialSource.MyCredentials ? { userCredential: true } : {}),
+      }
+    : undefined;
+  emit("update:auth", auth);
 }
 
 const selectedSource = ref("ngc-catalog");
@@ -229,9 +249,8 @@ const credentialSelectorModel = ref<ICredentialSelectorModel>({
   id: undefined,
 });
 
-const sharedSecretSourceSelectConfig: ISourceSelectConfig = {
-  disable: true,
-  showPersonalCredentialsOption: false,
+const credentialSourceSelectConfig: ISourceSelectConfig = {
+  showPersonalCredentialsOption: true,
 };
 
 const ngcApiKeyTypeSelectConfig: ITypeSelectConfig = {
@@ -240,10 +259,20 @@ const ngcApiKeyTypeSelectConfig: ITypeSelectConfig = {
   disable: true,
 };
 
+const customUrlUsesOCI = computed(() => props.chartRef.chartURL?.startsWith("oci://") ?? false);
+const customUrlTypeSelectConfig = computed<ITypeSelectConfig>(() => ({
+  hidden: false,
+  allowedTypes: customUrlUsesOCI.value
+    ? [ERunaiCredentialType.NgcApiKey, ERunaiCredentialType.DockerRegistry]
+    : [ERunaiCredentialType.NgcApiKey, ERunaiCredentialType.GenericSecret],
+}));
+
 const selectedRepo = computed(() => helmRepos.value.find((r) => r.url === props.chartRef.repo));
 const selectedCredentialId = computed(() => credentialSelectorModel.value.id);
 // Remount the selector when scope or repo changes so it reloads scoped credentials and drops internal selection state.
-const credentialSelectorKey = computed(() => `${props.clusterId}:${props.projectId ?? ""}:${props.chartRef.repo ?? ""}`);
+const credentialSelectorKey = computed(
+  () => `${props.clusterId}:${props.projectId ?? ""}:${props.chartRef.repo ?? ""}:${customUrlUsesOCI.value}`,
+);
 const canBrowseSelectedRepo = computed(() => {
   if (!props.chartRef.repo) return false;
   if (!selectedRepo.value?.isPrivate) return true;
@@ -398,10 +427,19 @@ async function handleRepoChange(repo: string): Promise<void> {
   }
 }
 
+function handleChartURLChange(chartURL: string): void {
+  const nextUsesOCI = chartURL.startsWith("oci://");
+  if (nextUsesOCI !== customUrlUsesOCI.value) {
+    credentialSelectorModel.value = getEmptyCredentialSelectorModel();
+    updateAuth();
+  }
+  updateChartRef({ chartURL });
+}
+
 async function handleCredentialChange(model: ICredentialSelectorModel): Promise<void> {
   credentialSelectorModel.value = model;
   chartLoadError.value = "";
-  updateAuth(model.id);
+  updateAuth(model.id, model.source);
   updateChartRef({ chartName: "", chartVersion: "" });
   if (props.chartRef.repo && model.id) {
     await loadRepoCharts(props.chartRef.repo, model.id);

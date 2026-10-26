@@ -7,7 +7,10 @@ package dao_crud
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 
 	authorization "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
@@ -23,18 +26,18 @@ import (
 )
 
 const (
-	crudWorkloadUpsertUpdate    = "UPDATE crud_workloads SET created_at=?,created_by=?,updated_at=?,updated_by=?,deleted_at=?,deleted_by=?,update_count=?,tenant_id=?,cluster_id=?,department_id=?,project_id=?,workload_type=?,requested_name=?,name=?,namespace=?,spec=?,master_spec=?,master_same_as_worker=?,desired_phase=?,assets_mapping=? WHERE crud_workloads.deleted_at IS NULL AND id = ?"
-	crudWorkloadDesiredUpdate   = "UPDATE crud_workloads SET desired_phase=?,updated_at=?,updated_by=? WHERE tenant_id = ? AND id = ?"
-	crudWorkloadGetPrefix       = "SELECT * FROM crud_workloads WHERE tenant_id = ? AND id = ? AND workload_type = ?"
-	crudWorkloadGetSuffix       = " ORDER BY crud_workloads.id LIMIT ?"
-	crudWorkloadListSelect      = "SELECT * FROM crud_workloads WHERE tenant_id = ? AND workload_type = ? AND cluster_id = ? AND update_count > ? ORDER BY update_count LIMIT ?"
-	crudWorkloadCleanupDelete   = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ? AND workload_type = ? AND desired_phase = ? AND update_count < ?"
-	crudWorkloadProjectUpdate   = "UPDATE crud_workloads SET desired_phase=? WHERE tenant_id = ? AND cluster_id = ? AND project_id = ?"
-	crudWorkloadTenantDelete    = "DELETE FROM crud_workloads WHERE tenant_id = ?"
-	crudWorkloadClusterDelete   = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ?"
-	crudWorkloadByIdDelete      = "DELETE FROM crud_workloads WHERE crud_workloads.id = ? AND crud_workloads.tenant_id = ?"
-	crudWorkloadSyncProject     = "DELETE FROM crud_workloads WHERE tenant_id = ? AND project_id = ?"
-	crudWorkloadSyncFull        = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ? AND id >= ? AND id <= ? AND NOT id IN (?,?) AND workload_type = ?"
+	crudWorkloadUpsertUpdate  = "UPDATE crud_workloads SET created_at=?,created_by=?,updated_at=?,updated_by=?,deleted_at=?,deleted_by=?,update_count=?,tenant_id=?,cluster_id=?,department_id=?,project_id=?,workload_type=?,requested_name=?,name=?,namespace=?,spec=?,master_spec=?,master_same_as_worker=?,desired_phase=?,assets_mapping=? WHERE crud_workloads.deleted_at IS NULL AND id = ?"
+	crudWorkloadDesiredUpdate = "UPDATE crud_workloads SET desired_phase=?,updated_at=?,updated_by=? WHERE tenant_id = ? AND id = ?"
+	crudWorkloadGetPrefix     = "SELECT * FROM crud_workloads WHERE tenant_id = ? AND id = ? AND workload_type = ?"
+	crudWorkloadGetSuffix     = " ORDER BY crud_workloads.id LIMIT ?"
+	crudWorkloadListSelect    = "SELECT * FROM crud_workloads WHERE tenant_id = ? AND workload_type = ? AND cluster_id = ? AND update_count > ? ORDER BY update_count LIMIT ?"
+	crudWorkloadCleanupDelete = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ? AND workload_type = ? AND desired_phase = ? AND update_count < ?"
+	crudWorkloadProjectUpdate = "UPDATE crud_workloads SET desired_phase=? WHERE tenant_id = ? AND cluster_id = ? AND project_id = ?"
+	crudWorkloadTenantDelete  = "DELETE FROM crud_workloads WHERE tenant_id = ?"
+	crudWorkloadClusterDelete = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ?"
+	crudWorkloadByIdDelete    = "DELETE FROM crud_workloads WHERE crud_workloads.id = ? AND crud_workloads.tenant_id = ?"
+	crudWorkloadSyncProject   = "DELETE FROM crud_workloads WHERE tenant_id = ? AND project_id = ?"
+	crudWorkloadSyncFull      = "DELETE FROM crud_workloads WHERE tenant_id = ? AND cluster_id = ? AND id >= ? AND id <= ? AND NOT id IN (?,?) AND workload_type = ?"
 )
 
 type crudWorkloadRow struct {
@@ -490,3 +493,56 @@ var _ = Describe("DbSyncWorkloads", func() {
 		Expect(apiErr).ToNot(BeNil())
 	})
 })
+
+var _ = DescribeTable("GPU memory DB boundary", func(snapshot bool) {
+	m := setupDaoMock(GinkgoT())
+	var spec, storedSpec workloadsApi.SupersetSpec
+	var master, storedMaster workloadsApi.MasterSpec
+	Expect(json.Unmarshal([]byte(`{"compute":{"gpuMemoryPortionRequest":0.25,"gpuMemoryPortionLimit":0.5,"gpuComputeMode":"sm-sharing"}}`), &spec)).To(Succeed())
+	Expect(json.Unmarshal([]byte(`{"compute":{"gpuPortionRequest":0.25,"gpuPortionLimit":0.5,"gpuComputeMode":"sm-sharing"}}`), &storedSpec)).To(Succeed())
+	Expect(json.Unmarshal([]byte(`{"compute":{"gpuMemoryPortionRequest":0.75}}`), &master)).To(Succeed())
+	Expect(json.Unmarshal([]byte(`{"compute":{"gpuPortionRequest":0.75}}`), &storedMaster)).To(Succeed())
+	before, err := json.Marshal(spec)
+	Expect(err).ToNot(HaveOccurred())
+	beforeMaster, err := json.Marshal(master)
+	Expect(err).ToNot(HaveOccurred())
+	stored, err := json.Marshal(storedSpec)
+	Expect(err).ToNot(HaveOccurred())
+	storedMasterJSON, err := json.Marshal(storedMaster)
+	Expect(err).ToNot(HaveOccurred())
+
+	query, count, specIndex := crudWorkloadUpsertUpdate, 21, 15
+	if snapshot {
+		query, count, specIndex = snapshotUpsertUpdate, 17, 12
+	}
+	args := make([]any, count)
+	for i := range args {
+		args[i] = dbtesting.AnyArg()
+	}
+	args[specIndex], args[specIndex+1] = string(stored), string(storedMasterJSON)
+	m.ExpectTransaction().Begin()
+	m.ExpectExec(query, args...).Returns(1)
+	m.ExpectTransaction().Commit()
+	if snapshot {
+		record := newSnapshotFixture()
+		record.Spec, record.MasterSpec = &spec, &master
+		Expect(DbUpsertWorkloadV2Snapshot(testCtx(1), record)).To(BeNil())
+		Expect(record.Spec).To(BeIdenticalTo(&spec))
+		Expect(record.MasterSpec).To(BeIdenticalTo(&master))
+	} else {
+		record := newCrudWorkloadFixture()
+		record.Spec, record.MasterSpec = &spec, &master
+		Expect(DbUpsertWorkload(testCtx(1), record)).To(BeNil())
+		Expect(record.Spec).To(BeIdenticalTo(&spec))
+		Expect(record.MasterSpec).To(BeIdenticalTo(&master))
+	}
+	after, err := json.Marshal(spec)
+	Expect(err).ToNot(HaveOccurred())
+	Expect(after).To(Equal(before))
+	afterMaster, err := json.Marshal(master)
+	Expect(err).ToNot(HaveOccurred())
+	Expect(afterMaster).To(Equal(beforeMaster))
+},
+	Entry("stores workload aliases without changing the caller's spec", false),
+	Entry("stores snapshot aliases without changing the caller's spec", true),
+)

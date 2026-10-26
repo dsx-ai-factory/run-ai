@@ -10,7 +10,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	"github.com/rs/zerolog/log"
@@ -33,11 +32,9 @@ const (
 	PrefixTlsKey       = "tls-key-"
 	PrefixCaCert       = "ca-cert-"
 	PrefixDockerConfig = "docker-config-"
-
-	TempFilePermissions = 0700
 )
 
-func getAuthOptions(ctx context.Context, k8sClient client.Client, namespace string, authSpec *v1alpha1.HelmAuthSpec) (*AuthOptions, error) {
+func getAuthOptions(ctx context.Context, k8sClient client.Client, namespace string, authSpec *v1alpha1.HelmAuthSpec) (_ *AuthOptions, err error) {
 	if authSpec == nil {
 		return nil, nil
 	}
@@ -46,6 +43,12 @@ func getAuthOptions(ctx context.Context, k8sClient client.Client, namespace stri
 		InsecureSkipTLSVerify: authSpec.InsecureSkipTLSVerify,
 		CAFile:                authSpec.CAFile,
 	}
+	// On failure the caller never gets authOpts, so nobody else can remove files already written.
+	defer func() {
+		if err != nil {
+			err = errors.Join(err, authOpts.Cleanup())
+		}
+	}()
 
 	// If no secret reference, return with just the static options
 	if authSpec.SecretRef == nil {
@@ -71,7 +74,7 @@ func getAuthOptions(ctx context.Context, k8sClient client.Client, namespace stri
 		if !ok || len(dockerConfig) == 0 {
 			return nil, fmt.Errorf("secret %s is type %s but missing key %s", authSpec.SecretRef.Name, corev1.SecretTypeDockerConfigJson, corev1.DockerConfigJsonKey)
 		}
-		tempFile, err := writeDockerConfigToTempFile(dockerConfig)
+		tempFile, err := authOpts.writeTempFile(PrefixDockerConfig, dockerConfig)
 		if err != nil {
 			return nil, fmt.Errorf("failed to write docker config: %w", err)
 		}
@@ -86,20 +89,20 @@ func getAuthOptions(ctx context.Context, k8sClient client.Client, namespace stri
 			return nil, fmt.Errorf("secret %s is type %s but missing %s or %s", authSpec.SecretRef.Name, corev1.SecretTypeTLS, corev1.TLSCertKey, corev1.TLSPrivateKeyKey)
 		}
 
-		tempCertFile, err := writeTempFile(PrefixTlsCert, cert)
+		tempCertFile, err := authOpts.writeTempFile(PrefixTlsCert, cert)
 		if err != nil {
 			return nil, fmt.Errorf("failed to write TLS cert: %w", err)
 		}
 		authOpts.CertFile = tempCertFile
 
-		tempKeyFile, err := writeTempFile(PrefixTlsKey, key)
+		tempKeyFile, err := authOpts.writeTempFile(PrefixTlsKey, key)
 		if err != nil {
 			return nil, fmt.Errorf("failed to write TLS key: %w", err)
 		}
 		authOpts.KeyFile = tempKeyFile
 
 		if ca, ok := secret.Data[CaCertFile]; ok {
-			tempFile, err := writeTempFile(PrefixCaCert, ca)
+			tempFile, err := authOpts.writeTempFile(PrefixCaCert, ca)
 			if err != nil {
 				return nil, fmt.Errorf("failed to write CA cert: %w", err)
 			}
@@ -140,7 +143,7 @@ func getAuthOptions(ctx context.Context, k8sClient client.Client, namespace stri
 		}
 
 		if ca, ok := secret.Data[CaCertFile]; ok {
-			tempFile, err := writeTempFile(PrefixCaCert, ca)
+			tempFile, err := authOpts.writeTempFile(PrefixCaCert, ca)
 			if err != nil {
 				return nil, fmt.Errorf("failed to write CA cert: %w", err)
 			}
@@ -153,29 +156,38 @@ func getAuthOptions(ctx context.Context, k8sClient client.Client, namespace stri
 	return &authOpts, nil
 }
 
-func writeDockerConfigToTempFile(data []byte) (string, error) {
-	return writeTempFile(PrefixDockerConfig, data)
-}
-
-// writeTempFile writes data to a temporary file and returns the path
-// (TODO) note that those files are not removed by the controller, only by the casual cleanup of /tmp, it's not critical but not ideal
-func writeTempFile(prefix string, data []byte) (string, error) {
-	tempDir := filepath.Join(os.TempDir(), TempAuthDir)
-	if err := os.MkdirAll(tempDir, TempFilePermissions); err != nil {
-		return "", fmt.Errorf("failed to create temp dir: %w", err)
+// writeTempFile writes data to a new file in the private temp dir of authOpts and returns its path.
+// The dir is created on first use and removed by Cleanup.
+func (a *AuthOptions) writeTempFile(prefix string, data []byte) (string, error) {
+	if a.tempDir == "" {
+		tempDir, err := os.MkdirTemp("", TempAuthDir+"-")
+		if err != nil {
+			return "", fmt.Errorf("failed to create temp dir: %w", err)
+		}
+		a.tempDir = tempDir
 	}
 
-	tempFile, err := os.CreateTemp(tempDir, prefix)
+	tempFile, err := os.CreateTemp(a.tempDir, prefix)
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp file: %w", err)
 	}
-	defer func(tempFile *os.File) {
-		_ = tempFile.Close()
-	}(tempFile)
 
-	if _, err := tempFile.Write(data); err != nil {
+	_, writeErr := tempFile.Write(data)
+	if err := errors.Join(writeErr, tempFile.Close()); err != nil {
 		return "", fmt.Errorf("failed to write temp file: %w", err)
 	}
 
 	return tempFile.Name(), nil
+}
+
+// Cleanup removes the files written from the auth secret. Safe to call on a nil receiver.
+func (a *AuthOptions) Cleanup() error {
+	if a == nil || a.tempDir == "" {
+		return nil
+	}
+	if err := os.RemoveAll(a.tempDir); err != nil {
+		return fmt.Errorf("failed to remove helm auth temp dir %s: %w", a.tempDir, err)
+	}
+	a.tempDir = ""
+	return nil
 }

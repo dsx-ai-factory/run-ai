@@ -27,9 +27,8 @@
       <template #footer>
         <div class="workload-copy-cli-actions q-px-md">
           <span class="italic inline-block link-text">
-            To learn how to submit a workload via CLI, see the CLI
-            <a href="https://docshub.run.ai/guides/reference/cli/runai" target="_blank">v2</a> and
-            <a href="https://docs.run.ai/latest/Researcher/cli-reference/runai-submit/" target="_blank">v1</a> reference
+            To learn how to submit a workload via CLI, see the
+            <a :href="DOCS.CLI.SUBMIT" target="_blank">CLI reference</a>.
           </span>
           <q-btn label="Close" color="primary" @click="onCancel" aid="close-workload-copy-cli-modal" />
         </div>

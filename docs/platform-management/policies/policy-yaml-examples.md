@@ -6,7 +6,7 @@ This page provides YAML examples for NVIDIA Run:ai native workload policies. The
 
 This example shows how to add a new limitation to the GPU usage for workloads of type workspace:
 
-1.  Check the [workload API](https://run-ai-docs.nvidia.com/api/2.26/policies/policy) fields documentation and select the field(s) that are most relevant for GPU usage.
+1.  Check the [workload API](api:main-api:GET/api/v1/policies) fields documentation and select the field(s) that are most relevant for GPU usage.
 
     ```json
     {

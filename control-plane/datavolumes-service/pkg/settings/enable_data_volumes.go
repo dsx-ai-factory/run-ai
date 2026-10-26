@@ -20,7 +20,7 @@ func (e *EnableDataVolumes) Category() string {
 }
 
 func (e *EnableDataVolumes) Description() string {
-	return "Enable to allow creation of data volumes to share underlying data across scopes. For more information, see the Data volumes guide"
+	return "Enable to allow creation of data volumes to share underlying data across scopes. For more information, see the <a data-doc-key='dataVolumes' target='_blank'>Data volumes guide</a>"
 }
 
 func (e *EnableDataVolumes) DisplayName() string {

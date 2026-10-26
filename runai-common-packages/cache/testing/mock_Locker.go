@@ -20,10 +20,19 @@ func NewMockLocker(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *MockLocker {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &MockLocker{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -64,15 +73,26 @@ type MockLocker_Lock_Call struct {
 }
 
 // Lock is a helper method to define mock.On call
-//   - ctx
-//   - ttl
-func (_e *MockLocker_Expecter) Lock(ctx interface{}, ttl interface{}) *MockLocker_Lock_Call {
+//   - ctx context.Context
+//   - ttl time.Duration
+func (_e *MockLocker_Expecter) Lock(ctx any, ttl any) *MockLocker_Lock_Call {
 	return &MockLocker_Lock_Call{Call: _e.mock.On("Lock", ctx, ttl)}
 }
 
 func (_c *MockLocker_Lock_Call) Run(run func(ctx context.Context, ttl time.Duration)) *MockLocker_Lock_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(time.Duration))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 time.Duration
+		if args[1] != nil {
+			arg1 = args[1].(time.Duration)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }
@@ -110,14 +130,20 @@ type MockLocker_Unlock_Call struct {
 }
 
 // Unlock is a helper method to define mock.On call
-//   - ctx
-func (_e *MockLocker_Expecter) Unlock(ctx interface{}) *MockLocker_Unlock_Call {
+//   - ctx context.Context
+func (_e *MockLocker_Expecter) Unlock(ctx any) *MockLocker_Unlock_Call {
 	return &MockLocker_Unlock_Call{Call: _e.mock.On("Unlock", ctx)}
 }
 
 func (_c *MockLocker_Unlock_Call) Run(run func(ctx context.Context)) *MockLocker_Unlock_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		run(
+			arg0,
+		)
 	})
 	return _c
 }

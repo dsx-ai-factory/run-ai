@@ -1,0 +1,12 @@
+type: object
+description: The response of GET /api/v1/workloads/slim.
+required:
+  - workloads
+properties:
+  next:
+    type: integer
+    example: 1
+  workloads:
+    type: array
+    items:
+      $ref: './WorkloadSlim.yaml'

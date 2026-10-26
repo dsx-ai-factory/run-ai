@@ -11,7 +11,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/models"
 )
 
-//go:generate mockery --name IdpDal
 type IdpDal interface {
 	SaveIdpMetadata(ctx context.Context, idpMetadata *models.IdpMetadata) error
 	UpdateIdpMetadata(ctx context.Context, newIdpMetadata *models.IdpMetadata) error

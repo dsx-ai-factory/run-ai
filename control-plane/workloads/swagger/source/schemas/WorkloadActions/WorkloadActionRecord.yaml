@@ -1,0 +1,17 @@
+type: object
+required: [id, workloadId, workloadName, subject, subjectType, action, acceptedAt]
+properties:
+  id:
+    $ref: './WorkloadActionId.yaml'
+  workloadId:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/WorkloadId.yaml'
+  workloadName:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/WorkloadName.yaml'
+  subject:
+    $ref: './WorkloadActionSubject.yaml'
+  subjectType:
+    $ref: './WorkloadActionSubjectType.yaml'
+  action:
+    $ref: './WorkloadActionType.yaml'
+  acceptedAt:
+    $ref: './WorkloadActionAcceptedAt.yaml'

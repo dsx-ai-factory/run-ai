@@ -212,7 +212,6 @@ describe("distributed-hybrid.vue", () => {
             limit: -1,
             overQuotaWeight: 12,
           },
-          priority: "MediumLow",
         },
       ],
     };

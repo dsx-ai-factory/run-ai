@@ -2466,6 +2466,358 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/device-classes:
+    get:
+      summary: get device classes for a given cluster
+      operationId: get_device_classes
+      tags:
+        - Device Classes
+      x-audit: false
+      x-authorize:
+        resource-type: device-classes
+        action: read
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+        - $ref: '#/components/parameters/nameFilter'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClasses'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: create a Device Class
+      operationId: createDeviceClass
+      x-internal: true
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+      tags:
+        - Device Classes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClass'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClass'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    put:
+      summary: update a Device Class
+      operationId: updateDeviceClass
+      x-internal: true
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+      tags:
+        - Device Classes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClass'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClass'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    delete:
+      summary: delete a Device Class
+      operationId: deleteDeviceClass
+      tags:
+        - Device Classes
+      x-internal: true
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-authorize:
+        resource-type: device-classes
+        action: delete
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+        - $ref: '#/components/parameters/ObjectByName'
+      responses:
+        '204':
+          $ref: '#/components/responses/204NoContent'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/device-classes/sync:
+    post:
+      summary: Sync cluster Device Classes
+      description: Use to sync cluster device classes
+      operationId: sync_device_class
+      x-authorize:
+        resource-type: device-classes
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-internal: true
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_device_classes_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+      tags:
+        - Device Classes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceClasses'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceClasses'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/resource-claim-templates:
+    get:
+      summary: list details of ResourceClaimTemplates
+      operationId: list_resource_claim_templates
+      tags:
+        - Resource Claim Templates
+      x-internal: true
+      x-no-authorization: true
+      x-service: k8s-objects-tracker
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ScopeType'
+        - $ref: '#/components/parameters/ScopeId'
+        - $ref: '#/components/parameters/nameFilter'
+        - $ref: '#/components/parameters/FilterByCluster'
+        - $ref: '#/components/parameters/originFilter'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplates'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    post:
+      summary: create a Resource Claim Template
+      operationId: createResourceClaimTemplate
+      x-internal: true
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+      tags:
+        - Resource Claim Templates
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplate'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplate'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    put:
+      summary: update a Resource Claim Template
+      operationId: updateResourceClaimTemplate
+      x-internal: true
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+      tags:
+        - Resource Claim Templates
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplate'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplate'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+    delete:
+      summary: delete a Resource Claim Template
+      operationId: deleteResourceClaimTemplate
+      tags:
+        - Resource Claim Templates
+      x-internal: true
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: delete
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+        - $ref: '#/components/parameters/ResourceScopeType'
+        - $ref: '#/components/parameters/ScopeIdRequired'
+        - $ref: '#/components/parameters/ObjectByName'
+      responses:
+        '204':
+          $ref: '#/components/responses/204NoContent'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/resource-claim-templates/sync:
+    post:
+      summary: sync the full set of ResourceClaimTemplates observed in a cluster
+      description: |
+        Cluster-wide full-set replace for every ResourceClaimTemplate the cluster currently observes. The payload may contain items at different scopes (cluster, department, project) in the same call; each item declares its own scope via scopeType and scopeId in the body. Any tracked ResourceClaimTemplate row for this cluster that is not present in the payload is removed, regardless of its scope - the agent is asserting the entire cluster inventory with each call, so a missing row means the template no longer exists.
+      operationId: syncResourceClaimTemplates
+      tags:
+        - Resource Claim Templates
+      x-internal: true
+      x-authorize:
+        resource-type: resource-claim-templates
+        action: sync
+      x-service: k8s-objects-tracker
+      x-audit: false
+      x-test-coverage:
+        - k8s-objects-tracker/pkg/services/api_resource_claim_templates_service_test.go
+      parameters:
+        - $ref: '#/components/parameters/ClusterIdRequired'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceClaimTemplates'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceClaimTemplates'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/storage-class-configuration:
     get:
       summary: List storage class configurations
@@ -2918,6 +3270,22 @@ components:
       schema:
         type: string
       required: true
+    ResourceScopeType:
+      name: scopeType
+      in: query
+      required: true
+      description: The resource scope type to filter by.
+      schema:
+        $ref: '#/components/schemas/ResourceScopeType'
+    ScopeIdRequired:
+      name: scopeId
+      in: query
+      required: true
+      description: The scope resource id that identifies the row.
+      schema:
+        type: string
+        minLength: 1
+        example: '2'
     StorageClassConfigurationFilterBy:
       name: filterBy
       in: query
@@ -3371,16 +3739,18 @@ components:
       items:
         $ref: '#/components/schemas/V1StorageClass'
       x-schema-name: StorageClasses
+    ReportingClusterId:
+      type: string
+      format: uuid
+      description: Cluster ID which has sent the resource info
+      example: 550e8400-e29b-41d4-a716-446655440000
     StorageClass:
       type: object
       required:
         - storage_class_name
       properties:
         cluster_id:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storage_class_name:
           type: string
           description: Storage class name
@@ -3709,10 +4079,7 @@ components:
         - spec
       properties:
         clusterId:
-          type: string
-          format: uuid
-          description: Cluster ID which has sent the resource info
-          example: 550e8400-e29b-41d4-a716-446655440000
+          $ref: '#/components/schemas/ReportingClusterId'
         storageClassName:
           type: string
           description: Storage class name
@@ -3732,6 +4099,88 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/StorageClassV2'
+    DeviceClass:
+      type: object
+      required:
+        - deviceClassName
+      properties:
+        clusterId:
+          $ref: '#/components/schemas/ReportingClusterId'
+        deviceClassName:
+          type: string
+          description: |
+            DeviceClass name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+          minLength: 1
+          maxLength: 253
+          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+          example: gpu.nvidia.com
+    DeviceClasses:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          maxItems: 1000
+          items:
+            $ref: '#/components/schemas/DeviceClass'
+    ResourceClaimTemplateName:
+      type: string
+      description: |
+        ResourceClaimTemplate name. Must follow Kubernetes DNS-1123 subdomain rules (lowercase alphanumeric, `-`, and `.`, starting and ending with an alphanumeric character), up to 253 characters.
+      minLength: 1
+      maxLength: 253
+      pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+      example: rct-gpu-1
+    ResourceScopeType:
+      description: The scope type the resource is defined at.
+      type: string
+      enum:
+        - cluster
+        - department
+        - project
+    ResourceClaimTemplate:
+      type: object
+      required:
+        - name
+        - namespace
+        - scopeType
+        - scopeId
+      properties:
+        name:
+          $ref: '#/components/schemas/ResourceClaimTemplateName'
+        namespace:
+          type: string
+          description: the namespace the ResourceClaimTemplate lives in
+          minLength: 1
+          maxLength: 253
+          example: runai
+        scopeType:
+          $ref: '#/components/schemas/ResourceScopeType'
+        scopeId:
+          type: string
+          minLength: 1
+          description: |
+            Scope identifier. For cluster scope the scopeId must equal the clusterId query parameter (the request is rejected otherwise). For department scope send the department id; for project scope send the project id.
+        origin:
+          $ref: '#/components/schemas/Origin'
+        assetId:
+          type: string
+          description: |
+            Control-plane asset id this template was created from. Present only when origin is "assets". Allows the control plane to join tracker rows back to the originating asset record.
+          nullable: true
+        issues:
+          $ref: '#/components/schemas/Issues'
+    ResourceClaimTemplates:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          maxItems: 10000
+          items:
+            $ref: '#/components/schemas/ResourceClaimTemplate'
     TenantId:
       description: The id of the tenant.
       type: integer
@@ -3851,6 +4300,7 @@ components:
         - pvc
         - secret
         - config-map
+        - resource-claim-template
     ClusterObjectIssueType:
       type: string
       enum:

@@ -10,7 +10,7 @@ Department:                         default
 Submitted By:                       test@example.com
 Priority:                           very-high (150)
 Category:                           Deploy
-Preemptible:                        false
+Preemptibility:                     Non-preemptible
 Image:                              nvcr.io/nim/meta/llama3-8b-instruct
 Labels:                             [app:nim-service,
                                      env:production]
@@ -52,6 +52,6 @@ Compute Resources
 
 Network
 
- Name             Tool Type        Connection Type  Container Port   URL                                                       
-───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
- NIMService       NIMService       ExternalUrl      8080             https://aviados-dev.runailabs.com/test-nim/my-nim-service 
+ Name             Tool Type        Connection Type  Container Port   URL                                                     
+─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+ NIMService       NIMService       ExternalUrl      8080             https://aviados-dev.example.com/test-nim/my-nim-service 

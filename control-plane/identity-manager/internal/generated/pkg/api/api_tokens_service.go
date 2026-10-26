@@ -77,24 +77,3 @@ func (s *TokensAPIService) GrantTokenV2(ctx context.Context, grantType string, c
 
 	return Response(http.StatusNotImplemented, nil), errors.New("GrantTokenV2 method not implemented")
 }
-
-// AppToken - get application token
-// Deprecated
-func (s *TokensAPIService) AppToken(ctx context.Context, appTokenRequest AppTokenRequest) (ImplResponse, error) {
-	// TODO - update AppToken with the required logic for this service method.
-	// Add api_tokens_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
-
-	// TODO: Uncomment the next line to return response Response(200, AppTokenResponse{}) or use other options such as http.Ok ...
-	// return Response(200, AppTokenResponse{}), nil
-
-	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
-	// return Response(400, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
-	// return Response(500, Error{}), nil
-
-	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
-	// return Response(503, Error{}), nil
-
-	return Response(http.StatusNotImplemented, nil), errors.New("AppToken method not implemented")
-}

@@ -1508,10 +1508,15 @@ components:
     Preemptibility:
       description: "Specifies whether the workload can be preempted by higher-priority\
         \ workloads. Valid values are preemptible, semi-preemptible and non-preemptible.\
-        \ If explicitly set, this value takes precedence. If not set, the system derives\
-        \ the preemptibility from the priorityClassName field, ensuring backward compatibility.\
-        \ Each workload type has a default preemptibility. To view the default preemptibility\
-        \ for each workload type, use the GET /workload-types endpoint."
+        \ Semi-preemptible is intended for multi-pod workloads. Replicas up to the\
+        \ configured minimum are non-preemptible, while replicas above that minimum\
+        \ are preemptible. On single-pod workloads with a fixed replica count of one,\
+        \ semi-preemptible behaves as non-preemptible. The API continues to accept\
+        \ semi-preemptible for these workloads. If explicitly set, this value takes\
+        \ precedence. If not set, the system derives the preemptibility from the priorityClassName\
+        \ field, ensuring backward compatibility. Each workload type has a default\
+        \ preemptibility. To view the default preemptibility for each workload type,\
+        \ use the GET /workload-types endpoint."
       enum:
       - preemptible
       - semi-preemptible
@@ -1581,7 +1586,6 @@ components:
         name: http
         targetPort: 8000
         nodePort: 30080
-      nullable: true
       properties:
         name:
           description: The Service port name.
@@ -1658,7 +1662,7 @@ components:
         name:
           description: The Kubernetes Service name.
           example: workload-service
-          maxLength: 253
+          maxLength: 63
           minLength: 1
           type: string
         type:
@@ -1692,7 +1696,8 @@ components:
       - selector
       type: object
     ServiceRef:
-      description: Reference an existing Service.
+      description: Reference an existing Service. Requires authorization on the service
+        and externalAccess on the endpoint.
       example:
         port: 8000
         name: existing-service
@@ -1701,7 +1706,7 @@ components:
         name:
           description: The name of the existing Kubernetes Service.
           example: existing-service
-          maxLength: 253
+          maxLength: 63
           minLength: 1
           type: string
         port:
@@ -1797,14 +1802,17 @@ components:
             nullable: true
             type: boolean
         type: object
+      description: |-
+        Access control for this networking endpoint. Requires externalAccess.
+        Only the access list selected by authorizationType may be nonempty; authenticatedUsers requires both lists to be empty.
       example:
         forceJsonResponse: false
         authorizationType: authenticatedUsers
       nullable: true
       type: object
     NetworkingService:
-      description: Service configuration for routing traffic to the workload. Use
-        'spec' or 'ref' (not both).
+      description: Service configuration for routing traffic to the workload. Provide
+        exactly one of spec or ref.
       example:
         authorization:
           forceJsonResponse: false
@@ -1845,7 +1853,6 @@ components:
             nodePort: 30080
           labels:
             app: my-app
-      nullable: true
       properties:
         spec:
           $ref: '#/components/schemas/ServiceSpec'
@@ -1855,8 +1862,9 @@ components:
           $ref: '#/components/schemas/Workloadv2Authorization'
       type: object
     NetworkingEndpoint:
-      description: A single networking endpoint. An endpoint may create or reference
-        one Service and may expose it externally.
+      description: |-
+        A single networking endpoint. Provide a Service, externalAccess containing an Ingress, Route, or HTTPRoute, or both.
+        An endpoint may create or reference at most one Service. Authorization requires externalAccess.
       example:
         services:
         - authorization:
@@ -1902,7 +1910,6 @@ components:
           ingress: "{}"
           route: "{}"
           httpRoute: "{}"
-      nullable: true
       properties:
         externalAccess:
           $ref: '#/components/schemas/ExternalAccess'
@@ -1918,7 +1925,7 @@ components:
     NetworkingConfiguration:
       description: |
         Networking endpoint configurations for the workload (external access, services with auth).
-        Supported for cluster version 2.25 and above.
+        Requires cluster version 3.0.0 or later.
       items:
         $ref: '#/components/schemas/NetworkingEndpoint'
       maxItems: 1000
@@ -2436,7 +2443,7 @@ components:
         networking:
           description: |
             Networking endpoint configurations for the workload (external access, services with auth).
-            Supported for cluster version 2.25 and above.
+            Requires cluster version 3.0.0 or later.
           items:
             $ref: '#/components/schemas/NetworkingEndpoint'
           maxItems: 1000
@@ -5324,6 +5331,16 @@ components:
       nullable: true
       pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
       type: string
+    GpuComputeMode:
+      description: GPU compute sharing mode. Policy and template defaults apply before
+        the built-in time-slicing fallback. Explicit modes require Run:ai cluster
+        version 3.0.14 or later.
+      enum:
+      - time-slicing
+      - sm-sharing
+      minLength: 1
+      nullable: true
+      type: string
     GpuDevicesRequest:
       description: "Requested number of GPU devices. Currently if more than one device\
         \ is requested, it is not possible to provide values for gpuMemory or gpuPortion."
@@ -5340,6 +5357,25 @@ components:
       nullable: true
       pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
       type: string
+    GpuMemoryPortionLimit:
+      description: Maximum GPU memory fraction consumed per GPU device. Must be no
+        less than gpuMemoryPortionRequest.
+      example: 0.5
+      format: double
+      minimum: 0
+      nullable: true
+      type: number
+      x-gorm-ignore: true
+    GpuMemoryPortionRequest:
+      description: "GPU memory fraction to allocate per GPU device, between 0 and\
+        \ 1. Required when gpuRequestType is portion."
+      example: 0.5
+      format: double
+      maximum: 1
+      minimum: 0
+      nullable: true
+      type: number
+      x-gorm-ignore: true
     GpuMemoryRequest:
       description: "Required if and only if gpuRequestType is memory. States the GPU\
         \ memory to allocate for the created workload, per GPU device. Note that the\
@@ -5351,17 +5387,21 @@ components:
       pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
       type: string
     GpuPortionLimit:
-      description: "Limitations on the portion consumed by the workload, per GPU device.\
-        \ The system guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
+      deprecated: true
+      description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations on\
+        \ the portion consumed by the workload, per GPU device. The system guarantees\
+        \ The gpuPotionLimit must be no less than the gpuPortionRequest."
       example: 0.5
       format: double
       minimum: 0
       nullable: true
       type: number
     GpuPortionRequest:
-      description: "Required if and only if gpuRequestType is portion. States the\
-        \ portion of the GPU to allocate for the created workload, per GPU device,\
-        \ between 0 and 1. The default is no allocated GPUs."
+      deprecated: true
+      description: "Deprecated. Use gpuMemoryPortionRequest instead. Required if and\
+        \ only if gpuRequestType is portion. States the portion of the GPU to allocate\
+        \ for the created workload, per GPU device, between 0 and 1. The default is\
+        \ no allocated GPUs."
       example: 0.5
       format: double
       minimum: 0
@@ -6026,7 +6066,7 @@ components:
       description: "Indicates whether the inference serving endpoint should be accessible\
         \ outside the cluster. If set to true, the endpoint will be exposed externally.\
         \ To enable external access, your administrator must configure the cluster\
-        \ as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference).\
+        \ as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate).\
         \ section."
       nullable: true
       type: boolean
@@ -6141,7 +6181,7 @@ components:
           description: "Indicates whether the inference serving endpoint should be\
             \ accessible outside the cluster. If set to true, the endpoint will be\
             \ exposed externally. To enable external access, your administrator must\
-            \ configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference).\
+            \ configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate).\
             \ section."
           nullable: true
           type: boolean
@@ -6371,15 +6411,18 @@ components:
           value: initial-research
         compute:
           cpuMemoryLimit: 30M
-          gpuMemoryRequest: 10M
-          gpuPortionRequest: 0.5
           gpuMemoryLimit: 10M
           cpuCoreLimit: 2
-          cpuCoreRequest: 0.5
-          gpuPortionLimit: 0.5
           gpuRequestType: portion
           cpuMemoryRequest: 20M
           gpuDevicesRequest: 1
+          gpuMemoryRequest: 10M
+          gpuMemoryPortionLimit: 0.5
+          gpuPortionRequest: 0.5
+          gpuComputeMode: time-slicing
+          gpuMemoryPortionRequest: 0.5
+          cpuCoreRequest: 0.5
+          gpuPortionLimit: 0.5
         preemptibility: preemptible
         security:
           runAsGid: 30
@@ -6625,15 +6668,18 @@ components:
             value: initial-research
           compute:
             cpuMemoryLimit: 30M
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -7210,15 +7256,18 @@ components:
             value: initial-research
           compute:
             cpuMemoryLimit: 30M
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -7531,15 +7580,18 @@ components:
             value: initial-research
           compute:
             cpuMemoryLimit: 30M
-            gpuMemoryRequest: 10M
-            gpuPortionRequest: 0.5
             gpuMemoryLimit: 10M
             cpuCoreLimit: 2
-            cpuCoreRequest: 0.5
-            gpuPortionLimit: 0.5
             gpuRequestType: portion
             cpuMemoryRequest: 20M
             gpuDevicesRequest: 1
+            gpuMemoryRequest: 10M
+            gpuMemoryPortionLimit: 0.5
+            gpuPortionRequest: 0.5
+            gpuComputeMode: time-slicing
+            gpuMemoryPortionRequest: 0.5
+            cpuCoreRequest: 0.5
+            gpuPortionLimit: 0.5
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -7982,15 +8034,18 @@ components:
     NimServiceSpec_allOf_compute:
       example:
         cpuMemoryLimit: 30M
-        gpuMemoryRequest: 10M
-        gpuPortionRequest: 0.5
         gpuMemoryLimit: 10M
         cpuCoreLimit: 2
-        cpuCoreRequest: 0.5
-        gpuPortionLimit: 0.5
         gpuRequestType: portion
         cpuMemoryRequest: 20M
         gpuDevicesRequest: 1
+        gpuMemoryRequest: 10M
+        gpuMemoryPortionLimit: 0.5
+        gpuPortionRequest: 0.5
+        gpuComputeMode: time-slicing
+        gpuMemoryPortionRequest: 0.5
+        cpuCoreRequest: 0.5
+        gpuPortionLimit: 0.5
       nullable: true
       properties:
         cpuCoreLimit:
@@ -8032,6 +8087,8 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuComputeMode:
+          $ref: '#/components/schemas/GpuComputeMode'
         gpuDevicesRequest:
           description: "Requested number of GPU devices. Currently if more than one\
             \ device is requested, it is not possible to provide values for gpuMemory\
@@ -8050,6 +8107,25 @@ components:
           nullable: true
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
+        gpuMemoryPortionLimit:
+          description: Maximum GPU memory fraction consumed per GPU device. Must be
+            no less than gpuMemoryPortionRequest.
+          example: 0.5
+          format: double
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
+        gpuMemoryPortionRequest:
+          description: "GPU memory fraction to allocate per GPU device, between 0\
+            \ and 1. Required when gpuRequestType is portion."
+          example: 0.5
+          format: double
+          maximum: 1
+          minimum: 0
+          nullable: true
+          type: number
+          x-gorm-ignore: true
         gpuMemoryRequest:
           description: "Required if and only if gpuRequestType is memory. States the\
             \ GPU memory to allocate for the created workload, per GPU device. Note\
@@ -8061,18 +8137,21 @@ components:
           pattern: "^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$"
           type: string
         gpuPortionLimit:
-          description: "Limitations on the portion consumed by the workload, per GPU\
-            \ device. The system guarantees The gpuPotionLimit must be no less than\
-            \ the gpuPortionRequest."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionLimit instead. Limitations\
+            \ on the portion consumed by the workload, per GPU device. The system\
+            \ guarantees The gpuPotionLimit must be no less than the gpuPortionRequest."
           example: 0.5
           format: double
           minimum: 0
           nullable: true
           type: number
         gpuPortionRequest:
-          description: "Required if and only if gpuRequestType is portion. States\
-            \ the portion of the GPU to allocate for the created workload, per GPU\
-            \ device, between 0 and 1. The default is no allocated GPUs."
+          deprecated: true
+          description: "Deprecated. Use gpuMemoryPortionRequest instead. Required\
+            \ if and only if gpuRequestType is portion. States the portion of the\
+            \ GPU to allocate for the created workload, per GPU device, between 0\
+            \ and 1. The default is no allocated GPUs."
           example: 0.5
           format: double
           minimum: 0

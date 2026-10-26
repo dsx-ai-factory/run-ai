@@ -19,10 +19,19 @@ func NewMocksubscriberer(t interface {
 	mock.TestingT
 	Cleanup(func())
 }) *Mocksubscriberer {
+	if helper, ok := t.(interface{ Helper() }); ok {
+		helper.Helper()
+	}
+
 	mock := &Mocksubscriberer{}
 	mock.Mock.Test(t)
 
-	t.Cleanup(func() { mock.AssertExpectations(t) })
+	t.Cleanup(func() {
+		if helper, ok := t.(interface{ Helper() }); ok {
+			helper.Helper()
+		}
+		mock.AssertExpectations(t)
+	})
 
 	return mock
 }
@@ -96,15 +105,26 @@ type Mocksubscriberer_Subscribe_Call struct {
 }
 
 // Subscribe is a helper method to define mock.On call
-//   - ctx
-//   - callback
-func (_e *Mocksubscriberer_Expecter) Subscribe(ctx interface{}, callback interface{}) *Mocksubscriberer_Subscribe_Call {
+//   - ctx context.Context
+//   - callback func(event []byte) error
+func (_e *Mocksubscriberer_Expecter) Subscribe(ctx any, callback any) *Mocksubscriberer_Subscribe_Call {
 	return &Mocksubscriberer_Subscribe_Call{Call: _e.mock.On("Subscribe", ctx, callback)}
 }
 
 func (_c *Mocksubscriberer_Subscribe_Call) Run(run func(ctx context.Context, callback func(event []byte) error)) *Mocksubscriberer_Subscribe_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(func(event []byte) error))
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 func(event []byte) error
+		if args[1] != nil {
+			arg1 = args[1].(func(event []byte) error)
+		}
+		run(
+			arg0,
+			arg1,
+		)
 	})
 	return _c
 }

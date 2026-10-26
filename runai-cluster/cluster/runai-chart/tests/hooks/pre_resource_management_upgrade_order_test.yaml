@@ -1,0 +1,19 @@
+suite: Test pre-resource-management-upgrade hook ordering
+
+templates:
+  - templates/hooks/pre-resource-management-upgrade-job.yaml
+  - charts/kai-resource-management/templates/hooks/pre/crd-upgrader.yaml
+
+tests:
+  - it: should migrate only after the KRM crd-upgrader has installed the kai.resources CRDs
+    set:
+      helmHooksHandler.enabled: true
+    asserts:
+      - equal:
+          path: metadata.annotations["helm.sh/hook-weight"]
+          value: "2"
+        template: charts/kai-resource-management/templates/hooks/pre/crd-upgrader.yaml
+      - equal:
+          path: metadata.annotations["helm.sh/hook-weight"]
+          value: "5"
+        template: templates/hooks/pre-resource-management-upgrade-job.yaml

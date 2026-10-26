@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
-	workloadsApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-client/generated"
 )
 
 type SimpleMock struct {
@@ -23,9 +23,15 @@ type SimpleMock struct {
 
 	ByWorkloadName      map[string][]*workloadsApi.Workload
 	SyncIssuesByCluster map[string]*workloadsApi.ClusterSyncReport
+	WorkloadActions     []workloadsApi.WorkloadActionRecordInput
 
 	// cluster id to valid priorities and categories
 	PriorityClassesAndCategories map[string]*workloadsApi.GetAvailablePrioritiesAndCategories200Response
+}
+
+func (sm *SimpleMock) CreateWorkloadActions(_ context.Context, request workloadsApi.CreateWorkloadActionsRequest) *workloadsApi.Error {
+	sm.WorkloadActions = append(sm.WorkloadActions, request.Actions...)
+	return nil
 }
 
 func NewSimpleMock() *SimpleMock {

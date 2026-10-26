@@ -84,13 +84,13 @@ Click one of the values of the Subject(s) column, to view the list of subjects a
 | Authorized by | The user who granted the access rule                                                                                                                                                                                            |
 | Last updated  | The last time the access rule was updated                                                                                                                                                                                       |
 
-<Info>
+<Note>
 
 **Note**
 
 A role given in a certain scope, means the role applies to this scope and any descendant scopes in the organizational tree.
 
-</Info>
+</Note>
 
 ### Workloads Associated with the Department
 
@@ -130,7 +130,7 @@ To create a new Department:
     * Click **CREATE DEPARTMENT & CLOSE** to create the department without assigning resources.
     * Click **CREATE DEPARTMENT & CONTINUE** to assign resources and scheduling behavior.
 
-    <Info><p><strong>Note</strong></p><ul><li>The department is created and appears in the <strong>Departments</strong> grid.</li><li><p>When you select <strong>CREATE DEPARTMENT &#x26; CLOSE</strong>, the department is created without assigned resources. The department's quota is set to 0, which means workloads can run only when spare GPUs are available in the node pool. The following default settings are applied:</p><ul><li>The department is created with a <strong>Medium Low</strong> rank.</li><li>Over quota weight is always applied when distributing over-quota GPUs among departments in the same rank. By default, the department’s weight is derived proportionally from its assigned GPU quota. Since the quota is set to 0, the effective weight is 0. If <strong>Over quota weight</strong> is enabled via <strong>General settings</strong>, the department is assigned a default weight of 2.</li></ul></li></ul></Info>
+    <Note><p><strong>Note</strong></p><ul><li>The department is created and appears in the <strong>Departments</strong> grid.</li><li><p>When you select <strong>CREATE DEPARTMENT &#x26; CLOSE</strong>, the department is created without assigned resources. The department's quota is set to 0, which means workloads can run only when spare GPUs are available in the node pool. The following default settings are applied:</p><ul><li>The department is created with a <strong>Medium Low</strong> rank.</li><li>Over quota weight is always applied when distributing over-quota GPUs among departments in the same rank. By default, the department’s weight is derived proportionally from its assigned GPU quota. Since the quota is set to 0, the effective weight is 0. If <strong>Over quota weight</strong> is enabled via <strong>General settings</strong>, the department is assigned a default weight of 2.</li></ul></li></ul></Note>
 
 ### Assigning GPU Quota
 
@@ -139,7 +139,7 @@ Assign GPUs to the department and define how the [Scheduler](../../runai-schedul
 1. Review the **node pools** available to the department. The list includes all node pools configured in the platform and represents the department’s default (suggested) configuration. This configuration determines which node pools and priority order are applied to newly created projects in the department. Administrators can override this configuration per project by selecting different node pools and adjusting their order.
 2.  Add **node pools** and set the default order in which workloads will be scheduled to use them. The leftmost node pool is the first one workloads will attempt to schedule onto. The Scheduler first tries to allocate resources using the highest priority node pool, then the next in priority, until it reaches the lowest priority node pool list, then the Scheduler starts from the highest again.
 
-    <Info><p><strong>Note</strong></p><ul><li>When no node pools are configured, you can assign quota for the whole department, instead of per node pool. After node pools are created, you can assign quota for each node pool separately.</li><li>The order of node pools can be overridden during workload submission by an admin policy or by the user.</li></ul></Info>
+    <Note><p><strong>Note</strong></p><ul><li>When no node pools are configured, you can assign quota for the whole department, instead of per node pool. After node pools are created, you can assign quota for each node pool separately.</li><li>The order of node pools can be overridden during workload submission by an admin policy or by the user.</li></ul></Note>
 3. Review the GPU quota per node pool:
    * **Unassigned** - The number of GPUs not assigned to subordinate projects.
    * **Total** - The total number of GPUs assigned to the department in this node pool.
@@ -148,7 +148,7 @@ Assign GPUs to the department and define how the [Scheduler](../../runai-schedul
    * **Unassigned quota** - The number of GPUs still available in the node pool that are not yet assigned for any department.
    *   **Sum of other departments’ assigned quota** - The total number of GPUs already assigned to all other departments in this same node pool.
 
-       <Info><p><strong>Note</strong></p><p>When assigning a department GPU quota that exceeds the node pool’s available GPUs, or setting the department quota to <strong>Unlimited</strong>, the system may display warnings, but the quota is not enforced. Actual GPU consumption is constrained by the physical capacity of the node pool or cluster, regardless of the assigned quota.</p></Info>
+       <Note><p><strong>Note</strong></p><p>When assigning a department GPU quota that exceeds the node pool’s available GPUs, or setting the department quota to <strong>Unlimited</strong>, the system may display warnings, but the quota is not enforced. Actual GPU consumption is constrained by the physical capacity of the node pool or cluster, regardless of the assigned quota.</p></Note>
 5. You can adjust **other departments' quotas** to free up additional resources. A table lists all departments and their assigned GPU quotas. Updating these values redistributes the department’s assigned and unassigned GPU quota across projects for the selected node pool, as reflected in the **Quota distribution** graph next to each department:
    * Use the **Search** icon to find a department
    * Click the **GPU** quota value and set the number of GPUs
@@ -162,7 +162,7 @@ Define how workloads can consume GPUs beyond the department's assigned quota whe
 
 1.  **Allow workloads to exceed the department’s quota** is enabled by default, allowing workloads in the department to consume GPUs beyond the assigned quota. If disabled, workloads from the department will run only within the assigned quota and will not consume additional GPUs, even if resources are available.
 
-    <Info><p><strong>Note</strong></p><p>Workloads running over quota are <strong>opportunistic</strong> and may be preempted or stopped at any time when higher priority workloads require resources.</p></Info>
+    <Note><p><strong>Note</strong></p><p>Workloads running over quota are <strong>opportunistic</strong> and may be preempted or stopped at any time when higher priority workloads require resources.</p></Note>
 2. Set the **max GPU allocation**. This value defines the maximum GPU device allocation the department can get from the node pool, representing the maximum sum of assigned quota and over-quota GPUs:
    * By default, this field is set to **Unlimited**, allowing the department to consume any available over-quota GPUs
    * Enter a **number** equal to or above the assigned quota
@@ -204,7 +204,7 @@ Assign CPU resources (cores and memory) to the project and define the maximum CP
 1. Set the number of **CPU (Cores)** department can use in the selected node pool. By default, CPU cores are set to **Unlimited**, allowing the department to consume any available CPU resources in the node pool. Enter a **number**.
 2.  Set the amount of **CPU memory** available to the department in the selected node pool. By default, CPU memory is set to **Unlimited**, allowing the department to consume any available CPU resources in the node pool. Enter a **number** and select a unit (**MB**, **MiB**, or **GB**)
 
-    <Info><p><strong>Note</strong></p><ul><li>When assigning a department CPU quota that exceeds the node pool’s available CPUs, or setting the CPU quota to <strong>Unlimited</strong>, the system may display warnings, but the quota is not enforced. Actual CPU consumption is constrained by the physical capacity of the node pool or cluster, regardless of the assigned quota.</li><li>When the <strong>CPU quota</strong> feature flag is disabled, any previously set CPU quotas for a project are automatically removed.</li></ul></Info>
+    <Note><p><strong>Note</strong></p><ul><li>When assigning a department CPU quota that exceeds the node pool’s available CPUs, or setting the CPU quota to <strong>Unlimited</strong>, the system may display warnings, but the quota is not enforced. Actual CPU consumption is constrained by the physical capacity of the node pool or cluster, regardless of the assigned quota.</li><li>When the <strong>CPU quota</strong> feature flag is disabled, any previously set CPU quotas for a project are automatically removed.</li></ul></Note>
 3. These steps apply to the selected node pool. If multiple node pools are configured, repeat the process for each.
 4. Click **SAVE & CONTINUE**
 
@@ -222,13 +222,13 @@ Scheduling rules control how compute resources are used by workloads. The restri
 
 Once scheduling rules are set for a department, all matching workloads associated with the department have the restrictions applied to them, as defined, when the workload is submitted. New scheduling rules added to a department are not applied over previously created workloads associated with that department.
 
-<Info>
+<Note>
 
 **Note**
 
 Setting scheduling rules in a department enforces the rules on all associated projects.
 
-</Info>
+</Note>
 
 ### Applying Access Rules
 
@@ -249,7 +249,7 @@ Setting scheduling rules in a department enforces the rules on all associated pr
 3. From the dropdown menu, select the form you want to modify
 4. Update the settings and click **SAVE & CONTINUE**
 
-<Info>
+<Note>
 
 **Note**
 
@@ -260,7 +260,7 @@ When editing a department:
 * You cannot set GPU and CPU quotas below the quotas currently consumed by **non-preemptible workloads**.
 * You cannot set CPU or GPU quotas that are less than the quota already assigned to its **subordinate projects**.
 
-</Info>
+</Note>
 
 ## Viewing a Department’s Policy
 
@@ -275,14 +275,14 @@ To view the policy of a department:
    * **Rule** - Set up constraints on workload policy fields
    * **Source** - The origin of the applied policy (cluster, department or project)
 
-<Info>
+<Note>
 
 **Note**
 
 * The policy affecting the department consists of rules and defaults. Some of these rules and defaults may be derived from the policies of a parent cluster (source). You can see the source of each rule in the policy form.
 * A policy set for a department affects all subordinated projects and their workloads, according to the policy workload type.
 
-</Info>
+</Note>
 
 ## Deleting a Department
 
@@ -290,13 +290,13 @@ To view the policy of a department:
 2. Click **DELETE**
 3. On the dialog, click **DELETE** to confirm the deletion
 
-<Info>
+<Note>
 
 **Note**
 
 Deleting a department permanently deletes its subordinated projects, any assets created in the scope of this department, and any of its subordinated projects such as compute resources, environments, data sources, templates, and credentials. However, workloads running within the department’s subordinated projects, or the policies defined for this department or its subordinated projects - remain intact and running.
 
-</Info>
+</Note>
 
 ## Using CLI
 
@@ -304,4 +304,16 @@ To view the available actions on departments, see the department [CLI v2 referen
 
 ## Using API
 
-To view the available actions, go to the [Departments](https://run-ai-docs.nvidia.com/api/2.26/organizations/departments) API reference.
+To view the available actions, go to the [Departments](api:main-api:GET/api/v1/org-unit/departments) API reference.
+
+
+## Using MCP
+
+The NVIDIA Run:ai MCP server exposes [Resources and Organization](../../../agents/tools-reference.md#resources-and-organization) tools to manage departments via natural language:
+
+* `list_departments` - list departments by name or count
+* `list_department_resources` - see a department's configured GPU, CPU, and memory quota per node pool
+* `get_org_unit_metrics` - track a department's GPU, CPU, and memory allocation and utilization over time
+* `manage_org_unit` - create, update, or delete a department, including quota per node pool
+
+See [AI Agents](../../../agents/overview.md) for setup.

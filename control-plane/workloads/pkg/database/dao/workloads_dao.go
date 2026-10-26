@@ -109,6 +109,11 @@ func (w *WorkloadsDao) DbUpsertWorkload(ctx context.Context, workload models.Wor
 		return dbErr.WithDetails(err)
 	}
 
+	if err := resetSupportSuspendOfV1Workloads(tx, workload.TenantID, notSuspendableIds(workload)); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reset support_suspend of workload %s: %v", workload.Name, err)
+		return dbErr.WithDetails(err)
+	}
+
 	return nil
 }
 
@@ -128,6 +133,10 @@ func (w *WorkloadsDao) DbUpsertWorkloadFull(ctx context.Context, tenantID uint, 
 	if _, saveErr := query.Save(&workload); saveErr != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to save workload %s, err %v", workload.Name, saveErr)
 		return dbErr.WithDetails(saveErr)
+	}
+	if resetErr := resetSupportSuspendOfV1Workloads(tx, tenantID, notSuspendableIds(workload)); resetErr != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reset support_suspend of workload %s: %v", workload.Name, resetErr)
+		return dbErr.WithDetails(resetErr)
 	}
 
 	// 2. Upsert children
@@ -594,6 +603,57 @@ func (w *WorkloadsDao) DbGetWorkloads(
 	return workloads, nil
 }
 
+// DbGetWorkloadsSlim lists the active workloads from the workloads table instead of the view, sorted by id ascending:
+// only the WorkloadSlim columns, without pod aggregates, and including workloads created after the last materialized
+// view refresh.
+func (w *WorkloadsDao) DbGetWorkloadsSlim(
+	ctx context.Context,
+	tenantId uint,
+	permittedScopes *openapi.PermittedScopes,
+	offset int32,
+	limit int32,
+	filterBy []queryapi.Filter,
+) (*[]models.WorkloadSlim, *api.Error) {
+	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list workloads", nil)
+
+	tx := runaidb.DB().WithContext(ctx)
+
+	workloads := &[]models.WorkloadSlim{}
+
+	query := tx.
+		Table(WorkloadsTableName).
+		Select("id, name, type, project_name, cluster_id, distributed_framework").
+		Where("tenant_id = ?", tenantId).
+		Where("deleted_at IS NULL")
+
+	if permittedScopes != nil {
+		if permittedScopes.System == nil || !*permittedScopes.System {
+			query = query.Where(getPermittedScopesFilter(*permittedScopes))
+		}
+	}
+
+	query = query.WithEnricher(querydbenrich.Filters(filterBy))
+
+	// a plain "id ASC" is served by the primary key index; FormatSortClause adds NULLS FIRST, which forces a full sort
+	query = query.Order("id ASC")
+
+	if offset != 0 {
+		query = query.Offset(int(offset))
+	}
+
+	if limit != 0 {
+		query = query.Limit(int(limit))
+	}
+
+	err := query.Find(workloads)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to list slim workloads, err: %v", err)
+		return &[]models.WorkloadSlim{}, dbErr.WithDetails(err)
+	}
+
+	return workloads, nil
+}
+
 func (w *WorkloadsDao) DbSyncWorkloads(
 	ctx context.Context,
 	tenantId uint,
@@ -614,6 +674,7 @@ func (w *WorkloadsDao) DbSyncWorkloads(
 
 	syncedWorkloads := []string{}
 	failedWorkloads := []string{}
+	notSuspendableWorkloads := []string{}
 	for _, workload := range workloads {
 		query := tx.Table(WorkloadsTableName)
 
@@ -627,9 +688,17 @@ func (w *WorkloadsDao) DbSyncWorkloads(
 		} else {
 			tx.SavePoint("sp")
 			syncedWorkloads = append(syncedWorkloads, workload.ID.String())
+			if !workload.SupportSuspend {
+				notSuspendableWorkloads = append(notSuspendableWorkloads, workload.ID.String())
+			}
 		}
 
 		excludingIds = append(excludingIds, workload.ID.String())
+	}
+
+	if err := resetSupportSuspendOfV1Workloads(tx, tenantId, notSuspendableWorkloads); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reset support_suspend of synced workloads: %v", err)
+		return nil, nil, nil, dbErr.WithDetails(err)
 	}
 
 	if projectId == "" && clusterId == "" {
@@ -663,6 +732,38 @@ func (w *WorkloadsDao) DbSyncWorkloads(
 	committed = true
 
 	return syncedWorkloads, failedWorkloads, deletedWorkloadIds, nil
+}
+
+// notSuspendableIds returns the workload's id when the cluster reports it as not suspendable, so single-row
+// upserts can share resetSupportSuspendOfV1Workloads with the batch sync.
+func notSuspendableIds(workload models.Workload) []string {
+	if workload.SupportSuspend {
+		return nil
+	}
+	return []string{workload.ID.String()}
+}
+
+// resetSupportSuspendOfV1Workloads lets the cluster's "not suspendable" report win for workloads that
+// are not managed through the V2 API. omitWorkloadsEmptyStaticFields drops a false support_suspend from
+// the save so a control-plane-set true on V2 workloads survives the sync, but for V1 workloads the
+// cluster is the source of truth: a legacy InferenceWorkload is created with support_suspend=true and
+// must be corrected once the cluster reports it cannot be suspended.
+func resetSupportSuspendOfV1Workloads(tx orm.DB, tenantId uint, workloadIds []string) error {
+	if len(workloadIds) == 0 {
+		return nil
+	}
+
+	_, err := tx.Table(WorkloadsTableName).
+		Where(fmt.Sprintf("%s = ?", WorkloadsColumnTenantId), tenantId).
+		Where(fmt.Sprintf("%s IN ?", WorkloadsColumnId), workloadIds).
+		Where(fmt.Sprintf("%s = ?", WorkloadsColumnSupportSuspend), true).
+		Where(fmt.Sprintf("%s IS NULL OR %s <> ?", WorkloadsColumnSourceApi, WorkloadsColumnSourceApi), string(api.SOURCEAPI_WORKLOADS_V2)).
+		Update(WorkloadsColumnSupportSuspend, false)
+	if err != nil {
+		return fmt.Errorf("reset support_suspend for tenant %d: %w", tenantId, err)
+	}
+
+	return nil
 }
 
 func omitWorkloadsEmptyStaticFields(query orm.DB, workload models.Workload) orm.DB {
@@ -784,11 +885,13 @@ func (w *WorkloadsDao) buildTelemetryQuery(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) orm.DB {
 	tx := runaidb.DB().WithContext(ctx)
 	query := tx.Table(w.view).
 		Where("tenant_id = ?", tenantId).
-		Where("deleted_at IS NULL")
+		Where("deleted_at IS NULL").
+		WithEnricher(querydbenrich.Filters(filterBy))
 
 	if permittedScopes != nil {
 		if permittedScopes.System == nil || !*permittedScopes.System {
@@ -837,6 +940,7 @@ func (w *WorkloadsDao) dbGetWorkloadTelemetry(
 	groupBy [][]string,
 	dataField string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, error) {
 	telemetryGroupValues := []telemetry_utils.TelemetryGroupValue{}
 
@@ -848,7 +952,7 @@ func (w *WorkloadsDao) dbGetWorkloadTelemetry(
 		}
 	}
 
-	query := w.buildTelemetryQuery(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases).
+	query := w.buildTelemetryQuery(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, phases, filterBy).
 		Select(selectPhrase)
 
 	_, err := query.Scan(&telemetryGroupValues)
@@ -869,10 +973,11 @@ func (w *WorkloadsDao) DbGetWorkloadCount(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get workload count", nil)
 
-	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COUNT(id)", phases)
+	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COUNT(id)", phases, filterBy)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get workload count, err: %v", err)
 		return workloadTelemetry, dbErr.WithDetails(err)
@@ -891,10 +996,11 @@ func (w *WorkloadsDao) DbGetGpuAllocation(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get gpu allocation", nil)
 
-	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COALESCE(SUM(allocated_gpu), 0)", phases)
+	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COALESCE(SUM(allocated_gpu), 0)", phases, filterBy)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get gpu allocation, err: %v", err)
 		return workloadTelemetry, dbErr.WithDetails(err)
@@ -913,10 +1019,11 @@ func (w *WorkloadsDao) DbGetIdleAllocatedGpus(
 	permittedScopes *openapi.PermittedScopes,
 	groupBy [][]string,
 	phases []api.Phase,
+	filterBy []queryapi.Filter,
 ) (*[]telemetry_utils.TelemetryGroupValue, *api.Error) {
 	dbErr := api.NewError(http.StatusInternalServerError, "Failed to get idle allocated gpus", nil)
 
-	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COALESCE(SUM(idle_allocated_gpus), 0)", phases)
+	workloadTelemetry, err := w.dbGetWorkloadTelemetry(ctx, tenantId, clusterId, nodepoolName, departmentId, projectId, permittedScopes, groupBy, "COALESCE(SUM(idle_allocated_gpus), 0)", phases, filterBy)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get idle allocated gpus, err: %v", err)
 		return workloadTelemetry, dbErr.WithDetails(err)
@@ -990,6 +1097,29 @@ func (w *WorkloadsDao) DbGetWorkloadClusterId(ctx context.Context, tenantId uint
 	}
 
 	return workload.ClusterID, nil
+}
+
+// DbGetWorkloadScope returns only the cluster, project, department and namespace of a live
+// workload, reading the workloads table rather than workloads_view to skip its pod aggregates.
+// A deleted workload is reported as not found.
+func (w *WorkloadsDao) DbGetWorkloadScope(ctx context.Context, tenantId uint, workloadId uuid.UUID) (*models.Workload, *api.Error) {
+	dbErr := api.NewError(http.StatusInternalServerError, fmt.Sprintf("Failed to get workload %s", workloadId), nil)
+
+	workload := &models.Workload{}
+	err := runaidb.DB().WithContext(ctx).
+		Table(WorkloadsTableName).
+		Select("cluster_id, project_id, department_id, namespace").
+		Where("tenant_id = ?", tenantId).
+		Where("id = ?", workloadId).
+		First(workload)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get workload %s, err: %v", workloadId, err)
+		}
+		return nil, dbErr.WithDetails(err)
+	}
+
+	return workload, nil
 }
 
 // GetWorkloadFromDb returns the workload from the db

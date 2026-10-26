@@ -33,4 +33,4 @@
 ## Releasing
 
 Versioned by git tag `runaictx/vX.Y.Z`. Use `make package-bump-version` (production,
-from master) or `make package-bump-version-dev` (any branch).
+from main) or `make package-bump-version-dev` (any branch).
