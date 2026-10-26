@@ -48761,6 +48761,8 @@ components:
           type: string
           description: Service Provider (SP) metadata url
     MandatoryClaim:
+      required:
+        - validateSignature
       type: object
       nullable: true
       required:
@@ -48771,6 +48773,11 @@ components:
           type: string
           pattern: '.*[a-zA-Z].*'
           minLength: 1
+        validateSignature:
+          type: boolean
+          description: >-
+            Whether the signature of SAML responses from the identity provider
+            is validated
           maxLength: 255
         values:
           type: array

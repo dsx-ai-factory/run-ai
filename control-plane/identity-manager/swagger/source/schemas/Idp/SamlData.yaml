@@ -1,5 +1,7 @@
 type: object
 nullable: true
+required:
+- validateSignature
 
 properties:
   signingCertificate:
@@ -11,3 +13,6 @@ properties:
   serviceProviderMetadataUrl:
     type: string
     description: "Service Provider (SP) metadata url"
+  validateSignature:
+    type: boolean
+    description: "Whether the signature of SAML responses from the identity provider is validated"
