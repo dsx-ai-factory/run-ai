@@ -477,7 +477,7 @@ var _ = Describe("BuildOAuth2ProxyVolumes", func() {
 		volumes := BuildOAuth2ProxyVolumes(info)
 		Expect(volumes).To(HaveLen(2))
 		Expect(volumes[0].Name).To(Equal("runai-auth"))
-		Expect(volumes[1].Name).To(Equal("custom-ca"))
+		Expect(volumes[1].Name).To(Equal("runai-ca-cert"))
 		Expect(volumes[1].Secret).NotTo(BeNil())
 		Expect(volumes[1].Secret.Items[0].Key).To(Equal("runai-ca.pem"))
 	})

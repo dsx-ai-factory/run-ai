@@ -141,12 +141,6 @@ var _ = Describe("BuildGitSyncInitContainers parity", func() {
 
 	expectParity := func() {
 		clusterOut := legacyOutput[[]corev1.Container]("GetGitSyncInitContainers")
-		// Historical builders used the Secret name for the CA volume.
-		if cfg.IsCustomCAGitEnabled() {
-			for i := range clusterOut {
-				clusterOut[i].VolumeMounts[len(clusterOut[i].VolumeMounts)-1].Name = "custom-ca-git"
-			}
-		}
 		cpOut, err := BuildGitSyncInitContainers(gitSyncInfoFromStorageFields(storageFields, cfg))
 		Expect(err).To(BeNil())
 		Expect(cpOut).To(Equal(clusterOut))
@@ -420,7 +414,7 @@ var _ = Describe("BuildGitSyncVolumes", func() {
 		Expect(volumes).To(HaveLen(3))
 		Expect(volumes[0].Name).To(Equal("code-sync-0"))
 		Expect(volumes[1].Name).To(Equal("code-sync-1"))
-		Expect(volumes[2].Name).To(Equal("custom-ca-git"))
+		Expect(volumes[2].Name).To(Equal("runai-ca-cert"))
 		Expect(volumes[2].Secret).NotTo(BeNil())
 		Expect(volumes[2].Secret.SecretName).To(Equal("runai-ca-cert"))
 		Expect(*volumes[2].Secret.DefaultMode).To(Equal(int32(420)))
