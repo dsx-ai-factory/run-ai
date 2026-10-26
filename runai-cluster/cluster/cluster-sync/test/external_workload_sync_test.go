@@ -18,6 +18,7 @@ import (
 	flds "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/workload_fields/field_types"
 	kaiv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
 	coreV1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
 
@@ -34,6 +35,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/controllers"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/test/fakecachedclient"
+	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	dinfwv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
 	diwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
@@ -712,6 +714,102 @@ var _ = Describe("ExternalWorkloadHandler", Ordered, func() {
 
 				eventuallyExpectPodGroupAnnotatedWithExternalWorkloadName(workloadPodGroup0, "ew-10", fakeCachedClient)
 				eventuallyExpectPodGroupAnnotatedWithExternalWorkloadName(workloadPodGroup3, "ew-13", fakeCachedClient)
+			})
+		})
+	})
+
+	Context("queued update of an external workload", func() {
+		var externalWorkload *v1alpha1.ExternalWorkload
+		var workloadRunner *dromosv1alpha1.WorkloadRunner
+		var externalWorkloadHandler *handlers.ExternalWorkloadHandler
+		key := types.NamespacedName{Name: workloadName1, Namespace: namespaceForTest}
+
+		BeforeEach(func() {
+			externalWorkload, _, _ = BuildExternalWorkload(workloadName1, namespaceForTest, workloadId1, v1alpha1.ExWRunningPhase)
+			externalWorkload.Labels = map[string]string{
+				commonconstants.WorkloadRunnerNameLabel: workloadName1,
+				commonconstants.WorkloadRunnerUidLabel:  "workload-runner-uid",
+			}
+			workloadRunner = &dromosv1alpha1.WorkloadRunner{
+				ObjectMeta: metav1.ObjectMeta{Name: workloadName1, Namespace: namespaceForTest, UID: "workload-runner-uid"},
+			}
+
+			server.RouteToHandler("PUT", pathWithId, func(writer http.ResponseWriter, request *http.Request) {
+				updatedExternalWorkloadId <- strings.TrimPrefix(request.URL.Path, apiPathPrefix)
+				ghttp.RespondWith(http.StatusOK, "ok")(writer, request)
+			})
+		})
+
+		JustBeforeEach(func() {
+			backendClient = backendclient.NewBackendClient(server.URL(), nil)
+			ns := BuildNamespace(namespaceForTest, map[string]string{constants.RunaiQueueLabel: projectForTest})
+			project1 := BuildProjectWithDepId(projectForTest, projectIdStr1, namespaceForTest, depId)
+			kaiProject1 := BuildKaiProjectWithDepId(projectForTest, projectIdStr1, namespaceForTest, depId)
+			fakeClientBuilder := fakerunaiclient.NewClientBuilder().WithScheme(GetTestScheme()).
+				WithObjects(ns, project1, kaiProject1, externalWorkload)
+			if workloadRunner != nil {
+				fakeClientBuilder = fakeClientBuilder.WithObjects(workloadRunner)
+			}
+			fakeCachedClient = fakecachedclient.NewFakeCachedClient(fakeClientBuilder)
+			podHandler := handlers.NewPodHandler(backendClient, fakeCachedClient)
+			podRateLimiter := fakeCachedClient.NewRateLimitedController(cachedclient.PodRL, podHandler)
+			workloadHandler := handlers.NewWorkloadHandler(backendClient, fakeCachedClient, podHandler, podRateLimiter)
+			externalWorkloadHandler = handlers.NewExternalWorkloadHandler(workloadHandler)
+		})
+
+		It("upserts the workload when its WorkloadRunner exists", func() {
+			Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+			Expect(updatedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
+		})
+
+		When("its WorkloadRunner was deleted", func() {
+			BeforeEach(func() {
+				workloadRunner = nil
+			})
+
+			It("does not upsert the workload", func() {
+				Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+				Expect(updatedExternalWorkloadId).NotTo(Receive())
+			})
+		})
+
+		When("its WorkloadRunner was replaced by another one with the same name", func() {
+			BeforeEach(func() {
+				workloadRunner.UID = "replacement-workload-runner-uid"
+			})
+
+			It("does not upsert the workload", func() {
+				Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+				Expect(updatedExternalWorkloadId).NotTo(Receive())
+			})
+		})
+
+		When("it has no WorkloadRunner UID label", func() {
+			BeforeEach(func() {
+				delete(externalWorkload.Labels, commonconstants.WorkloadRunnerUidLabel)
+				workloadRunner.UID = "replacement-workload-runner-uid"
+			})
+
+			It("upserts the workload while its WorkloadRunner exists", func() {
+				Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+				Expect(updatedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
+			})
+		})
+
+		When("it has no WorkloadRunner", func() {
+			BeforeEach(func() {
+				externalWorkload.Labels = nil
+				workloadRunner = nil
+			})
+
+			It("upserts the workload", func() {
+				Expect(externalWorkloadHandler.HandleUpdateItem(key)).To(Succeed())
+
+				Expect(updatedExternalWorkloadId).To(Receive(Equal("d5c5bc73-bb89-408b-8560-c63c5374cf90")))
 			})
 		})
 	})
