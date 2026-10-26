@@ -75,7 +75,6 @@ func (cr *ClientsReconciler) reconcileDefaultClients(ctx context.Context, realm 
 	// here anymore: installers authenticate with per-cluster clients. Realms that already have it keep it.
 	clients := []realm_client.Client{
 		realm_client.NewAdminUiClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
-		realm_client.NewRunaiCliClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
 		realm_client.NewCLIClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
 		realm_client.NewTokenExchangeClient(realm, tenantId, cr.config.appHost, cr.config.hostTemplate),
 		realm_client.NewMcpClient(realm, tenantId),
@@ -88,9 +87,11 @@ func (cr *ClientsReconciler) reconcileDefaultClients(ctx context.Context, realm 
 		}
 	}
 
-	if err := cr.clientReconcilerHelper.DeleteClientIfExists(ctx, realm, utils.RUNAI_CLIENT_ID); err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete deprecated client %s in realm %s: %v", utils.RUNAI_CLIENT_ID, realm, err)
-		return err
+	for _, deprecatedClientID := range []string{utils.RUNAI_CLIENT_ID, utils.RUNAI_CLI_CLIENT_ID} {
+		if err := cr.clientReconcilerHelper.DeleteClientIfExists(ctx, realm, deprecatedClientID); err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete deprecated client %s in realm %s: %v", deprecatedClientID, realm, err)
+			return err
+		}
 	}
 	return nil
 }

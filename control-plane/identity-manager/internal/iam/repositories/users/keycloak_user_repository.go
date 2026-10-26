@@ -42,6 +42,9 @@ const (
 
 const (
 	UnmanagedAttributesKey = "unmanagedAttributePolicy"
+
+	// cliClientID is the confidential Keycloak client used to verify a user's current password.
+	cliClientID = "cli"
 )
 
 type UsersResponse struct {
@@ -184,13 +187,28 @@ func (k *KeycloakUserRepository) LogoutUserBySessionID(ctx context.Context, real
 }
 
 func (k *KeycloakUserRepository) ChangeUserPassword(ctx context.Context, realm string, user *models.User, currentPassword string, newPassword string) error {
-	jwt, err := k.kcClient.Login(ctx, "runai-cli", "", realm, *user.Username, currentPassword)
-	if jwt == nil || err != nil {
-		return errors.HandleKeyCloakError(err)
-	}
 	token, err := k.auth.GetAdminToken(ctx)
 	if err != nil {
 		return err
+	}
+	// The cli client is confidential, so its secret is resolved server-side to verify the current password.
+	clients, err := k.kcClient.GetClients(ctx, *token, realm, gocloak.GetClientsParams{ClientID: gocloak.StringP(cliClientID)})
+	if err != nil {
+		return errors.HandleKeyCloakError(err)
+	}
+	if len(clients) == 0 || clients[0] == nil || clients[0].ID == nil {
+		return errors.HandleKeyCloakError(fmt.Errorf("client %s not found in realm %s", cliClientID, realm))
+	}
+	credentials, err := k.kcClient.GetClientSecret(ctx, *token, realm, *clients[0].ID)
+	if err != nil {
+		return errors.HandleKeyCloakError(err)
+	}
+	if credentials == nil || credentials.Value == nil {
+		return errors.HandleKeyCloakError(fmt.Errorf("client %s has no secret in realm %s", cliClientID, realm))
+	}
+	jwt, err := k.kcClient.Login(ctx, cliClientID, *credentials.Value, realm, *user.Username, currentPassword)
+	if jwt == nil || err != nil {
+		return errors.HandleKeyCloakError(err)
 	}
 	err = k.kcClient.SetPassword(ctx, *token, *user.ID, realm, newPassword, false)
 	if err != nil {

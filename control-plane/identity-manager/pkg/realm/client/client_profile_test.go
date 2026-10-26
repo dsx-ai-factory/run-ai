@@ -35,17 +35,6 @@ func TestApplyClientProfile(t *testing.T) {
 			expectedEmailScopeDefault: true,
 		},
 		{
-			name:       "RunaiCLI",
-			clientType: ClientTypeRunaiCLI,
-			expectedConfig: &iamModels.ClientConfig{
-				PublicClient:              ptr.To(true),
-				DirectAccessGrantsEnabled: ptr.To(true),
-				StandardFlowEnabled:       ptr.To(true),
-				ServiceAccountsEnabled:    ptr.To(false),
-			},
-			expectedEmailScopeDefault: true,
-		},
-		{
 			name:       "CLI",
 			clientType: ClientTypeCLI,
 			expectedConfig: &iamModels.ClientConfig{
@@ -229,7 +218,6 @@ func TestIsSecretlessUserGrantClient(t *testing.T) {
 
 	secretless := map[string]bool{
 		ProfileClientID(ClientTypeCLI):           true,
-		ProfileClientID(ClientTypeRunaiCLI):      true,
 		ProfileClientID(ClientTypeRunaiAdminUI):  true,
 		ProfileClientID(ClientTypeTokenExchange): true,
 		ProfileClientID(ClientTypeMCP):           true,

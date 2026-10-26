@@ -249,6 +249,15 @@ func TestLogoutUser_FailToLogoutUser(t *testing.T) {
 	goCloakMock.AssertExpectations(t)
 }
 
+func mockCliClientSecret(authMock *authMocks.Auth, goCloakMock *kcMocks.GoCloak, ctx context.Context) {
+	jwt := kcMocks.GetMockAccessToken()
+	authMock.On("GetAdminToken", ctx).Return(jwt, nil)
+	goCloakMock.On("GetClients", ctx, *jwt, realm, gocloak.GetClientsParams{ClientID: gocloak.StringP("cli")}).
+		Return([]*gocloak.Client{{ID: gocloak.StringP("cli-id")}}, nil)
+	goCloakMock.On("GetClientSecret", ctx, *jwt, realm, "cli-id").
+		Return(&gocloak.CredentialRepresentation{Value: gocloak.StringP("cli-secret")}, nil)
+}
+
 func TestChangeUserPassword_HappyFlow(t *testing.T) {
 	authMock, goCloakMock, _, testSubject := initTest(t)
 	jwt := kcMocks.GetMockAccessToken()
@@ -256,8 +265,8 @@ func TestChangeUserPassword_HappyFlow(t *testing.T) {
 	ctx := context.Background()
 	user := getMockUsers()[0]
 
-	goCloakMock.On("Login", ctx, "runai-cli", "", realm, *user.Username, password).Return(LoginResponse, nil)
-	authMock.On("GetAdminToken", ctx).Return(jwt, nil)
+	mockCliClientSecret(authMock, goCloakMock, ctx)
+	goCloakMock.On("Login", ctx, "cli", "cli-secret", realm, *user.Username, password).Return(LoginResponse, nil)
 	goCloakMock.On("SetPassword", ctx, *jwt, *user.ID, realm, password, false).Return(nil)
 	err := testSubject.ChangeUserPassword(ctx, realm, user, password, password)
 	assert.NoError(t, err)
@@ -266,27 +275,39 @@ func TestChangeUserPassword_HappyFlow(t *testing.T) {
 }
 
 func TestChangeUserPassword_FailedToLogin(t *testing.T) {
-	_, goCloakMock, _, testSubject := initTest(t)
+	authMock, goCloakMock, _, testSubject := initTest(t)
 	ctx := context.Background()
 	user := getMockUsers()[0]
 
-	goCloakMock.On("Login", ctx, "runai-cli", "", realm, *user.Username, password).Return(nil, assert.AnError)
+	mockCliClientSecret(authMock, goCloakMock, ctx)
+	goCloakMock.On("Login", ctx, "cli", "cli-secret", realm, *user.Username, password).Return(nil, assert.AnError)
 	err := testSubject.ChangeUserPassword(ctx, realm, user, password, password)
 	assert.Error(t, err)
 	goCloakMock.AssertExpectations(t)
 }
 
 func TestChangeUserPassword_FailToGetAdminToken(t *testing.T) {
-	authMock, goCloakMock, _, testSubject := initTest(t)
+	authMock, _, _, testSubject := initTest(t)
 	ctx := context.Background()
-	LoginResponse := kcMocks.GetMockJWT()
 	user := getMockUsers()[0]
 
-	goCloakMock.On("Login", ctx, "runai-cli", "", realm, *user.Username, password).Return(LoginResponse, nil)
 	authMock.On("GetAdminToken", ctx).Return(nil, assert.AnError)
 	err := testSubject.ChangeUserPassword(ctx, realm, user, password, password)
 	assert.Error(t, err)
 	authMock.AssertExpectations(t)
+}
+
+func TestChangeUserPassword_CliClientNotFound(t *testing.T) {
+	authMock, goCloakMock, _, testSubject := initTest(t)
+	jwt := kcMocks.GetMockAccessToken()
+	ctx := context.Background()
+	user := getMockUsers()[0]
+
+	authMock.On("GetAdminToken", ctx).Return(jwt, nil)
+	goCloakMock.On("GetClients", ctx, *jwt, realm, gocloak.GetClientsParams{ClientID: gocloak.StringP("cli")}).Return([]*gocloak.Client{}, nil)
+	err := testSubject.ChangeUserPassword(ctx, realm, user, password, password)
+	assert.Error(t, err)
+	goCloakMock.AssertNotCalled(t, "Login", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything)
 }
 
 func TestChangeUserPassword_FailToChangePassword(t *testing.T) {
@@ -296,8 +317,8 @@ func TestChangeUserPassword_FailToChangePassword(t *testing.T) {
 	ctx := context.Background()
 	user := getMockUsers()[0]
 
-	goCloakMock.On("Login", ctx, "runai-cli", "", realm, *user.Username, password).Return(LoginResponse, nil)
-	authMock.On("GetAdminToken", ctx).Return(jwt, nil)
+	mockCliClientSecret(authMock, goCloakMock, ctx)
+	goCloakMock.On("Login", ctx, "cli", "cli-secret", realm, *user.Username, password).Return(LoginResponse, nil)
 	goCloakMock.On("SetPassword", ctx, *jwt, *user.ID, realm, password, false).Return(assert.AnError)
 	err := testSubject.ChangeUserPassword(ctx, realm, user, password, password)
 	assert.Error(t, err)
