@@ -8,6 +8,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"maps"
 	"net/http"
 	"net/http/httptest"
 	"time"
@@ -159,7 +160,7 @@ var _ = Describe("SystemMappingTest", func() {
 			Expect(err).To(BeNil())
 			Expect(after.Description).ToNot(BeNil())
 			Expect(*after.Description).To(Equal(newDescription))
-			Expect(after.Fields).To(HaveKey("keep"))
+			Expect(after.Fields).ToNot(HaveKey("keep"))
 			Expect(after.Fields).To(HaveKey("newField"))
 		})
 	})
@@ -528,6 +529,171 @@ var _ = Describe("SystemMappingTest", func() {
 			Expect(after.Fields["keep"].Scope).To(Equal(api.MAPPINGSCOPE_SYSTEM))
 			Expect(after.Fields).To(HaveKey("newField"))
 			Expect(after.Fields["newField"].Scope).To(Equal(api.MAPPINGSCOPE_SYSTEM))
+		})
+
+		It("prunes fields and item selectors the builder no longer defines when description changes", func() {
+			db := runaidb.DB()
+			ms := MappingApiService{}
+			name := "runai-system-fg-version-prune"
+			oldDescription := "v-old"
+			newDescription := "v-new"
+
+			initial := newFieldGroupForTest(name, api.MAPPINGSCOPE_SYSTEM, 0, systemMappingActor,
+				map[string]api.FieldGroupFieldsWithScopeValue{
+					"keep":    newFieldForTest("keepSpec", []string{"keptSel"}, api.MAPPINGSCOPE_SYSTEM),
+					"stale":   newFieldForTest("staleSpec", []string{"staleSel"}, api.MAPPINGSCOPE_SYSTEM),
+					"movesTo": newFieldForTest("movesSpec", []string{"staleSel"}, api.MAPPINGSCOPE_SYSTEM),
+				},
+				map[string]api.ItemSelectorsWithScopeValue{
+					"keptSel":  newItemSelForTest(`.kept[]`, api.MAPPINGSCOPE_SYSTEM),
+					"staleSel": newItemSelForTest(`.stale[]`, api.MAPPINGSCOPE_SYSTEM),
+				},
+			)
+			initial.Description = &oldDescription
+			_, apiErr := ms.createFieldGroup(sysAdminCtx, initial)
+			Expect(apiErr).To(BeNil())
+
+			builder := func() (map[string]api.FieldGroupField, map[string]api.ItemSelector) {
+				field := func(specRef string, itemSelectors ...string) api.FieldGroupField {
+					return api.FieldGroupField{
+						Formatter:     dbmodel.BuiltinFormatterKeyValue,
+						SpecRef:       specRef,
+						Type:          api.MAPPINGFIELDTYPE_STRING,
+						ItemSelectors: itemSelectors,
+					}
+				}
+				return map[string]api.FieldGroupField{
+					"keep":     field("keepSpec", "keptSel"),
+					"movesTo":  field("movesSpec", "keptSel"),
+					"newField": field("newSpec"),
+				}, map[string]api.ItemSelector{
+					"keptSel": {Query: `.kept[]`},
+				}
+			}
+
+			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			pruneSystemFieldGroup(sysAdminCtx, db, ms, name, newDescription, builder)
+			handleSystemFieldGroup(sysAdminCtx, db, ms, name, newDescription, builder, cv)
+
+			after, err := ms.getFieldGroup(sysAdminCtx, name)
+			Expect(err).To(BeNil())
+			Expect(*after.Description).To(Equal(newDescription))
+			Expect(after.Fields).To(HaveLen(3))
+			Expect(after.Fields).To(HaveKey("keep"))
+			Expect(after.Fields).To(HaveKey("newField"))
+			Expect(after.Fields).ToNot(HaveKey("stale"))
+			Expect(after.Fields["movesTo"].ItemSelectors).To(Equal([]string{"keptSel"}))
+			Expect(after.ItemSelectors).To(HaveLen(1))
+			Expect(after.ItemSelectors).To(HaveKey("keptSel"))
+		})
+	})
+
+	Context("re-seeding a database seeded before the resource claim rename", func() {
+		It("removes the reservedResourceClaims and container resourceClaims keys", func() {
+			db := runaidb.DB().WithContext(sysAdminCtx)
+			ms := MappingApiService{}
+
+			podSpecRow, err := dao.GetFieldGroupByNameAndScope(sysAdminCtx, db, sm.SystemPodSpecFgName, api.MAPPINGSCOPE_SYSTEM)
+			Expect(err).To(BeNil())
+			andCtrRow, err := dao.GetFieldGroupByNameAndScope(sysAdminCtx, db, sm.SystemPodSpecAndContainerFgName, api.MAPPINGSCOPE_SYSTEM)
+			Expect(err).To(BeNil())
+			formatterRow, err := dao.GetFormatterByName(sysAdminCtx, db, sm.SystemPodSpecFormatterName)
+			Expect(err).To(BeNil())
+
+			// System rows are suite-wide singletons (see DeleteAllTablesForTesting); restore them for later specs.
+			podSpecOrig, andCtrOrig, formatterOrig := *podSpecRow, *andCtrRow, *formatterRow
+			podSpecOrig.Fields, podSpecOrig.ItemSelectors = maps.Clone(podSpecRow.Fields), maps.Clone(podSpecRow.ItemSelectors)
+			andCtrOrig.Fields, andCtrOrig.ItemSelectors = maps.Clone(andCtrRow.Fields), maps.Clone(andCtrRow.ItemSelectors)
+			formatterOrig.Fields = maps.Clone(formatterRow.Fields)
+			DeferCleanup(func() {
+				Expect(dao.SaveFieldGroup(sysAdminCtx, db, &podSpecOrig)).To(BeNil())
+				Expect(dao.SaveFieldGroup(sysAdminCtx, db, &andCtrOrig)).To(BeNil())
+				Expect(dao.SaveFormatter(sysAdminCtx, db, &formatterOrig)).To(BeNil())
+				Expect(dao.WipeAllEntityCaches(sysAdminCtx)).To(BeNil())
+			})
+
+			oldItemSelectorNames := map[string]string{
+				"allResourceClaims":          "allReservedResourceClaims",
+				"resourceClaimByName":        "reservedResourceClaimByName",
+				"allDirectResourceClaims":    "allClaimBasedReservedResourceClaims",
+				"allTemplatedResourceClaims": "allTemplateBasedReservedResourceClaims",
+			}
+			oldFieldNames := map[string]string{
+				"resourceClaims":                           "reservedResourceClaims",
+				"resourceClaims-name":                      "reservedResourceClaims-Name",
+				"resourceClaims-resourceClaimName":         "reservedResourceClaims-ClaimName",
+				"resourceClaims-resourceClaimTemplateName": "reservedResourceClaims-ClaimTemplate",
+			}
+
+			for newName, oldName := range oldItemSelectorNames {
+				Expect(podSpecRow.ItemSelectors).To(HaveKey(newName))
+				podSpecRow.ItemSelectors[oldName] = podSpecRow.ItemSelectors[newName]
+				delete(podSpecRow.ItemSelectors, newName)
+			}
+			for newName, oldName := range oldFieldNames {
+				Expect(podSpecRow.Fields).To(HaveKey(newName))
+				field := podSpecRow.Fields[newName]
+				var oldSelectors []string
+				for _, sel := range field.ItemSelectors {
+					oldSelectors = append(oldSelectors, oldItemSelectorNames[sel])
+				}
+				field.ItemSelectors = oldSelectors
+				podSpecRow.Fields[oldName] = field
+				delete(podSpecRow.Fields, newName)
+			}
+			oldPodSpecDesc := "podSpec fields (v3)"
+			podSpecRow.Description = &oldPodSpecDesc
+			Expect(dao.SaveFieldGroup(sysAdminCtx, db, podSpecRow)).To(BeNil())
+
+			andCtrRow.Fields["resourceClaims"] = api.FieldGroupFieldsWithScopeValue{
+				Formatter: sm.SystemPodSpecFormatterName,
+				Type:      api.MAPPINGFIELDTYPE_OBJECT,
+				Scope:     api.MAPPINGSCOPE_SYSTEM,
+			}
+			andCtrRow.Fields["resourceClaims-Name"] = newFieldForTest("name", []string{"allResourceClaims"}, api.MAPPINGSCOPE_SYSTEM)
+			andCtrRow.Fields["resourceClaims-Request"] = newFieldForTest("request", []string{"allResourceClaims"}, api.MAPPINGSCOPE_SYSTEM)
+			andCtrRow.ItemSelectors["allResourceClaims"] = newItemSelForTest(`(.resources.claims // [])[]`, api.MAPPINGSCOPE_SYSTEM)
+			oldAndCtrDesc := "podSpecAndContainer fields (v3)"
+			andCtrRow.Description = &oldAndCtrDesc
+			Expect(dao.SaveFieldGroup(sysAdminCtx, db, andCtrRow)).To(BeNil())
+
+			formatterRow.Fields["reservedResourceClaims"] = formatterRow.Fields["resourceClaims"]
+			oldFormatterDesc := "formatter for podSpec fields (v5)"
+			formatterRow.Description = &oldFormatterDesc
+			Expect(dao.SaveFormatter(sysAdminCtx, db, formatterRow)).To(BeNil())
+
+			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			handleSystemFormatters(sysAdminCtx, ms, cv)
+			handleSystemFieldGroups(sysAdminCtx, db, ms, cv)
+			handleSystemMappings(sysAdminCtx, db, ms, cv)
+
+			podSpec, gerr := ms.getFieldGroup(sysAdminCtx, sm.SystemPodSpecFgName)
+			Expect(gerr).To(BeNil())
+			Expect(*podSpec.Description).To(Equal(systemPodSpecFgDesc))
+			for newName, oldName := range oldFieldNames {
+				Expect(podSpec.Fields).To(HaveKey(newName))
+				Expect(podSpec.Fields).ToNot(HaveKey(oldName))
+			}
+			for newName, oldName := range oldItemSelectorNames {
+				Expect(podSpec.ItemSelectors).To(HaveKey(newName))
+				Expect(podSpec.ItemSelectors).ToNot(HaveKey(oldName))
+			}
+			Expect(podSpec.ItemSelectors["allResourceClaims"].Query).To(Equal(`(.resourceClaims // [])[]`))
+
+			andCtr, gerr := ms.getFieldGroup(sysAdminCtx, sm.SystemPodSpecAndContainerFgName)
+			Expect(gerr).To(BeNil())
+			Expect(*andCtr.Description).To(Equal(systemPodSpecAndContainerFgDesc))
+			Expect(andCtr.Fields).ToNot(HaveKey("resourceClaims"))
+			Expect(andCtr.Fields).ToNot(HaveKey("resourceClaims-Name"))
+			Expect(andCtr.Fields).ToNot(HaveKey("resourceClaims-Request"))
+			Expect(andCtr.ItemSelectors).ToNot(HaveKey("allResourceClaims"))
+			Expect(andCtr.Fields).To(HaveKey("resourceRequests"))
+
+			formatter, ferr := ms.getFormatter(sysAdminCtx, sm.SystemPodSpecFormatterName)
+			Expect(ferr).To(BeNil())
+			Expect(*formatter.Description).To(Equal(systemPodSpecFormatterDesc))
+			Expect(formatter.Fields).ToNot(HaveKey("reservedResourceClaims"))
+			Expect(formatter.Fields).To(HaveKey("resourceClaims"))
 		})
 	})
 
