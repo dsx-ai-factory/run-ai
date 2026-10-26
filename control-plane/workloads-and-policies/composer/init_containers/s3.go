@@ -25,8 +25,10 @@ const (
 
 	s3CADefaultMode int32 = 420
 
-	s3CACertsDir = "/etc/ssl/certs"
-	s3ReadyFile  = "/runai-goofys-ready"
+	s3CACertsDir        = "/etc/ssl/certs"
+	s3ReadyMountPath    = "/runai-goofys"
+	s3ReadyFile         = s3ReadyMountPath + "/ready"
+	s3ReadyVolumePrefix = "s3-ready"
 
 	// goofys gets at most these extra args: --uid <v>, --gid <v>, --endpoint <v>, --ready-file <v>, bucket, path.
 	maxGoofysPerItemArgs = 10
@@ -98,7 +100,7 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 			command = append(command, "--endpoint", item.Url)
 		}
 		// Older and custom images may not implement the readiness flags.
-		mountCheckEnabled := cfg.S3FsMountCheckImage() == image
+		mountCheckEnabled := s3MountCheckEnabled(cfg)
 		var startupProbe *corev1.Probe
 		if mountCheckEnabled {
 			command = append(command, "--ready-file", s3ReadyFile)
@@ -119,6 +121,12 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 				MountPath:        item.Path,
 				MountPropagation: &mountBidirectional,
 			},
+		}
+		if mountCheckEnabled {
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name:      fmt.Sprintf("%s-%d", s3ReadyVolumePrefix, idx),
+				MountPath: s3ReadyMountPath,
+			})
 		}
 		if cfg.IsCustomCAS3Enabled() {
 			volumeMounts = append(volumeMounts, s3CAVolumeMount(cfg))
@@ -152,6 +160,11 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 	return result, nil
 }
 
+func s3MountCheckEnabled(cfg composer.ClusterStorageConfig) bool {
+	image := cfg.S3FsImage()
+	return image != "" && cfg.S3FsMountCheckImage() == image
+}
+
 func s3CAVolumeMount(cfg composer.ClusterStorageConfig) corev1.VolumeMount {
 	return corev1.VolumeMount{
 		Name:      cfg.CustomCAS3Secret(),
@@ -176,11 +189,15 @@ func BuildS3Volumes(info *composer.S3Info) []corev1.Volume {
 		hasAnyS3 = true
 
 		result = append(result, corev1.Volume{
-			Name: fmt.Sprintf("%s-%d", s3VolumePrefix, idx),
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
+			Name:         fmt.Sprintf("%s-%d", s3VolumePrefix, idx),
+			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 		})
+		if s3MountCheckEnabled(cfg) {
+			result = append(result, corev1.Volume{
+				Name:         fmt.Sprintf("%s-%d", s3ReadyVolumePrefix, idx),
+				VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+			})
+		}
 	}
 
 	if hasAnyS3 && cfg.IsCustomCAS3Enabled() {
