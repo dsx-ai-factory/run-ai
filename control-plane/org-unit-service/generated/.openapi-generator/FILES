@@ -95,6 +95,7 @@ pkg/api/model_get_projects_ranking_200_response.go
 pkg/api/model_get_ranks_200_response.go
 pkg/api/model_get_sync_departments_200_response.go
 pkg/api/model_get_sync_projects_200_response.go
+pkg/api/model_gpu_resource_request.go
 pkg/api/model_http_response.go
 pkg/api/model_list_reports_200_response.go
 pkg/api/model_measurement_response.go

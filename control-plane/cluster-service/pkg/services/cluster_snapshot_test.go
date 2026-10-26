@@ -45,13 +45,14 @@ var _ = Describe("ClusterSnapshot", func() {
 			Expect(snapshot.CustomCAS3).To(BeNil())
 		})
 
-		It("composes all 12 cluster-reported values when populated", func() {
+		It("composes cluster-reported values when populated", func() {
 			terminationPolicy := api.OPENSHIFTROUTETERMINATIONPOLICY_PASSTHROUGH
 			cluster := &api.DisplayedCluster{
 				Status: &api.ClusterDisplayedStatus{
 					Config: &api.ClusterReportedConfig{
 						GitSyncImage:                           ptr.To("reg.example.com/git-sync:v1"),
 						S3FileSystemImage:                      ptr.To("reg.example.com/goofys:v2"),
+						S3FileSystemMountCheckImage:            ptr.To("reg.example.com/goofys:v2"),
 						RunaiOauth2ProxyImage:                  ptr.To("reg.example.com/oauth2-proxy:v3"),
 						RunaiOauth2ProxyUsernameLoaderImage:    ptr.To("reg.example.com/username-loader:v4"),
 						RunaiOauth2ProxyRedisFQDN:              ptr.To("redis.example.com:6379"),
@@ -83,6 +84,7 @@ var _ = Describe("ClusterSnapshot", func() {
 			Expect(snapshot).NotTo(BeNil())
 			Expect(*snapshot.GitSyncImage).To(Equal("reg.example.com/git-sync:v1"))
 			Expect(*snapshot.S3FileSystemImage).To(Equal("reg.example.com/goofys:v2"))
+			Expect(*snapshot.S3FileSystemMountCheckImage).To(Equal("reg.example.com/goofys:v2"))
 			Expect(*snapshot.RunaiOauth2ProxyImage).To(Equal("reg.example.com/oauth2-proxy:v3"))
 			Expect(*snapshot.RunaiOauth2ProxyUsernameLoaderImage).To(Equal("reg.example.com/username-loader:v4"))
 			Expect(*snapshot.RunaiOauth2ProxyRedisFQDN).To(Equal("redis.example.com:6379"))
@@ -124,6 +126,7 @@ var _ = Describe("ClusterSnapshot", func() {
 			Expect(snapshot).NotTo(BeNil())
 			Expect(*snapshot.GitSyncImage).To(Equal("reg.example.com/git-sync:v1"))
 			Expect(snapshot.S3FileSystemImage).To(BeNil())
+			Expect(snapshot.S3FileSystemMountCheckImage).To(BeNil())
 			Expect(snapshot.RunaiOauth2ProxyImage).To(BeNil())
 			Expect(snapshot.ExternalAuthUrlEnabled).To(BeNil())
 			Expect(snapshot.OpenshiftRouteTerminationPolicy).To(BeNil())

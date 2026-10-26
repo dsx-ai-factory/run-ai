@@ -2284,8 +2284,12 @@ paths:
       x-audit: true
   /api/v1/org-unit/departments/{departmentId}/resources:
     patch:
-      description: Partial updates to specific items in the list. Should be used for
-        update one or more attributes of an item without modifying the entire resource.
+      description: "Updates the resources of the node pools in the request. Node pools\
+        \ that are not in the request stay unchanged. Each node pool in the request\
+        \ is replaced as a whole. GPU deserved is required for node pools with quota\
+        \ enabled, and other omitted fields are set to their defaults. To change only\
+        \ part of a node pool, for example only its rank, use the node pool resources\
+        \ batch patch."
       operationId: patch_department_resources
       parameters:
       - description: The id of the department.
@@ -3467,8 +3471,12 @@ paths:
       x-audit: true
   /api/v1/org-unit/projects/{projectId}/resources:
     patch:
-      description: Partial updates to specific items in the list. Should be used for
-        update one or more attributes of an item without modifying the entire resource.
+      description: "Updates the resources of the node pools in the request. Node pools\
+        \ that are not in the request stay unchanged. Each node pool in the request\
+        \ is replaced as a whole. GPU deserved is required for node pools with quota\
+        \ enabled, and other omitted fields are set to their defaults. To change only\
+        \ part of a node pool, for example only its rank, use the node pool resources\
+        \ batch patch."
       operationId: patch_project_resources
       parameters:
       - description: The project id
@@ -8599,6 +8607,31 @@ components:
               memory: 1000
               cpu: 1000
               gpu: 0
+    GpuResourceRequest:
+      properties:
+        deserved:
+          description: "The GPU quota assigned to this org-unit. Required for node\
+            \ pools with quota enabled. For node pools with quota disabled, it must\
+            \ be 0 or omitted."
+          example: 1000
+          format: double
+          type: number
+          x-go-pointer: true
+        limit:
+          description: "The maximum GPU device allocation the org-unit can get from\
+            \ this node pool, representing the maximum sum of assigned quota and over-quota\
+            \ GPUs. Set to null for unlimited."
+          example: 0
+          format: double
+          nullable: true
+          type: number
+        overQuotaWeight:
+          description: |
+            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.
+          example: 2
+          format: double
+          nullable: true
+          type: number
     ResourcesNullable:
       example:
         nodePool:
@@ -13697,7 +13730,8 @@ components:
       allOf:
       - $ref: '#/components/schemas/NonNullResource'
       - description: "Defines the GPU quota assignment, maximum GPU device allocation,\
-          \ and weight assigned that determines the fairshare of over-quota resources."
+          \ and weight assigned that determines the fairshare of over-quota resources.\
+          \ For node pools with quota disabled, deserved is 0."
       example:
         overQuotaWeight: 2
         limit: 0
@@ -13755,9 +13789,12 @@ components:
       type: object
     ResourcesNullable_gpu:
       allOf:
-      - $ref: '#/components/schemas/NonNullResource'
+      - $ref: '#/components/schemas/GpuResourceRequest'
       - description: "Defines the GPU quota assignment, maximum GPU device allocation,\
-          \ and weight assigned that determines the fairshare of over-quota resources."
+          \ and weight assigned that determines the fairshare of over-quota resources.\
+          \ Required for node pools with quota enabled. For node pools with quota\
+          \ disabled, deserved must be 0 or omitted and limit must be -1, null or\
+          \ omitted."
       example:
         overQuotaWeight: 2
         limit: 0
@@ -13927,7 +13964,10 @@ components:
       allOf:
       - $ref: '#/components/schemas/Resource'
       - description: "Defines the GPU quota assignment, maximum GPU device allocation,\
-          \ and weight assigned that determines the fairshare of over-quota resources."
+          \ and weight assigned that determines the fairshare of over-quota resources.\
+          \ Optional. If omitted, the GPU values stay unchanged. For node pools with\
+          \ quota disabled, deserved must be 0 or omitted and limit must be -1, null\
+          \ or omitted."
       nullable: true
       type: object
     NodePoolAssignedResourcesV1Response_nodePool:

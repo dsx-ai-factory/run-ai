@@ -83,7 +83,7 @@ type {{classname}} struct {
 	{{/deprecated}}
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//{{name}} {{#isNullable}}*{{/isNullable}}{{{dataType}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
-	{{name}} {{#isNullable}}*{{/isNullable}}{{{dataType}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}" gorm:"{{#vendorExtensions.x-gorm-ignore}}-{{/vendorExtensions.x-gorm-ignore}}{{^vendorExtensions.x-gorm-ignore}}{{#isModel}}serializer:json; type:jsonb;{{/isModel}}{{#isMap}}serializer:json; type:jsonb;{{/isMap}}{{#isArray}}serializer:json; type:jsonb;{{/isArray}}{{^isNullable}}not null;{{/isNullable}}{{/vendorExtensions.x-gorm-ignore}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
+	{{name}} {{#isNullable}}*{{/isNullable}}{{^isNullable}}{{#vendorExtensions.x-go-pointer}}*{{/vendorExtensions.x-go-pointer}}{{/isNullable}}{{{dataType}}} `json:"{{baseName}}{{^required}},omitempty{{/required}}" gorm:"{{#vendorExtensions.x-gorm-ignore}}-{{/vendorExtensions.x-gorm-ignore}}{{^vendorExtensions.x-gorm-ignore}}{{#isModel}}serializer:json; type:jsonb;{{/isModel}}{{#isMap}}serializer:json; type:jsonb;{{/isMap}}{{#isArray}}serializer:json; type:jsonb;{{/isArray}}{{^isNullable}}not null;{{/isNullable}}{{/vendorExtensions.x-gorm-ignore}}"{{#vendorExtensions.x-go-custom-tag}} {{{.}}}{{/vendorExtensions.x-go-custom-tag}}`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 {{/vars}}
 }{{/isEnum}}

@@ -500,6 +500,11 @@ func (in *PublicConfiguration) DeepCopyInto(out *PublicConfiguration) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.S3FileSystemMountCheckImage != nil {
+		in, out := &in.S3FileSystemMountCheckImage, &out.S3FileSystemMountCheckImage
+		*out = new(string)
+		**out = **in
+	}
 	if in.S3FileSystemResources != nil {
 		in, out := &in.S3FileSystemResources, &out.S3FileSystemResources
 		*out = new(PublicResourceRequirements)

@@ -32,3 +32,10 @@ func TestReadJSONResponseString(t *testing.T) {
 func TestReadJSONResponseRejectsMissingBody(t *testing.T) {
 	assert.ErrorContains(t, ReadJSONResponse(nil, &map[string]any{}), "missing response body")
 }
+
+func TestReadJSONResponseRejectsTrailingData(t *testing.T) {
+	for _, body := range []string{`{} {}`, `{} invalid`} {
+		resp := &http.Response{Body: io.NopCloser(strings.NewReader(body))}
+		assert.ErrorContains(t, ReadJSONResponse(resp, &map[string]any{}), "decode response body")
+	}
+}

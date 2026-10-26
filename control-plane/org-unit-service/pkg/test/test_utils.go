@@ -16,6 +16,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/google/uuid"
 	"k8s.io/apimachinery/pkg/util/rand"
+	"k8s.io/utils/ptr"
 )
 
 func createDefaultApiV1NodePoolResources(fullResources bool, nodePools []api.ResourcesNodePool) []api.ResourcesNullable {
@@ -27,7 +28,7 @@ func createDefaultApiV1NodePoolResources(fullResources bool, nodePools []api.Res
 		npResources := api.ResourcesNullable{
 			NodePool: &nodePool,
 			Gpu: api.ResourcesNullableGpu{
-				Deserved:        gpuDeserved,
+				Deserved:        ptr.To(gpuDeserved),
 				Limit:           &gpuLimit,
 				OverQuotaWeight: &gpuOqWeight,
 			},
@@ -84,7 +85,7 @@ func validateRank(requestedRank *string, actualRank *string, fieldName string) {
 
 func validateResourcesAndNullable(requestedResources api.ResourcesNullable, actualResources api.Resources) {
 	Expect(requestedResources.Cpu).To(Equal(actualResources.Cpu))
-	Expect(requestedResources.Gpu.Deserved).To(Equal(actualResources.Gpu.Deserved))
+	Expect(ptr.Deref(requestedResources.Gpu.Deserved, 0)).To(Equal(actualResources.Gpu.Deserved))
 	Expect(requestedResources.Gpu.Limit).To(Equal(actualResources.Gpu.Limit))
 	Expect(requestedResources.Gpu.OverQuotaWeight).To(Equal(actualResources.Gpu.OverQuotaWeight))
 	Expect(requestedResources.NodePool).To(Equal(actualResources.NodePool))

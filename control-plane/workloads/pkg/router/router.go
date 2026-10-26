@@ -97,6 +97,7 @@ func CreateRouter() chi.Router {
 		router.Use(runaimetrics.HttpMiddleware)
 		router.Use(logginghttp.HttpMiddleware)
 		router.Use(middlewares.PreserveJwtToken)
+		router.Use(chartInspectionBodyLimit)
 		api.AddRoutes(router, WorkloadsBatchAPIController, WorkspacesAPIController, TrainingsAPIController, DistributedAPIController,
 			InferencesAPIController, DistributedInferencesAPIController, WorkloadsAPIController, UnifiedWorkloadAPIController, PodsAPIController, EventsAPIController, RevisionsAPIController, PodGroupsAPIController,
 			TemplatesAPIController, WorkloadPropertiesAPIController, ApplicationsAPIController, SyncController, settingsApiController, WorkloadActionsAPIController)

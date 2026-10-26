@@ -77,6 +77,11 @@ func (in *AnyworkloadController) DeepCopyInto(out *AnyworkloadController) {
 		*out = new(common.Image)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.S3FileSystemMountCheckEnabled != nil {
+		in, out := &in.S3FileSystemMountCheckEnabled, &out.S3FileSystemMountCheckEnabled
+		*out = new(bool)
+		**out = **in
+	}
 	if in.RunaiOauth2ProxyImage != nil {
 		in, out := &in.RunaiOauth2ProxyImage, &out.RunaiOauth2ProxyImage
 		*out = new(common.Image)

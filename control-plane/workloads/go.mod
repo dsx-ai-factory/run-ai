@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/workloads
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/avast/retry-go/v4 v4.6.0

@@ -226,6 +226,120 @@ export interface AIApplicationAuth {
     'assetId'?: string;
 }
 /**
+ * Select exactly one chart source: chartId for an existing uploaded archive, chartURL for a direct archive URL, or repo with chartName and an exact chartVersion. Sources cannot be combined. Inspection of a repository chart requires an explicit version; latest-version selection is not supported. Authentication uses the caller-accessible personal or shared credential asset. 
+ * @export
+ * @interface AIApplicationChartInspectionRequest
+ */
+export interface AIApplicationChartInspectionRequest {
+    /**
+     * 
+     * @type {AIApplicationSpecChartRef}
+     * @memberof AIApplicationChartInspectionRequest
+     */
+    'chartRef': AIApplicationSpecChartRef;
+    /**
+     * 
+     * @type {AIApplicationAuth}
+     * @memberof AIApplicationChartInspectionRequest
+     */
+    'auth'?: AIApplicationAuth;
+}
+/**
+ * 
+ * @export
+ * @interface AIApplicationChartInspectionResponse
+ */
+export interface AIApplicationChartInspectionResponse {
+    /**
+     * Helm chart name.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'chartName': string;
+    /**
+     * Helm chart version.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'chartVersion': string;
+    /**
+     * Lowercase hexadecimal SHA-256 digest of the exact inspected archive bytes.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'archiveSHA256': string;
+    /**
+     * Whether the chart contains a root questions.yaml or questions.yml file, including an unusable file.
+     * @type {boolean}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'hasQuestions': boolean;
+    /**
+     * 
+     * @type {AIApplicationChartQuestionsStatus}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'questionsStatus': AIApplicationChartQuestionsStatus;
+    /**
+     * Normalized group declarations in author order; empty for absent or unusable declarations.
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'groups': Array<{ [key: string]: any; }>;
+    /**
+     * Normalized root questions in author order. Each question preserves supported declared metadata and may contain recursive subquestions through four child levels (five levels total), with roots at depth zero. Supported compatibility forms are normalized. Unknown question types become string with a warning; unsupported optional properties are ignored with a warning. Invalid mandatory metadata, bindings, options, defaults, conditions, or excessive nesting make the entire declaration unusable. Credential and Secret question types are not supported. This response contains no raw declaration YAML or complete values.yaml defaults. 
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'questions': Array<{ [key: string]: any; }>;
+    /**
+     * Diagnostics for recoverable metadata and unusable declarations.
+     * @type {Array<AIApplicationChartInspectionWarning>}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'warnings': Array<AIApplicationChartInspectionWarning>;
+}
+/**
+ * 
+ * @export
+ * @interface AIApplicationChartInspectionWarning
+ */
+export interface AIApplicationChartInspectionWarning {
+    /**
+     * Stable machine-readable diagnostic identifier.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionWarning
+     */
+    'code': string;
+    /**
+     * Explanation of the problem and available recovery.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionWarning
+     */
+    'message': string;
+    /**
+     * Location within the declaration, or an empty string for a document-wide diagnostic.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionWarning
+     */
+    'path': string;
+}
+/**
+ * Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is usable after supported normalization. Unusable means declaration validation failed; questions and groups are empty and warnings explain the failure. An unusable declaration does not block raw YAML configuration or deployment. 
+ * @export
+ * @enum {string}
+ */
+
+export const AIApplicationChartQuestionsStatus = {
+    Absent: 'absent',
+    Usable: 'usable',
+    Unusable: 'unusable'
+} as const;
+
+export type AIApplicationChartQuestionsStatus = typeof AIApplicationChartQuestionsStatus[keyof typeof AIApplicationChartQuestionsStatus];
+
+
+/**
  * Result of uploading a packaged Helm chart archive.
  * @export
  * @interface AIApplicationChartUploadResponse
@@ -448,13 +562,13 @@ export interface AIApplicationSpecChartRef {
      */
     'repo'?: string;
     /**
-     * The name of the chart within the specified repository. This corresponds to the chart’s directory name.
+     * Helm chart name.
      * @type {string}
      * @memberof AIApplicationSpecChartRef
      */
     'chartName'?: string;
     /**
-     * The specific Semantic Version (SemVer) of the chart to deploy.
+     * Helm chart version.
      * @type {string}
      * @memberof AIApplicationSpecChartRef
      */
@@ -13824,7 +13938,7 @@ export interface PortsRules {
     'instances'?: ItemRules | null;
 }
 /**
- * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+ * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
  * @export
  * @enum {string}
  */
@@ -27344,6 +27458,46 @@ export const AIApplicationsApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
+         * Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration in the control plane. Uploaded charts reference an archive already stored by the chart upload API. The response contains normalized question metadata and diagnostics; it does not contain the complete chart defaults or credential values. Missing or unusable questions declarations return a successful response so callers can offer raw YAML configuration. Download, authentication, and invalid archive failures return an error and are not reported as absent questions. Archives containing both root declaration filenames are rejected as ambiguous. 
+         * @summary Inspect a Helm chart questions declaration.
+         * @param {AIApplicationChartInspectionRequest} aIApplicationChartInspectionRequest Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inspectApplicationChart: async (aIApplicationChartInspectionRequest: AIApplicationChartInspectionRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'aIApplicationChartInspectionRequest' is not null or undefined
+            assertParamExists('inspectApplicationChart', 'aIApplicationChartInspectionRequest', aIApplicationChartInspectionRequest)
+            const localVarPath = `/api/v1/ai-applications/charts/inspect`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(aIApplicationChartInspectionRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List AI applications.
          * @summary List AI applications. [Experimental]
          * @param {AIApplicationVerbosity} [verbosity] response verbosity level.
@@ -27621,6 +27775,17 @@ export const AIApplicationsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration in the control plane. Uploaded charts reference an archive already stored by the chart upload API. The response contains normalized question metadata and diagnostics; it does not contain the complete chart defaults or credential values. Missing or unusable questions declarations return a successful response so callers can offer raw YAML configuration. Download, authentication, and invalid archive failures return an error and are not reported as absent questions. Archives containing both root declaration filenames are rejected as ambiguous. 
+         * @summary Inspect a Helm chart questions declaration.
+         * @param {AIApplicationChartInspectionRequest} aIApplicationChartInspectionRequest Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async inspectApplicationChart(aIApplicationChartInspectionRequest: AIApplicationChartInspectionRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AIApplicationChartInspectionResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.inspectApplicationChart(aIApplicationChartInspectionRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * List AI applications.
          * @summary List AI applications. [Experimental]
          * @param {AIApplicationVerbosity} [verbosity] response verbosity level.
@@ -27733,6 +27898,16 @@ export const AIApplicationsApiFactory = function (configuration?: Configuration,
          */
         getApplication(aiApplicationId: string, options?: any): AxiosPromise<AIApplication> {
             return localVarFp.getApplication(aiApplicationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration in the control plane. Uploaded charts reference an archive already stored by the chart upload API. The response contains normalized question metadata and diagnostics; it does not contain the complete chart defaults or credential values. Missing or unusable questions declarations return a successful response so callers can offer raw YAML configuration. Download, authentication, and invalid archive failures return an error and are not reported as absent questions. Archives containing both root declaration filenames are rejected as ambiguous. 
+         * @summary Inspect a Helm chart questions declaration.
+         * @param {AIApplicationChartInspectionRequest} aIApplicationChartInspectionRequest Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inspectApplicationChart(aIApplicationChartInspectionRequest: AIApplicationChartInspectionRequest, options?: any): AxiosPromise<AIApplicationChartInspectionResponse> {
+            return localVarFp.inspectApplicationChart(aIApplicationChartInspectionRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * List AI applications.
@@ -27852,6 +28027,18 @@ export class AIApplicationsApi extends BaseAPI {
      */
     public getApplication(aiApplicationId: string, options?: AxiosRequestConfig) {
         return AIApplicationsApiFp(this.configuration).getApplication(aiApplicationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration in the control plane. Uploaded charts reference an archive already stored by the chart upload API. The response contains normalized question metadata and diagnostics; it does not contain the complete chart defaults or credential values. Missing or unusable questions declarations return a successful response so callers can offer raw YAML configuration. Download, authentication, and invalid archive failures return an error and are not reported as absent questions. Archives containing both root declaration filenames are rejected as ambiguous. 
+     * @summary Inspect a Helm chart questions declaration.
+     * @param {AIApplicationChartInspectionRequest} aIApplicationChartInspectionRequest Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AIApplicationsApi
+     */
+    public inspectApplicationChart(aIApplicationChartInspectionRequest: AIApplicationChartInspectionRequest, options?: AxiosRequestConfig) {
+        return AIApplicationsApiFp(this.configuration).inspectApplicationChart(aIApplicationChartInspectionRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

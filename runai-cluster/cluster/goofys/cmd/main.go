@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"sync"
 	"syscall"
@@ -93,14 +94,17 @@ func kill(pid int, s os.Signal) (err error) {
 	return
 }
 
-// Mount the file system based on the supplied arguments, returning a
-// fuse.MountedFileSystem that can be joined to wait for unmounting.
-func mount(
-	ctx context.Context,
-	bucketName string,
-	flags *FlagStorage) (fs *Goofys, mfs *fuse.MountedFileSystem, err error) {
+var mount = goofys.Mount
+var unmount = syscall.Unmount
 
-	return goofys.Mount(ctx, bucketName, flags)
+func clearReadyFile(path string) error {
+	if path == "" {
+		return nil
+	}
+	if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("clear readiness file: %w", err)
+	}
+	return nil
 }
 
 func massagePath() {
@@ -132,11 +136,36 @@ func main() {
 	massagePath()
 
 	app := NewApp()
+	app.Flags = append(app.Flags,
+		cli.StringFlag{Name: "ready-file", Usage: "Create a local readiness file after mounting successfully (requires -f)."},
+		cli.StringFlag{Name: "check-ready", Usage: "Check readiness and the current goofys mount: --check-ready /ready/file /mount/path."},
+	)
 
 	var flags *FlagStorage
 	var child *os.Process
 
 	app.Action = func(c *cli.Context) (err error) {
+		if c.IsSet("check-ready") {
+			if !filepath.IsAbs(c.String("check-ready")) || c.NArg() != 1 || c.Args().First() == "" || c.IsSet("ready-file") {
+				return fmt.Errorf("usage: goofys --check-ready /absolute/readiness/file mount/path")
+			}
+			mountPoint, err := filepath.Abs(c.Args().First())
+			if err != nil {
+				return fmt.Errorf("resolve mount point: %w", err)
+			}
+			info, err := os.Stat(c.String("check-ready"))
+			if err != nil {
+				return fmt.Errorf("check readiness file: %w", err)
+			}
+			if !info.Mode().IsRegular() {
+				return fmt.Errorf("readiness file must be a regular file")
+			}
+			mountInfo, err := readMountInfo()
+			if err != nil {
+				return fmt.Errorf("read current mounts: %w", err)
+			}
+			return checkGoofysMount(string(mountInfo), mountPoint)
+		}
 		// We should get two arguments exactly. Otherwise error out.
 		if len(c.Args()) != 2 {
 			fmt.Fprintf(
@@ -145,6 +174,28 @@ func main() {
 				app.Name)
 			cli.ShowAppHelp(c)
 			os.Exit(1)
+		}
+
+		readyFile := c.String("ready-file")
+		if c.IsSet("ready-file") && (!filepath.IsAbs(readyFile) || !c.Bool("f")) {
+			return fmt.Errorf("--ready-file requires an absolute path and -f")
+		}
+		if readyFile != "" {
+			mountPoint, err := filepath.Abs(c.Args()[1])
+			if err != nil {
+				return fmt.Errorf("resolve mount point: %w", err)
+			}
+			relative, err := filepath.Rel(mountPoint, filepath.Clean(readyFile))
+			if err != nil {
+				return fmt.Errorf("locate readiness file outside mount point: %w", err)
+			}
+			if relative != ".." && !strings.HasPrefix(relative, ".."+string(os.PathSeparator)) {
+				return fmt.Errorf("readiness file must be outside the mount point")
+			}
+		}
+		// A previous mount must never satisfy this process's startup probe.
+		if err := clearReadyFile(readyFile); err != nil {
+			return err
 		}
 
 		// Populate and parse flags.
@@ -158,6 +209,11 @@ func main() {
 		defer func() {
 			time.Sleep(time.Second)
 			flags.Cleanup()
+		}()
+		defer func() {
+			if err := clearReadyFile(readyFile); err != nil {
+				log.Error(err)
+			}
 		}()
 
 		if !flags.Foreground {
@@ -213,6 +269,15 @@ func main() {
 				kill(os.Getppid(), syscall.SIGUSR1)
 			}
 			log.Println("File system has been successfully mounted.")
+			if readyFile != "" {
+				if err := os.WriteFile(readyFile, nil, 0600); err != nil {
+					// The scratch image has no fusermount helper.
+					if unmountErr := unmount(flags.MountPoint, 0); unmountErr != nil {
+						log.Errorf("Failed to unmount after readiness error: %v", unmountErr)
+					}
+					return fmt.Errorf("create readiness file: %w", err)
+				}
+			}
 			// Let the user unmount with Ctrl-C
 			// (SIGINT). But if cache is on, catfs will
 			// receive the signal and we would detect that exiting
@@ -232,6 +297,7 @@ func main() {
 
 	err := app.Run(MassageMountFlags(os.Args))
 	if err != nil {
+		log.Error(err)
 		if flags != nil && !flags.Foreground && child != nil {
 			log.Fatalln("Unable to mount file system, see syslog for details")
 		}

@@ -84,6 +84,7 @@ Class | Method | HTTP request | Description
 *AIApplicationsAPI* | [**DeleteApplication**](docs/AIApplicationsAPI.md#deleteapplication) | **Delete** /api/v1/ai-applications/{aiApplicationId} | Delete AI application.
 *AIApplicationsAPI* | [**DownloadApplicationChart**](docs/AIApplicationsAPI.md#downloadapplicationchart) | **Get** /api/v1/ai-applications/charts/{chartId}/content | Download an uploaded Helm chart archive.
 *AIApplicationsAPI* | [**GetApplication**](docs/AIApplicationsAPI.md#getapplication) | **Get** /api/v1/ai-applications/{aiApplicationId} | Get AI application. [Experimental]
+*AIApplicationsAPI* | [**InspectApplicationChart**](docs/AIApplicationsAPI.md#inspectapplicationchart) | **Post** /api/v1/ai-applications/charts/inspect | Inspect a Helm chart questions declaration.
 *AIApplicationsAPI* | [**ListApplications**](docs/AIApplicationsAPI.md#listapplications) | **Get** /api/v1/ai-applications | List AI applications. [Experimental]
 *AIApplicationsAPI* | [**RequestApplicationsUpdates**](docs/AIApplicationsAPI.md#requestapplicationsupdates) | **Post** /api/v1/ai-applications/sync-report | Request applications updates
 *AIApplicationsAPI* | [**SyncApplications**](docs/AIApplicationsAPI.md#syncapplications) | **Post** /api/v1/ai-applications/sync | Sync AI applications.
@@ -242,6 +243,10 @@ Class | Method | HTTP request | Description
  - [AIApplication](docs/AIApplication.md)
  - [AIApplicationAllocatedResources](docs/AIApplicationAllocatedResources.md)
  - [AIApplicationAuth](docs/AIApplicationAuth.md)
+ - [AIApplicationChartInspectionRequest](docs/AIApplicationChartInspectionRequest.md)
+ - [AIApplicationChartInspectionResponse](docs/AIApplicationChartInspectionResponse.md)
+ - [AIApplicationChartInspectionWarning](docs/AIApplicationChartInspectionWarning.md)
+ - [AIApplicationChartQuestionsStatus](docs/AIApplicationChartQuestionsStatus.md)
  - [AIApplicationChartUploadResponse](docs/AIApplicationChartUploadResponse.md)
  - [AIApplicationCreationRequest](docs/AIApplicationCreationRequest.md)
  - [AIApplicationForSync](docs/AIApplicationForSync.md)

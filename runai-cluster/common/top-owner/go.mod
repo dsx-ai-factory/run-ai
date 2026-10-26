@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/common/top-owner
 
-go 1.26.8
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.4

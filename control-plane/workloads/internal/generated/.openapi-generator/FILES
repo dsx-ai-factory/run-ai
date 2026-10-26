@@ -52,6 +52,10 @@ pkg/api/model_activation_replicas_field.go
 pkg/api/model_ai_application.go
 pkg/api/model_ai_application_allocated_resources.go
 pkg/api/model_ai_application_auth.go
+pkg/api/model_ai_application_chart_inspection_request.go
+pkg/api/model_ai_application_chart_inspection_response.go
+pkg/api/model_ai_application_chart_inspection_warning.go
+pkg/api/model_ai_application_chart_questions_status.go
 pkg/api/model_ai_application_chart_upload_response.go
 pkg/api/model_ai_application_creation_request.go
 pkg/api/model_ai_application_endpoint.go

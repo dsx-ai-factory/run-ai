@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/karta-migrate
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250428095855-d1862558c98a

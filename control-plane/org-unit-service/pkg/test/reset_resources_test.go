@@ -382,7 +382,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				departmentUpdateReq := getDepartmentUpdateRequestFromListResponse(dep)
 				for i := range departmentUpdateReq.Resources {
 					if departmentUpdateReq.Resources[i].NodePool.Name == defaultNodePoolName {
-						departmentUpdateReq.Resources[i].Gpu.Deserved = 6
+						departmentUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(6))
 						departmentUpdateReq.Resources[i].Gpu.Limit = ptr.To(float64(12))
 						departmentUpdateReq.Resources[i].Gpu.OverQuotaWeight = ptr.To(float64(16))
 						if departmentUpdateReq.Resources[i].Cpu != nil {
@@ -449,7 +449,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				departmentUpdateReq := getDepartmentUpdateRequestFromListResponse(dep)
 				for i := range departmentUpdateReq.Resources {
 					if departmentUpdateReq.Resources[i].NodePool.Id == nodePoolId2 {
-						departmentUpdateReq.Resources[i].Gpu.Deserved = 5
+						departmentUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(5))
 						departmentUpdateReq.Resources[i].Gpu.Limit = ptr.To(float64(10))
 						departmentUpdateReq.Resources[i].Gpu.OverQuotaWeight = ptr.To(float64(15))
 					}
@@ -490,7 +490,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				projectUpdateReq := getProjectUpdateRequest(p)
 				for i := range projectUpdateReq.Resources {
 					if projectUpdateReq.Resources[i].NodePool.Name == defaultNodePoolName {
-						projectUpdateReq.Resources[i].Gpu.Deserved = 3
+						projectUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(3))
 						projectUpdateReq.Resources[i].Gpu.Limit = ptr.To(float64(3))
 						projectUpdateReq.Resources[i].Gpu.OverQuotaWeight = ptr.To(float64(5))
 						projectUpdateReq.Resources[i].Cpu = &api.ResourcesCpu{
@@ -617,7 +617,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				projectUpdateReq := getProjectUpdateRequest(p)
 				for i := range projectUpdateReq.Resources {
 					if projectUpdateReq.Resources[i].NodePool.Name == defaultNodePoolName {
-						projectUpdateReq.Resources[i].Gpu.Deserved = 4
+						projectUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(4))
 						projectUpdateReq.Resources[i].Gpu.Limit = ptr.To(float64(4))
 						projectUpdateReq.Resources[i].Gpu.OverQuotaWeight = ptr.To(float64(15))
 						if projectUpdateReq.Resources[i].Cpu != nil {
@@ -686,7 +686,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			projectUpdateReq := getProjectUpdateRequest(projectBBefore)
 			for i := range projectUpdateReq.Resources {
 				if projectUpdateReq.Resources[i].NodePool.Name == defaultNodePoolName {
-					projectUpdateReq.Resources[i].Gpu.Deserved = 3
+					projectUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(3))
 				}
 			}
 			updateProjectBResponse, err := projectApiService.UpdateProject(ctx, projB.Id, projectUpdateReq)
@@ -721,7 +721,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				projectUpdateReq := getProjectUpdateRequest(p)
 				for i := range projectUpdateReq.Resources {
 					if projectUpdateReq.Resources[i].NodePool.Name == defaultNodePoolName {
-						projectUpdateReq.Resources[i].Gpu.Deserved = 4
+						projectUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(4))
 						projectUpdateReq.Resources[i].Gpu.Limit = ptr.To(float64(4))
 						projectUpdateReq.Resources[i].Gpu.OverQuotaWeight = ptr.To(float64(15))
 						if projectUpdateReq.Resources[i].Cpu != nil {
@@ -927,7 +927,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				for _, p := range projListBefore.Body.(api.GetProjects200Response).Projects {
 					projectUpdateReq := getProjectUpdateRequest(p)
 					for i := range projectUpdateReq.Resources {
-						projectUpdateReq.Resources[i].Gpu.Deserved = 3
+						projectUpdateReq.Resources[i].Gpu.Deserved = ptr.To(float64(3))
 						projectUpdateReq.Resources[i].Gpu.Limit = ptr.To(float64(3))
 						projectUpdateReq.Resources[i].Cpu = &api.ResourcesCpu{
 							Deserved: ptr.To(float64(2)),

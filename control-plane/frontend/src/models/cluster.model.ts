@@ -22,8 +22,8 @@ export const CLUSTER_STATUS_TOOLTIP = {
     "<br>As a result, some features may be impacted.",
   MissingGpuFractioningPrerequisites: "{{reason}}" + "<br>As a result, GPU fractions are not supported.",
   // Emitted once after the sections above, which may both be present.
-  PrerequisitesGuide: DOCS.INSTALLATION.PREREQUISITES
-    ? `For more information see the <a href="${DOCS.INSTALLATION.PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>.`
+  PrerequisitesGuide: DOCS.INSTALLATION.CLUSTER_PREREQUISITES
+    ? `For more information see the <a href="${DOCS.INSTALLATION.CLUSTER_PREREQUISITES}" style="text-decoration: underline;" target="_blank">Prerequisites guide</a>.`
     : "",
   ServiceIssues:
     "Some Run:ai service(s) in the cluster are not functioning properly. <br>" +

@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1
 
-go 1.26.8
+go 1.27.3
 
 require (
 	github.com/openshift/api v0.0.0-20250901120840-a638ff2e96fb

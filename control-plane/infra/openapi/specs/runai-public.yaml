@@ -1892,7 +1892,7 @@ paths:
     patch:
       summary: Patch department resources
       operationId: patch_department_resources
-      description: Partial updates to specific items in the list. Should be used for update one or more attributes of an item without modifying the entire resource.
+      description: Updates the resources of the node pools in the request. Node pools that are not in the request stay unchanged. Each node pool in the request is replaced as a whole. GPU deserved is required for node pools with quota enabled, and other omitted fields are set to their defaults. To change only part of a node pool, for example only its rank, use the node pool resources batch patch.
       tags:
         - Departments
       parameters:
@@ -2205,7 +2205,7 @@ paths:
     patch:
       summary: Patch project resources
       operationId: patch_project_resources
-      description: Partial updates to specific items in the list. Should be used for update one or more attributes of an item without modifying the entire resource.
+      description: Updates the resources of the node pools in the request. Node pools that are not in the request stay unchanged. Each node pool in the request is replaced as a whole. GPU deserved is required for node pools with quota enabled, and other omitted fields are set to their defaults. To change only part of a node pool, for example only its rank, use the node pool resources batch patch.
       tags:
         - Projects
       parameters:
@@ -8304,6 +8304,8 @@ paths:
 
 
 
+
+
           For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
         - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
       tags:
@@ -13442,6 +13444,10 @@ components:
           example: gcr.io/runai/goofys:v0.24.0
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          type: string
+          nullable: true
+          description: The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:
@@ -14145,6 +14151,8 @@ components:
 
 
 
+
+
              - binpack - Place as many GPU pods as possible on each GPU device to use fewer devices and maximize available capacity, minimizing GPU fraction fragmentation.
              - spread - Distribute GPU pods across as many GPU devices as possible to balance load across devices.
           allOf:
@@ -14199,6 +14207,8 @@ components:
 
 
 
+
+
              - 0.0: Ignore historical usage data (100% current usage).
              - 1.0: Historical usage data has higher impact, it may cause fairshare to be 0.
              - Values between 0.0 and 1.0 combine historical and current usage to maintain a balanced fairshare
@@ -14211,6 +14221,8 @@ components:
           pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
           description: |
             Set the half-life time to define the decay rate of a project’s historical resource usage. The half-life defines how long it takes for past usage to diminish to half of its original influence on a project's fairshare.
+
+
 
 
 
@@ -15776,7 +15788,7 @@ components:
             - deserved
           allOf:
             - $ref: '#/components/schemas/NonNullResource'
-            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources. For node pools with quota disabled, deserved is 0.
         cpu:
           type: object
           nullable: true
@@ -15843,6 +15855,27 @@ components:
               items:
                 $ref: '#/components/schemas/Resources'
               description: Resources assigned to this Organization per Node Pool
+    GpuResourceRequest:
+      properties:
+        deserved:
+          type: number
+          format: double
+          description: The GPU quota assigned to this org-unit. Required for node pools with quota enabled. For node pools with quota disabled, it must be 0 or omitted.
+          example: 1000
+          x-go-pointer: true
+        limit:
+          type: number
+          format: double
+          description: The maximum GPU device allocation the org-unit can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs. Set to null for unlimited.
+          nullable: true
+          example: 0
+        overQuotaWeight:
+          type: number
+          format: double
+          description: |
+            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.
+          nullable: true
+          example: 2
     ResourcesNullable:
       properties:
         nodePool:
@@ -15862,8 +15895,8 @@ components:
           nullable: true
         gpu:
           allOf:
-            - $ref: '#/components/schemas/NonNullResource'
-            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+            - $ref: '#/components/schemas/GpuResourceRequest'
+            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources. Required for node pools with quota enabled. For node pools with quota disabled, deserved must be 0 or omitted and limit must be -1, null or omitted.
         cpu:
           type: object
           nullable: true
@@ -16382,7 +16415,7 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/Resource'
-            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources. Optional. If omitted, the GPU values stay unchanged. For node pools with quota disabled, deserved must be 0 or omitted and limit must be -1, null or omitted.
         cpu:
           type: object
           nullable: true
@@ -20205,7 +20238,7 @@ components:
           maxLength: 63
       nullable: true
     Preemptibility:
-      description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+      description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
       type: string
       minLength: 1
       enum:
@@ -33527,15 +33560,15 @@ components:
       description: The HTTP or HTTPS URL of the Helm repository that hosts the chart. This must match a repository that is accessible. Used together with `name` and `version`.
       maxLength: 250
       example: https://charts.bitnami.com/bitnami
-    AIApplicationChartName:
+    ChartName:
       type: string
-      description: The name of the chart within the specified repository. This corresponds to the chart’s directory name.
       maxLength: 250
+      description: Helm chart name.
       example: redis
-    AIApplicationChartVersion:
+    ChartVersion:
       type: string
-      description: The specific Semantic Version (SemVer) of the chart to deploy.
       maxLength: 50
+      description: Helm chart version.
       example: 17.3.17
     AIApplicationChartUrl:
       type: string
@@ -33560,9 +33593,9 @@ components:
         repo:
           $ref: '#/components/schemas/AIApplicationChartRepo'
         chartName:
-          $ref: '#/components/schemas/AIApplicationChartName'
+          $ref: '#/components/schemas/ChartName'
         chartVersion:
-          $ref: '#/components/schemas/AIApplicationChartVersion'
+          $ref: '#/components/schemas/ChartVersion'
         chartURL:
           $ref: '#/components/schemas/AIApplicationChartUrl'
         chartId:

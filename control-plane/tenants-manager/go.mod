@@ -3,37 +3,37 @@ module github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager
 go 1.27.3
 
 require (
-	github.com/aws/smithy-go v1.28.5
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.12
+	github.com/aws/smithy-go v1.28.6
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.13
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
-	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.7
+	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.8
 	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21
-	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.23
-	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.8
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.19
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.30
+	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.24
+	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.9
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-resty/resty/v2 v2.17.2
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.11.0
 	github.com/lib/pq v1.12.3
-	github.com/nats-io/nats.go v1.54.0
+	github.com/nats-io/nats.go v1.55.0
 	github.com/onsi/ginkgo/v2 v2.33.1
 	github.com/onsi/gomega v1.44.0
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/sync v0.24.0
 	gorm.io/gorm v1.31.2
-	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
+	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 )
 
 require (
@@ -41,13 +41,13 @@ require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20261013165250-51075c6ea6bc // indirect
 	github.com/ClickHouse/ch-go v0.74.0 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.49.0 // indirect
+	github.com/ClickHouse/clickhouse-go/v2 v2.50.0 // indirect
 	github.com/Masterminds/semver/v3 v3.5.0 // indirect
 	github.com/Microsoft/go-winio v0.6.4 // indirect
 	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/ThreeDotsLabs/watermill v1.5.3 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5 // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
+	github.com/andybalholm/brotli v1.2.7 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -60,9 +60,9 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.4 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1 // indirect
-	github.com/ebitengine/purego v0.11.1 // indirect; in
+	github.com/ebitengine/purego v0.11.2 // indirect; in
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect

@@ -343,6 +343,9 @@
         "s3FileSystemImage": {
           "$ref": "#/$defs/Image"
         },
+        "s3FileSystemMountCheckEnabled": {
+          "type": "boolean"
+        },
         "runaiOauth2ProxyImage": {
           "$ref": "#/$defs/Image"
         },
