@@ -42,10 +42,10 @@ const (
 
 	// NOTE! Change the version here whenever you want to update the system element
 	// v4/v3/v2 -> enriched argsInfo with all $ARGS.named references
-	systemPodSpecFormatterDesc             = "formatter for podSpec fields (v5)"
-	systemPodSpecFgDesc                    = "podSpec fields (v3)"
+	systemPodSpecFormatterDesc             = "formatter for podSpec fields (v6)"
+	systemPodSpecFgDesc                    = "podSpec fields (v4)"
 	systemPodSpecContainerFgDesc           = "podSpecContainer fields (v3)"
-	systemPodSpecAndContainerFgDesc        = "podSpecAndContainer fields (v3)"
+	systemPodSpecAndContainerFgDesc        = "podSpecAndContainer fields (v4)"
 	systemJobSpecFormatterDesc             = "formatter for jobSpec fields (v3)"
 	systemJobSpecFgDesc                    = "jobSpec fields (v3)"
 	systemSelectorFormatterDesc            = "formatter for selector fields (v4)"
@@ -64,7 +64,7 @@ const (
 	systemNimCacheContainerFgDesc          = "nimCacheContainer fields (v2)"
 	systemNimServiceSpecFormatterDesc      = "formatter for nimServiceSpec fields (v2)"
 	systemNimServiceSpecFgDesc             = "nimServiceSpec fields (v2)"
-	systemNimServiceContainerFgDesc        = "nimServiceContainer fields (v2)"
+	systemNimServiceContainerFgDesc        = "nimServiceContainer fields (v3)"
 	systemKubeflowRunPolicyFormatterDesc   = "formatter for kubeflow runPolicy fields (v2)"
 	systemKubeflowReplicaSpecFormatterDesc = "formatter for kubeflow replicaSpec fields (v2)"
 	systemKubeflowRunPolicyFgDesc          = "kubeflow runPolicy fields (v2)"

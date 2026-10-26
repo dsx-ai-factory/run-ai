@@ -60,9 +60,6 @@ spec:
           name: http
           protocol: TCP
         resources:
-          claims:
-          - name: claim
-            request: shared-request
           limits:
             cpu: "1"
             memory: 1Gi
@@ -123,9 +120,6 @@ spec:
           name: http
           protocol: TCP
         resources:
-          claims:
-          - name: claim
-            request: shared-request
           limits:
             cpu: "1"
             memory: 1Gi
