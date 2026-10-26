@@ -22,6 +22,9 @@ data:
   {{- if ne $top.Values.catalogService.config.wholeGPUCutoffPercent nil }}
   WHOLE_GPU_CUTOFF_PERCENT: {{ $top.Values.catalogService.config.wholeGPUCutoffPercent | quote }}
   {{- end }}
+  {{- if ne $top.Values.catalogService.config.ngcMetadataCacheTTLSeconds nil }}
+  NGC_METADATA_CACHE_TTL_SECONDS: {{ $top.Values.catalogService.config.ngcMetadataCacheTTLSeconds | quote }}
+  {{- end }}
   INVENTORY_REQUEST_TIMEOUT_SEC: {{ $top.Values.catalogService.config.inventoryRequestTimeoutSec | default 30 | quote }}
   CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name (toString $top.Values.clusterService.service.port) }}
   TEMP_BACKEND_SETTINGS_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.tempBackendSettings.name (toString $top.Values.tempBackendSettings.service.port) }}

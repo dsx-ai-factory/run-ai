@@ -116,11 +116,11 @@
             660,
             620,
             225,
-            "4  Fetch exact-tag NGC data",
+            "4  Read cached / NGC data",
             [
-              "One metadata lookup for the model/tag",
-              "404 / no profiles: valid absence of data",
-              "Transport or malformed response: 503"
+              "Exact image/tag cache; expiry: 15 min",
+              "Miss / cache failure: query NGC",
+              "Cache profiles only; skip empty / errors"
             ],
             "blue"
           ]
@@ -633,11 +633,11 @@
             800,
             620,
             180,
-            "Fetch NGC profiles",
+            "Read metadata cache / NGC",
             [
-              "Use the exact image and tag.",
-              "latest is queried as published.",
-              "Then evaluate each selected pair."
+              "Exact image/tag cache: default 15 min.",
+              "Miss / cache failure -> fetch NGC.",
+              "Cache profiles only; inventory stays fresh."
             ],
             "blue"
           ]

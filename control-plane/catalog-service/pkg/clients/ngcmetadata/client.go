@@ -17,6 +17,11 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
 
 const (
@@ -46,16 +51,23 @@ type Metadata struct {
 }
 
 type Client struct {
-	httpClient *http.Client
+	httpClient     *http.Client
+	cacheAvailable bool
 }
 
 // New accepts the service's timeout-configured HTTP client. No registry key or
 // caller JWT is needed for this public metadata endpoint.
-func New(httpClient *http.Client) *Client {
+func New(httpClient *http.Client, cacheTTL time.Duration) *Client {
 	if httpClient == nil {
 		httpClient = &http.Client{Timeout: 30 * time.Second}
 	}
-	return &Client{httpClient: httpClient}
+	// Use the existing CP cache backend, with a separate store so catalog
+	// image/tag browsing retains its own expiry and record-size policy.
+	err := cache.RegisterStore[Metadata](options.Ttl(cacheTTL), options.MaxRecordSizeKB(maxResponseBytes/1024))
+	if err != nil {
+		logging.Warnf("Failed to register NGC metadata cache; fetching directly: %v", err)
+	}
+	return &Client{httpClient: httpClient, cacheAvailable: err == nil}
 }
 
 // Validate checks the image and separate tag before constructing an NGC query.
@@ -76,6 +88,18 @@ func Validate(image, tag string) error {
 func (c *Client) Get(ctx context.Context, image, tag string) (Metadata, error) {
 	if err := Validate(image, tag); err != nil {
 		return Metadata{}, err
+	}
+	if err := ctx.Err(); err != nil {
+		return Metadata{}, err
+	}
+	// Metadata is public and independent of cluster/user identity. Keep the
+	// exact image and tag (including latest) in the versioned cache key.
+	cacheKey := "ngc_metadata_v1:" + image + ":" + tag
+	if c.cacheAvailable {
+		cached, err := cache.Get[Metadata](ctx, cacheKey)
+		if err == nil && cached != nil {
+			return *cached, nil
+		}
 	}
 	query := url.Values{
 		"resourceId": {strings.TrimPrefix(image, "nvcr.io/")},
@@ -114,6 +138,13 @@ func (c *Client) Get(ctx context.Context, image, tag string) (Metadata, error) {
 	// NGC permits release-only metadata; profiles is an optional section.
 	if metadata.Profiles == nil {
 		metadata.Profiles = []Profile{}
+	}
+	// Empty/absent profiles and 404s remain uncached: metadata publication
+	// can lag the container release. Dependency errors also never enter cache.
+	if c.cacheAvailable && len(metadata.Profiles) > 0 {
+		if err := cache.Set[Metadata](ctx, cacheKey, *metadata); err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to set NGC metadata cache: %v", err)
+		}
 	}
 	return *metadata, nil
 }

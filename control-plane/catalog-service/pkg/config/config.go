@@ -35,7 +35,8 @@ type Server struct {
 }
 
 type NGC struct {
-	RequestTimeoutSec int `mapstructure:"request_timeout_sec" validate:"required"`
+	MetadataCacheTTLSeconds int `mapstructure:"ngc_metadata_cache_ttl_seconds" validate:"gt=0"`
+	RequestTimeoutSec       int `mapstructure:"request_timeout_sec" validate:"required"`
 }
 
 func (s *Server) SetDefaults() {
@@ -43,6 +44,7 @@ func (s *Server) SetDefaults() {
 }
 
 func (s *NGC) SetDefaults() {
+	s.MetadataCacheTTLSeconds = 15 * 60
 	s.RequestTimeoutSec = 30
 }
 

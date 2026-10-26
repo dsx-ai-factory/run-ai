@@ -2,6 +2,8 @@
 
 These diagrams describe the implemented API and CLI behavior. They document the current flow; they do not validate runtime compatibility or model startup.
 
+Exact image/tag metadata is read through the existing CP cache with a configurable 15-minute default expiry. Cache misses/failures fetch NGC directly; only successful nonempty profile lists are cached. Missing data and errors are not cached. Inventory and allocations remain fresh on every request. See the [service configuration and cache policy](../../README.md#nim-testdev-right-sizing).
+
 ## Full feature flow
 
 Request inputs, authorization, paginated inventory, exact-tag metadata, profile selection, allocation and response boundaries.

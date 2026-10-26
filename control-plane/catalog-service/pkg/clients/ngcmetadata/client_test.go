@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 	"testing"
+	"time"
 )
 
 type transportFunc func(*http.Request) (*http.Response, error)
@@ -28,7 +29,7 @@ func TestMetadataPreservesPublishedProfileAndExactTag(t *testing.T) {
 			t.Fatal("public NGC lookup must not forward caller credentials")
 		}
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"profiles":[{"profile_id":"published-profile","gpu":"NVIDIA-B200","precision":"bf16","inference_backend":"vllm","tensor_parallel_size":2,"pipeline_parallel_size":1,"min_vram_per_device_gb":35,"gpu_device":"2901:10de","tested_gpu_devices":["2901:10de"]}]}`))}, nil
-	})})
+	})}, 15*time.Minute)
 	metadata, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
 	if err != nil {
 		t.Fatal(err)
@@ -66,7 +67,7 @@ func TestMetadataMissingDiffersFromUpstreamFailure(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: tt.status, Body: io.NopCloser(strings.NewReader(tt.body))}, nil
-			})})
+			})}, 15*time.Minute)
 			result, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "latest")
 			if (err != nil) != tt.wantError {
 				t.Fatalf("error = %v; want error %v", err, tt.wantError)
@@ -81,7 +82,7 @@ func TestMetadataMissingDiffersFromUpstreamFailure(t *testing.T) {
 func TestMetadataDoesNotInventMissingMemoryOrParallelism(t *testing.T) {
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"profiles":[{"profile_id":"missing"},{"profile_id":"zero","min_vram_per_device_gb":0}]}`))}, nil
-	})})
+	})}, 15*time.Minute)
 	result, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "latest")
 	if err != nil {
 		t.Fatal(err)
@@ -96,7 +97,7 @@ func TestMetadataRejectsInvalidImageOrTagBeforeNetwork(t *testing.T) {
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		t.Fatal("invalid input reached NGC")
 		return nil, nil
-	})})
+	})}, 15*time.Minute)
 	for _, tt := range []struct{ image, tag string }{
 		{"https://attacker.invalid/model", "latest"},
 		{"nvcr.io/other/model", "latest"},
@@ -116,7 +117,7 @@ func TestMetadataPropagatesCancellation(t *testing.T) {
 	cancel()
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		return nil, r.Context().Err()
-	})})
+	})}, 15*time.Minute)
 	_, err := client.Get(ctx, "nvcr.io/nim/nvidia/example", "latest")
 	if !errors.Is(err, context.Canceled) {
 		t.Fatalf("error = %v", err)

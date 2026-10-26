@@ -29,10 +29,10 @@
   <text x="130" y="596" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#132C42" text-anchor="start" dominant-baseline="central">Fetch profiles, select a baseline, size the allocation</text>
   <text x="2130" y="596" font-family="Arial, sans-serif" font-size="24" font-weight="400" fill="#52677D" text-anchor="end" dominant-baseline="central">Continue from right to left</text>
   <rect x="1510" y="660" width="620" height="225" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
-  <text x="1534" y="696" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">4  Fetch exact-tag NGC data</text>
-  <text x="1534" y="741" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">One metadata lookup for the model/tag</text>
-  <text x="1534" y="777" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">404 / no profiles: valid absence of data</text>
-  <text x="1534" y="813" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Transport or malformed response: 503</text>
+  <text x="1534" y="696" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">4  Read cached / NGC data</text>
+  <text x="1534" y="741" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Exact image/tag cache; expiry: 15 min</text>
+  <text x="1534" y="777" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Miss / cache failure: query NGC</text>
+  <text x="1534" y="813" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Cache profiles only; skip empty / errors</text>
   <rect x="790" y="660" width="620" height="225" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
   <text x="814" y="696" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">5  Match + select profiles</text>
   <text x="814" y="741" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">For each selected type/capacity pair</text>

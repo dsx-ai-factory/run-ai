@@ -33,10 +33,10 @@
   <text x="91" y="756" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">2</text>
   <text x="130" y="756" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#132C42" text-anchor="start" dominant-baseline="central">Fetch the model/tag metadata</text>
   <rect x="790" y="800" width="620" height="180" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
-  <text x="814" y="836" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">Fetch NGC profiles</text>
-  <text x="814" y="881" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Use the exact image and tag.</text>
-  <text x="814" y="917" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">latest is queried as published.</text>
-  <text x="814" y="953" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Then evaluate each selected pair.</text>
+  <text x="814" y="836" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">Read metadata cache / NGC</text>
+  <text x="814" y="881" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Exact image/tag cache: default 15 min.</text>
+  <text x="814" y="917" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Miss / cache failure -&gt; fetch NGC.</text>
+  <text x="814" y="953" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Cache profiles only; inventory stays fresh.</text>
   <rect x="70" y="800" width="620" height="180" rx="20" fill="#FFF0F2" stroke="#B32D42" stroke-width="2" />
   <text x="94" y="836" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#B32D42" text-anchor="start" dominant-baseline="central">503  dependency failure</text>
   <text x="94" y="881" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Inventory or NGC retrieval failed.</text>

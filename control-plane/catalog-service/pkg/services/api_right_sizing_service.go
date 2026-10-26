@@ -26,9 +26,10 @@ type RightSizingAPIService struct {
 func NewRightSizingAPIService() *RightSizingAPIService {
 	servicesConfig := config.Get[*catalogconfig.Services]()
 	inventory := gpuinventory.New(clusterclient.NewClusterClient(servicesConfig.ClusterServiceUrl), time.Duration(servicesConfig.InventoryRequestTimeoutSec)*time.Second)
+	ngcConfig := config.Get[*catalogconfig.NGC]()
 	metadata := ngcmetadata.New(&http.Client{
-		Timeout: time.Duration(config.Get[*catalogconfig.NGC]().RequestTimeoutSec) * time.Second,
-	})
+		Timeout: time.Duration(ngcConfig.RequestTimeoutSec) * time.Second,
+	}, time.Duration(ngcConfig.MetadataCacheTTLSeconds)*time.Second)
 	return &RightSizingAPIService{service: rightsizing.New(inventory, metadata, servicesConfig.WholeGPUCutoffPercent)}
 }
 
