@@ -16,7 +16,6 @@ import (
 )
 
 const (
-	gitSyncCAVolumeName     = "custom-ca-git"
 	gitSyncContainerPrefix  = "git-sync"
 	GitSyncNamePrefix       = "code-sync"
 	GitSyncPathPrefix       = "/code"
@@ -167,7 +166,7 @@ func BuildGitSyncInitContainers(info *GitSyncInfo) ([]corev1.Container, *workloa
 
 func gitSyncCAVolumeMount(cfg ClusterStorageConfig) corev1.VolumeMount {
 	return corev1.VolumeMount{
-		Name:      gitSyncCAVolumeName,
+		Name:      cfg.CustomCAGitSecret(),
 		MountPath: fmt.Sprintf("/etc/ssl/certs/%s", cfg.CustomCAGitKey()),
 		SubPath:   cfg.CustomCAGitKey(),
 	}
@@ -216,7 +215,7 @@ func BuildGitSyncVolumes(info *GitSyncInfo) []corev1.Volume {
 
 func gitSyncCAVolume(cfg ClusterStorageConfig) corev1.Volume {
 	return corev1.Volume{
-		Name: gitSyncCAVolumeName,
+		Name: cfg.CustomCAGitSecret(),
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
 				DefaultMode: convutils.Ref(gitSyncCADefaultMode),

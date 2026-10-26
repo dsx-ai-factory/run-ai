@@ -17,7 +17,6 @@ import (
 
 const (
 	s3DataMountPath   = "/runai-s3"
-	s3CAVolumeName    = "custom-ca-s3"
 	s3ContainerPrefix = "s3-fs"
 	s3VolumePrefix    = "s3"
 
@@ -129,7 +128,7 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 		}
 		if mountCheckEnabled {
 			volumeMounts = append(volumeMounts, corev1.VolumeMount{
-				Name:      fmt.Sprintf("%s-%d", s3ReadyVolumePrefix, idx),
+				Name:      s3ReadyVolumeName(idx, cfg),
 				MountPath: s3ReadyMountPath,
 			})
 		}
@@ -170,9 +169,18 @@ func s3MountCheckEnabled(cfg composer.ClusterStorageConfig) bool {
 	return image != "" && cfg.S3FsMountCheckImage() == image
 }
 
+// CA Secret names are also Pod volume names; keep readiness volumes distinct.
+func s3ReadyVolumeName(idx int, cfg composer.ClusterStorageConfig) string {
+	name := fmt.Sprintf("%s-%d", s3ReadyVolumePrefix, idx)
+	for name == cfg.CustomCAS3Secret() || name == cfg.CustomCAGitSecret() || name == cfg.CustomCAAuthSecret() {
+		name += "-ready"
+	}
+	return name
+}
+
 func s3CAVolumeMount(cfg composer.ClusterStorageConfig) corev1.VolumeMount {
 	return corev1.VolumeMount{
-		Name:      s3CAVolumeName,
+		Name:      cfg.CustomCAS3Secret(),
 		MountPath: fmt.Sprintf("%s/%s", s3CACertsDir, cfg.CustomCAS3Key()),
 		SubPath:   cfg.CustomCAS3Key(),
 	}
@@ -199,7 +207,7 @@ func BuildS3Volumes(info *composer.S3Info) []corev1.Volume {
 		})
 		if s3MountCheckEnabled(cfg) {
 			result = append(result, corev1.Volume{
-				Name:         fmt.Sprintf("%s-%d", s3ReadyVolumePrefix, idx),
+				Name:         s3ReadyVolumeName(idx, cfg),
 				VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 			})
 		}
@@ -214,7 +222,7 @@ func BuildS3Volumes(info *composer.S3Info) []corev1.Volume {
 
 func s3CAVolume(cfg composer.ClusterStorageConfig) corev1.Volume {
 	return corev1.Volume{
-		Name: s3CAVolumeName,
+		Name: cfg.CustomCAS3Secret(),
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
 				DefaultMode: convutils.Ref(s3CADefaultMode),

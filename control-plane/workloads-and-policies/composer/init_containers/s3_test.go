@@ -198,14 +198,14 @@ var _ = Describe("BuildS3InitContainers", func() {
 		Expect(containers[0].VolumeMounts).To(HaveLen(2))
 		Expect(containers[0].VolumeMounts[0].Name).To(Equal("s3-0"))
 		Expect(*containers[0].VolumeMounts[0].MountPropagation).To(Equal(corev1.MountPropagationBidirectional))
-		Expect(containers[0].VolumeMounts[1].Name).To(Equal("custom-ca-s3"))
+		Expect(containers[0].VolumeMounts[1].Name).To(Equal("ca-secret"))
 		Expect(containers[0].VolumeMounts[1].SubPath).To(Equal("ca.pem"))
 
 		volumes := BuildS3Volumes(info)
 		Expect(volumes).To(HaveLen(3))
 		Expect(volumes[0].Name).To(Equal("s3-0"))
 		Expect(volumes[1].Name).To(Equal("s3-1"))
-		Expect(volumes[2].Name).To(Equal("custom-ca-s3"))
+		Expect(volumes[2].Name).To(Equal("ca-secret"))
 		Expect(volumes[2].Secret).NotTo(BeNil())
 	})
 
