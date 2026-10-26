@@ -19,11 +19,11 @@ import (
 	"fmt"
 )
 
-// checks if the RightSizingResponseResultsInnerRecommendation type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &RightSizingResponseResultsInnerRecommendation{}
+// checks if the RightSizingRecommendation type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &RightSizingRecommendation{}
 
-// RightSizingResponseResultsInnerRecommendation struct for RightSizingResponseResultsInnerRecommendation
-type RightSizingResponseResultsInnerRecommendation struct {
+// RightSizingRecommendation struct for RightSizingRecommendation
+type RightSizingRecommendation struct {
 	AllocationType          string `json:"allocationType"`
 	GpuCount                int64  `json:"gpuCount"`
 	GpuMemoryPerDeviceBytes *int64 `json:"gpuMemoryPerDeviceBytes,omitempty"`
@@ -33,30 +33,30 @@ type RightSizingResponseResultsInnerRecommendation struct {
 	Warning *string `json:"warning,omitempty"`
 }
 
-type _RightSizingResponseResultsInnerRecommendation RightSizingResponseResultsInnerRecommendation
+type _RightSizingRecommendation RightSizingRecommendation
 
-// NewRightSizingResponseResultsInnerRecommendation instantiates a new RightSizingResponseResultsInnerRecommendation object
+// NewRightSizingRecommendation instantiates a new RightSizingRecommendation object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingResponseResultsInnerRecommendation(allocationType string, gpuCount int64, estimated bool) *RightSizingResponseResultsInnerRecommendation {
-	this := RightSizingResponseResultsInnerRecommendation{}
+func NewRightSizingRecommendation(allocationType string, gpuCount int64, estimated bool) *RightSizingRecommendation {
+	this := RightSizingRecommendation{}
 	this.AllocationType = allocationType
 	this.GpuCount = gpuCount
 	this.Estimated = estimated
 	return &this
 }
 
-// NewRightSizingResponseResultsInnerRecommendationWithDefaults instantiates a new RightSizingResponseResultsInnerRecommendation object
+// NewRightSizingRecommendationWithDefaults instantiates a new RightSizingRecommendation object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRightSizingResponseResultsInnerRecommendationWithDefaults() *RightSizingResponseResultsInnerRecommendation {
-	this := RightSizingResponseResultsInnerRecommendation{}
+func NewRightSizingRecommendationWithDefaults() *RightSizingRecommendation {
+	this := RightSizingRecommendation{}
 	return &this
 }
 
 // GetAllocationType returns the AllocationType field value
-func (o *RightSizingResponseResultsInnerRecommendation) GetAllocationType() string {
+func (o *RightSizingRecommendation) GetAllocationType() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -67,7 +67,7 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetAllocationType() stri
 
 // GetAllocationTypeOk returns a tuple with the AllocationType field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponseResultsInnerRecommendation) GetAllocationTypeOk() (*string, bool) {
+func (o *RightSizingRecommendation) GetAllocationTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -75,12 +75,12 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetAllocationTypeOk() (*
 }
 
 // SetAllocationType sets field value
-func (o *RightSizingResponseResultsInnerRecommendation) SetAllocationType(v string) {
+func (o *RightSizingRecommendation) SetAllocationType(v string) {
 	o.AllocationType = v
 }
 
 // GetGpuCount returns the GpuCount field value
-func (o *RightSizingResponseResultsInnerRecommendation) GetGpuCount() int64 {
+func (o *RightSizingRecommendation) GetGpuCount() int64 {
 	if o == nil {
 		var ret int64
 		return ret
@@ -91,7 +91,7 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetGpuCount() int64 {
 
 // GetGpuCountOk returns a tuple with the GpuCount field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponseResultsInnerRecommendation) GetGpuCountOk() (*int64, bool) {
+func (o *RightSizingRecommendation) GetGpuCountOk() (*int64, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -99,12 +99,12 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetGpuCountOk() (*int64,
 }
 
 // SetGpuCount sets field value
-func (o *RightSizingResponseResultsInnerRecommendation) SetGpuCount(v int64) {
+func (o *RightSizingRecommendation) SetGpuCount(v int64) {
 	o.GpuCount = v
 }
 
 // GetGpuMemoryPerDeviceBytes returns the GpuMemoryPerDeviceBytes field value if set, zero value otherwise.
-func (o *RightSizingResponseResultsInnerRecommendation) GetGpuMemoryPerDeviceBytes() int64 {
+func (o *RightSizingRecommendation) GetGpuMemoryPerDeviceBytes() int64 {
 	if o == nil || IsNil(o.GpuMemoryPerDeviceBytes) {
 		var ret int64
 		return ret
@@ -114,7 +114,7 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetGpuMemoryPerDeviceByt
 
 // GetGpuMemoryPerDeviceBytesOk returns a tuple with the GpuMemoryPerDeviceBytes field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponseResultsInnerRecommendation) GetGpuMemoryPerDeviceBytesOk() (*int64, bool) {
+func (o *RightSizingRecommendation) GetGpuMemoryPerDeviceBytesOk() (*int64, bool) {
 	if o == nil || IsNil(o.GpuMemoryPerDeviceBytes) {
 		return nil, false
 	}
@@ -122,7 +122,7 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetGpuMemoryPerDeviceByt
 }
 
 // HasGpuMemoryPerDeviceBytes returns a boolean if a field has been set.
-func (o *RightSizingResponseResultsInnerRecommendation) HasGpuMemoryPerDeviceBytes() bool {
+func (o *RightSizingRecommendation) HasGpuMemoryPerDeviceBytes() bool {
 	if o != nil && !IsNil(o.GpuMemoryPerDeviceBytes) {
 		return true
 	}
@@ -131,12 +131,12 @@ func (o *RightSizingResponseResultsInnerRecommendation) HasGpuMemoryPerDeviceByt
 }
 
 // SetGpuMemoryPerDeviceBytes gets a reference to the given int64 and assigns it to the GpuMemoryPerDeviceBytes field.
-func (o *RightSizingResponseResultsInnerRecommendation) SetGpuMemoryPerDeviceBytes(v int64) {
+func (o *RightSizingRecommendation) SetGpuMemoryPerDeviceBytes(v int64) {
 	o.GpuMemoryPerDeviceBytes = &v
 }
 
 // GetEstimated returns the Estimated field value
-func (o *RightSizingResponseResultsInnerRecommendation) GetEstimated() bool {
+func (o *RightSizingRecommendation) GetEstimated() bool {
 	if o == nil {
 		var ret bool
 		return ret
@@ -147,7 +147,7 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetEstimated() bool {
 
 // GetEstimatedOk returns a tuple with the Estimated field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponseResultsInnerRecommendation) GetEstimatedOk() (*bool, bool) {
+func (o *RightSizingRecommendation) GetEstimatedOk() (*bool, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -155,12 +155,12 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetEstimatedOk() (*bool,
 }
 
 // SetEstimated sets field value
-func (o *RightSizingResponseResultsInnerRecommendation) SetEstimated(v bool) {
+func (o *RightSizingRecommendation) SetEstimated(v bool) {
 	o.Estimated = v
 }
 
 // GetWarning returns the Warning field value if set, zero value otherwise.
-func (o *RightSizingResponseResultsInnerRecommendation) GetWarning() string {
+func (o *RightSizingRecommendation) GetWarning() string {
 	if o == nil || IsNil(o.Warning) {
 		var ret string
 		return ret
@@ -170,7 +170,7 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetWarning() string {
 
 // GetWarningOk returns a tuple with the Warning field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponseResultsInnerRecommendation) GetWarningOk() (*string, bool) {
+func (o *RightSizingRecommendation) GetWarningOk() (*string, bool) {
 	if o == nil || IsNil(o.Warning) {
 		return nil, false
 	}
@@ -178,7 +178,7 @@ func (o *RightSizingResponseResultsInnerRecommendation) GetWarningOk() (*string,
 }
 
 // HasWarning returns a boolean if a field has been set.
-func (o *RightSizingResponseResultsInnerRecommendation) HasWarning() bool {
+func (o *RightSizingRecommendation) HasWarning() bool {
 	if o != nil && !IsNil(o.Warning) {
 		return true
 	}
@@ -187,11 +187,11 @@ func (o *RightSizingResponseResultsInnerRecommendation) HasWarning() bool {
 }
 
 // SetWarning gets a reference to the given string and assigns it to the Warning field.
-func (o *RightSizingResponseResultsInnerRecommendation) SetWarning(v string) {
+func (o *RightSizingRecommendation) SetWarning(v string) {
 	o.Warning = &v
 }
 
-func (o RightSizingResponseResultsInnerRecommendation) MarshalJSON() ([]byte, error) {
+func (o RightSizingRecommendation) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -199,7 +199,7 @@ func (o RightSizingResponseResultsInnerRecommendation) MarshalJSON() ([]byte, er
 	return json.Marshal(toSerialize)
 }
 
-func (o RightSizingResponseResultsInnerRecommendation) ToMap() (map[string]interface{}, error) {
+func (o RightSizingRecommendation) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["allocationType"] = o.AllocationType
 	toSerialize["gpuCount"] = o.GpuCount
@@ -213,7 +213,7 @@ func (o RightSizingResponseResultsInnerRecommendation) ToMap() (map[string]inter
 	return toSerialize, nil
 }
 
-func (o *RightSizingResponseResultsInnerRecommendation) UnmarshalJSON(data []byte) (err error) {
+func (o *RightSizingRecommendation) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -242,55 +242,55 @@ func (o *RightSizingResponseResultsInnerRecommendation) UnmarshalJSON(data []byt
 	//
 	fmt.Sprintf("dummy")
 
-	varRightSizingResponseResultsInnerRecommendation := _RightSizingResponseResultsInnerRecommendation{}
+	varRightSizingRecommendation := _RightSizingRecommendation{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	// RUNAI
 	// decoder.DisallowUnknownFields()
 	//
-	err = decoder.Decode(&varRightSizingResponseResultsInnerRecommendation)
+	err = decoder.Decode(&varRightSizingRecommendation)
 
 	if err != nil {
 		return err
 	}
 
-	*o = RightSizingResponseResultsInnerRecommendation(varRightSizingResponseResultsInnerRecommendation)
+	*o = RightSizingRecommendation(varRightSizingRecommendation)
 
 	return err
 }
 
-type NullableRightSizingResponseResultsInnerRecommendation struct {
-	value *RightSizingResponseResultsInnerRecommendation
+type NullableRightSizingRecommendation struct {
+	value *RightSizingRecommendation
 	isSet bool
 }
 
-func (v NullableRightSizingResponseResultsInnerRecommendation) Get() *RightSizingResponseResultsInnerRecommendation {
+func (v NullableRightSizingRecommendation) Get() *RightSizingRecommendation {
 	return v.value
 }
 
-func (v *NullableRightSizingResponseResultsInnerRecommendation) Set(val *RightSizingResponseResultsInnerRecommendation) {
+func (v *NullableRightSizingRecommendation) Set(val *RightSizingRecommendation) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRightSizingResponseResultsInnerRecommendation) IsSet() bool {
+func (v NullableRightSizingRecommendation) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRightSizingResponseResultsInnerRecommendation) Unset() {
+func (v *NullableRightSizingRecommendation) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRightSizingResponseResultsInnerRecommendation(val *RightSizingResponseResultsInnerRecommendation) *NullableRightSizingResponseResultsInnerRecommendation {
-	return &NullableRightSizingResponseResultsInnerRecommendation{value: val, isSet: true}
+func NewNullableRightSizingRecommendation(val *RightSizingRecommendation) *NullableRightSizingRecommendation {
+	return &NullableRightSizingRecommendation{value: val, isSet: true}
 }
 
-func (v NullableRightSizingResponseResultsInnerRecommendation) MarshalJSON() ([]byte, error) {
+func (v NullableRightSizingRecommendation) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRightSizingResponseResultsInnerRecommendation) UnmarshalJSON(src []byte) error {
+func (v *NullableRightSizingRecommendation) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

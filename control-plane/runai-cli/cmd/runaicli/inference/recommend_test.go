@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -111,36 +112,50 @@ func TestRecommendLifecycleKeepsJSONClean(t *testing.T) {
 }
 
 func TestRecommendCommandPreservesCallerCancellation(t *testing.T) {
-	directory := t.TempDir()
-	if err := os.WriteFile(filepath.Join(directory, "config.json"), []byte("{}"), 0600); err != nil {
-		t.Fatal(err)
-	}
-	if err := instance.Initializing(config.Options{ConfigPath: directory, ConfigFile: "config.json"}); err != nil {
-		t.Fatal(err)
-	}
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		_, _ = w.Write([]byte(`{"image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","results":[]}`))
-	}))
-	defer server.Close()
-	if err := instance.SetCPURL(server.URL); err != nil {
-		t.Fatal(err)
-	}
-	if err := instance.SetCluster("cluster-id", "test", ""); err != nil {
-		t.Fatal(err)
-	}
-	instance.SetToken("<test-token>")
-	var output bytes.Buffer
-	root := &cobra.Command{Use: "runai", SilenceErrors: true, SilenceUsage: true}
-	command := newRecommendCommand()
-	root.AddCommand(command)
-	root.AddGroup(&cobra.Group{ID: command.GroupID, Title: "Inference"})
-	root.SetOut(&output)
-	root.SetErr(&output)
-	root.SetArgs([]string{"recommend", "--image", "nvcr.io/nim/nvidia/example", "--tag", "1.2.3"})
-	ctx, cancel := context.WithCancel(context.Background())
-	cancel()
-	if err := root.ExecuteContext(ctx); err == nil || !strings.Contains(err.Error(), "context canceled") {
-		t.Fatalf("command discarded caller cancellation: %v output=%s", err, output.String())
+	for _, tc := range []struct{ name, config string }{
+		{"reporting disabled", `{}`},
+		{"invalid reporter", `{"transaction":{"settings":{"metrics":{"enabled":true,"report":{"type":"invalid"}}}}}`},
+		{"malformed reporting config", `{"transaction":{"settings":{"metrics":{"enabled":"invalid"}}}}`},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			directory := t.TempDir()
+			if err := os.WriteFile(filepath.Join(directory, "config.json"), []byte(tc.config), 0600); err != nil {
+				t.Fatal(err)
+			}
+			if err := instance.Initializing(config.Options{ConfigPath: directory, ConfigFile: "config.json"}); err != nil {
+				t.Fatal(err)
+			}
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, _ = w.Write([]byte(`{"image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","results":[]}`))
+			}))
+			defer server.Close()
+			if err := instance.SetCPURL(server.URL); err != nil {
+				t.Fatal(err)
+			}
+			if err := instance.SetCluster("cluster-id", "test", ""); err != nil {
+				t.Fatal(err)
+			}
+			instance.SetToken("<test-token>")
+			var output, errorOutput bytes.Buffer
+			root := &cobra.Command{Use: "runai", SilenceErrors: true, SilenceUsage: true}
+			command := newRecommendCommand()
+			root.AddCommand(command)
+			root.AddGroup(&cobra.Group{ID: command.GroupID, Title: "Inference"})
+			root.SetOut(&output)
+			root.SetErr(&errorOutput)
+			root.SetArgs([]string{"recommend", "--image", "nvcr.io/nim/nvidia/example", "--tag", "1.2.3"})
+			ctx, cancel := context.WithCancel(context.Background())
+			cancel()
+			if err := root.ExecuteContext(ctx); !errors.Is(err, context.Canceled) {
+				t.Fatalf("command discarded caller cancellation: %v output=%s", err, output.String())
+			}
+			if !errors.Is(instance.GetTxn().GetError(), context.Canceled) || instance.GetTxn().GetInfo().Cmd != "runai recommend" {
+				t.Fatalf("failed command was not reported: error=%v command=%q", instance.GetTxn().GetError(), instance.GetTxn().GetInfo().Cmd)
+			}
+			if output.Len() != 0 || !strings.Contains(errorOutput.String(), "context canceled") {
+				t.Fatalf("failure must only write to stderr: stdout=%q stderr=%q", output.String(), errorOutput.String())
+			}
+		})
 	}
 }

@@ -169,7 +169,9 @@ func TestInventoryAddsDeadlineForCallerWithoutOne(t *testing.T) {
 		}
 		return &clusterapi.GetNodepoolsMinimal200Response{}, nil
 	}), 30*time.Second)
-	_, _ = client.Get(context.Background(), clusterID)
+	if _, err := client.Get(context.Background(), clusterID); err != nil {
+		t.Fatalf("inventory lookup with an added deadline failed: %v", err)
+	}
 }
 
 func TestInventoryTimeoutCancelsBlockedDependency(t *testing.T) {

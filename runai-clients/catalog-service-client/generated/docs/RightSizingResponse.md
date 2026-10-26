@@ -6,13 +6,13 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Image** | **string** |  | 
 **Tag** | **string** |  | 
-**Results** | [**[]RightSizingResponseResultsInner**](RightSizingResponseResultsInner.md) |  | 
+**Results** | [**[]RightSizingResult**](RightSizingResult.md) |  | 
 
 ## Methods
 
 ### NewRightSizingResponse
 
-`func NewRightSizingResponse(image string, tag string, results []RightSizingResponseResultsInner, ) *RightSizingResponse`
+`func NewRightSizingResponse(image string, tag string, results []RightSizingResult, ) *RightSizingResponse`
 
 NewRightSizingResponse instantiates a new RightSizingResponse object
 This constructor will assign default values to properties that have it defined,
@@ -69,20 +69,20 @@ SetTag sets Tag field to given value.
 
 ### GetResults
 
-`func (o *RightSizingResponse) GetResults() []RightSizingResponseResultsInner`
+`func (o *RightSizingResponse) GetResults() []RightSizingResult`
 
 GetResults returns the Results field if non-nil, zero value otherwise.
 
 ### GetResultsOk
 
-`func (o *RightSizingResponse) GetResultsOk() (*[]RightSizingResponseResultsInner, bool)`
+`func (o *RightSizingResponse) GetResultsOk() (*[]RightSizingResult, bool)`
 
 GetResultsOk returns a tuple with the Results field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetResults
 
-`func (o *RightSizingResponse) SetResults(v []RightSizingResponseResultsInner)`
+`func (o *RightSizingResponse) SetResults(v []RightSizingResult)`
 
 SetResults sets Results field to given value.
 

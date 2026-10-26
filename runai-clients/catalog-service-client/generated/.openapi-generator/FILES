@@ -42,10 +42,10 @@ docs/RegistryIntegrationCreationRequest.md
 docs/RegistryIntegrationListResponse.md
 docs/RegistryIntegrationUpdateRequest.md
 docs/RightSizingAPI.md
+docs/RightSizingRecommendation.md
 docs/RightSizingRequest.md
 docs/RightSizingResponse.md
-docs/RightSizingResponseResultsInner.md
-docs/RightSizingResponseResultsInnerRecommendation.md
+docs/RightSizingResult.md
 docs/ScopeType.md
 docs/SettingsAPI.md
 docs/SubmissionError.md
@@ -77,10 +77,10 @@ model_registry_integration.go
 model_registry_integration_creation_request.go
 model_registry_integration_list_response.go
 model_registry_integration_update_request.go
+model_right_sizing_recommendation.go
 model_right_sizing_request.go
 model_right_sizing_response.go
-model_right_sizing_response_results_inner.go
-model_right_sizing_response_results_inner_recommendation.go
+model_right_sizing_result.go
 model_scope_type.go
 model_submission_error.go
 model_update_catalog_setting_by_key_request.go

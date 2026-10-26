@@ -675,6 +675,51 @@ export interface RegistryIntegrationUpdateRequest {
 /**
  * 
  * @export
+ * @interface RightSizingRecommendation
+ */
+export interface RightSizingRecommendation {
+    /**
+     * 
+     * @type {string}
+     * @memberof RightSizingRecommendation
+     */
+    'allocationType': RightSizingRecommendationAllocationTypeEnum;
+    /**
+     * 
+     * @type {number}
+     * @memberof RightSizingRecommendation
+     */
+    'gpuCount': number;
+    /**
+     * 
+     * @type {number}
+     * @memberof RightSizingRecommendation
+     */
+    'gpuMemoryPerDeviceBytes'?: number;
+    /**
+     * Whether GPU count is a naive estimate. False describes allocation arithmetic only; it does not verify runtime or hardware compatibility.
+     * @type {boolean}
+     * @memberof RightSizingRecommendation
+     */
+    'estimated': boolean;
+    /**
+     * Conditional sizing prerequisites, unverified hardware/runtime compatibility, and limitations of an estimated count. Read before using the allocation.
+     * @type {string}
+     * @memberof RightSizingRecommendation
+     */
+    'warning'?: string;
+}
+
+export const RightSizingRecommendationAllocationTypeEnum = {
+    Memory: 'gpu_memory',
+    Count: 'gpu_count'
+} as const;
+
+export type RightSizingRecommendationAllocationTypeEnum = typeof RightSizingRecommendationAllocationTypeEnum[keyof typeof RightSizingRecommendationAllocationTypeEnum];
+
+/**
+ * 
+ * @export
  * @interface RightSizingRequest
  */
 export interface RightSizingRequest {
@@ -723,124 +768,79 @@ export interface RightSizingResponse {
     'tag': string;
     /**
      * 
-     * @type {Array<RightSizingResponseResultsInner>}
+     * @type {Array<RightSizingResult>}
      * @memberof RightSizingResponse
      */
-    'results': Array<RightSizingResponseResultsInner>;
+    'results': Array<RightSizingResult>;
 }
 /**
  * 
  * @export
- * @interface RightSizingResponseResultsInner
+ * @interface RightSizingResult
  */
-export interface RightSizingResponseResultsInner {
+export interface RightSizingResult {
     /**
      * 
      * @type {string}
-     * @memberof RightSizingResponseResultsInner
+     * @memberof RightSizingResult
      */
     'gpuType': string;
     /**
      * Reported per-device capacity, not free memory or a quota guarantee.
      * @type {number}
-     * @memberof RightSizingResponseResultsInner
+     * @memberof RightSizingResult
      */
     'gpuMemoryCapacityBytes'?: number;
     /**
      * 
      * @type {string}
-     * @memberof RightSizingResponseResultsInner
+     * @memberof RightSizingResult
      */
-    'status': RightSizingResponseResultsInnerStatusEnum;
+    'status': RightSizingResultStatusEnum;
     /**
      * Published NGC minimum for the source profile, before allocation rounding.
      * @type {number}
-     * @memberof RightSizingResponseResultsInner
+     * @memberof RightSizingResult
      */
     'minimumGpuMemoryPerDeviceGb'?: number;
     /**
      * 
      * @type {string}
-     * @memberof RightSizingResponseResultsInner
+     * @memberof RightSizingResult
      */
     'profileId'?: string;
     /**
      * 
      * @type {string}
-     * @memberof RightSizingResponseResultsInner
+     * @memberof RightSizingResult
      */
     'precision'?: string;
     /**
      * 
      * @type {string}
-     * @memberof RightSizingResponseResultsInner
+     * @memberof RightSizingResult
      */
     'inferenceBackend'?: string;
     /**
      * Explanation when sizing cannot be recommended.
      * @type {string}
-     * @memberof RightSizingResponseResultsInner
+     * @memberof RightSizingResult
      */
     'reason'?: string;
     /**
      * 
-     * @type {RightSizingResponseResultsInnerRecommendation}
-     * @memberof RightSizingResponseResultsInner
+     * @type {RightSizingRecommendation}
+     * @memberof RightSizingResult
      */
-    'recommendation'?: RightSizingResponseResultsInnerRecommendation | null;
+    'recommendation'?: RightSizingRecommendation | null;
 }
 
-export const RightSizingResponseResultsInnerStatusEnum = {
+export const RightSizingResultStatusEnum = {
     Recommended: 'recommended',
     NoRecommendation: 'no_recommendation'
 } as const;
 
-export type RightSizingResponseResultsInnerStatusEnum = typeof RightSizingResponseResultsInnerStatusEnum[keyof typeof RightSizingResponseResultsInnerStatusEnum];
-
-/**
- * 
- * @export
- * @interface RightSizingResponseResultsInnerRecommendation
- */
-export interface RightSizingResponseResultsInnerRecommendation {
-    /**
-     * 
-     * @type {string}
-     * @memberof RightSizingResponseResultsInnerRecommendation
-     */
-    'allocationType': RightSizingResponseResultsInnerRecommendationAllocationTypeEnum;
-    /**
-     * 
-     * @type {number}
-     * @memberof RightSizingResponseResultsInnerRecommendation
-     */
-    'gpuCount': number;
-    /**
-     * 
-     * @type {number}
-     * @memberof RightSizingResponseResultsInnerRecommendation
-     */
-    'gpuMemoryPerDeviceBytes'?: number;
-    /**
-     * Whether GPU count is a naive estimate. False describes allocation arithmetic only; it does not verify runtime or hardware compatibility.
-     * @type {boolean}
-     * @memberof RightSizingResponseResultsInnerRecommendation
-     */
-    'estimated': boolean;
-    /**
-     * Conditional sizing prerequisites, unverified hardware/runtime compatibility, and limitations of an estimated count. Read before using the allocation.
-     * @type {string}
-     * @memberof RightSizingResponseResultsInnerRecommendation
-     */
-    'warning'?: string;
-}
-
-export const RightSizingResponseResultsInnerRecommendationAllocationTypeEnum = {
-    Memory: 'gpu_memory',
-    Count: 'gpu_count'
-} as const;
-
-export type RightSizingResponseResultsInnerRecommendationAllocationTypeEnum = typeof RightSizingResponseResultsInnerRecommendationAllocationTypeEnum[keyof typeof RightSizingResponseResultsInnerRecommendationAllocationTypeEnum];
+export type RightSizingResultStatusEnum = typeof RightSizingResultStatusEnum[keyof typeof RightSizingResultStatusEnum];
 
 /**
  * 

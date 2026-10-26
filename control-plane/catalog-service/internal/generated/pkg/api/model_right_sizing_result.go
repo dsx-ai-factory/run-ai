@@ -16,11 +16,11 @@ package api
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
-var dummyRightSizingResponseResultsInner = runaihttp.AssertPattern
+var dummyRightSizingResult = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-type RightSizingResponseResultsInner struct {
+type RightSizingResult struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuType string `json:"gpuType"`
@@ -66,13 +66,13 @@ type RightSizingResponseResultsInner struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Recommendation *RightSizingResponseResultsInnerRecommendation `json:"recommendation,omitempty"`
-	Recommendation *RightSizingResponseResultsInnerRecommendation `json:"recommendation,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//Recommendation *RightSizingRecommendation `json:"recommendation,omitempty"`
+	Recommendation *RightSizingRecommendation `json:"recommendation,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
-// AssertRightSizingResponseResultsInnerRequired checks if the required fields are not zero-ed
-func AssertRightSizingResponseResultsInnerRequired(obj RightSizingResponseResultsInner) error {
+// AssertRightSizingResultRequired checks if the required fields are not zero-ed
+func AssertRightSizingResultRequired(obj RightSizingResult) error {
 	elements := map[string]interface{}{
 		"gpuType": obj.GpuType,
 		"status":  obj.Status,
@@ -84,15 +84,15 @@ func AssertRightSizingResponseResultsInnerRequired(obj RightSizingResponseResult
 	}
 
 	if obj.Recommendation != nil {
-		if err := AssertRightSizingResponseResultsInnerRecommendationRequired(*obj.Recommendation); err != nil {
+		if err := AssertRightSizingRecommendationRequired(*obj.Recommendation); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// AssertRightSizingResponseResultsInnerConstraints checks if the values respects the defined constraints
-func AssertRightSizingResponseResultsInnerConstraints(obj RightSizingResponseResultsInner) error {
+// AssertRightSizingResultConstraints checks if the values respects the defined constraints
+func AssertRightSizingResultConstraints(obj RightSizingResult) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
@@ -139,7 +139,7 @@ func AssertRightSizingResponseResultsInnerConstraints(obj RightSizingResponseRes
 
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.Recommendation != nil {
-		if err := AssertRightSizingResponseResultsInnerRecommendationConstraints(*obj.Recommendation); err != nil {
+		if err := AssertRightSizingRecommendationConstraints(*obj.Recommendation); err != nil {
 			return err
 		}
 	}

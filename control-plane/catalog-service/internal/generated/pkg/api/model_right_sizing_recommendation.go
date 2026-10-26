@@ -20,11 +20,11 @@ import (
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
-var dummyRightSizingResponseResultsInnerRecommendation = runaihttp.AssertPattern
+var dummyRightSizingRecommendation = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-type RightSizingResponseResultsInnerRecommendation struct {
+type RightSizingRecommendation struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//AllocationType string `json:"allocationType"`
@@ -54,8 +54,8 @@ type RightSizingResponseResultsInnerRecommendation struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
-// AssertRightSizingResponseResultsInnerRecommendationRequired checks if the required fields are not zero-ed
-func AssertRightSizingResponseResultsInnerRecommendationRequired(obj RightSizingResponseResultsInnerRecommendation) error {
+// AssertRightSizingRecommendationRequired checks if the required fields are not zero-ed
+func AssertRightSizingRecommendationRequired(obj RightSizingRecommendation) error {
 	elements := map[string]interface{}{
 		"allocationType": obj.AllocationType,
 		"gpuCount":       obj.GpuCount,
@@ -70,8 +70,8 @@ func AssertRightSizingResponseResultsInnerRecommendationRequired(obj RightSizing
 	return nil
 }
 
-// AssertRightSizingResponseResultsInnerRecommendationConstraints checks if the values respects the defined constraints
-func AssertRightSizingResponseResultsInnerRecommendationConstraints(obj RightSizingResponseResultsInnerRecommendation) error {
+// AssertRightSizingRecommendationConstraints checks if the values respects the defined constraints
+func AssertRightSizingRecommendationConstraints(obj RightSizingRecommendation) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

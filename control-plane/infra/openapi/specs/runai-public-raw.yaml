@@ -61132,6 +61132,73 @@ components:
           description: >-
             Exact inventory GPU type. Omitted or null evaluates all reported
             types and capacities.
+    RightSizingRecommendation:
+      type: object
+      nullable: true
+      required:
+        - allocationType
+        - gpuCount
+        - estimated
+      properties:
+        allocationType:
+          type: string
+          enum:
+            - gpu_memory
+            - gpu_count
+        gpuCount:
+          type: integer
+          format: int64
+          minimum: 1
+        gpuMemoryPerDeviceBytes:
+          type: integer
+          format: int64
+          minimum: 1
+        estimated:
+          type: boolean
+          description: >-
+            Whether GPU count is a naive estimate. False describes allocation
+            arithmetic only; it does not verify runtime or hardware
+            compatibility.
+        warning:
+          type: string
+          description: >-
+            Conditional sizing prerequisites, unverified hardware/runtime
+            compatibility, and limitations of an estimated count. Read before
+            using the allocation.
+    RightSizingResult:
+      type: object
+      required:
+        - gpuType
+        - status
+      properties:
+        gpuType:
+          type: string
+        gpuMemoryCapacityBytes:
+          type: integer
+          format: int64
+          description: 'Reported per-device capacity, not free memory or a quota guarantee.'
+        status:
+          type: string
+          enum:
+            - recommended
+            - no_recommendation
+        minimumGpuMemoryPerDeviceGb:
+          type: number
+          format: double
+          description: >-
+            Published NGC minimum for the source profile, before allocation
+            rounding.
+        profileId:
+          type: string
+        precision:
+          type: string
+        inferenceBackend:
+          type: string
+        reason:
+          type: string
+          description: Explanation when sizing cannot be recommended.
+        recommendation:
+          $ref: '#/components/schemas/RightSizingRecommendation'
     RightSizingResponse:
       type: object
       required:
@@ -61146,72 +61213,7 @@ components:
         results:
           type: array
           items:
-            type: object
-            required:
-              - gpuType
-              - status
-            properties:
-              gpuType:
-                type: string
-              gpuMemoryCapacityBytes:
-                type: integer
-                format: int64
-                description: >-
-                  Reported per-device capacity, not free memory or a quota
-                  guarantee.
-              status:
-                type: string
-                enum:
-                  - recommended
-                  - no_recommendation
-              minimumGpuMemoryPerDeviceGb:
-                type: number
-                format: double
-                description: >-
-                  Published NGC minimum for the source profile, before
-                  allocation rounding.
-              profileId:
-                type: string
-              precision:
-                type: string
-              inferenceBackend:
-                type: string
-              reason:
-                type: string
-                description: Explanation when sizing cannot be recommended.
-              recommendation:
-                type: object
-                nullable: true
-                required:
-                  - allocationType
-                  - gpuCount
-                  - estimated
-                properties:
-                  allocationType:
-                    type: string
-                    enum:
-                      - gpu_memory
-                      - gpu_count
-                  gpuCount:
-                    type: integer
-                    format: int64
-                    minimum: 1
-                  gpuMemoryPerDeviceBytes:
-                    type: integer
-                    format: int64
-                    minimum: 1
-                  estimated:
-                    type: boolean
-                    description: >-
-                      Whether GPU count is a naive estimate. False describes
-                      allocation arithmetic only; it does not verify runtime or
-                      hardware compatibility.
-                  warning:
-                    type: string
-                    description: >-
-                      Conditional sizing prerequisites, unverified
-                      hardware/runtime compatibility, and limitations of an
-                      estimated count. Read before using the allocation.
+            $ref: '#/components/schemas/RightSizingResult'
     EnableNgcIntegrationSetting:
       type: object
       properties:

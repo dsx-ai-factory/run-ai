@@ -1,0 +1,27 @@
+type: object
+required: [gpuType, status]
+properties:
+  gpuType:
+    type: string
+  gpuMemoryCapacityBytes:
+    type: integer
+    format: int64
+    description: Reported per-device capacity, not free memory or a quota guarantee.
+  status:
+    type: string
+    enum: [recommended, no_recommendation]
+  minimumGpuMemoryPerDeviceGb:
+    type: number
+    format: double
+    description: Published NGC minimum for the source profile, before allocation rounding.
+  profileId:
+    type: string
+  precision:
+    type: string
+  inferenceBackend:
+    type: string
+  reason:
+    type: string
+    description: Explanation when sizing cannot be recommended.
+  recommendation:
+    $ref: './RightSizingRecommendation.yaml'

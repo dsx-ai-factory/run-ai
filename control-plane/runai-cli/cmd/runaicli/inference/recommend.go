@@ -9,9 +9,9 @@ import (
 	"fmt"
 	"io"
 
-	apiconfig "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api/config"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/cmdtxn"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
-	clierrors "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/errors"
+	sizingclient "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/rightsizing/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/transaction/info"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/transaction/reporter"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
@@ -38,7 +38,12 @@ func newRecommendCommand() *cobra.Command {
 			if id := instance.GetTxn().GetCtx().Value(info.Id); id != nil {
 				ctx = context.WithValue(ctx, info.Id, id)
 			}
-			return runRecommendation(ctx, instance.GetConfigValue(config.ControlPlaneUrl), instance.GetToken(), *request, cmd.OutOrStdout())
+			if err := runRecommendation(ctx, instance.GetConfigValue(config.ControlPlaneUrl), instance.GetToken(), *request, cmd.OutOrStdout()); err != nil {
+				// Reporting must not replace the command's original failure.
+				_ = cmdtxn.CmdErrorPrintAndSet(cmd, "inference recommendation failed", err)
+				return err
+			}
+			return nil
 		},
 	}
 	command.Flags().StringVar(&image, "image", "", "Untagged nvcr.io/nim/organization/model image")
@@ -50,16 +55,13 @@ func newRecommendCommand() *cobra.Command {
 }
 
 func runRecommendation(ctx context.Context, baseURL, token string, request catalog.RightSizingRequest, out io.Writer) error {
-	configuration, err := apiconfig.CreateCatalogConfig(baseURL, token)
+	client, err := sizingclient.NewClient(baseURL, token)
 	if err != nil {
 		return fmt.Errorf("configure sizing API: %w", err)
 	}
-	result, response, err := catalog.NewAPIClient(configuration).RightSizingAPI.RecommendInferenceResources(ctx).RightSizingRequest(request).Execute()
-	if response != nil && response.Body != nil {
-		defer response.Body.Close()
-	}
+	result, err := client.Recommend(ctx, request)
 	if err != nil {
-		return clierrors.HandleResponseError(response, err)
+		return err
 	}
 	encoder := json.NewEncoder(out)
 	encoder.SetIndent("", "  ")

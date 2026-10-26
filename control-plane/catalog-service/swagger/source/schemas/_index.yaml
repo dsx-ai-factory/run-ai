@@ -43,3 +43,7 @@ RightSizingRequest:
   $ref: './rightSizing/RightSizingRequest.yaml'
 RightSizingResponse:
   $ref: './rightSizing/RightSizingResponse.yaml'
+RightSizingResult:
+  $ref: './rightSizing/RightSizingResult.yaml'
+RightSizingRecommendation:
+  $ref: './rightSizing/RightSizingRecommendation.yaml'

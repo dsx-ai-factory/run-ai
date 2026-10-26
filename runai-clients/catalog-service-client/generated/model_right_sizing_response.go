@@ -24,9 +24,9 @@ var _ MappedNullable = &RightSizingResponse{}
 
 // RightSizingResponse struct for RightSizingResponse
 type RightSizingResponse struct {
-	Image   string                            `json:"image"`
-	Tag     string                            `json:"tag"`
-	Results []RightSizingResponseResultsInner `json:"results"`
+	Image   string              `json:"image"`
+	Tag     string              `json:"tag"`
+	Results []RightSizingResult `json:"results"`
 }
 
 type _RightSizingResponse RightSizingResponse
@@ -35,7 +35,7 @@ type _RightSizingResponse RightSizingResponse
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingResponse(image string, tag string, results []RightSizingResponseResultsInner) *RightSizingResponse {
+func NewRightSizingResponse(image string, tag string, results []RightSizingResult) *RightSizingResponse {
 	this := RightSizingResponse{}
 	this.Image = image
 	this.Tag = tag
@@ -100,9 +100,9 @@ func (o *RightSizingResponse) SetTag(v string) {
 }
 
 // GetResults returns the Results field value
-func (o *RightSizingResponse) GetResults() []RightSizingResponseResultsInner {
+func (o *RightSizingResponse) GetResults() []RightSizingResult {
 	if o == nil {
-		var ret []RightSizingResponseResultsInner
+		var ret []RightSizingResult
 		return ret
 	}
 
@@ -111,7 +111,7 @@ func (o *RightSizingResponse) GetResults() []RightSizingResponseResultsInner {
 
 // GetResultsOk returns a tuple with the Results field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponse) GetResultsOk() ([]RightSizingResponseResultsInner, bool) {
+func (o *RightSizingResponse) GetResultsOk() ([]RightSizingResult, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -119,7 +119,7 @@ func (o *RightSizingResponse) GetResultsOk() ([]RightSizingResponseResultsInner,
 }
 
 // SetResults sets field value
-func (o *RightSizingResponse) SetResults(v []RightSizingResponseResultsInner) {
+func (o *RightSizingResponse) SetResults(v []RightSizingResult) {
 	o.Results = v
 }
 

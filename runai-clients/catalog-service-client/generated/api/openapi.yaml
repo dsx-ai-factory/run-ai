@@ -2368,82 +2368,7 @@ components:
       - image
       - tag
       type: object
-    RightSizingResponse:
-      example:
-        image: image
-        tag: tag
-        results:
-        - minimumGpuMemoryPerDeviceGb: 6.027456183070403
-          reason: reason
-          gpuMemoryCapacityBytes: 0
-          profileId: profileId
-          precision: precision
-          recommendation:
-            estimated: true
-            gpuMemoryPerDeviceBytes: 1
-            warning: warning
-            allocationType: gpu_memory
-            gpuCount: 1
-          gpuType: gpuType
-          status: recommended
-          inferenceBackend: inferenceBackend
-        - minimumGpuMemoryPerDeviceGb: 6.027456183070403
-          reason: reason
-          gpuMemoryCapacityBytes: 0
-          profileId: profileId
-          precision: precision
-          recommendation:
-            estimated: true
-            gpuMemoryPerDeviceBytes: 1
-            warning: warning
-            allocationType: gpu_memory
-            gpuCount: 1
-          gpuType: gpuType
-          status: recommended
-          inferenceBackend: inferenceBackend
-      properties:
-        image:
-          type: string
-        tag:
-          type: string
-        results:
-          items:
-            $ref: '#/components/schemas/RightSizingResponse_results_inner'
-          type: array
-      required:
-      - image
-      - results
-      - tag
-      type: object
-    EnableNgcIntegrationSetting:
-      example:
-        enabled: false
-      properties:
-        enabled:
-          nullable: true
-          type: boolean
-      type: object
-    ComplianceIssues:
-      nullable: true
-      properties:
-        complianceIssues:
-          items:
-            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
-          type: array
-      type: object
-    SubmissionError:
-      allOf:
-      - $ref: '#/components/schemas/Error'
-      - $ref: '#/components/schemas/ComplianceIssues'
-    GetEnableNgcIntegration_value:
-      example:
-        enabled: true
-      properties:
-        enabled:
-          nullable: true
-          type: boolean
-      type: object
-    RightSizingResponse_results_inner_recommendation:
+    RightSizingRecommendation:
       example:
         estimated: true
         gpuMemoryPerDeviceBytes: 1
@@ -2479,7 +2404,7 @@ components:
       - estimated
       - gpuCount
       type: object
-    RightSizingResponse_results_inner:
+    RightSizingResult:
       example:
         minimumGpuMemoryPerDeviceGb: 6.027456183070403
         reason: reason
@@ -2522,10 +2447,85 @@ components:
           description: Explanation when sizing cannot be recommended.
           type: string
         recommendation:
-          $ref: '#/components/schemas/RightSizingResponse_results_inner_recommendation'
+          $ref: '#/components/schemas/RightSizingRecommendation'
       required:
       - gpuType
       - status
+      type: object
+    RightSizingResponse:
+      example:
+        image: image
+        tag: tag
+        results:
+        - minimumGpuMemoryPerDeviceGb: 6.027456183070403
+          reason: reason
+          gpuMemoryCapacityBytes: 0
+          profileId: profileId
+          precision: precision
+          recommendation:
+            estimated: true
+            gpuMemoryPerDeviceBytes: 1
+            warning: warning
+            allocationType: gpu_memory
+            gpuCount: 1
+          gpuType: gpuType
+          status: recommended
+          inferenceBackend: inferenceBackend
+        - minimumGpuMemoryPerDeviceGb: 6.027456183070403
+          reason: reason
+          gpuMemoryCapacityBytes: 0
+          profileId: profileId
+          precision: precision
+          recommendation:
+            estimated: true
+            gpuMemoryPerDeviceBytes: 1
+            warning: warning
+            allocationType: gpu_memory
+            gpuCount: 1
+          gpuType: gpuType
+          status: recommended
+          inferenceBackend: inferenceBackend
+      properties:
+        image:
+          type: string
+        tag:
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/RightSizingResult'
+          type: array
+      required:
+      - image
+      - results
+      - tag
+      type: object
+    EnableNgcIntegrationSetting:
+      example:
+        enabled: false
+      properties:
+        enabled:
+          nullable: true
+          type: boolean
+      type: object
+    ComplianceIssues:
+      nullable: true
+      properties:
+        complianceIssues:
+          items:
+            $ref: '#/components/schemas/ComplianceIssues_complianceIssues_inner'
+          type: array
+      type: object
+    SubmissionError:
+      allOf:
+      - $ref: '#/components/schemas/Error'
+      - $ref: '#/components/schemas/ComplianceIssues'
+    GetEnableNgcIntegration_value:
+      example:
+        enabled: true
+      properties:
+        enabled:
+          nullable: true
+          type: boolean
       type: object
     ComplianceIssues_complianceIssues_inner:
       properties:

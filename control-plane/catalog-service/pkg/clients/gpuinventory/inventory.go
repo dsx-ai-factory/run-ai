@@ -15,6 +15,7 @@ import (
 	"time"
 
 	clusterapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/google/uuid"
 )
 
@@ -54,7 +55,7 @@ func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) 
 		gpuType string
 		memory  int64
 	}
-	seen := make(map[key]bool)
+	seen := datastructs.NewSet[key]()
 	result := make([]Hardware, 0)
 	for _, pool := range pools.Nodepools {
 		for _, gpu := range pool.GpuTypes {
@@ -70,10 +71,10 @@ func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) 
 				memory = *gpu.GpuMemoryBytes
 			}
 			k := key{name, memory}
-			if seen[k] {
+			if seen.Has(k) {
 				continue
 			}
-			seen[k] = true
+			seen.Add(k)
 			hardware := Hardware{Type: name}
 			if memory > 0 {
 				hardware.MemoryBytes = &memory

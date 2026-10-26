@@ -1,4 +1,4 @@
-# RightSizingResponseResultsInnerRecommendation
+# RightSizingRecommendation
 
 ## Properties
 
@@ -12,130 +12,130 @@ Name | Type | Description | Notes
 
 ## Methods
 
-### NewRightSizingResponseResultsInnerRecommendation
+### NewRightSizingRecommendation
 
-`func NewRightSizingResponseResultsInnerRecommendation(allocationType string, gpuCount int64, estimated bool, ) *RightSizingResponseResultsInnerRecommendation`
+`func NewRightSizingRecommendation(allocationType string, gpuCount int64, estimated bool, ) *RightSizingRecommendation`
 
-NewRightSizingResponseResultsInnerRecommendation instantiates a new RightSizingResponseResultsInnerRecommendation object
+NewRightSizingRecommendation instantiates a new RightSizingRecommendation object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewRightSizingResponseResultsInnerRecommendationWithDefaults
+### NewRightSizingRecommendationWithDefaults
 
-`func NewRightSizingResponseResultsInnerRecommendationWithDefaults() *RightSizingResponseResultsInnerRecommendation`
+`func NewRightSizingRecommendationWithDefaults() *RightSizingRecommendation`
 
-NewRightSizingResponseResultsInnerRecommendationWithDefaults instantiates a new RightSizingResponseResultsInnerRecommendation object
+NewRightSizingRecommendationWithDefaults instantiates a new RightSizingRecommendation object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetAllocationType
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetAllocationType() string`
+`func (o *RightSizingRecommendation) GetAllocationType() string`
 
 GetAllocationType returns the AllocationType field if non-nil, zero value otherwise.
 
 ### GetAllocationTypeOk
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetAllocationTypeOk() (*string, bool)`
+`func (o *RightSizingRecommendation) GetAllocationTypeOk() (*string, bool)`
 
 GetAllocationTypeOk returns a tuple with the AllocationType field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetAllocationType
 
-`func (o *RightSizingResponseResultsInnerRecommendation) SetAllocationType(v string)`
+`func (o *RightSizingRecommendation) SetAllocationType(v string)`
 
 SetAllocationType sets AllocationType field to given value.
 
 
 ### GetGpuCount
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetGpuCount() int64`
+`func (o *RightSizingRecommendation) GetGpuCount() int64`
 
 GetGpuCount returns the GpuCount field if non-nil, zero value otherwise.
 
 ### GetGpuCountOk
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetGpuCountOk() (*int64, bool)`
+`func (o *RightSizingRecommendation) GetGpuCountOk() (*int64, bool)`
 
 GetGpuCountOk returns a tuple with the GpuCount field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetGpuCount
 
-`func (o *RightSizingResponseResultsInnerRecommendation) SetGpuCount(v int64)`
+`func (o *RightSizingRecommendation) SetGpuCount(v int64)`
 
 SetGpuCount sets GpuCount field to given value.
 
 
 ### GetGpuMemoryPerDeviceBytes
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetGpuMemoryPerDeviceBytes() int64`
+`func (o *RightSizingRecommendation) GetGpuMemoryPerDeviceBytes() int64`
 
 GetGpuMemoryPerDeviceBytes returns the GpuMemoryPerDeviceBytes field if non-nil, zero value otherwise.
 
 ### GetGpuMemoryPerDeviceBytesOk
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetGpuMemoryPerDeviceBytesOk() (*int64, bool)`
+`func (o *RightSizingRecommendation) GetGpuMemoryPerDeviceBytesOk() (*int64, bool)`
 
 GetGpuMemoryPerDeviceBytesOk returns a tuple with the GpuMemoryPerDeviceBytes field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetGpuMemoryPerDeviceBytes
 
-`func (o *RightSizingResponseResultsInnerRecommendation) SetGpuMemoryPerDeviceBytes(v int64)`
+`func (o *RightSizingRecommendation) SetGpuMemoryPerDeviceBytes(v int64)`
 
 SetGpuMemoryPerDeviceBytes sets GpuMemoryPerDeviceBytes field to given value.
 
 ### HasGpuMemoryPerDeviceBytes
 
-`func (o *RightSizingResponseResultsInnerRecommendation) HasGpuMemoryPerDeviceBytes() bool`
+`func (o *RightSizingRecommendation) HasGpuMemoryPerDeviceBytes() bool`
 
 HasGpuMemoryPerDeviceBytes returns a boolean if a field has been set.
 
 ### GetEstimated
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetEstimated() bool`
+`func (o *RightSizingRecommendation) GetEstimated() bool`
 
 GetEstimated returns the Estimated field if non-nil, zero value otherwise.
 
 ### GetEstimatedOk
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetEstimatedOk() (*bool, bool)`
+`func (o *RightSizingRecommendation) GetEstimatedOk() (*bool, bool)`
 
 GetEstimatedOk returns a tuple with the Estimated field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetEstimated
 
-`func (o *RightSizingResponseResultsInnerRecommendation) SetEstimated(v bool)`
+`func (o *RightSizingRecommendation) SetEstimated(v bool)`
 
 SetEstimated sets Estimated field to given value.
 
 
 ### GetWarning
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetWarning() string`
+`func (o *RightSizingRecommendation) GetWarning() string`
 
 GetWarning returns the Warning field if non-nil, zero value otherwise.
 
 ### GetWarningOk
 
-`func (o *RightSizingResponseResultsInnerRecommendation) GetWarningOk() (*string, bool)`
+`func (o *RightSizingRecommendation) GetWarningOk() (*string, bool)`
 
 GetWarningOk returns a tuple with the Warning field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetWarning
 
-`func (o *RightSizingResponseResultsInnerRecommendation) SetWarning(v string)`
+`func (o *RightSizingRecommendation) SetWarning(v string)`
 
 SetWarning sets Warning field to given value.
 
 ### HasWarning
 
-`func (o *RightSizingResponseResultsInnerRecommendation) HasWarning() bool`
+`func (o *RightSizingRecommendation) HasWarning() bool`
 
 HasWarning returns a boolean if a field has been set.
 

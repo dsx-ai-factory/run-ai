@@ -33,8 +33,8 @@ type RightSizingResponse struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Results []RightSizingResponseResultsInner `json:"results"`
-	Results []RightSizingResponseResultsInner `json:"results" gorm:"serializer:json; type:jsonb;not null;"`
+	//Results []RightSizingResult `json:"results"`
+	Results []RightSizingResult `json:"results" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
@@ -52,7 +52,7 @@ func AssertRightSizingResponseRequired(obj RightSizingResponse) error {
 	}
 
 	for _, el := range obj.Results {
-		if err := AssertRightSizingResponseResultsInnerRequired(el); err != nil {
+		if err := AssertRightSizingResultRequired(el); err != nil {
 			return err
 		}
 	}
@@ -77,7 +77,7 @@ func AssertRightSizingResponseConstraints(obj RightSizingResponse) error {
 
 	//////////////////////// RUNAI END //////////////////////////
 	for _, el := range obj.Results {
-		if err := AssertRightSizingResponseResultsInnerConstraints(el); err != nil {
+		if err := AssertRightSizingResultConstraints(el); err != nil {
 			return err
 		}
 	}

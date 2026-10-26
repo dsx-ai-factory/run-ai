@@ -35,7 +35,7 @@ func New(inventory Inventory, metadata Metadata) *Service {
 }
 
 func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest) (api.RightSizingResponse, *api.Error) {
-	response := api.RightSizingResponse{Image: request.Image, Tag: request.Tag, Results: []api.RightSizingResponseResultsInner{}}
+	response := api.RightSizingResponse{Image: request.Image, Tag: request.Tag, Results: []api.RightSizingResult{}}
 	if err := uuid.Validate(request.ClusterId); err != nil {
 		return response, api.NewError(http.StatusBadRequest, "Invalid cluster ID", err)
 	}
@@ -71,8 +71,8 @@ func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest)
 	return response, nil
 }
 
-func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Profile) api.RightSizingResponseResultsInner {
-	result := api.RightSizingResponseResultsInner{GpuType: gpu.Type, Status: "no_recommendation"}
+func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Profile) api.RightSizingResult {
+	result := api.RightSizingResult{GpuType: gpu.Type, Status: "no_recommendation"}
 	if gpu.MemoryBytes == nil || *gpu.MemoryBytes <= 0 {
 		result.Reason = "GPU memory capacity is not reported by the cluster"
 		return result
@@ -116,7 +116,7 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 			count++
 		}
 		result.Status = "recommended"
-		result.Recommendation = &api.RightSizingResponseResultsInnerRecommendation{
+		result.Recommendation = &api.RightSizingRecommendation{
 			AllocationType: "gpu_count", GpuCount: count, Estimated: true,
 			Warning: profileSizingWarning(*chosen) + " Estimated from a single-device profile. This count is not a validated tensor-parallel configuration.",
 		}
@@ -127,7 +127,7 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 	if allocation.WholeGPU {
 		allocationType = "gpu_count"
 	}
-	result.Recommendation = &api.RightSizingResponseResultsInnerRecommendation{
+	result.Recommendation = &api.RightSizingRecommendation{
 		AllocationType: allocationType, GpuCount: 1,
 		GpuMemoryPerDeviceBytes: allocation.AllocatedMemoryBytes,
 		Estimated:               false,
