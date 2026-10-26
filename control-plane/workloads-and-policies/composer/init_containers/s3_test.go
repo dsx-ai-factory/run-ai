@@ -49,10 +49,10 @@ var _ = Describe("BuildS3InitContainers", func() {
 				Name: readyVolume, MountPath: "/runai-goofys",
 			}))
 			Expect(applicationMounts[i].Name).NotTo(Equal(readyVolume))
-			Expect(containers[i].Command[len(containers[i].Command)-4:]).To(Equal([]string{"--ready-file", "/runai-goofys/ready", item.Bucket, item.Path}))
+			Expect(containers[i].Command[len(containers[i].Command)-4:]).To(Equal([]string{"--ready-file", "/runai-goofys/ready", item.Bucket, "/runai-s3"}))
 			Expect(containers[i].RestartPolicy).To(Equal(ptr.To(corev1.ContainerRestartPolicyAlways)))
 			Expect(containers[i].StartupProbe).NotTo(BeNil())
-			Expect(containers[i].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys/ready", item.Path}))
+			Expect(containers[i].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys/ready", "/runai-s3"}))
 			Expect(containers[i].StartupProbe.PeriodSeconds).To(Equal(int32(2)))
 			Expect(containers[i].StartupProbe.TimeoutSeconds).To(Equal(int32(2)))
 			Expect(containers[i].StartupProbe.FailureThreshold).To(Equal(int32(150)))
@@ -72,6 +72,8 @@ var _ = Describe("BuildS3InitContainers", func() {
 			Expect(containers[0].VolumeMounts).To(HaveLen(1))
 			Expect(err).To(BeNil())
 			Expect(containers[0].StartupProbe).To(BeNil())
+			Expect(containers[0].VolumeMounts[0].MountPath).To(Equal("/storage"))
+			Expect(containers[0].Command[len(containers[0].Command)-1]).To(Equal("/storage"))
 			Expect(containers[0].Command).NotTo(ContainElement("--ready-file"))
 		},
 		Entry("older cluster without a capability", ""),
@@ -88,7 +90,7 @@ var _ = Describe("BuildS3InitContainers", func() {
 		})
 		Expect(err).To(BeNil())
 		Expect(containers[0].StartupProbe).NotTo(BeNil())
-		Expect(containers[0].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys/ready", "/storage"}))
+		Expect(containers[0].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys/ready", "/runai-s3"}))
 		Expect(containers[0].Command).To(ContainElement("--ready-file"))
 	})
 
@@ -196,14 +198,14 @@ var _ = Describe("BuildS3InitContainers", func() {
 		Expect(containers[0].VolumeMounts).To(HaveLen(2))
 		Expect(containers[0].VolumeMounts[0].Name).To(Equal("s3-0"))
 		Expect(*containers[0].VolumeMounts[0].MountPropagation).To(Equal(corev1.MountPropagationBidirectional))
-		Expect(containers[0].VolumeMounts[1].Name).To(Equal("ca-secret"))
+		Expect(containers[0].VolumeMounts[1].Name).To(Equal("custom-ca-s3"))
 		Expect(containers[0].VolumeMounts[1].SubPath).To(Equal("ca.pem"))
 
 		volumes := BuildS3Volumes(info)
 		Expect(volumes).To(HaveLen(3))
 		Expect(volumes[0].Name).To(Equal("s3-0"))
 		Expect(volumes[1].Name).To(Equal("s3-1"))
-		Expect(volumes[2].Name).To(Equal("ca-secret"))
+		Expect(volumes[2].Name).To(Equal("custom-ca-s3"))
 		Expect(volumes[2].Secret).NotTo(BeNil())
 	})
 

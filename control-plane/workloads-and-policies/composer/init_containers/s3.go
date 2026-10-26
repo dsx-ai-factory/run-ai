@@ -16,6 +16,8 @@ import (
 )
 
 const (
+	s3DataMountPath   = "/runai-s3"
+	s3CAVolumeName    = "custom-ca-s3"
 	s3ContainerPrefix = "s3-fs"
 	s3VolumePrefix    = "s3"
 
@@ -101,24 +103,27 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 		}
 		// Older and custom images may not implement the readiness flags.
 		mountCheckEnabled := s3MountCheckEnabled(cfg)
+		mountPath := item.Path
 		var startupProbe *corev1.Probe
 		if mountCheckEnabled {
+			// Keep the sidecar's mount points independent of the application path.
+			mountPath = s3DataMountPath
 			command = append(command, "--ready-file", s3ReadyFile)
 			startupProbe = &corev1.Probe{
 				ProbeHandler: corev1.ProbeHandler{Exec: &corev1.ExecAction{
-					Command: []string{"goofys", "--check-ready", s3ReadyFile, item.Path},
+					Command: []string{"goofys", "--check-ready", s3ReadyFile, mountPath},
 				}},
 				PeriodSeconds:    2,
 				TimeoutSeconds:   2,
 				FailureThreshold: 150,
 			}
 		}
-		command = append(command, item.Bucket, item.Path)
+		command = append(command, item.Bucket, mountPath)
 
 		volumeMounts := []corev1.VolumeMount{
 			{
 				Name:             fmt.Sprintf("%s-%d", s3VolumePrefix, idx),
-				MountPath:        item.Path,
+				MountPath:        mountPath,
 				MountPropagation: &mountBidirectional,
 			},
 		}
@@ -167,7 +172,7 @@ func s3MountCheckEnabled(cfg composer.ClusterStorageConfig) bool {
 
 func s3CAVolumeMount(cfg composer.ClusterStorageConfig) corev1.VolumeMount {
 	return corev1.VolumeMount{
-		Name:      cfg.CustomCAS3Secret(),
+		Name:      s3CAVolumeName,
 		MountPath: fmt.Sprintf("%s/%s", s3CACertsDir, cfg.CustomCAS3Key()),
 		SubPath:   cfg.CustomCAS3Key(),
 	}
@@ -209,7 +214,7 @@ func BuildS3Volumes(info *composer.S3Info) []corev1.Volume {
 
 func s3CAVolume(cfg composer.ClusterStorageConfig) corev1.Volume {
 	return corev1.Volume{
-		Name: cfg.CustomCAS3Secret(),
+		Name: s3CAVolumeName,
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
 				DefaultMode: convutils.Ref(s3CADefaultMode),

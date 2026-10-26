@@ -8,6 +8,7 @@ package builders
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
@@ -879,9 +880,14 @@ func GetEmptyDirVolumes(emptyDirVolumes *flds.EmptyDirVolumeField) ([]corev1.Vol
 	return result, nil
 }
 
+// CA volume names come from internal prefixes, independently of Secret names.
+func caVolumeName(envVarPrefix string) string {
+	return strings.ToLower(strings.ReplaceAll(envVarPrefix, "_", "-"))
+}
+
 func ComposeCAVolume(envVarPrefix string) corev1.Volume {
 	return corev1.Volume{
-		Name: config.GetCustomCASecret(envVarPrefix),
+		Name: caVolumeName(envVarPrefix),
 		VolumeSource: corev1.VolumeSource{
 			Secret: &corev1.SecretVolumeSource{
 				DefaultMode: utils.Ref(int32(420)),
@@ -897,7 +903,7 @@ func ComposeCAVolume(envVarPrefix string) corev1.Volume {
 
 func ComposeCAVolumeMount(envVarPrefix string) corev1.VolumeMount {
 	return corev1.VolumeMount{
-		Name:      config.GetCustomCASecret(envVarPrefix),
+		Name:      caVolumeName(envVarPrefix),
 		MountPath: fmt.Sprintf("/etc/ssl/certs/%s", config.GetCustomCAKey(envVarPrefix)),
 		SubPath:   config.GetCustomCAKey(envVarPrefix),
 	}
