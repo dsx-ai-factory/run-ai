@@ -62,6 +62,37 @@ var _ = Describe("Workspace and Training pod metadata", func() {
 				}
 			})
 
+			DescribeTable("leaves Kubernetes Job identity labels for Kubernetes to generate",
+				func(key string) {
+					customLabels := map[string]string{
+						"app.kubernetes.io/part-of":        "label-validation",
+						"batch.kubernetes.io/custom-label": "keep",
+					}
+					for name, value := range customLabels {
+						label := workloadsApi.Label{}
+						label.SetName(name)
+						label.SetValue(value)
+						spec.Labels = append(spec.Labels, label)
+					}
+					label := workloadsApi.Label{}
+					label.SetName(key)
+					label.SetValue("user-value")
+					spec.Labels = append(spec.Labels, label)
+
+					target := compose()
+					Expect(target.Job.Labels).To(HaveKeyWithValue(key, "user-value"))
+					Expect(target.Job.Spec.Template.Labels).NotTo(HaveKey(key))
+					for name, value := range customLabels {
+						Expect(target.Job.Labels).To(HaveKeyWithValue(name, value))
+						Expect(target.Job.Spec.Template.Labels).To(HaveKeyWithValue(name, value))
+					}
+				},
+				Entry("controller UID", "batch.kubernetes.io/controller-uid"),
+				Entry("legacy controller UID", "controller-uid"),
+				Entry("Job name", "batch.kubernetes.io/job-name"),
+				Entry("legacy Job name", "job-name"),
+			)
+
 			DescribeTable("preserves generated pod identity metadata",
 				func(withConflictingLabels bool) {
 					expected := map[string]string{
