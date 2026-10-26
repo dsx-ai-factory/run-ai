@@ -74,7 +74,7 @@ A Gov-ready installation also pulls the hardened third-party images from Docker 
 
 ## Download the Installer
 
-Download the `runai-installer` binary for your operating system and CPU architecture, on each machine you run the installer from. Replace `<VERSION>` with the NVIDIA Run:ai version you are installing, for example `3.0.17`:
+Download the `runai-installer` binary for your operating system and CPU architecture, on each machine you run the installer from. Replace `<VERSION>` with the NVIDIA Run:ai version you are installing, for example `3.0.20`:
 
 ```bash
 # Linux, AMD64 (x86_64)
