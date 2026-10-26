@@ -37,6 +37,9 @@ type SamlData struct {
 	EntityId string `json:"entityId,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Whether Keycloak validates the signature of SAML responses from the identity provider
+	ValidateSignature bool `json:"validateSignature"`
+
 	// Service Provider (SP) metadata url
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ServiceProviderMetadataUrl string `json:"serviceProviderMetadataUrl,omitempty"`
