@@ -32,7 +32,7 @@ Dependencies
 | `dario.cat/mergo` | v1.0.2 | BSD-3-Clause | https://pkg.go.dev/dario.cat/mergo@v1.0.2?tab=licenses |
 | `filippo.io/edwards25519` | v1.2.0 | BSD-3-Clause | https://pkg.go.dev/filippo.io/edwards25519@v1.2.0?tab=licenses |
 | `github.com/ClickHouse/ch-go` | v0.74.0 | Apache-2.0 | https://github.com/ClickHouse/ch-go/blob/v0.74.0/LICENSE |
-| `github.com/ClickHouse/clickhouse-go/v2` | v2.49.0 | Apache-2.0 | https://pkg.go.dev/github.com/ClickHouse/clickhouse-go/v2@v2.49.0?tab=licenses |
+| `github.com/ClickHouse/clickhouse-go/v2` | v2.50.0 | Apache-2.0 | https://pkg.go.dev/github.com/ClickHouse/clickhouse-go/v2@v2.50.0?tab=licenses |
 | `github.com/PaesslerAG/gval` | v1.2.4 | BSD-3-Clause | https://github.com/PaesslerAG/gval/blob/v1.2.4/LICENSE |
 | `github.com/PaesslerAG/jsonpath` | v0.1.1 | BSD-3-Clause | https://github.com/PaesslerAG/jsonpath/blob/v0.1.1/LICENSE |
 | `github.com/Rican7/retry` | v0.3.1 | MIT | https://github.com/Rican7/retry/blob/v0.3.1/LICENSE |
