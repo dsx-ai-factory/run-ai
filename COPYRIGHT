@@ -7375,6 +7375,7 @@ Copyright ClickHouse, Inc - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/ClickHouse/clickhouse-go/v2 v2.49.0
+  github.com/ClickHouse/clickhouse-go/v2 v2.50.0
 
 Copyright 2016-2023 ClickHouse, Inc.
 
