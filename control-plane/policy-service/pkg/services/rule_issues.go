@@ -90,3 +90,18 @@ func (r *ruleIssues) toError() *api.Error {
 func (r *ruleIssues) all() []*api.Error {
 	return r.items
 }
+
+// policyStatus returns Degraded with every collected message, or Ready when
+// nothing was collected.
+func (r *ruleIssues) policyStatus() *api.PolicyStatus {
+	if len(r.items) == 0 {
+		return &api.PolicyStatus{Phase: api.POLICYPHASE_READY, Issues: []string{}}
+	}
+
+	messages := make([]string, len(r.items))
+	for i, issue := range r.items {
+		messages[i] = issue.Message
+	}
+
+	return &api.PolicyStatus{Phase: api.POLICYPHASE_DEGRADED, Issues: messages}
+}

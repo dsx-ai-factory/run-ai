@@ -563,12 +563,12 @@ var _ = Describe("SystemMappingTest", func() {
 					}
 				}
 				return map[string]api.FieldGroupField{
-					"keep":     field("keepSpec", "keptSel"),
-					"movesTo":  field("movesSpec", "keptSel"),
-					"newField": field("newSpec"),
-				}, map[string]api.ItemSelector{
-					"keptSel": {Query: `.kept[]`},
-				}
+						"keep":     field("keepSpec", "keptSel"),
+						"movesTo":  field("movesSpec", "keptSel"),
+						"newField": field("newSpec"),
+					}, map[string]api.ItemSelector{
+						"keptSel": {Query: `.kept[]`},
+					}
 			}
 
 			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
