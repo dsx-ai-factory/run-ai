@@ -27,6 +27,9 @@ BatchJobTarget:
           annotations:
             user: tester
           labels:
+            ADDED1: added1
+            Lbl1: lbl1
+            NO_VALUE: ""
             app: job
             createdBy: Job
             project: test
