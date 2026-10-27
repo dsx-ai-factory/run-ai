@@ -11202,6 +11202,7 @@ Copyright Gengo, Inc - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/grpc-ecosystem/grpc-gateway/v2 v2.32.0
+  github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0
 
 Copyright (c) 2015, Gengo, Inc.
 All rights reserved.
