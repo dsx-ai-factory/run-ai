@@ -58,7 +58,7 @@ Dependencies
 | `github.com/go-viper/mapstructure/v2` | v2.5.0 | MIT | https://pkg.go.dev/github.com/go-viper/mapstructure/v2@v2.5.0?tab=licenses |
 | `github.com/golang-migrate/migrate/v4` | v4.20.1 | MIT | https://pkg.go.dev/github.com/golang-migrate/migrate/v4@v4.20.1?tab=licenses |
 | `github.com/google/uuid` | v1.6.0 | BSD-3-Clause | https://github.com/google/uuid/blob/v1.6.0/LICENSE |
-| `github.com/grpc-ecosystem/grpc-gateway/v2` | v2.32.0 | BSD-3-Clause | https://pkg.go.dev/github.com/grpc-ecosystem/grpc-gateway/v2@v2.32.0?tab=licenses |
+| `github.com/grpc-ecosystem/grpc-gateway/v2` | v2.33.0 | BSD-3-Clause | https://pkg.go.dev/github.com/grpc-ecosystem/grpc-gateway/v2@v2.33.0?tab=licenses |
 | `github.com/hashicorp/go-version` | v1.9.0 | MPL-2.0 | https://github.com/hashicorp/go-version/blob/v1.9.0/LICENSE |
 | `github.com/jackc/pgpassfile` | v1.0.0 | MIT | https://github.com/jackc/pgpassfile/blob/v1.0.0/LICENSE |
 | `github.com/jackc/pgservicefile` | v0.0.0-20240606120523-5a60cdf6a761 | MIT | https://github.com/jackc/pgservicefile/blob/5a60cdf6a761/LICENSE |
