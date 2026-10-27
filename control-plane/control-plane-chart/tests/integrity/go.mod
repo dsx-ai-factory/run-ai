@@ -14,8 +14,8 @@ require (
 	github.com/BurntSushi/toml v1.6.0 // indirect
 	github.com/aws/aws-sdk-go-v2 v1.47.4 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.7.24 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.33.10 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.20.10 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.33.11 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.20.11 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.20.4 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/s3/transfermanager v0.1.17 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.5.7 // indirect
@@ -26,7 +26,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.90.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.72.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ec2 v1.341.0 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ecr v1.66.6 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ecr v1.67.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.47.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.102.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/iam v1.64.5 // indirect
@@ -35,13 +35,13 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.13.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.14.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.20.7 // indirect
-	github.com/aws/aws-sdk-go-v2/service/kms v1.61.6 // indirect
+	github.com/aws/aws-sdk-go-v2/service/kms v1.62.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/lambda v1.113.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/rds v1.131.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/route53 v1.70.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/secretsmanager v1.50.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.10.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signin v1.11.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sns v1.47.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sqs v1.52.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssm v1.81.0 // indirect
