@@ -130,7 +130,7 @@ Dependencies
 | `google.golang.org/genproto/googleapis/api` | v0.0.0-20261026165753-2ffab32bce7e | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261026165753-2ffab32bce7e?tab=licenses |
 | `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261026165753-2ffab32bce7e | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261026165753-2ffab32bce7e?tab=licenses |
 | `google.golang.org/genproto/googleapis/type` | v0.0.0-20261026165753-2ffab32bce7e | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto@v0.0.0-20261026165753-2ffab32bce7e?tab=licenses |
-| `google.golang.org/grpc` | v1.84.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.84.0?tab=licenses |
+| `google.golang.org/grpc` | v1.85.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.85.0?tab=licenses |
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
 | `gopkg.in/ini.v1` | v1.67.3 | Apache-2.0 | https://pkg.go.dev/gopkg.in/ini.v1@v1.67.3?tab=licenses |
 
@@ -3075,7 +3075,7 @@ limitations under the License.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `google.golang.org/grpc` v1.84.0
+  - `google.golang.org/grpc` v1.85.0
 --------------------------------------------------------------------------------
 
 Copyright 2014 gRPC authors.
