@@ -33,12 +33,24 @@ var _ = Describe("BuildS3InitContainers", func() {
 		containers, err := BuildS3InitContainers(info)
 		Expect(err).To(BeNil())
 		Expect(containers).To(HaveLen(3))
+		volumes := BuildS3Volumes(info)
+		Expect(volumes).To(HaveLen(6))
+		applicationMounts := BuildS3MainVolumeMounts(info)
+		Expect(applicationMounts).To(HaveLen(3))
 		for i, key := range []string{"first", "second", "third"} {
 			item := info.Items[key]
-			Expect(containers[i].Command[len(containers[i].Command)-4:]).To(Equal([]string{"--ready-file", "/runai-goofys-ready", item.Bucket, item.Path}))
+			readyVolume := []string{"s3-ready-0", "s3-ready-1", "s3-ready-2"}[i]
+			Expect(volumes).To(ContainElement(corev1.Volume{
+				Name: readyVolume, VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+			}))
+			Expect(containers[i].VolumeMounts).To(ContainElement(corev1.VolumeMount{
+				Name: readyVolume, MountPath: "/runai-goofys",
+			}))
+			Expect(applicationMounts[i].Name).NotTo(Equal(readyVolume))
+			Expect(containers[i].Command[len(containers[i].Command)-4:]).To(Equal([]string{"--ready-file", "/runai-goofys/ready", item.Bucket, "/runai-s3"}))
 			Expect(containers[i].RestartPolicy).To(Equal(ptr.To(corev1.ContainerRestartPolicyAlways)))
 			Expect(containers[i].StartupProbe).NotTo(BeNil())
-			Expect(containers[i].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys-ready", item.Path}))
+			Expect(containers[i].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys/ready", "/runai-s3"}))
 			Expect(containers[i].StartupProbe.PeriodSeconds).To(Equal(int32(2)))
 			Expect(containers[i].StartupProbe.TimeoutSeconds).To(Equal(int32(2)))
 			Expect(containers[i].StartupProbe.FailureThreshold).To(Equal(int32(150)))
@@ -49,11 +61,17 @@ var _ = Describe("BuildS3InitContainers", func() {
 		func(advertised string) {
 			cfg := s3TestConfig().(composer.StaticClusterStorageConfig)
 			cfg.SetS3FsMountCheckImage(advertised)
-			containers, err := BuildS3InitContainers(&composer.S3Info{Config: cfg,
+			info := &composer.S3Info{Config: cfg,
 				Items: map[string]*composer.S3Item{"s3": {Bucket: "bucket", Path: "/storage"}},
-			})
+			}
+			containers, err := BuildS3InitContainers(info)
+			Expect(BuildS3Volumes(info)).To(HaveLen(1))
+			Expect(containers).To(HaveLen(1))
+			Expect(containers[0].VolumeMounts).To(HaveLen(1))
 			Expect(err).To(BeNil())
 			Expect(containers[0].StartupProbe).To(BeNil())
+			Expect(containers[0].VolumeMounts[0].MountPath).To(Equal("/storage"))
+			Expect(containers[0].Command[len(containers[0].Command)-1]).To(Equal("/storage"))
 			Expect(containers[0].Command).NotTo(ContainElement("--ready-file"))
 		},
 		Entry("older cluster without a capability", ""),
@@ -70,7 +88,7 @@ var _ = Describe("BuildS3InitContainers", func() {
 		})
 		Expect(err).To(BeNil())
 		Expect(containers[0].StartupProbe).NotTo(BeNil())
-		Expect(containers[0].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys-ready", "/storage"}))
+		Expect(containers[0].StartupProbe.Exec.Command).To(Equal([]string{"goofys", "--check-ready", "/runai-goofys/ready", "/runai-s3"}))
 		Expect(containers[0].Command).To(ContainElement("--ready-file"))
 	})
 

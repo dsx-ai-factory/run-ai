@@ -28322,6 +28322,8 @@ components:
           items:
             $ref: '#/components/schemas/BatchResponseFailureItem'
     AccessRulesFilterFields:
+      required:
+        - validateSignature
       $ref: '#/components/schemas/AccessRulesSortFilterFields'
     SamlData:
       type: object
@@ -28332,6 +28334,9 @@ components:
         singleSignOnServiceUrl:
           type: string
         entityId:
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
           type: string
         serviceProviderMetadataUrl:
           type: string

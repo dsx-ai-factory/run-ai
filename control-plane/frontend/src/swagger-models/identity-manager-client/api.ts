@@ -1619,6 +1619,12 @@ export interface SamlData {
      * @memberof SamlData
      */
     'serviceProviderMetadataUrl'?: string;
+    /**
+     * Whether the signature of SAML responses from the identity provider is validated
+     * @type {boolean}
+     * @memberof SamlData
+     */
+    'validateSignature': boolean;
 }
 /**
  * 
