@@ -1,0 +1,80 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2200" height="1530" viewBox="0 0 2200 1530">
+  <rect x="0" y="0" width="2200" height="1530" rx="0" fill="#F5F7FB" />
+  <text x="70" y="74" font-family="Arial, sans-serif" font-size="58" font-weight="700" fill="#132C42" text-anchor="start" dominant-baseline="central">NIM GPU sizing: from model to recommendation</text>
+  <text x="70" y="131" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#52677D" text-anchor="start" dominant-baseline="central">Published PR behavior | Model requirements + installed hardware | No deployment or reservation</text>
+  <rect x="70" y="220" width="620" height="190" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="94" y="256" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">1. API or CLI request</text>
+  <text x="94" y="301" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Exact NIM image + tag and cluster ID</text>
+  <text x="94" y="337" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Optional GPU type</text>
+  <text x="94" y="373" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">CLI: runai inference recommend</text>
+  <rect x="790" y="220" width="620" height="190" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="814" y="256" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">2. Check the request</text>
+  <text x="814" y="301" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Existing authentication and access checks</text>
+  <text x="814" y="337" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Validate cluster ID, image, tag and type</text>
+  <text x="814" y="373" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">catalog-service owns the sizing endpoint</text>
+  <rect x="1510" y="220" width="620" height="190" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="1534" y="256" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">3. Read cluster inventory</text>
+  <text x="1534" y="301" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">cluster-service: every inventory page</text>
+  <text x="1534" y="337" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Separate GPU types and capacities</text>
+  <text x="1534" y="373" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Matching device count on one node</text>
+  <polyline points="690,315 790,315" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="790,315 773.0,307.0 773.0,323.0" fill="#52677D" />
+  <polyline points="1410,315 1510,315" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1510,315 1493.0,307.0 1493.0,323.0" fill="#52677D" />
+  <polyline points="1820,410 1820,465 380,465 380,540" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="380,540 388.0,523.0 372.0,523.0" fill="#52677D" />
+  <rect x="70" y="540" width="620" height="210" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="94" y="576" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">4. Get exact-tag NGC profiles</text>
+  <text x="94" y="621" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Reuse successful, nonempty metadata</text>
+  <text x="94" y="657" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Existing CP cache: 15-minute default</text>
+  <text x="94" y="693" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Otherwise fetch public NGC metadata</text>
+  <rect x="790" y="540" width="620" height="210" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="814" y="576" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">5. Find applicable profiles</text>
+  <text x="814" y="621" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Direct PCI, tested PCI, or GPU-agnostic</text>
+  <text x="814" y="657" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Explicit positive TP/PP and minimum</text>
+  <text x="814" y="693" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Memory and GPU count must fit one node</text>
+  <rect x="1510" y="540" width="620" height="210" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="1534" y="576" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">6. Choose a fitting profile</text>
+  <text x="1534" y="621" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Prefer a single-GPU configuration</text>
+  <text x="1534" y="657" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Then: hardware evidence, fewer GPUs,</text>
+  <text x="1534" y="693" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">lower per-device minimum, profile ID</text>
+  <polyline points="690,645 790,645" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="790,645 773.0,637.0 773.0,653.0" fill="#52677D" />
+  <polyline points="1410,645 1510,645" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1510,645 1493.0,637.0 1493.0,653.0" fill="#52677D" />
+  <polyline points="1820,750 1820,815 380,815 380,890" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="380,890 388.0,873.0 372.0,873.0" fill="#52677D" />
+  <rect x="70" y="890" width="620" height="210" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
+  <text x="94" y="926" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">7. Apply allocation policy</text>
+  <text x="94" y="971" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">One GPU: below 90% -&gt; memory minimum</text>
+  <text x="94" y="1007" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">90-100% -&gt; one whole GPU</text>
+  <text x="94" y="1043" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Parallel: exactly TP x PP whole GPUs</text>
+  <rect x="790" y="890" width="620" height="210" rx="20" fill="#EAF6EF" stroke="#23784E" stroke-width="2" />
+  <text x="814" y="926" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#23784E" text-anchor="start" dominant-baseline="central">8. Return the JSON result</text>
+  <text x="814" y="971" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Profile ID, precision, backend, minimum</text>
+  <text x="814" y="1007" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">TP/PP layout and allocation</text>
+  <text x="814" y="1043" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">HTTP 200: recommended</text>
+  <rect x="1510" y="890" width="620" height="210" rx="20" fill="#FFF5E0" stroke="#986313" stroke-width="2" />
+  <text x="1534" y="926" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#986313" text-anchor="start" dominant-baseline="central">Supported alternative</text>
+  <text x="1534" y="971" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">HTTP 200: no_recommendation + reason</text>
+  <text x="1534" y="1007" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Missing capacity/count or no fitting profile</text>
+  <text x="1534" y="1043" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">No cluster GPUs: empty results</text>
+  <polyline points="690,995 790,995" fill="none" stroke="#52677D" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="790,995 773.0,987.0 773.0,1003.0" fill="#52677D" />
+  <polyline points="2130,645 2160,645 2160,855 1820,855 1820,890" fill="none" stroke="#986313" stroke-width="4" stroke-linejoin="round" />
+  <polygon points="1820,890 1828.0,873.0 1812.0,873.0" fill="#986313" />
+  <rect x="1882.5" y="797" width="215" height="36" rx="5" fill="#F5F7FB" />
+  <text x="1990" y="815" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#986313" text-anchor="middle" dominant-baseline="central">No eligible profile</text>
+  <rect x="70" y="1190" width="980" height="180" rx="20" fill="#EEF1F5" stroke="#52677D" stroke-width="2" />
+  <text x="94" y="1226" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#52677D" text-anchor="start" dominant-baseline="central">Hardware identity and tested-device lists</text>
+  <text x="94" y="1271" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Only unambiguous exact names establish PCI identity.</text>
+  <text x="94" y="1307" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Empty tested_gpu_devices does not exclude an untargeted profile.</text>
+  <text x="94" y="1343" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Unknown/ambiguous names can still use a GPU-agnostic profile.</text>
+  <rect x="1150" y="1190" width="980" height="180" rx="20" fill="#EEF1F5" stroke="#52677D" stroke-width="2" />
+  <text x="1174" y="1226" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#52677D" text-anchor="start" dominant-baseline="central">Policy and scope</text>
+  <text x="1174" y="1271" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">90% is one configurable sharing policy; no added headroom.</text>
+  <text x="1174" y="1307" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Published minima are per device and depend on profile settings.</text>
+  <text x="1174" y="1343" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">This response does not verify free GPUs, scheduling or startup.</text>
+  <text x="70" y="1445" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#52677D" text-anchor="start" dominant-baseline="central">Solid cards: implemented behavior. Blue: processing. Green: recommendation. Amber: valid alternative. Gray: context.</text>
+  <text x="70" y="1490" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#52677D" text-anchor="start" dominant-baseline="central">Request/authentication failures and dependency errors are shown in the API decision diagram.</text>
+</svg>

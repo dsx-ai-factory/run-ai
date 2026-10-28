@@ -1,0 +1,1014 @@
+{
+  "diagrams": [
+    {
+      "name": "nim-sizing-feature-flow",
+      "width": 2200,
+      "height": 1530,
+      "title": "NIM GPU sizing: from model to recommendation",
+      "subtitle": "Published PR behavior | Model requirements + installed hardware | No deployment or reservation",
+      "elements": [
+        {
+          "op": "box",
+          "args": [
+            70,
+            220,
+            620,
+            190,
+            "1. API or CLI request",
+            [
+              "Exact NIM image + tag and cluster ID",
+              "Optional GPU type",
+              "CLI: runai inference recommend"
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            790,
+            220,
+            620,
+            190,
+            "2. Check the request",
+            [
+              "Existing authentication and access checks",
+              "Validate cluster ID, image, tag and type",
+              "catalog-service owns the sizing endpoint"
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1510,
+            220,
+            620,
+            190,
+            "3. Read cluster inventory",
+            [
+              "cluster-service: every inventory page",
+              "Separate GPU types and capacities",
+              "Matching device count on one node"
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                690,
+                315
+              ],
+              [
+                790,
+                315
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1410,
+                315
+              ],
+              [
+                1510,
+                315
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1820,
+                410
+              ],
+              [
+                1820,
+                465
+              ],
+              [
+                380,
+                465
+              ],
+              [
+                380,
+                540
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            540,
+            620,
+            210,
+            "4. Get exact-tag NGC profiles",
+            [
+              "Reuse successful, nonempty metadata",
+              "Existing CP cache: 15-minute default",
+              "Otherwise fetch public NGC metadata"
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            790,
+            540,
+            620,
+            210,
+            "5. Find applicable profiles",
+            [
+              "Direct PCI, tested PCI, or GPU-agnostic",
+              "Explicit positive TP/PP and minimum",
+              "Memory and GPU count must fit one node"
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1510,
+            540,
+            620,
+            210,
+            "6. Choose a fitting profile",
+            [
+              "Prefer a single-GPU configuration",
+              "Then: hardware evidence, fewer GPUs,",
+              "lower per-device minimum, profile ID"
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                690,
+                645
+              ],
+              [
+                790,
+                645
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1410,
+                645
+              ],
+              [
+                1510,
+                645
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1820,
+                750
+              ],
+              [
+                1820,
+                815
+              ],
+              [
+                380,
+                815
+              ],
+              [
+                380,
+                890
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            890,
+            620,
+            210,
+            "7. Apply allocation policy",
+            [
+              "One GPU: below 90% -> memory minimum",
+              "90-100% -> one whole GPU",
+              "Parallel: exactly TP x PP whole GPUs"
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            790,
+            890,
+            620,
+            210,
+            "8. Return the JSON result",
+            [
+              "Profile ID, precision, backend, minimum",
+              "TP/PP layout and allocation",
+              "HTTP 200: recommended"
+            ],
+            "green"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1510,
+            890,
+            620,
+            210,
+            "Supported alternative",
+            [
+              "HTTP 200: no_recommendation + reason",
+              "Missing capacity/count or no fitting profile",
+              "No cluster GPUs: empty results"
+            ],
+            "amber"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                690,
+                995
+              ],
+              [
+                790,
+                995
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                2130,
+                645
+              ],
+              [
+                2160,
+                645
+              ],
+              [
+                2160,
+                855
+              ],
+              [
+                1820,
+                855
+              ],
+              [
+                1820,
+                890
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "No eligible profile",
+            "labelpos": [
+              1990,
+              815
+            ],
+            "color": "#986313"
+          }
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            1190,
+            980,
+            180,
+            "Hardware identity and tested-device lists",
+            [
+              "Only unambiguous exact names establish PCI identity.",
+              "Empty tested_gpu_devices does not exclude an untargeted profile.",
+              "Unknown/ambiguous names can still use a GPU-agnostic profile."
+            ],
+            "muted"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1150,
+            1190,
+            980,
+            180,
+            "Policy and scope",
+            [
+              "90% is one configurable sharing policy; no added headroom.",
+              "Published minima are per device and depend on profile settings.",
+              "This response does not verify free GPUs, scheduling or startup."
+            ],
+            "muted"
+          ]
+        },
+        {
+          "op": "text",
+          "args": [
+            70,
+            1445,
+            "Solid cards: implemented behavior. Blue: processing. Green: recommendation. Amber: valid alternative. Gray: context.",
+            25,
+            false,
+            "#52677D"
+          ]
+        },
+        {
+          "op": "text",
+          "args": [
+            70,
+            1490,
+            "Request/authentication failures and dependency errors are shown in the API decision diagram.",
+            25,
+            false,
+            "#52677D"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "nim-sizing-api-decisions",
+      "width": 2200,
+      "height": 2430,
+      "title": "NIM sizing API: decisions and responses",
+      "subtitle": "POST /api/v1/inference/right-sizing/recommendation | Existing authentication applies first",
+      "elements": [
+        {
+          "op": "box",
+          "args": [
+            70,
+            220,
+            1350,
+            170,
+            "1. Authorized request with valid inputs?",
+            [
+              "Required: exact NIM image, separate tag and cluster ID.",
+              "Optional gpuType must be nonempty when provided."
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1530,
+            220,
+            600,
+            170,
+            "Request rejected",
+            [
+              "Existing authentication/access errors",
+              "Invalid input: HTTP 400"
+            ],
+            "red"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1420,
+                305
+              ],
+              [
+                1530,
+                305
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "No",
+            "labelpos": [
+              1475,
+              280
+            ],
+            "color": "#B32D42"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                745,
+                390
+              ],
+              [
+                745,
+                450
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Yes",
+            "labelpos": [
+              790,
+              420
+            ]
+          }
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            450,
+            1350,
+            145,
+            "2. Retrieve fresh, paginated cluster inventory",
+            [
+              "Read each GPU type/capacity and its matching count on one node."
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1530,
+            450,
+            600,
+            145,
+            "Inventory unavailable",
+            [
+              "HTTP 503 dependency error"
+            ],
+            "red"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1420,
+                525
+              ],
+              [
+                1530,
+                525
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Error",
+            "labelpos": [
+              1475,
+              500
+            ],
+            "color": "#B32D42"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                745,
+                595
+              ],
+              [
+                745,
+                660
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            660,
+            1350,
+            260,
+            "3. Is gpuType supplied?",
+            [
+              "Provided: exact inventory type only; evaluate each reported capacity.",
+              "Omitted/null: evaluate every reported type/capacity independently.",
+              "Provided but absent from inventory: HTTP 400.",
+              "Omitted/null with no inventory: HTTP 200 with results: []."
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1530,
+            660,
+            600,
+            145,
+            "Unknown explicit type",
+            [
+              "HTTP 400 validation error"
+            ],
+            "red"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1530,
+            835,
+            600,
+            145,
+            "No cluster GPUs",
+            [
+              "HTTP 200 | results: []"
+            ],
+            "amber"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1420,
+                735
+              ],
+              [
+                1530,
+                735
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Absent",
+            "labelpos": [
+              1475,
+              710
+            ],
+            "color": "#B32D42"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1420,
+                900
+              ],
+              [
+                1530,
+                900
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Empty",
+            "labelpos": [
+              1475,
+              875
+            ],
+            "color": "#986313"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                745,
+                920
+              ],
+              [
+                745,
+                1040
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Hardware selected",
+            "labelpos": [
+              890,
+              995
+            ]
+          }
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            1040,
+            1350,
+            170,
+            "4. Get NGC profiles for this exact image + tag",
+            [
+              "Cache hit: reuse metadata. Cache miss/error: fetch NGC; default expiry is 15 minutes.",
+              "404 or empty metadata: continue with no profiles. Do not cache emptiness/errors."
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1530,
+            1040,
+            600,
+            170,
+            "NGC unavailable",
+            [
+              "HTTP 503 dependency error",
+              "No expired-data fallback"
+            ],
+            "red"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1420,
+                1125
+              ],
+              [
+                1530,
+                1125
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Error",
+            "labelpos": [
+              1475,
+              1100
+            ],
+            "color": "#B32D42"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                745,
+                1210
+              ],
+              [
+                745,
+                1300
+              ]
+            ]
+          ],
+          "kwargs": {}
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            1300,
+            1350,
+            260,
+            "5. For each selected type/capacity: a fitting applicable profile?",
+            [
+              "Require capacity, per-node count, explicit positive TP/PP and published per-device minimum.",
+              "Match direct PCI, tested PCI, or untargeted GPU-agnostic applicability.",
+              "Empty/missing tested_gpu_devices: an untargeted profile remains eligible.",
+              "Prefer one GPU; then hardware evidence, GPU count, minimum and profile ID."
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1530,
+            1300,
+            600,
+            210,
+            "No recommendation",
+            [
+              "HTTP 200 | no_recommendation",
+              "Return a clear per-hardware reason",
+              "No inferred GPU-count fallback"
+            ],
+            "amber"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1420,
+                1405
+              ],
+              [
+                1530,
+                1405
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "No",
+            "labelpos": [
+              1475,
+              1380
+            ],
+            "color": "#986313"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                745,
+                1560
+              ],
+              [
+                745,
+                1640
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Yes",
+            "labelpos": [
+              790,
+              1600
+            ]
+          }
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            1640,
+            1350,
+            150,
+            "6. Does the selected profile use one GPU?",
+            [
+              "Count = published tensor parallel size x pipeline parallel size; respect max_gpu_count."
+            ],
+            "blue"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            1530,
+            1640,
+            600,
+            190,
+            "Parallel allocation",
+            [
+              "Exactly TP x PP whole GPUs",
+              "Full per-device capacity",
+              "Published minimum fits each GPU"
+            ],
+            "green"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1420,
+                1715
+              ],
+              [
+                1530,
+                1715
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "No",
+            "labelpos": [
+              1475,
+              1690
+            ],
+            "color": "#23784E"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                745,
+                1790
+              ],
+              [
+                745,
+                1870
+              ],
+              [
+                395,
+                1870
+              ],
+              [
+                395,
+                1930
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Yes: below cutoff",
+            "labelpos": [
+              445,
+              1840
+            ]
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                745,
+                1870
+              ],
+              [
+                1105,
+                1870
+              ],
+              [
+                1105,
+                1930
+              ]
+            ]
+          ],
+          "kwargs": {
+            "label": "Yes: cutoff through capacity",
+            "labelpos": [
+              1105,
+              1840
+            ]
+          }
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            1930,
+            650,
+            170,
+            "Memory allocation",
+            [
+              "Below 90% of per-device capacity",
+              "Allocate the published memory minimum"
+            ],
+            "green"
+          ]
+        },
+        {
+          "op": "box",
+          "args": [
+            790,
+            1930,
+            630,
+            170,
+            "One whole GPU",
+            [
+              "90-100% of per-device capacity",
+              "Allocate the full device capacity"
+            ],
+            "green"
+          ]
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                395,
+                2100
+              ],
+              [
+                395,
+                2160
+              ]
+            ]
+          ],
+          "kwargs": {
+            "color": "#23784E"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1105,
+                2100
+              ],
+              [
+                1105,
+                2160
+              ]
+            ]
+          ],
+          "kwargs": {
+            "color": "#23784E"
+          }
+        },
+        {
+          "op": "arrow",
+          "args": [
+            [
+              [
+                1830,
+                1830
+              ],
+              [
+                1830,
+                2160
+              ]
+            ]
+          ],
+          "kwargs": {
+            "color": "#23784E"
+          }
+        },
+        {
+          "op": "box",
+          "args": [
+            70,
+            2160,
+            2060,
+            145,
+            "HTTP 200 | recommended",
+            [
+              "Return profile ID, precision, backend, published minimum, TP/PP and allocation. One request may mix result statuses."
+            ],
+            "green"
+          ]
+        },
+        {
+          "op": "text",
+          "args": [
+            70,
+            2350,
+            "90% is configurable and controls sharing. No added headroom. If a minimum exceeds capacity, skip that profile and consider other published layouts.",
+            25,
+            false,
+            "#52677D"
+          ]
+        },
+        {
+          "op": "text",
+          "args": [
+            70,
+            2400,
+            "Solid cards: implemented behavior. Blue: processing. Green: recommended. Amber: valid alternative. Red: request/dependency failure.",
+            25,
+            false,
+            "#52677D"
+          ]
+        }
+      ]
+    }
+  ]
+}
