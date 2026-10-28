@@ -7,8 +7,10 @@ package datasources
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"maps"
+	"net/http"
 	"strings"
 
 	workloads "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
@@ -38,19 +40,20 @@ type listDatasourcesInput struct {
 	Offset               int32                 `json:"offset,omitempty" jsonschema:"Pagination offset. Use nextOffset from the previous response."`
 }
 
+// Keep metadata strings open to newer API enum values.
 type datasourceListItem struct {
-	Kind                assets.AssetKind `json:"kind" jsonschema:"API asset kind to pass unchanged to manage_datasource."`
-	DatasourceID        string           `json:"datasourceId"                   jsonschema:"Datasource asset UUID to pass to manage_datasource."`
-	Name                string           `json:"name"                            jsonschema:"Datasource name."`
-	Scope               assets.Scope     `json:"scope"                           jsonschema:"Datasource scope."`
-	Datasource          map[string]any   `json:"datasource"                     jsonschema:"Complete datasource returned by the Assets API, including its type-specific spec wrapper."`
-	UpdateRequest       map[string]any   `json:"updateRequest,omitempty"         jsonschema:"Complete kind-specific update request accepted by manage_datasource update. Modify only intended fields and keep all others."` //nolint:lll
-	ExpectedUpdateCount *int64           `json:"expectedUpdateCount,omitempty"   jsonschema:"API update count to pass unchanged to manage_datasource update for a best-effort stale-write check."`                          //nolint:lll
-	UpdateBlockedReason string           `json:"updateBlockedReason,omitempty"   jsonschema:"Why this datasource cannot be updated. Present only when updateRequest is unavailable."`
+	Kind                string         `json:"kind,omitempty" jsonschema:"Asset kind reported by the API. Unsupported kinds are listed with updates blocked."`
+	DatasourceID        string         `json:"datasourceId,omitempty" jsonschema:"Asset ID reported by the API, when available."`
+	Name                string         `json:"name,omitempty" jsonschema:"Datasource name, when available."`
+	Scope               string         `json:"scope,omitempty" jsonschema:"Scope reported by the API, when available."`
+	Datasource          any            `json:"datasource"                     jsonschema:"Unmodified entry returned by the Assets API, including unsupported or malformed entries."`
+	UpdateRequest       map[string]any `json:"updateRequest,omitempty"         jsonschema:"Complete kind-specific update request accepted by manage_datasource update. Modify only intended fields and keep all others."` //nolint:lll
+	ExpectedUpdateCount *int64         `json:"expectedUpdateCount,omitempty"   jsonschema:"API update count to pass unchanged to manage_datasource update for a best-effort stale-write check."`                          //nolint:lll
+	UpdateBlockedReason string         `json:"updateBlockedReason,omitempty"   jsonschema:"Why this datasource cannot be updated. Present only when updateRequest is unavailable."`
 }
 
 type listDatasourcesOutput struct {
-	Datasources []datasourceListItem `json:"datasources"          jsonschema:"Matching datasources with complete specs and update preparation status."`
+	Datasources []datasourceListItem `json:"datasources"          jsonschema:"Matching API entries with update preparation status."`
 	TotalCount  int32                `json:"totalCount"            jsonschema:"Total number of datasources matching the filters across all pages."`
 	HasMore     bool                 `json:"hasMore"               jsonschema:"True when more datasources exist beyond the returned page; pass nextOffset back as offset."`
 	NextOffset  int32                `json:"nextOffset,omitempty"  jsonschema:"Offset to pass on the next call. Only set when hasMore is true."`
@@ -60,7 +63,7 @@ func registerListDatasources(r *runaimcp.Registry, client *runaiclient.Client) {
 	runaimcp.Register(r, runaimcp.Tool[listDatasourcesInput, listDatasourcesOutput]{
 		Name: "list_datasources",
 		Description: "List datasource assets using Assets API scope, ID, name, type, compliance, usage, and status options with pagination. " +
-			"Results include complete specs and, when supported, updateRequest and expectedUpdateCount for manage_datasource; otherwise updateBlockedReason explains why updates are unavailable.",
+			"Results include raw API entries and, when supported, updateRequest and expectedUpdateCount for manage_datasource; otherwise updateBlockedReason explains why updates are unavailable.",
 		ReadOnly: true,
 		Handler: func(ctx context.Context, in listDatasourcesInput) (listDatasourcesOutput, error) {
 			return listDatasourcesRun(ctx, client, in)
@@ -75,12 +78,8 @@ func listDatasourcesRun(ctx context.Context, client *runaiclient.Client, in list
 	}
 	page, hasMore, nextOffset := common.Paginate(entries, in.Offset, common.EffectiveLimit(in.Limit))
 	items := make([]datasourceListItem, 0, len(page))
-	for index, raw := range page {
-		item, err := datasourceListItemFromRaw(raw.(map[string]any))
-		if err != nil {
-			return listDatasourcesOutput{}, fmt.Errorf("list datasources: entry %d: %w", int(in.Offset)+index, err)
-		}
-		items = append(items, item)
+	for _, raw := range page {
+		items = append(items, datasourceListItemFromRaw(raw))
 	}
 	return listDatasourcesOutput{Datasources: items, TotalCount: int32(len(entries)), HasMore: hasMore, NextOffset: nextOffset}, nil
 }
@@ -89,8 +88,14 @@ func fetchDatasources(ctx context.Context, client *runaiclient.Client, in listDa
 	req := datasourceListRequest(ctx, client, in)
 	resp, err := assetResponse(req.Execute())
 	if err != nil {
-		return nil, fmt.Errorf("list datasources: %w", runaimcp.MapHTTPError(resp, err))
+		var decodeErr *assets.GenericOpenAPIError
+		// New enum values or malformed entries can defeat the generated decoder.
+		// Only recover its decode errors on successful HTTP responses.
+		if resp == nil || resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices || !errors.As(err, &decodeErr) {
+			return nil, fmt.Errorf("list datasources: %w", runaimcp.MapHTTPError(resp, err))
+		}
 	}
+
 	raw, err := readDatasourceResponse(resp, "list datasources")
 	if err != nil {
 		return nil, err
@@ -98,12 +103,6 @@ func fetchDatasources(ctx context.Context, client *runaiclient.Client, in listDa
 	values, ok := raw["entries"].([]any)
 	if !ok {
 		return nil, fmt.Errorf("list datasources: entries must be an array: %w", runaimcp.ErrUpstream)
-	}
-	for index, value := range values {
-		entry, ok := value.(map[string]any)
-		if !ok || entry == nil {
-			return nil, fmt.Errorf("list datasources: entry %d must be an object: %w", index, runaimcp.ErrUpstream)
-		}
 	}
 	return values, nil
 }
@@ -155,41 +154,49 @@ func datasourceListRequest(ctx context.Context, client *runaiclient.Client, in l
 	return req
 }
 
-func datasourceListItemFromRaw(raw map[string]any) (datasourceListItem, error) {
+func datasourceListItemFromRaw(value any) datasourceListItem {
+	item := datasourceListItem{Datasource: value}
+	raw, ok := value.(map[string]any)
+	if !ok || raw == nil {
+		item.UpdateBlockedReason = "datasource entry must be an object"
+		return item
+	}
 	meta, _ := raw["meta"].(map[string]any)
-	kindValue, _ := meta["kind"].(string)
-	kind := assets.AssetKind(kindValue)
+	kind, _ := meta["kind"].(string)
+	scope, _ := meta["scope"].(string)
+	item.Kind, item.Scope = kind, scope
+	item.DatasourceID, _ = meta["id"].(string)
+	item.Name, _ = meta["name"].(string)
+
 	spec, ok := raw["spec"].(map[string]any)
 	if !ok {
-		return datasourceListItem{}, fmt.Errorf("datasource spec must be an object: %w", runaimcp.ErrUpstream)
+		item.UpdateBlockedReason = "datasource spec must be an object"
+		return item
 	}
-
 	normalized := maps.Clone(raw)
-	specKey := datasourceSpecKey(kind)
+	specKey := datasourceSpecKey(assets.AssetKind(item.Kind))
 	if specKey != "" {
 		normalized["spec"] = spec[specKey]
 	}
-	snapshot, err := newDatasourceSnapshot(normalized, kind)
+	snapshot, err := newDatasourceSnapshot(normalized, assets.AssetKind(item.Kind))
 	if err != nil {
-		return datasourceListItem{}, err
+		item.UpdateBlockedReason = err.Error()
+		return item
 	}
 	snapshot = prepareDatasourceUpdate(snapshot)
-	item := datasourceListItem{
-		Kind: snapshot.kind, DatasourceID: snapshot.id, Name: snapshot.name,
-		Scope: snapshot.scope, Datasource: raw, UpdateBlockedReason: snapshot.updateBlockedReason,
-	}
+	item.UpdateBlockedReason = snapshot.updateBlockedReason
 	if item.UpdateBlockedReason != "" {
-		return item, nil
+		return item
 	}
 	for field, value := range spec {
 		if field != specKey && value != nil {
 			item.UpdateBlockedReason = "the datasource specification contains unsupported fields"
-			return item, nil
+			return item
 		}
 	}
 	item.UpdateRequest = snapshot.updateRequest
 	item.ExpectedUpdateCount = snapshot.updateCount
-	return item, nil
+	return item
 }
 
 func (in listDatasourcesInput) Validate() error {

@@ -7,6 +7,7 @@ package datasources
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"testing"
@@ -41,8 +42,7 @@ func TestDatasourceListBlocksUnsafeUpdates(t *testing.T) {
 			case "missing_update_count":
 				delete(meta, "updateCount")
 			}
-			item, err := datasourceListItemFromRaw(raw)
-			require.NoError(t, err)
+			item := datasourceListItemFromRaw(raw)
 			assert.Nil(t, item.UpdateRequest)
 			assert.Nil(t, item.ExpectedUpdateCount)
 			assert.NotEmpty(t, item.UpdateBlockedReason)
@@ -65,7 +65,7 @@ func TestDatasourceListAllowsNullableSpecs(t *testing.T) {
 			require.NoError(t, err)
 			require.Len(t, out.Datasources, 1)
 			item := out.Datasources[0]
-			assert.Equal(t, raw["spec"], item.Datasource["spec"])
+			assert.Equal(t, raw["spec"], item.Datasource.(map[string]any)["spec"])
 			if tc.kind == assets.ASSETKIND_CONFIG_MAP || tc.kind == assets.ASSETKIND_SECRET_VOLUME {
 				require.Empty(t, item.UpdateBlockedReason)
 				assert.NotContains(t, item.UpdateRequest, "spec")
@@ -93,11 +93,11 @@ func TestListDatasourcesPreparesEveryKind(t *testing.T) {
 			require.NoError(t, err)
 			require.Len(t, out.Datasources, 1)
 			item := out.Datasources[0]
-			assert.Equal(t, tc.kind, item.Kind)
+			assert.Equal(t, string(tc.kind), item.Kind)
 			assert.Equal(t, testDatasourceID, item.DatasourceID)
 			require.Empty(t, item.UpdateBlockedReason)
 			assert.Equal(t, datasourceRequest(tc, false)["spec"], item.UpdateRequest["spec"])
-			in := manageDatasourceInput{Action: common.ActionUpdate, Kind: item.Kind, DatasourceID: item.DatasourceID, Request: item.UpdateRequest, ExpectedUpdateCount: item.ExpectedUpdateCount}
+			in := manageDatasourceInput{Action: common.ActionUpdate, Kind: assets.AssetKind(item.Kind), DatasourceID: item.DatasourceID, Request: item.UpdateRequest, ExpectedUpdateCount: item.ExpectedUpdateCount}
 			require.NoError(t, in.Validate())
 		})
 	}
@@ -131,7 +131,7 @@ func TestListDatasourcePagination(t *testing.T) {
 			require.NotNil(t, out.Datasources)
 			kinds := make([]assets.AssetKind, 0, len(out.Datasources))
 			for _, item := range out.Datasources {
-				kinds = append(kinds, item.Kind)
+				kinds = append(kinds, assets.AssetKind(item.Kind))
 			}
 			assert.Equal(t, test.kinds, kinds)
 			assert.Equal(t, int32(len(entries)), out.TotalCount)
@@ -219,6 +219,86 @@ func TestListDatasourcesPreservesAPIErrors(t *testing.T) {
 			_, err := listDatasourcesRun(context.Background(), client, listDatasourcesInput{})
 			require.ErrorIs(t, err, tc.want)
 			assert.ErrorContains(t, err, "cannot load project datasources")
+		})
+	}
+}
+
+func TestListDatasourcesKeepsHealthyEntries(t *testing.T) {
+	for _, scenario := range []string{"invalid_id", "unknown_scope", "unknown_kind", "invalid_spec", "invalid_counter", "non_object", "null"} {
+		t.Run(scenario, func(t *testing.T) {
+			tc := datasourceCases()[0]
+			healthy := datasourceResponse(tc, 2)
+			healthy["spec"] = map[string]any{"nfs": tc.spec}
+			broken := datasourceResponse(tc, 2)
+			broken["spec"] = map[string]any{"nfs": tc.spec}
+			meta := broken["meta"].(map[string]any)
+			var unsupported any = broken
+			switch scenario {
+			case "invalid_id":
+				meta["id"] = "external-id"
+			case "unknown_scope":
+				meta["scope"] = "future-scope"
+			case "unknown_kind":
+				meta["kind"] = "future-kind"
+			case "invalid_spec":
+				broken["spec"] = "not-an-object"
+			case "invalid_counter":
+				meta["updateCount"] = "invalid"
+			case "non_object":
+				unsupported = "not-an-object"
+			case "null":
+				unsupported = nil
+			}
+			client, mux := runaiclienttest.NewServer(t)
+			mux.HandleFunc("/api/v1/asset/datasource", func(w http.ResponseWriter, r *http.Request) {
+				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"entries": []any{healthy, unsupported, healthy}})
+			})
+			first, err := listDatasourcesRun(context.Background(), client, listDatasourcesInput{Limit: 2})
+			require.NoError(t, err)
+			require.Len(t, first.Datasources, 2)
+			assert.Equal(t, int32(3), first.TotalCount)
+			assert.True(t, first.HasMore)
+			assert.Equal(t, int32(2), first.NextOffset)
+			valid, blocked := first.Datasources[0], first.Datasources[1]
+			assert.NotNil(t, valid.UpdateRequest)
+			require.NotNil(t, valid.ExpectedUpdateCount)
+			assert.Equal(t, int64(2), *valid.ExpectedUpdateCount)
+			assert.Empty(t, valid.UpdateBlockedReason)
+			assert.Nil(t, blocked.UpdateRequest)
+			assert.Nil(t, blocked.ExpectedUpdateCount)
+			assert.NotEmpty(t, blocked.UpdateBlockedReason)
+			expected, err := json.Marshal(unsupported)
+			require.NoError(t, err)
+			actual, err := json.Marshal(blocked.Datasource)
+			require.NoError(t, err)
+			assert.JSONEq(t, string(expected), string(actual))
+			last, err := listDatasourcesRun(context.Background(), client, listDatasourcesInput{Limit: 2, Offset: first.NextOffset})
+			require.NoError(t, err)
+			require.Len(t, last.Datasources, 1)
+			assert.NotNil(t, last.Datasources[0].UpdateRequest)
+			assert.False(t, last.HasMore)
+		})
+	}
+}
+
+func TestListDatasourcesRejectsInvalidEnvelopes(t *testing.T) {
+	for name, body := range map[string]string{
+		"invalid_json":  "not-json",
+		"not_an_object": `[]`,
+		"missing_list":  `{}`,
+		"not_a_list":    `{"entries": {}}`,
+		"null_list":     `{"entries": null}`,
+		"trailing_json": `{"entries": []}{}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			client, mux := runaiclienttest.NewServer(t)
+			mux.HandleFunc("/api/v1/asset/datasource", func(w http.ResponseWriter, r *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				_, err := w.Write([]byte(body))
+				assert.NoError(t, err)
+			})
+			_, err := listDatasourcesRun(context.Background(), client, listDatasourcesInput{})
+			require.ErrorIs(t, err, runaimcp.ErrUpstream)
 		})
 	}
 }

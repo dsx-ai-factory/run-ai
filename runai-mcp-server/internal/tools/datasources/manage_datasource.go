@@ -321,7 +321,11 @@ func resolveDatasourceID(ctx context.Context, client *runaiclient.Client, in man
 	}
 	var matches []string
 	for _, entry := range entries {
-		meta, _ := entry.(map[string]any)["meta"].(map[string]any)
+		raw, ok := entry.(map[string]any)
+		if !ok || raw == nil {
+			return "", fmt.Errorf("resolve datasource %q: entry must be an object: %w", in.Name, runaimcp.ErrUpstream)
+		}
+		meta, _ := raw["meta"].(map[string]any)
 		if meta["name"] != in.Name || meta["kind"] != string(in.Kind) {
 			continue
 		}

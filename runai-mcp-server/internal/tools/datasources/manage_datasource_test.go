@@ -529,7 +529,8 @@ func TestDatasourceMCPRoundTrip(t *testing.T) {
 			mux.HandleFunc("/api/v1/asset/datasource", func(w http.ResponseWriter, r *http.Request) {
 				raw := datasourceResponse(tc, 2)
 				raw["spec"] = map[string]any{tc.specKey: tc.spec}
-				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"entries": []any{raw}})
+				future := map[string]any{"meta": map[string]any{"id": "external-id", "kind": "future-kind", "scope": "future-scope"}, "spec": "future-spec"}
+				runaiclienttest.WriteJSON(w, http.StatusOK, map[string]any{"entries": []any{raw, future}})
 			})
 			mux.HandleFunc("/api/v1/asset/datasource/nfs/"+testDatasourceID, func(w http.ResponseWriter, r *http.Request) {
 				response := datasourceResponse(tc, 2)
@@ -566,9 +567,15 @@ func TestDatasourceMCPRoundTrip(t *testing.T) {
 			require.False(t, listed.IsError)
 			var list listDatasourcesOutput
 			decodeDatasourceToolResult(t, listed, &list)
-			require.Len(t, list.Datasources, 1)
+			require.Len(t, list.Datasources, 2)
+			blocked := list.Datasources[1]
+			assert.Equal(t, "future-kind", blocked.Kind)
+			assert.Equal(t, "future-scope", blocked.Scope)
+			assert.NotEmpty(t, blocked.UpdateBlockedReason)
+			assert.Nil(t, blocked.UpdateRequest)
+			assert.Nil(t, blocked.ExpectedUpdateCount)
 			item := list.Datasources[0]
-			require.Equal(t, assets.ASSETKIND_NFS, item.Kind)
+			require.Equal(t, string(assets.ASSETKIND_NFS), item.Kind)
 			require.NotNil(t, item.ExpectedUpdateCount)
 			if readOnly {
 				require.NotContains(t, names, "manage_datasource")
@@ -577,7 +584,7 @@ func TestDatasourceMCPRoundTrip(t *testing.T) {
 			require.Contains(t, names, "manage_datasource")
 			request := item.UpdateRequest
 			request["meta"].(map[string]any)["name"] = "renamed"
-			input := manageDatasourceInput{Action: common.ActionUpdate, Kind: item.Kind, Name: item.Name, ExpectedUpdateCount: item.ExpectedUpdateCount, Request: request}
+			input := manageDatasourceInput{Action: common.ActionUpdate, Kind: assets.AssetKind(item.Kind), Name: item.Name, ExpectedUpdateCount: item.ExpectedUpdateCount, Request: request}
 			denied, err := session.CallTool(ctx, &mcp.CallToolParams{Name: "manage_datasource", Arguments: input})
 			require.NoError(t, err)
 			require.True(t, denied.IsError)
@@ -774,7 +781,7 @@ func TestDatasourceManageByName(t *testing.T) {
 }
 
 func TestDatasourceNameLookupGuards(t *testing.T) {
-	for _, scenario := range []string{"ambiguous", "missing", "ignored_missing", "renamed", "confirmation_required", "scope_missing", "scope_ambiguous", "scope_empty_id", "project_zero", "project_overflow", "cluster_invalid"} {
+	for _, scenario := range []string{"ambiguous", "missing", "ignored_missing", "renamed", "confirmation_required", "scope_missing", "scope_ambiguous", "scope_empty_id", "project_zero", "project_overflow", "cluster_invalid", "malformed_entry"} {
 		t.Run(scenario, func(t *testing.T) {
 			client, mux := runaiclienttest.NewServer(t)
 			tc := datasourceCases()[0]
@@ -811,6 +818,9 @@ func TestDatasourceNameLookupGuards(t *testing.T) {
 					meta["id"] = "22222222-2222-4222-8222-222222222222"
 					other["meta"] = meta
 					entries = append(entries, other)
+				}
+				if scenario == "malformed_entry" {
+					entries = []any{"not-an-object"}
 				}
 				if scenario == "missing" || scenario == "ignored_missing" {
 					entries = []any{}
@@ -854,7 +864,7 @@ func TestDatasourceNameLookupGuards(t *testing.T) {
 				assert.NotEmpty(t, out.Warnings)
 			case "scope_ambiguous", "project_overflow", "cluster_invalid":
 				require.ErrorIs(t, err, runaimcp.ErrValidation)
-			case "scope_empty_id":
+			case "scope_empty_id", "malformed_entry":
 				require.ErrorIs(t, err, runaimcp.ErrUpstream)
 			case "renamed":
 				require.ErrorIs(t, err, runaimcp.ErrConflict)
