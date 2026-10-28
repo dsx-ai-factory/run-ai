@@ -58,7 +58,7 @@ const (
 )
 
 func NimConfigurationFlagSet(flags *pflag.FlagSet, spec *NimService) {
-	flags.StringVar(&spec.GpuType, "gpu-type", "", "Exact nvidia.com/gpu.product label. Automatically sizes the NIM when GPU resources and policy defaults are omitted.")
+	flags.StringVar(&spec.GpuType, "gpu-type", "", "Cluster nvidia.com/gpu.product label (case-insensitive lookup; Tab completes inventory labels). Automatically sizes when GPU resources and policy defaults are omitted; explicit zero keeps CPU-only behavior.")
 	flags.StringVar(&spec.NgcSecret, consts.AttributeNameNgcSecret, "", consts.AttributeUsageNgcSecret)
 
 	flags.StringVar(&spec.ModelPvc, consts.AttributeNameModelPvc, "", consts.AttributeUsageModelPvc)

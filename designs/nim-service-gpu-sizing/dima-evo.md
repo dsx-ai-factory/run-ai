@@ -132,3 +132,66 @@ Catalog-service used
 The exact rollback image/container snapshot is also saved locally at
 `/tmp/nim-evo-before-images.json`. These rollback targets are recorded only;
 they have not been applied.
+
+## GPU type completion and case-insensitive CLI lookup
+
+The local feature CLI now completes NIM submit `--gpu-type` from the selected
+cluster's paginated node inventory. It returns sorted, unique, exact product
+labels and matches typed prefixes without regard to case. No static GPU map is
+used. Standard shell completion must be enabled for Tab to invoke it.
+
+NIM submission resolves a case-insensitive inventory match to its exact label
+before sending the API request, preserving explicit allocations. Exact matches
+win; ambiguous case-only matches fail with a request to use the exact label.
+Unknown names retain existing API/manual scheduling behavior. Inventory errors
+are returned rather than silently submitting a possibly incorrect selector.
+Omitting the GPU type skips this inventory lookup. This is CLI-only behavior;
+direct API callers must still supply the exact label.
+
+Enable completion for the existing zsh alias in the current terminal:
+
+```bash
+autoload -Uz compinit && compinit
+source <(runai-evo completion zsh)
+compdef _runai runai-evo
+zstyle ':completion:*:*:*runai*:*' matcher 'm:{a-zA-Z}={A-Za-z}'
+```
+
+The local wrapper sets `RUNAI_CLI_CONFIG_PATH` so normal execution and Cobra's
+completion process use the same authenticated profile. A live mixed-case
+submission resolved `nViDiA-a100-sxm4-40gb` to
+`nvidia.com/gpu.product=NVIDIA-A100-SXM4-40GB` and requested 33 GB. The temporary
+service was deleted after verification.
+
+## Review follow-up (2026-10-28)
+
+- CLI version: 2.124.0; generated NIM submit reference includes the GPU-type flag.
+- Real inventory clients are rebuilt per call, preserving current credentials and
+  domain. Mock injection remains supported and regression tested.
+- Explicit zero GPU requests retain CPU-only semantics; they do not trigger
+  recommendations. Omitting GPU allocation is distinct from requesting zero.
+- With a GPU type, limit-only requests (including zero plus a limit) now fail
+  before creation instead of silently losing their limits.
+- With a GPU type, a memory request with more than one GPU now fails explicitly.
+  The current memory annotation represents one device and previously lost the
+  count. Use a whole-GPU count or device count plus memory fraction instead.
+- Policy integration tests cover default allocation precedence, locked defaults,
+  rejection of 33 GB against a 20 GB maximum, and rejection of eight devices
+  against a four-device maximum. Rejections produce no queued workload.
+- Positive placement checks covered all three simulated GPU types, auto sizing
+  on both A100 capacities, an eight-GPU recommendation, and combined flags.
+  All pods were assigned to nodes with the requested product label. The original
+  count-plus-memory probe exposed the unsupported-count behavior above; it is
+  not counted as a successful two-device allocation.
+
+The cluster still uses fake GPUs. Pod node assignment and requested resource
+composition are verified; model execution/readiness is not established.
+
+The final review build is deployed as
+`runai.jfrog.io/cp-containers-lab/workloads-manager:dima-evo-nim-review-20261028-v2`
+(digest `sha256:6696c7ebead35dfd5f3c4e016bef66ccbe8376d3197ef409c4f17e940ab6b84b`).
+Rollout completed successfully. Live checks confirmed rejection of limit-only
+and multi-device memory requests and acceptance of explicit zero. Actual zsh
+Tab keystrokes completed both `tesla-` and `nvidia-a100-sxm4-4` to the exact
+inventory labels with the per-command matcher setting above. Evidence and
+commands are recorded in `review-followup-results.json`.

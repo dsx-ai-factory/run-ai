@@ -602,6 +602,27 @@ var _ = Describe("NimServicesImpl", func() {
 			Expect(failure.Message).To(ContainSubstring("policy"))
 			Expect(calls).To(Equal(1))
 		})
+
+		DescribeTable("rejects recommended resources above policy maxima before queueing", func(allocation, rules string) {
+			var policy policiesApi.NimServicePolicyDefaultsAndRules
+			Expect(json.Unmarshal([]byte(`{"rules":{"compute":`+rules+`}}`), &policy)).To(Succeed())
+			policiesClient.SetMock(policiesClient.SimpleMockClientFactory{SimpleMockClient: policiesClient.SimpleMockClient{EffectiveUpdatedAt: time.Now(), EffectiveNimServicePolicy: &policy}})
+			nimServicesImpl.recommendGPU = func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+				calls++
+				var response catalog.RightSizingResponse
+				Expect(json.Unmarshal([]byte(`{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"profile","recommendation":`+allocation+`}]}`), &response)).To(Succeed())
+				return &response, nil
+			}
+			toCreate := request()
+			failure := failToCreateNimServiceForTest(router, randoms, &toCreate, http.StatusBadRequest)
+			Expect(failure.Message).To(ContainSubstring("policy"))
+			Expect(calls).To(Equal(1))
+			updates := getUpdatesForTest(createRouterForTest(), randoms, 0, 50, emptyClusterReports)
+			Expect(updates.Workloads).To(BeEmpty())
+		},
+			Entry("33 GB exceeds 20 GB", `{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":33000000000,"estimated":false}`, `{"gpuMemoryRequest":{"max":"20G"}}`),
+			Entry("8 devices exceeds 4", `{"allocationType":"gpu_count","gpuCount":8,"estimated":false}`, `{"gpuDevicesRequest":{"max":4}}`),
+		)
 		It("returns a synchronous error when there is no recommendation", func() {
 			nimServicesImpl.recommendGPU = func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
 				return &catalog.RightSizingResponse{}, nil

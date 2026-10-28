@@ -28,6 +28,18 @@ func (nsi *NimServicesImpl) resolveNimGPUAllocation(ctx context.Context, project
 	if *spec.GpuType == "" || len(validation.IsValidLabelValue(*spec.GpuType)) != 0 {
 		return false, api.NewError(http.StatusBadRequest, "gpuType must be an exact, nonempty nvidia.com/gpu.product label value", nil)
 	}
+	// A limit without a request is discarded by the NIM composer. Reject it
+	// rather than silently skipping automatic sizing and producing a CPU-only manifest.
+	if c := spec.Compute; c != nil {
+		if c.GpuDevicesRequest != nil && *c.GpuDevicesRequest > 1 && c.GpuMemoryRequest != nil {
+			return false, api.NewError(http.StatusBadRequest, "NIM GPU memory requests across multiple devices are not supported; use whole GPU counts or gpuMemoryPortionRequest with gpuDevicesRequest", nil)
+		}
+		hasLimit := c.GpuMemoryLimit != nil || c.GpuMemoryPortionLimit != nil || c.GpuPortionLimit != nil
+		hasRequest := (c.GpuDevicesRequest != nil && *c.GpuDevicesRequest > 0) || c.GpuMemoryRequest != nil || c.GpuMemoryPortionRequest != nil || c.GpuPortionRequest != nil
+		if hasLimit && !hasRequest {
+			return false, api.NewError(http.StatusBadRequest, "GPU limits require an explicit GPU allocation request; omit the limits to use automatic sizing", nil)
+		}
+	}
 	if hasNimGPUAllocation(spec.Compute) {
 		return false, nil
 	}

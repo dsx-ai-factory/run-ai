@@ -13,6 +13,7 @@ import (
 	apilist "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/list"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/nim/client"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/nim/service"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/node"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/list"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec"
@@ -65,6 +66,16 @@ func Delete(txn *transaction.Txn, domain string, token string, uuid string) erro
 }
 
 func Submit(txn *transaction.Txn, domain, token, name, projectId, clusterId string, generalSpec *spec.GeneralSpec) (string, error) {
+	if err := generalSpec.ResolveNimGPUType(func() ([]string, error) {
+		inventory, err := node.GetNodeLister(domain, token)
+		if err != nil {
+			return nil, err
+		}
+		return inventory.GPUTypes(txn.GetCtx(), clusterId)
+	}); err != nil {
+		return "", err
+	}
+
 	nimClient, err := getNimClient(domain, token)
 	if err != nil {
 		return "", err

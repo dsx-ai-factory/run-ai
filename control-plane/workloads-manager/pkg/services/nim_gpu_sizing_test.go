@@ -62,8 +62,27 @@ var _ = Describe("NIM automatic GPU sizing", func() {
 		Entry("fraction", `{"gpuMemoryPortionRequest":0.5}`),
 		Entry("legacy fraction", `{"gpuPortionRequest":0.5}`),
 		Entry("explicit zero must be validated rather than replaced", `{"gpuDevicesRequest":0}`),
-		Entry("limit alone must be validated rather than replaced", `{"gpuMemoryLimit":"30G"}`),
 	)
+	DescribeTable("rejects GPU limits without a requested allocation", func(compute string) {
+		spec := newSpec(`,"compute":` + compute)
+		_, err := service.resolveNimGPUAllocation(context.Background(), projectID, &spec)
+		Expect(err).NotTo(BeNil())
+		Expect(int(err.Code)).To(Equal(400))
+		Expect(err.Message).To(ContainSubstring("GPU limits require"))
+		Expect(calls).To(BeZero())
+	},
+		Entry("memory limit", `{"gpuMemoryLimit":"30G"}`),
+		Entry("fraction limit", `{"gpuMemoryPortionLimit":0.5}`),
+		Entry("zero devices with limit", `{"gpuDevicesRequest":0,"gpuMemoryLimit":"30G"}`),
+	)
+	It("rejects memory requests across multiple devices rather than losing the count", func() {
+		spec := newSpec(`,"compute":{"gpuDevicesRequest":2,"gpuMemoryRequest":"10G"}`)
+		_, err := service.resolveNimGPUAllocation(context.Background(), projectID, &spec)
+		Expect(err).NotTo(BeNil())
+		Expect(int(err.Code)).To(Equal(400))
+		Expect(err.Message).To(ContainSubstring("multiple devices"))
+		Expect(calls).To(BeZero())
+	})
 	It("keeps legacy submission independent of recommendations", func() {
 		spec := newSpec("")
 		spec.GpuType = nil

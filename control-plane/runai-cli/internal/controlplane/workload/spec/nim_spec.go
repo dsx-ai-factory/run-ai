@@ -381,3 +381,34 @@ func setNimAccessMode(am *parser.AttributeMapper, claimInfo *openapi.ClaimInfo) 
 		claimInfo.SetAccessModes(*accessMode)
 	}
 }
+
+// ResolveNimGPUType preserves the inventory's casing for Kubernetes selectors.
+// Unknown labels retain the existing API/manual scheduling behavior.
+func (gs *GeneralSpec) ResolveNimGPUType(fetch func() ([]string, error)) error {
+	value := gs.flags.Nim.GpuType
+	if value == "" {
+		return nil
+	}
+	labels, err := fetch()
+	if err != nil {
+		return fmt.Errorf("resolve NIM GPU type: %w", err)
+	}
+	for _, label := range labels {
+		if label == value {
+			return nil
+		}
+	}
+	match := ""
+	for _, label := range labels {
+		if strings.EqualFold(value, label) {
+			if match != "" && match != label {
+				return fmt.Errorf("GPU type %q matches multiple inventory labels; use the exact label", value)
+			}
+			match = label
+		}
+	}
+	if match != "" {
+		gs.flags.Nim.GpuType = match
+	}
+	return nil
+}
