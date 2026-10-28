@@ -443,7 +443,7 @@ Configures the `airgap pack` command, which builds an air-gapped bundle from a r
 
 ```yaml
 settings:
-  runaiVersion: 3.0.17
+  runaiVersion: 3.0.20
   architecture: amd64
   output: /path/to/runai-airgap.tar
 
@@ -465,7 +465,7 @@ A standard air-gapped bundle needs only the `settings` section. `imageOverrides`
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `settings.runaiVersion` | string | Yes | Target NVIDIA Run:ai version to pack, for example `3.0.17`. |
+| `settings.runaiVersion` | string | Yes | Target NVIDIA Run:ai version to pack, for example `3.0.20`. |
 | `settings.architecture` | string | No | CPU architecture to pack. Supported values: `amd64`, `arm64`. |
 | `settings.output` | string | No | Path to write the resulting bundle archive. Defaults to `runai-<version>-airgap.tar` in the current directory. |
 | `imageOverrides` | list | No | Substitutes or adds images sourced from your own registry instead of the release's defaults - for example, a third-party service image such as Keycloak. See [Third-Party Services](../../system-requirements/third-party-services.md#image-registry). For a Gov-ready installation, add an entry for each hardened third-party image - see [Gov-Ready Third-Party Services](../../system-requirements/gov-ready-third-party-services.md). |
