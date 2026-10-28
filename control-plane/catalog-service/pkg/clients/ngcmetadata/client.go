@@ -43,6 +43,7 @@ type Profile struct {
 	InferenceBackend       string   `json:"inference_backend,omitempty"`
 	TensorParallelSize     *int     `json:"tensor_parallel_size,omitempty"`
 	PipelineParallelSize   *int     `json:"pipeline_parallel_size,omitempty"`
+	MaxGPUCount            *int64   `json:"max_gpu_count,omitempty"`
 	MinimumVRAMPerDeviceGB *float64 `json:"min_vram_per_device_gb,omitempty"`
 }
 
@@ -94,7 +95,8 @@ func (c *Client) Get(ctx context.Context, image, tag string) (Metadata, error) {
 	}
 	// Metadata is public and independent of cluster/user identity. Keep the
 	// exact image and tag (including latest) in the versioned cache key.
-	cacheKey := "ngc_metadata_v1:" + image + ":" + tag
+	// v2 includes max_gpu_count, which older cached projections discarded.
+	cacheKey := "ngc_metadata_v2:" + image + ":" + tag
 	if c.cacheAvailable {
 		cached, err := cache.Get[Metadata](ctx, cacheKey)
 		if err == nil && cached != nil {

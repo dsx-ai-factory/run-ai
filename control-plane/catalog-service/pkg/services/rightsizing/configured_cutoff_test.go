@@ -34,7 +34,7 @@ func TestSingleGPUAllocationUsesConfiguredSharingCutoff(t *testing.T) {
 
 func TestInvalidSharingPolicyDoesNotBecomeEstimatedGPUCount(t *testing.T) {
 	capacity := int64(100_000_000_000)
-	result := recommendForHardware(gpuinventory.Hardware{Type: "unknown", MemoryBytes: &capacity}, []ngcmetadata.Profile{sizingProfile("generic", 20)}, 0)
+	result := recommendForHardware(gpuinventory.Hardware{Type: "unknown", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{sizingProfile("generic", 20)}, 0)
 	if result.Status != "no_recommendation" || result.Recommendation != nil || result.Reason == "" {
 		t.Fatalf("invalid sharing policy produced allocation: %+v", result)
 	}

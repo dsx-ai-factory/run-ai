@@ -34,7 +34,7 @@ func TestExactLlamaTagSelectsPrecisionPerHardware(t *testing.T) {
 		{"NVIDIA-B200", "nvfp4", "20739fe3e660205a0a64339c06bf2aa5c90f4935dd5e547b2b22d96f9c91fbc4", 24},
 	} {
 		t.Run(tc.gpu, func(t *testing.T) {
-			r := recommendForHardware(gpuinventory.Hardware{Type: tc.gpu, MemoryBytes: &capacity}, metadata.Profiles, 90)
+			r := recommendForHardware(gpuinventory.Hardware{Type: tc.gpu, MemoryBytes: &capacity, MaxDevicesPerNode: 8}, metadata.Profiles, 90)
 			if r.Status != "recommended" || r.ProfileId != tc.profile || r.Precision != tc.precision || r.InferenceBackend != "vllm" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum {
 				t.Fatalf("wrong profile: %+v", r)
 			}
@@ -84,7 +84,7 @@ func TestNGCTargetingTiersAndFit(t *testing.T) {
 		{"missing minimum permits tested fallback", "NVIDIA-A100-SXM4-80GB", "tested", []ngcmetadata.Profile{noMinimum, tested}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			r := recommendForHardware(gpuinventory.Hardware{Type: tc.gpu, MemoryBytes: &capacity}, tc.profiles, 90)
+			r := recommendForHardware(gpuinventory.Hardware{Type: tc.gpu, MemoryBytes: &capacity, MaxDevicesPerNode: 8}, tc.profiles, 90)
 			if r.ProfileId != tc.want {
 				t.Fatalf("profile=%q want=%q; result=%+v", r.ProfileId, tc.want, r)
 			}
@@ -105,8 +105,8 @@ func TestMixedInventoryAndExplicitGPUType(t *testing.T) {
 	h.Precision = "fp8"
 	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) {
 		return []gpuinventory.Hardware{
-			{Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &small}, {Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &large},
-			{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &large}, {Type: "unmatched", MemoryBytes: &large}}, nil
+			{Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &small, MaxDevicesPerNode: 8}, {Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &large, MaxDevicesPerNode: 8},
+			{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &large, MaxDevicesPerNode: 8}, {Type: "unmatched", MemoryBytes: &large, MaxDevicesPerNode: 8}}, nil
 	}),
 		metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
 			return ngcmetadata.Metadata{Profiles: []ngcmetadata.Profile{a, h}}, nil
@@ -141,11 +141,10 @@ func TestRecommendationAllocationBoundaries(t *testing.T) {
 		{"exactly 90 percent", 90, 90, "gpu_count", 1, 100_000_000_000, false},
 		{"above 90 percent", 91, 90, "gpu_count", 1, 100_000_000_000, false},
 		{"exactly capacity", 100, 90, "gpu_count", 1, 100_000_000_000, false},
-		{"above capacity stays estimated", 101, 90, "gpu_count", 2, 0, true},
 		{"configured 80 percent", 85, 80, "gpu_count", 1, 100_000_000_000, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			r := recommendForHardware(gpuinventory.Hardware{Type: "unknown", MemoryBytes: &capacity}, []ngcmetadata.Profile{sizingProfile("generic", tc.minimum)}, tc.cutoff)
+			r := recommendForHardware(gpuinventory.Hardware{Type: "unknown", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{sizingProfile("generic", tc.minimum)}, tc.cutoff)
 			a := r.Recommendation
 			if r.Status != "recommended" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum || a == nil || a.AllocationType != tc.allocation || a.GpuCount != tc.count || a.GpuMemoryPerDeviceBytes != tc.memory || a.Estimated != tc.estimated {
 				t.Fatalf("allocation=%+v result=%+v", a, r)

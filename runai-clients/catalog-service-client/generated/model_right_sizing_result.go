@@ -33,6 +33,10 @@ type RightSizingResult struct {
 	ProfileId                   *string  `json:"profileId,omitempty"`
 	Precision                   *string  `json:"precision,omitempty"`
 	InferenceBackend            *string  `json:"inferenceBackend,omitempty"`
+	// Explicit tensor parallel size from the selected published profile.
+	TensorParallelSize *int64 `json:"tensorParallelSize,omitempty"`
+	// Explicit pipeline parallel size from the selected published profile.
+	PipelineParallelSize *int64 `json:"pipelineParallelSize,omitempty"`
 	// Explanation when sizing cannot be recommended.
 	Reason         *string                           `json:"reason,omitempty"`
 	Recommendation NullableRightSizingRecommendation `json:"recommendation,omitempty"`
@@ -267,6 +271,70 @@ func (o *RightSizingResult) SetInferenceBackend(v string) {
 	o.InferenceBackend = &v
 }
 
+// GetTensorParallelSize returns the TensorParallelSize field value if set, zero value otherwise.
+func (o *RightSizingResult) GetTensorParallelSize() int64 {
+	if o == nil || IsNil(o.TensorParallelSize) {
+		var ret int64
+		return ret
+	}
+	return *o.TensorParallelSize
+}
+
+// GetTensorParallelSizeOk returns a tuple with the TensorParallelSize field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RightSizingResult) GetTensorParallelSizeOk() (*int64, bool) {
+	if o == nil || IsNil(o.TensorParallelSize) {
+		return nil, false
+	}
+	return o.TensorParallelSize, true
+}
+
+// HasTensorParallelSize returns a boolean if a field has been set.
+func (o *RightSizingResult) HasTensorParallelSize() bool {
+	if o != nil && !IsNil(o.TensorParallelSize) {
+		return true
+	}
+
+	return false
+}
+
+// SetTensorParallelSize gets a reference to the given int64 and assigns it to the TensorParallelSize field.
+func (o *RightSizingResult) SetTensorParallelSize(v int64) {
+	o.TensorParallelSize = &v
+}
+
+// GetPipelineParallelSize returns the PipelineParallelSize field value if set, zero value otherwise.
+func (o *RightSizingResult) GetPipelineParallelSize() int64 {
+	if o == nil || IsNil(o.PipelineParallelSize) {
+		var ret int64
+		return ret
+	}
+	return *o.PipelineParallelSize
+}
+
+// GetPipelineParallelSizeOk returns a tuple with the PipelineParallelSize field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RightSizingResult) GetPipelineParallelSizeOk() (*int64, bool) {
+	if o == nil || IsNil(o.PipelineParallelSize) {
+		return nil, false
+	}
+	return o.PipelineParallelSize, true
+}
+
+// HasPipelineParallelSize returns a boolean if a field has been set.
+func (o *RightSizingResult) HasPipelineParallelSize() bool {
+	if o != nil && !IsNil(o.PipelineParallelSize) {
+		return true
+	}
+
+	return false
+}
+
+// SetPipelineParallelSize gets a reference to the given int64 and assigns it to the PipelineParallelSize field.
+func (o *RightSizingResult) SetPipelineParallelSize(v int64) {
+	o.PipelineParallelSize = &v
+}
+
 // GetReason returns the Reason field value if set, zero value otherwise.
 func (o *RightSizingResult) GetReason() string {
 	if o == nil || IsNil(o.Reason) {
@@ -368,6 +436,12 @@ func (o RightSizingResult) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.InferenceBackend) {
 		toSerialize["inferenceBackend"] = o.InferenceBackend
+	}
+	if !IsNil(o.TensorParallelSize) {
+		toSerialize["tensorParallelSize"] = o.TensorParallelSize
+	}
+	if !IsNil(o.PipelineParallelSize) {
+		toSerialize["pipelineParallelSize"] = o.PipelineParallelSize
 	}
 	if !IsNil(o.Reason) {
 		toSerialize["reason"] = o.Reason

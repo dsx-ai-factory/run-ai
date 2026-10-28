@@ -28,7 +28,7 @@ func TestMetadataPreservesPublishedProfileAndExactTag(t *testing.T) {
 		if r.Header.Get("Authorization") != "" {
 			t.Fatal("public NGC lookup must not forward caller credentials")
 		}
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"profiles":[{"profile_id":"published-profile","gpu":"NVIDIA-B200","precision":"bf16","inference_backend":"vllm","tensor_parallel_size":2,"pipeline_parallel_size":1,"min_vram_per_device_gb":35,"gpu_device":"2901:10de","tested_gpu_devices":["2901:10de"]}]}`))}, nil
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"profiles":[{"profile_id":"published-profile","gpu":"NVIDIA-B200","precision":"bf16","inference_backend":"vllm","tensor_parallel_size":2,"pipeline_parallel_size":1,"max_gpu_count":4,"min_vram_per_device_gb":35,"gpu_device":"2901:10de","tested_gpu_devices":["2901:10de"]}]}`))}, nil
 	})}, 15*time.Minute)
 	metadata, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
 	if err != nil {
@@ -41,7 +41,7 @@ func TestMetadataPreservesPublishedProfileAndExactTag(t *testing.T) {
 	if p.ID != "published-profile" || p.MinimumVRAMPerDeviceGB == nil || *p.MinimumVRAMPerDeviceGB != 35 ||
 		p.TensorParallelSize == nil || *p.TensorParallelSize != 2 || p.PipelineParallelSize == nil || *p.PipelineParallelSize != 1 ||
 		p.GPU != "NVIDIA-B200" || p.GPUDevice != "2901:10de" || p.Precision != "bf16" ||
-		p.InferenceBackend != "vllm" || len(p.TestedGPUDevices) != 1 {
+		p.InferenceBackend != "vllm" || len(p.TestedGPUDevices) != 1 || p.MaxGPUCount == nil || *p.MaxGPUCount != 4 {
 		t.Fatalf("profile information lost: %+v", p)
 	}
 }

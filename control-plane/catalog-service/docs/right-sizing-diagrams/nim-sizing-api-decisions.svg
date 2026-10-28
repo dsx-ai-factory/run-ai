@@ -60,9 +60,9 @@
   <text x="130" y="1051" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#132C42" text-anchor="start" dominant-baseline="central">Prepare each hardware entry</text>
   <rect x="70" y="1110" width="2060" height="180" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
   <text x="94" y="1146" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">For each selected GPU type/capacity</text>
-  <text x="94" y="1191" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Missing or nonpositive capacity -&gt; no_recommendation for this entry.</text>
-  <text x="94" y="1227" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Resolve the exact PCI identity. Unknown or ambiguous inventory names can still use GPU-agnostic profiles.</text>
-  <text x="94" y="1263" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">An eligible baseline has a profile ID, explicit TP=1 and PP=1, and a positive, finite published minimum.</text>
+  <text x="94" y="1191" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Missing capacity or single-node count -&gt; no_recommendation for this entry.</text>
+  <text x="94" y="1227" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Resolve exact PCI identity; unknown / ambiguous names may use GPU-agnostic profiles.</text>
+  <text x="94" y="1263" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Require profile ID, positive TP/PP and finite minimum; fit memory + one-node count, respect max_gpu_count.</text>
   <polyline points="1100,980 1100,1110" fill="none" stroke="#176BA7" stroke-width="4" stroke-linejoin="round" />
   <polygon points="1100,1110 1108.0,1093.0 1092.0,1093.0" fill="#176BA7" />
   <polyline points="1820,980 1820,1020 1160,1020 1160,1110" fill="none" stroke="#986313" stroke-width="4" stroke-linejoin="round" />
@@ -117,24 +117,24 @@
   <text x="1895" y="1675" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#52677D" text-anchor="middle" dominant-baseline="central">After all profiles</text>
   <rect x="70" y="1690" width="42" height="42" rx="12" fill="#132C42" />
   <text x="91" y="1711" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#FFFFFF" text-anchor="middle" dominant-baseline="central">5</text>
-  <text x="130" y="1711" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#132C42" text-anchor="start" dominant-baseline="central">Select a profile and return this entry</text>
+  <text x="130" y="1711" font-family="Arial, sans-serif" font-size="34" font-weight="700" fill="#132C42" text-anchor="start" dominant-baseline="central">Select a fitting profile and return this entry</text>
   <rect x="70" y="1760" width="2060" height="155" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
-  <text x="94" y="1796" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">Choose the best surviving baseline</text>
-  <text x="94" y="1841" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Keep fitting profiles first; if none fit, retain a baseline for an explicitly estimated GPU count.</text>
-  <text x="94" y="1877" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Prefer direct &gt; tested &gt; GPU-agnostic. Within the tier: lowest minimum, then profile ID.</text>
+  <text x="94" y="1796" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">Choose the best fitting published profile</text>
+  <text x="94" y="1841" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Fitting TP1 first. Otherwise parallel profiles: direct &gt; tested &gt; GPU-agnostic, then fewest GPUs.</text>
+  <text x="94" y="1877" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Within the surviving tier/count: lowest per-device minimum, then profile ID. No scalar estimate.</text>
   <rect x="70" y="2020" width="990" height="160" rx="20" fill="#EAF6EF" stroke="#23784E" stroke-width="2" />
   <text x="94" y="2056" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#23784E" text-anchor="start" dominant-baseline="central">200  recommended</text>
-  <text x="94" y="2101" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">profileId, precision, inferenceBackend and published minimum</text>
-  <text x="94" y="2137" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">recommendation: allocation + warning; estimated count if oversized</text>
+  <text x="94" y="2101" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Profile ID, precision, backend, minimum and TP/PP</text>
+  <text x="94" y="2137" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Exact published allocation + warning; estimated: false</text>
   <rect x="1140" y="2020" width="990" height="160" rx="20" fill="#FFF5E0" stroke="#986313" stroke-width="2" />
   <text x="1164" y="2056" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#986313" text-anchor="start" dominant-baseline="central">200  no_recommendation</text>
-  <text x="1164" y="2101" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Missing capacity, no eligible minimum or no matching profile.</text>
+  <text x="1164" y="2101" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Missing capacity / node count, no eligible minimum or no fitting profile.</text>
   <text x="1164" y="2137" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Return a clear reason; no recommendation object.</text>
   <polyline points="1100,1915 1100,1970" fill="none" stroke="#52677D" stroke-width="3" />
   <polyline points="1100,1970 565,1970 565,2020" fill="none" stroke="#23784E" stroke-width="4" stroke-linejoin="round" />
   <polygon points="565,2020 573.0,2003.0 557.0,2003.0" fill="#23784E" />
-  <rect x="455.0" y="1952" width="220" height="36" rx="5" fill="#F5F7FB" />
-  <text x="565" y="1970" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#23784E" text-anchor="middle" dominant-baseline="central">Baseline selected</text>
+  <rect x="410.5" y="1952" width="309" height="36" rx="5" fill="#F5F7FB" />
+  <text x="565" y="1970" font-family="Arial, sans-serif" font-size="25" font-weight="400" fill="#23784E" text-anchor="middle" dominant-baseline="central">Published layout selected</text>
   <polyline points="1100,1970 1635,1970 1635,2020" fill="none" stroke="#986313" stroke-width="4" stroke-linejoin="round" />
   <polygon points="1635,2020 1643.0,2003.0 1627.0,2003.0" fill="#986313" />
   <rect x="1503.0" y="1952" width="264" height="36" rx="5" fill="#F5F7FB" />

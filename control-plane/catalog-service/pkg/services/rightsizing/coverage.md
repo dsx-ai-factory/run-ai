@@ -2,11 +2,11 @@
 
 Observed 2026-10-17T21:15:41.707772+00:00 through 2026-10-17T21:20:04.820913+00:00. This is a historical public NGC snapshot, not a promise of current availability.
 
-302 repositories; 1949 exact tags queried; 22835 profiles. 28 repositories have a positive per-device memory value. 20 repositories have at least one baseline eligible under this implementation (269 profiles).
+302 repositories; 1949 exact tags queried; 22835 profiles. 28 repositories have a positive per-device memory value. 20 repositories had at least one untargeted TP1/PP1 baseline (269 profiles) under the historical counting rule.
 
-Eligibility requires a positive memory value, explicit TP=1 and PP=1, and no GPU target restriction. Targeted profiles need PCI matching that the current inventory does not provide. This table counts profile records across tags, not unique models or deployed configurations. Repository names are not a reliable LLM/speech classification; no inferred classification is used.
+The historical counting rule required positive memory, explicit TP=1 and PP=1, and no GPU target restriction. It is not current eligibility: the implementation now also selects fitting published parallel profiles, uses the bundled PCI mapping and requires matching per-node counts. This table counts profile records across tags, not unique models or deployed configurations. Repository names are not a reliable LLM/speech classification; no inferred classification is used.
 
-The API requests the exact tag at runtime. Missing memory, hardware capacity, or a compatible baseline produces no recommendation. Memory is converted using decimal GB (10^9 bytes); NGC documents GB without an explicit decimal/binary definition. Validate this assumption with NGC before changing units.
+The API requests the exact tag at runtime. Missing memory, hardware capacity/per-node counts, or a fitting applicable published profile produces no recommendation. Memory is converted using decimal GB (10^9 bytes); NGC documents GB without an explicit decimal/binary definition. Validate this assumption with NGC before changing units.
 
 Every numerical recommendation is conditional on the selected profile being executable on the target GPU. The response warning explicitly records that precision/backend/runtime compatibility is unverified; `estimated: false` refers only to allocation arithmetic. NVFP4 requires Blackwell by default, or supported vLLM/SGLang pre-Blackwell emulation with `NIM_ALLOW_NVFP4_EMULATION=1`; TensorRT-LLM has no emulation path. Verify the exact NIM image tag and host configuration. [NVIDIA NVFP4 configuration](https://docs.nvidia.com/nim/large-language-models/2.0.13/reference/advanced-configuration.html#nvfp4-emulation)
 

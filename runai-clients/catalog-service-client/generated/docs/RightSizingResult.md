@@ -11,6 +11,8 @@ Name | Type | Description | Notes
 **ProfileId** | Pointer to **string** |  | [optional] 
 **Precision** | Pointer to **string** |  | [optional] 
 **InferenceBackend** | Pointer to **string** |  | [optional] 
+**TensorParallelSize** | Pointer to **int64** | Explicit tensor parallel size from the selected published profile. | [optional] 
+**PipelineParallelSize** | Pointer to **int64** | Explicit pipeline parallel size from the selected published profile. | [optional] 
 **Reason** | Pointer to **string** | Explanation when sizing cannot be recommended. | [optional] 
 **Recommendation** | Pointer to [**NullableRightSizingRecommendation**](RightSizingRecommendation.md) |  | [optional] 
 
@@ -197,6 +199,56 @@ SetInferenceBackend sets InferenceBackend field to given value.
 `func (o *RightSizingResult) HasInferenceBackend() bool`
 
 HasInferenceBackend returns a boolean if a field has been set.
+
+### GetTensorParallelSize
+
+`func (o *RightSizingResult) GetTensorParallelSize() int64`
+
+GetTensorParallelSize returns the TensorParallelSize field if non-nil, zero value otherwise.
+
+### GetTensorParallelSizeOk
+
+`func (o *RightSizingResult) GetTensorParallelSizeOk() (*int64, bool)`
+
+GetTensorParallelSizeOk returns a tuple with the TensorParallelSize field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetTensorParallelSize
+
+`func (o *RightSizingResult) SetTensorParallelSize(v int64)`
+
+SetTensorParallelSize sets TensorParallelSize field to given value.
+
+### HasTensorParallelSize
+
+`func (o *RightSizingResult) HasTensorParallelSize() bool`
+
+HasTensorParallelSize returns a boolean if a field has been set.
+
+### GetPipelineParallelSize
+
+`func (o *RightSizingResult) GetPipelineParallelSize() int64`
+
+GetPipelineParallelSize returns the PipelineParallelSize field if non-nil, zero value otherwise.
+
+### GetPipelineParallelSizeOk
+
+`func (o *RightSizingResult) GetPipelineParallelSizeOk() (*int64, bool)`
+
+GetPipelineParallelSizeOk returns a tuple with the PipelineParallelSize field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPipelineParallelSize
+
+`func (o *RightSizingResult) SetPipelineParallelSize(v int64)`
+
+SetPipelineParallelSize sets PipelineParallelSize field to given value.
+
+### HasPipelineParallelSize
+
+`func (o *RightSizingResult) HasPipelineParallelSize() bool`
+
+HasPipelineParallelSize returns a boolean if a field has been set.
 
 ### GetReason
 

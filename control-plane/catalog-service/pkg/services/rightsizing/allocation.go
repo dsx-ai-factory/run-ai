@@ -17,7 +17,7 @@ type Allocation struct {
 
 // SingleGPUAllocation applies the cutoff to an already resolved, compatible
 // single-device requirement. Both inputs must use the same byte units. Hardware
-// compatibility, usable capacity, and multi-GPU estimates are separate concerns.
+// compatibility, usable capacity, and parallel-profile selection are separate concerns.
 func SingleGPUAllocation(minimumBytes, capacityBytes, cutoffPercent int64) (Allocation, error) {
 	if cutoffPercent < 1 || cutoffPercent > 100 {
 		return Allocation{}, errors.New("whole-GPU sharing cutoff must be between 1 and 100 percent")

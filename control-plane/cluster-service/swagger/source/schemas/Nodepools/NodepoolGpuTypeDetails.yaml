@@ -21,4 +21,13 @@ properties:
     minimum: 0
     description: Total number of GPU devices of this type across the node pool's nodes.
     example: 16
+  maxDevicesPerNode:
+    type: integer
+    format: int64
+    minimum: 1
+    description: >-
+      Largest installed GPU count on a single node for this exact GPU type and
+      per-device memory capacity. Not a sum across nodes or a free-device count.
+      Omitted when per-node count evidence is unavailable.
+    example: 8
 x-schema-name: NodepoolGpuTypeDetails

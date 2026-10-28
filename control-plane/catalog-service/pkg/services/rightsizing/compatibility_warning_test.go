@@ -16,19 +16,18 @@ func TestSizingRecommendationsExposeUnverifiedRuntimeCompatibility(t *testing.T)
 	for _, tc := range []struct {
 		name, precision, backend string
 		minimum                  float64
-		estimated                bool
 	}{
-		{"fractional BF16", "bf16", "vllm", 15, false},
-		{"whole GPU NVFP4", "nvfp4", "vllm", 24, false},
-		{"estimated NVFP4", "nvfp4", "sglang", 82, true},
-		{"TensorRT NVFP4", "nvfp4", "tensorrt_llm", 24, false},
+		{"fractional BF16", "bf16", "vllm", 15},
+		{"whole GPU NVFP4", "nvfp4", "vllm", 24},
+		{"SGLang NVFP4", "nvfp4", "sglang", 24},
+		{"TensorRT NVFP4", "nvfp4", "tensorrt_llm", 24},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-A10G", MemoryBytes: &capacity}, []ngcmetadata.Profile{{
+			result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-A10G", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{{
 				ID: "published-profile", Precision: tc.precision, InferenceBackend: tc.backend,
 				MinimumVRAMPerDeviceGB: &tc.minimum, TensorParallelSize: &one, PipelineParallelSize: &one,
 			}}, 90)
-			if result.Recommendation == nil || result.ProfileId != "published-profile" || result.Recommendation.Estimated != tc.estimated {
+			if result.Recommendation == nil || result.ProfileId != "published-profile" || result.Recommendation.Estimated {
 				t.Fatalf("sizing/source information changed: %+v", result)
 			}
 			warning := result.Recommendation.Warning
@@ -41,9 +40,6 @@ func TestSizingRecommendationsExposeUnverifiedRuntimeCompatibility(t *testing.T)
 						t.Errorf("NVFP4 runtime prerequisite %q is missing: %q", prerequisite, warning)
 					}
 				}
-			}
-			if tc.estimated && !strings.Contains(warning, "not a validated tensor-parallel configuration") {
-				t.Fatalf("naive-count caveat lost: %q", warning)
 			}
 		})
 	}

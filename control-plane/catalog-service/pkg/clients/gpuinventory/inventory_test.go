@@ -28,6 +28,43 @@ func (f nodePoolsFunc) GetNodePoolsMinimalByCluster(ctx context.Context, id stri
 
 const clusterID = "4b94efde-b05a-4118-a03a-1dedff81fa8e"
 
+func TestInventoryMergesPerNodeCountsByMaximumWithinEachCapacity(t *testing.T) {
+	small, large, two, four, six := int64(40_000_000_000), int64(80_000_000_000), int64(2), int64(4), int64(6)
+	client := New(nodePoolsFunc(func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
+		return &clusterapi.GetNodepoolsMinimal200Response{Nodepools: []clusterapi.NodepoolMinimal{
+			{GpuTypes: []clusterapi.NodepoolGpuTypeDetails{
+				{Type: "A100", GpuMemoryBytes: &large, TotalDevices: 8, MaxDevicesPerNode: &four},
+				{Type: "A100", GpuMemoryBytes: &small, TotalDevices: 2, MaxDevicesPerNode: &two},
+			}},
+			{GpuTypes: []clusterapi.NodepoolGpuTypeDetails{
+				{Type: "A100", GpuMemoryBytes: &large, TotalDevices: 6, MaxDevicesPerNode: &six},
+				{Type: "A100", GpuMemoryBytes: &large, TotalDevices: 20}, // Unknown count cannot invent a 20-GPU node.
+				{Type: "T4", TotalDevices: 8},
+			}},
+		}}, nil
+	}), 30*time.Second)
+	got, err := client.Get(context.Background(), clusterID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(got) != 3 || got[0].MaxDevicesPerNode != 2 || got[1].MaxDevicesPerNode != 6 || got[2].MaxDevicesPerNode != 0 {
+		t.Fatalf("counts were summed, mixed between capacities, or inferred: %+v", got)
+	}
+}
+
+func TestInventoryRejectsImpossiblePerNodeCounts(t *testing.T) {
+	for _, count := range []int64{-1, 0, 3} {
+		client := New(nodePoolsFunc(func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
+			return &clusterapi.GetNodepoolsMinimal200Response{Nodepools: []clusterapi.NodepoolMinimal{{GpuTypes: []clusterapi.NodepoolGpuTypeDetails{
+				{Type: "A100", TotalDevices: 2, MaxDevicesPerNode: &count},
+			}}}}, nil
+		}), 30*time.Second)
+		if got, err := client.Get(context.Background(), clusterID); err == nil || got != nil {
+			t.Fatalf("accepted per-node count %d for a two-device pool: %+v %v", count, got, err)
+		}
+	}
+}
+
 func TestInventoryKeepsDistinctCapacitiesWithoutClaimingAvailability(t *testing.T) {
 	small, large := int64(40_000_000_000), int64(80_000_000_000)
 	client := New(nodePoolsFunc(func(_ context.Context, id string) (*clusterapi.GetNodepoolsMinimal200Response, error) {

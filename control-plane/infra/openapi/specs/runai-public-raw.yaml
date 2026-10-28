@@ -29341,6 +29341,16 @@ components:
             Total number of GPU devices of this type across the node pool's
             nodes.
           example: 16
+        maxDevicesPerNode:
+          type: integer
+          format: int64
+          minimum: 1
+          description: >-
+            Largest installed GPU count on a single node for this exact GPU type
+            and per-device memory capacity. Not a sum across nodes or a
+            free-device count. Omitted when per-node count evidence is
+            unavailable.
+          example: 8
       x-schema-name: NodepoolGpuTypeDetails
     NodepoolGpuTypes:
       type: array
@@ -61414,15 +61424,16 @@ components:
         estimated:
           type: boolean
           description: >-
-            Whether GPU count is a naive estimate. False describes allocation
-            arithmetic only; it does not verify runtime or hardware
+            Whether this is an estimated allocation. Published-profile
+            recommendations return false; this describes the source layout and
+            allocation arithmetic, not verified runtime or hardware
             compatibility.
         warning:
           type: string
           description: >-
-            Conditional sizing prerequisites, unverified hardware/runtime
-            compatibility, and limitations of an estimated count. Read before
-            using the allocation.
+            Conditional sizing prerequisites, publisher-defined minimum
+            assumptions, and unverified hardware/runtime or interconnect
+            compatibility. Read before using the allocation.
     RightSizingResult:
       type: object
       required:
@@ -61452,6 +61463,16 @@ components:
           type: string
         inferenceBackend:
           type: string
+        tensorParallelSize:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Explicit tensor parallel size from the selected published profile.
+        pipelineParallelSize:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Explicit pipeline parallel size from the selected published profile.
         reason:
           type: string
           description: Explanation when sizing cannot be recommended.

@@ -105,7 +105,7 @@
           "args": [
             595,
             2,
-            "Fetch profiles, select a baseline, size the allocation",
+            "Fetch profiles, select a published layout, size the allocation",
             "Continue from right to left"
           ]
         },
@@ -132,11 +132,11 @@
             660,
             620,
             225,
-            "5  Match + select profiles",
+            "5  Select a fitting published profile",
             [
-              "For each selected type/capacity pair",
-              "Fit first; direct > tested > GPU-agnostic",
-              "Lowest minimum, then profile ID"
+              "Per-device memory + one-node count fit",
+              "TP1 first; direct > tested > GPU-agnostic",
+              "Then fewest GPUs, minimum, profile ID"
             ],
             "blue"
           ]
@@ -148,11 +148,11 @@
             660,
             620,
             225,
-            "6  Apply sharing policy",
+            "6  Allocate selected layout",
             [
-              "Below 90%: allocate required memory",
-              "90% through capacity: one whole GPU",
-              "Above capacity: estimated GPU count"
+              "TP1 below 90%: published memory",
+              "TP1 at 90\u2013100%: one whole GPU",
+              "Parallel profile: exact TP \u00d7 PP whole GPUs"
             ],
             "blue"
           ]
@@ -235,7 +235,7 @@
             "200  recommended",
             [
               "Profile ID, precision, backend, minimum",
-              "Memory allocation or GPU count",
+              "Explicit TP/PP + allocation; estimated: false",
               "Evidence + runtime caveats in warning"
             ],
             "green"
@@ -250,7 +250,7 @@
             210,
             "200  no_recommendation",
             [
-              "Missing capacity or usable profile data",
+              "Missing capacity / node count / fitting profile",
               "Explain why this entry cannot be sized",
               "No suggested allocation for this entry"
             ],
@@ -305,7 +305,7 @@
           ],
           "kwargs": {
             "color": "#23784E",
-            "label": "Published minimum available",
+            "label": "Fitting published layout",
             "labelpos": [
               380,
               930
@@ -328,7 +328,7 @@
           ],
           "kwargs": {
             "color": "#986313",
-            "label": "No usable minimum / capacity",
+            "label": "Missing evidence / no fit",
             "labelpos": [
               1100,
               965
@@ -436,7 +436,7 @@
           "args": [
             70,
             1580,
-            "Blue: processing   Green: successful result   Amber: supported alternative / estimate   Red: failure   Gray: context",
+            "Blue: processing   Green: successful result   Amber: supported alternative   Red: failure   Gray: context",
             23
           ],
           "kwargs": {
@@ -738,9 +738,9 @@
             180,
             "For each selected GPU type/capacity",
             [
-              "Missing or nonpositive capacity -> no_recommendation for this entry.",
-              "Resolve the exact PCI identity. Unknown or ambiguous inventory names can still use GPU-agnostic profiles.",
-              "An eligible baseline has a profile ID, explicit TP=1 and PP=1, and a positive, finite published minimum."
+              "Missing capacity or single-node count -> no_recommendation for this entry.",
+              "Resolve exact PCI identity; unknown / ambiguous names may use GPU-agnostic profiles.",
+              "Require profile ID, positive TP/PP and finite minimum; fit memory + one-node count, respect max_gpu_count."
             ],
             "blue"
           ]
@@ -1104,7 +1104,7 @@
           "args": [
             1710,
             5,
-            "Select a profile and return this entry",
+            "Select a fitting profile and return this entry",
             null
           ]
         },
@@ -1115,10 +1115,10 @@
             1760,
             2060,
             155,
-            "Choose the best surviving baseline",
+            "Choose the best fitting published profile",
             [
-              "Keep fitting profiles first; if none fit, retain a baseline for an explicitly estimated GPU count.",
-              "Prefer direct > tested > GPU-agnostic. Within the tier: lowest minimum, then profile ID."
+              "Fitting TP1 first. Otherwise parallel profiles: direct > tested > GPU-agnostic, then fewest GPUs.",
+              "Within the surviving tier/count: lowest per-device minimum, then profile ID. No scalar estimate."
             ],
             "blue"
           ]
@@ -1132,8 +1132,8 @@
             160,
             "200  recommended",
             [
-              "profileId, precision, inferenceBackend and published minimum",
-              "recommendation: allocation + warning; estimated count if oversized"
+              "Profile ID, precision, backend, minimum and TP/PP",
+              "Exact published allocation + warning; estimated: false"
             ],
             "green"
           ]
@@ -1147,7 +1147,7 @@
             160,
             "200  no_recommendation",
             [
-              "Missing capacity, no eligible minimum or no matching profile.",
+              "Missing capacity / node count, no eligible minimum or no fitting profile.",
               "Return a clear reason; no recommendation object."
             ],
             "amber"
@@ -1190,7 +1190,7 @@
           ],
           "kwargs": {
             "color": "#23784E",
-            "label": "Baseline selected",
+            "label": "Published layout selected",
             "labelpos": [
               565,
               1970
@@ -1255,7 +1255,7 @@
       "width": 2200,
       "height": 1700,
       "title": "Allocation policy: minimum to resource request",
-      "subtitle": "After profile selection | Sharing cutoff defaults to 90% | Examples use decimal 80 GB capacity",
+      "subtitle": "After published-profile selection | TP1 sharing cutoff defaults to 90% | Decimal GB examples",
       "elements": [
         {
           "op": "section",
@@ -1273,10 +1273,10 @@
             250,
             620,
             225,
-            "Published minimum",
+            "Published profile",
             [
-              "Use the selected profile as published.",
-              "Explicit TP=1 and PP=1 baseline.",
+              "Positive TP/PP, memory and profile ID.",
+              "Count = TP \u00d7 PP, without rounding.",
               "No invented extra headroom."
             ],
             "blue"
@@ -1289,11 +1289,11 @@
             250,
             620,
             225,
-            "Reported device capacity",
+            "Reported hardware",
             [
-              "Use per-device bytes from inventory.",
-              "Positive capacity is required.",
-              "Not free memory or project quota."
+              "Per-device capacity + one-node count.",
+              "Each profile must fit both.",
+              "Installed devices, not free capacity."
             ],
             "blue"
           ]
@@ -1390,10 +1390,10 @@
             595,
             2060,
             155,
-            "Compute in bytes without changing the published minimum",
+            "Use the published per-device minimum and exact layout",
             [
-              "m = ceil(published minimum GB x 1,000,000,000); C = reported capacity bytes.",
-              "Whole-GPU threshold = ceil(C x cutoffPercent / 100). Compare m with that threshold and C."
+              "m = ceil(minimum GB x 1,000,000,000); C = capacity bytes. Reject profiles with m > C or count > one node.",
+              "TP1: compare m with ceil(C x cutoffPercent / 100). Parallel: allocate whole GPUs, regardless of cutoff."
             ],
             "blue"
           ]
@@ -1502,7 +1502,7 @@
             900,
             620,
             190,
-            "Below 90% of capacity",
+            "TP1 below 90% of capacity",
             [
               "allocationType: gpu_memory; count: 1",
               "gpuMemoryPerDeviceBytes = m",
@@ -1518,7 +1518,7 @@
             900,
             620,
             190,
-            "90% through 100%",
+            "TP1 at 90% through 100%",
             [
               "allocationType: gpu_count; count: 1",
               "gpuMemoryPerDeviceBytes = C",
@@ -1534,13 +1534,13 @@
             900,
             620,
             190,
-            "Above device capacity",
+            "Fitting parallel profile",
             [
-              "gpu_count = ceil(m / C)",
-              "No per-device memory allocation.",
-              "estimated: true + count warning"
+              "allocationType: gpu_count; count: TP \u00d7 PP",
+              "gpuMemoryPerDeviceBytes = C",
+              "estimated: false"
             ],
-            "amber"
+            "green"
           ]
         },
         {
@@ -1580,12 +1580,12 @@
             1170,
             620,
             160,
-            "Example: 81 / 80 GB",
+            "Example: FP8 TP2 / PP1",
             [
-              "Requirement exceeds one device.",
-              "Estimate two GPUs; TP is not validated."
+              "57 GB floor; two 80 GB devices fit.",
+              "Request two whole GPUs on one node."
             ],
-            "amber"
+            "green"
           ]
         },
         {
@@ -1639,7 +1639,7 @@
             ]
           ],
           "kwargs": {
-            "color": "#986313"
+            "color": "#23784E"
           }
         },
         {
@@ -1651,9 +1651,9 @@
             175,
             "Meaning and limits",
             [
-              "The cutoff is a sharing rule, not OOM protection. Numerical allocation does not establish runtime compatibility.",
-              "Estimated counts do not verify device availability, a supported tensor-parallel configuration or schedulability.",
-              "Upstream says minima include runtime overhead and baseline KV cache; exact settings await written confirmation."
+              "No fitting published profile or missing hardware evidence -> no_recommendation. No rescaling / power-of-two fallback.",
+              "The 90% cutoff is a sharing rule, not OOM protection. Exact counts do not guarantee runtime or interconnect compatibility.",
+              "Minima are publisher-defined; KV cache and runtime overhead settings may vary and require exact-profile confirmation."
             ],
             "muted"
           ]
@@ -1663,7 +1663,7 @@
           "args": [
             70,
             1650,
-            "Blue: processing   Green: successful result   Amber: supported alternative / estimate   Red: failure   Gray: context",
+            "Blue: processing   Green: successful result   Amber: supported alternative   Red: failure   Gray: context",
             23
           ],
           "kwargs": {
