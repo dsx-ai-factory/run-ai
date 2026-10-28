@@ -14,7 +14,9 @@ Contact: support@run.ai
 package openapi
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the SamlData type satisfies the MappedNullable interface at compile time
@@ -27,14 +29,19 @@ type SamlData struct {
 	EntityId               *string `json:"entityId,omitempty"`
 	// Service Provider (SP) metadata url
 	ServiceProviderMetadataUrl *string `json:"serviceProviderMetadataUrl,omitempty"`
+	// Whether the signature of SAML responses from the identity provider is validated
+	ValidateSignature bool `json:"validateSignature"`
 }
+
+type _SamlData SamlData
 
 // NewSamlData instantiates a new SamlData object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSamlData() *SamlData {
+func NewSamlData(validateSignature bool) *SamlData {
 	this := SamlData{}
+	this.ValidateSignature = validateSignature
 	return &this
 }
 
@@ -174,6 +181,30 @@ func (o *SamlData) SetServiceProviderMetadataUrl(v string) {
 	o.ServiceProviderMetadataUrl = &v
 }
 
+// GetValidateSignature returns the ValidateSignature field value
+func (o *SamlData) GetValidateSignature() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.ValidateSignature
+}
+
+// GetValidateSignatureOk returns a tuple with the ValidateSignature field value
+// and a boolean to check if the value has been set.
+func (o *SamlData) GetValidateSignatureOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.ValidateSignature, true
+}
+
+// SetValidateSignature sets field value
+func (o *SamlData) SetValidateSignature(v bool) {
+	o.ValidateSignature = v
+}
+
 func (o SamlData) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -196,7 +227,52 @@ func (o SamlData) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ServiceProviderMetadataUrl) {
 		toSerialize["serviceProviderMetadataUrl"] = o.ServiceProviderMetadataUrl
 	}
+	toSerialize["validateSignature"] = o.ValidateSignature
 	return toSerialize, nil
+}
+
+func (o *SamlData) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	// RUNAI
+	// requiredProperties := []string{
+	//
+	//  	"validateSignature",
+	// }
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	// RUNAI
+	//  for _, requiredProperty := range(requiredProperties) {
+	//  	if _, exists := allProperties[requiredProperty]; !exists {
+	//  		return fmt.Errorf("no value given for required property %v", requiredProperty)
+	//  	}
+	//  }
+	//
+	fmt.Sprintf("dummy")
+
+	varSamlData := _SamlData{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	// RUNAI
+	// decoder.DisallowUnknownFields()
+	//
+	err = decoder.Decode(&varSamlData)
+
+	if err != nil {
+		return err
+	}
+
+	*o = SamlData(varSamlData)
+
+	return err
 }
 
 type NullableSamlData struct {
