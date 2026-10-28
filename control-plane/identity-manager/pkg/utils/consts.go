@@ -108,6 +108,7 @@ const (
 	MetadataXmlType        = "metadataXmlType"
 	SigningCertificate     = "signingCertificate"
 	SingleSignOnServiceUrl = "singleSignOnServiceUrl"
+	ValidateSignature      = "validateSignature"
 )
 
 // OIDC config fields

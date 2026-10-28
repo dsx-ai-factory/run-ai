@@ -1,0 +1,81 @@
+{
+  "apiVersion": "run.ai/v1alpha1",
+  "kind": "Karta",
+  "spec": {
+    "optimizationInstructions": {},
+    "structureDefinition": {
+      "childComponents": [
+        {
+          "kind": {
+            "group": "apps",
+            "kind": "ReplicaSet",
+            "version": "v1"
+          },
+          "name": "replicaset",
+          "ownerRef": "deployment"
+        }
+      ],
+      "rootComponent": {
+        "kind": {
+          "group": "apps",
+          "kind": "Deployment",
+          "version": "v1"
+        },
+        "name": "deployment",
+        "scaleDefinition": {
+          "replicasPath": ".spec.replicas // 1"
+        },
+        "specDefinition": {
+          "podTemplateSpecPath": ".spec.template"
+        },
+        "statusDefinition": {
+          "conditionsDefinition": {
+            "messageFieldName": "message",
+            "path": ".status.conditions",
+            "reasonFieldName": "reason",
+            "statusFieldName": "status",
+            "typeFieldName": "type"
+          },
+          "statusMappings": {
+            "failed": [
+              {
+                "byConditions": [
+                  {
+                    "reason": "ProgressDeadlineExceeded",
+                    "status": "False",
+                    "type": "Progressing"
+                  }
+                ]
+              }
+            ],
+            "initializing": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "Progressing"
+                  },
+                  {
+                    "status": "False",
+                    "type": "Available"
+                  }
+                ]
+              }
+            ],
+            "running": [
+              {
+                "byConditions": [
+                  {
+                    "reason": "NewReplicaSetAvailable",
+                    "status": "True",
+                    "type": "Progressing"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

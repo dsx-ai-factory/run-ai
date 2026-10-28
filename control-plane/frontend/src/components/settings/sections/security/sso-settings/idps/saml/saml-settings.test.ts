@@ -18,6 +18,7 @@ describe("saml-settings.vue", () => {
     entityId: "runai-app.run.ai/bgu",
     singleSignOnServiceUrl: "http://test.com/sso",
     signingCertificate: "test-cert",
+    validateSignature: true,
   };
 
   const mockIdp: Idp = {
