@@ -107,7 +107,7 @@
     {
       "id": "A10-point-in-time-after-node-drop",
       "prompt": "A couple of nodes dropped on cluster 20000000-0000-4000-8000-0000000000c1 about half an hour ago. Is the cluster OK now?",
-      "expected_output": "Not OK: the cluster is STUCK now. The current snapshot shows 4 unhealthy nodes (24 GPUs unschedulable) and STUCK infer-pool and edge-pool. The skill reports the current state only; it cannot reconstruct when nodes dropped. 2 failed workloads were evicted from node-train-03; node correlation routes to runai-get-workload-health-summary.",
+      "expected_output": "Not OK: the cluster is STUCK now. The current snapshot shows 4 unhealthy nodes (24 GPUs unschedulable) and STUCK infer-pool and edge-pool. The skill reports the current state only; it cannot reconstruct when nodes dropped. 2 workloads failed; node correlation routes to runai-get-workload-health-summary.",
       "expected_skill": "runai-get-cluster-health-summary",
       "expected_script": null,
       "assertions": [
