@@ -15,7 +15,6 @@ import (
 	"time"
 
 	clusterapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
-	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/google/uuid"
 )
 
@@ -27,6 +26,8 @@ type Hardware struct {
 	Type string
 	// MemoryBytes is nil when nodes do not report a usable per-device capacity.
 	MemoryBytes *int64
+	// Largest reported count on one node for this exact type/capacity; zero is unknown.
+	MaxDevicesPerNode int64
 }
 
 type Client struct {
@@ -55,13 +56,20 @@ func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) 
 		gpuType string
 		memory  int64
 	}
-	seen := datastructs.NewSet[key]()
+	indices := make(map[key]int)
 	result := make([]Hardware, 0)
 	for _, pool := range pools.Nodepools {
 		for _, gpu := range pool.GpuTypes {
 			name := strings.TrimSpace(gpu.Type)
 			if gpu.TotalDevices < 0 || (gpu.TotalDevices > 0 && name == "") {
 				return nil, fmt.Errorf("cluster GPU inventory contains an invalid device count or missing GPU type")
+			}
+			var maxPerNode int64
+			if gpu.MaxDevicesPerNode != nil {
+				maxPerNode = *gpu.MaxDevicesPerNode
+				if maxPerNode <= 0 || maxPerNode > int64(gpu.TotalDevices) {
+					return nil, fmt.Errorf("cluster GPU inventory contains an invalid per-node device count")
+				}
 			}
 			if gpu.TotalDevices == 0 {
 				continue
@@ -71,11 +79,14 @@ func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) 
 				memory = *gpu.GpuMemoryBytes
 			}
 			k := key{name, memory}
-			if seen.Has(k) {
+			if index, exists := indices[k]; exists {
+				// A pool or page is not a node. Summing these counts would invent
+				// a single-node layout from GPUs installed on different nodes.
+				result[index].MaxDevicesPerNode = max(result[index].MaxDevicesPerNode, maxPerNode)
 				continue
 			}
-			seen.Add(k)
-			hardware := Hardware{Type: name}
+			indices[k] = len(result)
+			hardware := Hardware{Type: name, MaxDevicesPerNode: maxPerNode}
 			if memory > 0 {
 				hardware.MemoryBytes = &memory
 			}

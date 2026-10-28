@@ -30,7 +30,7 @@ func (f metadataFunc) Get(ctx context.Context, image, tag string) (ngcmetadata.M
 func TestRecommendKeepsCapacitiesAndAppliesCutoff(t *testing.T) {
 	small, large, minimum, one := int64(40_000_000_000), int64(80_000_000_000), 36.0, 1
 	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) {
-		return []gpuinventory.Hardware{{Type: "NVIDIA-A100", MemoryBytes: &small}, {Type: "NVIDIA-A100", MemoryBytes: &large}, {Type: "T4"}}, nil
+		return []gpuinventory.Hardware{{Type: "NVIDIA-A100", MemoryBytes: &small, MaxDevicesPerNode: 8}, {Type: "NVIDIA-A100", MemoryBytes: &large, MaxDevicesPerNode: 8}, {Type: "T4"}}, nil
 	}), metadataFunc(func(_ context.Context, image, tag string) (ngcmetadata.Metadata, error) {
 		if image != "nvcr.io/nim/nvidia/example" || tag != "2.1.4" {
 			t.Fatalf("wrong image/tag: %s %s", image, tag)
@@ -57,10 +57,10 @@ func TestRecommendKeepsCapacitiesAndAppliesCutoff(t *testing.T) {
 	}
 }
 
-func TestRecommendNeverUsesMultiDeviceMinimumAsTotal(t *testing.T) {
+func TestRecommendUsesMultiDeviceMinimumPerDevice(t *testing.T) {
 	capacity, minimum, tp, pp := int64(80_000_000_000), 35.0, 4, 1
 	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) {
-		return []gpuinventory.Hardware{{Type: "A100", MemoryBytes: &capacity}}, nil
+		return []gpuinventory.Hardware{{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}}, nil
 	}),
 		metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
 			return ngcmetadata.Metadata{Profiles: []ngcmetadata.Profile{{ID: "tp4", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &tp, PipelineParallelSize: &pp}}}, nil
@@ -69,15 +69,16 @@ func TestRecommendNeverUsesMultiDeviceMinimumAsTotal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if result.Results[0].Status != "no_recommendation" {
-		t.Fatalf("multi-device profile treated as single GPU: %+v", result)
+	allocation := result.Results[0].Recommendation
+	if allocation == nil || allocation.GpuCount != 4 || allocation.GpuMemoryPerDeviceBytes != capacity || result.Results[0].MinimumGpuMemoryPerDeviceGb != minimum {
+		t.Fatalf("multi-device minimum or count changed: %+v", result)
 	}
 }
 
 func TestRecommendMissingMetadataAndUpstreamErrors(t *testing.T) {
 	capacity := int64(80_000_000_000)
 	inventory := inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) {
-		return []gpuinventory.Hardware{{Type: "A100", MemoryBytes: &capacity}}, nil
+		return []gpuinventory.Hardware{{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}}, nil
 	})
 	s := New(inventory, metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
 		return ngcmetadata.Metadata{}, nil
@@ -118,7 +119,7 @@ func TestRejectsUnverifiedTargetedProfiles(t *testing.T) {
 		{"display name only", "A100", ""}, {"PCI only", "", "20b2:10de"}, {"matching name different PCI", "A100", "ffff:10de"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, []ngcmetadata.Profile{{ID: "targeted", GPU: tc.gpu, GPUDevice: tc.device, MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, 90)
+			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{{ID: "targeted", GPU: tc.gpu, GPUDevice: tc.device, MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, 90)
 			if result.Status != "no_recommendation" || result.Recommendation != nil {
 				t.Fatalf("unverified hardware recommended: %+v", result)
 			}
@@ -126,11 +127,11 @@ func TestRejectsUnverifiedTargetedProfiles(t *testing.T) {
 	}
 }
 
-func TestSingleDeviceBaselineProducesExplicitEstimate(t *testing.T) {
+func TestOversizedSingleDeviceBaselineDoesNotProduceEstimate(t *testing.T) {
 	capacity, minimum, one := int64(40_000_000_000), 81.0, 1
-	result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, []ngcmetadata.Profile{{ID: "generic", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, 90)
-	if result.Recommendation == nil || !result.Recommendation.Estimated || result.Recommendation.GpuCount != 3 || result.Recommendation.Warning == "" || result.ProfileId != "generic" {
-		t.Fatalf("bad estimate: %+v", result)
+	result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{{ID: "generic", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, 90)
+	if result.Status != "no_recommendation" || result.Recommendation != nil || result.Reason == "" {
+		t.Fatalf("unsupported estimate: %+v", result)
 	}
 }
 
@@ -148,7 +149,7 @@ func TestProfileSelectionRequiresEvidenceAndIsDeterministic(t *testing.T) {
 		{"tested devices are history", []ngcmetadata.Profile{{ID: "generic", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one, TestedGPUDevices: []string{"different-pci"}}}, "generic"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity}, tc.profiles, 90)
+			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, tc.profiles, 90)
 			if result.ProfileId != tc.want {
 				t.Fatalf("profile=%q want=%q", result.ProfileId, tc.want)
 			}

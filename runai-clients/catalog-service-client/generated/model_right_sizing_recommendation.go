@@ -27,9 +27,9 @@ type RightSizingRecommendation struct {
 	AllocationType          string `json:"allocationType"`
 	GpuCount                int64  `json:"gpuCount"`
 	GpuMemoryPerDeviceBytes *int64 `json:"gpuMemoryPerDeviceBytes,omitempty"`
-	// Whether GPU count is a naive estimate. False describes allocation arithmetic only; it does not verify runtime or hardware compatibility.
+	// Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility.
 	Estimated bool `json:"estimated"`
-	// Conditional sizing prerequisites, unverified hardware/runtime compatibility, and limitations of an estimated count. Read before using the allocation.
+	// Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation.
 	Warning *string `json:"warning,omitempty"`
 }
 

@@ -697,13 +697,13 @@ export interface RightSizingRecommendation {
      */
     'gpuMemoryPerDeviceBytes'?: number;
     /**
-     * Whether GPU count is a naive estimate. False describes allocation arithmetic only; it does not verify runtime or hardware compatibility.
+     * Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility.
      * @type {boolean}
      * @memberof RightSizingRecommendation
      */
     'estimated': boolean;
     /**
-     * Conditional sizing prerequisites, unverified hardware/runtime compatibility, and limitations of an estimated count. Read before using the allocation.
+     * Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation.
      * @type {string}
      * @memberof RightSizingRecommendation
      */
@@ -821,6 +821,18 @@ export interface RightSizingResult {
      * @memberof RightSizingResult
      */
     'inferenceBackend'?: string;
+    /**
+     * Explicit tensor parallel size from the selected published profile.
+     * @type {number}
+     * @memberof RightSizingResult
+     */
+    'tensorParallelSize'?: number;
+    /**
+     * Explicit pipeline parallel size from the selected published profile.
+     * @type {number}
+     * @memberof RightSizingResult
+     */
+    'pipelineParallelSize'?: number;
     /**
      * Explanation when sizing cannot be recommended.
      * @type {string}

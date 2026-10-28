@@ -194,23 +194,3 @@ Go-client version pinned to `v7.12.0` in the [`Makefile`](Makefile)). Run
 `internal/generated` directory **must not be edited by hand** — changes are
 overwritten on the next generation run.
 </content>
-
-## NIM test/dev right-sizing
-
-See the [feature, API decision and allocation diagrams](docs/right-sizing-diagrams/README.md) for the implemented flow and response branches.
-
-`POST /api/v1/inference/right-sizing/recommendation` and `runai inference recommend` use the exact NIM image/tag and the selected cluster's installed GPU inventory. Omitted/null `gpuType` returns one result per reported type/capacity; an explicit type restricts the results. Inventory does not establish free memory, quota, available device count, or schedulability.
-
-NGC sizing metadata uses the existing CP `cache/v2` backend, keyed by exact image and tag. `NGC_METADATA_CACHE_TTL_SECONDS` defaults to **900** (15 minutes) and must be positive; Helm can override `catalogService.config.ngcMetadataCacheTTLSeconds` (null keeps the service default). This is a dedicated store, separate from NGC image/tag browsing. Storage follows the service's existing cache configuration (in-memory per replica by default), and `CACHE_ENABLED=false` disables it. No new cache server is introduced.
-
-Only successful metadata with nonempty profiles is cached. A cache miss or cache error fetches NGC directly; 404s, empty/absent profiles, malformed data and dependency errors are not cached. Expired data is not served on an NGC failure. Changes to a previously cached tag, including `latest`, may take up to the configured expiry to appear. Cluster inventory, authorization and the final recommendation are evaluated on every request.
-
-Only profiles with explicit TP=1, PP=1 and a positive published per-device minimum are eligible. Following [NGC's targeting guide](https://docs.nvidia.com/nim/metadata-api/1.0.0/guides/choose-a-profile), fitting direct PCI matches take preference over tested matches, then GPU-agnostic profiles (both `gpu` and `gpu_device` absent). Within the preferred surviving tier, choose the lowest minimum, then profile ID for deterministic ties. An empty tested list does not exclude direct or GPU-agnostic profiles; a nonempty list records validation history rather than an exclusive GPU allowlist. A display name alone cannot establish a targeted match.
-
-Exact inventory names resolve through the bundled [NVIDIA snapshot](pkg/clients/gpuinventory/data/README.md). Unknown or ambiguous names can still use a GPU-agnostic profile. Each numerical result retains the profile ID, precision, backend and published minimum, with a warning distinguishing targeting/testing evidence from unverified runtime behavior. Missing capacity or no eligible minimum returns an explained `no_recommendation`; dependency failures remain errors.
-
-`WHOLE_GPU_CUTOFF_PERCENT` controls the sharing policy and defaults to **90**, as agreed with Rajan. Valid values are 1..100. Helm users can override `catalogService.config.wholeGPUCutoffPercent`; null leaves the service default in effect. Below the cutoff, recommend the published minimum in bytes; at/above it through full capacity, recommend one whole GPU. This cutoff is a sharing rule, not OOM protection. No additional headroom is invented. When no eligible profile fits one device, the selected single-device baseline produces a rounded-up count explicitly marked estimated. This does not validate tensor parallelism; validated multi-GPU selection belongs to RUN-43719.
-
-NGC GB values retain the existing decimal-GB conversion. Rajan clarified that the published minimum already includes runtime overhead and a baseline KV cache. Written confirmation of the exact context length, concurrency and KV-cache/runtime settings is pending for RUN-43426; this does not block test/dev sizing or establish production/startup/OOM guarantees.
-
-For `meta/llama-3.1-8b-instruct:2.0.13`, exact API metadata reports 24 GB NVFP4 on tested B200 PCI `2901:10de`, 27 GB FP8 on H100 `2330:10de`, and 33 GB BF16 on A100 `20b0:10de` / `20b2:10de`. The inventory label `NVIDIA-B200` is ambiguous in NVIDIA's mapping, so its 24 GB result is classified as a generic fallback rather than claimed to be tested on a resolved device. The [system card](https://build.nvidia.com/meta/llama-3_1-8b-instruct/systemcard) currently lists BF16 16 GB minimum / 33 GB recommended and FP8 8 GB minimum / 16 GB recommended, with a relaxed-memory setting below recommended values. Those release-unspecific values differ from the exact-tag profile metadata and are not substituted into this API. `latest` is queried verbatim; registry tag changes do not imply NGC republished metadata.

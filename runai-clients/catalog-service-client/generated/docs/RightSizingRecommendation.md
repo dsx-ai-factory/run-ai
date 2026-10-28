@@ -7,8 +7,8 @@ Name | Type | Description | Notes
 **AllocationType** | **string** |  | 
 **GpuCount** | **int64** |  | 
 **GpuMemoryPerDeviceBytes** | Pointer to **int64** |  | [optional] 
-**Estimated** | **bool** | Whether GPU count is a naive estimate. False describes allocation arithmetic only; it does not verify runtime or hardware compatibility. | 
-**Warning** | Pointer to **string** | Conditional sizing prerequisites, unverified hardware/runtime compatibility, and limitations of an estimated count. Read before using the allocation. | [optional] 
+**Estimated** | **bool** | Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility. | 
+**Warning** | Pointer to **string** | Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation. | [optional] 
 
 ## Methods
 

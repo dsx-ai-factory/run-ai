@@ -20,7 +20,7 @@ type sizingInventory struct{}
 
 func (sizingInventory) Get(context.Context, string) ([]gpuinventory.Hardware, error) {
 	capacity := int64(80_000_000_000)
-	return []gpuinventory.Hardware{{Type: "A100", MemoryBytes: &capacity}, {Type: "T4"}}, nil
+	return []gpuinventory.Hardware{{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, {Type: "T4"}}, nil
 }
 
 type sizingMetadata struct{}

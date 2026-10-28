@@ -4095,6 +4095,12 @@ export interface NodepoolGpuTypeDetails {
      * @memberof NodepoolGpuTypeDetails
      */
     'totalDevices': number;
+    /**
+     * Largest installed GPU count on a single node for this exact GPU type and per-device memory capacity. Not a sum across nodes or a free-device count. Omitted when per-node count evidence is unavailable.
+     * @type {number}
+     * @memberof NodepoolGpuTypeDetails
+     */
+    'maxDevicesPerNode'?: number;
 }
 /**
  * 

@@ -2391,13 +2391,14 @@ components:
           minimum: 1
           type: integer
         estimated:
-          description: Whether GPU count is a naive estimate. False describes allocation
-            arithmetic only; it does not verify runtime or hardware compatibility.
+          description: "Whether this is an estimated allocation. Published-profile\
+            \ recommendations return false; this describes the source layout and allocation\
+            \ arithmetic, not verified runtime or hardware compatibility."
           type: boolean
         warning:
-          description: "Conditional sizing prerequisites, unverified hardware/runtime\
-            \ compatibility, and limitations of an estimated count. Read before using\
-            \ the allocation."
+          description: "Conditional sizing prerequisites, publisher-defined minimum\
+            \ assumptions, and unverified hardware/runtime or interconnect compatibility.\
+            \ Read before using the allocation."
           type: string
       required:
       - allocationType
@@ -2407,7 +2408,9 @@ components:
     RightSizingResult:
       example:
         minimumGpuMemoryPerDeviceGb: 6.027456183070403
+        tensorParallelSize: 1
         reason: reason
+        pipelineParallelSize: 1
         gpuMemoryCapacityBytes: 0
         profileId: profileId
         precision: precision
@@ -2443,6 +2446,17 @@ components:
           type: string
         inferenceBackend:
           type: string
+        tensorParallelSize:
+          description: Explicit tensor parallel size from the selected published profile.
+          format: int64
+          minimum: 1
+          type: integer
+        pipelineParallelSize:
+          description: Explicit pipeline parallel size from the selected published
+            profile.
+          format: int64
+          minimum: 1
+          type: integer
         reason:
           description: Explanation when sizing cannot be recommended.
           type: string
@@ -2458,7 +2472,9 @@ components:
         tag: tag
         results:
         - minimumGpuMemoryPerDeviceGb: 6.027456183070403
+          tensorParallelSize: 1
           reason: reason
+          pipelineParallelSize: 1
           gpuMemoryCapacityBytes: 0
           profileId: profileId
           precision: precision
@@ -2472,7 +2488,9 @@ components:
           status: recommended
           inferenceBackend: inferenceBackend
         - minimumGpuMemoryPerDeviceGb: 6.027456183070403
+          tensorParallelSize: 1
           reason: reason
+          pipelineParallelSize: 1
           gpuMemoryCapacityBytes: 0
           profileId: profileId
           precision: precision

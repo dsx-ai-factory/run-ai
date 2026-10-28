@@ -20,6 +20,16 @@ properties:
     type: string
   inferenceBackend:
     type: string
+  tensorParallelSize:
+    type: integer
+    format: int64
+    minimum: 1
+    description: Explicit tensor parallel size from the selected published profile.
+  pipelineParallelSize:
+    type: integer
+    format: int64
+    minimum: 1
+    description: Explicit pipeline parallel size from the selected published profile.
   reason:
     type: string
     description: Explanation when sizing cannot be recommended.
