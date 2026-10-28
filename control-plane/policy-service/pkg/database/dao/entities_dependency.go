@@ -8,12 +8,14 @@ package dao
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbtables"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
 	"gorm.io/gorm/clause"
@@ -53,9 +55,13 @@ func UpsertEntityDependencies(ctx context.Context, db orm.DB, rows []dbmodel.Ent
 // depends on the given component to PendingUpdate, in all tenants, and returns
 // how many policies were marked. the purpose is that system mapping updates will
 // change the affected policies (in all the tenants) to PendingUpdate.
-func MarkPoliciesPendingByComponent(_ context.Context, db orm.DB, componentType dbmodel.ComponentType, componentId string) (int, *api.Error) {
+// policies already in marked are not updated again; the newly marked ones are added to it.
+func MarkPoliciesPendingByComponent(_ context.Context, db orm.DB, componentType dbmodel.ComponentType, componentId string,
+	markedAsPendingUpdate datastructs.Set[string],
+) (int, *api.Error) {
 	var policyIds []string
-	if err := db.Table(dbtables.EntitiesCacheTable).
+
+	q := db.Table(dbtables.EntitiesCacheTable).
 		Joins(fmt.Sprintf("JOIN %s ON %s.%s = %s.%s",
 			dbtables.EntitiesDependencyTable,
 			dbtables.EntitiesDependencyTable, dbtables.EntitiesDependencyColumnCacheId,
@@ -63,27 +69,34 @@ func MarkPoliciesPendingByComponent(_ context.Context, db orm.DB, componentType 
 		Where(fmt.Sprintf("%s.%s = ?", dbtables.EntitiesCacheTable, dbtables.EntitiesCacheColumnEntityType), dbmodel.EntityTypeBreakdown).
 		Where(fmt.Sprintf("%s.%s = ?", dbtables.EntitiesDependencyTable, dbtables.EntitiesDependencyColumnComponentType), componentType).
 		Where(fmt.Sprintf("%s.%s = ?", dbtables.EntitiesDependencyTable, dbtables.EntitiesDependencyColumnComponentId), componentId).
-		Distinct().
-		Pluck(fmt.Sprintf("%s.%s", dbtables.EntitiesCacheTable, dbtables.EntitiesCacheColumnEntityId), &policyIds); err != nil {
+		Distinct()
+
+	err := q.Pluck(fmt.Sprintf("%s.%s", dbtables.EntitiesCacheTable, dbtables.EntitiesCacheColumnEntityId), &policyIds)
+	if err != nil {
 		dbErr := database.Error(database.LIST, database.EntitiesCache).WithDetails(err)
 		logging.Errorf("failed to find policies depending on component %s/%s: %s: %v", componentType, componentId, dbErr.Message, err)
 		return 0, dbErr
 	}
 
+	// remove from the updates those policies that we already put to pendingUpdate
+	policyIds = slices.DeleteFunc(policyIds, markedAsPendingUpdate.Has)
 	if len(policyIds) == 0 {
 		return 0, nil
 	}
 
-	if _, err := db.Table(dbtables.PoliciesTable).
+	_, err = db.Table(dbtables.PoliciesTable).
 		Where(fmt.Sprintf("%s.%s IN ?", dbtables.PoliciesTable, dbtables.PoliciesColumnId), policyIds).
 		UpdateColumns(map[string]interface{}{
 			dbtables.PoliciesColumnValidationStatus: string(api.POLICYPHASE_PENDING_UPDATE),
 			dbtables.PoliciesColumnValidationIssues: nil,
-		}); err != nil {
+		})
+	if err != nil {
 		dbErr := database.Error(database.UPDATE, database.Policies).WithDetails(err)
 		logging.Errorf("failed to mark %d policies as %s: %s: %v", len(policyIds), api.POLICYPHASE_PENDING_UPDATE, dbErr.Message, err)
 		return 0, dbErr
 	}
+
+	markedAsPendingUpdate.Add(policyIds...)
 
 	return len(policyIds), nil
 }

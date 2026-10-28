@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"maps"
 	"net/http"
 	"slices"
 	"time"
@@ -16,6 +17,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
@@ -150,7 +152,8 @@ func HandleSystemMapping() {
 	ms := MappingApiService{}
 	cv := NewMappingConsistencyValidator(ctx, api.MAPPINGSCOPE_SYSTEM)
 
-	// Nothing is seeded yet, so a restart marks the same policies again; seeding now would lose them for good.
+	// Before we apply the new mappings, we have to see if the new mapping affecting any policies and mark them
+	// with PendingUpdate status. this is aligned with the behavior we use for mapping changes that users make.
 	if err := markPoliciesOfChangedSystemComponents(ctx, db, systemFormatterSeeds, systemFieldGroupSeeds, systemWorkloadMappingSeeds); err != nil {
 		logging.Fatalf("failed to mark the policies affected by system mapping changes before seeding: %v", err)
 	}
@@ -300,8 +303,9 @@ func markPoliciesOfChangedSystemComponents(ctx context.Context, db orm.DB, forma
 		return err
 	}
 
+	marked := datastructs.NewSet[string]()
 	for _, component := range changed {
-		count, err := dao.MarkPoliciesPendingByComponent(ctx, db, component.ComponentType, component.ComponentId)
+		count, err := dao.MarkPoliciesPendingByComponent(ctx, db, component.ComponentType, component.ComponentId, marked)
 		if err != nil {
 			return err
 		}
@@ -312,81 +316,147 @@ func markPoliciesOfChangedSystemComponents(ctx context.Context, db orm.DB, forma
 	return nil
 }
 
-// changedSystemComponents returns the stored system components whose description is outdated and whose stored
-// entries the seeds remove or change, identified as their dependency rows identify them. Components not stored yet
-// are skipped: nothing can depend on them.
+// find the system components that are about to change in the upcoming system mapping update.
+// we know it by the description of those components. for example, if a component has a description
+// "xxx (v5)" in the database and the upcoming mapping has "xxx (v7)" then we know that this component
+// is about to change.
 func changedSystemComponents(ctx context.Context, db orm.DB, formatters []systemFormatterSeed,
 	fieldGroups []systemFieldGroupSeed, mappings []systemWorkloadMappingSeed,
 ) ([]dbmodel.EntitiesDependency, *api.Error) {
+	changedFormatters, err := changedSystemFormatters(ctx, db, formatters)
+	if err != nil {
+		return nil, err
+	}
+
+	changedFieldGroups, err := changedSystemFieldGroups(ctx, db, fieldGroups)
+	if err != nil {
+		return nil, err
+	}
+
+	changedMappings, err := changedSystemMappings(ctx, db, mappings)
+	if err != nil {
+		return nil, err
+	}
+
+	return slices.Concat(changedFormatters, changedFieldGroups, changedMappings), nil
+}
+
+// outdatedSystemComponents returns the stored system components of componentType whose description differs from
+// the updates ones (those from the updated code), keyed by name. updatedDescription maps every seeded name to
+// its updated description; names that are not stored yet (=new components) are skipped, since nothing can depend on them.
+func outdatedSystemComponents(ctx context.Context, db orm.DB, componentType dbmodel.ComponentType,
+	updatedDescription map[string]string,
+) (map[string]dao.SystemComponent, *api.Error) {
+	stored, err := dao.ListSystemComponentsByNames(ctx, db, componentType, slices.Collect(maps.Keys(updatedDescription)))
+	if err != nil {
+		return nil, err
+	}
+
+	maps.DeleteFunc(stored, func(name string, component dao.SystemComponent) bool {
+		return sameDescription(component.Description, updatedDescription[name])
+	})
+
+	return stored, nil
+}
+
+func changedSystemFormatters(ctx context.Context, db orm.DB, seeds []systemFormatterSeed) ([]dbmodel.EntitiesDependency, *api.Error) {
+	builders := map[string]sm.SystemFormatterFieldsBuilder{}
+	updatedDescription := map[string]string{}
+	for _, seed := range seeds {
+		if seed.builder != nil {
+			builders[seed.name] = seed.builder
+			updatedDescription[seed.name] = seed.description
+		}
+	}
+
+	outdated, err := outdatedSystemComponents(ctx, db, dbmodel.ComponentTypeFormatter, updatedDescription)
+	if err != nil || len(outdated) == 0 {
+		return nil, err
+	}
+
+	rows, err := dao.GetSystemFormattersByNames(ctx, db, slices.Collect(maps.Keys(outdated)))
+	if err != nil {
+		return nil, err
+	}
+
 	var changed []dbmodel.EntitiesDependency
-
-	for _, seed := range formatters {
-		if seed.builder == nil {
-			continue
-		}
-		row, err := dao.GetFormatterByName(ctx, db, seed.name)
-		if err != nil {
-			if err.Code == http.StatusNotFound {
-				continue
-			}
-			return nil, err
-		}
-		if descriptionIs(row.Description, seed.description) {
-			continue
-		}
-		fields := enrichedFormatterFields(seed.builder())
+	for name, row := range rows {
+		fields := enrichedFormatterFields(builders[name]())
 		if len(keysMissingFrom(row.Fields, fields)) > 0 || existingEntriesChanged(row.Fields, fields) {
-			changed = append(changed, dbmodel.EntitiesDependency{ComponentType: dbmodel.ComponentTypeFormatter, ComponentId: row.ID.String()})
-		}
-	}
-
-	for _, seed := range fieldGroups {
-		if seed.builder == nil {
-			continue
-		}
-		row, err := dao.GetFieldGroupByNameAndScope(ctx, db, seed.name, api.MAPPINGSCOPE_SYSTEM)
-		if err != nil {
-			if err.Code == http.StatusNotFound {
-				continue
-			}
-			return nil, err
-		}
-		if descriptionIs(row.Description, seed.description) {
-			continue
-		}
-		fields, itemSelectors := seed.builder()
-		scopedFields := addScopeToFields(fields, api.MAPPINGSCOPE_SYSTEM)
-		scopedItemSelectors := addScopeToItemSelectors(itemSelectors, api.MAPPINGSCOPE_SYSTEM)
-		if len(keysMissingFrom(row.Fields, scopedFields)) > 0 || len(keysMissingFrom(row.ItemSelectors, scopedItemSelectors)) > 0 ||
-			existingEntriesChanged(row.Fields, scopedFields) || existingEntriesChanged(row.ItemSelectors, scopedItemSelectors) {
-			changed = append(changed, dbmodel.EntitiesDependency{ComponentType: dbmodel.ComponentTypeFieldGroup, ComponentId: row.ID.String()})
-		}
-	}
-
-	for _, seed := range mappings {
-		if seed.builder == nil {
-			continue
-		}
-		gvk, specSelectors := seed.builder()
-		row, err := dao.GetMappingByGvkAndScope(ctx, gvk, api.MAPPINGSCOPE_SYSTEM)
-		if err != nil {
-			if err.Code == http.StatusNotFound {
-				continue
-			}
-			return nil, err
-		}
-		if descriptionIs(row.Description, seed.description) {
-			continue
-		}
-		if specSelectorsChanged(row.SpecSelectors, addScopeToSpecSelectors(specSelectors, api.MAPPINGSCOPE_SYSTEM)) {
-			changed = append(changed, dbmodel.EntitiesDependency{ComponentType: dbmodel.ComponentTypeMapping, ComponentId: gvkComponentId(gvk)})
+			changed = append(changed, outdated[name].Dependency())
 		}
 	}
 
 	return changed, nil
 }
 
-func descriptionIs(description *string, want string) bool {
+func changedSystemFieldGroups(ctx context.Context, db orm.DB, seeds []systemFieldGroupSeed) ([]dbmodel.EntitiesDependency, *api.Error) {
+	builders := map[string]sm.SystemFieldGroupBuilder{}
+	updatedDescriptions := map[string]string{}
+	for _, seed := range seeds {
+		if seed.builder != nil {
+			builders[seed.name] = seed.builder
+			updatedDescriptions[seed.name] = seed.description
+		}
+	}
+
+	outdated, err := outdatedSystemComponents(ctx, db, dbmodel.ComponentTypeFieldGroup, updatedDescriptions)
+	if err != nil || len(outdated) == 0 {
+		return nil, err
+	}
+
+	rows, err := dao.GetSystemFieldGroupsByNames(ctx, db, slices.Collect(maps.Keys(outdated)))
+	if err != nil {
+		return nil, err
+	}
+
+	var changed []dbmodel.EntitiesDependency
+	for name, row := range rows {
+		fields, itemSelectors := builders[name]()
+		scopedFields := addScopeToFields(fields, api.MAPPINGSCOPE_SYSTEM)
+		scopedItemSelectors := addScopeToItemSelectors(itemSelectors, api.MAPPINGSCOPE_SYSTEM)
+
+		if len(keysMissingFrom(row.Fields, scopedFields)) > 0 || len(keysMissingFrom(row.ItemSelectors, scopedItemSelectors)) > 0 ||
+			existingEntriesChanged(row.Fields, scopedFields) || existingEntriesChanged(row.ItemSelectors, scopedItemSelectors) {
+			changed = append(changed, outdated[name].Dependency())
+		}
+	}
+
+	return changed, nil
+}
+
+func changedSystemMappings(ctx context.Context, db orm.DB, seeds []systemWorkloadMappingSeed) ([]dbmodel.EntitiesDependency, *api.Error) {
+	specSelectorsByGvk := map[string]map[string]api.SpecSelector{}
+	updatedDescription := map[string]string{}
+	for _, seed := range seeds {
+		if seed.builder != nil {
+			gvk, specSelectors := seed.builder()
+			specSelectorsByGvk[gvkComponentId(gvk)] = specSelectors
+			updatedDescription[gvkComponentId(gvk)] = seed.description
+		}
+	}
+
+	outdated, err := outdatedSystemComponents(ctx, db, dbmodel.ComponentTypeMapping, updatedDescription)
+	if err != nil || len(outdated) == 0 {
+		return nil, err
+	}
+
+	rows, err := dao.GetSystemMappingsByGvkIds(ctx, db, slices.Collect(maps.Keys(outdated)))
+	if err != nil {
+		return nil, err
+	}
+
+	var changed []dbmodel.EntitiesDependency
+	for gvkId, row := range rows {
+		if specSelectorsChanged(row.SpecSelectors, addScopeToSpecSelectors(specSelectorsByGvk[gvkId], api.MAPPINGSCOPE_SYSTEM)) {
+			changed = append(changed, outdated[gvkId].Dependency())
+		}
+	}
+
+	return changed, nil
+}
+
+func sameDescription(description *string, want string) bool {
 	return description != nil && *description == want
 }
 
