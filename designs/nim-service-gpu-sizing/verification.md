@@ -1,5 +1,9 @@
 # Verification
 
+Update: deployment was subsequently authorized and completed on dima-evo.
+See [dima-evo deployment and live checks](dima-evo.md); the notes below record
+the pre-deployment implementation verification.
+
 Local implementation is based on recommendation PR #3129 at
 `f6999bdcf14c8fe6ac3a422299cc1ccaeabcd51b`.
 
