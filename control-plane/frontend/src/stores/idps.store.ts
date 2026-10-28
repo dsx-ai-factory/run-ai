@@ -14,19 +14,9 @@ import { usePermissionStore } from "@/stores/permissions.store";
 // SamlData directly) once the backend API change that exposes it on GET /idps is merged and the client is regenerated.
 type SamlDataWithValidateSignature = SamlData & { validateSignature?: boolean };
 
-// TEMP (dev only): lets us see the SAML signature warnings before the backend change is merged.
-// Enable from the browser console with: localStorage.setItem("mock-saml-validate-signature", "false")
-// Remove together with SamlDataWithValidateSignature.
-const MOCK_VALIDATE_SIGNATURE_KEY = "mock-saml-validate-signature";
-
-function applyMockValidateSignature(idps: Array<Idp>): Array<Idp> {
-  if (!import.meta.env.DEV || localStorage.getItem(MOCK_VALIDATE_SIGNATURE_KEY) !== "false") return idps;
-  return idps.map((idp) =>
-    idp.type === IdpTypeEnum.Saml
-      ? { ...idp, samlData: { ...idp.samlData, validateSignature: false } as SamlDataWithValidateSignature }
-      : idp,
-  );
-}
+// TEMP: forces the "signature validation disabled" condition to be true so the UI can be seen before the backend
+// change is merged. Off under vitest so the unit tests exercise the real logic. Remove before merging.
+const TEMP_FORCE_SAML_SIGNATURE_WARNING = import.meta.env.MODE !== "test";
 
 export const useIdpsStore = defineStore("Idps", {
   state: () => ({
@@ -40,6 +30,7 @@ export const useIdpsStore = defineStore("Idps", {
     },
     // Strict `=== false`: a backend that doesn't return the field yet must not trigger the warnings.
     isSamlSignatureValidationDisabled(): boolean {
+      if (TEMP_FORCE_SAML_SIGNATURE_WARNING) return true;
       const samlData = this.currentIdp?.samlData as SamlDataWithValidateSignature | undefined;
       return this.currentIdp?.type === IdpTypeEnum.Saml && samlData?.validateSignature === false;
     },
@@ -53,7 +44,7 @@ export const useIdpsStore = defineStore("Idps", {
   },
   actions: {
     async loadIdps(): Promise<Array<Idp>> {
-      this.idps = applyMockValidateSignature(await idpService.getIdps());
+      this.idps = await idpService.getIdps();
       if (this.currentIdp) {
         this.idpMappers = this.currentIdp.mappers;
       } else {

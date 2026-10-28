@@ -15,8 +15,6 @@ vi.mock("@/services/control-plane/idp.service/idp.service", () => ({
   idpService: { getIdps: vi.fn() },
 }));
 
-const MOCK_KEY = "mock-saml-validate-signature";
-
 function samlIdp(validateSignature?: boolean): Idp {
   return {
     alias: "saml",
@@ -39,11 +37,9 @@ function grantSecuritySettings(actions: Action[]): void {
 describe("idps.store - SAML signature validation", () => {
   beforeEach(() => {
     setActivePinia(createPinia());
-    localStorage.removeItem(MOCK_KEY);
   });
 
   afterEach(() => {
-    localStorage.removeItem(MOCK_KEY);
     vi.clearAllMocks();
   });
 
@@ -104,27 +100,6 @@ describe("idps.store - SAML signature validation", () => {
       await store.loadIdps();
 
       expect(store.shouldShowSamlSignatureBanner).toBe(false);
-    });
-  });
-
-  describe("TEMP dev mock (mock-saml-validate-signature)", () => {
-    it("forces validateSignature=false on the SAML IdP when the flag is set", async () => {
-      localStorage.setItem(MOCK_KEY, "false");
-      vi.mocked(idpService.getIdps).mockResolvedValue([samlIdp(true)]);
-      const store = useIdpsStore();
-
-      await store.loadIdps();
-
-      expect(store.isSamlSignatureValidationDisabled).toBe(true);
-    });
-
-    it("leaves the backend value untouched when the flag is not set", async () => {
-      vi.mocked(idpService.getIdps).mockResolvedValue([samlIdp(true)]);
-      const store = useIdpsStore();
-
-      await store.loadIdps();
-
-      expect(store.isSamlSignatureValidationDisabled).toBe(false);
     });
   });
 });
