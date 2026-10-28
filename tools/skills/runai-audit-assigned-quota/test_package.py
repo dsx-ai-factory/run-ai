@@ -125,20 +125,43 @@ class FixtureTests(unittest.TestCase):
         self.assertGreater(deserved, pool["total"])
         self.assertEqual(pool["free"], 0)
 
-    def test_pending_count_ignores_node_pool_filter(self):
+    def test_node_pool_filter_drops_unscheduled_pending(self):
         scoped = payload(exchange([call("get_workloads_summary", {
             "orgType": "project", "orgName": "hpc-fill", "nodePoolName": "node-pool-2",
         })])[0])
         unscoped = payload(exchange([call("get_workloads_summary", {
             "orgType": "project", "orgName": "hpc-fill",
         })])[0])
-        self.assertEqual(scoped["counts"]["pending"], 2)
-        self.assertEqual(scoped["counts"]["pending"], unscoped["counts"]["pending"])
+        self.assertEqual(scoped["counts"]["pending"], 0)
+        self.assertEqual(unscoped["counts"]["pending"], 2)
+
+    def pending_ids(self, project):
+        listed = payload(exchange([call("list_workloads", {
+            "phase": "Pending", "projectName": {"operator": "==", "value": project},
+            "includeDetails": True,
+        })])[0])
+        return listed["workloads"]
+
+    def test_pending_ids_match_summary_count(self):
+        for project, (count, _, _) in mock.PENDING.items():
+            with self.subTest(project=project):
+                self.assertEqual(len(self.pending_ids(project)), count)
 
     def test_self_inflicted_pending_reason_is_not_capacity_wait(self):
-        status = payload(exchange([call("get_workload_status", {"orgName": "quota-hog"})])[0])
-        self.assertFalse(status["preemptible"])
-        self.assertIn("quota exceeded for non-preemptible", status["reason"])
+        rows = self.pending_ids("quota-hog")
+        self.assertFalse(rows[0]["preemptible"])
+        status = payload(exchange([call("get_workload_status", {"workloadId": rows[0]["id"]})])[0])
+        self.assertEqual(status["phase"], "Pending")
+        self.assertIn("quota exceeded for non-preemptible", status["phaseMessage"])
+
+    def test_status_requires_a_known_workload_id(self):
+        responses = exchange([
+            call("get_workload_status", {}, 1),
+            call("get_workload_status", {"workloadId": "missing"}, 2),
+            call("get_workload_status", {"orgName": "quota-hog"}, 3),
+        ])
+        for response in responses:
+            self.assertTrue(response["result"]["isError"])
 
     def test_department_rollups_reconcile_with_project_cells(self):
         for (department, pool), (deserved, allocated) in mock.DEPTS.items():

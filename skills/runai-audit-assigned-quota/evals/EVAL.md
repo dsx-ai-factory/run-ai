@@ -16,6 +16,7 @@ published skill so it cannot accidentally expand the CI gate.
 - Read deserved, allocated, and limit per project and node pool; derive over-quota use and deficit.
 - Count a project as starved only when it has pending demand waiting for capacity held by others.
 - Read pending counts project-scoped, without a node-pool filter.
+- Resolve pending workload IDs with `list_workloads`, then read each reason from `get_workload_status`.
 - Treat "quota exceeded for non-preemptible workloads" as self-inflicted, not starvation.
 - Detect over-subscription when the sum of deserved quota exceeds a pool's capacity.
 - Lead with the same-pool starved and borrowing pair; never pair projects across pools.
@@ -41,10 +42,12 @@ exceeded, so it is self-inflicted, and no project over-borrows in that pool. On
 project cells. Pool totals include system usage, so free capacity must come from
 the inventory, not from summing project cells.
 
-The mock reproduces one backend behavior: pending counts are not filtered by
-node pool, because pending pods have no pool yet. Its `get_workload_status`
-accepts a project name and returns that project's pending reason; the real tool
-takes a workload ID. Exact per-call recordings from a live cluster are not claimed.
+The mock reproduces these backend behaviors: a `nodePoolName` filter on
+`get_workloads_summary` matches current placement, so unscheduled pending
+workloads drop out and the count reads 0; pending reasons come from
+`get_workload_status` by workload ID, with IDs from `list_workloads`; unknown
+workload IDs return tool errors. Exact per-call recordings from a live cluster
+are not claimed.
 
 Kubernetes access is unavailable in these trials. The MCP server only exposes
 read-only tools and never contacts a cluster; agent inference and judging still
