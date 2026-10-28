@@ -53,7 +53,6 @@ func TestParallelProfilesChooseFewestGPUsWithinMemoryAndNodeLimits(t *testing.T)
 		require.Equal(t, tc.count, result.Recommendation.GpuCount)
 		require.Equal(t, "gpu_count", result.Recommendation.AllocationType)
 		require.Equal(t, capacity, result.Recommendation.GpuMemoryPerDeviceBytes)
-		require.False(t, result.Recommendation.Estimated)
 		require.Equal(t, tc.count, result.TensorParallelSize)
 		require.Equal(t, int64(1), result.PipelineParallelSize)
 	}
@@ -67,7 +66,6 @@ func TestPublishedCountRetainsNonPowerOfTwoAndPipelineLayout(t *testing.T) {
 	require.Equal(t, int64(6), result.Recommendation.GpuCount)
 	require.Equal(t, int64(3), result.TensorParallelSize)
 	require.Equal(t, int64(2), result.PipelineParallelSize)
-	require.False(t, result.Recommendation.Estimated)
 }
 
 func TestParallelSelectionFiltersFitBeforeHardwareTierThenUsesDeterministicTies(t *testing.T) {

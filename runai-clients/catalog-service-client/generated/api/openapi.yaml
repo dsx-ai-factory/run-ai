@@ -2370,9 +2370,7 @@ components:
       type: object
     RightSizingRecommendation:
       example:
-        estimated: true
         gpuMemoryPerDeviceBytes: 1
-        warning: warning
         allocationType: gpu_memory
         gpuCount: 1
       nullable: true
@@ -2390,19 +2388,8 @@ components:
           format: int64
           minimum: 1
           type: integer
-        estimated:
-          description: "Whether this is an estimated allocation. Published-profile\
-            \ recommendations return false; this describes the source layout and allocation\
-            \ arithmetic, not verified runtime or hardware compatibility."
-          type: boolean
-        warning:
-          description: "Conditional sizing prerequisites, publisher-defined minimum\
-            \ assumptions, and unverified hardware/runtime or interconnect compatibility.\
-            \ Read before using the allocation."
-          type: string
       required:
       - allocationType
-      - estimated
       - gpuCount
       type: object
     RightSizingResult:
@@ -2415,9 +2402,7 @@ components:
         profileId: profileId
         precision: precision
         recommendation:
-          estimated: true
           gpuMemoryPerDeviceBytes: 1
-          warning: warning
           allocationType: gpu_memory
           gpuCount: 1
         gpuType: gpuType
@@ -2479,9 +2464,7 @@ components:
           profileId: profileId
           precision: precision
           recommendation:
-            estimated: true
             gpuMemoryPerDeviceBytes: 1
-            warning: warning
             allocationType: gpu_memory
             gpuCount: 1
           gpuType: gpuType
@@ -2495,9 +2478,7 @@ components:
           profileId: profileId
           precision: precision
           recommendation:
-            estimated: true
             gpuMemoryPerDeviceBytes: 1
-            warning: warning
             allocationType: gpu_memory
             gpuCount: 1
           gpuType: gpuType

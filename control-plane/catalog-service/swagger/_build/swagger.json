@@ -1836,8 +1836,7 @@
         "nullable": true,
         "required": [
           "allocationType",
-          "gpuCount",
-          "estimated"
+          "gpuCount"
         ],
         "properties": {
           "allocationType": {
@@ -1856,14 +1855,6 @@
             "type": "integer",
             "format": "int64",
             "minimum": 1
-          },
-          "estimated": {
-            "type": "boolean",
-            "description": "Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility."
-          },
-          "warning": {
-            "type": "string",
-            "description": "Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation."
           }
         }
       },

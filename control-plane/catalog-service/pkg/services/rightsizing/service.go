@@ -103,7 +103,6 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 		result.Recommendation = &api.RightSizingRecommendation{
 			AllocationType: "gpu_count", GpuCount: chosen.count,
 			GpuMemoryPerDeviceBytes: *gpu.MemoryBytes,
-			Estimated:               false, Warning: profileSizingWarning(*profile, chosen.match),
 		}
 		return result
 	}
@@ -120,8 +119,6 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 	result.Recommendation = &api.RightSizingRecommendation{
 		AllocationType: allocationType, GpuCount: 1,
 		GpuMemoryPerDeviceBytes: allocation.AllocatedMemoryBytes,
-		Estimated:               false,
-		Warning:                 profileSizingWarning(*profile, chosen.match),
 	}
 	return result
 }
@@ -152,24 +149,4 @@ func matchHardware(profile ngcmetadata.Profile, pciDevice string) hardwareMatch 
 		return genericHardwareMatch
 	}
 	return noHardwareMatch
-}
-
-// A published memory floor does not establish that the profile can execute on
-// every GPU. Keep this prerequisite visible even for exact allocation arithmetic.
-func profileSizingWarning(profile ngcmetadata.Profile, match hardwareMatch) string {
-	evidence := "GPU-agnostic NGC profile; testing on the target GPU is not recorded. "
-	if match == directHardwareMatch {
-		evidence = "NGC profile targets this GPU PCI device. "
-	}
-	if match == testedHardwareMatch {
-		evidence = "NGC records this profile as tested on the target GPU PCI device. "
-	}
-	warning := evidence + "Memory sizing only; compatibility of the selected profile, precision, backend and runtime configuration with the target GPU is unverified. " +
-		"Published minima are publisher-defined; KV cache and runtime overhead settings are not guaranteed. " +
-		"Node counts describe installed devices, not free GPUs or verified interconnects. Verify the profile can run on the target hardware before deploying."
-	if strings.EqualFold(profile.Precision, "nvfp4") {
-		warning += " NVFP4 requires Blackwell by default. Pre-Blackwell emulation requires a supported vLLM or SGLang image" +
-			" and NIM_ALLOW_NVFP4_EMULATION=1; TensorRT-LLM does not support emulation. Verify the exact image tag and host configuration."
-	}
-	return warning
 }

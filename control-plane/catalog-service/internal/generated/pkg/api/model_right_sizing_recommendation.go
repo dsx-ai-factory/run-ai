@@ -40,18 +40,6 @@ type RightSizingRecommendation struct {
 	//GpuMemoryPerDeviceBytes int64 `json:"gpuMemoryPerDeviceBytes,omitempty"`
 	GpuMemoryPerDeviceBytes int64 `json:"gpuMemoryPerDeviceBytes,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Estimated bool `json:"estimated"`
-	Estimated bool `json:"estimated" gorm:"not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Warning string `json:"warning,omitempty"`
-	Warning string `json:"warning,omitempty" gorm:"not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertRightSizingRecommendationRequired checks if the required fields are not zero-ed
@@ -59,7 +47,6 @@ func AssertRightSizingRecommendationRequired(obj RightSizingRecommendation) erro
 	elements := map[string]interface{}{
 		"allocationType": obj.AllocationType,
 		"gpuCount":       obj.GpuCount,
-		"estimated":      obj.Estimated,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -88,16 +75,6 @@ func AssertRightSizingRecommendationConstraints(obj RightSizingRecommendation) e
 	if obj.GpuMemoryPerDeviceBytes < 1 {
 		return &ParsingError{Param: "GpuMemoryPerDeviceBytes", Err: errors.New(errMsgMinValueConstraint)}
 	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

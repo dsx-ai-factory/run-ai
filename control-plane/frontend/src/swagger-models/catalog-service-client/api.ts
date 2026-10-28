@@ -696,18 +696,6 @@ export interface RightSizingRecommendation {
      * @memberof RightSizingRecommendation
      */
     'gpuMemoryPerDeviceBytes'?: number;
-    /**
-     * Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility.
-     * @type {boolean}
-     * @memberof RightSizingRecommendation
-     */
-    'estimated': boolean;
-    /**
-     * Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation.
-     * @type {string}
-     * @memberof RightSizingRecommendation
-     */
-    'warning'?: string;
 }
 
 export const RightSizingRecommendationAllocationTypeEnum = {
