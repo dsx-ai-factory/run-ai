@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb
 go 1.27.3
 
 require (
-	github.com/aws/smithy-go v1.28.6
+	github.com/aws/smithy-go v1.28.7
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
 	github.com/stretchr/testify v1.12.1

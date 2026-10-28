@@ -168,6 +168,16 @@ func GetEffectivePolicyOfProject(ctx context.Context, policyClient policies.Clie
 		defaultFromOrder = &emptyPolicy.DefaultFromOrder
 	}
 
+	// Policy-service omits empty replica order maps, so a non-nil defaultFromOrder
+	// can still have a nil Worker or Master. Compliance callers dereference both
+	// fields; initialize missing maps to represent no dependency ordering and avoid a panic.
+	if defaultFromOrder.Worker == nil {
+		defaultFromOrder.Worker = &map[string][]string{}
+	}
+	if defaultFromOrder.Master == nil {
+		defaultFromOrder.Master = &map[string][]string{}
+	}
+
 	effectivePolicy := EffectivePolicyOfProject{
 		DefaultsV2: convutils.MapMe(effectivePolicyAsJson[defaultsSection]),
 		RulesV2:    convutils.MapMe(effectivePolicyAsJson[rulesSection]),
