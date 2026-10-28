@@ -201,6 +201,25 @@ func (wc *WorkloadsClient) CreateWorkload(ctx context.Context, workload openapi.
 	return nil, openapi.NewError(http.StatusServiceUnavailable, formattedErr)
 }
 
+// CreateWorkloadActions stores accepted actions forwarded by workloads-manager.
+func (wc *WorkloadsClient) CreateWorkloadActions(ctx context.Context, actions openapi.CreateWorkloadActionsRequest) *openapi.Error {
+	request := wc.ApiClient.WorkloadActionsAPI.InternalCreateWorkloadActions(ctx).CreateWorkloadActionsRequest(actions)
+	httpResponse, err := request.Execute()
+	if httpResponse != nil {
+		defer httpResponse.Body.Close()
+		if httpResponse.StatusCode == http.StatusNoContent {
+			return nil
+		}
+		data, _ := io.ReadAll(httpResponse.Body)
+		message := fmt.Sprintf("failed to request workloads service to create workload actions: [%d] %s", httpResponse.StatusCode, data)
+		return openapi.NewError(int32(httpResponse.StatusCode), message)
+	}
+	if err == nil {
+		err = fmt.Errorf("no HTTP response received")
+	}
+	return openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to request workloads service to create workload actions: %v", err))
+}
+
 func (wc *WorkloadsClient) PatchWorkload(ctx context.Context, workloadId string, fields openapi.WorkloadPatchFields) *openapi.Error {
 	request := wc.ApiClient.WorkloadsAPI.InternalPatchWorkloadPhase(ctx, workloadId)
 

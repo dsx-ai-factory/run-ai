@@ -1,11 +1,11 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/integration-tests
 
-go 1.27.2
+go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.6
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
 	github.com/stretchr/testify v1.12.1
 )
 
@@ -14,10 +14,10 @@ require (
 	filippo.io/edwards25519 v1.2.0 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20261013165250-51075c6ea6bc // indirect
 	github.com/ClickHouse/ch-go v0.74.0 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.49.0 // indirect
+	github.com/ClickHouse/clickhouse-go/v2 v2.50.0 // indirect
 	github.com/Microsoft/go-winio v0.6.4 // indirect
-	github.com/andybalholm/brotli v1.2.6 // indirect
-	github.com/aws/smithy-go v1.28.5 // indirect
+	github.com/andybalholm/brotli v1.2.7 // indirect
+	github.com/aws/smithy-go v1.28.7 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -30,13 +30,13 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.6 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.29 // indirect
-	github.com/ebitengine/purego v0.11.1 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31 // indirect
+	github.com/ebitengine/purego v0.11.2 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-faster/city v1.0.1 // indirect
 	github.com/go-faster/errors v0.8.0 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
@@ -49,7 +49,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/golang-migrate/migrate/v4 v4.20.1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.31.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
@@ -87,7 +87,7 @@ require (
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/segmentio/asm v1.2.1 // indirect
 	github.com/shirou/gopsutil/v4 v4.26.9 // indirect
-	github.com/shopspring/decimal v1.5.0 // indirect
+	github.com/shopspring/decimal v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.10.2 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
@@ -100,7 +100,7 @@ require (
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect
 	go.opentelemetry.io/otel v1.47.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.47.0 // indirect
@@ -115,9 +115,9 @@ require (
 	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941 // indirect
-	google.golang.org/grpc v1.84.0 // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261026165753-2ffab32bce7e // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261026165753-2ffab32bce7e // indirect
+	google.golang.org/grpc v1.85.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect

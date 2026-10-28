@@ -30,6 +30,8 @@ pkg/api/api_trainings.go
 pkg/api/api_trainings_service.go
 pkg/api/api_unified.go
 pkg/api/api_unified_service.go
+pkg/api/api_workload_actions.go
+pkg/api/api_workload_actions_service.go
 pkg/api/api_workload_properties.go
 pkg/api/api_workload_properties_service.go
 pkg/api/api_workload_templates.go
@@ -50,6 +52,10 @@ pkg/api/model_activation_replicas_field.go
 pkg/api/model_ai_application.go
 pkg/api/model_ai_application_allocated_resources.go
 pkg/api/model_ai_application_auth.go
+pkg/api/model_ai_application_chart_inspection_request.go
+pkg/api/model_ai_application_chart_inspection_response.go
+pkg/api/model_ai_application_chart_inspection_warning.go
+pkg/api/model_ai_application_chart_questions_status.go
 pkg/api/model_ai_application_chart_upload_response.go
 pkg/api/model_ai_application_creation_request.go
 pkg/api/model_ai_application_endpoint.go
@@ -124,6 +130,7 @@ pkg/api/model_container.go
 pkg/api/model_count_response.go
 pkg/api/model_count_workload_elements_200_response.go
 pkg/api/model_count_workloads_200_response.go
+pkg/api/model_create_workload_actions_request.go
 pkg/api/model_data_volume.go
 pkg/api/model_data_volume_instance.go
 pkg/api/model_data_volume_rules.go
@@ -255,6 +262,7 @@ pkg/api/model_get_workload_priorities_200_response.go
 pkg/api/model_get_workload_submission_v2_enabled.go
 pkg/api/model_get_workloads_200_response.go
 pkg/api/model_get_workloads_setting.go
+pkg/api/model_get_workloads_slim_response.go
 pkg/api/model_git_authentication_method.go
 pkg/api/model_git_common.go
 pkg/api/model_git_instance.go
@@ -328,6 +336,7 @@ pkg/api/model_integer_rules_optional.go
 pkg/api/model_internal_enrich_org_unit_ranking_request.go
 pkg/api/model_internal_enrich_org_unit_ranking_response.go
 pkg/api/model_internal_pods_sync_request.go
+pkg/api/model_internal_resource_claim_template_workloads_request.go
 pkg/api/model_internal_sync_pods_207_response.go
 pkg/api/model_internal_sync_workloads_207_response.go
 pkg/api/model_internal_workloads_sync_request.go
@@ -385,6 +394,8 @@ pkg/api/model_pod_node_affinity_preferred.go
 pkg/api/model_pod_node_affinity_required.go
 pkg/api/model_pod_preferred_node_selector_term.go
 pkg/api/model_pod_request_resources.go
+pkg/api/model_pod_resource_claim.go
+pkg/api/model_pod_resource_claim_binding.go
 pkg/api/model_pod_sort_filter_fields.go
 pkg/api/model_pod_sync_fields.go
 pkg/api/model_pod_toleration.go
@@ -440,6 +451,10 @@ pkg/api/model_request_info.go
 pkg/api/model_request_resource_cores.go
 pkg/api/model_request_resource_quantity.go
 pkg/api/model_requested_pods.go
+pkg/api/model_resource_claim_template_ref.go
+pkg/api/model_resource_claim_template_workload.go
+pkg/api/model_resource_claim_template_workload_pod.go
+pkg/api/model_resource_claim_template_workloads_response.go
 pkg/api/model_resource_ref.go
 pkg/api/model_resource_ref_kind.go
 pkg/api/model_response_info.go
@@ -566,6 +581,7 @@ pkg/api/model_update_spec_spec.go
 pkg/api/model_update_workloads_setting_by_key_request.go
 pkg/api/model_workload.go
 pkg/api/model_workload_action_record.go
+pkg/api/model_workload_action_record_input.go
 pkg/api/model_workload_action_type.go
 pkg/api/model_workload_allocated_resources.go
 pkg/api/model_workload_batch.go
@@ -592,9 +608,13 @@ pkg/api/model_workload_network_status_services_inner_ports_inner.go
 pkg/api/model_workload_network_status_services_inner_urls_inner.go
 pkg/api/model_workload_node_affinity.go
 pkg/api/model_workload_patch_fields.go
+pkg/api/model_workload_pod_resource_claims.go
 pkg/api/model_workload_pods_sync_request.go
 pkg/api/model_workload_priority.go
 pkg/api/model_workload_request_resources.go
+pkg/api/model_workload_resource_claim.go
+pkg/api/model_workload_resource_claims_response.go
+pkg/api/model_workload_slim.go
 pkg/api/model_workload_sort_filter_fields.go
 pkg/api/model_workload_submission_v2_enabled_setting.go
 pkg/api/model_workload_sync_fields.go

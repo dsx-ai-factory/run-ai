@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+type: object
+required:
+  - code
+  - message
+  - path
+properties:
+  code:
+    type: string
+    description: Stable machine-readable diagnostic identifier.
+  message:
+    type: string
+    description: Explanation of the problem and available recovery.
+  path:
+    type: string
+    description: Location within the declaration, or an empty string for a document-wide diagnostic.

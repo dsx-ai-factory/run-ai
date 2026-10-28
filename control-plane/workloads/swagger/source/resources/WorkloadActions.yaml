@@ -9,7 +9,7 @@ get:
     resource-type: workloads
     action: read
     resource-id: workloadId
-  tags: [Events]
+  tags: [WorkloadActions]
   parameters:
     - $ref: '../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml'
     - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
@@ -20,7 +20,7 @@ get:
       content:
         application/json:
           schema:
-            $ref: '../schemas/Events/GetWorkloadActionsResponse.yaml'
+            $ref: '../schemas/WorkloadActions/GetWorkloadActionsResponse.yaml'
     400:
       $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
     401:

@@ -77,13 +77,10 @@ For a same-cluster installation on Kubernetes, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
-       telemetryService: # Support-Entitled Release only
-         enabled: true
-         telemetryAuth: # Optional
-           token: <SERVICE_API_KEY>
+       telemetryService.enabled: true # Support-Entitled Release only
+       telemetryService.telemetryAuth.token: <SERVICE_API_KEY> # Optional
        # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 4. Define the cluster:
@@ -108,8 +105,7 @@ For a same-cluster installation on Kubernetes, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 5. Enable the prerequisites:
@@ -180,8 +176,7 @@ controlPlane:
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
     # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 cluster:
   enabled: true
@@ -193,8 +188,7 @@ cluster:
   version: ""
   customHelmValues:
     # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 prerequisites:
   gpuOperator:
@@ -261,13 +255,10 @@ For a same-cluster installation on OpenShift, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        supportEntitled: true # Support-Entitled Release only
-       telemetryService: # Support-Entitled Release only
-         enabled: true
-         telemetryAuth: # Optional
-           token: <SERVICE_API_KEY>
+       telemetryService.enabled: true # Support-Entitled Release only
+       telemetryService.telemetryAuth.token: <SERVICE_API_KEY> # Optional
        # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 4. Define the cluster:
@@ -286,8 +277,7 @@ For a same-cluster installation on OpenShift, configure:
      version: "" # Omit to install the latest supported version
      customHelmValues:
        # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
-       global:
-         fipsMode: only # Gov-ready
+       global.fipsMode: only # Gov-ready
    ```
 
 5. Enable the prerequisites:
@@ -344,8 +334,7 @@ controlPlane:
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
     # Gov-ready: add the image pull secret, external PostgreSQL, and hardened control plane values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 cluster:
   enabled: true
@@ -353,8 +342,7 @@ cluster:
   version: ""
   customHelmValues:
     # Gov-ready: add the image pull secret and hardened cluster values, see Gov-Ready Third-Party Services
-    global:
-      fipsMode: only # Gov-ready
+    global.fipsMode: only # Gov-ready
 
 prerequisites:
   gpuOperator:

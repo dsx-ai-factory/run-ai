@@ -1014,7 +1014,7 @@ func createApiResources(gpuDeserved float64, cpuDeserved float64, memoryDeserved
 		},
 		Gpu: api.ResourcesNullableGpu{
 			Limit:           &gpuDeserved,
-			Deserved:        gpuDeserved,
+			Deserved:        ptr.To(gpuDeserved),
 			OverQuotaWeight: &gpuDeserved,
 		},
 		Cpu: &api.ResourcesCpu{

@@ -226,6 +226,120 @@ export interface AIApplicationAuth {
     'assetId'?: string;
 }
 /**
+ * Select exactly one chart source: chartId for an existing uploaded archive, chartURL for a direct archive URL, or repo with chartName and an exact chartVersion. Sources cannot be combined. Inspection of a repository chart requires an explicit version; latest-version selection is not supported. Authentication uses the caller-accessible personal or shared credential asset. 
+ * @export
+ * @interface AIApplicationChartInspectionRequest
+ */
+export interface AIApplicationChartInspectionRequest {
+    /**
+     * 
+     * @type {AIApplicationSpecChartRef}
+     * @memberof AIApplicationChartInspectionRequest
+     */
+    'chartRef': AIApplicationSpecChartRef;
+    /**
+     * 
+     * @type {AIApplicationAuth}
+     * @memberof AIApplicationChartInspectionRequest
+     */
+    'auth'?: AIApplicationAuth;
+}
+/**
+ * 
+ * @export
+ * @interface AIApplicationChartInspectionResponse
+ */
+export interface AIApplicationChartInspectionResponse {
+    /**
+     * Helm chart name.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'chartName': string;
+    /**
+     * Helm chart version.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'chartVersion': string;
+    /**
+     * Lowercase hexadecimal SHA-256 digest of the exact inspected archive bytes.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'archiveSHA256': string;
+    /**
+     * Whether the chart contains a root questions.yaml or questions.yml file, including an unusable file.
+     * @type {boolean}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'hasQuestions': boolean;
+    /**
+     * 
+     * @type {AIApplicationChartQuestionsStatus}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'questionsStatus': AIApplicationChartQuestionsStatus;
+    /**
+     * Normalized group declarations in author order; empty for absent or unusable declarations.
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'groups': Array<{ [key: string]: any; }>;
+    /**
+     * Normalized root questions in author order. Each question preserves supported declared metadata and may contain recursive subquestions through four child levels (five levels total), with roots at depth zero. Supported compatibility forms are normalized. Unknown question types become string with a warning; unsupported optional properties are ignored with a warning. Invalid mandatory metadata, bindings, options, defaults, conditions, or excessive nesting make the entire declaration unusable. Credential and Secret question types are not supported. This response contains no raw declaration YAML or complete values.yaml defaults. 
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'questions': Array<{ [key: string]: any; }>;
+    /**
+     * Diagnostics for recoverable metadata and unusable declarations.
+     * @type {Array<AIApplicationChartInspectionWarning>}
+     * @memberof AIApplicationChartInspectionResponse
+     */
+    'warnings': Array<AIApplicationChartInspectionWarning>;
+}
+/**
+ * 
+ * @export
+ * @interface AIApplicationChartInspectionWarning
+ */
+export interface AIApplicationChartInspectionWarning {
+    /**
+     * Stable machine-readable diagnostic identifier.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionWarning
+     */
+    'code': string;
+    /**
+     * Explanation of the problem and available recovery.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionWarning
+     */
+    'message': string;
+    /**
+     * Location within the declaration, or an empty string for a document-wide diagnostic.
+     * @type {string}
+     * @memberof AIApplicationChartInspectionWarning
+     */
+    'path': string;
+}
+/**
+ * Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is usable after supported normalization. Unusable means declaration validation failed; questions and groups are empty and warnings explain the failure. An unusable declaration does not block raw YAML configuration or deployment. 
+ * @export
+ * @enum {string}
+ */
+
+export const AIApplicationChartQuestionsStatus = {
+    Absent: 'absent',
+    Usable: 'usable',
+    Unusable: 'unusable'
+} as const;
+
+export type AIApplicationChartQuestionsStatus = typeof AIApplicationChartQuestionsStatus[keyof typeof AIApplicationChartQuestionsStatus];
+
+
+/**
  * Result of uploading a packaged Helm chart archive.
  * @export
  * @interface AIApplicationChartUploadResponse
@@ -448,13 +562,13 @@ export interface AIApplicationSpecChartRef {
      */
     'repo'?: string;
     /**
-     * The name of the chart within the specified repository. This corresponds to the chart’s directory name.
+     * Helm chart name.
      * @type {string}
      * @memberof AIApplicationSpecChartRef
      */
     'chartName'?: string;
     /**
-     * The specific Semantic Version (SemVer) of the chart to deploy.
+     * Helm chart version.
      * @type {string}
      * @memberof AIApplicationSpecChartRef
      */
@@ -2614,6 +2728,19 @@ export interface CountWorkloads200Response {
      * @memberof CountWorkloads200Response
      */
     'count': number;
+}
+/**
+ * 
+ * @export
+ * @interface CreateWorkloadActionsRequest
+ */
+export interface CreateWorkloadActionsRequest {
+    /**
+     * 
+     * @type {Array<WorkloadActionRecordInput>}
+     * @memberof CreateWorkloadActionsRequest
+     */
+    'actions': Array<WorkloadActionRecordInput>;
 }
 /**
  * 
@@ -8742,6 +8869,25 @@ export interface GetWorkloadsSetting {
     'stage'?: string;
 }
 /**
+ * The response of GET /api/v1/workloads/slim.
+ * @export
+ * @interface GetWorkloadsSlimResponse
+ */
+export interface GetWorkloadsSlimResponse {
+    /**
+     * 
+     * @type {number}
+     * @memberof GetWorkloadsSlimResponse
+     */
+    'next'?: number;
+    /**
+     * 
+     * @type {Array<WorkloadSlim>}
+     * @memberof GetWorkloadsSlimResponse
+     */
+    'workloads': Array<WorkloadSlim>;
+}
+/**
  * Specifies the authentication method to use when accessing the Git repository. This is required for private repositories - `password` - Authenticate using a username and password. - `ssh-key` - Authenticate using an SSH private key.
  * @export
  * @enum {string}
@@ -8992,7 +9138,7 @@ export interface GitsRules {
     'instances'?: ItemRules | null;
 }
 /**
- * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+ * GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
  * @export
  * @enum {string}
  */
@@ -11409,6 +11555,31 @@ export interface InternalPodsSyncRequest {
 /**
  * 
  * @export
+ * @interface InternalResourceClaimTemplateWorkloadsRequest
+ */
+export interface InternalResourceClaimTemplateWorkloadsRequest {
+    /**
+     * The name of the ResourceClaimTemplate, as referenced by pods.
+     * @type {string}
+     * @memberof InternalResourceClaimTemplateWorkloadsRequest
+     */
+    'name': string;
+    /**
+     * 
+     * @type {ScopeType}
+     * @memberof InternalResourceClaimTemplateWorkloadsRequest
+     */
+    'scopeType': ScopeType;
+    /**
+     * The id of the cluster, department or project, depending on the scope type.
+     * @type {string}
+     * @memberof InternalResourceClaimTemplateWorkloadsRequest
+     */
+    'scopeId': string;
+}
+/**
+ * 
+ * @export
  * @interface InternalSyncPods207Response
  */
 export interface InternalSyncPods207Response {
@@ -12787,6 +12958,12 @@ export interface Pod {
      */
     'elements'?: Array<PodElement> | null;
     /**
+     * Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here.
+     * @type {Array<PodResourceClaim>}
+     * @memberof Pod
+     */
+    'resourceClaims'?: Array<PodResourceClaim> | null;
+    /**
      * The id of the tenant.
      * @type {number}
      * @memberof Pod
@@ -13206,6 +13383,56 @@ export interface PodRequestResources {
 /**
  * 
  * @export
+ * @interface PodResourceClaim
+ */
+export interface PodResourceClaim {
+    /**
+     * Pod-local name of the claim entry (DNS_LABEL). Mirrors `pod.spec.resourceClaims[].name` and the key used by `pod.status.resourceClaimStatuses[].name` to publish the bound claim.
+     * @type {string}
+     * @memberof PodResourceClaim
+     */
+    'name': string;
+    /**
+     * Name of the referenced `ResourceClaimTemplate` in the pod\'s namespace, when the claim entry was created from a template. Mutually exclusive with `resourceClaimName`. Mirrors `pod.spec.resourceClaims[].resourceClaimTemplateName`.
+     * @type {string}
+     * @memberof PodResourceClaim
+     */
+    'resourceClaimTemplateName'?: string | null;
+    /**
+     * Name of a standalone `ResourceClaim` that the pod references directly, when the claim entry is not created from a template. Mutually exclusive with `resourceClaimTemplateName`. Mirrors `pod.spec.resourceClaims[].resourceClaimName`.
+     * @type {string}
+     * @memberof PodResourceClaim
+     */
+    'resourceClaimName'?: string | null;
+    /**
+     * Name of the actual `ResourceClaim` bound to the pod for this entry. For a template-generated entry this is populated from `pod.status.resourceClaimStatuses[].resourceClaimName` once Kubernetes publishes it, and is null until then. For a standalone entry it equals `resourceClaimName` and is populated immediately. This is the field the forward-view API surfaces as the \"actual\" bound claim.
+     * @type {string}
+     * @memberof PodResourceClaim
+     */
+    'allocatedResourceClaimName'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface PodResourceClaimBinding
+ */
+export interface PodResourceClaimBinding {
+    /**
+     * Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'name': string;
+    /**
+     * Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+     * @type {string}
+     * @memberof PodResourceClaimBinding
+     */
+    'claimName'?: string | null;
+}
+/**
+ * 
+ * @export
  * @enum {string}
  */
 
@@ -13355,6 +13582,12 @@ export interface PodSyncFields {
      * @memberof PodSyncFields
      */
     'elements'?: Array<PodElement> | null;
+    /**
+     * Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here.
+     * @type {Array<PodResourceClaim>}
+     * @memberof PodSyncFields
+     */
+    'resourceClaims'?: Array<PodResourceClaim> | null;
 }
 /**
  * 
@@ -13705,7 +13938,7 @@ export interface PortsRules {
     'instances'?: ItemRules | null;
 }
 /**
- * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+ * Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
  * @export
  * @enum {string}
  */
@@ -14734,6 +14967,112 @@ export interface RequestedPods {
      * @memberof RequestedPods
      */
     'completions'?: number | null;
+}
+/**
+ * The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
+ * @export
+ * @interface ResourceClaimTemplateRef
+ */
+export interface ResourceClaimTemplateRef {
+    /**
+     * Name of the ResourceClaimTemplate in the pod\'s namespace.
+     * @type {string}
+     * @memberof ResourceClaimTemplateRef
+     */
+    'name': string;
+    /**
+     * Whether the template is managed by NVIDIA Run:ai (created through the resource claim templates API) rather than created directly in the cluster.
+     * @type {boolean}
+     * @memberof ResourceClaimTemplateRef
+     */
+    'managed': boolean;
+    /**
+     * The id of the managed resource claim template. Null for an unmanaged template.
+     * @type {string}
+     * @memberof ResourceClaimTemplateRef
+     */
+    'id'?: string | null;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkload
+ */
+export interface ResourceClaimTemplateWorkload {
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'workloadId': string;
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'name': string;
+    /**
+     * The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'type': string;
+    /**
+     * The id of the project.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'projectId': string;
+    /**
+     * The pods of the workload that reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkloadPod>}
+     * @memberof ResourceClaimTemplateWorkload
+     */
+    'pods': Array<ResourceClaimTemplateWorkloadPod>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadPod
+ */
+export interface ResourceClaimTemplateWorkloadPod {
+    /**
+     * The id of the pod.
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'podName': string;
+    /**
+     * The pod\'s claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.
+     * @type {Array<PodResourceClaimBinding>}
+     * @memberof ResourceClaimTemplateWorkloadPod
+     */
+    'resourceClaims': Array<PodResourceClaimBinding>;
+}
+/**
+ * 
+ * @export
+ * @interface ResourceClaimTemplateWorkloadsResponse
+ */
+export interface ResourceClaimTemplateWorkloadsResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit). 
+     * @type {number}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'next'?: number;
+    /**
+     * The workloads whose pods currently reference the resource claim template.
+     * @type {Array<ResourceClaimTemplateWorkload>}
+     * @memberof ResourceClaimTemplateWorkloadsResponse
+     */
+    'workloads': Array<ResourceClaimTemplateWorkload>;
 }
 /**
  * A reference to an existing Kubernetes resource (PersistentVolumeClaim, Secret, or ConfigMap) used by a workload\'s pod template.
@@ -22680,6 +23019,49 @@ export interface WorkloadActionRecord {
 /**
  * 
  * @export
+ * @interface WorkloadActionRecordInput
+ */
+export interface WorkloadActionRecordInput {
+    /**
+     * A unique ID of the workload action-history record.
+     * @type {string}
+     * @memberof WorkloadActionRecordInput
+     */
+    'id': string;
+    /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof WorkloadActionRecordInput
+     */
+    'clusterId': string;
+    /**
+     * A unique ID of the workload.
+     * @type {string}
+     * @memberof WorkloadActionRecordInput
+     */
+    'workloadId': string;
+    /**
+     * The name of the workload.
+     * @type {string}
+     * @memberof WorkloadActionRecordInput
+     */
+    'workloadName': string;
+    /**
+     * 
+     * @type {WorkloadActionType}
+     * @memberof WorkloadActionRecordInput
+     */
+    'action': WorkloadActionType;
+    /**
+     * The time when the workload action was accepted.
+     * @type {string}
+     * @memberof WorkloadActionRecordInput
+     */
+    'acceptedAt': string;
+}
+/**
+ * 
+ * @export
  * @enum {string}
  */
 
@@ -23975,6 +24357,37 @@ export interface WorkloadPatchFields {
 /**
  * 
  * @export
+ * @interface WorkloadPodResourceClaims
+ */
+export interface WorkloadPodResourceClaims {
+    /**
+     * The id of the pod.
+     * @type {string}
+     * @memberof WorkloadPodResourceClaims
+     */
+    'podId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadPodResourceClaims
+     */
+    'podName': string;
+    /**
+     * Identifies the function of the pod within a distributed workload (for example, leader, worker, or master).
+     * @type {string}
+     * @memberof WorkloadPodResourceClaims
+     */
+    'task'?: string | null;
+    /**
+     * The claims the pod references, in the order they appear in `pod.spec.resourceClaims`.
+     * @type {Array<WorkloadResourceClaim>}
+     * @memberof WorkloadPodResourceClaims
+     */
+    'resourceClaims': Array<WorkloadResourceClaim>;
+}
+/**
+ * 
+ * @export
  * @interface WorkloadPodsSyncRequest
  */
 export interface WorkloadPodsSyncRequest {
@@ -24149,6 +24562,106 @@ export interface WorkloadRequestResources {
      * @memberof WorkloadRequestResources
      */
     'extendedResources'?: Array<WorkloadsExtendedResource> | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkloadResourceClaim
+ */
+export interface WorkloadResourceClaim {
+    /**
+     * Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+     * @type {string}
+     * @memberof WorkloadResourceClaim
+     */
+    'name': string;
+    /**
+     * Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+     * @type {string}
+     * @memberof WorkloadResourceClaim
+     */
+    'claimName'?: string | null;
+    /**
+     * 
+     * @type {ResourceClaimTemplateRef}
+     * @memberof WorkloadResourceClaim
+     */
+    'template'?: ResourceClaimTemplateRef | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkloadResourceClaimAllOf
+ */
+export interface WorkloadResourceClaimAllOf {
+    /**
+     * 
+     * @type {ResourceClaimTemplateRef}
+     * @memberof WorkloadResourceClaimAllOf
+     */
+    'template'?: ResourceClaimTemplateRef | null;
+}
+/**
+ * 
+ * @export
+ * @interface WorkloadResourceClaimsResponse
+ */
+export interface WorkloadResourceClaimsResponse {
+    /**
+     * Offset for the next page of results. Present only when there are more pods beyond the current page (i.e., the number of returned pods equals the limit). 
+     * @type {number}
+     * @memberof WorkloadResourceClaimsResponse
+     */
+    'next'?: number;
+    /**
+     * The pods of the workload that reference at least one claim.
+     * @type {Array<WorkloadPodResourceClaims>}
+     * @memberof WorkloadResourceClaimsResponse
+     */
+    'pods': Array<WorkloadPodResourceClaims>;
+}
+/**
+ * A workload as returned by GET /api/v1/workloads/slim.
+ * @export
+ * @interface WorkloadSlim
+ */
+export interface WorkloadSlim {
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'name': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'type'?: string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'projectName': string;
+    /**
+     * The id of the cluster.
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'clusterId': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof WorkloadSlim
+     */
+    'distributedFramework'?: string;
 }
 /**
  * 
@@ -26945,6 +27458,46 @@ export const AIApplicationsApiAxiosParamCreator = function (configuration?: Conf
             };
         },
         /**
+         * Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration in the control plane. Uploaded charts reference an archive already stored by the chart upload API. The response contains normalized question metadata and diagnostics; it does not contain the complete chart defaults or credential values. Missing or unusable questions declarations return a successful response so callers can offer raw YAML configuration. Download, authentication, and invalid archive failures return an error and are not reported as absent questions. Archives containing both root declaration filenames are rejected as ambiguous. 
+         * @summary Inspect a Helm chart questions declaration.
+         * @param {AIApplicationChartInspectionRequest} aIApplicationChartInspectionRequest Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inspectApplicationChart: async (aIApplicationChartInspectionRequest: AIApplicationChartInspectionRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'aIApplicationChartInspectionRequest' is not null or undefined
+            assertParamExists('inspectApplicationChart', 'aIApplicationChartInspectionRequest', aIApplicationChartInspectionRequest)
+            const localVarPath = `/api/v1/ai-applications/charts/inspect`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(aIApplicationChartInspectionRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * List AI applications.
          * @summary List AI applications. [Experimental]
          * @param {AIApplicationVerbosity} [verbosity] response verbosity level.
@@ -27222,6 +27775,17 @@ export const AIApplicationsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration in the control plane. Uploaded charts reference an archive already stored by the chart upload API. The response contains normalized question metadata and diagnostics; it does not contain the complete chart defaults or credential values. Missing or unusable questions declarations return a successful response so callers can offer raw YAML configuration. Download, authentication, and invalid archive failures return an error and are not reported as absent questions. Archives containing both root declaration filenames are rejected as ambiguous. 
+         * @summary Inspect a Helm chart questions declaration.
+         * @param {AIApplicationChartInspectionRequest} aIApplicationChartInspectionRequest Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async inspectApplicationChart(aIApplicationChartInspectionRequest: AIApplicationChartInspectionRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<AIApplicationChartInspectionResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.inspectApplicationChart(aIApplicationChartInspectionRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * List AI applications.
          * @summary List AI applications. [Experimental]
          * @param {AIApplicationVerbosity} [verbosity] response verbosity level.
@@ -27334,6 +27898,16 @@ export const AIApplicationsApiFactory = function (configuration?: Configuration,
          */
         getApplication(aiApplicationId: string, options?: any): AxiosPromise<AIApplication> {
             return localVarFp.getApplication(aiApplicationId, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration in the control plane. Uploaded charts reference an archive already stored by the chart upload API. The response contains normalized question metadata and diagnostics; it does not contain the complete chart defaults or credential values. Missing or unusable questions declarations return a successful response so callers can offer raw YAML configuration. Download, authentication, and invalid archive failures return an error and are not reported as absent questions. Archives containing both root declaration filenames are rejected as ambiguous. 
+         * @summary Inspect a Helm chart questions declaration.
+         * @param {AIApplicationChartInspectionRequest} aIApplicationChartInspectionRequest Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        inspectApplicationChart(aIApplicationChartInspectionRequest: AIApplicationChartInspectionRequest, options?: any): AxiosPromise<AIApplicationChartInspectionResponse> {
+            return localVarFp.inspectApplicationChart(aIApplicationChartInspectionRequest, options).then((request) => request(axios, basePath));
         },
         /**
          * List AI applications.
@@ -27453,6 +28027,18 @@ export class AIApplicationsApi extends BaseAPI {
      */
     public getApplication(aiApplicationId: string, options?: AxiosRequestConfig) {
         return AIApplicationsApiFp(this.configuration).getApplication(aiApplicationId, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration in the control plane. Uploaded charts reference an archive already stored by the chart upload API. The response contains normalized question metadata and diagnostics; it does not contain the complete chart defaults or credential values. Missing or unusable questions declarations return a successful response so callers can offer raw YAML configuration. Download, authentication, and invalid archive failures return an error and are not reported as absent questions. Archives containing both root declaration filenames are rejected as ambiguous. 
+     * @summary Inspect a Helm chart questions declaration.
+     * @param {AIApplicationChartInspectionRequest} aIApplicationChartInspectionRequest Chart source selection and optional saved credential reference, up to 64 KiB of JSON.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof AIApplicationsApi
+     */
+    public inspectApplicationChart(aIApplicationChartInspectionRequest: AIApplicationChartInspectionRequest, options?: AxiosRequestConfig) {
+        return AIApplicationsApiFp(this.configuration).inspectApplicationChart(aIApplicationChartInspectionRequest, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -28694,54 +29280,6 @@ export const EventsApiAxiosParamCreator = function (configuration?: Configuratio
             };
         },
         /**
-         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
-         * @summary Get workload action history.
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {number} [offset] The offset of the first item returned in the collection.
-         * @param {number} [limit] The maximum number of entries to return.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getWorkloadActionsHistory: async (workloadId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
-            // verify required parameter 'workloadId' is not null or undefined
-            assertParamExists('getWorkloadActionsHistory', 'workloadId', workloadId)
-            const localVarPath = `/api/v1/workloads/{workloadId}/actions`
-                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
-            // use dummy base URL string because the URL constructor only accepts absolute URLs.
-            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
-            let baseOptions;
-            if (configuration) {
-                baseOptions = configuration.baseOptions;
-            }
-
-            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
-            const localVarHeaderParameter = {} as any;
-            const localVarQueryParameter = {} as any;
-
-            // authentication bearerAuth required
-            // http bearer authentication required
-            await setBearerAuthToObject(localVarHeaderParameter, configuration)
-
-            if (offset !== undefined) {
-                localVarQueryParameter['offset'] = offset;
-            }
-
-            if (limit !== undefined) {
-                localVarQueryParameter['limit'] = limit;
-            }
-
-
-    
-            setSearchParams(localVarUrlObj, localVarQueryParameter);
-            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
-            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
-
-            return {
-                url: toPathString(localVarUrlObj),
-                options: localVarRequestOptions,
-            };
-        },
-        /**
          * Retrieve all the workload events using a workload id.
          * @summary Get the workload events.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -28918,19 +29456,6 @@ export const EventsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
-         * @summary Get workload action history.
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {number} [offset] The offset of the first item returned in the collection.
-         * @param {number} [limit] The maximum number of entries to return.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        async getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloadActionsResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadActionsHistory(workloadId, offset, limit, options);
-            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
-        },
-        /**
          * Retrieve all the workload events using a workload id.
          * @summary Get the workload events.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -29004,18 +29529,6 @@ export const EventsApiFactory = function (configuration?: Configuration, basePat
             return localVarFp.getRevisionHistory(revisionId, offset, limit, options).then((request) => request(axios, basePath));
         },
         /**
-         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
-         * @summary Get workload action history.
-         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-         * @param {number} [offset] The offset of the first item returned in the collection.
-         * @param {number} [limit] The maximum number of entries to return.
-         * @param {*} [options] Override http request option.
-         * @throws {RequiredError}
-         */
-        getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: any): AxiosPromise<GetWorkloadActionsResponse> {
-            return localVarFp.getWorkloadActionsHistory(workloadId, offset, limit, options).then((request) => request(axios, basePath));
-        },
-        /**
          * Retrieve all the workload events using a workload id.
          * @summary Get the workload events.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -29087,20 +29600,6 @@ export class EventsApi extends BaseAPI {
      */
     public getRevisionHistory(revisionId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
         return EventsApiFp(this.configuration).getRevisionHistory(revisionId, offset, limit, options).then((request) => request(this.axios, this.basePath));
-    }
-
-    /**
-     * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
-     * @summary Get workload action history.
-     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
-     * @param {number} [offset] The offset of the first item returned in the collection.
-     * @param {number} [limit] The maximum number of entries to return.
-     * @param {*} [options] Override http request option.
-     * @throws {RequiredError}
-     * @memberof EventsApi
-     */
-    public getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
-        return EventsApiFp(this.configuration).getWorkloadActionsHistory(workloadId, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -32974,6 +33473,204 @@ export class UnifiedApi extends BaseAPI {
      */
     public getUnifiedWorkload(unifiedWorkloadRequest?: UnifiedWorkloadRequest, options?: AxiosRequestConfig) {
         return UnifiedApiFp(this.configuration).getUnifiedWorkload(unifiedWorkloadRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+}
+
+
+/**
+ * WorkloadActionsApi - axios parameter creator
+ * @export
+ */
+export const WorkloadActionsApiAxiosParamCreator = function (configuration?: Configuration) {
+    return {
+        /**
+         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * @summary Get workload action history.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadActionsHistory: async (workloadId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workloadId' is not null or undefined
+            assertParamExists('getWorkloadActionsHistory', 'workloadId', workloadId)
+            const localVarPath = `/api/v1/workloads/{workloadId}/actions`
+                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Records workload actions accepted by workloads-manager, using the authenticated request context to identify who performed them and the supplied timestamp to record when they were accepted.
+         * @summary Store workload actions.
+         * @param {CreateWorkloadActionsRequest} createWorkloadActionsRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        internalCreateWorkloadActions: async (createWorkloadActionsRequest: CreateWorkloadActionsRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'createWorkloadActionsRequest' is not null or undefined
+            assertParamExists('internalCreateWorkloadActions', 'createWorkloadActionsRequest', createWorkloadActionsRequest)
+            const localVarPath = `/internal/workloads/actions`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(createWorkloadActionsRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+    }
+};
+
+/**
+ * WorkloadActionsApi - functional programming interface
+ * @export
+ */
+export const WorkloadActionsApiFp = function(configuration?: Configuration) {
+    const localVarAxiosParamCreator = WorkloadActionsApiAxiosParamCreator(configuration)
+    return {
+        /**
+         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * @summary Get workload action history.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloadActionsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadActionsHistory(workloadId, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Records workload actions accepted by workloads-manager, using the authenticated request context to identify who performed them and the supplied timestamp to record when they were accepted.
+         * @summary Store workload actions.
+         * @param {CreateWorkloadActionsRequest} createWorkloadActionsRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async internalCreateWorkloadActions(createWorkloadActionsRequest: CreateWorkloadActionsRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<void>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.internalCreateWorkloadActions(createWorkloadActionsRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+    }
+};
+
+/**
+ * WorkloadActionsApi - factory interface
+ * @export
+ */
+export const WorkloadActionsApiFactory = function (configuration?: Configuration, basePath?: string, axios?: AxiosInstance) {
+    const localVarFp = WorkloadActionsApiFp(configuration)
+    return {
+        /**
+         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * @summary Get workload action history.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: any): AxiosPromise<GetWorkloadActionsResponse> {
+            return localVarFp.getWorkloadActionsHistory(workloadId, offset, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Records workload actions accepted by workloads-manager, using the authenticated request context to identify who performed them and the supplied timestamp to record when they were accepted.
+         * @summary Store workload actions.
+         * @param {CreateWorkloadActionsRequest} createWorkloadActionsRequest 
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        internalCreateWorkloadActions(createWorkloadActionsRequest: CreateWorkloadActionsRequest, options?: any): AxiosPromise<void> {
+            return localVarFp.internalCreateWorkloadActions(createWorkloadActionsRequest, options).then((request) => request(axios, basePath));
+        },
+    };
+};
+
+/**
+ * WorkloadActionsApi - object-oriented interface
+ * @export
+ * @class WorkloadActionsApi
+ * @extends {BaseAPI}
+ */
+export class WorkloadActionsApi extends BaseAPI {
+    /**
+     * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+     * @summary Get workload action history.
+     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkloadActionsApi
+     */
+    public getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return WorkloadActionsApiFp(this.configuration).getWorkloadActionsHistory(workloadId, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Records workload actions accepted by workloads-manager, using the authenticated request context to identify who performed them and the supplied timestamp to record when they were accepted.
+     * @summary Store workload actions.
+     * @param {CreateWorkloadActionsRequest} createWorkloadActionsRequest 
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkloadActionsApi
+     */
+    public internalCreateWorkloadActions(createWorkloadActionsRequest: CreateWorkloadActionsRequest, options?: AxiosRequestConfig) {
+        return WorkloadActionsApiFp(this.configuration).internalCreateWorkloadActions(createWorkloadActionsRequest, options).then((request) => request(this.axios, this.basePath));
     }
 }
 
@@ -37689,6 +38386,54 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
             };
         },
         /**
+         * Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed. 
+         * @summary Get workload resource claims by workload id.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadResourceClaims: async (workloadId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'workloadId' is not null or undefined
+            assertParamExists('getWorkloadResourceClaims', 'workloadId', workloadId)
+            const localVarPath = `/api/v1/workloads/{workloadId}/resource-claims`
+                .replace(`{${"workloadId"}}`, encodeURIComponent(String(workloadId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * Retrieve a list of active workloads with details.
          * @summary List workloads.
          * @param {boolean} [deleted] Return only deleted resources when &#x60;true&#x60;.
@@ -37744,6 +38489,55 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
 
             if (search !== undefined) {
                 localVarQueryParameter['search'] = search;
+            }
+
+
+    
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
+         * @summary List workloads, slim.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadsSlim: async (offset?: number, limit?: number, filterBy?: Array<string>, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            const localVarPath = `/api/v1/workloads/slim`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'GET', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+            if (filterBy) {
+                localVarQueryParameter['filterBy'] = filterBy.join(COLLECTION_FORMATS.csv);
             }
 
 
@@ -37907,6 +38701,56 @@ export const WorkloadsApiAxiosParamCreator = function (configuration?: Configura
             let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
             localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
             localVarRequestOptions.data = serializeDataIfNeeded(internalEnrichOrgUnitRankingRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
+         * Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template. 
+         * @summary List the workloads referencing a resource claim template (Internal API).
+         * @param {InternalResourceClaimTemplateWorkloadsRequest} internalResourceClaimTemplateWorkloadsRequest 
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        internalGetResourceClaimTemplateWorkloads: async (internalResourceClaimTemplateWorkloadsRequest: InternalResourceClaimTemplateWorkloadsRequest, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'internalResourceClaimTemplateWorkloadsRequest' is not null or undefined
+            assertParamExists('internalGetResourceClaimTemplateWorkloads', 'internalResourceClaimTemplateWorkloadsRequest', internalResourceClaimTemplateWorkloadsRequest)
+            const localVarPath = `/internal/workloads/resource-claim-templates/workloads`;
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (offset !== undefined) {
+                localVarQueryParameter['offset'] = offset;
+            }
+
+            if (limit !== undefined) {
+                localVarQueryParameter['limit'] = limit;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(internalResourceClaimTemplateWorkloadsRequest, localVarRequestOptions, configuration)
 
             return {
                 url: toPathString(localVarUrlObj),
@@ -38500,6 +39344,19 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed. 
+         * @summary Get workload resource claims by workload id.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWorkloadResourceClaims(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<WorkloadResourceClaimsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadResourceClaims(workloadId, offset, limit, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * Retrieve a list of active workloads with details.
          * @summary List workloads.
          * @param {boolean} [deleted] Return only deleted resources when &#x60;true&#x60;.
@@ -38514,6 +39371,19 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
          */
         async getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloads200Response>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
+         * @summary List workloads, slim.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async getWorkloadsSlim(offset?: number, limit?: number, filterBy?: Array<string>, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloadsSlimResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadsSlim(offset, limit, filterBy, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -38554,6 +39424,19 @@ export const WorkloadsApiFp = function(configuration?: Configuration) {
          */
         async internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest: InternalEnrichOrgUnitRankingRequest, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<InternalEnrichOrgUnitRankingResponse>> {
             const localVarAxiosArgs = await localVarAxiosParamCreator.internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
+         * Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template. 
+         * @summary List the workloads referencing a resource claim template (Internal API).
+         * @param {InternalResourceClaimTemplateWorkloadsRequest} internalResourceClaimTemplateWorkloadsRequest 
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest: InternalResourceClaimTemplateWorkloadsRequest, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<ResourceClaimTemplateWorkloadsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest, offset, limit, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -38820,6 +39703,18 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
             return localVarFp.getWorkloadMetrics(workloadId, metricType, start, end, numberOfSamples, options).then((request) => request(axios, basePath));
         },
         /**
+         * Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed. 
+         * @summary Get workload resource claims by workload id.
+         * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadResourceClaims(workloadId: string, offset?: number, limit?: number, options?: any): AxiosPromise<WorkloadResourceClaimsResponse> {
+            return localVarFp.getWorkloadResourceClaims(workloadId, offset, limit, options).then((request) => request(axios, basePath));
+        },
+        /**
          * Retrieve a list of active workloads with details.
          * @summary List workloads.
          * @param {boolean} [deleted] Return only deleted resources when &#x60;true&#x60;.
@@ -38834,6 +39729,18 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
          */
         getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: any): AxiosPromise<GetWorkloads200Response> {
             return localVarFp.getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
+         * @summary List workloads, slim.
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        getWorkloadsSlim(offset?: number, limit?: number, filterBy?: Array<string>, options?: any): AxiosPromise<GetWorkloadsSlimResponse> {
+            return localVarFp.getWorkloadsSlim(offset, limit, filterBy, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieves workload data by telemetry type. Optionally filter by specific workload phases.  Telemetry Types: - WORKLOADS_COUNT: Count of workloads - GPU_ALLOCATION: GPU allocation metrics - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).   For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters. - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads 
@@ -38871,6 +39778,18 @@ export const WorkloadsApiFactory = function (configuration?: Configuration, base
          */
         internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest: InternalEnrichOrgUnitRankingRequest, options?: any): AxiosPromise<InternalEnrichOrgUnitRankingResponse> {
             return localVarFp.internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template. 
+         * @summary List the workloads referencing a resource claim template (Internal API).
+         * @param {InternalResourceClaimTemplateWorkloadsRequest} internalResourceClaimTemplateWorkloadsRequest 
+         * @param {number} [offset] The offset of the first item returned in the collection.
+         * @param {number} [limit] The maximum number of entries to return.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest: InternalResourceClaimTemplateWorkloadsRequest, offset?: number, limit?: number, options?: any): AxiosPromise<ResourceClaimTemplateWorkloadsResponse> {
+            return localVarFp.internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest, offset, limit, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -39148,6 +40067,20 @@ export class WorkloadsApi extends BaseAPI {
     }
 
     /**
+     * Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed. 
+     * @summary Get workload resource claims by workload id.
+     * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkloadsApi
+     */
+    public getWorkloadResourceClaims(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return WorkloadsApiFp(this.configuration).getWorkloadResourceClaims(workloadId, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
      * Retrieve a list of active workloads with details.
      * @summary List workloads.
      * @param {boolean} [deleted] Return only deleted resources when &#x60;true&#x60;.
@@ -39163,6 +40096,20 @@ export class WorkloadsApi extends BaseAPI {
      */
     public getWorkloads(deleted?: boolean, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'type' | 'name' | 'clusterId' | 'projectId' | 'projectName' | 'departmentId' | 'departmentName' | 'createdAt' | 'deletedAt' | 'submittedBy' | 'phase' | 'completedAt' | 'nodepool' | 'distributedFramework' | 'allocatedGPU' | 'idleAllocatedGpus' | 'phaseUpdatedAt' | 'category' | 'priority' | 'totalPendingTimeSeconds' | 'totalRunningTimeSeconds' | 'priorityClassName' | 'preemptibility' | 'guaranteedRuntimeEndsAt' | 'aiApplicationId' | 'aiApplicationName', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig) {
         return WorkloadsApiFp(this.configuration).getWorkloads(deleted, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Retrieve a list of active workloads with only their identity fields, sorted by id in ascending order. Workloads are read from the workloads table directly instead of the workloads view, so newly created workloads are returned immediately. 
+     * @summary List workloads, slim.
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {Array<string>} [filterBy] Filter results by a parameter. Use the format field-name operator value. Operators are &#x60;&#x3D;&#x3D;&#x60; Equals, &#x60;!&#x3D;&#x60; Not equals, &#x60;&lt;&#x3D;&#x60; Less than or equal, &#x60;&gt;&#x3D;&#x60; Greater than or equal, &#x60;&#x3D;@&#x60; contains, &#x60;!@&#x60; Does not contain, &#x60;&#x3D;^&#x60; Starts with and &#x60;&#x3D;$&#x60; Ends with.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkloadsApi
+     */
+    public getWorkloadsSlim(offset?: number, limit?: number, filterBy?: Array<string>, options?: AxiosRequestConfig) {
+        return WorkloadsApiFp(this.configuration).getWorkloadsSlim(offset, limit, filterBy, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -39206,6 +40153,20 @@ export class WorkloadsApi extends BaseAPI {
      */
     public internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest: InternalEnrichOrgUnitRankingRequest, options?: AxiosRequestConfig) {
         return WorkloadsApiFp(this.configuration).internalEnrichOrgUnitRanking(internalEnrichOrgUnitRankingRequest, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Lists the workloads in the given scope whose pods reference the ResourceClaimTemplate with the given name, with the pods that use it and the ResourceClaim each pod is bound to. Standalone ResourceClaims are never included. Results are limited to the workloads the caller is permitted to read. Used by assets-service to serve the workloads view of a managed resource claim template. 
+     * @summary List the workloads referencing a resource claim template (Internal API).
+     * @param {InternalResourceClaimTemplateWorkloadsRequest} internalResourceClaimTemplateWorkloadsRequest 
+     * @param {number} [offset] The offset of the first item returned in the collection.
+     * @param {number} [limit] The maximum number of entries to return.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof WorkloadsApi
+     */
+    public internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest: InternalResourceClaimTemplateWorkloadsRequest, offset?: number, limit?: number, options?: AxiosRequestConfig) {
+        return WorkloadsApiFp(this.configuration).internalGetResourceClaimTemplateWorkloads(internalResourceClaimTemplateWorkloadsRequest, offset, limit, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -8,6 +8,7 @@ package services
 import (
 	"context"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/google/uuid"
@@ -42,10 +43,10 @@ const (
 
 	// NOTE! Change the version here whenever you want to update the system element
 	// v4/v3/v2 -> enriched argsInfo with all $ARGS.named references
-	systemPodSpecFormatterDesc             = "formatter for podSpec fields (v5)"
-	systemPodSpecFgDesc                    = "podSpec fields (v3)"
+	systemPodSpecFormatterDesc             = "formatter for podSpec fields (v6)"
+	systemPodSpecFgDesc                    = "podSpec fields (v4)"
 	systemPodSpecContainerFgDesc           = "podSpecContainer fields (v3)"
-	systemPodSpecAndContainerFgDesc        = "podSpecAndContainer fields (v3)"
+	systemPodSpecAndContainerFgDesc        = "podSpecAndContainer fields (v4)"
 	systemJobSpecFormatterDesc             = "formatter for jobSpec fields (v3)"
 	systemJobSpecFgDesc                    = "jobSpec fields (v3)"
 	systemSelectorFormatterDesc            = "formatter for selector fields (v4)"
@@ -64,7 +65,7 @@ const (
 	systemNimCacheContainerFgDesc          = "nimCacheContainer fields (v2)"
 	systemNimServiceSpecFormatterDesc      = "formatter for nimServiceSpec fields (v2)"
 	systemNimServiceSpecFgDesc             = "nimServiceSpec fields (v2)"
-	systemNimServiceContainerFgDesc        = "nimServiceContainer fields (v2)"
+	systemNimServiceContainerFgDesc        = "nimServiceContainer fields (v3)"
 	systemKubeflowRunPolicyFormatterDesc   = "formatter for kubeflow runPolicy fields (v2)"
 	systemKubeflowReplicaSpecFormatterDesc = "formatter for kubeflow replicaSpec fields (v2)"
 	systemKubeflowRunPolicyFgDesc          = "kubeflow runPolicy fields (v2)"
@@ -177,37 +178,55 @@ func handleSystemFormatters(ctx context.Context, ms MappingApiService, _ *Mappin
 	handleSystemFormatter(ctx, ms, sm.SystemNativeSpecFormatterName, systemNativeSpecFormatterDesc, sm.BuildSystemNativeSpecFormatterFields)
 }
 
+type systemFieldGroupSeed struct {
+	name        string
+	description string
+	builder     sm.SystemFieldGroupBuilder
+}
+
+var systemFieldGroupSeeds = []systemFieldGroupSeed{
+	{sm.SystemPodSpecFgName, systemPodSpecFgDesc, sm.BuildSystemPodSpecFg},
+	{sm.SystemPodSpecContainerFgName, systemPodSpecContainerFgDesc, sm.BuildSystemPodSpecContainerFg},
+	{sm.SystemPodSpecAndContainerFgName, systemPodSpecAndContainerFgDesc, sm.BuildSystemPodSpecAndContainerFg},
+	{sm.SystemJobSpecFgName, systemJobSpecFgDesc, sm.BuildSystemJobSpecFg},
+	{sm.SystemSelectorFgName, systemSelectorFgDesc, sm.BuildSystemSelectorFg},
+	{sm.SystemDeploymentSpecFgName, systemDeploymentSpecFgDesc, sm.BuildSystemDeploymentSpecFg},
+	{sm.SystemReplicaSetSpecFgName, systemReplicaSetSpecFgDesc, sm.BuildSystemReplicaSetSpecFg},
+	{sm.SystemStatefulSetSpecFgName, systemStatefulSetSpecFgDesc, sm.BuildSystemStatefulSetSpecFg},
+	{sm.SystemCronJobSpecFgName, systemCronJobSpecFgDesc, sm.BuildSystemCronJobSpecFg},
+	{sm.SystemMetadataFgName, systemMetadataFgDesc, sm.BuildSystemMetadataFg},
+	{sm.SystemNimCacheSpecFgName, systemNimCacheSpecFgDesc, sm.BuildSystemNimCacheSpecFg},
+	{sm.SystemNimCacheContainerFgName, systemNimCacheContainerFgDesc, sm.BuildSystemNimCacheContainerFg},
+	{sm.SystemNimServiceSpecFgName, systemNimServiceSpecFgDesc, sm.BuildSystemNimServiceSpecFg},
+	{sm.SystemNimServiceContainerFgName, systemNimServiceContainerFgDesc, sm.BuildSystemNimServiceContainerFg},
+	{sm.SystemKubeflowRunPolicyFgName, systemKubeflowRunPolicyFgDesc, sm.BuildSystemKubeflowRunPolicyFg},
+	{sm.SystemKubeflowReplicaSpecFgName, systemKubeflowReplicaSpecFgDesc, sm.BuildSystemKubeflowReplicaSpecFg},
+	{sm.SystemPyTorchJobSpecFgName, systemPyTorchJobSpecFgDesc, sm.BuildSystemPyTorchJobSpecFg},
+	{sm.SystemMPIJobSpecFgName, systemMPIJobSpecFgDesc, sm.BuildSystemMPIJobSpecFg},
+	{sm.SystemLeaderWorkerSetSpecFgName, systemLeaderWorkerSetSpecFgDesc, sm.BuildSystemLeaderWorkerSetSpecFg},
+	{sm.SystemLeaderWorkerTemplateFgName, systemLeaderWorkerTemplateFgDesc, sm.BuildSystemLeaderWorkerTemplateFg},
+	{sm.SystemDynamoGraphDeploymentSpecFgName, systemDynamoGraphDeploymentSpecFgDesc, sm.BuildSystemDynamoGraphDeploymentSpecFg},
+	{sm.SystemDynamoServiceSpecFgName, systemDynamoServiceSpecFgDesc, sm.BuildSystemDynamoServiceSpecFg},
+	{sm.SystemRayClusterSpecFgName, systemRayClusterSpecFgDesc, sm.BuildSystemRayClusterSpecFg},
+	{sm.SystemRayWorkerGroupSpecFgName, systemRayWorkerGroupSpecFgDesc, sm.BuildSystemRayWorkerGroupSpecFg},
+	{sm.SystemRayJobSpecFgName, systemRayJobSpecFgDesc, sm.BuildSystemRayJobSpecFg},
+	{sm.SystemRayServiceSpecFgName, systemRayServiceSpecFgDesc, sm.BuildSystemRayServiceSpecFg},
+	{sm.SystemNativeSpecFgName, systemNativeSpecFgDesc, sm.BuildSystemNativeSpecFg},
+	{sm.SystemNativeDistributedSpecFgName, systemNativeDistributedSpecFgDesc, sm.BuildSystemNativeDistributedSpecFg},
+}
+
 func handleSystemFieldGroups(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
 	logging.Infof("handle system mapping field groups")
 
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemPodSpecFgName, systemPodSpecFgDesc, sm.BuildSystemPodSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemPodSpecContainerFgName, systemPodSpecContainerFgDesc, sm.BuildSystemPodSpecContainerFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemPodSpecAndContainerFgName, systemPodSpecAndContainerFgDesc, sm.BuildSystemPodSpecAndContainerFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemJobSpecFgName, systemJobSpecFgDesc, sm.BuildSystemJobSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemSelectorFgName, systemSelectorFgDesc, sm.BuildSystemSelectorFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemDeploymentSpecFgName, systemDeploymentSpecFgDesc, sm.BuildSystemDeploymentSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemReplicaSetSpecFgName, systemReplicaSetSpecFgDesc, sm.BuildSystemReplicaSetSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemStatefulSetSpecFgName, systemStatefulSetSpecFgDesc, sm.BuildSystemStatefulSetSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemCronJobSpecFgName, systemCronJobSpecFgDesc, sm.BuildSystemCronJobSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemMetadataFgName, systemMetadataFgDesc, sm.BuildSystemMetadataFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemNimCacheSpecFgName, systemNimCacheSpecFgDesc, sm.BuildSystemNimCacheSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemNimCacheContainerFgName, systemNimCacheContainerFgDesc, sm.BuildSystemNimCacheContainerFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemNimServiceSpecFgName, systemNimServiceSpecFgDesc, sm.BuildSystemNimServiceSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemNimServiceContainerFgName, systemNimServiceContainerFgDesc, sm.BuildSystemNimServiceContainerFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemKubeflowRunPolicyFgName, systemKubeflowRunPolicyFgDesc, sm.BuildSystemKubeflowRunPolicyFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemKubeflowReplicaSpecFgName, systemKubeflowReplicaSpecFgDesc, sm.BuildSystemKubeflowReplicaSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemPyTorchJobSpecFgName, systemPyTorchJobSpecFgDesc, sm.BuildSystemPyTorchJobSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemMPIJobSpecFgName, systemMPIJobSpecFgDesc, sm.BuildSystemMPIJobSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemLeaderWorkerSetSpecFgName, systemLeaderWorkerSetSpecFgDesc, sm.BuildSystemLeaderWorkerSetSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemLeaderWorkerTemplateFgName, systemLeaderWorkerTemplateFgDesc, sm.BuildSystemLeaderWorkerTemplateFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemDynamoGraphDeploymentSpecFgName, systemDynamoGraphDeploymentSpecFgDesc, sm.BuildSystemDynamoGraphDeploymentSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemDynamoServiceSpecFgName, systemDynamoServiceSpecFgDesc, sm.BuildSystemDynamoServiceSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemRayClusterSpecFgName, systemRayClusterSpecFgDesc, sm.BuildSystemRayClusterSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemRayWorkerGroupSpecFgName, systemRayWorkerGroupSpecFgDesc, sm.BuildSystemRayWorkerGroupSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemRayJobSpecFgName, systemRayJobSpecFgDesc, sm.BuildSystemRayJobSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemRayServiceSpecFgName, systemRayServiceSpecFgDesc, sm.BuildSystemRayServiceSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemNativeSpecFgName, systemNativeSpecFgDesc, sm.BuildSystemNativeSpecFg, cv)
-	handleSystemFieldGroup(ctx, db, ms, sm.SystemNativeDistributedSpecFgName, systemNativeDistributedSpecFgDesc, sm.BuildSystemNativeDistributedSpecFg, cv)
+	// Every outdated group is pruned before any group is merged: a key renamed or moved between groups that
+	// share a spec selector would otherwise exist in both and fail the consistency check.
+	for _, seed := range systemFieldGroupSeeds {
+		pruneSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder)
+	}
+
+	for _, seed := range systemFieldGroupSeeds {
+		handleSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder, cv)
+	}
 }
 
 func handleSystemMappings(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
@@ -337,8 +356,8 @@ func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiSe
 }
 
 // handleSystemFormatter ensures a system formatter row exists. If the stored description already matches
-// wantDescription, it returns without building or merging fields. Otherwise it merges buildFields()
-// into the formatter, sets description to wantDescription, and saves.
+// wantDescription, it returns without building or merging fields. Otherwise it replaces the formatter fields
+// with buildFields(), sets description to wantDescription, and saves.
 func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterName, wantDescription string, buildFields sm.SystemFormatterFieldsBuilder) {
 	if buildFields == nil {
 		logging.Errorf("handle update of system formatter %s", formatterName)
@@ -375,9 +394,19 @@ func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterN
 		return
 	}
 
+	fields := buildFields()
+
+	if stale := keysMissingFrom(formatter.Fields, fields); len(stale) > 0 {
+		if err := ms.deleteFormatterFields(ctx, formatterName, stale); err != nil {
+			logging.Errorf("prune system formatter %s: %v", formatterName, err)
+			return
+		}
+		logging.Infof("system formatter %s: removed fields %v", formatterName, stale)
+	}
+
 	updateReq := api.FormatterUpdateRequest{
 		Description: &wantDescription,
-		Fields:      buildFields(),
+		Fields:      fields,
 	}
 
 	if _, err := ms.patchFormatter(ctx, formatterName, &updateReq); err != nil {
@@ -404,6 +433,78 @@ func newEmptySystemFormatterRow(name string) *dbmodel.MappingFormatters {
 		UpdatedAt: now,
 		UpdatedBy: systemMappingActor,
 	}
+}
+
+// pruneSystemFieldGroup removes from an outdated system field group the fields and item selectors that builder no
+// longer defines. Kept fields that reference a removed item selector are removed too; handleSystemFieldGroup
+// re-adds them from builder.
+func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService, fieldGroupName, wantDescription string,
+	builder sm.SystemFieldGroupBuilder,
+) {
+	if builder == nil {
+		return
+	}
+
+	systemRow, err := dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
+	if err != nil {
+		if err.Code != http.StatusNotFound {
+			logging.Errorf("failed to load system field group %s for pruning: %v", fieldGroupName, err)
+		}
+		return
+	}
+
+	if systemRow.Description != nil && *systemRow.Description == wantDescription {
+		return
+	}
+
+	fields, itemSelectors := builder()
+	staleItemSelectors := keysMissingFrom(systemRow.ItemSelectors, itemSelectors)
+	staleFields := keysMissingFrom(systemRow.Fields, fields)
+	for name, field := range systemRow.Fields {
+		if _, kept := fields[name]; kept && slices.ContainsFunc(field.ItemSelectors, func(sel string) bool {
+			return slices.Contains(staleItemSelectors, sel)
+		}) {
+			staleFields = append(staleFields, name)
+		}
+	}
+	slices.Sort(staleFields)
+
+	if len(staleFields) == 0 && len(staleItemSelectors) == 0 {
+		return
+	}
+
+	if len(staleFields) > 0 {
+		req := api.FieldGroupDeleteFieldsRequest{Fields: staleFields}
+		if _, err := ms.deleteFieldGroupFields(ctx, fieldGroupName, api.MAPPINGSCOPE_SYSTEM, &req); err != nil {
+			logging.Errorf("prune system field group %s fields: %v", fieldGroupName, err)
+			return
+		}
+	}
+
+	if len(staleItemSelectors) > 0 {
+		req := api.FieldGroupDeleteItemSelectorsRequest{ItemSelectors: staleItemSelectors}
+		if _, err := ms.deleteFieldGroupItemSelectors(ctx, fieldGroupName, api.MAPPINGSCOPE_SYSTEM, &req); err != nil {
+			logging.Errorf("prune system field group %s item selectors: %v", fieldGroupName, err)
+			return
+		}
+	}
+
+	wipeCachesAfterSystemSeed(ctx, "system field group "+fieldGroupName)
+
+	logging.Infof("system field group %s: removed fields %v and item selectors %v", fieldGroupName, staleFields, staleItemSelectors)
+}
+
+// keysMissingFrom returns the keys of stored that built does not define, sorted.
+func keysMissingFrom[S, B any](stored map[string]S, built map[string]B) []string {
+	var missing []string
+	for key := range stored {
+		if _, ok := built[key]; !ok {
+			missing = append(missing, key)
+		}
+	}
+	slices.Sort(missing)
+
+	return missing
 }
 
 func handleSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService, fieldGroupName, wantDescription string,

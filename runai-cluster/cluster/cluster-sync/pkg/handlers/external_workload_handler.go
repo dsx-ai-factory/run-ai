@@ -14,11 +14,13 @@ import (
 	"github.com/OneOfOne/xxhash"
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
+	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	topowner "github.com/dsx-ai-factory/run-ai/runai-cluster/common/top-owner"
 	kubeaischedv2alpha2 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/scheduling/v2alpha2"
 	corev1 "k8s.io/api/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/utils/ptr"
@@ -36,7 +38,33 @@ func (h *ExternalWorkloadHandler) HandleUpdateItem(key client.ObjectKey) error {
 		return err
 	}
 
+	// The runner is deleted before garbage collection removes its external workload, and queued updates aren't
+	// ordered with the informer's delete handler, so an update sent in between can reach the backend after the delete.
+	if h.isWorkloadRunnerDeleted(externalWorkload) {
+		zap.S().Infof("WorkloadRunner of ExternalWorkload <%s/%s> was deleted - not upserting",
+			externalWorkload.Namespace, externalWorkload.Name)
+		return nil
+	}
+
 	return h.handleAddUpdate(externalWorkload)
+}
+
+func (h *ExternalWorkloadHandler) isWorkloadRunnerDeleted(externalWorkload *v1alpha1.ExternalWorkload) bool {
+	wlrName := externalWorkload.Labels[commonconstants.WorkloadRunnerNameLabel]
+	if wlrName == "" {
+		return false
+	}
+
+	workloadRunner := &dromosv1alpha1.WorkloadRunner{}
+	err := h.cachedClient.Get(context.Background(),
+		client.ObjectKey{Name: wlrName, Namespace: externalWorkload.Namespace}, workloadRunner)
+	if apierrors.IsNotFound(err) {
+		return true
+	}
+
+	// A same-name runner with another UID is a replacement, so this external workload's own runner is gone.
+	wlrUid := externalWorkload.Labels[commonconstants.WorkloadRunnerUidLabel]
+	return err == nil && wlrUid != "" && string(workloadRunner.UID) != wlrUid
 }
 
 func NewExternalWorkloadHandler(workloadHandler *WorkloadHandler) *ExternalWorkloadHandler {

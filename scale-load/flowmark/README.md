@@ -48,11 +48,11 @@ folder: every suite declares its category and the runner checks the two match.
 ```
 scenarios/
   scale/                    how latency grows with the number of workloads
-    deployment-burst.yaml   Deployment created through Kubernetes → ExternalWorkload appears
     training-burst.yaml     Training created through the control plane → WorkloadRunner appears
     workspace-burst.yaml    Workspace created through the control plane → WorkloadRunner appears
   load/                     how latency behaves under a steady stream of submissions
     workspace-ttj.yaml      Workspaces submitted at a fixed rate → time to job, split into spans
+    workspace-ttj-stress.yaml  the same at 100/s with 500 users, to find the ceiling
 ```
 
 The selfcheck scenario is not a test and stays out of this tree. It lives
@@ -65,8 +65,7 @@ Knobs of the `scale-burst` suite:
 | knob | default | meaning |
 |---|---|---|
 | `workloads` | `[100, 250, 500]` | round sizes; each round creates that many workloads. Before round 1 one workload is created and removed to warm up the new project; it is not measured |
-| `workloadType` | `Deployment` | `Deployment`, `Training` or `Workspace` |
-| `podsPerWorkload` | 1 | replicas per Deployment; must be 1 for `Training` and `Workspace` |
+| `workloadType` | `Training` | `Training` or `Workspace`, both created through the control plane |
 | `image` | `registry.k8s.io/pause:3.9` | container image; point it at a mirror on air-gapped clusters |
 | `submitConcurrency` | 16 | parallel create and delete calls |
 | `kubeRequestsPerSecond` | 50 | Kubernetes client rate limit |
@@ -74,7 +73,7 @@ Knobs of the `scale-burst` suite:
 | `timeout` | `15m` | how long a round waits for all workloads to arrive |
 | `setupTimeout` | `5m` | project creation, quiesce between rounds, cleanup |
 | `settle` | `90s` | quiet time between rounds |
-| `slo` | none | upper bounds on `p50_ms`, `p90_ms`, `p99_ms`, `mean_ms` or `max_ms`, e.g. `p90_ms: 5000`; add `@<round size>` for one round, e.g. `p90_ms@500: 60000`, otherwise the plain key covers every round; per-round keys for rounds that are not in the run, for example after `--workloads 20`, are ignored and left out of the report; a round above its limit is reported as a regression, the run still passes |
+| `slo` | none | upper bounds on `p50_ms`, `p90_ms` or `p99_ms`, e.g. `p90_ms: 5000`, and a lower bound on `throughput_per_sec`, e.g. `throughput_per_sec: 4`; add `@<round size>` for one round, e.g. `p90_ms@500: 60000`, otherwise the plain key covers every round; per-round keys for rounds that are not in the run, for example after `--workloads 20`, are ignored and left out of the report; a round above its limit is reported as a regression, the run still passes |
 | `cluster` | single cluster | cluster name when the control plane has several |
 
 Each run creates its own project, runs the rounds, deletes everything, and
@@ -86,13 +85,15 @@ Knobs of the `load-ttj` suite:
 | knob | default | meaning |
 |---|---|---|
 | `users` | 10 | parallel submitters; the most requests in flight at once |
+| `spawnRate` | 0 | users joining per second at the start; 0 starts every user at once. Submissions ramp with the active users, so `rate` is reached once all users are in |
 | `rate` | 2 | target submissions per second; may not exceed `controlPlaneRequestsPerSecond` |
 | `duration` | `3m` | how long submissions keep coming |
 | `workloadType` | `Workspace` | `Workspace` or `Training`, both submitted through the control plane |
 | `image` | `registry.k8s.io/pause:3.9` | container image of every workload |
 | `timeout` | `10m` | how long to wait for arrivals after the last submission |
 | `setupTimeout` | `5m` | project creation, each create call, cleanup |
-| `slo` | none | upper bounds named `<span>_<stat>`, e.g. `ttj_p90_ms: 10000`, `cluster_synced_p99_ms: 12000`; `p90_ms` alone belongs to `scale-burst` |
+| `minSubmittedPercent` | 90 | share of the planned submissions the pacer must get out, else the scenario fails with "the environment could not absorb the load"; 0 keeps the shortfall out of the verdict |
+| `slo` | none | upper bounds named `<span>_<stat>`, e.g. `ttj_p90_ms: 10000`, `cluster_synced_p99_ms: 12000`, and `failed_count`, the most rejected submissions allowed; `p90_ms` alone belongs to `scale-burst` |
 | `kubeRequestsPerSecond`, `controlPlaneRequestsPerSecond`, `cluster` | as above | shared with `scale-burst` |
 
 Each accepted Workspace is timed in three legs on one clock: `api_accepted`
@@ -100,8 +101,15 @@ from the request to the 200, `cluster_synced` from the 200 to its
 WorkloadRunner on the cluster, `pod_created` from the WorkloadRunner to its
 first pod. `ttj`, the time to job, runs from the 200 to the first pod. A
 rejected submission counts in `failed_count` and enters no latency. The pacer
-never fires missed ticks later; when the achieved rate ends more than 10%
-under the target, the section fails and says so.
+never fires missed ticks later; when fewer than 90% of the planned
+submissions were made, the section fails and says so.
+
+## Dashboard
+
+The nightly results are shown at https://dsx-ai-factory.github.io/run-ai/flowmark/: a
+table of runs and a trend chart per scenario and KPI, with the SLO line, the
+flagged nights and the control plane build of every point. The page lives in
+`dashboard/` and is described in [dashboard/README.md](dashboard/README.md).
 
 ## Results
 
@@ -109,13 +117,15 @@ Every run writes `reports/results-<timestamp>.json` and adds it to
 `reports/manifest.json`, the ordered list of runs. The file holds run
 metadata (start time, provider, cluster type, versions) and one
 section per scenario. A `scale-burst` section has `p50_ms@N`, `p90_ms@N`,
-`p99_ms@N`, `mean_ms@N`, `max_ms@N` and `throughput_per_sec@N`, `N` being the
+`p99_ms@N` and `throughput_per_sec@N`, `N` being the
 round size; `throughput_per_sec@N` is the number
 of arrived workloads divided by the time from the first create response to
 the last arrival. A `load-ttj` section has `<span>_p50_ms`,
 `<span>_p90_ms` and `<span>_p99_ms` for `api_accepted`, `cluster_synced`,
 `pod_created` and `ttj`, plus `failed_count`, the creates the control plane
-rejected; the accepted ones are still timed. A workload that never reached
+rejected; the accepted ones are still timed. `planned_count` and
+`submitted_count` show how much of the schedule the pacer got out, which is
+the ceiling reading when `minSubmittedPercent` is 0. A workload that never reached
 the cluster fails the section, is counted in `error` and never enters a
 latency as zero. The health of
 the measurement itself is not a metric: when the cluster watch had to be
@@ -132,9 +142,9 @@ median is a regression. Runs where the scenario did not run or its section
 failed do not count, an earlier file that cannot be read is skipped and named
 in the log, and with fewer than 7 values the comparison is skipped.
 Against the SLO: the limits from the scenario file are copied into the
-section's `slo` block, and every latency metric with a limit there, p90 or
-not, is a regression when above it, regardless of history. Prefer `p90_ms` or `p99_ms` for SLOs: `max_ms` is the single slowest
-workload of the night, so one unlucky pod makes it fire. A flagged metric gets
+section's `slo` block, and every metric with a limit there, p90 or not, is a
+regression when it misses it, above a latency limit or below a throughput
+floor, regardless of history. A flagged metric gets
 a sibling `<metric>_regression: true`, `regression_detected` at the top of the
 file becomes true, and `regressions` lists every finding with a ready-made
 message, for example "training-burst p90_ms@100: 5900 ms is +18% over the

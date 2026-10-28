@@ -126,7 +126,7 @@ The runai-cluster chart configures these scheduling subcharts:
 
 #### KRM and kai-scheduler CRDs
 
-The script applies nothing by hand. Both charts ship their CRDs in their own `crds/` directory, which Helm applies for subcharts, and each carries a crd-upgrader hook for the upgrade path. If a placeholder subchart was installed (see below), the CRDs are missing along with everything else.
+The script applies nothing by hand. Both charts ship their CRDs in their own `crds/` directory, which Helm applies for subcharts, and each carries a crd-upgrader hook for the upgrade path.
 
 #### Scale-Adjust Namespace
 
@@ -136,13 +136,11 @@ Enabling `kai-resource-management` triggers creation of the `runai-scale-adjust`
 
 Before installing, the script reconciles `charts/` against `Chart.yaml`, since Helm needs a subchart present for every declared dependency and `charts/*.tgz` is gitignored (a fresh clone has none):
 
-1. **Prune** — deletes any tarball that no longer matches a declared dependency. Helm loads *every* tarball in `charts/`, so a leftover from a previous version bump would make the resolved subchart ambiguous, and a tarball for a removed dependency would render with no condition to gate it.
-2. **Fetch** — runs `helm dependency build` to pull the real subcharts. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/workload-map/karta`) and need no credentials.
-3. **Fall back** — if the fetch fails (offline, registry down), generates a minimal placeholder so the install can still proceed, and warns that the subchart will be empty.
+1. **Check** — runs `helm dependency list`. Helm compares `charts/` against `Chart.yaml` itself, so a dependency may use any version constraint Helm supports (`0.2.6`, `~0.18.0`, `^1.2`, `>=1.0 <2.0`). Anything not `ok` (missing, wrong version, too many matches) or a tarball `Chart.yaml` does not declare triggers a fetch. Helm loads *every* tarball in `charts/`, so a leftover from a removed dependency would otherwise render with no condition to gate it.
+2. **Fetch** — runs `helm dependency update`, which resolves version ranges, pulls the real subcharts and replaces outdated or undeclared tarballs. Both come from public OCI registries (`ghcr.io/kai-scheduler`, `ghcr.io/dsx-ai-factory/workload-map/karta`) and need no credentials.
+3. **Fail** — if a dependency is still not satisfied (offline, registry down, no version matches the constraint), the script stops with the Helm error instead of installing a chart with an empty scheduler.
 
-Names and versions are read from `Chart.yaml`, so bumping a dependency cannot leave the script stale.
-
-> **If you see the placeholder warning,** `kai-resource-management` and `karta` will be enabled but deploy nothing — Helm matches dependencies by name only, so a placeholder satisfies the check and the subchart installs empty. Re-run once you have network access, or fetch manually with `helm dependency build runai-cluster/cluster/runai-chart`. See [Known Issues](#known-issues).
+Empty placeholder tarballs left in `charts/` by older versions of the script are removed first, so the real charts are fetched.
 
 ---
 
@@ -431,24 +429,22 @@ Images are pushed to the local `kind-registry` container and referenced as `loca
 
 ### No KRM / kai-scheduler / karta Pods After Deploy
 
-The script fetches these subcharts automatically, but if the fetch failed it falls back to an empty placeholder and the scheduler silently deploys nothing. Look for this in the output:
+The script stops before installing the chart if it cannot fetch these subcharts:
 
 ```
-[warn]   Could not fetch kai-resource-management@<version> — installing an EMPTY placeholder.
+ERROR: runai-cluster chart dependencies are not satisfied (see above and the helm output). ...
 ```
 
-The version comes from `Chart.yaml`, so it moves as that pin moves. Confirm by size: a real chart is tens of KB, a placeholder a few hundred bytes:
+The Helm error above it says why (no network, registry down, no version matching the constraint in `Chart.yaml`). Check what Helm sees in `charts/`; every dependency should be `ok`:
 
 ```bash
-ls -l runai-cluster/cluster/runai-chart/charts/*.tgz
-# kai-resource-management-v<version>.tgz  ~140 KB   real  (bundles kai-scheduler)
-# karta-<version>.tgz                      ~13 KB   real
+helm dependency list runai-cluster/cluster/runai-chart
 ```
 
-Fix by fetching manually, then redeploying just the chart:
+Fix the cause, fetch manually, then redeploy just the chart:
 
 ```bash
-helm dependency build runai-cluster/cluster/runai-chart
+helm dependency update runai-cluster/cluster/runai-chart
 ./local-dev.sh --skip-build --skip-cluster
 ```
 
@@ -466,7 +462,7 @@ With the real charts you should see these pods:
 kubectl get pods -n runai | grep -E 'kai|karta'
 ```
 
-Historically this was a hard failure rather than a fallback: the placeholder versions were hardcoded in `local-dev.sh` and drifted from `Chart.yaml` (which moved to kai-scheduler `v0.16.8` and karta `0.2.1`, and dropped `runai-engine` entirely), so every fresh clone got empty subcharts. The script now derives names and versions from `Chart.yaml`.
+Earlier versions of the script installed an empty placeholder subchart when the fetch failed, so the scheduler silently deployed nothing; they also could not handle a version range in `Chart.yaml` ([#2716](https://github.com/dsx-ai-factory/run-ai/issues/2716)).
 
 ### Go Build Failures After an OSS Re-Export
 

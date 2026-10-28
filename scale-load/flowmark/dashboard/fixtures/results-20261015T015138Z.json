@@ -1,0 +1,99 @@
+{
+  "schema": "v1",
+  "metadata": {
+    "date": "2026-10-15T01:51:38.383927593Z",
+    "finished_at": "2026-10-15T02:19:02.381298356Z",
+    "provider": "ci",
+    "cluster_type": "vanilla-fake-gpu",
+    "control_plane_version": "0.0.0-30005121.main-f056749",
+    "cluster_version": "0.0.0-30005074.main-0284623"
+  },
+  "regression_detected": true,
+  "regressions": [
+    {
+      "section": "workspace-ttj",
+      "metric": "pod_created_p90_ms",
+      "message": "workspace-ttj pod_created_p90_ms: 3040 ms is over the SLO of 3000 ms"
+    }
+  ],
+  "sections": {
+    "training-burst": {
+      "category": "scale",
+      "metrics": {
+        "p50_ms@100": 4081,
+        "p50_ms@250": 4635,
+        "p50_ms@500": 4199,
+        "p90_ms@100": 8557,
+        "p90_ms@250": 8931,
+        "p90_ms@500": 8330,
+        "p99_ms@100": 9538,
+        "p99_ms@250": 10229,
+        "p99_ms@500": 10136,
+        "throughput_per_sec@100": 6.060244769381013,
+        "throughput_per_sec@250": 5.422524246097217,
+        "throughput_per_sec@500": 5.1692134093414515,
+        "workload_type": "Training"
+      },
+      "slo": {
+        "p90_ms": 10000,
+        "p90_ms@250": 50000,
+        "p90_ms@500": 200000,
+        "throughput_per_sec": 4
+      },
+      "failed": false
+    },
+    "workspace-burst": {
+      "category": "scale",
+      "metrics": {
+        "p50_ms@100": 4519,
+        "p50_ms@250": 3737,
+        "p50_ms@500": 4203,
+        "p90_ms@100": 7956,
+        "p90_ms@250": 8336,
+        "p90_ms@500": 8035,
+        "p99_ms@100": 9486,
+        "p99_ms@250": 10002,
+        "p99_ms@500": 10236,
+        "throughput_per_sec@100": 5.672128231847626,
+        "throughput_per_sec@250": 5.490535525144653,
+        "throughput_per_sec@500": 5.444588225686866,
+        "workload_type": "Workspace"
+      },
+      "slo": {
+        "p90_ms": 10000,
+        "p90_ms@250": 50000,
+        "p90_ms@500": 200000,
+        "throughput_per_sec": 4
+      },
+      "failed": false
+    },
+    "workspace-ttj": {
+      "category": "load",
+      "metrics": {
+        "api_accepted_p50_ms": 130,
+        "api_accepted_p90_ms": 147,
+        "api_accepted_p99_ms": 194,
+        "cluster_synced_p50_ms": 5071,
+        "cluster_synced_p90_ms": 9166,
+        "cluster_synced_p99_ms": 9992,
+        "failed_count": 0,
+        "pod_created_p50_ms": 1108,
+        "pod_created_p90_ms": 3040,
+        "pod_created_p90_ms_regression": true,
+        "pod_created_p99_ms": 3791,
+        "ttj_p50_ms": 6512,
+        "ttj_p90_ms": 10268,
+        "ttj_p99_ms": 11492,
+        "workload_type": "Workspace"
+      },
+      "slo": {
+        "api_accepted_p90_ms": 500,
+        "cluster_synced_p90_ms": 10000,
+        "failed_count": 2,
+        "pod_created_p90_ms": 3000,
+        "ttj_p90_ms": 12000
+      },
+      "failed": false
+    }
+  }
+}

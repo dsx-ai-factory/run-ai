@@ -6,12 +6,15 @@
 package displayer
 
 import (
+	"fmt"
+
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/ui/field"
 )
 
 // Type definitions
 type Compute struct {
+	GPUComputeMode     *string            `json:"gpuComputeMode,omitempty" yaml:"gpucomputemode,omitempty"`
 	RequestedResources ComputeResources   `json:"requestedResources"`
 	AllocatedResources AllocatedResources `json:"allocatedResources"`
 	RequestedNodePools []string           `json:"requestedNodePools,omitempty"`
@@ -57,6 +60,12 @@ func NewComputeSection(compute Compute) *Section {
 
 func (c *ComputeDisplayer) Subject() string {
 	return TitleCompute
+}
+
+func (c *ComputeDisplayer) DisplayBeforeTable(indent string) {
+	if mode := field.StringOrEmpty(c.compute.GPUComputeMode); mode != "" {
+		fmt.Printf("%s%-*s %s\n", indent, GeneralAndRuntimeColumnPadding, FieldGPUComputeMode+":", mode) //nolint:forbidigo
+	}
 }
 
 func (c *ComputeDisplayer) Columns() []table.Column {

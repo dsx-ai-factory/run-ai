@@ -113,8 +113,8 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 					{
 						Name:  "GODEBUG",
 						Value: outils.FipsGodebugValue(d.runaiConfig, "off"),
-          },
-          {
+					},
+					{
 						Name:  "CREATE_SERVICE_MONITORS",
 						Value: strconv.FormatBool(*projectControllerConfig.CreateServiceMonitors),
 					},

@@ -6,6 +6,7 @@
 package displayer_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -99,6 +100,41 @@ var _ = Describe("ComputeBuilder", func() {
 })
 
 var _ = Describe("BuildComputeFromSpec", func() {
+	DescribeTable("reads memory aliases without changing existing resource units",
+		func(input string) {
+			var spec openapi.WorkspaceSpecSpecAllOfCompute
+			Expect(json.Unmarshal([]byte(input), &spec)).To(Succeed())
+			compute := displayer.BuildComputeFromSpec(&spec)
+			Expect(compute.RequestedResources.GPUCompute.Requested).To(Equal(0.5))
+			Expect(compute.RequestedResources.GPUCompute.Limit).To(Equal(openapi.PtrFloat64(0.75)))
+		},
+		Entry("old response", `{"gpuPortionRequest":0.5,"gpuPortionLimit":0.75}`),
+		Entry("new response", `{"gpuMemoryPortionRequest":0.5,"gpuMemoryPortionLimit":0.75}`),
+		Entry("dual response", `{"gpuPortionRequest":0.5,"gpuPortionLimit":0.75,"gpuMemoryPortionRequest":0.5,"gpuMemoryPortionLimit":0.75}`),
+		Entry("multiple devices", `{"gpuDevicesRequest":2,"gpuMemoryPortionRequest":0.25,"gpuMemoryPortionLimit":0.375}`),
+	)
+
+	DescribeTable("includes a mode only when returned by the API",
+		func(input, expected string) {
+			var spec openapi.WorkspaceSpecSpecAllOfCompute
+			Expect(json.Unmarshal([]byte(input), &spec)).To(Succeed())
+			compute := displayer.BuildComputeFromSpec(&spec)
+			payload, err := json.Marshal(compute)
+			Expect(err).NotTo(HaveOccurred())
+			if expected == "" {
+				Expect(compute.GPUComputeMode).To(BeNil())
+				Expect(string(payload)).NotTo(ContainSubstring("gpuComputeMode"))
+			} else {
+				Expect(compute.GPUComputeMode).To(Equal(openapi.PtrString(expected)))
+				Expect(string(payload)).To(ContainSubstring(`"gpuComputeMode":"` + expected + `"`))
+			}
+		},
+		Entry("omitted", `{}`, ""),
+		Entry("null", `{"gpuComputeMode":null}`, ""),
+		Entry("time slicing", `{"gpuComputeMode":"time-slicing"}`, "time-slicing"),
+		Entry("SM sharing", `{"gpuComputeMode":"sm-sharing"}`, "sm-sharing"),
+	)
+
 	It("maps every displayed request and limit field", func() {
 		spec := openapi.NewWorkspaceSpecSpecAllOfCompute()
 		spec.SetGpuPortionRequest(0.5)

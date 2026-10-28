@@ -863,6 +863,61 @@
         }
       }
     },
+    "/api/v1/k8s-objects/resource-claim-templates/{AssetId}/workloads": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/AssetId"
+        }
+      ],
+      "get": {
+        "summary": "List the workloads using a resource claim template.",
+        "description": "Use to list the workloads whose pods currently reference the resource claim template, with the pods that use it and the ResourceClaim each pod is bound to. Only workloads the caller is permitted to read are returned.",
+        "operationId": "get_rct_workloads",
+        "x-authorize": {
+          "resource-type": "resource-claim-templates",
+          "action": "read"
+        },
+        "x-service": "assets-service",
+        "x-test-coverage": [
+          "control-plane/assets-service/pkg/services/api_rct_service_test.go"
+        ],
+        "tags": [
+          "Resource Claim Templates"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/Offset"
+          },
+          {
+            "$ref": "#/components/parameters/Limit"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Request completed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResourceClaimTemplateWorkloadsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/k8s-objects/updates": {
       "post": {
         "summary": "Allow cluster to request a list of k8sObjects updates that needs to be synced to the cluster and to send success/failure about the result of previous sync.",
@@ -8321,15 +8376,14 @@
         "nullable": true
       },
       "GpuComputeMode": {
-        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.",
+        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.",
         "type": "string",
         "minLength": 1,
         "enum": [
           "time-slicing",
           "sm-sharing"
         ],
-        "nullable": true,
-        "x-gorm-ignore": true
+        "nullable": true
       },
       "GpuDevicesRequest": {
         "description": "Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.",
@@ -8774,6 +8828,113 @@
           },
           "spec": {
             "$ref": "#/components/schemas/RctSpec"
+          }
+        }
+      },
+      "ReportedWorkloadType": {
+        "description": "The type of the workload. Any workload type the cluster reports, not only the NVIDIA Run:ai native ones.",
+        "type": "string",
+        "example": "Training"
+      },
+      "ProjectId": {
+        "description": "The id of the project.",
+        "type": "string",
+        "example": 1,
+        "pattern": ".*"
+      },
+      "PodResourceClaimBinding": {
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.",
+            "example": "gpu-1"
+          },
+          "claimName": {
+            "type": "string",
+            "nullable": true,
+            "description": "Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.",
+            "example": "bert-worker-0-gpu-1-mk4s8"
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkloadPod": {
+        "type": "object",
+        "required": [
+          "podId",
+          "podName",
+          "resourceClaims"
+        ],
+        "properties": {
+          "podId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "The id of the pod."
+          },
+          "podName": {
+            "type": "string",
+            "example": "bert-worker-0"
+          },
+          "resourceClaims": {
+            "type": "array",
+            "description": "The pod's claims that were generated from the resource claim template. A pod usually has one, but may list several when more than one of its claim entries references the same template.",
+            "items": {
+              "$ref": "#/components/schemas/PodResourceClaimBinding"
+            }
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkload": {
+        "type": "object",
+        "required": [
+          "workloadId",
+          "name",
+          "type",
+          "projectId",
+          "pods"
+        ],
+        "properties": {
+          "workloadId": {
+            "$ref": "#/components/schemas/WorkloadId"
+          },
+          "name": {
+            "$ref": "#/components/schemas/WorkloadName"
+          },
+          "type": {
+            "$ref": "#/components/schemas/ReportedWorkloadType"
+          },
+          "projectId": {
+            "$ref": "#/components/schemas/ProjectId"
+          },
+          "pods": {
+            "type": "array",
+            "description": "The pods of the workload that reference the resource claim template.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplateWorkloadPod"
+            }
+          }
+        }
+      },
+      "ResourceClaimTemplateWorkloadsResponse": {
+        "type": "object",
+        "required": [
+          "workloads"
+        ],
+        "properties": {
+          "next": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Offset for the next page of results. Present only when there are more workloads beyond the current page (i.e., the number of returned workloads equals the limit).\n"
+          },
+          "workloads": {
+            "type": "array",
+            "description": "The workloads whose pods currently reference the resource claim template.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceClaimTemplateWorkload"
+            }
           }
         }
       },
@@ -12033,7 +12194,7 @@
         "nullable": true
       },
       "Preemptibility": {
-        "description": "Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.",
+        "description": "Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.",
         "type": "string",
         "minLength": 1,
         "enum": [
@@ -13083,12 +13244,6 @@
             "$ref": "#/components/schemas/ComplianceIssuesV2"
           }
         ]
-      },
-      "ProjectId": {
-        "description": "The id of the project.",
-        "type": "string",
-        "example": 1,
-        "pattern": ".*"
       },
       "DepartmentId": {
         "description": "The id of the department.",

@@ -69,6 +69,10 @@ func registerConfigs() error {
 		return fmt.Errorf("failed to register async cluster delete configuration: %v", err)
 	}
 
+	if err := config.Register[*EditableNodepoolCapabilities](); err != nil {
+		return fmt.Errorf("failed to register editable nodepool capabilities configuration: %v", err)
+	}
+
 	if err := config.Register[*ApplicationMetricStore](); err != nil {
 		return fmt.Errorf("failed to register application metric store configuration: %v", err)
 	}

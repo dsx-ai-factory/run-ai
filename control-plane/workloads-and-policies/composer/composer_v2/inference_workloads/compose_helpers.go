@@ -13,6 +13,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/init_containers"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/itemized"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -50,6 +51,11 @@ func (itc *InferenceToKnativeComposer) processComputeFields(
 		if src == nil {
 			return nil
 		}
+		canonical, err := gpucompat.NormalizeLegacyWorkloadCompute(src)
+		if err != nil {
+			return workloadsApi.NewError(http.StatusBadRequest, err.Error())
+		}
+		src = canonical
 
 		container := &target.Service.Spec.Template.Spec.Containers[0]
 		podMeta := &target.Service.Spec.Template.ObjectMeta
@@ -63,7 +69,7 @@ func (itc *InferenceToKnativeComposer) processComputeFields(
 			itc.fc.ComposeCpuMemoryLimit(src.CpuMemoryLimit.Get(), src.CpuMemoryRequest.Get(), &container.Resources.Limits, composer.StringToK8sResourceList, composer.ResourceMemory),
 
 			itc.fc.ComposeGpuRequestsAndLimits(ctx, src.GpuDevicesRequest.Get(), src.GpuRequestType.Get(),
-				src.GpuPortionRequest.Get(), src.GpuPortionLimit.Get(),
+				src.GpuMemoryPortionRequest.Get(), src.GpuMemoryPortionLimit.Get(),
 				src.GpuMemoryRequest.Get(), src.GpuMemoryLimit.Get(), composer.WholeGpusToK8sResources,
 				&container.Resources, nil, &sizingInfo),
 		)
@@ -76,6 +82,7 @@ func (itc *InferenceToKnativeComposer) processComputeFields(
 			// GPU memory/portion limit is written either as the legacy env var (< 3.0
 			// clusters) or as the per-container CUDA/KAI annotations (>= 3.0). The
 			// two pairs are mutually exclusive at the compose helper level.
+			itc.fc.ComposeGpuComputeMode(composer.EnumToString(src.GpuComputeMode.Get()), &sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
 			itc.fc.ComposeMemoryLimitEnv(&sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuMemoryLimitEnvVar),
 			itc.fc.ComposePortionLimitEnv(&sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuPortionLimitEnvVar),
 			itc.fc.ComposeMemoryLimitAnnotation(&sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),

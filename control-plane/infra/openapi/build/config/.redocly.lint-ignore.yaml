@@ -12,6 +12,7 @@
     - '#/paths/~1api~1v1~1workloads~1distributed-inferences~1updates'
     - '#/paths/~1api~1v1~1workloads~1{workloadId}~1elements'
     - '#/paths/~1api~1v1~1workloads~1{workloadId}~1elements~1count'
+    - '#/paths/~1api~1v1~1workloads~1{workloadId}~1resource-claims'
     - '#/paths/~1api~1v1~1datavolumes~1settings~1{key}'
     - '#/paths/~1api~1v1~1workloads~1settings~1{key}'
     - '#/paths/~1api~1v1~1clusters~1settings~1{key}'

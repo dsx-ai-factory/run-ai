@@ -2204,7 +2204,7 @@ clusterService:
         # Inclusive
         # Defaults to the chart's app version
         max: ''
-      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai
+      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai-oss
       helmRegistryUsername: ''
       helmRegistryPasswordPlaceholder: ''
     maxWaitForClusterRemoteConfigStatusUpdate: 5m
@@ -2953,12 +2953,6 @@ traefik:
     interval: 30s
     scrapeTimeout: 30s
 
-# When set, /api/docs and /redoc/* paths redirect to this external URL (used in SaaS).
-# Leave empty for self-hosted (no API docs endpoint served).
-redoc:
-  docsSite:
-    url: ""
-
 # When enabled, the chart fails to render if the release namespace is not labeled
 # istio-injection=disabled. Run the following before installing/upgrading:
 #   kubectl label namespace <release-namespace> istio-injection=disabled
@@ -3317,6 +3311,7 @@ workloads:
     # (CHART_RETENTION_MINUTES). Charts referenced by an already-deployed application
     # are removed regardless; this bounds abandoned/unclaimed uploads. Default 24h.
     chartRetentionMinutes: 1440
+    chartInspectionCacheTTLSeconds: 600
     server:
       writeTimeout: 2m
       readTimeout: 2m

@@ -289,11 +289,6 @@ func nimServiceContainerItemSelectorDefs() []SystemItemSel {
 			Query:    `((.resources.limits // {}) | to_entries[]) | select(.key == $ARGS.named.resourceLimitKey)`,
 			ArgsInfo: map[string]api.MappingFieldType{"resourceLimitKey": api.MAPPINGFIELDTYPE_STRING},
 		},
-		{
-			Name:  "allResourceClaims",
-			Desc:  "all device resource claims",
-			Query: `(.resources.claims // [])[]`,
-		},
 	}
 }
 
@@ -310,7 +305,6 @@ func nimServiceContainerFgFields() []SystemFgField {
 	selectorsEnvVarFromResource := []string{"envVarFromResource"}
 	selectorsResourceRequests := []string{"allResourceRequests", "resourceRequestByKey"}
 	selectorsResourceLimits := []string{"allResourceLimits", "resourceLimitByKey"}
-	selectorsResourceClaims := []string{"allResourceClaims"}
 
 	return []SystemFgField{
 		////////////////////////////////////////////////////////
@@ -453,21 +447,6 @@ func nimServiceContainerFgFields() []SystemFgField {
 			SpecRef:       convutils.Ref("value"),
 			Type:          api.MAPPINGFIELDTYPE_QUANTITY,
 			ItemSelectors: selectorsResourceLimits,
-		},
-		{Name: "resourceClaims", Formatter: podSpec, Type: api.MAPPINGFIELDTYPE_OBJECT},
-		{
-			Name:          "resourceClaims-Name",
-			Formatter:     keyValue,
-			SpecRef:       convutils.Ref("name"),
-			Type:          api.MAPPINGFIELDTYPE_STRING,
-			ItemSelectors: selectorsResourceClaims,
-		},
-		{
-			Name:          "resourceClaims-Request",
-			Formatter:     keyValue,
-			SpecRef:       convutils.Ref("request"),
-			Type:          api.MAPPINGFIELDTYPE_STRING,
-			ItemSelectors: selectorsResourceClaims,
 		},
 	}
 }

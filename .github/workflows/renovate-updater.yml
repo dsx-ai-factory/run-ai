@@ -16,9 +16,14 @@ permissions:
 jobs:
   renovate-pr-updater:
     name: Renovate PR Updater
+    # The branch name alone is not proof of a Renovate PR: anyone with write access
+    # can push a renovate/* branch. Require the Renovate bot to have opened the PR
+    # and to be the one triggering this event (pushes by others are not approved).
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
-      startsWith(github.head_ref, 'renovate/')
+      startsWith(github.head_ref, 'renovate/') &&
+      github.event.pull_request.user.login == 'devops-runai' &&
+      github.event.sender.login == 'devops-runai'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -31,5 +36,25 @@ jobs:
           
       - name: Enable Pull Request review
         run: gh pr review ${{ github.event.pull_request.number }} --approve
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_HUB_APPROVER_TOKEN }}
+
+  # Stale approvals are not dismissed on push, so the bot's earlier approval would
+  # still auto-merge commits someone else pushes to a Renovate PR. Turn auto-merge
+  # off instead; a person then has to merge it.
+  renovate-pr-external-push:
+    name: Disable automerge after a non-Renovate push
+    if: >-
+      github.event.action == 'synchronize' &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.head_ref, 'renovate/') &&
+      github.event.pull_request.user.login == 'devops-runai' &&
+      github.event.sender.login != 'devops-runai'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disable Pull Request Automerge
+        run: |
+          gh pr merge ${{ github.event.pull_request.number }} --disable-auto --repo ${{ github.repository }} \
+            || echo "Auto-merge was not enabled on this PR"
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_HUB_APPROVER_TOKEN }}

@@ -603,6 +603,57 @@ func (w *WorkloadsDao) DbGetWorkloads(
 	return workloads, nil
 }
 
+// DbGetWorkloadsSlim lists the active workloads from the workloads table instead of the view, sorted by id ascending:
+// only the WorkloadSlim columns, without pod aggregates, and including workloads created after the last materialized
+// view refresh.
+func (w *WorkloadsDao) DbGetWorkloadsSlim(
+	ctx context.Context,
+	tenantId uint,
+	permittedScopes *openapi.PermittedScopes,
+	offset int32,
+	limit int32,
+	filterBy []queryapi.Filter,
+) (*[]models.WorkloadSlim, *api.Error) {
+	dbErr := api.NewError(http.StatusInternalServerError, "Failed to list workloads", nil)
+
+	tx := runaidb.DB().WithContext(ctx)
+
+	workloads := &[]models.WorkloadSlim{}
+
+	query := tx.
+		Table(WorkloadsTableName).
+		Select("id, name, type, project_name, cluster_id, distributed_framework").
+		Where("tenant_id = ?", tenantId).
+		Where("deleted_at IS NULL")
+
+	if permittedScopes != nil {
+		if permittedScopes.System == nil || !*permittedScopes.System {
+			query = query.Where(getPermittedScopesFilter(*permittedScopes))
+		}
+	}
+
+	query = query.WithEnricher(querydbenrich.Filters(filterBy))
+
+	// a plain "id ASC" is served by the primary key index; FormatSortClause adds NULLS FIRST, which forces a full sort
+	query = query.Order("id ASC")
+
+	if offset != 0 {
+		query = query.Offset(int(offset))
+	}
+
+	if limit != 0 {
+		query = query.Limit(int(limit))
+	}
+
+	err := query.Find(workloads)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to list slim workloads, err: %v", err)
+		return &[]models.WorkloadSlim{}, dbErr.WithDetails(err)
+	}
+
+	return workloads, nil
+}
+
 func (w *WorkloadsDao) DbSyncWorkloads(
 	ctx context.Context,
 	tenantId uint,
@@ -1046,6 +1097,29 @@ func (w *WorkloadsDao) DbGetWorkloadClusterId(ctx context.Context, tenantId uint
 	}
 
 	return workload.ClusterID, nil
+}
+
+// DbGetWorkloadScope returns only the cluster, project, department and namespace of a live
+// workload, reading the workloads table rather than workloads_view to skip its pod aggregates.
+// A deleted workload is reported as not found.
+func (w *WorkloadsDao) DbGetWorkloadScope(ctx context.Context, tenantId uint, workloadId uuid.UUID) (*models.Workload, *api.Error) {
+	dbErr := api.NewError(http.StatusInternalServerError, fmt.Sprintf("Failed to get workload %s", workloadId), nil)
+
+	workload := &models.Workload{}
+	err := runaidb.DB().WithContext(ctx).
+		Table(WorkloadsTableName).
+		Select("cluster_id, project_id, department_id, namespace").
+		Where("tenant_id = ?", tenantId).
+		Where("id = ?", workloadId).
+		First(workload)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get workload %s, err: %v", workloadId, err)
+		}
+		return nil, dbErr.WithDetails(err)
+	}
+
+	return workload, nil
 }
 
 // GetWorkloadFromDb returns the workload from the db

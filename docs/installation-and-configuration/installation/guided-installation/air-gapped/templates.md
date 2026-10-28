@@ -259,33 +259,24 @@ controlPlane:
     keyPath: /path/to/cp-key.pem
   customHelmValues:
     supportEntitled: true # Support-Entitled Release only
-    global:
-      fipsMode: only
-      postgresql:
-        auth:
-          host: <POSTGRESQL_HOST>
-          port: <POSTGRESQL_PORT>
-          database: <DATABASE_NAME>
-          username: <ROLE_NAME>
-          password: <ROLE_PASSWORD> # Or use existingSecret
-          postgresPassword: <ANY_VALUE> # Required, not used with an external instance
-          dbSslMode: <SSL_MODE>
-    postgresql:
-      enabled: false
-    keycloakx:
-      securityContext:
-        runAsUser: 65532
-      command:
-        - /bin/sh
-        - -c
-        - |
-          KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)" \
-          KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)" \
-          exec /opt/keycloak/bin/kc.sh start \
-            --features=token-exchange,admin-fine-grained-authz:v1,fips
-    nats:
-      command:
-        - /nats-server
+    global.fipsMode: only
+    global.postgresql.auth.host: <POSTGRESQL_HOST>
+    global.postgresql.auth.port: <POSTGRESQL_PORT>
+    global.postgresql.auth.database: <DATABASE_NAME>
+    global.postgresql.auth.username: <ROLE_NAME>
+    global.postgresql.auth.password: <ROLE_PASSWORD> # Or use existingSecret
+    global.postgresql.auth.postgresPassword: <ANY_VALUE> # Required, not used with an external instance
+    global.postgresql.auth.dbSslMode: <SSL_MODE>
+    postgresql.enabled: false
+    keycloakx.securityContext.runAsUser: 65532
+    keycloakx.command[0]: /bin/sh
+    keycloakx.command[1]: -c
+    keycloakx.command[2]: >-
+      KC_BOOTSTRAP_ADMIN_USERNAME="$(cat /run/secrets/keycloak/admin-username)"
+      KC_BOOTSTRAP_ADMIN_PASSWORD="$(cat /run/secrets/keycloak/admin-password)"
+      exec /opt/keycloak/bin/kc.sh start
+      --features=token-exchange\,admin-fine-grained-authz:v1\,fips
+    nats.command[0]: /nats-server
 
 cluster:
   enabled: true
@@ -294,8 +285,7 @@ cluster:
     certPath: /path/to/cluster-cert.pem
     keyPath: /path/to/cluster-key.pem
   customHelmValues:
-    global:
-      fipsMode: only
+    global.fipsMode: only
 
 prerequisites:
   gpuOperator:

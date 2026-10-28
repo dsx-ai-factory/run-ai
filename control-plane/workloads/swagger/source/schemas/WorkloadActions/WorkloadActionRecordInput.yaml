@@ -1,0 +1,15 @@
+type: object
+required: [id, clusterId, workloadId, workloadName, action, acceptedAt]
+properties:
+  id:
+    $ref: './WorkloadActionId.yaml'
+  clusterId:
+    $ref: '../../../../../infra/openapi/docs/schemas/scopes/ClusterId.yaml'
+  workloadId:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/WorkloadId.yaml'
+  workloadName:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads/WorkloadName.yaml'
+  action:
+    $ref: './WorkloadActionType.yaml'
+  acceptedAt:
+    $ref: './WorkloadActionAcceptedAt.yaml'

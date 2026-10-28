@@ -18,8 +18,6 @@ type Summary struct {
 	P50               time.Duration
 	P90               time.Duration
 	P99               time.Duration
-	Mean              time.Duration
-	Max               time.Duration
 	Makespan          time.Duration
 	Throughput        float64
 }
@@ -55,13 +53,6 @@ func Stats(timings []Timing) Summary {
 	summary.P50 = percentile(durations, 50)
 	summary.P90 = percentile(durations, 90)
 	summary.P99 = percentile(durations, 99)
-	summary.Max = durations[len(durations)-1]
-
-	var sum time.Duration
-	for _, d := range durations {
-		sum += d
-	}
-	summary.Mean = sum / time.Duration(len(durations))
 
 	summary.Makespan = max(last.Sub(first), 0)
 	if summary.HasThroughput() {

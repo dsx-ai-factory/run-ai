@@ -134,6 +134,12 @@ type Pod struct {
 	Elements *[]PodElement `json:"elements,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ResourceClaims *[]PodResourceClaim `json:"resourceClaims,omitempty"`
+	ResourceClaims *[]PodResourceClaim `json:"resourceClaims,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// The id of the tenant.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//TenantId int32 `json:"tenantId"`
@@ -213,6 +219,13 @@ func AssertPodRequired(obj Pod) error {
 	if obj.Elements != nil {
 		for _, el := range *obj.Elements {
 			if err := AssertPodElementRequired(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.ResourceClaims != nil {
+		for _, el := range *obj.ResourceClaims {
+			if err := AssertPodResourceClaimRequired(el); err != nil {
 				return err
 			}
 		}
@@ -353,6 +366,18 @@ func AssertPodConstraints(obj Pod) error {
 	if obj.Elements != nil {
 		for _, el := range *obj.Elements {
 			if err := AssertPodElementConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ResourceClaims != nil {
+		for _, el := range *obj.ResourceClaims {
+			if err := AssertPodResourceClaimConstraints(el); err != nil {
 				return err
 			}
 		}

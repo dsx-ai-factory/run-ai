@@ -1,11 +1,11 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb
 
-go 1.27.2
+go 1.27.3
 
 require (
-	github.com/aws/smithy-go v1.28.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.18
+	github.com/aws/smithy-go v1.28.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
 	github.com/stretchr/testify v1.12.1
 	github.com/testcontainers/testcontainers-go v0.44.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0
@@ -25,10 +25,10 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/ebitengine/purego v0.11.1 // indirect
+	github.com/ebitengine/purego v0.11.2 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
-	github.com/gabriel-vasile/mimetype v1.4.15 // indirect
+	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
@@ -74,7 +74,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 )

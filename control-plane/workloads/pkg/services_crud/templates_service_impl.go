@@ -540,6 +540,14 @@ func (ts *TemplatesService) ListTemplatesUnified(ctx context.Context, workloadTy
 		response.Pagination.NextOffset = float32(offsetParam + recordCount)
 	}
 
+	for i, template := range response.Entries {
+		projected, err := legacyCompatibleTemplate(template)
+		if err != nil {
+			return nil, err
+		}
+		response.Entries[i] = projected
+	}
+
 	return &response, nil
 }
 

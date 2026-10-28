@@ -1,3 +1,5 @@
+
+
 # DRA Management and Submission
 
 ## Table of Contents
@@ -497,11 +499,11 @@ No need to change the `workloads_view` as we do not have this information in the
 | 5 | New asset support — `DeviceClass` validation | DoD 4.3 — reject creation when `deviceClassName` is absent from the cluster's tracked `DeviceClass`es. | Done |
 | 6 | New asset sync + replicate | DoD 5; §3 (Sync and Replication Issues Reporting) — apply to the cluster, replicate to target namespaces, report sync/replication issues to the CP. | Done |
 | 7 | `k8s-objects-tracker` tracks `ResourceClaimTemplate`s (incl. APIs) | DoD 1; §4.2 — managed + unmanaged, storage-class pattern (`v2` read + `v1` sync). | Done |
-| 8 | Submission — anyworkload | DoD 6.1 — reference a template in the `podSpec` - Validation only. | Done |
+| 8 | Submission — anyworkload | DoD 6.1 — reference a template in the `podSpec`. | Done (testing only) |
 | 9 | Submission — native workloads (incl. policies) | DoD 6.2 — DRA field in the native spec; wire through the composer and policy enforcement. | CP blocks deleting a template that is still referenced by native workloads (delete-in-use guard). |
 | 10 | Ensure anyworkload policies model the DRA fields correctly | DoD 6.1 — policy schema/validation covers the `resourceClaims` fields for anyworkloads. | — |
 | 11 | Reject submission if the referenced template is not ready | DoD 6.3 — reject when the referenced template's status is not successful (e.g. not synced/replicated). Applies to anyworkload and native. | — |
-| 12 | `cluster-sync` reports DRA usage | DoD 7; §5 — read `spec.resourceClaims` + `status.resourceClaimStatuses` per pod, add to `PodSyncFields`, persist per-pod usage. | — |
+| 12 | `cluster-sync` reports DRA usage | DoD 7; §5 — read `spec.resourceClaims` + `status.resourceClaimStatuses` per pod, add to `PodSyncFields`, persist per-pod usage. | Done |
 | 13 | Visibility API — workloads of a template (reverse) | DoD 7.1; §5 — `GET /api/v1/k8s-objects/resource-claim-template/{id}/workloads`. | — |
 | 14 | Visibility API — templates of a workload (forward) | DoD 7.2; §5 — `GET /api/v1/workloads/{id}/resource-claims`, incl. standalone claims and the actual `ResourceClaim` binding. | — |
 | 15 | UI — management + visibility screens | §1 — template CRUD + the workload/template usage views. | Need figma. |

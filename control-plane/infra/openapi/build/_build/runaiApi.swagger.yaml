@@ -15,10 +15,6 @@ info:
 
     To get your access token, follow the instructions in [Request a token](/run-ai/self-hosted/reference/rest-api/getting-started/how-to-authenticate-to-the-api#request-an-api-token).
   title: NVIDIA Run:ai
-  x-logo:
-    url: ./runai-logo-api.png
-    altText: NVIDIA Run:ai
-    href: https://run.ai
   license:
     name: NVIDIA Run:ai
     url: https://www.nvidia.com/en-us/agreements/enterprise-software/nvidia-software-license-agreement/
@@ -27,187 +23,64 @@ servers:
 security:
   - bearerAuth: []
 tags:
-  - name: Organizations
-  - name: Authentication and Authorization
-  - name: Audit
-  - name: Datavolumes
-  - name: Workloads
-  - name: Workload assets
-  - name: Policies
-  - name: Notifications
-  - name: AI Applications
   - name: Clusters
-    x-parent: Organizations
-    description: Use these endpoints to create, manage and delete NVIDIA Run:ai Kubernetes clusters.
   - name: Departments
-    x-parent: Organizations
-    description: "Departments, in the hierarchy of resource allocation, are above Projects. A Department can contain multiple Projects, and has its own quotas. \nA Department's quota supersedes the total of the Project quotas in the Department, so tt is recommended \nthat a Department's quota be the total, or more than of all the Project quotas in the Department. \nFor further information see, [Working with Departments](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/departments).\n"
   - name: Reports
-    x-parent: Organizations
   - name: NodePools
-    x-parent: Organizations
-    description: "Node pools assist in managing heterogeneous resources effectively. \nA node pool is a set of nodes grouped into a bucket of resources using a predefined (for example, GPU-Type) or \nadministrator-defined label (for example, key & value). \nFor more information, see [Node Pools](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/resources/node-pools).\n"
   - name: Nodes
-    x-parent: Organizations
-    description: "Nodes are worker machines in Kubernetes and may be either a virtual or a physical machine, depending on the cluster. \nEach Node is managed by the NVIDIA Run:ai control plane. For more information, see [Nodes](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/resources/nodes).\n"
   - name: Projects
-    x-parent: Organizations
-    description: "Projects implement resource allocation policies and create segregation between \ndifferent initiatives. It can represent a team, an individual, or an initiative that \nshares resources or has a specific resources budget (quota). \nSee [Projects](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) \nfor more information.\n"
   - name: Logo
-    x-parent: Organizations
-    description: Use to manage tenant logo files.
   - name: Researcher Command Line Interface
-    x-parent: Organizations
   - name: Researcher Command Line Interface Deprecated
-    x-parent: Organizations
   - name: Network Topologies
-    x-parent: Organizations
-    description: The Network Topologies API enables administrators to reflect the hierarchical network topology connectivity of nodes in a data center, such as racks, blocks, and other organizational units, to improve pod scheduling decisions for communication-intensive AI/ML workloads. To support topology-aware scheduling, this API allows administrators to define a multi-level network topology element using ordered Kubernetes node labels that represent the network connectivity of nodes in the data center. Nodes are labeled with the same key-value pairs labels that represent their location in the data center network. These labels are used by the NVIDIA Run:ai Scheduler to prefer scheduling pods on nodes that are "closer" to each other, minimizing communication overhead and optimizing workload performance.
   - name: Access Keys
-    x-parent: Authentication and Authorization
-    description: |
-      Access Keys allow users to authenticate and interact programmatically with the NVIDIA Run:ai API.
-      Each access key consists of a client ID and secret that can be used to obtain authentication tokens.
-      Access keys can be managed by individual users for their own use, or by administrators for organization-wide access.
-      For more information, see [Access control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).
   - name: Access rules
-    x-parent: Authentication and Authorization
-    description: "Access rules provide user authorization to system resources and entities.\nIt is managed using Role-based access control (RBAC) which is a policy-neutral \naccess control mechanism defined around roles and privileges. \nThe components of RBAC make it simple to manage access to system resources and entities.\nFor more information, see [Access control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).\n"
   - name: Service Accounts
-    x-parent: Authentication and Authorization
-    description: "Service accounts enable programmatic access to the NVIDIA Run:ai API, allowing applications or automated systems to authenticate and interact securely. \nEach service account is associated with an access key which includes a client ID and secret used to generate access token. \nService accounts can be managed organization-wide or with a defined scope.\n"
   - name: Roles
-    x-parent: Authentication and Authorization
-    description: "The Roles API allows administrators to define and manage roles within the NVIDIA Run:ai platform. \nA role represents a collection of permission sets that determine what actions can be performed across NVIDIA Run:ai resources.\nNVIDIA Run:ai provides a list of predefined roles that cover common operational needs, such as managing workloads, projects, or data and storage. \nAdministrators can also use this API to create custom roles by combining specific permission sets to match their organization's access model.\n"
   - name: Tokens
-    x-parent: Authentication and Authorization
-    description: "Use tokens to facilitate authentication to the NVIDIA Run:ai API. \nThe API server must be configured to use the NVIDIA Run:ai identity \nservice to validate authentication tokens.\n"
   - name: Users
-    x-parent: Authentication and Authorization
   - name: Idps
-    x-parent: Authentication and Authorization
   - name: Me
-    x-parent: Authentication and Authorization
-    description: "\"Me\" returns the authenticated user's permissions within the system. \nIt provides a comprehensive view of access rules (roles, subjects and scope) assigned to the current user.\nFor more information see [Access control](/run-ai/self-hosted/documentation/platform-management/authentication/overview).\n"
   - name: Events
-    x-parent: Workloads
-    description: Workload events that occurred while the workload was running. Use to diagnose issue around workload scheduling.
   - name: Pods
-    x-parent: Workloads
-    description: Retrieve data about workload pods from your NVIDIA Run:ai platform.
+  - name: Workloads
   - name: Workloads V2
-    x-parent: Workloads
-    description: |
-      The Workloads V2 API allows you to create, retrieve, and delete workloads that originate from third-party ML frameworks, tools, or the broader Kubernetes ecosystem. These workloads are registered in the platform through the Workload Types API, some are already registered in NVIDIA Run:ai, while others can be added by administrators.
-      Each submission combines the user's Kubernetes manifest with NVIDIA Run:ai scheduling metadata, enabling consistent orchestration, monitoring, and governance. See [Extending workload support](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/workload-types/extending-workload-support) for more details.
   - name: NVIDIA NIM
-    x-parent: Workloads
-    description: |
-      The NVIDIA NIM API provides endpoints to create and manage workloads that deploy NVIDIA Inference Microservices (NIM) through the NIM Operator. These workloads package optimized NVIDIA model servers and run as managed services on the NVIDIA Run:ai platform.
-      Each request includes NVIDIA Run:ai scheduling metadata (for example, project, priority, and category) and a NIM service specification that defines the container image, compute resources, environment variables, storage, and networking configuration. Once submitted, NVIDIA Run:ai handles scheduling, orchestration, and lifecycle management of the NIM service to ensure reliable and efficient model serving.
   - name: Workspaces
-    x-parent: Workloads
-    description: "A Workspace is a simplified tool for researchers to conduct experiments, build AI models, access standard MLOps tools, and collaborate with their peers.\nWorkspaces abstract complex concepts related to running containerized workloads in a Kubernetes environment and are built from predefined setups that include\nnetworking, storage, secrets and other resources. All the setup and configurations for research, including container \nimages, data sets, resource requests, as well as all tools are included. for the research, in a single place. \nIt answers the research needs while ensuring infrastructure owners keep control and allocation efficiency.\nA workspace is associated with a specific NVIDIA Run:ai project and you can have multiple workspaces under a specific project. \nFor more information, see [Workspaces](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-workspaces/running-workspace).\n"
   - name: Trainings
-    x-parent: Workloads
-    description: "Trainings are dedicated workloads that are specifically used for training models. \nThey are by design preemptible workloads because they are used in unattended sessions where the  \nscientists and researchers do not need to be present. These workloads are allowed to utilize \nresources over the project's quota.      \n"
   - name: Inferences
-    x-parent: Workloads
-    description: Inference workloads deploy trained models into a production environment to generate predictions from live data. These workloads are prioritized over Trainings and Workspaces during scheduling. NVIDIA Run:ai Inference workloads support auto-scaling to maintain service-level agreements (SLAs) by dynamically adjusting resources as demand changes.
   - name: Revisions
-    x-parent: Workloads
-    description: Revisions are associated with an inference workload and represent a snapshot of its configuration. A revision is created on each change to the inference workload.
   - name: Distributed
-    x-parent: Workloads
-    description: "Distributed Training, is the ability to split the training of a model among multiple processors. \nIt is often a necessity when multi-GPU training no longer applies; \ntypically when you require more GPUs than exist on a single node. \nEach such split is a pod (see definition above). NVIDIA Run:ai spawns an additional launcher process that manages and \ncoordinates the other worker pods. For more information, see [Distributed training](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/using-training/distributed-training-models).\n"
   - name: Workloads batch
-    x-parent: Workloads
   - name: Workload properties
-    x-parent: Workloads
-    description: |
-      Workload properties define the behavioral and scheduling characteristics of a workload submitted to the NVIDIA Run:ai platform. These properties such as type, category, and priority determine how workloads are classified, monitored, and scheduled.
-      - Type - Defines the functional behavior of a workload, such as training or inference, and serves as the foundation for how it is classified within the platform. Each workload type includes a default category (used for monitoring) and a default priority (used for scheduling within a project).
-      - Category - Represents the role or purpose of a workload, such as  Build, Train, Deploy. Each workload type is assigned a default category to ensure consistent classification across the platform for monitoring purposes. See [Monitor workloads by category](/run-ai/self-hosted/documentation/platform-management/monitor-performance/workload-categories).
-      - Priority - Determines the scheduling order of workloads within a project and whether a workload can be preempted. Higher-priority workloads are scheduled first and may become non-preemptible, preventing interruption by lower-priority workloads. See [Workload priority control](/run-ai/self-hosted/documentation/platform-management/runai-scheduler/scheduling/workload-priority-control).
   - name: Workload templates
-    x-parent: Workloads
-    description: "This set of endpoints manages workload templates used to define reusable workload configurations across various workload types in the NVIDIA Run:ai platform. \nTemplates help standardize workload definitions for consistent submission and resource usage across projects and users.\n"
   - name: Distributed Inferences
-    x-parent: Workloads
-    description: "Distributed inference enables running inference workloads across multiple pods, typically to scale model serving beyond a single container or node. This approach is useful when a single instance cannot meet resource requirements.NVIDIA Run:ai supports this model using Leader Worker Set (LWS). \nEach pod plays a specific role, either as a leader or worker, and together they form a coordinated service. NVIDIA Run:ai manages the orchestration and configuration of these pods to ensure efficient and scalable inference execution\n"
   - name: Permissions
-    x-parent: Authentication and Authorization
-    description: "Permissions define the actions that users can perform on specific resources within the NVIDIA Run:ai platform. \nEach permission consists of a resource type and an allowed action. \nThe Permission Sets API provides a catalog of all available permission sets in the NVIDIA Run:ai platform. \nEach permission set is a predefined collection of permissions that represent the permissions required for a role to perform specific operations. \nPermission sets serve as the building blocks for roles and are used in both NVIDIA Run:ai predefined roles and custom roles defined through the [Roles API](#tag/Roles).\n"
   - name: Settings
-    x-parent: Organizations
-    description: |
-      View and manage configuration settings for your organization.
   - name: Org unit
-    x-parent: Authentication and Authorization
-    description: Org unit.
   - name: AuditLogs
-    x-parent: Audit
-    description: The audit log provides audit trail information for user activity, changes to business objects and other important information. For more information, see [Audit log](/run-ai/self-hosted/documentation/installation-and-configuration/operate/observability/event-history).
+  - name: Datavolumes
   - name: Compute
-    x-parent: Workload assets
-    description: "A compute resource is a building block that represents compute resources such as GPUs, CPU cores, and CPU memory.\nThe compute resources may consist of multiple physical resources, for example, 0.5 GPU, 8 cores and 200 Megabytes of CPU memory. \nA compute resource is available to a scope and and all of the organizational units within that scope. \n\nFor more information, see [Compute resource](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/assets/compute-resources).\n"
   - name: Credentials
-    x-parent: Workload assets
-    description: Credentials are used to unlock protected resources such as applications, containers, and other assets. For more information, see [Credentials](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/assets/credentials).
   - name: Datasources
-    x-parent: Workload assets
-    description: Data source assets.
   - name: Environment
-    x-parent: Workload assets
-    description: "An environment resource designates the container image, the image pull policy, working directory, security parameters, and others. \nIt exposes all the necessary tools (open source, 3rd party, or custom tools) along \nwith their connection interfaces including external node port and the container ports.\nYou can also specify a standard, distributed, or inference workload architecture for the environment.\nAn environment is a mandatory building block for the creation of a workload.\nFor more information, see [Environments](/run-ai/self-hosted/documentation/workloads-in-nvidia-run-ai/assets/environments).\n"
   - name: Git
-    x-parent: Workload assets
-    description: Use Git as a data source location for data sets that are relevant to the workload being submitted.
   - name: HostPath
-    x-parent: Workload assets
-    description: Use a HostPath as a data source location for data sets that are relevant to the workload being submitted.
   - name: NFS
-    x-parent: Workload assets
-    description: Use NFS as a data source location for data sets that are relevant to the workload being submitted.
   - name: PVC
-    x-parent: Workload assets
-    description: Use a PVC as a data source location for data sets that are relevant to the workload being submitted.
   - name: Registry
-    x-parent: Workload assets
-    description: Use an images registry to enable the listting of repositories and tags that can be used as a data source location for data sets that are relevant to the workload being submitted.
   - name: S3
-    x-parent: Workload assets
-    description: Use an S3 simple storage service as a data source location for data sets that are relevant to the workload being submitted.
   - name: ConfigMap
-    x-parent: Workload assets
-    description: Use a ConfigMap as a data source location for data sets that are relevant to the workload being submitted.
   - name: Secret
-    x-parent: Workload assets
-    description: Use a credentials as a data source location for data sets that are relevant to the workload being submitted.
   - name: Template
-    x-parent: Workload assets
-    description: Templates are a pre-set configuration used to quickly configure and submit workloads using existing assets.
   - name: Policy
-    x-parent: Policies
-    description: "Policies allow administrators to impose restrictions and set default values for researcher workloads. \nRestrictions and default values can be placed on CPUs, GPUs, and other resources or entities. \nFor more information, see [Policies](/run-ai/self-hosted/documentation/platform-management/policies/policies-and-rules).\n"
   - name: Notification State
-    x-parent: Notifications
-    description: Use to manage notification state.
   - name: Notification Types
-    x-parent: Notifications
-    description: Use to get notification types.
   - name: NotificationChannels
-    x-parent: Notifications
-    description: Notification Channels are the medium through which notifications are sent.
   - name: Slack
-    x-parent: Notifications
-    description: Configure Slack notifications for your organization.
   - name: Email
-    x-parent: Notifications
-    description: Configure Email notifications for your organization.
   - name: Subscriptions
-    x-parent: Notifications
-    description: Use to manage notifications subscriptions.
+  - name: AI Applications
   - name: Synchronization
     description: Internal interface for synchronizing assets between the clusters and the control plane.
 paths:
@@ -2019,7 +1892,7 @@ paths:
     patch:
       summary: Patch department resources
       operationId: patch_department_resources
-      description: Partial updates to specific items in the list. Should be used for update one or more attributes of an item without modifying the entire resource.
+      description: Updates the resources of the node pools in the request. Node pools that are not in the request stay unchanged. Each node pool in the request is replaced as a whole. GPU deserved is required for node pools with quota enabled, and other omitted fields are set to their defaults. To change only part of a node pool, for example only its rank, use the node pool resources batch patch.
       tags:
         - Departments
       parameters:
@@ -2332,7 +2205,7 @@ paths:
     patch:
       summary: Patch project resources
       operationId: patch_project_resources
-      description: Partial updates to specific items in the list. Should be used for update one or more attributes of an item without modifying the entire resource.
+      description: Updates the resources of the node pools in the request. Node pools that are not in the request stay unchanged. Each node pool in the request is replaced as a whole. GPU deserved is required for node pools with quota enabled, and other omitted fields are set to their defaults. To change only part of a node pool, for example only its rank, use the node pool resources batch patch.
       tags:
         - Projects
       parameters:
@@ -8293,7 +8166,7 @@ paths:
       description: Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
       operationId: get_workload_actions_history
       tags:
-        - Events
+        - WorkloadActions
       parameters:
         - $ref: '#/components/parameters/WorkloadId'
         - $ref: '#/components/parameters/Offset'
@@ -8425,6 +8298,8 @@ paths:
         - WORKLOADS_COUNT: Count of workloads
         - GPU_ALLOCATION: GPU allocation metrics
         - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).
+
+
 
 
 
@@ -10482,6 +10357,37 @@ paths:
                     format: int32
                     minimum: 0
                     description: The total number of structure elements that exist for this workload. When no truncation occurred, this equals storedElementsCount.
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/workloads/{workloadId}/resource-claims:
+    get:
+      summary: Get workload resource claims by workload id.
+      description: |
+        Retrieve the Dynamic Resource Allocation (DRA) claims used by the workload, grouped per pod. Each claim carries the ResourceClaim bound to the pod and, when the claim was generated from a ResourceClaimTemplate, the template it came from. Only pods that reference at least one claim are listed.
+      operationId: get_workload_resource_claims
+      tags:
+        - Workloads
+      parameters:
+        - $ref: '#/components/parameters/WorkloadId'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Executed successfully.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkloadResourceClaimsResponse'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
@@ -14213,6 +14119,8 @@ components:
 
 
 
+
+
              - binpack - Place as many GPU pods as possible on each GPU device to use fewer devices and maximize available capacity, minimizing GPU fraction fragmentation.
              - spread - Distribute GPU pods across as many GPU devices as possible to balance load across devices.
           allOf:
@@ -14267,6 +14175,8 @@ components:
 
 
 
+
+
              - 0.0: Ignore historical usage data (100% current usage).
              - 1.0: Historical usage data has higher impact, it may cause fairshare to be 0.
              - Values between 0.0 and 1.0 combine historical and current usage to maintain a balanced fairshare
@@ -14279,6 +14189,8 @@ components:
           pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
           description: |
             Set the half-life time to define the decay rate of a project’s historical resource usage. The half-life defines how long it takes for past usage to diminish to half of its original influence on a project's fairshare.
+
+
 
 
 
@@ -15844,7 +15756,7 @@ components:
             - deserved
           allOf:
             - $ref: '#/components/schemas/NonNullResource'
-            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources. For node pools with quota disabled, deserved is 0.
         cpu:
           type: object
           nullable: true
@@ -15911,6 +15823,27 @@ components:
               items:
                 $ref: '#/components/schemas/Resources'
               description: Resources assigned to this Organization per Node Pool
+    GpuResourceRequest:
+      properties:
+        deserved:
+          type: number
+          format: double
+          description: The GPU quota assigned to this org-unit. Required for node pools with quota enabled. For node pools with quota disabled, it must be 0 or omitted.
+          example: 1000
+          x-go-pointer: true
+        limit:
+          type: number
+          format: double
+          description: The maximum GPU device allocation the org-unit can get from this node pool, representing the maximum sum of assigned quota and over-quota GPUs. Set to null for unlimited.
+          nullable: true
+          example: 0
+        overQuotaWeight:
+          type: number
+          format: double
+          description: |
+            The weight assigned to determine the org-unit's share of over-quota resources within its rank. When multiple org-units share the same rank in a node pool, resources are distributed proportionally based on their weights. Valid values: 1–20. Requires over-quota weight to be enabled. When enabled, the default is 2. See [GPU over quota](/run-ai/self-hosted/documentation/platform-management/manage-ai-initiatives/organization/projects) for more details.
+          nullable: true
+          example: 2
     ResourcesNullable:
       properties:
         nodePool:
@@ -15930,8 +15863,8 @@ components:
           nullable: true
         gpu:
           allOf:
-            - $ref: '#/components/schemas/NonNullResource'
-            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+            - $ref: '#/components/schemas/GpuResourceRequest'
+            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources. Required for node pools with quota enabled. For node pools with quota disabled, deserved must be 0 or omitted and limit must be -1, null or omitted.
         cpu:
           type: object
           nullable: true
@@ -16450,7 +16383,7 @@ components:
           nullable: true
           allOf:
             - $ref: '#/components/schemas/Resource'
-            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+            - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources. Optional. If omitted, the GPU values stay unchanged. For node pools with quota disabled, deserved must be 0 or omitted and limit must be -1, null or omitted.
         cpu:
           type: object
           nullable: true
@@ -17936,14 +17869,13 @@ components:
       maxItems: 1000
       nullable: true
     GpuComputeMode:
-      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.
+      description: GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.
       type: string
       minLength: 1
       enum:
         - time-slicing
         - sm-sharing
       nullable: true
-      x-gorm-ignore: true
     GpuDevicesRequest:
       description: Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
       type: integer
@@ -18202,6 +18134,20 @@ components:
           type: string
       nullable: true
       type: object
+    PodResourceClaimBinding:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Pod-local name of the claim entry, as listed in `pod.spec.resourceClaims[].name` and referenced by containers in `resources.claims`.
+          example: gpu-1
+        claimName:
+          type: string
+          nullable: true
+          description: Name of the ResourceClaim bound to the pod for this entry. For a claim generated from a template, this is null until Kubernetes creates and binds the claim.
+          example: bert-worker-0-gpu-1-mk4s8
     AssetMetaForSync:
       allOf:
         - $ref: '#/components/schemas/AssetCreationFields'
@@ -28376,6 +28322,8 @@ components:
           items:
             $ref: '#/components/schemas/BatchResponseFailureItem'
     AccessRulesFilterFields:
+      required:
+        - validateSignature
       $ref: '#/components/schemas/AccessRulesSortFilterFields'
     SamlData:
       type: object
@@ -28386,6 +28334,9 @@ components:
         singleSignOnServiceUrl:
           type: string
         entityId:
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
           type: string
         serviceProviderMetadataUrl:
           type: string
@@ -30229,6 +30180,30 @@ components:
           description: The hierarchy level of this pod's associated workload structure element. Level 1 represents the top of the hierarchy, with levels 2 and 3 representing progressively nested elements.
           minimum: 1
           maximum: 3
+    PodResourceClaim:
+      type: object
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: Pod-local name of the claim entry (DNS_LABEL). Mirrors `pod.spec.resourceClaims[].name` and the key used by `pod.status.resourceClaimStatuses[].name` to publish the bound claim.
+          example: gpu-1
+        resourceClaimTemplateName:
+          type: string
+          nullable: true
+          description: Name of the referenced `ResourceClaimTemplate` in the pod's namespace, when the claim entry was created from a template. Mutually exclusive with `resourceClaimName`. Mirrors `pod.spec.resourceClaims[].resourceClaimTemplateName`.
+          example: single-gpu
+        resourceClaimName:
+          type: string
+          nullable: true
+          description: Name of a standalone `ResourceClaim` that the pod references directly, when the claim entry is not created from a template. Mutually exclusive with `resourceClaimTemplateName`. Mirrors `pod.spec.resourceClaims[].resourceClaimName`.
+          example: shared-infiniband
+        allocatedResourceClaimName:
+          type: string
+          nullable: true
+          description: Name of the actual `ResourceClaim` bound to the pod for this entry. For a template-generated entry this is populated from `pod.status.resourceClaimStatuses[].resourceClaimName` once Kubernetes publishes it, and is null until then. For a standalone entry it equals `resourceClaimName` and is populated immediately. This is the field the forward-view API surfaces as the "actual" bound claim.
+          example: dra-gpu-test-gpu-1-mk4s8
     PodSyncFields:
       type: object
       required:
@@ -30314,6 +30289,12 @@ components:
           items:
             $ref: '#/components/schemas/PodElement'
           description: The workload structure elements this pod belongs to, ordered by hierarchy level.
+        resourceClaims:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/PodResourceClaim'
+          description: Per-pod DRA usage reported as-is from the cluster. One entry per `pod.spec.resourceClaims[]` member — either a reference to a `ResourceClaimTemplate` or a standalone `ResourceClaim` — enriched with the actual bound `ResourceClaim` name once published in `pod.status.resourceClaimStatuses[]`. Managed/ownership resolution against the k8s-object store happens at API read time, not here.
     Workloads:
       type: array
       items:
@@ -33037,6 +33018,72 @@ components:
         - CPU_MEMORY_USAGE_BYTES
         - CPU_MEMORY_REQUEST_BYTES
         - CPU_MEMORY_LIMIT_BYTES
+    ResourceClaimTemplateRef:
+      description: The ResourceClaimTemplate the claim was generated from. Absent for a standalone ResourceClaim that the pod references directly.
+      nullable: true
+      type: object
+      required:
+        - name
+        - managed
+      properties:
+        name:
+          type: string
+          description: Name of the ResourceClaimTemplate in the pod's namespace.
+          example: single-gpu
+        managed:
+          type: boolean
+          description: Whether the template is managed by NVIDIA Run:ai (created through the resource claim templates API) rather than created directly in the cluster.
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: The id of the managed resource claim template. Null for an unmanaged template.
+    WorkloadResourceClaim:
+      allOf:
+        - $ref: '#/components/schemas/PodResourceClaimBinding'
+        - type: object
+          properties:
+            template:
+              $ref: '#/components/schemas/ResourceClaimTemplateRef'
+    WorkloadPodResourceClaims:
+      type: object
+      required:
+        - podId
+        - podName
+        - resourceClaims
+      properties:
+        podId:
+          type: string
+          format: uuid
+          description: The id of the pod.
+        podName:
+          type: string
+          example: bert-worker-0
+        task:
+          type: string
+          nullable: true
+          description: Identifies the function of the pod within a distributed workload (for example, leader, worker, or master).
+          example: worker
+        resourceClaims:
+          type: array
+          description: The claims the pod references, in the order they appear in `pod.spec.resourceClaims`.
+          items:
+            $ref: '#/components/schemas/WorkloadResourceClaim'
+    WorkloadResourceClaimsResponse:
+      type: object
+      required:
+        - pods
+      properties:
+        next:
+          type: integer
+          format: int32
+          description: |
+            Offset for the next page of results. Present only when there are more pods beyond the current page (i.e., the number of returned pods equals the limit).
+        pods:
+          type: array
+          description: The pods of the workload that reference at least one claim.
+          items:
+            $ref: '#/components/schemas/WorkloadPodResourceClaims'
     WorkloadCategory:
       type: object
       required:
@@ -33486,15 +33533,15 @@ components:
       description: The HTTP or HTTPS URL of the Helm repository that hosts the chart. This must match a repository that is accessible. Used together with `name` and `version`.
       maxLength: 250
       example: https://charts.bitnami.com/bitnami
-    AIApplicationChartName:
+    ChartName:
       type: string
-      description: The name of the chart within the specified repository. This corresponds to the chart’s directory name.
       maxLength: 250
+      description: Helm chart name.
       example: redis
-    AIApplicationChartVersion:
+    ChartVersion:
       type: string
-      description: The specific Semantic Version (SemVer) of the chart to deploy.
       maxLength: 50
+      description: Helm chart version.
       example: 17.3.17
     AIApplicationChartUrl:
       type: string
@@ -33519,9 +33566,9 @@ components:
         repo:
           $ref: '#/components/schemas/AIApplicationChartRepo'
         chartName:
-          $ref: '#/components/schemas/AIApplicationChartName'
+          $ref: '#/components/schemas/ChartName'
         chartVersion:
-          $ref: '#/components/schemas/AIApplicationChartVersion'
+          $ref: '#/components/schemas/ChartVersion'
         chartURL:
           $ref: '#/components/schemas/AIApplicationChartUrl'
         chartId:
@@ -34041,6 +34088,149 @@ components:
           description: List of user credentials to make available to the workload.
           items:
             $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentialSource'
+    WorkloadV2UpdateConfigurationPvcMetadata:
+      type: object
+      additionalProperties: false
+      description: |
+        PVC metadata forwarded to the created PVC as-is.
+        The Namespace is determined by the WorkloadRunner.
+      required:
+        - name
+      properties:
+        name:
+          type: string
+          description: |
+            PVC name. Must be unique across the workload's PVCs and conform to
+            Kubernetes DNS-1123 subdomain rules.
+          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+          minLength: 1
+          maxLength: 253
+          example: my-pytorch-pvc
+        labels:
+          type: object
+          description: |
+            Labels to apply to the created PVC. Map of string keys and string values.
+          additionalProperties:
+            type: string
+          example:
+            team: research
+        annotations:
+          type: object
+          description: |
+            Annotations to apply to the created PVC. Map of string keys and string
+            values. Commonly used to pass CSI driver hints.
+          additionalProperties:
+            type: string
+    WorkloadV2UpdateConfigurationPvcAccessMode:
+      type: string
+      description: |
+        Access mode for the PVC. Values follow `v1.PersistentVolumeAccessMode`.
+        - `ReadWriteOnce` mounts read/write by a single node.
+        - `ReadOnlyMany` mounts read-only by many nodes.
+        - `ReadWriteMany` mounts read/write by many nodes.
+        - `ReadWriteOncePod` mounts read/write by a single pod.
+      enum:
+        - ReadWriteOnce
+        - ReadOnlyMany
+        - ReadWriteMany
+        - ReadWriteOncePod
+      example: ReadWriteOnce
+    WorkloadV2UpdateConfigurationPvcResources:
+      type: object
+      additionalProperties: false
+      description: Resource requirements for the PVC. Only `requests.storage` is supported.
+      required:
+        - requests
+      properties:
+        requests:
+          type: object
+          additionalProperties: false
+          required:
+            - storage
+          properties:
+            storage:
+              type: string
+              description: |
+                Requested storage size as a Kubernetes quantity string
+                (e.g. `1Gi`, `500Mi`, `10Ti`).
+              pattern: ^([+]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+              minLength: 1
+              maxLength: 63
+              example: 1Gi
+    WorkloadV2UpdateConfigurationPvcVolumeMode:
+      type: string
+      description: |
+        Volume mode for the PVC. `Filesystem` (default) presents the volume as a
+        mounted filesystem; `Block` presents it as a raw block device.
+      enum:
+        - Filesystem
+        - Block
+      example: Filesystem
+    WorkloadV2UpdateConfigurationPvcSpec:
+      type: object
+      additionalProperties: false
+      description: |
+        PersistentVolumeClaim spec. Subset of `v1.PersistentVolumeClaimSpec`.
+      required:
+        - accessModes
+        - resources
+      properties:
+        accessModes:
+          type: array
+          description: Access modes the volume should support. At least one is required.
+          minItems: 1
+          maxItems: 4
+          uniqueItems: true
+          items:
+            $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcAccessMode'
+          example:
+            - ReadWriteOnce
+        resources:
+          $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcResources'
+        storageClassName:
+          type: string
+          description: |
+            Name of the StorageClass to use. When omitted, the cluster's default
+            StorageClass is used (if one is configured).
+          pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+          minLength: 1
+          maxLength: 253
+          nullable: true
+          example: standard
+        volumeMode:
+          type: string
+          allOf:
+            - $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode'
+          nullable: true
+    WorkloadV2UpdateConfigurationPvc:
+      type: object
+      additionalProperties: false
+      description: |
+        PersistentVolumeClaim entry to be created and reconciled under the
+        WorkloadRunner on the cluster. Maps onto a Kubernetes `v1.PersistentVolumeClaim`
+        with a curated subset of fields exposed at the API layer.
+      required:
+        - metadata
+        - spec
+      properties:
+        metadata:
+          $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcMetadata'
+        spec:
+          $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcSpec'
+    WorkloadV2UpdateConfigurationPvcsConfig:
+      type: object
+      additionalProperties: false
+      nullable: true
+      description: Configuration applied to PVCs that are created and reconciled alongside the workload.
+      example:
+        cleanupOnCompletion: true
+      properties:
+        cleanupOnCompletion:
+          description: |
+            Delete the workload-owned PVCs when the workload reaches a terminal state.
+            When unset, the cluster default behavior applies.
+          type: boolean
+          nullable: true
     WorkloadV2Configuration:
       type: object
       description: Specifies the features configuration to apply to a workload.
@@ -34055,6 +34245,17 @@ components:
           $ref: '#/components/schemas/NetworkingConfiguration'
         userCredentials:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials'
+        pvcs:
+          type: array
+          nullable: true
+          maxItems: 1000
+          description: PVCs to create and reconcile alongside the workload.
+          items:
+            $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvc'
+        pvcsConfig:
+          nullable: true
+          description: Configuration applied to PVCs that are created and reconciled alongside the workload.
+          $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig'
     WorkloadV2MetadataCreateParams:
       type: object
       properties:
@@ -37748,82 +37949,3 @@ components:
       value:
         msg: System maintenance scheduled for this weekend
         enableDismiss: true
-x-tagGroups:
-  - name: Organizations
-    tags:
-      - Settings
-      - Clusters
-      - Departments
-      - Reports
-      - NodePools
-      - Nodes
-      - Projects
-      - Logo
-      - Researcher Command Line Interface
-      - Researcher Command Line Interface Deprecated
-      - Network Topologies
-  - name: Authentication and Authorization
-    tags:
-      - Access Keys
-      - Access rules
-      - Permissions
-      - Service Accounts
-      - Roles
-      - Tokens
-      - Users
-      - Idps
-      - Me
-      - Org unit
-  - name: Audit
-    tags:
-      - AuditLogs
-  - name: Datavolumes
-    tags:
-      - Datavolumes
-  - name: Workloads
-    tags:
-      - Events
-      - Pods
-      - Workloads
-      - Workloads V2
-      - NVIDIA NIM
-      - Workspaces
-      - Trainings
-      - Inferences
-      - Revisions
-      - Distributed
-      - Workloads batch
-      - Workload properties
-      - Workload templates
-      - Distributed Inferences
-  - name: Workload assets
-    tags:
-      - Compute
-      - Credentials
-      - Datasources
-      - Environment
-      - Storage Classes
-      - Storage Class Configuration
-      - Git
-      - HostPath
-      - NFS
-      - PVC
-      - Registry
-      - S3
-      - ConfigMap
-      - Secret
-      - Template
-  - name: Policies
-    tags:
-      - Policy
-  - name: Notifications
-    tags:
-      - Notification State
-      - Notification Types
-      - NotificationChannels
-      - Slack
-      - Email
-      - Subscriptions
-  - name: AI Applications
-    tags:
-      - AI Applications

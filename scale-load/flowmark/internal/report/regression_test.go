@@ -288,3 +288,30 @@ func TestJudgeStillComparesWhenAnOldRunIsUnreadable(t *testing.T) {
 		t.Fatalf("the skipped file must be named in the note: %q", note)
 	}
 }
+
+func TestThroughputSLOIsAFloorNotACeiling(t *testing.T) {
+	section := core.Section{
+		Category: core.CategoryScale,
+		Metrics:  map[string]any{"throughput_per_sec@100": 6.3, "throughput_per_sec@500": 4.2, "p90_ms@100": int64(900)},
+		SLO:      map[string]int{"throughput_per_sec": 5, "p90_ms": 1000},
+	}
+	judged := DetectRegressions(Build(map[string]core.Section{burstSection: section}, RunInfo{}), nil, sevenNights)
+	if len(judged.Regressions) != 1 {
+		t.Fatalf("only the round under 5 per second may be flagged: %+v", judged.Regressions)
+	}
+	r := judged.Regressions[0]
+	if r.Metric != "throughput_per_sec@500" || r.Against != AgainstSLO || !strings.Contains(r.Message, "4.2/s is under the SLO of 5.0/s") {
+		t.Fatalf("the slow round must blame the floor: %+v", r)
+	}
+	if judged.Sections[burstSection].Metrics["throughput_per_sec@500_regression"] != true {
+		t.Fatal("the flagged metric must get its sibling flag")
+	}
+}
+
+func TestCountSLOIsReportedAsAPlainNumber(t *testing.T) {
+	section := core.Section{Category: core.CategoryLoad, Metrics: map[string]any{"failed_count": 3}, SLO: map[string]int{"failed_count": 2}}
+	judged := DetectRegressions(Build(map[string]core.Section{"workspace-ttj": section}, RunInfo{}), nil, sevenNights)
+	if len(judged.Regressions) != 1 || judged.Regressions[0].Message != "workspace-ttj failed_count: 3 is over the SLO of 2" {
+		t.Fatalf("a count is judged as a ceiling and printed without a unit: %+v", judged.Regressions)
+	}
+}

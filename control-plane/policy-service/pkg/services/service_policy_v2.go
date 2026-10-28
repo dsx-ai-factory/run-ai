@@ -10,6 +10,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dao"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -147,16 +149,17 @@ func toResponse(src *api.DefaultFromOrder) *api.DefaultFromOrder {
 
 	// we want to put in the response only maps that have at least one itemized rule
 	// or at least one rule for the flat rules
+	// Keep dependency paths consistent with legacy defaultFrom references in responses.
 
 	if src.Worker != nil {
 		if len(src.Worker) > 1 || len(src.Worker[""]) > 0 {
-			result.Worker = src.Worker
+			result.Worker = gpucompat.LegacyGPUDefaultFromOrder(src.Worker)
 		}
 	}
 
 	if src.Master != nil {
 		if len(src.Master) > 1 || len(src.Master[""]) > 0 {
-			result.Master = src.Master
+			result.Master = gpucompat.LegacyGPUDefaultFromOrder(src.Master)
 		}
 	}
 
@@ -741,7 +744,8 @@ func jsonBMapToResponse[T any](dest **T, src dbmodels.JsonBMap) {
 		if (*dest) == nil {
 			(*dest) = new(T)
 		}
-		src.Unmarshal(*dest)
+		projected := dbmodels.JsonBMap(gpucompat.LegacyCompatibleGPUPolicy(src))
+		projected.Unmarshal(*dest)
 	}
 }
 
@@ -753,10 +757,17 @@ func loadFromJson(src any) map[string]interface{} {
 }
 
 func validateResetFields(resetFields []string, defaults map[string]interface{}, rules map[string]interface{}) *api.Error {
-	defaultsFields := datastructs.NewSet(policy_compliance.FieldsOfDefaults(defaults)...)
-	rulesFields := datastructs.NewSet(policy_compliance.FieldsWithRules(rules)...)
+	defaultsFields := datastructs.NewSet[string]()
+	for _, field := range policy_compliance.FieldsOfDefaults(defaults) {
+		defaultsFields.Add(gpucompat.CanonicalGPUFieldPath(field))
+	}
+	rulesFields := datastructs.NewSet[string]()
+	for _, field := range policy_compliance.FieldsWithRules(rules) {
+		rulesFields.Add(gpucompat.CanonicalGPUFieldPath(field))
+	}
 
 	for _, resetField := range resetFields {
+		resetField = gpucompat.CanonicalGPUFieldPath(resetField)
 		if defaultsFields.Has(resetField) {
 			return api.NewValidationError(fmt.Sprintf("%s: reset and defaults are mutually excluded", resetField))
 		}

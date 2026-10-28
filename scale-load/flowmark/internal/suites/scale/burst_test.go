@@ -20,11 +20,9 @@ import (
 	"testing"
 	"time"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/watch"
 	k8sclient "sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -46,35 +44,34 @@ func TestParseSettings(t *testing.T) {
 		want    settings
 		wantErr string
 	}{
-		{name: "defaults", knobs: nil, want: settings{rounds: []int{100, 250, 500}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second}},
-		{name: "yaml knobs", knobs: map[string]any{"workloads": []any{10, 20}, "podsPerWorkload": 0, "image": "mirror.local/pause:3.9", "submitConcurrency": 20, "kubeRequestsPerSecond": 100, "controlPlaneRequestsPerSecond": 10, "timeout": "30s", "setupTimeout": "1m", "settle": "5s", "cluster": "kind", "slo": map[string]any{"p90_ms": 5000}},
-			want: settings{rounds: []int{10, 20}, workloadType: "Deployment", pods: 0, image: "mirror.local/pause:3.9", concurrency: 20, limits: client.Limits{KubeRequestsPerSecond: 100, ControlPlaneRequestsPerSecond: 10}, timeout: 30 * time.Second, setupTimeout: time.Minute, settle: 5 * time.Second, cluster: "kind", slo: map[string]int{"p90_ms": 5000}}},
-		{name: "training", knobs: map[string]any{"workloadType": "Training"}, want: settings{rounds: []int{100, 250, 500}, workloadType: "Training", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second}},
-		{name: "workspace", knobs: map[string]any{"workloadType": "Workspace"}, want: settings{rounds: []int{100, 250, 500}, workloadType: "Workspace", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second}},
+		{name: "defaults", knobs: nil, want: settings{rounds: []int{100, 250, 500}, workloadType: "Training", image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second}},
+		{name: "yaml knobs", knobs: map[string]any{"workloads": []any{10, 20}, "image": "mirror.local/pause:3.9", "submitConcurrency": 20, "kubeRequestsPerSecond": 100, "controlPlaneRequestsPerSecond": 10, "timeout": "30s", "setupTimeout": "1m", "settle": "5s", "cluster": "kind", "slo": map[string]any{"p90_ms": 5000}},
+			want: settings{rounds: []int{10, 20}, workloadType: "Training", image: "mirror.local/pause:3.9", concurrency: 20, limits: client.Limits{KubeRequestsPerSecond: 100, ControlPlaneRequestsPerSecond: 10}, timeout: 30 * time.Second, setupTimeout: time.Minute, settle: 5 * time.Second, cluster: "kind", slo: map[string]int{"p90_ms": 5000}}},
+		{name: "training", knobs: map[string]any{"workloadType": "Training"}, want: settings{rounds: []int{100, 250, 500}, workloadType: "Training", image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second}},
+		{name: "workspace", knobs: map[string]any{"workloadType": "Workspace"}, want: settings{rounds: []int{100, 250, 500}, workloadType: "Workspace", image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second}},
 		{name: "too much concurrency", knobs: map[string]any{"submitConcurrency": 500}, wantErr: "submitConcurrency must be between 1 and 64"},
 		{name: "zero request rate", knobs: map[string]any{"kubeRequestsPerSecond": 0}, wantErr: "kubeRequestsPerSecond must be between 1 and 1000"},
 		{name: "empty image", knobs: map[string]any{"image": ""}, wantErr: "image must not be empty"},
-		{name: "training with pods", knobs: map[string]any{"workloadType": "Training", "podsPerWorkload": 2}, wantErr: "podsPerWorkload must be 1 for Training"},
-		{name: "workspace with pods", knobs: map[string]any{"workloadType": "Workspace", "podsPerWorkload": 2}, wantErr: "podsPerWorkload must be 1 for Workspace"},
-		{name: "unsupported type", knobs: map[string]any{"workloadType": "StatefulSet"}, wantErr: "is not supported, use Deployment, Training or Workspace"},
+		{name: "unsupported type", knobs: map[string]any{"workloadType": "StatefulSet"}, wantErr: "is not supported, use Training or Workspace"},
 		{name: "misspelled knob", knobs: map[string]any{"workloadTipe": "Training"}, wantErr: `unknown knob "workloadTipe"; known knobs: workloads, workloadType`},
 		{name: "empty rounds", knobs: map[string]any{"workloads": []any{}}, wantErr: "at least one round"},
 		{name: "zero round", knobs: map[string]any{"workloads": []any{100, 0}}, wantErr: "at least 1"},
 		{name: "repeated size", knobs: map[string]any{"workloads": []any{100, 100}}, wantErr: "must not repeat a round size, got 100 twice"},
-		{name: "too many pods", knobs: map[string]any{"podsPerWorkload": 50}, wantErr: "between 0 and 10"},
 		{name: "wrong list type", knobs: map[string]any{"workloads": "many"}, wantErr: "must be a list"},
 		{name: "slo not a number", knobs: map[string]any{"slo": map[string]any{"p90_ms": "5s"}}, wantErr: `entry "p90_ms" must be a whole number`},
 		{name: "slo nested", knobs: map[string]any{"slo": map[string]any{"tiers": map[string]any{"gold": 1}}}, wantErr: `entry "tiers" must be a whole number`},
-		{name: "slo of another suite", knobs: map[string]any{"slo": map[string]any{"ttj_p90_ms": 10000}}, wantErr: `slo key "ttj_p90_ms" is not a latency this suite reports; use one of p50_ms, p90_ms, p99_ms, mean_ms, max_ms`},
-		{name: "slo on a count", knobs: map[string]any{"slo": map[string]any{"never_arrived_count": 0}}, wantErr: `slo key "never_arrived_count" is not a latency`},
+		{name: "slo of another suite", knobs: map[string]any{"slo": map[string]any{"ttj_p90_ms": 10000}}, wantErr: `slo key "ttj_p90_ms" is not a metric this suite reports; use one of p50_ms, p90_ms, p99_ms, throughput_per_sec`},
+		{name: "slo on a count", knobs: map[string]any{"slo": map[string]any{"never_arrived_count": 0}}, wantErr: `slo key "never_arrived_count" is not a metric`},
 		{name: "slo per round", knobs: map[string]any{"slo": map[string]any{"p90_ms": 5000, "p90_ms@500": 60000}},
-			want: settings{rounds: []int{100, 250, 500}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p90_ms": 5000, "p90_ms@500": 60000}}},
+			want: settings{rounds: []int{100, 250, 500}, workloadType: "Training", image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p90_ms": 5000, "p90_ms@500": 60000}}},
 		{name: "slo for a round not in this run is kept for the file and ignored at run time", knobs: map[string]any{"workloads": []any{20}, "slo": map[string]any{"p90_ms": 5000, "p90_ms@500": 60000}},
-			want: settings{rounds: []int{20}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p90_ms": 5000, "p90_ms@500": 60000}}},
+			want: settings{rounds: []int{20}, workloadType: "Training", image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p90_ms": 5000, "p90_ms@500": 60000}}},
 		{name: "slo with a bad round", knobs: map[string]any{"slo": map[string]any{"p90_ms@big": 1}}, wantErr: `slo key "p90_ms@big" must end with a round size`},
 		{name: "slo with a zero round", knobs: map[string]any{"slo": map[string]any{"p90_ms@0": 1}}, wantErr: `must end with a round size`},
-		{name: "slo on p99 and max", knobs: map[string]any{"slo": map[string]any{"p99_ms": 9000, "max_ms": 20000}},
-			want: settings{rounds: []int{100, 250, 500}, workloadType: "Deployment", pods: 1, image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p99_ms": 9000, "max_ms": 20000}}},
+		{name: "slo on p99", knobs: map[string]any{"slo": map[string]any{"p99_ms": 9000}},
+			want: settings{rounds: []int{100, 250, 500}, workloadType: "Training", image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"p99_ms": 9000}}},
+		{name: "slo on throughput", knobs: map[string]any{"slo": map[string]any{"throughput_per_sec": 5, "throughput_per_sec@500": 4}},
+			want: settings{rounds: []int{100, 250, 500}, workloadType: "Training", image: defaultImage, concurrency: 16, limits: client.DefaultLimits, timeout: 15 * time.Minute, setupTimeout: 5 * time.Minute, settle: 90 * time.Second, slo: map[string]int{"throughput_per_sec": 5, "throughput_per_sec@500": 4}}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -88,7 +85,7 @@ func TestParseSettings(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !slices.Equal(got.rounds, tc.want.rounds) || got.workloadType != tc.want.workloadType || got.pods != tc.want.pods ||
+			if !slices.Equal(got.rounds, tc.want.rounds) || got.workloadType != tc.want.workloadType ||
 				got.image != tc.want.image || got.concurrency != tc.want.concurrency || got.limits != tc.want.limits ||
 				got.timeout != tc.want.timeout || got.setupTimeout != tc.want.setupTimeout || got.settle != tc.want.settle || got.cluster != tc.want.cluster ||
 				!maps.Equal(got.slo, tc.want.slo) {
@@ -109,114 +106,8 @@ func fakeKube() k8sclient.WithWatch {
 	}).Build()
 }
 
-func fakeIntegrator(t *testing.T, ctx context.Context, kube k8sclient.WithWatch) {
-	t.Helper()
-	events, err := kube.Watch(ctx, &appsv1.DeploymentList{}, k8sclient.InNamespace(testNamespace))
-	if err != nil {
-		t.Fatal(err)
-	}
-	go func() {
-		defer events.Stop()
-		for event := range events.ResultChan() {
-			deployment, ok := event.Object.(*appsv1.Deployment)
-			if !ok {
-				continue
-			}
-			external := &unstructured.Unstructured{}
-			external.SetGroupVersionKind(measure.ExternalWorkloadKind)
-			external.SetNamespace(testNamespace)
-			external.SetName("ew-deployment-" + deployment.Name)
-			_ = unstructured.SetNestedField(external.Object, string(deployment.UID), "spec", "originalWorkloadUID")
-			switch event.Type {
-			case watch.Added:
-				_ = kube.Create(ctx, external)
-			case watch.Deleted:
-				_ = kube.Delete(ctx, external)
-			}
-		}
-	}()
-}
-
 func quick() settings {
-	return settings{pods: 1, image: defaultImage, concurrency: 4, timeout: 5 * time.Second, setupTimeout: 5 * time.Second, settle: 10 * time.Millisecond, poll: 20 * time.Millisecond}
-}
-
-func TestDeploymentRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	kube := fakeKube()
-	fakeIntegrator(t, ctx, kube)
-
-	result := runRound(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, "1a2b3c4d", 2, 7, quick())
-
-	if result.err != nil {
-		t.Fatalf("round must succeed: %v", result.err)
-	}
-	summary := measure.Stats(result.timings)
-	if summary.SampleSize != 7 || summary.NeverArrivedCount != 0 || summary.FailedCount != 0 {
-		t.Fatalf("all 7 deployments must be measured: %+v", summary)
-	}
-	for _, timing := range result.timings {
-		if !strings.HasPrefix(timing.Name, "flowmark-burst-1a2b3c4d-r2-") {
-			t.Fatalf("timings must be reported under the workload name, got %q", timing.Name)
-		}
-	}
-	var left appsv1.DeploymentList
-	if err := kube.List(ctx, &left, k8sclient.InNamespace(testNamespace)); err != nil || len(left.Items) != 0 {
-		t.Fatalf("quiesce must delete the round's deployments, %d left (%v)", len(left.Items), err)
-	}
-	if result.unmatched != 0 {
-		t.Fatalf("nothing may be unmatched: %+v", result)
-	}
-}
-
-func TestDeploymentRoundLabelsObjectsWithRoundAndSize(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	kube := fakeKube()
-	var seen atomic.Pointer[map[string]string]
-	events, err := kube.Watch(ctx, &appsv1.DeploymentList{}, k8sclient.InNamespace(testNamespace))
-	if err != nil {
-		t.Fatal(err)
-	}
-	go func() {
-		for event := range events.ResultChan() {
-			if deployment, ok := event.Object.(*appsv1.Deployment); ok && event.Type == watch.Added {
-				labels := deployment.Spec.Template.Labels
-				seen.Store(&labels)
-			}
-		}
-	}()
-	knobs := quick()
-	knobs.timeout = 50 * time.Millisecond
-
-	runRound(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, "1a2b3c4d", 3, 2, knobs)
-
-	labels := seen.Load()
-	if labels == nil || (*labels)[roundLabel] != "3" || (*labels)[roundSizeLabel] != "2" || (*labels)[runLabel] != "1a2b3c4d" {
-		t.Fatalf("pod template must carry run, round index and round size labels, got %v", labels)
-	}
-}
-
-func TestDeploymentRoundWithoutIntegratorReportsNeverArrivedAndStillCleansUp(t *testing.T) {
-	ctx := context.Background()
-	kube := fakeKube()
-	knobs := quick()
-	knobs.timeout = 100 * time.Millisecond
-
-	result := runRound(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, "1a2b3c4d", 1, 3, knobs)
-
-	summary := measure.Stats(result.timings)
-	if summary.NeverArrivedCount != 3 || summary.SampleSize != 0 {
-		t.Fatalf("without an integrator every deployment must be marked never arrived: %+v", summary)
-	}
-	if result.err != nil {
-		t.Fatalf("quiesce must still succeed when nothing arrived: %v", result.err)
-	}
-	var left appsv1.DeploymentList
-	if err := kube.List(ctx, &left, k8sclient.InNamespace(testNamespace)); err != nil || len(left.Items) != 0 {
-		t.Fatalf("deployments must be deleted even after a timeout, %d left", len(left.Items))
-	}
+	return settings{image: defaultImage, concurrency: 4, timeout: 5 * time.Second, setupTimeout: 5 * time.Second, settle: 10 * time.Millisecond, poll: 20 * time.Millisecond}
 }
 
 type fakeControlPlane struct {
@@ -401,6 +292,16 @@ func TestControlPlaneRoundMeasuresEveryWorkloadAndQuiesces(t *testing.T) {
 	}
 }
 
+func controlPlaneFlowAgainstFakeServer(t *testing.T, kube k8sclient.WithWatch) *controlPlaneFlow {
+	t.Helper()
+	server := httptest.NewServer(&fakeControlPlane{kube: kube})
+	t.Cleanup(server.Close)
+	clients := &client.Clients{Kube: kube, Workloads: workloadclient.NewAPIClient(&workloadclient.Configuration{
+		Servers: workloadclient.ServerConfigurations{{URL: server.URL}},
+	})}
+	return newControlPlaneFlow(submit.TrainingType, clients, submit.ProjectRef{ID: "p1", Name: "proj", Namespace: testNamespace, ClusterID: "c1"}, 4)
+}
+
 func labelledPod(name string, labels map[string]string) *corev1.Pod {
 	pod := &corev1.Pod{}
 	pod.Name, pod.Namespace, pod.Labels = name, testNamespace, labels
@@ -412,16 +313,16 @@ func TestQuiesceWaitsForWorkloadObjectsAndEveryPodInTheNamespace(t *testing.T) {
 	ctx := context.Background()
 	round := map[string]string{runLabel: "x", roundLabel: "1"}
 	stale := &unstructured.Unstructured{}
-	stale.SetGroupVersionKind(measure.ExternalWorkloadKind)
+	stale.SetGroupVersionKind(measure.WorkloadRunnerKind)
 	stale.SetNamespace(testNamespace)
-	stale.SetName("ew-deployment-stale")
+	stale.SetName("stale-runner")
 
 	cases := []struct {
 		name    string
 		objects []k8sclient.Object
 		wantErr string
 	}{
-		{name: "external workload remains", objects: []k8sclient.Object{stale}, wantErr: "1 workload objects and 0 pods still present"},
+		{name: "workload runner remains", objects: []k8sclient.Object{stale}, wantErr: "1 workload objects and 0 pods still present"},
 		{name: "pod of the round remains", objects: []k8sclient.Object{labelledPod("p1", round)}, wantErr: "0 workload objects and 1 pods still present"},
 		{name: "any pod in the namespace counts", objects: []k8sclient.Object{labelledPod("p2", map[string]string{"app": "other"})}, wantErr: "0 workload objects and 1 pods still present"},
 		{name: "empty namespace", objects: nil},
@@ -434,7 +335,8 @@ func TestQuiesceWaitsForWorkloadObjectsAndEveryPodInTheNamespace(t *testing.T) {
 					t.Fatal(err)
 				}
 			}
-			err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 50*time.Millisecond, 10*time.Millisecond)
+			flow := controlPlaneFlowAgainstFakeServer(t, kube)
+			err := quiesce(ctx, flow, kube, testNamespace, round, 300*time.Millisecond, 10*time.Millisecond)
 			if tc.wantErr == "" {
 				if err != nil {
 					t.Fatalf("quiesce must succeed: %v", err)
@@ -461,34 +363,9 @@ func TestQuiesceReturnsOnceTheLastPodIsGone(t *testing.T) {
 		_ = kube.Delete(ctx, pod)
 	}()
 
-	if err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 5*time.Second, 10*time.Millisecond); err != nil {
+	flow := controlPlaneFlowAgainstFakeServer(t, kube)
+	if err := quiesce(ctx, flow, kube, testNamespace, round, 5*time.Second, 10*time.Millisecond); err != nil {
 		t.Fatalf("quiesce must succeed once the pod is gone: %v", err)
-	}
-}
-
-func TestQuiesceDeletesEveryLabelledDeploymentAndNothingElse(t *testing.T) {
-	ctx := context.Background()
-	kube := fakeKube()
-	round := map[string]string{runLabel: "x", roundLabel: "1"}
-	other := map[string]string{runLabel: "x", roundLabel: "2"}
-	for name, labels := range map[string]map[string]string{"r1-1": round, "r1-2": round, "r2-1": other} {
-		deployment := &appsv1.Deployment{}
-		deployment.Name, deployment.Namespace, deployment.Labels = name, testNamespace, labels
-		if err := kube.Create(ctx, deployment); err != nil {
-			t.Fatal(err)
-		}
-	}
-
-	if err := quiesce(ctx, &deploymentFlow{kube: kube, concurrency: 4}, kube, testNamespace, round, 5*time.Second, 10*time.Millisecond); err != nil {
-		t.Fatal(err)
-	}
-
-	var left appsv1.DeploymentList
-	if err := kube.List(ctx, &left, k8sclient.InNamespace(testNamespace)); err != nil {
-		t.Fatal(err)
-	}
-	if len(left.Items) != 1 || left.Items[0].Name != "r2-1" {
-		t.Fatalf("only the other round's deployment may survive, got %v", left.Items)
 	}
 }
 
@@ -503,7 +380,7 @@ func timing(name string, outcome measure.Outcome, d time.Duration, err error) me
 }
 
 func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
-	knobs := settings{rounds: []int{2, 3}, workloadType: "Deployment", pods: 1, settle: time.Second, slo: map[string]int{"p90_ms": 5000}}
+	knobs := settings{rounds: []int{2, 3}, workloadType: "Workspace", settle: time.Second, slo: map[string]int{"p90_ms": 5000}}
 	rounds := []round{
 		{index: 1, size: 2, timings: []measure.Timing{timing("a", measure.Arrived, time.Second, nil), timing("b", measure.Arrived, 3*time.Second, nil)}},
 		{index: 2, size: 3, timings: []measure.Timing{timing("c", measure.Arrived, 4*time.Second, nil), timing("d", measure.Arrived, 5*time.Second, nil), timing("e", measure.Arrived, 6*time.Second, nil)}},
@@ -514,7 +391,7 @@ func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 	if section.Failed || section.Error != "" {
 		t.Fatalf("clean rounds must not fail: %+v", section)
 	}
-	if section.Metrics["workload_type"] != "Deployment" {
+	if section.Metrics["workload_type"] != "Workspace" {
 		t.Fatalf("the workload type must be reported: %v", section.Metrics)
 	}
 	for _, key := range []string{"flow", "kube_requests_per_sec", "control_plane_requests_per_sec", "rounds", "submit_concurrency", "settle_ms", "sample_size@2", "makespan_ms@2", "pods_per_workload", "submit_makespan_ms@2", "unmatched_arrivals@2", "image", "slo", "success_rate@2"} {
@@ -530,7 +407,7 @@ func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 			t.Fatalf("limits live in the slo block, not among the metrics: %s", key)
 		}
 	}
-	documented := []string{"p50_ms", "p90_ms", "p99_ms", "mean_ms", "max_ms", "throughput_per_sec"}
+	documented := []string{"p50_ms", "p90_ms", "p99_ms", "throughput_per_sec"}
 	for _, size := range knobs.rounds {
 		for _, key := range documented {
 			if _, present := section.Metrics[fmt.Sprintf("%s@%d", key, size)]; !present {
@@ -542,12 +419,12 @@ func TestBuildSectionReportsEveryRoundAndTheSLO(t *testing.T) {
 		t.Fatalf("per-round metrics wrong: %v", section.Metrics)
 	}
 	if section.Metrics["throughput_per_sec@3"] != 0.5 {
-		t.Fatalf("3 arrivals whose last one lands 6 s after the first create is 0.5 per second, written with one decimal: %v", section.Metrics["throughput_per_sec@3"])
+		t.Fatalf("3 arrivals whose last one lands 6 s after the first create is 0.5 per second: %v", section.Metrics["throughput_per_sec@3"])
 	}
 }
 
 func TestBuildSectionNeverArrivedRoundFailsWithoutZeros(t *testing.T) {
-	knobs := settings{rounds: []int{2}, workloadType: "Deployment", pods: 1}
+	knobs := settings{rounds: []int{2}, workloadType: "Workspace"}
 	rounds := []round{{index: 1, size: 2, unmatched: 2, timings: []measure.Timing{
 		timing("a", measure.NeverArrived, 0, nil),
 		timing("b", measure.NeverArrived, 0, errors.New("watch closed by the server")),
@@ -570,7 +447,7 @@ func TestBuildSectionNeverArrivedRoundFailsWithoutZeros(t *testing.T) {
 }
 
 func TestBuildSectionStoppedRunAndFailedCreates(t *testing.T) {
-	knobs := settings{rounds: []int{1, 2, 3}, workloadType: "Training", pods: 1}
+	knobs := settings{rounds: []int{1, 2, 3}, workloadType: "Training"}
 	rounds := []round{
 		{index: 1, size: 1, timings: []measure.Timing{timing("a", measure.Failed, 0, errors.New("HTTP 429 from the control plane"))}},
 		{index: 2, size: 2, err: errors.New("namespace did not quiesce within 5m"), timings: []measure.Timing{timing("b", measure.Arrived, time.Second, nil), timing("c", measure.Arrived, time.Second, nil)}},
@@ -641,7 +518,7 @@ func TestDescribeRound(t *testing.T) {
 func TestSectionKeepsOnlyTheSLOsOfTheRoundsThatRan(t *testing.T) {
 	knobs := quick()
 	knobs.rounds = []int{20}
-	knobs.slo = map[string]int{"p90_ms": 8000, "p90_ms@250": 40000, "p90_ms@500": 160000, "max_ms@500": 180000}
+	knobs.slo = map[string]int{"p90_ms": 8000, "p90_ms@250": 40000, "p90_ms@500": 160000, "p99_ms@500": 180000}
 	rounds := []round{{index: 1, size: 20, timings: []measure.Timing{timing("a", measure.Arrived, time.Second, nil), timing("b", measure.Arrived, 2*time.Second, nil)}}}
 
 	section := buildSection(rounds, knobs)
@@ -671,7 +548,7 @@ func TestSuiteRunMeasuresEveryRoundWithAFakeSession(t *testing.T) {
 	if err != nil || section.Failed {
 		t.Fatalf("two clean rounds must pass: %v / %+v", err, section)
 	}
-	for _, key := range []string{"p50_ms@2", "p90_ms@2", "max_ms@2", "p50_ms@3", "p90_ms@3", "max_ms@3"} {
+	for _, key := range []string{"p50_ms@2", "p90_ms@2", "p99_ms@2", "p50_ms@3", "p90_ms@3", "p99_ms@3"} {
 		if _, present := section.Metrics[key]; !present {
 			t.Fatalf("%s missing from %v", key, section.Metrics)
 		}
@@ -695,7 +572,7 @@ func TestSuiteRunFailsWhenTheSessionCannotBeOpened(t *testing.T) {
 }
 
 type cancellingFlow struct {
-	deploymentFlow
+	controlPlaneFlow
 	cancel context.CancelFunc
 }
 
@@ -708,7 +585,7 @@ func (f *cancellingFlow) create(ctx context.Context, workload item) (string, err
 func TestInterruptedCreatesAreNotCountedAsFailures(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	kube := fakeKube()
-	flow := &cancellingFlow{deploymentFlow: deploymentFlow{kube: kube, concurrency: 1}, cancel: cancel}
+	flow := &cancellingFlow{controlPlaneFlow: controlPlaneFlow{clients: &client.Clients{Kube: kube}, concurrency: 1}, cancel: cancel}
 
 	result := runRound(ctx, flow, kube, testNamespace, "1a2b3c4d", 1, 5, quick())
 
@@ -724,7 +601,7 @@ func TestInterruptedCreatesAreNotCountedAsFailures(t *testing.T) {
 func TestWarmUpReturnsTheCancellation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	kube := fakeKube()
-	flow := &cancellingFlow{deploymentFlow: deploymentFlow{kube: kube, concurrency: 1}, cancel: cancel}
+	flow := &cancellingFlow{controlPlaneFlow: controlPlaneFlow{clients: &client.Clients{Kube: kube}, concurrency: 1}, cancel: cancel}
 
 	err := warmUp(ctx, flow, kube, testNamespace, "1a2b3c4d", quick())
 

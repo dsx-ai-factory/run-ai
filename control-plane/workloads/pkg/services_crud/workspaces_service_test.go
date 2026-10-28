@@ -126,7 +126,7 @@ var _ = Describe("workspaces service validations", func() {
 		const subjectType = "ServiceAccount"
 		requestCtx := context.WithValue(ctx, runaictx.CfSubjectID, subject)
 		requestCtx = context.WithValue(requestCtx, runaictx.CfSubjectType, subjectType)
-		router := api.NewRouter(api.NewWorkspacesAPIController(workspacesService), api.NewEventsAPIController(services.NewEventsService()))
+		router := api.NewRouter(api.NewWorkspacesAPIController(workspacesService), api.NewWorkloadActionsAPIController(services.NewWorkloadActionsService()))
 		body, err := json.Marshal(createWorkspaceRequest("http-workspace", randoms.ProjectIdStr, randoms.ClusterId, "", ""))
 		Expect(err).NotTo(HaveOccurred())
 		request := httptest.NewRequest(http.MethodPost, "/api/v1/workloads/workspaces", bytes.NewReader(body)).WithContext(requestCtx)

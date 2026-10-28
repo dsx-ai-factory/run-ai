@@ -41,6 +41,7 @@ data:
   CHART_PUBLIC_BASE_URL: {{ $top.Values.workloads.config.chartPublicBaseUrl | default (printf "https://%s" $top.Values.global.domain) | quote }}
   CHART_MAX_UPLOAD_BYTES: {{ mul $top.Values.workloads.config.chartUploadMaxSizeMB 1048576 | quote }}
   CHART_RETENTION_MINUTES: {{ $top.Values.workloads.config.chartRetentionMinutes | quote }}
+  CHART_INSPECTION_CACHE_TTL_SECONDS: {{ $top.Values.workloads.config.chartInspectionCacheTTLSeconds | default 600 | quote }}
   CLEANER_INTERVAL_HOURS: "24"
   DELETED_WORKLOADS_DAYS_TO_LIVE: "14"
   FINISHED_WORKLOADS_DAYS_TO_LIVE: "28"

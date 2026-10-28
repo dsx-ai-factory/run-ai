@@ -17,6 +17,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/identity"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/metrics"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/orgunits"
+	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/policies"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/resources"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/settings"
 	"github.com/dsx-ai-factory/run-ai/runai-mcp-server/internal/tools/templates"
@@ -33,6 +34,7 @@ func Register(r *runaimcp.Registry, client *runaiclient.Client) {
 	environments.Register(r, client)
 	metrics.Register(r, client)
 	orgunits.Register(r, client)
+	policies.Register(r, client)
 	resources.Register(r, client)
 	settings.Register(r, client)
 	templates.Register(r, client)

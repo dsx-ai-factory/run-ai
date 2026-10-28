@@ -1199,7 +1199,7 @@
         "pattern": ".*"
       },
       "Preemptibility": {
-        "description": "Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.",
+        "description": "Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.",
         "type": "string",
         "minLength": 1,
         "enum": [
@@ -1663,6 +1663,7 @@
             "example": "standard"
           },
           "volumeMode": {
+            "type": "string",
             "allOf": [
               {
                 "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode"
@@ -1728,7 +1729,6 @@
             "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationUserCredentials"
           },
           "pvcs": {
-            "x-internal": true,
             "type": "array",
             "nullable": true,
             "maxItems": 1000,
@@ -1738,7 +1738,6 @@
             }
           },
           "pvcsConfig": {
-            "x-internal": true,
             "nullable": true,
             "description": "Configuration applied to PVCs that are created and reconciled alongside the workload.",
             "$ref": "#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig"
@@ -2635,15 +2634,14 @@
         "nullable": true
       },
       "GpuComputeMode": {
-        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require an available GPU fractioning runtime on the selected cluster.",
+        "description": "GPU compute sharing mode. Policy and template defaults apply before the built-in time-slicing fallback. Explicit modes require Run:ai cluster version 3.0.14 or later.",
         "type": "string",
         "minLength": 1,
         "enum": [
           "time-slicing",
           "sm-sharing"
         ],
-        "nullable": true,
-        "x-gorm-ignore": true
+        "nullable": true
       },
       "GpuDevicesRequest": {
         "description": "Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.",

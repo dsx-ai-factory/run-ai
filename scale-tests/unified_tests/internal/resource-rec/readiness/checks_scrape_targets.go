@@ -117,7 +117,7 @@ func (c *Checker) queryUpByNode(ctx context.Context, job string) (map[string]boo
 		c.restConfig,
 		func(api v1.API) error {
 			q := fmt.Sprintf("min by (node) (up{job=%q})", job)
-			result, _, err := api.Query(ctx, q, time.Now())
+			result, _, _, err := api.Query(ctx, q, time.Now())
 			if err != nil {
 				return fmt.Errorf("query %q failed: %w", q, err)
 			}
@@ -149,7 +149,7 @@ func (c *Checker) queryUpByJob(ctx context.Context) (map[string]bool, error) {
 		c.cfg.PrometheusPort,
 		c.restConfig,
 		func(api v1.API) error {
-			result, _, err := api.Query(ctx, "min by (job) (up)", time.Now())
+			result, _, _, err := api.Query(ctx, "min by (job) (up)", time.Now())
 			if err != nil {
 				return fmt.Errorf("up query failed: %w", err)
 			}

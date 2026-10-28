@@ -152,7 +152,7 @@ func TestGetFirstUserRoleAndScope_CloudOperator(t *testing.T) {
 }
 
 func TestGetFirstUserRoleAndScope_UnspportedRole(t *testing.T) {
-	scope := getScopeByRole(authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_APPLICATION)
+	scope := getScopeByRole(authorization_api.ALLOWEDINTERNALCREATEROLES_INSTALLER_SERVICE_ACCOUNT)
 	assert.Equal(t, authorization_api.SCOPETYPE_TENANT, scope)
 }
 

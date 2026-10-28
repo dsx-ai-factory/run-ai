@@ -16,8 +16,8 @@ properties:
     nullable: true
   gpu:
     allOf:
-      - $ref: "./NonNullResource.yaml"
-      - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources.
+      - $ref: "./GpuResourceRequest.yaml"
+      - description: Defines the GPU quota assignment, maximum GPU device allocation, and weight assigned that determines the fairshare of over-quota resources. Required for node pools with quota enabled. For node pools with quota disabled, deserved must be 0 or omitted and limit must be -1, null or omitted.
   cpu:
     type: object
     nullable: true

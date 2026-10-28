@@ -37,6 +37,7 @@ func InferenceUpdateComputeFlagSet(flagsCompute *pflag.FlagSet, specCompute *sub
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.GpuPortionLimit), consts.AttributeNameGpuPortionLimit, consts.AttributeUsageGpuPortionLimit)
 	flagsCompute.StringVar(&specCompute.GpuMemoryRequest, consts.AttributeNameGpuMemoryRequest, "", consts.AttributeUsageGpuMemoryRequest)
 	flagsCompute.StringVar(&specCompute.GpuMemoryLimit, consts.AttributeNameGpuMemoryLimit, "", consts.AttributeUsageGpuMemoryLimit)
+	submit.GpuMemoryAndModeFlagSet(flagsCompute, specCompute)
 
 	// CPU related flags
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.CpuCoreRequest), consts.AttributeNameCpuCoreRequest, consts.AttributeUsageCpuCoreRequest)
@@ -62,6 +63,7 @@ func NimUpdateComputeFlagSet(flagsCompute *pflag.FlagSet, specCompute *submit.Co
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.GpuPortionLimit), consts.AttributeNameGpuPortionLimit, consts.AttributeUsageGpuPortionLimit)
 	flagsCompute.StringVar(&specCompute.GpuMemoryRequest, consts.AttributeNameGpuMemoryRequest, "", consts.AttributeUsageGpuMemoryRequest)
 	flagsCompute.StringVar(&specCompute.GpuMemoryLimit, consts.AttributeNameGpuMemoryLimit, "", consts.AttributeUsageGpuMemoryLimit)
+	submit.GpuMemoryAndModeFlagSet(flagsCompute, specCompute)
 
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.CpuCoreRequest), consts.AttributeNameCpuCoreRequest, consts.AttributeUsageCpuCoreRequest)
 	flagsCompute.Var(cli.NewNullableNonNegativeFloat64Flag(&specCompute.CpuCoreLimit), consts.AttributeNameCpuCoreLimit, consts.AttributeUsageCpuCoreLimit)

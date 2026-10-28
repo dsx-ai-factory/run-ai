@@ -50,7 +50,7 @@ kubectl create secret generic <SECRET_NAME> \
 
 ## Download the Installer
 
-Download the `runai-installer` binary for your operating system and CPU architecture, on the machine you run the installer from. Replace `<VERSION>` with the NVIDIA Run:ai version you are installing, for example `3.0.17`:
+Download the `runai-installer` binary for your operating system and CPU architecture, on the machine you run the installer from. Replace `<VERSION>` with the NVIDIA Run:ai version you are installing, for example `3.0.20`:
 
 ```bash
 # Linux, AMD64 (x86_64)
