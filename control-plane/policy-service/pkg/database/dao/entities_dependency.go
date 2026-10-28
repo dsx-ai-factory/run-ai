@@ -49,6 +49,46 @@ func UpsertEntityDependencies(ctx context.Context, db orm.DB, rows []dbmodel.Ent
 	return nil
 }
 
+// MarkPoliciesPendingByComponent sets every policy whose cached breakdown
+// depends on the given component to PendingUpdate, in all tenants, and returns
+// how many policies were marked. it is meant for system seeding, which runs as
+// the system tenant but changes components every tenant depends on. the caches
+// and dependency rows are left in place.
+func MarkPoliciesPendingByComponent(_ context.Context, db orm.DB, componentType dbmodel.ComponentType, componentId string) (int, *api.Error) {
+	var policyIds []string
+	if err := db.Table(dbtables.EntitiesCacheTable).
+		Joins(fmt.Sprintf("JOIN %s ON %s.%s = %s.%s",
+			dbtables.EntitiesDependencyTable,
+			dbtables.EntitiesDependencyTable, dbtables.EntitiesDependencyColumnCacheId,
+			dbtables.EntitiesCacheTable, dbtables.EntitiesCacheColumnId)).
+		Where(fmt.Sprintf("%s.%s = ?", dbtables.EntitiesCacheTable, dbtables.EntitiesCacheColumnEntityType), dbmodel.EntityTypeBreakdown).
+		Where(fmt.Sprintf("%s.%s = ?", dbtables.EntitiesDependencyTable, dbtables.EntitiesDependencyColumnComponentType), componentType).
+		Where(fmt.Sprintf("%s.%s = ?", dbtables.EntitiesDependencyTable, dbtables.EntitiesDependencyColumnComponentId), componentId).
+		Distinct().
+		Pluck(fmt.Sprintf("%s.%s", dbtables.EntitiesCacheTable, dbtables.EntitiesCacheColumnEntityId), &policyIds); err != nil {
+		dbErr := database.Error(database.LIST, database.EntitiesCache).WithDetails(err)
+		logging.Errorf("failed to find policies depending on component %s/%s: %s: %v", componentType, componentId, dbErr.Message, err)
+		return 0, dbErr
+	}
+
+	if len(policyIds) == 0 {
+		return 0, nil
+	}
+
+	if _, err := db.Table(dbtables.PoliciesTable).
+		Where(fmt.Sprintf("%s.%s IN ?", dbtables.PoliciesTable, dbtables.PoliciesColumnId), policyIds).
+		UpdateColumns(map[string]interface{}{
+			dbtables.PoliciesColumnValidationStatus: string(api.POLICYPHASE_PENDING_UPDATE),
+			dbtables.PoliciesColumnValidationIssues: nil,
+		}); err != nil {
+		dbErr := database.Error(database.UPDATE, database.Policies).WithDetails(err)
+		logging.Errorf("failed to mark %d policies as %s: %s: %v", len(policyIds), api.POLICYPHASE_PENDING_UPDATE, dbErr.Message, err)
+		return 0, dbErr
+	}
+
+	return len(policyIds), nil
+}
+
 // OnComponentDeleted invalidates every entity whose cache depends on the given
 // component, scoped to the caller's tenant. it executes four steps on db:
 //
