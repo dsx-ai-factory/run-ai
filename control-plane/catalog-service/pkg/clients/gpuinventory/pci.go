@@ -12,10 +12,12 @@ import (
 //go:embed data/nvidia-gpus.json data/LICENSE.nvidia-driver-assistant
 var gpuSnapshot embed.FS
 
+type gpuPCISnapshot struct {
+	Devices map[string][]string `json:"devices"`
+}
+
 var gpuPCIDevices = func() map[string][]string {
-	var snapshot struct {
-		Devices map[string][]string `json:"devices"`
-	}
+	var snapshot gpuPCISnapshot
 	data, err := gpuSnapshot.ReadFile("data/nvidia-gpus.json")
 	if err != nil {
 		panic(fmt.Sprintf("read embedded NVIDIA GPU snapshot: %v", err))

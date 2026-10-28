@@ -2368,20 +2368,25 @@ components:
       - image
       - tag
       type: object
+    RightSizingStatus:
+      enum:
+      - recommended
+      - no_recommendation
+      type: string
+    RightSizingAllocationType:
+      enum:
+      - gpu_memory
+      - gpu_count
+      type: string
     RightSizingRecommendation:
       example:
-        estimated: true
         gpuMemoryPerDeviceBytes: 1
-        warning: warning
         allocationType: gpu_memory
         gpuCount: 1
       nullable: true
       properties:
         allocationType:
-          enum:
-          - gpu_memory
-          - gpu_count
-          type: string
+          $ref: '#/components/schemas/RightSizingAllocationType'
         gpuCount:
           format: int64
           minimum: 1
@@ -2390,19 +2395,8 @@ components:
           format: int64
           minimum: 1
           type: integer
-        estimated:
-          description: "Whether this is an estimated allocation. Published-profile\
-            \ recommendations return false; this describes the source layout and allocation\
-            \ arithmetic, not verified runtime or hardware compatibility."
-          type: boolean
-        warning:
-          description: "Conditional sizing prerequisites, publisher-defined minimum\
-            \ assumptions, and unverified hardware/runtime or interconnect compatibility.\
-            \ Read before using the allocation."
-          type: string
       required:
       - allocationType
-      - estimated
       - gpuCount
       type: object
     RightSizingResult:
@@ -2415,9 +2409,7 @@ components:
         profileId: profileId
         precision: precision
         recommendation:
-          estimated: true
           gpuMemoryPerDeviceBytes: 1
-          warning: warning
           allocationType: gpu_memory
           gpuCount: 1
         gpuType: gpuType
@@ -2431,10 +2423,7 @@ components:
           format: int64
           type: integer
         status:
-          enum:
-          - recommended
-          - no_recommendation
-          type: string
+          $ref: '#/components/schemas/RightSizingStatus'
         minimumGpuMemoryPerDeviceGb:
           description: "Published NGC minimum for the source profile, before allocation\
             \ rounding."
@@ -2479,9 +2468,7 @@ components:
           profileId: profileId
           precision: precision
           recommendation:
-            estimated: true
             gpuMemoryPerDeviceBytes: 1
-            warning: warning
             allocationType: gpu_memory
             gpuCount: 1
           gpuType: gpuType
@@ -2495,9 +2482,7 @@ components:
           profileId: profileId
           precision: precision
           recommendation:
-            estimated: true
             gpuMemoryPerDeviceBytes: 1
-            warning: warning
             allocationType: gpu_memory
             gpuCount: 1
           gpuType: gpuType

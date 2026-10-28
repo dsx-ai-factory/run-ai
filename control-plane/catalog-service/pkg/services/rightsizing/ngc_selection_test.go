@@ -7,7 +7,6 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"strings"
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/gpuinventory"
@@ -37,9 +36,6 @@ func TestExactLlamaTagSelectsPrecisionPerHardware(t *testing.T) {
 			r := recommendForHardware(gpuinventory.Hardware{Type: tc.gpu, MemoryBytes: &capacity, MaxDevicesPerNode: 8}, metadata.Profiles, 90)
 			if r.Status != "recommended" || r.ProfileId != tc.profile || r.Precision != tc.precision || r.InferenceBackend != "vllm" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum {
 				t.Fatalf("wrong profile: %+v", r)
-			}
-			if tc.gpu == "NVIDIA-B200" && !strings.Contains(r.Recommendation.Warning, "GPU-agnostic") {
-				t.Fatalf("ambiguous B200 identity must not claim tested match: %+v", r)
 			}
 		})
 	}
@@ -135,18 +131,17 @@ func TestRecommendationAllocationBoundaries(t *testing.T) {
 		cutoff        int64
 		allocation    string
 		count, memory int64
-		estimated     bool
 	}{
-		{"below 90 percent", 89.999999999, 90, "gpu_memory", 1, 89_999_999_999, false},
-		{"exactly 90 percent", 90, 90, "gpu_count", 1, 100_000_000_000, false},
-		{"above 90 percent", 91, 90, "gpu_count", 1, 100_000_000_000, false},
-		{"exactly capacity", 100, 90, "gpu_count", 1, 100_000_000_000, false},
-		{"configured 80 percent", 85, 80, "gpu_count", 1, 100_000_000_000, false},
+		{"below 90 percent", 89.999999999, 90, "gpu_memory", 1, 89_999_999_999},
+		{"exactly 90 percent", 90, 90, "gpu_count", 1, 100_000_000_000},
+		{"above 90 percent", 91, 90, "gpu_count", 1, 100_000_000_000},
+		{"exactly capacity", 100, 90, "gpu_count", 1, 100_000_000_000},
+		{"configured 80 percent", 85, 80, "gpu_count", 1, 100_000_000_000},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			r := recommendForHardware(gpuinventory.Hardware{Type: "unknown", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{sizingProfile("generic", tc.minimum)}, tc.cutoff)
 			a := r.Recommendation
-			if r.Status != "recommended" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum || a == nil || a.AllocationType != tc.allocation || a.GpuCount != tc.count || a.GpuMemoryPerDeviceBytes != tc.memory || a.Estimated != tc.estimated {
+			if r.Status != "recommended" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum || a == nil || string(a.AllocationType) != tc.allocation || a.GpuCount != tc.count || a.GpuMemoryPerDeviceBytes != tc.memory {
 				t.Fatalf("allocation=%+v result=%+v", a, r)
 			}
 		})

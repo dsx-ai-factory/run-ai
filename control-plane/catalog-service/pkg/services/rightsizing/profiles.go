@@ -35,7 +35,12 @@ func selectProfile(profiles []ngcmetadata.Profile, pciDevice string, capacity, n
 		if minimumBytes > capacity || match == noHardwareMatch {
 			continue
 		}
-		candidate := &profileCandidate{profile: profile, match: match, count: count, minimumBytes: minimumBytes}
+		candidate := &profileCandidate{
+			profile:      profile,
+			match:        match,
+			count:        count,
+			minimumBytes: minimumBytes,
+		}
 		if chosen == nil || candidate.precedes(chosen) {
 			chosen = candidate
 		}

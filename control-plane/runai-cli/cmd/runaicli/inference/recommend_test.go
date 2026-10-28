@@ -44,7 +44,7 @@ func TestRecommendationHTTPContract(t *testing.T) {
 					_, _ = w.Write([]byte(`{"code":503,"message":"NGC sizing metadata unavailable"}`))
 					return
 				}
-				_, _ = w.Write([]byte(`{"image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","results":[{"gpuType":"A100","status":"recommended","minimumGpuMemoryPerDeviceGb":36,"recommendation":{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":36000000000,"estimated":false}},{"gpuType":"T4","status":"no_recommendation","reason":"Missing capacity"}]}`))
+				_, _ = w.Write([]byte(`{"image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","results":[{"gpuType":"A100","status":"recommended","minimumGpuMemoryPerDeviceGb":36,"recommendation":{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":36000000000}},{"gpuType":"T4","status":"no_recommendation","reason":"Missing capacity"}]}`))
 			}))
 			defer server.Close()
 			request := catalog.NewRightSizingRequest("cluster-id", "nvcr.io/nim/nvidia/example", "1.2.3")
@@ -70,8 +70,8 @@ func TestRecommendationHTTPContract(t *testing.T) {
 				t.Fatalf("bad output: %s", output.String())
 			}
 			recommendation := result.Results[0]["recommendation"].(map[string]interface{})
-			if recommendation["estimated"] != false {
-				t.Fatalf("lost false estimated: %s", output.String())
+			if len(recommendation) != 3 {
+				t.Fatalf("unexpected recommendation fields: %s", output.String())
 			}
 			if result.Results[1]["recommendation"] != nil {
 				t.Fatalf("invented recommendation: %s", output.String())

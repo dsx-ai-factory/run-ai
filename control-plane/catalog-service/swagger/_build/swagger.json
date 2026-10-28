@@ -1831,21 +1831,30 @@
           }
         }
       },
+      "RightSizingStatus": {
+        "type": "string",
+        "enum": [
+          "recommended",
+          "no_recommendation"
+        ]
+      },
+      "RightSizingAllocationType": {
+        "type": "string",
+        "enum": [
+          "gpu_memory",
+          "gpu_count"
+        ]
+      },
       "RightSizingRecommendation": {
         "type": "object",
         "nullable": true,
         "required": [
           "allocationType",
-          "gpuCount",
-          "estimated"
+          "gpuCount"
         ],
         "properties": {
           "allocationType": {
-            "type": "string",
-            "enum": [
-              "gpu_memory",
-              "gpu_count"
-            ]
+            "$ref": "#/components/schemas/RightSizingAllocationType"
           },
           "gpuCount": {
             "type": "integer",
@@ -1856,14 +1865,6 @@
             "type": "integer",
             "format": "int64",
             "minimum": 1
-          },
-          "estimated": {
-            "type": "boolean",
-            "description": "Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility."
-          },
-          "warning": {
-            "type": "string",
-            "description": "Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation."
           }
         }
       },
@@ -1883,11 +1884,7 @@
             "description": "Reported per-device capacity, not free memory or a quota guarantee."
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "recommended",
-              "no_recommendation"
-            ]
+            "$ref": "#/components/schemas/RightSizingStatus"
           },
           "minimumGpuMemoryPerDeviceGb": {
             "type": "number",

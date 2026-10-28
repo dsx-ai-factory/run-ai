@@ -5,9 +5,9 @@
 
 package rightsizing
 
-import "errors"
+import "github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/internal/generated/pkg/api"
 
-var ErrDoesNotFitSingleGPU = errors.New("minimum memory exceeds single-GPU capacity")
+var ErrDoesNotFitSingleGPU = api.NewValidationError("minimum memory exceeds single-GPU capacity")
 
 type Allocation struct {
 	MinimumMemoryBytes   int64
@@ -18,12 +18,12 @@ type Allocation struct {
 // SingleGPUAllocation applies the cutoff to an already resolved, compatible
 // single-device requirement. Both inputs must use the same byte units. Hardware
 // compatibility, usable capacity, and parallel-profile selection are separate concerns.
-func SingleGPUAllocation(minimumBytes, capacityBytes, cutoffPercent int64) (Allocation, error) {
+func SingleGPUAllocation(minimumBytes, capacityBytes, cutoffPercent int64) (Allocation, *api.Error) {
 	if cutoffPercent < 1 || cutoffPercent > 100 {
-		return Allocation{}, errors.New("whole-GPU sharing cutoff must be between 1 and 100 percent")
+		return Allocation{}, api.NewValidationError("whole-GPU sharing cutoff must be between 1 and 100 percent")
 	}
 	if minimumBytes <= 0 || capacityBytes <= 0 {
-		return Allocation{}, errors.New("minimum memory and GPU capacity must be positive")
+		return Allocation{}, api.NewValidationError("minimum memory and GPU capacity must be positive")
 	}
 	if minimumBytes > capacityBytes {
 		return Allocation{}, ErrDoesNotFitSingleGPU

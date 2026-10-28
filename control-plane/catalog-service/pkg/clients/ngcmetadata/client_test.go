@@ -10,6 +10,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -43,6 +44,32 @@ func TestMetadataPreservesPublishedProfileAndExactTag(t *testing.T) {
 		p.GPU != "NVIDIA-B200" || p.GPUDevice != "2901:10de" || p.Precision != "bf16" ||
 		p.InferenceBackend != "vllm" || len(p.TestedGPUDevices) != 1 || p.MaxGPUCount == nil || *p.MaxGPUCount != 4 {
 		t.Fatalf("profile information lost: %+v", p)
+	}
+}
+
+func TestTagValidationExplainsLengthAndCharacterConstraints(t *testing.T) {
+	image := "nvcr.io/nim/nvidia/example"
+	if err := Validate(image, strings.Repeat("a", 128)); err != nil {
+		t.Fatalf("maximum-length valid tag rejected: %v", err)
+	}
+	for _, tag := range []string{strings.Repeat("a", 129), "-bad", "a&b", ""} {
+		err := Validate(image, tag)
+		if err == nil || !strings.Contains(err.Error(), "128") || !strings.Contains(err.Error(), "start") {
+			t.Fatalf("invalid tag %q needs actionable length and character constraints: %v", tag, err)
+		}
+	}
+}
+
+func TestOversizedMetadataReportsTheResponseLimit(t *testing.T) {
+	client := New(&http.Client{Transport: transportFunc(func(*http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader(strings.Repeat(" ", maxResponseBytes+1))),
+		}, nil
+	})}, 15*time.Minute)
+	_, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/oversized", "1.0")
+	if err == nil || !strings.Contains(err.Error(), strconv.Itoa(maxResponseBytes)) {
+		t.Fatalf("oversized response must report its byte limit: %v", err)
 	}
 }
 

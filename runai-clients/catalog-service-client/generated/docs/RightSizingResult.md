@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **GpuType** | **string** |  | 
 **GpuMemoryCapacityBytes** | Pointer to **int64** | Reported per-device capacity, not free memory or a quota guarantee. | [optional] 
-**Status** | **string** |  | 
+**Status** | [**RightSizingStatus**](RightSizingStatus.md) |  | 
 **MinimumGpuMemoryPerDeviceGb** | Pointer to **float64** | Published NGC minimum for the source profile, before allocation rounding. | [optional] 
 **ProfileId** | Pointer to **string** |  | [optional] 
 **Precision** | Pointer to **string** |  | [optional] 
@@ -20,7 +20,7 @@ Name | Type | Description | Notes
 
 ### NewRightSizingResult
 
-`func NewRightSizingResult(gpuType string, status string, ) *RightSizingResult`
+`func NewRightSizingResult(gpuType string, status RightSizingStatus, ) *RightSizingResult`
 
 NewRightSizingResult instantiates a new RightSizingResult object
 This constructor will assign default values to properties that have it defined,
@@ -82,20 +82,20 @@ HasGpuMemoryCapacityBytes returns a boolean if a field has been set.
 
 ### GetStatus
 
-`func (o *RightSizingResult) GetStatus() string`
+`func (o *RightSizingResult) GetStatus() RightSizingStatus`
 
 GetStatus returns the Status field if non-nil, zero value otherwise.
 
 ### GetStatusOk
 
-`func (o *RightSizingResult) GetStatusOk() (*string, bool)`
+`func (o *RightSizingResult) GetStatusOk() (*RightSizingStatus, bool)`
 
 GetStatusOk returns a tuple with the Status field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetStatus
 
-`func (o *RightSizingResult) SetStatus(v string)`
+`func (o *RightSizingResult) SetStatus(v RightSizingStatus)`
 
 SetStatus sets Status field to given value.
 

@@ -8,8 +8,7 @@ properties:
     format: int64
     description: Reported per-device capacity, not free memory or a quota guarantee.
   status:
-    type: string
-    enum: [recommended, no_recommendation]
+    $ref: './RightSizingStatus.yaml'
   minimumGpuMemoryPerDeviceGb:
     type: number
     format: double

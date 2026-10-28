@@ -24,13 +24,9 @@ var _ MappedNullable = &RightSizingRecommendation{}
 
 // RightSizingRecommendation struct for RightSizingRecommendation
 type RightSizingRecommendation struct {
-	AllocationType          string `json:"allocationType"`
-	GpuCount                int64  `json:"gpuCount"`
-	GpuMemoryPerDeviceBytes *int64 `json:"gpuMemoryPerDeviceBytes,omitempty"`
-	// Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility.
-	Estimated bool `json:"estimated"`
-	// Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation.
-	Warning *string `json:"warning,omitempty"`
+	AllocationType          RightSizingAllocationType `json:"allocationType"`
+	GpuCount                int64                     `json:"gpuCount"`
+	GpuMemoryPerDeviceBytes *int64                    `json:"gpuMemoryPerDeviceBytes,omitempty"`
 }
 
 type _RightSizingRecommendation RightSizingRecommendation
@@ -39,11 +35,10 @@ type _RightSizingRecommendation RightSizingRecommendation
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingRecommendation(allocationType string, gpuCount int64, estimated bool) *RightSizingRecommendation {
+func NewRightSizingRecommendation(allocationType RightSizingAllocationType, gpuCount int64) *RightSizingRecommendation {
 	this := RightSizingRecommendation{}
 	this.AllocationType = allocationType
 	this.GpuCount = gpuCount
-	this.Estimated = estimated
 	return &this
 }
 
@@ -56,9 +51,9 @@ func NewRightSizingRecommendationWithDefaults() *RightSizingRecommendation {
 }
 
 // GetAllocationType returns the AllocationType field value
-func (o *RightSizingRecommendation) GetAllocationType() string {
+func (o *RightSizingRecommendation) GetAllocationType() RightSizingAllocationType {
 	if o == nil {
-		var ret string
+		var ret RightSizingAllocationType
 		return ret
 	}
 
@@ -67,7 +62,7 @@ func (o *RightSizingRecommendation) GetAllocationType() string {
 
 // GetAllocationTypeOk returns a tuple with the AllocationType field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingRecommendation) GetAllocationTypeOk() (*string, bool) {
+func (o *RightSizingRecommendation) GetAllocationTypeOk() (*RightSizingAllocationType, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -75,7 +70,7 @@ func (o *RightSizingRecommendation) GetAllocationTypeOk() (*string, bool) {
 }
 
 // SetAllocationType sets field value
-func (o *RightSizingRecommendation) SetAllocationType(v string) {
+func (o *RightSizingRecommendation) SetAllocationType(v RightSizingAllocationType) {
 	o.AllocationType = v
 }
 
@@ -135,62 +130,6 @@ func (o *RightSizingRecommendation) SetGpuMemoryPerDeviceBytes(v int64) {
 	o.GpuMemoryPerDeviceBytes = &v
 }
 
-// GetEstimated returns the Estimated field value
-func (o *RightSizingRecommendation) GetEstimated() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.Estimated
-}
-
-// GetEstimatedOk returns a tuple with the Estimated field value
-// and a boolean to check if the value has been set.
-func (o *RightSizingRecommendation) GetEstimatedOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Estimated, true
-}
-
-// SetEstimated sets field value
-func (o *RightSizingRecommendation) SetEstimated(v bool) {
-	o.Estimated = v
-}
-
-// GetWarning returns the Warning field value if set, zero value otherwise.
-func (o *RightSizingRecommendation) GetWarning() string {
-	if o == nil || IsNil(o.Warning) {
-		var ret string
-		return ret
-	}
-	return *o.Warning
-}
-
-// GetWarningOk returns a tuple with the Warning field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *RightSizingRecommendation) GetWarningOk() (*string, bool) {
-	if o == nil || IsNil(o.Warning) {
-		return nil, false
-	}
-	return o.Warning, true
-}
-
-// HasWarning returns a boolean if a field has been set.
-func (o *RightSizingRecommendation) HasWarning() bool {
-	if o != nil && !IsNil(o.Warning) {
-		return true
-	}
-
-	return false
-}
-
-// SetWarning gets a reference to the given string and assigns it to the Warning field.
-func (o *RightSizingRecommendation) SetWarning(v string) {
-	o.Warning = &v
-}
-
 func (o RightSizingRecommendation) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -206,10 +145,6 @@ func (o RightSizingRecommendation) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.GpuMemoryPerDeviceBytes) {
 		toSerialize["gpuMemoryPerDeviceBytes"] = o.GpuMemoryPerDeviceBytes
 	}
-	toSerialize["estimated"] = o.Estimated
-	if !IsNil(o.Warning) {
-		toSerialize["warning"] = o.Warning
-	}
 	return toSerialize, nil
 }
 
@@ -222,7 +157,6 @@ func (o *RightSizingRecommendation) UnmarshalJSON(data []byte) (err error) {
 	//
 	//  	"allocationType",
 	//  	"gpuCount",
-	//  	"estimated",
 	// }
 
 	allProperties := make(map[string]interface{})

@@ -8,7 +8,10 @@ package rightsizing
 import (
 	"errors"
 	"math"
+	"net/http"
 	"testing"
+
+	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/internal/generated/pkg/api"
 )
 
 func TestSingleGPUAllocationUsesNinetyPercentCutoff(t *testing.T) {
@@ -40,6 +43,28 @@ func TestSingleGPUAllocationUsesNinetyPercentCutoff(t *testing.T) {
 			}
 			if got.AllocatedMemoryBytes != wantMemory {
 				t.Fatalf("allocated memory = %d; want %d", got.AllocatedMemoryBytes, wantMemory)
+			}
+		})
+	}
+}
+
+func TestAllocationFailuresUseAPIValidationErrors(t *testing.T) {
+	for _, testCase := range []struct {
+		name                      string
+		minimum, capacity, cutoff int64
+	}{
+		{"invalid policy", 20, 80, 0},
+		{"missing memory", 0, 80, 90},
+		{"oversized requirement", 81, 80, 90},
+	} {
+		t.Run(testCase.name, func(t *testing.T) {
+			_, err := SingleGPUAllocation(testCase.minimum, testCase.capacity, testCase.cutoff)
+			var apiError *api.Error
+			if !errors.As(err, &apiError) {
+				t.Fatalf("allocation validation must preserve the service error contract: %v", err)
+			}
+			if apiError.Code != http.StatusBadRequest || apiError.Message == "" {
+				t.Fatalf("unexpected validation error: %+v", apiError)
 			}
 		})
 	}

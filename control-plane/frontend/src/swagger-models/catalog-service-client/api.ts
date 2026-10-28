@@ -675,15 +675,29 @@ export interface RegistryIntegrationUpdateRequest {
 /**
  * 
  * @export
+ * @enum {string}
+ */
+
+export const RightSizingAllocationType = {
+    Memory: 'gpu_memory',
+    Count: 'gpu_count'
+} as const;
+
+export type RightSizingAllocationType = typeof RightSizingAllocationType[keyof typeof RightSizingAllocationType];
+
+
+/**
+ * 
+ * @export
  * @interface RightSizingRecommendation
  */
 export interface RightSizingRecommendation {
     /**
      * 
-     * @type {string}
+     * @type {RightSizingAllocationType}
      * @memberof RightSizingRecommendation
      */
-    'allocationType': RightSizingRecommendationAllocationTypeEnum;
+    'allocationType': RightSizingAllocationType;
     /**
      * 
      * @type {number}
@@ -696,27 +710,7 @@ export interface RightSizingRecommendation {
      * @memberof RightSizingRecommendation
      */
     'gpuMemoryPerDeviceBytes'?: number;
-    /**
-     * Whether this is an estimated allocation. Published-profile recommendations return false; this describes the source layout and allocation arithmetic, not verified runtime or hardware compatibility.
-     * @type {boolean}
-     * @memberof RightSizingRecommendation
-     */
-    'estimated': boolean;
-    /**
-     * Conditional sizing prerequisites, publisher-defined minimum assumptions, and unverified hardware/runtime or interconnect compatibility. Read before using the allocation.
-     * @type {string}
-     * @memberof RightSizingRecommendation
-     */
-    'warning'?: string;
 }
-
-export const RightSizingRecommendationAllocationTypeEnum = {
-    Memory: 'gpu_memory',
-    Count: 'gpu_count'
-} as const;
-
-export type RightSizingRecommendationAllocationTypeEnum = typeof RightSizingRecommendationAllocationTypeEnum[keyof typeof RightSizingRecommendationAllocationTypeEnum];
-
 /**
  * 
  * @export
@@ -793,10 +787,10 @@ export interface RightSizingResult {
     'gpuMemoryCapacityBytes'?: number;
     /**
      * 
-     * @type {string}
+     * @type {RightSizingStatus}
      * @memberof RightSizingResult
      */
-    'status': RightSizingResultStatusEnum;
+    'status': RightSizingStatus;
     /**
      * Published NGC minimum for the source profile, before allocation rounding.
      * @type {number}
@@ -846,13 +840,19 @@ export interface RightSizingResult {
      */
     'recommendation'?: RightSizingRecommendation | null;
 }
+/**
+ * 
+ * @export
+ * @enum {string}
+ */
 
-export const RightSizingResultStatusEnum = {
+export const RightSizingStatus = {
     Recommended: 'recommended',
     NoRecommendation: 'no_recommendation'
 } as const;
 
-export type RightSizingResultStatusEnum = typeof RightSizingResultStatusEnum[keyof typeof RightSizingResultStatusEnum];
+export type RightSizingStatus = typeof RightSizingStatus[keyof typeof RightSizingStatus];
+
 
 /**
  * 

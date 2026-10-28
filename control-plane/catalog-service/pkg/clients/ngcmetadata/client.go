@@ -27,11 +27,12 @@ import (
 const (
 	metadataURL      = "https://api.ngc.nvidia.com/v2/nim/metadata"
 	maxResponseBytes = 16 << 20
+	maxTagLength     = 128
 )
 
 var (
 	imagePattern = regexp.MustCompile(`^nvcr\.io/nim/[a-z0-9]+(?:[._-][a-z0-9]+)*/[a-z0-9]+(?:[._-][a-z0-9]+)*$`)
-	tagPattern   = regexp.MustCompile(`^[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}$`)
+	tagPattern   = regexp.MustCompile(fmt.Sprintf(`^[A-Za-z0-9_][A-Za-z0-9_.-]{0,%d}$`, maxTagLength-1))
 )
 
 type Profile struct {
@@ -68,7 +69,10 @@ func New(httpClient *http.Client, cacheTTL time.Duration) *Client {
 	if err != nil {
 		logging.Warnf("Failed to register NGC metadata cache; fetching directly: %v", err)
 	}
-	return &Client{httpClient: httpClient, cacheAvailable: err == nil}
+	return &Client{
+		httpClient:     httpClient,
+		cacheAvailable: err == nil,
+	}
 }
 
 // Validate checks the image and separate tag before constructing an NGC query.
@@ -79,7 +83,7 @@ func Validate(image, tag string) error {
 		return fmt.Errorf("image must be an untagged nvcr.io/nim/<organization>/<model> reference")
 	}
 	if !tagPattern.MatchString(tag) {
-		return fmt.Errorf("tag must be a nonempty container image tag")
+		return fmt.Errorf("tag must contain 1 to %d characters, start with an ASCII letter, digit or underscore, and use only ASCII letters, digits, underscores, dots or hyphens", maxTagLength)
 	}
 	return nil
 }
@@ -128,7 +132,7 @@ func (c *Client) Get(ctx context.Context, image, tag string) (Metadata, error) {
 		return Metadata{}, fmt.Errorf("read NGC metadata: %w", err)
 	}
 	if len(body) > maxResponseBytes {
-		return Metadata{}, fmt.Errorf("NGC metadata response exceeds size limit")
+		return Metadata{}, fmt.Errorf("NGC metadata response exceeds the maximum size of %d bytes", maxResponseBytes)
 	}
 	var metadata *Metadata
 	if err := json.Unmarshal(body, &metadata); err != nil {

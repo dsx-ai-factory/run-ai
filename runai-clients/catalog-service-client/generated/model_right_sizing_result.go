@@ -26,8 +26,8 @@ var _ MappedNullable = &RightSizingResult{}
 type RightSizingResult struct {
 	GpuType string `json:"gpuType"`
 	// Reported per-device capacity, not free memory or a quota guarantee.
-	GpuMemoryCapacityBytes *int64 `json:"gpuMemoryCapacityBytes,omitempty"`
-	Status                 string `json:"status"`
+	GpuMemoryCapacityBytes *int64            `json:"gpuMemoryCapacityBytes,omitempty"`
+	Status                 RightSizingStatus `json:"status"`
 	// Published NGC minimum for the source profile, before allocation rounding.
 	MinimumGpuMemoryPerDeviceGb *float64 `json:"minimumGpuMemoryPerDeviceGb,omitempty"`
 	ProfileId                   *string  `json:"profileId,omitempty"`
@@ -48,7 +48,7 @@ type _RightSizingResult RightSizingResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingResult(gpuType string, status string) *RightSizingResult {
+func NewRightSizingResult(gpuType string, status RightSizingStatus) *RightSizingResult {
 	this := RightSizingResult{}
 	this.GpuType = gpuType
 	this.Status = status
@@ -120,9 +120,9 @@ func (o *RightSizingResult) SetGpuMemoryCapacityBytes(v int64) {
 }
 
 // GetStatus returns the Status field value
-func (o *RightSizingResult) GetStatus() string {
+func (o *RightSizingResult) GetStatus() RightSizingStatus {
 	if o == nil {
-		var ret string
+		var ret RightSizingStatus
 		return ret
 	}
 
@@ -131,7 +131,7 @@ func (o *RightSizingResult) GetStatus() string {
 
 // GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetStatusOk() (*string, bool) {
+func (o *RightSizingResult) GetStatusOk() (*RightSizingStatus, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -139,7 +139,7 @@ func (o *RightSizingResult) GetStatusOk() (*string, bool) {
 }
 
 // SetStatus sets field value
-func (o *RightSizingResult) SetStatus(v string) {
+func (o *RightSizingResult) SetStatus(v RightSizingStatus) {
 	o.Status = v
 }
 
