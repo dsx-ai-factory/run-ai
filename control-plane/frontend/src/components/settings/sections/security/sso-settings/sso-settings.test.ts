@@ -31,6 +31,7 @@ describe("sso-settings.vue", () => {
     entityId: "test-entity",
     singleSignOnServiceUrl: "http://test.com/sso",
     signingCertificate: "test-cert",
+    validateSignature: true,
   };
 
   const factory = (idp?: Idp) => {

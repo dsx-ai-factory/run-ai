@@ -3,7 +3,7 @@
 {{- if and $runai_operator.config $createRunaiConfig }}
 {{- $config := deepCopy $runai_operator.config -}}
 {{- $anyworkload := deepCopy (default (dict) (index $config "anyworkload-controller")) -}}
-{{- $migratedFields := list "openshiftRouteConfiguration" "gitSyncImage" "s3FileSystemImage" "runaiOauth2ProxyImage" "runaiOauth2ProxyRedisFQDN" "runaiOauth2ProxyWorkloadAuthSecretName" "runaiOauth2ProxySessionStoreType" "runaiOauth2ProxyUsernameLoaderImage" "externalAuthUrlEnabled" -}}
+{{- $migratedFields := list "openshiftRouteConfiguration" "gitSyncImage" "s3FileSystemImage" "s3FileSystemMountCheckEnabled" "runaiOauth2ProxyImage" "runaiOauth2ProxyRedisFQDN" "runaiOauth2ProxyWorkloadAuthSecretName" "runaiOauth2ProxySessionStoreType" "runaiOauth2ProxyUsernameLoaderImage" "externalAuthUrlEnabled" -}}
 {{- range $legacyName := list "workload-controller" "inference-workload-controller" -}}
   {{- $legacy := default (dict) (index $config $legacyName) -}}
   {{- range $field := $migratedFields -}}

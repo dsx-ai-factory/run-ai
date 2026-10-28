@@ -72,7 +72,7 @@ type AnyworkloadController struct {
 	// S3FileSystemMountCheckEnabled overrides startup-probe support for the configured S3 image.
 	// When unset, only the bundled goofys image from this operator build is enabled.
 	// Custom images must implement goofys --ready-file and --check-ready before opting in.
-	// Enabling probes requires a writable /runai-goofys-ready on the sidecar root filesystem.
+	// Readiness markers use a writable volume mounted only into the S3 sidecar.
 	// +kubebuilder:validation:Optional
 	S3FileSystemMountCheckEnabled *bool `json:"s3FileSystemMountCheckEnabled,omitempty"`
 

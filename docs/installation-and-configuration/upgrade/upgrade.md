@@ -386,8 +386,17 @@ helm repo update
 helm install haproxy-kubernetes-ingress haproxytech/kubernetes-ingress \
  --create-namespace \
  --namespace haproxy-controller \
- --set controller.service.type=LoadBalancer
+ --set controller.service.type=LoadBalancer \
+ --set-string controller.config.ssl-redirect-port=443
 ```
+
+<Note>
+
+**Note**
+
+For ingresses with TLS, HAProxy redirects HTTP requests to the port set in `controller.config.ssl-redirect-port`. The default is 8443, the controller's container port, which clients cannot reach through the LoadBalancer Service. The LoadBalancer Service exposes HTTPS on port 443, so set `ssl-redirect-port` to 443. For more information, refer to [ssl-redirect-port](https://www.haproxy.com/documentation/kubernetes-ingress/community/configuration-reference/configmap/) in the HAProxy Kubernetes Ingress Controller documentation.
+
+</Note>
 
 </Accordion>
 
@@ -408,8 +417,17 @@ helm install haproxy-kubernetes-ingress haproxytech/kubernetes-ingress \
  --set controller.service.externalTrafficPolicy=Local \
  --set controller.service.annotations."oci-network-load-balancer\.oraclecloud\.com/is-preserve-source"="True" \
  --set controller.service.annotations."oci-network-load-balancer\.oraclecloud\.com/security-list-management-mode"=All \
- --set controller.service.annotations."oci\.oraclecloud\.com/load-balancer-type"=nlb
+ --set controller.service.annotations."oci\.oraclecloud\.com/load-balancer-type"=nlb \
+ --set-string controller.config.ssl-redirect-port=443
 ```
+
+<Note>
+
+**Note**
+
+For ingresses with TLS, HAProxy redirects HTTP requests to the port set in `controller.config.ssl-redirect-port`. The default is 8443, the controller's container port, which clients cannot reach through the LoadBalancer Service. The LoadBalancer Service exposes HTTPS on port 443, so set `ssl-redirect-port` to 443. For more information, refer to [ssl-redirect-port](https://www.haproxy.com/documentation/kubernetes-ingress/community/configuration-reference/configmap/) in the HAProxy Kubernetes Ingress Controller documentation.
+
+</Note>
 
 </Accordion>
 
@@ -479,6 +497,53 @@ To run the test, identify the IP address that should reach the cluster’s nodes
     ```
 
 Once the application is deployed, access the cluster’s IP address in a browser. If the page displays **“hello from haproxy-ingress”**, HAProxy is functioning correctly and you can proceed with upgrading NVIDIA Run:ai.
+
+The NVIDIA Run:ai control plane uses an ingress with TLS, so also verify how HAProxy redirects HTTP requests to HTTPS. This test uses a self-signed certificate for the example host `hello.example.com`.
+
+1.  Create a self-signed certificate and a TLS secret:
+
+    ```bash
+    openssl req -x509 -nodes -days 1 -newkey rsa:2048 \
+      -subj "/CN=hello.example.com" -keyout hello.key -out hello.crt
+    kubectl create secret tls hello-tls --cert=hello.crt --key=hello.key
+    ```
+2.  Create a local `haproxy-tls-test.yml` file with an ingress that uses the secret:
+
+    ```yaml
+    apiVersion: networking.k8s.io/v1
+    kind: Ingress
+    metadata:
+      name: hello-tls
+    spec:
+      ingressClassName: haproxy
+      tls:
+      - hosts:
+        - hello.example.com
+        secretName: hello-tls
+      rules:
+      - host: hello.example.com
+        http:
+          paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hello
+                port:
+                  number: 80
+    ```
+3.  Run the following command:
+
+    ```bash
+    kubectl apply -f haproxy-tls-test.yml
+    ```
+4.  Send an HTTP request and check the `location` header in the response. Replace `<IP>` with the address that clients use: a node IP address for direct NodePort access, or the load balancer address for LoadBalancer installations. Replace `<HTTP-PORT>` with the port that clients use for HTTP, for example, the HTTP NodePort (`32080`) or `80` behind a load balancer:
+
+    ```bash
+    curl -sI -H "Host: hello.example.com" http://<IP>:<HTTP-PORT>/
+    ```
+
+The `location` header must point to the HTTPS port that clients connect to, for example, `https://hello.example.com:32443/` for direct NodePort access. If it points to port 8443, set `controller.config.ssl-redirect-port` as described in [Install and Configure HAProxy Kubernetes Ingress Controller](#install-and-configure-haproxy-kubernetes-ingress-controller).
 
 ### Upgrade the Control Plane
 

@@ -5,13 +5,17 @@ BatchJobTarget:
     kind: Job
     metadata:
       annotations:
+        example.com/note: test
         run.ai/submitted-by: tester
       labels:
         ADDED1: added1
         Lbl1: lbl1
         NO_VALUE: ""
         app: job
+        app.kubernetes.io/part-of: example
         createdBy: Job
+        example.com/empty: ""
+        example.com/no-value: ""
         project: test
         release: labels
         run.ai/control-plane-managed: "true"
@@ -25,10 +29,17 @@ BatchJobTarget:
       template:
         metadata:
           annotations:
+            example.com/note: test
             user: tester
           labels:
+            ADDED1: added1
+            Lbl1: lbl1
+            NO_VALUE: ""
             app: job
+            app.kubernetes.io/part-of: example
             createdBy: Job
+            example.com/empty: ""
+            example.com/no-value: ""
             project: test
             release: labels
             workloadKind: Training

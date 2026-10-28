@@ -356,6 +356,7 @@ func (s *IdpsApiService) addIdpDataByIdpType(ctx context.Context, res *api.Idp, 
 			SigningCertificate:     (*provider.Config)[utils.SigningCertificate],
 			SingleSignOnServiceUrl: (*provider.Config)[utils.SingleSignOnServiceUrl],
 			EntityId:               (*provider.Config)[utils.EntityId],
+			ValidateSignature:      (*provider.Config)[utils.ValidateSignature] == "true",
 		}
 		res.SamlData.ServiceProviderMetadataUrl = s.getSPSamlMetadataUrl(ctx, *provider.Alias)
 	}

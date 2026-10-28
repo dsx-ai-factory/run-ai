@@ -233,10 +233,52 @@ var ComposerTests = append([]TableEntry{
 		expectedFname: "auto_deletion_tr",
 	}),
 
-	Entry("labels", ComposerTest{
+	Entry("labels and annotations for workspace", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:     "labels",
+		expectedFname: "labels_ws",
+	}),
+
+	Entry("labels and annotations for training", ComposerTest{
 		workloadType:  string(workloadsApi.WORKLOADTYPE_TRAINING),
 		specFname:     "labels",
 		expectedFname: "labels_tr",
+	}),
+
+	Entry("Kubernetes Job identity labels for workspace", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:     "labels_job_identity",
+		expectedFname: "labels_job_identity_ws",
+	}),
+
+	Entry("Kubernetes Job identity labels for training", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:     "labels_job_identity",
+		expectedFname: "labels_job_identity_tr",
+	}),
+
+	Entry("generated pod identity labels for workspace", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:     "labels_identity_override",
+		expectedFname: "labels_identity_override_ws",
+	}),
+
+	Entry("generated pod identity labels for training", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:     "labels_identity_override",
+		expectedFname: "labels_identity_override_tr",
+	}),
+
+	Entry("generated user annotation without labels for workspace", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:     "annotations_user_override",
+		expectedFname: "annotations_user_override_ws",
+	}),
+
+	Entry("generated user annotation without labels for training", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:     "annotations_user_override",
+		expectedFname: "annotations_user_override_tr",
 	}),
 
 	Entry("rich", ComposerTest{

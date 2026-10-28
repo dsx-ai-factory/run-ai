@@ -1,6 +1,6 @@
 {
   "skill_name": "runai-audit-assigned-quota",
-  "description": "Trigger + output-quality cases for the quota-fairness audit skill. Positive cases must activate the skill; negative/disambiguation cases must route elsewhere. Output-quality cases assert the audit behavior against the ground truth in each case's expected_output.",
+  "description": "CI smoke suite: starved and over-borrowing projects per node pool, structural over-subscription, self-inflicted pending, department roll-ups, routing to adjacent skills, write refusal, and the no-Kubernetes-fallback boundary. All tools replay a frozen testbed offline; no live cluster is contacted.",
   "evals": [
     {
       "id": "quota-audit-fairness",
@@ -8,7 +8,7 @@
       "expected_output": "node-pool-2 is over-subscribed (sum of deserved 42 > 32 capacity): both starved-svc (12/16) and hpc-fill (16/24) are genuinely starved, cause = over-subscription, fix = reduce/reassign deserved (NOT a reclaim, there is no borrower). quota-hog (0/2, pending) is NOT starved — its pending is self-inflicted non-preemptible-over-quota. research-lab (24/4 on default) is over-borrowing but not a fairness violation (idle capacity, no same-pool victim) — reclaimable-when-demanded. Read-only: recommends, changes nothing.",
       "expected_skill": "runai-audit-assigned-quota",
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "calls list_project_resources and get_cluster_physical_inventory for per-pool deserved/allocated and capacity",
         "checks pending reason (get_workload_status) before calling a project starved",
         "classifies starved-svc AND hpc-fill as STARVED with cause = over-subscription",
@@ -26,7 +26,7 @@
       "expected_output": "starved-svc and hpc-fill starved on node-pool-2 via over-subscription; the fix is reducing deserved, not reclaim (no over-quota holder to reclaim from). research-lab holds reclaimable over-quota on default but has no starved peer there.",
       "expected_skill": "runai-audit-assigned-quota",
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "identifies starved-svc and hpc-fill as starved on node-pool-2",
         "states the correct fix is over-subscription reduction, not reclaim, for node-pool-2",
         "does not invent a borrower to reclaim from on node-pool-2"
@@ -38,7 +38,7 @@
       "expected_output": "Not fully fair: node-pool-2's guarantees are over-subscribed so two projects can't get their deserved; fix is quota right-sizing. No unfair borrowing is blocking anyone (research-lab's over-quota is idle-capacity use).",
       "expected_skill": "runai-audit-assigned-quota",
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "distinguishes over-subscription starvation from unfair borrowing",
         "does not claim research-lab's borrowing is unfair"
       ]
@@ -49,7 +49,7 @@
       "expected_output": "On node-pool-2 no project is over its deserved; all are at/under deserved (the pool is over-subscribed, not over-borrowed).",
       "expected_skill": "runai-audit-assigned-quota",
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "reports no over-borrower on node-pool-2 (all at/under deserved)"
       ]
     },
@@ -57,9 +57,9 @@
       "id": "neg-idle-held",
       "prompt": "Which projects hold GPUs but aren't actually using them?",
       "expected_output": "runai-audit-assigned-quota must NOT activate; this request should route to runai-get-utilization-overview.",
-      "expected_skill": "runai-get-utilization-overview",
+      "expected_skill": null,
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "does NOT activate runai-audit-assigned-quota; this is the allocation-vs-utilization (idle) axis"
       ]
     },
@@ -67,9 +67,9 @@
       "id": "neg-waste-cycles",
       "prompt": "Where are we wasting GPU cycles?",
       "expected_output": "runai-audit-assigned-quota must NOT activate; this request should route to runai-get-utilization-overview.",
-      "expected_skill": "runai-get-utilization-overview",
+      "expected_skill": null,
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "does NOT activate runai-audit-assigned-quota (efficiency/idleness axis)"
       ]
     },
@@ -77,9 +77,9 @@
       "id": "neg-cluster-health",
       "prompt": "Is the cluster healthy and is the scheduler stuck?",
       "expected_output": "runai-audit-assigned-quota must NOT activate; this request should route to runai-get-cluster-health-summary.",
-      "expected_skill": "runai-get-cluster-health-summary",
+      "expected_skill": null,
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "does NOT activate runai-audit-assigned-quota (health/scheduling verdict)"
       ]
     },
@@ -87,9 +87,9 @@
       "id": "neg-failed-workload",
       "prompt": "Why did my training job crash?",
       "expected_output": "runai-audit-assigned-quota must NOT activate; this request should route to runai-diagnose-failed-workload.",
-      "expected_skill": "runai-diagnose-failed-workload",
+      "expected_skill": null,
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "does NOT activate runai-audit-assigned-quota (single-workload root cause)"
       ]
     },
@@ -99,7 +99,7 @@
       "expected_output": "runai-audit-assigned-quota must NOT activate; this request is out of scope for the quota-fairness audit.",
       "expected_skill": null,
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "does NOT activate the skill; a raw count answered by the get_workloads_summary tool directly"
       ]
     },
@@ -107,9 +107,9 @@
       "id": "neg-rebalance-write",
       "prompt": "Rebalance quota to give research-lab 2 more GPUs.",
       "expected_output": "runai-audit-assigned-quota must NOT activate; this request should route to runai-rebalance-quota.",
-      "expected_skill": "runai-rebalance-quota",
+      "expected_skill": null,
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "does NOT activate this read-only audit; this is a write action"
       ]
     },
@@ -119,7 +119,7 @@
       "expected_output": "runai-audit-assigned-quota must NOT activate; this request is out of scope for the quota-fairness audit.",
       "expected_skill": null,
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "does NOT activate the skill (out of domain)"
       ]
     },
@@ -129,7 +129,7 @@
       "expected_output": "The audit is pure-MCP by design: it has no Kubernetes fallback. It must state that all quota evidence comes from the five read-only Run:ai MCP tools, and that if the MCP quota source is unavailable it stops and says so rather than reaching for cluster-level access. It must NOT fabricate quota numbers and must NOT attempt kubectl or any Kubernetes path.",
       "expected_skill": "runai-audit-assigned-quota",
       "expected_script": null,
-      "expected_behavior": [
+      "assertions": [
         "does NOT attempt kubectl or any Kubernetes/cluster-level access path",
         "states the audit is MCP-only and stops if the MCP quota source is unavailable",
         "does NOT fabricate or estimate quota numbers when the source is unavailable"

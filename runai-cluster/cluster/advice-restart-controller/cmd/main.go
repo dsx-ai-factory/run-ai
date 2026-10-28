@@ -8,7 +8,7 @@ package main
 import (
 	"os"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/apis/heimdall/v1alpha1"
+	"github.com/dsx-ai-factory/nvidia-recovery/advice-operator/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-controller/pkg/controller"
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"

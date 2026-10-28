@@ -385,8 +385,10 @@ func clonePtr[T any](in *T) *T {
 
 // WorkloadConfiguration represents all workload configuration
 type WorkloadConfiguration struct {
-	Mnnvl      *MnnvlConfiguration      `json:"mnnvl,omitempty"`
-	Networking *NetworkingConfiguration `json:"networking,omitempty"`
+	// PodOwnershipLabelsStamped records creation-time stamping so old templates remain unchanged on edits.
+	PodOwnershipLabelsStamped bool                     `json:"podOwnershipLabelsStamped,omitempty"`
+	Mnnvl                     *MnnvlConfiguration      `json:"mnnvl,omitempty"`
+	Networking                *NetworkingConfiguration `json:"networking,omitempty"`
 	// InferenceEndpoint is resolved by the server, never accepted from the public
 	// workload configuration. Nil preserves the behavior of existing workloads.
 	InferenceEndpoint *api.AgentInferenceEndpoint `json:"inferenceEndpoint,omitempty"`

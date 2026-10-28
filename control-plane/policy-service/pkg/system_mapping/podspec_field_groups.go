@@ -11,6 +11,13 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 )
 
+const (
+	itemSelAllResourceClaims          = "allResourceClaims"
+	itemSelResourceClaimByName        = "resourceClaimByName"
+	itemSelAllDirectResourceClaims    = "allDirectResourceClaims"
+	itemSelAllTemplatedResourceClaims = "allTemplatedResourceClaims"
+)
+
 func BuildFieldGroupFieldMap(entries []SystemFgField) map[string]api.FieldGroupField {
 	out := make(map[string]api.FieldGroupField, len(entries))
 
@@ -157,23 +164,23 @@ func podSpecItemSelectorDefs() []SystemItemSel {
 			Query: `(.schedulingGates // [])[]`,
 		},
 		{
-			Name:  "allReservedResourceClaims",
+			Name:  itemSelAllResourceClaims,
 			Desc:  "all resource claims",
 			Query: `(.resourceClaims // [])[]`,
 		},
 		{
-			Name:     "reservedResourceClaimByName",
+			Name:     itemSelResourceClaimByName,
 			Desc:     "resource claim with a given name",
 			Query:    `(.resourceClaims // [])[] | select(.name == $ARGS.named.resourceClaimPodName)`,
 			ArgsInfo: map[string]api.MappingFieldType{"resourceClaimPodName": api.MAPPINGFIELDTYPE_STRING},
 		},
 		{
-			Name:  "allClaimBasedReservedResourceClaims",
+			Name:  itemSelAllDirectResourceClaims,
 			Desc:  "resource claims that reference a ResourceClaim by name",
 			Query: `(.resourceClaims // [])[] | select(.resourceClaimName != null and .resourceClaimName != "")`,
 		},
 		{
-			Name:  "allTemplateBasedReservedResourceClaims",
+			Name:  itemSelAllTemplatedResourceClaims,
 			Desc:  "resource claims produced from a ResourceClaimTemplate",
 			Query: `(.resourceClaims // [])[] | select(.resourceClaimTemplateName != null and .resourceClaimTemplateName != "")`,
 		},
@@ -317,11 +324,6 @@ func podSpecAndContainerItemSelectorDefs() []SystemItemSel {
 			Query:    `((.resources.limits // {}) | to_entries[]) | select(.key == $ARGS.named.resourceLimitKey)`,
 			ArgsInfo: map[string]api.MappingFieldType{"resourceLimitKey": api.MAPPINGFIELDTYPE_STRING},
 		},
-		{
-			Name:  "allResourceClaims",
-			Desc:  "all device resource claims",
-			Query: `(.resources.claims // [])[]`,
-		},
 	}
 }
 
@@ -336,9 +338,9 @@ func podSpecFgFields() []SystemFgField {
 	selectorsImagePullSecrets := []string{"allImagePullSecrets"}
 	selectorsReadinessGates := []string{"allReadinessGates"}
 	selectorsSchedulingGates := []string{"allSchedulingGates"}
-	selectorsReservedResourceClaimsAll := []string{"allReservedResourceClaims", "reservedResourceClaimByName", "allClaimBasedReservedResourceClaims", "allTemplateBasedReservedResourceClaims"}
-	selectorsReservedResourceClaimsWithClaimName := []string{"allReservedResourceClaims", "reservedResourceClaimByName", "allClaimBasedReservedResourceClaims"}
-	selectorsReservedResourceClaimsWithTemplate := []string{"allReservedResourceClaims", "reservedResourceClaimByName", "allTemplateBasedReservedResourceClaims"}
+	selectorsResourceClaimsAll := []string{itemSelAllResourceClaims, itemSelResourceClaimByName, itemSelAllDirectResourceClaims, itemSelAllTemplatedResourceClaims}
+	selectorsResourceClaimsDirect := []string{itemSelAllResourceClaims, itemSelResourceClaimByName, itemSelAllDirectResourceClaims}
+	selectorsResourceClaimsTemplated := []string{itemSelAllResourceClaims, itemSelResourceClaimByName, itemSelAllTemplatedResourceClaims}
 	selectorsVolumesAllKinds := []string{"allVolumes", "allConfigMapVolumes", "allEmptyDirVolumes", "allHostPathVolumes", "allNfsVolumes", "allPvcVolumes", "allSecretVolumes"}
 	selectorsVolumesConfigMap := []string{"allConfigMapVolumes"}
 	selectorsVolumesEmptyDir := []string{"allEmptyDirVolumes"}
@@ -582,30 +584,30 @@ func podSpecFgFields() []SystemFgField {
 			ItemSelectors: selectorsSchedulingGates,
 		},
 		{
-			Name:      "reservedResourceClaims",
+			Name:      "resourceClaims",
 			Formatter: podSpec,
 			Type:      api.MAPPINGFIELDTYPE_OBJECT,
 		},
 		{
-			Name:          "reservedResourceClaims-Name",
+			Name:          "resourceClaims-name",
 			Formatter:     keyValue,
 			SpecRef:       convutils.Ref("name"),
 			Type:          api.MAPPINGFIELDTYPE_STRING,
-			ItemSelectors: selectorsReservedResourceClaimsAll,
+			ItemSelectors: selectorsResourceClaimsAll,
 		},
 		{
-			Name:          "reservedResourceClaims-ClaimName",
+			Name:          "resourceClaims-resourceClaimName",
 			Formatter:     keyValue,
 			SpecRef:       convutils.Ref("resourceClaimName"),
 			Type:          api.MAPPINGFIELDTYPE_STRING,
-			ItemSelectors: selectorsReservedResourceClaimsWithClaimName,
+			ItemSelectors: selectorsResourceClaimsDirect,
 		},
 		{
-			Name:          "reservedResourceClaims-ClaimTemplate",
+			Name:          "resourceClaims-resourceClaimTemplateName",
 			Formatter:     keyValue,
 			SpecRef:       convutils.Ref("resourceClaimTemplateName"),
 			Type:          api.MAPPINGFIELDTYPE_STRING,
-			ItemSelectors: selectorsReservedResourceClaimsWithTemplate,
+			ItemSelectors: selectorsResourceClaimsTemplated,
 		},
 		{
 			Name:      "nodeName",
@@ -1192,7 +1194,6 @@ func podSpecAndContainerFgFields() []SystemFgField {
 	podSpec := SystemPodSpecFormatterName
 	selectorsResourceRequests := []string{"allResourceRequests", "resourceRequestByKey"}
 	selectorsResourceLimits := []string{"allResourceLimits", "resourceLimitByKey"}
-	selectorsResourceClaims := []string{"allResourceClaims"}
 
 	return []SystemFgField{
 		{
@@ -1242,25 +1243,6 @@ func podSpecAndContainerFgFields() []SystemFgField {
 			SpecRef:       convutils.Ref("value"),
 			Type:          api.MAPPINGFIELDTYPE_QUANTITY,
 			ItemSelectors: selectorsResourceLimits,
-		},
-		{
-			Name:      "resourceClaims",
-			Formatter: podSpec,
-			Type:      api.MAPPINGFIELDTYPE_OBJECT,
-		},
-		{
-			Name:          "resourceClaims-Name",
-			Formatter:     keyValue,
-			SpecRef:       convutils.Ref("name"),
-			Type:          api.MAPPINGFIELDTYPE_STRING,
-			ItemSelectors: selectorsResourceClaims,
-		},
-		{
-			Name:          "resourceClaims-Request",
-			Formatter:     keyValue,
-			SpecRef:       convutils.Ref("request"),
-			Type:          api.MAPPINGFIELDTYPE_STRING,
-			ItemSelectors: selectorsResourceClaims,
 		},
 		{
 			Name:      "appArmorProfile-Type",
