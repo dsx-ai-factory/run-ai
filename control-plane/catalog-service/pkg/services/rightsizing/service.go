@@ -31,11 +31,19 @@ type Service struct {
 }
 
 func New(inventory Inventory, metadata Metadata, cutoffPercent int64) *Service {
-	return &Service{inventory: inventory, metadata: metadata, cutoffPercent: cutoffPercent}
+	return &Service{
+		inventory:     inventory,
+		metadata:      metadata,
+		cutoffPercent: cutoffPercent,
+	}
 }
 
 func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest) (api.RightSizingResponse, *api.Error) {
-	response := api.RightSizingResponse{Image: request.Image, Tag: request.Tag, Results: []api.RightSizingResult{}}
+	response := api.RightSizingResponse{
+		Image:   request.Image,
+		Tag:     request.Tag,
+		Results: []api.RightSizingResult{},
+	}
 	if err := uuid.Validate(request.ClusterId); err != nil {
 		return response, api.NewError(http.StatusBadRequest, "Invalid cluster ID", err)
 	}
@@ -72,7 +80,10 @@ func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest)
 }
 
 func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Profile, cutoffPercent int64) api.RightSizingResult {
-	result := api.RightSizingResult{GpuType: gpu.Type, Status: "no_recommendation"}
+	result := api.RightSizingResult{
+		GpuType: gpu.Type,
+		Status:  api.RIGHTSIZINGSTATUS_NO_RECOMMENDATION,
+	}
 	if gpu.MemoryBytes == nil || *gpu.MemoryBytes <= 0 {
 		result.Reason = "GPU memory capacity is not reported by the cluster"
 		return result
@@ -99,9 +110,10 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 	result.TensorParallelSize = int64(*profile.TensorParallelSize)
 	result.PipelineParallelSize = int64(*profile.PipelineParallelSize)
 	if chosen.count > 1 {
-		result.Status = "recommended"
+		result.Status = api.RIGHTSIZINGSTATUS_RECOMMENDED
 		result.Recommendation = &api.RightSizingRecommendation{
-			AllocationType: "gpu_count", GpuCount: chosen.count,
+			AllocationType:          api.RIGHTSIZINGALLOCATIONTYPE_GPU_COUNT,
+			GpuCount:                chosen.count,
 			GpuMemoryPerDeviceBytes: *gpu.MemoryBytes,
 		}
 		return result
@@ -111,13 +123,14 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 		result.Reason = "GPU allocation sharing policy is invalid"
 		return result
 	}
-	result.Status = "recommended"
-	allocationType := "gpu_memory"
+	result.Status = api.RIGHTSIZINGSTATUS_RECOMMENDED
+	allocationType := api.RIGHTSIZINGALLOCATIONTYPE_GPU_MEMORY
 	if allocation.WholeGPU {
-		allocationType = "gpu_count"
+		allocationType = api.RIGHTSIZINGALLOCATIONTYPE_GPU_COUNT
 	}
 	result.Recommendation = &api.RightSizingRecommendation{
-		AllocationType: allocationType, GpuCount: 1,
+		AllocationType:          allocationType,
+		GpuCount:                1,
 		GpuMemoryPerDeviceBytes: allocation.AllocatedMemoryBytes,
 	}
 	return result

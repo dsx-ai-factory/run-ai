@@ -1831,6 +1831,20 @@
           }
         }
       },
+      "RightSizingStatus": {
+        "type": "string",
+        "enum": [
+          "recommended",
+          "no_recommendation"
+        ]
+      },
+      "RightSizingAllocationType": {
+        "type": "string",
+        "enum": [
+          "gpu_memory",
+          "gpu_count"
+        ]
+      },
       "RightSizingRecommendation": {
         "type": "object",
         "nullable": true,
@@ -1840,11 +1854,7 @@
         ],
         "properties": {
           "allocationType": {
-            "type": "string",
-            "enum": [
-              "gpu_memory",
-              "gpu_count"
-            ]
+            "$ref": "#/components/schemas/RightSizingAllocationType"
           },
           "gpuCount": {
             "type": "integer",
@@ -1874,11 +1884,7 @@
             "description": "Reported per-device capacity, not free memory or a quota guarantee."
           },
           "status": {
-            "type": "string",
-            "enum": [
-              "recommended",
-              "no_recommendation"
-            ]
+            "$ref": "#/components/schemas/RightSizingStatus"
           },
           "minimumGpuMemoryPerDeviceGb": {
             "type": "number",

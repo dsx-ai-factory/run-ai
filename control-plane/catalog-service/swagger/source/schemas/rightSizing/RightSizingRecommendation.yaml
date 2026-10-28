@@ -3,8 +3,7 @@ nullable: true
 required: [allocationType, gpuCount]
 properties:
   allocationType:
-    type: string
-    enum: [gpu_memory, gpu_count]
+    $ref: './RightSizingAllocationType.yaml'
   gpuCount:
     type: integer
     format: int64

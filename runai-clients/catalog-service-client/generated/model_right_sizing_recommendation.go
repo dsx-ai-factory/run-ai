@@ -24,9 +24,9 @@ var _ MappedNullable = &RightSizingRecommendation{}
 
 // RightSizingRecommendation struct for RightSizingRecommendation
 type RightSizingRecommendation struct {
-	AllocationType          string `json:"allocationType"`
-	GpuCount                int64  `json:"gpuCount"`
-	GpuMemoryPerDeviceBytes *int64 `json:"gpuMemoryPerDeviceBytes,omitempty"`
+	AllocationType          RightSizingAllocationType `json:"allocationType"`
+	GpuCount                int64                     `json:"gpuCount"`
+	GpuMemoryPerDeviceBytes *int64                    `json:"gpuMemoryPerDeviceBytes,omitempty"`
 }
 
 type _RightSizingRecommendation RightSizingRecommendation
@@ -35,7 +35,7 @@ type _RightSizingRecommendation RightSizingRecommendation
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingRecommendation(allocationType string, gpuCount int64) *RightSizingRecommendation {
+func NewRightSizingRecommendation(allocationType RightSizingAllocationType, gpuCount int64) *RightSizingRecommendation {
 	this := RightSizingRecommendation{}
 	this.AllocationType = allocationType
 	this.GpuCount = gpuCount
@@ -51,9 +51,9 @@ func NewRightSizingRecommendationWithDefaults() *RightSizingRecommendation {
 }
 
 // GetAllocationType returns the AllocationType field value
-func (o *RightSizingRecommendation) GetAllocationType() string {
+func (o *RightSizingRecommendation) GetAllocationType() RightSizingAllocationType {
 	if o == nil {
-		var ret string
+		var ret RightSizingAllocationType
 		return ret
 	}
 
@@ -62,7 +62,7 @@ func (o *RightSizingRecommendation) GetAllocationType() string {
 
 // GetAllocationTypeOk returns a tuple with the AllocationType field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingRecommendation) GetAllocationTypeOk() (*string, bool) {
+func (o *RightSizingRecommendation) GetAllocationTypeOk() (*RightSizingAllocationType, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -70,7 +70,7 @@ func (o *RightSizingRecommendation) GetAllocationTypeOk() (*string, bool) {
 }
 
 // SetAllocationType sets field value
-func (o *RightSizingRecommendation) SetAllocationType(v string) {
+func (o *RightSizingRecommendation) SetAllocationType(v RightSizingAllocationType) {
 	o.AllocationType = v
 }
 

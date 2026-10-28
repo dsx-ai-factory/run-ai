@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**AllocationType** | **string** |  | 
+**AllocationType** | [**RightSizingAllocationType**](RightSizingAllocationType.md) |  | 
 **GpuCount** | **int64** |  | 
 **GpuMemoryPerDeviceBytes** | Pointer to **int64** |  | [optional] 
 
@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 
 ### NewRightSizingRecommendation
 
-`func NewRightSizingRecommendation(allocationType string, gpuCount int64, ) *RightSizingRecommendation`
+`func NewRightSizingRecommendation(allocationType RightSizingAllocationType, gpuCount int64, ) *RightSizingRecommendation`
 
 NewRightSizingRecommendation instantiates a new RightSizingRecommendation object
 This constructor will assign default values to properties that have it defined,
@@ -29,20 +29,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetAllocationType
 
-`func (o *RightSizingRecommendation) GetAllocationType() string`
+`func (o *RightSizingRecommendation) GetAllocationType() RightSizingAllocationType`
 
 GetAllocationType returns the AllocationType field if non-nil, zero value otherwise.
 
 ### GetAllocationTypeOk
 
-`func (o *RightSizingRecommendation) GetAllocationTypeOk() (*string, bool)`
+`func (o *RightSizingRecommendation) GetAllocationTypeOk() (*RightSizingAllocationType, bool)`
 
 GetAllocationTypeOk returns a tuple with the AllocationType field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetAllocationType
 
-`func (o *RightSizingRecommendation) SetAllocationType(v string)`
+`func (o *RightSizingRecommendation) SetAllocationType(v RightSizingAllocationType)`
 
 SetAllocationType sets AllocationType field to given value.
 

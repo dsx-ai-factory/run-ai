@@ -27,8 +27,8 @@ var dummyRightSizingRecommendation = runaihttp.AssertPattern
 type RightSizingRecommendation struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//AllocationType string `json:"allocationType"`
-	AllocationType string `json:"allocationType" gorm:"not null;"`
+	//AllocationType RightSizingAllocationType `json:"allocationType"`
+	AllocationType RightSizingAllocationType `json:"allocationType" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -62,6 +62,10 @@ func AssertRightSizingRecommendationConstraints(obj RightSizingRecommendation) e
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	if okValue := obj.AllocationType.IsValid(); !okValue {
+		return &UnsupportedValueError{Field: "AllocationType", Value: string(obj.AllocationType)}
+	}
 
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.GpuCount < 1 {

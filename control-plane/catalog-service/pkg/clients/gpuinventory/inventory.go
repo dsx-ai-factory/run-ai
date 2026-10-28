@@ -36,7 +36,10 @@ type Client struct {
 }
 
 func New(nodePools NodePoolsClient, requestTimeout time.Duration) *Client {
-	return &Client{nodePools: nodePools, requestTimeout: requestTimeout}
+	return &Client{
+		nodePools:      nodePools,
+		requestTimeout: requestTimeout,
+	}
 }
 
 func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) {
@@ -52,11 +55,11 @@ func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) 
 	if pools == nil {
 		return nil, fmt.Errorf("cluster GPU inventory returned no response")
 	}
-	type key struct {
+	type hardwareKey struct {
 		gpuType string
 		memory  int64
 	}
-	indices := make(map[key]int)
+	indices := make(map[hardwareKey]int)
 	result := make([]Hardware, 0)
 	for _, pool := range pools.Nodepools {
 		for _, gpu := range pool.GpuTypes {
@@ -78,15 +81,21 @@ func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) 
 			if gpu.GpuMemoryBytes != nil && *gpu.GpuMemoryBytes > 0 {
 				memory = *gpu.GpuMemoryBytes
 			}
-			k := key{name, memory}
-			if index, exists := indices[k]; exists {
+			hardwareIdentity := hardwareKey{
+				gpuType: name,
+				memory:  memory,
+			}
+			if index, exists := indices[hardwareIdentity]; exists {
 				// A pool or page is not a node. Summing these counts would invent
 				// a single-node layout from GPUs installed on different nodes.
 				result[index].MaxDevicesPerNode = max(result[index].MaxDevicesPerNode, maxPerNode)
 				continue
 			}
-			indices[k] = len(result)
-			hardware := Hardware{Type: name, MaxDevicesPerNode: maxPerNode}
+			indices[hardwareIdentity] = len(result)
+			hardware := Hardware{
+				Type:              name,
+				MaxDevicesPerNode: maxPerNode,
+			}
 			if memory > 0 {
 				hardware.MemoryBytes = &memory
 			}

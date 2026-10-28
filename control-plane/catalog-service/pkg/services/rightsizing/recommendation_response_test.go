@@ -33,7 +33,7 @@ func TestRecommendationResponseContainsOnlyAllocationFields(t *testing.T) {
 			result := recommendForHardware(gpuinventory.Hardware{
 				Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8,
 			}, []ngcmetadata.Profile{profile}, 90)
-			require.Equal(t, "recommended", result.Status)
+			require.Equal(t, "recommended", string(result.Status))
 			body, err := json.Marshal(result.Recommendation)
 			require.NoError(t, err)
 			require.JSONEq(t, tc.want, string(body))

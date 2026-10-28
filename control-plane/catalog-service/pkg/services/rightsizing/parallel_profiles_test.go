@@ -18,7 +18,7 @@ func TestScalarMemoryFloorDoesNotEstablishParallelLayout(t *testing.T) {
 	capacity, minimum, one := int64(80_000_000_000), 380.0, 1
 	result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8},
 		[]ngcmetadata.Profile{{ID: "tp1-floor", TensorParallelSize: &one, PipelineParallelSize: &one, MinimumVRAMPerDeviceGB: &minimum}}, 90)
-	require.Equal(t, "no_recommendation", result.Status)
+	require.Equal(t, "no_recommendation", string(result.Status))
 	require.Nil(t, result.Recommendation, "neither five nor eight GPUs is justified by this scalar TP1 floor")
 }
 
@@ -43,15 +43,15 @@ func TestParallelProfilesChooseFewestGPUsWithinMemoryAndNodeLimits(t *testing.T)
 		capacity := tc.capacity * 1_000_000_000
 		result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: tc.nodeCount}, profiles, 90)
 		if tc.profile == "" {
-			require.Equal(t, "no_recommendation", result.Status)
+			require.Equal(t, "no_recommendation", string(result.Status))
 			require.Nil(t, result.Recommendation)
 			continue
 		}
-		require.Equal(t, "recommended", result.Status)
+		require.Equal(t, "recommended", string(result.Status))
 		require.Equal(t, tc.profile, result.ProfileId)
 		require.NotNil(t, result.Recommendation)
 		require.Equal(t, tc.count, result.Recommendation.GpuCount)
-		require.Equal(t, "gpu_count", result.Recommendation.AllocationType)
+		require.Equal(t, "gpu_count", string(result.Recommendation.AllocationType))
 		require.Equal(t, capacity, result.Recommendation.GpuMemoryPerDeviceBytes)
 		require.Equal(t, tc.count, result.TensorParallelSize)
 		require.Equal(t, int64(1), result.PipelineParallelSize)
@@ -62,7 +62,7 @@ func TestPublishedCountRetainsNonPowerOfTwoAndPipelineLayout(t *testing.T) {
 	capacity := int64(80_000_000_000)
 	result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8},
 		[]ngcmetadata.Profile{publishedParallelProfile("tp3-pp2", 30, 3, 2)}, 90)
-	require.Equal(t, "recommended", result.Status)
+	require.Equal(t, "recommended", string(result.Status))
 	require.Equal(t, int64(6), result.Recommendation.GpuCount)
 	require.Equal(t, int64(3), result.TensorParallelSize)
 	require.Equal(t, int64(2), result.PipelineParallelSize)
@@ -108,7 +108,7 @@ func TestFittingSingleDeviceBaselineKeepsExistingSharingPolicy(t *testing.T) {
 		r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8},
 			[]ngcmetadata.Profile{direct, publishedParallelProfile("one", tc.minimum, 1, 1)}, 90)
 		require.Equal(t, "one", r.ProfileId)
-		require.Equal(t, tc.kind, r.Recommendation.AllocationType)
+		require.Equal(t, tc.kind, string(r.Recommendation.AllocationType))
 		require.Equal(t, int64(1), r.Recommendation.GpuCount)
 	}
 }
@@ -118,13 +118,13 @@ func TestParallelLayoutsRequireExplicitPositiveNonOverflowingValues(t *testing.T
 	for _, tc := range []struct{ tp, pp int }{{0, 1}, {-1, 2}, {2, 0}, {2, -1}, {math.MaxInt, 2}} {
 		r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8},
 			[]ngcmetadata.Profile{publishedParallelProfile("bad-layout", 1, tc.tp, tc.pp)}, 90)
-		require.Equal(t, "no_recommendation", r.Status)
+		require.Equal(t, "no_recommendation", string(r.Status))
 		require.Nil(t, r.Recommendation)
 	}
 	absent := publishedParallelProfile("missing-pp", 20, 2, 1)
 	absent.PipelineParallelSize = nil
 	r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{absent}, 90)
-	require.Equal(t, "no_recommendation", r.Status)
+	require.Equal(t, "no_recommendation", string(r.Status))
 }
 
 func TestProfileMaximumGPUCountIsRespected(t *testing.T) {
@@ -142,7 +142,7 @@ func TestUnknownNodeCountDoesNotProduceAllocation(t *testing.T) {
 	capacity := int64(80_000_000_000)
 	r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity},
 		[]ngcmetadata.Profile{publishedParallelProfile("one", 30, 1, 1)}, 90)
-	require.Equal(t, "no_recommendation", r.Status)
+	require.Equal(t, "no_recommendation", string(r.Status))
 	require.Contains(t, r.Reason, "single-node GPU count")
 	require.Nil(t, r.Recommendation)
 }

@@ -141,7 +141,7 @@ func TestRecommendationAllocationBoundaries(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			r := recommendForHardware(gpuinventory.Hardware{Type: "unknown", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{sizingProfile("generic", tc.minimum)}, tc.cutoff)
 			a := r.Recommendation
-			if r.Status != "recommended" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum || a == nil || a.AllocationType != tc.allocation || a.GpuCount != tc.count || a.GpuMemoryPerDeviceBytes != tc.memory {
+			if r.Status != "recommended" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum || a == nil || string(a.AllocationType) != tc.allocation || a.GpuCount != tc.count || a.GpuMemoryPerDeviceBytes != tc.memory {
 				t.Fatalf("allocation=%+v result=%+v", a, r)
 			}
 		})

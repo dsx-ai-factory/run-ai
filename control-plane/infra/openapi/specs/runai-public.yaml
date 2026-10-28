@@ -35938,6 +35938,16 @@ components:
           type: string
           nullable: true
           description: Exact inventory GPU type. Omitted or null evaluates all reported types and capacities.
+    RightSizingStatus:
+      type: string
+      enum:
+        - recommended
+        - no_recommendation
+    RightSizingAllocationType:
+      type: string
+      enum:
+        - gpu_memory
+        - gpu_count
     RightSizingRecommendation:
       type: object
       nullable: true
@@ -35946,10 +35956,7 @@ components:
         - gpuCount
       properties:
         allocationType:
-          type: string
-          enum:
-            - gpu_memory
-            - gpu_count
+          $ref: '#/components/schemas/RightSizingAllocationType'
         gpuCount:
           type: integer
           format: int64
@@ -35971,10 +35978,7 @@ components:
           format: int64
           description: Reported per-device capacity, not free memory or a quota guarantee.
         status:
-          type: string
-          enum:
-            - recommended
-            - no_recommendation
+          $ref: '#/components/schemas/RightSizingStatus'
         minimumGpuMemoryPerDeviceGb:
           type: number
           format: double
