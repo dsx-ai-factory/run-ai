@@ -219,6 +219,12 @@ export interface SamlConfigSettings {
   signingCertificate: string;
 }
 
+export interface SamlCertificateDetails {
+  showExpirationDate: boolean;
+  expirationDate: Date | null;
+  expirationError: string;
+}
+
 export const autoRedirectSSOSetting: Setting = {
   label: "Auto-Redirect to SSO",
   value: "false",
