@@ -313,6 +313,16 @@ func markPoliciesOfChangedSystemComponents(ctx context.Context, db orm.DB, forma
 			component.ComponentType, component.ComponentId, count, api.POLICYPHASE_PENDING_UPDATE)
 	}
 
+	if len(changed) == 0 {
+		return nil
+	}
+
+	count, err := dao.MarkUncachedPoliciesPending(ctx, db)
+	if err != nil {
+		return err
+	}
+	logging.Infof("system mapping changes: marked %d policies without a cached breakdown as %s", count, api.POLICYPHASE_PENDING_UPDATE)
+
 	return nil
 }
 

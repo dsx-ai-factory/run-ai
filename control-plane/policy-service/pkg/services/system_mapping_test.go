@@ -847,6 +847,24 @@ var _ = Describe("SystemMappingTest", func() {
 			Expect(cacheExistsForPolicy(tenantContextForTest(1), fieldAPolicy)).To(BeFalse())
 		})
 
+		It("marks the policies without a cached breakdown PendingUpdate when a system component changes", func() {
+			Expect(dao.DeleteBreakdownCachesOfSubtree(tenantContextForTest(1), db, []string{otherPolicy})).To(BeNil())
+
+			fields := baseFields()
+			delete(fields, "fieldB")
+			seed("v2", baseFormatterFields(), fields, baseSelectors())
+
+			Expect(storedPhase(otherPolicy)).To(Equal(api.POLICYPHASE_PENDING_UPDATE))
+		})
+
+		It("leaves the policies without a cached breakdown alone when no system component changes", func() {
+			Expect(dao.DeleteBreakdownCachesOfSubtree(tenantContextForTest(1), db, []string{otherPolicy})).To(BeNil())
+
+			seed("v2", baseFormatterFields(), baseFields(), baseSelectors())
+
+			Expect(storedPhase(otherPolicy)).To(Equal(api.POLICYPHASE_READY))
+		})
+
 		type reseedCase struct {
 			change      func(map[string]api.FormatterField, map[string]api.FieldGroupField, map[string]api.SpecSelector)
 			fieldAPhase api.PolicyPhase
