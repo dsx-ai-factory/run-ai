@@ -150,6 +150,11 @@ type SupersetRules struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuType *StringRules `json:"gpuType,omitempty"`
+	GpuType *StringRules `json:"gpuType,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Image *StringRules `json:"image,omitempty"`
 	Image *StringRules `json:"image,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -399,6 +404,11 @@ func AssertSupersetRulesRequired(obj SupersetRules) error {
 	}
 	if obj.ExposedUrls != nil {
 		if err := AssertExposedUrlsRulesRequired(*obj.ExposedUrls); err != nil {
+			return err
+		}
+	}
+	if obj.GpuType != nil {
+		if err := AssertStringRulesRequired(*obj.GpuType); err != nil {
 			return err
 		}
 	}
@@ -779,6 +789,16 @@ func AssertSupersetRulesConstraints(obj SupersetRules) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.ExposedUrls != nil {
 		if err := AssertExposedUrlsRulesConstraints(*obj.ExposedUrls); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuType != nil {
+		if err := AssertStringRulesConstraints(*obj.GpuType); err != nil {
 			return err
 		}
 	}

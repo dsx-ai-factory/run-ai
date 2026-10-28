@@ -21,6 +21,7 @@ data:
   DB_PORT: {{ $top.Values.workloadsManager.config.dbPort | default $top.Values.global.postgresql.auth.port | quote }}
   DB_SCHEMA: {{ $top.Values.workloadsManager.config.dbScheme | default $top.Values.global.postgresql.auth.scheme | quote }}
 
+  CATALOG_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.catalogService.name ($top.Values.catalogService.service.port | toString) | quote }}
   WORKLOADS_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.workloads.name ($top.Values.workloads.service.port | toString) | quote }}
   ORG_UNIT_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.orgUnitService.name (toString $top.Values.orgUnitService.service.port) }}
   CLUSTER_SERVICE_URL: {{ printf "http://%s-%s:%s" $top.Values.fullnameOverride $top.Values.clusterService.name ($top.Values.clusterService.service.port | toString) | quote }}

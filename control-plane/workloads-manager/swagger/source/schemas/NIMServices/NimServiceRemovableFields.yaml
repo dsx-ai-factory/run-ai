@@ -12,6 +12,7 @@ enum:
   - annotations
   - labels
   - tolerations
+  - gpuType
   - nodePools
   - imagePullSecrets
 

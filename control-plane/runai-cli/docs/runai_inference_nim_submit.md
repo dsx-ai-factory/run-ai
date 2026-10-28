@@ -53,6 +53,7 @@ runai inference nim submit <workload-name> -p <project-name> -i nvcr.io/nim/meta
       --gpu-memory-portion-request positiveFloat   GPU memory fraction to allocate per device (between 0 and 1, e.g. 0.5).
       --gpu-memory-request string                  Amount of GPU memory to allocate (e.g. 1G, 500M).
       --gpu-request-type string                    Type of GPU request: portion, memory
+      --gpu-type string                            Cluster nvidia.com/gpu.product label (case-insensitive lookup; Tab completes inventory labels). Automatically sizes when GPU resources and policy defaults are omitted; explicit zero keeps CPU-only behavior.
   -h, --help                                       help for submit
   -i, --image string                               The container image to use for the workload.
       --image-pull-policy string                   Image pull policy for the container. Valid values: Always, IfNotPresent, Never.

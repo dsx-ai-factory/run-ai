@@ -6,8 +6,10 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	catalog "github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client/generated"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -522,6 +524,112 @@ var _ = Describe("NimServicesImpl", func() {
 			rule, ok := rules[0].(map[string]interface{})
 			Expect(ok).To(BeTrue())
 			Expect(rule["host"]).To(Equal("my-nim.example.com"))
+		})
+	})
+
+	Context("GPU type automatic submission", func() {
+		var calls int
+		BeforeEach(func() {
+			displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
+			var status clustersApi.ClusterDisplayedStatus
+			Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
+			displayed.Status.Set(&status)
+			clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
+			calls = 0
+			nimServicesImpl.recommendGPU = func(ctx context.Context, request catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+				calls++
+				Expect(request.ClusterId).To(Equal(randoms.ClusterId))
+				Expect(request.GetGpuType()).To(Equal("NVIDIA-H100-80GB-HBM3"))
+				var response catalog.RightSizingResponse
+				Expect(json.Unmarshal([]byte(`{"image":"nvcr.io/nim/meta/llama-3.1-8b-instruct","tag":"1.8.0","results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"fp8-profile","recommendation":{"allocationType":"gpu_count","gpuCount":1}}]}`), &response)).To(Succeed())
+				return &response, nil
+			}
+		})
+		request := func() api.NimServiceCreateRequest {
+			var spec api.NimServiceSpec
+			Expect(convutils.CopySpecs(&spec, sampleNimServiceSpec)).To(Succeed())
+			spec.GpuType = convutils.Ref("NVIDIA-H100-80GB-HBM3")
+			spec.Image = convutils.Ref("nvcr.io/nim/meta/llama-3.1-8b-instruct:1.8.0")
+			return api.NimServiceCreateRequest{Metadata: api.NimServiceMetadataCreateParams{Name: "auto-sized-nim", ProjectId: randoms.ProjectIdStr}, Spec: spec}
+		}
+		It("persists allocation, profile and placement across creation and an unrelated update", func() {
+			toCreate := request()
+			id, created := createNimServiceForTest(router, randoms, &toCreate)
+			Expect(calls).To(Equal(1))
+			Expect(created.Spec.Compute.GpuDevicesRequest).To(Equal(convutils.Ref(int32(1))))
+			Expect(created.Spec.ModelStore.NimCache.Profile).To(Equal(convutils.Ref("fp8-profile")))
+			updated := updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{Spec: api.NimServiceSpec{Replicas: convutils.Ref(int32(2))}})
+			Expect(calls).To(Equal(1))
+			Expect(updated.Spec.GpuType).To(Equal(toCreate.Spec.GpuType))
+			Expect(updated.Spec.Compute.GpuDevicesRequest).To(Equal(convutils.Ref(int32(1))))
+			Expect(updated.Spec.ModelStore.NimCache.Profile).To(Equal(convutils.Ref("fp8-profile")))
+			updates := getUpdatesForTest(createRouterForTest(), randoms, 0, 50, emptyClusterReports)
+			var manifest map[string]interface{}
+			for _, update := range updates.Workloads {
+				if update.Id == id {
+					manifest = update.WorkloadManifest
+				}
+			}
+			Expect(manifest).NotTo(BeNil())
+			Expect(manifest["spec"].(map[string]interface{})["nodeSelector"]).To(Equal(map[string]interface{}{"nvidia.com/gpu.product": "NVIDIA-H100-80GB-HBM3"}))
+		})
+		It("preserves policy-default allocation without calling recommendations", func() {
+			var policy policiesApi.NimServicePolicyDefaultsAndRules
+			Expect(json.Unmarshal([]byte(`{"defaults":{"compute":{"gpuDevicesRequest":2}}}`), &policy)).To(Succeed())
+			policiesClient.SetMock(policiesClient.SimpleMockClientFactory{SimpleMockClient: policiesClient.SimpleMockClient{EffectiveUpdatedAt: time.Now(), EffectiveNimServicePolicy: &policy}})
+			toCreate := request()
+			_, created := createNimServiceForTest(router, randoms, &toCreate)
+			Expect(calls).To(BeZero())
+			Expect(created.Spec.Compute.GpuDevicesRequest).To(Equal(convutils.Ref(int32(2))))
+		})
+		It("keeps locked numeric policy defaults unchanged during automatic sizing", func() {
+			var policy policiesApi.NimServicePolicyDefaultsAndRules
+			Expect(json.Unmarshal([]byte(`{"defaults":{"tolerations":{"instances":[{"name":"gpu-taint","key":"dedicated","operator":"Exists","effect":"NoExecute","seconds":60}]}},"rules":{"tolerations":{"instances":{"locked":["gpu-taint"]}}}}`), &policy)).To(Succeed())
+			policiesClient.SetMock(policiesClient.SimpleMockClientFactory{SimpleMockClient: policiesClient.SimpleMockClient{EffectiveUpdatedAt: time.Now(), EffectiveNimServicePolicy: &policy}})
+			toCreate := request()
+			_, created := createNimServiceForTest(router, randoms, &toCreate)
+			Expect(calls).To(Equal(1))
+			Expect(created.Spec.Tolerations).NotTo(BeNil())
+			Expect(*created.Spec.Tolerations).To(HaveLen(1))
+			Expect((*created.Spec.Tolerations)[0].Seconds).To(Equal(convutils.Ref(int32(60))))
+		})
+		It("checks generated allocation against policy before submission", func() {
+			var policy policiesApi.NimServicePolicyDefaultsAndRules
+			Expect(json.Unmarshal([]byte(`{"rules":{"compute":{"gpuDevicesRequest":{"min":2}}}}`), &policy)).To(Succeed())
+			policiesClient.SetMock(policiesClient.SimpleMockClientFactory{SimpleMockClient: policiesClient.SimpleMockClient{EffectiveUpdatedAt: time.Now(), EffectiveNimServicePolicy: &policy}})
+			toCreate := request()
+			failure := failToCreateNimServiceForTest(router, randoms, &toCreate, http.StatusBadRequest)
+			Expect(failure.Message).To(ContainSubstring("policy"))
+			Expect(calls).To(Equal(1))
+		})
+
+		DescribeTable("rejects recommended resources above policy maxima before queueing", func(allocation, rules string) {
+			var policy policiesApi.NimServicePolicyDefaultsAndRules
+			Expect(json.Unmarshal([]byte(`{"rules":{"compute":`+rules+`}}`), &policy)).To(Succeed())
+			policiesClient.SetMock(policiesClient.SimpleMockClientFactory{SimpleMockClient: policiesClient.SimpleMockClient{EffectiveUpdatedAt: time.Now(), EffectiveNimServicePolicy: &policy}})
+			nimServicesImpl.recommendGPU = func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+				calls++
+				var response catalog.RightSizingResponse
+				Expect(json.Unmarshal([]byte(`{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"profile","recommendation":`+allocation+`}]}`), &response)).To(Succeed())
+				return &response, nil
+			}
+			toCreate := request()
+			failure := failToCreateNimServiceForTest(router, randoms, &toCreate, http.StatusBadRequest)
+			Expect(failure.Message).To(ContainSubstring("policy"))
+			Expect(calls).To(Equal(1))
+			updates := getUpdatesForTest(createRouterForTest(), randoms, 0, 50, emptyClusterReports)
+			Expect(updates.Workloads).To(BeEmpty())
+		},
+			Entry("33 GB exceeds 20 GB", `{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":33000000000}`, `{"gpuMemoryRequest":{"max":"20G"}}`),
+			Entry("8 devices exceeds 4", `{"allocationType":"gpu_count","gpuCount":8}`, `{"gpuDevicesRequest":{"max":4}}`),
+		)
+		It("returns a synchronous error when there is no recommendation", func() {
+			nimServicesImpl.recommendGPU = func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+				return &catalog.RightSizingResponse{}, nil
+			}
+			toCreate := request()
+			failure := failToCreateNimServiceForTest(router, randoms, &toCreate, http.StatusBadRequest)
+			Expect(failure.Message).To(ContainSubstring("no GPU sizing recommendation"))
 		})
 	})
 
@@ -2134,6 +2242,38 @@ var _ = Describe("NimServicesImpl", func() {
 
 			updatedPayload := updateNimServiceForTest(router, randoms, id, &toUpdate)
 			Expect(updatedPayload.Spec.EnvironmentVariables).To(BeNil())
+		})
+
+		It("should remove gpuType using fieldsToRemove without changing allocation or profile", func() {
+			displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
+			var status clustersApi.ClusterDisplayedStatus
+			Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
+			displayed.Status.Set(&status)
+			clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
+			toCreate := api.NimServiceCreateRequest{
+				Metadata: api.NimServiceMetadataCreateParams{Name: "nim-remove-gpu-type", ProjectId: randoms.ProjectIdStr},
+				Spec:     sampleNimServiceSpec,
+			}
+			toCreate.Spec.GpuType = convutils.Ref("NVIDIA-H100-80GB-HBM3")
+			toCreate.Spec.Compute = &api.NimServiceSpecAllOfCompute{GpuDevicesRequest: convutils.Ref(int32(1))}
+			toCreate.Spec.EnvironmentVariables = &[]api.EnvironmentVariable{{Name: convutils.Ref("NIM_MODEL_PROFILE"), Value: convutils.Ref("chosen-profile")}}
+			id, created := createNimServiceForTest(router, randoms, &toCreate)
+			Expect(created.Spec.GpuType).NotTo(BeNil())
+			updated := updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{
+				Spec:           api.NimServiceSpec{Image: sampleNimServiceSpec.Image},
+				FieldsToRemove: []api.NimServiceRemovableFields{"gpuType"},
+			})
+			Expect(updated.Spec.GpuType).To(BeNil())
+			Expect(updated.Spec.Compute.GpuDevicesRequest).To(Equal(created.Spec.Compute.GpuDevicesRequest))
+			Expect(updated.Spec.EnvironmentVariables).To(Equal(created.Spec.EnvironmentVariables))
+			ctx := setContext(randoms.TenantIdStr, adminUser, []string{})
+			permittedScopes, err := authClient.ParsePermittedScopes(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			record, dbErr := dao.DbGetWorkload(ctx, id, permittedScopes)
+			Expect(dbErr).To(BeNil())
+			manifestSpec := record.RawManifest["spec"].(map[string]interface{})
+			selector, _ := manifestSpec["nodeSelector"].(map[string]interface{})
+			Expect(selector).NotTo(HaveKey("nvidia.com/gpu.product"))
 		})
 
 		It("should remove nodePools using fieldsToRemove", func() {

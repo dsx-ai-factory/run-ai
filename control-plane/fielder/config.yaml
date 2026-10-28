@@ -587,6 +587,19 @@ fields:
           - NimServiceRules
           - SpecificRunParamsSpec
           - SpecificRunParamsRules
+  gpuType:
+    name: gpuType
+    variants:
+      - spec: resources/GpuType.yaml
+        defaults: resources/GpuType.yaml
+        rules: ../policy_rules/StringRules.yaml
+        targets:
+          - SupersetSpec
+          - SupersetDefaults
+          - SupersetRules
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
   priorityClass:
     name: "priorityClass"
     variants:

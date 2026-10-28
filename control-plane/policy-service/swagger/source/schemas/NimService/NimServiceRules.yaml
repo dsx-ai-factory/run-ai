@@ -59,6 +59,8 @@ allOf:
       type: object
     environmentVariables:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    gpuType:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
     image:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
     imagePullPolicy:

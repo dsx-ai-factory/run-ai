@@ -34,6 +34,7 @@ const (
 	NIMSERVICEREMOVABLEFIELDS_ANNOTATIONS           NimServiceRemovableFields = "annotations"
 	NIMSERVICEREMOVABLEFIELDS_LABELS                NimServiceRemovableFields = "labels"
 	NIMSERVICEREMOVABLEFIELDS_TOLERATIONS           NimServiceRemovableFields = "tolerations"
+	NIMSERVICEREMOVABLEFIELDS_GPU_TYPE              NimServiceRemovableFields = "gpuType"
 	NIMSERVICEREMOVABLEFIELDS_NODE_POOLS            NimServiceRemovableFields = "nodePools"
 	NIMSERVICEREMOVABLEFIELDS_IMAGE_PULL_SECRETS    NimServiceRemovableFields = "imagePullSecrets"
 )
@@ -51,6 +52,7 @@ var AllowedNimServiceRemovableFieldsEnumValues = []NimServiceRemovableFields{
 	"annotations",
 	"labels",
 	"tolerations",
+	"gpuType",
 	"nodePools",
 	"imagePullSecrets",
 }

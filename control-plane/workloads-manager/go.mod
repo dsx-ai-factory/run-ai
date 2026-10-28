@@ -5,6 +5,7 @@ go 1.27.3
 require (
 	github.com/NVIDIA/k8s-nim-operator v0.0.0-20260601160319-679627a97be7
 	github.com/cenkalti/backoff/v4 v4.3.0
+	github.com/distribution/reference v0.6.0
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.7
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v0.0.0
@@ -19,6 +20,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.2
+	github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0
@@ -50,18 +52,6 @@ require (
 	gorm.io/gorm v1.31.2
 	k8s.io/api v0.36.2
 	k8s.io/apimachinery v0.36.2
-)
-
-replace (
-	// Force all dependencies to use k8s.io v0.34.1 to avoid type incompatibilities
-	k8s.io/api => k8s.io/api v0.35.4
-	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.35.4
-	k8s.io/apimachinery => k8s.io/apimachinery v0.35.4
-	k8s.io/apiserver => k8s.io/apiserver v0.35.4
-	k8s.io/client-go => k8s.io/client-go v0.35.4
-	k8s.io/component-base => k8s.io/component-base v0.35.4
-	k8s.io/dynamic-resource-allocation => k8s.io/dynamic-resource-allocation v0.35.4
-	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.22.4
 )
 
 require (
@@ -112,7 +102,6 @@ require (
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
-	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.7.0 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/scopeinfo v1.1.1 // indirect
@@ -329,6 +318,18 @@ require (
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
 
+replace (
+	// Force all dependencies to use k8s.io v0.34.1 to avoid type incompatibilities
+	k8s.io/api => k8s.io/api v0.35.4
+	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.35.4
+	k8s.io/apimachinery => k8s.io/apimachinery v0.35.4
+	k8s.io/apiserver => k8s.io/apiserver v0.35.4
+	k8s.io/client-go => k8s.io/client-go v0.35.4
+	k8s.io/component-base => k8s.io/component-base v0.35.4
+	k8s.io/dynamic-resource-allocation => k8s.io/dynamic-resource-allocation v0.35.4
+	sigs.k8s.io/controller-runtime => sigs.k8s.io/controller-runtime v0.22.4
+)
+
 // required due to a replace in runai-operator repo
 replace (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants => ../../runai-cluster/cluster/common/constants
@@ -367,3 +368,5 @@ replace github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies =>
 replace github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 => ../../runai-cluster/cluster/dromos/api/v1alpha1
 
 replace github.com/kserve/kserve => ../workloads-and-policies/third_party/kserve
+
+replace github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client => ../../runai-clients/catalog-service-client

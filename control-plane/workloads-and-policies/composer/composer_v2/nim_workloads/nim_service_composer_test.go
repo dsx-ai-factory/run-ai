@@ -637,6 +637,37 @@ var _ = Describe("NimServiceComposer", func() {
 		}, NimServiceComposerTests)
 	})
 
+	Context("GPU type placement", func() {
+		It("places the NIM on the requested product without replacing other selectors", func() {
+			input, err := os.ReadFile("testing/inputs/image_with_tag.yaml")
+			Expect(err).NotTo(HaveOccurred())
+			var spec api.NimServiceSpec
+			Expect(yaml.Unmarshal(input, &spec)).To(Succeed())
+			Expect(json.Unmarshal([]byte(`{"gpuType":"NVIDIA-H100-80GB-HBM3"}`), &spec)).To(Succeed())
+			cluster := mockClustersClientInfo("test-cluster", false, "", false, "nvidia", "3.0.0")
+			converter := NewNimServiceComposer("test-workload", "tester", cluster, "test-project", composer.OptionsForNimService())
+			actual := nimv1alpha1.NIMServiceSpec{NodeSelector: map[string]string{"existing": "restriction"}}
+			Expect(converter.Compose(context.Background(), &spec, &actual)()).To(BeNil())
+			Expect(actual.NodeSelector).To(Equal(map[string]string{
+				"existing": "restriction", "nvidia.com/gpu.product": "NVIDIA-H100-80GB-HBM3",
+			}))
+		})
+	})
+
+	DescribeTable("rejects invalid GPU product labels", func(gpuType string) {
+		input, err := os.ReadFile("testing/inputs/image_with_tag.yaml")
+		Expect(err).NotTo(HaveOccurred())
+		var spec api.NimServiceSpec
+		Expect(yaml.Unmarshal(input, &spec)).To(Succeed())
+		spec.SetGpuType(gpuType)
+		cluster := mockClustersClientInfo("test-cluster", false, "", false, "nvidia", "3.0.0")
+		converter := NewNimServiceComposer("test-workload", "tester", cluster, "test-project", composer.OptionsForNimService())
+		var actual nimv1alpha1.NIMServiceSpec
+		failure := converter.Compose(context.Background(), &spec, &actual)()
+		Expect(failure).NotTo(BeNil())
+		Expect(failure.Error()).To(ContainSubstring("gpuType"))
+	}, Entry("empty", ""), Entry("display name with spaces", "NVIDIA H100"), Entry("label key instead of value", "nvidia.com/gpu.product"))
+
 	Context("serialized replica configuration", func() {
 		DescribeTable("preserves the replica configuration accepted by NIM", func(tc NimReplicaCompositionTest) {
 			input, err := os.ReadFile("testing/inputs/autoscaling_minimal.yaml")

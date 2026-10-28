@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **Category** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **Compute** | Pointer to [**NullableNimServiceRulesAllOfCompute**](NimServiceRulesAllOfCompute.md) |  | [optional] 
 **EnvironmentVariables** | Pointer to [**NullableInstancesRules**](InstancesRules.md) |  | [optional] 
+**GpuType** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional]
 **Image** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicyRules**](ImagePullPolicyRules.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**NullableImagePullSecretsRules**](ImagePullSecretsRules.md) |  | [optional] 
@@ -219,6 +220,41 @@ HasEnvironmentVariables returns a boolean if a field has been set.
 `func (o *NimServiceRules) UnsetEnvironmentVariables()`
 
 UnsetEnvironmentVariables ensures that no value is present for EnvironmentVariables, not even an explicit nil
+### GetGpuType
+
+`func (o *NimServiceRules) GetGpuType() StringRules`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *NimServiceRules) GetGpuTypeOk() (*StringRules, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *NimServiceRules) SetGpuType(v StringRules)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *NimServiceRules) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *NimServiceRules) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *NimServiceRules) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImage
 
 `func (o *NimServiceRules) GetImage() StringRules`

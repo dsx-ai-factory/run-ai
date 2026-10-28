@@ -23,6 +23,7 @@ const (
 	Priorities    ResourceType = "priorities"
 	ExistingPvc   ResourceType = "existing-pvc"
 	Node          ResourceType = "node"
+	GPUType       ResourceType = "gpu-type"
 	AIApplication ResourceType = "application"
 )
 
@@ -70,7 +71,11 @@ func GetFlagCompletionFn(
 		filtered := make([]string, 0)
 		for _, option := range options {
 			// if got a prefix to complete, make sure the option starts with it
-			if shouldComplete && !strings.HasPrefix(option, toComplete) {
+			prefix, value := toComplete, option
+			if resourceType == GPUType {
+				prefix, value = strings.ToLower(prefix), strings.ToLower(value)
+			}
+			if shouldComplete && !strings.HasPrefix(value, prefix) {
 				continue
 			}
 

@@ -8,6 +8,7 @@ package submit
 import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/common/submit"
 	workloadcommon "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/completion/workload"
+	nodecompletion "github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/node"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/priorities"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/project"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/cmd/runaicli/pvc"
@@ -81,6 +82,9 @@ func (c *Command) buildCommand() *cobra.Command {
 
 func (c *Command) RegisterFlags() error {
 	c.generalSpec.SetFlags(c.Cmd, &submit.Project)
+	if c.generalSpec.GetType() == spectype.NimService {
+		_ = c.Cmd.RegisterFlagCompletionFunc("gpu-type", nodecompletion.GetGPUTypesForFlag)
+	}
 	_ = c.Cmd.RegisterFlagCompletionFunc(consts.ProjectStr, project.GetProjectNamesForFlag)
 	_ = c.Cmd.RegisterFlagCompletionFunc(consts.AttributeNameExistingPvc, pvc.GetExistingPVCFlag)
 	_ = c.Cmd.RegisterFlagCompletionFunc(consts.AttributeNamePriorityClass, priorities.GetPrioritiesNamesForFlag)

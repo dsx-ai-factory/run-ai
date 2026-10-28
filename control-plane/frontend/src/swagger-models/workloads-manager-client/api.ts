@@ -903,6 +903,7 @@ export const NimServiceRemovableFields = {
     Annotations: 'annotations',
     Labels: 'labels',
     Tolerations: 'tolerations',
+    GpuType: 'gpuType',
     NodePools: 'nodePools',
     ImagePullSecrets: 'imagePullSecrets'
 } as const;
@@ -1055,6 +1056,12 @@ export interface NimServiceSpec {
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
     /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof NimServiceSpec
+     */
+    'gpuType'?: string | null;
+    /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
      * @memberof NimServiceSpec
@@ -1181,6 +1188,12 @@ export interface NimServiceSpecAllOf {
      * @memberof NimServiceSpecAllOf
      */
     'environmentVariables'?: Array<EnvironmentVariable> | null;
+    /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof NimServiceSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
