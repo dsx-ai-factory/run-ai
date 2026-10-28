@@ -91,8 +91,8 @@ func (r *ruleIssues) all() []*api.Error {
 	return r.items
 }
 
-// policyStatus returns Degraded with every collected message, or Ready when
-// nothing was collected.
+// policyStatus returns Degraded or Ready based on existance of issues.
+// the issues themselves are returned as well
 func (r *ruleIssues) policyStatus() *api.PolicyStatus {
 	if len(r.items) == 0 {
 		return &api.PolicyStatus{Phase: api.POLICYPHASE_READY, Issues: []string{}}

@@ -150,7 +150,10 @@ func HandleSystemMapping() {
 	ms := MappingApiService{}
 	cv := NewMappingConsistencyValidator(ctx, api.MAPPINGSCOPE_SYSTEM)
 
-	markPoliciesOfChangedSystemComponents(ctx, db, systemFormatterSeeds, systemFieldGroupSeeds, systemWorkloadMappingSeeds)
+	// Nothing is seeded yet, so a restart marks the same policies again; seeding now would lose them for good.
+	if err := markPoliciesOfChangedSystemComponents(ctx, db, systemFormatterSeeds, systemFieldGroupSeeds, systemWorkloadMappingSeeds); err != nil {
+		logging.Fatalf("failed to mark the policies affected by system mapping changes before seeding: %v", err)
+	}
 
 	handleSystemFormatters(ctx, ms, cv)
 
@@ -291,24 +294,30 @@ func handleSystemMappings(ctx context.Context, db orm.DB, ms MappingApiService, 
 // dependency rows of every tenant that depend on it.
 func markPoliciesOfChangedSystemComponents(ctx context.Context, db orm.DB, formatters []systemFormatterSeed,
 	fieldGroups []systemFieldGroupSeed, mappings []systemWorkloadMappingSeed,
-) {
-	for _, component := range changedSystemComponents(ctx, db, formatters, fieldGroups, mappings) {
+) *api.Error {
+	changed, err := changedSystemComponents(ctx, db, formatters, fieldGroups, mappings)
+	if err != nil {
+		return err
+	}
+
+	for _, component := range changed {
 		count, err := dao.MarkPoliciesPendingByComponent(ctx, db, component.ComponentType, component.ComponentId)
 		if err != nil {
-			logging.Errorf("failed to mark policies depending on system %s %s as %s: %v",
-				component.ComponentType, component.ComponentId, api.POLICYPHASE_PENDING_UPDATE, err)
-			continue
+			return err
 		}
 		logging.Infof("system %s %s changes: marked %d dependent policies as %s",
 			component.ComponentType, component.ComponentId, count, api.POLICYPHASE_PENDING_UPDATE)
 	}
+
+	return nil
 }
 
 // changedSystemComponents returns the stored system components whose description is outdated and whose stored
-// entries the seeds remove or change, identified as their dependency rows identify them.
+// entries the seeds remove or change, identified as their dependency rows identify them. Components not stored yet
+// are skipped: nothing can depend on them.
 func changedSystemComponents(ctx context.Context, db orm.DB, formatters []systemFormatterSeed,
 	fieldGroups []systemFieldGroupSeed, mappings []systemWorkloadMappingSeed,
-) []dbmodel.EntitiesDependency {
+) ([]dbmodel.EntitiesDependency, *api.Error) {
 	var changed []dbmodel.EntitiesDependency
 
 	for _, seed := range formatters {
@@ -316,7 +325,13 @@ func changedSystemComponents(ctx context.Context, db orm.DB, formatters []system
 			continue
 		}
 		row, err := dao.GetFormatterByName(ctx, db, seed.name)
-		if err != nil || descriptionIs(row.Description, seed.description) {
+		if err != nil {
+			if err.Code == http.StatusNotFound {
+				continue
+			}
+			return nil, err
+		}
+		if descriptionIs(row.Description, seed.description) {
 			continue
 		}
 		fields := enrichedFormatterFields(seed.builder())
@@ -330,7 +345,13 @@ func changedSystemComponents(ctx context.Context, db orm.DB, formatters []system
 			continue
 		}
 		row, err := dao.GetFieldGroupByNameAndScope(ctx, db, seed.name, api.MAPPINGSCOPE_SYSTEM)
-		if err != nil || descriptionIs(row.Description, seed.description) {
+		if err != nil {
+			if err.Code == http.StatusNotFound {
+				continue
+			}
+			return nil, err
+		}
+		if descriptionIs(row.Description, seed.description) {
 			continue
 		}
 		fields, itemSelectors := seed.builder()
@@ -348,7 +369,13 @@ func changedSystemComponents(ctx context.Context, db orm.DB, formatters []system
 		}
 		gvk, specSelectors := seed.builder()
 		row, err := dao.GetMappingByGvkAndScope(ctx, gvk, api.MAPPINGSCOPE_SYSTEM)
-		if err != nil || descriptionIs(row.Description, seed.description) {
+		if err != nil {
+			if err.Code == http.StatusNotFound {
+				continue
+			}
+			return nil, err
+		}
+		if descriptionIs(row.Description, seed.description) {
 			continue
 		}
 		if specSelectorsChanged(row.SpecSelectors, addScopeToSpecSelectors(specSelectors, api.MAPPINGSCOPE_SYSTEM)) {
@@ -356,7 +383,7 @@ func changedSystemComponents(ctx context.Context, db orm.DB, formatters []system
 		}
 	}
 
-	return changed
+	return changed, nil
 }
 
 func descriptionIs(description *string, want string) bool {
@@ -477,6 +504,7 @@ func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiSe
 				return
 			}
 		} else {
+			wipeCachesAfterSystemSeed(ctx, "system workload mapping "+mappingName)
 			logging.Infof("system workload mapping %s created", mappingName)
 			return
 		}
