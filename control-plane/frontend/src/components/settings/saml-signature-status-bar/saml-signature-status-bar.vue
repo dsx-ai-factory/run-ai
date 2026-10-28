@@ -10,11 +10,12 @@
     :variant="ENotificationBarVariant.Error"
     icon-override="ph-bold ph-warning-circle"
     show-h1-content
-    title="Your SAML connection isn't validating identity provider signatures,"
+    title="Security risk: identity provider signatures aren't validated,"
   >
-    which may impact user verification. To enable validation,
+    Login responses can't be confirmed as authentic, which allows unauthorized access to user accounts. To enable
+    validation,
     <template #inline-actions>
-      <router-link :to="securitySettingsLocation">reconfigure SAML in your SSO settings.</router-link>
+      <router-link :to="securitySettingsLocation">reconfigure SAML in SSO settings.</router-link>
     </template>
   </notification-alert-bar>
 </template>

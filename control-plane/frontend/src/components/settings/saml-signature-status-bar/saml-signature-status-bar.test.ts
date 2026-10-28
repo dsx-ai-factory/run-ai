@@ -63,9 +63,9 @@ describe("saml-signature-status-bar.vue", () => {
     const wrapper = createWrapper();
 
     expect(bar(wrapper).exists()).toBe(true);
-    expect(wrapper.text()).toContain("Your SAML connection isn't validating identity provider signatures,");
-    expect(wrapper.text()).toContain("which may impact user verification. To enable validation,");
-    expect(wrapper.text()).toContain("reconfigure SAML in your SSO settings.");
+    expect(wrapper.text()).toContain("Security risk: identity provider signatures aren't validated,");
+    expect(wrapper.text()).toContain("Login responses can't be confirmed as authentic, which allows unauthorized access to user accounts.");
+    expect(wrapper.text()).toContain("reconfigure SAML in SSO settings.");
   });
 
   it("uses the error variant", () => {
