@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { mount } from "@vue/test-utils";
 import { Quasar } from "quasar";
 import { createTestingPinia } from "@pinia/testing";
@@ -13,6 +13,13 @@ import { usePermissionStore } from "@/stores/permissions.store";
 import { IdpTypeEnum, type Idp } from "@/swagger-models/identity-manager-client";
 import { Action, ResourceType, ResourceTypeGroupId } from "@/swagger-models/authorization-client";
 import { SETTINGS_ROUTE_NAMES } from "@/router/settings.routes/settings.routes.names";
+
+const mockRoute = vi.hoisted(() => ({ name: "some-page" as string }));
+
+vi.mock("vue-router", async (importOriginal) => ({
+  ...(await importOriginal<Record<string, unknown>>()),
+  useRoute: () => mockRoute,
+}));
 
 interface CreateOptions {
   validateSignature?: boolean;
@@ -37,11 +44,11 @@ function createWrapper({
     },
   ]);
   useIdpsStore(pinia).idps = [{ alias: "idp", type, samlData: { validateSignature } } as unknown as Idp];
+  mockRoute.name = routeName;
 
   return mount(SamlSignatureStatusBar, {
     global: {
       plugins: [Quasar, pinia],
-      mocks: { $route: { name: routeName } },
       stubs: {
         RouterLink: { name: "RouterLink", props: ["to"], template: "<a data-test='link'><slot /></a>" },
       },

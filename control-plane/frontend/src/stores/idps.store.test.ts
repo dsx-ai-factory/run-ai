@@ -20,7 +20,7 @@ function samlIdp(validateSignature?: boolean): Idp {
     alias: "saml",
     type: IdpTypeEnum.Saml,
     samlData: { entityId: "entity", validateSignature },
-  } as Idp;
+  } as unknown as Idp;
 }
 
 function grantSecuritySettings(actions: Action[]): void {
