@@ -81,8 +81,14 @@ GOCACHE_HOST_DIR=${HOME}/.cache/go-build-docker-gocache
 GOPATH_HOST_DIR=${HOME}/.cache/go-build-docker-gopath
 DOCKER_GO_CACHING_VOLUME_AND_ENV := -v ${GOPATH_HOST_DIR}:/go:z -v ${GOCACHE_HOST_DIR}:${GOCACHE_DOCKER_DIR}:z -e GOPATH=/go -e GOCACHE=${GOCACHE_DOCKER_DIR} -e GOLANGCI_LINT_CACHE=${GOCACHE_DOCKER_DIR}
 
+# Podman presents the bind-mounted repo as root-owned while these containers run as the
+# host uid, so git rejects it ("detected dubious ownership") and `go build` of a package
+# fails with "error obtaining VCS status: exit status 128". GIT_CONFIG_* is command-scope
+# config, which git honours for safe.directory regardless of HOME or GIT_CONFIG_GLOBAL.
+DOCKER_GIT_SAFE_DIRECTORY := -e GIT_CONFIG_COUNT=1 -e GIT_CONFIG_KEY_0=safe.directory -e GIT_CONFIG_VALUE_0=/local
+
 ### GO
-DOCKER_GO_BASE_COMMAND=${DOCKER_COMMAND} -v ${HOME}/.gitconfig://.gitconfig -e GIT_CONFIG_GLOBAL=/.gitconfig -e GOPRIVATE=${GOPRIVATE} -e CGO_ENABLED=0 -e GO111MODULE=on ${DOCKER_GO_CACHING_VOLUME_AND_ENV}
+DOCKER_GO_BASE_COMMAND=${DOCKER_COMMAND} -v ${HOME}/.gitconfig://.gitconfig -e GIT_CONFIG_GLOBAL=/.gitconfig ${DOCKER_GIT_SAFE_DIRECTORY} -e GOPRIVATE=${GOPRIVATE} -e CGO_ENABLED=0 -e GO111MODULE=on ${DOCKER_GO_CACHING_VOLUME_AND_ENV}
 DOCKER_GO_BASE_COMMAND_PRIVILEGED=${DOCKER_COMMAND_PRIVILEGED} -v ${HOME}/.gitconfig:/root/.gitconfig -e GOPRIVATE=${GOPRIVATE} --network=host -e CGO_ENABLED=0 -e GO111MODULE=on ${DOCKER_GO_CACHING_VOLUME_AND_ENV}
 DOCKER_GO_COMMAND=${DOCKER_GO_BASE_COMMAND} -e GOOS=${OS} -e GOARCH=${ARCH} ${DOCKERHUB_PROXY}library/golang:${GO_VERSION}
 DOCKER_GO_COMMAND_ARM=${DOCKER_GO_BASE_COMMAND} -e GOOS=linux -e GOARCH=arm64 ${DOCKERHUB_PROXY}library/golang:${GO_VERSION}
@@ -91,7 +97,7 @@ DOCKER_GO_COMMAND_PRIVILEGED=${DOCKER_GO_BASE_COMMAND_PRIVILEGED} -e GOOS=${OS} 
 DOCKER_GO_COMMAND_LINUX=${DOCKER_GO_BASE_COMMAND} -e GOOS=linux -e GOARCH=${ARCH} ${DOCKERHUB_PROXY}library/golang:${GO_VERSION}
 
 # CGO-enabled command, for services that need to compile against C libraries.
-DOCKER_CGO_BASE_COMMAND=${DOCKER_COMMAND} -v ${HOME}/.gitconfig://.gitconfig -e GOPRIVATE=${GOPRIVATE} ${DOCKER_GO_CACHING_VOLUME_AND_ENV}
+DOCKER_CGO_BASE_COMMAND=${DOCKER_COMMAND} -v ${HOME}/.gitconfig://.gitconfig ${DOCKER_GIT_SAFE_DIRECTORY} -e GOPRIVATE=${GOPRIVATE} ${DOCKER_GO_CACHING_VOLUME_AND_ENV}
 DOCKER_CGO_COMMAND=${DOCKER_CGO_BASE_COMMAND} -e CGO_ENABLED=1 -e GOOS=${OS} -e GOARCH=${ARCH} ${DOCKERHUB_PROXY}library/golang:${GO_VERSION}
 
 DOCKER_GINKGO_COMMAND=${DOCKER_GO_COMMAND} /bin/sh -c '${GINKGO_COMMAND}'

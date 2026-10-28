@@ -1,0 +1,166 @@
+{
+  "apiVersion": "run.ai/v1alpha1",
+  "kind": "Karta",
+  "spec": {
+    "optimizationInstructions": {
+      "gangScheduling": {
+        "podGroups": [
+          {
+            "members": [
+              {
+                "componentName": "launcher",
+                "groupByKeyPaths": [
+                  ".metadata.labels[\"training.kubeflow.org/job-name\"]"
+                ]
+              },
+              {
+                "componentName": "worker",
+                "groupByKeyPaths": [
+                  ".metadata.labels[\"training.kubeflow.org/job-name\"]"
+                ]
+              }
+            ],
+            "name": "job"
+          }
+        ]
+      }
+    },
+    "structureDefinition": {
+      "childComponents": [
+        {
+          "kind": {
+            "group": "",
+            "kind": "Pod",
+            "version": "v1"
+          },
+          "name": "launcher",
+          "ownerRef": "mpijob",
+          "podSelector": {
+            "componentTypeSelector": {
+              "keyPath": ".metadata.labels[\"training.kubeflow.org/replica-type\"]",
+              "value": "launcher"
+            }
+          },
+          "scaleDefinition": {
+            "replicasPath": ".spec.mpiReplicaSpecs.Launcher.replicas // 1"
+          },
+          "specDefinition": {
+            "podTemplateSpecPath": ".spec.mpiReplicaSpecs.Launcher.template"
+          }
+        },
+        {
+          "kind": {
+            "group": "",
+            "kind": "Pod",
+            "version": "v1"
+          },
+          "name": "worker",
+          "ownerRef": "mpijob",
+          "podSelector": {
+            "componentTypeSelector": {
+              "keyPath": ".metadata.labels[\"training.kubeflow.org/replica-type\"]",
+              "value": "worker"
+            }
+          },
+          "scaleDefinition": {
+            "replicasPath": ".spec.mpiReplicaSpecs.Worker.replicas // 1"
+          },
+          "specDefinition": {
+            "podTemplateSpecPath": ".spec.mpiReplicaSpecs.Worker.template"
+          }
+        }
+      ],
+      "rootComponent": {
+        "kind": {
+          "group": "kubeflow.org",
+          "kind": "MPIJob",
+          "version": "v2beta1"
+        },
+        "name": "mpijob",
+        "statusDefinition": {
+          "conditionsDefinition": {
+            "messageFieldName": "message",
+            "path": ".status.conditions",
+            "reasonFieldName": "reason",
+            "statusFieldName": "status",
+            "typeFieldName": "type"
+          },
+          "statusMappings": {
+            "completed": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "Succeeded"
+                  }
+                ]
+              }
+            ],
+            "failed": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "Failed"
+                  }
+                ]
+              }
+            ],
+            "initializing": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "Created"
+                  }
+                ]
+              }
+            ],
+            "running": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "Running"
+                  }
+                ]
+              }
+            ],
+            "suspended": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "Suspended"
+                  }
+                ]
+              }
+            ],
+            "suspending": [
+              {
+                "byExpression": {
+                  "expectedResult": "true",
+                  "expression": ".spec.runPolicy.suspend == true and (.status.replicaStatuses // {} | to_entries | map(.value.active // 0) | add // 0) > 0"
+                }
+              }
+            ]
+          }
+        },
+        "suspendDefinition": {
+          "resumeActions": [
+            {
+              "path": ".spec.runPolicy.suspend",
+              "value": "false"
+            }
+          ],
+          "suspendActions": [
+            {
+              "path": ".spec.runPolicy.suspend",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

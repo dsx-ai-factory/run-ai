@@ -1,0 +1,85 @@
+{
+  "apiVersion": "run.ai/v1alpha1",
+  "kind": "Karta",
+  "spec": {
+    "optimizationInstructions": {},
+    "structureDefinition": {
+      "childComponents": [
+        {
+          "kind": {
+            "group": "",
+            "kind": "Pod",
+            "version": "v1"
+          },
+          "name": "templates[].name",
+          "ownerRef": "workflow",
+          "scaleDefinition": {
+            "replicasPath": ".spec.templates[].parallelism"
+          },
+          "specDefinition": {
+            "fragmentedPodSpecDefinition": {
+              "annotationsPath": "spec.templates[].metadata.annotations",
+              "labelsPath": "spec.templates[].metadata.labels",
+              "nodeAffinityPath": "spec.templates[].affinity.nodeAffinity",
+              "podAffinityPath": "spec.templates[].affinity.podAffinity",
+              "priorityClassNamePath": "spec.templates[].priorityClassName",
+              "schedulerNamePath": "spec.templates[].schedulerName"
+            },
+            "metadataPath": "spec.templates[].metadata"
+          }
+        }
+      ],
+      "rootComponent": {
+        "kind": {
+          "group": "argoproj.io",
+          "kind": "Workflow",
+          "version": "v1alpha1"
+        },
+        "name": "workflow",
+        "scaleDefinition": {
+          "replicasPath": ".spec.parallelism"
+        },
+        "specDefinition": {
+          "fragmentedPodSpecDefinition": {
+            "nodeAffinityPath": ".spec.affinity.nodeAffinity",
+            "podAffinityPath": ".spec.affinity.podAffinity",
+            "schedulerNamePath": ".spec.schedulerName"
+          },
+          "metadataPath": "spec.workflowMetadata"
+        },
+        "statusDefinition": {
+          "conditionsDefinition": {
+            "messageFieldName": "message",
+            "path": ".status.conditions",
+            "reasonFieldName": "reason",
+            "statusFieldName": "status",
+            "typeFieldName": "type"
+          },
+          "phaseDefinition": {
+            "path": ".status.phase"
+          },
+          "statusMappings": {
+            "completed": [
+              {
+                "byPhase": "Succeeded"
+              }
+            ],
+            "failed": [
+              {
+                "byPhase": "Failed"
+              },
+              {
+                "byPhase": "Error"
+              }
+            ],
+            "running": [
+              {
+                "byPhase": "Running"
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

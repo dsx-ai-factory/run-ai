@@ -11,6 +11,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/external-workload-integrator/resources"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/admissionpolicy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 )
@@ -45,14 +46,15 @@ func (o *operand) Enabled() bool {
 }
 
 func Operand(k8sReader kc.HybridClient, runaiConfig *runv1.RunaiConfig) operands.Operand {
-	return &operand{
-		runaiConfig: runaiConfig,
-		resources: []operands.Resource{
-			resources.NewDeploymentResource(Name, k8sReader, runaiConfig),
-			resources.NewServiceAccountResource(Name, k8sReader, runaiConfig),
-			resources.NewServiceMonitorResource(Name, k8sReader, runaiConfig),
-			resources.NewServiceResource(Name, k8sReader, runaiConfig),
-			resources.NewVPAResource(Name, k8sReader, runaiConfig),
-		},
+	operandResources := []operands.Resource{
+		resources.NewDeploymentResource(Name, k8sReader, runaiConfig),
+		resources.NewServiceAccountResource(Name, k8sReader, runaiConfig),
+		resources.NewServiceMonitorResource(Name, k8sReader, runaiConfig),
+		resources.NewServiceResource(Name, k8sReader, runaiConfig),
+		resources.NewVPAResource(Name, k8sReader, runaiConfig),
 	}
+	operandResources = append(operandResources, admissionpolicy.NewResources(
+		Name, k8sReader, resources.PodOwnershipPolicyDefinition(runaiConfig),
+	)...)
+	return &operand{runaiConfig: runaiConfig, resources: operandResources}
 }
