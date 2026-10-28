@@ -744,10 +744,10 @@ var _ = Describe("SystemMappingTest", func() {
 			}
 			mappingBuilder := func() (api.Gvk, map[string]api.SpecSelector) { return gvk, selectors }
 
-			markPoliciesOfChangedSystemComponents(sysAdminCtx, db,
+			Expect(markPoliciesOfChangedSystemComponents(sysAdminCtx, db,
 				[]systemFormatterSeed{{formatterName, version, formatterBuilder}},
 				[]systemFieldGroupSeed{{fgName, version, fgBuilder}},
-				[]systemWorkloadMappingSeed{{"seed-mark", version, mappingBuilder}})
+				[]systemWorkloadMappingSeed{{"seed-mark", version, mappingBuilder}})).To(BeNil())
 
 			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
 			handleSystemFormatter(sysAdminCtx, ms, formatterName, version, formatterBuilder)
@@ -824,7 +824,27 @@ var _ = Describe("SystemMappingTest", func() {
 				mappings[i].description = "outdated"
 			}
 
-			Expect(changedSystemComponents(sysAdminCtx, db, formatters, fieldGroups, mappings)).To(BeEmpty())
+			changed, err := changedSystemComponents(sysAdminCtx, db, formatters, fieldGroups, mappings)
+			Expect(err).To(BeNil())
+			Expect(changed).To(BeEmpty())
+		})
+
+		It("drops the cached breakdowns when it creates a system mapping", func() {
+			newGvk := api.Gvk{Group: convutils.Ref("seed-mark.example.com"), Kind: "SeedMarkNew", Version: "v1"}
+			DeferCleanup(func() {
+				_, err := db.Where(&dbmodel.MappingSelectors{GvkKind: newGvk.Kind, ScopeType: api.MAPPINGSCOPE_SYSTEM}).Delete(&dbmodel.MappingSelectors{})
+				Expect(err).ToNot(HaveOccurred())
+			})
+			Expect(cacheExistsForPolicy(tenantContextForTest(1), fieldAPolicy)).To(BeTrue())
+
+			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			handleSystemWorkloadMapping(sysAdminCtx, db, ms, "seed-mark-new", "v1", func() (api.Gvk, map[string]api.SpecSelector) {
+				return newGvk, map[string]api.SpecSelector{"newSel": {Query: `.spec`, FieldGroups: []string{otherFgName}}}
+			}, cv)
+
+			_, err := dao.GetMappingByGvkAndScope(sysAdminCtx, newGvk, api.MAPPINGSCOPE_SYSTEM)
+			Expect(err).To(BeNil())
+			Expect(cacheExistsForPolicy(tenantContextForTest(1), fieldAPolicy)).To(BeFalse())
 		})
 
 		type reseedCase struct {

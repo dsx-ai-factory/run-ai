@@ -51,9 +51,8 @@ func UpsertEntityDependencies(ctx context.Context, db orm.DB, rows []dbmodel.Ent
 
 // MarkPoliciesPendingByComponent sets every policy whose cached breakdown
 // depends on the given component to PendingUpdate, in all tenants, and returns
-// how many policies were marked. it is meant for system seeding, which runs as
-// the system tenant but changes components every tenant depends on. the caches
-// and dependency rows are left in place.
+// how many policies were marked. the purpose is that system mapping updates will
+// change the affected policies (in all the tenants) to PendingUpdate.
 func MarkPoliciesPendingByComponent(_ context.Context, db orm.DB, componentType dbmodel.ComponentType, componentId string) (int, *api.Error) {
 	var policyIds []string
 	if err := db.Table(dbtables.EntitiesCacheTable).
