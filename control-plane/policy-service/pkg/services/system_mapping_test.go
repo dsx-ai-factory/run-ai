@@ -11,6 +11,7 @@ import (
 	"maps"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
@@ -565,12 +566,12 @@ var _ = Describe("SystemMappingTest", func() {
 					}
 				}
 				return map[string]api.FieldGroupField{
-						"keep":     field("keepSpec", "keptSel"),
-						"movesTo":  field("movesSpec", "keptSel"),
-						"newField": field("newSpec"),
-					}, map[string]api.ItemSelector{
-						"keptSel": {Query: `.kept[]`},
-					}
+					"keep":     field("keepSpec", "keptSel"),
+					"movesTo":  field("movesSpec", "keptSel"),
+					"newField": field("newSpec"),
+				}, map[string]api.ItemSelector{
+					"keptSel": {Query: `.kept[]`},
+				}
 			}
 
 			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
@@ -701,9 +702,9 @@ var _ = Describe("SystemMappingTest", func() {
 
 	Context("re-seeding system components that policies depend on", func() {
 		const (
-			formatterName = "seed-mark-formatter"
-			fgName        = "seed-mark-fg"
-			otherFgName   = "seed-mark-other-fg"
+			formatterName = "runai-seed-mark-formatter"
+			fgName        = "runai-seed-mark-fg"
+			otherFgName   = "runai-seed-mark-other-fg"
 		)
 		gvk := api.Gvk{Group: convutils.Ref("seed-mark.example.com"), Kind: "SeedMark", Version: "v1"}
 		otherGvk := api.Gvk{Group: convutils.Ref("seed-mark.example.com"), Kind: "SeedMarkOther", Version: "v1"}
@@ -713,8 +714,13 @@ var _ = Describe("SystemMappingTest", func() {
 		field := func(formatter, specRef string) api.FieldGroupField {
 			return api.FieldGroupField{Formatter: formatter, SpecRef: specRef, Type: api.MAPPINGFIELDTYPE_STRING}
 		}
+		formatterField := func(arg string) api.FormatterField {
+			f := minimalFormatterField(arg)
+			f.GetExpr = convutils.Ref(".x")
+			return f
+		}
 		baseFormatterFields := func() map[string]api.FormatterField {
-			return map[string]api.FormatterField{"fieldA": minimalFormatterField("a")}
+			return map[string]api.FormatterField{"fieldA": formatterField("a")}
 		}
 		baseFields := func() map[string]api.FieldGroupField {
 			return map[string]api.FieldGroupField{
@@ -732,16 +738,22 @@ var _ = Describe("SystemMappingTest", func() {
 		seed := func(version string, formatterFields map[string]api.FormatterField, fields map[string]api.FieldGroupField,
 			selectors map[string]api.SpecSelector,
 		) {
-			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			formatterBuilder := func() map[string]api.FormatterField { return formatterFields }
 			fgBuilder := func() (map[string]api.FieldGroupField, map[string]api.ItemSelector) {
 				return fields, map[string]api.ItemSelector{}
 			}
-			handleSystemFormatter(sysAdminCtx, ms, formatterName, version, func() map[string]api.FormatterField { return formatterFields })
+			mappingBuilder := func() (api.Gvk, map[string]api.SpecSelector) { return gvk, selectors }
+
+			markPoliciesOfChangedSystemComponents(sysAdminCtx, db,
+				[]systemFormatterSeed{{formatterName, version, formatterBuilder}},
+				[]systemFieldGroupSeed{{fgName, version, fgBuilder}},
+				[]systemWorkloadMappingSeed{{"seed-mark", version, mappingBuilder}})
+
+			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			handleSystemFormatter(sysAdminCtx, ms, formatterName, version, formatterBuilder)
 			pruneSystemFieldGroup(sysAdminCtx, db, ms, fgName, version, fgBuilder)
 			handleSystemFieldGroup(sysAdminCtx, db, ms, fgName, version, fgBuilder, cv)
-			handleSystemWorkloadMapping(sysAdminCtx, db, ms, "seed-mark", version, func() (api.Gvk, map[string]api.SpecSelector) {
-				return gvk, selectors
-			}, cv)
+			handleSystemWorkloadMapping(sysAdminCtx, db, ms, "seed-mark", version, mappingBuilder, cv)
 		}
 
 		storedPhase := func(policyId string) api.PolicyPhase {
@@ -798,6 +810,23 @@ var _ = Describe("SystemMappingTest", func() {
 			otherPolicy = policyOn(1, "1111", otherGvk, rule("fieldC", "otherSel"))
 		})
 
+		It("finds no changes when the seeded system components are re-seeded with new versions only", func() {
+			formatters := slices.Clone(systemFormatterSeeds)
+			for i := range formatters {
+				formatters[i].description = "outdated"
+			}
+			fieldGroups := slices.Clone(systemFieldGroupSeeds)
+			for i := range fieldGroups {
+				fieldGroups[i].description = "outdated"
+			}
+			mappings := slices.Clone(systemWorkloadMappingSeeds)
+			for i := range mappings {
+				mappings[i].description = "outdated"
+			}
+
+			Expect(changedSystemComponents(sysAdminCtx, db, formatters, fieldGroups, mappings)).To(BeEmpty())
+		})
+
 		type reseedCase struct {
 			change      func(map[string]api.FormatterField, map[string]api.FieldGroupField, map[string]api.SpecSelector)
 			fieldAPhase api.PolicyPhase
@@ -822,7 +851,7 @@ var _ = Describe("SystemMappingTest", func() {
 			}),
 			Entry("a formatter field is added", reseedCase{
 				change: func(f map[string]api.FormatterField, _ map[string]api.FieldGroupField, _ map[string]api.SpecSelector) {
-					f["fieldE"] = minimalFormatterField("e")
+					f["fieldE"] = formatterField("e")
 				},
 				fieldAPhase: api.POLICYPHASE_READY,
 				fieldBPhase: api.POLICYPHASE_READY,
@@ -850,7 +879,7 @@ var _ = Describe("SystemMappingTest", func() {
 			}),
 			Entry("a formatter field changes, marking only the policy whose field uses it", reseedCase{
 				change: func(f map[string]api.FormatterField, _ map[string]api.FieldGroupField, _ map[string]api.SpecSelector) {
-					f["fieldA"] = minimalFormatterField("changed")
+					f["fieldA"] = formatterField("changed")
 				},
 				fieldAPhase: api.POLICYPHASE_PENDING_UPDATE,
 				fieldBPhase: api.POLICYPHASE_READY,
