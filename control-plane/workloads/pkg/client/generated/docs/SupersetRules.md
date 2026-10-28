@@ -29,6 +29,7 @@ Name | Type | Description | Notes
 **DistributedFramework** | Pointer to [**NullableDistributedFrameworkRules**](DistributedFrameworkRules.md) |  | [optional] 
 **EnvironmentVariables** | Pointer to [**NullableInstancesRules**](InstancesRules.md) |  | [optional] 
 **ExposedUrls** | Pointer to [**NullableExposedUrlsRules**](ExposedUrlsRules.md) |  | [optional] 
+**GpuType** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional]
 **Image** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicyRules**](ImagePullPolicyRules.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**NullableImagePullSecretsRules**](ImagePullSecretsRules.md) |  | [optional] 
@@ -949,6 +950,41 @@ HasExposedUrls returns a boolean if a field has been set.
 `func (o *SupersetRules) UnsetExposedUrls()`
 
 UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
+### GetGpuType
+
+`func (o *SupersetRules) GetGpuType() StringRules`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *SupersetRules) GetGpuTypeOk() (*StringRules, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *SupersetRules) SetGpuType(v StringRules)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *SupersetRules) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *SupersetRules) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *SupersetRules) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImage
 
 `func (o *SupersetRules) GetImage() StringRules`

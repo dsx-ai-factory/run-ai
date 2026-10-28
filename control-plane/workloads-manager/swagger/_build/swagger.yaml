@@ -2102,6 +2102,13 @@ components:
         $ref: '#/components/schemas/EnvironmentVariable'
       maxItems: 1000
       nullable: true
+    GpuType:
+      description: Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+      type: string
+      nullable: true
+      minLength: 1
+      maxLength: 63
+      pattern: ^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$
     Image:
       description: Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
       type: string
@@ -2664,6 +2671,8 @@ components:
               type: object
             environmentVariables:
               $ref: '#/components/schemas/EnvironmentVariables'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:

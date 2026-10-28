@@ -32,6 +32,9 @@ func NewNimSpec() *GeneralSpec {
 func (gs *GeneralSpec) GenerateNimServiceSpec(ctx context.Context, clusterId string) (*openapi.NimServiceSpec, error) {
 	spec := openapi.NewNimServiceSpec()
 	flags := &gs.flags.Nim
+	if flags.GpuType != "" {
+		spec.SetGpuType(flags.GpuType)
+	}
 
 	if gs.flags.Container.Image != "" {
 		spec.Image.Set(&gs.flags.Container.Image)

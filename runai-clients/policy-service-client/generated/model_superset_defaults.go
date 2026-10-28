@@ -60,6 +60,8 @@ type SupersetDefaults struct {
 	DistributedFramework NullableDistributedFramework         `json:"distributedFramework,omitempty"`
 	EnvironmentVariables NullableEnvironmentVariablesDefaults `json:"environmentVariables,omitempty"`
 	ExposedUrls          NullableExposedUrlsDefaults          `json:"exposedUrls,omitempty"`
+	// Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+	GpuType NullableString `json:"gpuType,omitempty" validate:"regexp=^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$"`
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	Image            NullableString                   `json:"image,omitempty" validate:"regexp=.*"`
 	ImagePullPolicy  NullableImagePullPolicy          `json:"imagePullPolicy,omitempty"`
@@ -1201,6 +1203,49 @@ func (o *SupersetDefaults) SetExposedUrlsNil() {
 // UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
 func (o *SupersetDefaults) UnsetExposedUrls() {
 	o.ExposedUrls.Unset()
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetDefaults) GetGpuType() string {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetDefaults) GetGpuTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *SupersetDefaults) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
+func (o *SupersetDefaults) SetGpuType(v string) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *SupersetDefaults) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *SupersetDefaults) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -2365,6 +2410,9 @@ func (o SupersetDefaults) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ExposedUrls.IsSet() {
 		toSerialize["exposedUrls"] = o.ExposedUrls.Get()
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

@@ -48,6 +48,11 @@ type NimServiceRules struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuType *StringRules `json:"gpuType,omitempty"`
+	GpuType *StringRules `json:"gpuType,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Image *StringRules `json:"image,omitempty"`
 	Image *StringRules `json:"image,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -147,6 +152,11 @@ func AssertNimServiceRulesRequired(obj NimServiceRules) error {
 	}
 	if obj.EnvironmentVariables != nil {
 		if err := AssertInstancesRulesRequired(*obj.EnvironmentVariables); err != nil {
+			return err
+		}
+	}
+	if obj.GpuType != nil {
+		if err := AssertStringRulesRequired(*obj.GpuType); err != nil {
 			return err
 		}
 	}
@@ -277,6 +287,16 @@ func AssertNimServiceRulesConstraints(obj NimServiceRules) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.EnvironmentVariables != nil {
 		if err := AssertInstancesRulesConstraints(*obj.EnvironmentVariables); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.GpuType != nil {
+		if err := AssertStringRulesConstraints(*obj.GpuType); err != nil {
 			return err
 		}
 	}

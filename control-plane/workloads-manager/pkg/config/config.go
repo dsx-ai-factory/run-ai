@@ -12,6 +12,7 @@ import (
 )
 
 type Services struct {
+	CatalogServiceUrl string `mapstructure:"catalog_service_url" validate:"required"`
 	AuthorizationUrl  string `mapstructure:"authorization_service_url" validate:"required"`
 	OrgUnitUrl        string `mapstructure:"org_unit_url" validate:"required"`
 	ClusterServiceUrl string `mapstructure:"cluster_service_url" validate:"required"`
@@ -25,6 +26,7 @@ type Services struct {
 }
 
 func (s *Services) SetDefaults() {
+	s.CatalogServiceUrl = "http://runai-backend-catalog-service:8080"
 	s.AuthorizationUrl = "http://runai-backend-authorization:8080"
 	s.OrgUnitUrl = "http://runai-backend-org-unit-service:8080"
 	s.ClusterServiceUrl = "http://runai-backend-cluster-service:8080"

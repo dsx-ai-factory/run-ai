@@ -49,6 +49,7 @@ type SupersetRules struct {
 	DistributedFramework                   NullableDistributedFrameworkRules                                `json:"distributedFramework,omitempty"`
 	EnvironmentVariables                   NullableInstancesRules                                           `json:"environmentVariables,omitempty"`
 	ExposedUrls                            NullableExposedUrlsRules                                         `json:"exposedUrls,omitempty"`
+	GpuType                                NullableStringRules                                              `json:"gpuType,omitempty"`
 	Image                                  NullableStringRules                                              `json:"image,omitempty"`
 	ImagePullPolicy                        NullableImagePullPolicyRules                                     `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets                       NullableImagePullSecretsRules                                    `json:"imagePullSecrets,omitempty"`
@@ -1166,6 +1167,49 @@ func (o *SupersetRules) SetExposedUrlsNil() {
 // UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
 func (o *SupersetRules) UnsetExposedUrls() {
 	o.ExposedUrls.Unset()
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetRules) GetGpuType() StringRules {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret StringRules
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetRules) GetGpuTypeOk() (*StringRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *SupersetRules) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableStringRules and assigns it to the GpuType field.
+func (o *SupersetRules) SetGpuType(v StringRules) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *SupersetRules) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *SupersetRules) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -2327,6 +2371,9 @@ func (o SupersetRules) ToMap() (map[string]interface{}, error) {
 	}
 	if o.ExposedUrls.IsSet() {
 		toSerialize["exposedUrls"] = o.ExposedUrls.Get()
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

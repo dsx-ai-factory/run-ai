@@ -111,6 +111,7 @@ func (nsc *NimServiceComposer) Compose(ctx context.Context, src *workloadsManage
 		runner.Batch(
 			nsc.fc.CopyString(convutils.Ref(composer.RunaiSchedulerName), &target.SchedulerName, composer.StringToString, nil),
 			nsc.fc.ComposeImage(src.Image.Get(), &target.Image, imageToNimImage, nil),
+			nsc.fc.ComposeGPUType(src.GpuType.Get(), &target.NodeSelector, composer.StringToMapString, composer.NvidiaGPUProductLabel),
 			nsc.fc.CopyString(composer.EnumToString(src.ImagePullPolicy.Get()), &target.Image.PullPolicy, composer.StringToString, nil),
 			nsc.fc.ComposeImagePullSecrets(nil, composer.CastSlice[workloadsManagerApi.ImagePullSecret, workloadsApi.ImagePullSecret](src.ImagePullSecrets),
 				&target.Image.PullSecrets, composer.AddStringsAoArray, nil),

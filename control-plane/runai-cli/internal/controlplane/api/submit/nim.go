@@ -19,6 +19,7 @@ import (
 )
 
 type NimService struct {
+	GpuType     string
 	ServingPort string
 	Replicas    int32
 
@@ -57,6 +58,7 @@ const (
 )
 
 func NimConfigurationFlagSet(flags *pflag.FlagSet, spec *NimService) {
+	flags.StringVar(&spec.GpuType, "gpu-type", "", "Exact nvidia.com/gpu.product label. Automatically sizes the NIM when GPU resources and policy defaults are omitted.")
 	flags.StringVar(&spec.NgcSecret, consts.AttributeNameNgcSecret, "", consts.AttributeUsageNgcSecret)
 
 	flags.StringVar(&spec.ModelPvc, consts.AttributeNameModelPvc, "", consts.AttributeUsageModelPvc)

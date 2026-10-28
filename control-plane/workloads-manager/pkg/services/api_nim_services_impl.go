@@ -13,6 +13,10 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/gpucompat"
+	catalogClient "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/clients/catalog"
+	ourConfig "github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/config"
+	catalog "github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 
 	nimv1alpha1 "github.com/NVIDIA/k8s-nim-operator/api/apps/v1alpha1"
 	authClient "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client"
@@ -27,6 +31,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/middleware"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	openapi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -40,11 +45,15 @@ const (
 
 type NimServicesImpl struct {
 	workloadsImpl *WorkloadsV2Impl
+	recommendGPU  func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error)
 }
 
 func NewNimServicesImpl(workloadsImpl *WorkloadsV2Impl) *NimServicesImpl {
 	return &NimServicesImpl{
 		workloadsImpl: workloadsImpl,
+		recommendGPU: func(ctx context.Context, request catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+			return catalogClient.New(config.Get[*ourConfig.Services]().CatalogServiceUrl).Recommend(ctx, request)
+		},
 	}
 }
 
@@ -62,6 +71,23 @@ func (nsi *NimServicesImpl) CreateNimService(ctx context.Context, request api.Ni
 	mutatedSpec, mutateErr := MutateWorkload[api.NimServiceSpec](&request.Spec, nil /*template spec when supported*/, policyDefaults)
 	if mutateErr != nil {
 		return nil, mutateErr
+	}
+
+	// Resolve sizing after defaults, then subject the resulting allocation and profile to policy.
+	var resolvedSpec api.NimServiceSpec
+	if err := convutils.CopySpecs(&resolvedSpec, mutatedSpec); err != nil {
+		return nil, NewSubmissionError(http.StatusInternalServerError, "failed to prepare NIM sizing input", err)
+	}
+	autosized, sizingErr := nsi.resolveNimGPUAllocation(ctx, request.Metadata.ProjectId, &resolvedSpec)
+	if sizingErr != nil {
+		return nil, ToSubmissionError(sizingErr)
+	}
+	if autosized {
+		var err error
+		mutatedSpec, err = gojsonq.LoadJson(resolvedSpec)
+		if err != nil {
+			return nil, NewSubmissionError(http.StatusInternalServerError, "failed to apply NIM sizing", err)
+		}
 	}
 
 	// Even though the prepare for mutation is primarily needed for mutation function, we also need to call it before validateSpecAgainstPolicy.
@@ -82,6 +108,13 @@ func (nsi *NimServicesImpl) CreateNimService(ctx context.Context, request api.Ni
 	var submittedSpec api.NimServiceSpec
 	if err := convutils.CopySpecs(&submittedSpec, request.Spec); err != nil {
 		return nil, NewSubmissionError(http.StatusInternalServerError, "failed to copy the submitted NIM spec", err)
+	}
+	// Persist automatic choices so later updates do not resize from changing metadata.
+	if autosized {
+		submittedSpec.GpuType = resolvedSpec.GpuType
+		submittedSpec.Compute = resolvedSpec.Compute
+		submittedSpec.EnvironmentVariables = resolvedSpec.EnvironmentVariables
+		submittedSpec.ModelStore = resolvedSpec.ModelStore
 	}
 	if request.Spec.Compute != nil {
 		compute := *request.Spec.Compute
