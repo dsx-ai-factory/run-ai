@@ -28,28 +28,16 @@ import (
 )
 
 // wipeCachesAfterSystemSeed drops the entire breakdown cache + dependency
-// tables. used once system seeding has created or updated any system-scoped
-// component (mapping, field group, formatter): any cached breakdown could now
-// be stale, so we rebuild from scratch on next read.
+// tables. used by the system seeding paths whenever any system-scoped
+// component (mapping, field group, formatter) is created or updated: any
+// cached breakdown could now be stale, so we rebuild from scratch on next read.
 //
 // since this runs at service startup, an error here means the cache is in an
 // undefined state — fail fast rather than continue with potentially stale data.
-func wipeCachesAfterSystemSeed(ctx context.Context) {
+func wipeCachesAfterSystemSeed(ctx context.Context, what string) {
 	if err := dao.WipeAllEntityCaches(ctx); err != nil {
-		logging.Fatalf("failed to wipe breakdown caches after system seeding: %v", err)
+		logging.Fatalf("failed to wipe breakdown caches after seeding %s: %v", what, err)
 	}
-}
-
-// markPoliciesPendingAfterSystemSeed marks the policies of every tenant whose cached breakdown depends on a system
-// component as PendingUpdate. Seeding calls it when existing entries of the component were removed or changed; added
-// entries cannot break a policy. It reads the dependency rows, so it must run before wipeCachesAfterSystemSeed.
-func markPoliciesPendingAfterSystemSeed(ctx context.Context, what string, componentType dbmodel.ComponentType, componentId string) {
-	count, err := dao.MarkPoliciesPendingByComponent(ctx, runaidb.DB().WithContext(ctx), componentType, componentId)
-	if err != nil {
-		logging.Errorf("failed to mark policies depending on %s as %s: %v", what, api.POLICYPHASE_PENDING_UPDATE, err)
-		return
-	}
-	logging.Infof("%s: marked %d dependent policies as %s", what, count, api.POLICYPHASE_PENDING_UPDATE)
 }
 
 const (
@@ -162,16 +150,13 @@ func HandleSystemMapping() {
 	ms := MappingApiService{}
 	cv := NewMappingConsistencyValidator(ctx, api.MAPPINGSCOPE_SYSTEM)
 
-	wroteFormatters := handleSystemFormatters(ctx, ms, cv)
+	markPoliciesOfChangedSystemComponents(ctx, db, systemFormatterSeeds, systemFieldGroupSeeds, systemWorkloadMappingSeeds)
 
-	wroteFieldGroups := handleSystemFieldGroups(ctx, db, ms, cv)
+	handleSystemFormatters(ctx, ms, cv)
 
-	wroteMappings := handleSystemMappings(ctx, db, ms, cv)
+	handleSystemFieldGroups(ctx, db, ms, cv)
 
-	// Wiping after each component would delete the dependency rows that marking the policies of a later one reads.
-	if wroteFormatters || wroteFieldGroups || wroteMappings {
-		wipeCachesAfterSystemSeed(ctx)
-	}
+	handleSystemMappings(ctx, db, ms, cv)
 }
 
 type systemFormatterSeed struct {
@@ -201,18 +186,12 @@ var systemFormatterSeeds = []systemFormatterSeed{
 	{sm.SystemNativeSpecFormatterName, systemNativeSpecFormatterDesc, sm.BuildSystemNativeSpecFormatterFields},
 }
 
-// handleSystemFormatters seeds every system formatter and reports whether any of them was written.
-func handleSystemFormatters(ctx context.Context, ms MappingApiService, _ *MappingConsistencyValidator) bool {
+func handleSystemFormatters(ctx context.Context, ms MappingApiService, _ *MappingConsistencyValidator) {
 	logging.Infof("handle system mapping formatters")
 
-	wrote := false
 	for _, seed := range systemFormatterSeeds {
-		if handleSystemFormatter(ctx, ms, seed.name, seed.description, seed.builder) {
-			wrote = true
-		}
+		handleSystemFormatter(ctx, ms, seed.name, seed.description, seed.builder)
 	}
-
-	return wrote
 }
 
 type systemFieldGroupSeed struct {
@@ -252,27 +231,18 @@ var systemFieldGroupSeeds = []systemFieldGroupSeed{
 	{sm.SystemNativeDistributedSpecFgName, systemNativeDistributedSpecFgDesc, sm.BuildSystemNativeDistributedSpecFg},
 }
 
-// handleSystemFieldGroups seeds every system field group and reports whether any of them was written.
-func handleSystemFieldGroups(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) bool {
+func handleSystemFieldGroups(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
 	logging.Infof("handle system mapping field groups")
-
-	wrote := false
 
 	// Every outdated group is pruned before any group is merged: a key renamed or moved between groups that
 	// share a spec selector would otherwise exist in both and fail the consistency check.
 	for _, seed := range systemFieldGroupSeeds {
-		if pruneSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder) {
-			wrote = true
-		}
+		pruneSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder)
 	}
 
 	for _, seed := range systemFieldGroupSeeds {
-		if handleSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder, cv) {
-			wrote = true
-		}
+		handleSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder, cv)
 	}
-
-	return wrote
 }
 
 type systemWorkloadMappingSeed struct {
@@ -307,126 +277,117 @@ var systemWorkloadMappingSeeds = []systemWorkloadMappingSeed{
 	{systemRunAiDistributedMappingName, systemRunAiDistributedMappingDesc, sm.BuildSystemRunAiDistributedV1Mapping},
 }
 
-// handleSystemMappings seeds every system workload mapping and reports whether any of them was updated.
-func handleSystemMappings(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) bool {
+func handleSystemMappings(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
 	logging.Infof("handle system mapping and spec selectors")
 
-	wrote := false
 	for _, seed := range systemWorkloadMappingSeeds {
-		if handleSystemWorkloadMapping(ctx, db, ms, seed.name, seed.description, seed.builder, cv) {
-			wrote = true
-		}
+		handleSystemWorkloadMapping(ctx, db, ms, seed.name, seed.description, seed.builder, cv)
 	}
-
-	return wrote
 }
 
-// handleSystemWorkloadMapping ensures a system-scoped mapping row exists for the workload GVK returned by builder,
-// and reports whether an existing row was updated. mappingName is used only in log lines (DB identity is GVK).
-func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiService, mappingName, wantDescription string,
-	builder sm.SystemWorkloadMappingBuilder, cv *MappingConsistencyValidator,
-) bool {
-	if builder == nil {
-		logging.Errorf("nil builder for system workload mapping %s", mappingName)
-		return false
+// markPoliciesOfChangedSystemComponents marks as PendingUpdate the policies of every tenant whose cached breakdown
+// depends on a system component that the seeds remove or change entries of. Added entries cannot break a policy, so
+// they mark nothing. It must run before anything is seeded: seeding a system component drops the caches and
+// dependency rows of every tenant that depend on it.
+func markPoliciesOfChangedSystemComponents(ctx context.Context, db orm.DB, formatters []systemFormatterSeed,
+	fieldGroups []systemFieldGroupSeed, mappings []systemWorkloadMappingSeed,
+) {
+	for _, component := range changedSystemComponents(ctx, db, formatters, fieldGroups, mappings) {
+		count, err := dao.MarkPoliciesPendingByComponent(ctx, db, component.ComponentType, component.ComponentId)
+		if err != nil {
+			logging.Errorf("failed to mark policies depending on system %s %s as %s: %v",
+				component.ComponentType, component.ComponentId, api.POLICYPHASE_PENDING_UPDATE, err)
+			continue
+		}
+		logging.Infof("system %s %s changes: marked %d dependent policies as %s",
+			component.ComponentType, component.ComponentId, count, api.POLICYPHASE_PENDING_UPDATE)
 	}
+}
 
-	gvk, specSelectorsAPI := builder()
-	logging.Infof("handle system workload mapping %s (%s/%s/%s)", mappingName, convutils.Deref(gvk.Group, ""), gvk.Kind, gvk.Version)
+// changedSystemComponents returns the stored system components whose description is outdated and whose stored
+// entries the seeds remove or change, identified as their dependency rows identify them.
+func changedSystemComponents(ctx context.Context, db orm.DB, formatters []systemFormatterSeed,
+	fieldGroups []systemFieldGroupSeed, mappings []systemWorkloadMappingSeed,
+) []dbmodel.EntitiesDependency {
+	var changed []dbmodel.EntitiesDependency
 
-	systemRow, err := dao.GetMappingByGvkAndScope(ctx, gvk, api.MAPPINGSCOPE_SYSTEM)
-	if err != nil {
-		if err.Code != http.StatusNotFound {
-			logging.Errorf("failed to load system workload mapping %s: %v", mappingName, err)
-			return false
+	for _, seed := range formatters {
+		if seed.builder == nil {
+			continue
 		}
-
-		built := addScopeToSpecSelectors(specSelectorsAPI, api.MAPPINGSCOPE_SYSTEM)
-		if vErr := validateSpecSelectorMapKeys(built); vErr != nil {
-			logging.Errorf("system workload mapping %s seed validate keys: %v", mappingName, vErr)
-			return false
+		row, err := dao.GetFormatterByName(ctx, db, seed.name)
+		if err != nil || descriptionIs(row.Description, seed.description) {
+			continue
 		}
-		if vErr := validateSpecSelectorJQExprs(built); vErr != nil {
-			logging.Errorf("system workload mapping %s seed validate JQ: %v", mappingName, vErr)
-			return false
-		}
-
-		now := time.Now().UTC()
-		desc := wantDescription
-		row := &dbmodel.MappingSelectors{
-			ID:            uuid.New(),
-			GvkGroup:      convutils.Deref(gvk.Group, ""),
-			GvkKind:       gvk.Kind,
-			GvkVersion:    gvk.Version,
-			Description:   &desc,
-			ScopeType:     api.MAPPINGSCOPE_SYSTEM,
-			TenantId:      0,
-			SpecSelectors: built,
-			CreatedAt:     now,
-			CreatedBy:     systemMappingActor,
-			UpdatedAt:     now,
-			UpdatedBy:     systemMappingActor,
-		}
-
-		if _, cerr := ms.createMapping(ctx, row, cv); cerr != nil {
-			if cerr.Code != http.StatusConflict {
-				logging.Errorf("failed to create system workload mapping %s: %v", mappingName, cerr)
-				return false
-			}
-			systemRow, err = dao.GetMappingByGvkAndScope(ctx, gvk, api.MAPPINGSCOPE_SYSTEM)
-			if err != nil {
-				logging.Errorf("failed to reload system workload mapping %s after conflict: %v", mappingName, err)
-				return false
-			}
-		} else {
-			logging.Infof("system workload mapping %s created", mappingName)
-			return false
+		fields := enrichedFormatterFields(seed.builder())
+		if len(keysMissingFrom(row.Fields, fields)) > 0 || existingEntriesChanged(row.Fields, fields) {
+			changed = append(changed, dbmodel.EntitiesDependency{ComponentType: dbmodel.ComponentTypeFormatter, ComponentId: row.ID.String()})
 		}
 	}
 
-	if systemRow.Description != nil && *systemRow.Description == wantDescription {
-		logging.Infof("system workload mapping %s: description unchanged (%q), skipping seed", mappingName, wantDescription)
-		return false
+	for _, seed := range fieldGroups {
+		if seed.builder == nil {
+			continue
+		}
+		row, err := dao.GetFieldGroupByNameAndScope(ctx, db, seed.name, api.MAPPINGSCOPE_SYSTEM)
+		if err != nil || descriptionIs(row.Description, seed.description) {
+			continue
+		}
+		fields, itemSelectors := seed.builder()
+		scopedFields := addScopeToFields(fields, api.MAPPINGSCOPE_SYSTEM)
+		scopedItemSelectors := addScopeToItemSelectors(itemSelectors, api.MAPPINGSCOPE_SYSTEM)
+		if len(keysMissingFrom(row.Fields, scopedFields)) > 0 || len(keysMissingFrom(row.ItemSelectors, scopedItemSelectors)) > 0 ||
+			existingEntriesChanged(row.Fields, scopedFields) || existingEntriesChanged(row.ItemSelectors, scopedItemSelectors) {
+			changed = append(changed, dbmodel.EntitiesDependency{ComponentType: dbmodel.ComponentTypeFieldGroup, ComponentId: row.ID.String()})
+		}
 	}
 
-	built := addScopeToSpecSelectors(specSelectorsAPI, api.MAPPINGSCOPE_SYSTEM)
-	if vErr := validateSpecSelectorMapKeys(built); vErr != nil {
-		logging.Errorf("system workload mapping %s seed validate keys: %v", mappingName, vErr)
-		return false
-	}
-	if vErr := validateSpecSelectorJQExprs(built); vErr != nil {
-		logging.Errorf("system workload mapping %s seed validate JQ: %v", mappingName, vErr)
-		return false
-	}
-	if vErr := cv.ValidateMappingChange(ctx, db, built); vErr != nil {
-		logging.Errorf("system workload mapping %s consistency: %v", mappingName, vErr)
-		return false
-	}
-
-	changed := specSelectorsChanged(systemRow.SpecSelectors, built)
-
-	desc := wantDescription
-	systemRow.Description = &desc
-	systemRow.SpecSelectors = built
-	systemRow.UpdatedAt = time.Now().UTC()
-	systemRow.UpdatedBy = systemMappingActor
-
-	if sErr := dao.SaveMapping(ctx, runaidb.DB().WithContext(ctx), systemRow); sErr != nil {
-		logging.Errorf("seed system workload mapping %s: %v", mappingName, sErr)
-		return false
+	for _, seed := range mappings {
+		if seed.builder == nil {
+			continue
+		}
+		gvk, specSelectors := seed.builder()
+		row, err := dao.GetMappingByGvkAndScope(ctx, gvk, api.MAPPINGSCOPE_SYSTEM)
+		if err != nil || descriptionIs(row.Description, seed.description) {
+			continue
+		}
+		if specSelectorsChanged(row.SpecSelectors, addScopeToSpecSelectors(specSelectors, api.MAPPINGSCOPE_SYSTEM)) {
+			changed = append(changed, dbmodel.EntitiesDependency{ComponentType: dbmodel.ComponentTypeMapping, ComponentId: gvkComponentId(gvk)})
+		}
 	}
 
-	if changed {
-		markPoliciesPendingAfterSystemSeed(ctx, "system workload mapping "+mappingName, dbmodel.ComponentTypeMapping, gvkComponentId(gvk))
+	return changed
+}
+
+func descriptionIs(description *string, want string) bool {
+	return description != nil && *description == want
+}
+
+// enrichedFormatterFields returns fields as patchFormatter stores them.
+func enrichedFormatterFields(fields map[string]api.FormatterField) map[string]api.FormatterField {
+	enriched := make(map[string]api.FormatterField, len(fields))
+	for key, field := range fields {
+		EnrichFormatterFieldArgsInfo(&field)
+		enriched[key] = field
 	}
 
-	logging.Infof("system workload mapping %s updated with %s", mappingName, wantDescription)
+	return enriched
+}
 
-	return true
+// existingEntriesChanged reports whether built defines any key of stored differently. Keys only one side has are not
+// compared.
+func existingEntriesChanged[T any](stored, built map[string]T) bool {
+	for key, builtEntry := range built {
+		if storedEntry, ok := stored[key]; ok && !sameJSON(storedEntry, builtEntry) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // specSelectorsChanged reports whether built removes or changes any spec selector of stored. A selector that only
-// gains field groups is not a change: it can only make more fields reachable.
+// gains field groups has not changed: it can only make more fields reachable.
 func specSelectorsChanged(stored, built map[string]api.SpecSelectorsWithScopeValue) bool {
 	if len(keysMissingFrom(stored, built)) > 0 {
 		return true
@@ -449,13 +410,120 @@ func specSelectorsChanged(stored, built map[string]api.SpecSelectorsWithScopeVal
 	return false
 }
 
+// sameJSON compares two entries as they are stored in their JSONB column. A value that fails to marshal is never
+// the same.
+func sameJSON(a, b any) bool {
+	aJSON, aErr := json.Marshal(a)
+	bJSON, bErr := json.Marshal(b)
+
+	return aErr == nil && bErr == nil && bytes.Equal(aJSON, bJSON)
+}
+
+// handleSystemWorkloadMapping ensures a system-scoped mapping row exists for the workload GVK returned by builder.
+// mappingName is used only in log lines (DB identity is GVK).
+func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiService, mappingName, wantDescription string,
+	builder sm.SystemWorkloadMappingBuilder, cv *MappingConsistencyValidator,
+) {
+	if builder == nil {
+		logging.Errorf("nil builder for system workload mapping %s", mappingName)
+		return
+	}
+
+	gvk, specSelectorsAPI := builder()
+	logging.Infof("handle system workload mapping %s (%s/%s/%s)", mappingName, convutils.Deref(gvk.Group, ""), gvk.Kind, gvk.Version)
+
+	systemRow, err := dao.GetMappingByGvkAndScope(ctx, gvk, api.MAPPINGSCOPE_SYSTEM)
+	if err != nil {
+		if err.Code != http.StatusNotFound {
+			logging.Errorf("failed to load system workload mapping %s: %v", mappingName, err)
+			return
+		}
+
+		built := addScopeToSpecSelectors(specSelectorsAPI, api.MAPPINGSCOPE_SYSTEM)
+		if vErr := validateSpecSelectorMapKeys(built); vErr != nil {
+			logging.Errorf("system workload mapping %s seed validate keys: %v", mappingName, vErr)
+			return
+		}
+		if vErr := validateSpecSelectorJQExprs(built); vErr != nil {
+			logging.Errorf("system workload mapping %s seed validate JQ: %v", mappingName, vErr)
+			return
+		}
+
+		now := time.Now().UTC()
+		desc := wantDescription
+		row := &dbmodel.MappingSelectors{
+			ID:            uuid.New(),
+			GvkGroup:      convutils.Deref(gvk.Group, ""),
+			GvkKind:       gvk.Kind,
+			GvkVersion:    gvk.Version,
+			Description:   &desc,
+			ScopeType:     api.MAPPINGSCOPE_SYSTEM,
+			TenantId:      0,
+			SpecSelectors: built,
+			CreatedAt:     now,
+			CreatedBy:     systemMappingActor,
+			UpdatedAt:     now,
+			UpdatedBy:     systemMappingActor,
+		}
+
+		if _, cerr := ms.createMapping(ctx, row, cv); cerr != nil {
+			if cerr.Code != http.StatusConflict {
+				logging.Errorf("failed to create system workload mapping %s: %v", mappingName, cerr)
+				return
+			}
+			systemRow, err = dao.GetMappingByGvkAndScope(ctx, gvk, api.MAPPINGSCOPE_SYSTEM)
+			if err != nil {
+				logging.Errorf("failed to reload system workload mapping %s after conflict: %v", mappingName, err)
+				return
+			}
+		} else {
+			logging.Infof("system workload mapping %s created", mappingName)
+			return
+		}
+	}
+
+	if systemRow.Description != nil && *systemRow.Description == wantDescription {
+		logging.Infof("system workload mapping %s: description unchanged (%q), skipping seed", mappingName, wantDescription)
+		return
+	}
+
+	built := addScopeToSpecSelectors(specSelectorsAPI, api.MAPPINGSCOPE_SYSTEM)
+	if vErr := validateSpecSelectorMapKeys(built); vErr != nil {
+		logging.Errorf("system workload mapping %s seed validate keys: %v", mappingName, vErr)
+		return
+	}
+	if vErr := validateSpecSelectorJQExprs(built); vErr != nil {
+		logging.Errorf("system workload mapping %s seed validate JQ: %v", mappingName, vErr)
+		return
+	}
+	if vErr := cv.ValidateMappingChange(ctx, db, built); vErr != nil {
+		logging.Errorf("system workload mapping %s consistency: %v", mappingName, vErr)
+		return
+	}
+
+	desc := wantDescription
+	systemRow.Description = &desc
+	systemRow.SpecSelectors = built
+	systemRow.UpdatedAt = time.Now().UTC()
+	systemRow.UpdatedBy = systemMappingActor
+
+	if sErr := dao.SaveMapping(ctx, runaidb.DB().WithContext(ctx), systemRow); sErr != nil {
+		logging.Errorf("seed system workload mapping %s: %v", mappingName, sErr)
+		return
+	}
+
+	wipeCachesAfterSystemSeed(ctx, "system workload mapping "+mappingName)
+
+	logging.Infof("system workload mapping %s updated with %s", mappingName, wantDescription)
+}
+
 // handleSystemFormatter ensures a system formatter row exists. If the stored description already matches
 // wantDescription, it returns without building or merging fields. Otherwise it replaces the formatter fields
-// with buildFields(), sets description to wantDescription, saves, and reports that it did.
-func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterName, wantDescription string, buildFields sm.SystemFormatterFieldsBuilder) bool {
+// with buildFields(), sets description to wantDescription, and saves.
+func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterName, wantDescription string, buildFields sm.SystemFormatterFieldsBuilder) {
 	if buildFields == nil {
 		logging.Errorf("handle update of system formatter %s", formatterName)
-		return false
+		return
 	}
 
 	formatter, err := ms.getFormatter(ctx, formatterName)
@@ -470,32 +538,30 @@ func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterN
 					formatter, err = ms.getFormatter(ctx, formatterName)
 					if err != nil {
 						logging.Errorf("failed to reload system formatter %s after conflict: %v", formatterName, err)
-						return false
+						return
 					}
 				} else {
 					logging.Errorf("failed to create system formatter %s: %v", formatterName, err)
-					return false
+					return
 				}
 			}
 		} else {
 			logging.Errorf("failed to load system formatter %s: %v", formatterName, err)
-			return false
+			return
 		}
 	}
 
 	if formatter.Description != nil && *formatter.Description == wantDescription {
 		logging.Infof("system formatter %s: description unchanged (%q), skipping seed", formatterName, wantDescription)
-		return false
+		return
 	}
 
 	fields := buildFields()
-	stale := keysMissingFrom(formatter.Fields, fields)
-	changed := len(stale) > 0 || existingEntriesChanged(formatter.Fields, enrichedFormatterFields(fields))
 
-	if len(stale) > 0 {
+	if stale := keysMissingFrom(formatter.Fields, fields); len(stale) > 0 {
 		if err := ms.deleteFormatterFields(ctx, formatterName, stale); err != nil {
 			logging.Errorf("prune system formatter %s: %v", formatterName, err)
-			return false
+			return
 		}
 		logging.Infof("system formatter %s: removed fields %v", formatterName, stale)
 	}
@@ -507,27 +573,12 @@ func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterN
 
 	if _, err := ms.patchFormatter(ctx, formatterName, &updateReq); err != nil {
 		logging.Errorf("seed system formatter %s: %v", formatterName, err)
-		return false
+		return
 	}
 
-	if changed {
-		markPoliciesPendingAfterSystemSeed(ctx, "system formatter "+formatterName, dbmodel.ComponentTypeFormatter, formatter.Id)
-	}
+	wipeCachesAfterSystemSeed(ctx, "system formatter "+formatterName)
 
 	logging.Infof("system formatter %s: updated with %s", formatterName, wantDescription)
-
-	return true
-}
-
-// enrichedFormatterFields returns fields as patchFormatter stores them.
-func enrichedFormatterFields(fields map[string]api.FormatterField) map[string]api.FormatterField {
-	enriched := make(map[string]api.FormatterField, len(fields))
-	for key, field := range fields {
-		EnrichFormatterFieldArgsInfo(&field)
-		enriched[key] = field
-	}
-
-	return enriched
 }
 
 func newEmptySystemFormatterRow(name string) *dbmodel.MappingFormatters {
@@ -548,12 +599,12 @@ func newEmptySystemFormatterRow(name string) *dbmodel.MappingFormatters {
 
 // pruneSystemFieldGroup removes from an outdated system field group the fields and item selectors that builder no
 // longer defines. Kept fields that reference a removed item selector are removed too; handleSystemFieldGroup
-// re-adds them from builder. Reports whether anything was removed.
+// re-adds them from builder.
 func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService, fieldGroupName, wantDescription string,
 	builder sm.SystemFieldGroupBuilder,
-) bool {
+) {
 	if builder == nil {
-		return false
+		return
 	}
 
 	systemRow, err := dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
@@ -561,11 +612,11 @@ func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService,
 		if err.Code != http.StatusNotFound {
 			logging.Errorf("failed to load system field group %s for pruning: %v", fieldGroupName, err)
 		}
-		return false
+		return
 	}
 
 	if systemRow.Description != nil && *systemRow.Description == wantDescription {
-		return false
+		return
 	}
 
 	fields, itemSelectors := builder()
@@ -581,14 +632,14 @@ func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService,
 	slices.Sort(staleFields)
 
 	if len(staleFields) == 0 && len(staleItemSelectors) == 0 {
-		return false
+		return
 	}
 
 	if len(staleFields) > 0 {
 		req := api.FieldGroupDeleteFieldsRequest{Fields: staleFields}
 		if _, err := ms.deleteFieldGroupFields(ctx, fieldGroupName, api.MAPPINGSCOPE_SYSTEM, &req); err != nil {
 			logging.Errorf("prune system field group %s fields: %v", fieldGroupName, err)
-			return false
+			return
 		}
 	}
 
@@ -596,36 +647,13 @@ func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService,
 		req := api.FieldGroupDeleteItemSelectorsRequest{ItemSelectors: staleItemSelectors}
 		if _, err := ms.deleteFieldGroupItemSelectors(ctx, fieldGroupName, api.MAPPINGSCOPE_SYSTEM, &req); err != nil {
 			logging.Errorf("prune system field group %s item selectors: %v", fieldGroupName, err)
-			return false
+			return
 		}
 	}
 
-	markPoliciesPendingAfterSystemSeed(ctx, "system field group "+fieldGroupName, dbmodel.ComponentTypeFieldGroup, systemRow.ID.String())
+	wipeCachesAfterSystemSeed(ctx, "system field group "+fieldGroupName)
 
 	logging.Infof("system field group %s: removed fields %v and item selectors %v", fieldGroupName, staleFields, staleItemSelectors)
-
-	return true
-}
-
-// existingEntriesChanged reports whether built defines any key of stored differently. Keys only one side has are not
-// compared: keysMissingFrom finds the removed ones, and added ones cannot break a policy.
-func existingEntriesChanged[T any](stored, built map[string]T) bool {
-	for key, builtEntry := range built {
-		if storedEntry, ok := stored[key]; ok && !sameJSON(storedEntry, builtEntry) {
-			return true
-		}
-	}
-
-	return false
-}
-
-// sameJSON compares two entries as they are stored in their JSONB column. A value that fails to marshal is never
-// the same.
-func sameJSON(a, b any) bool {
-	aJSON, aErr := json.Marshal(a)
-	bJSON, bErr := json.Marshal(b)
-
-	return aErr == nil && bErr == nil && bytes.Equal(aJSON, bJSON)
 }
 
 // keysMissingFrom returns the keys of stored that built does not define, sorted.
@@ -641,14 +669,12 @@ func keysMissingFrom[S, B any](stored map[string]S, built map[string]B) []string
 	return missing
 }
 
-// handleSystemFieldGroup ensures a system field group row exists and, when its description is outdated, merges the
-// builder's fields and item selectors into it. Reports whether the group was updated.
 func handleSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService, fieldGroupName, wantDescription string,
 	builder sm.SystemFieldGroupBuilder, cv *MappingConsistencyValidator,
-) bool {
+) {
 	if builder == nil {
 		logging.Errorf("nil builder for system field group %s", fieldGroupName)
-		return false
+		return
 	}
 
 	systemRow, err := dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
@@ -659,33 +685,31 @@ func handleSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService
 					systemRow, err = dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
 					if err != nil {
 						logging.Errorf("failed to reload system field group %s after conflict: %v", fieldGroupName, err)
-						return false
+						return
 					}
 				} else {
 					logging.Errorf("failed to create system field group %s: %v", fieldGroupName, cerr)
-					return false
+					return
 				}
 			} else {
 				systemRow, err = dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
 				if err != nil {
 					logging.Errorf("failed to reload system field group %s after create: %v", fieldGroupName, err)
-					return false
+					return
 				}
 			}
 		} else {
 			logging.Errorf("failed to load system field group %s: %v", fieldGroupName, err)
-			return false
+			return
 		}
 	}
 
 	if systemRow.Description != nil && *systemRow.Description == wantDescription {
 		logging.Infof("system field group %s: description unchanged (%q), skipping seed", fieldGroupName, wantDescription)
-		return false
+		return
 	}
 
 	fields, itemSelectors := builder()
-	changed := existingEntriesChanged(systemRow.Fields, addScopeToFields(fields, api.MAPPINGSCOPE_SYSTEM)) ||
-		existingEntriesChanged(systemRow.ItemSelectors, addScopeToItemSelectors(itemSelectors, api.MAPPINGSCOPE_SYSTEM))
 
 	updateReq := api.FieldGroupUpdateRequest{
 		Description:   &wantDescription,
@@ -695,16 +719,12 @@ func handleSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService
 
 	if _, err := ms.patchFieldGroup(ctx, fieldGroupName, api.MAPPINGSCOPE_SYSTEM, &updateReq, cv); err != nil {
 		logging.Errorf("seed system field group %s: %v", fieldGroupName, err)
-		return false
+		return
 	}
 
-	if changed {
-		markPoliciesPendingAfterSystemSeed(ctx, "system field group "+fieldGroupName, dbmodel.ComponentTypeFieldGroup, systemRow.ID.String())
-	}
+	wipeCachesAfterSystemSeed(ctx, "system field group "+fieldGroupName)
 
 	logging.Infof("system field group %s: updated with %s", fieldGroupName, wantDescription)
-
-	return true
 }
 
 func newEmptySystemFieldGroupRow(name string) *dbmodel.MappingFieldGroups {
