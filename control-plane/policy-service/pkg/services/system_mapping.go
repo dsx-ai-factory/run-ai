@@ -6,7 +6,9 @@
 package services
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"slices"
 	"time"
@@ -26,16 +28,28 @@ import (
 )
 
 // wipeCachesAfterSystemSeed drops the entire breakdown cache + dependency
-// tables. used by the system seeding paths whenever any system-scoped
-// component (mapping, field group, formatter) is created or updated: any
-// cached breakdown could now be stale, so we rebuild from scratch on next read.
+// tables. used once system seeding has created or updated any system-scoped
+// component (mapping, field group, formatter): any cached breakdown could now
+// be stale, so we rebuild from scratch on next read.
 //
 // since this runs at service startup, an error here means the cache is in an
 // undefined state — fail fast rather than continue with potentially stale data.
-func wipeCachesAfterSystemSeed(ctx context.Context, what string) {
+func wipeCachesAfterSystemSeed(ctx context.Context) {
 	if err := dao.WipeAllEntityCaches(ctx); err != nil {
-		logging.Fatalf("failed to wipe breakdown caches after seeding %s: %v", what, err)
+		logging.Fatalf("failed to wipe breakdown caches after system seeding: %v", err)
 	}
+}
+
+// markPoliciesPendingAfterSystemSeed marks the policies of every tenant whose cached breakdown depends on a system
+// component as PendingUpdate. Seeding calls it when existing entries of the component were removed or changed; added
+// entries cannot break a policy. It reads the dependency rows, so it must run before wipeCachesAfterSystemSeed.
+func markPoliciesPendingAfterSystemSeed(ctx context.Context, what string, componentType dbmodel.ComponentType, componentId string) {
+	count, err := dao.MarkPoliciesPendingByComponent(ctx, runaidb.DB().WithContext(ctx), componentType, componentId)
+	if err != nil {
+		logging.Errorf("failed to mark policies depending on %s as %s: %v", what, api.POLICYPHASE_PENDING_UPDATE, err)
+		return
+	}
+	logging.Infof("%s: marked %d dependent policies as %s", what, count, api.POLICYPHASE_PENDING_UPDATE)
 }
 
 const (
@@ -148,34 +162,57 @@ func HandleSystemMapping() {
 	ms := MappingApiService{}
 	cv := NewMappingConsistencyValidator(ctx, api.MAPPINGSCOPE_SYSTEM)
 
-	handleSystemFormatters(ctx, ms, cv)
+	wroteFormatters := handleSystemFormatters(ctx, ms, cv)
 
-	handleSystemFieldGroups(ctx, db, ms, cv)
+	wroteFieldGroups := handleSystemFieldGroups(ctx, db, ms, cv)
 
-	handleSystemMappings(ctx, db, ms, cv)
+	wroteMappings := handleSystemMappings(ctx, db, ms, cv)
+
+	// Wiping after each component would delete the dependency rows that marking the policies of a later one reads.
+	if wroteFormatters || wroteFieldGroups || wroteMappings {
+		wipeCachesAfterSystemSeed(ctx)
+	}
 }
 
-func handleSystemFormatters(ctx context.Context, ms MappingApiService, _ *MappingConsistencyValidator) {
+type systemFormatterSeed struct {
+	name        string
+	description string
+	builder     sm.SystemFormatterFieldsBuilder
+}
+
+var systemFormatterSeeds = []systemFormatterSeed{
+	{sm.SystemPodSpecFormatterName, systemPodSpecFormatterDesc, sm.BuildSystemPodSpecFormatterFields},
+	{sm.SystemJobSpecFormatterName, systemJobSpecFormatterDesc, sm.BuildSystemJobSpecFormatterFields},
+	{sm.SystemSelectorFormatterName, systemSelectorFormatterDesc, sm.BuildSystemSelectorFormatterFields},
+	{sm.SystemMetadataFormatterName, systemMetadataFormatterDesc, sm.BuildSystemMetadataFormatterFields},
+	{sm.SystemDeploymentSpecFormatterName, systemDeploymentSpecFormatterDesc, sm.BuildSystemDeploymentSpecFormatterFields},
+	{sm.SystemStatefulSetSpecFormatterName, systemStatefulSetSpecFormatterDesc, sm.BuildSystemStatefulSetSpecFormatterFields},
+	{sm.SystemCronJobSpecFormatterName, systemCronJobSpecFormatterDesc, sm.BuildSystemCronJobSpecFormatterFields},
+	{sm.SystemNimCacheSpecFormatterName, systemNimCacheSpecFormatterDesc, sm.BuildSystemNimCacheSpecFormatterFields},
+	{sm.SystemNimServiceSpecFormatterName, systemNimServiceSpecFormatterDesc, sm.BuildSystemNimServiceSpecFormatterFields},
+	{sm.SystemKubeflowRunPolicyFormatterName, systemKubeflowRunPolicyFormatterDesc, sm.BuildSystemKubeflowRunPolicyFormatterFields},
+	{sm.SystemKubeflowReplicaSpecFormatterName, systemKubeflowReplicaSpecFormatterDesc, sm.BuildSystemKubeflowReplicaSpecFormatterFields},
+	{sm.SystemPyTorchJobSpecFormatterName, systemPyTorchJobSpecFormatterDesc, sm.BuildSystemPyTorchJobSpecFormatterFields},
+	{sm.SystemLeaderWorkerSetFormatterName, systemLeaderWorkerSetSpecFormatterDesc, sm.BuildSystemLeaderWorkerSetSpecFormatterFields},
+	{sm.SystemDynamoGraphDeploymentFormatterName, systemDynamoGraphDeploymentFormatterDesc, sm.BuildSystemDynamoGraphDeploymentSpecFormatterFields},
+	{sm.SystemRayClusterSpecFormatterName, systemRayClusterSpecFormatterDesc, sm.BuildSystemRayClusterSpecFormatterFields},
+	{sm.SystemRayJobSpecFormatterName, systemRayJobSpecFormatterDesc, sm.BuildSystemRayJobSpecFormatterFields},
+	{sm.SystemRayServiceSpecFormatterName, systemRayServiceSpecFormatterDesc, sm.BuildSystemRayServiceSpecFormatterFields},
+	{sm.SystemNativeSpecFormatterName, systemNativeSpecFormatterDesc, sm.BuildSystemNativeSpecFormatterFields},
+}
+
+// handleSystemFormatters seeds every system formatter and reports whether any of them was written.
+func handleSystemFormatters(ctx context.Context, ms MappingApiService, _ *MappingConsistencyValidator) bool {
 	logging.Infof("handle system mapping formatters")
 
-	handleSystemFormatter(ctx, ms, sm.SystemPodSpecFormatterName, systemPodSpecFormatterDesc, sm.BuildSystemPodSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemJobSpecFormatterName, systemJobSpecFormatterDesc, sm.BuildSystemJobSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemSelectorFormatterName, systemSelectorFormatterDesc, sm.BuildSystemSelectorFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemMetadataFormatterName, systemMetadataFormatterDesc, sm.BuildSystemMetadataFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemDeploymentSpecFormatterName, systemDeploymentSpecFormatterDesc, sm.BuildSystemDeploymentSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemStatefulSetSpecFormatterName, systemStatefulSetSpecFormatterDesc, sm.BuildSystemStatefulSetSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemCronJobSpecFormatterName, systemCronJobSpecFormatterDesc, sm.BuildSystemCronJobSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemNimCacheSpecFormatterName, systemNimCacheSpecFormatterDesc, sm.BuildSystemNimCacheSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemNimServiceSpecFormatterName, systemNimServiceSpecFormatterDesc, sm.BuildSystemNimServiceSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemKubeflowRunPolicyFormatterName, systemKubeflowRunPolicyFormatterDesc, sm.BuildSystemKubeflowRunPolicyFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemKubeflowReplicaSpecFormatterName, systemKubeflowReplicaSpecFormatterDesc, sm.BuildSystemKubeflowReplicaSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemPyTorchJobSpecFormatterName, systemPyTorchJobSpecFormatterDesc, sm.BuildSystemPyTorchJobSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemLeaderWorkerSetFormatterName, systemLeaderWorkerSetSpecFormatterDesc, sm.BuildSystemLeaderWorkerSetSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemDynamoGraphDeploymentFormatterName, systemDynamoGraphDeploymentFormatterDesc, sm.BuildSystemDynamoGraphDeploymentSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemRayClusterSpecFormatterName, systemRayClusterSpecFormatterDesc, sm.BuildSystemRayClusterSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemRayJobSpecFormatterName, systemRayJobSpecFormatterDesc, sm.BuildSystemRayJobSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemRayServiceSpecFormatterName, systemRayServiceSpecFormatterDesc, sm.BuildSystemRayServiceSpecFormatterFields)
-	handleSystemFormatter(ctx, ms, sm.SystemNativeSpecFormatterName, systemNativeSpecFormatterDesc, sm.BuildSystemNativeSpecFormatterFields)
+	wrote := false
+	for _, seed := range systemFormatterSeeds {
+		if handleSystemFormatter(ctx, ms, seed.name, seed.description, seed.builder) {
+			wrote = true
+		}
+	}
+
+	return wrote
 }
 
 type systemFieldGroupSeed struct {
@@ -215,56 +252,83 @@ var systemFieldGroupSeeds = []systemFieldGroupSeed{
 	{sm.SystemNativeDistributedSpecFgName, systemNativeDistributedSpecFgDesc, sm.BuildSystemNativeDistributedSpecFg},
 }
 
-func handleSystemFieldGroups(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
+// handleSystemFieldGroups seeds every system field group and reports whether any of them was written.
+func handleSystemFieldGroups(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) bool {
 	logging.Infof("handle system mapping field groups")
+
+	wrote := false
 
 	// Every outdated group is pruned before any group is merged: a key renamed or moved between groups that
 	// share a spec selector would otherwise exist in both and fail the consistency check.
 	for _, seed := range systemFieldGroupSeeds {
-		pruneSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder)
+		if pruneSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder) {
+			wrote = true
+		}
 	}
 
 	for _, seed := range systemFieldGroupSeeds {
-		handleSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder, cv)
+		if handleSystemFieldGroup(ctx, db, ms, seed.name, seed.description, seed.builder, cv) {
+			wrote = true
+		}
 	}
+
+	return wrote
 }
 
-func handleSystemMappings(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) {
-	logging.Infof("handle system mapping and spec selectors")
+type systemWorkloadMappingSeed struct {
+	name        string
+	description string
+	builder     sm.SystemWorkloadMappingBuilder
+}
 
-	handleSystemWorkloadMapping(ctx, db, ms, systemDeploymentMappingName, systemDeploymentMappingDesc, sm.BuildSystemAppsDeploymentV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemBatchJobMappingName, systemBatchJobMappingDesc, sm.BuildSystemBatchJobV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemAppsReplicaSetMappingName, systemAppsReplicaSetMappingDesc, sm.BuildSystemAppsReplicaSetV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemAppsStatefulSetMappingName, systemAppsStatefulSetMappingDesc, sm.BuildSystemAppsStatefulSetV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemBatchCronJobMappingName, systemBatchCronJobMappingDesc, sm.BuildSystemBatchCronJobV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemCorePodMappingName, systemCorePodMappingDesc, sm.BuildSystemCorePodV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemNimCacheMappingName, systemNimCacheMappingDesc, sm.BuildSystemAppsNvidiaComNimCacheV1alpha1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemNimServiceMappingName, systemNimServiceMappingDesc, sm.BuildSystemAppsNvidiaComNimServiceV1alpha1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemPyTorchJobMappingName, systemPyTorchJobMappingDesc, sm.BuildSystemKubeflowOrgPyTorchJobV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemMPIJobMappingName, systemMPIJobMappingDesc, sm.BuildSystemKubeflowOrgMPIJobV2beta1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemTFJobMappingName, systemTFJobMappingDesc, sm.BuildSystemKubeflowOrgTFJobV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemXGBoostJobMappingName, systemXGBoostJobMappingDesc, sm.BuildSystemKubeflowOrgXGBoostJobV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemJAXJobMappingName, systemJAXJobMappingDesc, sm.BuildSystemKubeflowOrgJAXJobV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemLeaderWorkerSetMappingName, systemLeaderWorkerSetMappingDesc, sm.BuildSystemLeaderWorkerSetXK8sIoV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemDynamoGraphDeploymentMappingName, systemDynamoGraphDeploymentMappingDesc, sm.BuildSystemNvidiaComDynamoGraphDeploymentV1alpha1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemRayClusterMappingName, systemRayClusterMappingDesc, sm.BuildSystemRayIoRayClusterV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemRayJobMappingName, systemRayJobMappingDesc, sm.BuildSystemRayIoRayJobV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemRayServiceMappingName, systemRayServiceMappingDesc, sm.BuildSystemRayIoRayServiceV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemKnativeServiceMappingName, systemKnativeServiceMappingDesc, sm.BuildSystemServingKnativeDevServiceV1Mapping, cv)
+var systemWorkloadMappingSeeds = []systemWorkloadMappingSeed{
+	{systemDeploymentMappingName, systemDeploymentMappingDesc, sm.BuildSystemAppsDeploymentV1Mapping},
+	{systemBatchJobMappingName, systemBatchJobMappingDesc, sm.BuildSystemBatchJobV1Mapping},
+	{systemAppsReplicaSetMappingName, systemAppsReplicaSetMappingDesc, sm.BuildSystemAppsReplicaSetV1Mapping},
+	{systemAppsStatefulSetMappingName, systemAppsStatefulSetMappingDesc, sm.BuildSystemAppsStatefulSetV1Mapping},
+	{systemBatchCronJobMappingName, systemBatchCronJobMappingDesc, sm.BuildSystemBatchCronJobV1Mapping},
+	{systemCorePodMappingName, systemCorePodMappingDesc, sm.BuildSystemCorePodV1Mapping},
+	{systemNimCacheMappingName, systemNimCacheMappingDesc, sm.BuildSystemAppsNvidiaComNimCacheV1alpha1Mapping},
+	{systemNimServiceMappingName, systemNimServiceMappingDesc, sm.BuildSystemAppsNvidiaComNimServiceV1alpha1Mapping},
+	{systemPyTorchJobMappingName, systemPyTorchJobMappingDesc, sm.BuildSystemKubeflowOrgPyTorchJobV1Mapping},
+	{systemMPIJobMappingName, systemMPIJobMappingDesc, sm.BuildSystemKubeflowOrgMPIJobV2beta1Mapping},
+	{systemTFJobMappingName, systemTFJobMappingDesc, sm.BuildSystemKubeflowOrgTFJobV1Mapping},
+	{systemXGBoostJobMappingName, systemXGBoostJobMappingDesc, sm.BuildSystemKubeflowOrgXGBoostJobV1Mapping},
+	{systemJAXJobMappingName, systemJAXJobMappingDesc, sm.BuildSystemKubeflowOrgJAXJobV1Mapping},
+	{systemLeaderWorkerSetMappingName, systemLeaderWorkerSetMappingDesc, sm.BuildSystemLeaderWorkerSetXK8sIoV1Mapping},
+	{systemDynamoGraphDeploymentMappingName, systemDynamoGraphDeploymentMappingDesc, sm.BuildSystemNvidiaComDynamoGraphDeploymentV1alpha1Mapping},
+	{systemRayClusterMappingName, systemRayClusterMappingDesc, sm.BuildSystemRayIoRayClusterV1Mapping},
+	{systemRayJobMappingName, systemRayJobMappingDesc, sm.BuildSystemRayIoRayJobV1Mapping},
+	{systemRayServiceMappingName, systemRayServiceMappingDesc, sm.BuildSystemRayIoRayServiceV1Mapping},
+	{systemKnativeServiceMappingName, systemKnativeServiceMappingDesc, sm.BuildSystemServingKnativeDevServiceV1Mapping},
 
 	// Native policy spec mappings (fictive GVKs)
-	handleSystemWorkloadMapping(ctx, db, ms, systemRunAiWorkspaceMappingName, systemRunAiWorkspaceMappingDesc, sm.BuildSystemRunAiWorkspaceV1Mapping, cv)
-	handleSystemWorkloadMapping(ctx, db, ms, systemRunAiDistributedMappingName, systemRunAiDistributedMappingDesc, sm.BuildSystemRunAiDistributedV1Mapping, cv)
+	{systemRunAiWorkspaceMappingName, systemRunAiWorkspaceMappingDesc, sm.BuildSystemRunAiWorkspaceV1Mapping},
+	{systemRunAiDistributedMappingName, systemRunAiDistributedMappingDesc, sm.BuildSystemRunAiDistributedV1Mapping},
 }
 
-// handleSystemWorkloadMapping ensures a system-scoped mapping row exists for the workload GVK returned by builder.
-// mappingName is used only in log lines (DB identity is GVK).
+// handleSystemMappings seeds every system workload mapping and reports whether any of them was updated.
+func handleSystemMappings(ctx context.Context, db orm.DB, ms MappingApiService, cv *MappingConsistencyValidator) bool {
+	logging.Infof("handle system mapping and spec selectors")
+
+	wrote := false
+	for _, seed := range systemWorkloadMappingSeeds {
+		if handleSystemWorkloadMapping(ctx, db, ms, seed.name, seed.description, seed.builder, cv) {
+			wrote = true
+		}
+	}
+
+	return wrote
+}
+
+// handleSystemWorkloadMapping ensures a system-scoped mapping row exists for the workload GVK returned by builder,
+// and reports whether an existing row was updated. mappingName is used only in log lines (DB identity is GVK).
 func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiService, mappingName, wantDescription string,
 	builder sm.SystemWorkloadMappingBuilder, cv *MappingConsistencyValidator,
-) {
+) bool {
 	if builder == nil {
 		logging.Errorf("nil builder for system workload mapping %s", mappingName)
-		return
+		return false
 	}
 
 	gvk, specSelectorsAPI := builder()
@@ -274,17 +338,17 @@ func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiSe
 	if err != nil {
 		if err.Code != http.StatusNotFound {
 			logging.Errorf("failed to load system workload mapping %s: %v", mappingName, err)
-			return
+			return false
 		}
 
 		built := addScopeToSpecSelectors(specSelectorsAPI, api.MAPPINGSCOPE_SYSTEM)
 		if vErr := validateSpecSelectorMapKeys(built); vErr != nil {
 			logging.Errorf("system workload mapping %s seed validate keys: %v", mappingName, vErr)
-			return
+			return false
 		}
 		if vErr := validateSpecSelectorJQExprs(built); vErr != nil {
 			logging.Errorf("system workload mapping %s seed validate JQ: %v", mappingName, vErr)
-			return
+			return false
 		}
 
 		now := time.Now().UTC()
@@ -307,37 +371,39 @@ func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiSe
 		if _, cerr := ms.createMapping(ctx, row, cv); cerr != nil {
 			if cerr.Code != http.StatusConflict {
 				logging.Errorf("failed to create system workload mapping %s: %v", mappingName, cerr)
-				return
+				return false
 			}
 			systemRow, err = dao.GetMappingByGvkAndScope(ctx, gvk, api.MAPPINGSCOPE_SYSTEM)
 			if err != nil {
 				logging.Errorf("failed to reload system workload mapping %s after conflict: %v", mappingName, err)
-				return
+				return false
 			}
 		} else {
 			logging.Infof("system workload mapping %s created", mappingName)
-			return
+			return false
 		}
 	}
 
 	if systemRow.Description != nil && *systemRow.Description == wantDescription {
 		logging.Infof("system workload mapping %s: description unchanged (%q), skipping seed", mappingName, wantDescription)
-		return
+		return false
 	}
 
 	built := addScopeToSpecSelectors(specSelectorsAPI, api.MAPPINGSCOPE_SYSTEM)
 	if vErr := validateSpecSelectorMapKeys(built); vErr != nil {
 		logging.Errorf("system workload mapping %s seed validate keys: %v", mappingName, vErr)
-		return
+		return false
 	}
 	if vErr := validateSpecSelectorJQExprs(built); vErr != nil {
 		logging.Errorf("system workload mapping %s seed validate JQ: %v", mappingName, vErr)
-		return
+		return false
 	}
 	if vErr := cv.ValidateMappingChange(ctx, db, built); vErr != nil {
 		logging.Errorf("system workload mapping %s consistency: %v", mappingName, vErr)
-		return
+		return false
 	}
+
+	changed := specSelectorsChanged(systemRow.SpecSelectors, built)
 
 	desc := wantDescription
 	systemRow.Description = &desc
@@ -347,21 +413,49 @@ func handleSystemWorkloadMapping(ctx context.Context, db orm.DB, ms MappingApiSe
 
 	if sErr := dao.SaveMapping(ctx, runaidb.DB().WithContext(ctx), systemRow); sErr != nil {
 		logging.Errorf("seed system workload mapping %s: %v", mappingName, sErr)
-		return
+		return false
 	}
 
-	wipeCachesAfterSystemSeed(ctx, "system workload mapping "+mappingName)
+	if changed {
+		markPoliciesPendingAfterSystemSeed(ctx, "system workload mapping "+mappingName, dbmodel.ComponentTypeMapping, gvkComponentId(gvk))
+	}
 
 	logging.Infof("system workload mapping %s updated with %s", mappingName, wantDescription)
+
+	return true
+}
+
+// specSelectorsChanged reports whether built removes or changes any spec selector of stored. A selector that only
+// gains field groups is not a change: it can only make more fields reachable.
+func specSelectorsChanged(stored, built map[string]api.SpecSelectorsWithScopeValue) bool {
+	if len(keysMissingFrom(stored, built)) > 0 {
+		return true
+	}
+
+	for name, builtSel := range built {
+		storedSel, ok := stored[name]
+		if !ok {
+			continue
+		}
+		if slices.ContainsFunc(storedSel.FieldGroups, func(fg string) bool { return !slices.Contains(builtSel.FieldGroups, fg) }) {
+			return true
+		}
+		storedSel.FieldGroups, builtSel.FieldGroups = nil, nil
+		if !sameJSON(storedSel, builtSel) {
+			return true
+		}
+	}
+
+	return false
 }
 
 // handleSystemFormatter ensures a system formatter row exists. If the stored description already matches
 // wantDescription, it returns without building or merging fields. Otherwise it replaces the formatter fields
-// with buildFields(), sets description to wantDescription, and saves.
-func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterName, wantDescription string, buildFields sm.SystemFormatterFieldsBuilder) {
+// with buildFields(), sets description to wantDescription, saves, and reports that it did.
+func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterName, wantDescription string, buildFields sm.SystemFormatterFieldsBuilder) bool {
 	if buildFields == nil {
 		logging.Errorf("handle update of system formatter %s", formatterName)
-		return
+		return false
 	}
 
 	formatter, err := ms.getFormatter(ctx, formatterName)
@@ -376,30 +470,32 @@ func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterN
 					formatter, err = ms.getFormatter(ctx, formatterName)
 					if err != nil {
 						logging.Errorf("failed to reload system formatter %s after conflict: %v", formatterName, err)
-						return
+						return false
 					}
 				} else {
 					logging.Errorf("failed to create system formatter %s: %v", formatterName, err)
-					return
+					return false
 				}
 			}
 		} else {
 			logging.Errorf("failed to load system formatter %s: %v", formatterName, err)
-			return
+			return false
 		}
 	}
 
 	if formatter.Description != nil && *formatter.Description == wantDescription {
 		logging.Infof("system formatter %s: description unchanged (%q), skipping seed", formatterName, wantDescription)
-		return
+		return false
 	}
 
 	fields := buildFields()
+	stale := keysMissingFrom(formatter.Fields, fields)
+	changed := len(stale) > 0 || existingEntriesChanged(formatter.Fields, enrichedFormatterFields(fields))
 
-	if stale := keysMissingFrom(formatter.Fields, fields); len(stale) > 0 {
+	if len(stale) > 0 {
 		if err := ms.deleteFormatterFields(ctx, formatterName, stale); err != nil {
 			logging.Errorf("prune system formatter %s: %v", formatterName, err)
-			return
+			return false
 		}
 		logging.Infof("system formatter %s: removed fields %v", formatterName, stale)
 	}
@@ -411,12 +507,27 @@ func handleSystemFormatter(ctx context.Context, ms MappingApiService, formatterN
 
 	if _, err := ms.patchFormatter(ctx, formatterName, &updateReq); err != nil {
 		logging.Errorf("seed system formatter %s: %v", formatterName, err)
-		return
+		return false
 	}
 
-	wipeCachesAfterSystemSeed(ctx, "system formatter "+formatterName)
+	if changed {
+		markPoliciesPendingAfterSystemSeed(ctx, "system formatter "+formatterName, dbmodel.ComponentTypeFormatter, formatter.Id)
+	}
 
 	logging.Infof("system formatter %s: updated with %s", formatterName, wantDescription)
+
+	return true
+}
+
+// enrichedFormatterFields returns fields as patchFormatter stores them.
+func enrichedFormatterFields(fields map[string]api.FormatterField) map[string]api.FormatterField {
+	enriched := make(map[string]api.FormatterField, len(fields))
+	for key, field := range fields {
+		EnrichFormatterFieldArgsInfo(&field)
+		enriched[key] = field
+	}
+
+	return enriched
 }
 
 func newEmptySystemFormatterRow(name string) *dbmodel.MappingFormatters {
@@ -437,12 +548,12 @@ func newEmptySystemFormatterRow(name string) *dbmodel.MappingFormatters {
 
 // pruneSystemFieldGroup removes from an outdated system field group the fields and item selectors that builder no
 // longer defines. Kept fields that reference a removed item selector are removed too; handleSystemFieldGroup
-// re-adds them from builder.
+// re-adds them from builder. Reports whether anything was removed.
 func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService, fieldGroupName, wantDescription string,
 	builder sm.SystemFieldGroupBuilder,
-) {
+) bool {
 	if builder == nil {
-		return
+		return false
 	}
 
 	systemRow, err := dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
@@ -450,11 +561,11 @@ func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService,
 		if err.Code != http.StatusNotFound {
 			logging.Errorf("failed to load system field group %s for pruning: %v", fieldGroupName, err)
 		}
-		return
+		return false
 	}
 
 	if systemRow.Description != nil && *systemRow.Description == wantDescription {
-		return
+		return false
 	}
 
 	fields, itemSelectors := builder()
@@ -470,14 +581,14 @@ func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService,
 	slices.Sort(staleFields)
 
 	if len(staleFields) == 0 && len(staleItemSelectors) == 0 {
-		return
+		return false
 	}
 
 	if len(staleFields) > 0 {
 		req := api.FieldGroupDeleteFieldsRequest{Fields: staleFields}
 		if _, err := ms.deleteFieldGroupFields(ctx, fieldGroupName, api.MAPPINGSCOPE_SYSTEM, &req); err != nil {
 			logging.Errorf("prune system field group %s fields: %v", fieldGroupName, err)
-			return
+			return false
 		}
 	}
 
@@ -485,13 +596,36 @@ func pruneSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService,
 		req := api.FieldGroupDeleteItemSelectorsRequest{ItemSelectors: staleItemSelectors}
 		if _, err := ms.deleteFieldGroupItemSelectors(ctx, fieldGroupName, api.MAPPINGSCOPE_SYSTEM, &req); err != nil {
 			logging.Errorf("prune system field group %s item selectors: %v", fieldGroupName, err)
-			return
+			return false
 		}
 	}
 
-	wipeCachesAfterSystemSeed(ctx, "system field group "+fieldGroupName)
+	markPoliciesPendingAfterSystemSeed(ctx, "system field group "+fieldGroupName, dbmodel.ComponentTypeFieldGroup, systemRow.ID.String())
 
 	logging.Infof("system field group %s: removed fields %v and item selectors %v", fieldGroupName, staleFields, staleItemSelectors)
+
+	return true
+}
+
+// existingEntriesChanged reports whether built defines any key of stored differently. Keys only one side has are not
+// compared: keysMissingFrom finds the removed ones, and added ones cannot break a policy.
+func existingEntriesChanged[T any](stored, built map[string]T) bool {
+	for key, builtEntry := range built {
+		if storedEntry, ok := stored[key]; ok && !sameJSON(storedEntry, builtEntry) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// sameJSON compares two entries as they are stored in their JSONB column. A value that fails to marshal is never
+// the same.
+func sameJSON(a, b any) bool {
+	aJSON, aErr := json.Marshal(a)
+	bJSON, bErr := json.Marshal(b)
+
+	return aErr == nil && bErr == nil && bytes.Equal(aJSON, bJSON)
 }
 
 // keysMissingFrom returns the keys of stored that built does not define, sorted.
@@ -507,12 +641,14 @@ func keysMissingFrom[S, B any](stored map[string]S, built map[string]B) []string
 	return missing
 }
 
+// handleSystemFieldGroup ensures a system field group row exists and, when its description is outdated, merges the
+// builder's fields and item selectors into it. Reports whether the group was updated.
 func handleSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService, fieldGroupName, wantDescription string,
 	builder sm.SystemFieldGroupBuilder, cv *MappingConsistencyValidator,
-) {
+) bool {
 	if builder == nil {
 		logging.Errorf("nil builder for system field group %s", fieldGroupName)
-		return
+		return false
 	}
 
 	systemRow, err := dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
@@ -523,31 +659,33 @@ func handleSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService
 					systemRow, err = dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
 					if err != nil {
 						logging.Errorf("failed to reload system field group %s after conflict: %v", fieldGroupName, err)
-						return
+						return false
 					}
 				} else {
 					logging.Errorf("failed to create system field group %s: %v", fieldGroupName, cerr)
-					return
+					return false
 				}
 			} else {
 				systemRow, err = dao.GetFieldGroupByNameAndScope(ctx, db, fieldGroupName, api.MAPPINGSCOPE_SYSTEM)
 				if err != nil {
 					logging.Errorf("failed to reload system field group %s after create: %v", fieldGroupName, err)
-					return
+					return false
 				}
 			}
 		} else {
 			logging.Errorf("failed to load system field group %s: %v", fieldGroupName, err)
-			return
+			return false
 		}
 	}
 
 	if systemRow.Description != nil && *systemRow.Description == wantDescription {
 		logging.Infof("system field group %s: description unchanged (%q), skipping seed", fieldGroupName, wantDescription)
-		return
+		return false
 	}
 
 	fields, itemSelectors := builder()
+	changed := existingEntriesChanged(systemRow.Fields, addScopeToFields(fields, api.MAPPINGSCOPE_SYSTEM)) ||
+		existingEntriesChanged(systemRow.ItemSelectors, addScopeToItemSelectors(itemSelectors, api.MAPPINGSCOPE_SYSTEM))
 
 	updateReq := api.FieldGroupUpdateRequest{
 		Description:   &wantDescription,
@@ -557,12 +695,16 @@ func handleSystemFieldGroup(ctx context.Context, db orm.DB, ms MappingApiService
 
 	if _, err := ms.patchFieldGroup(ctx, fieldGroupName, api.MAPPINGSCOPE_SYSTEM, &updateReq, cv); err != nil {
 		logging.Errorf("seed system field group %s: %v", fieldGroupName, err)
-		return
+		return false
 	}
 
-	wipeCachesAfterSystemSeed(ctx, "system field group "+fieldGroupName)
+	if changed {
+		markPoliciesPendingAfterSystemSeed(ctx, "system field group "+fieldGroupName, dbmodel.ComponentTypeFieldGroup, systemRow.ID.String())
+	}
 
 	logging.Infof("system field group %s: updated with %s", fieldGroupName, wantDescription)
+
+	return true
 }
 
 func newEmptySystemFieldGroupRow(name string) *dbmodel.MappingFieldGroups {
