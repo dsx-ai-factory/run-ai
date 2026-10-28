@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2
 go 1.27.3
 
 require (
-	github.com/aws/smithy-go v1.28.6
+	github.com/aws/smithy-go v1.28.7
 	github.com/cenkalti/backoff/v4 v4.3.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8
