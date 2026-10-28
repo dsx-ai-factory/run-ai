@@ -73,6 +73,10 @@ rules:
       - httproutes
     verbs:
       - delete
+  - apiGroups: [inference.platform.run.ai]
+    resources: [inferenceendpoints]
+    verbs: [get, create, update, patch, delete]
+
 ---
 # Run:AI AnyworkloadController
 apiVersion: rbac.authorization.k8s.io/v1
@@ -284,6 +288,10 @@ rules:
     verbs:
       - create
       - patch
+  - apiGroups: [inference.platform.run.ai]
+    resources: [inferenceendpoints]
+    verbs: [get, list, watch]
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

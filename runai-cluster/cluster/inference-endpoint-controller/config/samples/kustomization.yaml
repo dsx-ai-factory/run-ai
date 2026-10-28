@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- inference_v1alpha1_inferenceendpoint.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

@@ -163,7 +163,7 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 
 		It("carries the per-project role bindings KRM now owns", func() {
 			projectController := krmConfigFor(defaultRunaiConfig()).Spec.ProjectController
-			Expect(projectController.ExtraProjectRoleBindings).To(HaveLen(17))
+			Expect(projectController.ExtraProjectRoleBindings).To(HaveLen(18))
 
 			var names []string
 			for _, binding := range projectController.ExtraProjectRoleBindings {
@@ -172,7 +172,7 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 				// Everything outside the OpenShift set binds the install namespace.
 				Expect(binding.BindProjectServiceAccount).To(BeNil())
 			}
-			Expect(names).To(ContainElements("runai-agent", "cluster-sync", "anyworkload-controller"))
+			Expect(names).To(ContainElements("runai-agent", "cluster-sync", "anyworkload-controller", "inference-endpoint-controller"))
 			// KRM's controller reaches project namespaces cluster-wide, and the Run:ai
 			// service account this bound no longer exists.
 			Expect(names).NotTo(ContainElement("runai-project-controller-project"))
@@ -184,7 +184,7 @@ var _ = Describe("KRMConfigForRunaiConfig", func() {
 			runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor = runv1internal.KubernetesFlavorOpenShift
 
 			bindings := krmConfigFor(runaiConfig).Spec.ProjectController.ExtraProjectRoleBindings
-			Expect(bindings).To(HaveLen(20))
+			Expect(bindings).To(HaveLen(21))
 
 			found := map[string]kaiv1alpha1.ProjectRoleBinding{}
 			for _, binding := range bindings {

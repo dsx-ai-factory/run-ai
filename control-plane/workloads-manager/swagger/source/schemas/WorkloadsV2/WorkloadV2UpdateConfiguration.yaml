@@ -26,6 +26,10 @@ example:
               - path: /
                 pathType: Prefix
 properties:
+  inferenceEndpoint:
+    x-internal: true
+    nullable: true
+    $ref: "./AgentInferenceEndpoint.yaml"
   mnnvl:
     $ref: "./WorkloadV2UpdateConfigurationMnnvl.yaml"
   networking:

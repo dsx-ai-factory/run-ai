@@ -1,0 +1,15 @@
+{
+  "service_name": "inference-endpoint-controller",
+  "enabled": true,
+  "artifact_type": "container",
+  "cache_artifacts": true,
+  "path_to_artifacts": "bin/",
+  "notifications": {
+    "slack": {
+      "mention": "@viper"
+    }
+  },
+  "jira": {
+    "team_name": "Viper Team"
+  }
+}

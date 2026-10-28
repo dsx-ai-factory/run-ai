@@ -387,6 +387,9 @@ func clonePtr[T any](in *T) *T {
 type WorkloadConfiguration struct {
 	Mnnvl      *MnnvlConfiguration      `json:"mnnvl,omitempty"`
 	Networking *NetworkingConfiguration `json:"networking,omitempty"`
+	// InferenceEndpoint is resolved by the server, never accepted from the public
+	// workload configuration. Nil preserves the behavior of existing workloads.
+	InferenceEndpoint *api.AgentInferenceEndpoint `json:"inferenceEndpoint,omitempty"`
 	// NetworkingOwnershipContract is set only when Workloads Manager applies
 	// the binding during creation. It remains nil for older records so an
 	// update cannot add a selector that their existing Pods do not carry.
@@ -545,6 +548,12 @@ func (q *WorkloadsQueueRecord) ToClusterUpdate() api.WorkloadV2Update {
 
 	if q.Configuration != nil {
 		cfg := api.WorkloadV2UpdateConfiguration{}
+		if endpoint := q.Configuration.InferenceEndpoint; endpoint != nil {
+			cfg.InferenceEndpoint = &api.AgentInferenceEndpoint{SchemaVersion: endpoint.SchemaVersion}
+			if spec := cloneInterfaceMapPtr(&endpoint.Spec); spec != nil {
+				cfg.InferenceEndpoint.Spec = *spec
+			}
+		}
 		if q.Configuration.Networking != nil {
 			cfg.Networking = q.Configuration.Networking.ToAgentAPI(q.Name)
 			cfg.NetworkingEndpoints = q.Configuration.Networking.ToAPI(q.Name)

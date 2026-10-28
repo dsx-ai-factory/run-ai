@@ -22,8 +22,9 @@ var _ MappedNullable = &WorkloadV2UpdateConfiguration{}
 
 // WorkloadV2UpdateConfiguration struct for WorkloadV2UpdateConfiguration
 type WorkloadV2UpdateConfiguration struct {
-	Mnnvl      *WorkloadV2UpdateConfigurationMnnvl  `json:"mnnvl,omitempty"`
-	Networking NullableAgentNetworkingConfiguration `json:"networking,omitempty"`
+	InferenceEndpoint NullableAgentInferenceEndpoint       `json:"inferenceEndpoint,omitempty"`
+	Mnnvl             *WorkloadV2UpdateConfigurationMnnvl  `json:"mnnvl,omitempty"`
+	Networking        NullableAgentNetworkingConfiguration `json:"networking,omitempty"`
 	// Endpoint-array networking configuration sent to agents that support the new networking shape. Supported for cluster version 2.26.0 and above.
 	NetworkingEndpoints         []NetworkingEndpoint                                 `json:"networkingEndpoints,omitempty"`
 	NetworkingSubmissionProfile *NetworkingSubmissionProfile                         `json:"networkingSubmissionProfile,omitempty"`
@@ -48,6 +49,49 @@ func NewWorkloadV2UpdateConfiguration() *WorkloadV2UpdateConfiguration {
 func NewWorkloadV2UpdateConfigurationWithDefaults() *WorkloadV2UpdateConfiguration {
 	this := WorkloadV2UpdateConfiguration{}
 	return &this
+}
+
+// GetInferenceEndpoint returns the InferenceEndpoint field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *WorkloadV2UpdateConfiguration) GetInferenceEndpoint() AgentInferenceEndpoint {
+	if o == nil || IsNil(o.InferenceEndpoint.Get()) {
+		var ret AgentInferenceEndpoint
+		return ret
+	}
+	return *o.InferenceEndpoint.Get()
+}
+
+// GetInferenceEndpointOk returns a tuple with the InferenceEndpoint field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *WorkloadV2UpdateConfiguration) GetInferenceEndpointOk() (*AgentInferenceEndpoint, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.InferenceEndpoint.Get(), o.InferenceEndpoint.IsSet()
+}
+
+// HasInferenceEndpoint returns a boolean if a field has been set.
+func (o *WorkloadV2UpdateConfiguration) HasInferenceEndpoint() bool {
+	if o != nil && o.InferenceEndpoint.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetInferenceEndpoint gets a reference to the given NullableAgentInferenceEndpoint and assigns it to the InferenceEndpoint field.
+func (o *WorkloadV2UpdateConfiguration) SetInferenceEndpoint(v AgentInferenceEndpoint) {
+	o.InferenceEndpoint.Set(&v)
+}
+
+// SetInferenceEndpointNil sets the value for InferenceEndpoint to be an explicit nil
+func (o *WorkloadV2UpdateConfiguration) SetInferenceEndpointNil() {
+	o.InferenceEndpoint.Set(nil)
+}
+
+// UnsetInferenceEndpoint ensures that no value is present for InferenceEndpoint, not even an explicit nil
+func (o *WorkloadV2UpdateConfiguration) UnsetInferenceEndpoint() {
+	o.InferenceEndpoint.Unset()
 }
 
 // GetMnnvl returns the Mnnvl field value if set, zero value otherwise.
@@ -319,6 +363,9 @@ func (o WorkloadV2UpdateConfiguration) MarshalJSON() ([]byte, error) {
 
 func (o WorkloadV2UpdateConfiguration) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if o.InferenceEndpoint.IsSet() {
+		toSerialize["inferenceEndpoint"] = o.InferenceEndpoint.Get()
+	}
 	if !IsNil(o.Mnnvl) {
 		toSerialize["mnnvl"] = o.Mnnvl
 	}

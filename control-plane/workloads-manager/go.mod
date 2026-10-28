@@ -22,6 +22,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/policy-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0
+	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20260804144203-08ba37680424
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.8
@@ -50,6 +51,9 @@ require (
 	gorm.io/gorm v1.31.2
 	k8s.io/api v0.36.2
 	k8s.io/apimachinery v0.36.2
+	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
+	sigs.k8s.io/gateway-api v1.5.0
+	sigs.k8s.io/lws v0.7.0
 )
 
 replace (
@@ -120,7 +124,6 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/personalcreds v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk v0.0.0-20250907093507-4e419875bd3d // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-common v0.0.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0 // indirect
 	github.com/ebitengine/purego v0.10.1 // indirect
@@ -159,7 +162,6 @@ require (
 	github.com/go-playground/validator/v10 v10.30.5 // indirect
 	github.com/go-sql-driver/mysql v1.10.1 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
-	github.com/goccy/go-yaml v1.19.2 // indirect
 	github.com/golang-jwt/jwt/v5 v5.3.1 // indirect
 	github.com/golang-migrate/migrate/v4 v4.19.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
@@ -188,6 +190,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.1-0.20220621161143-b0104c826a24 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
+	github.com/kai-scheduler/KAI-scheduler v0.18.2 // indirect
 	github.com/kedacore/keda/v2 v2.18.3 // indirect
 	github.com/klauspost/compress v1.20.3 // indirect
 	github.com/kserve/kserve v0.17.1 // indirect
@@ -260,7 +263,6 @@ require (
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.2.0 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
-	github.com/xyproto/randomstring v1.2.0 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/detectors/gcp v1.44.0 // indirect
@@ -315,15 +317,12 @@ require (
 	k8s.io/dynamic-resource-allocation v0.35.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260317180543-43fb72c5454a // indirect
-	k8s.io/utils v0.0.0-20260507154919-ff6756f316d2 // indirect
 	knative.dev/networking v0.0.0-20260120131110-a7cdca238a0d // indirect
 	knative.dev/pkg v0.0.0-20260120122510-4a022ed9999a // indirect
 	knative.dev/serving v0.48.1 // indirect
 	sigs.k8s.io/controller-runtime v0.23.3 // indirect
-	sigs.k8s.io/gateway-api v1.5.0 // indirect
 	sigs.k8s.io/gateway-api-inference-extension v1.3.0 // indirect
 	sigs.k8s.io/json v0.0.0-20250730193827-2d320260d730 // indirect
-	sigs.k8s.io/lws v0.7.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.2 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
