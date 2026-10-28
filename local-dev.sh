@@ -1517,7 +1517,8 @@ container_build() {
     if [[ -f "${HOME}/.docker/config.json" ]]; then
       authfile_args=(--authfile "${HOME}/.docker/config.json")
     fi
-    podman build --platform linux/amd64 --retry 3 --retry-delay 5s "${authfile_args[@]}" -t "${image_ref}" "$@"
+    podman build --platform linux/amd64 --retry 3 --retry-delay 5s \
+      "${authfile_args[@]+"${authfile_args[@]}"}" -t "${image_ref}" "$@"
     podman tag "localhost/${image_ref}" "docker.io/${image_ref}" 2>/dev/null || true
   else
     docker buildx build --platform linux/amd64 --provenance=false --load -t "${image_ref}" "$@"
