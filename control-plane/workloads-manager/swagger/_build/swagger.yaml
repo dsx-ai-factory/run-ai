@@ -2792,6 +2792,7 @@ components:
         - annotations
         - labels
         - tolerations
+        - gpuType
         - nodePools
         - imagePullSecrets
     NimServiceUpdateRequest:

@@ -25,6 +25,8 @@
 
 * `TOLERATIONS` (value: `"tolerations"`)
 
+* `GPU_TYPE` (value: `"gpuType"`)
+
 * `NODE_POOLS` (value: `"nodePools"`)
 
 * `IMAGE_PULL_SECRETS` (value: `"imagePullSecrets"`)

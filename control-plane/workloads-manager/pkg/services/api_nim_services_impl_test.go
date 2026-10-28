@@ -2244,6 +2244,38 @@ var _ = Describe("NimServicesImpl", func() {
 			Expect(updatedPayload.Spec.EnvironmentVariables).To(BeNil())
 		})
 
+		It("should remove gpuType using fieldsToRemove without changing allocation or profile", func() {
+			displayed := clusterInfoOf(randoms, testutils.DefaultClusterVersionForTesting)
+			var status clustersApi.ClusterDisplayedStatus
+			Expect(json.Unmarshal([]byte(`{"dependencies":{"required":{"gpu-stack":{"available":true,"components":{"nvidia":{"available":true}}}}}}`), &status)).To(Succeed())
+			displayed.Status.Set(&status)
+			clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
+			toCreate := api.NimServiceCreateRequest{
+				Metadata: api.NimServiceMetadataCreateParams{Name: "nim-remove-gpu-type", ProjectId: randoms.ProjectIdStr},
+				Spec:     sampleNimServiceSpec,
+			}
+			toCreate.Spec.GpuType = convutils.Ref("NVIDIA-H100-80GB-HBM3")
+			toCreate.Spec.Compute = &api.NimServiceSpecAllOfCompute{GpuDevicesRequest: convutils.Ref(int32(1))}
+			toCreate.Spec.EnvironmentVariables = &[]api.EnvironmentVariable{{Name: convutils.Ref("NIM_MODEL_PROFILE"), Value: convutils.Ref("chosen-profile")}}
+			id, created := createNimServiceForTest(router, randoms, &toCreate)
+			Expect(created.Spec.GpuType).NotTo(BeNil())
+			updated := updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{
+				Spec:           api.NimServiceSpec{Image: sampleNimServiceSpec.Image},
+				FieldsToRemove: []api.NimServiceRemovableFields{"gpuType"},
+			})
+			Expect(updated.Spec.GpuType).To(BeNil())
+			Expect(updated.Spec.Compute.GpuDevicesRequest).To(Equal(created.Spec.Compute.GpuDevicesRequest))
+			Expect(updated.Spec.EnvironmentVariables).To(Equal(created.Spec.EnvironmentVariables))
+			ctx := setContext(randoms.TenantIdStr, adminUser, []string{})
+			permittedScopes, err := authClient.ParsePermittedScopes(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			record, dbErr := dao.DbGetWorkload(ctx, id, permittedScopes)
+			Expect(dbErr).To(BeNil())
+			manifestSpec := record.RawManifest["spec"].(map[string]interface{})
+			selector, _ := manifestSpec["nodeSelector"].(map[string]interface{})
+			Expect(selector).NotTo(HaveKey("nvidia.com/gpu.product"))
+		})
+
 		It("should remove nodePools using fieldsToRemove", func() {
 			toCreate := api.NimServiceCreateRequest{
 				Metadata: api.NimServiceMetadataCreateParams{

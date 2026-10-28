@@ -7,7 +7,8 @@ NIM Service submission accepts `spec.gpuType` through
 Use the exact `nvidia.com/gpu.product` node label, for example
 `NVIDIA-H100-80GB-HBM3`. The control plane copies this value into the NIMService
 CR's `spec.nodeSelector`. There is no PCI translation in this submission path.
-CLI completion suggests inventory labels from the selected cluster. CLI lookup
+CLI completion and case lookup use paginated minimal node-pool inventory
+from the selected cluster, without requiring `nodes/read`. CLI lookup
 accepts case-insensitive input and sends the canonical inventory label; the API
 requires exact case.
 
@@ -59,3 +60,11 @@ NGC's published minimum is used for test/dev sizing. Rajan clarified that it
 includes runtime overhead and baseline KV cache; exact settings await written
 confirmation. The 90% cutoff is a sharing policy, not OOM protection. These
 recommendations do not establish production or runtime guarantees.
+
+To clear a previously selected GPU type, update the service with
+`fieldsToRemove: ["gpuType"]`. This removes the product selector while preserving
+allocation and profile. `gpuType: null` alone does not remove an existing value.
+Other placement constraints remain in effect.
+
+Helm sets `CATALOG_SERVICE_URL` from `fullnameOverride`, `catalogService.name`,
+and `catalogService.service.port`, so custom service names and ports are honored.

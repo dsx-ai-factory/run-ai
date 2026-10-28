@@ -903,6 +903,7 @@ export const NimServiceRemovableFields = {
     Annotations: 'annotations',
     Labels: 'labels',
     Tolerations: 'tolerations',
+    GpuType: 'gpuType',
     NodePools: 'nodePools',
     ImagePullSecrets: 'imagePullSecrets'
 } as const;

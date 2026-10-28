@@ -1,5 +1,21 @@
 # Verification
 
+## Review fixes (2026-10-29)
+
+- CLI uses paginated minimal node-pool inventory for lookup and completion.
+  HTTP regression denies every other endpoint and verifies exact/mixed-case
+  labels with explicit GPU count reach submission. Both cases reproduce HTTP 403
+  with the original lookup and pass with the fix. Separate inventory regression
+  verifies page two, selected-cluster filtering, deduplication, and errors.
+- Helm ConfigMap tests cover default and custom catalog URLs; both failed before
+  wiring and pass afterward. Chart lint and full custom rendering pass.
+- API regression reproduced HTTP 400 for gpuType removal before regeneration.
+  It now passes, checking the stored manifest has no GPU product selector and
+  allocation/profile are preserved.
+- Full workloads-manager suite and targeted CLI suites pass.
+- No redeployment or live tests under restricted user roles in this revision.
+
+
 ## PR publication verification (2026-10-28)
 
 Merged recommendation PR #3129 through `73611d490`. The submit consumer now
