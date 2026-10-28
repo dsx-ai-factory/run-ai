@@ -7,6 +7,10 @@ NIM Service submission accepts `spec.gpuType` through
 Use the exact `nvidia.com/gpu.product` node label, for example
 `NVIDIA-H100-80GB-HBM3`. The control plane copies this value into the NIMService
 CR's `spec.nodeSelector`. There is no PCI translation in this submission path.
+CLI completion suggests inventory labels from the selected cluster. CLI lookup
+accepts case-insensitive input and sends the canonical inventory label; the API
+requires exact case.
+
 Placement assumes each node has one GPU model. A selector does not reserve
 capacity or guarantee that the workload can immediately be scheduled.
 
@@ -20,14 +24,15 @@ capacity or guarantee that the workload can immediately be scheduled.
 | Recommendation dependency fails | Return an error, preserving the dependency's HTTP status. |
 
 CPU resources and `gpuComputeMode` alone do not count as a GPU allocation.
-Explicit zero values or GPU limits are not replaced by automatic sizing; normal
-resource validation still applies. An image with an explicit tag is required for
+An explicit zero-device request remains CPU-only. GPU limits without a positive
+allocation request are rejected. Memory requests across multiple devices are
+rejected; use whole GPU counts or device count plus a memory fraction. An image with an explicit tag is required for
 automatic sizing; digest-only or combined tag/digest references are unsupported.
 
 The recommendation service owns profile eligibility, minimum memory, the 90%
 sharing cutoff, and multi-GPU profile selection. The submit path uses the returned
-byte quantity or device count without adding headroom. It accepts validated
-multi-GPU recommendations but refuses a count marked as an arithmetic estimate.
+byte quantity or device count without adding headroom. It accepts multi-GPU recommendations from the catalog contract, which requires
+a validated multi-GPU profile rather than an arithmetic estimate.
 Automatic multi-node sizing is not supported; specify resources explicitly.
 
 Automatic sizing pins `NIM_MODEL_PROFILE` and, when using a NIMCache, its profile

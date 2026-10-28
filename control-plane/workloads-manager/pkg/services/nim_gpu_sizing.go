@@ -112,9 +112,6 @@ func selectNimSizingResult(response *catalog.RightSizingResponse, gpuType string
 				(a.AllocationType == "gpu_memory" && (a.GetGpuMemoryPerDeviceBytes() < 1 || a.GpuCount != 1)) {
 				return nil, api.NewError(http.StatusBadGateway, "recommendation service returned an invalid NIM allocation or profile", nil)
 			}
-			if a.Estimated && a.GpuCount > 1 {
-				return nil, api.NewError(http.StatusBadRequest, "automatic NIM sizing requires a validated multi-GPU profile; the available count is only estimated; specify resources explicitly", nil)
-			}
 			if selected != nil {
 				b := selected.Recommendation.Get()
 				if selected.GetProfileId() != result.GetProfileId() || b.AllocationType != a.AllocationType || b.GpuCount != a.GpuCount || b.GetGpuMemoryPerDeviceBytes() != a.GetGpuMemoryPerDeviceBytes() {

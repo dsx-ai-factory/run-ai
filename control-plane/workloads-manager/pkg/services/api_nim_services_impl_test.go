@@ -541,7 +541,7 @@ var _ = Describe("NimServicesImpl", func() {
 				Expect(request.ClusterId).To(Equal(randoms.ClusterId))
 				Expect(request.GetGpuType()).To(Equal("NVIDIA-H100-80GB-HBM3"))
 				var response catalog.RightSizingResponse
-				Expect(json.Unmarshal([]byte(`{"image":"nvcr.io/nim/meta/llama-3.1-8b-instruct","tag":"1.8.0","results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"fp8-profile","recommendation":{"allocationType":"gpu_count","gpuCount":1,"estimated":false}}]}`), &response)).To(Succeed())
+				Expect(json.Unmarshal([]byte(`{"image":"nvcr.io/nim/meta/llama-3.1-8b-instruct","tag":"1.8.0","results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"fp8-profile","recommendation":{"allocationType":"gpu_count","gpuCount":1}}]}`), &response)).To(Succeed())
 				return &response, nil
 			}
 		})
@@ -620,8 +620,8 @@ var _ = Describe("NimServicesImpl", func() {
 			updates := getUpdatesForTest(createRouterForTest(), randoms, 0, 50, emptyClusterReports)
 			Expect(updates.Workloads).To(BeEmpty())
 		},
-			Entry("33 GB exceeds 20 GB", `{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":33000000000,"estimated":false}`, `{"gpuMemoryRequest":{"max":"20G"}}`),
-			Entry("8 devices exceeds 4", `{"allocationType":"gpu_count","gpuCount":8,"estimated":false}`, `{"gpuDevicesRequest":{"max":4}}`),
+			Entry("33 GB exceeds 20 GB", `{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":33000000000}`, `{"gpuMemoryRequest":{"max":"20G"}}`),
+			Entry("8 devices exceeds 4", `{"allocationType":"gpu_count","gpuCount":8}`, `{"gpuDevicesRequest":{"max":4}}`),
 		)
 		It("returns a synchronous error when there is no recommendation", func() {
 			nimServicesImpl.recommendGPU = func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {

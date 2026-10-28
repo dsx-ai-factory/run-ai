@@ -30,7 +30,7 @@ var _ = Describe("NIM automatic GPU sizing", func() {
 		calls = 0
 		dependencyError = nil
 		response = &catalog.RightSizingResponse{}
-		Expect(json.Unmarshal([]byte(`{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"fp8-profile","gpuMemoryCapacityBytes":80000000000,"recommendation":{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":27000000000,"estimated":false}}]}`), response)).To(Succeed())
+		Expect(json.Unmarshal([]byte(`{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"fp8-profile","gpuMemoryCapacityBytes":80000000000,"recommendation":{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":27000000000}}]}`), response)).To(Succeed())
 		service = &NimServicesImpl{recommendGPU: func(ctx context.Context, request catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
 			calls++
 			Expect(request.ClusterId).To(Equal(randoms.ClusterId))
@@ -118,7 +118,7 @@ var _ = Describe("NIM automatic GPU sizing", func() {
 	},
 		Entry("no matching result", "", `{"results":[]}`, 400),
 		Entry("no recommendation", "", `{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"no_recommendation","reason":"No eligible profile"}]}`, 400),
-		Entry("estimated multiple GPUs", "", `{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"fp8-profile","recommendation":{"allocationType":"gpu_count","gpuCount":2,"estimated":true}}]}`, 400),
+		Entry("missing profile for multiple GPUs", "", `{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","recommendation":{"allocationType":"gpu_count","gpuCount":2}}]}`, 502),
 		Entry("conflicting profile env", `,"environmentVariables":[{"name":"NIM_MODEL_PROFILE","value":"other"}]`, "", 400),
 		Entry("conflicting cache profile", `,"modelStore":{"nimCache":{"name":"cache","profile":"other"}}`, "", 400),
 		Entry("multi-node sizing is separate", `,"multiNode":{"workers":2}`, "", 400),
@@ -130,7 +130,7 @@ var _ = Describe("NIM automatic GPU sizing", func() {
 		Expect(err).To(Equal(dependencyError))
 	})
 	It("accepts validated whole-GPU counts returned by the recommendation API", func() {
-		response.Results[0].Recommendation.Set(catalog.NewRightSizingRecommendation("gpu_count", 2, false))
+		response.Results[0].Recommendation.Set(catalog.NewRightSizingRecommendation(catalog.RIGHTSIZINGALLOCATIONTYPE_GPU_COUNT, 2))
 		spec := newSpec("")
 		_, err := service.resolveNimGPUAllocation(context.Background(), projectID, &spec)
 		Expect(err).To(BeNil())

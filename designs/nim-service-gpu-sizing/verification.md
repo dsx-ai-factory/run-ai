@@ -1,5 +1,31 @@
 # Verification
 
+## PR publication verification (2026-10-28)
+
+Merged recommendation PR #3129 through `73611d490`. The submit consumer now
+uses its current contract: multi-GPU eligibility belongs to the recommendation
+service, and the removed `estimated` field is no longer read or included in
+fixtures. Missing profile IDs remain rejected before workload creation.
+
+Passed after this merge:
+
+- Full workloads-manager suite: `CGO_ENABLED=0 go test ./...`.
+- CLI node inventory, workload spec, NIM submission, completion, command
+  registration, and NIM unit suites.
+- Catalog recommendation suite: `CGO_ENABLED=0 go test ./pkg/services/rightsizing`.
+- NIM composer suite: `CGO_ENABLED=0 go test ./composer/composer_v2/nim_workloads`.
+- `git diff --check`.
+
+Earlier live checks are recorded in [dima-evo.md](dima-evo.md). They verified
+submission responses and node placement on FakeGPU nodes, not successful model
+loading or inference. The latest dependency merge has not been redeployed.
+Full lint and production/runtime guarantees remain unverified.
+
+## Historical implementation verification
+
+The following records the original implementation checkpoint; the publication
+checks above and deployment notes supersede its pending integration/status notes.
+
 Update: deployment was subsequently authorized and completed on dima-evo.
 See [dima-evo deployment and live checks](dima-evo.md); the notes below record
 the pre-deployment implementation verification.
