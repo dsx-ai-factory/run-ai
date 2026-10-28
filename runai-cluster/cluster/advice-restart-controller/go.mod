@@ -3,6 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/advice-restart-con
 go 1.27.3
 
 require (
+	github.com/dsx-ai-factory/nvidia-recovery/advice-operator v0.0.0-20261022230236-295f5e2d16c3
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1 v0.0.0
