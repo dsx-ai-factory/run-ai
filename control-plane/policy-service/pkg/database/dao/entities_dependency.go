@@ -101,6 +101,33 @@ func MarkPoliciesPendingByComponent(_ context.Context, db orm.DB, componentType 
 	return len(policyIds), nil
 }
 
+// MarkUncachedPoliciesPending sets every live workload-type policy, in all tenants, that has no cached breakdown
+// to PendingUpdate, and returns how many policies were marked. without a cached breakdown there are no dependency
+// rows, so MarkPoliciesPendingByComponent cannot tell whether a changed system component affects the policy.
+func MarkUncachedPoliciesPending(_ context.Context, db orm.DB) (int, *api.Error) {
+	noCachedBreakdown := fmt.Sprintf("NOT EXISTS (SELECT 1 FROM %[1]s WHERE %[1]s.%[2]s = %[3]s.%[4]s AND %[1]s.%[5]s = ? AND %[1]s.%[6]s = %[3]s.%[7]s::text)",
+		dbtables.EntitiesCacheTable, dbtables.EntitiesCacheColumnTenantId,
+		dbtables.PoliciesTable, dbtables.PoliciesColumnTenantId,
+		dbtables.EntitiesCacheColumnEntityType, dbtables.EntitiesCacheColumnEntityId, dbtables.PoliciesColumnId)
+
+	rowsAffected, err := db.Table(dbtables.PoliciesTable).
+		Where(fmt.Sprintf("%s.%s = ?", dbtables.PoliciesTable, dbtables.PoliciesColumnGvkWorkload), true).
+		Where(fmt.Sprintf("%s.%s IS NULL", dbtables.PoliciesTable, dbtables.DeletedAtColumn)).
+		Where(fmt.Sprintf("%s.%s IS DISTINCT FROM ?", dbtables.PoliciesTable, dbtables.PoliciesColumnValidationStatus), string(api.POLICYPHASE_PENDING_UPDATE)).
+		Where(noCachedBreakdown, dbmodel.EntityTypeBreakdown).
+		UpdateColumns(map[string]interface{}{
+			dbtables.PoliciesColumnValidationStatus: string(api.POLICYPHASE_PENDING_UPDATE),
+			dbtables.PoliciesColumnValidationIssues: nil,
+		})
+	if err != nil {
+		dbErr := database.Error(database.UPDATE, database.Policies).WithDetailsFromDbResult(rowsAffected, err)
+		logging.Errorf("failed to mark the policies without a cached breakdown as %s: %s: %v", api.POLICYPHASE_PENDING_UPDATE, dbErr.Message, err)
+		return 0, dbErr
+	}
+
+	return int(rowsAffected), nil
+}
+
 // OnComponentDeleted invalidates every entity whose cache depends on the given
 // component, scoped to the caller's tenant. it executes four steps on db:
 //
