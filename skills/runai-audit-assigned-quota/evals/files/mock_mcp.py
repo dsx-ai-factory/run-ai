@@ -94,7 +94,8 @@ TOOLS = {
 def schema():
     return [{"name":n,"description":d,"inputSchema":{"type":"object","properties":{
         "nodePoolName":{"type":"string"},"projectName":{"type":"string"},
-        "departmentName":{"type":"string"},"orgType":{"type":"string"},"orgName":{"type":"string"}}}}
+        "departmentName":{"type":"string"},"orgType":{"type":"string"},"orgName":{"type":"string"}}},
+        "annotations":{"readOnlyHint":True,"destructiveHint":False}}
         for n,(d,_) in TOOLS.items()]
 
 def send(obj): sys.stdout.write(json.dumps(obj)+"\n"); sys.stdout.flush()
@@ -104,7 +105,9 @@ def main():
         line=line.strip()
         if not line: continue
         try: req=json.loads(line)
-        except Exception: continue
+        except Exception:
+            send({"jsonrpc":"2.0","id":None,"error":{"code":-32700,"message":"parse error"}})
+            continue
         m=req.get("method"); rid=req.get("id")
         if m=="initialize":
             send({"jsonrpc":"2.0","id":rid,"result":{"protocolVersion":"2024-11-05",
