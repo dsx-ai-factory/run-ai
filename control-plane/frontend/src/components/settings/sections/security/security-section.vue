@@ -8,7 +8,8 @@
     class="security-section settings-container"
     label="Security"
     :subheader="sectionSubHeader"
-    :section-invalid="isCertificateExpired"
+    :default-opened="defaultOpened"
+    :section-invalid="isSectionInvalid"
     :section-warning="isCertificateExpiringSoon"
     show-status-icon-when-open
     @show="() => initializeSecuritySettings(true)"
@@ -95,7 +96,12 @@ export default defineComponent({
     RunaiTooltip,
     RunaiExpansionItem,
   },
-  props: {},
+  props: {
+    defaultOpened: {
+      type: Boolean,
+      default: false,
+    },
+  },
   data() {
     return {
       idpStore: useIdpsStore(),
@@ -130,6 +136,9 @@ export default defineComponent({
         default:
           return "None";
       }
+    },
+    isSectionInvalid(): boolean {
+      return this.isCertificateExpired || this.idpStore.isSamlSignatureValidationDisabled;
     },
     securityResourceType(): keyof typeof ResourceType {
       return "SecuritySettings";

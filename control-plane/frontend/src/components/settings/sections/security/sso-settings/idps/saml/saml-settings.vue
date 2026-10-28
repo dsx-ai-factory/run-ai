@@ -72,6 +72,20 @@
     </setting-editable-field>
     <q-separator class="idp-card-separator" />
     <notification-alert-bar
+      v-if="idpStore.isSamlSignatureValidationDisabled"
+      aid="saml-signature-validation-alert"
+      class="q-mx-sm q-mb-sm signature-validation-warning"
+      :variant="ENotificationBarVariant.Error"
+      icon-override="ph-bold ph-warning-circle"
+      orientation="vertical"
+      show-h1-content
+      title="Action required: SAML responses aren’t signature-verified"
+    >
+      Login responses can’t be confirmed as coming from the identity provider, which leaves sign-in open to forged
+      responses.<br />
+      To fix this, edit the identity provider and replace the metadata XML with an updated file.
+    </notification-alert-bar>
+    <notification-alert-bar
       v-if="certificateWarningVariant"
       class="q-mx-sm q-mb-sm certificate-warning"
       :variant="certificateWarningVariant"
@@ -162,6 +176,7 @@ export default defineComponent({
       idpStore: useIdpsStore(),
       idpResources: {} as IdpResources,
       DOCS,
+      ENotificationBarVariant,
     };
   },
   async created(): Promise<void> {
@@ -306,6 +321,7 @@ export default defineComponent({
   border-radius: 4px;
   overflow: hidden;
 }
+.signature-validation-warning,
 .certificate-warning,
 .redirect-url-field {
   margin: 12px;
