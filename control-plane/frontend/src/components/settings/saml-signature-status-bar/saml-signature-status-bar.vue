@@ -10,9 +10,9 @@
     :variant="ENotificationBarVariant.Error"
     icon-override="ph-bold ph-warning-circle"
     show-h1-content
-    title="Security risk: identity provider signatures aren't validated,"
+    title="Security risk: Identity provider signatures aren't being validated."
   >
-    Login responses can't be confirmed as authentic, which allows unauthorized access to user accounts. To enable
+    Login responses can't be confirmed as authentic, which may allow unauthorized access to user accounts. To enable
     validation,
     <template #inline-actions>
       <router-link :to="securitySettingsLocation">reconfigure SAML in SSO settings.</router-link>
