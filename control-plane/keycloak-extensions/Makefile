@@ -7,6 +7,14 @@ include ../../build/makefile/index.mk
 # Change for every new service
 SERVICE_NAME=keycloak-extensions
 GRADLE_IMAGE=${DOCKERHUB_PROXY}library/gradle:8.12.0-jdk21
+
+# The OpenTelemetry Java agent the image ships (Dockerfile: /extensions/agent/).
+# Renovate bumps the version and rewrites the sha256; the NOTICE lists the agent.
+# attribution: shipped
+# renovate: datasource=github-releases depName=open-telemetry/opentelemetry-java-instrumentation
+OTEL_AGENT_VERSION ?= v2.29.0
+OTEL_AGENT_SHA256 ?= 546531ca690a8603d2923b6db26bbda35c6409327b1e610430ae33c2f8f68050
+
 ##@ Basic Commands
 REPORTS_DIR=runai-custom-providers/build/reports/tests/test/classes/
 PARSE_SCRIPT=runai-custom-providers/scripts/parse_html_report.py
@@ -44,8 +52,8 @@ build-gradle: ## Build the Gradle (Java SPI providers + OTel agent) artifacts.
 	/bin/sh -c \
 	'rm -rf /tmp/.gradle/caches && \
 	mkdir -p bin && \
-	curl -sfL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.29.0/opentelemetry-javaagent.jar -o bin/opentelemetry-javaagent.jar && \
-	echo "546531ca690a8603d2923b6db26bbda35c6409327b1e610430ae33c2f8f68050  bin/opentelemetry-javaagent.jar" | sha256sum -c - && \
+	curl -sfL https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/$(OTEL_AGENT_VERSION)/opentelemetry-javaagent.jar -o bin/opentelemetry-javaagent.jar && \
+	echo "$(OTEL_AGENT_SHA256)  bin/opentelemetry-javaagent.jar" | sha256sum -c - && \
 	gradle build -p runai-custom-providers && \
 	cp ./runai-custom-providers/build/libs/runai-custom-providers.jar bin/runai-custom-providers.jar'
 .PHONY: build-gradle
