@@ -165,7 +165,7 @@ global:
     tag: "16-alpine"
     pullPolicy: IfNotPresent
   postgresImage:
-    registry: docker.io
+    registry: ""
     repository: postgres
     tag: "16-alpine"
     pullPolicy: IfNotPresent
@@ -1315,7 +1315,7 @@ keycloakx:
   extraInitContainers: |-
     {{- include "awaitingPostgresReadinessContainerFromMap" $ }}
     - name: keycloak-schema-init
-      image: "{{ $.Values.global.postgresImage.registry }}/{{ $.Values.global.postgresImage.repository }}:{{ $.Values.global.postgresImage.tag }}"
+      image: "{{ include \"control-plane.postgresImage.registry\" $ }}/{{ $.Values.global.postgresImage.repository }}:{{ $.Values.global.postgresImage.tag }}"
       volumeMounts:
         - mountPath: /etc/secrets
           name: db-password
@@ -1345,6 +1345,7 @@ keycloakx:
       securityContext:
         allowPrivilegeEscalation: false
         runAsNonRoot: true
+        readOnlyRootFilesystem: true
         {{- /* On OpenShift the keycloakx SCC injects its pinned uid; fixed uids
         fail SCC admission. Elsewhere the root-default postgres image needs an
         explicit non-root uid for runAsNonRoot. */}}
