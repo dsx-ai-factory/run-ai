@@ -81,7 +81,8 @@ func (s *Sampler) recordMetrics() {
 	conf := config.Get[*cache_config.Cache]()
 	storeConfigs := s.storeLister.List()
 	for _, storeConf := range storeConfigs {
-		s.recordStoreLimits(storeConf.Name, int64(conf.MaxStoreSizeMB*mbToBytes), int64(conf.MaxRecordSizeKB*kbToBytes))
+		maxStoreSizeMB, maxRecordSizeKB := storeLimits(storeConf, conf)
+		s.recordStoreLimits(storeConf.Name, int64(maxStoreSizeMB*mbToBytes), int64(maxRecordSizeKB*kbToBytes))
 
 		if storeMemUsageBytes, err := s.memoryUsageRetrieverer.RetrieveMemory(storeConf.Name); err == nil {
 			s.recordStoreUsedBytes(storeConf.Name, storeMemUsageBytes)
@@ -91,6 +92,25 @@ func (s *Sampler) recordMetrics() {
 			s.recordStoreRecordsCount(storeConf.Name, storeLen)
 		}
 	}
+}
+
+// storeLimits resolves the limits a store actually enforces. Each store is
+// created with its own options, which override the global cache config, so a
+// per-store metric has to read them from the store rather than from the config.
+// A store without options, or with an option that was never set, falls back to
+// the global value instead of reporting a limit of zero.
+func storeLimits(store *options.Store, conf *cache_config.Cache) (maxStoreSizeMB, maxRecordSizeKB int) {
+	maxStoreSizeMB, maxRecordSizeKB = conf.MaxStoreSizeMB, conf.MaxRecordSizeKB
+	if store == nil || store.Options == nil {
+		return maxStoreSizeMB, maxRecordSizeKB
+	}
+	if store.Options.MaxStoreSizeMB > 0 {
+		maxStoreSizeMB = store.Options.MaxStoreSizeMB
+	}
+	if store.Options.MaxRecordSizeKB > 0 {
+		maxRecordSizeKB = store.Options.MaxRecordSizeKB
+	}
+	return maxStoreSizeMB, maxRecordSizeKB
 }
 
 func (s *Sampler) recordStoreLimits(storeName string, maxUsageBytes int64, maxRecordBytes int64) {
