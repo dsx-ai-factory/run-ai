@@ -20,6 +20,7 @@ CELLS = [
     ("default","def-proj-2","default",       3, 3, 3),
     ("default","def-proj-3","default",       3, 3, 3),
 ]
+CLUSTER_ID = "50000000-0000-4000-8000-0000000000f1"
 CAPACITY = {"default":128, "node-pool-2":32}
 # Pool and department totals below intentionally exceed the sum of the CELLS above —
 # they include system + unlisted-project usage (node-pool-2: 28 listed + 4 system = 32,
@@ -50,25 +51,65 @@ def project_resources(a):
                     "gpu":{"deserved":des,"allocated":al,"limit":lim,"overQuotaWeight":2}})
     return {"resources":out,"hasMore":False}
 
+class ToolError(Exception):
+    pass
+
+# One running workload per allocated cell and one row per pending workload.
+WORKLOADS = []
+for pool,proj,dept,des,al,lim in CELLS:
+    if al>0:
+        WORKLOADS.append({"name":f"{proj}-run-{pool}","phase":"Running","projectName":proj,
+                          "currentNodePools":[pool],"preemptible":True,"phaseMessage":""})
+for proj,(count,pre,reason) in PENDING.items():
+    for i in range(count):
+        WORKLOADS.append({"name":f"{proj}-pending-{i+1}","phase":"Pending","projectName":proj,
+                          "currentNodePools":[],"preemptible":pre,"phaseMessage":reason})
+for i,row in enumerate(WORKLOADS):
+    row["id"]=f"00000000-0000-4000-8000-{i+1:012d}"
+WORKLOAD_BY_ID={row["id"]:row for row in WORKLOADS}
+
 def workloads_summary(a):
     proj=a.get("orgName"); npf=a.get("nodePoolName")
-    pend,_,_=PENDING.get(proj,(0,None,None))
-    # running derived from the frozen per-cell allocation (one running workload per
-    # allocated cell), filtered by the requested pool.
-    running=sum(1 for pool,pr,dept,des,al,lim in CELLS if pr==proj and al>0 and (not npf or npf==pool))
-    # pending is deliberately NOT filtered by nodePoolName: pending pods are unscheduled
-    # (no pool assignment yet), so the real get_workloads_summary returns them regardless
-    # of the pool filter (verified against a live cluster). Filtering pending by pool would
-    # return 0 and hide starvation.
+    rows=[r for r in WORKLOADS if (not proj or r["projectName"]==proj)
+          and (not npf or npf in r["currentNodePools"])]
+    pend=sum(1 for r in rows if r["phase"]=="Pending")
+    running=sum(1 for r in rows if r["phase"]=="Running")
     return {"scope":{"orgType":a.get("orgType"),"orgName":proj,"nodePool":npf},
             "counts":{"pending":pend,"running":running,"failed":0,"completed":0,"stopped":0,"other":0},
             "total":pend+running}
 
+def project_filter(value):
+    if value is None or isinstance(value,str): return value
+    if isinstance(value,dict) and value.get("operator")=="==": return value.get("value")
+    raise ToolError("validation: this fixture supports only projectName with operator ==")
+
+def list_workloads(a):
+    proj=project_filter(a.get("projectName")); phase=a.get("phase"); npf=a.get("nodePoolName")
+    limit=int(a.get("limit") or 50); offset=int(a.get("offset") or 0)
+    rows=[r for r in WORKLOADS if (not proj or r["projectName"]==proj)
+          and (not phase or r["phase"]==phase) and (not npf or npf in r["currentNodePools"])]
+    page=rows[offset:offset+limit]
+    out=[]
+    for r in page:
+        item={"id":r["id"],"name":r["name"],"type":"Training","phase":r["phase"],
+              "projectName":r["projectName"],"clusterId":CLUSTER_ID}
+        if a.get("includeDetails"):
+            item.update(preemptible=r["preemptible"],currentNodePools=r["currentNodePools"])
+        out.append(item)
+    more=offset+limit<len(rows)
+    result={"workloads":out,"hasMore":more}
+    if more: result["nextOffset"]=offset+limit
+    return result
+
 def workload_status(a):
-    proj=a.get("orgName") or a.get("projectName") or ""
-    c,pre,reason=PENDING.get(proj,(0,None,None))
-    if not c: return {"project":proj,"pending":0,"note":"no pending workloads"}
-    return {"project":proj,"phase":"Pending","preemptible":pre,"reason":reason}
+    wid=a.get("workloadId")
+    if not wid: raise ToolError("validation: workloadId is required")
+    row=WORKLOAD_BY_ID.get(wid)
+    if row is None: raise ToolError(f"not_found: workload {wid} not found")
+    status={"id":row["id"],"name":row["name"],"clusterId":CLUSTER_ID,"type":"Training",
+            "phase":row["phase"],"projectName":row["projectName"]}
+    if row["phaseMessage"]: status["phaseMessage"]=row["phaseMessage"]
+    return status
 
 def physical_inventory(a):
     npf=a.get("nodePoolName")
@@ -86,15 +127,26 @@ def dept_resources(a):
 TOOLS = {
   "list_project_resources": ("Configured GPU quota + current allocation per project per node pool.", project_resources),
   "list_department_resources": ("A department's own configured quota per node pool.", dept_resources),
-  "get_workloads_summary": ("Workload counts by phase for a scope (cluster/project/department/node pool).", workloads_summary),
-  "get_workload_status": ("A workload/project pending status and scheduler reason.", workload_status),
+  "get_workloads_summary": ("Workload counts by phase for a scope (cluster/project/department/node pool). A nodePoolName filter matches current placement, so unscheduled pending workloads drop out.", workloads_summary),
+  "list_workloads": ("Workload rows with IDs, filtered by phase, projectName comparison, or current node pool. includeDetails adds preemptibility.", list_workloads),
+  "get_workload_status": ("One workload's phase and phaseMessage (the scheduler's reason), by workloadId.", workload_status),
   "get_cluster_physical_inventory": ("Per-node-pool GPU capacity.", physical_inventory),
 }
 
+COMMON_PROPERTIES = {"clusterId":{"type":"string"},"nodePoolName":{"type":"string"},
+    "projectName":{"type":"string"},"departmentName":{"type":"string"},
+    "orgType":{"type":"string"},"orgName":{"type":"string"}}
+TOOL_PROPERTIES = {
+    "list_workloads": {"clusterId":{"type":"string"},"nodePoolName":{"type":"string"},"phase":{"type":"string"},
+        "projectName":{"type":"object","properties":{"operator":{"type":"string"},"value":{"type":"string"}}},
+        "includeDetails":{"type":"boolean"},"limit":{"type":"integer"},"offset":{"type":"integer"}},
+    "get_workload_status": {"workloadId":{"type":"string"}},
+}
+
 def schema():
-    return [{"name":n,"description":d,"inputSchema":{"type":"object","properties":{
-        "nodePoolName":{"type":"string"},"projectName":{"type":"string"},
-        "departmentName":{"type":"string"},"orgType":{"type":"string"},"orgName":{"type":"string"}}}}
+    return [{"name":n,"description":d,
+        "inputSchema":{"type":"object","properties":TOOL_PROPERTIES.get(n,COMMON_PROPERTIES)},
+        "annotations":{"readOnlyHint":True,"destructiveHint":False}}
         for n,(d,_) in TOOLS.items()]
 
 def send(obj): sys.stdout.write(json.dumps(obj)+"\n"); sys.stdout.flush()
@@ -104,7 +156,9 @@ def main():
         line=line.strip()
         if not line: continue
         try: req=json.loads(line)
-        except Exception: continue
+        except Exception:
+            send({"jsonrpc":"2.0","id":None,"error":{"code":-32700,"message":"parse error"}})
+            continue
         m=req.get("method"); rid=req.get("id")
         if m=="initialize":
             send({"jsonrpc":"2.0","id":rid,"result":{"protocolVersion":"2024-11-05",
@@ -119,7 +173,11 @@ def main():
             if not fn:
                 send({"jsonrpc":"2.0","id":rid,"error":{"code":-32601,"message":f"unknown tool {name}"}})
             else:
-                res=fn[1](args)
+                try:
+                    res=fn[1](args)
+                except (ToolError,ValueError,TypeError) as error:
+                    send({"jsonrpc":"2.0","id":rid,"result":{"content":[{"type":"text","text":str(error)}],"isError":True}})
+                    continue
                 send({"jsonrpc":"2.0","id":rid,"result":{"content":[{"type":"text","text":json.dumps(res)}]}})
         elif rid is not None:
             send({"jsonrpc":"2.0","id":rid,"error":{"code":-32601,"message":f"unknown method {m}"}})

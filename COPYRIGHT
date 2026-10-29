@@ -10951,6 +10951,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Copyright Faye Amacker - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
+  github.com/fxamacker/cbor/v2 v2.10.0
   github.com/fxamacker/cbor/v2 v2.9.0
   github.com/fxamacker/cbor/v2 v2.9.1
   github.com/fxamacker/cbor/v2 v2.9.6
@@ -15327,7 +15328,7 @@ THE SOFTWARE.
 Copyright Naoya Inada <naoina@kuune.org> - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/go-openapi/runtime/middleware/denco v0.33.3
+  github.com/go-openapi/runtime/middleware/denco v0.33.4
 
 Copyright (c) 2014 Naoya Inada <naoina@kuune.org>
 
@@ -18072,17 +18073,17 @@ Components:
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
-  cloud.google.com/go/auth v0.24.1
+  cloud.google.com/go/auth v0.24.2
   cloud.google.com/go/auth/oauth2adapt v0.2.8
-  cloud.google.com/go/auth/oauth2adapt v0.3.0
+  cloud.google.com/go/auth/oauth2adapt v0.3.1
   cloud.google.com/go/compute/metadata v0.10.0
   cloud.google.com/go/compute/metadata v0.9.0
-  cloud.google.com/go/iam v1.15.0
+  cloud.google.com/go/iam v1.15.1
   cloud.google.com/go/iam v1.5.3
   cloud.google.com/go/internal v0.121.6
   cloud.google.com/go/internal v0.123.0
   cloud.google.com/go/monitoring v1.24.3
-  cloud.google.com/go/monitoring v1.32.0
+  cloud.google.com/go/monitoring v1.32.1
   cloud.google.com/go/storage v1.56.0
   cloud.google.com/go/storage v1.70.0
   dompurify 3.4.16
@@ -18113,8 +18114,8 @@ Components:
   github.com/go-openapi/jsonreference v1.0.2
   github.com/go-openapi/jsonreference v1.0.3
   github.com/go-openapi/loads v0.25.3
-  github.com/go-openapi/runtime v0.33.3
-  github.com/go-openapi/runtime/server-middleware v0.33.3
+  github.com/go-openapi/runtime v0.33.4
+  github.com/go-openapi/runtime/server-middleware v0.33.4
   github.com/go-openapi/spec v1.0.1
   github.com/go-openapi/strfmt v0.27.4
   github.com/go-openapi/swag v0.23.0
@@ -18220,6 +18221,7 @@ Components:
   k8s.io/apimachinery/pkg v0.36.4
   k8s.io/apimachinery/pkg v0.37.0
   k8s.io/apimachinery/pkg v0.37.1
+  k8s.io/apimachinery/pkg v0.37.2
   k8s.io/apimachinery/pkg/util v0.32.0-alpha.3
   k8s.io/apiserver/pkg v0.35.4
   k8s.io/apiserver/pkg v0.36.2
@@ -18533,9 +18535,7 @@ Components:
   go.opentelemetry.io/auto/sdk v1.2.1
   go.opentelemetry.io/contrib/detectors/gcp v1.44.0
   go.opentelemetry.io/contrib/detectors/gcp v1.47.0
-  go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.69.0
   go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0
-  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.69.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.71.0
   go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0
   go.opentelemetry.io/otel v1.47.0
@@ -21156,6 +21156,7 @@ Components:
   golang.org/x/net v0.56.0
   golang.org/x/net v0.59.0
   golang.org/x/net v0.61.0
+  golang.org/x/net v0.62.0
   golang.org/x/oauth2 v0.30.0
   golang.org/x/oauth2 v0.32.0
   golang.org/x/oauth2 v0.36.0
@@ -25978,7 +25979,7 @@ limitations under the License.
 --------------------------------------------------------------------------------
 NOTICE of github.com/go-openapi/runtime
 Components:
-  github.com/go-openapi/runtime v0.33.3
+  github.com/go-openapi/runtime v0.33.4
 
 Copyright 2015-2025 go-swagger maintainers
 
