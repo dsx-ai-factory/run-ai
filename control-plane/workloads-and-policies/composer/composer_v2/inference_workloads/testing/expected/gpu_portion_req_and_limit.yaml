@@ -22,7 +22,7 @@ Service:
         annotations:
           gpu-fraction: "0.5"
           gpu-fraction-num-devices: "1"
-          kai.scheduler/container.my-llm.gpu-memory.portion.limit: "0.5"
+          kai.scheduler/container.my-llm.gpu-memory.portion.limit: "0.8"
         labels:
           app: service
           createdBy: Service

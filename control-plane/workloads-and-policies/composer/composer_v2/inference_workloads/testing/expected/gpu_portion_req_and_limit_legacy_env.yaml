@@ -33,7 +33,7 @@ Service:
         containers:
         - env:
           - name: RUNAI_GPU_PORTION_LIMIT
-            value: "0.5"
+            value: "0.8"
           image: my-llm:latest
           name: my-llm
           ports:

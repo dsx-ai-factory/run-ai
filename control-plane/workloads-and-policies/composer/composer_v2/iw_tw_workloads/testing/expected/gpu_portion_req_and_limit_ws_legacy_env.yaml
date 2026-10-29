@@ -40,7 +40,7 @@ BatchJobTarget:
             - name: RUNAI_JOB_NAME
               value: gpu_portion_req_and_limit
             - name: RUNAI_GPU_PORTION_LIMIT
-              value: "0.5"
+              value: "0.8"
             image: ubuntu
             name: gpu_portion_req_and_limit
             resources: {}
@@ -68,7 +68,7 @@ Notification:
     number: 1
   requestedResources:
     gpu:
-      limit: 0.5
+      limit: 0.8
       request: 0.5
     gpuRequestType: portion
   submittedBy: test

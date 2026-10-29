@@ -258,6 +258,42 @@ var _ = Describe("fields composer test", func() {
 		})
 
 	})
+
+	Context("portion limit annotation matches KAI admission rules", func() {
+		annotationsSupportedFc := FieldsComposer{
+			Options: FieldsComposerOptions{GpuMemoryLimitAnnotationsSupported: true},
+		}
+		key := fmt.Sprintf(KaiGpuMemoryPortionLimitAnnotationKeyFormat, "main")
+
+		DescribeTable("ComposePortionLimitAnnotation",
+			func(request, limit float64, wantValue string, wantErr string) {
+				annotations := map[string]string{}
+				sizing := GpuSizingInfo{PortionRequest: &request, PortionLimit: &limit}
+
+				err := annotationsSupportedFc.ComposePortionLimitAnnotation(&sizing, "main", &annotations, StringToMapString)()
+
+				if wantErr != "" {
+					Expect(err).NotTo(BeNil())
+					Expect(err.Error()).To(ContainSubstring(wantErr))
+					Expect(annotations).To(BeEmpty())
+					return
+				}
+				Expect(err).To(BeNil())
+				if wantValue == "" {
+					Expect(annotations).To(BeEmpty())
+					return
+				}
+				Expect(annotations).To(HaveKeyWithValue(key, wantValue))
+			},
+			Entry("limit above the request is written", 0.5, 0.8, "0.8", ""),
+			Entry("limit equal to the request is dropped", 0.1, 0.1, "", ""),
+			Entry("limit with 5 decimals is written", 0.5, 0.62345, "0.62345", ""),
+			Entry("limit of a whole GPU is rejected", 0.5, 1.0, "", "must be smaller than 1"),
+			Entry("limit above a whole GPU is rejected", 0.5, 2.0, "", "must be smaller than 1"),
+			Entry("limit with 6 decimals is rejected", 0.5, 0.666666, "", "at most 5 digits"),
+			Entry("whole-GPU request writes no limit", 1.0, 1.0, "", ""),
+		)
+	})
 })
 
 func intToIntTest(src *int64, target any, cookie any) *workloadsApi.Error {

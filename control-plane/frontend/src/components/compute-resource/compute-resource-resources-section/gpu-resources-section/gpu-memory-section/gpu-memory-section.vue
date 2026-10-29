@@ -366,8 +366,8 @@ export default defineComponent({
       if (value === null) {
         return true;
       }
-      if (value < this.gpuPortionRequest || value > 100) {
-        return errorMessagesUtils.LIMIT_FROM_REQUEST_TO_MAX(100);
+      if (value < this.gpuPortionRequest || value >= 100) {
+        return errorMessagesUtils.LIMIT_FROM_REQUEST_TO_MAX(PortionRequestMax);
       }
       return true;
     },

@@ -24,7 +24,7 @@ BatchJobTarget:
           annotations:
             gpu-fraction: "0.5"
             gpu-fraction-num-devices: "1"
-            kai.scheduler/container.gpu_portion_req_and_limit.gpu-memory.portion.limit: "0.5"
+            kai.scheduler/container.gpu_portion_req_and_limit.gpu-memory.portion.limit: "0.8"
             user: tester
           labels:
             app: job
@@ -67,7 +67,7 @@ Notification:
     number: 1
   requestedResources:
     gpu:
-      limit: 0.5
+      limit: 0.8
       request: 0.5
     gpuRequestType: portion
   submittedBy: test
