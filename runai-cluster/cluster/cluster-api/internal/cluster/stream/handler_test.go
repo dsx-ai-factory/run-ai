@@ -6,7 +6,13 @@
 package stream
 
 import (
+	"context"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
+	"time"
+
+	ws "nhooyr.io/websocket"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/websocket"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api/internal/websocket/connection"
@@ -47,6 +53,39 @@ var _ = Describe("Handler Test", func() {
 			ka, err := handler.GetKeepAlive()
 			Expect(err).ToNot(HaveOccurred())
 			Expect(ka.GetType()).To(Equal(keepalive.IdleType))
+		})
+
+		It("uses separate ping and idle intervals", func() {
+			cfg := GetInstance()
+			DeferCleanup(cfg.SetPingTime, cfg.GetPingTime())
+			DeferCleanup(cfg.SetIdleTime, cfg.GetIdleTime())
+			// Allow the connection to stay idle longer than the ping interval.
+			cfg.SetPingTime(10 * time.Millisecond)
+			cfg.SetIdleTime(time.Second)
+
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				defer GinkgoRecover()
+				peer, err := ws.Accept(w, r, nil)
+				Expect(err).ToNot(HaveOccurred())
+				// Keep the connection open without sending output.
+				peer.CloseRead(ctx)
+			}))
+			defer server.Close()
+			client, _, err := ws.Dial(ctx, server.URL, nil)
+			Expect(err).ToNot(HaveOccurred())
+			enc := websocket.NewConnection(client, ctx)
+			defer func() { _ = enc.Close() }()
+
+			ka, err := NewHandler(enc, Options{}).GetKeepAlive()
+			Expect(err).ToNot(HaveOccurred())
+
+			// A ping should not close the connection.
+			Eventually(ka.Channel()).Should(Receive())
+			Expect(ka.Execute()).To(Succeed())
+			// The connection should close after the idle timeout.
+			Eventually(ka.Execute, 2*time.Second, 10*time.Millisecond).Should(MatchError("idle reach"))
 		})
 
 		It("options with stdin - success (interactive)", func() {
