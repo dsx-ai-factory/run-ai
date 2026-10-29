@@ -65,7 +65,30 @@ func (c *NotifyClienter) InitNotifyClient(ctx context.Context, config *notifycli
 }
 
 func (c *NotifyClienter) GetEnabledTenants() []string {
-	return notifyclient.GetEnabledTenants()
+	tenants, _, err := c.tenantsClient.InternalAPI.ManagementGetTenantsInternal(context.Background()).Execute()
+	if err != nil {
+		logging.Errorf("Failed to get tenants, error: %s", err.Error())
+		return nil
+	}
+	return enabledTenantIds(tenants, notifyclient.GetEnabledTenants())
+}
+
+func enabledTenantIds(tenants []tenants_api.Tenant, routeIds []string) []string {
+	enabledRoutes := make(map[string]bool, len(routeIds))
+	for _, routeId := range routeIds {
+		enabledRoutes[routeId] = true
+	}
+
+	tenantIds := make([]string, 0, len(tenants))
+	for _, tenant := range tenants {
+		tenantId := strconv.FormatInt(int64(tenant.Id), 10)
+		if _, enabled := enabledRoutes[tenantId]; !enabled {
+			continue
+		}
+		tenantIds = append(tenantIds, tenantId)
+	}
+
+	return tenantIds
 }
 
 func (c *NotifyClienter) RegisterNotifications(origin string, notifications []*notifyclient.NotificationKind, removeMissing *bool) error {
