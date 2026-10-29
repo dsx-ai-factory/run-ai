@@ -408,6 +408,27 @@ func (s *IdpsApiService) updateIdp(ctx context.Context, realm string, idpRequest
 }
 
 func (s *IdpsApiService) getIdpConfig(ctx context.Context, realm string, idpRequest *models.IdpData) (map[string]string, error) {
+	config, err := s.loadIdpConfig(ctx, realm, idpRequest)
+	if err != nil {
+		return nil, err
+	}
+	if config == nil {
+		config = map[string]string{}
+	}
+	if idpRequest.Idp != models.SAML {
+		return config, nil
+	}
+
+	if err := utils.ValidateSigningCertificate(config[utils.SigningCertificate]); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("rejected saml signing certificate for idp %s. err: %s", idpRequest.Alias, err.Error())
+		return nil, err
+	}
+
+	config[utils.ValidateSignature] = "true"
+	return config, nil
+}
+
+func (s *IdpsApiService) loadIdpConfig(ctx context.Context, realm string, idpRequest *models.IdpData) (map[string]string, error) {
 	if isIdpXmlWithFileType(*idpRequest) {
 		metadata, err := getValidatedSamlMetadata(idpRequest.Resource)
 		if err != nil {

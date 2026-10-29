@@ -277,17 +277,39 @@ func ValidateSamlMetadata(metadata []byte) error {
 		return fmt.Errorf("invalid XML formatting or layout schema: %w", entityErr)
 	}
 
-	// 3. Ensure the aggregate actually contains descriptors to read
-	if len(entities.EntityDescriptors) == 0 {
+	// An EntitiesDescriptor may contain another EntitiesDescriptor. The IdP entity can sit only in that inner aggregate.
+	if err := validateEntitiesDescriptor(&entities); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateEntitiesDescriptor(entities *saml.EntitiesDescriptor) error {
+	found, err := entityDescriptorInAggregate(entities)
+	if err != nil {
+		return err
+	}
+	if !found {
 		return fmt.Errorf("SAML structural validation error: EntitiesDescriptor aggregate contains no child EntityDescriptor blocks")
 	}
-
-	// 4. Validate the first child element
-	if entities.EntityDescriptors[0].EntityID == "" {
-		return fmt.Errorf("SAML structural validation error: the first entity descriptor in the aggregate is missing a mandatory 'entityID'")
-	}
-
 	return nil
+}
+
+func entityDescriptorInAggregate(entities *saml.EntitiesDescriptor) (bool, error) {
+	found := len(entities.EntityDescriptors) > 0
+	for _, entity := range entities.EntityDescriptors {
+		if entity.EntityID == "" {
+			return false, fmt.Errorf("SAML structural validation error: an entity descriptor in the aggregate is missing a mandatory 'entityID'")
+		}
+	}
+	for i := range entities.EntitiesDescriptors {
+		nestedFound, err := entityDescriptorInAggregate(&entities.EntitiesDescriptors[i])
+		if err != nil {
+			return false, err
+		}
+		found = found || nestedFound
+	}
+	return found, nil
 }
 
 func DecodeBase64ToReader(encodedBase64 string) (io.Reader, error) {

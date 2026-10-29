@@ -273,8 +273,22 @@ func TestValidateSamlMetadata(t *testing.T) {
 			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntityDescriptor entityID="https://idp.example.com"/></EntitiesDescriptor>`,
 		},
 		{
+			name:     "nested entities descriptor aggregate",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntitiesDescriptor Name="partner"><EntityDescriptor entityID="https://idp.example.com"><IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"/></EntityDescriptor></EntitiesDescriptor></EntitiesDescriptor>`,
+		},
+		{
+			name:     "nested entities descriptor without entity id",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntitiesDescriptor><EntityDescriptor/></EntitiesDescriptor></EntitiesDescriptor>`,
+			wantErr:  true,
+		},
+		{
 			name:     "entities descriptor without children",
 			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"></EntitiesDescriptor>`,
+			wantErr:  true,
+		},
+		{
+			name:     "nested entities descriptor without children",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntitiesDescriptor Name="partner"></EntitiesDescriptor></EntitiesDescriptor>`,
 			wantErr:  true,
 		},
 		{
