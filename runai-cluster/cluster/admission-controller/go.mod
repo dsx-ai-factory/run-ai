@@ -5,8 +5,8 @@ go 1.27.3
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261028111558-b2411b2fe3e4
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261028111558-b2411b2fe3e4
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261029093751-86faaf0abd00
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261029093751-86faaf0abd00
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
@@ -14,9 +14,9 @@ require (
 	github.com/stretchr/testify v1.12.1
 	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
 	gomodules.xyz/jsonpatch/v2 v2.5.0
-	k8s.io/api v0.37.1
-	k8s.io/apimachinery v0.37.1
-	k8s.io/client-go v0.37.1
+	k8s.io/api v0.37.2
+	k8s.io/apimachinery v0.37.2
+	k8s.io/client-go v0.37.2
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
 	sigs.k8s.io/controller-runtime v0.24.1
 	sigs.k8s.io/karpenter v1.15.1
@@ -30,7 +30,7 @@ replace (
 )
 
 require (
-	github.com/awslabs/operatorpkg v0.0.0-20261019155633-4e7ba6e9cd42 // indirect
+	github.com/awslabs/operatorpkg v0.0.0-20261028170822-b593ddc9a575 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -39,7 +39,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.14.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
-	github.com/fxamacker/cbor/v2 v2.9.6 // indirect
+	github.com/fxamacker/cbor/v2 v2.10.0 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-openapi/jsonpointer v1.0.2 // indirect
@@ -104,9 +104,9 @@ require (
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.13.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
-	k8s.io/apiextensions-apiserver v0.37.1 // indirect
-	k8s.io/component-base v0.37.1 // indirect
-	k8s.io/dynamic-resource-allocation v0.37.1 // indirect
+	k8s.io/apiextensions-apiserver v0.37.2 // indirect
+	k8s.io/component-base v0.37.2 // indirect
+	k8s.io/dynamic-resource-allocation v0.37.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260721132016-d427ff9ee9ad // indirect
 	sigs.k8s.io/json v0.0.0-20260909141634-11ed52e25bc5 // indirect
