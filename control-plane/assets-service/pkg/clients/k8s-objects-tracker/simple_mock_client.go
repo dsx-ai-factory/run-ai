@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 
@@ -301,6 +302,14 @@ func (s SimpleMockClient) WithAccessKey(clusterId string, accessKey *api.AccessK
 	return s
 }
 
+// secretResourceName builds the name of the secret the cluster creates, the
+// same way the cluster agent does: lower cased, because Kubernetes object names
+// are lower case. Without it the mock reports a differently cased name than the
+// real cluster for any asset whose name has upper case letters.
+func secretResourceName(prefix string, assetName string) string {
+	return strings.ToLower(fmt.Sprintf("%s-%s", prefix, assetName))
+}
+
 func (s SimpleMockClient) secretOriginAndName(assetKind api.AssetKind, assetName string, existingSecretName *string) (k8sObjectsTracker.Origin, string) {
 	if existingSecretName != nil {
 		return k8sObjectsTracker.ORIGIN_EXISTING, *existingSecretName
@@ -308,15 +317,15 @@ func (s SimpleMockClient) secretOriginAndName(assetKind api.AssetKind, assetName
 
 	switch assetKind {
 	case api.ASSETKIND_ACCESS_KEY:
-		return k8sObjectsTracker.ORIGIN_ASSETS, fmt.Sprintf("%s-%s", k8sObjectsTracker.SECRETTYPE_ACCESS_KEY, assetName)
+		return k8sObjectsTracker.ORIGIN_ASSETS, secretResourceName(string(k8sObjectsTracker.SECRETTYPE_ACCESS_KEY), assetName)
 	case api.ASSETKIND_PASSWORD:
-		return k8sObjectsTracker.ORIGIN_ASSETS, fmt.Sprintf("%s-%s", k8sObjectsTracker.SECRETTYPE_PASSWORD, assetName)
+		return k8sObjectsTracker.ORIGIN_ASSETS, secretResourceName(string(k8sObjectsTracker.SECRETTYPE_PASSWORD), assetName)
 	case api.ASSETKIND_DOCKER_REGISTRY:
-		return k8sObjectsTracker.ORIGIN_ASSETS, fmt.Sprintf("%s-%s", k8sObjectsTracker.SECRETTYPE_DOCKER_REGISTRY, assetName)
+		return k8sObjectsTracker.ORIGIN_ASSETS, secretResourceName(string(k8sObjectsTracker.SECRETTYPE_DOCKER_REGISTRY), assetName)
 	case api.ASSETKIND_GENERIC_SECRET:
-		return k8sObjectsTracker.ORIGIN_ASSETS, fmt.Sprintf("%s-%s", k8sObjectsTracker.SECRETTYPE_GENERIC, assetName)
+		return k8sObjectsTracker.ORIGIN_ASSETS, secretResourceName(string(k8sObjectsTracker.SECRETTYPE_GENERIC), assetName)
 	default:
-		return k8sObjectsTracker.ORIGIN_ASSETS, fmt.Sprintf("unsupported-%s", assetName)
+		return k8sObjectsTracker.ORIGIN_ASSETS, secretResourceName("unsupported", assetName)
 	}
 }
 
@@ -327,15 +336,15 @@ func (s SimpleMockClient) secretClusterResourceName(assetKind api.AssetKind, ass
 
 	switch assetKind {
 	case api.ASSETKIND_ACCESS_KEY:
-		return fmt.Sprintf("accesskey-%s", assetName)
+		return secretResourceName("accesskey", assetName)
 	case api.ASSETKIND_PASSWORD:
-		return fmt.Sprintf("password-%s", assetName)
+		return secretResourceName("password", assetName)
 	case api.ASSETKIND_DOCKER_REGISTRY:
-		return fmt.Sprintf("dockerregistry-%s", assetName)
+		return secretResourceName("dockerregistry", assetName)
 	case api.ASSETKIND_GENERIC_SECRET:
-		return fmt.Sprintf("genericsecret-%s", assetName)
+		return secretResourceName("genericsecret", assetName)
 	default:
-		return fmt.Sprintf("unsupported-%s", assetName)
+		return secretResourceName("unsupported", assetName)
 	}
 }
 
