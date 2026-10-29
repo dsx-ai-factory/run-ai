@@ -93,48 +93,6 @@
         />
       </div>
     </div>
-    <div class="row" v-if="samlSettings?.singleSignOnServiceUrl">
-      <q-tooltip anchor="center middle">
-        {{ disabledTooltip }}
-      </q-tooltip>
-      <q-input
-        class="col-12 q-mb-lg"
-        :model-value="samlSettings?.singleSignOnServiceUrl"
-        no-error-icon
-        stack-label
-        label="Identity provider URL"
-        :disable="true"
-      />
-    </div>
-    <div class="row" v-if="samlSettings?.idpEntityId">
-      <q-tooltip anchor="center middle">
-        {{ disabledTooltip }}
-      </q-tooltip>
-      <q-input
-        :model-value="samlSettings?.idpEntityId"
-        class="col-12 q-mb-lg"
-        no-error-icon
-        stack-label
-        label="Identity provider Entity ID (issuer)"
-        :disable="true"
-      />
-    </div>
-    <div class="row" v-if="isFileSource ? metadataFile : samlSettings?.signingCertificate">
-      <q-tooltip anchor="center middle">
-        {{ disabledTooltip }}
-      </q-tooltip>
-      <q-input
-        :model-value="formattedExpirationDate"
-        :rules="[iValidCertificateDate]"
-        class="col-4 q-mb-lg"
-        no-error-icon
-        stack-label
-        readonly
-        :disable="isValidated"
-        label="Certificate expiration date"
-        ref="samlExpirationDateInput"
-      />
-    </div>
   </div>
 </template>
 
@@ -145,9 +103,7 @@ import { isValidUrl } from "@/common/form.validators";
 import type { QFile, QInput } from "quasar";
 import type { IdpResources, SamlCreationData } from "@/swagger-models/identity-manager-client";
 import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
-import type { SamlConfigSettings } from "@/models/setting.model";
-import { dateUtil } from "@/utils/date.util";
-import { DATE_FORMATS } from "@/constants/date-formats";
+import type { SamlCertificateDetails, SamlConfigSettings } from "@/models/setting.model";
 import { stringUtil } from "@/utils/string.util";
 import { deepCopy, isEqual } from "@/utils/common.util";
 import { HTMLUtil } from "@/utils/html.util/html.util";
@@ -164,7 +120,7 @@ import type { ResourceType } from "@/swagger-models/authorization-client";
 export default defineComponent({
   name: "saml-fields",
   components: { RunaiBtn, SettingReadonlyInput },
-  emits: ["updated"],
+  emits: ["updated", "certificate-details"],
   props: {
     samlSettings: {
       type: Object as PropType<SamlConfigSettings>,
@@ -193,7 +149,6 @@ export default defineComponent({
     return {
       samlFields: {} as SamlCreationData,
       expirationDate: null as Date | null,
-      isValidated: false,
       samlSource: SamlCreationDataMetadataXmlTypeEnum.File as SamlCreationDataMetadataXmlTypeEnum,
       metadataFile: null as File | null,
       originalSamlFields: {} as SamlCreationData,
@@ -217,11 +172,14 @@ export default defineComponent({
     samlSourceType() {
       return SamlCreationDataMetadataXmlTypeEnum;
     },
-    disabledTooltip(): string {
-      return "This can't be modified. To make changes, modify the metadata file above";
-    },
-    formattedExpirationDate(): string {
-      return this.expirationDate ? dateUtil.dateFormat(this.expirationDate, DATE_FORMATS.STANDARD_DATE) : "";
+    certificateDetails(): SamlCertificateDetails {
+      const showExpirationDate = this.isFileSource ? !!this.metadataFile : !!this.samlSettings?.signingCertificate;
+      const validity = this.iValidCertificateDate();
+      return {
+        showExpirationDate,
+        expirationDate: this.expirationDate,
+        expirationError: showExpirationDate && typeof validity === "string" ? validity : "",
+      };
     },
     isFileSource(): boolean {
       return this.samlSource === SamlCreationDataMetadataXmlTypeEnum.File;
@@ -245,7 +203,6 @@ export default defineComponent({
     async validate(): Promise<boolean> {
       if (this.samlSource === SamlCreationDataMetadataXmlTypeEnum.File) {
         (this.$refs.metadataFileInput as typeof QFile)?.validate();
-        (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
         return !!this.metadataFile && this.isValidCertificate;
       } else {
         return (this.$refs.samlUrlInput as QInput).validate();
@@ -304,14 +261,9 @@ export default defineComponent({
       const token = selectionToken ?? this.fileSelectionToken;
       const certificate =
         certificateOverride !== undefined ? certificateOverride : this.samlSettings?.signingCertificate;
-      this.isValidated = false;
       const expirationDate = certificate ? await idpCommon.getCertificateExpirationDate(certificate) : null;
       if (token !== this.fileSelectionToken) return false;
       this.expirationDate = expirationDate;
-      (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
-      if (this.expirationDate && idpCommon.iValidCertificateDate(this.expirationDate as Date)) {
-        this.isValidated = true;
-      }
       return true;
     },
     clearFile(): void {
@@ -328,7 +280,6 @@ export default defineComponent({
       this.samlFields.metadataXmlFile = "";
       this.samlFields.fileName = "";
       this.expirationDate = null;
-      this.isValidated = false;
       (this.$refs.metadataFileInput as typeof QFile)?.validate();
       this.onUpdated();
       const reader = new FileReader();
@@ -363,8 +314,6 @@ export default defineComponent({
       this.samlFields.metadataXmlFile = "";
       this.samlFields.fileName = "";
       this.expirationDate = null;
-      this.isValidated = false;
-      (this.$refs.samlExpirationDateInput as typeof QInput)?.validate();
       this.onUpdated();
     },
     clearUrlContent(): void {
@@ -380,6 +329,12 @@ export default defineComponent({
     },
   },
   watch: {
+    certificateDetails: {
+      handler(details: SamlCertificateDetails): void {
+        this.$emit("certificate-details", details);
+      },
+      immediate: true,
+    },
     samlSource(): void {
       this.$nextTick(() => {
         if (this.isFileSource) {

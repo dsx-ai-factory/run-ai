@@ -24,9 +24,19 @@
           :is-new-idp="isNewIdp"
           :saml-settings="samlConfigSettings"
           @updated="updateSamlFields"
+          @certificate-details="onCertificateDetails"
           ref="samlFieldsEl"
         />
       </div>
+      <saml-idp-details
+        class="q-mb-lg"
+        :single-sign-on-service-url="samlConfigSettings.singleSignOnServiceUrl"
+        :idp-entity-id="samlConfigSettings.idpEntityId"
+        :expiration-date="editCertificateDetails.expirationDate"
+        :show-expiration-date="editCertificateDetails.showExpirationDate"
+        :expiration-error="editCertificateDetails.expirationError"
+        :tooltip="DETAILS_TOOLTIP"
+      />
       <div class="col-12 q-mb-lg">
         <setting-readable-field label="Entity ID">
           <div class="row no-wrap items-center">
@@ -80,6 +90,13 @@
       :title="certificateWarningTitle"
       message="Edit the identity provider and replace the metadata XML with an updated file."
     />
+    <saml-idp-details
+      class="idp-details"
+      :single-sign-on-service-url="samlConfigSettings.singleSignOnServiceUrl"
+      :idp-entity-id="samlConfigSettings.idpEntityId"
+      :expiration-date="certificateExpirationDate"
+      :show-expiration-date="!!samlConfigSettings.signingCertificate"
+    />
     <div v-if="hasIdpAttributes" class="redirect-url-field">
       <div>Use the following if required by the identity provider</div>
       <setting-readable-field label="Redirect URL">
@@ -97,7 +114,12 @@
 <script lang="ts">
 import type { PropType } from "vue";
 import { defineComponent } from "vue";
-import type { IIdpMapperItem, IWrapperBoxSettingMessages, SamlConfigSettings } from "@/models/setting.model";
+import type {
+  IIdpMapperItem,
+  IWrapperBoxSettingMessages,
+  SamlCertificateDetails,
+  SamlConfigSettings,
+} from "@/models/setting.model";
 import { settingsUtil } from "@/utils/settings.util";
 import { useAuthStore } from "@/stores/auth.store";
 import { idpCommon } from "../idp-common/idp-common";
@@ -117,15 +139,19 @@ import { SettingEditableField } from "@/components/settings/setting-editable-fie
 import { SettingWrapperBox } from "@/components/settings/setting-wrapper-box";
 import { SettingReadableField } from "@/components/settings/setting-readable-field";
 import SamlFields from "@/components/settings/sections/security/sso-settings/idps/saml/saml-fields/saml-fields.vue";
+import { SamlIdpDetails } from "@/components/settings/sections/security/sso-settings/idps/saml/saml-idp-details";
 import { DOCS } from "@/constants/docs";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { ENotificationBarVariant, NotificationAlertBar } from "@/components/common/notification-alert-bar";
+
+const DETAILS_TOOLTIP = "This can't be modified. To make changes, modify the metadata file above";
 
 export default defineComponent({
   name: "saml-settings",
   components: {
     RunaiBtn,
     SamlFields,
+    SamlIdpDetails,
     SettingEditableField,
     IdpMappers,
     SettingReadableField,
@@ -161,7 +187,13 @@ export default defineComponent({
       certificateRequestToken: 0,
       idpStore: useIdpsStore(),
       idpResources: {} as IdpResources,
+      editCertificateDetails: {
+        showExpirationDate: false,
+        expirationDate: null,
+        expirationError: "",
+      } as SamlCertificateDetails,
       DOCS,
+      DETAILS_TOOLTIP,
     };
   },
   async created(): Promise<void> {
@@ -241,6 +273,9 @@ export default defineComponent({
       this.idpMappersItems = this._getIdpMappers();
       this.isEditMode = true;
     },
+    onCertificateDetails(details: SamlCertificateDetails): void {
+      this.editCertificateDetails = details;
+    },
     updateSamlFields(newSamlFields: SamlCreationData, isValid: boolean, idpFieldsHasChanges: boolean): void {
       this.isValidIdpFields = isValid;
       this.idpFields = newSamlFields;
@@ -307,7 +342,8 @@ export default defineComponent({
   overflow: hidden;
 }
 .certificate-warning,
-.redirect-url-field {
+.redirect-url-field,
+.idp-details {
   margin: 12px;
 }
 .idp-card-separator {
