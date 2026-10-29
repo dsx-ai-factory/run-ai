@@ -21,11 +21,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.5.8 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.8.8 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.5.8 // indirect
-	github.com/aws/aws-sdk-go-v2/service/acm v1.50.7 // indirect
+	github.com/aws/aws-sdk-go-v2/service/acm v1.51.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/autoscaling v1.79.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs v1.90.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.72.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ec2 v1.342.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ec2 v1.343.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ecr v1.67.1 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ecrpublic v1.47.7 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ecs v1.103.0 // indirect
@@ -53,7 +53,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/emicklei/go-restful/v3 v3.14.0 // indirect
-	github.com/fxamacker/cbor/v2 v2.9.6 // indirect
+	github.com/fxamacker/cbor/v2 v2.10.0 // indirect
 	github.com/go-errors/errors v1.5.1 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-openapi/jsonpointer v1.0.2 // indirect
