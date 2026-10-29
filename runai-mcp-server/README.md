@@ -48,7 +48,7 @@ make inspect \
 
 ### Claude Code
 
-Add to `~/.claude/settings.json` (global) or `.claude/settings.json` (project):
+Merge the following into `~/.claude.json` (user scope, available across projects) or `.mcp.json` in your project root (project scope), preserving any existing settings and `mcpServers` entries. See [Claude Code's MCP configuration scopes](https://code.claude.com/docs/en/mcp#mcp-installation-scopes).
 
 ```json
 {
@@ -60,7 +60,7 @@ Add to `~/.claude/settings.json` (global) or `.claude/settings.json` (project):
         "-e", "RUNAI_BASE_URL",
         "-e", "RUNAI_CLIENT_ID",
         "-e", "RUNAI_CLIENT_SECRET",
-        "registry.example.com/runai-mcp-server:<tag>",
+        "registry.example.com/runai-mcp-server:<tag>"
       ],
       "env": {
         "RUNAI_BASE_URL": "https://<cluster-url>",
@@ -86,7 +86,7 @@ Add to `~/.cursor/mcp.json` (global) or `.cursor/mcp.json` (project):
         "-e", "RUNAI_BASE_URL",
         "-e", "RUNAI_CLIENT_ID",
         "-e", "RUNAI_CLIENT_SECRET",
-        "registry.example.com/runai-mcp-server:<tag>",
+        "registry.example.com/runai-mcp-server:<tag>"
       ],
       "env": {
         "RUNAI_BASE_URL": "https://<cluster-url>",
