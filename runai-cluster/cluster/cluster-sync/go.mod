@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/OneOfOne/xxhash v1.2.8

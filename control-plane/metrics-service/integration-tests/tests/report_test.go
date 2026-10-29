@@ -600,7 +600,7 @@ func (suite *ReportTestSuite) TestGetReport_ReturnsTheCreatedReport() {
 	require.Equal(suite.T(), int32(1), got.TenantId)
 	require.Equal(suite.T(), []openapi.Label{{Name: "clusterId", DisplayName: "ClusterId"}}, got.Labels)
 	require.False(suite.T(), got.CreatedAt.IsZero())
-	require.False(suite.T(), got.StatusUpdatedAt.Before(got.CreatedAt))
+	require.WithinDuration(suite.T(), got.CreatedAt, got.StatusUpdatedAt, time.Second)
 }
 
 func (suite *ReportTestSuite) TestDeleteReport() {

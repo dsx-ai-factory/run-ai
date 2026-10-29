@@ -41,9 +41,6 @@ spec:
     repository: nvcr.io/nim/llm
     tag: 1.0.0
   resources:
-    claims:
-    - name: myclaim
-      request: shared-request
     limits:
       cpu: "2"
       memory: 8Gi

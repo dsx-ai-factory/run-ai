@@ -29,13 +29,13 @@ type AiApplicationSpecChartRef struct {
 	Repo string `json:"repo,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The name of the chart within the specified repository. This corresponds to the chart’s directory name.
+	// Helm chart name.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ChartName string `json:"chartName,omitempty"`
 	ChartName string `json:"chartName,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The specific Semantic Version (SemVer) of the chart to deploy.
+	// Helm chart version.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ChartVersion string `json:"chartVersion,omitempty"`
 	ChartVersion string `json:"chartVersion,omitempty" gorm:"not null;"`

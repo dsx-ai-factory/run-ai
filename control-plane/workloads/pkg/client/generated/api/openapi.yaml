@@ -13091,6 +13091,108 @@ paths:
       x-authorize:
         resource-type: applications
         action: create
+  /api/v1/ai-applications/charts/inspect:
+    post:
+      description: |
+        Download or read the selected chart archive and inspect its root questions.yaml or questions.yml declaration
+        in the control plane. Uploaded charts reference an archive already stored by the chart upload API.
+        The response contains normalized question metadata and diagnostics; it does not contain the
+        complete chart defaults or credential values. Missing or unusable questions declarations return
+        a successful response so callers can offer raw YAML configuration. Download, authentication,
+        and invalid archive failures return an error and are not reported as absent questions.
+        Archives containing both root declaration filenames are rejected as ambiguous.
+      operationId: inspect_application_chart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AIApplicationChartInspectionRequest'
+        description: "Chart source selection and optional saved credential reference,\
+          \ up to 64 KiB of JSON."
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AIApplicationChartInspectionResponse'
+          description: "Chart inspected, including absent or unusable questions declarations."
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "408":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The chart inspection request was cancelled or exceeded its
+            deadline.
+        "413":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Request entity too large
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The upstream chart source is unavailable or inspection capacity
+            is exhausted.
+      summary: Inspect a Helm chart questions declaration.
+      tags:
+      - AI Applications
+      x-service: workloads
+      x-test-coverage:
+      - control-plane/workloads/pkg/services/ai_applications_chart_inspection_unit_test.go
+      - control-plane/workloads/pkg/services/ai_applications_chart_inspection_http_test.go
+      x-authorize:
+        resource-type: applications
+        action: create
+    x-internal: true
   /api/v1/ai-applications/charts/{chartId}/content:
     get:
       description: |
@@ -14815,6 +14917,12 @@ components:
           schema:
             $ref: '#/components/schemas/HttpResponse'
       description: Accepted.
+    "413RequestEntityTooLarge":
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+      description: Request entity too large
     "400BadSubmissionRequest":
       content:
         application/json:
@@ -14831,12 +14939,6 @@ components:
           schema:
             $ref: '#/components/schemas/Error'
       description: Not acceptable request
-    "413RequestEntityTooLarge":
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/Error'
-      description: Request entity too large
     "415UnsupportedMediaType":
       content:
         application/json:
@@ -26357,10 +26459,15 @@ components:
     Preemptibility:
       description: "Specifies whether the workload can be preempted by higher-priority\
         \ workloads. Valid values are preemptible, semi-preemptible and non-preemptible.\
-        \ If explicitly set, this value takes precedence. If not set, the system derives\
-        \ the preemptibility from the priorityClassName field, ensuring backward compatibility.\
-        \ Each workload type has a default preemptibility. To view the default preemptibility\
-        \ for each workload type, use the GET /workload-types endpoint."
+        \ Semi-preemptible is intended for multi-pod workloads. Replicas up to the\
+        \ configured minimum are non-preemptible, while replicas above that minimum\
+        \ are preemptible. On single-pod workloads with a fixed replica count of one,\
+        \ semi-preemptible behaves as non-preemptible. The API continues to accept\
+        \ semi-preemptible for these workloads. If explicitly set, this value takes\
+        \ precedence. If not set, the system derives the preemptibility from the priorityClassName\
+        \ field, ensuring backward compatibility. Each workload type has a default\
+        \ preemptibility. To view the default preemptibility for each workload type,\
+        \ use the GET /workload-types endpoint."
       enum:
       - preemptible
       - semi-preemptible
@@ -128172,14 +128279,13 @@ components:
       example: https://charts.bitnami.com/bitnami
       maxLength: 250
       type: string
-    AIApplicationChartName:
-      description: The name of the chart within the specified repository. This corresponds
-        to the chart’s directory name.
+    ChartName:
+      description: Helm chart name.
       example: redis
       maxLength: 250
       type: string
-    AIApplicationChartVersion:
-      description: The specific Semantic Version (SemVer) of the chart to deploy.
+    ChartVersion:
+      description: Helm chart version.
       example: 17.3.17
       maxLength: 50
       type: string
@@ -128218,13 +128324,12 @@ components:
           maxLength: 250
           type: string
         chartName:
-          description: The name of the chart within the specified repository. This
-            corresponds to the chart’s directory name.
+          description: Helm chart name.
           example: redis
           maxLength: 250
           type: string
         chartVersion:
-          description: The specific Semantic Version (SemVer) of the chart to deploy.
+          description: Helm chart version.
           example: 17.3.17
           maxLength: 50
           type: string
@@ -128544,6 +128649,138 @@ components:
           type: string
       required:
       - chartId
+      type: object
+    AIApplicationChartInspectionRequest:
+      description: |
+        Select exactly one chart source: chartId for an existing uploaded archive, chartURL for a direct
+        archive URL, or repo with chartName and an exact chartVersion. Sources cannot be combined.
+        Inspection of a repository chart requires an explicit version; latest-version selection
+        is not supported. Authentication uses the caller-accessible personal or shared credential asset.
+      example:
+        auth:
+          assetId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+          userCredential: true
+        chartRef:
+          chartName: redis
+          chartVersion: 17.3.17
+          chartId: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+          repo: https://charts.bitnami.com/bitnami
+          chartURL: https://helm.ngc.nvidia.com/nvidia/blueprint/charts/nvidia-blueprint-rag-v2.3.0.tgz
+      properties:
+        chartRef:
+          $ref: '#/components/schemas/AIApplicationSpecChartRef'
+        auth:
+          $ref: '#/components/schemas/AIApplicationAuth'
+      required:
+      - chartRef
+      type: object
+    AIApplicationChartQuestionsStatus:
+      description: |
+        Absent means neither root questions.yaml nor questions.yml exists. Usable means the entire declaration is
+        usable after supported normalization. Unusable means declaration validation failed;
+        questions and groups are empty and warnings explain the failure. An unusable declaration
+        does not block raw YAML configuration or deployment.
+      enum:
+      - absent
+      - usable
+      - unusable
+      type: string
+    AIApplicationChartInspectionWarning:
+      example:
+        path: path
+        code: code
+        message: message
+      properties:
+        code:
+          description: Stable machine-readable diagnostic identifier.
+          type: string
+        message:
+          description: Explanation of the problem and available recovery.
+          type: string
+        path:
+          description: "Location within the declaration, or an empty string for a\
+            \ document-wide diagnostic."
+          type: string
+      required:
+      - code
+      - message
+      - path
+      type: object
+    AIApplicationChartInspectionResponse:
+      example:
+        chartName: redis
+        chartVersion: 17.3.17
+        warnings:
+        - path: path
+          code: code
+          message: message
+        - path: path
+          code: code
+          message: message
+        questions:
+        - key: ""
+        - key: ""
+        archiveSHA256: archiveSHA256
+        groups:
+        - key: ""
+        - key: ""
+        hasQuestions: true
+        questionsStatus: absent
+      properties:
+        chartName:
+          description: Helm chart name.
+          example: redis
+          maxLength: 250
+          type: string
+        chartVersion:
+          description: Helm chart version.
+          example: 17.3.17
+          maxLength: 50
+          type: string
+        archiveSHA256:
+          description: Lowercase hexadecimal SHA-256 digest of the exact inspected
+            archive bytes.
+          type: string
+        hasQuestions:
+          description: "Whether the chart contains a root questions.yaml or questions.yml\
+            \ file, including an unusable file."
+          type: boolean
+        questionsStatus:
+          $ref: '#/components/schemas/AIApplicationChartQuestionsStatus'
+        groups:
+          description: Normalized group declarations in author order; empty for absent
+            or unusable declarations.
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+        questions:
+          description: |
+            Normalized root questions in author order. Each question preserves supported declared
+            metadata and may contain recursive subquestions through four child levels (five levels total), with roots at
+            depth zero. Supported compatibility forms are normalized. Unknown question types become
+            string with a warning; unsupported optional properties are ignored with a warning. Invalid
+            mandatory metadata, bindings, options, defaults, conditions, or excessive nesting make the
+            entire declaration unusable. Credential and Secret question types are not supported.
+            This response contains no raw declaration YAML or complete values.yaml defaults.
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+        warnings:
+          description: Diagnostics for recoverable metadata and unusable declarations.
+          items:
+            $ref: '#/components/schemas/AIApplicationChartInspectionWarning'
+          type: array
+      required:
+      - archiveSHA256
+      - chartName
+      - chartVersion
+      - groups
+      - hasQuestions
+      - questions
+      - questionsStatus
+      - warnings
       type: object
     AIApplicationSyncResource:
       example:

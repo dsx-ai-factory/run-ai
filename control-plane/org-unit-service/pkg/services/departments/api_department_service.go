@@ -738,15 +738,14 @@ func (s *DepartmentApiService) patchDepartmentNodePoolResources(
 		return nil, "", apiErr
 	}
 
-	err = services.ValidateNodePoolResourcesPatchRequest(ctx, patchRequest, nodePools)
+	convertedResources := services.ConvertNodePoolResourcesPatchRequest(patchRequest, departmentNodePoolResources.GpuDeserved)
+	err = services.ValidateNodePoolResourcesPatchRequest(ctx, convertedResources, nodePools)
 	if err != nil {
 		return nil, "", api.NewError(http.StatusBadRequest, fmt.Sprintf("patch department resources validation failed: %s", err.Error()), err)
 	}
 
-	// convert for over-quota validation
-	convertedResources := []api.ResourcesNullable{services.ConvertNodePoolResourcesPatchRequest(patchRequest)}
 	orgUnitResources := []models.Resources{departmentNodePoolResources.ToResources()}
-	patchedResources, err := services.MapNodePoolPatchResourcesRequestToModel(ctx, convertedResources, orgUnitResources, nodePools, []api.NodePoolResourcesPatchRequest{patchRequest})
+	patchedResources, err := services.MapNodePoolPatchResourcesRequestToModel(ctx, []api.ResourcesNullable{convertedResources}, orgUnitResources, nodePools, []api.NodePoolResourcesPatchRequest{patchRequest})
 	if err != nil {
 		return nil, "", api.NewError(http.StatusInternalServerError, "failed to map resources to model", err)
 	}

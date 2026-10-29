@@ -40,6 +40,7 @@ type PublicConfiguration struct {
 	GitSyncImage                           *string                     `yaml:"gitSyncImage,omitempty"`
 	GitSyncResources                       *PublicResourceRequirements `yaml:"gitSyncResources,omitempty"`
 	S3FileSystemImage                      *string                     `yaml:"s3FileSystemImage,omitempty"`
+	S3FileSystemMountCheckImage            *string                     `yaml:"s3FileSystemMountCheckImage,omitempty"`
 	S3FileSystemResources                  *PublicResourceRequirements `yaml:"s3FileSystemResources,omitempty"`
 	FipsMode                               *string                     `yaml:"fipsMode,omitempty"`
 	RunaiOauth2ProxyImage                  *string                     `yaml:"runaiOauth2ProxyImage,omitempty"`

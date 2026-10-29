@@ -86,6 +86,7 @@ docs/GetProjectsRanking200Response.md
 docs/GetRanks200Response.md
 docs/GetSyncDepartments200Response.md
 docs/GetSyncProjects200Response.md
+docs/GpuResourceRequest.md
 docs/HealthAPI.md
 docs/HttpResponse.md
 docs/ListReports200Response.md
@@ -293,6 +294,7 @@ model_get_projects_ranking_200_response.go
 model_get_ranks_200_response.go
 model_get_sync_departments_200_response.go
 model_get_sync_projects_200_response.go
+model_gpu_resource_request.go
 model_http_response.go
 model_list_reports_200_response.go
 model_measurement_response.go

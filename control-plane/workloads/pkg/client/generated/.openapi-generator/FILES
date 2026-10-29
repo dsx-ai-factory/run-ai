@@ -28,6 +28,10 @@ configuration.go
 docs/AIApplication.md
 docs/AIApplicationAllocatedResources.md
 docs/AIApplicationAuth.md
+docs/AIApplicationChartInspectionRequest.md
+docs/AIApplicationChartInspectionResponse.md
+docs/AIApplicationChartInspectionWarning.md
+docs/AIApplicationChartQuestionsStatus.md
 docs/AIApplicationChartUploadResponse.md
 docs/AIApplicationCreationRequest.md
 docs/AIApplicationForSync.md
@@ -660,6 +664,10 @@ model_activation_replicas_field.go
 model_ai_application.go
 model_ai_application_allocated_resources.go
 model_ai_application_auth.go
+model_ai_application_chart_inspection_request.go
+model_ai_application_chart_inspection_response.go
+model_ai_application_chart_inspection_warning.go
+model_ai_application_chart_questions_status.go
 model_ai_application_chart_upload_response.go
 model_ai_application_creation_request.go
 model_ai_application_endpoint.go

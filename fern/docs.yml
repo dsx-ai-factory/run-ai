@@ -54,16 +54,22 @@ redirects:
     destination: /run-ai/self-hosted/reference/rest-api/endpoints/ai-applications/:slug*
     permanent: true
   - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/fractions
-    destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/memory-fractions
+    destination: /run-ai/self-hosted/documentation/platform-management/runai-scheduler/resource-optimization/gpu-fractions/memory-fractions
     permanent: true
   - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/dynamic-fractions
-    destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/dynamic-memory-fractions
+    destination: /run-ai/self-hosted/documentation/platform-management/runai-scheduler/resource-optimization/gpu-fractions/dynamic-memory-fractions
     permanent: true
   - source: /self-hosted/platform-management/runai-scheduler/resource-optimization/time-slicing
-    destination: /self-hosted/platform-management/runai-scheduler/resource-optimization/gpu-fractions/compute-modes
+    destination: /run-ai/self-hosted/documentation/platform-management/runai-scheduler/resource-optimization/gpu-fractions/compute-modes
+    permanent: true
+  - source: /self-hosted/documentation/ai-applications/ai-applications
+    destination: /run-ai/self-hosted/documentation/ai-applications/submit-ai-applications
     permanent: true
   - source: /run-ai/self-hosted/documentation/platform-management/authentication/cluster-authentication
     destination: /run-ai/self-hosted/documentation/installation-and-configuration/config/cluster-authentication
+    permanent: true
+  - source: /self-hosted/documentation/installation-and-configuration/config/cluster-configuration
+    destination: /run-ai/self-hosted/documentation/installation-and-configuration/config/advanced-cluster-configuration
     permanent: true
   - source: /run-ai/self-hosted/documentation/platform-management/authentication/permissions
     destination: /run-ai/self-hosted/documentation/platform-management/authentication/roles/permissions

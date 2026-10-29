@@ -38,7 +38,7 @@ func TestMapHTTPError_SurfacesBodyOnDecodeFailure(t *testing.T) {
 
 	t.Run("bare_string_body_replaces_decode_noise", func(t *testing.T) {
 		err := MapHTTPError(resp(http.StatusBadRequest), decodeErr)
-		assert.ErrorIs(t, err, ErrUpstream)
+		assert.ErrorIs(t, err, ErrValidation)
 		assert.Contains(t, err.Error(), "gpu-over-provisioning")
 		assert.NotContains(t, err.Error(), "unmarshal")
 	})
@@ -56,6 +56,14 @@ func TestMapHTTPError_SurfacesBodyOnDecodeFailure(t *testing.T) {
 		withModel := fakeOpenAPIError{msg: "quota exceeded", body: []byte(`{"message":"x"}`), model: struct{}{}}
 		err := MapHTTPError(resp(http.StatusBadRequest), withModel)
 		assert.Contains(t, err.Error(), "quota exceeded")
+	})
+	t.Run("decoded_model_with_only_status_in_error", func(t *testing.T) {
+		err := MapHTTPError(&http.Response{StatusCode: http.StatusBadRequest, Status: "400 Bad Request"}, fakeOpenAPIError{
+			msg: "400 Bad Request", model: struct{}{},
+			body: []byte(`{"code":400,"message":"To apply a policy, there must be at least one default or rule"}`),
+		})
+		assert.ErrorIs(t, err, ErrValidation)
+		assert.Contains(t, err.Error(), "at least one default or rule")
 	})
 	t.Run("plain_error_untouched", func(t *testing.T) {
 		err := MapHTTPError(resp(http.StatusNotFound), errors.New("boom"))
@@ -84,6 +92,8 @@ func TestMapHTTPError(t *testing.T) {
 		status int
 		want   error
 	}{
+		{http.StatusBadRequest, ErrValidation},
+		{http.StatusUnprocessableEntity, ErrValidation},
 		{http.StatusUnauthorized, ErrAuth},
 		{http.StatusForbidden, ErrForbidden},
 		{http.StatusNotFound, ErrNotFound},

@@ -1,4 +1,0 @@
-type: string
-description: The specific Semantic Version (SemVer) of the chart to deploy.
-maxLength: 50
-example: 17.3.17

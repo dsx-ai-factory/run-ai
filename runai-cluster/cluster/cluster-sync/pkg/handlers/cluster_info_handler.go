@@ -7,8 +7,11 @@ package handlers
 
 import (
 	"context"
+	"errors"
+	"net/http"
 	"sync"
 
+	swagger "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/metrics"
@@ -78,10 +81,12 @@ func (handler *ClusterInfoHandler) sendClusterInfo(clusterInfoCm *corev1.ConfigM
 
 	{
 		defer metrics.GetMetricsExporter().MeasureExecutionTime(handler.resourceName, operation)()
-		res, err := handler.runaiBackendClient.ClusterServiceClient.ClustersAPI.UpdateClusterInfo(
+		res, err := updateClusterInfo(
 			handler.runaiBackendClient.Context(),
+			handler.runaiBackendClient.ClusterServiceClient,
 			config.Config().ClusterUuid,
-		).ClusterInfoSyncRequest(clusterInfoToSend).Execute()
+			clusterInfoToSend,
+		)
 		if res != nil {
 			_ = res.Body.Close()
 		}
@@ -92,4 +97,31 @@ func (handler *ClusterInfoHandler) sendClusterInfo(clusterInfoCm *corev1.ConfigM
 			"Updated ClusterInfo",
 		)
 	}
+}
+
+var mountCheckCompatibilityNotice sync.Once
+
+func updateClusterInfo(ctx context.Context, apiClient *swagger.APIClient, clusterID string, info swagger.ClusterInfoSyncRequest) (*http.Response, error) {
+	request := apiClient.ClustersAPI.UpdateClusterInfo(ctx, clusterID).ClusterInfoSyncRequest(info)
+	res, err := request.Execute()
+	var apiErr *swagger.GenericOpenAPIError
+	if res == nil || res.StatusCode != http.StatusBadRequest || !errors.As(err, &apiErr) {
+		return res, err
+	}
+	responseError, ok := apiErr.Model().(swagger.Error)
+	status := info.Status.Get()
+	if !ok || responseError.Message != `json: unknown field "s3FileSystemMountCheckImage"` || status == nil {
+		return res, err
+	}
+	reportedConfig := status.Config.Get()
+	if reportedConfig == nil || !reportedConfig.HasS3FileSystemMountCheckImage() {
+		return res, err
+	}
+	// Control planes are upgraded first. This fallback keeps cluster reporting
+	// functional if an older control plane is encountered nevertheless.
+	mountCheckCompatibilityNotice.Do(func() {
+		zap.S().Info("Control plane does not support S3 mount-readiness reporting; retrying without the capability")
+	})
+	reportedConfig.UnsetS3FileSystemMountCheckImage()
+	return request.ClusterInfoSyncRequest(info).Execute()
 }

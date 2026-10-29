@@ -6,13 +6,13 @@ require (
 	github.com/Rican7/retry v0.3.1
 	github.com/ThreeDotsLabs/watermill v1.5.3
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5
-	github.com/aws/smithy-go v1.28.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.2
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.17
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.7
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.9
+	github.com/aws/smithy-go v1.28.7
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
 	github.com/google/uuid v1.6.0
-	github.com/nats-io/nats.go v1.54.0
+	github.com/nats-io/nats.go v1.55.0
 	github.com/pkg/errors v0.9.1
 	github.com/redis/go-redis/v9 v9.23.0
 	github.com/segmentio/kafka-go v0.4.51

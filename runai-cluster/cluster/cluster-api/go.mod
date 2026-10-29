@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-api
 
-go 1.27.2
+go 1.27.3
 
 require (
 	github.com/MicahParks/keyfunc v1.9.0
