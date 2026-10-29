@@ -13353,6 +13353,10 @@ components:
           example: gcr.io/runai/goofys:v0.24.0
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          type: string
+          nullable: true
+          description: The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:
@@ -28054,25 +28058,25 @@ components:
     SamlData:
       type: object
       nullable: true
+      required:
+        - validateSignature
       properties:
         signingCertificate:
           type: string
         singleSignOnServiceUrl:
-      required:
-        - validateSignature
           type: string
         entityId:
           type: string
         serviceProviderMetadataUrl:
           type: string
           description: Service Provider (SP) metadata url
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
     MandatoryClaim:
       type: object
       nullable: true
       required:
-        validateSignature:
-          type: boolean
-          description: Whether the signature of SAML responses from the identity provider is validated
         - claim
         - values
       properties:

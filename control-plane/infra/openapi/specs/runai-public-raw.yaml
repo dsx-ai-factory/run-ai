@@ -16034,17 +16034,27 @@ paths:
     x-internal: true
     post:
       summary: Mint a short-lived bootstrap JWT for the installer service account.
-      description: |
+      description: >
         Returns a 2-hour Keycloak access token for the cluster's dedicated
+
         per-cluster installer service account, scoped to the given cluster.
+
         Called by cluster-service when generating the cluster install command.
+
         The token is passed to the Helm hook as
-        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer token
+
+        --set controlPlane.bootstrapToken=<token> and used directly as a Bearer
+        token
+
         to call GET /clusters/{uuid}/control-plane-config — the installer client
+
         secret never leaves the server.
 
+
         The per-cluster installer client is resolved (and, if needed,
+
         self-healed by creating it) internally, so callers only need to say
+
         which cluster the token is for.
       x-service: identity-manager
       x-test-coverage: not-applicable
@@ -29661,7 +29671,8 @@ components:
       example:
         installationStr: >-
           helm upgrade -i runai-cluster runai/runai-cluster -n runai --set
-          cluster.uid=... --set controlPlane.bootstrapToken=<installer-bootstrap-jwt>
+          cluster.uid=... --set
+          controlPlane.bootstrapToken=<installer-bootstrap-jwt>
         repositoryName: runai
         chartRepoURL: 'https://charts.example.com'
         bootstrapToken: <installer-bootstrap-jwt>
@@ -48790,6 +48801,8 @@ components:
     SamlData:
       type: object
       nullable: true
+      required:
+        - validateSignature
       properties:
         signingCertificate:
           type: string
@@ -48800,9 +48813,12 @@ components:
         serviceProviderMetadataUrl:
           type: string
           description: Service Provider (SP) metadata url
+        validateSignature:
+          type: boolean
+          description: >-
+            Whether the signature of SAML responses from the identity provider
+            is validated
     MandatoryClaim:
-      required:
-        - validateSignature
       type: object
       nullable: true
       required:
@@ -48813,11 +48829,6 @@ components:
           type: string
           pattern: '.*[a-zA-Z].*'
           minLength: 1
-        validateSignature:
-          type: boolean
-          description: >-
-            Whether the signature of SAML responses from the identity provider
-            is validated
           maxLength: 255
         values:
           type: array
