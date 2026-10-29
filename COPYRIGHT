@@ -15660,7 +15660,7 @@ THE SOFTWARE.
 Copyright Naoya Inada <naoina@kuune.org> - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/go-openapi/runtime/middleware/denco v0.33.3
+  github.com/go-openapi/runtime/middleware/denco v0.33.4
 
 Copyright (c) 2014 Naoya Inada <naoina@kuune.org>
 
@@ -18417,8 +18417,8 @@ Components:
   github.com/go-openapi/jsonreference v1.0.2
   github.com/go-openapi/jsonreference v1.0.3
   github.com/go-openapi/loads v0.25.3
-  github.com/go-openapi/runtime v0.33.3
-  github.com/go-openapi/runtime/server-middleware v0.33.3
+  github.com/go-openapi/runtime v0.33.4
+  github.com/go-openapi/runtime/server-middleware v0.33.4
   github.com/go-openapi/spec v1.0.1
   github.com/go-openapi/strfmt v0.27.4
   github.com/go-openapi/swag v0.23.0
@@ -21463,6 +21463,7 @@ Components:
   golang.org/x/net v0.56.0
   golang.org/x/net v0.59.0
   golang.org/x/net v0.61.0
+  golang.org/x/net v0.62.0
   golang.org/x/oauth2 v0.30.0
   golang.org/x/oauth2 v0.32.0
   golang.org/x/oauth2 v0.36.0
@@ -26290,7 +26291,7 @@ limitations under the License.
 --------------------------------------------------------------------------------
 NOTICE of github.com/go-openapi/runtime
 Components:
-  github.com/go-openapi/runtime v0.33.3
+  github.com/go-openapi/runtime v0.33.4
 
 Copyright 2015-2025 go-swagger maintainers
 
