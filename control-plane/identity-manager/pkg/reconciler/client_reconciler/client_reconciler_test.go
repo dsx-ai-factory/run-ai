@@ -68,6 +68,7 @@ func TestNonSSOMappersWithExistsClients(t *testing.T) {
 	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
 	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
@@ -92,6 +93,7 @@ func TestSSOMappersWithExistsClients(t *testing.T) {
 	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
 	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
 	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.Nil(t, err)
@@ -112,4 +114,46 @@ func TestReconcileDefaultClients_DeleteClientIfExistsError(t *testing.T) {
 
 	err := testSubject.Reconcile(context.Background(), realmName, true)
 	assert.ErrorContains(t, err, "delete failed")
+}
+
+func TestReconcileDisablesAdminCliClient(t *testing.T) {
+	iamMock, tenantResolverMock, reconcilerHelperMock, testSubject := initClientReconcilerTest(t)
+	clients := test_utils.GetBasicReconcilerClientWithTenantIdMapperArray()
+	realmName := "test-realm"
+	defaultIamMockSetup(iamMock, clients, realmName, true)
+	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
+	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(nil)
+
+	err := testSubject.Reconcile(context.Background(), realmName, true)
+	assert.Nil(t, err)
+	reconcilerHelperMock.AssertCalled(t, "DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID)
+}
+
+func TestReconcileAdminCliDisableFailureDoesNotFailReconcile(t *testing.T) {
+	iamMock, tenantResolverMock, reconcilerHelperMock, testSubject := initClientReconcilerTest(t)
+	clients := test_utils.GetBasicReconcilerClientWithTenantIdMapperArray()
+	realmName := "test-realm"
+	defaultIamMockSetup(iamMock, clients, realmName, true)
+	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
+	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), realmName, utils.RUNAI_CLIENT_ID).Return(nil)
+	reconcilerHelperMock.On("DisableClientIfExists", context.Background(), realmName, utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID).Return(errors.New("disable failed"))
+
+	err := testSubject.Reconcile(context.Background(), realmName, true)
+	assert.Nil(t, err)
+}
+
+func TestReconcileNeverDisablesAdminCliInMasterRealm(t *testing.T) {
+	iamMock, tenantResolverMock, reconcilerHelperMock, testSubject := initClientReconcilerTest(t)
+	clients := test_utils.GetBasicReconcilerClientWithTenantIdMapperArray()
+	defaultIamMockSetup(iamMock, clients, utils.MASTER_REALM, true)
+	defaultTenantResolverMockSetup(tenantResolverMock, TenantId)
+	reconcilerHelperMock.On("ReconcileClient", context.Background(), mock.Anything, mock.Anything).Return(nil)
+	reconcilerHelperMock.On("DeleteClientIfExists", context.Background(), utils.MASTER_REALM, utils.RUNAI_CLIENT_ID).Return(nil)
+
+	err := testSubject.Reconcile(context.Background(), utils.MASTER_REALM, true)
+	assert.Nil(t, err)
+	reconcilerHelperMock.AssertNotCalled(t, "DisableClientIfExists", mock.Anything, mock.Anything, mock.Anything)
 }
