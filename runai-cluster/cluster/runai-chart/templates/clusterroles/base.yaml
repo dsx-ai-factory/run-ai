@@ -708,6 +708,14 @@ rules:
       - list
       - watch
   - apiGroups:
+      - node.k8s.io
+    resources:
+      - runtimeclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
       - apps
     resources:
       - deployments/finalizers

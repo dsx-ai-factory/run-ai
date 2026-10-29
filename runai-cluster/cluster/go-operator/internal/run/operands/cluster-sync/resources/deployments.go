@@ -152,6 +152,7 @@ func handleEnvVars(runaiConfig *runaiv1.RunaiConfig) []v1.EnvVar {
 		{Name: "NODE_LABEL_NVIDIA_CONTAINER_TOOLKIT", Value: *config.NodeLabelNvidiaContainerToolkit},
 		{Name: "NODE_LABEL_NVIDIA_DCGM_EXPORTER", Value: *config.NodeLabelNvidiaDcgmExporter},
 		{Name: "ENABLE_NODE_NVIDIA_COMPONENTS_READINESS", Value: strconv.FormatBool(*config.EnableNodeNvidiaComponentsReadiness)},
+		{Name: "CONFIDENTIAL_COMPUTING", Value: strconv.FormatBool(runaiConfig.IsConfidentialComputing())},
 		{Name: "RATE_LIMITER_WORKLOADS_DELAY_SECONDS", Value: strconv.Itoa(*config.RateLimiterWorkloadsDelaySeconds)},
 		{Name: "RATE_LIMITER_WORKLOADS_NUM_OF_WORKERS", Value: strconv.Itoa(*config.RateLimiterWorkloadsNumOfWorkers)},
 		{Name: "RATE_LIMITER_REGULAR_DELAY_SECONDS", Value: strconv.Itoa(*config.RateLimiterRegularDelaySeconds)},

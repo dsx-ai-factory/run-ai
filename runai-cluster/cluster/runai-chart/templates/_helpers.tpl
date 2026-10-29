@@ -231,3 +231,64 @@ nodeAffinity:
         {{- not (empty $lookupResult) -}}
     {{- end -}}
 {{- end -}}
+
+{{- define "ccPrecheck.name" -}}
+    {{- printf "%s-cc-precheck" .Release.Name | trunc 45 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "ccPrecheck.dispatcherName" -}}
+    {{- printf "%s-dispatcher-%d" (include "ccPrecheck.name" .) .Release.Revision -}}
+{{- end -}}
+
+{{- define "ccPrecheck.nodeSelector" -}}
+    {{- if .Values.ccPrecheck.nodeSelector -}}
+        {{- printf "%s,kubernetes.io/os=linux" .Values.ccPrecheck.nodeSelector -}}
+    {{- else -}}
+        kubernetes.io/os=linux
+    {{- end -}}
+{{- end -}}
+
+{{- define "ccPrecheck.probeImage" -}}
+    {{- $registry := .Values.global.image.registry | default .Values.ccPrecheck.probeImage.registry -}}
+    {{- printf "%s/%s:%s" $registry .Values.ccPrecheck.probeImage.name .Values.ccPrecheck.probeImage.tag -}}
+{{- end -}}
+
+{{- define "ccPrecheck.collectorImage" -}}
+    {{- $registry := .Values.global.image.registry | default .Values.ccPrecheck.collectorImage.registry -}}
+    {{- printf "%s/%s:%s" $registry .Values.ccPrecheck.collectorImage.name .Values.ccPrecheck.collectorImage.tag -}}
+{{- end -}}
+
+{{- define "ccPrecheck.dispatcherImage" -}}
+    {{- $registry := .Values.global.image.registry | default .Values.ccPrecheck.dispatcherImage.registry -}}
+    {{- printf "%s/%s:%s" $registry .Values.ccPrecheck.dispatcherImage.name .Values.ccPrecheck.dispatcherImage.tag -}}
+{{- end -}}
+
+{{- define "ccPrecheck.validate" -}}
+    {{- $cpu := 0 -}}
+    {{- $gpu := false -}}
+    {{- range $requirement := .Values.ccPrecheck.anyOf -}}
+        {{- if not (has $requirement (list "gpu-cc" "gpu-ppcie")) -}}
+            {{- fail "ccPrecheck.anyOf accepts gpu-cc and gpu-ppcie" -}}
+        {{- end -}}
+        {{- $gpu = true -}}
+    {{- end -}}
+    {{- range $requirement := .Values.ccPrecheck.requirements -}}
+        {{- if not (has $requirement (list "cc" "tdx" "snp" "se" "gpu-cc" "gpu-ppcie")) -}}
+            {{- fail (printf "Unknown ccPrecheck requirement: %s" $requirement) -}}
+        {{- end -}}
+        {{- if has $requirement (list "gpu-cc" "gpu-ppcie") -}}
+            {{- $gpu = true -}}
+        {{- else -}}
+            {{- $cpu = add $cpu 1 -}}
+        {{- end -}}
+    {{- end -}}
+    {{- if gt (int $cpu) 1 -}}
+        {{- fail "Choose one CPU TEE requirement, or cc to allow any supported CPU TEE" -}}
+    {{- end -}}
+    {{- if and (not .Values.ccPrecheck.requirements) (not .Values.ccPrecheck.anyOf) -}}
+        {{- fail "global.confidentialComputing.enabled requires ccPrecheck.requirements or ccPrecheck.anyOf" -}}
+    {{- end -}}
+    {{- if and .Values.ccPrecheck.gpuModels (not $gpu) -}}
+        {{- fail "ccPrecheck.gpuModels requires gpu-cc or gpu-ppcie" -}}
+    {{- end -}}
+{{- end -}}

@@ -103,5 +103,7 @@ func getClusterHookParams(opts *util.Options) (*hooks.ClusterHookParams, error) 
 		EngineToKAIMigrationEnabled:                 opts.EngineToKAIMigrationEnabled,
 		EnableRbacEscalation:                        opts.EnableRbacEscalation,
 		FipsMode:                                    opts.FipsMode,
+		ConfidentialComputing:                       opts.ConfidentialComputing,
+		ConfidentialComputingInitdataConfigMap:      opts.ConfidentialComputingInitdataConfigMap,
 	}, nil
 }

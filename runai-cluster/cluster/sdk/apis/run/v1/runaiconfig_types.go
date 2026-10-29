@@ -698,6 +698,11 @@ func (runaiConfig *RunaiConfig) ExtractReconciledConditionMessage() string {
 	return reconcileCondition.Message
 }
 
+func (runaiConfig *RunaiConfig) IsConfidentialComputing() bool {
+	return runaiConfig.Spec.Internal != nil && runaiConfig.Spec.Internal.Global != nil &&
+		runaiConfig.Spec.Internal.Global.ConfidentialComputing
+}
+
 func (runaiConfig *RunaiConfig) ShouldSkipDependencyChecks() bool {
 	return runaiConfig.Spec.Internal.Global.NMC.IsEnabled() || runaiConfig.Spec.Internal.Development.SkipDependencyChecks
 }

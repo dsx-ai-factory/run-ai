@@ -58,6 +58,8 @@ const (
 
 	name      = runv1.RunaiPublicConfigMapName
 	namespace = runv1.DefaultNamespace
+
+	nvidiaMetricsComponentName = "nvidia-metrics"
 )
 
 const gatewayAPIGroupVersion = "gateway.networking.k8s.io/v1"
@@ -185,6 +187,9 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		if internal.Global.FipsMode != "" {
 			configuration.FipsMode = ptr.To(internal.Global.FipsMode)
 		}
+		if internal.Global.ConfidentialComputing {
+			configuration.ConfidentialComputing = ptr.To(true)
+		}
 		if issuer := internal.Global.ControlPlane.Config.GetResearcherService().OauthProxy.GetOidcIssuerUrl(); issuer != "" {
 			configuration.RunaiOauth2ProxyOidcIssuerUrl = ptr.To(issuer)
 		}
@@ -255,7 +260,7 @@ func getRequiredComponentsStatus(ctx context.Context, kbClient kc.HybridClient, 
 			Reason:    "Managed Environment - Dependency checks skipped",
 		}
 	} else {
-		gpuStackStatus = getGpuStackStatus(ctx, kbClient)
+		gpuStackStatus = getGpuStackStatus(ctx, kbClient, config.IsConfidentialComputing())
 		prometheusStatus = getPrometheusStatus(config)
 	}
 
@@ -316,8 +321,8 @@ func isVersionSupportsOauth2(version string) error {
 	return nil
 }
 
-func getGpuStackStatus(ctx context.Context, kbClient client.Client) runv1.PublicStatus {
-	nvidiaStatus := getNvidiaStatus(ctx, kbClient)
+func getGpuStackStatus(ctx context.Context, kbClient client.Client, confidentialComputing bool) runv1.PublicStatus {
+	nvidiaStatus := getNvidiaStatus(ctx, kbClient, confidentialComputing)
 	gpuFractioningStatus := controller_utils.CheckGpuFractioningReadiness(ctx, kbClient)
 
 	available := *nvidiaStatus.Available && *gpuFractioningStatus.Available
@@ -339,7 +344,11 @@ func getGpuStackStatus(ctx context.Context, kbClient client.Client) runv1.Public
 	}
 }
 
-func getNvidiaStatus(ctx context.Context, kbClient client.Client) runv1.PublicStatus {
+func getNvidiaStatus(ctx context.Context, kbClient client.Client, confidentialComputing bool) runv1.PublicStatus {
+	if confidentialComputing {
+		return getConfidentialNvidiaStatus()
+	}
+
 	svc, nvidiaStackVerificationErr := controller_utils.GetDCGMExporterService(ctx, kbClient)
 	if svc == nil || nvidiaStackVerificationErr != nil {
 		return getUnavailableNvidiaStatus(nvidiaStackVerificationErr)
@@ -349,12 +358,26 @@ func getNvidiaStatus(ctx context.Context, kbClient client.Client) runv1.PublicSt
 	return getAvailableNvidiaStatus(nvidiaExporterVerificationErr, missingMetrics)
 }
 
+func getConfidentialNvidiaStatus() runv1.PublicStatus {
+	return runv1.PublicStatus{
+		Available: runv1.AvailableStatus(true),
+		Reason:    "",
+		Components: map[string]runv1.PublicStatus{
+			nvidiaMetricsComponentName: {
+				Available: runv1.AvailableStatus(false),
+				Reason: "DCGM runs inside the confidential guest; " +
+					"there is no cluster-scoped dcgm-exporter service to verify",
+			},
+		},
+	}
+}
+
 func getUnavailableNvidiaStatus(nvidiaStackVerificationErr error) runv1.PublicStatus {
 	return runv1.PublicStatus{
 		Available: runv1.AvailableStatus(false),
 		Reason:    errToString(nvidiaStackVerificationErr),
 		Components: map[string]runv1.PublicStatus{
-			"nvidia-metrics": {
+			nvidiaMetricsComponentName: {
 				Available: runv1.AvailableStatus(false),
 			},
 		},
@@ -366,7 +389,7 @@ func getAvailableNvidiaStatus(nvidiaExporterVerificationErr error, missingMetric
 		Available: runv1.AvailableStatus(true),
 		Reason:    "",
 		Components: map[string]runv1.PublicStatus{
-			"nvidia-metrics": {
+			nvidiaMetricsComponentName: {
 				Available: runv1.AvailableStatus(nvidiaExporterVerificationErr == nil && len(missingMetrics) == 0),
 				Reason:    getMissingMetricsErrorStr(nvidiaExporterVerificationErr, missingMetrics),
 			},

@@ -8,6 +8,7 @@ package parsers
 import (
 	"context"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -213,7 +214,7 @@ func (nodeParser *NodeParser) ParseNodeToServerScheme(node *corev1.Node) swagger
 		nodeInfo.Numa.Set(&numaInfo)
 	}
 
-	gpuInfo := getGpuInfo(node.Labels, node.Name)
+	gpuInfo := getGpuInfo(node)
 	if gpuInfo != nil {
 		nodeInfo.GpuInfo = *swagger.NewNullableGpuInfo(gpuInfo)
 	}
@@ -283,12 +284,14 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 
 	result = append(result, calculateUnschedulableCondition(node)...)
 
-	if nodeParser.gpuFractioningSupport.get() {
-		result = append(result, calculateGpuFractioningConditions(node)...)
-	}
+	if !config.Config().ConfidentialComputing {
+		if nodeParser.gpuFractioningSupport.get() {
+			result = append(result, calculateGpuFractioningConditions(node)...)
+		}
 
-	if config.Config().EnableNodeNvidiaComponentsReadiness {
-		result = append(result, nodeParser.calculateMissingNvidiaComponentsConditions(node)...)
+		if config.Config().EnableNodeNvidiaComponentsReadiness {
+			result = append(result, nodeParser.calculateMissingNvidiaComponentsConditions(node)...)
+		}
 	}
 
 	return result
@@ -586,15 +589,33 @@ func parseTaints(taints []corev1.Taint) []swagger.NodeTaint {
 	return result
 }
 
-func getGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
-	nvidiaGpuInfo := getNvidiaGpuInfo(nodeLabels, nodeName)
+func getGpuInfo(node *corev1.Node) *swagger.GpuInfo {
+	nvidiaGpuInfo := getNvidiaGpuInfo(node.Labels, node.Name)
 	if nvidiaGpuInfo != nil {
 		return nvidiaGpuInfo
 	}
 
-	amdGpuInfo := getAmdGpuInfo(nodeLabels, nodeName)
+	amdGpuInfo := getAmdGpuInfo(node.Labels, node.Name)
 	if amdGpuInfo != nil {
 		return amdGpuInfo
+	}
+
+	return getAdvertisedGpuInfo(node)
+}
+
+func getAdvertisedGpuInfo(node *corev1.Node) *swagger.GpuInfo {
+	for _, resourceName := range []corev1.ResourceName{constants.GpuResourceName, constants.AmdGpuResourceName} {
+		quantity, found := node.Status.Capacity[resourceName]
+		if !found {
+			continue
+		}
+
+		count := quantity.Value()
+		if count <= 0 || count > math.MaxInt32 {
+			continue
+		}
+
+		return &swagger.GpuInfo{GpuCount: int32(count)}
 	}
 
 	return nil
