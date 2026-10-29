@@ -23,6 +23,8 @@ import (
 // https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/#syntax-and-character-set
 const k8sAnnotationNameSegmentMax = 63
 
+const maxPortionLimitDecimals = 5
+
 // maxContainerNameLenForAnnotationKey returns how many characters a
 // containerName may occupy in an annotation-key format string of the shape
 // "<prefix>/<fixed>.%s.<fixed>" without pushing the name segment past the
@@ -383,6 +385,11 @@ func (fc *FieldsComposer) ComposeMemoryLimitAnnotation(src *GpuSizingInfo, conta
 //
 // No-op unless the cluster supports MinVersionGpuMemoryLimitAnnotations
 // (>= 3.0.0), in which case ComposePortionLimitEnv has already no-op'd.
+//
+// KAI admission rejects the pod unless gpu-fraction < limit < 1 with at most
+// 5 decimal places. A limit equal to the request adds no headroom, so it is
+// dropped rather than written; the other out-of-range values are rejected
+// here because silently dropping them would change what the user asked for.
 func (fc *FieldsComposer) ComposePortionLimitAnnotation(src *GpuSizingInfo, containerName string,
 	target any, setter FnStringSetter,
 ) func() *workloadsApi.Error {
@@ -390,8 +397,20 @@ func (fc *FieldsComposer) ComposePortionLimitAnnotation(src *GpuSizingInfo, cont
 		if !fc.Options.GpuMemoryLimitAnnotationsSupported {
 			return nil
 		}
-		if src.PortionLimit == nil || src.PortionRequest == nil {
+		if src.PortionLimit == nil || !src.IsFractionalPortion() {
 			return nil
+		}
+		if *src.PortionLimit == *src.PortionRequest {
+			return nil
+		}
+		if *src.PortionLimit >= 1 {
+			return workloadsApi.NewError(http.StatusBadRequest,
+				"compute.gpuPortionLimit must be smaller than 1 when gpuPortionRequest is a fraction")
+		}
+		value := strconv.FormatFloat(*src.PortionLimit, 'f', -1, 64)
+		if _, decimals, found := strings.Cut(value, "."); found && len(decimals) > maxPortionLimitDecimals {
+			return workloadsApi.NewError(http.StatusBadRequest,
+				fmt.Sprintf("compute.gpuPortionLimit must have at most %d digits after the decimal point", maxPortionLimitDecimals))
 		}
 		if containerName == "" {
 			return workloadsApi.NewError(http.StatusInternalServerError,
@@ -404,7 +423,6 @@ func (fc *FieldsComposer) ComposePortionLimitAnnotation(src *GpuSizingInfo, cont
 					containerName, len(containerName), maxLen))
 		}
 
-		value := strconv.FormatFloat(*src.PortionLimit, 'f', -1, 64)
 		key := fmt.Sprintf(KaiGpuMemoryPortionLimitAnnotationKeyFormat, containerName)
 		return setter(&value, target, key)
 	}

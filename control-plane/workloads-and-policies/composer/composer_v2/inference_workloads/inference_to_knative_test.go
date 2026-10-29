@@ -419,7 +419,7 @@ var _ = Describe("InferenceToKnativeComposer", func() {
 			expectedFile: "gpu_portion_req_and_limit",
 			assert: func(target *KnativeServiceTarget) {
 				ann := target.Service.Spec.Template.ObjectMeta.Annotations
-				Expect(ann).To(HaveKeyWithValue("kai.scheduler/container.my-llm.gpu-memory.portion.limit", "0.5"))
+				Expect(ann).To(HaveKeyWithValue("kai.scheduler/container.my-llm.gpu-memory.portion.limit", "0.8"))
 				for _, envVar := range target.Service.Spec.Template.Spec.Containers[0].Env {
 					Expect(envVar.Name).NotTo(Equal("RUNAI_GPU_PORTION_LIMIT"))
 				}
@@ -433,7 +433,7 @@ var _ = Describe("InferenceToKnativeComposer", func() {
 			assert: func(target *KnativeServiceTarget) {
 				ann := target.Service.Spec.Template.ObjectMeta.Annotations
 				Expect(ann).NotTo(HaveKey("kai.scheduler/container.my-llm.gpu-memory.portion.limit"))
-				Expect(environmentValue(target.Service.Spec.Template.Spec.Containers[0].Env, "RUNAI_GPU_PORTION_LIMIT")).To(Equal("0.5"))
+				Expect(environmentValue(target.Service.Spec.Template.Spec.Containers[0].Env, "RUNAI_GPU_PORTION_LIMIT")).To(Equal("0.8"))
 			},
 		}),
 

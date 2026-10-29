@@ -32,7 +32,7 @@ DistributedTarget:
               annotations:
                 gpu-fraction: "0.5"
                 gpu-fraction-num-devices: "1"
-                kai.scheduler/container.pytorch.gpu-memory.portion.limit: "0.5"
+                kai.scheduler/container.pytorch.gpu-memory.portion.limit: "0.8"
                 user: tester
               labels:
                 app: pytorchjob
@@ -63,7 +63,7 @@ DistributedTarget:
               annotations:
                 gpu-fraction: "0.5"
                 gpu-fraction-num-devices: "1"
-                kai.scheduler/container.pytorch.gpu-memory.portion.limit: "0.5"
+                kai.scheduler/container.pytorch.gpu-memory.portion.limit: "0.8"
                 user: tester
               labels:
                 app: pytorchjob

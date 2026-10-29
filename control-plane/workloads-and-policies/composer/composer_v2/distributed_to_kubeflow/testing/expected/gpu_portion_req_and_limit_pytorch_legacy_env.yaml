@@ -48,7 +48,7 @@ DistributedTarget:
                 - name: RUNAI_JOB_NAME
                   value: gpu_portion_req_and_limit
                 - name: RUNAI_GPU_PORTION_LIMIT
-                  value: "0.5"
+                  value: "0.8"
                 image: ubuntu
                 name: pytorch
                 resources: {}
@@ -80,7 +80,7 @@ DistributedTarget:
                 - name: RUNAI_JOB_NAME
                   value: gpu_portion_req_and_limit
                 - name: RUNAI_GPU_PORTION_LIMIT
-                  value: "0.5"
+                  value: "0.8"
                 image: ubuntu
                 name: pytorch
                 resources: {}

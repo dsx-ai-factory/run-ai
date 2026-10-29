@@ -119,4 +119,19 @@ describe("gpu-memory-section.vue", () => {
       expect(vm.gpuMemoryLimit).toBe(1000);
     });
   });
+
+  describe("isValidPortionLimit", () => {
+    it.each([
+      { limit: null, valid: true },
+      { limit: 50, valid: true },
+      { limit: 80, valid: true },
+      { limit: 99.5, valid: true },
+      { limit: 40, valid: false },
+      { limit: 100, valid: false },
+    ])("limit $limit with request 50 is valid: $valid", ({ limit, valid }) => {
+      wrapper = createWrapper();
+      const vm = wrapper.vm as InstanceType<typeof GpuMemorySection>;
+      expect(vm.isValidPortionLimit(limit) === true).toBe(valid);
+    });
+  });
 });

@@ -70,7 +70,7 @@ LeaderWorkerSet:
             - name: RUNAI_JOB_NAME
               value: test-lws
             - name: RUNAI_GPU_PORTION_LIMIT
-              value: "0.5"
+              value: "0.8"
             image: python:3.8
             name: leader
             ports:
