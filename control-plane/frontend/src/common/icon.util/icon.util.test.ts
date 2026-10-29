@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getNimIconIfNimImage, getHuggingFaceIcon } from "./icon.util";
+import { getNimIconIfNimImage, getHuggingFaceIcon, getNvidiaImageBasedIcon, isNvidiaImage } from "./icon.util";
 import {
   NIM_WORKLOAD_LABEL,
   NIM_IMAGE_PREFIX,
@@ -376,5 +376,49 @@ describe("getHuggingFaceIcon", () => {
 
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe("isNvidiaImage", () => {
+  it.each([
+    "nvcr.io/nvidia/nemo:25.02",
+    "ghcr.io/nvidia/openshell-community/sandboxes/base:latest",
+    "my-registry.example.com/mirror/ghcr.io/nvidia/some-image:1.0",
+  ])("should return true for %s", (image) => {
+    expect(isNvidiaImage(image)).toBe(true);
+  });
+
+  it.each([
+    "ghcr.io/other-org/some-image:latest",
+    "ghcr.io/nvidiafoo/some-image:latest",
+    "docker.io/library/ubuntu:24.04",
+    "",
+    null,
+    undefined,
+  ])("should return false for %s", (image) => {
+    expect(isNvidiaImage(image)).toBe(false);
+  });
+});
+
+describe("getNvidiaImageBasedIcon", () => {
+  it("should return the pytorch icon for an NVIDIA PyTorch image", () => {
+    expect(getNvidiaImageBasedIcon("nvcr.io/nvidia/pytorch:25.02-py3")).toBe("pytorch");
+  });
+
+  it("should return the nvidia icon for an image from nvcr.io/nvidia", () => {
+    expect(getNvidiaImageBasedIcon("nvcr.io/nvidia/nemo:25.02")).toBe("nvidia");
+  });
+
+  it("should return the nvidia icon for an image from ghcr.io/nvidia", () => {
+    expect(getNvidiaImageBasedIcon("ghcr.io/nvidia/openshell-community/sandboxes/base:latest")).toBe("nvidia");
+  });
+
+  it("should return null for an image that is not from NVIDIA", () => {
+    expect(getNvidiaImageBasedIcon("docker.io/library/ubuntu:24.04")).toBeNull();
+  });
+
+  it("should return null when there is no image", () => {
+    expect(getNvidiaImageBasedIcon(null)).toBeNull();
+    expect(getNvidiaImageBasedIcon(undefined)).toBeNull();
   });
 });
