@@ -154,6 +154,14 @@ func (s *InputValidationScreen) Update(msg tea.Msg) tea.Cmd {
 		s.currentValidation = msg.index
 		return s.validateNextItem(msg.index)
 	case validationProgressMsg:
+		// validateNextItem reports "no validations" and "unknown validation
+		// index" with an index that has no result slot, and with no inputs to
+		// validate the list stays empty. There is nothing to store and nothing
+		// left to validate, so the screen is done.
+		if msg.index < 0 || msg.index >= len(s.validationResults) {
+			return nil
+		}
+
 		nextIndex := msg.index + 1
 		s.currentValidation = nextIndex
 		s.validationResults[msg.index] = &msg.result
