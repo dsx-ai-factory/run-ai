@@ -186,7 +186,7 @@ func TestReconcileRealm_HappyFlow_ClientsFlow(t *testing.T) {
 
 	checkCliClient(t, ctx)
 	checkRunaiClientDeleted(t, ctx)
-	checkRunaiCliClient(t, ctx)
+	checkRunaiCliClientDeleted(t, ctx)
 	checkRunaiAdminUiClient(t, ctx)
 	checkRunaiTokenExchangeClient(t, ctx)
 	checkSharedInstallerClientNotCreated(t, ctx)
@@ -406,15 +406,10 @@ func checkRunaiClientDeleted(t *testing.T, ctx context.Context) {
 	require.Nil(t, client)
 }
 
-func checkRunaiCliClient(t *testing.T, ctx context.Context) {
+func checkRunaiCliClientDeleted(t *testing.T, ctx context.Context) {
 	client, err := IamServices.ClientService.GetClientByClientId(ctx, BaseRealmName, serviceUtils.RUNAI_CLI_CLIENT_ID)
 	require.NoError(t, err)
-	require.NotEmpty(t, client)
-	require.Equal(t, serviceUtils.RUNAI_CLI_CLIENT_ID, *client.Name)
-	require.Equal(t, serviceUtils.RUNAI_CLI_CLIENT_ID, *client.ClientID)
-	require.True(t, *client.Enabled)
-	require.False(t, client.IsClientAuthenticationEnabled())
-	require.NotNil(t, client.Attributes)
+	require.Nil(t, client)
 }
 
 func checkSharedInstallerClientNotCreated(t *testing.T, ctx context.Context) {
