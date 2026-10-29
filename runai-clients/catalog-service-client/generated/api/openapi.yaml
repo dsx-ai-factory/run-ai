@@ -1442,6 +1442,70 @@ paths:
     x-scope:
     - system
     - tenant
+  /api/v1/inference/right-sizing/recommendation:
+    post:
+      description: Returns recommendations without deploying or reserving resources.
+        Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing
+        data is a no_recommendation result; upstream retrieval failures are errors.
+      operationId: recommend_inference_resources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RightSizingRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RightSizingResponse'
+          description: Results per GPU type and capacity; may contain no recommendations.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Recommend GPU allocation for a NIM test/dev workload.
+      tags:
+      - RightSizing
+      x-service: catalog-service
+      x-authorize:
+        resource-type: inferences
+        action: create
+      x-test-coverage:
+      - control-plane/catalog-service/pkg/services/rightsizing/service_test.go
 components:
   parameters:
     RegistryIntegrationId:
@@ -2274,6 +2338,169 @@ components:
         enabled:
           nullable: true
           type: boolean
+      type: object
+    RightSizingRequest:
+      example:
+        image: image
+        clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        tag: tag
+        gpuType: gpuType
+      properties:
+        clusterId:
+          description: Cluster whose node-pool hardware metadata is evaluated.
+          format: uuid
+          type: string
+        image:
+          description: Untagged public nvcr.io/nim/organization/model image reference.
+          type: string
+        tag:
+          description: Exact image tag. NGC does not automatically refresh latest
+            metadata.
+          minLength: 1
+          type: string
+        gpuType:
+          description: Exact inventory GPU type. Omitted or null evaluates all reported
+            types and capacities.
+          nullable: true
+          type: string
+      required:
+      - clusterId
+      - image
+      - tag
+      type: object
+    RightSizingStatus:
+      enum:
+      - recommended
+      - no_recommendation
+      type: string
+    RightSizingAllocationType:
+      enum:
+      - gpu_memory
+      - gpu_count
+      type: string
+    RightSizingRecommendation:
+      example:
+        gpuMemoryPerDeviceBytes: 1
+        allocationType: gpu_memory
+        gpuCount: 1
+      nullable: true
+      properties:
+        allocationType:
+          $ref: '#/components/schemas/RightSizingAllocationType'
+        gpuCount:
+          format: int64
+          minimum: 1
+          type: integer
+        gpuMemoryPerDeviceBytes:
+          format: int64
+          minimum: 1
+          type: integer
+      required:
+      - allocationType
+      - gpuCount
+      type: object
+    RightSizingResult:
+      example:
+        minimumGpuMemoryPerDeviceGb: 6.027456183070403
+        tensorParallelSize: 1
+        reason: reason
+        pipelineParallelSize: 1
+        gpuMemoryCapacityBytes: 0
+        profileId: profileId
+        precision: precision
+        recommendation:
+          gpuMemoryPerDeviceBytes: 1
+          allocationType: gpu_memory
+          gpuCount: 1
+        gpuType: gpuType
+        status: recommended
+        inferenceBackend: inferenceBackend
+      properties:
+        gpuType:
+          type: string
+        gpuMemoryCapacityBytes:
+          description: "Reported per-device capacity, not free memory or a quota guarantee."
+          format: int64
+          type: integer
+        status:
+          $ref: '#/components/schemas/RightSizingStatus'
+        minimumGpuMemoryPerDeviceGb:
+          description: "Published NGC minimum for the source profile, before allocation\
+            \ rounding."
+          format: double
+          type: number
+        profileId:
+          type: string
+        precision:
+          type: string
+        inferenceBackend:
+          type: string
+        tensorParallelSize:
+          description: Explicit tensor parallel size from the selected published profile.
+          format: int64
+          minimum: 1
+          type: integer
+        pipelineParallelSize:
+          description: Explicit pipeline parallel size from the selected published
+            profile.
+          format: int64
+          minimum: 1
+          type: integer
+        reason:
+          description: Explanation when sizing cannot be recommended.
+          type: string
+        recommendation:
+          $ref: '#/components/schemas/RightSizingRecommendation'
+      required:
+      - gpuType
+      - status
+      type: object
+    RightSizingResponse:
+      example:
+        image: image
+        tag: tag
+        results:
+        - minimumGpuMemoryPerDeviceGb: 6.027456183070403
+          tensorParallelSize: 1
+          reason: reason
+          pipelineParallelSize: 1
+          gpuMemoryCapacityBytes: 0
+          profileId: profileId
+          precision: precision
+          recommendation:
+            gpuMemoryPerDeviceBytes: 1
+            allocationType: gpu_memory
+            gpuCount: 1
+          gpuType: gpuType
+          status: recommended
+          inferenceBackend: inferenceBackend
+        - minimumGpuMemoryPerDeviceGb: 6.027456183070403
+          tensorParallelSize: 1
+          reason: reason
+          pipelineParallelSize: 1
+          gpuMemoryCapacityBytes: 0
+          profileId: profileId
+          precision: precision
+          recommendation:
+            gpuMemoryPerDeviceBytes: 1
+            allocationType: gpu_memory
+            gpuCount: 1
+          gpuType: gpuType
+          status: recommended
+          inferenceBackend: inferenceBackend
+      properties:
+        image:
+          type: string
+        tag:
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/RightSizingResult'
+          type: array
+      required:
+      - image
+      - results
+      - tag
       type: object
     EnableNgcIntegrationSetting:
       example:

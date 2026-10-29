@@ -39,3 +39,15 @@ CatalogSettingsGetResponse:
   $ref: './Settings/CatalogSettingsGetResponse.yaml'
 UpdateCatalogSettingByKeyRequest:
   $ref: './Settings/UpdateCatalogSettingByKeyRequest.yaml'
+RightSizingRequest:
+  $ref: './rightSizing/RightSizingRequest.yaml'
+RightSizingResponse:
+  $ref: './rightSizing/RightSizingResponse.yaml'
+RightSizingResult:
+  $ref: './rightSizing/RightSizingResult.yaml'
+RightSizingRecommendation:
+  $ref: './rightSizing/RightSizingRecommendation.yaml'
+RightSizingStatus:
+  $ref: './rightSizing/RightSizingStatus.yaml'
+RightSizingAllocationType:
+  $ref: './rightSizing/RightSizingAllocationType.yaml'

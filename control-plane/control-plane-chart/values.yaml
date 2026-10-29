@@ -203,7 +203,7 @@ assetsService:
     - PathPrefix(`/api/v2/workspace`)
     - PathPrefix(`/api/v1/training`)
     - PathPrefix(`/api/v2/training`)
-    - PathPrefix(`/api/v1/inference`)
+    - PathPrefix(`/api/v1/inference`) && !Path(`/api/v1/inference/right-sizing/recommendation`)
     - PathPrefix(`/api/v2/inference`)
     - PathPrefix(`/api/v1/model-inference`)
     - PathPrefix(`/api/v2/model-inference`)
@@ -3842,6 +3842,7 @@ catalogService:
     - PathPrefix(`/api/v1/registries`)
     - PathPrefix(`/api/v1/helm-repos`)
     - PathPrefix(`/api/v1/huggingface/catalog`)
+    - Path(`/api/v1/inference/right-sizing/recommendation`)
 
   image:
     repository: catalog-service
@@ -3959,6 +3960,11 @@ catalogService:
   affinity: {}
 
   config:
+    # null uses catalog-service's default sharing cutoff; explicit values must be 1..100.
+    wholeGPUCutoffPercent: null
+    # null uses catalog-service's 900-second NGC metadata cache expiry; must be positive.
+    ngcMetadataCacheTTLSeconds: null
+    inventoryRequestTimeoutSec: 30
     logLevel: Info
     dbScheme: catalog
     server:

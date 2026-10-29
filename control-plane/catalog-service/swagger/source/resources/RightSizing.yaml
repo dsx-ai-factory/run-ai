@@ -1,0 +1,36 @@
+post:
+  summary: Recommend GPU allocation for a NIM test/dev workload.
+  description: >-
+    Returns recommendations without deploying or reserving resources. Evaluates
+    cluster hardware for the exact image tag. Missing trustworthy sizing data is
+    a no_recommendation result; upstream retrieval failures are errors.
+  operationId: recommend_inference_resources
+  x-service: catalog-service
+  x-authorize:
+    resource-type: inferences
+    action: create
+  x-test-coverage:
+    - control-plane/catalog-service/pkg/services/rightsizing/service_test.go
+  tags:
+    - RightSizing
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../schemas/rightSizing/RightSizingRequest.yaml'
+  responses:
+    '200':
+      description: Results per GPU type and capacity; may contain no recommendations.
+      content:
+        application/json:
+          schema:
+            $ref: '../schemas/rightSizing/RightSizingResponse.yaml'
+    '400':
+      $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    '401':
+      $ref: '../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    '403':
+      $ref: '../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    '503':
+      $ref: '../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'

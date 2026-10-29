@@ -13,6 +13,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client v0.0.0
+	github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/cli-exposer-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client v0.0.0
@@ -181,3 +182,6 @@ replace github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/cluster-api-client => ../../runai-clients/cluster-api-client
 
 replace github.com/dsx-ai-factory/run-ai/runai-clients/datavolumes-service-client => ../../runai-clients/datavolumes-service-client
+
+
+replace github.com/dsx-ai-factory/run-ai/runai-clients/catalog-service-client => ../../runai-clients/catalog-service-client
