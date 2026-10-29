@@ -14,6 +14,7 @@
         :skip-cluster-setup="shouldSkipClusterSetup"
       />
       <template v-if="allowToDisplayBanner">
+        <saml-signature-status-bar />
         <cluster-status-bar />
       </template>
       <runai-fallback-page v-if="isFallback" />
@@ -54,6 +55,7 @@ import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
 import { AdminMessageModal } from "@/components/admin-message-modal";
 import { SystemMessageModal } from "@/components/system-message-modal";
 import { ClusterStatusBar } from "@/components/cluster/cluster-status-bar";
+import { SamlSignatureStatusBar } from "@/components/settings/saml-signature-status-bar";
 import { NewLayout } from "@/components/infra/runai-layout/new-layout";
 import { GuidedTourPopupManager } from "@/components/common/guided-tour-popup";
 
@@ -103,6 +105,7 @@ export default defineComponent({
     AdminOnboardingModal,
     CustomBanner,
     ClusterStatusBar,
+    SamlSignatureStatusBar,
     RunaiFallbackPage,
     RunaiDefaultLoader,
     AdminMessageModal,

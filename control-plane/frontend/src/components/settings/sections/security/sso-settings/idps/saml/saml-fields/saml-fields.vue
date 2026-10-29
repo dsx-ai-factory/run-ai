@@ -269,7 +269,9 @@ export default defineComponent({
           this.metadataFile = new File([this.idpResources.resource as string], this.idpResources.resourceName as string);
           await this.setFileContent(this.idpResources.resourceName as string, this.idpResources.resource as string);
         } else {
-          this.samlFields.metadataXmlUrl = this.idpResources.resource as string;
+          // For URL sources the backend may return the downloaded metadata XML as the resource, not the URL itself.
+          const resource = this.idpResources.resource as string;
+          if (isValidUrl(resource)) this.samlFields.metadataXmlUrl = resource;
           this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.Url;
         }
       }
@@ -292,7 +294,7 @@ export default defineComponent({
     isValidInput(): boolean {
       return this.isFileSource
         ? !!this.metadataFile && this.isValidCertificate
-        : !!this.samlFields.metadataXmlUrl && isValidUrl(this.samlFields.metadataXmlUrl || "");
+        : this.isValidUrl(this.samlFields.metadataXmlUrl || "") === true;
     },
     iValidCertificateDate(): boolean | string {
       if (this.isValidCertificate) return true;

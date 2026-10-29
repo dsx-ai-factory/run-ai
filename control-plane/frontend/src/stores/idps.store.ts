@@ -4,8 +4,11 @@
  */
 
 import { defineStore } from "pinia";
+import { IdpTypeEnum } from "@/swagger-models/identity-manager-client";
 import type { Idp, IdpCreationRequest, IdpResources, Mappers } from "@/swagger-models/identity-manager-client";
+import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import { idpService } from "@/services/control-plane/idp.service/idp.service";
+import { usePermissionStore } from "@/stores/permissions.store";
 
 export const useIdpsStore = defineStore("Idps", {
   state: () => ({
@@ -16,6 +19,17 @@ export const useIdpsStore = defineStore("Idps", {
   getters: {
     currentIdp(): Idp | null {
       return this.idps.length > 0 ? this.idps[0] : null;
+    },
+    // Strict `=== false`: a backend that doesn't return the field must not trigger the warnings.
+    isSamlSignatureValidationDisabled(): boolean {
+      return this.currentIdp?.type === IdpTypeEnum.Saml && this.currentIdp.samlData?.validateSignature === false;
+    },
+    // The top banner is for admins who can fix it, so it is gated on the permission that allows editing the IdP.
+    shouldShowSamlSignatureBanner(): boolean {
+      return (
+        this.isSamlSignatureValidationDisabled &&
+        usePermissionStore().hasPermission(ResourceType.SecuritySettings, Action.Update)
+      );
     },
   },
   actions: {

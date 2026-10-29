@@ -203,6 +203,43 @@ describe("saml-fields.vue", () => {
       expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(true);
     });
 
+    it("fills the URL field when the stored resource of a URL-sourced IdP is a URL", async () => {
+      const { wrapper } = factory({
+        samlSettings: validSamlSettings,
+        isNewIdp: false,
+        idpResources: {
+          resourceName: SamlCreationDataMetadataXmlTypeEnum.Url,
+          resource: "https://idp.example.com/metadata",
+        },
+      });
+      await flushPromises();
+
+      expect((wrapper.vm as unknown as { samlFields: { metadataXmlUrl?: string } }).samlFields.metadataXmlUrl).toBe(
+        "https://idp.example.com/metadata",
+      );
+    });
+
+    it("leaves the URL field empty when the stored resource of a URL-sourced IdP is the metadata XML", async () => {
+      const { wrapper } = factory({
+        samlSettings: validSamlSettings,
+        isNewIdp: false,
+        idpResources: { resourceName: SamlCreationDataMetadataXmlTypeEnum.Url, resource: fakeMetadataXml },
+      });
+      await flushPromises();
+
+      const vm = wrapper.vm as unknown as { samlFields: { metadataXmlUrl?: string }; isValidInput: () => boolean };
+      expect(vm.samlFields.metadataXmlUrl).toBeFalsy();
+      expect(vm.isValidInput()).toBe(true);
+    });
+
+    it("still requires a URL for a new IdP", async () => {
+      const { wrapper } = factory({ isNewIdp: true });
+      (wrapper.vm as unknown as { samlSource: string }).samlSource = SamlCreationDataMetadataXmlTypeEnum.Url;
+      await flushPromises();
+
+      expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(false);
+    });
+
     it("does not report changes for an untouched, existing file-sourced IdP right after mount", async () => {
       const { wrapper } = factory({
         samlSettings: validSamlSettings,
