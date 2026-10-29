@@ -223,6 +223,22 @@ func (r *KeycloakClientRepository) DeleteClient(ctx context.Context, realm strin
 	return errors.HandleKeyCloakError(err)
 }
 
+// DisableClient disables the client and its direct access grants (password grant) without deleting it.
+func (r *KeycloakClientRepository) DisableClient(ctx context.Context, realm string, ID string) error {
+	token, err := r.auth.GetAdminToken(ctx)
+	if err != nil {
+		return errors.HandleKeyCloakError(err)
+	}
+	kcClient, err := r.kcClient.GetClient(ctx, *token, realm, ID)
+	if err != nil {
+		return errors.HandleKeyCloakError(err)
+	}
+	kcClient.Enabled = gocloak.BoolP(false)
+	kcClient.DirectAccessGrantsEnabled = gocloak.BoolP(false)
+	err = r.kcClient.UpdateClient(ctx, *token, realm, *kcClient)
+	return errors.HandleKeyCloakError(err)
+}
+
 func (r *KeycloakClientRepository) GetClients(ctx context.Context, realm string, filter *models.ClientFilter) ([]models.Client, error) {
 	token, err := r.auth.GetAdminToken(ctx)
 	if err != nil {
