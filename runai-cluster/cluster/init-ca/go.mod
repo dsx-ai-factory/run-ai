@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/init-ca
 go 1.27.3
 
 require (
-	github.com/cert-manager/cert-manager v1.21.2
+	github.com/cert-manager/cert-manager v1.21.3
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4
 	github.com/onsi/ginkgo v1.16.5
@@ -95,7 +95,7 @@ require (
 	k8s.io/apiextensions-apiserver v0.36.4 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260501160325-927ab1f70cd6 // indirect
-	k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 // indirect
+	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab // indirect
 	sigs.k8s.io/gateway-api v1.6.3 // indirect
 	sigs.k8s.io/json v0.0.0-20260909141634-11ed52e25bc5 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
