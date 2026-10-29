@@ -109,3 +109,22 @@ func ResolveOrgUnitID(ctx context.Context, client *runaiclient.Client, orgType, 
 			orgType, name, strings.Join(matches, ", "), runaimcp.ErrValidation)
 	}
 }
+
+// ResolveClusterID resolves an exact cluster name without selecting an ambiguous match.
+func ResolveClusterID(ctx context.Context, client *runaiclient.Client, name string) (string, error) {
+	resp, httpResp, err := client.Cluster.ClustersAPI.GetClustersMinimalData(ctx).
+		FilterBy([]string{FilterEq("name", name)}).Limit(2).Execute()
+	if err != nil {
+		return "", fmt.Errorf("resolve cluster %q: %w", name, runaimcp.MapHTTPError(httpResp, err))
+	}
+	if resp == nil {
+		return "", fmt.Errorf("resolve cluster %q: nil response: %w", name, runaimcp.ErrUpstream)
+	}
+	if len(resp.Clusters) == 0 {
+		return "", fmt.Errorf("cluster %q: %w", name, runaimcp.ErrNotFound)
+	}
+	if len(resp.Clusters) > 1 {
+		return "", fmt.Errorf("ambiguous_cluster: name %q matches multiple clusters; use the cluster ID: %w", name, runaimcp.ErrValidation)
+	}
+	return resp.Clusters[0].Uuid, nil
+}
