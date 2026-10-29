@@ -2208,7 +2208,7 @@ clusterService:
         # Inclusive
         # Defaults to the chart's app version
         max: ''
-      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai
+      helmRegistryUrl: https://helm.ngc.nvidia.com/nvidia/runai-oss
       helmRegistryUsername: ''
       helmRegistryPasswordPlaceholder: ''
     maxWaitForClusterRemoteConfigStatusUpdate: 5m

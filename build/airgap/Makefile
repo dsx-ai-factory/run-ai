@@ -13,7 +13,7 @@ REPOSITORY_ROOT := ../..
 IMAGE_LOCK_OUTPUT_DIR ?= $(REPOSITORY_ROOT)/dist/image-locks
 ARTIFACT_LOCK_OUTPUT_DIR ?= $(REPOSITORY_ROOT)/dist/artifact-locks
 ARTIFACT_LOCK_IMAGE_LOCKS ?=
-NGC_HELM_BASE_URL ?= https://helm.ngc.nvidia.com/nvidia/runai/charts
+NGC_HELM_BASE_URL ?= https://helm.ngc.nvidia.com/nvidia/runai-oss/charts
 ARTIFACT_LOCK_CHART_URLS ?= \
 	$(NGC_HELM_BASE_URL)/control-plane-$(VERSION).tgz \
 	$(NGC_HELM_BASE_URL)/runai-cluster-$(VERSION).tgz
