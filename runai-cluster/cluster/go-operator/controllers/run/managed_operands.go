@@ -11,6 +11,7 @@ import (
 	advice_restart_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/advice-restart-controller"
 	application_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/application-controller"
 	nodepool_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/nodepool-controller"
+	pod_group_assigner "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/pod-group-assigner"
 	queue_controller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/queue-controller"
 	runai_public "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/runai-public"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/templates"
@@ -143,6 +144,9 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	// KRM supplies the project-controller now; registering it disabled deletes
 	// the Deployment left behind.
 	mo.addRemoteCluster(project_controller.Operand(remoteClusterClient, runaiConfig))
+	// KRM supplies the pod-group-assigner under the same name; registering it
+	// disabled deletes the 2.x Deployment and Service until KRM controls them.
+	mo.addRemoteCluster(pod_group_assigner.Operand(remoteClusterClient, runaiConfig))
 	mo.addOldRemoteCluster(accessrule_controller.Operand(), *spec.AccessRuleController.Enabled && *spec.ProjectController.CreateRoleBindings)
 	mo.addOldRemoteCluster(mpi_operator.Operand(), true)
 	// Inert until gpu-fractioning is installed: the PodMonitor simply selects no pods.
