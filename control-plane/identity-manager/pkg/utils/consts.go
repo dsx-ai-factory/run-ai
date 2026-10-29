@@ -83,6 +83,7 @@ const (
 	RUNAI_CLI_CLIENT_ID            = "runai-cli"
 	RunaiInstallerClientId         = "runai-internal.installer"
 	CLI_CLIENT_ID                  = "cli"
+	KEYCLOAK_ADMIN_CLI_CLIENT_ID   = "admin-cli"
 	RUNAI_MCP_CLIENT_ID            = "runai-mcp"
 	ClientTypeWorkloadsAuth        = "workloads_auth"
 )
