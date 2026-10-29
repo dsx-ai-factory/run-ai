@@ -32,6 +32,7 @@ type Handler struct {
 	conn             connection.WebSocket
 	ht               Type
 	pingDurationTime time.Duration
+	idleDurationTime time.Duration
 }
 
 func NewHandler(conn connection.WebSocket, options Options) *Handler {
@@ -40,6 +41,7 @@ func NewHandler(conn connection.WebSocket, options Options) *Handler {
 		options:          options,
 		ht:               setType(options),
 		pingDurationTime: GetInstance().GetPingTime(),
+		idleDurationTime: GetInstance().GetIdleTime(),
 	}
 }
 
@@ -90,7 +92,7 @@ func (h *Handler) GetKeepAlive() (keepalive.Keepalive, error) {
 	case Interactive:
 		return keepalive.NewPing(h.conn, h.conn, h.pingDurationTime), nil
 	case ReadOnly:
-		return keepalive.NewIdle(h.conn, h.conn, h.pingDurationTime, h.pingDurationTime)
+		return keepalive.NewIdle(h.conn, h.conn, h.pingDurationTime, h.idleDurationTime)
 	}
 
 	return nil, fmt.Errorf("keepalive type was not defined")
