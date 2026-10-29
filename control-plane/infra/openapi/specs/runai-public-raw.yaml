@@ -264,10 +264,12 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   '/api/v1/clusters/{clusterUuid}/nodes/count':
     get:
-      summary: Count nodes
+      summary: Count nodes (Fern preview demo)
       operationId: count_nodes
       x-service: cluster-service
-      description: Count nodes
+      description: >-
+        Returns the number of nodes in a cluster. Demo change to showcase the
+        Fern docs preview.
       x-test-coverage:
         - control-plane/cluster-service/pkg/test/node_db_test.go
       x-authorize:
@@ -450,7 +452,7 @@ paths:
       - system
       - tenant
     get:
-      summary: Get a list of clusters.
+      summary: Get a list of clusters (Fern preview demo)
       x-service: cluster-service
       description: Retrieve a list of clusters with details.
       x-test-coverage:

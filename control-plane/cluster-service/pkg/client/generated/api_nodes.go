@@ -28,9 +28,9 @@ import (
 type NodesAPI interface {
 
 	/*
-		CountNodes Count nodes
+		CountNodes Count nodes (Fern preview demo)
 
-		Count nodes
+		Returns the number of nodes in a cluster. Demo change to showcase the Fern docs preview.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.
@@ -217,9 +217,9 @@ func (r ApiCountNodesRequest) Execute() (*CountNodes200Response, *http.Response,
 }
 
 /*
-CountNodes Count nodes
+CountNodes Count nodes (Fern preview demo)
 
-Count nodes
+Returns the number of nodes in a cluster. Demo change to showcase the Fern docs preview.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param clusterUuid The Universally Unique Identifier (UUID) of the cluster.

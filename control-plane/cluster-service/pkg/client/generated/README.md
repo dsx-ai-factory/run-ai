@@ -94,7 +94,7 @@ Class | Method | HTTP request | Description
 *ClustersAPI* | [**GetClusterName**](docs/ClustersAPI.md#getclustername) | **Get** /internal/clusters/{clusterUuid}/name | Get the cluster name.
 *ClustersAPI* | [**GetClusterUrl**](docs/ClustersAPI.md#getclusterurl) | **Get** /internal/clusters/{clusterUuid}/url | Get the cluster url.
 *ClustersAPI* | [**GetClusterVersions**](docs/ClustersAPI.md#getclusterversions) | **Get** /api/v1/clusters/versions | Get cluster versions.
-*ClustersAPI* | [**GetClusters**](docs/ClustersAPI.md#getclusters) | **Get** /api/v1/clusters | Get a list of clusters.
+*ClustersAPI* | [**GetClusters**](docs/ClustersAPI.md#getclusters) | **Get** /api/v1/clusters | Get a list of clusters (Fern preview demo)
 *ClustersAPI* | [**GetClustersCount**](docs/ClustersAPI.md#getclusterscount) | **Get** /api/v1/clusters/count | Count the amount of clusters in a tenant.
 *ClustersAPI* | [**GetClustersMinimalData**](docs/ClustersAPI.md#getclustersminimaldata) | **Get** /api/v1/clusters/minimal | Get clusters minimal data
 *ClustersAPI* | [**GetInternalClusters**](docs/ClustersAPI.md#getinternalclusters) | **Get** /internal/clusters | Get an internal list of clusters.
@@ -133,7 +133,7 @@ Class | Method | HTTP request | Description
 *NodePoolsAPI* | [**PatchNodepool**](docs/NodePoolsAPI.md#patchnodepool) | **Patch** /api/v1/node-pools/{nodepoolId} | Patch nodepool fields
 *NodePoolsAPI* | [**SyncNodepoolsStatus**](docs/NodePoolsAPI.md#syncnodepoolsstatus) | **Post** /api/v1/clusters/{clusterUuid}/nodepools/status | Sync nodepools status
 *NodePoolsAPI* | [**UpdateNodepool**](docs/NodePoolsAPI.md#updatenodepool) | **Put** /api/v1/node-pools/{nodepoolId} | Update nodepool
-*NodesAPI* | [**CountNodes**](docs/NodesAPI.md#countnodes) | **Get** /api/v1/clusters/{clusterUuid}/nodes/count | Count nodes
+*NodesAPI* | [**CountNodes**](docs/NodesAPI.md#countnodes) | **Get** /api/v1/clusters/{clusterUuid}/nodes/count | Count nodes (Fern preview demo)
 *NodesAPI* | [**CountTenantNodes**](docs/NodesAPI.md#counttenantnodes) | **Get** /api/v1/nodes/count | Count tenant nodes
 *NodesAPI* | [**DeleteNode**](docs/NodesAPI.md#deletenode) | **Delete** /api/v1/clusters/{clusterUuid}/nodes/{nodeName} | Delete a node from a cluster.
 *NodesAPI* | [**GetNode**](docs/NodesAPI.md#getnode) | **Get** /api/v1/nodes/{nodeId} | Get a node by ID.

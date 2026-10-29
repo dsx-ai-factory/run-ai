@@ -34,7 +34,7 @@ func NewNodesAPIService() *NodesAPIService {
 	return &NodesAPIService{}
 }
 
-// CountNodes - Count nodes
+// CountNodes - Count nodes (Fern preview demo)
 func (s *NodesAPIService) CountNodes(ctx context.Context, clusterUuid string, filterBy []string, search string) (ImplResponse, error) {
 	// TODO - update CountNodes with the required logic for this service method.
 	// Add api_nodes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.

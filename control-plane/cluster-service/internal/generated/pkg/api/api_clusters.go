@@ -789,7 +789,7 @@ func (c *ClustersAPIController) GetInternalClusters(w http.ResponseWriter, r *ht
 
 }
 
-// GetClusters - Get a list of clusters.
+// GetClusters - Get a list of clusters (Fern preview demo)
 func (c *ClustersAPIController) GetClusters(w http.ResponseWriter, r *http.Request) {
 	query, err := parseQuery(r.URL.RawQuery)
 	if err != nil {

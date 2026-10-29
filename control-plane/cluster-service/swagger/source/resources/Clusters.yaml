@@ -1,5 +1,5 @@
 get:
-  summary: Get a list of clusters.
+  summary: Get a list of clusters (Fern preview demo)
   x-service: cluster-service
   description: Retrieve a list of clusters with details.
   x-test-coverage:
