@@ -48,10 +48,7 @@ const (
 )
 
 func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateGvkPolicyReq) (*api.Policy, *api.Error) {
-	committed := false
-	tx := runaidb.DB().WithContext(ctx).Begin()
-	defer database.FinalizeTransaction(tx, &committed)
-
+	db := runaidb.DB().WithContext(ctx)
 	tenantId := auth.TenantIdOf(ctx)
 
 	appliedOrgUnit, scopeParams, scopeErr := NewScopeInfo(ctx, req.Scope, req.ClusterId, req.DepartmentId, req.ProjectId)
@@ -120,7 +117,7 @@ func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateG
 	// anything is wrong.
 	issues := newRuleIssues(1)
 
-	breakdownResult, err := pa.GeneratePolicyBreakdown(ctx, tx, req.WorkloadType, req.Rules, issues)
+	breakdownResult, err := pa.GeneratePolicyBreakdown(ctx, db, req.WorkloadType, req.Rules, issues)
 	if err != nil {
 		return nil, err
 	}
@@ -136,8 +133,6 @@ func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateG
 	if e := pa.validateRules(ctx, breakdown, req.Rules, issues).toError(); e != nil {
 		return nil, e
 	}
-
-	db := runaidb.DB().WithContext(ctx)
 
 	updated := false
 
@@ -209,6 +204,10 @@ func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateG
 			return nil, err
 		}
 
+		if err := pa.cacheEffectiveBreakdown(ctx, tx, req.WorkloadType, appliedPolicy); err != nil {
+			return nil, err
+		}
+
 		commitErr := tx.Commit()
 		if commitErr != nil {
 			return nil, database.Error(database.UPSERT, database.Policies).WithDetails(commitErr)
@@ -233,16 +232,6 @@ func (pa *PolicyApiService) createGvkPolicy(ctx context.Context, req api.CreateG
 
 	if !updated {
 		return nil, api.NewError(http.StatusConflict, "policies are currently being updated, try again later", nil)
-	}
-
-	//
-	//  cache the breakdown. at this point we need it mainly for the dependency in other components.
-	//  share tx with the surrounding create transaction so the cache row and its dependency edges
-	//  commit/roll back atomically with the policy row written above.
-	//
-	if _, cacheErr := dao.CacheBreakdown(ctx, tx, appliedPolicy.ID.String(), breakdownResult.Breakdown, breakdownResult.Dependencies); cacheErr != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to cache breakdown for policy %s: %v", appliedPolicy.ID.String(), cacheErr)
-		return nil, cacheErr
 	}
 
 	return appliedPolicy.ToGvkPolicyApi()
@@ -488,25 +477,7 @@ func (pa *PolicyApiService) getGvkPolicy(ctx context.Context, db orm.DB, stored 
 		}
 
 		// determine the new status based on validation results
-		var newStatus *api.PolicyStatus
-
-		collectedIssues := issues.all()
-		if len(collectedIssues) > 0 {
-			issueMessages := make([]string, len(collectedIssues))
-			for i, issue := range collectedIssues {
-				issueMessages[i] = issue.Message
-			}
-
-			newStatus = &api.PolicyStatus{
-				Phase:  api.POLICYPHASE_DEGRADED,
-				Issues: issueMessages,
-			}
-		} else {
-			newStatus = &api.PolicyStatus{
-				Phase:  api.POLICYPHASE_READY,
-				Issues: []string{},
-			}
-		}
+		newStatus := issues.policyStatus()
 
 		// update status in DB if it changed
 		statusChanged := stored.ValidationStatus == nil ||
@@ -894,22 +865,9 @@ func (pa *PolicyApiService) deleteGvkPolicyRules(ctx context.Context, policyId s
 			return nil, convErr
 		}
 
-		// regenerate the breakdown for the remaining rules
-		issues := newRuleIssues(0)
-		breakdownResult, bdErr := pa.GeneratePolicyBreakdown(ctx, tx, gvk, next, issues)
-		if bdErr != nil {
-			return nil, bdErr
-		}
-		breakdownHadIssues := len(issues.all()) > 0
-
 		appliedPolicy.Policy.RulesV2 = rulesV2
 		appliedPolicy.Policy.UpdatedAt = time.Now()
 		appliedPolicy.UpdatedBy = auth.SubjectIdOf(ctx)
-
-		// remaining rules are still valid → status Ready with no issues
-		readyPhase := api.POLICYPHASE_READY
-		appliedPolicy.ValidationStatus = &readyPhase
-		appliedPolicy.ValidationIssues = []string{}
 
 		if upErr := dao.UpdatePolicySpec(ctx, tx, &appliedPolicy.Policy); upErr != nil {
 			return nil, upErr
@@ -934,15 +892,8 @@ func (pa *PolicyApiService) deleteGvkPolicyRules(ctx context.Context, policyId s
 			return nil, err
 		}
 
-		// refresh this policy's own cache atomically with the spec update
-		if err := dao.OnEntityDeleted(ctx, tx, dbmodel.EntityTypeBreakdown, policyId); err != nil {
+		if err := pa.cacheEffectiveBreakdown(ctx, tx, gvk, appliedPolicy); err != nil {
 			return nil, err
-		}
-		if breakdownResult != nil && !breakdownHadIssues {
-			if _, cacheErr := dao.CacheBreakdown(ctx, tx, policyId, breakdownResult.Breakdown, breakdownResult.Dependencies); cacheErr != nil {
-				logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to cache breakdown for policy %s: %v", policyId, cacheErr)
-				return nil, cacheErr
-			}
 		}
 
 		commitErr := tx.Commit()
@@ -1015,8 +966,8 @@ func (pa *PolicyApiService) updateGvkPolicy(ctx context.Context, policyId string
 
 	//
 	//   validate the incoming rules up-front (no DB writes here). the
-	//   breakdown depends only on the rules + system mapping, so it's the
-	//   same across loop attempts and we don't have to redo it inside.
+	//   breakdown that gets cached is generated inside the loop, from the
+	//   merged rule set.
 	//
 	// update mirrors create: collect into a single shared bucket capped at
 	// the first finding so we return early on the first issue from either
@@ -1110,11 +1061,6 @@ func (pa *PolicyApiService) updateGvkPolicy(ctx context.Context, policyId string
 			appliedPolicy.Name = *req.Description
 		}
 
-		// validation passed, set status to Ready with no issues
-		readyPhase := api.POLICYPHASE_READY
-		appliedPolicy.ValidationStatus = &readyPhase
-		appliedPolicy.ValidationIssues = []string{}
-
 		if upErr := dao.UpdatePolicySpec(ctx, tx, &appliedPolicy.Policy); upErr != nil {
 			return nil, upErr
 		}
@@ -1138,15 +1084,8 @@ func (pa *PolicyApiService) updateGvkPolicy(ctx context.Context, policyId string
 			return nil, err
 		}
 
-		// refresh this policy's own cache atomically with the spec update
-		if err := dao.OnEntityDeleted(ctx, tx, dbmodel.EntityTypeBreakdown, policyId); err != nil {
+		if err := pa.cacheEffectiveBreakdown(ctx, tx, gvk, appliedPolicy); err != nil {
 			return nil, err
-		}
-		if breakdownResult != nil {
-			if _, cacheErr := dao.CacheBreakdown(ctx, tx, policyId, breakdownResult.Breakdown, breakdownResult.Dependencies); cacheErr != nil {
-				logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to cache breakdown for policy %s: %v", policyId, cacheErr)
-				return nil, cacheErr
-			}
 		}
 
 		commitErr := tx.Commit()
@@ -1181,6 +1120,47 @@ func (pa *PolicyApiService) updateGvkPolicy(ctx context.Context, policyId string
 	}
 
 	return reloaded.ToGvkPolicyApi()
+}
+
+// cacheEffectiveBreakdown regenerates the breakdown of the policy's effective
+// rules, caches it with its dependencies and stores the matching status: the
+// same work a get does on a cache miss, done in tx so it commits together
+// with the policy change.
+func (pa *PolicyApiService) cacheEffectiveBreakdown(ctx context.Context, tx orm.DB, gvk api.Gvk,
+	policy *dbmodel.PolicyWithOptionalEffective,
+) *api.Error {
+	policyId := policy.ID.String()
+
+	rules, rulesErr := dbmodel.FromGvkRulesApi[api.PolicyRule](policy.EffectivePolicy.RulesV2)
+	if rulesErr != nil {
+		return rulesErr
+	}
+
+	issues := newRuleIssues(0)
+
+	breakdownResult, bdErr := pa.GeneratePolicyBreakdown(ctx, tx, gvk, rules, issues)
+	if bdErr != nil {
+		return bdErr
+	}
+
+	if err := dao.OnEntityDeleted(ctx, tx, dbmodel.EntityTypeBreakdown, policyId); err != nil {
+		return err
+	}
+
+	if breakdownResult != nil {
+		if _, cacheErr := dao.CacheBreakdown(ctx, tx, policyId, breakdownResult.Breakdown, breakdownResult.Dependencies); cacheErr != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("failed to cache breakdown for policy %s: %v", policyId, cacheErr)
+			return cacheErr
+		}
+
+		pa.validateRules(ctx, breakdownResult.Breakdown, rules, issues)
+	}
+
+	status := issues.policyStatus()
+	policy.ValidationStatus = &status.Phase
+	policy.ValidationIssues = status.Issues
+
+	return dao.UpdatePoliciesStatus(ctx, tx, []string{policyId}, status)
 }
 
 // stringSlicesEqual compares two string slices for equality.
