@@ -18813,7 +18813,7 @@ Components:
   github.com/openshift/cluster-monitoring-operator/pkg v0.1.1-0.20260630153100-436164286f78
   github.com/openshift/custom-resource-status/conditions/v1 v1.1.2
   github.com/openshift/library-go/pkg v0.0.0-20260409165127-c57da2bf5720
-  github.com/prometheus/alertmanager/api/v2 v0.34.1
+  github.com/prometheus/alertmanager/api/v2 v0.34.2
   github.com/prometheus/client_golang v1.25.0
   github.com/prometheus/client_golang/prometheus v1.23.2
   github.com/prometheus/client_golang/prometheus v1.24.1
@@ -35214,7 +35214,7 @@ spdy/LICENSE and spdy/PATENTS.
 --------------------------------------------------------------------------------
 NOTICE of github.com/prometheus/alertmanager
 Components:
-  github.com/prometheus/alertmanager v0.34.1
+  github.com/prometheus/alertmanager v0.34.2
 
 Prometheus Alertmanager
 Copyright 2013-2015 The Prometheus Authors
