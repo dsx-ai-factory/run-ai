@@ -28,7 +28,6 @@ description: |
     * volumeMounts (runai-podSpec) — one rule per mount, merged by .name.
     * resourceLimits / resourceRequests (runai-podSpec) — one rule per
       key/value pair on .resources.limits / .requests.
-    * resourceClaims (runai-podSpec) — one rule per .resources.claims entry.
 
   Read together with cases/container/golden.yaml.
 effectiveRules:
@@ -84,10 +83,6 @@ effectiveRules:
   - field: resourceRequests
     specSelector: allContainers
     enforcements: [{ set: { key: memory, value: "1Gi" } }]
-  - field: resourceClaims
-    specSelector: allContainers
-    enforcements: [{ set: { name: claim, request: shared-request } }]
-
   # ----- shared securityContext leaves (KeyValue, both containers) -----
   - field: allowPrivilegeEscalation
     specSelector: allContainers
