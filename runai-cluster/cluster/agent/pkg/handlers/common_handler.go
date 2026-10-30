@@ -662,7 +662,8 @@ func (h *CommonHandler) getObjectByGVK(name, namespace string, gvk schema.GroupV
 }
 
 func (h *CommonHandler) deleteObject(object client.Object) error {
-	deleteOptions := &client.DeleteOptions{}
+	// A stale cache must not cause deletion of a replacement object with the same name.
+	deleteOptions := &client.DeleteOptions{Preconditions: &metav1.Preconditions{UID: new(object.GetUID())}}
 	deleteOptionsMsg := ""
 	if h.deletePropagationOrphan {
 		deleteOptionsMsg = "; with delete propagation = Orphan"
