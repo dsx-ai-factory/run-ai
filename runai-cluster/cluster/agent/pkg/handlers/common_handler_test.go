@@ -7,12 +7,18 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"strings"
 	"sync/atomic"
 
 	_ "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/tests/helper"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/topology"
+	v2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v2"
+	kaiorg "github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	corev1 "k8s.io/api/core/v1"
@@ -23,7 +29,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 var _ = Describe("CommonHandler", func() {
@@ -706,3 +714,55 @@ func (m *mockConflictClient) IsObjectNamespaced(obj runtime.Object) (bool, error
 func (m *mockConflictClient) RESTMapper() meta.RESTMapper {
 	return nil
 }
+
+type deleteTransport func(*http.Request) (*http.Response, error)
+
+func (f deleteTransport) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
+
+var _ = Describe("CommonHandler deletion", func() {
+	DescribeTable("DeleteObjectsById", func(cachedID string, cachedUID, liveUID types.UID, shouldDelete, expectConflict bool) {
+		scheme := runtime.NewScheme()
+		Expect(kaiorg.AddToScheme(scheme)).To(Succeed())
+		cached := &kaiorg.Project{ObjectMeta: metav1.ObjectMeta{Name: "team-a", UID: cachedUID, Labels: map[string]string{v2.ProjectIdLabel: cachedID}}}
+		reader := fake.NewClientBuilder().WithScheme(scheme).WithObjects(cached).Build()
+		mapper := meta.NewDefaultRESTMapper([]schema.GroupVersion{kaiorg.GroupVersion})
+		mapper.Add(kaiorg.GroupVersion.WithKind("Project"), meta.RESTScopeRoot)
+		deleted, requests := false, 0
+		transport := deleteTransport(func(r *http.Request) (*http.Response, error) {
+			requests++
+			Expect(r.Method).To(Equal(http.MethodDelete))
+			Expect(r.URL.Path).To(Equal("/apis/kai.resources/v1alpha1/projects/team-a"))
+			var options metav1.DeleteOptions
+			Expect(json.NewDecoder(r.Body).Decode(&options)).To(Succeed())
+			Expect(options.PropagationPolicy).To(HaveValue(Equal(metav1.DeletePropagationOrphan)))
+			// Model the API server rejecting a UID precondition for a replacement object.
+			status := metav1.Status{TypeMeta: metav1.TypeMeta{APIVersion: "v1", Kind: "Status"}, Status: metav1.StatusSuccess, Code: 200}
+			if options.Preconditions != nil && options.Preconditions.UID != nil && *options.Preconditions.UID != liveUID {
+				status.Status, status.Reason, status.Code = metav1.StatusFailure, metav1.StatusReasonConflict, 409
+				status.Message = "UID precondition does not match live project"
+			} else {
+				deleted = true
+			}
+			body, err := json.Marshal(status)
+			Expect(err).NotTo(HaveOccurred())
+			return &http.Response{StatusCode: int(status.Code), Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(string(body)))}, nil
+		})
+		writer, err := client.New(&rest.Config{Host: "https://agent.invalid", Transport: transport}, client.Options{Scheme: scheme, Mapper: mapper})
+		Expect(err).NotTo(HaveOccurred())
+		handler := &CommonHandler{runaiClient: writer, cachedClient: reader, gvk: kaiorg.GroupVersion.WithKind("Project"), deletePropagationOrphan: true}
+		_, err = handler.DeleteObjectsById(map[string]types.NamespacedName{"old-id": {Name: "team-a"}}, v2.ProjectIdLabel)
+		Expect(deleted).To(Equal(shouldDelete), "DELETE must not remove a replacement with another UID")
+		if expectConflict {
+			Expect(errors.IsConflict(err)).To(BeTrue())
+		} else {
+			Expect(err).NotTo(HaveOccurred())
+		}
+		if cachedID != "old-id" {
+			Expect(requests).To(BeZero())
+		}
+	},
+		Entry("deletes the intended project", "old-id", types.UID("uid-a"), types.UID("uid-a"), true, false),
+		Entry("preserves a replacement when the cache is current", "new-id", types.UID("uid-b"), types.UID("uid-b"), false, false),
+		Entry("preserves a replacement when the cache is stale", "old-id", types.UID("uid-a"), types.UID("uid-b"), false, true),
+	)
+})
