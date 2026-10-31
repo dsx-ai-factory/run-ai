@@ -1486,6 +1486,117 @@ var _ = Describe("Parsers", Ordered, func() {
 					}))
 			})
 		})
+
+		Context("Confidential computing readiness", func() {
+			confidentialReadyLabels := map[string]string{
+				clusterconstants.KataNvidiaGpuNodeLabel:  "true",
+				clusterconstants.AmdSevSnpNodeLabel:      "true",
+				clusterconstants.NvidiaCCReadyStateLabel: "true",
+				clusterconstants.KataRuntimeNodeLabel:    "true",
+			}
+
+			conditionTypes := func(conditions []clustersvcswagger.NodeStatusConditionDetails) []string {
+				types := []string{}
+				for _, condition := range conditions {
+					types = append(types, condition.Type)
+				}
+				return types
+			}
+
+			BeforeEach(func() {
+				config.Config().ConfidentialComputing = true
+				node.Labels = map[string]string{v1alpha1.NodePoolNameLabel: nodePoolName}
+				for key, value := range confidentialReadyLabels {
+					node.Labels[key] = value
+				}
+				node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			})
+
+			AfterEach(func() {
+				config.Config().ConfidentialComputing = false
+			})
+
+			It("reports a fully provisioned SEV-SNP GPU node as ready", func() {
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			It("reports a fully provisioned TDX GPU node as ready", func() {
+				delete(node.Labels, clusterconstants.AmdSevSnpNodeLabel)
+				node.Labels[clusterconstants.IntelTdxNodeLabel] = "true"
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			DescribeTable("reports the missing prerequisite on a GPU node",
+				func(mutate func(labels map[string]string), expectedConditionType string) {
+					mutate(node.Labels)
+
+					parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+					Expect(parsedNodeInfo.Status).To(Equal(parsers.MissingPrerequisitesPhase))
+					Expect(conditionTypes(parsedNodeInfo.Conditions)).To(ConsistOf(expectedConditionType))
+					Expect(parsedNodeInfo.Conditions[0].Message).ToNot(BeNil())
+				},
+				Entry("no TEE label",
+					func(labels map[string]string) { delete(labels, clusterconstants.AmdSevSnpNodeLabel) },
+					parsers.ConfidentialComputingMissingTEE),
+				Entry("TEE label not true",
+					func(labels map[string]string) { labels[clusterconstants.AmdSevSnpNodeLabel] = "false" },
+					parsers.ConfidentialComputingMissingTEE),
+				Entry("GPU not provisioned",
+					func(labels map[string]string) { delete(labels, clusterconstants.NvidiaCCReadyStateLabel) },
+					parsers.ConfidentialComputingGpuNotReady),
+				Entry("GPU unprovisioned",
+					func(labels map[string]string) { labels[clusterconstants.NvidiaCCReadyStateLabel] = "false" },
+					parsers.ConfidentialComputingGpuNotReady),
+				Entry("no kata runtime",
+					func(labels map[string]string) { delete(labels, clusterconstants.KataRuntimeNodeLabel) },
+					parsers.ConfidentialComputingMissingRuntime),
+			)
+
+			It("reports every missing prerequisite on a GPU node found by the configured GPU label", func() {
+				node.Labels = map[string]string{config.Config().NvidiaGPULabel: "true"}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.MissingPrerequisitesPhase))
+				Expect(conditionTypes(parsedNodeInfo.Conditions)).To(ConsistOf(
+					parsers.ConfidentialComputingMissingTEE,
+					parsers.ConfidentialComputingGpuNotReady,
+					parsers.ConfidentialComputingMissingRuntime,
+				))
+			})
+
+			It("keeps NotReady ahead of the confidential prerequisites", func() {
+				delete(node.Labels, clusterconstants.KataRuntimeNodeLabel)
+				node.Status.Conditions = []corev1.NodeCondition{notReadyCondition}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.NotReadyPhase))
+			})
+
+			It("does not evaluate a node without GPUs", func() {
+				node.Labels = map[string]string{v1alpha1.NodePoolNameLabel: nodePoolName}
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+
+			It("does not evaluate the node when confidential computing is off", func() {
+				config.Config().ConfidentialComputing = false
+				config.Config().EnableNodeNvidiaComponentsReadiness = false
+				defer func() { config.Config().EnableNodeNvidiaComponentsReadiness = true }()
+				delete(node.Labels, clusterconstants.KataRuntimeNodeLabel)
+				delete(node.Labels, clusterconstants.NvidiaCCReadyStateLabel)
+
+				parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+				Expect(parsedNodeInfo.Status).To(Equal(parsers.ReadyPhase))
+				Expect(parsedNodeInfo.Conditions).To(BeEmpty())
+			})
+		})
 	})
 })
 

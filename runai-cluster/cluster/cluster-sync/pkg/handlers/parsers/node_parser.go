@@ -101,8 +101,11 @@ var (
 	}
 
 	knownMissingPrerequisiteConditionTypes = map[string]bool{
-		MissingNrtHealthyPrerequisite:     true,
-		MissingGpuFractioningPrerequisite: true,
+		MissingNrtHealthyPrerequisite:       true,
+		MissingGpuFractioningPrerequisite:   true,
+		ConfidentialComputingMissingTEE:     true,
+		ConfidentialComputingGpuNotReady:    true,
+		ConfidentialComputingMissingRuntime: true,
 	}
 )
 
@@ -284,7 +287,9 @@ func (nodeParser *NodeParser) calculateNodeConditions(node *corev1.Node) []swagg
 
 	result = append(result, calculateUnschedulableCondition(node)...)
 
-	if !config.Config().ConfidentialComputing {
+	if config.Config().ConfidentialComputing {
+		result = append(result, calculateConfidentialComputingConditions(node)...)
+	} else {
 		if nodeParser.gpuFractioningSupport.get() {
 			result = append(result, calculateGpuFractioningConditions(node)...)
 		}
