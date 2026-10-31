@@ -258,6 +258,10 @@ func getRequiredComponentsStatus(ctx context.Context, kbClient kc.HybridClient, 
 		}
 	} else {
 		gpuStackStatus = getGpuStackStatus(ctx, kbClient, config.IsConfidentialComputing())
+		if config.IsConfidentialComputing() {
+			gpuStackStatus = withConfidentialComputingStatus(gpuStackStatus, getConfidentialComputingStatus(
+				ctx, kbClient.Uncached(), kbClient, config.Spec.Internal.Global.ConfidentialComputingInitdataConfigMap))
+		}
 		prometheusStatus = getPrometheusStatus(config)
 	}
 

@@ -39,6 +39,14 @@ rules:
     verbs:
       - get
       - list
+  {{- if .Values.global.confidentialComputing.enabled }}
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - list
+  {{- end }}
   - apiGroups:
       - admissionregistration.k8s.io
     resources:
