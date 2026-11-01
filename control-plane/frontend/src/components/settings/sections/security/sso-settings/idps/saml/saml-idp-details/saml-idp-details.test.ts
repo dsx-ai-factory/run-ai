@@ -28,6 +28,24 @@ describe("saml-idp-details.vue", () => {
     expect(wrapper.find<HTMLInputElement>("input[value='idp-entity']").exists()).toBe(true);
   });
 
+  it("shows the certificate expiration date first, then the URL and the entity ID", () => {
+    const wrapper = createWrapper({
+      singleSignOnServiceUrl: "https://idp.example.com/sso",
+      idpEntityId: "idp-entity",
+      expirationDate: new Date("2030-05-17T00:00:00.000Z"),
+      showExpirationDate: true,
+    });
+
+    const text = wrapper.text();
+    const certificate = text.indexOf("Certificate expiration date");
+    const url = text.indexOf("Identity provider URL");
+    const entityId = text.indexOf("Identity provider Entity ID (issuer)");
+
+    expect(certificate).toBeGreaterThanOrEqual(0);
+    expect(certificate).toBeLessThan(url);
+    expect(url).toBeLessThan(entityId);
+  });
+
   it("hides the fields that have no value", () => {
     const wrapper = createWrapper({ singleSignOnServiceUrl: "https://idp.example.com/sso" });
 
