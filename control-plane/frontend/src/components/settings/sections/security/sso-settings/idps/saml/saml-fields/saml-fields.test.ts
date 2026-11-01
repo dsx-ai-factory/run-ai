@@ -142,7 +142,10 @@ describe("saml-fields.vue", () => {
     });
   });
 
-  describe("certificate expiration field", () => {
+  describe("certificate details", () => {
+    const lastCertificateDetails = (wrapper: ReturnType<typeof factory>["wrapper"]) =>
+      wrapper.emitted("certificate-details")?.at(-1)?.[0];
+
     const now = new Date("2026-01-01T00:00:00.000Z");
     const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
 
@@ -151,22 +154,24 @@ describe("saml-fields.vue", () => {
       vi.setSystemTime(now);
     });
 
-    it("shows the expired-file message for an uploaded file, and hides the field once it's cleared", async () => {
+    it("reports the expired-file message for an uploaded file, and hides the date once it's cleared", async () => {
       vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
 
-      expect(wrapper.text()).toContain("Certificate expired. Replace the metadata file above.");
+      expect(lastCertificateDetails(wrapper)).toMatchObject({
+        showExpirationDate: true,
+        expirationError: "Certificate expired. Replace the metadata file above.",
+      });
 
       (wrapper.vm as unknown as { clearFile: () => void }).clearFile();
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.text()).not.toContain("Certificate expiration date");
-      expect(wrapper.text()).not.toContain("Certificate expired");
+      expect(lastCertificateDetails(wrapper)).toMatchObject({ showExpirationDate: false, expirationError: "" });
     });
 
-    it("shows the expired-URL message when sourced from a URL", async () => {
+    it("reports the expired-URL message when sourced from a URL", async () => {
       vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
 
       const { wrapper } = factory(
@@ -175,16 +180,30 @@ describe("saml-fields.vue", () => {
       );
       await flushPromises();
 
-      expect(wrapper.text()).toContain("Certificate expired. Replace the metadata URL above.");
+      expect(lastCertificateDetails(wrapper)).toMatchObject({
+        showExpirationDate: true,
+        expirationError: "Certificate expired. Replace the metadata URL above.",
+      });
     });
 
-    it("does not show an error for a certificate that is still valid", async () => {
+    it("reports no error for a certificate that is still valid", async () => {
       vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
 
-      expect(wrapper.text()).not.toContain("Certificate expired");
+      expect(lastCertificateDetails(wrapper)).toMatchObject({
+        showExpirationDate: true,
+        expirationDate: daysFromNow(120),
+        expirationError: "",
+      });
+    });
+
+    it("no longer renders the read-only identity provider fields", () => {
+      const { wrapper } = factory({ samlSettings: validSamlSettings, isNewIdp: false });
+
+      expect(wrapper.text()).not.toContain("Identity provider URL");
+      expect(wrapper.text()).not.toContain("Certificate expiration date");
     });
   });
 
