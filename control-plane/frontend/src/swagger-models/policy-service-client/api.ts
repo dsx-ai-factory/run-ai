@@ -1560,6 +1560,12 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceCommonDefaultsV2
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof DistributedInferenceCommonDefaultsV2
@@ -1621,6 +1627,12 @@ export interface DistributedInferenceCommonDefaultsV2AllOf {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceCommonDefaultsV2AllOf
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof DistributedInferenceCommonDefaultsV2AllOf
@@ -1663,6 +1675,12 @@ export interface DistributedInferenceCommonRulesV2 {
      * @memberof DistributedInferenceCommonRulesV2
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof DistributedInferenceCommonRulesV2
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -1726,6 +1744,12 @@ export interface DistributedInferenceCommonRulesV2AllOf {
     'nodePools'?: ArrayRules | null;
     /**
      * 
+     * @type {IntegerRules}
+     * @memberof DistributedInferenceCommonRulesV2AllOf
+     */
+    'objectivePriority'?: IntegerRules | null;
+    /**
+     * 
      * @type {PreemptibilityRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
@@ -1767,6 +1791,12 @@ export interface DistributedInferenceDefaultsV2 {
      * @memberof DistributedInferenceDefaultsV2
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceDefaultsV2
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -2669,6 +2699,12 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Defaults {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
@@ -2741,6 +2777,12 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Rules {
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -2973,6 +3015,12 @@ export interface DistributedInferenceRulesV2 {
      * @memberof DistributedInferenceRulesV2
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof DistributedInferenceRulesV2
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -5181,6 +5229,12 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof FallbackPolicyDefaultsAndRulesDefaults
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
@@ -5488,6 +5542,12 @@ export interface FallbackPolicyDefaultsAndRulesRules {
      * @memberof FallbackPolicyDefaultsAndRulesRules
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof FallbackPolicyDefaultsAndRulesRules
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -9686,6 +9746,12 @@ export interface NimServiceDefaults {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof NimServiceDefaults
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof NimServiceDefaults
@@ -9812,6 +9878,12 @@ export interface NimServiceDefaultsAllOf {
      * @memberof NimServiceDefaultsAllOf
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof NimServiceDefaultsAllOf
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -10215,6 +10287,12 @@ export interface NimServicePolicyDefaultsAndRulesDefaults {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof NimServicePolicyDefaultsAndRulesDefaults
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof NimServicePolicyDefaultsAndRulesDefaults
@@ -10341,6 +10419,12 @@ export interface NimServicePolicyDefaultsAndRulesRules {
      * @memberof NimServicePolicyDefaultsAndRulesRules
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof NimServicePolicyDefaultsAndRulesRules
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -10520,6 +10604,12 @@ export interface NimServiceRules {
     'nodePools'?: ArrayRules | null;
     /**
      * 
+     * @type {IntegerRules}
+     * @memberof NimServiceRules
+     */
+    'objectivePriority'?: IntegerRules | null;
+    /**
+     * 
      * @type {PreemptibilityRules}
      * @memberof NimServiceRules
      */
@@ -10645,6 +10735,12 @@ export interface NimServiceRulesAllOf {
      * @memberof NimServiceRulesAllOf
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof NimServiceRulesAllOf
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -15210,6 +15306,12 @@ export interface SupersetDefaults {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof SupersetDefaults
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof SupersetDefaults
@@ -16041,6 +16143,12 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof SupersetRules
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}

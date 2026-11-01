@@ -4265,6 +4265,12 @@ components:
         - my-node-pool-a
         - my-node-pool-b
       nullable: true
+    ObjectivePriority:
+      description: The priority of this workload's inference objective. The project policy sets the maximum value.
+      type: integer
+      format: int32
+      minimum: 0
+      nullable: true
     Preemptibility:
       description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
       type: string
@@ -4415,6 +4421,8 @@ components:
               $ref: '#/components/schemas/Category'
             nodePools:
               $ref: '#/components/schemas/NodePools'
+            objectivePriority:
+              $ref: '#/components/schemas/ObjectivePriority'
             preemptibility:
               $ref: '#/components/schemas/Preemptibility'
             priorityClass:
@@ -6277,6 +6285,8 @@ components:
               $ref: '#/components/schemas/StringRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
+            objectivePriority:
+              $ref: '#/components/schemas/IntegerRules'
             preemptibility:
               $ref: '#/components/schemas/PreemptibilityRules'
             priorityClass:
@@ -8508,6 +8518,8 @@ components:
               $ref: '#/components/schemas/NimServiceNgcAuthSecret'
             nodePools:
               $ref: '#/components/schemas/NodePools'
+            objectivePriority:
+              $ref: '#/components/schemas/ObjectivePriority'
             preemptibility:
               $ref: '#/components/schemas/Preemptibility'
             priorityClass:
@@ -8720,6 +8732,8 @@ components:
               $ref: '#/components/schemas/StringRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
+            objectivePriority:
+              $ref: '#/components/schemas/IntegerRules'
             preemptibility:
               $ref: '#/components/schemas/PreemptibilityRules'
             priorityClass:

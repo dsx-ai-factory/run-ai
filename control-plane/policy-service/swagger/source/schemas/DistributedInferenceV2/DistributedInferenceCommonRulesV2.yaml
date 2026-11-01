@@ -9,6 +9,8 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
+    objectivePriority:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/IntegerRules.yaml
     preemptibility:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/PreemptibilityRules.yaml
     priorityClass:

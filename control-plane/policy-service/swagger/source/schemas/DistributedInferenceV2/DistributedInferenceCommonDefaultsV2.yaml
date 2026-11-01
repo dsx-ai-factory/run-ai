@@ -9,6 +9,8 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodePools.yaml
+    objectivePriority:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ObjectivePriority.yaml
     preemptibility:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Preemptibility.yaml
     priorityClass:

@@ -55,6 +55,11 @@ type SupersetRules struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ObjectivePriority *IntegerRules `json:"objectivePriority,omitempty"`
+	ObjectivePriority *IntegerRules `json:"objectivePriority,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Preemptibility *PreemptibilityRules `json:"preemptibility,omitempty"`
 	Preemptibility *PreemptibilityRules `json:"preemptibility,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -304,6 +309,11 @@ func AssertSupersetRulesRequired(obj SupersetRules) error {
 	}
 	if obj.NodePools != nil {
 		if err := AssertArrayRulesRequired(*obj.NodePools); err != nil {
+			return err
+		}
+	}
+	if obj.ObjectivePriority != nil {
+		if err := AssertIntegerRulesRequired(*obj.ObjectivePriority); err != nil {
 			return err
 		}
 	}
@@ -589,6 +599,16 @@ func AssertSupersetRulesConstraints(obj SupersetRules) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.NodePools != nil {
 		if err := AssertArrayRulesConstraints(*obj.NodePools); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ObjectivePriority != nil {
+		if err := AssertIntegerRulesConstraints(*obj.ObjectivePriority); err != nil {
 			return err
 		}
 	}

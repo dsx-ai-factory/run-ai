@@ -1122,6 +1122,12 @@ export interface NimServiceSpec {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof NimServiceSpec
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof NimServiceSpec
@@ -1248,6 +1254,12 @@ export interface NimServiceSpecAllOf {
      * @memberof NimServiceSpecAllOf
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof NimServiceSpecAllOf
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}

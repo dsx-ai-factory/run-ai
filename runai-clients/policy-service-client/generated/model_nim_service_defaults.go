@@ -38,8 +38,10 @@ type NimServiceDefaults struct {
 	// The name of a Kubernetes secret containing the NGC access credentials. The secret must contain a key named NGC_API_KEY with the API key as the value.
 	NgcAuthSecret NullableString `json:"ngcAuthSecret,omitempty" validate:"regexp=^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"`
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
-	NodePools      []string               `json:"nodePools,omitempty"`
-	Preemptibility NullablePreemptibility `json:"preemptibility,omitempty"`
+	NodePools []string `json:"nodePools,omitempty"`
+	// The priority of this workload's inference objective. The project policy sets the maximum value.
+	ObjectivePriority NullableInt32          `json:"objectivePriority,omitempty"`
+	Preemptibility    NullablePreemptibility `json:"preemptibility,omitempty"`
 	// Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
 	PriorityClass NullableString `json:"priorityClass,omitempty" validate:"regexp=.*"`
 	Probes        NullableProbes `json:"probes,omitempty"`
@@ -620,6 +622,49 @@ func (o *NimServiceDefaults) SetNodePools(v []string) {
 	o.NodePools = v
 }
 
+// GetObjectivePriority returns the ObjectivePriority field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceDefaults) GetObjectivePriority() int32 {
+	if o == nil || IsNil(o.ObjectivePriority.Get()) {
+		var ret int32
+		return ret
+	}
+	return *o.ObjectivePriority.Get()
+}
+
+// GetObjectivePriorityOk returns a tuple with the ObjectivePriority field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceDefaults) GetObjectivePriorityOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ObjectivePriority.Get(), o.ObjectivePriority.IsSet()
+}
+
+// HasObjectivePriority returns a boolean if a field has been set.
+func (o *NimServiceDefaults) HasObjectivePriority() bool {
+	if o != nil && o.ObjectivePriority.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetObjectivePriority gets a reference to the given NullableInt32 and assigns it to the ObjectivePriority field.
+func (o *NimServiceDefaults) SetObjectivePriority(v int32) {
+	o.ObjectivePriority.Set(&v)
+}
+
+// SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+func (o *NimServiceDefaults) SetObjectivePriorityNil() {
+	o.ObjectivePriority.Set(nil)
+}
+
+// UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
+func (o *NimServiceDefaults) UnsetObjectivePriority() {
+	o.ObjectivePriority.Unset()
+}
+
 // GetPreemptibility returns the Preemptibility field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *NimServiceDefaults) GetPreemptibility() Preemptibility {
 	if o == nil || IsNil(o.Preemptibility.Get()) {
@@ -969,6 +1014,9 @@ func (o NimServiceDefaults) ToMap() (map[string]interface{}, error) {
 	}
 	if o.NodePools != nil {
 		toSerialize["nodePools"] = o.NodePools
+	}
+	if o.ObjectivePriority.IsSet() {
+		toSerialize["objectivePriority"] = o.ObjectivePriority.Get()
 	}
 	if o.Preemptibility.IsSet() {
 		toSerialize["preemptibility"] = o.Preemptibility.Get()

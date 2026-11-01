@@ -22,15 +22,16 @@ var _ MappedNullable = &DistributedInferenceCommonRulesV2{}
 
 // DistributedInferenceCommonRulesV2 struct for DistributedInferenceCommonRulesV2
 type DistributedInferenceCommonRulesV2 struct {
-	StartupPolicy  NullableDistributedInferenceStartupPolicyFieldRulesStartupPolicy `json:"startupPolicy,omitempty"`
-	Workers        NullableIntegerRules                                             `json:"workers,omitempty"`
-	Replicas       NullableIntegerRules                                             `json:"replicas,omitempty"`
-	Category       NullableStringRules                                              `json:"category,omitempty"`
-	NodePools      NullableArrayRules                                               `json:"nodePools,omitempty"`
-	Preemptibility NullablePreemptibilityRules                                      `json:"preemptibility,omitempty"`
-	PriorityClass  NullableStringRules                                              `json:"priorityClass,omitempty"`
-	RestartPolicy  NullableDistributedInferenceRestartPolicyRules                   `json:"restartPolicy,omitempty"`
-	ServingPort    NullableDistributedInferenceServingPortRules                     `json:"servingPort,omitempty"`
+	StartupPolicy     NullableDistributedInferenceStartupPolicyFieldRulesStartupPolicy `json:"startupPolicy,omitempty"`
+	Workers           NullableIntegerRules                                             `json:"workers,omitempty"`
+	Replicas          NullableIntegerRules                                             `json:"replicas,omitempty"`
+	Category          NullableStringRules                                              `json:"category,omitempty"`
+	NodePools         NullableArrayRules                                               `json:"nodePools,omitempty"`
+	ObjectivePriority NullableIntegerRules                                             `json:"objectivePriority,omitempty"`
+	Preemptibility    NullablePreemptibilityRules                                      `json:"preemptibility,omitempty"`
+	PriorityClass     NullableStringRules                                              `json:"priorityClass,omitempty"`
+	RestartPolicy     NullableDistributedInferenceRestartPolicyRules                   `json:"restartPolicy,omitempty"`
+	ServingPort       NullableDistributedInferenceServingPortRules                     `json:"servingPort,omitempty"`
 }
 
 // NewDistributedInferenceCommonRulesV2 instantiates a new DistributedInferenceCommonRulesV2 object
@@ -265,6 +266,49 @@ func (o *DistributedInferenceCommonRulesV2) UnsetNodePools() {
 	o.NodePools.Unset()
 }
 
+// GetObjectivePriority returns the ObjectivePriority field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceCommonRulesV2) GetObjectivePriority() IntegerRules {
+	if o == nil || IsNil(o.ObjectivePriority.Get()) {
+		var ret IntegerRules
+		return ret
+	}
+	return *o.ObjectivePriority.Get()
+}
+
+// GetObjectivePriorityOk returns a tuple with the ObjectivePriority field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceCommonRulesV2) GetObjectivePriorityOk() (*IntegerRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ObjectivePriority.Get(), o.ObjectivePriority.IsSet()
+}
+
+// HasObjectivePriority returns a boolean if a field has been set.
+func (o *DistributedInferenceCommonRulesV2) HasObjectivePriority() bool {
+	if o != nil && o.ObjectivePriority.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetObjectivePriority gets a reference to the given NullableIntegerRules and assigns it to the ObjectivePriority field.
+func (o *DistributedInferenceCommonRulesV2) SetObjectivePriority(v IntegerRules) {
+	o.ObjectivePriority.Set(&v)
+}
+
+// SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+func (o *DistributedInferenceCommonRulesV2) SetObjectivePriorityNil() {
+	o.ObjectivePriority.Set(nil)
+}
+
+// UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
+func (o *DistributedInferenceCommonRulesV2) UnsetObjectivePriority() {
+	o.ObjectivePriority.Unset()
+}
+
 // GetPreemptibility returns the Preemptibility field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *DistributedInferenceCommonRulesV2) GetPreemptibility() PreemptibilityRules {
 	if o == nil || IsNil(o.Preemptibility.Get()) {
@@ -461,6 +505,9 @@ func (o DistributedInferenceCommonRulesV2) ToMap() (map[string]interface{}, erro
 	}
 	if o.NodePools.IsSet() {
 		toSerialize["nodePools"] = o.NodePools.Get()
+	}
+	if o.ObjectivePriority.IsSet() {
+		toSerialize["objectivePriority"] = o.ObjectivePriority.Get()
 	}
 	if o.Preemptibility.IsSet() {
 		toSerialize["preemptibility"] = o.Preemptibility.Get()

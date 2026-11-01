@@ -17,6 +17,7 @@ Name | Type | Description | Notes
 **MultiNode** | Pointer to [**NullableNimServiceMultiNodeRules**](NimServiceMultiNodeRules.md) |  | [optional] 
 **NgcAuthSecret** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
+**ObjectivePriority** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibilityRules**](PreemptibilityRules.md) |  | [optional] 
 **PriorityClass** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **Probes** | Pointer to [**NullableProbesRules**](ProbesRules.md) |  | [optional] 
@@ -499,6 +500,41 @@ HasNodePools returns a boolean if a field has been set.
 `func (o *NimServiceRules) UnsetNodePools()`
 
 UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
+### GetObjectivePriority
+
+`func (o *NimServiceRules) GetObjectivePriority() IntegerRules`
+
+GetObjectivePriority returns the ObjectivePriority field if non-nil, zero value otherwise.
+
+### GetObjectivePriorityOk
+
+`func (o *NimServiceRules) GetObjectivePriorityOk() (*IntegerRules, bool)`
+
+GetObjectivePriorityOk returns a tuple with the ObjectivePriority field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetObjectivePriority
+
+`func (o *NimServiceRules) SetObjectivePriority(v IntegerRules)`
+
+SetObjectivePriority sets ObjectivePriority field to given value.
+
+### HasObjectivePriority
+
+`func (o *NimServiceRules) HasObjectivePriority() bool`
+
+HasObjectivePriority returns a boolean if a field has been set.
+
+### SetObjectivePriorityNil
+
+`func (o *NimServiceRules) SetObjectivePriorityNil(b bool)`
+
+ SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+
+### UnsetObjectivePriority
+`func (o *NimServiceRules) UnsetObjectivePriority()`
+
+UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
 ### GetPreemptibility
 
 `func (o *NimServiceRules) GetPreemptibility() PreemptibilityRules`

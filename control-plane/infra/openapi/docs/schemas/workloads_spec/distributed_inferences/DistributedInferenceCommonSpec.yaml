@@ -9,6 +9,8 @@ allOf:
       $ref: ../resources/Category.yaml
     nodePools:
       $ref: ../resources/NodePools.yaml
+    objectivePriority:
+      $ref: ../inferences/ObjectivePriority.yaml
     preemptibility:
       $ref: ../advanced/Preemptibility.yaml
     priorityClass:

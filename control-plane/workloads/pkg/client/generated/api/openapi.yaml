@@ -31032,6 +31032,13 @@ components:
             if the number of workers is greater than 0.
           nullable: true
           type: object
+    ObjectivePriority:
+      description: The priority of this workload's inference objective. The project
+        policy sets the maximum value.
+      format: int32
+      minimum: 0
+      nullable: true
+      type: integer
     DistributedInferenceRestartPolicy:
       default: RecreateGroupOnPodRestart
       description: |
@@ -31193,6 +31200,8 @@ components:
             $ref: '#/components/schemas/Category'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -32539,6 +32548,7 @@ components:
         completions: 1
         restartPolicy: null
         command: python
+        objectivePriority: null
         args: -x my-script.py
         environmentVariables:
         - podFieldRef:
@@ -35756,6 +35766,7 @@ components:
           completions: 1
           restartPolicy: null
           command: python
+          objectivePriority: null
           args: -x my-script.py
           environmentVariables:
           - podFieldRef:
@@ -37716,6 +37727,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -39687,6 +39699,7 @@ components:
               completions: 1
               restartPolicy: null
               command: python
+              objectivePriority: null
               args: -x my-script.py
               environmentVariables:
               - podFieldRef:
@@ -41645,6 +41658,7 @@ components:
               completions: 1
               restartPolicy: null
               command: python
+              objectivePriority: null
               args: -x my-script.py
               environmentVariables:
               - podFieldRef:
@@ -49664,6 +49678,7 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields'
       - $ref: '#/components/schemas/DistributedInferenceWorkerSpecFields'
       example:
+        objectivePriority: null
         preemptibility: preemptible
         startupPolicy: LeaderCreated
         leader: "{}"
@@ -49719,6 +49734,7 @@ components:
         templateId: 550e8400-e29b-41d4-a716-446655440000
         projectId: "1"
         spec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -49760,6 +49776,7 @@ components:
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
         projectId: "1"
         spec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -58067,6 +58084,7 @@ components:
           completions: 1
           restartPolicy: null
           command: python
+          objectivePriority: null
           args: -x my-script.py
           environmentVariables:
           - podFieldRef:
@@ -59995,6 +60013,7 @@ components:
           completions: 1
           restartPolicy: null
           command: python
+          objectivePriority: null
           args: -x my-script.py
           environmentVariables:
           - podFieldRef:
@@ -61968,6 +61987,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -63896,6 +63916,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -65848,6 +65869,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -67776,6 +67798,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -124358,6 +124381,7 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceLeaderTemplateSpecFields'
       - $ref: '#/components/schemas/DistributedInferenceWorkerTemplateSpecFields'
       example:
+        objectivePriority: null
         preemptibility: preemptible
         startupPolicy: LeaderCreated
         leader: "{}"
@@ -124415,6 +124439,7 @@ components:
           workloadType: Workspace
           updatedAt: 2022-01-01T03:49:52.531Z
         spec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -124440,6 +124465,7 @@ components:
           restartPolicy: RecreateGroupOnPodRestart
           workers: 4
         combinedSpec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -124494,6 +124520,7 @@ components:
           rule: min
           details: details
         spec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -124519,6 +124546,7 @@ components:
           restartPolicy: RecreateGroupOnPodRestart
           workers: 4
         combinedSpec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -124571,6 +124599,7 @@ components:
             rule: min
             details: details
           spec:
+            objectivePriority: null
             preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
@@ -124596,6 +124625,7 @@ components:
             restartPolicy: RecreateGroupOnPodRestart
             workers: 4
           combinedSpec:
+            objectivePriority: null
             preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
@@ -124645,6 +124675,7 @@ components:
             rule: min
             details: details
           spec:
+            objectivePriority: null
             preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
@@ -124670,6 +124701,7 @@ components:
             restartPolicy: RecreateGroupOnPodRestart
             workers: 4
           combinedSpec:
+            objectivePriority: null
             preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
@@ -124719,6 +124751,7 @@ components:
           name: my-template-name
           description: description of my template.
         spec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -124755,6 +124788,7 @@ components:
           name: my-template-name
           description: description of my template.
         spec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -124795,6 +124829,7 @@ components:
         - spec.image
         - spec.image
         spec:
+          objectivePriority: null
           preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
@@ -125331,6 +125366,8 @@ components:
             $ref: '#/components/schemas/Category'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -126510,6 +126547,8 @@ components:
             $ref: '#/components/schemas/StringRules'
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
+          objectivePriority:
+            $ref: '#/components/schemas/IntegerRules'
           preemptibility:
             $ref: '#/components/schemas/PreemptibilityRules'
           priorityClass:

@@ -35,6 +35,7 @@ type NimServiceRules struct {
 	MultiNode            NullableNimServiceMultiNodeRules        `json:"multiNode,omitempty"`
 	NgcAuthSecret        NullableStringRules                     `json:"ngcAuthSecret,omitempty"`
 	NodePools            NullableArrayRules                      `json:"nodePools,omitempty"`
+	ObjectivePriority    NullableIntegerRules                    `json:"objectivePriority,omitempty"`
 	Preemptibility       NullablePreemptibilityRules             `json:"preemptibility,omitempty"`
 	PriorityClass        NullableStringRules                     `json:"priorityClass,omitempty"`
 	Probes               NullableProbesRules                     `json:"probes,omitempty"`
@@ -620,6 +621,49 @@ func (o *NimServiceRules) UnsetNodePools() {
 	o.NodePools.Unset()
 }
 
+// GetObjectivePriority returns the ObjectivePriority field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRules) GetObjectivePriority() IntegerRules {
+	if o == nil || IsNil(o.ObjectivePriority.Get()) {
+		var ret IntegerRules
+		return ret
+	}
+	return *o.ObjectivePriority.Get()
+}
+
+// GetObjectivePriorityOk returns a tuple with the ObjectivePriority field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRules) GetObjectivePriorityOk() (*IntegerRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ObjectivePriority.Get(), o.ObjectivePriority.IsSet()
+}
+
+// HasObjectivePriority returns a boolean if a field has been set.
+func (o *NimServiceRules) HasObjectivePriority() bool {
+	if o != nil && o.ObjectivePriority.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetObjectivePriority gets a reference to the given NullableIntegerRules and assigns it to the ObjectivePriority field.
+func (o *NimServiceRules) SetObjectivePriority(v IntegerRules) {
+	o.ObjectivePriority.Set(&v)
+}
+
+// SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+func (o *NimServiceRules) SetObjectivePriorityNil() {
+	o.ObjectivePriority.Set(nil)
+}
+
+// UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
+func (o *NimServiceRules) UnsetObjectivePriority() {
+	o.ObjectivePriority.Unset()
+}
+
 // GetPreemptibility returns the Preemptibility field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *NimServiceRules) GetPreemptibility() PreemptibilityRules {
 	if o == nil || IsNil(o.Preemptibility.Get()) {
@@ -969,6 +1013,9 @@ func (o NimServiceRules) ToMap() (map[string]interface{}, error) {
 	}
 	if o.NodePools.IsSet() {
 		toSerialize["nodePools"] = o.NodePools.Get()
+	}
+	if o.ObjectivePriority.IsSet() {
+		toSerialize["objectivePriority"] = o.ObjectivePriority.Get()
 	}
 	if o.Preemptibility.IsSet() {
 		toSerialize["preemptibility"] = o.Preemptibility.Get()

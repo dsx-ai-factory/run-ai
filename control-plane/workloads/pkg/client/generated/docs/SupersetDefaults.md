@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **Worker** | Pointer to [**NullableDistributedInferenceLeaderWorkerDefaultsV2**](DistributedInferenceLeaderWorkerDefaultsV2.md) | Defines the pod specification for the workers. Required only if the number of workers is greater than 0. | [optional] 
 **Category** | Pointer to **NullableString** | Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform. | [optional] 
 **NodePools** | Pointer to **[]string** | A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available. | [optional] 
+**ObjectivePriority** | Pointer to **NullableInt32** | The priority of this workload&#39;s inference objective. The project policy sets the maximum value. | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibility**](Preemptibility.md) |  | [optional] 
 **PriorityClass** | Pointer to **NullableString** | Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value. | [optional] 
 **RestartPolicy** | Pointer to **NullableString** |  | [optional] 
@@ -284,6 +285,41 @@ HasNodePools returns a boolean if a field has been set.
 `func (o *SupersetDefaults) UnsetNodePools()`
 
 UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
+### GetObjectivePriority
+
+`func (o *SupersetDefaults) GetObjectivePriority() int32`
+
+GetObjectivePriority returns the ObjectivePriority field if non-nil, zero value otherwise.
+
+### GetObjectivePriorityOk
+
+`func (o *SupersetDefaults) GetObjectivePriorityOk() (*int32, bool)`
+
+GetObjectivePriorityOk returns a tuple with the ObjectivePriority field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetObjectivePriority
+
+`func (o *SupersetDefaults) SetObjectivePriority(v int32)`
+
+SetObjectivePriority sets ObjectivePriority field to given value.
+
+### HasObjectivePriority
+
+`func (o *SupersetDefaults) HasObjectivePriority() bool`
+
+HasObjectivePriority returns a boolean if a field has been set.
+
+### SetObjectivePriorityNil
+
+`func (o *SupersetDefaults) SetObjectivePriorityNil(b bool)`
+
+ SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+
+### UnsetObjectivePriority
+`func (o *SupersetDefaults) UnsetObjectivePriority()`
+
+UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
 ### GetPreemptibility
 
 `func (o *SupersetDefaults) GetPreemptibility() Preemptibility`

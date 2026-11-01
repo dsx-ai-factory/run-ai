@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **Replicas** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Category** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
+**ObjectivePriority** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibilityRules**](PreemptibilityRules.md) |  | [optional] 
 **PriorityClass** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **RestartPolicy** | Pointer to [**NullableDistributedInferenceRestartPolicyRules**](DistributedInferenceRestartPolicyRules.md) |  | [optional] 
@@ -208,6 +209,41 @@ HasNodePools returns a boolean if a field has been set.
 `func (o *DistributedInferenceCommonRulesV2) UnsetNodePools()`
 
 UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
+### GetObjectivePriority
+
+`func (o *DistributedInferenceCommonRulesV2) GetObjectivePriority() IntegerRules`
+
+GetObjectivePriority returns the ObjectivePriority field if non-nil, zero value otherwise.
+
+### GetObjectivePriorityOk
+
+`func (o *DistributedInferenceCommonRulesV2) GetObjectivePriorityOk() (*IntegerRules, bool)`
+
+GetObjectivePriorityOk returns a tuple with the ObjectivePriority field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetObjectivePriority
+
+`func (o *DistributedInferenceCommonRulesV2) SetObjectivePriority(v IntegerRules)`
+
+SetObjectivePriority sets ObjectivePriority field to given value.
+
+### HasObjectivePriority
+
+`func (o *DistributedInferenceCommonRulesV2) HasObjectivePriority() bool`
+
+HasObjectivePriority returns a boolean if a field has been set.
+
+### SetObjectivePriorityNil
+
+`func (o *DistributedInferenceCommonRulesV2) SetObjectivePriorityNil(b bool)`
+
+ SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+
+### UnsetObjectivePriority
+`func (o *DistributedInferenceCommonRulesV2) UnsetObjectivePriority()`
+
+UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
 ### GetPreemptibility
 
 `func (o *DistributedInferenceCommonRulesV2) GetPreemptibility() PreemptibilityRules`

@@ -4344,6 +4344,12 @@ export interface DistributedInferenceCommonSpec {
      */
     'nodePools'?: Array<string> | null;
     /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceCommonSpec
+     */
+    'objectivePriority'?: number | null;
+    /**
      * 
      * @type {Preemptibility}
      * @memberof DistributedInferenceCommonSpec
@@ -4404,6 +4410,12 @@ export interface DistributedInferenceCommonSpecAllOf {
      * @memberof DistributedInferenceCommonSpecAllOf
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceCommonSpecAllOf
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -13115,6 +13127,12 @@ export interface SupersetSpec {
      * @memberof SupersetSpec
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof SupersetSpec
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}

@@ -2051,7 +2051,7 @@ components:
             storage: 1Gi
         accessModes:
         - ReadWriteOnce
-        volumeMode: ""
+        volumeMode: volumeMode
       properties:
         accessModes:
           description: Access modes the volume should support. At least one is required.
@@ -2079,6 +2079,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode'
           nullable: true
+          type: string
       required:
       - accessModes
       - resources
@@ -2103,7 +2104,7 @@ components:
               storage: 1Gi
           accessModes:
           - ReadWriteOnce
-          volumeMode: ""
+          volumeMode: volumeMode
       properties:
         metadata:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcMetadata'
@@ -2146,7 +2147,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2160,7 +2161,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2174,7 +2175,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2188,7 +2189,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2202,7 +2203,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         userCredentials:
           sources:
           - ref: my-hf-token-abc1234567
@@ -2458,7 +2459,6 @@ components:
           maxItems: 1000
           nullable: true
           type: array
-          x-internal: true
         pvcsConfig:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig'
       type: object
@@ -2481,7 +2481,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2495,7 +2495,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2509,7 +2509,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2523,7 +2523,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2537,7 +2537,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           userCredentials:
             sources:
             - ref: my-hf-token-abc1234567
@@ -2875,7 +2875,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2889,7 +2889,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2903,7 +2903,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2917,7 +2917,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2931,7 +2931,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -3438,7 +3438,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3452,7 +3452,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3466,7 +3466,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3480,7 +3480,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3494,7 +3494,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           userCredentials:
             sources:
             - ref: my-hf-token-abc1234567
@@ -3790,7 +3790,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3804,7 +3804,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3818,7 +3818,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3832,7 +3832,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3846,7 +3846,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -4251,7 +4251,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4265,7 +4265,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4279,7 +4279,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4293,7 +4293,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4307,7 +4307,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               userCredentials:
                 sources:
                 - ref: my-hf-token-abc1234567
@@ -5926,6 +5926,13 @@ components:
       maxItems: 1000
       nullable: true
       type: array
+    ObjectivePriority:
+      description: The priority of this workload's inference objective. The project
+        policy sets the maximum value.
+      format: int32
+      minimum: 0
+      nullable: true
+      type: integer
     ProbeHandlerScheme:
       description: "Scheme to use for connecting to the host, defaults to HTTP."
       enum:
@@ -6348,6 +6355,8 @@ components:
             $ref: '#/components/schemas/NimServiceNgcAuthSecret'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -6445,6 +6454,7 @@ components:
           gpuMemoryPortionRequest: 0.5
           cpuCoreRequest: 0.5
           gpuPortionLimit: 0.5
+        objectivePriority: null
         preemptibility: preemptible
         security:
           runAsGid: 30
@@ -6702,6 +6712,7 @@ components:
             gpuMemoryPortionRequest: 0.5
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
+          objectivePriority: null
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -6901,7 +6912,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6915,7 +6926,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6929,7 +6940,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6943,7 +6954,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6957,7 +6968,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -7290,6 +7301,7 @@ components:
             gpuMemoryPortionRequest: 0.5
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
+          objectivePriority: null
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -7614,6 +7626,7 @@ components:
             gpuMemoryPortionRequest: 0.5
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
+          objectivePriority: null
           preemptibility: preemptible
           security:
             runAsGid: 30

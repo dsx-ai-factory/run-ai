@@ -40863,6 +40863,14 @@ components:
             - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec1'
           nullable: true
           type: object
+    ObjectivePriority:
+      description: >-
+        The priority of this workload's inference objective. The project policy
+        sets the maximum value.
+      type: integer
+      format: int32
+      minimum: 0
+      nullable: true
     DistributedInferenceRestartPolicy:
       description: >
         Determines the behavior when a pod fails.
@@ -41039,6 +41047,8 @@ components:
               $ref: '#/components/schemas/Category'
             nodePools:
               $ref: '#/components/schemas/NodePools'
+            objectivePriority:
+              $ref: '#/components/schemas/ObjectivePriority'
             preemptibility:
               $ref: '#/components/schemas/Preemptibility'
             priorityClass:
@@ -42513,6 +42523,8 @@ components:
               $ref: '#/components/schemas/Category'
             nodePools:
               $ref: '#/components/schemas/NodePools'
+            objectivePriority:
+              $ref: '#/components/schemas/ObjectivePriority'
             preemptibility:
               $ref: '#/components/schemas/Preemptibility'
             priorityClass:
@@ -43194,6 +43206,8 @@ components:
               $ref: '#/components/schemas/StringRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
+            objectivePriority:
+              $ref: '#/components/schemas/IntegerRules'
             preemptibility:
               $ref: '#/components/schemas/PreemptibilityRules'
             priorityClass:
@@ -45285,6 +45299,8 @@ components:
               $ref: '#/components/schemas/NimServiceNgcAuthSecret'
             nodePools:
               $ref: '#/components/schemas/NodePools'
+            objectivePriority:
+              $ref: '#/components/schemas/ObjectivePriority'
             preemptibility:
               $ref: '#/components/schemas/Preemptibility'
             priorityClass:
@@ -45497,6 +45513,8 @@ components:
               $ref: '#/components/schemas/StringRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
+            objectivePriority:
+              $ref: '#/components/schemas/IntegerRules'
             preemptibility:
               $ref: '#/components/schemas/PreemptibilityRules'
             priorityClass:
@@ -58748,6 +58766,8 @@ components:
               $ref: '#/components/schemas/NimServiceNgcAuthSecret'
             nodePools:
               $ref: '#/components/schemas/NodePools'
+            objectivePriority:
+              $ref: '#/components/schemas/ObjectivePriority'
             preemptibility:
               $ref: '#/components/schemas/Preemptibility'
             priorityClass:

@@ -77,6 +77,8 @@ allOf:
       $ref: ../workloads_spec/nim_services/NimServiceNgcAuthSecret.yaml
     nodePools:
       $ref: ../workloads_spec/resources/NodePools.yaml
+    objectivePriority:
+      $ref: ../workloads_spec/inferences/ObjectivePriority.yaml
     preemptibility:
       $ref: ../workloads_spec/advanced/Preemptibility.yaml
     priorityClass:

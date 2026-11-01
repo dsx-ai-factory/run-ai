@@ -16023,6 +16023,13 @@
           }
         }
       },
+      "ObjectivePriority": {
+        "description": "The priority of this workload's inference objective. The project policy sets the maximum value.",
+        "type": "integer",
+        "format": "int32",
+        "minimum": 0,
+        "nullable": true
+      },
       "DistributedInferenceRestartPolicy": {
         "description": "Determines the behavior when a pod fails.\n- `RecreateGroupOnPodRestart`: Restarts all pods in the group if any pod fails.\n- `None`: No automatic restart behavior is applied.\n",
         "type": "string",
@@ -16184,6 +16191,9 @@
               },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
+              },
+              "objectivePriority": {
+                "$ref": "#/components/schemas/ObjectivePriority"
               },
               "preemptibility": {
                 "$ref": "#/components/schemas/Preemptibility"

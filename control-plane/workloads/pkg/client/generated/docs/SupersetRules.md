@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **Worker** | Pointer to [**NullableDistributedInferenceLeaderWorkerRulesV2**](DistributedInferenceLeaderWorkerRulesV2.md) | Defines the pod specification for the workers. Required only if the number of workers is greater than 0. | [optional] 
 **Category** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
+**ObjectivePriority** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibilityRules**](PreemptibilityRules.md) |  | [optional] 
 **PriorityClass** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **RestartPolicy** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
@@ -284,6 +285,41 @@ HasNodePools returns a boolean if a field has been set.
 `func (o *SupersetRules) UnsetNodePools()`
 
 UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
+### GetObjectivePriority
+
+`func (o *SupersetRules) GetObjectivePriority() IntegerRules`
+
+GetObjectivePriority returns the ObjectivePriority field if non-nil, zero value otherwise.
+
+### GetObjectivePriorityOk
+
+`func (o *SupersetRules) GetObjectivePriorityOk() (*IntegerRules, bool)`
+
+GetObjectivePriorityOk returns a tuple with the ObjectivePriority field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetObjectivePriority
+
+`func (o *SupersetRules) SetObjectivePriority(v IntegerRules)`
+
+SetObjectivePriority sets ObjectivePriority field to given value.
+
+### HasObjectivePriority
+
+`func (o *SupersetRules) HasObjectivePriority() bool`
+
+HasObjectivePriority returns a boolean if a field has been set.
+
+### SetObjectivePriorityNil
+
+`func (o *SupersetRules) SetObjectivePriorityNil(b bool)`
+
+ SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+
+### UnsetObjectivePriority
+`func (o *SupersetRules) UnsetObjectivePriority()`
+
+UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
 ### GetPreemptibility
 
 `func (o *SupersetRules) GetPreemptibility() PreemptibilityRules`

@@ -55,6 +55,12 @@ type DistributedInferenceCommonSpec struct {
 	NodePools *[]string `json:"nodePools,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// The priority of this workload's inference objective. The project policy sets the maximum value.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ObjectivePriority *int32 `json:"objectivePriority,omitempty"`
+	ObjectivePriority *int32 `json:"objectivePriority,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Preemptibility *Preemptibility `json:"preemptibility,omitempty"`
 	Preemptibility *Preemptibility `json:"preemptibility,omitempty" gorm:""`
@@ -134,6 +140,14 @@ func AssertDistributedInferenceCommonSpecConstraints(obj DistributedInferenceCom
 	if maxItemsErr := runaihttp.AssertMaxItems(obj.NodePools, "NodePools", 1000); maxItemsErr != nil {
 		return &ParsingError{Param: "NodePools", Err: maxItemsErr}
 	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ObjectivePriority != nil && *obj.ObjectivePriority < 0 {
+		return &ParsingError{Param: "ObjectivePriority", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

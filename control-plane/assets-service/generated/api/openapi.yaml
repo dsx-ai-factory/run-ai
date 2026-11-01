@@ -59696,6 +59696,13 @@ components:
             if the number of workers is greater than 0.
           nullable: true
           type: object
+    ObjectivePriority:
+      description: The priority of this workload's inference objective. The project
+        policy sets the maximum value.
+      format: int32
+      minimum: 0
+      nullable: true
+      type: integer
     DistributedInferenceRestartPolicy:
       default: RecreateGroupOnPodRestart
       description: |
@@ -59857,6 +59864,8 @@ components:
             $ref: '#/components/schemas/Category'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -61524,6 +61533,7 @@ components:
         completions: 1
         restartPolicy: null
         command: python
+        objectivePriority: null
         args: -x my-script.py
         environmentVariables:
         - podFieldRef:
@@ -63755,6 +63765,7 @@ components:
           completions: 1
           restartPolicy: null
           command: python
+          objectivePriority: null
           args: -x my-script.py
           environmentVariables:
           - podFieldRef:

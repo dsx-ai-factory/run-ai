@@ -10100,6 +10100,13 @@ components:
       maxItems: 1000
       nullable: true
       type: array
+    ObjectivePriority:
+      description: The priority of this workload's inference objective. The project
+        policy sets the maximum value.
+      format: int32
+      minimum: 0
+      nullable: true
+      type: integer
     Preemptibility:
       description: "Specifies whether the workload can be preempted by higher-priority\
         \ workloads. Valid values are preemptible, semi-preemptible and non-preemptible.\
@@ -10279,6 +10286,8 @@ components:
             $ref: '#/components/schemas/Category'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -14042,6 +14051,8 @@ components:
             $ref: '#/components/schemas/StringRules'
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
+          objectivePriority:
+            $ref: '#/components/schemas/IntegerRules'
           preemptibility:
             $ref: '#/components/schemas/PreemptibilityRules'
           priorityClass:
@@ -61731,6 +61742,8 @@ components:
             $ref: '#/components/schemas/NimServiceNgcAuthSecret'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -61860,6 +61873,8 @@ components:
             $ref: '#/components/schemas/StringRules'
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
+          objectivePriority:
+            $ref: '#/components/schemas/IntegerRules'
           preemptibility:
             $ref: '#/components/schemas/PreemptibilityRules'
           priorityClass:
