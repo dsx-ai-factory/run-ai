@@ -11912,6 +11912,7 @@ Copyright Jack Christensen - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/jackc/pgx/v5 v5.11.0
+  github.com/jackc/pgx/v5 v5.12.0
 
 Copyright (c) 2013-2021 Jack Christensen
 
@@ -21597,8 +21598,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright The Go Authors, WAKAYAMA Shirou - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
+  github.com/shirou/gopsutil/v4 v4.26.10
   github.com/shirou/gopsutil/v4 v4.26.6
-  github.com/shirou/gopsutil/v4 v4.26.9
 
 gopsutil is distributed under BSD license reproduced below.
 
