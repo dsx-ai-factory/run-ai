@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 	gorm.io/gorm v1.31.2
