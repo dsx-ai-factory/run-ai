@@ -46,6 +46,16 @@ func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) run
 	}
 
 	if status != "False" {
+		// Ready is also True when the fractioning daemons have no node to run on (their node selector
+		// matches none), and then no node can run fractions: report that instead of "available", or
+		// every GPU node shows a missing fractions prerequisite and counts as not ready.
+		if conditionReason(config, "FractiondReady") == noTargetNodesReason &&
+			conditionReason(config, "MpsdReady") == noTargetNodesReason {
+			return runv1.PublicStatus{
+				Available: runv1.AvailableStatus(false),
+				Reason:    "GPU fractions are not deployed on any node: kai-gpu-fractioning has no target nodes",
+			}
+		}
 		return runv1.PublicStatus{Available: runv1.AvailableStatus(true)}
 	}
 
@@ -60,6 +70,27 @@ func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) run
 }
 
 var validConditionStatuses = map[string]bool{"True": true, "False": true, "Unknown": true}
+
+const noTargetNodesReason = "NoTargetNodes"
+
+// conditionReason returns the reason of the condition of that type, or "" when there is none.
+func conditionReason(config *unstructured.Unstructured, conditionType string) string {
+	conditions, ok, err := unstructured.NestedSlice(config.Object, "status", "conditions")
+	if err != nil || !ok {
+		return ""
+	}
+	for _, c := range conditions {
+		condMap, ok := c.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if condType, _, _ := unstructured.NestedString(condMap, "type"); condType == conditionType {
+			reason, _, _ := unstructured.NestedString(condMap, "reason")
+			return reason
+		}
+	}
+	return ""
+}
 
 func readyCondition(config *unstructured.Unstructured) (status, message string, found bool) {
 	conditions, ok, err := unstructured.NestedSlice(config.Object, "status", "conditions")

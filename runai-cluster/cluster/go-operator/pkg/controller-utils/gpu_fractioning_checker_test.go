@@ -110,6 +110,31 @@ var _ = Describe("CheckGpuFractioningReadiness", func() {
 		Expect(status.Reason).To(Equal("not ready: MpsdReady"))
 	})
 
+	It("reports unavailable when the fractioning daemons have no target nodes", func() {
+		obj := newGpuFractioningConfig(
+			map[string]interface{}{"type": "FractiondReady", "status": "True", "reason": "NoTargetNodes"},
+			map[string]interface{}{"type": "MpsdReady", "status": "True", "reason": "NoTargetNodes"},
+			readyCond("True", "all components are healthy"),
+		)
+		k8s = newClient(obj)
+
+		status := CheckGpuFractioningReadiness(apiAccessContext, k8s)
+		Expect(*status.Available).To(BeFalse())
+		Expect(status.Reason).To(ContainSubstring("no target nodes"))
+	})
+
+	It("reports available when the fractioning daemons run on some nodes", func() {
+		obj := newGpuFractioningConfig(
+			map[string]interface{}{"type": "FractiondReady", "status": "True", "reason": "AllPodsReady"},
+			map[string]interface{}{"type": "MpsdReady", "status": "True", "reason": "AllPodsReady"},
+			readyCond("True", "all components are healthy"),
+		)
+		k8s = newClient(obj)
+
+		status := CheckGpuFractioningReadiness(apiAccessContext, k8s)
+		Expect(*status.Available).To(BeTrue())
+	})
+
 	It("reports available when the CR has no conditions yet", func() {
 		obj := newGpuFractioningConfig()
 		k8s = newClient(obj)
