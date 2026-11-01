@@ -1073,6 +1073,18 @@ var _ = Describe("Parsers", Ordered, func() {
 			Expect(*gpuInfo.GpuMemoryBytes).To(BeEquivalentTo(int64(45) * 1024 * 1024 * 1024))
 		})
 
+		It("Parse Node To Update Info Request - AMD Gpu - product count missing, family count used", func() {
+			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			node.Labels[parsers.AmdGpuProductNameLabelKey] = "AMD_Radeon_Pro_W7900"
+			node.Labels[parsers.AmdGpuProductCountLabelPrefix+"AMD_Radeon_Pro_W7900"] = "not-a-number"
+			node.Labels[parsers.AmdGpuTypeLabelPrefix+"GC_11_0_0"] = "2"
+
+			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+			gpuInfo := parsedNodeInfo.GpuInfo.Get()
+			Expect(gpuInfo.GpuType).To(Equal("AMD-Radeon-Pro-W7900"))
+			Expect(gpuInfo.GpuCount).To(BeEquivalentTo(2))
+		})
+
 		It("Parse Node To Update Info Request - NVIDIA and AMD Gpus on one node", func() {
 			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
 			node.Labels[parsers.NvidiaGpuTypeLabelKey] = testGpuTypeA100

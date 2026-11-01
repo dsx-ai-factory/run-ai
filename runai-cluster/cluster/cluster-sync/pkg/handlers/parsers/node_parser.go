@@ -670,10 +670,16 @@ func getNvidiaGpuMemoryBytes(nodeLabels map[string]string, nodeName string) *int
 }
 
 func getAmdGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
-	if info := getAmdGpuInfoByProductName(nodeLabels, nodeName); info != nil {
-		return info
+	byFamily := getAmdGpuInfoByFamily(nodeLabels, nodeName)
+	info := getAmdGpuInfoByProductName(nodeLabels, nodeName)
+	if info == nil {
+		return byFamily
 	}
-	return getAmdGpuInfoByFamily(nodeLabels, nodeName)
+	// The product's count label is missing or unusable: the family label counts the same GPUs.
+	if info.GpuCount == 0 && byFamily != nil {
+		info.GpuCount = byFamily.GpuCount
+	}
+	return info
 }
 
 // The product name ("AMD_Radeon_Pro_W7900") names the GPU model like nvidia.com/gpu.product does;
