@@ -8,6 +8,7 @@
 import type { PolicyMeta } from "@/swagger-models/policy-service-client";
 import {
   PolicyType,
+  PolicyPhase,
   PolicySyncStatusOfClusterStatusEnum,
   ScopeType,
   type PolicyListEntry,
@@ -43,6 +44,7 @@ export const policyUtil = {
   isGvkPolicyListEntry,
   gvkKindFromPolicyType,
   getPolicyStatusColOptions,
+  getPolicyListStatusColOptions,
   getQueryObjectFromPolicyId,
   getPolicyScopePropertiesFromPolicyId,
   getOptionsWithRules,
@@ -194,6 +196,29 @@ function getPolicyScopePropertiesFromPolicyId(policyId: string): IPolicyScopePro
       };
   }
 }
+
+function getPolicyListStatusColOptions(policy: PolicyListEntry): IStatusColOptions {
+  if (!isGvkPolicyListEntry(policy)) {
+    const cluster = policy.status?.clusters?.[0];
+    return getPolicyStatusColOptions(cluster?.status, cluster?.errorMessage || undefined);
+  }
+
+  const phase = policy.availability?.phase;
+  const tooltipText = (policy.availability?.issues ?? [])
+    .map((issue) => issue.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"))
+    .join("<br>");
+  return {
+    ...getPolicyStatusColOptions(),
+    ...(phase ? policyAvailabilityStatusMap[phase] : {}),
+    tooltipText,
+  };
+}
+
+const policyAvailabilityStatusMap: Record<PolicyPhase, Pick<IStatusColOptions, "status" | "color">> = {
+  [PolicyPhase.Ready]: { status: "Ready", color: "success" },
+  [PolicyPhase.Degraded]: { status: "Degraded", color: "warning" },
+  [PolicyPhase.PendingUpdate]: { status: "Pending update", color: "warning" },
+};
 
 function getPolicyStatusColOptions(
   status?: PolicySyncStatusOfClusterStatusEnum,
