@@ -6959,6 +6959,7 @@ License Text(https://spdx.org/licenses/MIT.html)
 Components:
   go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
+  go.yaml.in/yaml/v3 v3.0.6
   gopkg.in/yaml.v3 v3.0.1
 
 
@@ -12243,6 +12244,7 @@ Copyright Jack Christensen - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/jackc/pgx/v5 v5.11.0
+  github.com/jackc/pgx/v5 v5.12.0
 
 Copyright (c) 2013-2021 Jack Christensen
 
@@ -18405,7 +18407,7 @@ Components:
   github.com/coreos/go-semver/semver v0.3.1
   github.com/envoyproxy/protoc-gen-validate/validate v1.3.3
   github.com/go-jose/go-jose/v4 v4.1.4
-  github.com/go-jose/go-jose/v4 v4.1.6
+  github.com/go-jose/go-jose/v4 v4.1.7
   github.com/go-openapi/analysis v1.0.1
   github.com/go-openapi/errors v0.22.9
   github.com/go-openapi/jsonpointer v0.21.0
@@ -19242,7 +19244,7 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/aws/smithy-go/ptr v1.28.5
   github.com/aws/smithy-go/ptr v1.28.7
-  github.com/awslabs/operatorpkg v0.0.0-20261028170822-b593ddc9a575
+  github.com/awslabs/operatorpkg v0.0.0-20261030165915-63f6f735c934
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
   github.com/xdg-go/pbkdf2 v1.0.0
@@ -21752,7 +21754,7 @@ Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/go-jose/go-jose/v4/json v4.1.4
-  github.com/go-jose/go-jose/v4/json v4.1.6
+  github.com/go-jose/go-jose/v4/json v4.1.7
   github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
   github.com/klauspost/crc32 v1.3.0
   github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
@@ -26123,7 +26125,7 @@ NOTICE of github.com/aws/smithy-go, github.com/awslabs/operatorpkg
 Components:
   github.com/aws/smithy-go v1.28.5
   github.com/aws/smithy-go v1.28.7
-  github.com/awslabs/operatorpkg v0.0.0-20261028170822-b593ddc9a575
+  github.com/awslabs/operatorpkg v0.0.0-20261030165915-63f6f735c934
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 
@@ -35533,6 +35535,7 @@ Components:
   go.yaml.in/yaml/v2 v2.4.4
   go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
+  go.yaml.in/yaml/v3 v3.0.6
   gopkg.in/yaml.v2 v2.4.0
   gopkg.in/yaml.v3 v3.0.1
 
