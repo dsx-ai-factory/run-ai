@@ -207,17 +207,33 @@ function getPolicyListStatusColOptions(policy: PolicyListEntry): IStatusColOptio
   const tooltipText = (policy.availability?.issues ?? [])
     .map((issue) => issue.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"))
     .join("<br>");
-  return {
-    ...getPolicyStatusColOptions(),
-    ...(phase ? policyAvailabilityStatusMap[phase] : {}),
-    tooltipText,
+  const statusOptions: IStatusColOptions = (phase && policyAvailabilityStatusMap[phase]) || {
+    status: "-",
+    displayAnimation: false,
+    filterKey: "status",
   };
+  return tableUtil.getStatusColOptions(statusOptions, tooltipText);
 }
 
-const policyAvailabilityStatusMap: Record<PolicyPhase, Pick<IStatusColOptions, "status" | "color">> = {
-  [PolicyPhase.Ready]: { status: "Ready", color: "success" },
-  [PolicyPhase.Degraded]: { status: "Degraded", color: "warning" },
-  [PolicyPhase.PendingUpdate]: { status: "Pending update", color: "warning" },
+const policyAvailabilityStatusMap: Record<PolicyPhase, IStatusColOptions> = {
+  [PolicyPhase.Ready]: {
+    status: "Ready",
+    color: "success",
+    displayAnimation: false,
+    filterKey: "status",
+  },
+  [PolicyPhase.Degraded]: {
+    status: "Degraded",
+    color: "warning",
+    displayAnimation: false,
+    filterKey: "status",
+  },
+  [PolicyPhase.PendingUpdate]: {
+    status: "Pending update",
+    color: "warning",
+    displayAnimation: false,
+    filterKey: "status",
+  },
 };
 
 function getPolicyStatusColOptions(
