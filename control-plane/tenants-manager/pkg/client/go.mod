@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32
 	github.com/stretchr/testify v1.12.1
 )
 
@@ -20,5 +20,5 @@ require (
 	go.opentelemetry.io/otel/log v1.47.0 // indirect
 	go.opentelemetry.io/otel/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 )
