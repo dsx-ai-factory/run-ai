@@ -5,20 +5,20 @@ go 1.27.3
 require (
 	github.com/Rican7/retry v0.3.1
 	github.com/aws/smithy-go v1.28.7
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.13
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.14
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.8
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.5
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.8
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/dbmodels v1.0.6
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.9
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.12
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.21
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.13
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907
 	github.com/google/uuid v1.6.0
@@ -42,9 +42,9 @@ require (
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.9 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.9 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.10 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.10 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
@@ -63,7 +63,7 @@ require (
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20240606120523-5a60cdf6a761 // indirect
-	github.com/jackc/pgx/v5 v5.11.0 // indirect
+	github.com/jackc/pgx/v5 v5.12.0 // indirect
 	github.com/jackc/puddle/v2 v2.2.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
@@ -115,7 +115,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.11.1 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e // indirect
 	golang.org/x/net v0.61.0 // indirect

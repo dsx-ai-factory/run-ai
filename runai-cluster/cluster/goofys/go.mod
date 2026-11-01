@@ -12,7 +12,7 @@ require (
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.13
 	github.com/Azure/go-autorest/autorest/azure/cli v0.4.7
 	github.com/aws/aws-sdk-go v1.55.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.5
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/jacobsa/fuse v0.0.0-20260630194014-a124548f6da7
@@ -52,13 +52,13 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
 	github.com/dimchansky/utfbom v1.2.0 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19 // indirect
 	github.com/envoyproxy/go-control-plane/envoy v1.40.0 // indirect
 	github.com/envoyproxy/protoc-gen-validate v1.3.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
-	github.com/go-jose/go-jose/v4 v4.1.6 // indirect
+	github.com/go-jose/go-jose/v4 v4.1.7 // indirect
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-ole/go-ole v1.3.0 // indirect
@@ -102,7 +102,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.47.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
