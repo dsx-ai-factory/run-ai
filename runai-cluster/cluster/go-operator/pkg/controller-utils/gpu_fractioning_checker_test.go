@@ -135,6 +135,19 @@ var _ = Describe("CheckGpuFractioningReadiness", func() {
 		Expect(*status.Available).To(BeTrue())
 	})
 
+	It("reports unavailable when a daemon condition is malformed", func() {
+		obj := newGpuFractioningConfig(
+			map[string]interface{}{"type": "FractiondReady", "status": "True", "reason": int64(3)},
+			map[string]interface{}{"type": "MpsdReady", "status": "True", "reason": "NoTargetNodes"},
+			readyCond("True", "all components are healthy"),
+		)
+		k8s = newClient(obj)
+
+		status := CheckGpuFractioningReadiness(apiAccessContext, k8s)
+		Expect(*status.Available).To(BeFalse())
+		Expect(status.Reason).To(ContainSubstring("FractiondReady reason"))
+	})
+
 	It("reports available when the CR has no conditions yet", func() {
 		obj := newGpuFractioningConfig()
 		k8s = newClient(obj)
