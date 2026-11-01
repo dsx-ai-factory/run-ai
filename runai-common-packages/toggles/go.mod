@@ -6,7 +6,7 @@ require (
 	github.com/Unleash/unleash-client-go/v3 v3.9.2
 	github.com/aws/smithy-go v1.28.7
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
 	github.com/stretchr/testify v1.12.1
 )
 
@@ -29,8 +29,8 @@ require (
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
-	github.com/twmb/murmur3 v1.2.1 // indirect
-	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	github.com/twmb/murmur3 v1.2.2 // indirect
+	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.57.0 // indirect
 	golang.org/x/sys v0.48.0 // indirect
 	golang.org/x/text v0.42.0 // indirect
