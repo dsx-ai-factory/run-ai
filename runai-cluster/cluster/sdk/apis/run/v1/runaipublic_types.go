@@ -93,5 +93,6 @@ const (
 	RunaiPublicJax              = "jax"
 	RunaiPublicGatewayAPI       = "gateway-api"
 	RunaiPublicAdvice           = "advice"
+	RunaiPublicSnapshot         = "snapshot"
 	DistributedFrameworkSuspend = "suspend"
 )

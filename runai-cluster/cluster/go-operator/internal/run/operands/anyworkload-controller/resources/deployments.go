@@ -14,6 +14,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/snapshot"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	outils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
@@ -105,7 +106,7 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 		},
 	}
 	allVolumes := append(outils.GlobalVolumes(d.runaiConfig), webhookCertVolumes...)
-	envVars, err := d.buildEnvVars(config, internal)
+	envVars, err := d.buildEnvVars(config, internal, d.detectSnapshot(ctx))
 	if err != nil {
 		return nil, fmt.Errorf("build anyworkload-controller environment: %w", err)
 	}
@@ -170,7 +171,14 @@ func (d *DeploymentResource) Enabled() bool {
 	return true
 }
 
-func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.AnyworkloadController, internal *runv1_internal.Internal) ([]v1.EnvVar, error) {
+// detectSnapshot looks for the Snapshot installation. A cluster without it
+// yields an unavailable status: the controller then runs with no Snapshot
+// watches registered, exactly as it does today.
+func (d *DeploymentResource) detectSnapshot(ctx context.Context) snapshot.Status {
+	return snapshot.Detect(ctx, d.k8sReader, d.runaiConfig)
+}
+
+func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.AnyworkloadController, internal *runv1_internal.Internal, snapshotStatus snapshot.Status) ([]v1.EnvVar, error) {
 	isOpenShift := internal != nil &&
 		internal.Global != nil &&
 		internal.Global.Platform != nil &&
@@ -211,6 +219,18 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 		{
 			Name:  "ENABLE_STORAGE_PLUGIN",
 			Value: strconv.FormatBool(*config.StoragePluginEnabled),
+		},
+		{
+			// Whether snapshots installed and healthy in this cluster
+			// and the development gate open.
+			Name:  "SNAPSHOT_ENABLED",
+			Value: strconv.FormatBool(snapshotStatus.Available && snapshot.FeatureGateEnabled()),
+		},
+		{
+			// Where the Snapshot node agent runs. Capture and restore pods can
+			// only be scheduled on those nodes.
+			Name:  "SNAPSHOT_AGENT_NODE_SELECTOR",
+			Value: snapshot.FormatNodeSelector(snapshotStatus.AgentNodeSelector),
 		},
 		{
 			Name:  "METRICS_PORT",

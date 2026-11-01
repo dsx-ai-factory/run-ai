@@ -49,6 +49,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-scheduler"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runtime-rules"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/shared-objects-controller"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/snapshot"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/status-updater"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/workload-exporter"
 	"github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1/numa_placement_exporter"
@@ -1159,6 +1160,11 @@ func (in *RunaiConfigSpec) DeepCopyInto(out *RunaiConfigSpec) {
 	if in.ClusterRedis != nil {
 		in, out := &in.ClusterRedis, &out.ClusterRedis
 		*out = new(cluster_redis.ClusterRedis)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Snapshot != nil {
+		in, out := &in.Snapshot, &out.Snapshot
+		*out = new(snapshot.Snapshot)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Internal != nil {

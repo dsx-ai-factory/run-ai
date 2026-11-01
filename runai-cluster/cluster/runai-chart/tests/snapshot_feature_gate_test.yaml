@@ -1,0 +1,49 @@
+suite: Test the Snapshot integration development gate
+
+templates:
+  - templates/deployment.yaml
+
+# The gate is deliberately a chart value and an operator env var, not a
+# RunaiConfig field. It exists only until the Snapshot integration's stories
+# have all merged, and a CRD field is the one surface that cannot simply be
+# deleted: it persists in stored objects and in an administrator's values file.
+# Removing the gate must be nothing more than deleting these two blocks.
+tests:
+  - it: should leave the gate shut by default
+    documentSelector:
+      path: kind
+      value: Deployment
+    asserts:
+      - isKind:
+          of: Deployment
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SNAPSHOT_FEATURE_ENABLED
+            value: "true"
+
+  - it: should leave the gate shut when explicitly disabled
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      development.snapshotFeatureEnabled: false
+    asserts:
+      - notContains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SNAPSHOT_FEATURE_ENABLED
+            value: "true"
+
+  - it: should open the gate when the development value is set
+    documentSelector:
+      path: kind
+      value: Deployment
+    set:
+      development.snapshotFeatureEnabled: true
+    asserts:
+      - contains:
+          path: spec.template.spec.containers[0].env
+          content:
+            name: SNAPSHOT_FEATURE_ENABLED
+            value: "true"

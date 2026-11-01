@@ -9,7 +9,10 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
+	"strings"
 	"testing"
+
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/snapshot"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
@@ -21,6 +24,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -33,7 +37,7 @@ func TestBuildEnvVarsUsesAnyworkloadOpenShiftRouteConfiguration(t *testing.T) {
 		}
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, snapshot.Status{})
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -93,7 +97,7 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 			runaiConfig.Spec.Global.GatewayAPI.Namespace = "gateway-system"
 			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, snapshot.Status{})
 			if err != nil {
 				t.Fatalf("buildEnvVars() error = %v", err)
 			}
@@ -117,7 +121,7 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 func TestBuildEnvVarsIncludesOAuth2ProxyTemplates(t *testing.T) {
 	runaiConfig := utils.GetDefaultRunaiConfig()
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, snapshot.Status{})
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -155,7 +159,7 @@ func TestBuildEnvVarsRejectsIncompleteGatewayConfiguration(t *testing.T) {
 			runaiConfig.Spec.Global.GatewayAPI.Namespace = tt.namespace
 			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-			_, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+			_, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, snapshot.Status{})
 			if err == nil {
 				t.Fatal("buildEnvVars() accepted an incomplete enabled Gateway configuration")
 			}
@@ -172,7 +176,7 @@ func TestBuildEnvVarsDoesNotInjectIngressAnnotationDefaults(t *testing.T) {
 	runaiConfig.Spec.Global.Ingress.Annotations = map[string]string{"example.com/default": "value"}
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, snapshot.Status{})
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -221,7 +225,7 @@ func TestBuildEnvVarsIncludesWorkloadInjectedContainerResources(t *testing.T) {
 	}
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, snapshot.Status{})
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -237,7 +241,7 @@ func TestBuildEnvVarsOmitsUnconfiguredWorkloadInjectedContainerResources(t *test
 	runaiConfig.SetDefaultsWhereNeeded()
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, snapshot.Status{})
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -325,7 +329,7 @@ func TestRestartAllowedServiceAccounts(t *testing.T) {
 			config.Spec.Internal.Global.NMC.ServiceAccountName = tc.agentServiceAccount
 			config.Spec.Internal.Global.NMC.AllowedServiceAccounts = tc.extra
 			resource := NewDeploymentResource("anyworkload-controller", nil, config)
-			variables, err := resource.buildEnvVars(config.Spec.AnyworkloadController, config.Spec.Internal)
+			variables, err := resource.buildEnvVars(config.Spec.AnyworkloadController, config.Spec.Internal, snapshot.Status{})
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -334,5 +338,107 @@ func TestRestartAllowedServiceAccounts(t *testing.T) {
 				t.Fatalf("restart identities = %q, want %q", value, tc.want)
 			}
 		})
+	}
+}
+
+// SNAPSHOT_ENABLED carries the operator's whole decision: Snapshot is installed
+// and healthy, and the development gate is open. The gate can only ever turn
+// the integration off — opening it on a cluster without Snapshot must not
+// enable anything, or the controller would watch CRDs that do not exist.
+func TestBuildEnvVarsSnapshot(t *testing.T) {
+	tests := []struct {
+		name           string
+		status         snapshot.Status
+		gateOpen       bool
+		wantEnabled    string
+		wantNodeSelect string
+	}{
+		{
+			name:           "no snapshot and the gate shut",
+			status:         snapshot.Status{},
+			wantEnabled:    "false",
+			wantNodeSelect: "",
+		},
+		{
+			name: "snapshot available but the gate is shut",
+			status: snapshot.Status{
+				Available:         true,
+				AgentNodeSelector: map[string]string{"nvidia.com/gpu.present": "true"},
+			},
+			wantEnabled:    "false",
+			wantNodeSelect: "nvidia.com/gpu.present=true",
+		},
+		{
+			// The gate is a safety catch, not a switch: it must never enable
+			// the integration on a cluster that has no Snapshot to talk to.
+			name:           "gate open but no snapshot installed",
+			status:         snapshot.Status{},
+			gateOpen:       true,
+			wantEnabled:    "false",
+			wantNodeSelect: "",
+		},
+		{
+			name: "snapshot available and the gate is open",
+			status: snapshot.Status{
+				Available:         true,
+				AgentNodeSelector: map[string]string{"b": "2", "a": "1"},
+			},
+			gateOpen:       true,
+			wantEnabled:    "true",
+			wantNodeSelect: "a=1,b=2",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if tc.gateOpen {
+				t.Setenv(snapshot.FeatureGateEnvVar, "true")
+			}
+
+			runaiConfig := &runaiv1.RunaiConfig{}
+			runaiConfig.SetDefaultsWhereNeeded()
+			res := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+
+			envVars, err := res.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, tc.status)
+			if err != nil {
+				t.Fatalf("buildEnvVars() error = %v", err)
+			}
+
+			for name, want := range map[string]string{
+				"SNAPSHOT_ENABLED":             tc.wantEnabled,
+				"SNAPSHOT_AGENT_NODE_SELECTOR": tc.wantNodeSelect,
+			} {
+				got, found := envValue(envVars, name)
+				if !found {
+					t.Errorf("%s env var not found", name)
+					continue
+				}
+				if got != want {
+					t.Errorf("%s = %q, want %q", name, got, want)
+				}
+			}
+
+			// The gate is the operator's business. Passing it on would make
+			// removing it a change the controller can see.
+			if _, found := envValue(envVars, "SNAPSHOT_FEATURE_ENABLED"); found {
+				t.Error("SNAPSHOT_FEATURE_ENABLED reaches the controller; the gate must stay operator-side")
+			}
+		})
+	}
+}
+
+// The gate lives in the operator's environment rather than in RunaiConfig, so
+// that removing it later leaves nothing behind in stored objects or in an
+// administrator's values file.
+func TestSnapshotFeatureGateIsNotPartOfTheCRD(t *testing.T) {
+	runaiConfig := &runaiv1.RunaiConfig{}
+	runaiConfig.SetDefaultsWhereNeeded()
+
+	spec, err := json.Marshal(runaiConfig.Spec.AnyworkloadController)
+	if err != nil {
+		t.Fatalf("marshal anyworkload-controller spec: %v", err)
+	}
+	if strings.Contains(string(spec), "snapshotFeatureEnabled") {
+		t.Fatal("snapshotFeatureEnabled is serialized into RunaiConfig; the gate must stay out of the CRD")
 	}
 }

@@ -32,6 +32,7 @@ import (
 	"github.com/aws/amazon-ssm-agent/agent/versionutil"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/knative"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/prometheus/resources"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/snapshot"
 	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	anyworkloadcontroller "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/anyworkload-controller"
@@ -405,8 +406,31 @@ func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, 
 	}
 
 	components[runv1.RunaiPublicAdvice] = getAdviceCRDStatus(discoveryClient)
+	components[runv1.RunaiPublicSnapshot] = getSnapshotStatus(ctx, kbClient, runaiConfig)
 
 	return components
+}
+
+// getSnapshotStatus reports the NVIDIA Snapshot installation. Snapshot is a
+// separate Helm install the administrator owns, so an absent one is a normal
+// result and reported as unavailable with a reason, never as an error.
+func getSnapshotStatus(ctx context.Context, kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig) runv1.PublicStatus {
+	status := snapshot.Detect(ctx, kbClient, runaiConfig)
+
+	return runv1.PublicStatus{
+		Available: runv1.AvailableStatus(status.Available),
+		Reason:    status.Reason,
+		Components: map[string]runv1.PublicStatus{
+			snapshot.ComponentCRD: {
+				Available: runv1.AvailableStatus(status.CRDInstalled),
+				Reason:    status.CRDReason,
+			},
+			snapshot.ComponentOperator: {
+				Available: runv1.AvailableStatus(status.OperatorReady),
+				Reason:    status.OperatorReason,
+			},
+		},
+	}
 }
 
 func getAdviceCRDStatus(discoveryClient discovery.DiscoveryInterface) runv1.PublicStatus {

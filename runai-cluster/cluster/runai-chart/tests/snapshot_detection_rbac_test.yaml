@@ -1,0 +1,51 @@
+suite: Test operator permissions for detecting NVIDIA Snapshot
+
+templates:
+  - templates/clusterroles/base.yaml
+
+# Snapshot is a separate Helm install the administrator owns. The operator only
+# reads it: the SnapshotJob CRD to tell whether it is installed, and the operator
+# Deployment and agent DaemonSet to tell whether it is healthy and where its
+# agent runs. The kubebuilder markers generate config/rbac/role.yaml, which the
+# chart does not install, so the grants have to exist here or detection fails
+# closed and every cluster reports Snapshot unavailable.
+tests:
+  - it: should let the operator read Snapshot's own CRD and nothing else
+    documentSelector:
+      path: rules[0].resources[0]
+      value: clusterversions
+    asserts:
+      - isKind:
+          of: ClusterRole
+      - equal:
+          path: metadata.name
+          value: runai-operator
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - apiextensions.k8s.io
+            resourceNames:
+              - snapshotjobs.nvidia.com
+            resources:
+              - customresourcedefinitions
+            verbs:
+              - get
+
+  - it: should let the operator read the Snapshot operator deployment and agent daemonset
+    documentSelector:
+      path: rules[0].resources[0]
+      value: clusterversions
+    asserts:
+      - contains:
+          path: rules
+          content:
+            apiGroups:
+              - "apps"
+            resources:
+              - deployments
+              - daemonsets
+            verbs:
+              - list
+              - get
+              - watch

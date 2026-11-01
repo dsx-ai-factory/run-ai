@@ -59,6 +59,10 @@ spec:
               value: {{ include "imageRegistry" . }}
             - name: IMG_DEFAULT_VERSION
               value: {{ $runai_operator.image.tag }}
+            {{- if .Values.development.snapshotFeatureEnabled }}
+            - name: SNAPSHOT_FEATURE_ENABLED
+              value: "true"
+            {{- end }}
             {{- range $name, $image := .Values.thirdPartyImages }}
             - name: IMG_THIRD_PARTY_{{ $name | replace "-" "_" | upper }}_REGISTRY
               value: {{ required (printf "thirdPartyImages.%s.registry is required" $name) $image.registry | quote }}
