@@ -4,14 +4,14 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getNimIconIfNimImage, getHuggingFaceIcon } from "./icon.util";
+import { getNimIconIfNimImage, getHuggingFaceIcon, getNvidiaImageBasedIcon, isAmdImage } from "./icon.util";
 import {
   NIM_WORKLOAD_LABEL,
   NIM_IMAGE_PREFIX,
   LLM_IMAGE_FOR_HUGGING_FACE,
   LLM_IMAGE_FOR_TGI,
 } from "@/models/inference.model";
-import { allWorkloadsIconsMap } from "../icons.constant";
+import { allWorkloadsIconsMap, AMD_WORKLOAD_ICON } from "../icons.constant";
 import { EWorkloadType } from "@/models/workload.model";
 import type { Label } from "@/swagger-models/assets-service-client";
 
@@ -376,5 +376,22 @@ describe("getHuggingFaceIcon", () => {
 
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe("getNvidiaImageBasedIcon - AMD ROCm images", () => {
+  it("should return the AMD icon for ROCm images", () => {
+    expect(getNvidiaImageBasedIcon("docker.io/rocm/pytorch:rocm10.1.0_ubuntu24.04_py3.12_pytorch_release_2.14.0")).toBe(
+      AMD_WORKLOAD_ICON,
+    );
+    expect(getNvidiaImageBasedIcon("rocm/vllm:latest")).toBe(AMD_WORKLOAD_ICON);
+    expect(getNvidiaImageBasedIcon("registry.example.com/mirror/rocm/pytorch@sha256:abc")).toBe(AMD_WORKLOAD_ICON);
+  });
+
+  it("should keep the NVIDIA icons and ignore look-alikes", () => {
+    expect(getNvidiaImageBasedIcon("nvcr.io/nvidia/pytorch:25.06-py3")).toBe("pytorch");
+    expect(getNvidiaImageBasedIcon("nvcr.io/nvidia/nemo:25.07")).toBe("nvidia");
+    expect(getNvidiaImageBasedIcon("myrocm/tool:1")).toBeNull();
+    expect(isAmdImage("jupyter/scipy-notebook")).toBe(false);
   });
 });

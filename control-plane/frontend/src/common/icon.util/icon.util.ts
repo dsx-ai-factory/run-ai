@@ -9,7 +9,7 @@ import {
   NIM_IMAGE_PREFIX,
   NIM_WORKLOAD_LABEL,
 } from "@/models/inference.model";
-import { allWorkloadsIconsMap } from "../icons.constant";
+import { allWorkloadsIconsMap, AMD_WORKLOAD_ICON } from "../icons.constant";
 import { EWorkloadType } from "@/models/workload.model";
 import type { Label } from "@/swagger-models/assets-service-client";
 
@@ -23,12 +23,20 @@ export function isNvidiaPytorch(image: string | null | undefined): boolean {
   return image.includes("nvcr.io/nvidia/pytorch");
 }
 
+// AMD's ROCm images live under rocm/ (docker.io/rocm/pytorch, rocm/vllm, a mirror's .../rocm/...).
+export function isAmdImage(image: string | null | undefined): boolean {
+  if (!image) return false;
+  return /(^|\/)rocm\//.test(image);
+}
+
 export function getNvidiaImageBasedIcon(image: string | null | undefined): string | null {
   if (!image) return null;
 
   if (isNvidiaPytorch(image)) return "pytorch";
 
   if (isNvidiaImage(image)) return "nvidia";
+
+  if (isAmdImage(image)) return AMD_WORKLOAD_ICON;
 
   return null;
 }
