@@ -22,6 +22,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 )
 
+var obsoleteClientIDs = []string{utils.KEYCLOAK_ADMIN_CLI_CLIENT_ID}
+
 type ClientsReconcilerConfig struct {
 	hostTemplate string
 	appHost      string
@@ -67,6 +69,11 @@ func (cr *ClientsReconciler) Reconcile(ctx context.Context, realm string, force 
 		return err
 	}
 
+	// Disabling obsolete clients is a hardening step: a failure must not block the rest of the realm reconcile.
+	if err := cr.disableObsoleteClients(ctx, realm); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to disable obsolete clients for realm %s: %v", realm, err)
+	}
+
 	return nil
 }
 
@@ -90,6 +97,23 @@ func (cr *ClientsReconciler) reconcileDefaultClients(ctx context.Context, realm 
 	if err := cr.clientReconcilerHelper.DeleteClientIfExists(ctx, realm, utils.RUNAI_CLIENT_ID); err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to delete deprecated client %s in realm %s: %v", utils.RUNAI_CLIENT_ID, realm, err)
 		return err
+	}
+	return nil
+}
+
+// disableObsoleteClients disables Keycloak default clients that Run:ai does not use in tenant realms.
+// admin-cli is created by Keycloak in every realm and is not used in tenant realms, so it is disabled
+// (with its direct access grants) on every reconcile. Keycloak rejects deleting it with a
+// 400, so it is disabled instead. It is never touched in the master realm, where the identity-manager
+// admin login still uses it.
+func (cr *ClientsReconciler) disableObsoleteClients(ctx context.Context, realm string) error {
+	if realm == utils.MASTER_REALM {
+		return nil
+	}
+	for _, clientID := range obsoleteClientIDs {
+		if err := cr.clientReconcilerHelper.DisableClientIfExists(ctx, realm, clientID); err != nil {
+			return fmt.Errorf("failed to disable obsolete client %s in realm %s: %w", clientID, realm, err)
+		}
 	}
 	return nil
 }
