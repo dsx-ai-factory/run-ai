@@ -54,10 +54,15 @@ const (
 	NotReadyPhase             = "NotReady"
 	MissingPrerequisitesPhase = "MissingPrerequisites"
 
-	NvidiaGpuCountLabelKey         = "nvidia.com/gpu.count"
-	NvidiaGpuTypeLabelKey          = "nvidia.com/gpu.product"
-	NvidiaGpuMemoryLabelKey        = "nvidia.com/gpu.memory"
-	AmdGpuTypeLabelPrefix          = "beta.amd.com/gpu.family."
+	NvidiaGpuCountLabelKey  = "nvidia.com/gpu.count"
+	NvidiaGpuTypeLabelKey   = "nvidia.com/gpu.product"
+	NvidiaGpuMemoryLabelKey = "nvidia.com/gpu.memory"
+	AmdGpuTypeLabelPrefix   = "beta.amd.com/gpu.family."
+	// The AMD GPU Operator's node labeller: amd.com/gpu.product-name=<name>, and the legacy
+	// beta.amd.com/gpu.product-name.<name>=<count of GPUs with that name on the node>.
+	AmdGpuProductNameLabelKey      = "amd.com/gpu.product-name"
+	AmdGpuProductCountLabelPrefix  = "beta.amd.com/gpu.product-name."
+	AmdGpuVramLabelKey             = "amd.com/gpu.vram"
 	GPUNetworkAccelerationLabelKey = "gpuNetworkAccelerationLabelKey"
 	NvidiaGpuCliqueLabel           = "nvidia.com/gpu.clique"
 
@@ -588,12 +593,20 @@ func parseTaints(taints []corev1.Taint) []swagger.NodeTaint {
 
 func getGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
 	nvidiaGpuInfo := getNvidiaGpuInfo(nodeLabels, nodeName)
-	if nvidiaGpuInfo != nil {
-		return nvidiaGpuInfo
-	}
-
 	amdGpuInfo := getAmdGpuInfo(nodeLabels, nodeName)
-	if amdGpuInfo != nil {
+
+	switch {
+	case nvidiaGpuInfo != nil && amdGpuInfo != nil:
+		// A node with GPUs of both vendors: one GpuInfo per node, so report both types and the
+		// total count. The memory stays the NVIDIA GPU's (the field holds one device's memory).
+		return &swagger.GpuInfo{
+			GpuType:        nvidiaGpuInfo.GpuType + " + " + amdGpuInfo.GpuType,
+			GpuCount:       nvidiaGpuInfo.GpuCount + amdGpuInfo.GpuCount,
+			GpuMemoryBytes: nvidiaGpuInfo.GpuMemoryBytes,
+		}
+	case nvidiaGpuInfo != nil:
+		return nvidiaGpuInfo
+	case amdGpuInfo != nil:
 		return amdGpuInfo
 	}
 
@@ -657,6 +670,52 @@ func getNvidiaGpuMemoryBytes(nodeLabels map[string]string, nodeName string) *int
 }
 
 func getAmdGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
+	if info := getAmdGpuInfoByProductName(nodeLabels, nodeName); info != nil {
+		return info
+	}
+	return getAmdGpuInfoByFamily(nodeLabels, nodeName)
+}
+
+// The product name ("AMD_Radeon_Pro_W7900") names the GPU model like nvidia.com/gpu.product does;
+// the family table below predates current AMD GPUs (a W7900 is family "GC_11_0_0").
+func getAmdGpuInfoByProductName(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
+	productName, found := nodeLabels[AmdGpuProductNameLabelKey]
+	if !found || productName == "" {
+		return nil
+	}
+
+	result := &swagger.GpuInfo{
+		GpuType:        strings.ReplaceAll(productName, "_", "-"),
+		GpuMemoryBytes: getAmdGpuMemoryBytes(nodeLabels[AmdGpuVramLabelKey]),
+	}
+
+	countStr, countFound := nodeLabels[AmdGpuProductCountLabelPrefix+productName]
+	if !countFound {
+		zap.S().Warnf("Found amd gpu type <%s> on node <%s>, but can't find gpu count", productName, nodeName)
+		return result
+	}
+
+	count, err := strconv.ParseInt(countStr, 10, 32)
+	if err != nil {
+		zap.S().Errorf("Failed to parse amd gpu count label value: <%s> for node <%s>, error: %s",
+			countStr, nodeName, err.Error())
+		return result
+	}
+
+	result.GpuCount = int32(count)
+	return result
+}
+
+// amd.com/gpu.vram is a size in GiB with a G suffix ("45G"); nil when it is missing or unusable.
+func getAmdGpuMemoryBytes(vram string) *int64 {
+	gib, err := strconv.Atoi(strings.TrimSuffix(vram, "G"))
+	if err != nil || gib <= 0 {
+		return nil
+	}
+	return ptr.To(int64(gib) * 1024 * bytesInMib)
+}
+
+func getAmdGpuInfoByFamily(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
 	for key, value := range nodeLabels {
 		if !strings.HasPrefix(key, AmdGpuTypeLabelPrefix) {
 			continue

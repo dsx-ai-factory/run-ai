@@ -1059,6 +1059,35 @@ var _ = Describe("Parsers", Ordered, func() {
 			Expect(gpuInfo.GpuCount).To(BeEquivalentTo(0))
 		})
 
+		It("Parse Node To Update Info Request - AMD Gpu - product name from the AMD GPU Operator", func() {
+			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			node.Labels[parsers.AmdGpuProductNameLabelKey] = "AMD_Radeon_Pro_W7900"
+			node.Labels[parsers.AmdGpuProductCountLabelPrefix+"AMD_Radeon_Pro_W7900"] = "1"
+			node.Labels[parsers.AmdGpuVramLabelKey] = "45G"
+			node.Labels[parsers.AmdGpuTypeLabelPrefix+"GC_11_0_0"] = "1"
+
+			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+			gpuInfo := parsedNodeInfo.GpuInfo.Get()
+			Expect(gpuInfo.GpuType).To(Equal("AMD-Radeon-Pro-W7900"))
+			Expect(gpuInfo.GpuCount).To(BeEquivalentTo(1))
+			Expect(*gpuInfo.GpuMemoryBytes).To(BeEquivalentTo(int64(45) * 1024 * 1024 * 1024))
+		})
+
+		It("Parse Node To Update Info Request - NVIDIA and AMD Gpus on one node", func() {
+			node.Status.Conditions = []corev1.NodeCondition{readyCondition}
+			node.Labels[parsers.NvidiaGpuTypeLabelKey] = testGpuTypeA100
+			node.Labels[parsers.NvidiaGpuCountLabelKey] = "2"
+			node.Labels[parsers.NvidiaGpuMemoryLabelKey] = "40960"
+			node.Labels[parsers.AmdGpuProductNameLabelKey] = "AMD_Radeon_Pro_W7900"
+			node.Labels[parsers.AmdGpuProductCountLabelPrefix+"AMD_Radeon_Pro_W7900"] = "1"
+
+			parsedNodeInfo := nodeParser.ParseNodeToServerScheme(node)
+			gpuInfo := parsedNodeInfo.GpuInfo.Get()
+			Expect(gpuInfo.GpuType).To(Equal(testGpuTypeA100 + " + AMD-Radeon-Pro-W7900"))
+			Expect(gpuInfo.GpuCount).To(BeEquivalentTo(3))
+			Expect(*gpuInfo.GpuMemoryBytes).To(BeEquivalentTo(int64(40960) * 1024 * 1024))
+		})
+
 		It("Parse Node To Update Info Request - NV Link DomainUid and CliqueID.", func() {
 			node.Annotations = map[string]string{parsers.GPUNetworkAccelerationLabelKey: parsers.NvidiaGpuCliqueLabel}
 			node.Labels[parsers.NvidiaGpuCliqueLabel] = testDomainCliqueValue
