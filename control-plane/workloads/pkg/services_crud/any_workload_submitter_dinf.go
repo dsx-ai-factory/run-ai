@@ -87,12 +87,8 @@ func (s *AnyWorkloadSubmitterDinf) Create(ctx context.Context, wc *workloadConte
 	if metadataErr := composeDinfConnectionMetadata(ctx, wc, spec); metadataErr != nil {
 		return nil, metadataErr
 	}
-	routing, routingErr := dinfInferenceRouting(spec)
-	if routingErr != nil {
-		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, fmt.Sprintf("failed to project inference routing: %v", routingErr))
-	}
-	if routing != nil {
-		target.Config.SetInferenceRouting(*routing)
+	if routingErr := setDinfInferenceRouting(spec, &target.Config); routingErr != nil {
+		return nil, routingErr
 	}
 
 	return &Submission{
@@ -225,6 +221,11 @@ func (s *AnyWorkloadSubmitterDinf) Update(ctx context.Context, wc *workloadConte
 	if err != nil {
 		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
 	}
+	// The update replaces the whole configuration, so it must carry the routing
+	// again; without it workloads-manager removes externalAccess.inference.
+	if routingErr := setDinfInferenceRouting(spec, &target.Config); routingErr != nil {
+		return nil, routingErr
+	}
 
 	return &Update{
 		Request: workloadMgrApi.WorkloadV2UpdateRequest{
@@ -242,6 +243,19 @@ func (s *AnyWorkloadSubmitterDinf) Update(ctx context.Context, wc *workloadConte
 func dinfLoadAwareRoutingRequested(spec *workloadsApi.DistributedInferenceSpecSpec) bool {
 	return spec != nil &&
 		(convutils.Deref(spec.LoadAwareRouting.Get(), false) || spec.ObjectivePriority.Get() != nil || len(spec.ModelRewrites) > 0)
+}
+
+// setDinfInferenceRouting sets the inferenceRouting carrier on the request
+// configuration when the workload opts in.
+func setDinfInferenceRouting(spec *workloadsApi.DistributedInferenceSpecSpec, configuration *workloadMgrApi.WorkloadV2Configuration) *workloadsApi.SubmissionErrorV2 {
+	routing, err := dinfInferenceRouting(spec)
+	if err != nil {
+		return workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, fmt.Sprintf("failed to project inference routing: %v", err))
+	}
+	if routing != nil {
+		configuration.SetInferenceRouting(*routing)
+	}
+	return nil
 }
 
 // dinfInferenceRouting carries the policy-validated spec fields that workloads-manager

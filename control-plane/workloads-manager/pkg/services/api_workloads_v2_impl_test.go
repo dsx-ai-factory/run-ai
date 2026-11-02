@@ -527,6 +527,77 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				Expect(endpoints[0].ExternalAccess.HttpRoute).NotTo(BeNil())
 				Expect(endpoints[0].ExternalAccess.Inference).To(BeNil())
 			})
+
+			Context("update", func() {
+				const optedInBlock = `{"epp":{"profile":"gie-v1.5"},"objectives":[{"model":"model","priority":1000}]}`
+				var id string
+
+				clusterInferenceBlock := func() *api.ExternalAccessInference {
+					records := queuedRecords()
+					Expect(records).To(HaveLen(1))
+					endpoints := records[0].ToClusterUpdate().Configuration.NetworkingEndpoints
+					Expect(endpoints).NotTo(BeNil())
+					Expect(*endpoints).To(HaveLen(1))
+					Expect((*endpoints)[0].ExternalAccess.HttpRoute).NotTo(BeNil())
+					return (*endpoints)[0].ExternalAccess.Inference
+				}
+				expectInferenceBlock := func(expected string) {
+					raw, err := json.Marshal(clusterInferenceBlock())
+					Expect(err).NotTo(HaveOccurred())
+					Expect(raw).To(MatchJSON(expected))
+				}
+				update := func(configuration api.WorkloadV2Configuration) *httptest.ResponseRecorder {
+					configuration.Networking = &networking
+					return tryToUpdateInternalWorkloadForTest(router, randoms, id, &api.WorkloadV2UpdateRequest{
+						Metadata: api.WorkloadV2MetadataUpdateParams{Configuration: &configuration},
+						Manifest: manifest,
+					})
+				}
+
+				BeforeEach(func() {
+					csclient.WithCluster(randoms.ClusterId, inferenceIntegrationClusterForTest())
+					configuration := optedIn()
+					configuration.Networking = &networking
+					id, _ = createInternalWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+						Metadata: api.WorkloadV2MetadataCreateParams{
+							Name: "model", ProjectId: randoms.ProjectIdStr, Configuration: configuration,
+							Category: convutils.Ref("default-category"), Priority: convutils.Ref("default-priority"),
+						},
+						Manifest: manifest,
+					})
+					expectInferenceBlock(optedInBlock)
+				})
+
+				It("resolves the inference block again when the updated workload still opts in", func() {
+					configuration := optedIn()
+					configuration.InferenceRouting.ObjectivePriority = convutils.Ref(int32(10))
+					resp := update(configuration)
+					Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+					expectInferenceBlock(`{"epp":{"profile":"gie-v1.5"},"objectives":[{"model":"model","priority":10}]}`)
+				})
+
+				It("removes the inference block when the updated workload no longer opts in", func() {
+					resp := update(api.WorkloadV2Configuration{})
+					Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+					Expect(clusterInferenceBlock()).To(BeNil())
+				})
+
+				It("rejects an opted-in update on a cluster without the integration", func() {
+					csclient.WithCluster(randoms.ClusterId, &clustersapi.DisplayedCluster{})
+					resp := update(optedIn())
+					Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+					Expect(resp.Body.String()).To(ContainSubstring(loadAwareRoutingUnavailableMessage))
+					expectInferenceBlock(optedInBlock)
+				})
+
+				It("rejects a networking-only update instead of dropping the inference block", func() {
+					apiErr := impl.UpdateWorkloadNetworkingConfig(setContext(randoms.TenantIdStr, adminUser, nil), id, &networking)
+					Expect(apiErr).NotTo(BeNil())
+					Expect(apiErr.Code).To(BeEquivalentTo(http.StatusBadRequest))
+					Expect(apiErr.Message).To(Equal(inferenceRoutingNetworkingOnlyUpdateMessage))
+					expectInferenceBlock(optedInBlock)
+				})
+			})
 		})
 	})
 

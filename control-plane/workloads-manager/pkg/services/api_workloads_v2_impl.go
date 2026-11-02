@@ -701,7 +701,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 	if err != nil {
 		return nil, api.NewError(http.StatusBadRequest, fmt.Sprintf("manifest validation failed: %v", err), nil)
 	}
-	// Updates never resolve inference routing; only the internal update path may carry the field.
+	// Only the internal update path may carry the field; it is resolved with the configuration below.
 	if routingErr := validateInferenceRoutingOrigin(request.Metadata.Configuration, options.skipAuth); routingErr != nil {
 		return nil, SubmissionErrorToApiError(routingErr)
 	}
@@ -864,6 +864,17 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		configuration, configErr := w.buildConfiguration(ctx, *request.Metadata.Configuration, project, workloadType, manifestResourceInfo, qRecord.Name, networkingSubmissionProfileForRecord(qRecord))
 		if configErr != nil {
 			return nil, SubmissionErrorToApiError(configErr)
+		}
+		// The replaced configuration keeps externalAccess.inference only while the
+		// updated workload still opts in; otherwise the composed HTTPRoute returns.
+		inferenceRouting := request.Metadata.Configuration.InferenceRouting
+		trustedConvertedFromNative := options.skipAuth && qRecord.TranslatedFromV1 && isConvertedFromNativeWorkload(manifestResourceInfo.Labels)
+		inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, qRecord.ClusterId, trustedConvertedFromNative, manifestResourceInfo.Labels)
+		if routingErr != nil {
+			return nil, SubmissionErrorToApiError(routingErr)
+		}
+		if routingErr := applyInferenceRouting(inferenceRouting, inferenceDefaults, effectiveManifest, configuration, qRecord.Name); routingErr != nil {
+			return nil, SubmissionErrorToApiError(routingErr)
 		}
 		qRecord.Configuration = configuration
 	}
@@ -1293,6 +1304,11 @@ func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, wo
 	qRecord, dbErr := dao.DbGetWorkload(ctx, workloadId, permittedScopes)
 	if dbErr != nil {
 		return dbErr
+	}
+	// This path has no inferenceRouting to resolve the block again, and the
+	// caller cannot submit one; replacing the networking would drop it.
+	if hasInferenceRouting(qRecord.Configuration) {
+		return SubmissionErrorToApiError(NewConfigurationError(inferenceRoutingNetworkingOnlyUpdateMessage))
 	}
 
 	if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, qRecord.ClusterId, qRecord.Name, netCfg, networkingSubmissionProfileForRecord(qRecord)); networkingErr != nil {

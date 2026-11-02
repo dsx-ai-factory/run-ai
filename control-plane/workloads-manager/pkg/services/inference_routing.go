@@ -22,8 +22,9 @@ import (
 )
 
 const (
-	inferenceRoutingNotSubmittableMessage = "metadata.configuration.inferenceRouting is set by the server and cannot be submitted"
-	loadAwareRoutingUnavailableMessage    = "load-aware routing is not available on this cluster"
+	inferenceRoutingNotSubmittableMessage       = "metadata.configuration.inferenceRouting is set by the server and cannot be submitted"
+	loadAwareRoutingUnavailableMessage          = "load-aware routing is not available on this cluster"
+	inferenceRoutingNetworkingOnlyUpdateMessage = "the networking of a workload with load-aware routing can change only through a workload update"
 )
 
 // inferenceRoutingOptedIn reports whether the workload spec selects the inference
@@ -115,6 +116,18 @@ func applyInferenceRouting(
 	}
 	endpoint.ExternalAccess.Inference = inference
 	return nil
+}
+
+func hasInferenceRouting(configuration *models.WorkloadConfiguration) bool {
+	if configuration == nil || configuration.Networking == nil {
+		return false
+	}
+	for _, endpoint := range *configuration.Networking {
+		if endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil {
+			return true
+		}
+	}
+	return false
 }
 
 // reportedClusterStatus drops the control-plane connection state, which is the
