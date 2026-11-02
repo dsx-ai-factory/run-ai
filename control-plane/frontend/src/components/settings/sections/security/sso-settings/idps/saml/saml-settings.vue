@@ -29,13 +29,11 @@
         />
       </div>
       <saml-idp-details
+        v-if="editCertificateDetails.expirationError"
         class="q-mb-lg"
-        :single-sign-on-service-url="samlConfigSettings.singleSignOnServiceUrl"
-        :idp-entity-id="samlConfigSettings.idpEntityId"
         :expiration-date="editCertificateDetails.expirationDate"
         :show-expiration-date="editCertificateDetails.showExpirationDate"
         :expiration-error="editCertificateDetails.expirationError"
-        :tooltip="DETAILS_TOOLTIP"
       />
       <div class="col-12 q-mb-lg">
         <setting-readable-field label="Entity ID">
@@ -158,8 +156,6 @@ import { DOCS } from "@/constants/docs";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { ENotificationBarVariant, NotificationAlertBar } from "@/components/common/notification-alert-bar";
 
-const DETAILS_TOOLTIP = "This can't be modified. To make changes, modify the metadata file above";
-
 export default defineComponent({
   name: "saml-settings",
   components: {
@@ -208,7 +204,6 @@ export default defineComponent({
       } as SamlCertificateDetails,
       DOCS,
       ENotificationBarVariant,
-      DETAILS_TOOLTIP,
     };
   },
   async created(): Promise<void> {

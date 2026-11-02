@@ -29,7 +29,7 @@ describe("saml-idp-details.vue", () => {
     expect(wrapper.find<HTMLInputElement>("input[value='idp-entity']").exists()).toBe(true);
   });
 
-  it("shows the certificate expiration date first, then the URL and the entity ID", () => {
+  it("shows the identity provider URL, then the entity ID, then the certificate expiration date", () => {
     const wrapper = createWrapper({
       singleSignOnServiceUrl: "https://idp.example.com/sso",
       idpEntityId: "idp-entity",
@@ -38,13 +38,13 @@ describe("saml-idp-details.vue", () => {
     });
 
     const text = wrapper.text();
-    const certificate = text.indexOf("Certificate expiration date");
     const url = text.indexOf("Identity provider URL");
     const entityId = text.indexOf("Identity provider Entity ID (issuer)");
+    const certificate = text.indexOf("Certificate expiration date");
 
-    expect(certificate).toBeGreaterThanOrEqual(0);
-    expect(certificate).toBeLessThan(url);
+    expect(url).toBeGreaterThanOrEqual(0);
     expect(url).toBeLessThan(entityId);
+    expect(entityId).toBeLessThan(certificate);
   });
 
   it("hides the fields that have no value", () => {
@@ -79,19 +79,16 @@ describe("saml-idp-details.vue", () => {
       });
     const validate = (wrapper: ReturnType<typeof mountInForm>) =>
       (wrapper.vm as unknown as { validate: () => Promise<boolean> }).validate();
-    const certificateInput = (wrapper: ReturnType<typeof mountInForm>) =>
-      wrapper.find<HTMLInputElement>("input[aria-label='Certificate expiration date'], input[type='text']");
 
-    it("is disabled and does not block the form while the certificate is valid", async () => {
+    it("does not block the form while the certificate is valid", async () => {
       const wrapper = mountInForm({ showExpirationDate: true, expirationDate: new Date("2030-05-17T00:00:00.000Z") });
       await flushPromises();
 
-      expect(certificateInput(wrapper).attributes("disabled")).toBeDefined();
       expect(await validate(wrapper)).toBe(true);
       wrapper.unmount();
     });
 
-    it("is active and blocks the form when the certificate is expired", async () => {
+    it("blocks the form when the certificate is expired", async () => {
       const wrapper = mountInForm({
         showExpirationDate: true,
         expirationDate: new Date("2020-01-01T00:00:00.000Z"),
@@ -99,7 +96,6 @@ describe("saml-idp-details.vue", () => {
       });
       await flushPromises();
 
-      expect(certificateInput(wrapper).attributes("disabled")).toBeUndefined();
       expect(await validate(wrapper)).toBe(false);
       expect(wrapper.text()).toContain("Certificate expired. Replace the metadata file above.");
       wrapper.unmount();

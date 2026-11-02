@@ -5,21 +5,6 @@
 
 <template>
   <div class="saml-idp-details col-12" aid="saml-idp-details">
-    <div v-if="showExpirationDate" class="row">
-      <q-tooltip v-if="tooltip" anchor="center middle">{{ tooltip }}</q-tooltip>
-      <q-input
-        class="col-12 q-mb-lg"
-        :model-value="formattedExpirationDate"
-        :error="!!expirationError"
-        :error-message="expirationError"
-        :rules="[certificateRule]"
-        no-error-icon
-        stack-label
-        readonly
-        :disable="!expirationError"
-        label="Certificate expiration date"
-      />
-    </div>
     <div v-if="singleSignOnServiceUrl" class="row">
       <q-tooltip v-if="tooltip" anchor="center middle">{{ tooltip }}</q-tooltip>
       <q-input
@@ -42,6 +27,20 @@
         disable
       />
     </div>
+    <div v-if="showExpirationDate" class="row">
+      <q-tooltip v-if="tooltip" anchor="center middle">{{ tooltip }}</q-tooltip>
+      <q-input
+        class="col-4 q-mb-lg"
+        :model-value="formattedExpirationDate"
+        :error="!!expirationError"
+        :error-message="expirationError"
+        :rules="[certificateRule]"
+        no-error-icon
+        stack-label
+        readonly
+        label="Certificate expiration date"
+      />
+    </div>
   </div>
 </template>
 
@@ -61,8 +60,8 @@ const props = defineProps<{
   tooltip?: string;
 }>();
 
-// Quasar skips the rules of a disabled field, so the field is disabled only while the certificate is fine.
-// With an expiration error it stays active, which makes the q-form that contains it fail its validation.
+// The field is readonly (not disabled) because Quasar skips the rules of disabled fields: with an expiration error
+// the rule makes the q-form that contains this field fail its validation.
 const certificateRule = (): boolean | string => !props.expirationError || props.expirationError;
 
 const formattedExpirationDate = computed((): string =>
