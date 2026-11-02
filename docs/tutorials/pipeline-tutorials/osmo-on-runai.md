@@ -1,6 +1,6 @@
 # Running NVIDIA OSMO Workflows on NVIDIA Run:ai
 
-This tutorial demonstrates how to run NVIDIA OSMO workflows on an NVIDIA Run:ai-managed Kubernetes cluster. OSMO runs each workflow as Kubernetes pods. NVIDIA Run:ai schedules those pods under the [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota) and priority of an [NVIDIA Run:ai project](../../platform-management/aiinitiatives/organization/projects.md).
+This tutorial demonstrates how to run NVIDIA OSMO workflows on an NVIDIA Run:ai-managed Kubernetes cluster, with an OSMO backend and pool for each [NVIDIA Run:ai project](../../platform-management/aiinitiatives/organization/projects.md). OSMO runs each workflow task as a Kubernetes pod, and NVIDIA Run:ai schedules those pods under the [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota) of the project. You can adapt this workflow for other teams, NVIDIA Run:ai projects, and OSMO pools.
 
 In this tutorial, you will learn how to:
 
@@ -22,7 +22,7 @@ Each part of the setup is responsible for the following:
   - **Pools.** A pool is a group of resources that users share. Users choose a pool when they submit a workflow. Each pool references the backend that runs its workflows. For more details, refer to [Resource Pools](https://nvidia.github.io/OSMO/release/6.3/user_guide/resource_pools/index.html).
   - **Backends and the backend operator.** A backend is a compute backend where workflows run. The backend operator runs on the compute cluster. Its worker creates the Kubernetes pods for the tasks, and its listener reports state changes back to the OSMO service. In this tutorial, each backend uses the namespace of one NVIDIA Run:ai project. For more details, refer to [Deploy Backend Operator](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/install_backend/deploy_backend.html).
 - **NVIDIA Run:ai** schedules the pods and enforces limits. It is responsible for:
-  - **Access to projects.** NVIDIA Run:ai administrators manage access to NVIDIA Run:ai projects in NVIDIA Run:ai. This is separate from how OSMO manages its users.
+  - **Access to projects.** NVIDIA Run:ai administrators manage access to the projects. This is separate from how OSMO manages its users.
   - **Projects and namespaces.** Each NVIDIA Run:ai project has its own Kubernetes namespace, which OSMO uses as a backend.
   - **Quota and priority.** NVIDIA Run:ai schedules every pod under the [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [priority, and preemption](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#priority-and-preemption) rules of the project.
   - **Pod placement.** NVIDIA Run:ai decides which nodes the pods run on.
@@ -34,6 +34,8 @@ Each NVIDIA Run:ai project maps to one OSMO backend, one OSMO pool, and one back
 | `osmo-high` | `osmo-high` | `osmo-high` | `runai-osmo-high` |
 | `osmo-low` | `osmo-low` | `osmo-low` | `runai-osmo-low` |
 
+The following diagram shows how users reach OSMO, and how each backend operator creates pods in the namespace of its NVIDIA Run:ai project:
+
 <img src="../../assets/osmo-on-runai-architecture.svg" alt="OSMO on NVIDIA Run:ai: the OSMO CLI connects to the OSMO service over HTTPS and WSS. The OSMO service includes the OSMO API and UI, the osmo-router, and the data stores. A backend operator for each backend, osmo-high and osmo-low, creates pods in the namespace of the matching NVIDIA Run:ai project, runai-osmo-high or runai-osmo-low. Both projects use the runai-scheduler." />
 
 ## Prerequisites
@@ -42,27 +44,25 @@ Before you start, make sure the following requirements are met:
 
 ### OSMO Prerequisites
 
-- **A running OSMO service and the OSMO CLI.** This tutorial uses OSMO **6.3.1**, with the `service` and `backend-operator` Helm charts at version **1.3.1**. For the service installation, refer to [Deploy Service](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html). For the CLI installation, refer to [Install Client](https://nvidia.github.io/OSMO/release/6.3/user_guide/getting_started/install/index.html). Use Helm 3.x. The values in this tutorial match these chart versions. A later chart can use a different values structure. The OSMO CLI must be logged in to the service.
+- **A running OSMO service.** For the installation, refer to [Deploy Service](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html). The OSMO administrator sets up the following before you start, and this tutorial does not cover them:
+  - **Data storage.** Where OSMO stores its data. Refer to [Step 1: Configure PostgreSQL](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html#step-1-configure-postgresql) and [Step 3: Configure Storage Access](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html#configure-storage-access) in Deploy Service.
+  - **External access.** How users reach OSMO from outside the cluster. Refer to [Networking](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/requirements/networking.html).
+  - **User login.** How users log in to OSMO. Refer to [Identity Provider (IdP) Setup](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/appendix/authentication/identity_provider_setup.html).
+- **The OSMO CLI, logged in to the service.** For the installation, refer to [Install Client](https://nvidia.github.io/OSMO/release/6.3/user_guide/getting_started/install/index.html).
+- **OSMO 6.3.1.** This tutorial uses OSMO 6.3.1, with the `service` and `backend-operator` Helm charts at version 1.3.1. The values in this tutorial match these chart versions. A later chart can use a different values structure.
+- **Helm 3.x.** Helm installs and upgrades the OSMO charts.
+- **Access to the OSMO images and charts.** The cluster must be able to pull the OSMO images from `nvcr.io/nvidia/osmo`. The commands in this tutorial install the OSMO charts from the `osmo` Helm repository. For how to add the repository, refer to [Deploy Backend Operator](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/install_backend/deploy_backend.html) in the OSMO documentation.
 
 ### NVIDIA Run:ai Prerequisites
 
 - **Administrator access.** You need a role that can create projects and change the scheduler settings.
 - **Kubernetes permissions.** You need Kubernetes cluster-admin permissions, or delegated permissions that allow creating the namespaces and the cluster-scoped objects of the OSMO backend operator, such as PriorityClasses.
-- **Command-line tools.** `kubectl`, `helm`, and `jq`.
-
-### Values to Replace
-
-Throughout this tutorial, replace:
-
-| Placeholder | Meaning | Example |
-|---|---|---|
-| `<project>` | An NVIDIA Run:ai project that runs OSMO workflows | `osmo-high` |
-| `runai-<project>` | The Kubernetes namespace of that project | `runai-osmo-high` |
-| `<workflow-id>` | The ID that OSMO returns when you submit a workflow | - |
 
 ## Step 1: Creating the NVIDIA Run:ai Projects
 
 Create one NVIDIA Run:ai project for each OSMO pool that you want to run on NVIDIA Run:ai. This tutorial creates two, `osmo-high` for high-priority workflows and `osmo-low` for low-priority workflows. Two projects let you test preemption in [Step 5](#step-5-testing-preemption).
+
+The project names are examples. If you use other names, replace `osmo-high`, `osmo-low`, and their namespaces, `runai-osmo-high` and `runai-osmo-low`, in every command and file in this tutorial.
 
 1. **Create the projects.** Create `osmo-high` and `osmo-low`, as described in [Adding a New Project](../../platform-management/aiinitiatives/organization/projects.md#adding-a-new-project). NVIDIA Run:ai creates the namespace of each project, `runai-osmo-high` and `runai-osmo-low`.
 2. **Set the quota.** Give each project the GPU and CPU quota that you want to guarantee for its pool, as described in [Assigning GPU Quota](../../platform-management/aiinitiatives/organization/projects.md#assigning-gpu-quota) and [Assigning CPU Quota](../../platform-management/aiinitiatives/organization/projects.md#assigning-cpu-quota). Workloads that run over the quota of a project can be preempted when other projects need the resources, so set the quotas intentionally. For how this works, refer to [Priority and Preemption](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#priority-and-preemption).
@@ -74,7 +74,7 @@ Create one NVIDIA Run:ai project for each OSMO pool that you want to run on NVID
    ```
 
    Each namespace must have the label `runai/queue` set to the name of its project. NVIDIA Run:ai [enforces the scheduler at the namespace level](../../platform-management/runai-scheduler/scheduling/default-scheduler.md#enforce-the-scheduler-at-the-namespace-level) with `enforceRunaiScheduler`, which is enabled by default. This matters because OSMO creates Kubernetes pods outside of NVIDIA Run:ai, so NVIDIA Run:ai treats them as [externally submitted Kubernetes workloads](../../workloads-in-nvidia-run-ai/workload-types/supported-features.md#externally-submitted-kubernetes-workloads). Enforcement makes sure that every pod in the namespace uses the `runai-scheduler`.
-4. **Label the compute nodes (only if your pod template uses a node selector).** The OSMO pod template `default_compute`, which you define in [Step 2](#step-2-connecting-osmo-to-each-project), selects compute nodes with the node selector `osmo-compute: "true"`. If your pod template does not set a node selector, skip this item. Otherwise, label each node that can run OSMO workflows:
+4. **Label the compute nodes (only if your pod template uses a node selector).** The OSMO pod template `default_compute`, which you define in [Step 2](#step-2-connecting-osmo-to-each-project), selects compute nodes with the node selector `osmo-compute: "true"`. If your pod template does not set a node selector, skip this item. Otherwise, label each node that can run OSMO workflows, replacing `<node-name>` with the name of the node:
 
    ```bash
    kubectl label nodes <node-name> --overwrite osmo-compute=true
@@ -85,7 +85,7 @@ Create one NVIDIA Run:ai project for each OSMO pool that you want to run on NVID
 
 ## Step 2: Connecting OSMO to Each Project
 
-Each NVIDIA Run:ai project needs three things in OSMO: a backend, a pool, and a backend-operator Helm release. The sections below show only the settings that connect OSMO to NVIDIA Run:ai. For the other chart values and the service installation, refer to [Deploy Service](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html).
+Each NVIDIA Run:ai project needs three things in OSMO: a backend, a pool, and a backend-operator Helm release. The following items show only the settings that connect OSMO to NVIDIA Run:ai. For the other chart values and the service installation, refer to [Deploy Service](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html).
 
 1. **Create the backend.** In the `services.configs.backends` section of the OSMO service values, add one backend for each project. The backend uses the namespace of the project and the NVIDIA Run:ai scheduler:
 
@@ -102,11 +102,25 @@ Each NVIDIA Run:ai project needs three things in OSMO: a backend, a pool, and a 
              scheduler_timeout: 30
    ```
 
-   * `k8s_namespace` - The namespace of the NVIDIA Run:ai project. It must match `backendNamespace` in the backend-operator release in item 4.
+   * `k8s_namespace` - The namespace of the NVIDIA Run:ai project. It must match `backendNamespace` in the backend-operator release in item 7.
    * `scheduler_type: kai` - The OSMO scheduler integration type that works with the NVIDIA Run:ai scheduler.
    * `scheduler_name: runai-scheduler` - Sets the scheduler name on every pod that OSMO creates. NVIDIA Run:ai enforces the same scheduler at the namespace level by default, as described in [Step 1](#step-1-creating-the-nvidia-runai-projects). Setting it in OSMO as well means the setting still applies if enforcement is turned off.
 
-2. **Create the pool.** In `services.configs.pools`, add one pool for each project. The pool points to the backend by name. Each pool uses one backend, and each backend uses one namespace, so the workflows of a pool run in one NVIDIA Run:ai project. This tutorial uses one pool and one backend for each project:
+   Add `osmo-low` the same way, with the names `osmo-low` and `runai-osmo-low`.
+
+2. **Define the pod template (only if your nodes use a node selector).** If your nodes do not use a node selector, skip this item. Otherwise, define the `default_compute` pod template in `services.configs.podTemplates`:
+
+   ```yaml
+   services:
+     configs:
+       podTemplates:
+         default_compute:
+           spec:
+             nodeSelector:
+               osmo-compute: "true"
+   ```
+
+3. **Create the pool.** In `services.configs.pools`, add one pool for each project. The pool points to the backend by name. Each pool uses one backend, and each backend uses one namespace, so the workflows of a pool run in one NVIDIA Run:ai project. This tutorial uses one pool and one backend for each project:
 
    ```yaml
    services:
@@ -130,30 +144,21 @@ Each NVIDIA Run:ai project needs three things in OSMO: a backend, a pool, and a 
                labels: {}
    ```
 
-   * `common_pod_template` - The pod templates that OSMO applies to the pods of the pool. A pod template is a reusable part of a pod specification, such as a node selector. `default_ctrl` and `default_user` are built-in templates of the OSMO service chart. `default_compute` sets the node selector from [Step 1](#step-1-creating-the-nvidia-runai-projects). If your nodes do not use a node selector, leave out `default_compute`.
+   * `common_pod_template` - The pod templates that OSMO applies to the pods of the pool. A pod template is a reusable part of a pod specification, such as a node selector. `default_ctrl` and `default_user` are built-in templates of the OSMO service chart. `default_compute` is the pod template from item 2, which sets the node selector from [Step 1](#step-1-creating-the-nvidia-runai-projects). If your nodes do not use a node selector, leave out `default_compute`.
    * `common_resource_validations` - Built-in rules of the OSMO service chart. They reject a workflow that requests more resources than the nodes have.
    * `default_platform` and `platforms` - A platform routes workflows to specific hardware in the pool. This pool has one platform, `default`, which workflows use when they do not choose one.
 
-   If you use the node selector, define the `default_compute` pod template in `services.configs.podTemplates`:
-
-   ```yaml
-   services:
-     configs:
-       podTemplates:
-         default_compute:
-           spec:
-             nodeSelector:
-               osmo-compute: "true"
-   ```
+   Add `osmo-low` the same way, with the names `osmo-low` and `runai-osmo-low`.
 
    For the other pool settings, refer to [Resource Pools](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/advanced_config/pool.html) in the OSMO deployment guide.
 
-   The default `osmo-user` role allows workflow submission only to the `default` pool. To let users submit workflows to the new pools, add a role for each pool and assign it to the users, as described in [Creating a Role for a Pool](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/appendix/authentication/roles_policies.html#creating-a-role-for-a-pool).
+4. **Give users access to the pools.** The default `osmo-user` role allows workflow submission only to the `default` pool. To let users submit workflows to the new pools, add a role for each pool and assign it to the users, as described in [Creating a Role for a Pool](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/appendix/authentication/roles_policies.html#creating-a-role-for-a-pool).
 
-   After you add the backend and the pool of each project, and the `default_compute` pod template if you use it, apply the updated values to your OSMO service release with `helm upgrade`, as described in [Deploy Service](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html). These values take effect only when the OSMO service reads its configuration from the Helm values, with `services.configs.enabled: true`, as set in [Step 4: Prepare values](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html#deploy-service-osmo-values) of Deploy Service.
+5. **Apply the values.** Apply the updated values to your OSMO service release with `helm upgrade`, as described in [Deploy Service](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html). Do this after you add the backend and the pool of each project, and the `default_compute` pod template if you use it. These values take effect only when the OSMO service reads its configuration from the Helm values, with `services.configs.enabled: true`, as set in [Step 4: Prepare values](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html#deploy-service-osmo-values) of Deploy Service.
 
-3. **Create the backend operator token.** The backend operator authenticates to the OSMO service with a token that has the `osmo-backend` role. Create the token and store it in a Kubernetes Secret in the OSMO namespace (`osmo` in this tutorial), as described in [Deploy Backend Operator](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/install_backend/deploy_backend.html).
-4. **Install the backend operator.** Install one `backend-operator` release for each project. The release runs in the OSMO namespace (`osmo`), and `backendNamespace` is the namespace of the NVIDIA Run:ai project:
+6. **Create the backend operator token.** The backend operator authenticates to the OSMO service with a token that has the `osmo-backend` role. Create the token and store it in a Kubernetes Secret in the OSMO namespace (`osmo` in this tutorial), as described in [Deploy Backend Operator](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/install_backend/deploy_backend.html).
+
+7. **Define the backend-operator values.** Define the values of one `backend-operator` release for each project. The release runs in the OSMO namespace (`osmo`), and `backendNamespace` is the namespace of the NVIDIA Run:ai project. The following values are for the release of `osmo-high`:
 
    ```yaml
    global:
@@ -167,14 +172,24 @@ Each NVIDIA Run:ai project needs three things in OSMO: a backend, a pool, and a 
 
    Do not point two backend-operator releases at the same backend name or namespace.
 
-   The release also needs the values that connect it to the OSMO service: `serviceUrl`, `agentNamespace`, `loginMethod`, and the name and key of the token Secret from item 3, in `accountTokenSecret` and `accountTokenSecretKey`. For these values, and for adding the OSMO Helm repository, refer to [Deploy Backend Operator](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/install_backend/deploy_backend.html).
+   The release also needs the values that connect it to the OSMO service: `serviceUrl`, `agentNamespace`, `loginMethod`, and the name and key of the token Secret from item 6, in `accountTokenSecret` and `accountTokenSecretKey`. For these values, and for adding the OSMO Helm repository, refer to [Deploy Backend Operator](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/install_backend/deploy_backend.html).
 
-   Save the values of the release in a file, for example `osmo-backend-high-values.yaml`, and install the release:
+8. **Install the backend operator.** Save the values of the release in a file, for example `osmo-backend-high-values.yaml`, and install the release:
 
    ```bash
    helm upgrade --install osmo-backend-high osmo/backend-operator \
      --namespace osmo \
      --values osmo-backend-high-values.yaml \
+     --version 1.3.1 \
+     --wait --timeout 10m
+   ```
+
+9. **Repeat for the other project.** Define the values of the release for `osmo-low` in the same way as in item 7, with the names `osmo-low` and `runai-osmo-low`. Install the release with its own values file:
+
+   ```bash
+   helm upgrade --install osmo-backend-low osmo/backend-operator \
+     --namespace osmo \
+     --values osmo-backend-low-values.yaml \
      --version 1.3.1 \
      --wait --timeout 10m
    ```
@@ -189,27 +204,17 @@ Each NVIDIA Run:ai project needs three things in OSMO: a backend, a pool, and a 
 
    If you add more projects, turn off the creation in every release except the first.
 
-5. **Repeat for the other project.** Add the backend, the pool, and the release for `osmo-low`. Use the same steps, except for the token, with the names `osmo-low` and `runai-osmo-low`. Install the release with its own values file:
+10. **Check the pools.** Both pools must show as `ONLINE` before you submit workflows:
 
-   ```bash
-   helm upgrade --install osmo-backend-low osmo/backend-operator \
-     --namespace osmo \
-     --values osmo-backend-low-values.yaml \
-     --version 1.3.1 \
-     --wait --timeout 10m
-   ```
+    ```bash
+    osmo pool list
+    ```
 
-6. **Check the pools.** Both pools must show as `ONLINE` before you submit workflows:
+    If a pool is not `ONLINE`, check the logs of the backend listener of its release, replacing `<project>` with the project name, `osmo-high` or `osmo-low`:
 
-   ```bash
-   osmo pool list
-   ```
-
-   If a pool is not `ONLINE`, check the logs of the backend listener of its release:
-
-   ```bash
-   kubectl logs -n osmo deployment/<project>-osmo-backend-listener --tail=100
-   ```
+    ```bash
+    kubectl logs -n osmo deployment/<project>-osmo-backend-listener --tail=100
+    ```
 
 ## Step 3: Enabling Preemption Reporting
 
@@ -234,7 +239,7 @@ kubectl -n runai get deployment runai-scheduler \
 
 The output must include `--update-pod-eviction-condition=true`.
 
-## Step 4: Running a Workflow and Inspecting Its Pods
+## Step 4: Running and Monitoring a Workflow
 
 Submit a small workflow to each pool, and check the pods that OSMO creates.
 
@@ -271,7 +276,7 @@ Submit a small workflow to each pool, and check the pods that OSMO creates.
    kubectl get pods -n runai-osmo-high -o wide
    ```
 
-   The pod must be in the `Running` phase. Then check the pod:
+   The pod must be in the `Running` phase. Then check the pod, replacing `<pod-name>` with the name from the previous command:
 
    ```bash
    kubectl get pod <pod-name> -n runai-osmo-high -o json | jq '{
@@ -297,7 +302,7 @@ Submit a small workflow to each pool, and check the pods that OSMO creates.
 
 This step checks that OSMO reports a preempted workflow correctly. Use the setting from [Step 3](#step-3-enabling-preemption-reporting).
 
-1. **Submit a long-running low-priority workflow** to the `osmo-low` pool, with the file from [Step 4](#step-4-running-a-workflow-and-inspecting-its-pods). The pool must use capacity that the NVIDIA Run:ai scheduler can reclaim:
+1. **Submit a long-running low-priority workflow** to the `osmo-low` pool, with the file from [Step 4](#step-4-running-and-monitoring-a-workflow). The pool must use capacity that the NVIDIA Run:ai scheduler can reclaim:
 
    ```bash
    osmo workflow submit hello-osmo.yaml --pool osmo-low --priority LOW
@@ -315,7 +320,7 @@ This step checks that OSMO reports a preempted workflow correctly. Use the setti
    kubectl get pods -n runai-osmo-low -w
    ```
 
-4. **Check the state in OSMO:**
+4. **Check the state in OSMO.** Use the workflow ID that OSMO returned when you submitted the low-priority workflow:
 
    ```bash
    osmo workflow events <workflow-id>
@@ -323,13 +328,6 @@ This step checks that OSMO reports a preempted workflow correctly. Use the setti
    ```
 
    OSMO must report the evicted workflow as `FAILED_PREEMPTED` with exit code `3006`, not as `FAILED` with code `2001`. To have OSMO reschedule the preempted workflow, set an exit action that reschedules tasks with exit code `3006`, and allow retries with `max_retry_per_task` in the workflow configuration. For more details, refer to [Exit Actions](https://nvidia.github.io/OSMO/release/6.3/user_guide/workflows/specification/exit_actions.html).
-
-## Scope and Limitations
-
-This tutorial does not cover how users reach OSMO from outside the cluster, where OSMO stores its data, or how users log in to OSMO. For these topics, refer to the following parts of the OSMO documentation:
-
-- [Step 1: Configure PostgreSQL](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html#step-1-configure-postgresql) and [Step 3: Configure Storage Access](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html#configure-storage-access) in [Deploy Service](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/getting_started/deploy_service.html) for where OSMO stores its data
-- [Identity Provider (IdP) Setup](https://nvidia.github.io/OSMO/release/6.3/deployment_guide/appendix/authentication/identity_provider_setup.html) for how users log in to OSMO
 
 ## Troubleshooting
 
