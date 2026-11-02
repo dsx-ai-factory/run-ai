@@ -61,15 +61,19 @@ export default defineComponent({
   data() {
     return {
       isFocus: false,
+      debouncedSearch: null as ReturnType<typeof debounce<(value: string) => void>> | null,
       elSearchInput: null as null | HTMLInputElement,
       inputId: `runai-general-search-input-${this.$.uid}`,
     };
   },
   created() {
-    this.updateSearch = debounce(this.updateSearch, 300);
+    this.debouncedSearch = debounce(this.updateSearch, 300);
   },
   mounted() {
     this.elSearchInput = this.$refs["search-input"] as HTMLInputElement;
+  },
+  beforeUnmount() {
+    this.debouncedSearch?.cancel();
   },
   methods: {
     focus(): void {
@@ -86,6 +90,7 @@ export default defineComponent({
       this.$emit("update-search-term", val);
     },
     clearSearch(): void {
+      this.debouncedSearch?.cancel();
       this.isFocus = false;
       this.setInputValue("");
       this.$emit("update-search-term", "");
@@ -93,7 +98,12 @@ export default defineComponent({
     handleInput(ev: Event): void {
       const value: string = (ev.target as HTMLInputElement).value;
       this.setInputValue(value);
-      this.updateSearch(value);
+      this.debouncedSearch?.(value);
+    },
+  },
+  watch: {
+    searchTerm() {
+      this.debouncedSearch?.cancel();
     },
   },
 });

@@ -1,6 +1,6 @@
 get:
   summary: Get workload action history.
-  description: Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+  description: Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
   operationId: get_workload_actions_history
   x-service: workloads
   x-test-coverage:
@@ -14,6 +14,30 @@ get:
     - $ref: '../../../../infra/openapi/docs/parameters/path/WorkloadId.yaml'
     - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
     - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - name: sortOrder
+      in: query
+      description: Sort direction. Defaults to newest first.
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: desc
+    - name: sortBy
+      in: query
+      description: Field to sort by. Defaults to acceptedAt.
+      schema:
+        type: string
+        enum: [acceptedAt, action, subject]
+    - name: filterBy
+      in: query
+      description: Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support ==, !=, <= and >= operators.
+      schema:
+        type: array
+        maxItems: 10
+        items:
+          type: string
+          pattern: "^((action|subject)(==|!=|<=|>=|=@|!@|=\\^|=\\$)|acceptedAt(==|!=|<=|>=)).+$"
+      explode: false
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
   responses:
     200:
       description: Executed successfully.

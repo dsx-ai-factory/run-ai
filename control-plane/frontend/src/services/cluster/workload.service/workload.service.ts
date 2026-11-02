@@ -66,6 +66,7 @@ import type { IFilterBy, IPaginationFilter } from "@/models/filter.model";
 import { controlPlaneService } from "@/services/control-plane/control-plane.service/control-plane.service";
 import type {
   GetWorkloadHistory200Response,
+  GetWorkloadActionsResponse,
   TelemetryResponse,
   Workload,
   WorkloadPatchFields,
@@ -82,6 +83,7 @@ export const workloadService = {
   list,
   getWorkloadPods,
   getWorkloadHistory,
+  getWorkloadActions,
   getWorkloadById,
   getWorkloadV2ById,
   getWorkloadCrudById,
@@ -485,6 +487,35 @@ async function patchWorkloadById(workloadId: string, patchFields: WorkloadPatchF
 
 async function getWorkloadHistory(workloadId: string, clusterUuid: string): Promise<GetWorkloadHistory200Response> {
   return controlPlaneService.get(`${WORKLOADS_SERVICE_ENDPOINT}/${workloadId}/history?clusterId=${clusterUuid}`);
+}
+
+export interface WorkloadActionsQuery {
+  sortBy?: "acceptedAt" | "action" | "subject";
+  sortOrder?: "asc" | "desc";
+  filterBy?: string[];
+  search?: string;
+}
+
+async function getWorkloadActions(
+  workloadId: string,
+  offset = 0,
+  limit = 50,
+  query?: WorkloadActionsQuery,
+): Promise<GetWorkloadActionsResponse> {
+  const api = workloadServiceApi.workloadActionsApi;
+  return (
+    await (query
+      ? api.getWorkloadActionsHistory(
+          workloadId,
+          offset,
+          limit,
+          query.sortOrder,
+          query.sortBy || undefined,
+          query.filterBy,
+          query.search,
+        )
+      : api.getWorkloadActionsHistory(workloadId, offset, limit))
+  ).data;
 }
 
 async function countWorkloadsByName(name: string, clusterId: string, projectId?: number | null): Promise<number> {

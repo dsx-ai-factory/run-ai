@@ -8,6 +8,10 @@ package dao
 import (
 	"context"
 	"net/http"
+	"strings"
+
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
+	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models"
@@ -62,7 +66,7 @@ func DbInsertRegisteredWorkloadActions(ctx context.Context, records []models.Wor
 	return DbInsertWorkloadActions(ctx, records)
 }
 
-func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, limit int32) ([]models.WorkloadActionHistory, bool, *api.Error) {
+func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, limit int32, sortOrder, sortColumn string, filters []queryapi.Filter, search string) ([]models.WorkloadActionHistory, bool, *api.Error) {
 	records := []models.WorkloadActionHistory{}
 	tenantID, apiErr := services_utils.ParseTenantId(ctx)
 	if apiErr != nil {
@@ -77,9 +81,24 @@ func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, lim
 	if limit > maxWorkloadActionsLimit {
 		limit = maxWorkloadActionsLimit
 	}
-	err := runaidb.DB().WithContext(ctx).
+	query := runaidb.DB().WithContext(ctx).
 		Where("tenant_id = ? AND workload_id = ?", tenantID, workloadID).
-		Order("accepted_at DESC, id DESC").
+		WithEnricher(querydbenrich.Filters(filters))
+	if term := strings.TrimSpace(search); term != "" {
+		// Match the event labels shown in the UI, including their past-tense suffixes.
+		const eventLabel = `CASE action
+            WHEN 'create' THEN 'Created'
+            WHEN 'update' THEN 'Updated'
+            WHEN 'delete' THEN 'Deleted'
+            WHEN 'suspend' THEN 'Suspended'
+            WHEN 'resume' THEN 'Resumed'
+            ELSE action END`
+		escaped := strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(term)
+		pattern := "%" + escaped + "%"
+		query = query.Where("(subject ILIKE ? OR ("+eventLabel+") ILIKE ?)", pattern, pattern)
+	}
+	err := query.Order(querydbenrich.FormatSortClause(sortColumn, sortOrder)).
+		Order("id DESC").
 		Offset(int(offset)).
 		Limit(int(limit + 1)).
 		Find(&records)

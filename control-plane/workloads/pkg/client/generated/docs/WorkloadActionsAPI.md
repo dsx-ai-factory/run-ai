@@ -11,7 +11,7 @@ Method | HTTP request | Description
 
 ## GetWorkloadActionsHistory
 
-> GetWorkloadActionsResponse GetWorkloadActionsHistory(ctx, workloadId).Offset(offset).Limit(limit).Execute()
+> GetWorkloadActionsResponse GetWorkloadActionsHistory(ctx, workloadId).Offset(offset).Limit(limit).SortOrder(sortOrder).SortBy(sortBy).FilterBy(filterBy).Search(search).Execute()
 
 Get workload action history.
 
@@ -33,10 +33,14 @@ func main() {
 	workloadId := "38400000-8cf0-11bd-b23e-10b96e4ef00d" // string | The  Universally Unique Identifier (UUID) of the workload.
 	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
 	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+	sortOrder := "sortOrder_example" // string | Sort direction. Defaults to newest first. (optional) (default to "desc")
+	sortBy := "sortBy_example" // string | Field to sort by. Defaults to acceptedAt. (optional)
+	filterBy := []string{"Inner_example"} // []string | Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support ==, !=, <= and >= operators. (optional)
+	search := "test project" // string | Filter results by a free text search. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.WorkloadActionsAPI.GetWorkloadActionsHistory(context.Background(), workloadId).Offset(offset).Limit(limit).Execute()
+	resp, r, err := apiClient.WorkloadActionsAPI.GetWorkloadActionsHistory(context.Background(), workloadId).Offset(offset).Limit(limit).SortOrder(sortOrder).SortBy(sortBy).FilterBy(filterBy).Search(search).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `WorkloadActionsAPI.GetWorkloadActionsHistory``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -64,6 +68,10 @@ Name | Type | Description  | Notes
 
  **offset** | **int32** | The offset of the first item returned in the collection. | 
  **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+ **sortOrder** | **string** | Sort direction. Defaults to newest first. | [default to &quot;desc&quot;]
+ **sortBy** | **string** | Field to sort by. Defaults to acceptedAt. | 
+ **filterBy** | **[]string** | Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D; operators. | 
+ **search** | **string** | Filter results by a free text search. | 
 
 ### Return type
 

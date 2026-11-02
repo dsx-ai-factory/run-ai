@@ -141,7 +141,8 @@ describe("RunaiAdvancedFilterChip", () => {
 
     await mountComponent(filters);
 
-    await wrapper.find(".filter-chip").trigger("click");
+    expect(wrapper.find('.filter-chip[role="button"]').exists()).toBe(false);
+    await wrapper.get('button[aria-label="Edit Workload filter: contains workspace-ds2423e"]').trigger("click");
 
     expect(wrapper.emitted("select")).toBeTruthy();
     expect(wrapper.emitted("select")?.[0]?.[0]).toEqual(filters[0]);

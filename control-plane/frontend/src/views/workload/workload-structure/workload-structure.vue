@@ -55,8 +55,9 @@
 
           <runai-tab-panels v-model="activeTab" class="context-tab-panels">
             <runai-tab-panel class="q-pa-none" :name="tabOptions.EventHistory">
-              <workload-history-tab
+              <workload-event-history
                 :drawer-width="contextPanelWidth"
+                v-model:initial-type="historyType"
                 :workload="workload"
                 :show-element-empty-state="isElementContext"
               />
@@ -129,7 +130,7 @@ import { RunaiTab, RunaiTabPanels, RunaiTabPanel, type ITab } from "@/components
 import { RunaiDrawerNoData } from "@/components/common/runai-drawer-no-data";
 import { RunaiStatus } from "@/components/common/runai-status";
 import { RunaiSvgIcon } from "@/components/common/runai-svg-icon";
-import { WorkloadHistoryTab } from "@/components/workload/workload-drawer-content/tabs/workload-history-tab";
+import WorkloadEventHistory from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.vue";
 import { WorkloadMetricsTab } from "@/components/workload/workload-drawer-content/tabs/workload-metrics-tab";
 import { WorkloadLogsTab } from "@/components/workload/workload-drawer-content/tabs/workload-logs-tab";
 import { WorkloadTerminal } from "@/components/workload/workload-drawer-content/tabs/workload-terminal";
@@ -185,6 +186,7 @@ const contextPods = ref<WorkloadServicePod[]>([]);
 // for an old elementId could otherwise overwrite a newer selection's pods.
 let contextPodsRequestToken = 0;
 const elementDetailsById = ref<WorkloadElementDetailsById>({});
+const historyType = ref<"logs" | "user-actions">(route.query.tab === "activity" ? "user-actions" : "logs");
 const activeTab = ref<StructureTab>(tabOptions.EventHistory);
 const rightPanelWidth = ref(PANEL_DEFAULT_WIDTH);
 const originalWidth = ref(PANEL_DEFAULT_WIDTH);
@@ -267,7 +269,7 @@ const selectedElementName = computed(() => {
 const childIncompatibleTabs: StructureTab[] = [tabOptions.EventHistory];
 
 const getRouteTab = (): StructureTab => {
-  const tab = route.query.tab;
+  const tab = route.query.tab === "activity" ? tabOptions.EventHistory : route.query.tab;
   const tabs = Object.values(tabOptions);
   const resolved =
     typeof tab === "string" && tabs.includes(tab as StructureTab) ? (tab as StructureTab) : tabOptions.EventHistory;
@@ -425,6 +427,7 @@ const startRefreshInterval = (): void => {
 watch(
   () => route.query.tab,
   () => {
+    if (route.query.tab === "activity") historyType.value = "user-actions";
     activeTab.value = getRouteTab();
   },
   { immediate: true },

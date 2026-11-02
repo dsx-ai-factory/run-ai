@@ -33484,15 +33484,19 @@ export class UnifiedApi extends BaseAPI {
 export const WorkloadActionsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
          * @summary Get workload action history.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort direction. Defaults to newest first.
+         * @param {'acceptedAt' | 'action' | 'subject'} [sortBy] Field to sort by. Defaults to acceptedAt.
+         * @param {Array<string>} [filterBy] Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D; operators.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloadActionsHistory: async (workloadId: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getWorkloadActionsHistory: async (workloadId: string, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'acceptedAt' | 'action' | 'subject', filterBy?: Array<string>, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'workloadId' is not null or undefined
             assertParamExists('getWorkloadActionsHistory', 'workloadId', workloadId)
             const localVarPath = `/api/v1/workloads/{workloadId}/actions`
@@ -33518,6 +33522,22 @@ export const WorkloadActionsApiAxiosParamCreator = function (configuration?: Con
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
+            }
+
+            if (sortOrder !== undefined) {
+                localVarQueryParameter['sortOrder'] = sortOrder;
+            }
+
+            if (sortBy !== undefined) {
+                localVarQueryParameter['sortBy'] = sortBy;
+            }
+
+            if (filterBy) {
+                localVarQueryParameter['filterBy'] = filterBy.join(COLLECTION_FORMATS.csv);
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
             }
 
 
@@ -33582,16 +33602,20 @@ export const WorkloadActionsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = WorkloadActionsApiAxiosParamCreator(configuration)
     return {
         /**
-         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
          * @summary Get workload action history.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort direction. Defaults to newest first.
+         * @param {'acceptedAt' | 'action' | 'subject'} [sortBy] Field to sort by. Defaults to acceptedAt.
+         * @param {Array<string>} [filterBy] Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D; operators.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloadActionsResponse>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadActionsHistory(workloadId, offset, limit, options);
+        async getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'acceptedAt' | 'action' | 'subject', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<GetWorkloadActionsResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getWorkloadActionsHistory(workloadId, offset, limit, sortOrder, sortBy, filterBy, search, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -33616,16 +33640,20 @@ export const WorkloadActionsApiFactory = function (configuration?: Configuration
     const localVarFp = WorkloadActionsApiFp(configuration)
     return {
         /**
-         * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
          * @summary Get workload action history.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {'asc' | 'desc'} [sortOrder] Sort direction. Defaults to newest first.
+         * @param {'acceptedAt' | 'action' | 'subject'} [sortBy] Field to sort by. Defaults to acceptedAt.
+         * @param {Array<string>} [filterBy] Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D; operators.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: any): AxiosPromise<GetWorkloadActionsResponse> {
-            return localVarFp.getWorkloadActionsHistory(workloadId, offset, limit, options).then((request) => request(axios, basePath));
+        getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'acceptedAt' | 'action' | 'subject', filterBy?: Array<string>, search?: string, options?: any): AxiosPromise<GetWorkloadActionsResponse> {
+            return localVarFp.getWorkloadActionsHistory(workloadId, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(axios, basePath));
         },
         /**
          * Records workload actions accepted by workloads-manager, using the authenticated request context to identify who performed them and the supplied timestamp to record when they were accepted.
@@ -33648,17 +33676,21 @@ export const WorkloadActionsApiFactory = function (configuration?: Configuration
  */
 export class WorkloadActionsApi extends BaseAPI {
     /**
-     * Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+     * Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
      * @summary Get workload action history.
      * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
      * @param {number} [offset] The offset of the first item returned in the collection.
      * @param {number} [limit] The maximum number of entries to return.
+     * @param {'asc' | 'desc'} [sortOrder] Sort direction. Defaults to newest first.
+     * @param {'acceptedAt' | 'action' | 'subject'} [sortBy] Field to sort by. Defaults to acceptedAt.
+     * @param {Array<string>} [filterBy] Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D; operators.
+     * @param {string} [search] Filter results by a free text search.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof WorkloadActionsApi
      */
-    public getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
-        return WorkloadActionsApiFp(this.configuration).getWorkloadActionsHistory(workloadId, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    public getWorkloadActionsHistory(workloadId: string, offset?: number, limit?: number, sortOrder?: 'asc' | 'desc', sortBy?: 'acceptedAt' | 'action' | 'subject', filterBy?: Array<string>, search?: string, options?: AxiosRequestConfig) {
+        return WorkloadActionsApiFp(this.configuration).getWorkloadActionsHistory(workloadId, offset, limit, sortOrder, sortBy, filterBy, search, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

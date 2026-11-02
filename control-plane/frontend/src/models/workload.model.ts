@@ -726,7 +726,18 @@ export interface ICanSubmitWorkload {
 }
 
 /** Drawer Navigation **/
-export type TWorkloadDrawerTab = "logs" | "terminal" | "metrics" | "pods" | "event history" | "details" | "structure";
+export const workloadDrawerTabs = [
+  "logs",
+  "terminal",
+  "metrics",
+  "pods",
+  "event history",
+  "activity",
+  "details",
+  "structure",
+  "yaml",
+] as const;
+export type TWorkloadDrawerTab = (typeof workloadDrawerTabs)[number];
 
 export interface IWorkloadDrawerNavigationPayload {
   tab: TWorkloadDrawerTab;

@@ -9,6 +9,8 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/actionhistory"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao"
@@ -51,7 +53,7 @@ func (s *WorkloadActionsService) InternalCreateWorkloadActions(ctx context.Conte
 	return api.Response(http.StatusNoContent, nil), nil
 }
 
-func (s *WorkloadActionsService) GetWorkloadActionsHistory(ctx context.Context, workloadId string, offset, limit int32) (api.ImplResponse, error) {
+func (s *WorkloadActionsService) GetWorkloadActionsHistory(ctx context.Context, workloadId string, offset, limit int32, sortOrder, sortBy string, filterBy []string, search string) (api.ImplResponse, error) {
 	id, err := uuid.Parse(workloadId)
 	if err != nil {
 		return NewErrorResponse(api.NewValidationError("workload Id must be a valid uuid")), nil
@@ -60,7 +62,30 @@ func (s *WorkloadActionsService) GetWorkloadActionsHistory(ctx context.Context, 
 		return NewErrorResponse(api.NewValidationError("offset and limit must not be negative")), nil
 	}
 	limit = setDefaultLimit(limit)
-	records, hasNext, dbErr := dao.DbGetWorkloadActions(ctx, id, offset, limit)
+	parser := queryapi.NewParser(models.WorkloadActionHistory{}.SortAndFilterFieldsToColumn())
+	filters, filterErr := parser.Filters(filterBy)
+	if filterErr != nil {
+		return ErrorToApiError(filterErr, http.StatusBadRequest), nil
+	}
+	for _, filter := range filters {
+		if filter.Field == "accepted_at" && (filter.Operator == "ILIKE" || filter.Operator == "NOT ILIKE") {
+			return NewErrorResponse(api.NewValidationError("acceptedAt only supports ==, !=, <= and >= operators")), nil
+		}
+	}
+	if sortBy == "" {
+		sortBy = "acceptedAt"
+	}
+	sortColumn, sortErr := parser.GetMapping(sortBy)
+	if sortErr != nil {
+		return ErrorToApiError(sortErr, http.StatusBadRequest), nil
+	}
+	if sortOrder == "" {
+		sortOrder = "desc"
+	}
+	if sortOrder != "asc" && sortOrder != "desc" {
+		return NewErrorResponse(api.NewValidationError("sortOrder must be asc or desc")), nil
+	}
+	records, hasNext, dbErr := dao.DbGetWorkloadActions(ctx, id, offset, limit, sortOrder, sortColumn, filters, search)
 	if dbErr != nil {
 		return NewErrorResponse(dbErr), nil
 	}

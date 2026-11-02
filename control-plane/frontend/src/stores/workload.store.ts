@@ -15,9 +15,10 @@ import {
   type Workload,
   type WorkloadCategory,
   type DistributedWorkload,
+  type WorkloadActionRecord,
 } from "@/swagger-models/workloads-client";
 import { Phase, type Training, type Workspace } from "@/swagger-models/workloads-client";
-import { workloadService } from "@/services/cluster/workload.service/workload.service";
+import { workloadService, type WorkloadActionsQuery } from "@/services/cluster/workload.service/workload.service";
 import { workloadUtil } from "@/utils/workload.util/workload.util";
 import { filterService } from "@/services/filter.service/filter.service";
 
@@ -55,6 +56,9 @@ export const useWorkloadStore = defineStore("WorkloadStore", {
   state: () => ({
     workloads: [] as Array<Workload>,
     workloadHistoryRecords: [] as Array<HistoryRecord>,
+    workloadActionRecords: [] as WorkloadActionRecord[],
+    workloadActionsNext: null as number | null,
+    workloadActionsRequestId: 0,
     workloadHistoryFilterBy: getDefaultFilters() as IJobFilter,
     loading: false as boolean,
     namespaces: {} as Record<string, string | undefined>,
@@ -184,6 +188,20 @@ export const useWorkloadStore = defineStore("WorkloadStore", {
     },
     async loadWorkloadHistory(workloadId: string, clusterUuid: string): Promise<void> {
       this.workloadHistoryRecords = (await workloadService.getWorkloadHistory(workloadId, clusterUuid)).records;
+    },
+    async loadWorkloadActions(workloadId: string, offset = 0, limit = 50, query?: WorkloadActionsQuery): Promise<void> {
+      const requestId = ++this.workloadActionsRequestId;
+      const response = await (query
+        ? workloadService.getWorkloadActions(workloadId, offset, limit, query)
+        : workloadService.getWorkloadActions(workloadId, offset, limit));
+      if (requestId !== this.workloadActionsRequestId) return;
+      this.workloadActionRecords = response.actions;
+      this.workloadActionsNext = response.next != null && response.next > offset ? response.next : null;
+    },
+    clearWorkloadActions(): void {
+      this.workloadActionsRequestId++;
+      this.workloadActionRecords = [];
+      this.workloadActionsNext = null;
     },
     getWorkloadHistoryList(withFilter = false): HistoryRecord[] {
       if (!withFilter) return this.workloadHistoryRecords;

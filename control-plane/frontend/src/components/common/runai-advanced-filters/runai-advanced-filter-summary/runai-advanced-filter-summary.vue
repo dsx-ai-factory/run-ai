@@ -4,17 +4,24 @@
 -->
 
 <template>
+  <!-- RunaiFilterChip owns an editor popup; summary chips need independent edit and remove controls. -->
   <q-chip
     class="filter-chip"
     v-for="filter in filters"
     :key="filter.name"
-    clickable
     removable
     size="md"
     @remove="$emit('remove', filter.name)"
-    @click="$emit('select', filter)"
-    >{{ filter.label }}:
-    <span class="q-pr-md q-pl-xs text-weight-medium"> {{ getFilterSummary(filter) }}</span>
+  >
+    <button
+      type="button"
+      class="filter-chip-edit"
+      :aria-label="`Edit ${filter.label} filter: ${getFilterSummary(filter)}`"
+      @click="$emit('select', filter)"
+    >
+      {{ filter.label }}:
+      <span class="q-pr-md q-pl-xs text-weight-medium">{{ getFilterSummary(filter) }}</span>
+    </button>
   </q-chip>
 </template>
 <script lang="ts">
@@ -87,4 +94,15 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.filter-chip-edit {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+</style>

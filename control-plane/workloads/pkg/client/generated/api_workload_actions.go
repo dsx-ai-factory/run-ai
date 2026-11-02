@@ -29,7 +29,7 @@ type WorkloadActionsAPI interface {
 	/*
 		GetWorkloadActionsHistory Get workload action history.
 
-		Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+		Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -64,6 +64,10 @@ type ApiGetWorkloadActionsHistoryRequest struct {
 	workloadId string
 	offset     *int32
 	limit      *int32
+	sortOrder  *string
+	sortBy     *string
+	filterBy   *[]string
+	search     *string
 }
 
 // The offset of the first item returned in the collection.
@@ -78,6 +82,30 @@ func (r ApiGetWorkloadActionsHistoryRequest) Limit(limit int32) ApiGetWorkloadAc
 	return r
 }
 
+// Sort direction. Defaults to newest first.
+func (r ApiGetWorkloadActionsHistoryRequest) SortOrder(sortOrder string) ApiGetWorkloadActionsHistoryRequest {
+	r.sortOrder = &sortOrder
+	return r
+}
+
+// Field to sort by. Defaults to acceptedAt.
+func (r ApiGetWorkloadActionsHistoryRequest) SortBy(sortBy string) ApiGetWorkloadActionsHistoryRequest {
+	r.sortBy = &sortBy
+	return r
+}
+
+// Filter event, subject or accepted time using the standard field/operator/value syntax. Dates use ISO 8601 timestamps and only support &#x3D;&#x3D;, !&#x3D;, &lt;&#x3D; and &gt;&#x3D; operators.
+func (r ApiGetWorkloadActionsHistoryRequest) FilterBy(filterBy []string) ApiGetWorkloadActionsHistoryRequest {
+	r.filterBy = &filterBy
+	return r
+}
+
+// Filter results by a free text search.
+func (r ApiGetWorkloadActionsHistoryRequest) Search(search string) ApiGetWorkloadActionsHistoryRequest {
+	r.search = &search
+	return r
+}
+
 func (r ApiGetWorkloadActionsHistoryRequest) Execute() (*GetWorkloadActionsResponse, *http.Response, error) {
 	return r.ApiService.GetWorkloadActionsHistoryExecute(r)
 }
@@ -85,7 +113,7 @@ func (r ApiGetWorkloadActionsHistoryRequest) Execute() (*GetWorkloadActionsRespo
 /*
 GetWorkloadActionsHistory Get workload action history.
 
-Returns accepted workload actions. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -131,6 +159,21 @@ func (a *WorkloadActionsAPIService) GetWorkloadActionsHistoryExecute(r ApiGetWor
 	} else {
 		var defaultValue int32 = 50
 		r.limit = &defaultValue
+	}
+	if r.sortOrder != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sortOrder", r.sortOrder, "form", "")
+	} else {
+		var defaultValue string = "desc"
+		r.sortOrder = &defaultValue
+	}
+	if r.sortBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sortBy", r.sortBy, "form", "")
+	}
+	if r.filterBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "filterBy", r.filterBy, "form", "csv")
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

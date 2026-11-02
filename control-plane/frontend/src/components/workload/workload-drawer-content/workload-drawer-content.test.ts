@@ -75,7 +75,8 @@ describe("WorkloadDrawerContent", () => {
           RunaiSvgIcon: true,
           RunaiStatus: true,
           RunaiDrawerNoData: true,
-          WorkloadHistoryTab: true,
+          WorkloadEventHistory: true,
+          WorkloadActivityTab: true,
           WorkloadMetricsTab: true,
           WorkloadLogsTab: true,
           WorkloadTerminal: true,
@@ -93,6 +94,40 @@ describe("WorkloadDrawerContent", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  describe("Event history navigation", () => {
+    it("exposes Event history without a separate Activity tab, including deleted workloads", () => {
+      const wrapper = createWrapper({ isDeletedViewType: true });
+      expect(wrapper.vm.workloadTabs.some((tab) => tab.name === "activity")).toBe(false);
+      expect(wrapper.vm.workloadTabs.find((tab) => tab.name === "event history")?.hidden).toBe(false);
+    });
+    it("maps existing Activity links to User actions inside Event history", async () => {
+      const wrapper = createWrapper({ navigationPayload: { tab: "activity" } }, { QTabPanels: false, QTabPanel: false });
+      await flushPromises();
+      expect(wrapper.vm.drawerTab).toBe("event history");
+      expect(wrapper.findComponent({ name: "WorkloadEventHistory" }).props("initialType")).toBe("user-actions");
+      expect(workloadService.getWorkloadPods).not.toHaveBeenCalled();
+    });
+    it("keeps workload-wide Event history hidden for structure elements", async () => {
+      const wrapper = createWrapper({ navigationPayload: { tab: "activity" } });
+      await flushPromises();
+      wrapper.vm.handleStructureElementSelected("element-1");
+      await flushPromises();
+      expect(wrapper.vm.workloadTabs.find((tab) => tab.name === "event history")?.hidden).toBe(true);
+      expect(wrapper.vm.drawerTab).toBe("metrics");
+    });
+    it("reopens User actions after selecting Logs and following another Activity link", async () => {
+      const wrapper = createWrapper({ navigationPayload: { tab: "activity" } }, { QTabPanels: false, QTabPanel: false });
+      await flushPromises();
+      const history = wrapper.findComponent({ name: "WorkloadEventHistory" });
+      history.vm.$emit("update:initialType", "logs");
+      await flushPromises();
+      expect(history.props("initialType")).toBe("logs");
+      await wrapper.setProps({ navigationPayload: { tab: "activity" } });
+      await flushPromises();
+      expect(history.props("initialType")).toBe("user-actions");
+    });
   });
 
   describe("hideStatus prop", () => {

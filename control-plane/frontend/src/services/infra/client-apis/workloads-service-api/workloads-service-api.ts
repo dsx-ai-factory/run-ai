@@ -20,6 +20,7 @@ import {
   DistributedInferencesApi,
   AIApplicationsApi,
   SettingsApi,
+  WorkloadActionsApi,
 } from "@/swagger-models/workloads-client";
 import { authenticatedAxios } from "@/services/infra/https.service/auth-axios.service";
 
@@ -40,6 +41,7 @@ class WorkloadServiceApi {
   workloadPropertiesApi: WorkloadPropertiesApi;
   aiApplicationsApi: AIApplicationsApi;
   settingsApi: SettingsApi;
+  workloadActionsApi: WorkloadActionsApi;
 
   constructor() {
     this.configuration = new Configuration();
@@ -58,6 +60,7 @@ class WorkloadServiceApi {
     this.workloadPropertiesApi = new WorkloadPropertiesApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.aiApplicationsApi = new AIApplicationsApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.settingsApi = new SettingsApi(this.configuration, this.baseUrl, authenticatedAxios);
+    this.workloadActionsApi = new WorkloadActionsApi(this.configuration, this.baseUrl, authenticatedAxios);
   }
 
   get baseUrl() {
