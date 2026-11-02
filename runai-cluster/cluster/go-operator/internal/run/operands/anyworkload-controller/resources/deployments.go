@@ -221,10 +221,8 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 			Value: strconv.FormatBool(*config.StoragePluginEnabled),
 		},
 		{
-			// Whether snapshots installed and healthy in this cluster
-			// and the development gate open.
 			Name:  "SNAPSHOT_ENABLED",
-			Value: strconv.FormatBool(snapshotStatus.Available),
+			Value: strconv.FormatBool(snapshotStatus.CRDInstalled),
 		},
 		{
 			// Where the Snapshot node agent runs. Capture and restore pods can

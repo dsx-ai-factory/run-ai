@@ -72,7 +72,7 @@ func Detect(ctx context.Context, reader client.Reader, runaiConfig *runv1.RunaiC
 
 	status := Status{}
 
-	status.CRDInstalled, status.CRDReason = crdInstalled(ctx, reader)
+	status.CRDInstalled, status.CRDReason = crdInstalled(ctx, uncached(reader))
 	status.OperatorReady, status.OperatorReason = operatorReady(ctx, reader, namespace, cfg.OperatorDeploymentName())
 
 	switch {
@@ -91,6 +91,15 @@ func Detect(ctx context.Context, reader client.Reader, runaiConfig *runv1.RunaiC
 	}
 
 	return status
+}
+
+// uncached returns a reader that goes straight to the API server, when the
+// caller has one.
+func uncached(reader client.Reader) client.Reader {
+	if direct, ok := reader.(interface{ Uncached() client.Client }); ok {
+		return direct.Uncached()
+	}
+	return reader
 }
 
 func crdInstalled(ctx context.Context, reader client.Reader) (bool, string) {

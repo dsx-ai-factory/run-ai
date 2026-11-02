@@ -356,9 +356,26 @@ func TestBuildEnvVarsSnapshot(t *testing.T) {
 			wantNodeSelect: "",
 		},
 		{
-			name: "snapshot available with an agent selector",
+			name: "snapshot installed and healthy",
 			status: snapshot.Status{
 				Available:         true,
+				CRDInstalled:      true,
+				OperatorReady:     true,
+				AgentNodeSelector: map[string]string{"nvidia.com/gpu.present": "true"},
+			},
+			wantEnabled:    "true",
+			wantNodeSelect: "nvidia.com/gpu.present=true",
+		},
+		{
+			// The decisive case. SNAPSHOT_ENABLED tracks the CRDs, not operator
+			// readiness: a Snapshot operator restart — an upgrade, an eviction —
+			// must not change this deployment, or every workload's controller
+			// gets rolled along with it. Design §8.1.
+			name: "snapshot operator restarting leaves the deployment unchanged",
+			status: snapshot.Status{
+				Available:         false,
+				CRDInstalled:      true,
+				OperatorReady:     false,
 				AgentNodeSelector: map[string]string{"nvidia.com/gpu.present": "true"},
 			},
 			wantEnabled:    "true",
@@ -370,6 +387,8 @@ func TestBuildEnvVarsSnapshot(t *testing.T) {
 			name: "agent selector is rendered in key order",
 			status: snapshot.Status{
 				Available:         true,
+				CRDInstalled:      true,
+				OperatorReady:     true,
 				AgentNodeSelector: map[string]string{"b": "2", "a": "1"},
 			},
 			wantEnabled:    "true",
