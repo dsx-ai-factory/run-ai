@@ -33,6 +33,8 @@ type NimServiceDefaults struct {
 	ImagePullPolicy  NullableImagePullPolicy          `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets NullableImagePullSecretsDefaults `json:"imagePullSecrets,omitempty"`
 	Labels           NullableLabelsDefaults           `json:"labels,omitempty"`
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
 	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
 	ModelRewrites []ModelRewrite                            `json:"modelRewrites,omitempty"`
 	ModelStore    NullableNimServiceDefaultsAllOfModelStore `json:"modelStore,omitempty"`
@@ -60,6 +62,8 @@ type NimServiceDefaults struct {
 // will change when the set of required properties is changed
 func NewNimServiceDefaults() *NimServiceDefaults {
 	this := NimServiceDefaults{}
+	var loadAwareRouting bool = false
+	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
 	return &this
@@ -70,6 +74,8 @@ func NewNimServiceDefaults() *NimServiceDefaults {
 // but it doesn't guarantee that properties required by API are set
 func NewNimServiceDefaultsWithDefaults() *NimServiceDefaults {
 	this := NimServiceDefaults{}
+	var loadAwareRouting bool = false
+	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
 	return &this
@@ -460,6 +466,49 @@ func (o *NimServiceDefaults) SetLabelsNil() {
 // UnsetLabels ensures that no value is present for Labels, not even an explicit nil
 func (o *NimServiceDefaults) UnsetLabels() {
 	o.Labels.Unset()
+}
+
+// GetLoadAwareRouting returns the LoadAwareRouting field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceDefaults) GetLoadAwareRouting() bool {
+	if o == nil || IsNil(o.LoadAwareRouting.Get()) {
+		var ret bool
+		return ret
+	}
+	return *o.LoadAwareRouting.Get()
+}
+
+// GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceDefaults) GetLoadAwareRoutingOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.LoadAwareRouting.Get(), o.LoadAwareRouting.IsSet()
+}
+
+// HasLoadAwareRouting returns a boolean if a field has been set.
+func (o *NimServiceDefaults) HasLoadAwareRouting() bool {
+	if o != nil && o.LoadAwareRouting.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLoadAwareRouting gets a reference to the given NullableBool and assigns it to the LoadAwareRouting field.
+func (o *NimServiceDefaults) SetLoadAwareRouting(v bool) {
+	o.LoadAwareRouting.Set(&v)
+}
+
+// SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+func (o *NimServiceDefaults) SetLoadAwareRoutingNil() {
+	o.LoadAwareRouting.Set(nil)
+}
+
+// UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+func (o *NimServiceDefaults) UnsetLoadAwareRouting() {
+	o.LoadAwareRouting.Unset()
 }
 
 // GetModelRewrites returns the ModelRewrites field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1037,6 +1086,9 @@ func (o NimServiceDefaults) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Labels.IsSet() {
 		toSerialize["labels"] = o.Labels.Get()
+	}
+	if o.LoadAwareRouting.IsSet() {
+		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
 	}
 	if o.ModelRewrites != nil {
 		toSerialize["modelRewrites"] = o.ModelRewrites

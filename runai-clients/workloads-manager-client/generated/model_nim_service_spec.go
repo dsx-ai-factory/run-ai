@@ -37,6 +37,8 @@ type NimServiceSpec struct {
 	ImagePullSecrets []ImagePullSecret `json:"imagePullSecrets,omitempty"`
 	// Set of labels to populate into the container running the workload.
 	Labels []Label `json:"labels,omitempty"`
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
 	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
 	ModelRewrites []ModelRewrite                        `json:"modelRewrites,omitempty"`
 	ModelStore    NullableNimServiceSpecAllOfModelStore `json:"modelStore,omitempty"`
@@ -65,6 +67,8 @@ type NimServiceSpec struct {
 // will change when the set of required properties is changed
 func NewNimServiceSpec() *NimServiceSpec {
 	this := NimServiceSpec{}
+	var loadAwareRouting bool = false
+	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
 	return &this
@@ -75,6 +79,8 @@ func NewNimServiceSpec() *NimServiceSpec {
 // but it doesn't guarantee that properties required by API are set
 func NewNimServiceSpecWithDefaults() *NimServiceSpec {
 	this := NimServiceSpec{}
+	var loadAwareRouting bool = false
+	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var replicas int32 = 1
 	this.Replicas = *NewNullableInt32(&replicas)
 	return &this
@@ -425,6 +431,49 @@ func (o *NimServiceSpec) HasLabels() bool {
 // SetLabels gets a reference to the given []Label and assigns it to the Labels field.
 func (o *NimServiceSpec) SetLabels(v []Label) {
 	o.Labels = v
+}
+
+// GetLoadAwareRouting returns the LoadAwareRouting field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceSpec) GetLoadAwareRouting() bool {
+	if o == nil || IsNil(o.LoadAwareRouting.Get()) {
+		var ret bool
+		return ret
+	}
+	return *o.LoadAwareRouting.Get()
+}
+
+// GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceSpec) GetLoadAwareRoutingOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.LoadAwareRouting.Get(), o.LoadAwareRouting.IsSet()
+}
+
+// HasLoadAwareRouting returns a boolean if a field has been set.
+func (o *NimServiceSpec) HasLoadAwareRouting() bool {
+	if o != nil && o.LoadAwareRouting.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLoadAwareRouting gets a reference to the given NullableBool and assigns it to the LoadAwareRouting field.
+func (o *NimServiceSpec) SetLoadAwareRouting(v bool) {
+	o.LoadAwareRouting.Set(&v)
+}
+
+// SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+func (o *NimServiceSpec) SetLoadAwareRoutingNil() {
+	o.LoadAwareRouting.Set(nil)
+}
+
+// UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+func (o *NimServiceSpec) UnsetLoadAwareRouting() {
+	o.LoadAwareRouting.Unset()
 }
 
 // GetModelRewrites returns the ModelRewrites field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -992,6 +1041,9 @@ func (o NimServiceSpec) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Labels != nil {
 		toSerialize["labels"] = o.Labels
+	}
+	if o.LoadAwareRouting.IsSet() {
+		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
 	}
 	if o.ModelRewrites != nil {
 		toSerialize["modelRewrites"] = o.ModelRewrites

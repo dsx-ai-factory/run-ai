@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **Workers** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Replicas** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Category** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
+**LoadAwareRouting** | Pointer to [**NullableBooleanRules**](BooleanRules.md) |  | [optional] 
 **ModelRewrites** | Pointer to [**NullableArbitraryRules**](ArbitraryRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
 **ObjectivePriority** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
@@ -175,6 +176,41 @@ HasCategory returns a boolean if a field has been set.
 `func (o *DistributedInferenceCommonRulesV2) UnsetCategory()`
 
 UnsetCategory ensures that no value is present for Category, not even an explicit nil
+### GetLoadAwareRouting
+
+`func (o *DistributedInferenceCommonRulesV2) GetLoadAwareRouting() BooleanRules`
+
+GetLoadAwareRouting returns the LoadAwareRouting field if non-nil, zero value otherwise.
+
+### GetLoadAwareRoutingOk
+
+`func (o *DistributedInferenceCommonRulesV2) GetLoadAwareRoutingOk() (*BooleanRules, bool)`
+
+GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLoadAwareRouting
+
+`func (o *DistributedInferenceCommonRulesV2) SetLoadAwareRouting(v BooleanRules)`
+
+SetLoadAwareRouting sets LoadAwareRouting field to given value.
+
+### HasLoadAwareRouting
+
+`func (o *DistributedInferenceCommonRulesV2) HasLoadAwareRouting() bool`
+
+HasLoadAwareRouting returns a boolean if a field has been set.
+
+### SetLoadAwareRoutingNil
+
+`func (o *DistributedInferenceCommonRulesV2) SetLoadAwareRoutingNil(b bool)`
+
+ SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+
+### UnsetLoadAwareRouting
+`func (o *DistributedInferenceCommonRulesV2) UnsetLoadAwareRouting()`
+
+UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
 ### GetModelRewrites
 
 `func (o *DistributedInferenceCommonRulesV2) GetModelRewrites() ArbitraryRules`

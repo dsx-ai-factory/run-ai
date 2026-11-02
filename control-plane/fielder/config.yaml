@@ -2566,6 +2566,26 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
 
+  loadAwareRouting:
+    name: loadAwareRouting
+    variants:
+      - name: dinf
+        spec: inferences/LoadAwareRouting.yaml
+        defaults: inferences/LoadAwareRouting.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+      - name: nim_service
+        spec: inferences/LoadAwareRouting.yaml
+        defaults: inferences/LoadAwareRouting.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
   metric:
      name: autoscaling.metric
      variants:

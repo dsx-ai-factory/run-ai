@@ -7,6 +7,8 @@ allOf:
   properties:
     category:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    loadAwareRouting:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
     modelRewrites:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArbitraryRules.yaml
     nodePools:

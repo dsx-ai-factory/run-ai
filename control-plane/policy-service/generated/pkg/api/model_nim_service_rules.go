@@ -68,6 +68,11 @@ type NimServiceRules struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRouting *BooleanRules `json:"loadAwareRouting,omitempty"`
+	LoadAwareRouting *BooleanRules `json:"loadAwareRouting,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ModelRewrites *ArbitraryRules `json:"modelRewrites,omitempty"`
 	ModelRewrites *ArbitraryRules `json:"modelRewrites,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -177,6 +182,11 @@ func AssertNimServiceRulesRequired(obj NimServiceRules) error {
 	}
 	if obj.Labels != nil {
 		if err := AssertInstancesRulesRequired(*obj.Labels); err != nil {
+			return err
+		}
+	}
+	if obj.LoadAwareRouting != nil {
+		if err := AssertBooleanRulesRequired(*obj.LoadAwareRouting); err != nil {
 			return err
 		}
 	}
@@ -337,6 +347,16 @@ func AssertNimServiceRulesConstraints(obj NimServiceRules) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.Labels != nil {
 		if err := AssertInstancesRulesConstraints(*obj.Labels); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.LoadAwareRouting != nil {
+		if err := AssertBooleanRulesConstraints(*obj.LoadAwareRouting); err != nil {
 			return err
 		}
 	}

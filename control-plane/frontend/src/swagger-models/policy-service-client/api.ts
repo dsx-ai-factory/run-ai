@@ -1554,6 +1554,12 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonDefaultsV2
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
      * @memberof DistributedInferenceCommonDefaultsV2
@@ -1627,6 +1633,12 @@ export interface DistributedInferenceCommonDefaultsV2AllOf {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonDefaultsV2AllOf
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
      * @memberof DistributedInferenceCommonDefaultsV2AllOf
@@ -1681,6 +1693,12 @@ export interface DistributedInferenceCommonRulesV2 {
      * @memberof DistributedInferenceCommonRulesV2
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceCommonRulesV2
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArbitraryRules}
@@ -1756,6 +1774,12 @@ export interface DistributedInferenceCommonRulesV2AllOf {
     'category'?: StringRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceCommonRulesV2AllOf
+     */
+    'loadAwareRouting'?: BooleanRules | null;
+    /**
+     * 
      * @type {ArbitraryRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
@@ -1809,6 +1833,12 @@ export interface DistributedInferenceDefaultsV2 {
      * @memberof DistributedInferenceDefaultsV2
      */
     'category'?: string | null;
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferenceDefaultsV2
+     */
+    'loadAwareRouting'?: boolean | null;
     /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
@@ -2723,6 +2753,12 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Defaults {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
@@ -2807,6 +2843,12 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Rules {
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArbitraryRules}
@@ -3051,6 +3093,12 @@ export interface DistributedInferenceRulesV2 {
      * @memberof DistributedInferenceRulesV2
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceRulesV2
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArbitraryRules}
@@ -5271,6 +5319,12 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof FallbackPolicyDefaultsAndRulesDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
@@ -5590,6 +5644,12 @@ export interface FallbackPolicyDefaultsAndRulesRules {
      * @memberof FallbackPolicyDefaultsAndRulesRules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof FallbackPolicyDefaultsAndRulesRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArbitraryRules}
@@ -9820,6 +9880,12 @@ export interface NimServiceDefaults {
      */
     'labels'?: LabelsDefaults | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof NimServiceDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
      * @memberof NimServiceDefaults
@@ -9958,6 +10024,12 @@ export interface NimServiceDefaultsAllOf {
      * @memberof NimServiceDefaultsAllOf
      */
     'labels'?: LabelsDefaults | null;
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof NimServiceDefaultsAllOf
+     */
+    'loadAwareRouting'?: boolean | null;
     /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
@@ -10373,6 +10445,12 @@ export interface NimServicePolicyDefaultsAndRulesDefaults {
      */
     'labels'?: LabelsDefaults | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof NimServicePolicyDefaultsAndRulesDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
      * @memberof NimServicePolicyDefaultsAndRulesDefaults
@@ -10511,6 +10589,12 @@ export interface NimServicePolicyDefaultsAndRulesRules {
      * @memberof NimServicePolicyDefaultsAndRulesRules
      */
     'labels'?: InstancesRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof NimServicePolicyDefaultsAndRulesRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArbitraryRules}
@@ -10702,6 +10786,12 @@ export interface NimServiceRules {
     'labels'?: InstancesRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof NimServiceRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
+    /**
+     * 
      * @type {ArbitraryRules}
      * @memberof NimServiceRules
      */
@@ -10839,6 +10929,12 @@ export interface NimServiceRulesAllOf {
      * @memberof NimServiceRulesAllOf
      */
     'labels'?: InstancesRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof NimServiceRulesAllOf
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArbitraryRules}
@@ -15434,6 +15530,12 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof SupersetDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
      * @memberof SupersetDefaults
@@ -16277,6 +16379,12 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof SupersetRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArbitraryRules}

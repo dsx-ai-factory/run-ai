@@ -32,6 +32,12 @@ type DistributedInferenceSpecSpec struct {
 	Category *string `json:"category,omitempty" gorm:"" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRouting *bool `json:"loadAwareRouting,omitempty"`
+	LoadAwareRouting *bool `json:"loadAwareRouting,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ModelRewrites *[]ModelRewrite `json:"modelRewrites,omitempty"`
@@ -134,6 +140,11 @@ func AssertDistributedInferenceSpecSpecConstraints(obj DistributedInferenceSpecS
 	if patternErr := runaihttp.AssertPattern(obj.Category, "Category", "/.*/"); patternErr != nil {
 		return &ParsingError{Param: "Category", Err: patternErr}
 	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

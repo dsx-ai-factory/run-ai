@@ -1,0 +1,4 @@
+description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+type: boolean
+default: false
+nullable: true

@@ -7,6 +7,8 @@ allOf:
   properties:
     category:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml
+    loadAwareRouting:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml
     modelRewrites:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ModelRewrites.yaml
     nodePools:

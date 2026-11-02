@@ -1148,6 +1148,12 @@ export interface NimServiceSpec {
      */
     'labels'?: Array<Label> | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof NimServiceSpec
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}
      * @memberof NimServiceSpec
@@ -1286,6 +1292,12 @@ export interface NimServiceSpecAllOf {
      * @memberof NimServiceSpecAllOf
      */
     'labels'?: Array<Label> | null;
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof NimServiceSpecAllOf
+     */
+    'loadAwareRouting'?: boolean | null;
     /**
      * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
      * @type {Array<ModelRewrite>}

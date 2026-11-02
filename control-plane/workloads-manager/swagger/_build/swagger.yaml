@@ -2212,6 +2212,11 @@ components:
         $ref: '#/components/schemas/Label'
       maxItems: 1000
       nullable: true
+    LoadAwareRouting:
+      description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+      type: boolean
+      default: false
+      nullable: true
     ModelRewriteTarget:
       type: object
       description: One served model name of a model rewrite rule and its traffic share.
@@ -2769,6 +2774,8 @@ components:
               $ref: '#/components/schemas/ImagePullSecrets'
             labels:
               $ref: '#/components/schemas/Labels'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
             modelRewrites:
               $ref: '#/components/schemas/ModelRewrites'
             modelStore:

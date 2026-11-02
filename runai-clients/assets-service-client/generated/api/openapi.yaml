@@ -59790,6 +59790,13 @@ components:
             if the number of workers is greater than 0.
           nullable: true
           type: object
+    LoadAwareRouting:
+      default: false
+      description: "Route requests to the serving port through the endpoint picker,\
+        \ which picks a Pod by load. Setting objectivePriority or modelRewrites also\
+        \ enables it."
+      nullable: true
+      type: boolean
     ModelRewriteTarget:
       description: One served model name of a model rewrite rule and its traffic share.
       properties:
@@ -60017,6 +60024,8 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
           modelRewrites:
             $ref: '#/components/schemas/ModelRewrites'
           nodePools:
@@ -61617,6 +61626,7 @@ components:
             name: storage-instance-a
             readOnly: true
             exclude: false
+        loadAwareRouting: null
         ports:
         - container: 8080
           serviceType: LoadBalancer
@@ -63860,6 +63870,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: null
           ports:
           - container: 8080
             serviceType: LoadBalancer

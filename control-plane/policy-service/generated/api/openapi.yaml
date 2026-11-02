@@ -10086,6 +10086,13 @@ components:
       nullable: true
       pattern: .*
       type: string
+    LoadAwareRouting:
+      default: false
+      description: "Route requests to the serving port through the endpoint picker,\
+        \ which picks a Pod by load. Setting objectivePriority or modelRewrites also\
+        \ enables it."
+      nullable: true
+      type: boolean
     ModelRewriteTarget:
       description: One served model name of a model rewrite rule and its traffic share.
       properties:
@@ -10345,6 +10352,8 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
           modelRewrites:
             $ref: '#/components/schemas/ModelRewrites'
           nodePools:
@@ -14112,6 +14121,8 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/StringRules'
+          loadAwareRouting:
+            $ref: '#/components/schemas/BooleanRules'
           modelRewrites:
             $ref: '#/components/schemas/ArbitraryRules'
           nodePools:
@@ -61799,6 +61810,8 @@ components:
             $ref: '#/components/schemas/ImagePullSecretsDefaults'
           labels:
             $ref: '#/components/schemas/LabelsDefaults'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
           modelRewrites:
             $ref: '#/components/schemas/ModelRewrites'
           modelStore:
@@ -61932,6 +61945,8 @@ components:
             $ref: '#/components/schemas/ImagePullSecretsRules'
           labels:
             $ref: '#/components/schemas/InstancesRules'
+          loadAwareRouting:
+            $ref: '#/components/schemas/BooleanRules'
           modelRewrites:
             $ref: '#/components/schemas/ArbitraryRules'
           modelStore:

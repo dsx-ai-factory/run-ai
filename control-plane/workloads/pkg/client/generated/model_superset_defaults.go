@@ -30,6 +30,8 @@ type SupersetDefaults struct {
 	Worker NullableDistributedInferenceLeaderWorkerDefaultsV2 `json:"worker,omitempty"`
 	// Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
 	Category NullableString `json:"category,omitempty" validate:"regexp=.*"`
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
 	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
 	ModelRewrites []ModelRewrite `json:"modelRewrites,omitempty"`
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
@@ -111,6 +113,8 @@ type SupersetDefaults struct {
 // will change when the set of required properties is changed
 func NewSupersetDefaults() *SupersetDefaults {
 	this := SupersetDefaults{}
+	var loadAwareRouting bool = false
+	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
 	this.StartupPolicy = *NewNullableDistributedInferenceStartupPolicy(&startupPolicy)
 	var workers int32 = 0
@@ -129,6 +133,8 @@ func NewSupersetDefaults() *SupersetDefaults {
 // but it doesn't guarantee that properties required by API are set
 func NewSupersetDefaultsWithDefaults() *SupersetDefaults {
 	this := SupersetDefaults{}
+	var loadAwareRouting bool = false
+	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
 	this.StartupPolicy = *NewNullableDistributedInferenceStartupPolicy(&startupPolicy)
 	var workers int32 = 0
@@ -355,6 +361,49 @@ func (o *SupersetDefaults) SetCategoryNil() {
 // UnsetCategory ensures that no value is present for Category, not even an explicit nil
 func (o *SupersetDefaults) UnsetCategory() {
 	o.Category.Unset()
+}
+
+// GetLoadAwareRouting returns the LoadAwareRouting field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetDefaults) GetLoadAwareRouting() bool {
+	if o == nil || IsNil(o.LoadAwareRouting.Get()) {
+		var ret bool
+		return ret
+	}
+	return *o.LoadAwareRouting.Get()
+}
+
+// GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetDefaults) GetLoadAwareRoutingOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.LoadAwareRouting.Get(), o.LoadAwareRouting.IsSet()
+}
+
+// HasLoadAwareRouting returns a boolean if a field has been set.
+func (o *SupersetDefaults) HasLoadAwareRouting() bool {
+	if o != nil && o.LoadAwareRouting.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLoadAwareRouting gets a reference to the given NullableBool and assigns it to the LoadAwareRouting field.
+func (o *SupersetDefaults) SetLoadAwareRouting(v bool) {
+	o.LoadAwareRouting.Set(&v)
+}
+
+// SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+func (o *SupersetDefaults) SetLoadAwareRoutingNil() {
+	o.LoadAwareRouting.Set(nil)
+}
+
+// UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+func (o *SupersetDefaults) UnsetLoadAwareRouting() {
+	o.LoadAwareRouting.Unset()
 }
 
 // GetModelRewrites returns the ModelRewrites field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -2385,6 +2434,9 @@ func (o SupersetDefaults) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Category.IsSet() {
 		toSerialize["category"] = o.Category.Get()
+	}
+	if o.LoadAwareRouting.IsSet() {
+		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
 	}
 	if o.ModelRewrites != nil {
 		toSerialize["modelRewrites"] = o.ModelRewrites

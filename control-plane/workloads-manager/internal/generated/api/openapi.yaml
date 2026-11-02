@@ -6194,6 +6194,13 @@ components:
       maxItems: 1000
       nullable: true
       type: array
+    LoadAwareRouting:
+      default: false
+      description: "Route requests to the serving port through the endpoint picker,\
+        \ which picks a Pod by load. Setting objectivePriority or modelRewrites also\
+        \ enables it."
+      nullable: true
+      type: boolean
     ModelRewriteTarget:
       description: One served model name of a model rewrite rule and its traffic share.
       properties:
@@ -6915,6 +6922,8 @@ components:
             $ref: '#/components/schemas/ImagePullSecrets'
           labels:
             $ref: '#/components/schemas/Labels'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
           modelRewrites:
             $ref: '#/components/schemas/ModelRewrites'
           modelStore:
@@ -6993,6 +7002,7 @@ components:
         - name: billing
           exclude: false
           value: my-billing-unit
+        loadAwareRouting: null
         priorityClass: null
         modelRewrites:
         - model: llama
@@ -7262,6 +7272,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: null
           priorityClass: null
           modelRewrites:
           - model: llama
@@ -7937,6 +7948,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: null
           priorityClass: null
           modelRewrites:
           - model: llama
@@ -8273,6 +8285,7 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: null
           priorityClass: null
           modelRewrites:
           - model: llama

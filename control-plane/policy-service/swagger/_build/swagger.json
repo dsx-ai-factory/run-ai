@@ -6376,6 +6376,12 @@
         "nullable": true,
         "pattern": ".*"
       },
+      "LoadAwareRouting": {
+        "description": "Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.",
+        "type": "boolean",
+        "default": false,
+        "nullable": true
+      },
       "ModelRewriteTarget": {
         "type": "object",
         "description": "One served model name of a model rewrite rule and its traffic share.",
@@ -6655,6 +6661,9 @@
             "properties": {
               "category": {
                 "$ref": "#/components/schemas/Category"
+              },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/LoadAwareRouting"
               },
               "modelRewrites": {
                 "$ref": "#/components/schemas/ModelRewrites"
@@ -9321,6 +9330,9 @@
             "properties": {
               "category": {
                 "$ref": "#/components/schemas/StringRules"
+              },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/BooleanRules"
               },
               "modelRewrites": {
                 "$ref": "#/components/schemas/ArbitraryRules"
@@ -12645,6 +12657,9 @@
               "labels": {
                 "$ref": "#/components/schemas/LabelsDefaults"
               },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/LoadAwareRouting"
+              },
               "modelRewrites": {
                 "$ref": "#/components/schemas/ModelRewrites"
               },
@@ -12980,6 +12995,9 @@
               },
               "labels": {
                 "$ref": "#/components/schemas/InstancesRules"
+              },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/BooleanRules"
               },
               "modelRewrites": {
                 "$ref": "#/components/schemas/ArbitraryRules"

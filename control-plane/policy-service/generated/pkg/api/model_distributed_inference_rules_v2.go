@@ -28,6 +28,11 @@ type DistributedInferenceRulesV2 struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRouting *BooleanRules `json:"loadAwareRouting,omitempty"`
+	LoadAwareRouting *BooleanRules `json:"loadAwareRouting,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ModelRewrites *ArbitraryRules `json:"modelRewrites,omitempty"`
 	ModelRewrites *ArbitraryRules `json:"modelRewrites,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -94,6 +99,11 @@ type DistributedInferenceRulesV2 struct {
 func AssertDistributedInferenceRulesV2Required(obj DistributedInferenceRulesV2) error {
 	if obj.Category != nil {
 		if err := AssertStringRulesRequired(*obj.Category); err != nil {
+			return err
+		}
+	}
+	if obj.LoadAwareRouting != nil {
+		if err := AssertBooleanRulesRequired(*obj.LoadAwareRouting); err != nil {
 			return err
 		}
 	}
@@ -169,6 +179,16 @@ func AssertDistributedInferenceRulesV2Constraints(obj DistributedInferenceRulesV
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.Category != nil {
 		if err := AssertStringRulesConstraints(*obj.Category); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.LoadAwareRouting != nil {
+		if err := AssertBooleanRulesConstraints(*obj.LoadAwareRouting); err != nil {
 			return err
 		}
 	}
