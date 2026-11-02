@@ -12,9 +12,11 @@
         :model-value="formattedExpirationDate"
         :error="!!expirationError"
         :error-message="expirationError"
+        :rules="[certificateRule]"
         no-error-icon
         stack-label
-        disable
+        readonly
+        :disable="!expirationError"
         label="Certificate expiration date"
       />
     </div>
@@ -58,6 +60,10 @@ const props = defineProps<{
   expirationError?: string;
   tooltip?: string;
 }>();
+
+// Quasar skips the rules of a disabled field, so the field is disabled only while the certificate is fine.
+// With an expiration error it stays active, which makes the q-form that contains it fail its validation.
+const certificateRule = (): boolean | string => !props.expirationError || props.expirationError;
 
 const formattedExpirationDate = computed((): string =>
   props.expirationDate ? dateUtil.dateFormat(props.expirationDate, DATE_FORMATS.STANDARD_DATE) : "",
