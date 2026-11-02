@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **Workers** | Pointer to **NullableInt32** | Specifies the number of worker nodes to run. If set to 0, only the leader node will run, and no worker pods will be created. In this case, worker spec is not required. | [optional] [default to 0]
 **Replicas** | Pointer to **NullableInt32** | Specifies the number of leader-worker sets to deploy. Each replica represents a group consisting of one leader pod and multiple worker pods.  For example, setting replicas: 3 will create 3 independent groups, each with its own leader and corresponding set of workers.  | [optional] [default to 1]
 **Category** | Pointer to **NullableString** | Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform. | [optional] 
+**ModelRewrites** | Pointer to [**[]ModelRewrite**](ModelRewrite.md) | Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight. | [optional] 
 **NodePools** | Pointer to **[]string** | A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available. | [optional] 
 **ObjectivePriority** | Pointer to **NullableInt32** | The priority of this workload&#39;s inference objective. The project policy sets the maximum value. | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibility**](Preemptibility.md) |  | [optional] 
@@ -174,6 +175,41 @@ HasCategory returns a boolean if a field has been set.
 `func (o *DistributedInferenceCommonDefaultsV2) UnsetCategory()`
 
 UnsetCategory ensures that no value is present for Category, not even an explicit nil
+### GetModelRewrites
+
+`func (o *DistributedInferenceCommonDefaultsV2) GetModelRewrites() []ModelRewrite`
+
+GetModelRewrites returns the ModelRewrites field if non-nil, zero value otherwise.
+
+### GetModelRewritesOk
+
+`func (o *DistributedInferenceCommonDefaultsV2) GetModelRewritesOk() (*[]ModelRewrite, bool)`
+
+GetModelRewritesOk returns a tuple with the ModelRewrites field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetModelRewrites
+
+`func (o *DistributedInferenceCommonDefaultsV2) SetModelRewrites(v []ModelRewrite)`
+
+SetModelRewrites sets ModelRewrites field to given value.
+
+### HasModelRewrites
+
+`func (o *DistributedInferenceCommonDefaultsV2) HasModelRewrites() bool`
+
+HasModelRewrites returns a boolean if a field has been set.
+
+### SetModelRewritesNil
+
+`func (o *DistributedInferenceCommonDefaultsV2) SetModelRewritesNil(b bool)`
+
+ SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+
+### UnsetModelRewrites
+`func (o *DistributedInferenceCommonDefaultsV2) UnsetModelRewrites()`
+
+UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
 ### GetNodePools
 
 `func (o *DistributedInferenceCommonDefaultsV2) GetNodePools() []string`

@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicy**](ImagePullPolicy.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**[]ImagePullSecret**](ImagePullSecret.md) | A list of references to Kubernetes secrets in the same namespace used for pulling container images. | [optional] 
 **Labels** | Pointer to [**[]Label**](Label.md) | Set of labels to populate into the container running the workload. | [optional] 
+**ModelRewrites** | Pointer to [**[]ModelRewrite**](ModelRewrite.md) | Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight. | [optional] 
 **ModelStore** | Pointer to [**NullableNimServiceSpecAllOfModelStore**](NimServiceSpecAllOfModelStore.md) |  | [optional] 
 **MultiNode** | Pointer to [**NullableNimServiceMultiNode**](NimServiceMultiNode.md) |  | [optional] 
 **NgcAuthSecret** | Pointer to **NullableString** | The name of a Kubernetes secret containing the NGC access credentials. The secret must contain a key named NGC_API_KEY with the API key as the value. | [optional] 
@@ -360,6 +361,41 @@ HasLabels returns a boolean if a field has been set.
 `func (o *NimServiceSpec) UnsetLabels()`
 
 UnsetLabels ensures that no value is present for Labels, not even an explicit nil
+### GetModelRewrites
+
+`func (o *NimServiceSpec) GetModelRewrites() []ModelRewrite`
+
+GetModelRewrites returns the ModelRewrites field if non-nil, zero value otherwise.
+
+### GetModelRewritesOk
+
+`func (o *NimServiceSpec) GetModelRewritesOk() (*[]ModelRewrite, bool)`
+
+GetModelRewritesOk returns a tuple with the ModelRewrites field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetModelRewrites
+
+`func (o *NimServiceSpec) SetModelRewrites(v []ModelRewrite)`
+
+SetModelRewrites sets ModelRewrites field to given value.
+
+### HasModelRewrites
+
+`func (o *NimServiceSpec) HasModelRewrites() bool`
+
+HasModelRewrites returns a boolean if a field has been set.
+
+### SetModelRewritesNil
+
+`func (o *NimServiceSpec) SetModelRewritesNil(b bool)`
+
+ SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+
+### UnsetModelRewrites
+`func (o *NimServiceSpec) UnsetModelRewrites()`
+
+UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
 ### GetModelStore
 
 `func (o *NimServiceSpec) GetModelStore() NimServiceSpecAllOfModelStore`

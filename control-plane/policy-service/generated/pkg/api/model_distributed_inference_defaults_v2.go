@@ -32,6 +32,12 @@ type DistributedInferenceDefaultsV2 struct {
 	Category *string `json:"category,omitempty" gorm:"" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ModelRewrites *[]ModelRewrite `json:"modelRewrites,omitempty"`
+	ModelRewrites *[]ModelRewrite `json:"modelRewrites,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//NodePools *[]string `json:"nodePools,omitempty"`
@@ -97,6 +103,13 @@ type DistributedInferenceDefaultsV2 struct {
 
 // AssertDistributedInferenceDefaultsV2Required checks if the required fields are not zero-ed
 func AssertDistributedInferenceDefaultsV2Required(obj DistributedInferenceDefaultsV2) error {
+	if obj.ModelRewrites != nil {
+		for _, el := range *obj.ModelRewrites {
+			if err := AssertModelRewriteRequired(el); err != nil {
+				return err
+			}
+		}
+	}
 	if obj.ServingPort != nil {
 		if err := AssertDistributedInferenceServingPortRequired(*obj.ServingPort); err != nil {
 			return err
@@ -125,6 +138,21 @@ func AssertDistributedInferenceDefaultsV2Constraints(obj DistributedInferenceDef
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.ModelRewrites, "ModelRewrites", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "ModelRewrites", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ModelRewrites != nil {
+		for _, el := range *obj.ModelRewrites {
+			if err := AssertModelRewriteConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if maxItemsErr := runaihttp.AssertMaxItems(obj.NodePools, "NodePools", 1000); maxItemsErr != nil {
 		return &ParsingError{Param: "NodePools", Err: maxItemsErr}

@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **Leader** | Pointer to [**NullableDistributedInferenceLeaderWorkerDefaultsV2**](DistributedInferenceLeaderWorkerDefaultsV2.md) | Defines the pod specification for the leader. Must always be provided, regardless of the number of workers. | [optional] 
 **Worker** | Pointer to [**NullableDistributedInferenceLeaderWorkerDefaultsV2**](DistributedInferenceLeaderWorkerDefaultsV2.md) | Defines the pod specification for the workers. Required only if the number of workers is greater than 0. | [optional] 
 **Category** | Pointer to **NullableString** | Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform. | [optional] 
+**ModelRewrites** | Pointer to [**[]ModelRewrite**](ModelRewrite.md) | Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight. | [optional] 
 **NodePools** | Pointer to **[]string** | A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available. | [optional] 
 **ObjectivePriority** | Pointer to **NullableInt32** | The priority of this workload&#39;s inference objective. The project policy sets the maximum value. | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibility**](Preemptibility.md) |  | [optional] 
@@ -250,6 +251,41 @@ HasCategory returns a boolean if a field has been set.
 `func (o *SupersetDefaults) UnsetCategory()`
 
 UnsetCategory ensures that no value is present for Category, not even an explicit nil
+### GetModelRewrites
+
+`func (o *SupersetDefaults) GetModelRewrites() []ModelRewrite`
+
+GetModelRewrites returns the ModelRewrites field if non-nil, zero value otherwise.
+
+### GetModelRewritesOk
+
+`func (o *SupersetDefaults) GetModelRewritesOk() (*[]ModelRewrite, bool)`
+
+GetModelRewritesOk returns a tuple with the ModelRewrites field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetModelRewrites
+
+`func (o *SupersetDefaults) SetModelRewrites(v []ModelRewrite)`
+
+SetModelRewrites sets ModelRewrites field to given value.
+
+### HasModelRewrites
+
+`func (o *SupersetDefaults) HasModelRewrites() bool`
+
+HasModelRewrites returns a boolean if a field has been set.
+
+### SetModelRewritesNil
+
+`func (o *SupersetDefaults) SetModelRewritesNil(b bool)`
+
+ SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+
+### UnsetModelRewrites
+`func (o *SupersetDefaults) UnsetModelRewrites()`
+
+UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
 ### GetNodePools
 
 `func (o *SupersetDefaults) GetNodePools() []string`

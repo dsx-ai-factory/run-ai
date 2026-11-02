@@ -1,0 +1,18 @@
+type: object
+description: One served model name of a model rewrite rule and its traffic share.
+properties:
+  model:
+    description: The model name sent to the serving pod in place of the requested one.
+    type: string
+    minLength: 1
+    maxLength: 10000
+    pattern: .*
+  weight:
+    description: The share of requests for this target, relative to the other targets of the same rule. Weights do not
+      need to sum to 100.
+    type: integer
+    format: int32
+    minimum: 1
+required:
+  - model
+  - weight

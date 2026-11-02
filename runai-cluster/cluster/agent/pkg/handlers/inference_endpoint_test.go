@@ -34,6 +34,29 @@ var _ = Describe("Inference endpoint Agent transport", func() {
 		Expect(resolved.SchemaVersion).To(Equal(endpoints.SchemaVersionV1))
 	})
 
+	It("carries model rewrites to the InferenceEndpoint spec", func() {
+		const rewrites = `[{"model":"chat","targets":[{"model":"chat-v1","weight":90},{"model":"chat-v2","weight":10}]}]`
+		withRewrites := `{"schemaVersion":"v1","spec":{
+			"workload":{"selector":{"matchLabels":{"app":"model"}},"port":8000},
+			"routing":{"gatewayRef":{"name":"inference","namespace":"gateways"},"hostnames":["model.example.test"]},
+			"epp":{"profile":"gie-v1.5"},
+			"rewrites":` + rewrites + `}}`
+		var config workloadsapi.WorkloadV2UpdateConfiguration
+		Expect(json.Unmarshal([]byte(`{"inferenceEndpoint":`+withRewrites+`}`), &config)).To(Succeed())
+		manifest := &unstructured.Unstructured{Object: map[string]interface{}{"apiVersion": "apps/v1", "kind": "Deployment"}}
+		runner, err := wrapWithWorkloadRunner(manifest, "workload-id", &config)
+		Expect(err).NotTo(HaveOccurred())
+		runner.Namespace = "project"
+		runner.UID = "0146a461-a4d2-42c3-a030-f020c3039297"
+		resolved, err := endpoints.GetInferenceEndpoint(runner)
+		Expect(err).NotTo(HaveOccurred())
+		endpoint, err := endpoints.BuildInferenceEndpoint(runner, resolved)
+		Expect(err).NotTo(HaveOccurred())
+		raw, err := json.Marshal(endpoint.Object["spec"].(map[string]interface{})["rewrites"])
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(raw)).To(MatchJSON(rewrites))
+	})
+
 	It("does not enable inference routing from a user annotation in the workload manifest", func() {
 		manifest := &unstructured.Unstructured{Object: map[string]interface{}{"apiVersion": "apps/v1", "kind": "Deployment"}}
 		manifest.SetAnnotations(map[string]string{endpoints.InferenceEndpointAnnotation: intent})

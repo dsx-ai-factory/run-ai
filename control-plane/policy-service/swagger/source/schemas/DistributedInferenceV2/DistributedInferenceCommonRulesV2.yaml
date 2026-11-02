@@ -7,6 +7,8 @@ allOf:
   properties:
     category:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    modelRewrites:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArbitraryRules.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
     objectivePriority:

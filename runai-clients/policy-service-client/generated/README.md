@@ -388,6 +388,8 @@ Class | Method | HTTP request | Description
  - [MatchExpressionOperator](docs/MatchExpressionOperator.md)
  - [MetricThresholdField](docs/MetricThresholdField.md)
  - [MetricThresholdPercentageField](docs/MetricThresholdPercentageField.md)
+ - [ModelRewrite](docs/ModelRewrite.md)
+ - [ModelRewriteTarget](docs/ModelRewriteTarget.md)
  - [MpiLauncherCreationPolicy](docs/MpiLauncherCreationPolicy.md)
  - [MpiLauncherCreationPolicyOptions](docs/MpiLauncherCreationPolicyOptions.md)
  - [MpiLauncherCreationPolicyOptionsOptionsInner](docs/MpiLauncherCreationPolicyOptionsOptionsInner.md)

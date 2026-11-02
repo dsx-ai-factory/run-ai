@@ -30,6 +30,8 @@ type SupersetDefaults struct {
 	Worker NullableDistributedInferenceLeaderWorkerDefaultsV2 `json:"worker,omitempty"`
 	// Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
 	Category NullableString `json:"category,omitempty" validate:"regexp=.*"`
+	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+	ModelRewrites []ModelRewrite `json:"modelRewrites,omitempty"`
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
 	NodePools []string `json:"nodePools,omitempty"`
 	// The priority of this workload's inference objective. The project policy sets the maximum value.
@@ -353,6 +355,39 @@ func (o *SupersetDefaults) SetCategoryNil() {
 // UnsetCategory ensures that no value is present for Category, not even an explicit nil
 func (o *SupersetDefaults) UnsetCategory() {
 	o.Category.Unset()
+}
+
+// GetModelRewrites returns the ModelRewrites field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *SupersetDefaults) GetModelRewrites() []ModelRewrite {
+	if o == nil {
+		var ret []ModelRewrite
+		return ret
+	}
+	return o.ModelRewrites
+}
+
+// GetModelRewritesOk returns a tuple with the ModelRewrites field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *SupersetDefaults) GetModelRewritesOk() ([]ModelRewrite, bool) {
+	if o == nil || IsNil(o.ModelRewrites) {
+		return nil, false
+	}
+	return o.ModelRewrites, true
+}
+
+// HasModelRewrites returns a boolean if a field has been set.
+func (o *SupersetDefaults) HasModelRewrites() bool {
+	if o != nil && !IsNil(o.ModelRewrites) {
+		return true
+	}
+
+	return false
+}
+
+// SetModelRewrites gets a reference to the given []ModelRewrite and assigns it to the ModelRewrites field.
+func (o *SupersetDefaults) SetModelRewrites(v []ModelRewrite) {
+	o.ModelRewrites = v
 }
 
 // GetNodePools returns the NodePools field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -2350,6 +2385,9 @@ func (o SupersetDefaults) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Category.IsSet() {
 		toSerialize["category"] = o.Category.Get()
+	}
+	if o.ModelRewrites != nil {
+		toSerialize["modelRewrites"] = o.ModelRewrites
 	}
 	if o.NodePools != nil {
 		toSerialize["nodePools"] = o.NodePools

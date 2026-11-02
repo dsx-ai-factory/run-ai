@@ -739,6 +739,44 @@ export interface ModelError {
     'details'?: string;
 }
 /**
+ * A rule that maps one requested model name to one or more served model names.
+ * @export
+ * @interface ModelRewrite
+ */
+export interface ModelRewrite {
+    /**
+     * The exact model name that clients put in the request body.
+     * @type {string}
+     * @memberof ModelRewrite
+     */
+    'model': string;
+    /**
+     * The served model names and their traffic shares.
+     * @type {Array<ModelRewriteTarget>}
+     * @memberof ModelRewrite
+     */
+    'targets': Array<ModelRewriteTarget>;
+}
+/**
+ * One served model name of a model rewrite rule and its traffic share.
+ * @export
+ * @interface ModelRewriteTarget
+ */
+export interface ModelRewriteTarget {
+    /**
+     * The model name sent to the serving pod in place of the requested one.
+     * @type {string}
+     * @memberof ModelRewriteTarget
+     */
+    'model': string;
+    /**
+     * The share of requests for this target, relative to the other targets of the same rule. Weights do not need to sum to 100.
+     * @type {number}
+     * @memberof ModelRewriteTarget
+     */
+    'weight': number;
+}
+/**
  * 
  * @export
  * @interface NIMServiceMetadataCreateParams
@@ -1098,6 +1136,12 @@ export interface NimServiceSpec {
      */
     'labels'?: Array<Label> | null;
     /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof NimServiceSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * 
      * @type {NimServiceSpecAllOfModelStore}
      * @memberof NimServiceSpec
@@ -1230,6 +1274,12 @@ export interface NimServiceSpecAllOf {
      * @memberof NimServiceSpecAllOf
      */
     'labels'?: Array<Label> | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof NimServiceSpecAllOf
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
     /**
      * 
      * @type {NimServiceSpecAllOfModelStore}

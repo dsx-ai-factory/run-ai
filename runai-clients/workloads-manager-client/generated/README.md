@@ -132,6 +132,8 @@ Class | Method | HTTP request | Description
  - [ImagePullSecret](docs/ImagePullSecret.md)
  - [Label](docs/Label.md)
  - [MnnvlMode](docs/MnnvlMode.md)
+ - [ModelRewrite](docs/ModelRewrite.md)
+ - [ModelRewriteTarget](docs/ModelRewriteTarget.md)
  - [NIMServiceMetadataCreateParams](docs/NIMServiceMetadataCreateParams.md)
  - [NetworkingEndpoint](docs/NetworkingEndpoint.md)
  - [NetworkingService](docs/NetworkingService.md)

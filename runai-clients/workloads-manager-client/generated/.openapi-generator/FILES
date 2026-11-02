@@ -43,6 +43,8 @@ docs/ImagePullPolicy.md
 docs/ImagePullSecret.md
 docs/Label.md
 docs/MnnvlMode.md
+docs/ModelRewrite.md
+docs/ModelRewriteTarget.md
 docs/NIMServiceMetadataCreateParams.md
 docs/NVIDIANIMAPI.md
 docs/NetworkingEndpoint.md
@@ -159,6 +161,8 @@ model_image_pull_policy.go
 model_image_pull_secret.go
 model_label.go
 model_mnnvl_mode.go
+model_model_rewrite.go
+model_model_rewrite_target.go
 model_networking_endpoint.go
 model_networking_service.go
 model_networking_submission_profile.go

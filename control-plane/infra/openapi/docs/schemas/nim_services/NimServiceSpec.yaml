@@ -63,6 +63,8 @@ allOf:
       $ref: ../workloads_spec/advanced/ImagePullSecrets.yaml
     labels:
       $ref: ../workloads_spec/advanced/Labels.yaml
+    modelRewrites:
+      $ref: ../workloads_spec/inferences/ModelRewrites.yaml
     modelStore:
       nullable: true
       properties:

@@ -242,6 +242,8 @@ pkg/api/model_match_expression.go
 pkg/api/model_match_expression_operator.go
 pkg/api/model_metric_threshold_field.go
 pkg/api/model_metric_threshold_percentage_field.go
+pkg/api/model_model_rewrite.go
+pkg/api/model_model_rewrite_target.go
 pkg/api/model_mpi_launcher_creation_policy.go
 pkg/api/model_mpi_launcher_creation_policy_options.go
 pkg/api/model_mpi_launcher_creation_policy_options_options_inner.go

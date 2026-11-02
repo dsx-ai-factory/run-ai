@@ -77,6 +77,12 @@ type NimServiceSpec struct {
 	Labels *[]Label `json:"labels,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ModelRewrites *[]ModelRewrite `json:"modelRewrites,omitempty"`
+	ModelRewrites *[]ModelRewrite `json:"modelRewrites,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ModelStore *NimServiceSpecAllOfModelStore `json:"modelStore,omitempty"`
 	ModelStore *NimServiceSpecAllOfModelStore `json:"modelStore,omitempty" gorm:"serializer:json; type:jsonb;"`
@@ -180,6 +186,13 @@ func AssertNimServiceSpecRequired(obj NimServiceSpec) error {
 	if obj.Labels != nil {
 		for _, el := range *obj.Labels {
 			if err := AssertLabelRequired(el); err != nil {
+				return err
+			}
+		}
+	}
+	if obj.ModelRewrites != nil {
+		for _, el := range *obj.ModelRewrites {
+			if err := AssertModelRewriteRequired(el); err != nil {
 				return err
 			}
 		}
@@ -330,6 +343,21 @@ func AssertNimServiceSpecConstraints(obj NimServiceSpec) error {
 	if obj.Labels != nil {
 		for _, el := range *obj.Labels {
 			if err := AssertLabelConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.ModelRewrites, "ModelRewrites", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "ModelRewrites", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ModelRewrites != nil {
+		for _, el := range *obj.ModelRewrites {
+			if err := AssertModelRewriteConstraints(el); err != nil {
 				return err
 			}
 		}

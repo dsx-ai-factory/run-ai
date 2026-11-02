@@ -74,7 +74,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 
 	It("uses the resolved leader selector, container target port, hostname and administrator Gateway", func() {
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(intent).NotTo(BeNil())
 		Expect(intent.SchemaVersion).To(Equal("v1"))
@@ -87,13 +87,36 @@ var _ = Describe("Distributed inference endpoint intent", func() {
         }`))
 	})
 
+	It("maps the workload model rewrites to the endpoint rewrites", func() {
+		setRoute()
+		rewrites := []api.ModelRewrite{
+			{Model: "llama", Targets: []api.ModelRewriteTarget{{Model: "llama-3.1-8b", Weight: 1}}},
+			{Model: "chat", Targets: []api.ModelRewriteTarget{{Model: "chat-v1", Weight: 90}, {Model: "chat-v2", Weight: 10}}},
+		}
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, rewrites, defaults)
+		Expect(err).NotTo(HaveOccurred())
+		raw, err := json.Marshal(intent.Spec["rewrites"])
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(raw)).To(MatchJSON(`[
+            {"model":"llama","targets":[{"model":"llama-3.1-8b","weight":1}]},
+            {"model":"chat","targets":[{"model":"chat-v1","weight":90},{"model":"chat-v2","weight":10}]}
+        ]`))
+	})
+
+	It("omits the endpoint rewrites when the workload has no model rewrites", func() {
+		setRoute()
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, []api.ModelRewrite{}, defaults)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(intent.Spec).NotTo(HaveKey("rewrites"))
+	})
+
 	It("keeps the selector stable as groups and workers scale", func() {
 		setRoute()
-		before, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+		before, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		lws.Spec.Replicas = ptr.To(int32(6))
 		lws.Spec.LeaderWorkerTemplate.Size = ptr.To(int32(8))
-		after, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+		after, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(after).To(Equal(before))
 	})
@@ -123,10 +146,10 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Expect(err).NotTo(HaveOccurred())
 		var resolved api.NetworkingEndpoint
 		Expect(json.Unmarshal(raw, &resolved)).To(Succeed())
-		intent, err := BuildDistributedInferenceIntent(&target.LeaderWorkerSet, resolved, defaults)
+		intent, err := BuildDistributedInferenceIntent(&target.LeaderWorkerSet, resolved, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		setRoute()
-		expected, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+		expected, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(intent).To(Equal(expected))
 	})
@@ -136,7 +159,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Labels = map[string]string{ownerLabel: "workload-123"}
 		(*(*endpoint.Services)[0].Spec.Selector)[ownerLabel] = "workload-123"
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		before, err := json.Marshal(intent)
 		Expect(err).NotTo(HaveOccurred())
@@ -150,7 +173,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 	DescribeTable("rejects unsupported serving topology", func(mutate func()) {
 		setRoute()
 		mutate()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 		Expect(err).To(HaveOccurred())
 		Expect(intent).To(BeNil())
 	},
@@ -189,7 +212,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 			(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
 			addSidecar(composer.Oauth2ContainerDefaultPort)
 			setRoute()
-			intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+			intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(intent).NotTo(BeNil())
 		})
@@ -197,7 +220,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		DescribeTable("rejects a serving port that does not match the auth mode", func(mutate func()) {
 			mutate()
 			setRoute()
-			intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+			intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("port"))
 			Expect(intent).To(BeNil())
@@ -226,7 +249,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 	DescribeTable("rejects routing constraints that the endpoint CR cannot preserve", func(mutate func()) {
 		mutate()
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 		Expect(err).To(HaveOccurred())
 		Expect(intent).To(BeNil())
 	},

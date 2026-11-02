@@ -3164,6 +3164,12 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceCommonDefaultsV2
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonDefaultsV2
@@ -3230,6 +3236,12 @@ export interface DistributedInferenceCommonRulesV2 {
      * @memberof DistributedInferenceCommonRulesV2
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceCommonRulesV2
+     */
+    'modelRewrites'?: ArbitraryRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -3299,6 +3311,12 @@ export interface DistributedInferenceCommonRulesV2AllOf {
     'category'?: StringRules | null;
     /**
      * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceCommonRulesV2AllOf
+     */
+    'modelRewrites'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {ArrayRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
@@ -3346,6 +3364,12 @@ export interface DistributedInferenceCommonSpec {
      * @memberof DistributedInferenceCommonSpec
      */
     'category'?: string | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceCommonSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -3413,6 +3437,12 @@ export interface DistributedInferenceCommonSpecAllOf {
      * @memberof DistributedInferenceCommonSpecAllOf
      */
     'category'?: string | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceCommonSpecAllOf
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -5238,6 +5268,12 @@ export interface DistributedInferenceSpecSpec {
      */
     'category'?: string | null;
     /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceSpecSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceSpecSpec
@@ -5513,6 +5549,12 @@ export interface DistributedInferenceTemplateSpec {
      * @memberof DistributedInferenceTemplateSpec
      */
     'category'?: string | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceTemplateSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -12407,6 +12449,44 @@ export interface ModelError {
     'details'?: string;
 }
 /**
+ * A rule that maps one requested model name to one or more served model names.
+ * @export
+ * @interface ModelRewrite
+ */
+export interface ModelRewrite {
+    /**
+     * The exact model name that clients put in the request body.
+     * @type {string}
+     * @memberof ModelRewrite
+     */
+    'model': string;
+    /**
+     * The served model names and their traffic shares.
+     * @type {Array<ModelRewriteTarget>}
+     * @memberof ModelRewrite
+     */
+    'targets': Array<ModelRewriteTarget>;
+}
+/**
+ * One served model name of a model rewrite rule and its traffic share.
+ * @export
+ * @interface ModelRewriteTarget
+ */
+export interface ModelRewriteTarget {
+    /**
+     * The model name sent to the serving pod in place of the requested one.
+     * @type {string}
+     * @memberof ModelRewriteTarget
+     */
+    'model': string;
+    /**
+     * The share of requests for this target, relative to the other targets of the same rule. Weights do not need to sum to 100.
+     * @type {number}
+     * @memberof ModelRewriteTarget
+     */
+    'weight': number;
+}
+/**
  * Define whether the MPI Launcher is created in parallel with the workers, or if its creation is postponed until all workers are in  Ready state. This prevents failures when the launcher attempts to connect to workers that are not yet ready.
  * @export
  * @enum {string}
@@ -16582,6 +16662,12 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof SupersetDefaults
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof SupersetDefaults
@@ -17400,6 +17486,12 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {ArbitraryRules}
+     * @memberof SupersetRules
+     */
+    'modelRewrites'?: ArbitraryRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -18376,6 +18468,12 @@ export interface SupersetSpec {
      * @memberof SupersetSpec
      */
     'category'?: string | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof SupersetSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -21356,6 +21454,12 @@ export interface UnifiedPolicyInfoPerReplicaTypeDefaults {
      */
     'category'?: string | null;
     /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
@@ -21669,6 +21773,12 @@ export interface UnifiedPolicyInfoPerReplicaTypeRules {
      * @memberof UnifiedPolicyInfoPerReplicaTypeRules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {ArbitraryRules}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeRules
+     */
+    'modelRewrites'?: ArbitraryRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -22212,6 +22322,12 @@ export interface UnifiedSpecWorker {
      * @memberof UnifiedSpecWorker
      */
     'category'?: string | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof UnifiedSpecWorker
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}

@@ -2980,6 +2980,88 @@
         "maxItems": 1000,
         "nullable": true
       },
+      "ModelRewriteTarget": {
+        "type": "object",
+        "description": "One served model name of a model rewrite rule and its traffic share.",
+        "properties": {
+          "model": {
+            "description": "The model name sent to the serving pod in place of the requested one.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000,
+            "pattern": ".*"
+          },
+          "weight": {
+            "description": "The share of requests for this target, relative to the other targets of the same rule. Weights do not need to sum to 100.",
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "model",
+          "weight"
+        ]
+      },
+      "ModelRewrite": {
+        "type": "object",
+        "description": "A rule that maps one requested model name to one or more served model names.",
+        "properties": {
+          "model": {
+            "description": "The exact model name that clients put in the request body.",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 10000,
+            "pattern": ".*"
+          },
+          "targets": {
+            "description": "The served model names and their traffic shares.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ModelRewriteTarget"
+            },
+            "minItems": 1,
+            "maxItems": 1000
+          }
+        },
+        "required": [
+          "model",
+          "targets"
+        ]
+      },
+      "ModelRewrites": {
+        "description": "Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/ModelRewrite"
+        },
+        "maxItems": 1000,
+        "nullable": true,
+        "example": [
+          {
+            "model": "llama",
+            "targets": [
+              {
+                "model": "llama-3.1-8b-instruct",
+                "weight": 1
+              }
+            ]
+          },
+          {
+            "model": "chat",
+            "targets": [
+              {
+                "model": "chat-v1",
+                "weight": 90
+              },
+              {
+                "model": "chat-v2",
+                "weight": 10
+              }
+            ]
+          }
+        ]
+      },
       "NimCache": {
         "description": "The specification of a NIM cache volume.",
         "type": "object",
@@ -3610,6 +3692,9 @@
               },
               "labels": {
                 "$ref": "#/components/schemas/Labels"
+              },
+              "modelRewrites": {
+                "$ref": "#/components/schemas/ModelRewrites"
               },
               "modelStore": {
                 "nullable": true,

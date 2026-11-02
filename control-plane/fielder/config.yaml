@@ -2546,6 +2546,26 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
 
+  modelRewrites:
+    name: modelRewrites
+    variants:
+      - name: dinf
+        spec: inferences/ModelRewrites.yaml
+        defaults: inferences/ModelRewrites.yaml
+        rules: ../policy_rules/ArbitraryRules.yaml
+        targets:
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+      - name: nim_service
+        spec: inferences/ModelRewrites.yaml
+        defaults: inferences/ModelRewrites.yaml
+        rules: ../policy_rules/ArbitraryRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
   metric:
      name: autoscaling.metric
      variants:

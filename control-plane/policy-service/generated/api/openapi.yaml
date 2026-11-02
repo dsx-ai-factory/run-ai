@@ -10086,6 +10086,67 @@ components:
       nullable: true
       pattern: .*
       type: string
+    ModelRewriteTarget:
+      description: One served model name of a model rewrite rule and its traffic share.
+      properties:
+        model:
+          description: The model name sent to the serving pod in place of the requested
+            one.
+          maxLength: 10000
+          minLength: 1
+          pattern: .*
+          type: string
+        weight:
+          description: "The share of requests for this target, relative to the other\
+            \ targets of the same rule. Weights do not need to sum to 100."
+          format: int32
+          minimum: 1
+          type: integer
+      required:
+      - model
+      - weight
+      type: object
+    ModelRewrite:
+      description: A rule that maps one requested model name to one or more served
+        model names.
+      properties:
+        model:
+          description: The exact model name that clients put in the request body.
+          maxLength: 10000
+          minLength: 1
+          pattern: .*
+          type: string
+        targets:
+          description: The served model names and their traffic shares.
+          items:
+            $ref: '#/components/schemas/ModelRewriteTarget'
+          maxItems: 1000
+          minItems: 1
+          type: array
+      required:
+      - model
+      - targets
+      type: object
+    ModelRewrites:
+      description: Model name rewrites that the inference endpoint applies at runtime.
+        Each rule maps a model name that clients request to one or more served model
+        names. One target makes an alias; several targets split traffic by weight.
+      example:
+      - model: llama
+        targets:
+        - model: llama-3.1-8b-instruct
+          weight: 1
+      - model: chat
+        targets:
+        - model: chat-v1
+          weight: 90
+        - model: chat-v2
+          weight: 10
+      items:
+        $ref: '#/components/schemas/ModelRewrite'
+      maxItems: 1000
+      nullable: true
+      type: array
     NodePools:
       description: A prioritized list of node pools for the scheduler to run the workload
         on. The scheduler will always try to use the first node pool before moving
@@ -10284,6 +10345,8 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          modelRewrites:
+            $ref: '#/components/schemas/ModelRewrites'
           nodePools:
             $ref: '#/components/schemas/NodePools'
           objectivePriority:
@@ -14049,6 +14112,8 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/StringRules'
+          modelRewrites:
+            $ref: '#/components/schemas/ArbitraryRules'
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
           objectivePriority:
@@ -61734,6 +61799,8 @@ components:
             $ref: '#/components/schemas/ImagePullSecretsDefaults'
           labels:
             $ref: '#/components/schemas/LabelsDefaults'
+          modelRewrites:
+            $ref: '#/components/schemas/ModelRewrites'
           modelStore:
             $ref: '#/components/schemas/NimServiceDefaults_allOf_modelStore'
           multiNode:
@@ -61865,6 +61932,8 @@ components:
             $ref: '#/components/schemas/ImagePullSecretsRules'
           labels:
             $ref: '#/components/schemas/InstancesRules'
+          modelRewrites:
+            $ref: '#/components/schemas/ArbitraryRules'
           modelStore:
             $ref: '#/components/schemas/NimServiceRules_allOf_modelStore'
           multiNode:

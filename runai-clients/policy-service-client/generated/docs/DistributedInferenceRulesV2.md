@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Category** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
+**ModelRewrites** | Pointer to [**NullableArbitraryRules**](ArbitraryRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
 **ObjectivePriority** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibilityRules**](PreemptibilityRules.md) |  | [optional] 
@@ -71,6 +72,41 @@ HasCategory returns a boolean if a field has been set.
 `func (o *DistributedInferenceRulesV2) UnsetCategory()`
 
 UnsetCategory ensures that no value is present for Category, not even an explicit nil
+### GetModelRewrites
+
+`func (o *DistributedInferenceRulesV2) GetModelRewrites() ArbitraryRules`
+
+GetModelRewrites returns the ModelRewrites field if non-nil, zero value otherwise.
+
+### GetModelRewritesOk
+
+`func (o *DistributedInferenceRulesV2) GetModelRewritesOk() (*ArbitraryRules, bool)`
+
+GetModelRewritesOk returns a tuple with the ModelRewrites field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetModelRewrites
+
+`func (o *DistributedInferenceRulesV2) SetModelRewrites(v ArbitraryRules)`
+
+SetModelRewrites sets ModelRewrites field to given value.
+
+### HasModelRewrites
+
+`func (o *DistributedInferenceRulesV2) HasModelRewrites() bool`
+
+HasModelRewrites returns a boolean if a field has been set.
+
+### SetModelRewritesNil
+
+`func (o *DistributedInferenceRulesV2) SetModelRewritesNil(b bool)`
+
+ SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+
+### UnsetModelRewrites
+`func (o *DistributedInferenceRulesV2) UnsetModelRewrites()`
+
+UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
 ### GetNodePools
 
 `func (o *DistributedInferenceRulesV2) GetNodePools() ArrayRules`

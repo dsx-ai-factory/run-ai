@@ -23,6 +23,7 @@ var _ MappedNullable = &DistributedInferenceRulesV2{}
 // DistributedInferenceRulesV2 struct for DistributedInferenceRulesV2
 type DistributedInferenceRulesV2 struct {
 	Category          NullableStringRules                                              `json:"category,omitempty"`
+	ModelRewrites     NullableArbitraryRules                                           `json:"modelRewrites,omitempty"`
 	NodePools         NullableArrayRules                                               `json:"nodePools,omitempty"`
 	ObjectivePriority NullableIntegerRules                                             `json:"objectivePriority,omitempty"`
 	Preemptibility    NullablePreemptibilityRules                                      `json:"preemptibility,omitempty"`
@@ -96,6 +97,49 @@ func (o *DistributedInferenceRulesV2) SetCategoryNil() {
 // UnsetCategory ensures that no value is present for Category, not even an explicit nil
 func (o *DistributedInferenceRulesV2) UnsetCategory() {
 	o.Category.Unset()
+}
+
+// GetModelRewrites returns the ModelRewrites field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceRulesV2) GetModelRewrites() ArbitraryRules {
+	if o == nil || IsNil(o.ModelRewrites.Get()) {
+		var ret ArbitraryRules
+		return ret
+	}
+	return *o.ModelRewrites.Get()
+}
+
+// GetModelRewritesOk returns a tuple with the ModelRewrites field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceRulesV2) GetModelRewritesOk() (*ArbitraryRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ModelRewrites.Get(), o.ModelRewrites.IsSet()
+}
+
+// HasModelRewrites returns a boolean if a field has been set.
+func (o *DistributedInferenceRulesV2) HasModelRewrites() bool {
+	if o != nil && o.ModelRewrites.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetModelRewrites gets a reference to the given NullableArbitraryRules and assigns it to the ModelRewrites field.
+func (o *DistributedInferenceRulesV2) SetModelRewrites(v ArbitraryRules) {
+	o.ModelRewrites.Set(&v)
+}
+
+// SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+func (o *DistributedInferenceRulesV2) SetModelRewritesNil() {
+	o.ModelRewrites.Set(nil)
+}
+
+// UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
+func (o *DistributedInferenceRulesV2) UnsetModelRewrites() {
+	o.ModelRewrites.Unset()
 }
 
 // GetNodePools returns the NodePools field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -583,6 +627,9 @@ func (o DistributedInferenceRulesV2) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Category.IsSet() {
 		toSerialize["category"] = o.Category.Get()
+	}
+	if o.ModelRewrites.IsSet() {
+		toSerialize["modelRewrites"] = o.ModelRewrites.Get()
 	}
 	if o.NodePools.IsSet() {
 		toSerialize["nodePools"] = o.NodePools.Get()

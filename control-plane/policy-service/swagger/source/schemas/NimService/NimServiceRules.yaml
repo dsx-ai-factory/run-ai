@@ -67,6 +67,8 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsRules.yaml
     labels:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/InstancesRules.yaml
+    modelRewrites:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArbitraryRules.yaml
     modelStore:
       nullable: true
       properties:

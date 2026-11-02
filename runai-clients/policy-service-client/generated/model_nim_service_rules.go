@@ -31,6 +31,7 @@ type NimServiceRules struct {
 	ImagePullPolicy      NullableImagePullPolicyRules            `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets     NullableImagePullSecretsRules           `json:"imagePullSecrets,omitempty"`
 	Labels               NullableInstancesRules                  `json:"labels,omitempty"`
+	ModelRewrites        NullableArbitraryRules                  `json:"modelRewrites,omitempty"`
 	ModelStore           NullableNimServiceRulesAllOfModelStore  `json:"modelStore,omitempty"`
 	MultiNode            NullableNimServiceMultiNodeRules        `json:"multiNode,omitempty"`
 	NgcAuthSecret        NullableStringRules                     `json:"ngcAuthSecret,omitempty"`
@@ -447,6 +448,49 @@ func (o *NimServiceRules) SetLabelsNil() {
 // UnsetLabels ensures that no value is present for Labels, not even an explicit nil
 func (o *NimServiceRules) UnsetLabels() {
 	o.Labels.Unset()
+}
+
+// GetModelRewrites returns the ModelRewrites field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRules) GetModelRewrites() ArbitraryRules {
+	if o == nil || IsNil(o.ModelRewrites.Get()) {
+		var ret ArbitraryRules
+		return ret
+	}
+	return *o.ModelRewrites.Get()
+}
+
+// GetModelRewritesOk returns a tuple with the ModelRewrites field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRules) GetModelRewritesOk() (*ArbitraryRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ModelRewrites.Get(), o.ModelRewrites.IsSet()
+}
+
+// HasModelRewrites returns a boolean if a field has been set.
+func (o *NimServiceRules) HasModelRewrites() bool {
+	if o != nil && o.ModelRewrites.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetModelRewrites gets a reference to the given NullableArbitraryRules and assigns it to the ModelRewrites field.
+func (o *NimServiceRules) SetModelRewrites(v ArbitraryRules) {
+	o.ModelRewrites.Set(&v)
+}
+
+// SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+func (o *NimServiceRules) SetModelRewritesNil() {
+	o.ModelRewrites.Set(nil)
+}
+
+// UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
+func (o *NimServiceRules) UnsetModelRewrites() {
+	o.ModelRewrites.Unset()
 }
 
 // GetModelStore returns the ModelStore field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1001,6 +1045,9 @@ func (o NimServiceRules) ToMap() (map[string]interface{}, error) {
 	}
 	if o.Labels.IsSet() {
 		toSerialize["labels"] = o.Labels.Get()
+	}
+	if o.ModelRewrites.IsSet() {
+		toSerialize["modelRewrites"] = o.ModelRewrites.Get()
 	}
 	if o.ModelStore.IsSet() {
 		toSerialize["modelStore"] = o.ModelStore.Get()

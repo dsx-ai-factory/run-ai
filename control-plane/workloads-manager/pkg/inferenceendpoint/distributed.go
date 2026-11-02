@@ -26,7 +26,9 @@ import (
 // It does not establish trusted submission origin or inference runtime compatibility;
 // a future submission caller must establish both before selecting this adapter.
 // Only the public HTTP, root-hostname topology is representable in this version.
-func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, defaults *Defaults) (*api.AgentInferenceEndpoint, error) {
+// rewrites are the workload's modelRewrites; they are copied to spec.rewrites, and
+// the key is omitted when there are none because the endpoint CRD has no nullable fields.
+func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, rewrites []api.ModelRewrite, defaults *Defaults) (*api.AgentInferenceEndpoint, error) {
 	if defaults == nil || defaults.GatewayName == "" || len(validation.IsDNS1123Subdomain(defaults.GatewayName)) != 0 ||
 		defaults.GatewayNamespace == "" || len(validation.IsDNS1123Label(defaults.GatewayNamespace)) != 0 || defaults.EPPProfile != "gie-v1.5" {
 		return nil, fmt.Errorf("distributed inference requires valid administrator Gateway defaults and the gie-v1.5 EPP profile")
@@ -43,20 +45,33 @@ func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.Ne
 	if err != nil {
 		return nil, err
 	}
-	return &api.AgentInferenceEndpoint{
-		SchemaVersion: runv1.InferenceEndpointIntegrationV1,
-		Spec: map[string]interface{}{
-			"workload": map[string]interface{}{
-				"selector": map[string]interface{}{"matchLabels": maps.Clone(*service.Selector)},
-				"port":     *service.Ports[0].TargetPort,
-			},
-			"routing": map[string]interface{}{
-				"gatewayRef": map[string]interface{}{"name": defaults.GatewayName, "namespace": defaults.GatewayNamespace},
-				"hostnames":  []string{hostname},
-			},
-			"epp": map[string]interface{}{"profile": defaults.EPPProfile},
+	spec := map[string]interface{}{
+		"workload": map[string]interface{}{
+			"selector": map[string]interface{}{"matchLabels": maps.Clone(*service.Selector)},
+			"port":     *service.Ports[0].TargetPort,
 		},
-	}, nil
+		"routing": map[string]interface{}{
+			"gatewayRef": map[string]interface{}{"name": defaults.GatewayName, "namespace": defaults.GatewayNamespace},
+			"hostnames":  []string{hostname},
+		},
+		"epp": map[string]interface{}{"profile": defaults.EPPProfile},
+	}
+	if len(rewrites) > 0 {
+		spec["rewrites"] = modelRewrites(rewrites)
+	}
+	return &api.AgentInferenceEndpoint{SchemaVersion: runv1.InferenceEndpointIntegrationV1, Spec: spec}, nil
+}
+
+func modelRewrites(rewrites []api.ModelRewrite) []interface{} {
+	rules := make([]interface{}, 0, len(rewrites))
+	for _, rewrite := range rewrites {
+		targets := make([]interface{}, 0, len(rewrite.Targets))
+		for _, target := range rewrite.Targets {
+			targets = append(targets, map[string]interface{}{"model": target.Model, "weight": target.Weight})
+		}
+		rules = append(rules, map[string]interface{}{"model": rewrite.Model, "targets": targets})
+	}
+	return rules
 }
 
 func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint) (*api.ServiceSpec, error) {
