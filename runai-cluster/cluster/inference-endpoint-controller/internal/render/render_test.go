@@ -322,6 +322,64 @@ var _ = Describe("Render", func() {
 		})
 	})
 
+	Context("default backend", func() {
+		inferenceRule := map[string]any{
+			"matches": []any{map[string]any{"path": map[string]any{"type": "PathPrefix", "value": "/v1"}}},
+			"backendRefs": []any{map[string]any{
+				"group": "inference.networking.k8s.io", "kind": "InferencePool", keyName: "llama3-pool",
+			}},
+			"timeouts": map[string]any{"request": "300s"},
+		}
+		defaultRule := map[string]any{
+			"matches": []any{map[string]any{"path": map[string]any{"type": "PathPrefix", "value": "/"}}},
+			"backendRefs": []any{map[string]any{
+				"group": "", "kind": "Service", keyName: "llama3-leader", "port": int64(80),
+			}},
+			"timeouts": map[string]any{"request": "300s"},
+		}
+		routeRules := func(in render.Input) []any {
+			route := byKey(must(render.Render(in)))["HTTPRoute/llama3-route"]
+			ExpectWithOffset(1, route).NotTo(BeNil())
+			rules, _, err := unstructured.NestedSlice(route.Object, "spec", "rules")
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+			return rules
+		}
+
+		It("routes every path outside /v1 to the Service after the inference rule", func() {
+			in := llama3Input()
+			in.DefaultBackend = &render.ServiceBackend{Name: "llama3-leader", Port: 80}
+			Expect(routeRules(in)).To(Equal([]any{inferenceRule, defaultRule}))
+		})
+
+		It("keeps the EPP-Profile header on the inference rule only", func() {
+			in := profilesInput()
+			in.DefaultBackend = &render.ServiceBackend{Name: "llama3-leader", Port: 80}
+			rules := routeRules(in)
+			Expect(rules).To(HaveLen(2))
+			Expect(rules[0]).To(HaveKey("filters"))
+			Expect(rules[1]).To(Equal(defaultRule))
+		})
+
+		It("renders only the inference rule when unset", func() {
+			Expect(routeRules(llama3Input())).To(Equal([]any{inferenceRule}))
+		})
+
+		DescribeTable("rejects an invalid Service reference",
+			func(backend render.ServiceBackend) {
+				in := llama3Input()
+				in.DefaultBackend = &backend
+				_, err := render.Render(in)
+				Expect(err).To(MatchError(ContainSubstring("routing.defaultBackendRef")))
+			},
+			Entry("empty name", render.ServiceBackend{Port: 80}),
+			Entry("upper-case name", render.ServiceBackend{Name: "Leader", Port: 80}),
+			Entry("name starting with a digit", render.ServiceBackend{Name: "0-leader", Port: 80}),
+			Entry("name with a YAML document marker", render.ServiceBackend{Name: "leader\n---\nkind: ConfigMap", Port: 80}),
+			Entry("zero port", render.ServiceBackend{Name: "llama3-leader"}),
+			Entry("port above 65535", render.ServiceBackend{Name: "llama3-leader", Port: 65536}),
+		)
+	})
+
 	Context("for a different endpoint", func() {
 		in := render.Input{
 			Name:             "chat",

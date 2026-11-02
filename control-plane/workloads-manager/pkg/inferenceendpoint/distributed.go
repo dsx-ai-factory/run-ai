@@ -53,6 +53,8 @@ func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.Ne
 		"routing": map[string]interface{}{
 			"gatewayRef": map[string]interface{}{"name": defaults.GatewayName, "namespace": defaults.GatewayNamespace},
 			"hostnames":  []string{hostname},
+			// Protected Services target the auth proxy, so non-inference paths stay behind it.
+			"defaultBackendRef": map[string]interface{}{"name": service.Name, "port": service.Ports[0].Port},
 		},
 		"epp": map[string]interface{}{"profile": defaults.EPPProfile},
 	}

@@ -300,6 +300,28 @@ spec:
               routing:
                 description: routing describes the Gateway attachment.
                 properties:
+                  defaultBackendRef:
+                    description: |-
+                      defaultBackendRef is the Service that receives requests not matched by
+                      the inference path prefix. Omit to route only the inference prefix.
+                    properties:
+                      name:
+                        description: name of the Service, a DNS-1035 label.
+                        maxLength: 63
+                        minLength: 1
+                        pattern: ^[a-z]([-a-z0-9]*[a-z0-9])?$
+                        type: string
+                      port:
+                        description: port is the Service port, not the container target
+                          port.
+                        format: int32
+                        maximum: 65535
+                        minimum: 1
+                        type: integer
+                    required:
+                    - name
+                    - port
+                    type: object
                   gatewayRef:
                     description: gatewayRef is the Gateway the generated HTTPRoute
                       attaches to.

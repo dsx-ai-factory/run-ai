@@ -31,3 +31,16 @@ spec:
       name: {{ printf "%s-pool" .Name | toJSON }}
     timeouts:
       request: 300s
+{{- with .DefaultBackend }}
+  - matches:
+    - path:
+        type: PathPrefix
+        value: /
+    backendRefs:
+    - group: ""
+      kind: Service
+      name: {{ .Name | toJSON }}
+      port: {{ .Port }}
+    timeouts:
+      request: 300s
+{{- end }}

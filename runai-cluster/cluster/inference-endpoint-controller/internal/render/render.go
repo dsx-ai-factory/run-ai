@@ -29,6 +29,7 @@ import (
 	"text/template"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/util/validation"
 	utilyaml "k8s.io/apimachinery/pkg/util/yaml"
 )
 
@@ -117,6 +118,14 @@ type Rewrite struct {
 	Targets []RewriteTarget
 }
 
+// ServiceBackend is a Service port in the endpoint namespace.
+type ServiceBackend struct {
+	// Name of the Service.
+	Name string
+	// Port is the Service port, not the container target port.
+	Port int32
+}
+
 // Objective is one priority lane. Each objective becomes its own
 // InferenceObjective, because the EPP selects a lane by object name.
 type Objective struct {
@@ -146,6 +155,9 @@ type Input struct {
 	MetricsNamespace string
 	// Hostnames the HTTPRoute matches.
 	Hostnames []string
+	// DefaultBackend receives requests the inference path prefix does not
+	// match. Nil means the HTTPRoute routes only the inference prefix.
+	DefaultBackend *ServiceBackend
 	// EppImage is the endpoint-picker container image. The controller resolves
 	// epp.profile to its pinned image before rendering.
 	EppImage string
@@ -189,6 +201,14 @@ func (in *Input) validate() error {
 	}
 	if in.EppImage == "" {
 		errs = append(errs, errors.New("epp.image is required"))
+	}
+	if b := in.DefaultBackend; b != nil {
+		if msgs := validation.IsDNS1035Label(b.Name); len(msgs) != 0 {
+			errs = append(errs, fmt.Errorf("routing.defaultBackendRef.name %q is not a DNS-1035 label: %s", b.Name, strings.Join(msgs, "; ")))
+		}
+		if b.Port < 1 || b.Port > 65535 {
+			errs = append(errs, fmt.Errorf("routing.defaultBackendRef.port %d is outside 1-65535", b.Port))
+		}
 	}
 	// A namespace is a DNS label, so a valid value is unchanged by DNSLabel.
 	if in.MetricsNamespace == "" || DNSLabel(in.MetricsNamespace) != in.MetricsNamespace {

@@ -2,7 +2,8 @@
 # Experimental llm-d-v0.10 profile scheduling is in inference_v1alpha1_inferenceendpoint_profiles.yaml.
 # This is a field reference, not a minimal configuration.
 # Prerequisites: the namespace, Gateway, and matching model-serving Pods exist;
-# the Pods serve both llama3 and llama3-v2 on port 8000.
+# the Pods serve both llama3 and llama3-v2 on port 8000; Service vllm-llama3
+# exposes them on port 80.
 apiVersion: inference.platform.run.ai/v1alpha1
 kind: InferenceEndpoint
 metadata:
@@ -22,6 +23,9 @@ spec:
     hostnames: # Required, at least one hostname; entries must be unique.
     - llama3-all-fields.test
     - llama3-all-fields-alias.test
+    defaultBackendRef: # Optional. Paths outside /v1 go to this Service; omit to route only /v1.
+      name: vllm-llama3 # Required. A Service in this endpoint's namespace.
+      port: 80 # Required, 1–65535. The Service port, not the container target port.
 
   epp: # Required. At least one of profile or image must be present.
     profile: gie-v1.5 # Optional. Pins the GIE v1.5.0 contract; llm-d-v0.10 is experimental.

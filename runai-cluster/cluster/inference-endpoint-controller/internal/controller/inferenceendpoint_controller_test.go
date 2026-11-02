@@ -228,6 +228,55 @@ var _ = Describe("InferenceEndpoint Controller", func() {
 		Expect(parents[0].(map[string]any)["namespace"]).To(Equal(ns), "gateway namespace defaults to the endpoint namespace")
 	})
 
+	It("adds and removes the default backend rule with routing.defaultBackendRef", func() {
+		routeRules := func() []any {
+			_, err := reconciler.Reconcile(ctx, request)
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+			route := &unstructured.Unstructured{}
+			route.SetGroupVersionKind(routeGVK)
+			ExpectWithOffset(1, k8sClient.Get(ctx, types.NamespacedName{Name: routeName, Namespace: ns}, route)).To(Succeed())
+			rules, _, err := unstructured.NestedSlice(route.Object, "spec", "rules")
+			ExpectWithOffset(1, err).NotTo(HaveOccurred())
+			return rules
+		}
+		Expect(routeRules()).To(HaveLen(1))
+
+		Expect(k8sClient.Get(ctx, request.NamespacedName, endpoint)).To(Succeed())
+		endpoint.Spec.Routing.DefaultBackendRef = &inferencev1alpha1.ServiceReference{Name: "llama3-leader", Port: 80}
+		Expect(k8sClient.Update(ctx, endpoint)).To(Succeed())
+		rules := routeRules()
+		Expect(rules).To(HaveLen(2))
+		Expect(rules[0].(map[string]any)["backendRefs"].([]any)[0]).To(HaveKeyWithValue("kind", "InferencePool"))
+		Expect(rules[1]).To(HaveKeyWithValue("matches", []any{map[string]any{"path": map[string]any{"type": "PathPrefix", "value": "/"}}}))
+		Expect(rules[1].(map[string]any)["backendRefs"]).To(ConsistOf(HaveKeyWithValue(testNameKey, "llama3-leader")))
+		Expect(rules[1].(map[string]any)["backendRefs"].([]any)[0]).To(HaveKeyWithValue("port", int64(80)))
+		Expect(rules[1].(map[string]any)["backendRefs"].([]any)[0]).To(HaveKeyWithValue("kind", "Service"))
+
+		Expect(k8sClient.Get(ctx, request.NamespacedName, endpoint)).To(Succeed())
+		endpoint.Spec.Routing.DefaultBackendRef = nil
+		Expect(k8sClient.Update(ctx, endpoint)).To(Succeed())
+		Expect(routeRules()).To(HaveLen(1))
+	})
+
+	DescribeTable("validates routing.defaultBackendRef at admission",
+		func(ref map[string]any, valid bool) {
+			candidate := endpointWithEpp(endpoint, map[string]any{profileField: profileName})
+			Expect(unstructured.SetNestedMap(candidate.Object, ref, "spec", "routing", "defaultBackendRef")).To(Succeed())
+			err := k8sClient.Create(ctx, candidate)
+			if valid {
+				Expect(err).NotTo(HaveOccurred())
+			} else {
+				Expect(errors.IsInvalid(err)).To(BeTrue(), "expected admission rejection, got %v", err)
+			}
+		},
+		Entry("Service name and port", map[string]any{testNameKey: "llama3-leader", "port": int64(80)}, true),
+		Entry("missing name", map[string]any{"port": int64(80)}, false),
+		Entry("missing port", map[string]any{testNameKey: "llama3-leader"}, false),
+		Entry("name that is not a DNS-1035 label", map[string]any{testNameKey: "0-Leader", "port": int64(80)}, false),
+		Entry("zero port", map[string]any{testNameKey: "llama3-leader", "port": int64(0)}, false),
+		Entry("port above 65535", map[string]any{testNameKey: "llama3-leader", "port": int64(65536)}, false),
+	)
+
 	It("stays not Ready until the Gateway accepts the route and the EPP is available", func() {
 		_, err := reconciler.Reconcile(ctx, request)
 		Expect(err).NotTo(HaveOccurred())

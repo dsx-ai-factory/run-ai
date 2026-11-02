@@ -82,7 +82,8 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(raw)).To(MatchJSON(`{
             "workload":{"selector":{"matchLabels":{"leaderworkerset.sigs.k8s.io/name":"model-1234","leaderworkerset.sigs.k8s.io/worker-index":"0"}},"port":8000},
-            "routing":{"gatewayRef":{"name":"inference","namespace":"gateways"},"hostnames":["model.example.com"]},
+            "routing":{"gatewayRef":{"name":"inference","namespace":"gateways"},"hostnames":["model.example.com"],
+                "defaultBackendRef":{"name":"dinfw-model-sp-0","port":80}},
             "epp":{"profile":"gie-v1.5"}
         }`))
 	})
@@ -215,6 +216,22 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 			intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(intent).NotTo(BeNil())
+		})
+
+		It("routes non-inference paths to the Service port that targets the auth proxy", func() {
+			authorize("authorizedUsers")
+			(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
+			addSidecar(composer.Oauth2ContainerDefaultPort)
+			setRoute()
+			intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
+			Expect(err).NotTo(HaveOccurred())
+			raw, err := json.Marshal(intent.Spec["routing"])
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(raw)).To(MatchJSON(`{
+                "gatewayRef":{"name":"inference","namespace":"gateways"},"hostnames":["model.example.com"],
+                "defaultBackendRef":{"name":"dinfw-model-sp-0","port":80}
+            }`))
+			Expect(intent.Spec["workload"]).To(HaveKeyWithValue("port", composer.Oauth2ContainerDefaultPort))
 		})
 
 		DescribeTable("rejects a serving port that does not match the auth mode", func(mutate func()) {

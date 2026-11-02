@@ -96,6 +96,28 @@ type RoutingSpec struct {
 	// +kubebuilder:validation:MinItems=1
 	// +listType=set
 	Hostnames []string `json:"hostnames"`
+
+	// defaultBackendRef is the Service that receives requests not matched by
+	// the inference path prefix. Omit to route only the inference prefix.
+	// +optional
+	DefaultBackendRef *ServiceReference `json:"defaultBackendRef,omitempty"`
+}
+
+// ServiceReference names a Service port in the namespace of the
+// InferenceEndpoint.
+type ServiceReference struct {
+	// name of the Service, a DNS-1035 label.
+	// +required
+	// +kubebuilder:validation:MinLength=1
+	// +kubebuilder:validation:MaxLength=63
+	// +kubebuilder:validation:Pattern=`^[a-z]([-a-z0-9]*[a-z0-9])?$`
+	Name string `json:"name"`
+
+	// port is the Service port, not the container target port.
+	// +required
+	// +kubebuilder:validation:Minimum=1
+	// +kubebuilder:validation:Maximum=65535
+	Port int32 `json:"port"`
 }
 
 // ScorerType names one of the endpoint picker's scoring signals.

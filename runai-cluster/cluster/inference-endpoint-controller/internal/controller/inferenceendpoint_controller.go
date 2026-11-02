@@ -229,6 +229,9 @@ func inputFor(endpoint *inferencev1alpha1.InferenceEndpoint) (render.Input, erro
 		EppImage:         image,
 		RuntimeProfiles:  endpoint.Spec.Epp.Profile == inferencev1alpha1.EppProfileLLMDV010,
 	}
+	if ref := endpoint.Spec.Routing.DefaultBackendRef; ref != nil {
+		in.DefaultBackend = &render.ServiceBackend{Name: ref.Name, Port: ref.Port}
+	}
 	if endpoint.Spec.Epp.Scheduling != nil {
 		in.ActiveProfile = string(endpoint.Spec.Epp.Scheduling.ActiveProfile)
 		in.DefaultProfile = string(endpoint.Spec.Epp.Scheduling.DefaultProfile)
