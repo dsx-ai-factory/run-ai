@@ -22,6 +22,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 )
 
+const loadAwareRoutingUnavailableMessage = "load-aware routing is not available on this cluster"
+
 // AnyWorkloadSubmitterDinf handles submission decisions for Distributed Inference workloads (LeaderWorkerSet).
 type AnyWorkloadSubmitterDinf struct{}
 
@@ -84,6 +86,13 @@ func (s *AnyWorkloadSubmitterDinf) Create(ctx context.Context, wc *workloadConte
 	}
 	if metadataErr := composeDinfConnectionMetadata(ctx, wc, spec); metadataErr != nil {
 		return nil, metadataErr
+	}
+	routing, routingErr := dinfInferenceRouting(spec)
+	if routingErr != nil {
+		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, fmt.Sprintf("failed to project inference routing: %v", routingErr))
+	}
+	if routing != nil {
+		target.Config.SetInferenceRouting(*routing)
 	}
 
 	return &Submission{
@@ -226,6 +235,44 @@ func (s *AnyWorkloadSubmitterDinf) Update(ctx context.Context, wc *workloadConte
 		},
 		Requirements: dinfComposer.WorkloadRequirements,
 	}, nil
+}
+
+// dinfLoadAwareRoutingRequested is the opt-in rule that workloads-manager applies
+// to inferenceRouting. Any objectivePriority value opts in, including 0.
+func dinfLoadAwareRoutingRequested(spec *workloadsApi.DistributedInferenceSpecSpec) bool {
+	return spec != nil &&
+		(convutils.Deref(spec.LoadAwareRouting.Get(), false) || spec.ObjectivePriority.Get() != nil || len(spec.ModelRewrites) > 0)
+}
+
+// dinfInferenceRouting carries the policy-validated spec fields that workloads-manager
+// needs to build the InferenceEndpoint intent. It returns nil when the workload did
+// not opt in, so the request stays unchanged.
+func dinfInferenceRouting(spec *workloadsApi.DistributedInferenceSpecSpec) (*workloadMgrApi.WorkloadV2ConfigurationInferenceRouting, error) {
+	if !dinfLoadAwareRoutingRequested(spec) {
+		return nil, nil
+	}
+	routing := workloadMgrApi.NewWorkloadV2ConfigurationInferenceRouting()
+	if loadAwareRouting := spec.LoadAwareRouting.Get(); loadAwareRouting != nil {
+		routing.SetLoadAwareRouting(*loadAwareRouting)
+	}
+	if priority := spec.ObjectivePriority.Get(); priority != nil {
+		routing.SetObjectivePriority(*priority)
+	}
+	if len(spec.ModelRewrites) > 0 {
+		var rewrites []workloadMgrApi.ModelRewrite
+		if err := convutils.CopySpecs(&rewrites, spec.ModelRewrites); err != nil {
+			return nil, fmt.Errorf("copy model rewrites: %w", err)
+		}
+		routing.SetModelRewrites(rewrites)
+	}
+	// The composer protects the serving port with an auth proxy unless the type is
+	// unset or public; workloads-manager needs the same decision to pick the target port.
+	if servingPort := spec.ServingPort.Get(); servingPort != nil {
+		if authorizationType := servingPort.AuthorizationType.Get(); authorizationType != nil {
+			routing.SetServingPortAuthorizationType(workloadMgrApi.ServingPortAccessAuthorizationTypeEnum(*authorizationType))
+		}
+	}
+	return routing, nil
 }
 
 func manifestName(manifest map[string]interface{}) (string, bool) {

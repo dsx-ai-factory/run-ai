@@ -7,6 +7,7 @@ package services_crud
 
 import (
 	"context"
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -78,21 +79,27 @@ func TestManifestName(t *testing.T) {
 }
 
 func TestAnyWorkloadSubmitterDinfCreateReturnsConnectionMetadata(t *testing.T) {
-	const clusterID = "dinf-connections-cluster"
-	displayedCluster := testing_pkg.BuildDisplayedCluster(clusterID, "3.0.0", nil)
+	wc, notificationsComposer := newDinfCreateContextForTest(t, newDinfSpecForTest())
 
-	originalCapabilitiesClient := checkerClusterClient.Get()
-	checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().WithCluster(clusterID, displayedCluster))
-	checker.InitClustersCache(testing_pkg.GetDefaultClustersCacheConfig())
-	t.Cleanup(func() {
-		checkerClusterClient.SetMock(originalCapabilitiesClient)
-		checker.InitClustersCache(testing_pkg.GetDefaultClustersCacheConfig())
-	})
+	submission, submissionErr := (&AnyWorkloadSubmitterDinf{}).Create(context.Background(), wc)
 
-	originalClusterService := clusterservice.Get()
-	clusterservice.SetMock(clientsclusterservice.NewSimpleMock().WithCluster(clusterID, &displayedCluster))
-	t.Cleanup(func() { clusterservice.SetMock(originalClusterService) })
+	require.Nil(t, submissionErr)
+	require.NotNil(t, submission)
+	require.NotNil(t, submission.ConnectionMetadata)
+	require.Same(t, notificationsComposer.Output, submission.ConnectionCreationFields)
+	require.Len(t, submission.ConnectionMetadata.Environments, 2)
 
+	leaderEnvironment := environmentByReplicaTypeForTest(submission.ConnectionMetadata.Environments, workloadsApi.REPLICATYPE_LEADER)
+	require.NotNil(t, leaderEnvironment)
+	require.Len(t, leaderEnvironment.Connections, 1)
+	require.Equal(t, int32(8080), leaderEnvironment.Connections[0].GetContainerPort())
+
+	workerEnvironment := environmentByReplicaTypeForTest(submission.ConnectionMetadata.Environments, workloadsApi.REPLICATYPE_WORKER)
+	require.NotNil(t, workerEnvironment)
+	require.Empty(t, workerEnvironment.Connections)
+}
+
+func newDinfSpecForTest() *workloadsApi.DistributedInferenceSpecSpec {
 	spec := workloadsApi.NewDistributedInferenceSpecSpec()
 	spec.SetWorkers(1)
 	spec.SetReplicas(1)
@@ -107,6 +114,25 @@ func TestAnyWorkloadSubmitterDinfCreateReturnsConnectionMetadata(t *testing.T) {
 	servingPort.SetAuthorizationType(workloadsApi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_PUBLIC)
 	servingPort.SetExposeExternally(false)
 	spec.SetServingPort(*servingPort)
+	return spec
+}
+
+func newDinfCreateContextForTest(t *testing.T, spec *workloadsApi.DistributedInferenceSpecSpec) (*workloadContext, *notifications.NotificationsComposer) {
+	t.Helper()
+	const clusterID = "dinf-connections-cluster"
+	displayedCluster := testing_pkg.BuildDisplayedCluster(clusterID, "3.0.0", nil)
+
+	originalCapabilitiesClient := checkerClusterClient.Get()
+	checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().WithCluster(clusterID, displayedCluster))
+	checker.InitClustersCache(testing_pkg.GetDefaultClustersCacheConfig())
+	t.Cleanup(func() {
+		checkerClusterClient.SetMock(originalCapabilitiesClient)
+		checker.InitClustersCache(testing_pkg.GetDefaultClustersCacheConfig())
+	})
+
+	originalClusterService := clusterservice.Get()
+	clusterservice.SetMock(clientsclusterservice.NewSimpleMock().WithCluster(clusterID, &displayedCluster))
+	t.Cleanup(func() { clusterservice.SetMock(originalClusterService) })
 
 	supersetSpec := workloadsApi.NewSupersetSpec()
 	require.NoError(t, convutils.CopySpecs(supersetSpec, spec))
@@ -144,23 +170,93 @@ func TestAnyWorkloadSubmitterDinfCreateReturnsConnectionMetadata(t *testing.T) {
 			notificationsComposer: notificationsComposer,
 		},
 	}
+	return wc, notificationsComposer
+}
 
-	submission, submissionErr := (&AnyWorkloadSubmitterDinf{}).Create(context.Background(), wc)
+func TestDinfInferenceRouting(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		mutate func(*workloadsApi.DistributedInferenceSpecSpec)
+		want   string
+	}{
+		{name: "no routing fields", mutate: func(*workloadsApi.DistributedInferenceSpecSpec) {}},
+		{name: "loadAwareRouting false", mutate: func(spec *workloadsApi.DistributedInferenceSpecSpec) { spec.SetLoadAwareRouting(false) }},
+		{
+			name:   "loadAwareRouting true",
+			mutate: func(spec *workloadsApi.DistributedInferenceSpecSpec) { spec.SetLoadAwareRouting(true) },
+			want:   `{"loadAwareRouting":true,"servingPortAuthorizationType":"public"}`,
+		},
+		{
+			name:   "objectivePriority 0",
+			mutate: func(spec *workloadsApi.DistributedInferenceSpecSpec) { spec.SetObjectivePriority(0) },
+			want:   `{"loadAwareRouting":false,"objectivePriority":0,"servingPortAuthorizationType":"public"}`,
+		},
+		{
+			name: "modelRewrites",
+			mutate: func(spec *workloadsApi.DistributedInferenceSpecSpec) {
+				spec.SetModelRewrites([]workloadsApi.ModelRewrite{{Model: "chat", Targets: []workloadsApi.ModelRewriteTarget{{Model: "chat-v1", Weight: 1}}}})
+			},
+			want: `{"loadAwareRouting":false,"modelRewrites":[{"model":"chat","targets":[{"model":"chat-v1","weight":1}]}],"servingPortAuthorizationType":"public"}`,
+		},
+		{
+			name: "protected serving port",
+			mutate: func(spec *workloadsApi.DistributedInferenceSpecSpec) {
+				spec.SetLoadAwareRouting(true)
+				servingPort := spec.GetServingPort()
+				servingPort.SetAuthorizationType(workloadsApi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS)
+				spec.SetServingPort(servingPort)
+			},
+			want: `{"loadAwareRouting":true,"servingPortAuthorizationType":"authenticatedUsers"}`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			spec := newDinfSpecForTest()
+			tc.mutate(spec)
 
-	require.Nil(t, submissionErr)
-	require.NotNil(t, submission)
-	require.NotNil(t, submission.ConnectionMetadata)
-	require.Same(t, notificationsComposer.Output, submission.ConnectionCreationFields)
-	require.Len(t, submission.ConnectionMetadata.Environments, 2)
+			routing, err := dinfInferenceRouting(spec)
 
-	leaderEnvironment := environmentByReplicaTypeForTest(submission.ConnectionMetadata.Environments, workloadsApi.REPLICATYPE_LEADER)
-	require.NotNil(t, leaderEnvironment)
-	require.Len(t, leaderEnvironment.Connections, 1)
-	require.Equal(t, int32(8080), leaderEnvironment.Connections[0].GetContainerPort())
+			require.NoError(t, err)
+			require.Equal(t, tc.want != "", dinfLoadAwareRoutingRequested(spec))
+			if tc.want == "" {
+				require.Nil(t, routing)
+				return
+			}
+			raw, err := json.Marshal(routing)
+			require.NoError(t, err)
+			require.JSONEq(t, tc.want, string(raw))
+		})
+	}
+}
 
-	workerEnvironment := environmentByReplicaTypeForTest(submission.ConnectionMetadata.Environments, workloadsApi.REPLICATYPE_WORKER)
-	require.NotNil(t, workerEnvironment)
-	require.Empty(t, workerEnvironment.Connections)
+func TestAnyWorkloadSubmitterDinfCreateCarriesInferenceRouting(t *testing.T) {
+	for _, tc := range []struct {
+		name    string
+		optedIn bool
+	}{
+		{name: "not opted in", optedIn: false},
+		{name: "opted in with objectivePriority 0", optedIn: true},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			spec := newDinfSpecForTest()
+			if tc.optedIn {
+				spec.SetObjectivePriority(0)
+			}
+			wc, _ := newDinfCreateContextForTest(t, spec)
+
+			submission, submissionErr := (&AnyWorkloadSubmitterDinf{}).Create(context.Background(), wc)
+
+			require.Nil(t, submissionErr)
+			require.NotNil(t, submission)
+			configuration := submission.Request.Metadata.Configuration
+			require.NotNil(t, configuration)
+			require.Equal(t, tc.optedIn, configuration.HasInferenceRouting())
+			if tc.optedIn {
+				routing := configuration.GetInferenceRouting()
+				require.Equal(t, int32(0), routing.GetObjectivePriority())
+				require.Equal(t, workloadMgrApi.SERVINGPORTACCESSAUTHORIZATIONTYPEENUM_PUBLIC, routing.GetServingPortAuthorizationType())
+			}
+		})
+	}
 }
 
 func TestComposeDinfConnectionMetadataCreatesLeaderAndWorkerEnvironments(t *testing.T) {

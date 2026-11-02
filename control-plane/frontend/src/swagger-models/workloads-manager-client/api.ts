@@ -1936,6 +1936,23 @@ export type ServiceType = typeof ServiceType[keyof typeof ServiceType];
 
 
 /**
+ * Specifies who can send inference requests to the serving endpoint:  Possible values: - `public`: No authorization is required. (Default) - `authenticatedUsers`: Any NVIDIA Run:ai authenticated user and service account can send requests. - `authorizedUsers`: Only users listed in the authorizedUsers field can send requests. - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field can send requests. - `authorizedUsersOrGroups`: Requires either authorizedUsers or authorizedGroups to be provided; if neither is set, or if both are set, a mutual exclusion error is reported. Supported from cluster version 2.19. 
+ * @export
+ * @enum {string}
+ */
+
+export const ServingPortAccessAuthorizationTypeEnum = {
+    Public: 'public',
+    AuthenticatedUsers: 'authenticatedUsers',
+    AuthorizedUsers: 'authorizedUsers',
+    AuthorizedGroups: 'authorizedGroups',
+    AuthorizedUsersOrGroups: 'authorizedUsersOrGroups'
+} as const;
+
+export type ServingPortAccessAuthorizationTypeEnum = typeof ServingPortAccessAuthorizationTypeEnum[keyof typeof ServingPortAccessAuthorizationTypeEnum];
+
+
+/**
  * The protocol to use for the exposed URL. If grpcPort is set, this defaults to grpc. Otherwise, it defaults to http.
  * @export
  * @enum {string}
@@ -2199,6 +2216,43 @@ export interface WorkloadV2Configuration {
      * @memberof WorkloadV2Configuration
      */
     'pvcsConfig'?: WorkloadV2UpdateConfigurationPvcsConfig | null;
+    /**
+     * 
+     * @type {WorkloadV2ConfigurationInferenceRouting}
+     * @memberof WorkloadV2Configuration
+     */
+    'inferenceRouting'?: WorkloadV2ConfigurationInferenceRouting | null;
+}
+/**
+ * Inference routing fields from the policy-validated workload spec. Set only by the workloads service on the internal create API; rejected in public workload submissions. Workloads Manager resolves them into externalAccess.inference on the serving endpoint.
+ * @export
+ * @interface WorkloadV2ConfigurationInferenceRouting
+ */
+export interface WorkloadV2ConfigurationInferenceRouting {
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof WorkloadV2ConfigurationInferenceRouting
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof WorkloadV2ConfigurationInferenceRouting
+     */
+    'objectivePriority'?: number | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof WorkloadV2ConfigurationInferenceRouting
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
+     * 
+     * @type {ServingPortAccessAuthorizationTypeEnum}
+     * @memberof WorkloadV2ConfigurationInferenceRouting
+     */
+    'servingPortAuthorizationType'?: ServingPortAccessAuthorizationTypeEnum | null;
 }
 /**
  * 
@@ -2609,6 +2663,12 @@ export interface WorkloadV2MetadataUpdateParamsConfiguration {
      * @memberof WorkloadV2MetadataUpdateParamsConfiguration
      */
     'pvcsConfig'?: WorkloadV2UpdateConfigurationPvcsConfig | null;
+    /**
+     * 
+     * @type {WorkloadV2ConfigurationInferenceRouting}
+     * @memberof WorkloadV2MetadataUpdateParamsConfiguration
+     */
+    'inferenceRouting'?: WorkloadV2ConfigurationInferenceRouting | null;
 }
 /**
  * 

@@ -148,6 +148,8 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		validationErrors.Add(ToSubmissionErrorV2(api.NewValidationError(apiErr.Error())))
 	}
 
+	validationErrors.Add(validateInferenceRoutingOrigin(&request.Metadata.Configuration, options.TranslatedFromV1))
+
 	// Validate manifest first - if invalid, we can't proceed with other validations
 	manifest, manifestErr := w.validateManifest(ctx, request.Manifest, request.ManifestBase64Encoded)
 	if manifestErr != nil {
@@ -231,6 +233,12 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		validationErrors.Add(configErr)
 		return nil, validationErrors.ToSubmissionErrors()
 	}
+	inferenceRouting := request.Metadata.Configuration.InferenceRouting
+	inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, project.ClusterId, trustedConvertedFromNative, manifestResourceInfo.Labels)
+	if routingErr != nil {
+		validationErrors.Add(routingErr)
+		return nil, validationErrors.ToSubmissionErrors()
+	}
 
 	// For dryRun, return effective metadata without creating workload
 	if options.DryRun {
@@ -282,6 +290,12 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 	resourceInfo, resourceErr := w.k8sUtil.GetResourceInfo(effectiveManifest)
 	if resourceErr != nil {
 		return nil, SingleError(NewManifestError(fmt.Sprintf("failed to extract resource info: %v", resourceErr)))
+	}
+
+	// Build the intent from the effective manifest, before the ownership binding
+	// adds the workload ID to the serving Service selector.
+	if routingErr := applyInferenceRouting(inferenceRouting, inferenceDefaults, effectiveManifest, configuration, name); routingErr != nil {
+		return nil, SingleError(routingErr)
 	}
 
 	// Get request path and body from context
@@ -686,6 +700,10 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 	manifest, err := w.validateManifest(ctx, request.Manifest, request.ManifestBase64Encoded)
 	if err != nil {
 		return nil, api.NewError(http.StatusBadRequest, fmt.Sprintf("manifest validation failed: %v", err), nil)
+	}
+	// Updates never resolve inference routing; only the internal update path may carry the field.
+	if routingErr := validateInferenceRoutingOrigin(request.Metadata.Configuration, options.skipAuth); routingErr != nil {
+		return nil, SubmissionErrorToApiError(routingErr)
 	}
 
 	tenantId, apiErr := runaictx.ParseTenantId(ctx)

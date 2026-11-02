@@ -155,6 +155,42 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 			Entry("only worker uses IdP", api.UIDGIDSOURCE_CUSTOM, api.UIDGIDSOURCE_FROM_IDP_TOKEN),
 		)
 
+		DescribeTable("rejects load-aware routing on the native submission path",
+			func(name string, mutate func(*api.DistributedInferenceSpecSpec), expectedCode int) {
+				request := api.DistributedInferenceCreationRequest{
+					Name:      name,
+					ProjectId: randoms.ProjectIdStr,
+					ClusterId: randoms.ClusterId,
+					Spec: api.DistributedInferenceSpecSpec{
+						ServingPort: &api.DistributedInferenceServingPort{
+							Port:     convutils.Ref(int32(8080)),
+							Protocol: convutils.Ref(api.DISTRIBUTEDINFERENCESERVINGPORTPROTOCOL_HTTP),
+						},
+						Workers:  convutils.Ref(int32(1)),
+						Replicas: convutils.Ref(int32(1)),
+						Leader:   &api.DistributedInferenceLeaderWorkerSpec{Image: convutils.Ref("leader-image")},
+						Worker:   &api.DistributedInferenceLeaderWorkerSpec{Image: convutils.Ref("worker-image")},
+					},
+				}
+				mutate(&request.Spec)
+
+				response, err := distributedInferencesService.CreateDistributedInference(ctx, request)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response.Code).To(Equal(expectedCode), "%v", response.Body)
+				if expectedCode == http.StatusBadRequest {
+					raw, marshalErr := json.Marshal(response.Body)
+					Expect(marshalErr).NotTo(HaveOccurred())
+					Expect(string(raw)).To(ContainSubstring(loadAwareRoutingUnavailableMessage))
+				}
+			},
+			Entry("loadAwareRouting true", "routing-native-load-aware", func(spec *api.DistributedInferenceSpecSpec) { spec.LoadAwareRouting = convutils.Ref(true) }, http.StatusBadRequest),
+			Entry("objectivePriority 0", "routing-native-priority", func(spec *api.DistributedInferenceSpecSpec) { spec.ObjectivePriority = convutils.Ref(int32(0)) }, http.StatusBadRequest),
+			Entry("modelRewrites", "routing-native-rewrites", func(spec *api.DistributedInferenceSpecSpec) {
+				spec.ModelRewrites = &[]api.ModelRewrite{{Model: "chat", Targets: []api.ModelRewriteTarget{{Model: "chat-v1", Weight: 1}}}}
+			}, http.StatusBadRequest),
+			Entry("loadAwareRouting false keeps native submission", "routing-native-not-opted-in", func(spec *api.DistributedInferenceSpecSpec) { spec.LoadAwareRouting = convutils.Ref(false) }, http.StatusAccepted),
+		)
+
 		It("should create distributed inference with security fields (hostIpc, hostNetwork) on leader and worker", func() {
 			request := api.DistributedInferenceCreationRequest{
 				Name:      "dist-inf-security",

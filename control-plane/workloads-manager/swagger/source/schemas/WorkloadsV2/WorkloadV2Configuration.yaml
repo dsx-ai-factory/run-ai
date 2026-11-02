@@ -22,3 +22,6 @@ properties:
     nullable: true
     description: Configuration applied to PVCs that are created and reconciled alongside the workload.
     $ref: "./WorkloadV2UpdateConfigurationPvcsConfig.yaml"
+  inferenceRouting:
+    x-internal: true
+    $ref: "./WorkloadV2ConfigurationInferenceRouting.yaml"

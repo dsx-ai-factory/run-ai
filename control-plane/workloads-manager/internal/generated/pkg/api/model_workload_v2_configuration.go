@@ -49,6 +49,11 @@ type WorkloadV2Configuration struct {
 	//PvcsConfig *WorkloadV2UpdateConfigurationPvcsConfig `json:"pvcsConfig,omitempty"`
 	PvcsConfig *WorkloadV2UpdateConfigurationPvcsConfig `json:"pvcsConfig,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//InferenceRouting *WorkloadV2ConfigurationInferenceRouting `json:"inferenceRouting,omitempty"`
+	InferenceRouting *WorkloadV2ConfigurationInferenceRouting `json:"inferenceRouting,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertWorkloadV2ConfigurationRequired checks if the required fields are not zero-ed
@@ -79,6 +84,11 @@ func AssertWorkloadV2ConfigurationRequired(obj WorkloadV2Configuration) error {
 	}
 	if obj.PvcsConfig != nil {
 		if err := AssertWorkloadV2UpdateConfigurationPvcsConfigRequired(*obj.PvcsConfig); err != nil {
+			return err
+		}
+	}
+	if obj.InferenceRouting != nil {
+		if err := AssertWorkloadV2ConfigurationInferenceRoutingRequired(*obj.InferenceRouting); err != nil {
 			return err
 		}
 	}
@@ -144,6 +154,16 @@ func AssertWorkloadV2ConfigurationConstraints(obj WorkloadV2Configuration) error
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.PvcsConfig != nil {
 		if err := AssertWorkloadV2UpdateConfigurationPvcsConfigConstraints(*obj.PvcsConfig); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.InferenceRouting != nil {
+		if err := AssertWorkloadV2ConfigurationInferenceRoutingConstraints(*obj.InferenceRouting); err != nil {
 			return err
 		}
 	}

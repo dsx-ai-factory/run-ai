@@ -82,6 +82,7 @@ docs/ServiceProtocol.md
 docs/ServiceRef.md
 docs/ServiceSpec.md
 docs/ServiceType.md
+docs/ServingPortAccessAuthorizationTypeEnum.md
 docs/ServingPortExposedProtocol.md
 docs/ServingPortServiceType.md
 docs/SettingsAPI.md
@@ -94,6 +95,7 @@ docs/TolerationOperator.md
 docs/WorkloadRunStateRequest.md
 docs/WorkloadV2.md
 docs/WorkloadV2Configuration.md
+docs/WorkloadV2ConfigurationInferenceRouting.md
 docs/WorkloadV2CreateRequest.md
 docs/WorkloadV2GetResponse.md
 docs/WorkloadV2Metadata.md
@@ -199,6 +201,7 @@ model_service_protocol.go
 model_service_ref.go
 model_service_spec.go
 model_service_type.go
+model_serving_port_access_authorization_type_enum.go
 model_serving_port_exposed_protocol.go
 model_serving_port_service_type.go
 model_submission_error.go
@@ -210,6 +213,7 @@ model_toleration_operator.go
 model_workload_run_state_request.go
 model_workload_v2.go
 model_workload_v2_configuration.go
+model_workload_v2_configuration_inference_routing.go
 model_workload_v2_create_request.go
 model_workload_v2_get_response.go
 model_workload_v2_metadata.go

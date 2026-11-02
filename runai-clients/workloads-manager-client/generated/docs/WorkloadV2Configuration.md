@@ -9,6 +9,7 @@ Name | Type | Description | Notes
 **UserCredentials** | Pointer to [**NullableWorkloadV2UpdateConfigurationUserCredentials**](WorkloadV2UpdateConfigurationUserCredentials.md) |  | [optional] 
 **Pvcs** | Pointer to [**[]WorkloadV2UpdateConfigurationPvc**](WorkloadV2UpdateConfigurationPvc.md) | PVCs to create and reconcile alongside the workload. | [optional] 
 **PvcsConfig** | Pointer to [**NullableWorkloadV2UpdateConfigurationPvcsConfig**](WorkloadV2UpdateConfigurationPvcsConfig.md) |  | [optional] 
+**InferenceRouting** | Pointer to [**NullableWorkloadV2ConfigurationInferenceRouting**](WorkloadV2ConfigurationInferenceRouting.md) |  | [optional] 
 
 ## Methods
 
@@ -204,6 +205,41 @@ HasPvcsConfig returns a boolean if a field has been set.
 `func (o *WorkloadV2Configuration) UnsetPvcsConfig()`
 
 UnsetPvcsConfig ensures that no value is present for PvcsConfig, not even an explicit nil
+### GetInferenceRouting
+
+`func (o *WorkloadV2Configuration) GetInferenceRouting() WorkloadV2ConfigurationInferenceRouting`
+
+GetInferenceRouting returns the InferenceRouting field if non-nil, zero value otherwise.
+
+### GetInferenceRoutingOk
+
+`func (o *WorkloadV2Configuration) GetInferenceRoutingOk() (*WorkloadV2ConfigurationInferenceRouting, bool)`
+
+GetInferenceRoutingOk returns a tuple with the InferenceRouting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetInferenceRouting
+
+`func (o *WorkloadV2Configuration) SetInferenceRouting(v WorkloadV2ConfigurationInferenceRouting)`
+
+SetInferenceRouting sets InferenceRouting field to given value.
+
+### HasInferenceRouting
+
+`func (o *WorkloadV2Configuration) HasInferenceRouting() bool`
+
+HasInferenceRouting returns a boolean if a field has been set.
+
+### SetInferenceRoutingNil
+
+`func (o *WorkloadV2Configuration) SetInferenceRoutingNil(b bool)`
+
+ SetInferenceRoutingNil sets the value for InferenceRouting to be an explicit nil
+
+### UnsetInferenceRouting
+`func (o *WorkloadV2Configuration) UnsetInferenceRouting()`
+
+UnsetInferenceRouting ensures that no value is present for InferenceRouting, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 
