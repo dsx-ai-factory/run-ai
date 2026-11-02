@@ -25427,6 +25427,7 @@ Components:
   github.com/opencontainers/selinux v1.13.1
   go.yaml.in/yaml/v2 v2.4.3
   go.yaml.in/yaml/v2 v2.4.4
+  go.yaml.in/yaml/v2 v2.4.5
   gomodules.xyz/jsonpatch/v2 v2.5.0
   gopkg.in/yaml.v2 v2.4.0
   k8s.io/cloud-provider/volume v0.35.4
@@ -35533,6 +35534,7 @@ NOTICE of go.yaml.in/yaml/v2, go.yaml.in/yaml/v3, gopkg.in/yaml.v2 and 1 others
 Components:
   go.yaml.in/yaml/v2 v2.4.3
   go.yaml.in/yaml/v2 v2.4.4
+  go.yaml.in/yaml/v2 v2.4.5
   go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
   go.yaml.in/yaml/v3 v3.0.6
