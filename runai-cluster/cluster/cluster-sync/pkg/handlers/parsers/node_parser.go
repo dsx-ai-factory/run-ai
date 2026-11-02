@@ -591,6 +591,7 @@ func parseTaints(taints []corev1.Taint) []swagger.NodeTaint {
 	return result
 }
 
+// getGpuInfo reports the node's GPUs from the NVIDIA and AMD node labels; nil on a node without GPUs.
 func getGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
 	nvidiaGpuInfo := getNvidiaGpuInfo(nodeLabels, nodeName)
 	amdGpuInfo := getAmdGpuInfo(nodeLabels, nodeName)
@@ -669,6 +670,8 @@ func getNvidiaGpuMemoryBytes(nodeLabels map[string]string, nodeName string) *int
 	return ptr.To(int64(gpuMemory) * bytesInMib)
 }
 
+// getAmdGpuInfo prefers the product-name labels, which name the GPU model, and falls back to the
+// family labels that older AMD node labellers publish.
 func getAmdGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
 	byFamily := getAmdGpuInfoByFamily(nodeLabels, nodeName)
 	info := getAmdGpuInfoByProductName(nodeLabels, nodeName)
@@ -682,7 +685,8 @@ func getAmdGpuInfo(nodeLabels map[string]string, nodeName string) *swagger.GpuIn
 	return info
 }
 
-// The product name ("AMD_Radeon_Pro_W7900") names the GPU model like nvidia.com/gpu.product does;
+// getAmdGpuInfoByProductName reads the AMD GPU Operator's product-name labels. The product name
+// ("AMD_Radeon_Pro_W7900") names the GPU model like nvidia.com/gpu.product does;
 // the family table below predates current AMD GPUs (a W7900 is family "GC_11_0_0").
 func getAmdGpuInfoByProductName(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
 	productName, found := nodeLabels[AmdGpuProductNameLabelKey]
@@ -712,7 +716,8 @@ func getAmdGpuInfoByProductName(nodeLabels map[string]string, nodeName string) *
 	return result
 }
 
-// amd.com/gpu.vram is a size in GiB with a G suffix ("45G"); nil when it is missing or unusable.
+// getAmdGpuMemoryBytes converts amd.com/gpu.vram, a size in GiB with a G suffix ("45G"), to bytes;
+// nil when it is missing or unusable.
 func getAmdGpuMemoryBytes(vram string) *int64 {
 	gib, err := strconv.Atoi(strings.TrimSuffix(vram, "G"))
 	if err != nil || gib <= 0 {
@@ -721,6 +726,8 @@ func getAmdGpuMemoryBytes(vram string) *int64 {
 	return ptr.To(int64(gib) * 1024 * bytesInMib)
 }
 
+// getAmdGpuInfoByFamily reads the legacy beta.amd.com/gpu.family.<acronym>=<count> label; the GPU
+// type is the family's name, or the acronym when the family is not in amdGpuFamilies.
 func getAmdGpuInfoByFamily(nodeLabels map[string]string, nodeName string) *swagger.GpuInfo {
 	for key, value := range nodeLabels {
 		if !strings.HasPrefix(key, AmdGpuTypeLabelPrefix) {
