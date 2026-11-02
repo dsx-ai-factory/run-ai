@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/gpumemory"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	v1 "k8s.io/api/core/v1"
@@ -80,19 +81,45 @@ func PodRunaiRequestsAndLimits(containers, initContainers []v1.Container, annota
 	requests, limits v1.ResourceList) {
 	requests, limits = PodRequestsAndLimits(containers, initContainers)
 	AddRunaiAnnotationsRequestedResources(annotations, requests, limits)
-	AddGpuLimitsFromContainers(containers, limits)
+	if !gpumemory.HasRequest(annotations) {
+		AddGpuLimitsFromContainers(containers, limits)
+	}
 	return
 }
 
 // AddRunaiAnnotationsRequestedResources
 // adds to both request and limit
-// uses correct units for gpu memory - in MB
+// preserves native GPU memory quantities and interprets legacy values as MB
 // mainly used by external-workload-integrator and cluster-sync for new workload api.
 func AddRunaiAnnotationsRequestedResources(podAnnotations map[string]string,
 	requests, limits v1.ResourceList) {
-	// currently, gpu fraction, memory and mig from annotation are only reflected in the first container,
-	// even if there are several containers. so we calculate it once (for each pod).
+	// Native quantities take precedence over legacy annotations and env limits.
+	memory, native, err := gpumemory.Read(podAnnotations)
+	if err != nil {
+		zap.S().Warnf("Failed to parse native GPU memory annotations: %s", err)
+	} else if native {
+		addResource(requests, constants.GpuMemoryResourceName, memory.Request)
+		addResource(limits, constants.GpuMemoryResourceName, memory.Limit)
+	} else {
+		addLegacyGpuRequests(podAnnotations, requests, limits)
+	}
 
+	// Add mig requests
+	for key, val := range podAnnotations {
+		if !strings.HasPrefix(key, constants.AnnotationMigProfilePrefix) {
+			continue
+		}
+		quantity, err := resource.ParseQuantity(val)
+		if err != nil {
+			zap.S().Warnf("Failed to parse mig %s annotation %s", key, val)
+		} else {
+			requests[v1.ResourceName(key)] = quantity
+			limits[v1.ResourceName(key)] = quantity
+		}
+	}
+}
+
+func addLegacyGpuRequests(podAnnotations map[string]string, requests, limits v1.ResourceList) {
 	// Add gpu memory request
 	gpuMemoryMb, found := podAnnotations[constants.AnnotationGpuMemory]
 	if found && gpuMemoryMb != "" {
@@ -127,20 +154,6 @@ func AddRunaiAnnotationsRequestedResources(podAnnotations map[string]string,
 			}
 			addResource(requests, constants.NvidiaGpuResourceName, quantity)
 			addResource(limits, constants.NvidiaGpuResourceName, quantity)
-		}
-	}
-
-	// Add mig requests
-	for key, val := range podAnnotations {
-		if !strings.HasPrefix(key, constants.AnnotationMigProfilePrefix) {
-			continue
-		}
-		quantity, err := resource.ParseQuantity(val)
-		if err != nil {
-			zap.S().Warnf("Failed to parse mig %s annotation %s", key, val)
-		} else {
-			requests[v1.ResourceName(key)] = quantity
-			limits[v1.ResourceName(key)] = quantity
 		}
 	}
 }

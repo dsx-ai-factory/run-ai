@@ -25,7 +25,7 @@ DistributedTarget:
           template:
             metadata:
               annotations:
-                gpu-memory: "2"
+                nvidia.com/container.jax.gpu-memory.request: 2M
                 user: tester
               labels:
                 app: jaxjob

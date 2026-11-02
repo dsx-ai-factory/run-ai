@@ -47,7 +47,8 @@ const (
 	// "8Gi" or decimal units like "8G" are both accepted — pick one consciously,
 	// since 8Gi != 8G).
 	//   Full key: fmt.Sprintf(CudaGpuMemoryLimitAnnotationKeyFormat, container.Name)
-	CudaGpuMemoryLimitAnnotationKeyFormat = "nvidia.com/container.%s.gpu-memory.limit"
+	CudaGpuMemoryLimitAnnotationKeyFormat   = "nvidia.com/container.%s.gpu-memory.limit"
+	CudaGpuMemoryRequestAnnotationKeyFormat = "nvidia.com/container.%s.gpu-memory.request"
 
 	// KaiGpuMemoryPortionLimitAnnotationKeyFormat is the pod-annotation key format
 	// the KAI scheduler consumes to express a portion-based GPU memory limit on a

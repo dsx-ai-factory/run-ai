@@ -30,8 +30,8 @@ DistributedTarget:
           template:
             metadata:
               annotations:
-                gpu-memory: "10"
                 nvidia.com/container.pytorch.gpu-memory.limit: 11M
+                nvidia.com/container.pytorch.gpu-memory.request: 10M
                 user: tester
               labels:
                 app: pytorchjob
@@ -60,8 +60,8 @@ DistributedTarget:
           template:
             metadata:
               annotations:
-                gpu-memory: "10"
                 nvidia.com/container.pytorch.gpu-memory.limit: 11M
+                nvidia.com/container.pytorch.gpu-memory.request: 10M
                 user: tester
               labels:
                 app: pytorchjob

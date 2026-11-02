@@ -410,17 +410,33 @@ func (fc *FieldsComposer) ComposePortionLimitAnnotation(src *GpuSizingInfo, cont
 	}
 }
 
-func (fc *FieldsComposer) ComposeMemoryReqAnnotation(src *GpuSizingInfo, target any, setter FnStringSetter, cookie any) func() *workloadsApi.Error {
+func (fc *FieldsComposer) ComposeMemoryReqAnnotation(src *GpuSizingInfo, containerName string, target any, setter FnStringSetter) func() *workloadsApi.Error {
 	return func() *workloadsApi.Error {
 		if src.MemoryRequest != nil {
 			gpuMemoryQuantity, err := resource.ParseQuantity(*src.MemoryRequest)
 			if err != nil {
-				return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf(MemoryFormatError, "gpuMemoryLimit"))
+				return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf(MemoryFormatError, "gpuMemoryRequest"))
+			}
+
+			if fc.Options.GpuMemoryLimitAnnotationsSupported {
+				if containerName == "" {
+					return workloadsApi.NewError(http.StatusInternalServerError,
+						"ComposeMemoryReqAnnotation: container name is required to build the nvidia.com/container.<name>.gpu-memory.request annotation key")
+				}
+				maxLen := maxContainerNameLenForAnnotationKey(CudaGpuMemoryRequestAnnotationKeyFormat)
+				if len(containerName) > maxLen {
+					return workloadsApi.NewError(http.StatusBadRequest,
+						fmt.Sprintf("container name %q (%d chars) is too long to fit in the nvidia.com/container.<name>.gpu-memory.request annotation key; shorten it to at most %d chars",
+							containerName, len(containerName), maxLen))
+				}
+				// KAI interprets the legacy annotation as MiB. Keep the quantity's
+				// units and use the same annotation family as the memory limit.
+				return setter(src.MemoryRequest, target, fmt.Sprintf(CudaGpuMemoryRequestAnnotationKeyFormat, containerName))
 			}
 
 			quantityStr := strconv.Itoa(int(gpuMemoryQuantity.Value() / bytesToMB))
 
-			return setter(&quantityStr, target, cookie)
+			return setter(&quantityStr, target, GpuMemoryAnnotation)
 		}
 		return nil
 	}

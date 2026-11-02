@@ -14,6 +14,7 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/gpumemory"
 )
 
 var (
@@ -23,7 +24,7 @@ var (
 func RequestsGPUFraction(pod *v1.Pod) bool {
 	_, foundFraction := pod.Annotations[constants.AnnotationGpuFraction]
 	_, foundGPUMemory := pod.Annotations[constants.AnnotationGpuMemory]
-	return foundFraction || foundGPUMemory
+	return foundFraction || foundGPUMemory || gpumemory.HasRequest(pod.Annotations)
 }
 
 func GetGPUFraction(pod *v1.Pod) (float64, error) {
@@ -39,6 +40,13 @@ func GetGPUFraction(pod *v1.Pod) (float64, error) {
 }
 
 func GetGPUMemory(pod *v1.Pod) (int64, error) {
+	memory, native, err := gpumemory.Read(pod.Annotations)
+	if err != nil {
+		return 0, fmt.Errorf("parse native GPU memory request: %w", err)
+	}
+	if native {
+		return memory.Request.Value() / 1000000, nil
+	}
 	gpuMemoryStr, found := pod.Annotations[constants.AnnotationGpuMemory]
 	if !found {
 		return 0, fmt.Errorf("GPU memory annotation not found")
@@ -53,9 +61,7 @@ func GetGPUMemory(pod *v1.Pod) (int64, error) {
 func GetNumGPUFractionDevices(pod *v1.Pod) (int64, error) {
 	mumDevicesStr, found := pod.Annotations[constants.AnnotationGpuFractionDevices]
 	if !found {
-		_, foundFraction := pod.Annotations[constants.AnnotationGpuFraction]
-		_, foundGPUMemory := pod.Annotations[constants.AnnotationGpuMemory]
-		if foundFraction || foundGPUMemory {
+		if RequestsGPUFraction(pod) {
 			return 1, nil
 		}
 		return 0, fractionDevicesAnnotationNotFound

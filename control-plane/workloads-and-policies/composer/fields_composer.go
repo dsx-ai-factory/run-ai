@@ -75,7 +75,8 @@ type FieldsComposerOptions struct {
 	GpuComputeModeSupported          bool
 	// GpuMemoryLimitAnnotationsSupported is set from checker.MinVersionGpuMemoryLimitAnnotations
 	// (cluster >= 3.0.0). When true, the composer emits the per-container CUDA/KAI GPU
-	// memory-limit annotations (nvidia.com/container.<name>.gpu-memory.limit and
+	// memory request/limit annotations (nvidia.com/container.<name>.gpu-memory.request,
+	// nvidia.com/container.<name>.gpu-memory.limit and
 	// kai.scheduler/container.<name>.gpu-memory.portion.limit). When false (older
 	// cluster), it falls back to the legacy RUNAI_GPU_MEMORY_LIMIT / RUNAI_GPU_PORTION_LIMIT
 	// container env vars.

@@ -203,9 +203,27 @@ var _ = Describe("fields composer test", func() {
 		}
 
 		It("derives the correct max container-name length from each annotation format", func() {
+			Expect(maxContainerNameLenForAnnotationKey(CudaGpuMemoryRequestAnnotationKeyFormat)).To(Equal(34))
 			Expect(maxContainerNameLenForAnnotationKey(CudaGpuMemoryLimitAnnotationKeyFormat)).To(Equal(36))
 			Expect(maxContainerNameLenForAnnotationKey(KaiGpuMemoryPortionLimitAnnotationKeyFormat)).To(Equal(28))
 		})
+
+		DescribeTable("validates the native request annotation key", func(containerName string, valid bool) {
+			annotations := map[string]string{}
+			sizing := GpuSizingInfo{MemoryRequest: &gpuMemoryRequest}
+			err := annotationsSupportedFc.ComposeMemoryReqAnnotation(&sizing, containerName, &annotations, StringToMapString)()
+			if valid {
+				Expect(err).To(BeNil())
+				Expect(annotations).To(HaveKeyWithValue(fmt.Sprintf(CudaGpuMemoryRequestAnnotationKeyFormat, containerName), gpuMemoryRequest))
+			} else {
+				Expect(err).NotTo(BeNil())
+				Expect(annotations).To(BeEmpty())
+			}
+		},
+			Entry("maximum container name", strings.Repeat("a", 34), true),
+			Entry("container name too long", strings.Repeat("a", 35), false),
+			Entry("missing container name", "", false),
+		)
 
 		It("ComposeMemoryLimitAnnotation accepts a container name at the max length", func() {
 			maxLen := maxContainerNameLenForAnnotationKey(CudaGpuMemoryLimitAnnotationKeyFormat)

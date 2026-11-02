@@ -13,11 +13,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/gpumemory"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	v1 "k8s.io/api/core/v1"
 	resourcehelper "k8s.io/kubectl/pkg/util/resource"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/status-updater/pkg/controllers/metadata"
 )
@@ -96,6 +98,10 @@ func GetGpuRequest(pod *v1.Pod) float64 {
 	amdGpuReq := req[amdGpuResourceName]
 	gpusCount += float64(amdGpuReq.Value())
 
+	if gpumemory.HasRequest(pod.Annotations) {
+		return gpusCount
+	}
+
 	gpuFraction, gpuFractionErr := strconv.ParseFloat(pod.Annotations[gpuFractionAnnotation], 64)
 	if !(gpuFraction <= 0 || gpuFraction > 1 || gpuFractionErr != nil) {
 		gpusCount += gpuFraction
@@ -105,9 +111,20 @@ func GetGpuRequest(pod *v1.Pod) float64 {
 }
 
 func GetGpuMemoryRequest(pod *v1.Pod) int64 {
+	return int64(getGpuMemoryRequestInMb(pod))
+}
+
+func getGpuMemoryRequestInMb(pod *v1.Pod) float64 {
+	memory, native, err := gpumemory.Read(pod.Annotations)
+	if err != nil {
+		log.Log.Error(err, "Failed to parse GPU request", "namespace", pod.Namespace, "pod", pod.Name)
+	} else if native {
+		// Status annotations use decimal MB even when the request uses binary units.
+		return memory.Request.AsApproximateFloat64() / ByteToMb
+	}
 	gpuMemory, err := strconv.ParseInt(pod.Annotations[gpuMemoryAnnotation], 10, 64)
 	if err == nil && gpuMemory > 0 {
-		return gpuMemory
+		return float64(gpuMemory)
 	}
 	return 0
 }
@@ -174,7 +191,8 @@ func getAllocatedMigPortion(ctx context.Context, pod *v1.Pod, kubeClient client.
 func matchAllMetrics(ctx context.Context, pod *v1.Pod, podMetrics *metadata.PodMetadata,
 	kubeClient client.Client) error {
 	requestExpressedInGpus := podMetrics.GPUs > 0
-	requestExpressedInGpuMemory := podMetrics.GpuMemory > 0
+	requestedGpuMemory := getGpuMemoryRequestInMb(pod)
+	requestExpressedInGpuMemory := requestedGpuMemory > 0
 
 	if len(pod.Spec.NodeName) == 0 { // Can't match metric if the pod isn't scheduled to a pod
 		return nil
@@ -195,7 +213,7 @@ func matchAllMetrics(ctx context.Context, pod *v1.Pod, podMetrics *metadata.PodM
 	if requestExpressedInGpus {
 		podMetrics.GpuMemory = int64(singleGpuMemory * podMetrics.GPUs)
 	} else if requestExpressedInGpuMemory {
-		podMetrics.GPUs = float64(podMetrics.GpuMemory) / singleGpuMemory
+		podMetrics.GPUs = requestedGpuMemory / singleGpuMemory
 	}
 
 	if podMetrics.FractionsCount > 1 {

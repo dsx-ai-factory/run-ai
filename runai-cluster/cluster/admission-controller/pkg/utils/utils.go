@@ -10,7 +10,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/admission-controller/pkg/types"
@@ -49,7 +51,7 @@ func GetRequestedGpus(limits v1.ResourceList, podMeta *metav1.ObjectMeta) float6
 	}
 
 	gpuMemoryAnnotationValue, found := podMeta.Annotations[types.RunaiGpuMemory]
-	if found && gpuMemoryAnnotationValue != "" {
+	if (found && gpuMemoryAnnotationValue != "") || HasNativeGpuMemoryAnnotation(podMeta.Annotations) {
 		return 1
 	}
 
@@ -64,4 +66,17 @@ func GetRequestedGpus(limits v1.ResourceList, podMeta *metav1.ObjectMeta) float6
 
 	log.Printf("job requires no GPUs")
 	return 0
+}
+
+func HasNativeGpuMemoryAnnotation(annotations map[string]string) bool {
+	for key, value := range annotations {
+		if !strings.HasPrefix(key, constants.AnnotationGpuMemoryContainerPrefix) ||
+			(!strings.HasSuffix(key, constants.AnnotationGpuMemoryRequestSuffix) && !strings.HasSuffix(key, constants.AnnotationGpuMemoryLimitSuffix)) {
+			continue
+		}
+		if quantity, err := resource.ParseQuantity(value); err == nil && quantity.Sign() > 0 {
+			return true
+		}
+	}
+	return false
 }
