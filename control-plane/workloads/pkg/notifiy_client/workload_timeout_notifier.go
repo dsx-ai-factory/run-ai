@@ -79,7 +79,11 @@ func runWorkloadTimeoutNotifier(ctx context.Context, conf *config.Notify, notifi
 	}
 	defer notifierLock.Unlock()
 
-	tenantsToNotify := notifyClient.GetEnabledTenants()
+	tenantsToNotify, err := notifyClient.GetEnabledTenants(ctx)
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get tenants to notify, error: %v", err)
+		return
+	}
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Starting workload timeout notifier for %d tenants - %+v", len(tenantsToNotify), tenantsToNotify)
 
 	for _, tenantId := range tenantsToNotify {
@@ -96,7 +100,7 @@ func runWorkloadTimeoutNotifier(ctx context.Context, conf *config.Notify, notifi
 			continue
 		}
 
-		tenantBaseUrl, err := notifyClient.GetTenantBaseUrl(tenantId)
+		tenantBaseUrl, err := notifyClient.GetTenantBaseUrl(ctx, tenantId)
 		if err != nil {
 			if !errors.IsNotFound(err) {
 				logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get tenant base url for tenant %s, error: %v", tenantId, err)

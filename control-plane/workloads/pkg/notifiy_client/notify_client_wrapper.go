@@ -7,8 +7,10 @@ package notifiy_client
 
 import (
 	"context"
+	"fmt"
 	"strconv"
 	"sync"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/utils/errors"
 
@@ -18,12 +20,17 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 )
 
+// tenantsRequestTimeout bounds the tenants-manager calls made from the notifier
+// goroutines, which run while holding the notifier lock - an unbounded request
+// would block every following notifier cycle.
+const tenantsRequestTimeout = 30 * time.Second
+
 type NotifyClient interface {
 	InitNotifyClient(ctx context.Context, config *notifyclient.NotifyClientConfig) error
-	GetEnabledTenants() []string
+	GetEnabledTenants(ctx context.Context) ([]string, error)
 	RegisterNotifications(origin string, notifications []*notifyclient.NotificationKind, removeMissing *bool) error
 	BuildNotification(category string, typ string) notifyclient.NotifyBuilderer
-	GetTenantBaseUrl(tenantId string) (string, error)
+	GetTenantBaseUrl(ctx context.Context, tenantId string) (string, error)
 }
 
 type NotifyClienter struct {
@@ -64,13 +71,15 @@ func (c *NotifyClienter) InitNotifyClient(ctx context.Context, config *notifycli
 	return nil
 }
 
-func (c *NotifyClienter) GetEnabledTenants() []string {
-	tenants, _, err := c.tenantsClient.InternalAPI.ManagementGetTenantsInternal(context.Background()).Execute()
+func (c *NotifyClienter) GetEnabledTenants(ctx context.Context) ([]string, error) {
+	reqCtx, cancel := context.WithTimeout(ctx, tenantsRequestTimeout)
+	defer cancel()
+
+	tenants, _, err := c.tenantsClient.InternalAPI.ManagementGetTenantsInternal(reqCtx).Execute()
 	if err != nil {
-		logging.Errorf("Failed to get tenants, error: %s", err.Error())
-		return nil
+		return nil, fmt.Errorf("get tenants: %w", err)
 	}
-	return enabledTenantIds(tenants, notifyclient.GetEnabledTenants())
+	return enabledTenantIds(tenants, notifyclient.GetEnabledTenants()), nil
 }
 
 func enabledTenantIds(tenants []tenants_api.Tenant, routeIds []string) []string {
@@ -99,7 +108,7 @@ func (c *NotifyClienter) BuildNotification(category string, typ string) notifycl
 	return notifyclient.BuildNotification(category, typ)
 }
 
-func (c *NotifyClienter) GetTenantBaseUrl(tenantId string) (string, error) {
+func (c *NotifyClienter) GetTenantBaseUrl(ctx context.Context, tenantId string) (string, error) {
 	c.tenantsUrlsCacheMutex.RLock()
 	url, ok := c.tenantsUrlsCache[tenantId]
 	c.tenantsUrlsCacheMutex.RUnlock()
@@ -109,7 +118,7 @@ func (c *NotifyClienter) GetTenantBaseUrl(tenantId string) (string, error) {
 	}
 
 	var err error
-	url, err = c.getTenantBaseUrl(tenantId)
+	url, err = c.getTenantBaseUrl(ctx, tenantId)
 	if err != nil {
 		return "", err
 	}
@@ -120,7 +129,7 @@ func (c *NotifyClienter) GetTenantBaseUrl(tenantId string) (string, error) {
 	return url, nil
 }
 
-func (c *NotifyClienter) getTenantBaseUrl(tenantId string) (string, error) {
+func (c *NotifyClienter) getTenantBaseUrl(ctx context.Context, tenantId string) (string, error) {
 	i, err := strconv.ParseInt(tenantId, 10, 32)
 	if err != nil {
 		logging.Errorf("Failed to parse tenantId %s to int, error: %s", tenantId, err.Error())
@@ -128,7 +137,10 @@ func (c *NotifyClienter) getTenantBaseUrl(tenantId string) (string, error) {
 	}
 	id := int32(i)
 
-	domain, _, err := c.tenantsClient.InternalAPI.GetTenantDomain(context.Background(), id).Execute()
+	reqCtx, cancel := context.WithTimeout(ctx, tenantsRequestTimeout)
+	defer cancel()
+
+	domain, _, err := c.tenantsClient.InternalAPI.GetTenantDomain(reqCtx, id).Execute()
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			logging.Errorf("Failed to get tenant domain for tenantId %s, error: %s", tenantId, err.Error())

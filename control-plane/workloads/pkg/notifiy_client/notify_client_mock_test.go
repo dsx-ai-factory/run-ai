@@ -39,8 +39,8 @@ func (c *NotifyClienterMock) InitNotifyClient(ctx context.Context, config *notif
 	return nil
 }
 
-func (c *NotifyClienterMock) GetEnabledTenants() []string {
-	return []string{testing.TestTenant}
+func (c *NotifyClienterMock) GetEnabledTenants(ctx context.Context) ([]string, error) {
+	return []string{testing.TestTenant}, nil
 }
 
 func (c *NotifyClienterMock) RegisterNotifications(origin string, notifications []*notifyclient.NotificationKind, removeMissing *bool) error {
@@ -63,7 +63,7 @@ func (c *NotifyClienterMock) BuildNotification(category string, typ string) noti
 	return NewNotifyClientBuildereMock(c, category, typ)
 }
 
-func (c *NotifyClienterMock) GetTenantBaseUrl(tenantId string) (string, error) {
+func (c *NotifyClienterMock) GetTenantBaseUrl(ctx context.Context, tenantId string) (string, error) {
 	return "https://mock.com", nil
 }
 
