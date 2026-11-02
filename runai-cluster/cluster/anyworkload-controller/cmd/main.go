@@ -73,10 +73,9 @@ func run() error {
 		)
 	}
 
-	// The operator has already decided this: Snapshot is installed and healthy,
-	// and its development gate is open. Until both hold nothing is registered,
-	// so a cluster without Snapshot behaves exactly as it does today and a
-	// user's opt-in never reaches half-built code.
+	// The operator has already decided this: Snapshot is installed and healthy
+	// in the cluster. Until then nothing is registered, so a cluster without
+	// Snapshot behaves exactly as it does today.
 	if cfg.SnapshotEnabled {
 		log.Info().
 			Str("agentNodeSelector", cfg.SnapshotAgentNodeSelector).

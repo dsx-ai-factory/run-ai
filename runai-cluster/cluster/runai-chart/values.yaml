@@ -168,8 +168,6 @@ development:
   skipDependeciesChecks: false
   # Enable profiling in the runai-operator
   enableProfiling: false
-  # Enable NVIDIA Snapshot integration.
-  snapshotFeatureEnabled: false
 kai-resource-management:
   enabled: true
   # Helm resolves subchart values before templates render, so this cannot be

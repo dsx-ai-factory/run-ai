@@ -9,7 +9,6 @@ import (
 	"context"
 	"encoding/json"
 	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/snapshot"
@@ -341,49 +340,38 @@ func TestRestartAllowedServiceAccounts(t *testing.T) {
 	}
 }
 
-// SNAPSHOT_ENABLED carries the operator's whole decision: Snapshot is installed
-// and healthy, and the development gate is open. The gate can only ever turn
-// the integration off — opening it on a cluster without Snapshot must not
-// enable anything, or the controller would watch CRDs that do not exist.
+// SNAPSHOT_ENABLED and SNAPSHOT_AGENT_NODE_SELECTOR are what carry detection
+// from the operator to the controller.
 func TestBuildEnvVarsSnapshot(t *testing.T) {
 	tests := []struct {
 		name           string
 		status         snapshot.Status
-		gateOpen       bool
 		wantEnabled    string
 		wantNodeSelect string
 	}{
 		{
-			name:           "no snapshot and the gate shut",
+			name:           "no snapshot in the cluster",
 			status:         snapshot.Status{},
 			wantEnabled:    "false",
 			wantNodeSelect: "",
 		},
 		{
-			name: "snapshot available but the gate is shut",
+			name: "snapshot available with an agent selector",
 			status: snapshot.Status{
 				Available:         true,
 				AgentNodeSelector: map[string]string{"nvidia.com/gpu.present": "true"},
 			},
-			wantEnabled:    "false",
+			wantEnabled:    "true",
 			wantNodeSelect: "nvidia.com/gpu.present=true",
 		},
 		{
-			// The gate is a safety catch, not a switch: it must never enable
-			// the integration on a cluster that has no Snapshot to talk to.
-			name:           "gate open but no snapshot installed",
-			status:         snapshot.Status{},
-			gateOpen:       true,
-			wantEnabled:    "false",
-			wantNodeSelect: "",
-		},
-		{
-			name: "snapshot available and the gate is open",
+			// Sorted, so an unchanged cluster never produces a changed
+			// deployment and an endless reconcile loop.
+			name: "agent selector is rendered in key order",
 			status: snapshot.Status{
 				Available:         true,
 				AgentNodeSelector: map[string]string{"b": "2", "a": "1"},
 			},
-			gateOpen:       true,
 			wantEnabled:    "true",
 			wantNodeSelect: "a=1,b=2",
 		},
@@ -391,10 +379,6 @@ func TestBuildEnvVarsSnapshot(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.gateOpen {
-				t.Setenv(snapshot.FeatureGateEnvVar, "true")
-			}
-
 			runaiConfig := &runaiv1.RunaiConfig{}
 			runaiConfig.SetDefaultsWhereNeeded()
 			res := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
@@ -417,28 +401,6 @@ func TestBuildEnvVarsSnapshot(t *testing.T) {
 					t.Errorf("%s = %q, want %q", name, got, want)
 				}
 			}
-
-			// The gate is the operator's business. Passing it on would make
-			// removing it a change the controller can see.
-			if _, found := envValue(envVars, "SNAPSHOT_FEATURE_ENABLED"); found {
-				t.Error("SNAPSHOT_FEATURE_ENABLED reaches the controller; the gate must stay operator-side")
-			}
 		})
-	}
-}
-
-// The gate lives in the operator's environment rather than in RunaiConfig, so
-// that removing it later leaves nothing behind in stored objects or in an
-// administrator's values file.
-func TestSnapshotFeatureGateIsNotPartOfTheCRD(t *testing.T) {
-	runaiConfig := &runaiv1.RunaiConfig{}
-	runaiConfig.SetDefaultsWhereNeeded()
-
-	spec, err := json.Marshal(runaiConfig.Spec.AnyworkloadController)
-	if err != nil {
-		t.Fatalf("marshal anyworkload-controller spec: %v", err)
-	}
-	if strings.Contains(string(spec), "snapshotFeatureEnabled") {
-		t.Fatal("snapshotFeatureEnabled is serialized into RunaiConfig; the gate must stay out of the CRD")
 	}
 }

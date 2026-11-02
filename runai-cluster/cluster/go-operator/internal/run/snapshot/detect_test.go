@@ -247,32 +247,3 @@ func TestObjectNamesFollowTheChartFullnameRule(t *testing.T) {
 		})
 	}
 }
-
-// The gate reads from the operator's environment. Anything other than an
-// explicit true leaves it shut, including a value the chart never writes.
-func TestFeatureGateEnabled(t *testing.T) {
-	tests := []struct {
-		name  string
-		value string
-		set   bool
-		want  bool
-	}{
-		{name: "unset defaults shut", want: false},
-		{name: "true opens it", value: "true", set: true, want: true},
-		{name: "1 opens it", value: "1", set: true, want: true},
-		{name: "false leaves it shut", value: "false", set: true, want: false},
-		{name: "empty leaves it shut", value: "", set: true, want: false},
-		{name: "garbage leaves it shut", value: "yes-please", set: true, want: false},
-	}
-
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			if tc.set {
-				t.Setenv(FeatureGateEnvVar, tc.value)
-			}
-			if got := FeatureGateEnabled(); got != tc.want {
-				t.Fatalf("FeatureGateEnabled() = %v, want %v", got, tc.want)
-			}
-		})
-	}
-}

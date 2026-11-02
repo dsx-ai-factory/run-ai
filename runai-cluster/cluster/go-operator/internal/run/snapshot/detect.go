@@ -16,9 +16,7 @@ package snapshot
 import (
 	"context"
 	"fmt"
-	"os"
 	"sort"
-	"strconv"
 	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -41,24 +39,6 @@ const (
 	ComponentCRD      = "snapshotjob-crd"
 	ComponentOperator = "operator"
 )
-
-// FeatureGateEnvVar is the development gate for the Snapshot integration, read
-// from the operator's own environment rather than from RunaiConfig.
-//
-// It is deliberately not part of the CRD. The gate exists only until the
-// integration's stories have all merged, and a CRD field is the one surface
-// that cannot simply be deleted: it persists in stored objects, in the chart's
-// generated schema, and in whatever the administrator wrote into their values.
-// A chart value under `development` leaves nothing behind when it goes.
-const FeatureGateEnvVar = "SNAPSHOT_FEATURE_ENABLED"
-
-// FeatureGateEnabled reports whether the development gate is open. It defaults
-// to closed, so that merging the integration's stories in any order never makes
-// a user's opt-in reach half-built code.
-func FeatureGateEnabled() bool {
-	enabled, err := strconv.ParseBool(os.Getenv(FeatureGateEnvVar))
-	return err == nil && enabled
-}
 
 // Status is what Run:ai knows about the Snapshot installation after looking.
 type Status struct {
