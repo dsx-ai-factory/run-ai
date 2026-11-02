@@ -14,7 +14,6 @@ import (
 	v1 "k8s.io/api/core/v1"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/gpumemory"
 )
 
 var (
@@ -24,7 +23,7 @@ var (
 func RequestsGPUFraction(pod *v1.Pod) bool {
 	_, foundFraction := pod.Annotations[constants.AnnotationGpuFraction]
 	_, foundGPUMemory := pod.Annotations[constants.AnnotationGpuMemory]
-	return foundFraction || foundGPUMemory || gpumemory.HasRequest(pod.Annotations)
+	return foundFraction || foundGPUMemory || HasNativeGPUMemoryAnnotations(pod.Annotations)
 }
 
 func GetGPUFraction(pod *v1.Pod) (float64, error) {
@@ -40,7 +39,7 @@ func GetGPUFraction(pod *v1.Pod) (float64, error) {
 }
 
 func GetGPUMemory(pod *v1.Pod) (int64, error) {
-	memory, native, err := gpumemory.Read(pod.Annotations)
+	memory, native, err := ReadNativeGPUMemoryAnnotations(pod.Annotations)
 	if err != nil {
 		return 0, fmt.Errorf("parse native GPU memory request: %w", err)
 	}

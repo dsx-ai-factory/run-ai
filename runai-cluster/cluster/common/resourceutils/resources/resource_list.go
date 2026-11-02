@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/gpumemory"
 	"go.uber.org/zap"
 	"golang.org/x/exp/maps"
 	v1 "k8s.io/api/core/v1"
@@ -81,7 +80,7 @@ func PodRunaiRequestsAndLimits(containers, initContainers []v1.Container, annota
 	requests, limits v1.ResourceList) {
 	requests, limits = PodRequestsAndLimits(containers, initContainers)
 	AddRunaiAnnotationsRequestedResources(annotations, requests, limits)
-	if !gpumemory.HasRequest(annotations) {
+	if !HasNativeGPUMemoryAnnotations(annotations) {
 		AddGpuLimitsFromContainers(containers, limits)
 	}
 	return
@@ -94,7 +93,7 @@ func PodRunaiRequestsAndLimits(containers, initContainers []v1.Container, annota
 func AddRunaiAnnotationsRequestedResources(podAnnotations map[string]string,
 	requests, limits v1.ResourceList) {
 	// Native quantities take precedence over legacy annotations and env limits.
-	memory, native, err := gpumemory.Read(podAnnotations)
+	memory, native, err := ReadNativeGPUMemoryAnnotations(podAnnotations)
 	if err != nil {
 		zap.S().Warnf("Failed to parse native GPU memory annotations: %s", err)
 	} else if native {

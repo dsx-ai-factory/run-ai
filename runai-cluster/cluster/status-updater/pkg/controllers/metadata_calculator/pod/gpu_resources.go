@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/gpumemory"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/resources"
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	v1 "k8s.io/api/core/v1"
@@ -98,7 +98,7 @@ func GetGpuRequest(pod *v1.Pod) float64 {
 	amdGpuReq := req[amdGpuResourceName]
 	gpusCount += float64(amdGpuReq.Value())
 
-	if gpumemory.HasRequest(pod.Annotations) {
+	if resources.HasNativeGPUMemoryAnnotations(pod.Annotations) {
 		return gpusCount
 	}
 
@@ -115,7 +115,7 @@ func GetGpuMemoryRequest(pod *v1.Pod) int64 {
 }
 
 func getGpuMemoryRequestInMb(pod *v1.Pod) float64 {
-	memory, native, err := gpumemory.Read(pod.Annotations)
+	memory, native, err := resources.ReadNativeGPUMemoryAnnotations(pod.Annotations)
 	if err != nil {
 		log.Log.Error(err, "Failed to parse GPU request", "namespace", pod.Namespace, "pod", pod.Name)
 	} else if native {
