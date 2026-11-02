@@ -131,13 +131,20 @@ controlPlane:
   clientSecret: ""
   # Bootstrap token used to authenticate with the control plane.
   # Takes precedence over clientSecret when both are set.
-  # Ignored if existingSecret is set.
+  # Ignored if existingSecret and secretKeys.bootstrapToken are set.
   bootstrapToken: ""
   # Name of an existing secret to use for the client secret
   existingSecret: ""
   # Key names in the existingSecret (only used if existingSecret is set)
   secretKeys:
+    # Key holding the client secret. Set to "" if the secret carries no client secret.
     clientSecret: client-secret
+    # Key holding the bootstrap token. When set, the token is read from the secret
+    # instead of controlPlane.bootstrapToken.
+    bootstrapToken: ""
+    # Key holding the cluster UID. When set, the UID is read from the secret
+    # instead of cluster.uid.
+    clusterUid: ""
 cluster:
   uid: ""
   rbac:
