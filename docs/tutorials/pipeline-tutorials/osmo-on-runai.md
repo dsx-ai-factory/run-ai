@@ -18,9 +18,11 @@ Each part of the setup is responsible for the following:
 
 - **OSMO** manages the workflows. It includes:
   - **The OSMO service.** The central service that provides the API and UI for workflow submission, monitoring, and management. For more details, refer to [Architecture](https://nvidia.github.io/OSMO/main/deployment_guide/introduction/architecture.html) in the OSMO documentation.
+  - **Users and permissions.** Users sign in to OSMO through an external identity provider (IdP). For more details, refer to [Configure an External IdP](https://nvidia.github.io/OSMO/main/deployment_guide/getting_started/deploy_service.html#configure-an-external-idp).
   - **Pools.** A pool is a group of resources that users share. Users choose a pool when they submit a workflow. Each pool references the backend that runs its workflows. For more details, refer to [Resource Pools](https://nvidia.github.io/OSMO/main/user_guide/resource_pools/index.html).
   - **Backends and the backend operator.** A backend is a compute backend where workflows run. The backend operator runs on the compute cluster. Its worker creates the Kubernetes pods for the tasks, and its listener reports state changes back to the OSMO service. In this tutorial, each backend uses the namespace of one NVIDIA Run:ai project. For more details, refer to [Deploy Compute Backend](https://nvidia.github.io/OSMO/main/deployment_guide/install_backend/deploy_backend.html).
 - **NVIDIA Run:ai** schedules the pods and enforces limits. It is responsible for:
+  - **Access to projects.** NVIDIA Run:ai administrators manage access to NVIDIA Run:ai projects in NVIDIA Run:ai. This is separate from how OSMO manages its users.
   - **Projects and namespaces.** Each NVIDIA Run:ai project has its own Kubernetes namespace, which OSMO uses as a backend.
   - **Quota and priority.** NVIDIA Run:ai schedules every pod under the [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota), [priority, and preemption](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#priority-and-preemption) rules of the project.
   - **Pod placement.** NVIDIA Run:ai decides which nodes the pods run on.
@@ -40,7 +42,7 @@ Before you start, make sure the following requirements are met:
 
 ### OSMO Prerequisites
 
-- **A running OSMO service and the OSMO CLI.** This tutorial uses OSMO **6.3.1**, with the `service` and `backend-operator` Helm charts at version **1.3.1**. For the installation, refer to [Deploy Service](https://nvidia.github.io/OSMO/main/deployment_guide/getting_started/deploy_service.html). Use Helm 3. Helm 4 was not used with these charts. The values in this tutorial match these chart versions. A later chart can use a different values structure. The OSMO CLI must be logged in to the service.
+- **A running OSMO service and the OSMO CLI.** This tutorial uses OSMO **6.3.1**, with the `service` and `backend-operator` Helm charts at version **1.3.1**. For the service installation, refer to [Deploy Service](https://nvidia.github.io/OSMO/main/deployment_guide/getting_started/deploy_service.html). For the CLI installation, refer to [Install Client](https://nvidia.github.io/OSMO/main/user_guide/getting_started/install/index.html). Use Helm 3.x. The values in this tutorial match these chart versions. A later chart can use a different values structure. The OSMO CLI must be logged in to the service.
 
 ### NVIDIA Run:ai Prerequisites
 
@@ -260,9 +262,10 @@ This step checks that OSMO reports a preempted workflow correctly. Use the setti
 
 ## Scope and Limitations
 
-This tutorial does not cover how users reach OSMO from outside the cluster, where OSMO stores its data, or how users log in to OSMO. For these topics, refer to [Deploy Service](https://nvidia.github.io/OSMO/main/deployment_guide/getting_started/deploy_service.html) in the OSMO documentation.
+This tutorial does not cover how users reach OSMO from outside the cluster, where OSMO stores its data, or how users log in to OSMO. For these topics, refer to the following sections of [Deploy Service](https://nvidia.github.io/OSMO/main/deployment_guide/getting_started/deploy_service.html) in the OSMO documentation:
 
-The quotas, node pools, and user permissions of your NVIDIA Run:ai projects depend on your cluster. Set them to match your environment.
+- [Configure PostgreSQL Connection](https://nvidia.github.io/OSMO/main/deployment_guide/getting_started/deploy_service.html#configure-postgresql-connection) and [Configure Storage Connection](https://nvidia.github.io/OSMO/main/deployment_guide/getting_started/deploy_service.html#configure-storage-connection) for where OSMO stores its data
+- [Configure an External IdP](https://nvidia.github.io/OSMO/main/deployment_guide/getting_started/deploy_service.html#configure-an-external-idp) for how users log in to OSMO
 
 ## Troubleshooting
 
