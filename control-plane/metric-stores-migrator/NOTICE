@@ -60,7 +60,7 @@ Dependencies
 | `go.opentelemetry.io/otel/log` | v1.47.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/otel/log@v1.47.0?tab=licenses |
 | `go.opentelemetry.io/otel/metric` | v1.47.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/otel/metric@v1.47.0?tab=licenses |
 | `go.opentelemetry.io/otel/trace` | v1.47.0 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/otel/trace@v1.47.0?tab=licenses |
-| `go.yaml.in/yaml/v3` | v3.0.5 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.5?tab=licenses |
+| `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
 | `golang.org/x/crypto/sha3` | v0.57.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.57.0?tab=licenses |
 | `golang.org/x/sys` | v0.49.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.49.0?tab=licenses |
 | `golang.org/x/text` | v0.43.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.43.0?tab=licenses |
@@ -1348,7 +1348,7 @@ section 4(d) of the Apache License, Version 2.0 requires.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `go.yaml.in/yaml/v3` v3.0.5
+  - `go.yaml.in/yaml/v3` v3.0.6
 --------------------------------------------------------------------------------
 
 Copyright 2011-2016 Canonical Ltd.

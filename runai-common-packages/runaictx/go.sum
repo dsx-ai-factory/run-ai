@@ -1,7 +1,7 @@
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 h1:GMqipJVJQYWroi0wqs4KPJTWtJz8YUJ5p5qWRL6l6ZY=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3/go.mod h1:U7eJ5tj0D0oAIENeWRziD+OdoJS/7fRDispUbhL1NMU=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18 h1:710hM8Br39+SS9WBTpt+MkegY2HiXwOm2PIRIbsnxWM=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18/go.mod h1:K8uJaxO5N+Y8VFmCJgKmIR3lMr6eiykdYFFWFd+bNrU=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19 h1:70Lt8uBkZKQTGJ99Oq+keTYALjKdlweTXq2tDebZYnw=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19/go.mod h1:7XxXaqJ5eGC0UYDMGjmeeKbnVQzmjB4ZII0LYITlGdk=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/fsnotify/fsnotify v1.10.1 h1:b0/UzAf9yR5rhf3RPm9gf3ehBPpf0oZKIjtpKrx59Ho=
@@ -54,8 +54,8 @@ github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWD
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
-go.yaml.in/yaml/v3 v3.0.5 h1:N6y/pJk8buWs9NY5ERU2HSMfm+IuD/OtfdAnq6kESPw=
-go.yaml.in/yaml/v3 v3.0.5/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
+go.yaml.in/yaml/v3 v3.0.6 h1:zcDfvjXEqTQmpjniUBLc91xYJMB2c4QOFxEF/LCEckM=
+go.yaml.in/yaml/v3 v3.0.6/go.mod h1:HVTZu1O7/Vkt2N+BFy8Zza+lnLsABggaTM2ZpNIGuKg=
 golang.org/x/crypto v0.57.0 h1:3ZVCjf8Ggz7zneR/EHRVx68Ctf+2pmIMP2UFhh9cC6M=
 golang.org/x/crypto v0.57.0/go.mod h1:Fdz0i5U6CoizGwLda9DttjSk6qlZo25zYNtR+ycvuZA=
 golang.org/x/sys v0.48.0 h1:bbX/i/6MgT9BVLM9RT1thmxL04yeTAhbEz4SyadbXoo=
