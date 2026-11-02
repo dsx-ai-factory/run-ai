@@ -8,8 +8,8 @@ description: |
   Custom formatters used here:
     * image-PullPolicy uses runai-nimServiceSpec (enum-enforced).
     * environmentVariables-* use runai-podSpec (reused).
-    * resourceRequests, resourceLimits, resourceClaims use runai-podSpec
-      (reused — one rule per entry, merged by key/name).
+    * resourceRequests, resourceLimits use runai-podSpec
+      (reused — one rule per entry, merged by key).
 
   Read together with cases/container/golden.yaml.
 effectiveRules:
@@ -84,6 +84,3 @@ effectiveRules:
   - field: resourceLimits
     specSelector: allContainers
     enforcements: [{ set: { key: memory, value: "8Gi" } }]
-  - field: resourceClaims
-    specSelector: allContainers
-    enforcements: [{ set: { name: myclaim, request: shared-request } }]

@@ -1,0 +1,137 @@
+{
+  "apiVersion": "run.ai/v1alpha1",
+  "kind": "Karta",
+  "spec": {
+    "optimizationInstructions": {
+      "gangScheduling": {
+        "podGroups": [
+          {
+            "members": [
+              {
+                "componentName": "group",
+                "groupByKeyPaths": [
+                  ".metadata.labels[\"leaderworkerset.sigs.k8s.io/name\"]",
+                  ".metadata.labels[\"leaderworkerset.sigs.k8s.io/group-index\"] // \"0\""
+                ]
+              }
+            ],
+            "name": "group"
+          }
+        ]
+      }
+    },
+    "structureDefinition": {
+      "childComponents": [
+        {
+          "name": "group",
+          "ownerRef": "leaderworkerset",
+          "podSelector": {
+            "replicaSelector": {
+              "keyPath": ".metadata.labels[\"leaderworkerset.sigs.k8s.io/group-index\"]"
+            }
+          },
+          "scaleDefinition": {
+            "replicasPath": ".spec.leaderWorkerTemplate.size"
+          }
+        },
+        {
+          "name": "leader",
+          "ownerRef": "group",
+          "podSelector": {
+            "componentTypeSelector": {
+              "keyPath": ".metadata.labels[\"leaderworkerset.sigs.k8s.io/worker-index\"]",
+              "value": "0"
+            }
+          },
+          "scaleDefinition": {
+            "replicasPath": ".spec.replicas // 1"
+          },
+          "specDefinition": {
+            "podTemplateSpecPath": ".spec.leaderWorkerTemplate.leaderTemplate"
+          }
+        },
+        {
+          "kind": {
+            "group": "apps",
+            "kind": "StatefulSet",
+            "version": "v1"
+          },
+          "name": "worker",
+          "ownerRef": "group",
+          "podSelector": {
+            "componentTypeSelector": {
+              "keyPath": ".metadata.annotations[\"leaderworkerset.sigs.k8s.io/leader-name\"]"
+            }
+          },
+          "scaleDefinition": {
+            "replicasPath": "(.spec.replicas // 1) * ((.spec.leaderWorkerTemplate.size // 1) - 1)"
+          },
+          "specDefinition": {
+            "podTemplateSpecPath": ".spec.leaderWorkerTemplate.workerTemplate"
+          }
+        }
+      ],
+      "rootComponent": {
+        "kind": {
+          "group": "leaderworkerset.x-k8s.io",
+          "kind": "LeaderWorkerSet",
+          "version": "v1"
+        },
+        "name": "leaderworkerset",
+        "statusDefinition": {
+          "conditionsDefinition": {
+            "messageFieldName": "message",
+            "path": ".status.conditions",
+            "reasonFieldName": "reason",
+            "statusFieldName": "status",
+            "typeFieldName": "type"
+          },
+          "statusMappings": {
+            "failed": [
+              {
+                "byConditions": [
+                  {
+                    "status": "False",
+                    "type": "Available"
+                  },
+                  {
+                    "status": "False",
+                    "type": "Progressing"
+                  },
+                  {
+                    "status": "False",
+                    "type": "UpdateInProgress"
+                  }
+                ]
+              }
+            ],
+            "initializing": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "Progressing"
+                  }
+                ]
+              }
+            ],
+            "running": [
+              {
+                "byConditions": [
+                  {
+                    "status": "True",
+                    "type": "Available"
+                  },
+                  {
+                    "status": "False",
+                    "type": "Progressing"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

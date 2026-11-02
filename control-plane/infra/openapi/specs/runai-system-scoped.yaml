@@ -4255,6 +4255,8 @@ components:
         - $ref: '#/components/schemas/Metadata'
         - type: object
           properties:
+      required:
+        - validateSignature
             clusterId:
               type: string
               format: uuid
@@ -4265,6 +4267,9 @@ components:
         signingCertificate:
           type: string
         singleSignOnServiceUrl:
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
           type: string
         entityId:
           type: string

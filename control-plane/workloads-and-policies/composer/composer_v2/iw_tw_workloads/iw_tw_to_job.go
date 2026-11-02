@@ -167,6 +167,8 @@ func (itc *InterTrainToJobComposer) Compose(ctx context.Context, src *workloadsA
 			itc.fc.CopyString(&itc.fc.WorkloadName, &container.Name, composer.StringToString, nil),
 
 			itc.fc.ComposeNameAndTypeLabels(itc.fc.WorkloadName, itc.fc.WorkloadType, JobType, itc.fc.ProjectName, &jobMeta.Labels, composer.MapToMapString, nil),
+			// Apply user labels first so the pod's generated identity labels remain authoritative.
+			itc.fc.ComposeLabels(src.Labels, &podMeta.Labels, jobPodLabelsToMap, nil),
 			itc.fc.ComposeNameAndTypeLabels(itc.fc.WorkloadName, itc.fc.WorkloadType, JobType, itc.fc.ProjectName, &podMeta.Labels, composer.MapToMapString, nil),
 			itc.fc.ComposeLabels(src.Labels, &jobMeta.Labels, composer.MapToMapString, nil),
 			itc.fc.ComposeAnnotations(src.Annotations, &jobMeta.Annotations, composer.MapToMapString, nil),

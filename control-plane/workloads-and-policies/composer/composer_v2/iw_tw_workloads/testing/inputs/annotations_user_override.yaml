@@ -1,0 +1,4 @@
+image: ubuntu
+annotations:
+  - name: user
+    value: user-value

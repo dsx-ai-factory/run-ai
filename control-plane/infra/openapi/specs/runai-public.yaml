@@ -28322,6 +28322,8 @@ components:
           $ref: '#/components/schemas/IdsList'
         failed:
           type: array
+      required:
+        - validateSignature
           description: The IDs that failed to update.
           items:
             $ref: '#/components/schemas/BatchResponseFailureItem'
@@ -28332,6 +28334,9 @@ components:
       nullable: true
       properties:
         signingCertificate:
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
           type: string
         singleSignOnServiceUrl:
           type: string
