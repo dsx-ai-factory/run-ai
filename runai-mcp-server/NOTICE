@@ -28,8 +28,8 @@ Dependencies
 | Package | Version | License | License source |
 |---------|---------|---------|----------------|
 | `github.com/Masterminds/semver/v3` | v3.5.0 | MIT | https://pkg.go.dev/github.com/Masterminds/semver/v3@v3.5.0?tab=licenses |
-| `github.com/MicahParks/jwkset` | v0.11.3 | Apache-2.0 | https://github.com/MicahParks/jwkset/blob/v0.11.3/LICENSE |
-| `github.com/MicahParks/keyfunc/v3` | v3.8.2 | Apache-2.0 | https://pkg.go.dev/github.com/MicahParks/keyfunc/v3@v3.8.2?tab=licenses |
+| `github.com/MicahParks/jwkset` | v0.11.4 | Apache-2.0 | https://github.com/MicahParks/jwkset/blob/v0.11.4/LICENSE |
+| `github.com/MicahParks/keyfunc/v3` | v3.9.1 | Apache-2.0 | https://pkg.go.dev/github.com/MicahParks/keyfunc/v3@v3.9.1?tab=licenses |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/cespare/xxhash/v2` | v2.3.0 | MIT | https://pkg.go.dev/github.com/cespare/xxhash/v2@v2.3.0?tab=licenses |
 | `github.com/felixge/httpsnoop` | v1.1.0 | MIT | https://github.com/felixge/httpsnoop/blob/v1.1.0/LICENSE.txt |

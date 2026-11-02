@@ -3,11 +3,11 @@ module github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/clien
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.4
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.5
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/old-auth-token-middleware v1.0.1
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.12.1
 	k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
