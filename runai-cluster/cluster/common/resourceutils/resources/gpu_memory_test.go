@@ -30,9 +30,15 @@ func TestPodGpuMemoryRequestsAndLimits(t *testing.T) {
 		{"larger limit", map[string]string{requestKey: "500M", limitKey: "525M"}, "", "500M", "525M"},
 		{"request only", map[string]string{requestKey: "500Mi"}, "", "500Mi", "500Mi"},
 		{"limit only defaults request", map[string]string{limitKey: "500Mi"}, "", "500Mi", "500Mi"},
-		{"native takes precedence", map[string]string{requestKey: "500M", limitKey: "525M", constants.AnnotationGpuMemory: "500"}, "1G", "500M", "525M"},
+		{"per-container limit takes precedence", map[string]string{requestKey: "500M", limitKey: "525M", constants.AnnotationGpuMemory: "500"}, "1G", "500M", "525M"},
 		{"legacy request", map[string]string{constants.AnnotationGpuMemory: "500"}, "", "500M", "500M"},
 		{"legacy env limit", map[string]string{constants.AnnotationGpuMemory: "500"}, "600M", "500M", "600M"},
+		{"legacy request with larger per-container limit", map[string]string{constants.AnnotationGpuMemory: "500", limitKey: "600M"}, "", "500M", "600M"},
+		{"legacy request with equal per-container limit", map[string]string{constants.AnnotationGpuMemory: "500", limitKey: "500M"}, "", "500M", "500M"},
+		{"legacy request with binary per-container limit", map[string]string{constants.AnnotationGpuMemory: "524", limitKey: "600Mi"}, "", "524M", "600Mi"},
+		{"KAI-added request preserves legacy accounting", map[string]string{constants.AnnotationGpuMemory: "500", requestKey: "500Mi", limitKey: "600M"}, "", "500M", "600M"},
+		{"per-container limit overrides legacy env limit", map[string]string{constants.AnnotationGpuMemory: "500", limitKey: "600M"}, "1G", "500M", "600M"},
+		{"per-container request with legacy env limit", map[string]string{requestKey: "500M"}, "600M", "500M", "600M"},
 		{"compute mode alone is not a request", map[string]string{"nvidia.com/container.worker.gpu-compute.mode": "sm-sharing"}, "", "0", "0"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -61,7 +67,7 @@ func TestNativeGpuMemoryFractionDetection(t *testing.T) {
 	require.EqualValues(t, 500, memory)
 }
 
-func TestReadNativeGPUMemoryAnnotationsInvalid(t *testing.T) {
+func TestReadGPUMemoryAnnotationsInvalid(t *testing.T) {
 	for _, tc := range []struct{ name, key, value string }{
 		{"invalid quantity", "nvidia.com/container.worker.gpu-memory.request", "invalid"},
 		{"zero request", "nvidia.com/container.worker.gpu-memory.request", "0"},
@@ -69,37 +75,68 @@ func TestReadNativeGPUMemoryAnnotationsInvalid(t *testing.T) {
 		{"missing container", "nvidia.com/container..gpu-memory.request", "500M"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			_, found, err := ReadNativeGPUMemoryAnnotations(map[string]string{tc.key: tc.value})
-			require.True(t, found)
+			_, err := ReadGPUMemoryAnnotations(map[string]string{tc.key: tc.value})
 			require.Error(t, err)
 		})
 	}
 }
 
-func TestReadNativeGPUMemoryAnnotationsDefaultsPerContainer(t *testing.T) {
+func TestReadGPUMemoryAnnotationsDefaultsPerContainer(t *testing.T) {
 	annotations := map[string]string{
 		"nvidia.com/container.worker.gpu-memory.request": "500M",
 		"nvidia.com/container.worker.gpu-memory.limit":   "600M",
 		"nvidia.com/container.other.gpu-memory.limit":    "500Mi",
 		"nvidia.com/container.worker.gpu-compute.mode":   "sm-sharing",
 	}
-	got, found, err := ReadNativeGPUMemoryAnnotations(annotations)
+	got, err := ReadGPUMemoryAnnotations(annotations)
 	require.NoError(t, err)
-	require.True(t, found)
-	require.True(t, HasNativeGPUMemoryAnnotations(annotations))
+	require.True(t, got.HasRequest)
+	require.True(t, HasPerContainerGPUMemoryAnnotations(annotations))
 	require.Zero(t, got.Request.Cmp(resource.MustParse("1024288k")))
 	require.Zero(t, got.Limit.Cmp(resource.MustParse("1124288k")))
 }
 
-func TestReadNativeGPUMemoryAnnotationsIgnoresUnrelated(t *testing.T) {
+func TestReadGPUMemoryAnnotationsIgnoresUnrelated(t *testing.T) {
 	annotations := map[string]string{
-		"gpu-memory": "500",
 		"nvidia.com/container.worker.gpu-compute.mode":    "sm-sharing",
 		"nvidia.com/container.worker.gpu-devices":         "GPU-example",
 		"example.com/container.worker.gpu-memory.request": "500M",
 	}
-	_, found, err := ReadNativeGPUMemoryAnnotations(annotations)
+	got, err := ReadGPUMemoryAnnotations(annotations)
 	require.NoError(t, err)
-	require.False(t, found)
-	require.False(t, HasNativeGPUMemoryAnnotations(annotations))
+	require.False(t, got.HasRequest)
+	require.False(t, HasPerContainerGPUMemoryAnnotations(annotations))
+}
+
+func TestPerContainerMemoryDoesNotReplaceLegacyFraction(t *testing.T) {
+	for _, withRequest := range []bool{false, true} {
+		t.Run(map[bool]string{false: "limit only", true: "request and limit"}[withRequest], func(t *testing.T) {
+			annotations := map[string]string{
+				constants.AnnotationGpuFraction:                "0.25",
+				"nvidia.com/container.worker.gpu-memory.limit": "600M",
+			}
+			if withRequest {
+				annotations["nvidia.com/container.worker.gpu-memory.request"] = "500M"
+			}
+			requests, limits := PodRunaiRequestsAndLimits(nil, nil, annotations)
+			gpu := requests[constants.NvidiaGpuResourceName]
+			memory := requests[constants.GpuMemoryResourceName]
+			limit := limits[constants.GpuMemoryResourceName]
+			require.Zero(t, gpu.Cmp(resource.MustParse("0.25")))
+			require.True(t, memory.IsZero())
+			require.Zero(t, limit.Cmp(resource.MustParse("600M")))
+		})
+	}
+}
+
+func TestInvalidMemoryRequestDoesNotDefaultFromLimit(t *testing.T) {
+	for _, requestKey := range []string{constants.AnnotationGpuMemory, "nvidia.com/container.worker.gpu-memory.request"} {
+		t.Run(requestKey, func(t *testing.T) {
+			_, err := ReadGPUMemoryAnnotations(map[string]string{
+				requestKey: "invalid",
+				"nvidia.com/container.worker.gpu-memory.limit": "600M",
+			})
+			require.Error(t, err)
+		})
+	}
 }

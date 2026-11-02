@@ -44,11 +44,44 @@ func TestNativeGpuMemoryAllocation(t *testing.T) {
 	}
 }
 
-func TestNativeGpuMemoryTakesPrecedenceOverLegacyFraction(t *testing.T) {
+func TestPerContainerGpuMemoryPreservesLegacyFraction(t *testing.T) {
 	pod := &v1.Pod{ObjectMeta: metav1.ObjectMeta{Annotations: map[string]string{
 		"nvidia.com/container.worker.gpu-memory.request": "500M",
 		gpuFractionAnnotation:                            "0.75",
 	}}}
-	require.Zero(t, GetGpuRequest(pod))
-	require.EqualValues(t, 500, GetGpuMemoryRequest(pod))
+	require.Equal(t, 0.75, GetGpuRequest(pod))
+	require.Zero(t, GetGpuMemoryRequest(pod))
+}
+
+func TestLegacyGpuMemoryAllocationWithPerContainerAnnotations(t *testing.T) {
+	for _, tc := range []struct{ name, request, limit string }{
+		{"larger limit", "", "600M"},
+		{"equal limit", "", "500M"},
+		{"binary limit", "", "600Mi"},
+		{"KAI-added request", "500Mi", "600M"},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			annotations := map[string]string{
+				gpuMemoryAnnotation:                            "500",
+				receivedResourceAnnotationName:                 receivedTypeFraction,
+				"nvidia.com/container.worker.gpu-memory.limit": tc.limit,
+			}
+			if tc.request != "" {
+				annotations["nvidia.com/container.worker.gpu-memory.request"] = tc.request
+			}
+			pod := &v1.Pod{
+				ObjectMeta: metav1.ObjectMeta{Annotations: annotations},
+				Spec:       v1.PodSpec{NodeName: "gpu-node"},
+				Status:     v1.PodStatus{Phase: v1.PodRunning},
+			}
+			original := pod.DeepCopy()
+			node := &v1.Node{ObjectMeta: metav1.ObjectMeta{Name: "gpu-node", Labels: map[string]string{nodeGpuMemoryLabelName: "16384"}}}
+			kubeClient := fake.NewClientBuilder().WithObjects(node).Build()
+			metrics := &metadata.PodMetadata{}
+			require.NoError(t, CalcPodGpuResources(context.Background(), pod, metrics, kubeClient))
+			require.EqualValues(t, 500, metrics.GpuMemory)
+			require.InDelta(t, 500e6/(16384*1048576), metrics.GPUs, 1e-12)
+			require.Equal(t, original, pod)
+		})
+	}
 }

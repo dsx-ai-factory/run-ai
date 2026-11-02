@@ -199,7 +199,7 @@ var _ = Describe("fields composer test", func() {
 		gpuPortionRequest := 0.5
 
 		annotationsSupportedFc := FieldsComposer{
-			Options: FieldsComposerOptions{GpuMemoryLimitAnnotationsSupported: true},
+			Options: FieldsComposerOptions{GpuMemoryLimitAnnotationsSupported: true, GpuMemoryRequestAnnotationsSupported: true},
 		}
 
 		It("derives the correct max container-name length from each annotation format", func() {

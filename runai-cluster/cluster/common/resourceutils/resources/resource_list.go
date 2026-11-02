@@ -80,9 +80,7 @@ func PodRunaiRequestsAndLimits(containers, initContainers []v1.Container, annota
 	requests, limits v1.ResourceList) {
 	requests, limits = PodRequestsAndLimits(containers, initContainers)
 	AddRunaiAnnotationsRequestedResources(annotations, requests, limits)
-	if !HasNativeGPUMemoryAnnotations(annotations) {
-		AddGpuLimitsFromContainers(containers, limits)
-	}
+	addGpuLimitsFromContainers(containers, limits, !hasPerContainerGPUMemoryLimit(annotations))
 	return
 }
 
@@ -92,16 +90,18 @@ func PodRunaiRequestsAndLimits(containers, initContainers []v1.Container, annota
 // mainly used by external-workload-integrator and cluster-sync for new workload api.
 func AddRunaiAnnotationsRequestedResources(podAnnotations map[string]string,
 	requests, limits v1.ResourceList) {
-	// Native quantities take precedence over legacy annotations and env limits.
-	memory, native, err := ReadNativeGPUMemoryAnnotations(podAnnotations)
+	memory, err := ReadGPUMemoryAnnotations(podAnnotations)
 	if err != nil {
-		zap.S().Warnf("Failed to parse native GPU memory annotations: %s", err)
-	} else if native {
-		addResource(requests, constants.GpuMemoryResourceName, memory.Request)
-		addResource(limits, constants.GpuMemoryResourceName, memory.Limit)
+		zap.S().Warnf("Failed to parse GPU memory annotations: %s", err)
 	} else {
-		addLegacyGpuRequests(podAnnotations, requests, limits)
+		if memory.HasRequest {
+			addResource(requests, constants.GpuMemoryResourceName, memory.Request)
+		}
+		if memory.HasRequest || !memory.Limit.IsZero() {
+			addResource(limits, constants.GpuMemoryResourceName, memory.Limit)
+		}
 	}
+	addLegacyGpuFractionRequests(podAnnotations, requests, limits)
 
 	// Add mig requests
 	for key, val := range podAnnotations {
@@ -118,22 +118,7 @@ func AddRunaiAnnotationsRequestedResources(podAnnotations map[string]string,
 	}
 }
 
-func addLegacyGpuRequests(podAnnotations map[string]string, requests, limits v1.ResourceList) {
-	// Add gpu memory request
-	gpuMemoryMb, found := podAnnotations[constants.AnnotationGpuMemory]
-	if found && gpuMemoryMb != "" {
-		quantity, err := resource.ParseQuantity(gpuMemoryMb)
-		if err != nil {
-			zap.S().Warnf("Failed to parse %s annotation %s", constants.AnnotationGpuMemory, gpuMemoryMb)
-		} else {
-			// the annotation's expected value is a number in MB, while resource.ParseQuantity parses it into Bytes,
-			// so we need to re-set it as MB.
-			quantity.Set(int64(quantity.AsApproximateFloat64() * 1000 * 1000))
-			addResource(requests, constants.GpuMemoryResourceName, quantity)
-			addResource(limits, constants.GpuMemoryResourceName, quantity)
-		}
-	}
-
+func addLegacyGpuFractionRequests(podAnnotations map[string]string, requests, limits v1.ResourceList) {
 	// Add gpu fraction request. The gpu-fraction annotation carries the per-device
 	// fraction (e.g. "0.5"); when the workload requests multiple devices at that
 	// fraction (via gpu-fraction-num-devices), scale so the reported request/limit
@@ -165,6 +150,10 @@ func SumResourceRequirements(left, right v1.ResourceRequirements) v1.ResourceReq
 }
 
 func AddGpuLimitsFromContainers(containers []v1.Container, limits v1.ResourceList) {
+	addGpuLimitsFromContainers(containers, limits, true)
+}
+
+func addGpuLimitsFromContainers(containers []v1.Container, limits v1.ResourceList, allowMemoryLimit bool) {
 	if len(containers) == 0 {
 		return
 	}
@@ -191,7 +180,7 @@ func AddGpuLimitsFromContainers(containers []v1.Container, limits v1.ResourceLis
 		// if the value is less than or equal to 1,
 		// it means it's the limit for GPU resources (a fraction or a whole GPU).
 		limits[constants.NvidiaGpuResourceName] = *gpuLimit
-	} else {
+	} else if allowMemoryLimit {
 		// else - it means it's gpu-memory limit.
 		limits[constants.GpuMemoryResourceName] = *gpuLimit
 	}

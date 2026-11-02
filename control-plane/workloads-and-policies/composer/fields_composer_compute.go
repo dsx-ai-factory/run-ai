@@ -418,7 +418,7 @@ func (fc *FieldsComposer) ComposeMemoryReqAnnotation(src *GpuSizingInfo, contain
 				return workloadsApi.NewError(http.StatusBadRequest, fmt.Sprintf(MemoryFormatError, "gpuMemoryRequest"))
 			}
 
-			if fc.Options.GpuMemoryLimitAnnotationsSupported {
+			if fc.Options.GpuMemoryRequestAnnotationsSupported {
 				if containerName == "" {
 					return workloadsApi.NewError(http.StatusInternalServerError,
 						"ComposeMemoryReqAnnotation: container name is required to build the nvidia.com/container.<name>.gpu-memory.request annotation key")

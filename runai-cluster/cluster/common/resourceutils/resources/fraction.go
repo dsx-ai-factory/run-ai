@@ -23,7 +23,7 @@ var (
 func RequestsGPUFraction(pod *v1.Pod) bool {
 	_, foundFraction := pod.Annotations[constants.AnnotationGpuFraction]
 	_, foundGPUMemory := pod.Annotations[constants.AnnotationGpuMemory]
-	return foundFraction || foundGPUMemory || HasNativeGPUMemoryAnnotations(pod.Annotations)
+	return foundFraction || foundGPUMemory || HasPerContainerGPUMemoryAnnotations(pod.Annotations)
 }
 
 func GetGPUFraction(pod *v1.Pod) (float64, error) {
@@ -39,22 +39,14 @@ func GetGPUFraction(pod *v1.Pod) (float64, error) {
 }
 
 func GetGPUMemory(pod *v1.Pod) (int64, error) {
-	memory, native, err := ReadNativeGPUMemoryAnnotations(pod.Annotations)
+	memory, err := ReadGPUMemoryAnnotations(pod.Annotations)
 	if err != nil {
-		return 0, fmt.Errorf("parse native GPU memory request: %w", err)
+		return 0, fmt.Errorf("parse GPU memory request: %w", err)
 	}
-	if native {
-		return memory.Request.Value() / 1000000, nil
-	}
-	gpuMemoryStr, found := pod.Annotations[constants.AnnotationGpuMemory]
-	if !found {
+	if !memory.HasRequest {
 		return 0, fmt.Errorf("GPU memory annotation not found")
 	}
-	memValue, err := strconv.ParseInt(gpuMemoryStr, 10, 64)
-	if err != nil {
-		return 0, fmt.Errorf("failed to parse GPU memory annotation value. err: %s", err)
-	}
-	return memValue, nil
+	return memory.Request.Value() / 1000000, nil
 }
 
 func GetNumGPUFractionDevices(pod *v1.Pod) (int64, error) {

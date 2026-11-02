@@ -98,10 +98,6 @@ func GetGpuRequest(pod *v1.Pod) float64 {
 	amdGpuReq := req[amdGpuResourceName]
 	gpusCount += float64(amdGpuReq.Value())
 
-	if resources.HasNativeGPUMemoryAnnotations(pod.Annotations) {
-		return gpusCount
-	}
-
 	gpuFraction, gpuFractionErr := strconv.ParseFloat(pod.Annotations[gpuFractionAnnotation], 64)
 	if !(gpuFraction <= 0 || gpuFraction > 1 || gpuFractionErr != nil) {
 		gpusCount += gpuFraction
@@ -115,18 +111,13 @@ func GetGpuMemoryRequest(pod *v1.Pod) int64 {
 }
 
 func getGpuMemoryRequestInMb(pod *v1.Pod) float64 {
-	memory, native, err := resources.ReadNativeGPUMemoryAnnotations(pod.Annotations)
+	memory, err := resources.ReadGPUMemoryAnnotations(pod.Annotations)
 	if err != nil {
 		log.Log.Error(err, "Failed to parse GPU request", "namespace", pod.Namespace, "pod", pod.Name)
-	} else if native {
-		// Status annotations use decimal MB even when the request uses binary units.
-		return memory.Request.AsApproximateFloat64() / ByteToMb
+		return 0
 	}
-	gpuMemory, err := strconv.ParseInt(pod.Annotations[gpuMemoryAnnotation], 10, 64)
-	if err == nil && gpuMemory > 0 {
-		return float64(gpuMemory)
-	}
-	return 0
+	// Status annotations use decimal MB even when the request uses binary units.
+	return memory.Request.AsApproximateFloat64() / ByteToMb
 }
 
 func GetGpuFractionsCount(pod *v1.Pod) int64 {

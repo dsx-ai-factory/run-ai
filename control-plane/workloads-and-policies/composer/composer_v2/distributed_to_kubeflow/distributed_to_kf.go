@@ -868,7 +868,7 @@ func (dkc *DistributedToKubeflowComposer) processComputeFields(ctx context.Conte
 			dkc.fc.ComposePortionLimitEnv(sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuPortionLimitEnvVar),
 			dkc.fc.ComposeMemoryLimitAnnotation(sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
 			dkc.fc.ComposePortionLimitAnnotation(sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
-			dkc.fc.ComposeMemoryReqAnnotation(sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
+			dkc.fc.ComposeMemoryReqAnnotation(sizingInfo, container.Name, &podMeta.Annotations, composer.GpuMemoryRequestToAnnotations),
 			dkc.fc.ComposePortionReqAnnotation(sizingInfo, &podMeta.Annotations, composer.StringToMapString, composer.GpuFractionAnnotation),
 			dkc.fc.ComposeNumDevicesAnnotation(sizingInfo, &podMeta.Annotations, composer.StringToMapString, composer.GpuFractionDevicesAnnotation),
 		)

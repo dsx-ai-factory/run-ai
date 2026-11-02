@@ -269,6 +269,10 @@ const (
 	// with support for the per-container gpu-compute.mode annotation.
 	MinVersionGpuComputeMode
 
+	// MinVersionGpuMemoryRequestAnnotations - the first cluster release whose
+	// resource readers support per-container GPU memory requests without gpu-memory.
+	MinVersionGpuMemoryRequestAnnotations
+
 	// NOTE -> Make sure to add the min version to the map below
 )
 
@@ -347,6 +351,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionOfSegmentTopology:                         "2.27.0",
 	MinVersionNoNativeSubmission:                        "3.0.0",
 	MinVersionGpuMemoryLimitAnnotations:                 "3.0.0",
+	MinVersionGpuMemoryRequestAnnotations:               "3.1.0",
 	MinVersionGpuComputeMode:                            "3.0.14",
 	MinVersionResourceClaimTemplates:                    "3.1.0",
 	MinVersionNetworkingOwnershipEnforcement:            "3.0.0",

@@ -59,7 +59,7 @@ func (dinfComposer *DistributedInferenceToLWSComposer) processComputeFields(
 			dinfComposer.fc.ComposePortionLimitEnv(&sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuPortionLimitEnvVar),
 			dinfComposer.fc.ComposeMemoryLimitAnnotation(&sizingInfo, container.Name, &target.Annotations, composer.StringToMapString),
 			dinfComposer.fc.ComposePortionLimitAnnotation(&sizingInfo, container.Name, &target.Annotations, composer.StringToMapString),
-			dinfComposer.fc.ComposeMemoryReqAnnotation(&sizingInfo, container.Name, &target.Annotations, composer.StringToMapString),
+			dinfComposer.fc.ComposeMemoryReqAnnotation(&sizingInfo, container.Name, &target.Annotations, composer.GpuMemoryRequestToAnnotations),
 			dinfComposer.fc.ComposePortionReqAnnotation(&sizingInfo, &target.Annotations, composer.StringToMapString, composer.GpuFractionAnnotation),
 			dinfComposer.fc.ComposeNumDevicesAnnotation(&sizingInfo, &target.Annotations, composer.StringToMapString, composer.GpuFractionDevicesAnnotation),
 		)

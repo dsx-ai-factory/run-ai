@@ -698,6 +698,7 @@ func runCase(tc composerCase) {
 			PreemptibilitySupported:              true,
 			EmptyDirAsVolumeSupported:            true,
 			GpuMemoryLimitAnnotationsSupported:   gpuMemoryLimitAnnotationsSupported,
+			GpuMemoryRequestAnnotationsSupported: gpuMemoryLimitAnnotationsSupported,
 			WorkloadV2ServiceSpecLabelsSupported: serviceSpecLabelsSupported,
 		},
 	)
