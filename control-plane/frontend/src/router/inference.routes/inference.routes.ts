@@ -121,33 +121,6 @@ export const inferenceRoutes: RunaiRouteRecord = {
       },
     },
     {
-      path: "tgi",
-      name: INFERENCE_ROUTE_NAMES.INFERENCE_TGI_EDIT,
-      component: () => import("@/views/inference/creation/inference-hugging-face-based.vue"),
-      meta: {
-        pageTitle: "New inference",
-        fullWidth: true,
-        requestToLeave: true,
-        resourceType: ResourceType.Inferences,
-        minPermittedActions: [Action.Create, Action.Update],
-        requiresAuth: true,
-        parentSubject: EMenuSubjectNames.WORKLOADS_MANAGER,
-        backPageName: WORKLOAD_ROUTE_NAMES.WORKLOAD_INDEX,
-      },
-      beforeEnter(to: RouteLocationNormalized, from: RouteLocationNormalized, next: NavigationGuardNext) {
-        if (from === START_LOCATION) {
-          next({ name: INFERENCE_ROUTE_NAMES.INFERENCE_NEW });
-          return;
-        }
-        const settingStore = useSettingStore();
-        if (settingStore.isFeatureEnabled(SettingKeys.EnableModelCatalog)) {
-          next();
-        } else {
-          next({ name: INFERENCE_ROUTE_NAMES.INFERENCE_NEW });
-        }
-      },
-    },
-    {
       path: "nim",
       name: INFERENCE_ROUTE_NAMES.INFERENCE_NIM_EDIT,
       component: () => import("@/views/inference/creation/inference-nim-based.vue"),

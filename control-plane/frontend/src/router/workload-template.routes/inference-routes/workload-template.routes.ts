@@ -30,21 +30,6 @@ export const inferenceTemplateRoutes: RunaiRouteRecord[] = [
     },
   },
   {
-    path: "inference/tgi/new",
-    name: INFERENCE_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INFERENCE_TGI,
-    component: WorkloadTemplateInferenceHuggingFace,
-    meta: {
-      pageTitle: "New inference template",
-      fullWidth: true,
-      requestToLeave: true,
-      backPageName: "workload-template-index",
-      resourceType: ResourceType.Templates,
-      minPermittedActions: [Action.Create, Action.Update],
-      requiresAuth: true,
-      parentSubject: EMenuSubjectNames.WORKLOADS_MANAGER,
-    },
-  },
-  {
     path: "inference/vllm/new",
     name: INFERENCE_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INFERENCE_VLLM,
     component: WorkloadTemplateInferenceHuggingFace,

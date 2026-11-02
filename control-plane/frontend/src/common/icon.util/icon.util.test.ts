@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { getNimIconIfNimImage, getHuggingFaceIcon } from "./icon.util";
+import { getNimIconIfNimImage, getHuggingFaceIcon, isTgiInference } from "./icon.util";
 import {
   NIM_WORKLOAD_LABEL,
   NIM_IMAGE_PREFIX,
@@ -376,5 +376,27 @@ describe("getHuggingFaceIcon", () => {
 
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe("isTgiInference", () => {
+  it.each([
+    { name: "inference with the TGI image", type: EWorkloadType.Inference, image: LLM_IMAGE_FOR_TGI, want: true },
+    {
+      name: "inference with the TGI image behind a custom registry",
+      type: EWorkloadType.Inference,
+      image: `my-registry.com/${LLM_IMAGE_FOR_TGI}`,
+      want: true,
+    },
+    {
+      name: "inference with the vLLM image",
+      type: EWorkloadType.Inference,
+      image: LLM_IMAGE_FOR_HUGGING_FACE,
+      want: false,
+    },
+    { name: "inference without an image", type: EWorkloadType.Inference, image: undefined, want: false },
+    { name: "non-inference with the TGI image", type: EWorkloadType.Training, image: LLM_IMAGE_FOR_TGI, want: false },
+  ])("should return $want for $name", ({ type, image, want }) => {
+    expect(isTgiInference(type, image)).toBe(want);
   });
 });

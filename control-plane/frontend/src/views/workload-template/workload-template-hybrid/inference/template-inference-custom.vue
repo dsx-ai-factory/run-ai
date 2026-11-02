@@ -545,8 +545,6 @@ export default defineComponent({
         this.$router.push({ name: INFERENCE_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INFERENCE_NIM });
       } else if (this.inferenceStore.inferenceFormUIState.modelBasedOn === EServerType.VLLM) {
         this.$router.push({ name: INFERENCE_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INFERENCE_VLLM });
-      } else if (this.inferenceStore.inferenceFormUIState.modelBasedOn === EServerType.TGI) {
-        this.$router.push({ name: INFERENCE_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INFERENCE_TGI });
       } else {
         console.error(`No model based on ${this.inferenceStore.inferenceFormUIState.modelBasedOn} found`);
       }

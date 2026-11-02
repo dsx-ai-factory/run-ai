@@ -99,7 +99,7 @@ import { policyUtil } from "@/utils/policy.util/policy.util";
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
 import type { IScopeModel } from "@/models/global.model";
 import { scopeUtil } from "@/utils/scope.util";
-import { EServerType, LLM_IMAGE_FOR_HUGGING_FACE, LLM_IMAGE_FOR_TGI } from "@/models/inference.model";
+import { EServerType, LLM_IMAGE_FOR_HUGGING_FACE } from "@/models/inference.model";
 
 const TemplateInferenceHuggingFace = defineComponent({
   name: "template-inference-hugging-face",
@@ -348,11 +348,7 @@ const TemplateInferenceHuggingFace = defineComponent({
         });
         this.inference = inferenceWorkloadUtil.setInferenceHuggingFaceUIDefaults(uiModel, this.authStore.isSSO);
 
-        if (this.inferenceStore.inferenceFormUIState.modelBasedOn === EServerType.TGI) {
-          this.inference.spec.image = LLM_IMAGE_FOR_TGI;
-        } else {
-          this.inference.spec.image = LLM_IMAGE_FOR_HUGGING_FACE;
-        }
+        this.inference.spec.image = LLM_IMAGE_FOR_HUGGING_FACE;
 
         this.createSectionsClearedStates();
       } catch (e: unknown) {

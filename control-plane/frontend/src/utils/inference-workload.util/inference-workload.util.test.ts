@@ -30,7 +30,6 @@ import {
   HF_HOME_DEFAULT_PATH,
   HOME_DEFAULT_PATH,
   LLM_IMAGE_FOR_HUGGING_FACE,
-  LLM_IMAGE_FOR_TGI,
   MAX_REPLICAS_DEFAULT_VALUE,
   MIN_REPLICAS_DEFAULT_VALUE,
   NIM_WORKLOAD_LABEL,
@@ -1718,19 +1717,15 @@ describe("inference-workload.util", () => {
       ).toThrow("Missing server type: The workload object must include a valid 'serverType' property.");
     });
 
-    it("should set the correct model flag based on server type", () => {
-      const tgiWorkload = { ...workload, serverType: EServerType.TGI, image: "tgi-image" };
+    it("should set the vLLM model flag", () => {
       const vllmWorkload = { ...workload, serverType: EServerType.VLLM, image: "inference-image" };
-
-      const tgiRequest = inferenceWorkloadUtil.getHFInferenceWorkloadCreationRequest(tgiWorkload, flatCompute);
-      expect(tgiRequest.spec?.args).toContain(`--model-id ${modelName} ${workload.specificEnv.args}`);
 
       const vllmRequest = inferenceWorkloadUtil.getHFInferenceWorkloadCreationRequest(vllmWorkload, flatCompute);
       expect(vllmRequest.spec?.args).toContain(`--model ${modelName} ${workload.specificEnv.args}`);
     });
 
     it("should include the correct server type image", () => {
-      const currWorkload = { ...workload, serverType: EServerType.TGI, image: "custom-image" };
+      const currWorkload = { ...workload, serverType: EServerType.VLLM, image: "custom-image" };
 
       const result = inferenceWorkloadUtil.getHFInferenceWorkloadCreationRequest(currWorkload, flatCompute);
       expect(result.spec?.image).toBe("custom-image");
@@ -2564,27 +2559,20 @@ describe("inference-workload.util", () => {
   describe("getHFArgsForModel", () => {
     const { getHFArgsForModel } = inferenceWorkloadUtil;
 
-    it("should return TGI args string when image is TGI", () => {
-      const modelName = "tgi-model";
-      const result = getHFArgsForModel(LLM_IMAGE_FOR_TGI, modelName);
-      expect(result).toBe(`${ARGS_PREFIX_FOR_TGI} ${modelName}`);
-    });
-
     it("should return VLLM args string when image is VLLM", () => {
       const modelName = "vllm-model";
-      const result = getHFArgsForModel(LLM_IMAGE_FOR_HUGGING_FACE, modelName);
+      const result = getHFArgsForModel(modelName);
       expect(result).toBe(`${ARGS_PREFIX_FOR_VLLM} ${modelName}`);
     });
 
     it("should handle model names with extra whitespace", () => {
       const modelName = "   spaced-model   ";
-      const result = getHFArgsForModel(LLM_IMAGE_FOR_HUGGING_FACE, modelName);
+      const result = getHFArgsForModel(modelName);
       expect(result).toBe(`${ARGS_PREFIX_FOR_VLLM} ${modelName}`);
     });
 
     it("should handle empty model name", () => {
-      expect(getHFArgsForModel(LLM_IMAGE_FOR_TGI, "")).toBe(`${ARGS_PREFIX_FOR_TGI} `);
-      expect(getHFArgsForModel(LLM_IMAGE_FOR_HUGGING_FACE, "")).toBe(`${ARGS_PREFIX_FOR_VLLM} `);
+      expect(getHFArgsForModel("")).toBe(`${ARGS_PREFIX_FOR_VLLM} `);
     });
   });
 

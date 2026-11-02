@@ -459,8 +459,6 @@ export default defineComponent({
         await this.continueToNim();
       } else if (this.inferenceNewModel.serverType === EServerType.VLLM) {
         await this.continueToVLLM();
-      } else if (this.inferenceNewModel.serverType === EServerType.TGI) {
-        await this.continueToTgi();
       } else {
         await this.continueToCustom();
       }
@@ -498,17 +496,6 @@ export default defineComponent({
       });
       await this.$router.push({
         name: INFERENCE_ROUTE_NAMES.INFERENCE_VLLM_EDIT,
-        query,
-      });
-    },
-
-    async continueToTgi(): Promise<void> {
-      const query = this.getQuery();
-      this.resetInferenceStore({
-        modelBasedOn: EServerType.TGI,
-      });
-      await this.$router.push({
-        name: INFERENCE_ROUTE_NAMES.INFERENCE_TGI_EDIT,
         query,
       });
     },

@@ -63,7 +63,7 @@ import type { SecretListInfo } from "@/swagger-models/k8s-objects-tracker-client
 import type { Inference, Workload } from "@/swagger-models/workloads-client";
 import type { IScopeModel, ISelectOption } from "@/models/global.model";
 import type { IUISuperWorkloadCreationRequest } from "@/models/workload.model";
-import { EServerType, LLM_IMAGE_FOR_HUGGING_FACE, LLM_IMAGE_FOR_TGI } from "@/models/inference.model";
+import { LLM_IMAGE_FOR_HUGGING_FACE } from "@/models/inference.model";
 
 // stores
 import { useAppStore } from "@/stores/app.store";
@@ -402,11 +402,7 @@ const InferenceHuggingFaceBased = defineComponent({
         if (clusterId) this.inference.clusterId = clusterId;
         if (workloadName) this.inference.name = workloadName;
 
-        if (this.inferenceStore.inference.serverType === EServerType.TGI) {
-          this.inference.spec.image = LLM_IMAGE_FOR_TGI;
-        } else {
-          this.inference.spec.image = LLM_IMAGE_FOR_HUGGING_FACE;
-        }
+        this.inference.spec.image = LLM_IMAGE_FOR_HUGGING_FACE;
       } catch (e) {
         this.$q.notify(alertUtil.getError("Failed to load inference model"));
         console.error("Failed to get unified inference:\n", e);
