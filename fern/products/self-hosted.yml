@@ -541,11 +541,11 @@ navigation:
       - page: Running AI Agents with NVIDIA OpenShell on NVIDIA Run:ai
         slug: openshell-on-runai
         path: ../../docs/tutorials/agent-tutorials/openshell-on-runai.md
-    - section: Integration Tutorials
+    - section: Pipeline Tutorials
       contents:
       - page: Running NVIDIA OSMO Workflows on NVIDIA Run:ai
         slug: osmo-on-runai
-        path: ../../docs/tutorials/integration-tutorials/osmo-on-runai.md
+        path: ../../docs/tutorials/pipeline-tutorials/osmo-on-runai.md
   - section: Agents
     contents:
     - page: Overview
