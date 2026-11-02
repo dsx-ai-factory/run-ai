@@ -21,7 +21,7 @@ var _ MappedNullable = &ClusterReportedConfig{}
 
 // ClusterReportedConfig Holds cluster configuration values.
 type ClusterReportedConfig struct {
-	// InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads.
+	// InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. v1 means the Agent and the Anyworkload networking plugin understand the externalAccess.inference block in networking endpoints. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads.
 	InferenceEndpointSchemaVersion NullableString `json:"inferenceEndpointSchemaVersion,omitempty"`
 	// indicates if the cluster workload ownership protection is enabled
 	WorkloadOwnershipProtection NullableBool `json:"workloadOwnershipProtection,omitempty"`

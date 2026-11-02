@@ -806,6 +806,37 @@ components:
         - Required: The workload is configured to use MNNVL acceleration. The workload type and at least one project’s node pool must support MNNVL, or the request fails. When set, the workload is scheduled only on compatible nodes, and may remain pending until sufficient MNNVL-capable capacity is available.
         - None: The workload will not use MNNVL acceleration, even if MNNVL-capable nodes are available.
       example: Required
+    ExternalAccessInference:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: |-
+        Server-resolved inference routing for this endpoint. Set only by the control plane; rejected in workload submissions.
+        Requires httpRoute and one created Service on the same endpoint. The cluster then creates an InferenceEndpoint instead of the HTTPRoute,
+        and derives its workload selector, target port, Gateway, hostnames and default backend from that Service and httpRoute.
+      required:
+        - epp
+      properties:
+        epp:
+          type: object
+          additionalProperties: true
+          description: InferenceEndpoint spec.epp, for example the EPP profile. Validated against the installed CRD when applied.
+        objectives:
+          type: array
+          nullable: true
+          maxItems: 1000
+          description: InferenceEndpoint spec.objectives. Omitted when there are none.
+          items:
+            type: object
+            additionalProperties: true
+        rewrites:
+          type: array
+          nullable: true
+          maxItems: 1000
+          description: InferenceEndpoint spec.rewrites. Omitted when there are none.
+          items:
+            type: object
+            additionalProperties: true
     ExternalAccess:
       type: object
       description: External access configuration. Same shape as the networking plugin. Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API). Omit or leave empty for no external access.
@@ -823,6 +854,10 @@ components:
           description: Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
           type: object
           nullable: true
+        inference:
+          x-internal: true
+          nullable: true
+          $ref: '#/components/schemas/ExternalAccessInference'
     ServiceType:
       description: The type of Kubernetes Service to create for the endpoint.
       type: string
@@ -1599,22 +1634,6 @@ components:
       properties:
         highestUpdate:
           $ref: '#/components/schemas/UpdateCount'
-    AgentInferenceEndpoint:
-      type: object
-      nullable: true
-      additionalProperties: false
-      description: Server-resolved inference routing intent for the Agent. Omitted for workloads without managed inference routing.
-      required:
-        - schemaVersion
-        - spec
-      properties:
-        schemaVersion:
-          type: string
-          description: Version of the transport envelope, currently v1. Consumers reject unsupported versions.
-        spec:
-          type: object
-          additionalProperties: true
-          description: Resolved InferenceEndpoint spec, validated against the installed CRD when applied. Does not include resource identity, ownership, or status.
     WorkloadV2UpdateConfigurationMnnvl:
       type: object
       additionalProperties: false
@@ -1725,10 +1744,6 @@ components:
                         - path: /
                           pathType: Prefix
       properties:
-        inferenceEndpoint:
-          x-internal: true
-          nullable: true
-          $ref: '#/components/schemas/AgentInferenceEndpoint'
         mnnvl:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationMnnvl'
         networking:

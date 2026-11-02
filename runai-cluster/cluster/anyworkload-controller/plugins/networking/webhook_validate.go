@@ -34,7 +34,8 @@ func (p *Plugin) WebhookValidate(
 	case inputLegacy:
 		return p.webhookValidateLegacy(ctx, existingRunner, desiredRunner)
 	case inputAnnotation:
-		return nil, validateEndpointsConfig(desiredRunner, cfg)
+		errs := validateEndpointsConfig(desiredRunner, cfg)
+		return nil, append(errs, p.validateInferenceEndpointAvailable(existingRunner, desiredRunner, cfg)...)
 	default:
 		return nil, nil
 	}
@@ -311,4 +312,27 @@ func validateIngressBackends(config *dromosv1alpha1.NetworkingConfig, basePath *
 	}
 
 	return errs
+}
+
+// validateInferenceEndpointAvailable requires the InferenceEndpoint API only for
+// new or changed inference routing. Finalizer removal and metadata-only updates
+// carry the same configuration and must not be rejected because the API was
+// removed after admission.
+func (p *Plugin) validateInferenceEndpointAvailable(
+	existingRunner *dromosv1alpha1.WorkloadRunner,
+	desiredRunner *dromosv1alpha1.WorkloadRunner,
+	cfg *endpoints.Config,
+) field.ErrorList {
+	if cfg.InferenceEndpointIndex() < 0 || !desiredRunner.DeletionTimestamp.IsZero() {
+		return nil
+	}
+	if existingRunner != nil &&
+		existingRunner.Annotations[endpoints.Annotation] == desiredRunner.Annotations[endpoints.Annotation] {
+		return nil
+	}
+	if err := p.inferenceEndpointAvailable(); err != nil {
+		path := field.NewPath("metadata", "annotations").Key(endpoints.Annotation)
+		return field.ErrorList{field.Forbidden(path, err.Error())}
+	}
+	return nil
 }

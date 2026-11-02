@@ -41,10 +41,14 @@ func (p *Plugin) statusEndpoints(
 	authResults := make([]endpointPhaseResult, len(cfg.Endpoints))
 	accessResults := make([]endpointPhaseResult, len(cfg.Endpoints))
 	var probeErr error
+	var inference *inferenceEndpointProbe
 
 	for i := range cfg.Endpoints {
 		endpoint := &cfg.Endpoints[i]
 		probes[i] = p.probeEndpointNetworking(ctx, runner, endpoint, k8sClient)
+		if probes[i].inference != nil && inference == nil {
+			inference = probes[i].inference
+		}
 		authResults[i] = probes[i].auth.result
 		accessResults[i] = probes[i].external.result
 		probeErr = errors.Join(probeErr, probes[i].auth.err, probes[i].external.err)
@@ -52,6 +56,11 @@ func (p *Plugin) statusEndpoints(
 
 	status.SetCondition(foldAuthProxyConditions(authResults))
 	status.SetCondition(foldExternalAccessConditions(accessResults))
+	if inference != nil {
+		status.SetCondition(inference.condition)
+	} else {
+		setInferenceEndpointDisabled(runner, status)
+	}
 
 	details, detailsErr := p.buildEndpointsNetworkingDetails(ctx, runner, cfg, k8sClient, probes)
 	detailsErr = errors.Join(detailsErr, setNetworkingAdditionalInfo(status, details))
@@ -81,6 +90,15 @@ func (p *Plugin) probeEndpointNetworking(
 			}
 		} else {
 			authProbe = p.probeAuthProxy(ctx, runner, getEndpointAuthProxyName(workloadServiceName), k8sClient)
+		}
+	}
+
+	if endpoint != nil && endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil {
+		inference := p.probeInferenceEndpoint(ctx, runner, endpoint, k8sClient)
+		return endpointNetworkingProbe{
+			auth:      authProbe,
+			external:  inferenceExternalAccessProbe(inference, endpoint.ExternalAccess.HTTPRoute),
+			inference: &inference,
 		}
 	}
 

@@ -25,25 +25,6 @@ import { DUMMY_BASE_URL, assertParamExists, setApiKeyToObject, setBasicAuthToObj
 import { BASE_PATH, COLLECTION_FORMATS, type RequestArgs, BaseAPI, RequiredError } from './base';
 
 /**
- * Server-resolved inference routing intent for the Agent. Omitted for workloads without managed inference routing.
- * @export
- * @interface AgentInferenceEndpoint
- */
-export interface AgentInferenceEndpoint {
-    /**
-     * Version of the transport envelope, currently v1. Consumers reject unsupported versions.
-     * @type {string}
-     * @memberof AgentInferenceEndpoint
-     */
-    'schemaVersion': string;
-    /**
-     * Resolved InferenceEndpoint spec, validated against the installed CRD when applied. Does not include resource identity, ownership, or status.
-     * @type {{ [key: string]: any; }}
-     * @memberof AgentInferenceEndpoint
-     */
-    'spec': { [key: string]: any; };
-}
-/**
  * Compatibility networking configuration sent to agents through the existing networking update field.
  * @export
  * @interface AgentNetworkingConfiguration
@@ -536,6 +517,37 @@ export interface ExternalAccess {
      * @memberof ExternalAccess
      */
     'httpRoute'?: object | null;
+    /**
+     * 
+     * @type {ExternalAccessInference}
+     * @memberof ExternalAccess
+     */
+    'inference'?: ExternalAccessInference | null;
+}
+/**
+ * Server-resolved inference routing for this endpoint. Set only by the control plane; rejected in workload submissions. Requires httpRoute and one created Service on the same endpoint. The cluster then creates an InferenceEndpoint instead of the HTTPRoute, and derives its workload selector, target port, Gateway, hostnames and default backend from that Service and httpRoute.
+ * @export
+ * @interface ExternalAccessInference
+ */
+export interface ExternalAccessInference {
+    /**
+     * InferenceEndpoint spec.epp, for example the EPP profile. Validated against the installed CRD when applied.
+     * @type {{ [key: string]: any; }}
+     * @memberof ExternalAccessInference
+     */
+    'epp': { [key: string]: any; };
+    /**
+     * InferenceEndpoint spec.objectives. Omitted when there are none.
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof ExternalAccessInference
+     */
+    'objectives'?: Array<{ [key: string]: any; }> | null;
+    /**
+     * InferenceEndpoint spec.rewrites. Omitted when there are none.
+     * @type {Array<{ [key: string]: any; }>}
+     * @memberof ExternalAccessInference
+     */
+    'rewrites'?: Array<{ [key: string]: any; }> | null;
 }
 /**
  * Specifies the Group, Version, and Kind (GVK) of the Kubernetes resource that defines the workload.
@@ -2690,12 +2702,6 @@ export interface WorkloadV2Update {
  * @interface WorkloadV2UpdateConfiguration
  */
 export interface WorkloadV2UpdateConfiguration {
-    /**
-     * 
-     * @type {AgentInferenceEndpoint}
-     * @memberof WorkloadV2UpdateConfiguration
-     */
-    'inferenceEndpoint'?: AgentInferenceEndpoint | null;
     /**
      * 
      * @type {WorkloadV2UpdateConfigurationMnnvl}

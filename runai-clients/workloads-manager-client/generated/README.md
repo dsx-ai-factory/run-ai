@@ -99,7 +99,6 @@ Class | Method | HTTP request | Description
 
 ## Documentation For Models
 
- - [AgentInferenceEndpoint](docs/AgentInferenceEndpoint.md)
  - [AgentNetworkingConfiguration](docs/AgentNetworkingConfiguration.md)
  - [AgentNetworkingService](docs/AgentNetworkingService.md)
  - [AgentServiceCreate](docs/AgentServiceCreate.md)
@@ -123,6 +122,7 @@ Class | Method | HTTP request | Description
  - [EnvironmentVariableUserCredential](docs/EnvironmentVariableUserCredential.md)
  - [Error](docs/Error.md)
  - [ExternalAccess](docs/ExternalAccess.md)
+ - [ExternalAccessInference](docs/ExternalAccessInference.md)
  - [GVK](docs/GVK.md)
  - [GetYamlSubmission](docs/GetYamlSubmission.md)
  - [GetYamlSubmissionValue](docs/GetYamlSubmissionValue.md)

@@ -27890,9 +27890,11 @@ components:
           nullable: true
           description: >-
             InferenceEndpoint integration contract declared by the operator when
-            Agent, Anyworkload and inference-endpoint-controller are enabled.
-            Omitted by older clusters. Operand readiness and administrator
-            Gateway settings must also be checked before enabling new workloads.
+            Agent, Anyworkload and inference-endpoint-controller are enabled. v1
+            means the Agent and the Anyworkload networking plugin understand the
+            externalAccess.inference block in networking endpoints. Omitted by
+            older clusters. Operand readiness and administrator Gateway settings
+            must also be checked before enabling new workloads.
         workloadOwnershipProtection:
           type: boolean
           nullable: true
@@ -57796,6 +57798,44 @@ components:
         - None: The workload will not use MNNVL acceleration, even if
         MNNVL-capable nodes are available.
       example: Required
+    ExternalAccessInference:
+      type: object
+      nullable: true
+      additionalProperties: false
+      description: >-
+        Server-resolved inference routing for this endpoint. Set only by the
+        control plane; rejected in workload submissions.
+
+        Requires httpRoute and one created Service on the same endpoint. The
+        cluster then creates an InferenceEndpoint instead of the HTTPRoute,
+
+        and derives its workload selector, target port, Gateway, hostnames and
+        default backend from that Service and httpRoute.
+      required:
+        - epp
+      properties:
+        epp:
+          type: object
+          additionalProperties: true
+          description: >-
+            InferenceEndpoint spec.epp, for example the EPP profile. Validated
+            against the installed CRD when applied.
+        objectives:
+          type: array
+          nullable: true
+          maxItems: 1000
+          description: InferenceEndpoint spec.objectives. Omitted when there are none.
+          items:
+            type: object
+            additionalProperties: true
+        rewrites:
+          type: array
+          nullable: true
+          maxItems: 1000
+          description: InferenceEndpoint spec.rewrites. Omitted when there are none.
+          items:
+            type: object
+            additionalProperties: true
     ExternalAccess:
       type: object
       description: >-
@@ -57822,6 +57862,10 @@ components:
             Used when cluster uses Gateway API.
           type: object
           nullable: true
+        inference:
+          x-internal: true
+          nullable: true
+          $ref: '#/components/schemas/ExternalAccessInference'
     ServiceType:
       description: The type of Kubernetes Service to create for the endpoint.
       type: string
@@ -58487,29 +58531,6 @@ components:
       properties:
         value:
           $ref: '#/components/schemas/RunState'
-    AgentInferenceEndpoint:
-      type: object
-      nullable: true
-      additionalProperties: false
-      description: >-
-        Server-resolved inference routing intent for the Agent. Omitted for
-        workloads without managed inference routing.
-      required:
-        - schemaVersion
-        - spec
-      properties:
-        schemaVersion:
-          type: string
-          description: >-
-            Version of the transport envelope, currently v1. Consumers reject
-            unsupported versions.
-        spec:
-          type: object
-          additionalProperties: true
-          description: >-
-            Resolved InferenceEndpoint spec, validated against the installed CRD
-            when applied. Does not include resource identity, ownership, or
-            status.
     WorkloadV2UpdateConfigurationMnnvl:
       type: object
       additionalProperties: false
@@ -58644,10 +58665,6 @@ components:
                         - path: /
                           pathType: Prefix
       properties:
-        inferenceEndpoint:
-          x-internal: true
-          nullable: true
-          $ref: '#/components/schemas/AgentInferenceEndpoint'
         mnnvl:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationMnnvl'
         networking:

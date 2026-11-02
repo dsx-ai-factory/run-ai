@@ -379,6 +379,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 					Entry("null service", `[{"services":[null]}]`, "networking[0].services[0] must contain spec or ref"),
 					Entry("service with both spec and ref", `[{"services":[{"spec":{"name":"one","selector":{"app":"one"},"ports":[{"port":80}]},"ref":{"name":"one","port":80}}]}]`, "networking[0].services[0] must not contain both spec and ref"),
 					Entry("multiple services", `[{"services":[{"ref":{"name":"one","port":80}},{"ref":{"name":"two","port":80}}]}]`, "networking[0].services must contain at most one service"),
+					Entry("server-set inference routing", `[{"services":[{"spec":{"name":"one","selector":{"app":"one"},"ports":[{"port":80}]}}],"externalAccess":{"httpRoute":{},"inference":{"epp":{"profile":"gie-v1.5"}}}}]`, "networking[0].externalAccess.inference is set by the server"),
 				)
 			})
 		}

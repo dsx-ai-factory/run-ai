@@ -9,12 +9,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"maps"
 	"reflect"
 
 	composer "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
-	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/utils/ptr"
@@ -22,13 +20,24 @@ import (
 	lwsv1 "sigs.k8s.io/lws/api/leaderworkerset/v1"
 )
 
-// BuildDistributedInferenceIntent maps the resolved native LWS serving topology.
+// BuildDistributedInferenceIntent returns the externalAccess.inference block for
+// the resolved native LWS serving topology. The caller sets it on the same
+// endpoint's externalAccess, next to httpRoute. The networking plugin derives the
+// InferenceEndpoint workload selector and port, Gateway, hostnames and default
+// backend from that endpoint's Service and httpRoute; this function checks that
+// they describe the leaders of lws behind the administrator Gateway, so the block
+// only carries what cannot be derived.
 // It does not establish trusted submission origin or inference runtime compatibility;
-// a future submission caller must establish both before selecting this adapter.
+// a future submission caller must establish both before selecting this adapter,
+// and must set the block after validating the caller's networking, which rejects it.
 // Only the public HTTP, root-hostname topology is representable in this version.
-// rewrites are the workload's modelRewrites; they are copied to spec.rewrites, and
-// the key is omitted when there are none because the endpoint CRD has no nullable fields.
-func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, rewrites []api.ModelRewrite, defaults *Defaults) (*api.AgentInferenceEndpoint, error) {
+// protected is the serving port's access mode from the request (servingPort.authorizationType
+// other than public). The composer protects distributed inference with an oauth2-proxy
+// sidecar in the leader Pod and does not set authorization on the networking Service,
+// so protection cannot be read from the endpoint.
+// rewrites are the workload's modelRewrites; the key is omitted when there are none
+// because the endpoint CRD has no nullable fields.
+func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, protected bool, rewrites []api.ModelRewrite, defaults *Defaults) (*api.ExternalAccessInference, error) {
 	if defaults == nil || defaults.GatewayName == "" || len(validation.IsDNS1123Subdomain(defaults.GatewayName)) != 0 ||
 		defaults.GatewayNamespace == "" || len(validation.IsDNS1123Label(defaults.GatewayNamespace)) != 0 || defaults.EPPProfile != "gie-v1.5" {
 		return nil, fmt.Errorf("distributed inference requires valid administrator Gateway defaults and the gie-v1.5 EPP profile")
@@ -37,35 +46,23 @@ func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.Ne
 		len(lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers) == 0 {
 		return nil, fmt.Errorf("distributed inference requires a named LWS with an explicit leader container")
 	}
-	service, err := distributedServingService(lws, endpoint)
+	service, err := distributedServingService(lws, endpoint, protected)
 	if err != nil {
 		return nil, err
 	}
-	hostname, err := distributedServingHostname(endpoint.ExternalAccess, service, defaults)
-	if err != nil {
+	if _, err := distributedServingHostname(endpoint.ExternalAccess, service, defaults); err != nil {
 		return nil, err
 	}
-	spec := map[string]interface{}{
-		"workload": map[string]interface{}{
-			"selector": map[string]interface{}{"matchLabels": maps.Clone(*service.Selector)},
-			"port":     *service.Ports[0].TargetPort,
-		},
-		"routing": map[string]interface{}{
-			"gatewayRef": map[string]interface{}{"name": defaults.GatewayName, "namespace": defaults.GatewayNamespace},
-			"hostnames":  []string{hostname},
-			// Protected Services target the auth proxy, so non-inference paths stay behind it.
-			"defaultBackendRef": map[string]interface{}{"name": service.Name, "port": service.Ports[0].Port},
-		},
-		"epp": map[string]interface{}{"profile": defaults.EPPProfile},
-	}
+	inference := &api.ExternalAccessInference{Epp: map[string]interface{}{"profile": defaults.EPPProfile}}
 	if len(rewrites) > 0 {
-		spec["rewrites"] = modelRewrites(rewrites)
+		rules := modelRewrites(rewrites)
+		inference.Rewrites = &rules
 	}
-	return &api.AgentInferenceEndpoint{SchemaVersion: runv1.InferenceEndpointIntegrationV1, Spec: spec}, nil
+	return inference, nil
 }
 
-func modelRewrites(rewrites []api.ModelRewrite) []interface{} {
-	rules := make([]interface{}, 0, len(rewrites))
+func modelRewrites(rewrites []api.ModelRewrite) []map[string]interface{} {
+	rules := make([]map[string]interface{}, 0, len(rewrites))
 	for _, rewrite := range rewrites {
 		targets := make([]interface{}, 0, len(rewrite.Targets))
 		for _, target := range rewrite.Targets {
@@ -76,7 +73,7 @@ func modelRewrites(rewrites []api.ModelRewrite) []interface{} {
 	return rules
 }
 
-func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint) (*api.ServiceSpec, error) {
+func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, protected bool) (*api.ServiceSpec, error) {
 	if endpoint.Services == nil || len(*endpoint.Services) != 1 {
 		return nil, fmt.Errorf("distributed inference requires exactly one created serving Service")
 	}
@@ -102,7 +99,7 @@ func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.Networki
 		(port.Protocol != nil && *port.Protocol != api.SERVICEPROTOCOL_TCP) {
 		return nil, fmt.Errorf("distributed inference serving Service requires an explicit TCP container target port")
 	}
-	if isProtected(networkingService.Authorization) {
+	if protected {
 		// The auth proxy is a sidecar in the leader Pod. It is the only valid target for
 		// protected serving; the model port behind it must never be exposed directly.
 		if *port.TargetPort != composer.Oauth2ContainerDefaultPort {
@@ -122,14 +119,6 @@ func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.Networki
 		return service, nil
 	}
 	return nil, fmt.Errorf("distributed inference target port must address the primary leader container directly; proxy routing is unsupported")
-}
-
-// authorizationTypePublic is the authorizationType value for an unauthenticated serving port.
-const authorizationTypePublic = "public"
-
-func isProtected(authorization *api.Workloadv2Authorization) bool {
-	return authorization != nil && authorization.AuthorizationType != nil &&
-		string(*authorization.AuthorizationType) != authorizationTypePublic
 }
 
 func containersDeclarePort(containers []corev1.Container, port int32) bool {

@@ -1534,6 +1534,53 @@ components:
       - None
       example: Required
       type: string
+    ExternalAccessInference:
+      additionalProperties: false
+      description: |-
+        Server-resolved inference routing for this endpoint. Set only by the control plane; rejected in workload submissions.
+        Requires httpRoute and one created Service on the same endpoint. The cluster then creates an InferenceEndpoint instead of the HTTPRoute,
+        and derives its workload selector, target port, Gateway, hostnames and default backend from that Service and httpRoute.
+      example:
+        rewrites:
+        - key: ""
+        - key: ""
+        - key: ""
+        - key: ""
+        - key: ""
+        epp:
+          key: ""
+        objectives:
+        - key: ""
+        - key: ""
+        - key: ""
+        - key: ""
+        - key: ""
+      nullable: true
+      properties:
+        epp:
+          additionalProperties: true
+          description: "InferenceEndpoint spec.epp, for example the EPP profile. Validated\
+            \ against the installed CRD when applied."
+          type: object
+        objectives:
+          description: InferenceEndpoint spec.objectives. Omitted when there are none.
+          items:
+            additionalProperties: true
+            type: object
+          maxItems: 1000
+          nullable: true
+          type: array
+        rewrites:
+          description: InferenceEndpoint spec.rewrites. Omitted when there are none.
+          items:
+            additionalProperties: true
+            type: object
+          maxItems: 1000
+          nullable: true
+          type: array
+      required:
+      - epp
+      type: object
     ExternalAccess:
       description: "External access configuration. Same shape as the networking plugin.\
         \ Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API).\
@@ -1541,6 +1588,21 @@ components:
       example:
         ingress: "{}"
         route: "{}"
+        inference:
+          rewrites:
+          - key: ""
+          - key: ""
+          - key: ""
+          - key: ""
+          - key: ""
+          epp:
+            key: ""
+          objectives:
+          - key: ""
+          - key: ""
+          - key: ""
+          - key: ""
+          - key: ""
         httpRoute: "{}"
       nullable: true
       properties:
@@ -1559,6 +1621,8 @@ components:
             Used when cluster uses Gateway API.
           nullable: true
           type: object
+        inference:
+          $ref: '#/components/schemas/ExternalAccessInference'
       type: object
     ServiceType:
       default: ClusterIP
@@ -1909,6 +1973,21 @@ components:
         externalAccess:
           ingress: "{}"
           route: "{}"
+          inference:
+            rewrites:
+            - key: ""
+            - key: ""
+            - key: ""
+            - key: ""
+            - key: ""
+            epp:
+              key: ""
+            objectives:
+            - key: ""
+            - key: ""
+            - key: ""
+            - key: ""
+            - key: ""
           httpRoute: "{}"
       properties:
         externalAccess:
@@ -2255,6 +2334,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2299,6 +2393,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2343,6 +2452,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2387,6 +2511,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2431,6 +2570,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         pvcsConfig:
           cleanupOnCompletion: true
@@ -2589,6 +2743,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2633,6 +2802,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2677,6 +2861,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2721,6 +2920,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2765,6 +2979,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           pvcsConfig:
             cleanupOnCompletion: true
@@ -2983,6 +3212,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3027,6 +3271,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3071,6 +3330,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3115,6 +3389,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3159,6 +3448,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true
@@ -3546,6 +3850,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3590,6 +3909,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3634,6 +3968,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3678,6 +4027,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3722,6 +4086,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           pvcsConfig:
             cleanupOnCompletion: true
@@ -3898,6 +4277,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3942,6 +4336,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3986,6 +4395,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -4030,6 +4454,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -4074,6 +4513,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true
@@ -4359,6 +4813,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4403,6 +4872,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4447,6 +4931,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4491,6 +4990,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4535,6 +5049,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               pvcsConfig:
                 cleanupOnCompletion: true
@@ -4795,26 +5324,6 @@ components:
           example: 12345
           format: int64
           type: integer
-    AgentInferenceEndpoint:
-      additionalProperties: false
-      description: Server-resolved inference routing intent for the Agent. Omitted
-        for workloads without managed inference routing.
-      nullable: true
-      properties:
-        schemaVersion:
-          description: "Version of the transport envelope, currently v1. Consumers\
-            \ reject unsupported versions."
-          type: string
-        spec:
-          additionalProperties: true
-          description: "Resolved InferenceEndpoint spec, validated against the installed\
-            \ CRD when applied. Does not include resource identity, ownership, or\
-            \ status."
-          type: object
-      required:
-      - schemaVersion
-      - spec
-      type: object
     WorkloadV2UpdateConfigurationMnnvl:
       additionalProperties: false
       properties:
@@ -4928,8 +5437,6 @@ components:
                     - path: /
                       pathType: Prefix
       properties:
-        inferenceEndpoint:
-          $ref: '#/components/schemas/AgentInferenceEndpoint'
         mnnvl:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationMnnvl'
         networking:
@@ -7105,6 +7612,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7149,6 +7671,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7193,6 +7730,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7237,6 +7789,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7281,6 +7848,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true

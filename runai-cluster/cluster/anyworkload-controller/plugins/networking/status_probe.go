@@ -26,6 +26,8 @@ import (
 type endpointNetworkingProbe struct {
 	auth     authProxyProbeResult
 	external externalAccessProbeResult
+	// inference is set only for the endpoint with externalAccess.inference.
+	inference *inferenceEndpointProbe
 }
 
 type authProxyProbeResult struct {

@@ -34,6 +34,21 @@ Validation rules largely mirror the legacy validator, applied per Endpoint, plus
 - K8s Service names must be unique across all Endpoints in the payload.
 - Mode (legacy vs annotation) is enforced mutually exclusive (see above).
 
+### Inference routing (annotation mode)
+
+An Endpoint's `externalAccess` may carry an `inference` block next to `httpRoute`. The control plane sets it; workload submissions cannot. When it is present, the plugin creates an `InferenceEndpoint` (`inference.platform.run.ai/v1alpha1`) named `inference-<runner UID>` and controlled by the WorkloadRunner, instead of the HTTPRoute. The Service and auth proxy are reconciled as usual. Removing the block deletes the `InferenceEndpoint` and creates the HTTPRoute again.
+
+| `InferenceEndpoint` field | Source |
+|---|---|
+| `workload.selector.matchLabels` | `services[0].create.spec.selector` |
+| `workload.port` | `services[0].create.spec.ports[0].targetPort` (numeric; defaults to `port`) |
+| `routing.gatewayRef` | `httpRoute.spec.parentRefs[0]` (must be the configured Gateway) |
+| `routing.hostnames` | `httpRoute.spec.hostnames` |
+| `routing.defaultBackendRef` | the backend the HTTPRoute would use: the auth-proxy Service when `services[0].auth` is set, otherwise the Service |
+| `epp` (required), `objectives`, `rewrites` | the `inference` block |
+
+Rules: at most one Endpoint per runner may set `inference`; it requires `httpRoute` without `ingress` or `route`, a created Service with a selector, and exactly one Gateway parentRef. Admission rejects new or changed inference routing when the `InferenceEndpoint` API is not installed. Status reports the `InferenceEndpoint` as an external access resource (kind `InferenceEndpoint`), takes service URLs from the `httpRoute` hostnames, and mirrors its `Ready` condition as `InferenceEndpointReady`.
+
 ### Activation (legacy mode)
 
 The plugin is triggered when `spec.instructions.networking` is present in the WorkloadRunner specification.

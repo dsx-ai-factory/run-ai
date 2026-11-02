@@ -40,10 +40,20 @@ type ExternalAccess struct {
 	//HttpRoute *map[string]interface{} `json:"httpRoute,omitempty"`
 	HttpRoute *map[string]interface{} `json:"httpRoute,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Inference *ExternalAccessInference `json:"inference,omitempty"`
+	Inference *ExternalAccessInference `json:"inference,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertExternalAccessRequired checks if the required fields are not zero-ed
 func AssertExternalAccessRequired(obj ExternalAccess) error {
+	if obj.Inference != nil {
+		if err := AssertExternalAccessInferenceRequired(*obj.Inference); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -64,5 +74,15 @@ func AssertExternalAccessConstraints(obj ExternalAccess) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Inference != nil {
+		if err := AssertExternalAccessInferenceConstraints(*obj.Inference); err != nil {
+			return err
+		}
+	}
 	return nil
 }

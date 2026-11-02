@@ -36,6 +36,11 @@ func (p *Plugin) handleEndpointsAdditionalResources(
 		"workloadRunner", runner.Name,
 		"endpointsCount", len(cfg.Endpoints))
 
+	if countInferenceEndpoints(cfg) > 1 {
+		_ = state.AddPluginIssue(ctx, p, runner, errMultipleInferenceEndpoints, false, "", issue.Network)
+		return nil
+	}
+
 	owner, done, err := p.resolveOwnerOrDone(ctx, runner, resource, k8sClient)
 	if done {
 		return p.recordOwnershipEnforcementError(
@@ -69,6 +74,13 @@ func (p *Plugin) handleEndpointsAdditionalResources(
 			logger.Error(err, "endpoint reconcile failed; continuing with siblings",
 				"workloadRunner", runner.Name, "endpointIndex", i)
 			sibErrs = errors.Join(sibErrs, fmt.Errorf("endpoint[%d]: %w", i, err))
+		}
+	}
+	if cfg.InferenceEndpointIndex() < 0 {
+		if err := p.deleteInferenceEndpoint(ctx, runner, k8sClient); err != nil {
+			hasUnhandledError = true
+			_ = state.AddPluginIssue(ctx, p, runner, err, true, "delete inference endpoint", issue.Network)
+			sibErrs = errors.Join(sibErrs, err)
 		}
 	}
 	if sibErrs != nil {
@@ -168,6 +180,9 @@ func (p *Plugin) reconcileEndpoint(
 		if endpoint.ExternalAccess == nil {
 			return nil
 		}
+		if endpoint.ExternalAccess.Inference != nil {
+			return fmt.Errorf("reconcile inference endpoint: %w", validateInferenceEndpointShape(endpoint))
+		}
 		return p.createEndpointExternalAccess(ctx, runner, endpoint, owner, k8sClient, "", 0)
 	}
 
@@ -202,6 +217,14 @@ func (p *Plugin) reconcileEndpoint(
 		backendServicePort = AuthProxyServicePort
 	}
 
+	if endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil {
+		if err := p.reconcileEndpointInference(
+			ctx, runner, endpoint, backendServiceName, backendServicePort, k8sClient,
+		); err != nil {
+			return fmt.Errorf("reconcile inference endpoint: %w", err)
+		}
+		return nil
+	}
 	if endpoint.ExternalAccess != nil {
 		if err := p.createEndpointExternalAccess(
 			ctx, runner, endpoint, owner, k8sClient,

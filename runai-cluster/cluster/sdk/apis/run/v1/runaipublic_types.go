@@ -5,8 +5,9 @@
 
 package v1
 
-// InferenceEndpointIntegrationV1 declares support for the v1 resolved intent
-// envelope across Agent and the Anyworkload inference endpoint plugin.
+// InferenceEndpointIntegrationV1 declares that the Agent and the Anyworkload
+// networking plugin understand the externalAccess.inference block in the
+// run.ai/endpoints annotation and create an InferenceEndpoint from it.
 const InferenceEndpointIntegrationV1 = "v1"
 
 type RunaiPublic struct {

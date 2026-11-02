@@ -102,10 +102,24 @@ func validateEndpointsConfig(runner *dromosv1alpha1.WorkloadRunner, cfg *endpoin
 	}
 
 	tracker := newEndpointNameTracker(runner)
+	inferenceIdx := -1
 	for i := range cfg.Endpoints {
 		endpoint := &cfg.Endpoints[i]
 		endpointPath := basePath.Child("endpoints").Index(i)
 		errs = append(errs, validateEndpoint(endpoint, endpointPath, tracker, i)...)
+		if ea := endpoint.ExternalAccess; ea != nil && ea.Inference != nil {
+			inferencePath := endpointPath.Child("externalAccess", "inference")
+			if inferenceIdx >= 0 {
+				errs = append(errs, field.Forbidden(inferencePath, fmt.Sprintf(
+					"%s; endpoints[%d] already sets it", errMultipleInferenceEndpoints.Error(), inferenceIdx,
+				)))
+				continue
+			}
+			inferenceIdx = i
+			if err := validateInferenceEndpointShape(endpoint); err != nil {
+				errs = append(errs, field.Invalid(inferencePath, "<inference routing>", err.Error()))
+			}
+		}
 	}
 
 	return errs

@@ -14,3 +14,7 @@ properties:
     description: Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
     type: object
     nullable: true
+  inference:
+    x-internal: true
+    nullable: true
+    $ref: "./ExternalAccessInference.yaml"

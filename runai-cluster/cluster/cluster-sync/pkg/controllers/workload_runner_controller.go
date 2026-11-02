@@ -56,10 +56,12 @@ func AddWorkloadRunnerHandlerToCache(cachedClient cachedclient.CachedClient,
 }
 
 func wlrSyncFieldsChanged(oldWlr, newWlr *dromosv1alpha1.WorkloadRunner) bool {
-	oldIntent, oldConfigured := oldWlr.Annotations[endpoints.InferenceEndpointAnnotation]
-	newIntent, newConfigured := newWlr.Annotations[endpoints.InferenceEndpointAnnotation]
-	if oldConfigured != newConfigured || oldIntent != newIntent ||
-		(newConfigured && oldWlr.Generation != newWlr.Generation) {
+	// Inference routing intent lives in the endpoints annotation. Any change to it
+	// while inference is requested on either side can change the reported condition.
+	oldConfigured, newConfigured := endpoints.HasInference(oldWlr), endpoints.HasInference(newWlr)
+	if oldConfigured != newConfigured ||
+		(newConfigured && (oldWlr.Annotations[endpoints.Annotation] != newWlr.Annotations[endpoints.Annotation] ||
+			oldWlr.Generation != newWlr.Generation)) {
 		return true
 	}
 
@@ -92,11 +94,8 @@ func wlrSyncFieldsChanged(oldWlr, newWlr *dromosv1alpha1.WorkloadRunner) bool {
 				return true
 			}
 			if name == networkingPluginName &&
-				(externalAccessConditionChanged(oldPlugin, newPlugin) || pluginDetailsChanged(oldPlugin, newPlugin)) {
-				return true
-			}
-			if name == endpoints.InferenceEndpointPluginName &&
-				(oldPlugin.Phase != newPlugin.Phase || inferenceEndpointConditionChanged(oldPlugin, newPlugin) || pluginDetailsChanged(oldPlugin, newPlugin)) {
+				(externalAccessConditionChanged(oldPlugin, newPlugin) || pluginDetailsChanged(oldPlugin, newPlugin) ||
+					inferenceEndpointConditionChanged(oldPlugin, newPlugin)) {
 				return true
 			}
 		}

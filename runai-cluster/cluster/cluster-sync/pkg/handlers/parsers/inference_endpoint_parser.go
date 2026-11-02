@@ -15,15 +15,17 @@ import (
 
 // Routing readiness describes the endpoint controller's resources, not model
 // traffic health. Preserve the workload's own conditions, phase and URLs.
+// Inference routing is configured by externalAccess.inference in the
+// run.ai/endpoints annotation and reported by the networking plugin.
 func appendInferenceEndpointCondition(runner *dromos.WorkloadRunner, fields *openapi.WorkloadSyncFields) {
-	if _, configured := runner.Annotations[endpoints.InferenceEndpointAnnotation]; !configured {
+	if !endpoints.HasInference(runner) {
 		return
 	}
 	condition := metav1.Condition{
 		Type: endpoints.InferenceEndpointReadyCondition, Status: metav1.ConditionUnknown,
 		Reason: "Pending", Message: "waiting for current inference routing status",
 	}
-	if plugin := runner.Status.Plugins[endpoints.InferenceEndpointPluginName]; plugin != nil {
+	if plugin := runner.Status.Plugins[networkingPluginName]; plugin != nil {
 		if observed := meta.FindStatusCondition(plugin.Conditions, endpoints.InferenceEndpointReadyCondition); observed != nil && observed.ObservedGeneration == runner.Generation {
 			condition = *observed
 		}

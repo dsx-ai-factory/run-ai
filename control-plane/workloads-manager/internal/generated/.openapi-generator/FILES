@@ -14,7 +14,6 @@ pkg/api/error.go
 pkg/api/helpers.go
 pkg/api/impl.go
 pkg/api/logger.go
-pkg/api/model_agent_inference_endpoint.go
 pkg/api/model_agent_networking_configuration.go
 pkg/api/model_agent_networking_service.go
 pkg/api/model_agent_service_create.go
@@ -38,6 +37,7 @@ pkg/api/model_environment_variable_secret.go
 pkg/api/model_environment_variable_user_credential.go
 pkg/api/model_error.go
 pkg/api/model_external_access.go
+pkg/api/model_external_access_inference.go
 pkg/api/model_get_yaml_submission.go
 pkg/api/model_get_yaml_submission_value.go
 pkg/api/model_gpu_compute_mode.go

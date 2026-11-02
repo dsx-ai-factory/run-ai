@@ -222,6 +222,8 @@ func (n *NetworkingConfiguration) ToAgentAPI(workloadName string) *api.AgentNetw
 	endpoint := (*n)[0]
 	if endpoint.ExternalAccess != nil {
 		config.ExternalAccess = cloneExternalAccess(endpoint.ExternalAccess)
+		// The legacy single-endpoint shape has no inference routing.
+		config.ExternalAccess.Inference = nil
 	}
 	if endpoint.Services != nil && len(*endpoint.Services) > 0 {
 		services := []api.AgentNetworkingService{networkingServiceToAgentAPI((*endpoint.Services)[0])}
@@ -326,7 +328,38 @@ func cloneExternalAccess(access *api.ExternalAccess) *api.ExternalAccess {
 		Ingress:   cloneInterfaceMapPtr(access.Ingress),
 		Route:     cloneInterfaceMapPtr(access.Route),
 		HttpRoute: cloneInterfaceMapPtr(access.HttpRoute),
+		Inference: cloneExternalAccessInference(access.Inference),
 	}
+}
+
+func cloneExternalAccessInference(in *api.ExternalAccessInference) *api.ExternalAccessInference {
+	if in == nil {
+		return nil
+	}
+	data, err := json.Marshal(in)
+	if err != nil {
+		return nil
+	}
+	var out api.ExternalAccessInference
+	if err := json.Unmarshal(data, &out); err != nil {
+		return nil
+	}
+	return &out
+}
+
+// ToPublicAPI is the user-facing projection. It omits the server-set
+// externalAccess.inference block, which users may not submit.
+func (n *NetworkingConfiguration) ToPublicAPI(workloadName string) *[]api.NetworkingEndpoint {
+	endpoints := n.ToAPI(workloadName)
+	if endpoints == nil {
+		return nil
+	}
+	for i := range *endpoints {
+		if access := (*endpoints)[i].ExternalAccess; access != nil {
+			access.Inference = nil
+		}
+	}
+	return endpoints
 }
 
 func cloneInterfaceMapPtr(in *map[string]interface{}) *map[string]interface{} {
@@ -389,9 +422,6 @@ type WorkloadConfiguration struct {
 	PodOwnershipLabelsStamped bool                     `json:"podOwnershipLabelsStamped,omitempty"`
 	Mnnvl                     *MnnvlConfiguration      `json:"mnnvl,omitempty"`
 	Networking                *NetworkingConfiguration `json:"networking,omitempty"`
-	// InferenceEndpoint is resolved by the server, never accepted from the public
-	// workload configuration. Nil preserves the behavior of existing workloads.
-	InferenceEndpoint *api.AgentInferenceEndpoint `json:"inferenceEndpoint,omitempty"`
 	// NetworkingOwnershipContract is set only when Workloads Manager applies
 	// the binding during creation. It remains nil for older records so an
 	// update cannot add a selector that their existing Pods do not carry.
@@ -508,7 +538,7 @@ func (q *WorkloadsQueueRecord) ToWorkloadV2() api.WorkloadV2 {
 			result.Metadata.Configuration.Mnnvl = &q.Configuration.Mnnvl.Mode
 		}
 		if q.Configuration.Networking != nil {
-			result.Metadata.Configuration.Networking = q.Configuration.Networking.ToAPI(q.Name)
+			result.Metadata.Configuration.Networking = q.Configuration.Networking.ToPublicAPI(q.Name)
 		}
 		if len(q.Configuration.Pvcs) > 0 {
 			result.Metadata.Configuration.Pvcs = &q.Configuration.Pvcs
@@ -550,12 +580,6 @@ func (q *WorkloadsQueueRecord) ToClusterUpdate() api.WorkloadV2Update {
 
 	if q.Configuration != nil {
 		cfg := api.WorkloadV2UpdateConfiguration{}
-		if endpoint := q.Configuration.InferenceEndpoint; endpoint != nil {
-			cfg.InferenceEndpoint = &api.AgentInferenceEndpoint{SchemaVersion: endpoint.SchemaVersion}
-			if spec := cloneInterfaceMapPtr(&endpoint.Spec); spec != nil {
-				cfg.InferenceEndpoint.Spec = *spec
-			}
-		}
 		if q.Configuration.Networking != nil {
 			cfg.Networking = q.Configuration.Networking.ToAgentAPI(q.Name)
 			cfg.NetworkingEndpoints = q.Configuration.Networking.ToAPI(q.Name)

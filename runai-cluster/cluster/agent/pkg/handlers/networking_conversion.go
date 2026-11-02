@@ -63,9 +63,53 @@ func convertNetworkingEndpoint(apiEndpoint *workloadsManagerApi.NetworkingEndpoi
 
 	if ea := apiEndpoint.ExternalAccess.Get(); ea != nil {
 		endpoint.ExternalAccess = convertEndpointExternalAccess(ea, useOpenShiftRoute)
+		inference, err := convertEndpointInference(ea.Inference.Get())
+		if err != nil {
+			return endpoint, fmt.Errorf("externalAccess.inference: %w", err)
+		}
+		if inference != nil {
+			// Keep the block even without a route so the networking plugin's
+			// admission reports the missing httpRoute instead of dropping it.
+			if endpoint.ExternalAccess == nil {
+				endpoint.ExternalAccess = &endpoints.ExternalAccess{}
+			}
+			endpoint.ExternalAccess.Inference = inference
+		}
 	}
 
 	return endpoint, nil
+}
+
+// convertEndpointInference carries the server-resolved inference block into the
+// run.ai/endpoints annotation. It is validated here so an invalid block fails the
+// sync instead of producing a WorkloadRunner that admission rejects.
+func convertEndpointInference(apiInference *workloadsManagerApi.ExternalAccessInference) (*endpoints.InferenceConfig, error) {
+	if apiInference == nil {
+		return nil, nil
+	}
+	inference := &endpoints.InferenceConfig{}
+	for _, field := range []struct {
+		target *json.RawMessage
+		value  any
+		set    bool
+	}{
+		{&inference.Epp, apiInference.Epp, apiInference.Epp != nil},
+		{&inference.Objectives, apiInference.Objectives, apiInference.Objectives != nil},
+		{&inference.Rewrites, apiInference.Rewrites, apiInference.Rewrites != nil},
+	} {
+		if !field.set {
+			continue
+		}
+		raw, err := json.Marshal(field.value)
+		if err != nil {
+			return nil, fmt.Errorf("encode: %w", err)
+		}
+		*field.target = raw
+	}
+	if err := inference.Validate(); err != nil {
+		return nil, err
+	}
+	return inference, nil
 }
 
 func convertEndpointService(apiSvc *workloadsManagerApi.NetworkingService) (endpoints.Service, error) {

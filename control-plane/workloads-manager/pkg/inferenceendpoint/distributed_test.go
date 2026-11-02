@@ -72,20 +72,15 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		endpoint.ExternalAccess = &api.ExternalAccess{HttpRoute: &object}
 	}
 
-	It("uses the resolved leader selector, container target port, hostname and administrator Gateway", func() {
+	It("returns an epp-only inference block for a validated topology without rewrites", func() {
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, false, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(intent).NotTo(BeNil())
-		Expect(intent.SchemaVersion).To(Equal("v1"))
-		raw, err := json.Marshal(intent.Spec)
+		raw, err := json.Marshal(intent)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(string(raw)).To(MatchJSON(`{
-            "workload":{"selector":{"matchLabels":{"leaderworkerset.sigs.k8s.io/name":"model-1234","leaderworkerset.sigs.k8s.io/worker-index":"0"}},"port":8000},
-            "routing":{"gatewayRef":{"name":"inference","namespace":"gateways"},"hostnames":["model.example.com"],
-                "defaultBackendRef":{"name":"dinfw-model-sp-0","port":80}},
-            "epp":{"profile":"gie-v1.5"}
-        }`))
+		// Selector, port, Gateway, hostnames and default backend are derived on the cluster.
+		Expect(string(raw)).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
 	})
 
 	It("maps the workload model rewrites to the endpoint rewrites", func() {
@@ -94,9 +89,10 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 			{Model: "llama", Targets: []api.ModelRewriteTarget{{Model: "llama-3.1-8b", Weight: 1}}},
 			{Model: "chat", Targets: []api.ModelRewriteTarget{{Model: "chat-v1", Weight: 90}, {Model: "chat-v2", Weight: 10}}},
 		}
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, rewrites, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, false, rewrites, defaults)
 		Expect(err).NotTo(HaveOccurred())
-		raw, err := json.Marshal(intent.Spec["rewrites"])
+		Expect(intent.Rewrites).NotTo(BeNil())
+		raw, err := json.Marshal(*intent.Rewrites)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(string(raw)).To(MatchJSON(`[
             {"model":"llama","targets":[{"model":"llama-3.1-8b","weight":1}]},
@@ -106,23 +102,15 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 
 	It("omits the endpoint rewrites when the workload has no model rewrites", func() {
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, []api.ModelRewrite{}, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, false, []api.ModelRewrite{}, defaults)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(intent.Spec).NotTo(HaveKey("rewrites"))
+		Expect(intent.Rewrites).To(BeNil())
+		raw, err := json.Marshal(intent)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(string(raw)).NotTo(ContainSubstring("rewrites"))
 	})
 
-	It("keeps the selector stable as groups and workers scale", func() {
-		setRoute()
-		before, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
-		Expect(err).NotTo(HaveOccurred())
-		lws.Spec.Replicas = ptr.To(int32(6))
-		lws.Spec.LeaderWorkerTemplate.Size = ptr.To(int32(8))
-		after, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(after).To(Equal(before))
-	})
-
-	It("accepts the resolved output of the native distributed-inference composer", func() {
+	composeNative := func(authorizationType *workloadsapi.DistributedInferenceServingPortAccessAuthorizationTypeEnum) (*lwsv1.LeaderWorkerSet, api.NetworkingEndpoint) {
 		config := &composer.StaticClusterStorageConfig{}
 		config.SetIngressEnabled(false)
 		config.SetGatewayAPIEnabled(true)
@@ -137,6 +125,11 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		port.SetPort(8000)
 		port.SetExposeExternally(true)
 		port.SetExposedUrl("https://model.example.com")
+		if authorizationType != nil {
+			port.SetAuthorizationType(*authorizationType)
+			config.SetOauth2ProxyImage("example.com/oauth2-proxy:1")
+			config.SetOauth2ProxyOidcIssuerUrl("https://auth.example.com")
+		}
 		spec.SetServingPort(*port)
 		builder := dinf_to_lws.NewDistributedInferenceToLWSComposer("model", "project", "project", "user", nil, nil, composer.FieldsComposerOptions{}, nil).
 			WithLeaderWorkerSetName("model-1234").WithClusterStorageConfig(config)
@@ -147,34 +140,66 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Expect(err).NotTo(HaveOccurred())
 		var resolved api.NetworkingEndpoint
 		Expect(json.Unmarshal(raw, &resolved)).To(Succeed())
-		intent, err := BuildDistributedInferenceIntent(&target.LeaderWorkerSet, resolved, nil, defaults)
+		return &target.LeaderWorkerSet, resolved
+	}
+
+	It("accepts the resolved output of the native distributed-inference composer", func() {
+		composed, resolved := composeNative(nil)
+		intent, err := BuildDistributedInferenceIntent(composed, resolved, false, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		setRoute()
-		expected, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
+		expected, err := BuildDistributedInferenceIntent(lws, endpoint, false, nil, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(intent).To(Equal(expected))
 	})
 
-	It("preserves additional bound selectors without sharing mutable input", func() {
+	It("accepts the protected output of the native composer only when told it is protected", func() {
+		authenticated := workloadsapi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS
+		composed, resolved := composeNative(&authenticated)
+		service := (*resolved.Services)[0]
+		Expect(service.Authorization).To(BeNil())
+		Expect(*service.Spec.Ports[0].TargetPort).To(Equal(composer.Oauth2ContainerDefaultPort))
+
+		intent, err := BuildDistributedInferenceIntent(composed, resolved, true, nil, defaults)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(intent).NotTo(BeNil())
+
+		_, err = BuildDistributedInferenceIntent(composed, resolved, false, nil, defaults)
+		Expect(err).To(MatchError(ContainSubstring("public distributed inference must not target the auth proxy port")))
+	})
+
+	It("rejects the public output of the native composer when told it is protected", func() {
+		composed, resolved := composeNative(nil)
+		_, err := BuildDistributedInferenceIntent(composed, resolved, true, nil, defaults)
+		Expect(err).To(MatchError(ContainSubstring("protected distributed inference must target the auth proxy port")))
+	})
+
+	It("accepts additional bound selectors that the leader template carries", func() {
 		const ownerLabel = "run.ai/networking-workload-id"
 		lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Labels = map[string]string{ownerLabel: "workload-123"}
 		(*(*endpoint.Services)[0].Spec.Selector)[ownerLabel] = "workload-123"
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
+		_, err := BuildDistributedInferenceIntent(lws, endpoint, false, nil, defaults)
+		Expect(err).NotTo(HaveOccurred())
+	})
+
+	It("does not share mutable rewrite input with the returned block", func() {
+		setRoute()
+		rewrites := []api.ModelRewrite{{Model: "chat", Targets: []api.ModelRewriteTarget{{Model: "chat-v1", Weight: 1}}}}
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, false, rewrites, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		before, err := json.Marshal(intent)
 		Expect(err).NotTo(HaveOccurred())
-		(*(*endpoint.Services)[0].Spec.Selector)[ownerLabel] = "changed"
+		rewrites[0].Targets[0].Model = "changed"
 		after, err := json.Marshal(intent)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(after).To(Equal(before))
-		Expect(string(before)).To(ContainSubstring("workload-123"))
 	})
 
 	DescribeTable("rejects unsupported serving topology", func(mutate func()) {
 		setRoute()
 		mutate()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, false, nil, defaults)
 		Expect(err).To(HaveOccurred())
 		Expect(intent).To(BeNil())
 	},
@@ -194,10 +219,10 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 	)
 
 	Context("protected serving", func() {
-		authorize := func(kind string) {
-			(*endpoint.Services)[0].Authorization = &api.Workloadv2Authorization{
-				AuthorizationType: ptr.To(api.AuthorizationType(kind)),
-			}
+		// servingPortToLWS protects the serving port with the leader's oauth2-proxy
+		// sidecar: Service port 80 targets 4180 and the endpoint carries no authorization.
+		targetAuthProxy := func() {
+			(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
 		}
 		addSidecar := func(ports ...int32) {
 			container := corev1.Container{Name: "oauth2-proxy"}
@@ -209,56 +234,38 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		}
 
 		It("accepts protected serving on the auth proxy port that the sidecar declares", func() {
-			authorize("authorizedUsers")
-			(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
+			targetAuthProxy()
 			addSidecar(composer.Oauth2ContainerDefaultPort)
 			setRoute()
-			intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
+			Expect((*endpoint.Services)[0].Authorization).To(BeNil())
+			intent, err := BuildDistributedInferenceIntent(lws, endpoint, true, nil, defaults)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(intent).NotTo(BeNil())
 		})
 
-		It("routes non-inference paths to the Service port that targets the auth proxy", func() {
-			authorize("authorizedUsers")
-			(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
-			addSidecar(composer.Oauth2ContainerDefaultPort)
-			setRoute()
-			intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
-			Expect(err).NotTo(HaveOccurred())
-			raw, err := json.Marshal(intent.Spec["routing"])
-			Expect(err).NotTo(HaveOccurred())
-			Expect(string(raw)).To(MatchJSON(`{
-                "gatewayRef":{"name":"inference","namespace":"gateways"},"hostnames":["model.example.com"],
-                "defaultBackendRef":{"name":"dinfw-model-sp-0","port":80}
-            }`))
-			Expect(intent.Spec["workload"]).To(HaveKeyWithValue("port", composer.Oauth2ContainerDefaultPort))
-		})
-
-		DescribeTable("rejects a serving port that does not match the auth mode", func(mutate func()) {
+		DescribeTable("rejects a serving port that does not match the auth mode", func(protected bool, mutate func()) {
 			mutate()
 			setRoute()
-			intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
+			intent, err := BuildDistributedInferenceIntent(lws, endpoint, protected, nil, defaults)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("port"))
 			Expect(intent).To(BeNil())
 		},
-			Entry("protected on the model port", func() {
-				authorize("authorizedUsers")
+			Entry("protected on the model port", true, func() {
 				addSidecar(composer.Oauth2ContainerDefaultPort)
 			}),
-			Entry("protected without a sidecar that declares the proxy port", func() {
-				authorize("authorizedUsers")
-				(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
+			Entry("protected without a sidecar that declares the proxy port", true, func() {
+				targetAuthProxy()
 			}),
-			Entry("public on the auth proxy port", func() {
-				(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
+			Entry("public on the auth proxy port", false, func() {
+				targetAuthProxy()
+				addSidecar(composer.Oauth2ContainerDefaultPort)
+			}),
+			Entry("public on the auth proxy port declared by the leader container", false, func() {
+				targetAuthProxy()
 				leader := lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers[0]
 				leader.Ports = append(leader.Ports, corev1.ContainerPort{ContainerPort: composer.Oauth2ContainerDefaultPort, Protocol: corev1.ProtocolTCP})
 				lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers[0] = leader
-			}),
-			Entry("public with an explicit public type on the auth proxy port", func() {
-				authorize("public")
-				(*endpoint.Services)[0].Spec.Ports[0].TargetPort = ptr.To(composer.Oauth2ContainerDefaultPort)
 			}),
 		)
 	})
@@ -266,7 +273,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 	DescribeTable("rejects routing constraints that the endpoint CR cannot preserve", func(mutate func()) {
 		mutate()
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, nil, defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, false, nil, defaults)
 		Expect(err).To(HaveOccurred())
 		Expect(intent).To(BeNil())
 	},

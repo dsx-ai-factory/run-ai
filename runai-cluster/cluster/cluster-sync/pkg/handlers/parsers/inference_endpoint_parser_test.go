@@ -26,14 +26,13 @@ var _ = Describe("InferenceEndpoint routing condition reporting", func() {
 		runner = &dromos.WorkloadRunner{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "runner", Namespace: "project", Generation: 2,
-				Annotations: map[string]string{endpoints.InferenceEndpointAnnotation: `{"schemaVersion":"v1","spec":{
-                    "workload":{"selector":{"matchLabels":{"app":"model"}},"port":8000},
-                    "routing":{"gatewayRef":{"name":"gateway"},"hostnames":["model.example.com"]},
-                    "epp":{"profile":"gie-v1.5"}
-                }}`},
+				Annotations: map[string]string{endpoints.Annotation: `{"schemaVersion":"v1","endpoints":[{
+                    "services":[{"create":{"metadata":{"name":"model"},"spec":{"selector":{"app":"model"},"ports":[{"port":8000}]}}}],
+                    "externalAccess":{"httpRoute":{"spec":{"hostnames":["model.example.com"]}},"inference":{"epp":{"profile":"gie-v1.5"}}}
+                }]}`},
 			},
 			Status: dromos.WorkloadRunnerStatus{Plugins: map[string]*dromos.PluginStatus{
-				endpoints.InferenceEndpointPluginName: {
+				networkingPluginName: {
 					Phase: dromos.PluginPhaseReady,
 					Conditions: []metav1.Condition{{
 						Type: endpoints.InferenceEndpointReadyCondition, Status: metav1.ConditionTrue,
@@ -71,7 +70,7 @@ var _ = Describe("InferenceEndpoint routing condition reporting", func() {
 	})
 
 	It("reports a rejected route without changing the workload phase", func() {
-		plugin := runner.Status.Plugins[endpoints.InferenceEndpointPluginName]
+		plugin := runner.Status.Plugins[networkingPluginName]
 		plugin.Phase = dromos.PluginPhasePending
 		plugin.Conditions[0].Status = metav1.ConditionFalse
 		plugin.Conditions[0].Reason = "EndpointNotReady"
@@ -84,7 +83,7 @@ var _ = Describe("InferenceEndpoint routing condition reporting", func() {
 	})
 
 	It("reports unknown routing state while the runner generation is stale", func() {
-		runner.Status.Plugins[endpoints.InferenceEndpointPluginName].Conditions[0].ObservedGeneration = 1
+		runner.Status.Plugins[networkingPluginName].Conditions[0].ObservedGeneration = 1
 		project()
 		Expect(fields.Conditions).To(HaveLen(2))
 		Expect(fields.Conditions[1].Status).To(Equal("Unknown"))
@@ -100,6 +99,14 @@ var _ = Describe("InferenceEndpoint routing condition reporting", func() {
 
 	It("leaves workloads without intent unchanged even if an old plugin status remains", func() {
 		runner.Annotations = nil
+		project()
+		Expect(fields.Conditions).To(Equal([]openapi.Condition{{Type: "Ready", Status: "True"}}))
+	})
+
+	It("leaves endpoints without an inference block unchanged", func() {
+		runner.Annotations = map[string]string{endpoints.Annotation: `{"schemaVersion":"v1","endpoints":[{
+            "services":[{"create":{"metadata":{"name":"model"},"spec":{"selector":{"app":"model"},"ports":[{"port":8000}]}}}],
+            "externalAccess":{"httpRoute":{"spec":{"hostnames":["model.example.com"]}}}}]}`}
 		project()
 		Expect(fields.Conditions).To(Equal([]openapi.Condition{{Type: "Ready", Status: "True"}}))
 	})

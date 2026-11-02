@@ -1358,6 +1358,12 @@ func validateNetworkingEndpoints(endpoints []api.NetworkingEndpoint) *api.Submis
 		field := fmt.Sprintf("metadata.configuration.networking[%d]", i)
 		hasService := endpoint.Services != nil && len(*endpoint.Services) > 0
 		access := endpoint.ExternalAccess
+		if access != nil && access.Inference != nil {
+			// Workloads Manager resolves inference routing after validation. A
+			// caller-supplied block would bypass project policy (objective priority,
+			// model rewrites) and the administrator's Gateway and EPP defaults.
+			return NewConfigurationError(field + ".externalAccess.inference is set by the server and cannot be submitted")
+		}
 		hasExposure := access != nil && (access.Ingress != nil || access.Route != nil || access.HttpRoute != nil)
 		if !hasService && !hasExposure {
 			return NewConfigurationError(field + " must contain a service or externalAccess with an Ingress, Route, or HTTPRoute")
@@ -1406,6 +1412,7 @@ func cloneExternalAccess(access *api.ExternalAccess) *api.ExternalAccess {
 		Ingress:   cloneInterfaceMapPtr(access.Ingress),
 		Route:     cloneInterfaceMapPtr(access.Route),
 		HttpRoute: cloneInterfaceMapPtr(access.HttpRoute),
+		Inference: cloneExternalAccessInference(access.Inference),
 	}
 }
 
@@ -1484,6 +1491,27 @@ func cloneStringMapPtr(in *map[string]string) *map[string]string {
 		out[key] = value
 	}
 	return &out
+}
+
+func cloneExternalAccessInference(in *api.ExternalAccessInference) *api.ExternalAccessInference {
+	if in == nil {
+		return nil
+	}
+	out := &api.ExternalAccessInference{Epp: cloneInterfaceMap(in.Epp)}
+	for _, list := range []struct {
+		in  *[]map[string]interface{}
+		out **[]map[string]interface{}
+	}{{in.Objectives, &out.Objectives}, {in.Rewrites, &out.Rewrites}} {
+		if list.in == nil {
+			continue
+		}
+		items := make([]map[string]interface{}, len(*list.in))
+		for i, item := range *list.in {
+			items[i] = cloneInterfaceMap(item)
+		}
+		*list.out = &items
+	}
+	return out
 }
 
 func cloneInterfaceMapPtr(in *map[string]interface{}) *map[string]interface{} {
