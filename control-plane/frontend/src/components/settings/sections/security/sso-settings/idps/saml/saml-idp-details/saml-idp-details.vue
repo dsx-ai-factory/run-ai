@@ -9,6 +9,7 @@
       <q-tooltip v-if="tooltip" anchor="center middle">{{ tooltip }}</q-tooltip>
       <q-input
         class="col-12 q-mb-lg"
+        :class="{ 'certificate-valid': !expirationError }"
         :model-value="formattedExpirationDate"
         :error="!!expirationError"
         :error-message="expirationError"
@@ -73,5 +74,21 @@ const formattedExpirationDate = computed((): string =>
 // A readonly field draws a dashed underline; keep it solid like the disabled fields next to it.
 .saml-idp-details :deep(.q-field--standard.q-field--readonly .q-field__control:before) {
   border-bottom-style: solid;
+}
+
+// The certificate field is readonly, not disabled, because Quasar skips the rules of disabled fields.
+// While the certificate is fine give it the same look as the disabled fields (dimmed, no hover, not editable).
+.saml-idp-details :deep(.certificate-valid) {
+  .q-field__inner {
+    cursor: not-allowed;
+  }
+
+  .q-field__control {
+    pointer-events: none;
+  }
+
+  .q-field__control > div {
+    opacity: 0.6;
+  }
 }
 </style>

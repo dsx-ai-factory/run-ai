@@ -70,6 +70,18 @@ describe("saml-idp-details.vue", () => {
 
     expect(wrapper.text()).not.toContain("Certificate expired");
   });
+  it("gives the certificate field the same look as the disabled fields only while the certificate is fine", async () => {
+    const valid = createWrapper({ showExpirationDate: true, expirationDate: new Date("2030-05-17T00:00:00.000Z") });
+    expect(valid.find(".q-field").classes()).toContain("certificate-valid");
+
+    const expired = createWrapper({
+      showExpirationDate: true,
+      expirationDate: new Date("2020-01-01T00:00:00.000Z"),
+      expirationError: "Certificate expired. Replace the metadata file above.",
+    });
+    expect(expired.find(".q-field").classes()).not.toContain("certificate-valid");
+  });
+
   describe("certificate expiration field in a form", () => {
     const mountInForm = (props: Props) =>
       mount(QForm, {
