@@ -25,7 +25,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-resty/resty/v2 v2.17.2
-	github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907
+	github.com/gocarina/gocsv v0.0.0-20261101205459-d0dd027dcbfa
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-version v1.9.0
 	github.com/jarcoal/httpmock v1.4.2
