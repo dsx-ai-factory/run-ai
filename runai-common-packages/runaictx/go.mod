@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19
 	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
 )

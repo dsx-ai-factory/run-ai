@@ -5,10 +5,10 @@ go 1.27.3
 require (
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service v0.0.0
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.20
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.21
 	github.com/google/uuid v1.6.0
 	github.com/lib/pq v1.12.3
 	github.com/onsi/ginkgo/v2 v2.33.1
@@ -43,18 +43,18 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.13 // indirect
+	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.14 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v0.0.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.4 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.7 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.9 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.12 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.8 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.31 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.5 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.9 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs v1.0.8 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi v1.0.9 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2 v2.4.10 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp v1.1.13 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaipubsub v1.6.9 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32 // indirect
 	github.com/ebitengine/purego v0.11.2 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
@@ -87,7 +87,7 @@ require (
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lithammer/shortuuid/v4 v4.3.0 // indirect
-	github.com/lufia/plan9stats v0.0.0-20260802145828-341c2f0c90b5 // indirect
+	github.com/lufia/plan9stats v0.0.0-20261101121723-be84dd9509a0 // indirect
 	github.com/magiconair/properties v1.18.12 // indirect
 	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect

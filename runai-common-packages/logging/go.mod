@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
 	github.com/rs/zerolog v1.35.1
 	github.com/stretchr/testify v1.12.1
 )

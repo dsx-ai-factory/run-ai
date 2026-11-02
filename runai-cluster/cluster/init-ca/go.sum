@@ -12,10 +12,10 @@ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1
 github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 h1:GMqipJVJQYWroi0wqs4KPJTWtJz8YUJ5p5qWRL6l6ZY=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3/go.mod h1:U7eJ5tj0D0oAIENeWRziD+OdoJS/7fRDispUbhL1NMU=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4 h1:ZFsaDg0jajauheRuXqDR3G67s/cbrYGLdKI3Y25ylgg=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.4/go.mod h1:ErGGQn5Ir+iBGNEWbGDo8YQAoCgonYD6BlMdbnTyyzY=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18 h1:710hM8Br39+SS9WBTpt+MkegY2HiXwOm2PIRIbsnxWM=
-github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.18/go.mod h1:K8uJaxO5N+Y8VFmCJgKmIR3lMr6eiykdYFFWFd+bNrU=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.5 h1:M0sDbfHdkOOgeCGynKogQR9urUE17khDOYMzhKWRzNA=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.5/go.mod h1:UMOon6b2gzjZF6GD4Kj8vMy1kjkR1hIO+inR6W0/FRQ=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19 h1:70Lt8uBkZKQTGJ99Oq+keTYALjKdlweTXq2tDebZYnw=
+github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19/go.mod h1:7XxXaqJ5eGC0UYDMGjmeeKbnVQzmjB4ZII0LYITlGdk=
 github.com/emicklei/go-restful/v3 v3.14.0 h1:6V6Ba8/5W1Z7amPinklZeCMlHBMwj53thpfxazCLMX4=
 github.com/emicklei/go-restful/v3 v3.14.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/evanphx/json-patch v5.9.0+incompatible h1:fBXyNpNMuTTDdquAq/uisOr2lShz4oaXpDTX2bLe7ls=
