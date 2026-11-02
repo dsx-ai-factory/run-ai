@@ -12725,7 +12725,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Copyright Jonathan Picques - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907
+  github.com/gocarina/gocsv v0.0.0-20261101205459-d0dd027dcbfa
 
 The MIT License (MIT)
 
