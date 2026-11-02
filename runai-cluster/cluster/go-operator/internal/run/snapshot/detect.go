@@ -84,11 +84,7 @@ func Detect(ctx context.Context, reader client.Reader, runaiConfig *runv1.RunaiC
 		status.Available = true
 	}
 
-	// Only worth reading the agent once the install is real; an unavailable
-	// Snapshot has no node selector worth reporting.
-	if status.Available {
-		status.AgentNodeSelector = agentNodeSelector(ctx, reader, namespace, cfg.AgentDaemonSetName())
-	}
+	status.AgentNodeSelector = agentNodeSelector(ctx, reader, namespace, cfg.AgentDaemonSetName())
 
 	return status
 }
@@ -142,6 +138,10 @@ func operatorReady(ctx context.Context, reader client.Reader, namespace, name st
 // the integration still works, it just places capture and restore pods without
 // the hint.
 func agentNodeSelector(ctx context.Context, reader client.Reader, namespace, name string) map[string]string {
+	if reader == nil {
+		return nil
+	}
+
 	daemonSet := &appsv1.DaemonSet{}
 	if err := reader.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, daemonSet); err != nil {
 		return nil

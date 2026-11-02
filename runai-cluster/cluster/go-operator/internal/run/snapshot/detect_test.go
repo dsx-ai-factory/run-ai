@@ -137,6 +137,16 @@ func TestDetect(t *testing.T) {
 			wantCRD:       true,
 			wantOperator:  true,
 		},
+		{
+			// The agent DaemonSet is untouched by an operator restart, so its
+			// selector must survive one. Dropping it here would change
+			// SNAPSHOT_AGENT_NODE_SELECTOR and roll the anyworkload-controller
+			// every time Snapshot is upgraded.
+			name:         "operator restarting keeps the agent selector",
+			objects:      []client.Object{crd(), operator(0), agent(map[string]string{"nvidia.com/gpu.present": "true"})},
+			wantCRD:      true,
+			wantSelector: map[string]string{"nvidia.com/gpu.present": "true"},
+		},
 	}
 
 	for _, tc := range tests {
