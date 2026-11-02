@@ -29,7 +29,7 @@ describe("saml-idp-details.vue", () => {
     expect(wrapper.find<HTMLInputElement>("input[value='idp-entity']").exists()).toBe(true);
   });
 
-  it("shows the identity provider URL, then the entity ID, then the certificate expiration date", () => {
+  it("shows the certificate expiration date first, then the identity provider URL and the entity ID", () => {
     const wrapper = createWrapper({
       singleSignOnServiceUrl: "https://idp.example.com/sso",
       idpEntityId: "idp-entity",
@@ -38,13 +38,13 @@ describe("saml-idp-details.vue", () => {
     });
 
     const text = wrapper.text();
+    const certificate = text.indexOf("Certificate expiration date");
     const url = text.indexOf("Identity provider URL");
     const entityId = text.indexOf("Identity provider Entity ID (issuer)");
-    const certificate = text.indexOf("Certificate expiration date");
 
-    expect(url).toBeGreaterThanOrEqual(0);
+    expect(certificate).toBeGreaterThanOrEqual(0);
+    expect(certificate).toBeLessThan(url);
     expect(url).toBeLessThan(entityId);
-    expect(entityId).toBeLessThan(certificate);
   });
 
   it("hides the fields that have no value", () => {

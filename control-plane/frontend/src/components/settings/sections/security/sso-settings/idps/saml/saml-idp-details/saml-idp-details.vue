@@ -5,6 +5,20 @@
 
 <template>
   <div class="saml-idp-details col-12" aid="saml-idp-details">
+    <div v-if="showExpirationDate" class="row">
+      <q-tooltip v-if="tooltip" anchor="center middle">{{ tooltip }}</q-tooltip>
+      <q-input
+        class="col-12 q-mb-lg"
+        :model-value="formattedExpirationDate"
+        :error="!!expirationError"
+        :error-message="expirationError"
+        :rules="[certificateRule]"
+        no-error-icon
+        stack-label
+        readonly
+        label="Certificate expiration date"
+      />
+    </div>
     <div v-if="singleSignOnServiceUrl" class="row">
       <q-tooltip v-if="tooltip" anchor="center middle">{{ tooltip }}</q-tooltip>
       <q-input
@@ -25,20 +39,6 @@
         stack-label
         label="Identity provider Entity ID (issuer)"
         disable
-      />
-    </div>
-    <div v-if="showExpirationDate" class="row">
-      <q-tooltip v-if="tooltip" anchor="center middle">{{ tooltip }}</q-tooltip>
-      <q-input
-        class="col-4 q-mb-lg"
-        :model-value="formattedExpirationDate"
-        :error="!!expirationError"
-        :error-message="expirationError"
-        :rules="[certificateRule]"
-        no-error-icon
-        stack-label
-        readonly
-        label="Certificate expiration date"
       />
     </div>
   </div>
@@ -68,3 +68,10 @@ const formattedExpirationDate = computed((): string =>
   props.expirationDate ? dateUtil.dateFormat(props.expirationDate, DATE_FORMATS.STANDARD_DATE) : "",
 );
 </script>
+
+<style lang="scss" scoped>
+// A readonly field draws a dashed underline; keep it solid like the disabled fields next to it.
+.saml-idp-details :deep(.q-field--standard.q-field--readonly .q-field__control:before) {
+  border-bottom-style: solid;
+}
+</style>
