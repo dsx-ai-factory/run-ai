@@ -21,10 +21,13 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/clients/cluster"
 	orgUnitService "github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database"
+	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dao"
+	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbmodel"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/tree"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 )
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -146,6 +149,30 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 
 	// ── top-down: ancestor changes invalidate descendants ──────────────────
 	Context("top-down: ancestor changes invalidate descendants", func() {
+
+		It("creating and patching a project under a department policy caches the effective breakdown, ancestor rules included", func() {
+			createGvkPolicyForTest(router, tenantId, newDepartmentPolicyReq([]api.PolicyRule{deptRule}))
+			projectPolicy := createGvkPolicyForTest(router, tenantId, newProjectPolicyReq([]api.PolicyRule{projectRule}))
+
+			cached, err := dao.GetCachedBreakdown(ctxFor(tenantId), projectPolicy.Id)
+			Expect(err).To(BeNil())
+			Expect(cached).NotTo(BeNil(), "create must cache the breakdown without a get")
+			expectBreakdownFields(cached, deptRule.Field, projectRule.Field)
+
+			patchReq, reqErr := http.NewRequest(http.MethodPatch, gvkPolicyURL(projectPolicy.Id), makePayload(api.UpdateGvkPolicyReq{
+				Description: convutils.Ref("renamed"),
+			}))
+			Expect(reqErr).To(BeNil())
+			patchReq.Header = *headerForAdmin(tenantId)
+			patchResp := httptest.NewRecorder()
+			router.ServeHTTP(patchResp, patchReq.WithContext(ctxFor(tenantId)))
+			Expect(patchResp.Code).To(Equal(http.StatusOK), patchResp.Body.String())
+
+			cached, err = dao.GetCachedBreakdown(ctxFor(tenantId), projectPolicy.Id)
+			Expect(err).To(BeNil())
+			Expect(cached).NotTo(BeNil(), "update must cache the breakdown without a get")
+			expectBreakdownFields(cached, deptRule.Field, projectRule.Field)
+		})
 
 		It("adding a cluster policy on top of dept+project clears their caches and the next get rebuilds the merged effective+breakdown", func() {
 			// 1. start with department + project (no cluster) and verify the
@@ -427,11 +454,14 @@ var _ = Describe("GVK Policy Service - multi-scope effective + breakdown", Order
 			// not magically repopulate an ancestor's cache (the ancestor
 			// cache is populated only when that ancestor itself is read).
 			//
-			// setup: only a cluster policy exists. the project has no policy
-			// of its own and the cluster cache has never been primed.
+			// setup: only a cluster policy exists and the project has no policy
+			// of its own. create caches the cluster breakdown, so drop it to
+			// start from an unprimed cluster cache.
 			clusterPolicy := createGvkPolicyForTest(router, tenantId, newClusterPolicyReq([]api.PolicyRule{clusterRule}))
+			Expect(dao.OnEntityDeleted(ctxFor(tenantId), runaidb.DB().WithContext(ctxFor(tenantId)),
+				dbmodel.EntityTypeBreakdown, clusterPolicy.Id)).To(BeNil())
 			Expect(cacheExistsForPolicy(ctxFor(tenantId), clusterPolicy.Id)).To(BeFalse(),
-				"sanity: cluster cache must not exist before any get-with-breakdown is issued")
+				"sanity: cluster cache must not exist before the project is read")
 
 			// reading the descendant (project) triggers the project's own
 			// recompute + breakdown caching, and writes a fresh effective

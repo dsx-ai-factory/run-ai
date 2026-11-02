@@ -11,6 +11,7 @@ import (
 	"maps"
 	"net/http"
 	"net/http/httptest"
+	"slices"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
@@ -20,9 +21,11 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbmodel"
 	sm "github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/system_mapping"
+	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/tree"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
 	"github.com/google/uuid"
 	. "github.com/onsi/ginkgo/v2"
@@ -695,6 +698,266 @@ var _ = Describe("SystemMappingTest", func() {
 			Expect(formatter.Fields).ToNot(HaveKey("reservedResourceClaims"))
 			Expect(formatter.Fields).To(HaveKey("resourceClaims"))
 		})
+	})
+
+	Context("re-seeding system components that policies depend on", func() {
+		const (
+			formatterName = "runai-seed-mark-formatter"
+			fgName        = "runai-seed-mark-fg"
+			otherFgName   = "runai-seed-mark-other-fg"
+		)
+		gvk := api.Gvk{Group: convutils.Ref("seed-mark.example.com"), Kind: "SeedMark", Version: "v1"}
+		otherGvk := api.Gvk{Group: convutils.Ref("seed-mark.example.com"), Kind: "SeedMarkOther", Version: "v1"}
+		db := runaidb.DB()
+		ms := MappingApiService{}
+
+		field := func(formatter, specRef string) api.FieldGroupField {
+			return api.FieldGroupField{Formatter: formatter, SpecRef: specRef, Type: api.MAPPINGFIELDTYPE_STRING}
+		}
+		formatterField := func(arg string) api.FormatterField {
+			f := minimalFormatterField(arg)
+			f.GetExpr = convutils.Ref(".x")
+			return f
+		}
+		baseFormatterFields := func() map[string]api.FormatterField {
+			return map[string]api.FormatterField{"fieldA": formatterField("a")}
+		}
+		baseFields := func() map[string]api.FieldGroupField {
+			return map[string]api.FieldGroupField{
+				"fieldA": field(formatterName, "a"),
+				"fieldB": field(dbmodel.BuiltinFormatterKeyValue, "b"),
+			}
+		}
+		baseSelectors := func() map[string]api.SpecSelector {
+			return map[string]api.SpecSelector{
+				"sel":      {Query: `.spec`, FieldGroups: []string{fgName}},
+				"extraSel": {Query: `.spec.extra`, FieldGroups: []string{fgName, otherFgName}},
+			}
+		}
+
+		seed := func(version string, formatterFields map[string]api.FormatterField, fields map[string]api.FieldGroupField,
+			selectors map[string]api.SpecSelector,
+		) {
+			formatterBuilder := func() map[string]api.FormatterField { return formatterFields }
+			fgBuilder := func() (map[string]api.FieldGroupField, map[string]api.ItemSelector) {
+				return fields, map[string]api.ItemSelector{}
+			}
+			mappingBuilder := func() (api.Gvk, map[string]api.SpecSelector) { return gvk, selectors }
+
+			Expect(markPoliciesOfChangedSystemComponents(sysAdminCtx, db,
+				[]systemFormatterSeed{{formatterName, version, formatterBuilder}},
+				[]systemFieldGroupSeed{{fgName, version, fgBuilder}},
+				[]systemWorkloadMappingSeed{{"seed-mark", version, mappingBuilder}})).To(BeNil())
+
+			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			handleSystemFormatter(sysAdminCtx, ms, formatterName, version, formatterBuilder)
+			pruneSystemFieldGroup(sysAdminCtx, db, ms, fgName, version, fgBuilder)
+			handleSystemFieldGroup(sysAdminCtx, db, ms, fgName, version, fgBuilder, cv)
+			handleSystemWorkloadMapping(sysAdminCtx, db, ms, "seed-mark", version, mappingBuilder, cv)
+		}
+
+		storedPhase := func(policyId string) api.PolicyPhase {
+			var row dbmodel.Policy
+			Expect(runaidb.DB().Table("policies").Where("id = ?", policyId).First(&row)).To(BeNil())
+			Expect(row.ValidationStatus).NotTo(BeNil())
+			return *row.ValidationStatus
+		}
+
+		policyOn := func(tenantId int32, projectId string, workloadType api.Gvk, rule api.PolicyRule) string {
+			created := createGvkPolicyForTest(router, tenantId, api.CreateGvkPolicyReq{
+				WorkloadType: workloadType,
+				Scope:        api.SCOPETYPE_PROJECT,
+				ProjectId:    convutils.Ref(projectId),
+				Rules:        []api.PolicyRule{rule},
+			})
+			Expect(storedPhase(created.Id)).To(Equal(api.POLICYPHASE_READY))
+			return created.Id
+		}
+		rule := func(fieldName, specSelector string) api.PolicyRule {
+			return api.PolicyRule{Field: fieldName, SpecSelector: specSelector, Enforcements: []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}}}
+		}
+
+		// fieldAPolicy and fieldBPolicy live in different tenants; otherPolicy depends on none of the re-seeded components.
+		var fieldAPolicy, fieldBPolicy, otherPolicy string
+
+		BeforeEach(func() {
+			tree.Restart()
+
+			// System rows are suite-wide (see DeleteAllTablesForTesting); remove the ones this context seeds.
+			DeferCleanup(func() {
+				for _, kind := range []string{gvk.Kind, otherGvk.Kind} {
+					_, err := db.Where(&dbmodel.MappingSelectors{GvkKind: kind, ScopeType: api.MAPPINGSCOPE_SYSTEM}).Delete(&dbmodel.MappingSelectors{})
+					Expect(err).ToNot(HaveOccurred())
+				}
+				_, err := db.Where("name IN ?", []string{fgName, otherFgName}).Delete(&dbmodel.MappingFieldGroups{})
+				Expect(err).ToNot(HaveOccurred())
+				_, err = db.Where(&dbmodel.MappingFormatters{Name: formatterName}).Delete(&dbmodel.MappingFormatters{})
+				Expect(err).ToNot(HaveOccurred())
+				Expect(dao.WipeAllEntityCaches(sysAdminCtx)).To(BeNil())
+			})
+
+			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			handleSystemFieldGroup(sysAdminCtx, db, ms, otherFgName, "v1", func() (map[string]api.FieldGroupField, map[string]api.ItemSelector) {
+				return map[string]api.FieldGroupField{"fieldC": field(dbmodel.BuiltinFormatterKeyValue, "c")}, map[string]api.ItemSelector{}
+			}, cv)
+			handleSystemWorkloadMapping(sysAdminCtx, db, ms, "seed-mark-other", "v1", func() (api.Gvk, map[string]api.SpecSelector) {
+				return otherGvk, map[string]api.SpecSelector{"otherSel": {Query: `.spec`, FieldGroups: []string{otherFgName}}}
+			}, cv)
+			seed("v1", baseFormatterFields(), baseFields(), baseSelectors())
+
+			fieldAPolicy = policyOn(1, "1111", gvk, rule("fieldA", "sel"))
+			fieldBPolicy = policyOn(2, "2111", gvk, rule("fieldB", "sel"))
+			otherPolicy = policyOn(1, "1111", otherGvk, rule("fieldC", "otherSel"))
+		})
+
+		It("finds no changes when the seeded system components are re-seeded with new versions only", func() {
+			formatters := slices.Clone(systemFormatterSeeds)
+			for i := range formatters {
+				formatters[i].description = "outdated"
+			}
+			fieldGroups := slices.Clone(systemFieldGroupSeeds)
+			for i := range fieldGroups {
+				fieldGroups[i].description = "outdated"
+			}
+			mappings := slices.Clone(systemWorkloadMappingSeeds)
+			for i := range mappings {
+				mappings[i].description = "outdated"
+			}
+
+			changed, err := changedSystemComponents(sysAdminCtx, db, formatters, fieldGroups, mappings)
+			Expect(err).To(BeNil())
+			Expect(changed).To(BeEmpty())
+		})
+
+		It("drops the cached breakdowns when it creates a system mapping", func() {
+			newGvk := api.Gvk{Group: convutils.Ref("seed-mark.example.com"), Kind: "SeedMarkNew", Version: "v1"}
+			DeferCleanup(func() {
+				_, err := db.Where(&dbmodel.MappingSelectors{GvkKind: newGvk.Kind, ScopeType: api.MAPPINGSCOPE_SYSTEM}).Delete(&dbmodel.MappingSelectors{})
+				Expect(err).ToNot(HaveOccurred())
+			})
+			Expect(cacheExistsForPolicy(tenantContextForTest(1), fieldAPolicy)).To(BeTrue())
+
+			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			handleSystemWorkloadMapping(sysAdminCtx, db, ms, "seed-mark-new", "v1", func() (api.Gvk, map[string]api.SpecSelector) {
+				return newGvk, map[string]api.SpecSelector{"newSel": {Query: `.spec`, FieldGroups: []string{otherFgName}}}
+			}, cv)
+
+			_, err := dao.GetMappingByGvkAndScope(sysAdminCtx, newGvk, api.MAPPINGSCOPE_SYSTEM)
+			Expect(err).To(BeNil())
+			Expect(cacheExistsForPolicy(tenantContextForTest(1), fieldAPolicy)).To(BeFalse())
+		})
+
+		It("marks the policies without a cached breakdown PendingUpdate when a system component changes", func() {
+			Expect(dao.DeleteBreakdownCachesOfSubtree(tenantContextForTest(1), db, []string{otherPolicy})).To(BeNil())
+
+			fields := baseFields()
+			delete(fields, "fieldB")
+			seed("v2", baseFormatterFields(), fields, baseSelectors())
+
+			Expect(storedPhase(otherPolicy)).To(Equal(api.POLICYPHASE_PENDING_UPDATE))
+		})
+
+		It("leaves the policies without a cached breakdown alone when no system component changes", func() {
+			Expect(dao.DeleteBreakdownCachesOfSubtree(tenantContextForTest(1), db, []string{otherPolicy})).To(BeNil())
+
+			seed("v2", baseFormatterFields(), baseFields(), baseSelectors())
+
+			Expect(storedPhase(otherPolicy)).To(Equal(api.POLICYPHASE_READY))
+		})
+
+		type reseedCase struct {
+			change      func(map[string]api.FormatterField, map[string]api.FieldGroupField, map[string]api.SpecSelector)
+			fieldAPhase api.PolicyPhase
+			fieldBPhase api.PolicyPhase
+		}
+
+		DescribeTable("marks the dependent policies of every tenant PendingUpdate only when existing entries are removed or changed",
+			func(tc reseedCase) {
+				formatterFields, fields, selectors := baseFormatterFields(), baseFields(), baseSelectors()
+				tc.change(formatterFields, fields, selectors)
+
+				seed("v2", formatterFields, fields, selectors)
+
+				Expect(storedPhase(fieldAPolicy)).To(Equal(tc.fieldAPhase))
+				Expect(storedPhase(fieldBPolicy)).To(Equal(tc.fieldBPhase))
+				Expect(storedPhase(otherPolicy)).To(Equal(api.POLICYPHASE_READY))
+			},
+			Entry("only the version changes", reseedCase{
+				change:      func(map[string]api.FormatterField, map[string]api.FieldGroupField, map[string]api.SpecSelector) {},
+				fieldAPhase: api.POLICYPHASE_READY,
+				fieldBPhase: api.POLICYPHASE_READY,
+			}),
+			Entry("a formatter field is added", reseedCase{
+				change: func(f map[string]api.FormatterField, _ map[string]api.FieldGroupField, _ map[string]api.SpecSelector) {
+					f["fieldE"] = formatterField("e")
+				},
+				fieldAPhase: api.POLICYPHASE_READY,
+				fieldBPhase: api.POLICYPHASE_READY,
+			}),
+			Entry("a field is added", reseedCase{
+				change: func(_ map[string]api.FormatterField, fg map[string]api.FieldGroupField, _ map[string]api.SpecSelector) {
+					fg["fieldD"] = field(dbmodel.BuiltinFormatterKeyValue, "d")
+				},
+				fieldAPhase: api.POLICYPHASE_READY,
+				fieldBPhase: api.POLICYPHASE_READY,
+			}),
+			Entry("a spec selector is added", reseedCase{
+				change: func(_ map[string]api.FormatterField, _ map[string]api.FieldGroupField, sel map[string]api.SpecSelector) {
+					sel["newSel"] = api.SpecSelector{Query: `.spec.new`, FieldGroups: []string{fgName}}
+				},
+				fieldAPhase: api.POLICYPHASE_READY,
+				fieldBPhase: api.POLICYPHASE_READY,
+			}),
+			Entry("a field group is added to a spec selector", reseedCase{
+				change: func(_ map[string]api.FormatterField, _ map[string]api.FieldGroupField, sel map[string]api.SpecSelector) {
+					sel["sel"] = api.SpecSelector{Query: `.spec`, FieldGroups: []string{fgName, otherFgName}}
+				},
+				fieldAPhase: api.POLICYPHASE_READY,
+				fieldBPhase: api.POLICYPHASE_READY,
+			}),
+			Entry("a formatter field changes, marking only the policy whose field uses it", reseedCase{
+				change: func(f map[string]api.FormatterField, _ map[string]api.FieldGroupField, _ map[string]api.SpecSelector) {
+					f["fieldA"] = formatterField("changed")
+				},
+				fieldAPhase: api.POLICYPHASE_PENDING_UPDATE,
+				fieldBPhase: api.POLICYPHASE_READY,
+			}),
+			Entry("a field is removed", reseedCase{
+				change: func(_ map[string]api.FormatterField, fg map[string]api.FieldGroupField, _ map[string]api.SpecSelector) {
+					delete(fg, "fieldB")
+				},
+				fieldAPhase: api.POLICYPHASE_PENDING_UPDATE,
+				fieldBPhase: api.POLICYPHASE_PENDING_UPDATE,
+			}),
+			Entry("a field changes", reseedCase{
+				change: func(_ map[string]api.FormatterField, fg map[string]api.FieldGroupField, _ map[string]api.SpecSelector) {
+					fg["fieldB"] = field(dbmodel.BuiltinFormatterKeyValue, "changed")
+				},
+				fieldAPhase: api.POLICYPHASE_PENDING_UPDATE,
+				fieldBPhase: api.POLICYPHASE_PENDING_UPDATE,
+			}),
+			Entry("a spec selector is removed", reseedCase{
+				change: func(_ map[string]api.FormatterField, _ map[string]api.FieldGroupField, sel map[string]api.SpecSelector) {
+					delete(sel, "extraSel")
+				},
+				fieldAPhase: api.POLICYPHASE_PENDING_UPDATE,
+				fieldBPhase: api.POLICYPHASE_PENDING_UPDATE,
+			}),
+			Entry("a field group is removed from a spec selector", reseedCase{
+				change: func(_ map[string]api.FormatterField, _ map[string]api.FieldGroupField, sel map[string]api.SpecSelector) {
+					sel["extraSel"] = api.SpecSelector{Query: `.spec.extra`, FieldGroups: []string{fgName}}
+				},
+				fieldAPhase: api.POLICYPHASE_PENDING_UPDATE,
+				fieldBPhase: api.POLICYPHASE_PENDING_UPDATE,
+			}),
+			Entry("a spec selector query changes", reseedCase{
+				change: func(_ map[string]api.FormatterField, _ map[string]api.FieldGroupField, sel map[string]api.SpecSelector) {
+					sel["extraSel"] = api.SpecSelector{Query: `.spec.other`, FieldGroups: []string{fgName, otherFgName}}
+				},
+				fieldAPhase: api.POLICYPHASE_PENDING_UPDATE,
+				fieldBPhase: api.POLICYPHASE_PENDING_UPDATE,
+			}),
+		)
 	})
 
 	Context("tenant overlay of system item selectors", func() {
