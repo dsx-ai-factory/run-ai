@@ -12393,7 +12393,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Copyright Jonathan Picques - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907
+  github.com/gocarina/gocsv v0.0.0-20261101205459-d0dd027dcbfa
 
 The MIT License (MIT)
 
@@ -13622,7 +13622,7 @@ Copyright Micah Parks - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/MicahParks/keyfunc v1.9.0
-  github.com/MicahParks/keyfunc/v3 v3.8.2
+  github.com/MicahParks/keyfunc/v3 v3.9.1
 
                                  Apache License
                            Version 2.0, January 2004
@@ -13830,7 +13830,7 @@ Components:
 Copyright Micah Parks - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/MicahParks/jwkset v0.11.3
+  github.com/MicahParks/jwkset v0.11.4
 
                                  Apache License
                            Version 2.0, January 2004
