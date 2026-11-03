@@ -9,12 +9,16 @@ import { Quasar } from "quasar";
 import { createTestingPinia } from "@pinia/testing";
 import SamlSignatureStatusBar from "./saml-signature-status-bar.vue";
 import { useIdpsStore } from "@/stores/idps.store";
+import { usePageBannerStore } from "@/stores/page-banner.store";
 import { usePermissionStore } from "@/stores/permissions.store";
 import { IdpTypeEnum, type Idp } from "@/swagger-models/identity-manager-client";
 import { Action, ResourceType, ResourceTypeGroupId } from "@/swagger-models/authorization-client";
 import { SETTINGS_ROUTE_NAMES } from "@/router/settings.routes/settings.routes.names";
+import { DASHBOARD_ROUTE_NAMES } from "@/router/dashboard.routes/dashboard.routes.names";
+import { DEPARTMENT_ROUTE_NAMES } from "@/router/department.routes/department.routes.names";
+import { USER_ROUTES_NAMES } from "@/router/users.routes/users.routes.names";
 
-const mockRoute = vi.hoisted(() => ({ name: "some-page" as string }));
+const mockRoute = vi.hoisted(() => ({ name: "some-page" as string, meta: {} as Record<string, boolean> }));
 
 vi.mock("vue-router", async (importOriginal) => ({
   ...(await importOriginal<Record<string, unknown>>()),
@@ -26,6 +30,8 @@ interface CreateOptions {
   type?: IdpTypeEnum;
   actions?: Action[];
   routeName?: string;
+  routeMeta?: Record<string, boolean>;
+  otherBannerShown?: boolean;
 }
 
 function createWrapper({
@@ -33,6 +39,8 @@ function createWrapper({
   type = IdpTypeEnum.Saml,
   actions = [Action.Read, Action.Update],
   routeName = "some-page",
+  routeMeta = {},
+  otherBannerShown = false,
 }: CreateOptions = {}) {
   const pinia = createTestingPinia({ stubActions: false });
   usePermissionStore(pinia).setPermissions([
@@ -45,6 +53,8 @@ function createWrapper({
   ]);
   useIdpsStore(pinia).idps = [{ alias: "idp", type, samlData: { validateSignature } } as unknown as Idp];
   mockRoute.name = routeName;
+  mockRoute.meta = routeMeta;
+  if (otherBannerShown) usePageBannerStore(pinia).register();
 
   return mount(SamlSignatureStatusBar, {
     global: {
@@ -94,5 +104,34 @@ describe("saml-signature-status-bar.vue", () => {
 
   it("is hidden on the general settings page, which shows the warning inline", () => {
     expect(bar(createWrapper({ routeName: SETTINGS_ROUTE_NAMES.SETTINGS_INDEX })).exists()).toBe(false);
+  });
+
+  it.each<{ name: string; routeMeta: Record<string, boolean> }>([
+    { name: "a full-width page (create/edit flows)", routeMeta: { fullWidth: true } },
+    { name: "a full-page screen (e.g. error pages)", routeMeta: { fullPage: true } },
+  ])("is hidden on $name", ({ routeMeta }) => {
+    expect(bar(createWrapper({ routeMeta })).exists()).toBe(false);
+  });
+
+  it.each([
+    { name: "Overview", routeName: DASHBOARD_ROUTE_NAMES.OVERVIEW_INDEX },
+    { name: "Users", routeName: USER_ROUTES_NAMES.USER_INDEX },
+    { name: "Departments", routeName: DEPARTMENT_ROUTE_NAMES.DEPARTMENT_INDEX },
+  ])("is shown on the $name page", ({ routeName }) => {
+    expect(bar(createWrapper({ routeName })).exists()).toBe(true);
+  });
+
+  it("is hidden while another banner is shown, since the other banner takes priority", () => {
+    expect(bar(createWrapper({ otherBannerShown: true })).exists()).toBe(false);
+  });
+
+  it("shows again once the other banner is gone", async () => {
+    const wrapper = createWrapper({ otherBannerShown: true });
+    expect(bar(wrapper).exists()).toBe(false);
+
+    usePageBannerStore().unregister();
+    await wrapper.vm.$nextTick();
+
+    expect(bar(wrapper).exists()).toBe(true);
   });
 });

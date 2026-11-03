@@ -4,7 +4,12 @@
 -->
 
 <template>
-  <notification-alert-bar v-if="shouldShowClusterWarning" :variant="statusWarningLevel" :message="clusterWarningMessage">
+  <notification-alert-bar
+    v-if="shouldShowClusterWarning"
+    page-banner
+    :variant="statusWarningLevel"
+    :message="clusterWarningMessage"
+  >
     <template #inline-actions>
       <router-link to="/clusters" v-if="shouldShowClustersLink">Clusters.</router-link>
     </template>
@@ -16,7 +21,6 @@ import { adminWarningStatuses, nonAdminWarningStatuses } from "@/models/cluster.
 import { useClusterStore } from "@/stores/cluster.store";
 import { useAuthStore } from "@/stores/auth.store";
 import { usePermissionStore } from "@/stores/permissions.store";
-import { useIdpsStore } from "@/stores/idps.store";
 import { defineComponent } from "vue";
 import { intervalUtil } from "@/utils/interval.util";
 import { EIntervalLabels } from "@/models/interval.model";
@@ -80,7 +84,6 @@ export default defineComponent({
       clusterStore: useClusterStore(),
       authStore: useAuthStore(),
       permissionStore: usePermissionStore(),
-      idpsStore: useIdpsStore(),
       currCluster: null as DisplayedCluster | null, // Full cluster data for operands access
     };
   },
@@ -122,8 +125,6 @@ export default defineComponent({
       if (!this.hasClusters || NO_CLUSTER_STATUS_BAR_PAGES.includes(this.$route.name?.toString() || "")) {
         return false;
       }
-      // The SAML signature banner takes priority; the cluster warning shows once SAML is reconfigured.
-      if (this.idpsStore.shouldShowSamlSignatureBanner) return false;
       return this.authStore.isAdmin
         ? this.isAdminWarningStatus
         : this.isNonAdminWarningStatus || this.isDashboardWarningStatus;
