@@ -9,6 +9,7 @@
     :class="{
       'wizard-steps-panel--nav-disabled': disableNavigation,
       'wizard-steps-panel--horizontal': orientation === 'horizontal',
+      'wizard-steps-panel--collapsed': collapsed && orientation === 'vertical',
     }"
     role="list"
     aria-label="Form steps"
@@ -39,7 +40,7 @@
                 <span v-else class="wizard-step-number text-weight-bolder">{{ index + 1 }}</span>
               </div>
             </q-item-section>
-            <q-item-section>
+            <q-item-section v-show="!collapsed || orientation === 'horizontal'">
               <q-item-label class="wizard-step-title text-weight-medium" :class="getTitleClasses(step)">
                 {{ step.title }}
               </q-item-label>
@@ -73,6 +74,7 @@ const props = withDefaults(
     activeStep: string;
     disableNavigation?: boolean;
     orientation?: WizardOrientation;
+    collapsed?: boolean;
   }>(),
   {
     orientation: "vertical",
@@ -232,6 +234,12 @@ defineExpose({
   // Re-enable pointer events on the wrapper to allow tooltips to work
   .wizard-step-wrapper {
     pointer-events: auto;
+  }
+}
+
+.wizard-steps-panel--collapsed {
+  .wizard-step-avatar {
+    padding-right: 0;
   }
 }
 

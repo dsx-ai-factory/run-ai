@@ -5,19 +5,37 @@
 
 <template>
   <div class="runai-panels-layout-wrapper">
-    <section class="runai-panels-layout">
-      <!-- Left Panel Slot -->
-      <aside v-if="$slots.left" class="panel-left panel-sticky" aria-label="Form summary">
-        <slot name="left"></slot>
+    <section class="runai-panels-layout" :class="{ 'runai-panels-layout--hide-right': hideRight }" :style="layoutStyle">
+      <!-- Track focus from slotted controls so keyboard users can expand the rail too. -->
+      <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
+      <aside
+        v-if="$slots.left"
+        class="panel-left panel-sticky"
+        :class="{ 'panel-left--collapsed': collapseLeft, 'panel-left--expanded': expandLeft }"
+        :tabindex="collapseLeft ? 0 : undefined"
+        aria-label="Form summary"
+        @mouseenter="leftHovered = true"
+        @mouseleave="leftHovered = false"
+        @focusin="leftFocused = true"
+        @focusout="onLeftFocusOut"
+      >
+        <div class="panel-left-content">
+          <slot name="left" :collapsed="collapseLeft && !expandLeft" :expanded="expandLeft"></slot>
+        </div>
       </aside>
 
       <!-- Main Content Slot -->
-      <main class="panel-main" :style="mainContentStyle">
+      <main class="panel-main">
         <slot></slot>
       </main>
 
       <!-- Right Panel Slot -->
-      <aside v-if="$slots.right" class="panel-right panel-sticky" aria-label="Additional information">
+      <aside
+        v-if="$slots.right"
+        v-show="!hideRight"
+        class="panel-right panel-sticky"
+        aria-label="Additional information"
+      >
         <slot name="right"></slot>
       </aside>
     </section>
@@ -25,22 +43,23 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
+import { useQuasar } from "quasar";
+import type { IRunaiPanelsLayoutProps } from "@/models/runai-panels-layout.model";
 
 defineOptions({
   name: "runai-panels-layout",
 });
 
-const props = withDefaults(
-  defineProps<{
-    marginTop?: string;
-    width?: string;
-  }>(),
-  {
-    marginTop: "24px",
-    width: "820px", // 1300px - 220 * 2( side panels ) - 20 * 2 (gap)  = 820px main panel width
-  },
-);
+const props = withDefaults(defineProps<IRunaiPanelsLayoutProps>(), {
+  marginTop: "24px",
+  width: "820px", // 1300px - 220 * 2( side panels ) - 20 * 2 (gap)  = 820px main panel width
+  leftWidth: "220px",
+  rightWidth: "220px",
+  collapsedLeftWidth: "56px",
+  hideRightOnSmallScreen: false,
+  collapseLeftOnSmallScreen: false,
+});
 
 // using computed instead of calc() scss method due to some caveats:
 // when combining v-bind() and calc() in the same expression as it does not always trigger the correct calculation.
@@ -51,16 +70,30 @@ const stickyTop = computed(() => {
   return `${marginValue + appHeaderValue}px`;
 });
 
-const mainContentStyle = computed(() => {
-  return {
-    width: props.width,
-  };
-});
+const $q = useQuasar();
+const smallScreen = computed(() => $q.screen.width < 1280);
+const hideRight = computed(() => props.hideRightOnSmallScreen && smallScreen.value);
+const collapseLeft = computed(() => props.collapseLeftOnSmallScreen && smallScreen.value);
+const leftHovered = ref(false);
+const leftFocused = ref(false);
+const expandLeft = computed(() => collapseLeft.value && (leftHovered.value || leftFocused.value));
+
+const onLeftFocusOut = (event: FocusEvent) => {
+  leftFocused.value = (event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null);
+};
+
+const layoutStyle = computed(() => ({
+  "--layout-left-width": collapseLeft.value ? props.collapsedLeftWidth : props.leftWidth,
+  "--layout-right-width": props.rightWidth,
+  "--layout-content-width": props.width,
+  "--layout-left-content-width": collapseLeft.value && !expandLeft.value ? props.collapsedLeftWidth : props.leftWidth,
+}));
 </script>
 
 <style scoped lang="scss">
 .runai-panels-layout-wrapper {
   width: 100%;
+  min-width: 0;
   display: flex;
   justify-content: center;
 }
@@ -68,14 +101,40 @@ const mainContentStyle = computed(() => {
 .runai-panels-layout {
   margin-top: v-bind(marginTop);
   display: grid;
-  grid-template-columns: 220px 1fr 220px;
+  grid-template-columns: var(--layout-left-width) minmax(0, 1fr) var(--layout-right-width);
   gap: 20px;
   align-items: flex-start;
-  min-width: 1300px;
+  width: 100%;
+  max-width: calc(var(--layout-left-width) + var(--layout-content-width) + var(--layout-right-width) + 40px);
+
+  &--hide-right {
+    grid-template-columns: var(--layout-left-width) minmax(0, 1fr);
+    max-width: calc(var(--layout-left-width) + var(--layout-content-width) + 20px);
+  }
 }
 
 .panel-main {
-  min-width: 600px;
+  grid-column: 2;
+  min-width: 0;
+}
+
+.panel-left {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.panel-left-content {
+  width: var(--layout-left-content-width);
+}
+
+.panel-left--expanded {
+  // The grid keeps the mini rail's width while the content overlays its neighbour.
+  z-index: 2;
+}
+
+.panel-right {
+  grid-column: 3;
+  grid-row: 1;
 }
 
 .panel-sticky {
