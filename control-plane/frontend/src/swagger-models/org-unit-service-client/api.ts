@@ -2353,6 +2353,380 @@ export interface FailedNodePoolResourcesPatchRequest {
 /**
  * 
  * @export
+ * @interface FairShareSimulationOrgUnit
+ */
+export interface FairShareSimulationOrgUnit {
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'type': FairShareSimulationOrgUnitTypeEnum;
+    /**
+     * Sent together with resources. Replaces the stored rank.
+     * @type {string}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'rank'?: string;
+    /**
+     * 
+     * @type {FairShareSimulationOrgUnitResources}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'resources'?: FairShareSimulationOrgUnitResources | null;
+    /**
+     * 
+     * @type {FairShareSimulationOrgUnitDemand}
+     * @memberof FairShareSimulationOrgUnit
+     */
+    'demand'?: FairShareSimulationOrgUnitDemand | null;
+}
+
+export const FairShareSimulationOrgUnitTypeEnum = {
+    Department: 'department',
+    Project: 'project'
+} as const;
+
+export type FairShareSimulationOrgUnitTypeEnum = typeof FairShareSimulationOrgUnitTypeEnum[keyof typeof FairShareSimulationOrgUnitTypeEnum];
+
+/**
+ * Resources a project asks for. Without it the project asks for the most it can get. Not allowed on departments, which ask for the sum of their projects\' demand.
+ * @export
+ * @interface FairShareSimulationOrgUnitDemand
+ */
+export interface FairShareSimulationOrgUnitDemand {
+    /**
+     * The number of GPUs (allocated/requested/...).
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitDemand
+     */
+    'gpu'?: number;
+    /**
+     * CPU in Millicores (allocated/requested/...).
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitDemand
+     */
+    'cpu'?: number;
+    /**
+     * Memory in MB (allocated/requested/...).
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitDemand
+     */
+    'memory'?: number;
+}
+/**
+ * Sent together with rank. Replaces the stored resources; -1 means unlimited.
+ * @export
+ * @interface FairShareSimulationOrgUnitResources
+ */
+export interface FairShareSimulationOrgUnitResources {
+    /**
+     * 
+     * @type {ResourcesPerNodePoolGpu}
+     * @memberof FairShareSimulationOrgUnitResources
+     */
+    'gpu'?: ResourcesPerNodePoolGpu;
+    /**
+     * 
+     * @type {ResourcesCpu}
+     * @memberof FairShareSimulationOrgUnitResources
+     */
+    'cpu'?: ResourcesCpu | null;
+    /**
+     * 
+     * @type {ResourcesMemory}
+     * @memberof FairShareSimulationOrgUnitResources
+     */
+    'memory'?: ResourcesMemory | null;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationRequest
+ */
+export interface FairShareSimulationRequest {
+    /**
+     * 
+     * @type {FairShareSimulationRequestNodePool}
+     * @memberof FairShareSimulationRequest
+     */
+    'nodePool'?: FairShareSimulationRequestNodePool | null;
+    /**
+     * Org units to simulate with other values than their stored ones. Others keep their stored values and ask for the most GPUs they can get.
+     * @type {Array<FairShareSimulationOrgUnit>}
+     * @memberof FairShareSimulationRequest
+     */
+    'orgUnits'?: Array<FairShareSimulationOrgUnit>;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationRequestNodePool
+ */
+export interface FairShareSimulationRequestNodePool {
+    /**
+     * 
+     * @type {FairShareSimulationRequestNodePoolCapacity}
+     * @memberof FairShareSimulationRequestNodePool
+     */
+    'capacity'?: FairShareSimulationRequestNodePoolCapacity | null;
+    /**
+     * 
+     * @type {FairShareSimulationRequestNodePoolSchedulingCapabilities}
+     * @memberof FairShareSimulationRequestNodePool
+     */
+    'schedulingCapabilities'?: FairShareSimulationRequestNodePoolSchedulingCapabilities | null;
+}
+/**
+ * Resources to split. Defaults to the node pool\'s capacity.
+ * @export
+ * @interface FairShareSimulationRequestNodePoolCapacity
+ */
+export interface FairShareSimulationRequestNodePoolCapacity {
+    /**
+     * The number of GPUs (allocated/requested/...).
+     * @type {number}
+     * @memberof FairShareSimulationRequestNodePoolCapacity
+     */
+    'gpu'?: number;
+    /**
+     * CPU in Millicores (allocated/requested/...).
+     * @type {number}
+     * @memberof FairShareSimulationRequestNodePoolCapacity
+     */
+    'cpu'?: number;
+    /**
+     * Memory in MB (allocated/requested/...).
+     * @type {number}
+     * @memberof FairShareSimulationRequestNodePoolCapacity
+     */
+    'memory'?: number;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationRequestNodePoolSchedulingCapabilities
+ */
+export interface FairShareSimulationRequestNodePoolSchedulingCapabilities {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationRequestNodePoolSchedulingCapabilities
+     */
+    'quota': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationRequestNodePoolSchedulingCapabilities
+     */
+    'ranks': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationRequestNodePoolSchedulingCapabilities
+     */
+    'adjustableWeights': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationRequestNodePoolSchedulingCapabilities
+     */
+    'cpuQuota': boolean;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationResources
+ */
+export interface FairShareSimulationResources {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationResources
+     */
+    'gpu': number;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationResponse
+ */
+export interface FairShareSimulationResponse {
+    /**
+     * 
+     * @type {FairShareSimulationResponseCapacity}
+     * @memberof FairShareSimulationResponse
+     */
+    'capacity': FairShareSimulationResponseCapacity;
+    /**
+     * 
+     * @type {Array<FairShareSimulationResult>}
+     * @memberof FairShareSimulationResponse
+     */
+    'orgUnits': Array<FairShareSimulationResult>;
+}
+/**
+ * The resources the simulation split.
+ * @export
+ * @interface FairShareSimulationResponseCapacity
+ */
+export interface FairShareSimulationResponseCapacity {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationResponseCapacity
+     */
+    'gpu': number;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationResult
+ */
+export interface FairShareSimulationResult {
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationResult
+     */
+    'id': string;
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationResult
+     */
+    'type': FairShareSimulationResultTypeEnum;
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationResult
+     */
+    'parentId'?: string | null;
+    /**
+     * 
+     * @type {FairShareSimulationResultFairShare}
+     * @memberof FairShareSimulationResult
+     */
+    'fairShare': FairShareSimulationResultFairShare;
+    /**
+     * 
+     * @type {FairShareSimulationResultGuaranteed}
+     * @memberof FairShareSimulationResult
+     */
+    'guaranteed': FairShareSimulationResultGuaranteed;
+    /**
+     * 
+     * @type {FairShareSimulationResultOverQuota}
+     * @memberof FairShareSimulationResult
+     */
+    'overQuota': FairShareSimulationResultOverQuota;
+    /**
+     * 
+     * @type {FairShareSimulationResultUnmet}
+     * @memberof FairShareSimulationResult
+     */
+    'unmet': FairShareSimulationResultUnmet;
+}
+
+export const FairShareSimulationResultTypeEnum = {
+    Department: 'department',
+    Project: 'project'
+} as const;
+
+export type FairShareSimulationResultTypeEnum = typeof FairShareSimulationResultTypeEnum[keyof typeof FairShareSimulationResultTypeEnum];
+
+/**
+ * Resources the scheduler would give the org unit, the sum of guaranteed and overQuota.
+ * @export
+ * @interface FairShareSimulationResultFairShare
+ */
+export interface FairShareSimulationResultFairShare {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationResultFairShare
+     */
+    'gpu': number;
+}
+/**
+ * The part of the fair share that comes from the org unit\'s quota.
+ * @export
+ * @interface FairShareSimulationResultGuaranteed
+ */
+export interface FairShareSimulationResultGuaranteed {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationResultGuaranteed
+     */
+    'gpu': number;
+}
+/**
+ * The part of the fair share above the org unit\'s quota.
+ * @export
+ * @interface FairShareSimulationResultOverQuota
+ */
+export interface FairShareSimulationResultOverQuota {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationResultOverQuota
+     */
+    'gpu': number;
+}
+/**
+ * Demand the fair share does not cover.
+ * @export
+ * @interface FairShareSimulationResultUnmet
+ */
+export interface FairShareSimulationResultUnmet {
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationResultUnmet
+     */
+    'gpu': number;
+}
+/**
+ * The node pool\'s scheduling capabilities to simulate. Defaults to the node pool\'s saved capabilities.
+ * @export
+ * @interface FairShareSimulationSchedulingCapabilities
+ */
+export interface FairShareSimulationSchedulingCapabilities {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationSchedulingCapabilities
+     */
+    'quota': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationSchedulingCapabilities
+     */
+    'ranks': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationSchedulingCapabilities
+     */
+    'adjustableWeights': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationSchedulingCapabilities
+     */
+    'cpuQuota': boolean;
+}
+/**
+ * 
+ * @export
  * @interface GetDepartmentNodePoolResources200Response
  */
 export interface GetDepartmentNodePoolResources200Response {
@@ -10424,6 +10798,60 @@ export const OrgUnitApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
+         * Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their settings and demand, and for the node pool\'s scheduling capabilities. The calculation covers every org unit of the node pool; the response holds the ones the caller can read. Nothing is saved. 
+         * @summary Simulate the fair share of a node pool\'s org units
+         * @param {string} nodepoolId The unique id identifying the Node Pool.
+         * @param {FairShareSimulationRequest} fairShareSimulationRequest 
+         * @param {'department' | 'project'} [orgUnitType] Return only org units of this type.
+         * @param {string} [parentId] Return only projects of this department.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        simulateNodePoolFairShare: async (nodepoolId: string, fairShareSimulationRequest: FairShareSimulationRequest, orgUnitType?: 'department' | 'project', parentId?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+            // verify required parameter 'nodepoolId' is not null or undefined
+            assertParamExists('simulateNodePoolFairShare', 'nodepoolId', nodepoolId)
+            // verify required parameter 'fairShareSimulationRequest' is not null or undefined
+            assertParamExists('simulateNodePoolFairShare', 'fairShareSimulationRequest', fairShareSimulationRequest)
+            const localVarPath = `/api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation`
+                .replace(`{${"nodepoolId"}}`, encodeURIComponent(String(nodepoolId)));
+            // use dummy base URL string because the URL constructor only accepts absolute URLs.
+            const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
+            let baseOptions;
+            if (configuration) {
+                baseOptions = configuration.baseOptions;
+            }
+
+            const localVarRequestOptions = { method: 'POST', ...baseOptions, ...options};
+            const localVarHeaderParameter = {} as any;
+            const localVarQueryParameter = {} as any;
+
+            // authentication bearerAuth required
+            // http bearer authentication required
+            await setBearerAuthToObject(localVarHeaderParameter, configuration)
+
+            if (orgUnitType !== undefined) {
+                localVarQueryParameter['orgUnitType'] = orgUnitType;
+            }
+
+            if (parentId !== undefined) {
+                localVarQueryParameter['parentId'] = parentId;
+            }
+
+
+    
+            localVarHeaderParameter['Content-Type'] = 'application/json';
+
+            setSearchParams(localVarUrlObj, localVarQueryParameter);
+            let headersFromBaseOptions = baseOptions && baseOptions.headers ? baseOptions.headers : {};
+            localVarRequestOptions.headers = {...localVarHeaderParameter, ...headersFromBaseOptions, ...options.headers};
+            localVarRequestOptions.data = serializeDataIfNeeded(fairShareSimulationRequest, localVarRequestOptions, configuration)
+
+            return {
+                url: toPathString(localVarUrlObj),
+                options: localVarRequestOptions,
+            };
+        },
+        /**
          * 
          * @param {OrgUnitSingleSetting} orgUnitSingleSetting 
          * @param {*} [options] Override http request option.
@@ -10549,6 +10977,20 @@ export const OrgUnitApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
+         * Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their settings and demand, and for the node pool\'s scheduling capabilities. The calculation covers every org unit of the node pool; the response holds the ones the caller can read. Nothing is saved. 
+         * @summary Simulate the fair share of a node pool\'s org units
+         * @param {string} nodepoolId The unique id identifying the Node Pool.
+         * @param {FairShareSimulationRequest} fairShareSimulationRequest 
+         * @param {'department' | 'project'} [orgUnitType] Return only org units of this type.
+         * @param {string} [parentId] Return only projects of this department.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        async simulateNodePoolFairShare(nodepoolId: string, fairShareSimulationRequest: FairShareSimulationRequest, orgUnitType?: 'department' | 'project', parentId?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<FairShareSimulationResponse>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.simulateNodePoolFairShare(nodepoolId, fairShareSimulationRequest, orgUnitType, parentId, options);
+            return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
+        },
+        /**
          * 
          * @param {OrgUnitSingleSetting} orgUnitSingleSetting 
          * @param {*} [options] Override http request option.
@@ -10636,6 +11078,19 @@ export const OrgUnitApiFactory = function (configuration?: Configuration, basePa
          */
         orgsNodePoolSummary(nodepoolId: string, nodepoolSummaryType: OrgUnitsNodepoolSummaryType, options?: any): AxiosPromise<OrgsNodePoolSummary200Response> {
             return localVarFp.orgsNodePoolSummary(nodepoolId, nodepoolSummaryType, options).then((request) => request(axios, basePath));
+        },
+        /**
+         * Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their settings and demand, and for the node pool\'s scheduling capabilities. The calculation covers every org unit of the node pool; the response holds the ones the caller can read. Nothing is saved. 
+         * @summary Simulate the fair share of a node pool\'s org units
+         * @param {string} nodepoolId The unique id identifying the Node Pool.
+         * @param {FairShareSimulationRequest} fairShareSimulationRequest 
+         * @param {'department' | 'project'} [orgUnitType] Return only org units of this type.
+         * @param {string} [parentId] Return only projects of this department.
+         * @param {*} [options] Override http request option.
+         * @throws {RequiredError}
+         */
+        simulateNodePoolFairShare(nodepoolId: string, fairShareSimulationRequest: FairShareSimulationRequest, orgUnitType?: 'department' | 'project', parentId?: string, options?: any): AxiosPromise<FairShareSimulationResponse> {
+            return localVarFp.simulateNodePoolFairShare(nodepoolId, fairShareSimulationRequest, orgUnitType, parentId, options).then((request) => request(axios, basePath));
         },
         /**
          * 
@@ -10737,6 +11192,21 @@ export class OrgUnitApi extends BaseAPI {
      */
     public orgsNodePoolSummary(nodepoolId: string, nodepoolSummaryType: OrgUnitsNodepoolSummaryType, options?: AxiosRequestConfig) {
         return OrgUnitApiFp(this.configuration).orgsNodePoolSummary(nodepoolId, nodepoolSummaryType, options).then((request) => request(this.axios, this.basePath));
+    }
+
+    /**
+     * Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their settings and demand, and for the node pool\'s scheduling capabilities. The calculation covers every org unit of the node pool; the response holds the ones the caller can read. Nothing is saved. 
+     * @summary Simulate the fair share of a node pool\'s org units
+     * @param {string} nodepoolId The unique id identifying the Node Pool.
+     * @param {FairShareSimulationRequest} fairShareSimulationRequest 
+     * @param {'department' | 'project'} [orgUnitType] Return only org units of this type.
+     * @param {string} [parentId] Return only projects of this department.
+     * @param {*} [options] Override http request option.
+     * @throws {RequiredError}
+     * @memberof OrgUnitApi
+     */
+    public simulateNodePoolFairShare(nodepoolId: string, fairShareSimulationRequest: FairShareSimulationRequest, orgUnitType?: 'department' | 'project', parentId?: string, options?: AxiosRequestConfig) {
+        return OrgUnitApiFp(this.configuration).simulateNodePoolFairShare(nodepoolId, fairShareSimulationRequest, orgUnitType, parentId, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

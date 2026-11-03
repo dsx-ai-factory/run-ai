@@ -116,6 +116,24 @@ type OrgUnitAPI interface {
 	OrgsNodePoolSummaryExecute(r ApiOrgsNodePoolSummaryRequest) (*OrgsNodePoolSummary200Response, *http.Response, error)
 
 	/*
+		SimulateNodePoolFairShare Simulate the fair share of a node pool's org units
+
+		Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their
+	settings and demand, and for the node pool's scheduling capabilities. The calculation covers every org unit of the node
+	pool; the response holds the ones the caller can read. Nothing is saved.
+
+
+		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+		@param nodepoolId The unique id identifying the Node Pool.
+		@return ApiSimulateNodePoolFairShareRequest
+	*/
+	SimulateNodePoolFairShare(ctx context.Context, nodepoolId string) ApiSimulateNodePoolFairShareRequest
+
+	// SimulateNodePoolFairShareExecute executes the request
+	//  @return FairShareSimulationResponse
+	SimulateNodePoolFairShareExecute(r ApiSimulateNodePoolFairShareRequest) (*FairShareSimulationResponse, *http.Response, error)
+
+	/*
 		UpdateOrgUnitSettings Method for UpdateOrgUnitSettings
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1110,6 +1128,198 @@ func (a *OrgUnitAPIService) OrgsNodePoolSummaryExecute(r ApiOrgsNodePoolSummaryR
 			error: localVarHTTPResponse.Status,
 		}
 		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 503 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiSimulateNodePoolFairShareRequest struct {
+	ctx                        context.Context
+	ApiService                 OrgUnitAPI
+	nodepoolId                 string
+	fairShareSimulationRequest *FairShareSimulationRequest
+	orgUnitType                *string
+	parentId                   *string
+}
+
+func (r ApiSimulateNodePoolFairShareRequest) FairShareSimulationRequest(fairShareSimulationRequest FairShareSimulationRequest) ApiSimulateNodePoolFairShareRequest {
+	r.fairShareSimulationRequest = &fairShareSimulationRequest
+	return r
+}
+
+// Return only org units of this type.
+func (r ApiSimulateNodePoolFairShareRequest) OrgUnitType(orgUnitType string) ApiSimulateNodePoolFairShareRequest {
+	r.orgUnitType = &orgUnitType
+	return r
+}
+
+// Return only projects of this department.
+func (r ApiSimulateNodePoolFairShareRequest) ParentId(parentId string) ApiSimulateNodePoolFairShareRequest {
+	r.parentId = &parentId
+	return r
+}
+
+func (r ApiSimulateNodePoolFairShareRequest) Execute() (*FairShareSimulationResponse, *http.Response, error) {
+	return r.ApiService.SimulateNodePoolFairShareExecute(r)
+}
+
+/*
+SimulateNodePoolFairShare Simulate the fair share of a node pool's org units
+
+Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their
+settings and demand, and for the node pool's scheduling capabilities. The calculation covers every org unit of the node
+pool; the response holds the ones the caller can read. Nothing is saved.
+
+	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+	@param nodepoolId The unique id identifying the Node Pool.
+	@return ApiSimulateNodePoolFairShareRequest
+*/
+func (a *OrgUnitAPIService) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string) ApiSimulateNodePoolFairShareRequest {
+	return ApiSimulateNodePoolFairShareRequest{
+		ApiService: a,
+		ctx:        ctx,
+		nodepoolId: nodepoolId,
+	}
+}
+
+// Execute executes the request
+//  @return FairShareSimulationResponse
+///////// RUNAI (remove isResponseFile filter on pointer)//////////
+func (a *OrgUnitAPIService) SimulateNodePoolFairShareExecute(r ApiSimulateNodePoolFairShareRequest) (*FairShareSimulationResponse, *http.Response, error) {
+	var (
+		localVarHTTPMethod  = http.MethodPost
+		localVarPostBody    interface{}
+		formFiles           []formFile
+		localVarReturnValue *FairShareSimulationResponse
+	)
+	///////////////////////////
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "OrgUnitAPIService.SimulateNodePoolFairShare")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation"
+	localVarPath = strings.Replace(localVarPath, "{"+"nodepoolId"+"}", url.PathEscape(parameterValueToString(r.nodepoolId, "nodepoolId")), -1)
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.fairShareSimulationRequest == nil {
+		return localVarReturnValue, nil, reportError("fairShareSimulationRequest is required and must be specified")
+	}
+
+	if r.orgUnitType != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "orgUnitType", r.orgUnitType, "form", "")
+	}
+	if r.parentId != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "parentId", r.parentId, "form", "")
+	}
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.fairShareSimulationRequest
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		if localVarHTTPResponse.StatusCode == 400 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 401 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

@@ -1,0 +1,8 @@
+type: object
+required:
+  - gpu
+properties:
+  gpu:
+    type: number
+    format: double
+    example: 4
