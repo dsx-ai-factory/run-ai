@@ -72,7 +72,7 @@ Dependencies
 | `github.com/klauspost/compress/s2` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/s2/LICENSE |
 | `github.com/klauspost/compress/snappy` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/snappy/LICENSE |
 | `github.com/klauspost/compress/zstd/internal/xxhash` | v1.20.3 | MIT | https://github.com/klauspost/compress/blob/v1.20.3/zstd/internal/xxhash/LICENSE.txt |
-| `github.com/klauspost/cpuid/v2` | v2.4.1 | MIT | https://pkg.go.dev/github.com/klauspost/cpuid/v2@v2.4.1?tab=licenses |
+| `github.com/klauspost/cpuid/v2` | v2.4.2 | MIT | https://pkg.go.dev/github.com/klauspost/cpuid/v2@v2.4.2?tab=licenses |
 | `github.com/klauspost/crc32` | v1.3.0 | BSD-3-Clause | https://github.com/klauspost/crc32/blob/v1.3.0/LICENSE |
 | `github.com/leodido/go-urn` | v1.5.0 | MIT | https://github.com/leodido/go-urn/blob/v1.5.0/LICENSE |
 | `github.com/lib/pq` | v1.12.3 | MIT | https://github.com/lib/pq/blob/v1.12.3/LICENSE |
