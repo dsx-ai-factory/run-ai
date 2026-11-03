@@ -26,7 +26,32 @@ const (
 	loadAwareRoutingUnavailableMessage          = "load-aware routing is not available on this cluster"
 	inferenceRoutingNetworkingOnlyUpdateMessage = "the networking of a workload with load-aware routing can change only through a workload update"
 	inferenceRoutingFixedAtCreationMessage      = "load-aware routing is chosen when the workload is created and cannot be turned on or off by an update"
+	inferenceRoutingUnsupportedWorkloadMessage  = "load-aware routing is supported only for distributed inference and NIM service workloads"
 )
+
+// inferenceRoutingAdapter selects the intent builder for a workload that opted in.
+type inferenceRoutingAdapter int
+
+const (
+	inferenceRoutingUnsupported inferenceRoutingAdapter = iota
+	inferenceRoutingDistributedInference
+	inferenceRoutingNIMService
+)
+
+// inferenceRoutingAdapterFor selects the adapter from the server-established
+// origin. The manifest labels and kind alone are caller-controlled.
+// trustedNIMService is set only by the in-process NIM API, which composes the manifest.
+func inferenceRoutingAdapterFor(trustedConvertedFromNative, trustedNIMService bool, resource *ResourceInfo) inferenceRoutingAdapter {
+	switch {
+	case resource == nil:
+		return inferenceRoutingUnsupported
+	case trustedConvertedFromNative && resource.Labels[constants.LabelWorkloadKind] == composer.DistributedInference:
+		return inferenceRoutingDistributedInference
+	case trustedNIMService && resource.Kind == nimServiceKind && resource.APIVersion == nimServiceAPIVersion:
+		return inferenceRoutingNIMService
+	}
+	return inferenceRoutingUnsupported
+}
 
 // inferenceRoutingOptedIn reports whether the workload spec selects the inference
 // endpoint path. Any objectivePriority value opts in, including 0.
@@ -39,10 +64,10 @@ func inferenceRoutingOptedIn(routing *api.WorkloadV2ConfigurationInferenceRoutin
 		(routing.ModelRewrites != nil && len(*routing.ModelRewrites) > 0)
 }
 
-// validateInferenceRoutingOrigin rejects inferenceRouting outside the internal API.
-// The workloads service fills it from the spec after project policy ran; a caller
-// of the public API could otherwise set objective priorities and rewrites that
-// the project policy does not allow.
+// validateInferenceRoutingOrigin rejects inferenceRouting outside the internal API
+// and the in-process NIM API. Both fill it from the spec after project policy ran;
+// a caller of the public API could otherwise set objective priorities and rewrites
+// that the project policy does not allow.
 func validateInferenceRoutingOrigin(configuration *api.WorkloadV2Configuration, trustedInternalCaller bool) *api.SubmissionErrorV2 {
 	if trustedInternalCaller || configuration == nil || configuration.InferenceRouting == nil {
 		return nil
@@ -56,14 +81,13 @@ func resolveInferenceRoutingDefaults(
 	ctx context.Context,
 	routing *api.WorkloadV2ConfigurationInferenceRouting,
 	clusterId string,
-	trustedConvertedFromNative bool,
-	manifestLabels map[string]string,
+	adapter inferenceRoutingAdapter,
 ) (*inferenceendpoint.Defaults, *api.SubmissionErrorV2) {
 	if !inferenceRoutingOptedIn(routing) {
 		return nil, nil
 	}
-	if !trustedConvertedFromNative || manifestLabels[constants.LabelWorkloadKind] != composer.DistributedInference {
-		return nil, NewConfigurationError("load-aware routing is supported only for distributed inference workloads")
+	if adapter == inferenceRoutingUnsupported {
+		return nil, NewConfigurationError(inferenceRoutingUnsupportedWorkloadMessage)
 	}
 
 	cluster, clusterErr := clustersClient.Get().GetClusterByUuid(ctx, clusterId)
@@ -84,6 +108,7 @@ func resolveInferenceRoutingDefaults(
 // runs after the caller's networking was validated, because that validation
 // rejects a submitted inference block. defaults is nil when the workload did not opt in.
 func applyInferenceRouting(
+	adapter inferenceRoutingAdapter,
 	routing *api.WorkloadV2ConfigurationInferenceRouting,
 	defaults *inferenceendpoint.Defaults,
 	manifest map[string]interface{},
@@ -93,20 +118,29 @@ func applyInferenceRouting(
 	if defaults == nil {
 		return nil
 	}
-	// The distributed inference composer creates one endpoint, for the serving port.
+	// The distributed inference composer and the NIM API create one endpoint, for the serving port.
 	if configuration == nil || configuration.Networking == nil || len(*configuration.Networking) != 1 {
 		return NewConfigurationError("load-aware routing requires one serving port endpoint")
 	}
 
-	lws, decodeErr := decodeLeaderWorkerSet(manifest)
-	if decodeErr != nil {
-		return NewManifestError(fmt.Sprintf("load-aware routing: %v", decodeErr))
-	}
-
 	endpoint := &(*configuration.Networking)[0]
-	protected := routing.ServingPortAuthorizationType != nil &&
-		*routing.ServingPortAuthorizationType != api.SERVINGPORTACCESSAUTHORIZATIONTYPEENUM_PUBLIC
-	inference, err := inferenceendpoint.BuildDistributedInferenceIntent(lws, *endpoint, protected, convutils.Deref(routing.ModelRewrites, nil), defaults)
+	rewrites := convutils.Deref(routing.ModelRewrites, nil)
+	var inference *api.ExternalAccessInference
+	var err error
+	switch adapter {
+	case inferenceRoutingDistributedInference:
+		lws, decodeErr := decodeLeaderWorkerSet(manifest)
+		if decodeErr != nil {
+			return NewManifestError(fmt.Sprintf("load-aware routing: %v", decodeErr))
+		}
+		protected := routing.ServingPortAuthorizationType != nil &&
+			*routing.ServingPortAuthorizationType != api.SERVINGPORTACCESSAUTHORIZATIONTYPEENUM_PUBLIC
+		inference, err = inferenceendpoint.BuildDistributedInferenceIntent(lws, *endpoint, protected, rewrites, defaults)
+	case inferenceRoutingNIMService:
+		inference, err = inferenceendpoint.BuildNIMServiceIntent(*endpoint, workloadName, rewrites, defaults)
+	default:
+		return NewConfigurationError(inferenceRoutingUnsupportedWorkloadMessage)
+	}
 	if err != nil {
 		return NewConfigurationError(fmt.Sprintf("load-aware routing: %v", err))
 	}
@@ -128,6 +162,28 @@ func validateInferenceRoutingUnchanged(existing *models.WorkloadConfiguration, r
 		return NewConfigurationError(inferenceRoutingFixedAtCreationMessage)
 	}
 	return nil
+}
+
+// resolveNIMServiceInferenceRouting returns the NIM serving networking with the
+// inference block resolved. The NIM update replaces the networking through a
+// record modifier rather than the update request's configuration, so
+// updateWorkloadV2 does not resolve the block for it.
+func resolveNIMServiceInferenceRouting(
+	ctx context.Context,
+	routing *api.WorkloadV2ConfigurationInferenceRouting,
+	clusterId string,
+	workloadName string,
+	networking *[]api.NetworkingEndpoint,
+) (*models.NetworkingConfiguration, *api.SubmissionErrorV2) {
+	configuration := &models.WorkloadConfiguration{Networking: cloneNetworkingConfig(networking)}
+	defaults, err := resolveInferenceRoutingDefaults(ctx, routing, clusterId, inferenceRoutingNIMService)
+	if err != nil {
+		return nil, err
+	}
+	if err := applyInferenceRouting(inferenceRoutingNIMService, routing, defaults, nil, configuration, workloadName); err != nil {
+		return nil, err
+	}
+	return configuration.Networking, nil
 }
 
 func hasInferenceRouting(configuration *models.WorkloadConfiguration) bool {

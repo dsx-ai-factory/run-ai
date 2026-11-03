@@ -20,6 +20,8 @@ import (
 	lwsv1 "sigs.k8s.io/lws/api/leaderworkerset/v1"
 )
 
+const distributedInferenceKind = "distributed inference"
+
 // BuildDistributedInferenceIntent returns the externalAccess.inference block for
 // the resolved native LWS serving topology. The caller sets it on the same
 // endpoint's externalAccess, next to httpRoute. The networking plugin derives the
@@ -35,11 +37,9 @@ import (
 // other than public). The composer protects distributed inference with an oauth2-proxy
 // sidecar in the leader Pod and does not set authorization on the networking Service,
 // so protection cannot be read from the endpoint.
-// rewrites are the workload's modelRewrites; the key is omitted when there are none
-// because the endpoint CRD has no nullable fields.
+// rewrites are the workload's modelRewrites.
 func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, protected bool, rewrites []api.ModelRewrite, defaults *Defaults) (*api.ExternalAccessInference, error) {
-	if defaults == nil || defaults.GatewayName == "" || len(validation.IsDNS1123Subdomain(defaults.GatewayName)) != 0 ||
-		defaults.GatewayNamespace == "" || len(validation.IsDNS1123Label(defaults.GatewayNamespace)) != 0 || defaults.EPPProfile != "gie-v1.5" {
+	if !validDefaults(defaults) {
 		return nil, fmt.Errorf("distributed inference requires valid administrator Gateway defaults and the gie-v1.5 EPP profile")
 	}
 	if lws == nil || lws.Name == "" || lws.Namespace == "" || lws.Spec.LeaderWorkerTemplate.LeaderTemplate == nil ||
@@ -50,15 +50,26 @@ func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.Ne
 	if err != nil {
 		return nil, err
 	}
-	if _, err := distributedServingHostname(endpoint.ExternalAccess, service, defaults); err != nil {
+	if _, err := servingHostname(distributedInferenceKind, endpoint.ExternalAccess, service.Name, service.Ports[0].Port, defaults); err != nil {
 		return nil, err
 	}
+	return newInferenceIntent(defaults, rewrites), nil
+}
+
+func validDefaults(defaults *Defaults) bool {
+	return defaults != nil && defaults.GatewayName != "" && len(validation.IsDNS1123Subdomain(defaults.GatewayName)) == 0 &&
+		defaults.GatewayNamespace != "" && len(validation.IsDNS1123Label(defaults.GatewayNamespace)) == 0 && defaults.EPPProfile == "gie-v1.5"
+}
+
+// newInferenceIntent omits the rewrites key when there are none because the
+// endpoint CRD has no nullable fields.
+func newInferenceIntent(defaults *Defaults, rewrites []api.ModelRewrite) *api.ExternalAccessInference {
 	inference := &api.ExternalAccessInference{Epp: map[string]interface{}{"profile": defaults.EPPProfile}}
 	if len(rewrites) > 0 {
 		rules := modelRewrites(rewrites)
 		inference.Rewrites = &rules
 	}
-	return inference, nil
+	return inference
 }
 
 func modelRewrites(rewrites []api.ModelRewrite) []map[string]interface{} {
@@ -132,23 +143,30 @@ func containersDeclarePort(containers []corev1.Container, port int32) bool {
 	return false
 }
 
-func distributedServingHostname(access *api.ExternalAccess, service *api.ServiceSpec, defaults *Defaults) (string, error) {
+// servingHostname checks that the endpoint is exposed only through a root-path
+// HTTPRoute on the administrator Gateway to backendName:backendPort, the only
+// exposure that the InferenceEndpoint route can replace without losing behavior.
+// kind names the workload in the errors.
+func servingHostname(kind string, access *api.ExternalAccess, backendName string, backendPort int32, defaults *Defaults) (string, error) {
 	if access == nil || access.HttpRoute == nil || access.Ingress != nil || access.Route != nil {
-		return "", fmt.Errorf("distributed inference requires an external Gateway HTTPRoute without Ingress or OpenShift Route")
+		return "", fmt.Errorf("%s requires an external Gateway HTTPRoute without Ingress or OpenShift Route", kind)
 	}
 	raw, err := json.Marshal(*access.HttpRoute)
 	if err != nil {
-		return "", fmt.Errorf("encode distributed inference HTTPRoute: %w", err)
+		return "", fmt.Errorf("encode %s HTTPRoute: %w", kind, err)
 	}
 	var route gatewayv1.HTTPRoute
 	decoder := json.NewDecoder(bytes.NewReader(raw))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&route); err != nil {
-		return "", fmt.Errorf("decode distributed inference HTTPRoute: %w", err)
+		return "", fmt.Errorf("decode %s HTTPRoute: %w", kind, err)
 	}
 	if route.APIVersion != gatewayv1.GroupVersion.String() || route.Kind != "HTTPRoute" || len(route.Annotations) != 0 || len(route.Spec.Hostnames) != 1 ||
 		len(validation.IsDNS1123Subdomain(string(route.Spec.Hostnames[0]))) != 0 {
-		return "", fmt.Errorf("distributed inference requires a v1 HTTPRoute with one concrete hostname and no annotation-based routing")
+		return "", fmt.Errorf("%s requires a v1 HTTPRoute with one concrete hostname and no annotation-based routing", kind)
+	}
+	if routePathPrefixed(route.Spec) {
+		return "", fmt.Errorf("%s requires a host-based URL; path-based URLs are not supported", kind)
 	}
 	// Match the native composer's complete route shape so filters, authentication,
 	// path prefixes and listener restrictions cannot be silently dropped by the CR.
@@ -160,12 +178,25 @@ func distributedServingHostname(access *api.ExternalAccess, service *api.Service
 		Rules: []gatewayv1.HTTPRouteRule{{
 			Matches: []gatewayv1.HTTPRouteMatch{{Path: &gatewayv1.HTTPPathMatch{Type: ptr.To(gatewayv1.PathMatchPathPrefix), Value: ptr.To("/")}}},
 			BackendRefs: []gatewayv1.HTTPBackendRef{{BackendRef: gatewayv1.BackendRef{BackendObjectReference: gatewayv1.BackendObjectReference{
-				Name: gatewayv1.ObjectName(service.Name), Port: ptr.To(gatewayv1.PortNumber(service.Ports[0].Port)),
+				Name: gatewayv1.ObjectName(backendName), Port: ptr.To(gatewayv1.PortNumber(backendPort)),
 			}}}},
 		}},
 	}
 	if !reflect.DeepEqual(route.Spec, expected) {
-		return "", fmt.Errorf("distributed inference HTTPRoute must use the administrator Gateway and one unfiltered root path to its serving Service")
+		return "", fmt.Errorf("%s HTTPRoute must use the administrator Gateway and one unfiltered root path to its serving Service", kind)
 	}
 	return string(route.Spec.Hostnames[0]), nil
+}
+
+// routePathPrefixed reports a URL with a path, which the composers expose as a
+// non-root path match.
+func routePathPrefixed(spec gatewayv1.HTTPRouteSpec) bool {
+	for _, rule := range spec.Rules {
+		for _, match := range rule.Matches {
+			if match.Path != nil && match.Path.Value != nil && *match.Path.Value != "/" {
+				return true
+			}
+		}
+	}
+	return false
 }

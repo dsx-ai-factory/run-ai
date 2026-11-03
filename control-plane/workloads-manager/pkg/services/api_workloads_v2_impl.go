@@ -100,6 +100,10 @@ type CreateWorkloadV2Options struct {
 	CheckYamlSubmissionFlag bool
 	TranslatedFromV1        bool
 	RecordAction            bool
+	// TrustedNIMService marks the in-process NIM API call. That caller derives
+	// configuration.inferenceRouting from the policy-mutated NIM spec, so the field
+	// is accepted from it. The public workloads API never sets this.
+	TrustedNIMService bool
 }
 
 // Public v2/YAML and in-process NIM updates use skipAuth=false and recordAction=true.
@@ -148,7 +152,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		validationErrors.Add(ToSubmissionErrorV2(api.NewValidationError(apiErr.Error())))
 	}
 
-	validationErrors.Add(validateInferenceRoutingOrigin(&request.Metadata.Configuration, options.TranslatedFromV1))
+	validationErrors.Add(validateInferenceRoutingOrigin(&request.Metadata.Configuration, options.TranslatedFromV1 || options.TrustedNIMService))
 
 	// Validate manifest first - if invalid, we can't proceed with other validations
 	manifest, manifestErr := w.validateManifest(ctx, request.Manifest, request.ManifestBase64Encoded)
@@ -234,7 +238,8 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		return nil, validationErrors.ToSubmissionErrors()
 	}
 	inferenceRouting := request.Metadata.Configuration.InferenceRouting
-	inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, project.ClusterId, trustedConvertedFromNative, manifestResourceInfo.Labels)
+	routingAdapter := inferenceRoutingAdapterFor(trustedConvertedFromNative, options.TrustedNIMService, manifestResourceInfo)
+	inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, project.ClusterId, routingAdapter)
 	if routingErr != nil {
 		validationErrors.Add(routingErr)
 		return nil, validationErrors.ToSubmissionErrors()
@@ -294,7 +299,7 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 
 	// Build the intent from the effective manifest, before the ownership binding
 	// adds the workload ID to the serving Service selector.
-	if routingErr := applyInferenceRouting(inferenceRouting, inferenceDefaults, effectiveManifest, configuration, name); routingErr != nil {
+	if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, effectiveManifest, configuration, name); routingErr != nil {
 		return nil, SingleError(routingErr)
 	}
 
@@ -872,11 +877,12 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 			return nil, SubmissionErrorToApiError(routingErr)
 		}
 		trustedConvertedFromNative := options.skipAuth && qRecord.TranslatedFromV1 && isConvertedFromNativeWorkload(manifestResourceInfo.Labels)
-		inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, qRecord.ClusterId, trustedConvertedFromNative, manifestResourceInfo.Labels)
+		routingAdapter := inferenceRoutingAdapterFor(trustedConvertedFromNative, false, manifestResourceInfo)
+		inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, qRecord.ClusterId, routingAdapter)
 		if routingErr != nil {
 			return nil, SubmissionErrorToApiError(routingErr)
 		}
-		if routingErr := applyInferenceRouting(inferenceRouting, inferenceDefaults, effectiveManifest, configuration, qRecord.Name); routingErr != nil {
+		if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, effectiveManifest, configuration, qRecord.Name); routingErr != nil {
 			return nil, SubmissionErrorToApiError(routingErr)
 		}
 		qRecord.Configuration = configuration

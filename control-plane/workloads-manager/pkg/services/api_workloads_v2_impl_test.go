@@ -450,13 +450,13 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			Expect(records[0].Configuration.Networking).To(BeNil())
 		})
 
-		It("rejects an internal opt-in for a workload that is not distributed inference", func() {
+		It("rejects an internal opt-in for a workload that is not distributed inference or a NIM service", func() {
 			resp := tryToCreateInternalWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
 				Metadata: api.WorkloadV2MetadataCreateParams{Name: "deployment", ProjectId: randoms.ProjectIdStr, Configuration: optedIn()},
 				Manifest: sampleManifest,
 			})
 			Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
-			Expect(resp.Body.String()).To(ContainSubstring("supported only for distributed inference workloads"))
+			Expect(resp.Body.String()).To(ContainSubstring(inferenceRoutingUnsupportedWorkloadMessage))
 			Expect(queuedRecords()).To(BeEmpty())
 		})
 

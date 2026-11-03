@@ -7,6 +7,7 @@ package services
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
@@ -286,7 +287,7 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 	const workloadName = "my-nim"
 
 	networkingConfig := func(sp *api.NimServiceServingPort, info nimServiceNetworkingInfo) *[]api.NetworkingEndpoint {
-		cfg, err := nimServingPortToNetworkingConfig(workloadName, sp, info)
+		cfg, err := nimServingPortToNetworkingConfig(workloadName, sp, info, false)
 		Expect(err).To(BeNil())
 		return cfg
 	}
@@ -335,7 +336,7 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 			ExposeExternally: convutils.Ref(true),
 			ExposedUrl:       convutils.Ref("/missing-host"),
 		}
-		cfg, err := nimServingPortToNetworkingConfig(workloadName, sp, nimServiceNetworkingInfo{})
+		cfg, err := nimServingPortToNetworkingConfig(workloadName, sp, nimServiceNetworkingInfo{}, false)
 
 		Expect(cfg).To(BeNil())
 		Expect(err).NotTo(BeNil())
@@ -393,6 +394,21 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 		rules := spec["rules"].([]interface{})
 		Expect(rules).To(HaveLen(1))
 		Expect(rules[0].(map[string]interface{})["host"]).To(Equal("my-nim.example.com"))
+	})
+
+	It("references the operator Service without authorization for a public NIM with load-aware routing", func() {
+		sp := &api.NimServiceServingPort{
+			Port:              convutils.Ref(int32(8000)),
+			ExposeExternally:  convutils.Ref(true),
+			ExposedUrl:        convutils.Ref("https://my-nim.example.com"),
+			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_PUBLIC),
+		}
+		cfg, err := nimServingPortToNetworkingConfig(workloadName, sp, nimServiceNetworkingInfo{IngressClass: "nginx"}, true)
+		Expect(err).To(BeNil())
+
+		endpoint := singleNetworkingEndpoint(cfg)
+		Expect(*endpoint.Services).To(Equal([]api.NetworkingService{{Ref: &api.ServiceRef{Name: workloadName, Port: 8000}}}))
+		Expect(endpoint.ExternalAccess).NotTo(BeNil())
 	})
 
 	It("sets Authorization when auth is explicitly requested alongside exposure", func() {
@@ -650,7 +666,7 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 			IngressClass:      "nginx",
 			IngressEnabled:    convutils.Ref(false),
 			UseOpenShiftRoute: true,
-		})
+		}, false)
 
 		Expect(cfg).To(BeNil())
 		Expect(err).NotTo(BeNil())
@@ -689,7 +705,7 @@ var _ = Describe("nimServingPortToNetworkingConfig", func() {
 		cfg, err := nimServingPortToNetworkingConfig(workloadName, sp, nimServiceNetworkingInfo{
 			IngressEnabled: convutils.Ref(false),
 			UseGatewayAPI:  true,
-		})
+		}, false)
 
 		Expect(cfg).To(BeNil())
 		Expect(err).NotTo(BeNil())
@@ -846,4 +862,71 @@ var _ = Describe("buildIngressExternalAccess", func() {
 		Expect(annotations).NotTo(HaveKey("nginx.ingress.kubernetes.io/configuration-snippet"))
 		Expect(annotations).NotTo(HaveKey(annotationHAProxyRequestSetHeader))
 	})
+})
+
+var _ = Describe("NIM load-aware routing", func() {
+	DescribeTable("opts in through the NIM spec fields",
+		func(spec api.NimServiceSpec, expected *api.WorkloadV2ConfigurationInferenceRouting) {
+			Expect(nimInferenceRouting(spec)).To(Equal(expected))
+		},
+		Entry("no routing fields", api.NimServiceSpec{}, nil),
+		Entry("loadAwareRouting false", api.NimServiceSpec{LoadAwareRouting: convutils.Ref(false)}, nil),
+		Entry("empty modelRewrites", api.NimServiceSpec{ModelRewrites: &[]api.ModelRewrite{}}, nil),
+		Entry("loadAwareRouting true", api.NimServiceSpec{LoadAwareRouting: convutils.Ref(true)},
+			&api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: convutils.Ref(true)}),
+		Entry("objectivePriority 0", api.NimServiceSpec{ObjectivePriority: convutils.Ref(int32(0))},
+			&api.WorkloadV2ConfigurationInferenceRouting{ObjectivePriority: convutils.Ref(int32(0))}),
+		Entry("modelRewrites", api.NimServiceSpec{ModelRewrites: &[]api.ModelRewrite{
+			{Model: "chat", Targets: []api.ModelRewriteTarget{{Model: "chat-v1", Weight: 1}}},
+		}}, &api.WorkloadV2ConfigurationInferenceRouting{ModelRewrites: &[]api.ModelRewrite{
+			{Model: "chat", Targets: []api.ModelRewriteTarget{{Model: "chat-v1", Weight: 1}}},
+		}}),
+	)
+
+	DescribeTable("accepts a public HTTP serving port that is exposed externally",
+		func(sp *api.NimServiceServingPort) {
+			Expect(validateNimInferenceRouting(sp)).To(BeNil())
+		},
+		Entry("exposed by default", &api.NimServiceServingPort{Port: convutils.Ref(int32(8000))}),
+		Entry("public authorization type", &api.NimServiceServingPort{
+			Port:              convutils.Ref(int32(8000)),
+			ExposeExternally:  convutils.Ref(true),
+			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_PUBLIC),
+		}),
+		Entry("explicit HTTP protocol", &api.NimServiceServingPort{
+			Port:            convutils.Ref(int32(8000)),
+			ExposedProtocol: convutils.Ref(api.SERVINGPORTEXPOSEDPROTOCOL_HTTP),
+		}),
+	)
+
+	DescribeTable("rejects a serving port that the endpoint picker cannot serve",
+		func(sp *api.NimServiceServingPort, message string) {
+			err := validateNimInferenceRouting(sp)
+			Expect(err).NotTo(BeNil())
+			Expect(err.Code).To(BeEquivalentTo(http.StatusBadRequest))
+			Expect(err.Message).To(Equal(message))
+		},
+		Entry("authenticated users", &api.NimServiceServingPort{
+			Port:              convutils.Ref(int32(8000)),
+			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHENTICATED_USERS),
+		}, nimLoadAwareRoutingProtectedMessage),
+		Entry("authorized groups", &api.NimServiceServingPort{
+			Port:              convutils.Ref(int32(8000)),
+			AuthorizationType: convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHORIZED_GROUPS),
+			AuthorizedGroups:  &[]string{"team"},
+		}, nimLoadAwareRoutingProtectedMessage),
+		Entry("no serving port", nil, nimLoadAwareRoutingNotExposedMessage),
+		Entry("not exposed externally", &api.NimServiceServingPort{
+			Port:             convutils.Ref(int32(8000)),
+			ExposeExternally: convutils.Ref(false),
+		}, nimLoadAwareRoutingNotExposedMessage),
+		Entry("gRPC port", &api.NimServiceServingPort{
+			Port:     convutils.Ref(int32(8000)),
+			GrpcPort: convutils.Ref(int32(8001)),
+		}, nimLoadAwareRoutingGRPCMessage),
+		Entry("gRPC exposed protocol", &api.NimServiceServingPort{
+			Port:            convutils.Ref(int32(8000)),
+			ExposedProtocol: convutils.Ref(api.SERVINGPORTEXPOSEDPROTOCOL_GRPC),
+		}, nimLoadAwareRoutingGRPCMessage),
+	)
 })
