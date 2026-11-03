@@ -186,6 +186,20 @@ func (p *Plugin) reconcileEndpoint(
 		return p.createEndpointExternalAccess(ctx, runner, endpoint, owner, k8sClient, "", 0)
 	}
 
+	if svc.Ref != nil && endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil {
+		// The NIM operator creates the referenced Service after the workload. Wait
+		// for it here, before ownership validation reports it as missing; the
+		// Service and EndpointSlice watches reconcile the runner once it exists.
+		if _, err := resolveInferenceWorkload(ctx, k8sClient, runner.Namespace, endpoint); err != nil {
+			if errors.Is(err, errInferenceServicePending) {
+				log.FromContext(ctx).V(1).Info("Waiting for the referenced inference Service",
+					"workloadRunner", runner.Name, "reason", err.Error())
+				return nil
+			}
+			return fmt.Errorf("reconcile inference endpoint: %w", err)
+		}
+	}
+
 	workloadServiceName, workloadServicePort, err := p.reconcileEndpointService(ctx, runner, svc, owner, k8sClient)
 	if err != nil {
 		authProxyName := ""

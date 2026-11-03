@@ -21,12 +21,14 @@ import (
 	. "github.com/onsi/gomega"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	discoveryv1 "k8s.io/api/discovery/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -98,6 +100,55 @@ func inferenceEndpointConfig(auth bool, targetPort int32, inference *endpoints.I
 			Inference: inference,
 		},
 	}}}
+}
+
+const (
+	testNIMServiceName = "llama-nim"
+	testNIMServiceUID  = "llama-nim-service-uid"
+)
+
+var testNIMSelector = map[string]string{"app": testNIMServiceName}
+
+// nimEndpointConfig is the endpoint the control plane sends for a public NIMService:
+// it references the Service the NIM operator creates later.
+func nimEndpointConfig(auth *endpoints.AuthConfig, inference *endpoints.InferenceConfig) *endpoints.Config {
+	route := llamaHTTPRoute()
+	route.Spec.Rules[0].BackendRefs[0].Name = testNIMServiceName
+	return &endpoints.Config{Endpoints: []endpoints.Endpoint{{
+		Services: []endpoints.Service{{
+			Ref:  &endpoints.ServiceRef{Name: testNIMServiceName, Port: 8000},
+			Auth: auth,
+		}},
+		ExternalAccess: &endpoints.ExternalAccess{HTTPRoute: route, Inference: inference},
+	}}}
+}
+
+// nimService mirrors the Service the NIM operator creates for a NIMService.
+func nimService(targetPort intstr.IntOrString) *corev1.Service {
+	return &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{Namespace: testNamespace, Name: testNIMServiceName, UID: testNIMServiceUID},
+		Spec: corev1.ServiceSpec{
+			Selector: testNIMSelector,
+			Ports:    []corev1.ServicePort{{Name: "api", Port: 8000, TargetPort: targetPort}},
+		},
+	}
+}
+
+// nimEndpointSlice is the slice the EndpointSlice controller writes once it
+// resolves the named "api" targetPort against the selected Pods.
+func nimEndpointSlice(port int32) *discoveryv1.EndpointSlice {
+	return &discoveryv1.EndpointSlice{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: testNamespace,
+			Name:      testNIMServiceName + "-abcde",
+			Labels:    map[string]string{discoveryv1.LabelServiceName: testNIMServiceName},
+			OwnerReferences: []metav1.OwnerReference{ownerReferenceFor(
+				"v1", "Service", testNIMServiceName, testNIMServiceUID, true,
+			)},
+		},
+		AddressType: discoveryv1.AddressTypeIPv4,
+		Ports:       []discoveryv1.EndpointPort{{Name: ptr.To("api"), Port: ptr.To(port)}},
+	}
 }
 
 func setRunnerEndpoints(runner *dromosv1alpha1.WorkloadRunner, cfg *endpoints.Config) {
@@ -480,12 +531,9 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 			cfg.Endpoints[0].ExternalAccess.HTTPRoute = nil
 			cfg.Endpoints[0].ExternalAccess.Ingress = newTestIngress("llama", testInferenceHost, "/")
 		}, "requires externalAccess.httpRoute"),
-		Entry("referenced Service", func(cfg *endpoints.Config) {
-			cfg.Endpoints[0].Services = []endpoints.Service{{
-				Ref:  &endpoints.ServiceRef{Name: "existing", Port: 8000},
-				Auth: &endpoints.AuthConfig{AuthorizationType: endpoints.AuthorizationTypeAuthenticatedUsers},
-			}}
-		}, "requires a created Service"),
+		Entry("referenced Service without a port", func(cfg *endpoints.Config) {
+			cfg.Endpoints[0].Services = []endpoints.Service{{Ref: &endpoints.ServiceRef{Name: "existing"}}}
+		}, "requires a referenced Service with a name and a port"),
 		Entry("named target port", func(cfg *endpoints.Config) {
 			cfg.Endpoints[0].Services[0].Create.Spec.Ports[0].TargetPort = intstr.FromString("http")
 		}, "numeric Service targetPort"),
@@ -516,5 +564,136 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 	It("admits a derivable inference endpoint", func() {
 		_, errs := plugin.WebhookValidate(ctx, nil, runner)
 		Expect(errs).To(BeEmpty())
+	})
+
+	authenticatedUsers := &endpoints.AuthConfig{AuthorizationType: endpoints.AuthorizationTypeAuthenticatedUsers}
+
+	DescribeTable("admits service auth with inference routing only for supported shapes",
+		func(cfg *endpoints.Config, expected string) {
+			setRunnerEndpoints(runner, cfg)
+			_, errs := plugin.WebhookValidate(ctx, nil, runner)
+			if expected == "" {
+				Expect(errs).To(BeEmpty())
+				return
+			}
+			Expect(errs.ToAggregate()).To(MatchError(ContainSubstring(expected)))
+		},
+		Entry("public referenced Service with inference, before the Service exists",
+			nimEndpointConfig(nil, inferenceTestBlock()), ""),
+		Entry("public referenced Service without inference",
+			nimEndpointConfig(nil, nil), "auth is required when using service reference"),
+		Entry("protected referenced Service with inference",
+			nimEndpointConfig(authenticatedUsers, inferenceTestBlock()),
+			"supports services[0].auth only on a created Service that targets the auth proxy sidecar port 4180"),
+		Entry("protected created Service that targets the auth proxy sidecar",
+			inferenceEndpointConfig(true, 4180, inferenceTestBlock()), ""),
+		Entry("protected created Service that targets the model port",
+			inferenceEndpointConfig(true, 8000, inferenceTestBlock()),
+			"supports services[0].auth only on a created Service that targets the auth proxy sidecar port 4180"),
+	)
+
+	Context("with a referenced NIM Service", func() {
+		BeforeEach(func() {
+			runner = runnerFromEndpoints(nimEndpointConfig(nil, inferenceTestBlock()))
+			runner.Generation = 2
+		})
+
+		expectPending := func(message string) {
+			status := newPluginStatus()
+			Expect(plugin.Status(ctx, runner, k8sClient, status, state)).To(Succeed())
+			Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhasePending))
+			condition := findEndpointsCondition(status, endpoints.InferenceEndpointReadyCondition)
+			Expect(condition).NotTo(BeNil())
+			Expect(condition.Status).To(Equal(metav1.ConditionFalse))
+			Expect(condition.Reason).To(Equal("Pending"))
+			Expect(condition.Message).To(ContainSubstring(message))
+		}
+		inferenceWorkloadSpec := func() map[string]any {
+			obj, err := getInferenceEndpoint()
+			Expect(err).NotTo(HaveOccurred())
+			workload, _, err := unstructured.NestedMap(obj.Object, "spec", "workload")
+			Expect(err).NotTo(HaveOccurred())
+			return workload
+		}
+
+		It("waits for the Service without an issue, then creates the InferenceEndpoint", func() {
+			Expect(reconcileRunner()).To(Succeed())
+			Expect(state.PluginIssues(plugin)).To(BeEmpty())
+			_, err := getInferenceEndpoint()
+			Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			Expect(httpRoutes()).To(BeEmpty())
+			expectPending("Service " + testNamespace + "/" + testNIMServiceName + " does not exist yet")
+
+			Expect(k8sClient.Create(ctx, nimService(intstr.FromInt32(8000)))).To(Succeed())
+			Expect(reconcileRunner()).To(Succeed())
+			Expect(state.PluginIssues(plugin)).To(BeEmpty())
+			obj, err := getInferenceEndpoint()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(metav1.IsControlledBy(obj, runner)).To(BeTrue())
+			Expect(httpRoutes()).To(BeEmpty())
+		})
+
+		It("derives the selector, numeric target port and default backend from the live Service", func() {
+			Expect(k8sClient.Create(ctx, nimService(intstr.FromInt32(9000)))).To(Succeed())
+			Expect(reconcileRunner()).To(Succeed())
+
+			obj, err := getInferenceEndpoint()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(specJSON(obj)).To(MatchJSON(`{
+				"workload":{"selector":{"matchLabels":{"app":"` + testNIMServiceName + `"}},"port":9000},
+				"routing":{"gatewayRef":{"name":"runai-gateway","namespace":"runai"},"hostnames":["` + testInferenceHost + `"],
+					"defaultBackendRef":{"name":"` + testNIMServiceName + `","port":8000}},
+				"epp":{"profile":"gie-v1.5"},
+				"objectives":[{"model":"llama-chat","priority":5}],
+				"rewrites":[{"model":"chat","targets":[{"model":"meta-llama/Llama-3.1-70B-Instruct","weight":1}]}]}`))
+			Expect(httpRoutes()).To(BeEmpty())
+			deployments := &appsv1.DeploymentList{}
+			Expect(k8sClient.List(ctx, deployments)).To(Succeed())
+			Expect(deployments.Items).To(BeEmpty())
+
+			// The status probe resolves the same live Service, so it sees the desired
+			// spec and waits only for the InferenceEndpoint controller.
+			status := newPluginStatus()
+			Expect(plugin.Status(ctx, runner, k8sClient, status, state)).To(Succeed())
+			Expect(findEndpointsCondition(status, endpoints.InferenceEndpointReadyCondition).Message).
+				To(Equal("waiting for current InferenceEndpoint generation"))
+		})
+
+		It("waits for an EndpointSlice to resolve a named target port", func() {
+			Expect(k8sClient.Create(ctx, nimService(intstr.FromString("api")))).To(Succeed())
+			Expect(reconcileRunner()).To(Succeed())
+			Expect(state.PluginIssues(plugin)).To(BeEmpty())
+			_, err := getInferenceEndpoint()
+			Expect(apierrors.IsNotFound(err)).To(BeTrue())
+			Expect(httpRoutes()).To(BeEmpty())
+			expectPending(`resolves port "api" yet`)
+		})
+
+		It("resolves a named target port from the Service's EndpointSlices", func() {
+			Expect(k8sClient.Create(ctx, nimService(intstr.FromString("api")))).To(Succeed())
+			Expect(k8sClient.Create(ctx, nimEndpointSlice(8080))).To(Succeed())
+			Expect(reconcileRunner()).To(Succeed())
+
+			Expect(inferenceWorkloadSpec()).To(Equal(map[string]any{
+				"selector": map[string]any{"matchLabels": map[string]any{"app": testNIMServiceName}},
+				"port":     int64(8080),
+			}))
+			Expect(httpRoutes()).To(BeEmpty())
+		})
+
+		It("keeps ownership validation for the referenced Service", func() {
+			Expect(k8sClient.Create(ctx, nimService(intstr.FromInt32(8000)))).To(Succeed())
+			Expect(k8sClient.Create(ctx, &corev1.Pod{ObjectMeta: metav1.ObjectMeta{
+				Namespace: testNamespace, Name: "foreign", Labels: testNIMSelector,
+			}})).To(Succeed())
+
+			Expect(reconcileRunner()).To(Succeed())
+			Expect(state.PluginIssues(plugin)).To(ContainElement(WithTransform(
+				func(i issue.Issue) string { return i.Error() },
+				ContainSubstring("is not owned by WorkloadRunner"),
+			)))
+			_, err := getInferenceEndpoint()
+			Expect(apierrors.IsNotFound(err)).To(BeTrue())
+		})
 	})
 })

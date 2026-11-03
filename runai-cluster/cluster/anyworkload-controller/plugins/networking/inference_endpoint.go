@@ -10,17 +10,23 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	endpoints "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/plugin/framework"
+	corev1 "k8s.io/api/core/v1"
+	discoveryv1 "k8s.io/api/discovery/v1"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 )
 
@@ -28,7 +34,16 @@ import (
 // InferenceEndpoint exists but its Ready condition is not yet true.
 const InferenceEndpointNotReadyReason = "InferenceEndpointNotReady"
 
-var errMultipleInferenceEndpoints = errors.New("at most one endpoint may set externalAccess.inference")
+var (
+	errMultipleInferenceEndpoints = errors.New("at most one endpoint may set externalAccess.inference")
+	// errInferenceServicePending marks a referenced Service, or its resolved port,
+	// that does not exist yet. The Service and EndpointSlice watches reconcile the
+	// runner again once it appears, so it is a wait, not a failure.
+	errInferenceServicePending = errors.New("waiting for the referenced Service")
+	// errInferenceServiceInvalid marks a live referenced Service the InferenceEndpoint
+	// cannot target. Only a change to the Service fixes it.
+	errInferenceServiceInvalid = errors.New("referenced Service cannot be targeted by inference routing")
+)
 
 // inferenceEndpointAvailable reports whether the InferenceEndpoint API is
 // installed. A missing API is a NoMatch error so callers can treat it as
@@ -56,11 +71,134 @@ func countInferenceEndpoints(cfg *endpoints.Config) int {
 	return count
 }
 
+// inferenceWorkload is the Pod selector and container port the InferenceEndpoint targets.
+type inferenceWorkload struct {
+	selector map[string]string
+	port     int32
+}
+
+// resolveInferenceWorkload reads the workload from a created Service spec, or
+// from the live referenced Service. A referenced Service is created by another
+// operator after the workload, so it may not exist yet.
+func resolveInferenceWorkload(
+	ctx context.Context,
+	reader client.Reader,
+	namespace string,
+	endpoint *endpoints.Endpoint,
+) (inferenceWorkload, error) {
+	if err := validateInferenceEndpointShape(endpoint); err != nil {
+		return inferenceWorkload{}, err
+	}
+	service := firstService(endpoint)
+	if service.Create != nil {
+		port := service.Create.Spec.Ports[0]
+		workload := inferenceWorkload{selector: service.Create.Spec.Selector, port: port.TargetPort.IntVal}
+		if workload.port == 0 {
+			workload.port = port.Port
+		}
+		return workload, nil
+	}
+	return resolveReferencedInferenceWorkload(ctx, reader, types.NamespacedName{
+		Namespace: namespace, Name: service.Ref.Name,
+	}, service.Ref.Port)
+}
+
+func resolveReferencedInferenceWorkload(
+	ctx context.Context,
+	reader client.Reader,
+	key types.NamespacedName,
+	servicePort int32,
+) (inferenceWorkload, error) {
+	service := &corev1.Service{}
+	if err := reader.Get(ctx, key, service); err != nil {
+		if apierrors.IsNotFound(err) {
+			return inferenceWorkload{}, fmt.Errorf("%w: Service %s does not exist yet", errInferenceServicePending, key)
+		}
+		return inferenceWorkload{}, fmt.Errorf("read Service %s: %w", key, err)
+	}
+	if len(service.Spec.Selector) == 0 {
+		return inferenceWorkload{}, fmt.Errorf("%w: Service %s has no selector", errInferenceServiceInvalid, key)
+	}
+	var port *corev1.ServicePort
+	for i := range service.Spec.Ports {
+		if service.Spec.Ports[i].Port == servicePort {
+			port = &service.Spec.Ports[i]
+			break
+		}
+	}
+	if port == nil {
+		return inferenceWorkload{}, fmt.Errorf("%w: Service %s has no port %d", errInferenceServiceInvalid, key, servicePort)
+	}
+	workload := inferenceWorkload{selector: service.Spec.Selector, port: port.TargetPort.IntVal}
+	if port.TargetPort.StrVal == "" {
+		if workload.port == 0 {
+			workload.port = port.Port
+		}
+		return workload, nil
+	}
+	resolved, err := resolveNamedTargetPort(ctx, reader, service, port.Name)
+	if err != nil {
+		return inferenceWorkload{}, err
+	}
+	workload.port = resolved
+	return workload, nil
+}
+
+// resolveNamedTargetPort reads the container port number behind a named
+// targetPort. The InferenceEndpoint needs a number, and only the EndpointSlice
+// controller resolves the name against the selected Pods.
+func resolveNamedTargetPort(
+	ctx context.Context,
+	reader client.Reader,
+	service *corev1.Service,
+	portName string,
+) (int32, error) {
+	key := client.ObjectKeyFromObject(service)
+	var slices discoveryv1.EndpointSliceList
+	if err := reader.List(
+		ctx,
+		&slices,
+		client.InNamespace(service.Namespace),
+		client.MatchingLabels{discoveryv1.LabelServiceName: service.Name},
+	); err != nil {
+		return 0, fmt.Errorf("list EndpointSlices for Service %s: %w", key, err)
+	}
+	numbers := sets.New[int32]()
+	for i := range slices.Items {
+		slice := &slices.Items[i]
+		// A slice left by a previous Service with the same name does not describe
+		// this Service's Pods. Skip it so it cannot hold the endpoint in Pending;
+		// ownership validation still reports it.
+		if controller := metav1.GetControllerOfNoCopy(slice); controller == nil ||
+			controller.Kind != serviceKind || controller.UID != service.UID {
+			continue
+		}
+		for _, port := range slice.Ports {
+			if port.Port != nil && port.Name != nil && *port.Name == portName {
+				numbers.Insert(*port.Port)
+			}
+		}
+	}
+	switch numbers.Len() {
+	case 0:
+		return 0, fmt.Errorf("%w: no EndpointSlice of Service %s resolves port %q yet",
+			errInferenceServicePending, key, portName)
+	case 1:
+		return numbers.UnsortedList()[0], nil
+	default:
+		// Pods disagree on the named port, e.g. during a rollout. Wait until the
+		// slices converge instead of routing to a port some Pods do not serve.
+		return 0, fmt.Errorf("%w: EndpointSlices of Service %s resolve port %q to %v",
+			errInferenceServicePending, key, portName, sets.List(numbers))
+	}
+}
+
 // inferenceEndpointTarget derives the InferenceEndpoint workload and routing
 // from the endpoint. The default backend is the Service the composed HTTPRoute
 // would have used, so non-inference paths keep the same auth behavior.
 func inferenceEndpointTarget(
 	endpoint *endpoints.Endpoint,
+	workload inferenceWorkload,
 	backendServiceName string,
 	backendServicePort int32,
 ) (endpoints.InferenceEndpointTarget, error) {
@@ -68,13 +206,8 @@ func inferenceEndpointTarget(
 	if err := validateInferenceEndpointShape(endpoint); err != nil {
 		return target, err
 	}
-	service := firstService(endpoint).Create
-	port := service.Spec.Ports[0]
-	target.Selector = service.Spec.Selector
-	target.Port = port.TargetPort.IntVal
-	if target.Port == 0 {
-		target.Port = port.Port
-	}
+	target.Selector = workload.selector
+	target.Port = workload.port
 	route := endpoint.ExternalAccess.HTTPRoute
 	parent := route.Spec.ParentRefs[0]
 	target.GatewayName = string(parent.Name)
@@ -103,11 +236,32 @@ func validateInferenceEndpointShape(endpoint *endpoints.Endpoint) error {
 		return fmt.Errorf("externalAccess.inference requires externalAccess.httpRoute without ingress or route")
 	}
 	service := firstService(endpoint)
-	if service == nil || service.Create == nil || len(service.Create.Spec.Selector) == 0 || len(service.Create.Spec.Ports) == 0 {
-		return fmt.Errorf("externalAccess.inference requires a created Service with a selector and a port")
+	switch {
+	case service != nil && service.Create != nil:
+		if len(service.Create.Spec.Selector) == 0 || len(service.Create.Spec.Ports) == 0 {
+			return fmt.Errorf("externalAccess.inference requires a created Service with a selector and a port")
+		}
+		if targetPort := service.Create.Spec.Ports[0].TargetPort; targetPort.StrVal != "" {
+			return fmt.Errorf("externalAccess.inference requires a numeric Service targetPort, got %q", targetPort.StrVal)
+		}
+	case service != nil && service.Ref != nil:
+		// The referenced Service may not exist at admission; reconcile resolves it.
+		if service.Ref.Name == "" || service.Ref.Port == 0 {
+			return fmt.Errorf("externalAccess.inference requires a referenced Service with a name and a port")
+		}
+	default:
+		return fmt.Errorf("externalAccess.inference requires a created Service with a selector and a port, " +
+			"or a referenced Service with a name and a port")
 	}
-	if targetPort := service.Create.Spec.Ports[0].TargetPort; targetPort.StrVal != "" {
-		return fmt.Errorf("externalAccess.inference requires a numeric Service targetPort, got %q", targetPort.StrVal)
+	// The auth proxy forwards to the Service port, and the InferenceEndpoint routes
+	// straight to the Pods. Only a Service whose Pods run the auth proxy sidecar
+	// keeps model traffic authenticated; any other protected Service would be
+	// exposed without auth until Gateway authentication exists.
+	if service.Auth != nil && (service.Create == nil ||
+		service.Create.Spec.Ports[0].TargetPort.IntVal != constants.ExternalUrlAuthContainerDefaultPort) {
+		return fmt.Errorf("externalAccess.inference supports services[0].auth only on a created Service "+
+			"that targets the auth proxy sidecar port %d; protected inference on other Services is not supported",
+			constants.ExternalUrlAuthContainerDefaultPort)
 	}
 	route := ea.HTTPRoute
 	if len(route.Spec.Hostnames) == 0 {
@@ -139,7 +293,16 @@ func (p *Plugin) reconcileEndpointInference(
 	if err := p.inferenceEndpointAvailable(); err != nil {
 		return err
 	}
-	target, err := inferenceEndpointTarget(endpoint, backendServiceName, backendServicePort)
+	workload, err := resolveInferenceWorkload(ctx, k8sClient, runner.Namespace, endpoint)
+	if err != nil {
+		if errors.Is(err, errInferenceServicePending) {
+			log.FromContext(ctx).V(1).Info("Waiting to create the InferenceEndpoint",
+				"workloadRunner", runner.Name, "reason", err.Error())
+			return nil
+		}
+		return err
+	}
+	target, err := inferenceEndpointTarget(endpoint, workload, backendServiceName, backendServicePort)
 	if err != nil {
 		return err
 	}
@@ -290,8 +453,18 @@ func (p *Plugin) probeInferenceEndpoint(
 	if err := p.inferenceEndpointAvailable(); err != nil {
 		return fail(err, false)
 	}
+	if err := validateInferenceEndpointShape(endpoint); err != nil {
+		return fail(err, false)
+	}
+	workload, err := resolveInferenceWorkload(ctx, k8sClient, runner.Namespace, endpoint)
+	switch {
+	case errors.Is(err, errInferenceServicePending):
+		return set(dromosv1alpha1.PluginPhasePending, metav1.ConditionFalse, "Pending", err.Error())
+	case err != nil:
+		return fail(err, !errors.Is(err, errInferenceServiceInvalid))
+	}
 	backendName, backendPort := inferenceDefaultBackend(endpoint)
-	target, err := inferenceEndpointTarget(endpoint, backendName, backendPort)
+	target, err := inferenceEndpointTarget(endpoint, workload, backendName, backendPort)
 	if err != nil {
 		return fail(err, false)
 	}

@@ -177,7 +177,7 @@ func validateEndpointServices(
 		}
 
 		if svc.Ref != nil {
-			errs = append(errs, validateEndpointServiceRef(svc, svcPath)...)
+			errs = append(errs, validateEndpointServiceRef(endpoint, svc, svcPath)...)
 		}
 		if svc.Create != nil {
 			errs = append(errs, validateEndpointServiceCreate(svc, svcPath)...)
@@ -348,9 +348,16 @@ func validateMetricsService(
 	return errs
 }
 
-func validateEndpointServiceRef(svc *endpoints.Service, svcPath *field.Path) field.ErrorList {
+func validateEndpointServiceRef(
+	endpoint *endpoints.Endpoint,
+	svc *endpoints.Service,
+	svcPath *field.Path,
+) field.ErrorList {
 	var errs field.ErrorList
-	if svc.Auth == nil {
+	// Inference routing targets a public NIM Service through its own Gateway
+	// route, so it is the one reference that needs no auth proxy.
+	inference := endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil
+	if svc.Auth == nil && !inference {
 		errs = append(errs, field.Required(
 			svcPath.Child("auth"),
 			"auth is required when using service reference; "+
