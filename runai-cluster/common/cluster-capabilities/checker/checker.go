@@ -257,6 +257,11 @@ const (
 	MinVersionGpuMemoryLimitAnnotations
 	// MinVersionOAuth2ProxyTemplates - the min cluster version that provisions the proxy error-page ConfigMap.
 	MinVersionOAuth2ProxyTemplates
+
+	// MinVersionGpuMemoryRequestAnnotations - the first cluster release whose
+	// resource readers support per-container GPU memory requests without gpu-memory.
+	MinVersionGpuMemoryRequestAnnotations
+
 	// NOTE -> Make sure to add the min version to the map below
 )
 
@@ -335,6 +340,7 @@ var clusterVersionToCapabilityMap = map[int]string{
 	MinVersionOfSegmentTopology:                         "2.27.0",
 	MinVersionNoNativeSubmission:                        "3.0.0",
 	MinVersionGpuMemoryLimitAnnotations:                 "3.0.0",
+	MinVersionGpuMemoryRequestAnnotations:               "3.0.23",
 	MinVersionOAuth2ProxyTemplates:                      "3.0.18",
 }
 
