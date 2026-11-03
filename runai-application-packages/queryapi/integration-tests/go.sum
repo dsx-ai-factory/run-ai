@@ -59,8 +59,8 @@ github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.21 h1:5A/Nl0
 github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.21/go.mod h1:ooztsrtw3u4S6LR4uk+UtyG46leaOK60H845oNnDAg8=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32 h1:rnYJz9fT4B8ameCv2NqdHf0XSdDFIsLrjNv3uLn7Obw=
 github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32/go.mod h1:uFXr+IqTPgp/+o5UvgLU4ywtKZFWD2aeWsrZ85uD7Qw=
-github.com/ebitengine/purego v0.11.2 h1:WWiTx8rD8zYdOwSj8O/NiNbsOvSAgJMTlyV1XlbUSeU=
-github.com/ebitengine/purego v0.11.2/go.mod h1:DCHPP08djqhNSoTfImcnHYQRZmd0qhakvrozqaEYhGQ=
+github.com/ebitengine/purego v0.11.3 h1:OB+JLpdm7ioymhyA+6s5kbb/uOuYycAgL8NNTFc5MLg=
+github.com/ebitengine/purego v0.11.3/go.mod h1:DCHPP08djqhNSoTfImcnHYQRZmd0qhakvrozqaEYhGQ=
 github.com/felixge/httpsnoop v1.1.0 h1:3YtUj32ZZkqZtt3sZZsClsymw/QDuVfpNhoA31zeORc=
 github.com/felixge/httpsnoop v1.1.0/go.mod h1:Zqxgdd+1Rkcz8euOqdr7lqgCRJztwr5hp9vDSi5UZCE=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
