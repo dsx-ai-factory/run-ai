@@ -4,8 +4,8 @@
 -->
 
 <template>
-  <div class="runai-panels-layout-wrapper">
-    <section class="runai-panels-layout" :class="{ 'runai-panels-layout--hide-right': hideRight }" :style="layoutStyle">
+  <div class="runai-panels-layout-wrapper" :style="layoutStyle">
+    <section class="runai-panels-layout" :class="{ 'runai-panels-layout--hide-right': hideRight }">
       <!-- Track focus from slotted controls so keyboard users can expand the rail too. -->
       <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
       <aside
@@ -83,16 +83,19 @@ const onLeftFocusOut = (event: FocusEvent) => {
 };
 
 const layoutStyle = computed(() => ({
+  "--layout-width": `calc(${collapseLeft.value ? props.collapsedLeftWidth : props.leftWidth} + ${props.width} + ${hideRight.value ? "20px" : `${props.rightWidth} + 40px`})`,
   "--layout-left-width": collapseLeft.value ? props.collapsedLeftWidth : props.leftWidth,
   "--layout-right-width": props.rightWidth,
-  "--layout-content-width": props.width,
   "--layout-left-content-width": collapseLeft.value && !expandLeft.value ? props.collapsedLeftWidth : props.leftWidth,
 }));
 </script>
 
 <style scoped lang="scss">
 .runai-panels-layout-wrapper {
-  width: 100%;
+  // Give shrink-to-fit parents the preferred width, while fitting constrained containers.
+  width: var(--layout-width);
+  max-width: 100%;
+  margin-inline: auto;
   min-width: 0;
   display: flex;
   justify-content: center;
@@ -105,11 +108,10 @@ const layoutStyle = computed(() => ({
   gap: 20px;
   align-items: flex-start;
   width: 100%;
-  max-width: calc(var(--layout-left-width) + var(--layout-content-width) + var(--layout-right-width) + 40px);
+  max-width: var(--layout-width);
 
   &--hide-right {
     grid-template-columns: var(--layout-left-width) minmax(0, 1fr);
-    max-width: calc(var(--layout-left-width) + var(--layout-content-width) + 20px);
   }
 }
 
