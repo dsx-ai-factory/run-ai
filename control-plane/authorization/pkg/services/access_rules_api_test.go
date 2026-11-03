@@ -1216,6 +1216,52 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 			testAccessRulesFilter(ctx, accessRulesApiService, "", "", filters, 5, false, "")
 		})
 	})
+	Context("Get access rules sync - role renamed in place", func() {
+		// migrateDeprecatedRoleNames renames the role in the control plane, but the
+		// ClusterRole shipped in the cluster chart keeps its original name, and the renamed name is
+		// not even a legal Kubernetes name. The sync must therefore keep reporting the un-renamed
+		// role as the cluster-facing predefined role, so the agent generates the same object name as
+		// before the upgrade and the role still resolves on the cluster.
+		BeforeEach(func() {
+			SetAncestorsCache(ctx, TestScopeId, api.RESOURCETYPE_PROJECT, &authorization_utils.Ancestors{
+				TenantId: tenantId,
+			})
+
+			legacyRoleAccessRuleBody := api.AccessRuleCreationFields{
+				ScopeId:     TestScopeId,
+				ScopeType:   api.SCOPETYPE_PROJECT,
+				SubjectId:   TestUser2Id,
+				SubjectType: api.SUBJECTTYPE_USER,
+				RoleId:      int32(RolesMap[static_roles.DepartmentAdminLegacy.Name]),
+			}
+			createTestAccessRule(ctx, accessRulesApiService, legacyRoleAccessRuleBody, &createdAccessRules, false, http.StatusCreated)
+		})
+
+		It("reports the un-renamed role as the predefined role", func() {
+			apiResponse, _ := accessRulesApiService.GetAccessRulesSync(ctx, 0, 0, "", "")
+			Expect(apiResponse.Code).To(Equal(http.StatusOK))
+
+			accessRules := httpResponseBodyToAccessRulesSync(apiResponse).AccessRules
+			legacyRoleId := int32(RolesMap[static_roles.DepartmentAdminLegacy.Name])
+
+			foundLegacyRule := false
+			for _, rule := range accessRules {
+				if rule.RoleId != legacyRoleId {
+					continue
+				}
+				foundLegacyRule = true
+
+				Expect(rule.RoleName).To(Equal(static_roles.DepartmentAdminLegacy.Name),
+					"the display name the UI shows must not change")
+				Expect(rule.PredefinedRole).NotTo(BeNil(),
+					"a renamed role must report a cluster-facing predefined role")
+				Expect((*rule.PredefinedRole).Name).To(Equal(static_roles.DepartmentAdmin.Name),
+					"the cluster-facing name must be the one the cluster chart has a ClusterRole for")
+			}
+			Expect(foundLegacyRule).To(BeTrue(), "the access rule on the renamed role should be in the sync response")
+		})
+	})
+
 	Context("Get access rules sync", func() {
 		BeforeEach(func() {
 			accessRule2Body := api.AccessRuleCreationFields{
