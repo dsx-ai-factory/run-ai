@@ -445,7 +445,7 @@ Additional non-sharable storage can be considered as well. They serve a task's o
 - `readWriteOnce` (for example EBS `gp2`): the volume is attached to one node at a time. Tasks that run one after another can share it, but a task that starts while a task on another node holds the volume waits until the volume is released. Zonal block storage adds another limit: every task that mounts the volume must run in the volume's availability zone.
 - `readOnlyMany`: many nodes can mount it, but only for reading. It fits an input dataset, not task outputs.
 
-If the workflow asks Run:ai to create the PVC (`existingPvc: false` without a `claimName`), each run will get its own claim, so no directory separation will be needed. With `ephemeral: true` the claim will be deleted when the workflow ends, which fits intermediate files that only the next task needs. The composer should translate this to Argo's `volumeClaimTemplates`, which Argo deletes when the workflow completes.
+If the workflow asks Run:ai to create the PVC (`existingPvc: false` without a `claimName`), each run will get its own claim, so no directory separation will be needed. With `ephemeral: true` the claim will be deleted when the workflow ends, which fits intermediate files that only the next task needs. The composer should translate this to Argo's `volumeClaimTemplates`, and set `spec.volumeClaimGC.strategy: OnWorkflowCompletion`, so that Argo deletes the claim when the workflow ends, whether it succeeded or failed. Argo's default, `OnWorkflowSuccess`, keeps the claims of a failed workflow until the Workflow itself is deleted. `volumeClaimGC` applies to every claim created from `volumeClaimTemplates` and to nothing else, so only ephemeral claims should be created that way. Existing claims, mounted as `persistentVolumeClaim` volumes, aren't affected.
 
 ***PVC Example - Run:ai Workflow***
 
@@ -2114,7 +2114,7 @@ This chapter lists the fields of the Run:ai workflow spec, and how the composer 
 | `environmentVariables` with `value`, `configMap` or `podFieldRef` | `environment` | `container.env` with `value`, `configMapKeyRef` or `fieldRef` |
 | `environmentVariables[].secret` (`name`, `key`) | `credentials: {<credential>: {<ENV>: <key>}}` | `container.env[].valueFrom.secretKeyRef` |
 | `environmentVariables[].userCredential` (`name`, `key`) | `credentials: {<credential>: {<ENV>: <key>}}` | `container.env[].valueFrom.secretKeyRef` to the copy of the user credential that Run:ai creates for the workflow, as for other types |
-| — | credential values of 8 characters or more are masked in logs | **Dropped**: Run:ai and Argo don't mask logs |
+| — | credential values of 8 characters or more are masked in the logs OSMO serves | **Dropped** for now: Run:ai and Argo don't mask logs, so a credential that a task prints can be read by anyone who can view the workflow's logs, for as long as the pod exists (Argo keeps pods until the Workflow is deleted, unless `podGC` is set) and in any downloaded or aggregated copy. Open decision for product, with security review: document that tasks must not print credentials, or mask the values in Run:ai's log views, as OSMO does in its own log service. See [Dropped OSMO Capabilities](osmo-to-runai-gaps.md#dropped-osmo-capabilities) |
 | `labels`, `annotations` | — | Template `metadata` |
 | `stdin`, `tty` | — | `container.stdin`, `container.tty` |
 | `probes.readiness` | — | `container.readinessProbe` |
@@ -2165,7 +2165,7 @@ Storage is covered in the [Input/Output Chain](#inputoutput-chain) example and i
 | ***Shared storage*** | | |
 | `spec.storage.<type>[]`, with the existing item schemas of the sharable types (`s3`, `nfs`, `pvc`) | the workflow data store (admin setting) | Per type, see the [Supported Storage Types](#supported-storage-types) table, on the template of each task that references it in `storageRef` |
 | `spec.storage.<type>[].directorySeparation` **[new]** | each task's folder in the data store | goofys mounts `<bucket>:{{workflow.name}}`, or `subPath: "{{workflow.name}}"` on each mount |
-| `spec.storage.pvc[]` with `claimInfo` and `ephemeral` | — | `spec.volumeClaimTemplates`, deleted when the workflow completes |
+| `spec.storage.pvc[]` with `claimInfo` and `ephemeral` | — | `spec.volumeClaimTemplates`, with `spec.volumeClaimGC.strategy: OnWorkflowCompletion`, so the claims are deleted when the workflow ends, whether it succeeded or failed |
 | `spec.storage.s3[].accessKeySecret`, `secretKeyOfAccessKeyId`, `secretKeyOfSecretKey` | data credentials, applied automatically to matching URLs | `env` of the goofys sidecar, from `secretKeyRef` |
 | `tasks[].storageRef` to a storage with `directorySeparation: none` | `inputs[].task: <workflow>:<task>` (an earlier workflow's output) | A mount of the storage's root, from which the task reads the earlier workflow's directory, named after that workflow. A PVC that Run:ai creates for each run can't be read this way |
 | ***Task storage*** | | |

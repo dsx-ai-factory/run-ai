@@ -36,7 +36,7 @@ See [Replicas and Host Names](osmo-to-runai.md#replicas-and-host-names).
 
 ### Preemption
 
-OSMO detects a preemption from the pod condition `PreemptionByScheduler`, which KAI sets, and marks the task as FAILED_PREEMPTED with exit code 3006. In Argo, a preempted attempt ends in the Error phase with the message "pod deleted", the same as any pod deleted outside Argo, so Argo's status alone can't tell a preemption from other deletions.
+This case hasn't been tested yet. According to OSMO's source, OSMO detects a preemption from the pod condition `PreemptionByScheduler`, which KAI sets before it evicts the pod, and marks the task as FAILED_PREEMPTED with exit code 3006. In Argo, we expect a preempted attempt to end in the Error phase with the message "pod deleted", the same as any pod deleted outside Argo, so Argo's status alone can't tell a preemption from other deletions. This is unverified: Argo's code gives this message only when the pod is gone before the controller sees its final state, so the attempt may also end as Failed with the container's exit code.
 
 See [Preemption](osmo-to-runai.md#preemption).
 
@@ -72,7 +72,7 @@ We don't plan to support these OSMO capabilities:
 
 | OSMO capability | Reason |
 | --- | --- |
-| Masking credential values of 8 characters or more in logs | Run:ai and Argo don't mask logs |
+| Masking credential values of 8 characters or more in logs | Run:ai and Argo don't mask logs, so a credential that a task prints can be read by anyone who can view the workflow's logs (the Run:ai UI and CLI, or `pods/log` access to the project's namespace). It stays readable as long as the pod exists (Argo keeps pods until the Workflow is deleted, unless `podGC` is set), and in downloaded logs and the cluster's log aggregation, if any. OSMO masks only the logs its own services serve, so masking in Run:ai's log views would give the same protection. Open decision for product, with security review: drop masking and document that tasks must not print credentials, or add it to Run:ai's log views |
 | `kpis` | It isn't documented, and OSMO only uploads the files without reading them. A task can write such files to its storage |
 | `inputs[].regex`, `outputs[].regex` | Tasks mount the whole directory |
 | `checkpoint[]` | Tasks write checkpoints directly to mounted storage |
