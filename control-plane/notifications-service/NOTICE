@@ -71,7 +71,7 @@ Dependencies
 | `github.com/go-openapi/validate` | v1.0.1 | Apache-2.0 | https://github.com/go-openapi/validate/blob/v1.0.1/LICENSE |
 | `github.com/go-playground/locales` | v0.14.2 | MIT | https://github.com/go-playground/locales/blob/v0.14.2/LICENSE |
 | `github.com/go-playground/universal-translator` | v0.18.2 | MIT | https://github.com/go-playground/universal-translator/blob/v0.18.2/LICENSE |
-| `github.com/go-playground/validator/v10` | v10.30.5 | MIT | https://github.com/go-playground/validator/blob/v10.30.5/LICENSE |
+| `github.com/go-playground/validator/v10` | v10.30.6 | MIT | https://github.com/go-playground/validator/blob/v10.30.6/LICENSE |
 | `github.com/go-sql-driver/mysql` | v1.10.1 | MPL-2.0 | https://github.com/go-sql-driver/mysql/blob/v1.10.1/LICENSE |
 | `github.com/go-viper/mapstructure/v2` | v2.5.0 | MIT | https://pkg.go.dev/github.com/go-viper/mapstructure/v2@v2.5.0?tab=licenses |
 | `github.com/google/gnostic-models` | v0.7.1 | Apache-2.0 | https://github.com/google/gnostic-models/blob/v0.7.1/LICENSE |
