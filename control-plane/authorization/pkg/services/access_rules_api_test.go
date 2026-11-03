@@ -1336,6 +1336,10 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 					Expect(rule.PredefinedRole).NotTo(BeNil())
 					Expect((*rule.PredefinedRole).Id).To(Equal(fmt.Sprintf("%d", dao.MapStaticRoleNameToRoleId[static_legacy_roles.ResearcherL1.Name])))
 					Expect((*rule.PredefinedRole).Name).To(Equal(static_legacy_roles.ResearcherL1.Name))
+				} else if clusterFacingRole, renamed := dao.RoleToClusterRoleMap[rule.RoleName]; renamed {
+					Expect(rule.PredefinedRole).NotTo(BeNil())
+					Expect((*rule.PredefinedRole).Name).To(Equal(clusterFacingRole))
+					Expect((*rule.PredefinedRole).Id).To(Equal(fmt.Sprintf("%d", dao.MapStaticRoleNameToRoleId[clusterFacingRole])))
 				} else {
 					Expect(rule.PredefinedRole).To(BeNil())
 				}
@@ -1355,10 +1359,15 @@ var _ = Describe("Access rules API tests", Ordered, func() {
 					Expect((*rule.PredefinedRole).Name).To(Equal(static_legacy_roles.ResearcherL1.Name))
 				} else {
 					mappedRule, found := NewToLegacyRolesMap[rule.RoleName]
+					clusterFacingRole, renamed := dao.RoleToClusterRoleMap[rule.RoleName]
 					if found {
 						Expect(rule.PredefinedRole).NotTo(BeNil())
 						Expect((*rule.PredefinedRole).Name).To(Equal(mappedRule))
 						Expect((*rule.PredefinedRole).Id).To(Equal(fmt.Sprintf("%d", dao.MapStaticRoleNameToRoleId[mappedRule])))
+					} else if renamed {
+						Expect(rule.PredefinedRole).NotTo(BeNil())
+						Expect((*rule.PredefinedRole).Name).To(Equal(clusterFacingRole))
+						Expect((*rule.PredefinedRole).Id).To(Equal(fmt.Sprintf("%d", dao.MapStaticRoleNameToRoleId[clusterFacingRole])))
 					} else {
 						Expect(rule.PredefinedRole).To(BeNil())
 					}
