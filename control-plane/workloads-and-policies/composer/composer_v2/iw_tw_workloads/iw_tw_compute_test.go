@@ -12,6 +12,77 @@ import (
 )
 
 var computeTests = []TableEntry{
+	Entry("gpu memory - equal decimal quantities (workspace)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_decimal_equal",
+		expectedFname:            "gpu_mem_decimal_equal_ws",
+		clusterVersion:           "3.0.23",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - equal decimal quantities (training)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:                "gpu_mem_decimal_equal",
+		expectedFname:            "gpu_mem_decimal_equal_tr",
+		clusterVersion:           "3.0.23",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - equivalent quantities with different units", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_mixed_units",
+		expectedFname:            "gpu_mem_mixed_units_ws",
+		clusterVersion:           "3.0.23",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - binary request without a limit", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_binary_request",
+		expectedFname:            "gpu_mem_binary_request_ws",
+		clusterVersion:           "3.0.23",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - legacy request before reader support", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_memory_req_and_limit",
+		expectedFname:            "gpu_memory_req_and_limit_ws_legacy_request",
+		clusterVersion:           "3.0.22",
+		validateGpuMemoryWithKai: false,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - later patch release", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_memory_req_and_limit",
+		expectedFname:            "gpu_memory_req_and_limit_ws",
+		clusterVersion:           "3.0.24",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - later minor release", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_memory_req_and_limit",
+		expectedFname:            "gpu_memory_req_and_limit_ws",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - development cluster", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_memory_req_and_limit",
+		expectedFname:            "gpu_memory_req_and_limit_ws",
+		clusterVersion:           "0.0.0-dev",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
 	Entry("cpu memory request syntax", ComposerTest{
 		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
 		specFname:     "cpu_memory_req_syntax",
@@ -152,9 +223,11 @@ var computeTests = []TableEntry{
 	}),
 
 	Entry("gpu memory request and limit", ComposerTest{
-		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
-		specFname:     "gpu_memory_req_and_limit",
-		expectedFname: "gpu_memory_req_and_limit_ws",
+		clusterVersion:           "3.0.23",
+		validateGpuMemoryWithKai: true,
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_memory_req_and_limit",
+		expectedFname:            "gpu_memory_req_and_limit_ws",
 		expectedRequirements: composer.WorkloadRequirements{
 			GpuOptimization: true,
 		},
