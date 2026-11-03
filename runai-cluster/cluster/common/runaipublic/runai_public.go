@@ -122,7 +122,7 @@ func (h *Handler) IsSnapshotCRDInstalled() (bool, string, error) {
 	if h.runaiPublic == nil {
 		err := h.getRunaiPublicConfigMap()
 		if err != nil {
-			return false, "", fmt.Errorf("invalid workload: %w", err)
+			return false, "", fmt.Errorf("read runai-public: %w", err)
 		}
 	}
 
@@ -143,7 +143,7 @@ func (h *Handler) SnapshotAgentNodeSelector() (string, error) {
 	if h.runaiPublic == nil {
 		err := h.getRunaiPublicConfigMap()
 		if err != nil {
-			return "", fmt.Errorf("invalid workload: %w", err)
+			return "", fmt.Errorf("read runai-public: %w", err)
 		}
 	}
 
