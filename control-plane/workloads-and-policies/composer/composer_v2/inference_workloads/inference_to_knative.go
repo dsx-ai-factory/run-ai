@@ -29,6 +29,7 @@ const (
 	annotationAutoscalingTarget    = "autoscaling.knative.dev/target"
 	annotationAutoscalingMin       = "autoscaling.knative.dev/min-scale"
 	annotationAutoscalingMax       = "autoscaling.knative.dev/max-scale"
+	annotationAutoscalingInitial   = "autoscaling.knative.dev/initial-scale"
 	annotationScaleToZeroRetention = "autoscaling.knative.dev/scale-to-zero-pod-retention-period"
 	annotationProgressDeadline     = "serving.knative.dev/progress-deadline"
 	annotationClusterLocal         = "networking.knative.dev/visibility"

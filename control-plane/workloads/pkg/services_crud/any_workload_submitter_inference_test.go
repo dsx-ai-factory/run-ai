@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"time"
 
+	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
@@ -119,9 +121,13 @@ var _ = Describe("buildInferenceWorkloadV2Metadata", func() {
 })
 
 var _ = Describe("AnyWorkloadSubmitterInference.Create", Serial, func() {
-	It("returns serving-port and exposed-URL connection metadata", func() {
+	DescribeTable("composes serving connections and checks explicit zero initial replicas", func(initial *int32, supported *bool, rejected bool) {
 		const clusterID = "inference-connections-cluster"
-		displayedCluster := testing_pkg.BuildDisplayedCluster(clusterID, "3.0.0", nil)
+		displayedCluster := testing_pkg.BuildDisplayedClusterWithKnative(clusterID, "3.0.0", true, true, true)
+		if supported != nil {
+			components := (*displayedCluster.Status.Get().GetDependencies().Optional[checker.KnativeDependency].Components)[checker.KnativeDependency].Components
+			(*components)[checker.ZeroInitialScaleDependency] = clusterApi.ClusterDependencyStatus{Available: *supported}
+		}
 		displayedCluster.SetDomain("https://mock-q7z3k.example.com")
 		clusterConfig := displayedCluster.Status.Get().GetConfig()
 		clusterConfig.SetRunaiOauth2ProxyImage("test.registry/oauth2-proxy:test")
@@ -148,6 +154,13 @@ var _ = Describe("AnyWorkloadSubmitterInference.Create", Serial, func() {
 		spec.SetImage("jupyter/base-notebook:latest")
 		spec.SetServingPort(*servingPort)
 		spec.SetExposedUrls([]workloadsApi.ExposedUrl{*exposedURL})
+		if initial != nil {
+			autoscaling := workloadsApi.NewAutoScaling()
+			autoscaling.SetMinReplicas(0)
+			autoscaling.SetMaxReplicas(1)
+			autoscaling.SetInitialReplicas(*initial)
+			spec.SetAutoscaling(*autoscaling)
+		}
 		inferenceSpec := &workloadsApi.InferenceSpecSpec{}
 		Expect(convutils.CopySpecs(inferenceSpec, spec)).To(Succeed())
 
@@ -186,6 +199,13 @@ var _ = Describe("AnyWorkloadSubmitterInference.Create", Serial, func() {
 
 		submission, submissionErr := (&AnyWorkloadSubmitterInference{}).Create(context.Background(), wc)
 
+		if rejected {
+			Expect(submissionErr).NotTo(BeNil())
+			Expect(int(submissionErr.Code)).To(Equal(http.StatusBadRequest))
+			Expect(submissionErr.Message).To(ContainSubstring("allow-zero-initial-scale=true"))
+			Expect(submission).To(BeNil())
+			return
+		}
 		Expect(submissionErr).To(BeNil())
 		Expect(submission).NotTo(BeNil())
 		Expect(submission.ConnectionMetadata).NotTo(BeNil())
@@ -211,7 +231,11 @@ var _ = Describe("AnyWorkloadSubmitterInference.Create", Serial, func() {
 		Expect(exposedURLConnection.GetContainerPort()).To(Equal(int32(7860)))
 		Expect(exposedURLConnection.GetCorrelationName()).To(Equal("url"))
 		Expect(exposedURLConnection.GetServiceResourceName()).To(Equal("infw-inference-url"))
-	})
+	},
+		Entry("default behavior", nil, nil, false),
+		Entry("zero accepted when enabled", convutils.Ref(int32(0)), convutils.Ref(true), false),
+		Entry("zero rejected when disabled", convutils.Ref(int32(0)), convutils.Ref(false), true),
+	)
 })
 
 var _ = Describe("AnyWorkloadSubmitterInference.CanUpdate", func() {
