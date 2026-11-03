@@ -78,7 +78,8 @@ runai {{.CommandType}} submit <workload-name> -p <project-name> -i tiangolo/uvic
 runai {{.CommandType}} submit <workload-name> -p <project-name> --template <template-name>
 
 # Submit a workload where workers inherit leader settings but override specific fields
-runai {{.CommandType}} submit <workload-name> -p <project-name> -i tiangolo/uvicorn-gunicorn-fastapi:python3.9 --environment ROLE=LEADER --replicas 3 --workers 7 -g 2 --serving-port 80 --worker-environment ROLE=WORKER
+runai {{.CommandType}} submit <workload-name> -p <project-name> -i tiangolo/uvicorn-gunicorn-fastapi:python3.9 \
+    --environment-variable ROLE=LEADER --replicas 3 --workers 7 -g 2 --serving-port 80 --worker-environment ROLE=WORKER
 
 # Submit a workload with a different worker setup (workers not based on leader configuration)
 runai {{.CommandType}} submit <workload-name> -p <project-name> -i tiangolo/uvicorn-gunicorn-fastapi:python3.9 --replicas 4 --workers 1 -g 8 --serving-port 80 --existing-pvc claimname=my-pvc,path=/data --worker-as-leader=false --worker-image tiangolo/uvicorn-gunicorn-fastapi:python3.9 --worker-gpu-devices-request 8` //nolint:lll // example no way to shorten it
