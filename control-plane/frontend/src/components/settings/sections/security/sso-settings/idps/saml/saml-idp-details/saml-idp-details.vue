@@ -14,6 +14,7 @@
         :error="!!expirationError"
         :error-message="expirationError"
         :rules="[certificateRule]"
+        hide-bottom-space
         no-error-icon
         stack-label
         readonly

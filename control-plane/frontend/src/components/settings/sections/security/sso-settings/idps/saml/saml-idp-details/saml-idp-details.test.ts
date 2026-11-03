@@ -70,6 +70,20 @@ describe("saml-idp-details.vue", () => {
 
     expect(wrapper.text()).not.toContain("Certificate expired");
   });
+
+  it("keeps the same spacing between the fields: no space is reserved under the certificate field while it is valid", () => {
+    const wrapper = createWrapper({
+      singleSignOnServiceUrl: "https://idp.example.com/sso",
+      idpEntityId: "idp-entity",
+      expirationDate: new Date("2030-05-17T00:00:00.000Z"),
+      showExpirationDate: true,
+    });
+
+    const fields = wrapper.findAll(".q-field");
+    expect(fields).toHaveLength(3);
+    fields.forEach((field) => expect(field.classes()).not.toContain("q-field--with-bottom"));
+  });
+
   it("gives the certificate field the same look as the disabled fields only while the certificate is fine", async () => {
     const valid = createWrapper({ showExpirationDate: true, expirationDate: new Date("2030-05-17T00:00:00.000Z") });
     expect(valid.find(".q-field").classes()).toContain("certificate-valid");

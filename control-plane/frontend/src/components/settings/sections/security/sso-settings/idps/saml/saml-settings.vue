@@ -351,14 +351,23 @@ export default defineComponent({
   border-radius: 4px;
   overflow: hidden;
 }
+// The title and the content share the same side inset, so they line up inside the card frame.
+.idp-card :deep(.setting-editable-field) {
+  padding-left: 16px;
+  padding-right: 16px;
+}
 .signature-validation-warning,
 .certificate-warning,
 .redirect-url-field,
 .idp-details {
-  margin: 12px;
+  margin: 12px 16px;
 }
 .idp-card-separator {
-  margin: 0 12px;
+  margin: 0 16px;
+}
+// The body sits right under the title, without the gap a vertical notification bar adds by default.
+.idp-card .signature-validation-warning :deep(.notification-alert-bar__title) {
+  margin-bottom: 0;
 }
 :deep(.download-icon) {
   color: var(--icon-default);
