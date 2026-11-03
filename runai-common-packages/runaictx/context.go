@@ -15,7 +15,6 @@ const (
 	CfIsManagementTenant ContextField = "is-management-tenant"
 	CfTenantId           ContextField = "tenant-id"
 	CfClientId           ContextField = "client-id"
-	CfClientType         ContextField = "client-type"
 	CfSubjectID          ContextField = "subject-id"
 	CfSubjectType        ContextField = "subject-type"
 	CfGroups             ContextField = "groups"

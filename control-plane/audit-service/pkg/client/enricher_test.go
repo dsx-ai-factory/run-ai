@@ -31,7 +31,6 @@ var (
 		runaictx.CfIsManagementTenant: "false",
 		runaictx.CfTenantId:           "12333",
 		runaictx.CfClientId:           "798789",
-		runaictx.CfClientType:         "clientType",
 		runaictx.CfSubjectID:          "subjectId",
 		runaictx.CfSubjectType:        "user",
 		runaictx.CfGroups:             "groups",

@@ -9,7 +9,6 @@ func getRunaiCtxMapping() map[interface{}]string {
 	return map[interface{}]string{
 		CfTenantId:           "tenant_id",
 		CfClientId:           "client_id",
-		CfClientType:         "client_type",
 		CfGroups:             "groups",
 		CfSubjectID:          "subject_id",
 		CfSubjectType:        "subject_type",
