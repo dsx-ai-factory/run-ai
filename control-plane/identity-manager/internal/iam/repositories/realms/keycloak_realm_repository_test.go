@@ -22,6 +22,7 @@ import (
 	runaicloakMocks "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/runaicloak/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"k8s.io/utils/ptr"
 )
 
@@ -79,6 +80,11 @@ func TestCreateRealm_HappyFlow(t *testing.T) {
 	realmName := *kcRealm.Realm
 	authMock.On("GetAdminToken", context.Background()).Return(jwt, nil)
 	iamMock.On("CreateRealm", context.Background(), *jwt, *kcRealm).Return(realmName, nil)
+	iamMock.On("GetClients", context.Background(), *jwt, realmName, gocloak.GetClientsParams{ClientID: gocloak.StringP("admin-cli")}).
+		Return([]*gocloak.Client{{ID: gocloak.StringP("admin-cli-id")}}, nil)
+	iamMock.On("UpdateClient", context.Background(), *jwt, realmName, mock.MatchedBy(func(c gocloak.Client) bool {
+		return c.Enabled != nil && !*c.Enabled && c.DirectAccessGrantsEnabled != nil && !*c.DirectAccessGrantsEnabled
+	})).Return(nil)
 
 	httpReq := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		if req.Method == http.MethodGet {
@@ -96,6 +102,37 @@ func TestCreateRealm_HappyFlow(t *testing.T) {
 	createdRealm, err := testSubject.CreateRealm(context.Background(), realm)
 	assert.Nil(t, err)
 	assert.Equal(t, realmName, createdRealm)
+	iamMock.AssertCalled(t, "UpdateClient", context.Background(), *jwt, realmName, mock.Anything)
+}
+
+func TestCreateRealm_AdminCliCleanupFailureDoesNotFailCreate(t *testing.T) {
+	authMock, iamMock, _, testSubject := initTest(t)
+	jwt := kcMocks.GetMockAccessToken()
+	kcRealm := getMockKcRealms()[0]
+	realm := getMockRealms()[0]
+	realmName := *kcRealm.Realm
+	authMock.On("GetAdminToken", context.Background()).Return(jwt, nil)
+	iamMock.On("CreateRealm", context.Background(), *jwt, *kcRealm).Return(realmName, nil)
+	iamMock.On("GetClients", context.Background(), *jwt, realmName, gocloak.GetClientsParams{ClientID: gocloak.StringP("admin-cli")}).
+		Return(nil, kcMocks.GetKeycloakError())
+
+	httpReq := httptest.NewServer(http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+		if req.Method == http.MethodGet {
+			res.WriteHeader(http.StatusOK)
+			res.Write(getUserProfileMetadataResponse())
+		}
+		if req.Method == http.MethodPut {
+			res.WriteHeader(http.StatusOK)
+			res.Write([]byte{})
+		}
+	}))
+	defer httpReq.Close()
+	authMock.On("GetHost").Return(httpReq.URL)
+
+	createdRealm, err := testSubject.CreateRealm(context.Background(), realm)
+	assert.Nil(t, err)
+	assert.Equal(t, realmName, createdRealm)
+	iamMock.AssertNotCalled(t, "UpdateClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
 }
 
 func getUserProfileMetadataResponse() []byte {
