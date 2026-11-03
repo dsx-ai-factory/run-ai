@@ -19,7 +19,6 @@ import (
 
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/rs/zerolog/log"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/selection"
 
@@ -48,7 +47,6 @@ type AccessRuleObjectInspector bool
 type AccessRulesExtractionResult struct {
 	clusterAccessRules    []client.Object
 	accessRuleIdsToDelete []string
-	renamedAccessRules    map[string]client.Object
 	lastUpdated           *time.Time
 }
 
@@ -81,8 +79,7 @@ func (h *AccessRulesHandler) Handle() error {
 	accessRulesExtractionResult, err := h.extractAccessRules(backendAccessRules)
 
 	metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionCreateOrUpdate, len(accessRulesExtractionResult.clusterAccessRules))
-	metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionDelete,
-		len(accessRulesExtractionResult.accessRuleIdsToDelete)+len(accessRulesExtractionResult.renamedAccessRules))
+	metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionDelete, len(accessRulesExtractionResult.accessRuleIdsToDelete))
 
 	// don't sync deleted - because we are getting the deleted objects from the backend and deleting them by id
 	_, _, innerErr := h.CreateOrUpdateObjects(accessRulesExtractionResult.clusterAccessRules)
@@ -98,13 +95,6 @@ func (h *AccessRulesHandler) Handle() error {
 		err = multierror.Append(err, innerErr)
 	}
 
-	// Drop what a rename left behind. Doing it last means a failure above can never leave an access rule with no
-	// object at all; at worst a duplicate survives for the next sync to collapse.
-	innerErr = h.deleteRenamedAccessRules(accessRulesExtractionResult.renamedAccessRules)
-	if innerErr != nil {
-		err = multierror.Append(err, innerErr)
-	}
-
 	if err != nil {
 		log.Error().Msgf("Failed to handle AccessRules, error: %s", err.Error())
 		return err
@@ -115,86 +105,6 @@ func (h *AccessRulesHandler) Handle() error {
 	log.Debug().Msgf("Successfully handled AccessRules")
 
 	return nil
-}
-
-// getAccessRuleId returns the runai/accessrule-id of an object that is worth looking up by id.
-// It returns an empty id for an object that needs no lookup at all: one already in the cluster under
-// the name we generate (nothing can have been renamed), or one carrying no id to key on. Callers
-// must skip an empty id - never look it up, or objects with no id would match each other.
-func (h *AccessRulesHandler) getAccessRuleId(clusterAccessRule client.Object) (string, error) {
-	_, getErr := h.getObject(clusterAccessRule.GetName(), clusterAccessRule.GetNamespace())
-	if getErr == nil {
-		// already in the cluster under this exact name - nothing can have been renamed
-		return "", nil
-	}
-	if !errors.IsNotFound(getErr) {
-		log.Error().Msgf("Failed getting AccessRule <%s>, error: %s",
-			clusterAccessRule.GetName(), getErr.Error())
-		return "", getErr
-	}
-
-	accessRuleId := clusterAccessRule.GetLabels()[v1alpha1.AccessRuleIdLabel]
-	if accessRuleId == "" {
-		log.Warn().Msgf("AccessRule <%s> has no <%s> label - cannot look for a renamed object",
-			clusterAccessRule.GetName(), v1alpha1.AccessRuleIdLabel)
-	}
-	return accessRuleId, nil
-}
-
-// findRenamedAccessRules pairs each access rule object we are about to reconcile with the object
-// already carrying the same runai/accessrule-id under a different name, if one exists.
-//
-// The generated name embeds the role name, so it moves whenever the role is renamed, while the id
-// never does - see GenerateAccessRuleName. Reconciling by name alone creates a second object beside
-// the first and never looks at the original again.
-func (h *AccessRulesHandler) findRenamedAccessRules(clusterAccessRules []client.Object,
-) (map[string]client.Object, error) {
-	renamedAccessRules := map[string]client.Object{}
-
-	var err error
-	accessRuleIdsToLookUp := []string{}
-	accessRulesById := map[string]client.Object{}
-
-	for _, clusterAccessRule := range clusterAccessRules {
-		accessRuleId, getErr := h.getAccessRuleId(clusterAccessRule)
-		if getErr != nil {
-			err = multierror.Append(err, getErr)
-			continue
-		}
-		if accessRuleId == "" {
-			// nothing to look up: either already there under this name, or no id to key on
-			continue
-		}
-
-		accessRulesById[accessRuleId] = clusterAccessRule
-		accessRuleIdsToLookUp = append(accessRuleIdsToLookUp, accessRuleId)
-	}
-
-	if len(accessRuleIdsToLookUp) == 0 {
-		return renamedAccessRules, err
-	}
-
-	existingAccessRules, listErr := h.listAccessRulesByIds(accessRuleIdsToLookUp)
-	if listErr != nil {
-		return renamedAccessRules, multierror.Append(err, listErr)
-	}
-
-	for index := range existingAccessRules {
-		existingAccessRule := &existingAccessRules[index]
-
-		clusterAccessRule, found := accessRulesById[existingAccessRule.Labels[v1alpha1.AccessRuleIdLabel]]
-		if !found {
-			continue
-		}
-		if existingAccessRule.GetName() == clusterAccessRule.GetName() ||
-			existingAccessRule.GetNamespace() != clusterAccessRule.GetNamespace() {
-			continue
-		}
-
-		renamedAccessRules[clusterAccessRule.GetName()] = existingAccessRule
-	}
-
-	return renamedAccessRules, err
 }
 
 // listAccessRulesByIds returns the AccessRules carrying one of the given runai/accessrule-id values,
@@ -251,25 +161,6 @@ func (h *AccessRulesHandler) deleteAccessRulesByIds(accessRuleIds []string) erro
 		if innerErr := h.deleteObject(accessRule); innerErr != nil {
 			err = multierror.Append(err, innerErr)
 			h.createDeletionEvent(accessRule, innerErr)
-		}
-	}
-
-	return err
-}
-
-// deleteRenamedAccessRules deletes the objects a rename left behind, now that the objects replacing
-// them are in place.
-func (h *AccessRulesHandler) deleteRenamedAccessRules(renamedAccessRules map[string]client.Object) error {
-	var err error
-
-	for currentName, staleAccessRule := range renamedAccessRules {
-		log.Info().Msgf("AccessRule <%s> holds the same <%s> as <%s> but was created under a name "+
-			"that is no longer generated for it - deleting it",
-			staleAccessRule.GetName(), v1alpha1.AccessRuleIdLabel, currentName)
-
-		if innerErr := h.deleteObject(staleAccessRule); innerErr != nil {
-			err = multierror.Append(err, innerErr)
-			h.createDeletionEvent(staleAccessRule, innerErr)
 		}
 	}
 
@@ -350,15 +241,9 @@ func (h *AccessRulesHandler) extractAccessRules(backendAccessRules []auth_openap
 		}
 	}
 
-	renamedAccessRules, innerErr := h.findRenamedAccessRules(clusterAccessRules)
-	if innerErr != nil {
-		err = multierror.Append(err, innerErr)
-	}
-
 	return AccessRulesExtractionResult{
 		clusterAccessRules:    clusterAccessRules,
 		accessRuleIdsToDelete: accessRuleIdsToDelete,
-		renamedAccessRules:    renamedAccessRules,
 		lastUpdated:           lastUpdated,
 	}, err
 }
