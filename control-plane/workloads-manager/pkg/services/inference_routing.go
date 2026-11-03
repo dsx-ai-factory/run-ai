@@ -25,6 +25,7 @@ const (
 	inferenceRoutingNotSubmittableMessage       = "metadata.configuration.inferenceRouting is set by the server and cannot be submitted"
 	loadAwareRoutingUnavailableMessage          = "load-aware routing is not available on this cluster"
 	inferenceRoutingNetworkingOnlyUpdateMessage = "the networking of a workload with load-aware routing can change only through a workload update"
+	inferenceRoutingFixedAtCreationMessage      = "load-aware routing is chosen when the workload is created and cannot be turned on or off by an update"
 )
 
 // inferenceRoutingOptedIn reports whether the workload spec selects the inference
@@ -115,6 +116,17 @@ func applyInferenceRouting(
 		inference.Objectives = &objectives
 	}
 	endpoint.ExternalAccess.Inference = inference
+	return nil
+}
+
+// validateInferenceRoutingUnchanged keeps a workload on the routing path it was
+// created with. An update may change the objective priority or the rewrites, but
+// not add or remove the opt-in, because that would swap the composed HTTPRoute and
+// the InferenceEndpoint route on a running workload.
+func validateInferenceRoutingUnchanged(existing *models.WorkloadConfiguration, routing *api.WorkloadV2ConfigurationInferenceRouting) *api.SubmissionErrorV2 {
+	if hasInferenceRouting(existing) != inferenceRoutingOptedIn(routing) {
+		return NewConfigurationError(inferenceRoutingFixedAtCreationMessage)
+	}
 	return nil
 }
 

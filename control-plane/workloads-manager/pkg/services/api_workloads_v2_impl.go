@@ -865,9 +865,12 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		if configErr != nil {
 			return nil, SubmissionErrorToApiError(configErr)
 		}
-		// The replaced configuration keeps externalAccess.inference only while the
-		// updated workload still opts in; otherwise the composed HTTPRoute returns.
+		// The routing path is fixed at creation, so the replaced configuration keeps
+		// externalAccess.inference exactly when the existing workload has it.
 		inferenceRouting := request.Metadata.Configuration.InferenceRouting
+		if routingErr := validateInferenceRoutingUnchanged(qRecord.Configuration, inferenceRouting); routingErr != nil {
+			return nil, SubmissionErrorToApiError(routingErr)
+		}
 		trustedConvertedFromNative := options.skipAuth && qRecord.TranslatedFromV1 && isConvertedFromNativeWorkload(manifestResourceInfo.Labels)
 		inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, qRecord.ClusterId, trustedConvertedFromNative, manifestResourceInfo.Labels)
 		if routingErr != nil {

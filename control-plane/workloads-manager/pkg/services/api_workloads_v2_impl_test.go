@@ -576,10 +576,30 @@ var _ = Describe("WorkloadsV2Impl", func() {
 					expectInferenceBlock(`{"epp":{"profile":"gie-v1.5"},"objectives":[{"model":"model","priority":10}]}`)
 				})
 
-				It("removes the inference block when the updated workload no longer opts in", func() {
+				It("rejects an update that turns load-aware routing off", func() {
 					resp := update(api.WorkloadV2Configuration{})
-					Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
-					Expect(clusterInferenceBlock()).To(BeNil())
+					Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+					Expect(resp.Body.String()).To(ContainSubstring(inferenceRoutingFixedAtCreationMessage))
+					expectInferenceBlock(optedInBlock)
+				})
+
+				It("rejects an update that turns load-aware routing on", func() {
+					configuration := api.WorkloadV2Configuration{Networking: &networking}
+					plainId, _ := createInternalWorkloadForTest(router, randoms, &api.WorkloadV2CreateRequest{
+						Metadata: api.WorkloadV2MetadataCreateParams{
+							Name: "plain-model", ProjectId: randoms.ProjectIdStr, Configuration: configuration,
+							Category: convutils.Ref("default-category"), Priority: convutils.Ref("default-priority"),
+						},
+						Manifest: manifest,
+					})
+					optedInConfiguration := optedIn()
+					optedInConfiguration.Networking = &networking
+					resp := tryToUpdateInternalWorkloadForTest(router, randoms, plainId, &api.WorkloadV2UpdateRequest{
+						Metadata: api.WorkloadV2MetadataUpdateParams{Configuration: &optedInConfiguration},
+						Manifest: manifest,
+					})
+					Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+					Expect(resp.Body.String()).To(ContainSubstring(inferenceRoutingFixedAtCreationMessage))
 				})
 
 				It("rejects an opted-in update on a cluster without the integration", func() {

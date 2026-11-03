@@ -222,7 +222,8 @@ func (s *AnyWorkloadSubmitterDinf) Update(ctx context.Context, wc *workloadConte
 		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
 	}
 	// The update replaces the whole configuration, so it must carry the routing
-	// again; without it workloads-manager removes externalAccess.inference.
+	// again; workloads-manager rejects an update whose opt-in differs from the
+	// one the workload was created with.
 	if routingErr := setDinfInferenceRouting(spec, &target.Config); routingErr != nil {
 		return nil, routingErr
 	}
