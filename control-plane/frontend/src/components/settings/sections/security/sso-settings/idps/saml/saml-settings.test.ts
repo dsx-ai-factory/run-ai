@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { mount } from "@vue/test-utils";
+import { flushPromises, mount } from "@vue/test-utils";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { Quasar } from "quasar";
 import { createTestingPinia } from "@pinia/testing";
@@ -255,6 +255,59 @@ describe("saml-settings.vue", () => {
       expect((wrapper.vm as unknown as { certificateWarningVariant: string | null }).certificateWarningVariant).toBe(
         null,
       );
+    });
+  });
+
+  describe("identity provider details", () => {
+    it("shows the identity provider URL, entity ID and expiration date in the saved card", async () => {
+      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(new Date("2030-05-17T00:00:00.000Z"));
+
+      const { wrapper } = factory(mockIdp, false);
+      await flushPromises();
+
+      const details = wrapper.findComponent({ name: "SamlIdpDetails" });
+      expect(details.exists()).toBe(true);
+      expect(details.props()).toMatchObject({
+        singleSignOnServiceUrl: "http://test.com/sso",
+        idpEntityId: "runai-app.run.ai/bgu",
+        showExpirationDate: true,
+      });
+      expect(details.props("expirationDate")).toEqual(new Date("2030-05-17T00:00:00.000Z"));
+    });
+
+    it("does not show the identity provider URL, entity ID or expiration date while editing", async () => {
+      const { wrapper } = factory(mockIdp, true);
+
+      wrapper.findComponent({ name: "saml-fields" }).vm.$emit("certificate-details", {
+        showExpirationDate: true,
+        expirationDate: new Date("2030-05-17T00:00:00.000Z"),
+        expirationError: "",
+      });
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.findComponent({ name: "SamlIdpDetails" }).exists()).toBe(false);
+    });
+
+    it("shows only the certificate expiration error while editing when the certificate is expired", async () => {
+      const { wrapper } = factory(mockIdp, true);
+      const expirationDate = new Date("2020-01-01T00:00:00.000Z");
+
+      wrapper.findComponent({ name: "saml-fields" }).vm.$emit("certificate-details", {
+        showExpirationDate: true,
+        expirationDate,
+        expirationError: "Certificate expired. Replace the metadata file above.",
+      });
+      await wrapper.vm.$nextTick();
+
+      const details = wrapper.findComponent({ name: "SamlIdpDetails" });
+      expect(details.exists()).toBe(true);
+      expect(details.props("singleSignOnServiceUrl")).toBeUndefined();
+      expect(details.props("idpEntityId")).toBeUndefined();
+      expect(details.props()).toMatchObject({
+        showExpirationDate: true,
+        expirationError: "Certificate expired. Replace the metadata file above.",
+      });
+      expect(details.props("expirationDate")).toEqual(expirationDate);
     });
   });
 });
