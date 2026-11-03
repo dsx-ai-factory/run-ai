@@ -94,6 +94,36 @@ func TestReconcile_DifferentVersion_ReconcilesCalled(t *testing.T) {
 	assert.NoError(t, err)
 }
 
+func TestReconcile_LegacyAndMigratedAccessKeys_AllWrittenWithCurrentType(t *testing.T) {
+	mockContainer, tenantResolverMock, versionsDalMock, subject := initTest(t)
+	tenantResolverMock.On("GetRealmTenantId", mock.Anything, mock.Anything).Return(testTenantId)
+	versionsDalMock.On("UpdateAccessKeysReconcilerVersions", mock.Anything, testTenantId, testVersion).Return(nil)
+
+	// the pull returns access keys in both stored formats, e.g. after a partial earlier run
+	apps := []iamModels.Client{
+		{
+			ClientID:   ptr.To("legacy-key"),
+			Attributes: &iamModels.ClientAttributes{CreatedBy: ptr.To("user@example.com"), ClientType: ptr.To("user-application")},
+		},
+		{
+			ClientID:   ptr.To("migrated-key"),
+			Attributes: &iamModels.ClientAttributes{CreatedBy: ptr.To("user@example.com"), ClientType: ptr.To(realm_client.ClientTypeUserApp)},
+		},
+	}
+	mockContainer.MockClientService.On("GetClients", mock.Anything, testRealm, clientTypeFilter()).Return(apps, nil)
+	mockContainer.MockClientService.On("GetClientByClientId", mock.Anything, testRealm, "legacy-key").Return(&apps[0], nil)
+	mockContainer.MockClientService.On("GetClientByClientId", mock.Anything, testRealm, "migrated-key").Return(&apps[1], nil)
+	writtenWithCurrentType := mock.MatchedBy(func(c *iamModels.Client) bool {
+		return c.Attributes != nil && c.Attributes.ClientType != nil && *c.Attributes.ClientType == realm_client.ClientTypeUserApp
+	})
+	mockContainer.MockClientService.On("UpdateClient", mock.Anything, testRealm, writtenWithCurrentType).Return(nil).Twice()
+
+	err := subject.Reconcile(context.Background(), testRealm, true)
+
+	assert.NoError(t, err)
+	mockContainer.MockClientService.AssertNumberOfCalls(t, "UpdateClient", 2)
+}
+
 func TestReconcile_VersionDalError_ReconcilesCalled(t *testing.T) {
 	mockContainer, tenantResolverMock, versionsDalMock, subject := initTest(t)
 	tenantResolverMock.On("GetRealmTenantId", mock.Anything, mock.Anything).Return(testTenantId)

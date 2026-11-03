@@ -284,7 +284,7 @@ func accessKeyModelToApiResponseAdministrator(ctx context.Context, accessKey *mo
 }
 
 func isAccessKey(app *models.Client) bool {
-	return app != nil && app.Attributes != nil && *app.Attributes.ClientType == realm_client.ClientTypeUserApp
+	return app != nil && app.Attributes != nil && app.Attributes.ClientType != nil && models.IsUserAppClientType(*app.Attributes.ClientType)
 }
 
 func getAccessKeyFilter(isTenantAdmin bool, createdBy *string) models.ClientFilter {

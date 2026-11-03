@@ -219,7 +219,7 @@ func TestClient_CreateInternalClient_DifferentClientTypes(t *testing.T) {
 		{
 			name:           "Application/External client type",
 			clientType:     openapi.CLIENTTYPE_APPLICATION,
-			expectType:     "tenant-application",
+			expectType:     "service-account",
 			expectExternal: true,
 		},
 	}

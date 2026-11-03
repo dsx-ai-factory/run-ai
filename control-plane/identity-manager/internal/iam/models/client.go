@@ -14,11 +14,33 @@ import (
 )
 
 const (
-	ClientTypeUserApp       = "user-application"
-	ClientTypeTenantApp     = "tenant-application"
+	ClientTypeUserApp       = "access-key"
+	ClientTypeTenantApp     = "service-account"
 	ClientTypeWorkloadsAuth = "WorkloadsAuth"
 	ClientTypeMCP           = "MCP"
+
+	// Values stored before the rename to ClientTypeUserApp / ClientTypeTenantApp. Clients keep them until the
+	// reconciler rewrites them, and the reconcile can run more than once, so lookups must accept both.
+	LegacyClientTypeUserApp   = "user-application"
+	LegacyClientTypeTenantApp = "tenant-application"
 )
+
+// LegacyClientType returns the pre-rename value of a client type, or false if the type was never renamed.
+func LegacyClientType(clientType string) (string, bool) {
+	switch clientType {
+	case ClientTypeUserApp:
+		return LegacyClientTypeUserApp, true
+	case ClientTypeTenantApp:
+		return LegacyClientTypeTenantApp, true
+	default:
+		return "", false
+	}
+}
+
+// IsUserAppClientType reports whether the stored value denotes an access key, in the current or legacy format.
+func IsUserAppClientType(clientType string) bool {
+	return clientType == ClientTypeUserApp || clientType == LegacyClientTypeUserApp
+}
 
 type ClientConfig struct {
 	PublicClient              *bool `json:"publicClient,omitempty"`

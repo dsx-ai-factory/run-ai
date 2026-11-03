@@ -32,6 +32,11 @@ const (
 	serviceAccountNamePrefix = "service-account"
 	accessKeyNamePrefix      = "access-key"
 	createdByUser            = "test@example.com"
+
+	// Client type values stored before the rename to "access-key" / "service-account". Hardcoded on purpose rather
+	// than taken from the constants, so the legacy helpers keep creating old-format clients after the constants change.
+	legacyAccessKeyClientType      = "user-application"
+	legacyServiceAccountClientType = "tenant-application"
 )
 
 type TestSteps struct {
@@ -131,6 +136,39 @@ func (t *TestSteps) CreateAccessKey(ctx context.Context, realm, tenantId string,
 	return t.iamClient.ClientService.CreateClient(ctx, realm, accessKey)
 }
 
+// CreateLegacyServiceAccount creates a service account stored the way it was before the client type rename.
+func (t *TestSteps) CreateLegacyServiceAccount(ctx context.Context, realm string, tenantId string) (string, error) {
+	name := GenerateRandomString(serviceAccountNamePrefix)
+	serviceAccount := &models.Client{
+		Name:     &name,
+		ClientID: &name,
+		Enabled:  ptr.To(true),
+		TenantId: &tenantId,
+		Attributes: &models.ClientAttributes{
+			CreatedBy: ptr.To(createdByUser),
+		},
+	}
+	realm_client.ApplyClientProfile(serviceAccount, realm_client.ClientTypeTenantApp)
+	serviceAccount.Attributes.ClientType = ptr.To(legacyServiceAccountClientType)
+	return t.iamClient.ClientService.CreateClient(ctx, realm, serviceAccount)
+}
+
+// CreateLegacyAccessKey creates an access key stored the way it was before the client type rename.
+func (t *TestSteps) CreateLegacyAccessKey(ctx context.Context, realm, tenantId, createdBy string) (string, error) {
+	accessKey := &models.Client{
+		Name:     ptr.To(GenerateRandomString(accessKeyNamePrefix)),
+		ClientID: ptr.To("clientID" + uuid.New().String()),
+		Enabled:  ptr.To(true),
+		TenantId: &tenantId,
+		Attributes: &models.ClientAttributes{
+			CreatedBy: &createdBy,
+		},
+	}
+	realm_client.ApplyClientProfile(accessKey, realm_client.ClientTypeUserApp)
+	accessKey.Attributes.ClientType = ptr.To(legacyAccessKeyClientType)
+	return t.iamClient.ClientService.CreateClient(ctx, realm, accessKey)
+}
+
 func (t *TestSteps) DeleteClient(ctx context.Context, realm string, appId string) error {
 	return t.iamClient.ClientService.DeleteClient(ctx, realm, appId)
 }
@@ -203,8 +241,17 @@ func (t *TestSteps) DeleteInternalClient(ctx context.Context, clientId string) e
 }
 
 func (t *TestSteps) ReconcileRealm(ctx context.Context, realmName string, reconcilerType *openapi.ReconcilerType) error {
+	return t.reconcileRealm(ctx, realmName, reconcilerType, false)
+}
+
+// ReconcileRealmForced skips the per-tenant version gate, so repeated runs in one test all execute.
+func (t *TestSteps) ReconcileRealmForced(ctx context.Context, realmName string, reconcilerType *openapi.ReconcilerType) error {
+	return t.reconcileRealm(ctx, realmName, reconcilerType, true)
+}
+
+func (t *TestSteps) reconcileRealm(ctx context.Context, realmName string, reconcilerType *openapi.ReconcilerType, force bool) error {
 	_, err := t.openapiClient.RealmAPI.ReconcileRealm(ctx, realmName).RealmReconcileRequest(openapi.RealmReconcileRequest{
-		Force:          ptr.To(false),
+		Force:          ptr.To(force),
 		ReconcilerType: *openapi.NewNullableReconcilerType(reconcilerType),
 	}).Execute()
 	if err != nil {

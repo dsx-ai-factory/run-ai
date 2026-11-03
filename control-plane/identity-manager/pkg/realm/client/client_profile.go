@@ -22,8 +22,8 @@ const (
 	ClientTypeTokenExchange = "TokenExchange"
 	ClientTypeAgent         = "agent"
 	ClientTypeInstaller     = "runai-installer"
-	ClientTypeUserApp       = "user-application"
-	ClientTypeTenantApp     = "tenant-application"
+	ClientTypeUserApp       = "access-key"
+	ClientTypeTenantApp     = "service-account"
 	ClientTypeMCP           = "MCP"
 )
 
