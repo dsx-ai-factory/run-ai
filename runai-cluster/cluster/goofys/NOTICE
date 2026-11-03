@@ -69,13 +69,13 @@ Dependencies
 | `github.com/felixge/httpsnoop` | v1.1.0 | MIT | https://github.com/felixge/httpsnoop/blob/v1.1.0/LICENSE.txt |
 | `github.com/fsnotify/fsnotify` | v1.10.1 | BSD-3-Clause | https://github.com/fsnotify/fsnotify/blob/v1.10.1/LICENSE |
 | `github.com/gabriel-vasile/mimetype` | v1.4.16 | MIT | https://github.com/gabriel-vasile/mimetype/blob/v1.4.16/LICENSE |
-| `github.com/go-jose/go-jose/v4` | v4.1.7 | Apache-2.0 | https://pkg.go.dev/github.com/go-jose/go-jose/v4@v4.1.7?tab=licenses |
-| `github.com/go-jose/go-jose/v4/json` | v4.1.7 | BSD-3-Clause | https://pkg.go.dev/github.com/go-jose/go-jose/v4@v4.1.7?tab=licenses |
+| `github.com/go-jose/go-jose/v4` | v4.1.8 | Apache-2.0 | https://pkg.go.dev/github.com/go-jose/go-jose/v4@v4.1.8?tab=licenses |
+| `github.com/go-jose/go-jose/v4/json` | v4.1.8 | BSD-3-Clause | https://pkg.go.dev/github.com/go-jose/go-jose/v4@v4.1.8?tab=licenses |
 | `github.com/go-logr/logr` | v1.4.4 | Apache-2.0 | https://github.com/go-logr/logr/blob/v1.4.4/LICENSE |
 | `github.com/go-logr/stdr` | v1.2.2 | Apache-2.0 | https://github.com/go-logr/stdr/blob/v1.2.2/LICENSE |
 | `github.com/go-playground/locales` | v0.14.2 | MIT | https://github.com/go-playground/locales/blob/v0.14.2/LICENSE |
 | `github.com/go-playground/universal-translator` | v0.18.2 | MIT | https://github.com/go-playground/universal-translator/blob/v0.18.2/LICENSE |
-| `github.com/go-playground/validator/v10` | v10.30.5 | MIT | https://github.com/go-playground/validator/blob/v10.30.5/LICENSE |
+| `github.com/go-playground/validator/v10` | v10.30.6 | MIT | https://github.com/go-playground/validator/blob/v10.30.6/LICENSE |
 | `github.com/go-viper/mapstructure/v2` | v2.5.0 | MIT | https://pkg.go.dev/github.com/go-viper/mapstructure/v2@v2.5.0?tab=licenses |
 | `github.com/gofrs/uuid` | v4.4.0+incompatible | MIT | https://github.com/gofrs/uuid/blob/v4.4.0/LICENSE |
 | `github.com/golang-jwt/jwt/v4` | v4.5.2 | MIT | https://pkg.go.dev/github.com/golang-jwt/jwt/v4@v4.5.2?tab=licenses |
