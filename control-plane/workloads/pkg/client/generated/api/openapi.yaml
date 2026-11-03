@@ -13993,6 +13993,47 @@ components:
         minimum: 1
         type: integer
       style: form
+    WorkloadActionsSortOrder:
+      description: Sort direction. Defaults to newest first.
+      explode: true
+      in: query
+      name: sortOrder
+      required: false
+      schema:
+        default: desc
+        enum:
+        - asc
+        - desc
+        type: string
+      style: form
+    WorkloadActionsSort:
+      description: Field to sort by. Defaults to acceptedAt.
+      explode: true
+      in: query
+      name: sortBy
+      required: false
+      schema:
+        enum:
+        - acceptedAt
+        - action
+        - subject
+        type: string
+      style: form
+    WorkloadActionsFilter:
+      description: "Filter event, subject or accepted time using the standard field/operator/value\
+        \ syntax. Dates use ISO 8601 timestamps and only support ==, !=, <= and >=\
+        \ operators."
+      explode: false
+      in: query
+      name: filterBy
+      required: false
+      schema:
+        items:
+          pattern: ^((action|subject)(==|!=|<=|>=|=@|!@|=\^|=\$)|acceptedAt(==|!=|<=|>=)).+$
+          type: string
+        maxItems: 10
+        type: array
+      style: form
     Search:
       description: Filter results by a free text search.
       explode: true
