@@ -39,7 +39,7 @@ func inferenceIntegrationClusterForTest() *clustersapi.DisplayedCluster {
 				GatewayNamespace:               *clustersapi.NewNullableString(ptr.To("gateways")),
 			}),
 			Operands: &map[string]clustersapi.ClusterReportedStatusOperandsValue{
-				"runai-agent": {Ready: true}, "anyworkload-controller": {Ready: true}, "inference-endpoint-controller": {Ready: true},
+				"agent": {Ready: true}, "anyworkload-controller": {Ready: true}, "inference-endpoint-controller": {Ready: true},
 			},
 		}),
 	}

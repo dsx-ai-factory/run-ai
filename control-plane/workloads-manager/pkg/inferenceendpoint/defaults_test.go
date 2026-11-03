@@ -30,7 +30,7 @@ var _ = Describe("Administrator inference endpoint defaults", func() {
 				GatewayNamespace:               *clustersapi.NewNullableString(ptr.To("gateways")),
 			}),
 			Operands: &map[string]clustersapi.ClusterReportedStatusOperandsValue{
-				"runai-agent": {Ready: true}, "anyworkload-controller": {Ready: true}, "inference-endpoint-controller": {Ready: true},
+				"agent": {Ready: true}, "anyworkload-controller": {Ready: true}, "inference-endpoint-controller": {Ready: true},
 			},
 		}
 	})
@@ -63,7 +63,7 @@ var _ = Describe("Administrator inference endpoint defaults", func() {
 		defaults, err := ResolveDefaults(status)
 		Expect(err).To(MatchError(ContainSubstring(operand)))
 		Expect(defaults).To(BeNil())
-	}, Entry("Agent", "runai-agent"), Entry("Anyworkload", "anyworkload-controller"), Entry("endpoint controller", "inference-endpoint-controller"))
+	}, Entry("Agent", "agent"), Entry("Anyworkload", "anyworkload-controller"), Entry("endpoint controller", "inference-endpoint-controller"))
 
 	It("rejects missing operand evidence during an upgrade", func() {
 		status.Operands = nil

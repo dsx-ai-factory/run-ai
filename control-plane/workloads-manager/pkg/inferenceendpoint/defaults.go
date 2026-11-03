@@ -36,8 +36,10 @@ func ResolveDefaults(status *clustersapi.ClusterReportedStatus) (*Defaults, erro
 	if *version != runv1.InferenceEndpointIntegrationV1 {
 		return nil, fmt.Errorf("unsupported inference endpoint integration %q", *version)
 	}
+	// Operand status is keyed by the operator's operand name, not the Deployment
+	// name: the agent reports as "agent" while its Deployment is runai-agent.
 	operands := status.GetOperands()
-	for _, name := range []string{"runai-agent", "anyworkload-controller", "inference-endpoint-controller"} {
+	for _, name := range []string{"agent", "anyworkload-controller", "inference-endpoint-controller"} {
 		if operand, found := operands[name]; !found || !operand.Ready {
 			return nil, fmt.Errorf("inference endpoint integration requires ready operand %s", name)
 		}
