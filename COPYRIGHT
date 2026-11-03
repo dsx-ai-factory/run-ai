@@ -12807,7 +12807,7 @@ Copyright Klaus Post - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/klauspost/cpuid/v2 v2.4.0
-  github.com/klauspost/cpuid/v2 v2.4.1
+  github.com/klauspost/cpuid/v2 v2.4.2
 
 The MIT License (MIT)
 
@@ -18946,6 +18946,7 @@ Components:
   github.com/xdg-go/pbkdf2 v1.0.0
   github.com/xdg-go/scram v1.1.2
   github.com/xdg-go/scram v1.2.0
+  github.com/xdg-go/scram v1.3.0
   github.com/xdg-go/stringprep v1.0.4
 
 
