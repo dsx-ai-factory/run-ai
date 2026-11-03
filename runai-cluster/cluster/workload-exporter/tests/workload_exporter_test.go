@@ -20,6 +20,7 @@ import (
 	dinfw "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
 	infwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/inferenceworkload/v2alpha1"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	diwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
@@ -27,7 +28,7 @@ import (
 	twv2a1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/node"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/pod"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/podGroup"
+	podgroup "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/podGroup"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/workload"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/metrics"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/metrics/data"
@@ -40,8 +41,11 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	kubefake "k8s.io/client-go/kubernetes/fake"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -298,7 +302,7 @@ var _ = Describe("TestWorkloadExporter", Ordered, func() {
 		}).Build()
 		err := k8sClient.Create(ctx, getWorkloadsConfigMapEntity())
 		Expect(err).To(BeNil())
-		podController = pod.NewPodController(k8sClient)
+		podController = pod.NewPodController(k8sClient, nil)
 		pgController = podgroup.NewPodGroupController(k8sClient)
 		nodeController = node.NewNodeController(k8sClient)
 
@@ -594,6 +598,101 @@ var _ = Describe("TestWorkloadExporter", Ordered, func() {
 
 		gauge1, _ := metrics.GetPodElementsMetric().GetMetricWithLabelValues(pod.Name, pod.Namespace, string(pod.UID), "elem-wl-id", "e1-uuid", "1")
 		Expect(testutil.ToFloat64(gauge1)).To(BeEquivalentTo(0))
+	})
+
+	// Pods that request GPUs through a DRA ResourceClaimTemplate (no nvidia.com/gpu in the pod spec).
+	newDRAController := func() *pod.PodController {
+		return pod.NewPodController(k8sClient, dra.NewDRAParser(k8sClient, kubefake.NewClientset()))
+	}
+	newDRAPod := func(name, node, phase, allocatedGpus string) *corev1.Pod {
+		draPod := buildPod(name, TestNamespaceName, name+"-workload-id", node, phase)
+		delete(draPod.Spec.Containers[0].Resources.Requests, constants.GpuResourceName)
+		delete(draPod.Spec.Containers[0].Resources.Limits, constants.GpuResourceName)
+		draPod.Spec.ResourceClaims = []corev1.PodResourceClaim{
+			{Name: "gpu", ResourceClaimTemplateName: ptr.To("dra-gpu-template")},
+		}
+		if allocatedGpus == "" {
+			delete(draPod.Annotations, constants.PodAllocatedGpusAnnotation)
+			delete(draPod.Annotations, constants.PodAllocatedGpuMemoryAnnotation)
+		} else {
+			draPod.Annotations[constants.PodAllocatedGpusAnnotation] = allocatedGpus
+		}
+		return draPod
+	}
+	createDRATemplate := func(gpus int64) {
+		template := &resourcev1.ResourceClaimTemplate{
+			ObjectMeta: metav1.ObjectMeta{Name: "dra-gpu-template", Namespace: TestNamespaceName},
+			Spec: resourcev1.ResourceClaimTemplateSpec{Spec: resourcev1.ResourceClaimSpec{
+				Devices: resourcev1.DeviceClaim{Requests: []resourcev1.DeviceRequest{{
+					Name: "gpu",
+					Exactly: &resourcev1.ExactDeviceRequest{
+						DeviceClassName: "gpu.nvidia.com",
+						AllocationMode:  resourcev1.DeviceAllocationModeExactCount,
+						Count:           gpus,
+					},
+				}}},
+			}},
+		}
+		Expect(k8sClient.Create(ctx, template)).To(Succeed())
+		testCreatedObjects = append(testCreatedObjects, template)
+	}
+	expectDRAPodMetrics := func(draPod *corev1.Pod, expected *ExpectedPodMetricValues) {
+		podIdentifier := prometheus.Labels{
+			metrics.PodNameLabel:    draPod.Name,
+			metrics.PodUUIDLabel:    string(draPod.UID),
+			metrics.NamespaceLabel:  draPod.Namespace,
+			metrics.WorkloadIdLabel: draPod.Name + "-workload-id",
+		}
+		Eventually(func(g Gomega) {
+			for i, podMetric := range metrics.GetPodResourcesMetrics() {
+				gauge, err := podMetric.GetMetricWith(podIdentifier)
+				g.Expect(err).To(BeNil())
+				g.Expect(testutil.ToFloat64(gauge)).To(Equal(getExpectedMetricValue(expected, i)),
+					"metric: %s", expectedPodMetricValueNames[i])
+			}
+		}, 3*time.Second, 200*time.Millisecond).Should(Succeed())
+	}
+
+	DescribeTable("Pod metrics tests - GPUs requested through DRA claims",
+		func(phase, node, allocatedGpus string, expected *ExpectedPodMetricValues) {
+			createDRATemplate(2)
+			draPod := newDRAPod("dra-pod", node, phase, allocatedGpus)
+			Expect(k8sClient.Create(ctx, draPod)).To(Succeed())
+			testCreatedObjects = append(testCreatedObjects, draPod)
+			podIdentifiersToReset[draPod.Name] = draPod.Namespace
+
+			_, err := newDRAController().Reconcile(ctx, getReconcileRequest(draPod.Name, draPod.Namespace))
+			Expect(err).To(BeNil())
+			expectDRAPodMetrics(draPod, expected)
+		},
+		Entry("pending pod: requested and limit come from the template, nothing allocated",
+			string(corev1.PodPending), "", "",
+			&ExpectedPodMetricValues{requestedGpus: 2, limitGpus: 2}),
+		Entry("running pod: allocation comes from the status-updater annotation",
+			string(corev1.PodRunning), TestNodeName, "2",
+			&ExpectedPodMetricValues{requestedGpus: 2, limitGpus: 2, allocatedGpus: 2,
+				allocatedGPUMemory: 10000, allocatedCpus: 100, allocatedCpuMemory: 1000}),
+	)
+
+	It("DRA pod - an allocation annotation update is reflected in the metrics", func() {
+		createDRATemplate(2)
+		draPod := newDRAPod("dra-pod-alloc", TestNodeName, string(corev1.PodRunning), "2")
+		Expect(k8sClient.Create(ctx, draPod)).To(Succeed())
+		testCreatedObjects = append(testCreatedObjects, draPod)
+		podIdentifiersToReset[draPod.Name] = draPod.Namespace
+		draController := newDRAController()
+
+		_, err := draController.Reconcile(ctx, getReconcileRequest(draPod.Name, draPod.Namespace))
+		Expect(err).To(BeNil())
+		expectDRAPodMetrics(draPod, &ExpectedPodMetricValues{requestedGpus: 2, limitGpus: 2, allocatedGpus: 2,
+			allocatedGPUMemory: 10000, allocatedCpus: 100, allocatedCpuMemory: 1000})
+
+		draPod.Annotations[constants.PodAllocatedGpusAnnotation] = "3"
+		Expect(k8sClient.Update(ctx, draPod)).To(Succeed())
+		_, err = draController.Reconcile(ctx, getReconcileRequest(draPod.Name, draPod.Namespace))
+		Expect(err).To(BeNil())
+		expectDRAPodMetrics(draPod, &ExpectedPodMetricValues{requestedGpus: 2, limitGpus: 2, allocatedGpus: 3,
+			allocatedGPUMemory: 10000, allocatedCpus: 100, allocatedCpuMemory: 1000})
 	})
 
 	It("Pod elements metric - pod without element IDs", func() {

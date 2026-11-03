@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/resources"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
@@ -173,6 +174,26 @@ func GetPodResources(pod *corev1.Pod) (*ResourcesInfo, *ResourcesInfo) {
 
 	requests, limits := getPodResources(podTemplateSpec)
 	return parseResources(requests), parseResources(limits)
+}
+
+// AddDRAGpus adds the GPUs the pod requests through DRA ResourceClaims (pod.Spec.ResourceClaims)
+// to its requested and limit GPUs, on top of any GPUs requested through the pod spec.
+// A DRA claim specifies a device count only, so GPU memory is left as configured.
+// Allocated GPUs are not touched: they come from the allocation annotations written by status-updater.
+// Lookup errors are returned so the controller retries.
+func AddDRAGpus(ctx context.Context, pod *corev1.Pod, draParser *dra.DRAParser, requested, limit *ResourcesInfo) error {
+	if draParser == nil || len(pod.Spec.ResourceClaims) == 0 {
+		return nil
+	}
+
+	draGpus, err := draParser.ResolvePodGpuCount(ctx, pod)
+	if err != nil {
+		return fmt.Errorf("failed resolving DRA GPUs of pod <%s/%s>: %w", pod.Namespace, pod.Name, err)
+	}
+
+	requested.Gpus += float64(draGpus)
+	limit.Gpus += float64(draGpus)
+	return nil
 }
 
 func parseResources(resources corev1.ResourceList) *ResourcesInfo {

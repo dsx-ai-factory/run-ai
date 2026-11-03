@@ -141,3 +141,25 @@ func TestFilterUpdateEvents_ElementLabels(t *testing.T) {
 		})
 	}
 }
+
+func TestFilterUpdateEvents_AllocationAnnotations(t *testing.T) {
+	tests := []struct {
+		name   string
+		oldAnn map[string]string
+		newAnn map[string]string
+		want   bool
+	}{
+		{"allocated gpus annotation added", map[string]string{}, map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, true},
+		{"allocated gpus annotation changed", map[string]string{commonconstants.PodAllocatedGpusAnnotation: "1"}, map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, true},
+		{"allocated gpu memory annotation changed", map[string]string{commonconstants.PodAllocatedGpuMemoryAnnotation: "1000"}, map[string]string{commonconstants.PodAllocatedGpuMemoryAnnotation: "2000"}, true},
+		{"allocation annotations unchanged", map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, false},
+		{"unrelated annotation changed", map[string]string{"foo": "a"}, map[string]string{"foo": "b"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := filterUpdateEvents(makeRunaiPod(nil, tt.oldAnn), makeRunaiPod(nil, tt.newAnn)); got != tt.want {
+				t.Errorf("filterUpdateEvents() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

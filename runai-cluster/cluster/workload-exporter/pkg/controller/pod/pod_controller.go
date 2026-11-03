@@ -12,6 +12,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/metrics"
@@ -31,12 +32,16 @@ var elementIdLabelKeys = []string{
 }
 
 type PodController struct {
-	client client.Client
+	client    client.Client
+	draParser *dra.DRAParser
 }
 
-func NewPodController(client client.Client) *PodController {
+// NewPodController creates the pod controller. draParser may be nil, in which case
+// GPUs requested through DRA ResourceClaims are not resolved.
+func NewPodController(client client.Client, draParser *dra.DRAParser) *PodController {
 	return &PodController{
-		client: client,
+		client:    client,
+		draParser: draParser,
 	}
 }
 
@@ -62,7 +67,7 @@ func (c *PodController) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.R
 		return ctrl.Result{Requeue: false}, nil
 	}
 
-	err = metrics.SetPodMetrics(ctx, pod, c.client)
+	err = metrics.SetPodMetrics(ctx, pod, c.client, c.draParser)
 	if err != nil {
 		log.Error().Msgf("Failed to set metrics for pod %s/%s, error: %s", pod.Namespace, pod.Name, err.Error())
 		return ctrl.Result{}, err
@@ -88,6 +93,8 @@ func filterUpdateEvents(old, new *corev1.Pod) bool {
 	return isRunaiPod(new) && (old.Status.Phase != new.Status.Phase ||
 		old.Annotations[commonconstants.PodStatusAnnotation] != new.Annotations[commonconstants.PodStatusAnnotation] ||
 		old.Spec.NodeName != new.Spec.NodeName ||
+		old.Annotations[commonconstants.PodAllocatedGpusAnnotation] != new.Annotations[commonconstants.PodAllocatedGpusAnnotation] ||
+		old.Annotations[commonconstants.PodAllocatedGpuMemoryAnnotation] != new.Annotations[commonconstants.PodAllocatedGpuMemoryAnnotation] ||
 		old.Labels[v1alpha1.NodePoolNameLabel] != new.Labels[v1alpha1.NodePoolNameLabel] ||
 		hasElementIdLabelAdded(old.Labels, new.Labels))
 }

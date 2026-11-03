@@ -7,9 +7,11 @@ package dra
 
 import (
 	"context"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	resourcev1 "k8s.io/api/resource/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -51,6 +53,68 @@ func (p *DRAParser) ResolveDRAGpuCount(ctx context.Context, namespace string, po
 		totalGpuCount += gpuCount
 	}
 	return totalGpuCount
+}
+
+// ResolvePodGpuCount resolves the NVIDIA GPU count a pod requests through DRA, counting every
+// pod-level claim once and returning lookup errors (unlike ResolveDRAGpuCount, which logs them and returns 0).
+//   - ResourceClaimName: the referenced claim is read.
+//   - ResourceClaimTemplateName: the claim generated for the pod (named in pod.Status.ResourceClaimStatuses)
+//     is read when it exists; before it exists (e.g. an unscheduled pod) the template is read instead.
+//     Both describe the same request, so only one of them is counted.
+func (p *DRAParser) ResolvePodGpuCount(ctx context.Context, pod *corev1.Pod) (int64, error) {
+	var totalGpuCount int64
+	counted := map[string]struct{}{}
+	for _, prc := range pod.Spec.ResourceClaims {
+		key, spec, err := p.podClaimSpec(ctx, pod, prc)
+		if err != nil {
+			return 0, err
+		}
+		if spec == nil {
+			continue
+		}
+		if _, found := counted[key]; found {
+			continue
+		}
+		counted[key] = struct{}{}
+		totalGpuCount += extractGpuCountFromClaimSpec(*spec)
+	}
+	return totalGpuCount, nil
+}
+
+// podClaimSpec returns the claim spec of one pod-level claim and a key identifying what was read.
+func (p *DRAParser) podClaimSpec(ctx context.Context, pod *corev1.Pod, prc corev1.PodResourceClaim) (string, *resourcev1.ResourceClaimSpec, error) {
+	claimName := ""
+	if prc.ResourceClaimName != nil {
+		claimName = *prc.ResourceClaimName
+	} else {
+		for _, status := range pod.Status.ResourceClaimStatuses {
+			if status.Name == prc.Name && status.ResourceClaimName != nil {
+				claimName = *status.ResourceClaimName
+				break
+			}
+		}
+	}
+
+	if claimName != "" {
+		claim, err := p.draClient.ResourceClaims(pod.Namespace).Get(ctx, claimName, metav1.GetOptions{})
+		if err == nil {
+			return "claim/" + claimName, &claim.Spec, nil
+		}
+		// A generated claim that is not readable yet falls back to its template.
+		if prc.ResourceClaimName != nil || !apierrors.IsNotFound(err) {
+			return "", nil, fmt.Errorf("getting ResourceClaim %s/%s: %w", pod.Namespace, claimName, err)
+		}
+	}
+
+	if prc.ResourceClaimTemplateName != nil && *prc.ResourceClaimTemplateName != "" {
+		template, err := p.draClient.ResourceClaimTemplates(pod.Namespace).Get(ctx, *prc.ResourceClaimTemplateName, metav1.GetOptions{})
+		if err != nil {
+			return "", nil, fmt.Errorf("getting ResourceClaimTemplate %s/%s: %w", pod.Namespace, *prc.ResourceClaimTemplateName, err)
+		}
+		return "template/" + prc.Name, &template.Spec.Spec, nil
+	}
+
+	return "", nil, nil
 }
 
 // ResolveNamedClaimGpuCount resolves GPU count from an explicit ResourceClaim name or ResourceClaimTemplate name.

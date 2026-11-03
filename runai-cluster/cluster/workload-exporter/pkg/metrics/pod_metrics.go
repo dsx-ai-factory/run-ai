@@ -15,6 +15,7 @@ import (
 	"github.com/rs/zerolog/log"
 
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/metrics/data"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/utils"
 
@@ -109,7 +110,7 @@ var (
 	)
 )
 
-func SetPodMetrics(ctx context.Context, pod *corev1.Pod, client client.Client) error {
+func SetPodMetrics(ctx context.Context, pod *corev1.Pod, client client.Client, draParser *dra.DRAParser) error {
 	name := pod.Name
 	namespace := pod.Namespace
 	uuid := string(pod.UID)
@@ -144,6 +145,9 @@ func SetPodMetrics(ctx context.Context, pod *corev1.Pod, client client.Client) e
 	}
 
 	resourcesRequested, resourcesLimit := data.GetPodResources(pod)
+	if err := data.AddDRAGpus(ctx, pod, draParser, resourcesRequested, resourcesLimit); err != nil {
+		return err
+	}
 	requestedGPUs := resourcesRequested.Gpus
 	requestedGPUsMemory := resourcesRequested.GpuMemoryMegaBytes
 	limitGPUs := resourcesLimit.Gpus
