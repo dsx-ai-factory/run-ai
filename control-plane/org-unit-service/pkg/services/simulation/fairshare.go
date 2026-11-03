@@ -27,8 +27,8 @@ type leftover struct {
 	remaining float64
 }
 
-// DivideResource splits totalAmount of one resource between queues the way KAI-scheduler v0.18.2 does
-// (plugins/proportion/resource_division, kValue 0). It must stay in step with the scheduler version the
+// DivideResource splits totalAmount of one resource between queues the way KAI-scheduler main does as of
+// a5a7d96f, after v0.18.2 (plugins/proportion/resource_division, kValue 0). It must stay in step with the scheduler version the
 // clusters run; kai_division_cases.json holds results produced by KAI's own code.
 func DivideResource(totalAmount float64, queues []Queue) map[string]float64 {
 	fair := make(map[string]float64, len(queues))
@@ -57,17 +57,16 @@ func DivideResource(totalAmount float64, queues []Queue) map[string]float64 {
 	}
 	sort.Sort(sort.Reverse(sort.IntSlice(priorities)))
 
-	leftovers := map[int]map[string]*leftover{}
-	for _, p := range priorities {
-		remaining, leftovers[p] = divideUpToFairShare(remaining, byPriority[p], fair)
-	}
 	for _, p := range priorities {
 		if remaining <= 0 {
 			break
 		}
-		if len(leftovers[p]) > 0 {
-			remaining = divideRemaining(remaining, leftovers[p], fair)
+		var left map[string]*leftover
+		remaining, left = divideUpToFairShare(remaining, byPriority[p], fair)
+		if remaining <= 0 || len(left) == 0 {
+			continue
 		}
+		remaining = divideRemaining(remaining, left, fair)
 	}
 	return fair
 }

@@ -50,13 +50,22 @@ var _ = Describe("DivideResource", func() {
 		}
 	})
 
-	It("passes what a rank leaves to the next rank", func() {
+	It("gives the over quota to the highest rank first", func() {
 		got := simulation.DivideResource(12, []simulation.Queue{
 			{ID: "a", Priority: 210, OverQuotaWeight: 1, Request: 10, MaxAllowed: simulation.Unlimited},
 			{ID: "b", Priority: 210, OverQuotaWeight: 3, Request: 10, MaxAllowed: simulation.Unlimited},
 			{ID: "c", Priority: 150, Deserved: 2, OverQuotaWeight: 1, Request: 10, MaxAllowed: simulation.Unlimited},
 			{ID: "d", Priority: 50, Deserved: 4, OverQuotaWeight: 1, Request: 10, MaxAllowed: simulation.Unlimited},
 		})
-		Expect(got).To(Equal(map[string]float64{"a": 1, "b": 4, "c": 3, "d": 4}))
+		Expect(got).To(Equal(map[string]float64{"a": 2, "b": 4, "c": 2, "d": 4}))
+	})
+
+	It("keeps rounding leftovers with a higher rank", func() {
+		got := simulation.DivideResource(6, []simulation.Queue{
+			{ID: "high-1", Priority: 2, Deserved: 1, OverQuotaWeight: 1, Request: 5, MaxAllowed: simulation.Unlimited, CreatedAt: 1},
+			{ID: "high-2", Priority: 2, Deserved: 1, OverQuotaWeight: 1, Request: 5, MaxAllowed: simulation.Unlimited, CreatedAt: 2},
+			{ID: "low", Priority: 1, Deserved: 1, OverQuotaWeight: 1, Request: 5, MaxAllowed: simulation.Unlimited, CreatedAt: 3},
+		})
+		Expect(got).To(Equal(map[string]float64{"high-1": 3, "high-2": 2, "low": 1}))
 	})
 })
