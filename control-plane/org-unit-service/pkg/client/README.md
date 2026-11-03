@@ -4,8 +4,8 @@ Generated Go client for the **org-unit-service** control-plane service. It wraps
 API ("An API for managing RunAi organizational units") so other Run:ai backend services can read and
 manage organizational units — departments and projects (with v1 variants), node types, notifications
 and reports. The package is owned by the same team that owns the
-[org-unit-service](../..) service; the generated code plus a
-hand-written wrapper live here as their own module so they can be versioned and imported
+[org-unit-service](../../control-plane/org-unit-service) service; the generated code plus a
+hand-written wrapper live here in `runai-clients/` so they can be versioned and imported
 independently of the server.
 
 ## Contents
@@ -67,13 +67,13 @@ Then construct the client with the service base URL and call the interface metho
 ## OpenAPI and code generation
 
 The API contract lives with the **server**, not here:
-[`control-plane/org-unit-service/swagger/source/openapi.yaml`](../../swagger/source/openapi.yaml).
+[`control-plane/org-unit-service/swagger/source/openapi.yaml`](../../control-plane/org-unit-service/swagger/source/openapi.yaml).
 The Go client in [`generated/`](generated) is produced by OpenAPI Generator (Go client generator,
-version pinned in [`build/makefile/openapi.mk`](../../../../build/makefile/openapi.mk)) as part of the
+version pinned in [`build/makefile/openapi.mk`](../../build/makefile/openapi.mk)) as part of the
 **owning service's** build. Regenerate it from the service directory, not from here:
 
 ```bash
-cd ../..
+cd ../../control-plane/org-unit-service
 make openapi-generate-code            # server stubs + Go client + JS client
 # or just the Go client:
 make openapi-generate-code-client-go
@@ -108,7 +108,7 @@ following targets no-ops:
 ## Versioning
 
 Released client versions are cut with the shared versioning targets (see
-[`build/makefile/versioning.mk`](../../../../build/makefile/versioning.mk)), which tag under
+[`build/makefile/versioning.mk`](../../build/makefile/versioning.mk)), which tag under
 `control-plane/org-unit-service/pkg/client/vX.Y.Z`:
 
 | Target | Description |
