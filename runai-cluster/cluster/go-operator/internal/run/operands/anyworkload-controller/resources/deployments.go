@@ -14,7 +14,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/snapshot"
+	runaipublic "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	outils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
@@ -106,7 +106,8 @@ func (d *DeploymentResource) Object(ctx context.Context) (client.Object, error) 
 		},
 	}
 	allVolumes := append(outils.GlobalVolumes(d.runaiConfig), webhookCertVolumes...)
-	envVars, err := d.buildEnvVars(config, internal, d.detectSnapshot(ctx))
+	snapshotCRDInstalled, snapshotAgentNodeSelector := d.snapshotSettings(ctx)
+	envVars, err := d.buildEnvVars(config, internal, snapshotCRDInstalled, snapshotAgentNodeSelector)
 	if err != nil {
 		return nil, fmt.Errorf("build anyworkload-controller environment: %w", err)
 	}
@@ -171,14 +172,29 @@ func (d *DeploymentResource) Enabled() bool {
 	return true
 }
 
-// detectSnapshot looks for the Snapshot installation. A cluster without it
-// yields an unavailable status: the controller then runs with no Snapshot
-// watches registered, exactly as it does today.
-func (d *DeploymentResource) detectSnapshot(ctx context.Context) snapshot.Status {
-	return snapshot.Detect(ctx, d.k8sReader, d.runaiConfig)
+// snapshotSettings reports what the runai-public ConfigMap says about Snapshot.
+//
+// A ConfigMap that cannot be read yet — a fresh install reconciles this
+// deployment before runai-public has been written — means no Snapshot rather
+// than a failed reconcile, on the same principle as the detection itself: a
+// cluster without Snapshot must behave exactly as it does today.
+func (d *DeploymentResource) snapshotSettings(ctx context.Context) (bool, string) {
+	handler := runaipublic.NewRunaiPublicHandler(ctx, d.k8sReader)
+
+	crdInstalled, _, err := handler.IsSnapshotCRDInstalled()
+	if err != nil || !crdInstalled {
+		return false, ""
+	}
+
+	nodeSelector, err := handler.SnapshotAgentNodeSelector()
+	if err != nil {
+		return true, ""
+	}
+	return true, nodeSelector
 }
 
-func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.AnyworkloadController, internal *runv1_internal.Internal, snapshotStatus snapshot.Status) ([]v1.EnvVar, error) {
+func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.AnyworkloadController, internal *runv1_internal.Internal,
+	snapshotCRDInstalled bool, snapshotAgentNodeSelector string) ([]v1.EnvVar, error) {
 	isOpenShift := internal != nil &&
 		internal.Global != nil &&
 		internal.Global.Platform != nil &&
@@ -222,13 +238,13 @@ func (d *DeploymentResource) buildEnvVars(config *anyworkload_controller.Anywork
 		},
 		{
 			Name:  "SNAPSHOT_ENABLED",
-			Value: strconv.FormatBool(snapshotStatus.CRDInstalled),
+			Value: strconv.FormatBool(snapshotCRDInstalled),
 		},
 		{
 			// Where the Snapshot node agent runs. Capture and restore pods can
 			// only be scheduled on those nodes.
 			Name:  "SNAPSHOT_AGENT_NODE_SELECTOR",
-			Value: snapshot.FormatNodeSelector(snapshotStatus.AgentNodeSelector),
+			Value: snapshotAgentNodeSelector,
 		},
 		{
 			Name:  "METRICS_PORT",

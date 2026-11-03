@@ -148,6 +148,10 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		}
 	}
 
+	// One detection for the whole ConfigMap: the optional-dependency status
+	// below and the agent node selector that consumers read both come from it.
+	snapshotStatus := snapshot.Detect(ctx, rp.kbClient, rp.runaiConfig)
+
 	configuration := &runv1.PublicConfiguration{
 		WorkloadOwnershipProtection: rp.runaiConfig.Spec.Global.EnableWorkloadOwnershipProtection,
 		SubdomainEnabled:            ptr.To(ptr.Deref(rp.runaiConfig.Spec.Global.SubdomainSupport, true)),
@@ -163,6 +167,10 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 	if gw := rp.runaiConfig.Spec.Global.GatewayAPI; gw != nil && gatewayAPIEnabled {
 		configuration.GatewayName = &gw.Name
 		configuration.GatewayNamespace = &gw.Namespace
+	}
+
+	if selector := snapshot.FormatNodeSelector(snapshotStatus.AgentNodeSelector); selector != "" {
+		configuration.SnapshotAgentNodeSelector = ptr.To(selector)
 	}
 
 	if aw := rp.runaiConfig.Spec.AnyworkloadController; aw != nil {
@@ -196,7 +204,7 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		RunaiConfigStatus: &rp.runaiConfig.Status,
 		Dependencies: &runv1.PublicDependencies{
 			Required: getRequiredComponentsStatus(ctx, rp.kbClient, rp.runaiConfig),
-			Optional: getOptionalComponentsStatus(ctx, rp.kbClient, rp.runaiConfig, discoveryClient),
+			Optional: getOptionalComponentsStatus(ctx, rp.kbClient, rp.runaiConfig, discoveryClient, snapshotStatus),
 		},
 		Platform: &runv1.PublicPlatform{
 			Type:        strings.ToLower(rp.runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor.String()),
@@ -388,7 +396,8 @@ func getMissingMetricsErrorStr(nvidiaExporterVerificationErr error, missingMetri
 		"Make sure they are mentioned in the file specified under the DCGM_EXPORTER_COLLECTORS environment variable"
 }
 
-func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig, discoveryClient discovery.DiscoveryInterface) map[string]runv1.PublicStatus {
+func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig,
+	discoveryClient discovery.DiscoveryInterface, snapshotStatus snapshot.Status) map[string]runv1.PublicStatus {
 	components := map[string]runv1.PublicStatus{}
 
 	components["knative"] = knative.GetKnativeStatus(ctx, kbClient)
@@ -406,7 +415,7 @@ func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, 
 	}
 
 	components[runv1.RunaiPublicAdvice] = getAdviceCRDStatus(discoveryClient)
-	components[runv1.RunaiPublicSnapshot] = getSnapshotStatus(ctx, kbClient, runaiConfig)
+	components[runv1.RunaiPublicSnapshot] = getSnapshotStatus(snapshotStatus)
 
 	return components
 }
@@ -414,9 +423,7 @@ func getOptionalComponentsStatus(ctx context.Context, kbClient kc.HybridClient, 
 // getSnapshotStatus reports the NVIDIA Snapshot installation. Snapshot is a
 // separate Helm install the administrator owns, so an absent one is a normal
 // result and reported as unavailable with a reason, never as an error.
-func getSnapshotStatus(ctx context.Context, kbClient kc.HybridClient, runaiConfig *runv1.RunaiConfig) runv1.PublicStatus {
-	status := snapshot.Detect(ctx, kbClient, runaiConfig)
-
+func getSnapshotStatus(status snapshot.Status) runv1.PublicStatus {
 	return runv1.PublicStatus{
 		Available: runv1.AvailableStatus(status.Available),
 		Reason:    status.Reason,

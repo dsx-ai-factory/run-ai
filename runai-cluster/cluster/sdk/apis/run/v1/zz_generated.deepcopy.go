@@ -581,6 +581,11 @@ func (in *PublicConfiguration) DeepCopyInto(out *PublicConfiguration) {
 		*out = new(string)
 		**out = **in
 	}
+	if in.SnapshotAgentNodeSelector != nil {
+		in, out := &in.SnapshotAgentNodeSelector, &out.SnapshotAgentNodeSelector
+		*out = new(string)
+		**out = **in
+	}
 	if in.DistGPUNetworkAcceleration != nil {
 		in, out := &in.DistGPUNetworkAcceleration, &out.DistGPUNetworkAcceleration
 		*out = new(bool)
