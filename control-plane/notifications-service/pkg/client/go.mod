@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/
 go 1.27.3
 
 require (
-	github.com/go-playground/validator/v10 v10.30.5
+	github.com/go-playground/validator/v10 v10.30.6
 	github.com/maypok86/otter/v2 v2.4.0
 	github.com/sethvargo/go-retry v0.4.0
 	github.com/spf13/viper v1.21.0
@@ -26,7 +26,7 @@ require (
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/crypto v0.57.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 )
