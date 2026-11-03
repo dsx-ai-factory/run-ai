@@ -9,6 +9,7 @@
       <template v-slot:banner>
         <section class="notification-alert-container" v-if="isSSOEnabled">
           <notification-alert-bar
+            page-banner
             :variant="ENotificationBarVariant.Info"
             message="*SSO (Single Sign-On) users are managed by the identity provider and will appear once they've signed in to Run:ai.* In the meantime, you can give them access via"
           >
