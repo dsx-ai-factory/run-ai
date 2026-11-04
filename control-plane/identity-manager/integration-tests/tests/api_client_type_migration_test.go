@@ -71,9 +71,7 @@ func TestReconcile_LegacyServiceAccount_RewrittenToCurrentType(t *testing.T) {
 	require.Contains(t, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeTenantApp), id)
 	require.Equal(t, "tenant-application", grantClientCredentialsClaims(t, ctx, realmName, id)["client_type"])
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("apps")
-	require.NoError(t, err)
-	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, reconcilerType))
+	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, ptr.To(openapi.RECONCILERTYPE_APPS)))
 
 	require.Equal(t, "service-account", clientTypeOf(t, ctx, realmName, id))
 	require.Equal(t, "service-account", grantClientCredentialsClaims(t, ctx, realmName, id)["client_type"])
@@ -99,9 +97,7 @@ func TestReconcile_LegacyAccessKey_RewrittenToCurrentType(t *testing.T) {
 	require.Equal(t, "user-application", legacyClaims["client_type"])
 	require.Equal(t, createdByUser, legacyClaims["sub"])
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("userApps")
-	require.NoError(t, err)
-	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, reconcilerType))
+	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, ptr.To(openapi.RECONCILERTYPE_USER_APPS)))
 
 	require.Equal(t, "access-key", clientTypeOf(t, ctx, realmName, id))
 	claims := grantClientCredentialsClaims(t, ctx, realmName, id)
@@ -131,10 +127,8 @@ func TestReconcile_MixedLegacyAndMigratedClients_AllEndOnCurrentTypeAndRerunIsSt
 	require.ElementsMatch(t, []string{legacyKeyId, migratedKeyId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeUserApp))
 	require.ElementsMatch(t, []string{legacyAccountId, migratedAccountId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeTenantApp))
 
-	appsType, err := openapi.NewReconcilerTypeFromValue("apps")
-	require.NoError(t, err)
-	userAppsType, err := openapi.NewReconcilerTypeFromValue("userApps")
-	require.NoError(t, err)
+	appsType := ptr.To(openapi.RECONCILERTYPE_APPS)
+	userAppsType := ptr.To(openapi.RECONCILERTYPE_USER_APPS)
 
 	// the reconcile can run more than once: the second pass must neither fail nor drop clients
 	for run := 1; run <= 2; run++ {
