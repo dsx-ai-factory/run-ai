@@ -8732,6 +8732,7 @@ components:
           type: string
         description:
           description: The description of the node pool.
+          maxLength: 250
           nullable: true
           type: string
         labelKey:
@@ -8812,6 +8813,7 @@ components:
       properties:
         description:
           description: The description of the node pool.
+          maxLength: 250
           nullable: true
           type: string
         labelKey:

@@ -83,6 +83,9 @@ func AssertNodepoolUpdateFieldsRequired(obj NodepoolUpdateFields) error {
 // AssertNodepoolUpdateFieldsConstraints checks if the values respects the defined constraints
 func AssertNodepoolUpdateFieldsConstraints(obj NodepoolUpdateFields) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.Description, "Description", 250); maxLengthErr != nil {
+		return &ParsingError{Param: "Description", Err: maxLengthErr}
+	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

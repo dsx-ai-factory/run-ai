@@ -13,6 +13,7 @@ properties:
   description:
     type: string
     nullable: true
+    maxLength: 250
     description: The description of the node pool.
   labelKey:
     description: Label key for associated nodes to the Node Pool (with value as in labelValue)

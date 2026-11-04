@@ -1227,7 +1227,7 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 
 		AfterAll(func() {
 			if nodepool.Id != "" {
-				_, _ = nodepoolService.DeleteNodepool(ctx, nodepool.Id)
+				deleteNodepools([]api.Nodepool{nodepool})
 			}
 		})
 
@@ -1301,6 +1301,21 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 			Expect(err).To(BeNil())
 			Expect(response.Code).To(Equal(http.StatusOK))
 			Expect(getNodepool().Description).To(BeEmpty())
+		})
+
+		It("Legacy update keeps the description", func() {
+			_, err := nodepoolService.PatchNodepool(ctx, nodepool.Id, api.NodepoolUpdateFields{
+				Description: ptr.To(patchedDescription),
+			})
+			Expect(err).To(BeNil())
+
+			response, err := nodepoolService.LegacyUpdateNodepool(ctx, testClusterId, nodepool.Id, api.LegacyUpdateNodePoolRequest{
+				LabelKey:   nodepool.LabelKey,
+				LabelValue: nodepool.LabelValue,
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(getNodepool().Description).To(Equal(patchedDescription))
 		})
 
 		It("Update without description clears it", func() {

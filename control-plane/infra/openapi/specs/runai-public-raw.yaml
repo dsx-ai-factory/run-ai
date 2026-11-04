@@ -29484,6 +29484,7 @@ components:
         description:
           type: string
           nullable: true
+          maxLength: 250
           description: The description of the node pool.
         labelKey:
           description: >-
@@ -29528,6 +29529,7 @@ components:
         description:
           type: string
           nullable: true
+          maxLength: 250
           description: The description of the node pool.
         labelKey:
           type: string
