@@ -1097,3 +1097,35 @@ func StringToSeccompProfile(src *string, target any, _ any) *workloadsApi.Error 
 	}
 	return nil
 }
+
+// GPUTypeToNodeAffinity intersects GPU placement with every existing alternative.
+func GPUTypeToNodeAffinity(src *string, target any, _ any) *workloadsApi.Error {
+	if src == nil {
+		return nil
+	}
+	affinity, ok := target.(**corev1.Affinity)
+	if !ok {
+		return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("GPUTypeToNodeAffinity: target type %T is not **corev1.Affinity", target))
+	}
+	if *affinity == nil {
+		*affinity = &corev1.Affinity{}
+	}
+	if (*affinity).NodeAffinity == nil {
+		(*affinity).NodeAffinity = &corev1.NodeAffinity{}
+	}
+	nodeAffinity := (*affinity).NodeAffinity
+	requirement := corev1.NodeSelectorRequirement{Key: NvidiaGPUProductLabel, Operator: corev1.NodeSelectorOpIn, Values: []string{*src}}
+	if nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution == nil {
+		nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution = &corev1.NodeSelector{NodeSelectorTerms: []corev1.NodeSelectorTerm{{MatchExpressions: []corev1.NodeSelectorRequirement{requirement}}}}
+		return nil
+	}
+	for i := range nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms {
+		term := &nodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms[i]
+		// An empty term matches nothing; adding a requirement would broaden it.
+		if len(term.MatchExpressions) == 0 && len(term.MatchFields) == 0 {
+			continue
+		}
+		term.MatchExpressions = append(term.MatchExpressions, requirement)
+	}
+	return nil
+}

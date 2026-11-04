@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	corev1 "k8s.io/api/core/v1"
 	"os"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
@@ -648,8 +649,10 @@ var _ = Describe("NimServiceComposer", func() {
 			converter := NewNimServiceComposer("test-workload", "tester", cluster, "test-project", composer.OptionsForNimService())
 			actual := nimv1alpha1.NIMServiceSpec{NodeSelector: map[string]string{"existing": "restriction"}}
 			Expect(converter.Compose(context.Background(), &spec, &actual)()).To(BeNil())
+			Expect(actual.Affinity).NotTo(BeNil())
+			Expect(actual.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms).To(Equal([]corev1.NodeSelectorTerm{{MatchExpressions: []corev1.NodeSelectorRequirement{{Key: composer.NvidiaGPUProductLabel, Operator: corev1.NodeSelectorOpIn, Values: []string{"NVIDIA-H100-80GB-HBM3"}}}}}))
 			Expect(actual.NodeSelector).To(Equal(map[string]string{
-				"existing": "restriction", "nvidia.com/gpu.product": "NVIDIA-H100-80GB-HBM3",
+				"existing": "restriction",
 			}))
 		})
 	})

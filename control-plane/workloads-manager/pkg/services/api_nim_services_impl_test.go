@@ -571,7 +571,10 @@ var _ = Describe("NimServicesImpl", func() {
 				}
 			}
 			Expect(manifest).NotTo(BeNil())
-			Expect(manifest["spec"].(map[string]interface{})["nodeSelector"]).To(Equal(map[string]interface{}{"nvidia.com/gpu.product": "NVIDIA-H100-80GB-HBM3"}))
+			Expect(manifest["spec"].(map[string]interface{})["nodeSelector"]).To(BeNil())
+			affinityJSON, err := json.Marshal(manifest["spec"].(map[string]interface{})["affinity"])
+			Expect(err).NotTo(HaveOccurred())
+			Expect(string(affinityJSON)).To(MatchJSON(`{"nodeAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":{"nodeSelectorTerms":[{"matchExpressions":[{"key":"nvidia.com/gpu.product","operator":"In","values":["NVIDIA-H100-80GB-HBM3"]}]}]}}}`))
 		})
 		It("preserves policy-default allocation without calling recommendations", func() {
 			var policy policiesApi.NimServicePolicyDefaultsAndRules
@@ -2274,6 +2277,7 @@ var _ = Describe("NimServicesImpl", func() {
 			manifestSpec := record.RawManifest["spec"].(map[string]interface{})
 			selector, _ := manifestSpec["nodeSelector"].(map[string]interface{})
 			Expect(selector).NotTo(HaveKey("nvidia.com/gpu.product"))
+			Expect(manifestSpec["affinity"]).To(BeNil())
 		})
 
 		It("should remove nodePools using fieldsToRemove", func() {
