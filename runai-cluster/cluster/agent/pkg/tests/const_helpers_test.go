@@ -1532,6 +1532,15 @@ var (
 		TenantId:    ptr.To(int32(1)),
 		CreatedBy:   "jane_doe5",
 	}
+	// BackendAccessRule5BeforeRoleRename is BackendAccessRule5ToBeDeleted as it looked before its role
+	// was renamed in the control plane. It is deliberately never served by the fake backend - it only
+	// exists to generate the name the cluster object was originally created under (RUN-44340).
+	BackendAccessRule5BeforeRoleRename = func() auth_openapi.AccessRuleSync {
+		beforeRename := BackendAccessRule5ToBeDeleted
+		beforeRename.RoleName = "user-before-the-rename"
+		return beforeRename
+	}()
+
 	BackendAccessRule6AlreadyDeleted = auth_openapi.AccessRuleSync{
 		ScopeId:     "6",
 		ScopeType:   auth_openapi.SCOPETYPE_PROJECT,
@@ -1563,13 +1572,16 @@ var (
 		CreatedBy:   "jane_doe6",
 	}
 
-	AccessRule1Name             = handlers.GenerateAccessRuleName(&BackendAccessRule1)
-	AccessRule2Name             = handlers.GenerateAccessRuleName(&BackendAccessRule2)
-	AccessRule3Name             = handlers.GenerateAccessRuleName(&BackendAccessRule3)
-	AccessRule4Name             = handlers.GenerateAccessRuleName(&BackendAccessRule4)
-	AccessRule5ToBeDeleted      = handlers.GenerateAccessRuleName(&BackendAccessRule5ToBeDeleted)
-	AccessRule6AlreadyDeleted   = handlers.GenerateAccessRuleName(&BackendAccessRule6AlreadyDeleted)
-	AccessRule7FutureUpdateTime = handlers.GenerateAccessRuleName(&BackendAccessRule7FutureUpdateTime)
+	AccessRule1Name           = handlers.GenerateAccessRuleName(&BackendAccessRule1)
+	AccessRule2Name           = handlers.GenerateAccessRuleName(&BackendAccessRule2)
+	AccessRule3Name           = handlers.GenerateAccessRuleName(&BackendAccessRule3)
+	AccessRule4Name           = handlers.GenerateAccessRuleName(&BackendAccessRule4)
+	AccessRule5ToBeDeleted    = handlers.GenerateAccessRuleName(&BackendAccessRule5ToBeDeleted)
+	AccessRule6AlreadyDeleted = handlers.GenerateAccessRuleName(&BackendAccessRule6AlreadyDeleted)
+	// AccessRule5OrphanedByRoleRename is the name access rule 5 got on the cluster before its role was
+	// renamed; it carries the same runai/accessrule-id label as AccessRule5ToBeDeleted.
+	AccessRule5OrphanedByRoleRename = handlers.GenerateAccessRuleName(&BackendAccessRule5BeforeRoleRename)
+	AccessRule7FutureUpdateTime     = handlers.GenerateAccessRuleName(&BackendAccessRule7FutureUpdateTime)
 
 	BackendAccessRulesMap = map[string]*auth_openapi.AccessRuleSync{
 		AccessRule1Name:             &BackendAccessRule1,
