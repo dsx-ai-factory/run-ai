@@ -17,7 +17,7 @@ require (
 	github.com/ClickHouse/clickhouse-go/v2 v2.50.0 // indirect
 	github.com/Microsoft/go-winio v0.6.4 // indirect
 	github.com/andybalholm/brotli v1.2.7 // indirect
-	github.com/aws/smithy-go v1.28.7 // indirect
+	github.com/aws/smithy-go v1.28.8 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -33,7 +33,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32 // indirect
-	github.com/ebitengine/purego v0.11.2 // indirect
+	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.16 // indirect
