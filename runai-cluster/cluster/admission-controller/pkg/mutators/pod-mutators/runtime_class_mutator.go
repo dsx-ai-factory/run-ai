@@ -7,7 +7,7 @@ package pod_mutators
 
 import (
 	"context"
-	"log"
+	"fmt"
 
 	"k8s.io/api/admission/v1beta1"
 	v1 "k8s.io/api/core/v1"
@@ -32,14 +32,13 @@ func (pm *PodMutator) mutateConfidentialRuntimeClass(pod *v1.Pod, _ *v1beta1.Adm
 
 	runtimeClasses := &nodev1.RuntimeClassList{}
 	if err := pm.client.GetCachedReader().List(context.Background(), runtimeClasses); err != nil {
-		log.Printf("Warning: could not list runtime classes: %v", err)
-		return nil
+		return fmt.Errorf("confidential computing is enabled but runtime classes could not be listed: %w", err)
 	}
 
 	runtimeClass := confidentialRuntimeClass(runtimeClasses.Items)
 	if runtimeClass == nil {
-		log.Printf("Warning: confidential computing is on but no confidential runtime class was found")
-		return nil
+		return fmt.Errorf("confidential computing is enabled but no runtime class schedules onto %s=true nodes; "+
+			"install KRAB with a confidential GPU runtime", ccReadyStateNodeLabel)
 	}
 
 	pod.Spec.RuntimeClassName = ptr.To(runtimeClass.Name)
