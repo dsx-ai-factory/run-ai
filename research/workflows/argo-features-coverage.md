@@ -31,13 +31,13 @@ The proposed API covers Argo's execution core: a DAG of container tasks with ret
 
 - **Passing values between tasks**, and using them to decide what runs next (output parameters, `when`, `withParam`). Tasks can share files today, but a file can't change the graph.
 - **Reacting to failure**: groups that run when another group fails (`depends` on `.Failed`), and exit handlers that run at the end of the workflow, whatever its result.
-- **Fan-out of independent tasks** (`withItems`, `withSequence`, `withParam`), with a limit on how many run at once (`parallelism`). The proposed `replicas` always gang-schedules its copies.
+- **Fan-out of independent tasks** (`withItems`, `withSequence`, `withParam`), with a limit on how many run at once (`parallelism`). The proposed `replicas` always gang-schedules its copies, and `groups[].copies` runs a fixed number of independent copies, but there is no fan-out over a list or an output, and no limit.
 - **Workflow operations**: suspend steps for manual approval, and retrying a failed workflow from the group that failed. Argo's suspend also doesn't match Run:ai's suspend, which deletes the pods.
 - **Reuse and scheduling**: workflow parameters, workflow templates and scheduled runs (CronWorkflow).
 
-Most of the other Argo features that the API leaves out are left out by the other Run:ai workload types too (for example, a single user container per task, or readiness probes only), or depend on an Argo artifact repository, which the design replaces with mounted storage.
+Most of the other Argo features that the API leaves out are left out by the other Run:ai workload types too (for example, a single user container per task, or readiness probes only), or depend on an Argo artifact repository, which the design replaces with mounted storage, or with S3 artifacts that name their own bucket.
 
-The review also found points that affect the main document, listed in [Findings That Affect the Main Document](#findings-that-affect-the-main-document). The most important one is that a failed task in a gang group can get the rest of the group evicted by KAI, including the leader of a group with `failurePolicy: Leader`.
+The review also found points that affect the main document, listed in [Findings That Affect the Main Document](#findings-that-affect-the-main-document). Most of them are now discussed in the main document. The most important one is that a failed task in a gang group can get the rest of the group evicted by KAI, including the leader of a group with `failurePolicy: Leader`.
 
 ## Summary
 
@@ -46,8 +46,8 @@ The table lists the features that are not covered, by area, with a suggested pri
 | Area | Not covered | Suggested priority |
 | --- | --- | --- |
 | [Data Passing](#data-passing) | Output parameters, `outputs.result`, workflow outputs | High |
-| | Input artifacts other than git and raw, output artifacts | Low |
-| [Graph Control](#graph-control) | `when`, `depends` on failure, fan-out of independent tasks | High |
+| | Artifacts other than git, raw and S3 | Low |
+| [Graph Control](#graph-control) | `when`, `depends` on failure, fan-out over a list or an output | High |
 | | Loops and recursion, `dag.target` | Low |
 | [Exit Handlers and Lifecycle Hooks](#exit-handlers-and-lifecycle-hooks) | `onExit`, `hooks` | Medium |
 | [Suspend Steps and Workflow Actions](#suspend-steps-and-workflow-actions) | Retry from the failed group, stop with exit handlers | High |
@@ -113,12 +113,12 @@ Argo reads the `{{...}}` syntax in every string of a template, which already aff
 
 ### Artifacts
 
-Argo can download input artifacts into a task before it starts, and upload output artifacts after it ends. It supports S3, GCS, Azure, HTTP, HDFS, OSS, Artifactory, git, and raw content given in the spec. The main document uses only git and raw artifacts, and mounts all other storage instead (see [Supported Storage Types](osmo-to-runai.md#supported-storage-types)). Not covered:
+Argo can download input artifacts into a task before it starts, and upload output artifacts after it ends. It supports S3, GCS, Azure, HTTP, HDFS, OSS, Artifactory, git, and raw content given in the spec. The main document uses git and raw artifacts, and proposes S3 input and output artifacts as an option for S3 storage (see [S3 by Copy](osmo-to-runai.md#s3-by-copy)). It mounts all other storage (see [Run:ai Supported Storage](osmo-to-runai.md#runai-supported-storage)). Not covered:
 
-- input artifacts other than git and raw, and all output artifacts;
+- artifacts other than git, raw and S3 (GCS, Azure, HTTP, HDFS, OSS, Artifactory);
 - the features that depend on an artifact repository: `archiveLocation`, `archiveLogs`, `artifactGC`, the `data` template, and passing an artifact from one task to another (`from: "{{tasks.a.outputs.artifacts.x}}"`) without naming its location. Run:ai doesn't plan to configure an artifact repository, so these stay not covered.
 
-One use of S3 artifacts may still be worth a test. An S3 artifact can name its bucket, endpoint and credentials Secret itself, so it doesn't need a repository. The composer could translate a task's S3 storage to an input artifact, copied in before the task starts, and an output artifact, copied out after it ends (with `archive: none: {}`, so the files are stored as they are and not as one tar.gz), instead of a goofys mount. This is OSMO's own model (download the inputs, upload the outputs). It doesn't need the privileged goofys sidecar, and gives the task a regular local file system. The costs are local disk space, copy time, and outputs that reach S3 only when the task ends. Not tested.
+S3 artifacts don't need a repository, because an S3 artifact can name its bucket, endpoint and credentials Secret itself. That is what makes the main document's S3 by Copy option possible. Not tested.
 
 ## Graph Control
 
@@ -203,9 +203,9 @@ spec:
 
 Uses: hyperparameter sweeps; batch inference or preprocessing over the shards of a dataset; evaluation over a list of benchmarks or checkpoints.
 
-In the proposed API, `tasks[].replicas` creates copies of a task in its group's PodGroup, so all the copies must be scheduled together. This is right for distributed training, but a sweep of 50 trials would wait until all 50 fit at once. To run independent copies, the user has to write one group per copy (see also [Jinja Loops and Replicas](#jinja-loops-and-replicas)).
+In the proposed API, `tasks[].replicas` creates copies of a task in its group's PodGroup, so all the copies must be scheduled together. This is right for distributed training, but a sweep of 50 trials would wait until all 50 fit at once. The main document also proposes `groups[].copies`, a fixed number of independent copies of a group, which the composer translates to `withSequence` on the group's task in the main DAG (see [General Fields](osmo-to-runai.md#general-fields)). It covers a fan-out over a count, but not over a list of values or an earlier task's output, and it has no limit on how many copies run at once.
 
-A possible direction is a fan-out on the group, for example `groups[].fanOut` with `items`, `count` or a reference to an output, and `parallelism`. The composer would put `withItems`, `withSequence` or `withParam` on the group's task in the main DAG, and pass the item to the tasks as an environment variable. For a group with more than one task, each copy needs its own PodGroup and Service, so their names must include the copy's index. Run:ai's status would show one entry per copy (Argo names them `sweep.trial(0:0.1)`, `sweep.trial(1:0.01)`, and so on).
+A possible direction is to extend `copies` into a fan-out, for example with `items` or a reference to an output, and `parallelism`. The composer would put `withItems` or `withParam` on the group's task, as it puts `withSequence` for `copies`, and pass the item to the tasks as an environment variable. Run:ai's status would show one entry per copy (Argo names them `sweep.trial(0:0.1)`, `sweep.trial(1:0.01)`, and so on).
 
 A fan-out also needs [Parallelism](#parallelism).
 
@@ -276,7 +276,7 @@ Run:ai has `suspend`, `resume` and `delete` actions on workloads. In Argo, some 
 | Retry a failed workflow from where it failed | Not a spec field | Argo's retry (`FormulateRetryWorkflow` in `workflow/util`) rewrites the Workflow's status: it resets the failed tasks and the tasks after them, keeps the tasks that succeeded, and returns the pods to delete. It works on Failed and Error workflows; a Succeeded workflow needs `restartSuccessful` and a node selector. |
 | Run again from the start | `FormulateResubmitWorkflow` | Creates a new Workflow from the same spec. In Run:ai, submitting the spec again does the same. |
 
-Retrying from the failed group matters more for workflows than for single workloads: a long pipeline that fails in its last group shouldn't run its training again. No Run:ai component runs the Argo server, so Run:ai's cluster component would have to vendor Argo's retry logic.
+Retrying from the failed group matters more for workflows than for single workloads: a long pipeline that fails in its last group shouldn't run its training again. No Run:ai component runs the Argo server, so Run:ai's cluster component would have to vendor Argo's retry logic. The main document discusses this for OSMO's restart and cancel, in [Restart of a Failed Workflow](osmo-to-runai.md#restart-of-a-failed-workflow) and [Cancel](osmo-to-runai.md#cancel).
 
 Gang groups need care in a retry. Argo resets only the tasks that failed, and keeps the other tasks of the group as they are, including the daemons that Argo stopped and marked as Succeeded. The retried task then joins a PodGroup that expects all the group's pods, and can't be scheduled. A retry has to reset the whole group, which Argo's retry supports with `restartSuccessful` and a node selector that matches the group's tasks. The same applies to the terminate-and-retry approach to suspend, and to the open question in [Retry of a Multi-Task Group](osmo-to-runai.md#retry-of-a-multi-task-group). From the v4.1 source (`planReset` in `workflow/util/util.go`); not tested.
 
@@ -405,7 +405,7 @@ Argo accepts most Kubernetes container and pod fields on a template. These have 
 | --- | --- | --- |
 | Progress (`status.progress`, and `ARGO_PROGRESS_FILE` for a task's own progress) | Not covered | Argo counts finished tasks out of all tasks, and a task can report its own progress by writing to the file in `ARGO_PROGRESS_FILE`. [Workflow Status](osmo-to-runai.md#workflow-status) doesn't show it yet, but could. Low priority |
 | Debug pause (`ARGO_DEBUG_PAUSE_BEFORE`, `ARGO_DEBUG_PAUSE_AFTER`) | Covered | Environment variables that pause a task before or after its command, until a marker file is created, for debugging through exec. They should work through `environmentVariables` (not tested) |
-| Log archiving (`archiveLogs`) | Not covered | Needs an artifact repository. Without it, a task's logs live as long as its pod, which Argo keeps until the Workflow is deleted, unless `podGC` is set. Low priority |
+| Log archiving (`archiveLogs`) | Not covered | Needs an artifact repository. Without it, a task's logs live as long as its pod, which Argo keeps until the Workflow is deleted, unless `podGC` is set. Low priority, but OSMO keeps logs after the workflow ends, see [Logs After the Workflow Ends](osmo-to-runai.md#logs-after-the-workflow-ends) |
 | Custom Prometheus metrics (`metrics` on the workflow or a template) | Not applicable | Exported by the Argo controller; Run:ai has its own metrics |
 | `estimatedDuration` | Not applicable | Computed from earlier runs of the same WorkflowTemplate or CronWorkflow |
 | Title and description annotations, links in the Argo UI | Not applicable | Run:ai has its own UI |
@@ -451,19 +451,11 @@ The main document doesn't decide yet on these settings, which the composer shoul
 
 ## Findings That Affect the Main Document
 
-These points came up during the review. They don't change what the API covers, but they affect the design in the main document. None of them was tested.
+These points came up during the review. They don't change what the API covers, but they affect the design in the main document, and most of them are now discussed there. Unless noted, none of them was tested.
 
 ### Gang Eviction After a Task Fails
 
-KAI's stale gang eviction applies to the PodGroups that the composer creates. KAI marks a PodGroup as stale when it has running pods but fewer than its `minMember`, and none of its pods has succeeded. After a grace period, 60 seconds by default (`defaultStalenessGracePeriod` in the cluster configuration), KAI evicts all the group's running pods. In a workflow group, this happens when:
-
-- a non-leader task fails while the leader is running, in a group with `failurePolicy: Leader`. Argo ignores the failure (`continueOn`), but KAI evicts the leader a minute later;
-- a task is retried (`retry`, or the preemption retry of `terminateAfterPreemption: false`), and its new pod isn't running within the grace period;
-- a task fails in a group with `failurePolicy: AnyTask`. Argo doesn't stop the rest of the group (see [failFast](#failfast)), so the eviction is what ends it. If the evicted tasks end in Error, as expected for a deleted pod (see [Preemption](osmo-to-runai.md#preemption)), the preemption retry would then retry them.
-
-Once one of the group's tasks has succeeded, the group is never stale, so a task that ends normally doesn't cause an eviction.
-
-The composer can set `spec.stalenessGracePeriod` on the PodGroups it creates (a negative value disables the eviction), and should choose it per `failurePolicy`. From `IsStale` in KAI's `podgroup_info/job_info.go` and its `stalegangeviction` action, and from Run:ai's [Stale Gang Eviction](../../docs/platform-management/runai-scheduler/scheduling/concepts-and-principles.md#stale-gang-eviction) docs.
+KAI evicts all the running pods of a PodGroup that has running pods, fewer of them than its `minMember`, and no pod that has succeeded, after a grace period (60 seconds by default). In a workflow group, this happens when a non-leader task fails in a group with `failurePolicy: Leader`, and when a retried task's new pod isn't running within the grace period. The main document has the composer turn the eviction off with a negative `stalenessGracePeriod` on the PodGroups it creates, see [PodGroup Management](osmo-to-runai.md#podgroup-management). For `failurePolicy: AnyTask`, where the eviction would be the only thing that stops the group, see [Group Failure Policy](osmo-to-runai.md#group-failure-policy). From `IsStale` in KAI's `podgroup_info/job_info.go` and its `stalegangeviction` action, and from Run:ai's [Stale Gang Eviction](../../docs/platform-management/runai-scheduler/scheduling/concepts-and-principles.md#stale-gang-eviction) docs.
 
 ### User Strings and Argo Templating
 
@@ -474,24 +466,19 @@ Argo substitutes `{{...}}` tags in every string of a template before it runs, in
 - `{{=...}}` is evaluated as an expression, unless the controller runs with `EXPRESSION_TEMPLATES=false`;
 - other tags, such as Jinja or Helm syntax in a script, are left as they are.
 
-So a user's script can fail the workflow by accident, or read values that the API doesn't document. The design should decide whether some Argo variables become part of the Run:ai API (for example the workflow name, or the retry attempt as `{{retries}}`), and how the composer handles other `{{` in user strings. We didn't find a documented escape in Argo.
+So a user's script can fail the workflow by accident, or read values that the API doesn't document. The design should decide whether some Argo variables become part of the Run:ai API (for example the workflow name, or the retry attempt as `{{retries}}`), and how the composer handles other `{{` in user strings. We didn't find a documented escape in Argo. The main document covers only the case of Run:ai's own template variables, which must be rendered before the composer, in [Templates and Apps](osmo-to-runai.md#templates-and-apps).
 
 A related naming rule: Argo rejects a DAG task whose name begins with a digit (`validate.go`), so the composer has to reject or rename groups and tasks with such names.
 
 ### failFast
 
-Argo's documentation says that with `failFast` (the default), a failed DAG task stops Argo from starting new tasks. In the v4.1 code (`executeDAG` and `assessDAGPhase` in `dag.go`), Argo starts every task whose dependencies are met, and doesn't end the DAG while any of its tasks is running. `failFast` only decides whether a failed branch fails the DAG before the tasks that haven't started yet, which in practice means tasks held back by `parallelism`. As a result:
-
-- independent groups keep running after a failure, as in OSMO (see [Failure and Retry](osmo-to-runai.md#failure-and-retry));
-- in a group with `failurePolicy: AnyTask`, a failed task doesn't stop the leader: Argo marks the group as Failed only when the leader ends, unless KAI evicts the group first (see [Gang Eviction After a Task Fails](#gang-eviction-after-a-task-fails)).
+Argo's documentation says that with `failFast` (the default), a failed DAG task stops Argo from starting new tasks. In the v4.1 code (`executeDAG` and `assessDAGPhase` in `dag.go`), Argo starts every task whose dependencies are met, and doesn't end the DAG while any of its tasks is running. `failFast` only decides whether a failed branch fails the DAG before the tasks that haven't started yet, which in practice means tasks held back by `parallelism`. The main document now covers both effects: independent groups keep running after a failure, as its Argo run shows (see [Failure and Retry](osmo-to-runai.md#failure-and-retry)), and a failed task doesn't stop a group with `failurePolicy: AnyTask` (see [Group Failure Policy](osmo-to-runai.md#group-failure-policy)).
 
 If `parallelism` is added, the composer should set `failFast` explicitly. To be tested.
 
 ### Large Workflow Status
 
-When a Workflow grows close to etcd's object size limit (about 1 MB), Argo compresses `status.nodes` into `status.compressedNodes`, with gzip by default (v4.1 adds zstd and brotli, through `WORKFLOW_COMPRESSION_ALGORITHM`). If node status offloading is enabled, Argo moves the nodes to a database and leaves `status.nodes` empty. The per-task status in [Workflow Status](osmo-to-runai.md#workflow-status) reads `status.nodes`, so Run:ai's status sync must also read `compressedNodes`, and Run:ai should keep offloading disabled when it installs Argo, or read the database.
-
-The spec counts toward the same limit. The composer repeats the storage mounts, the goofys sidecar and the environment variables in every task's template, so large workflows and fan-outs grow quickly.
+When a Workflow grows close to etcd's object size limit (about 1 MB), Argo compresses `status.nodes` into `status.compressedNodes`, with gzip by default (v4.1 adds zstd and brotli, through `WORKFLOW_COMPRESSION_ALGORITHM`), and with node status offloading it moves the nodes to a database. The spec counts toward the same limit. Now in [Large Workflows](osmo-to-runai.md#large-workflows).
 
 ### hostNetwork and DNS
 
@@ -499,4 +486,4 @@ The main document sets `hostNetwork` through `podSpecPatch` (see [Security](osmo
 
 ### Jinja Loops and Replicas
 
-The main document maps OSMO's Jinja loops to `tasks[].replicas` (see [General Fields](osmo-to-runai.md#general-fields)). That holds for a loop inside a group. A loop in OSMO's flat `tasks` list creates independent tasks, each in its own group, which `replicas` would gang-schedule instead. See [Fan-Out of Independent Tasks](#fan-out-of-independent-tasks).
+The main document maps a Jinja loop inside a group to `tasks[].replicas`, and a loop in OSMO's flat `tasks` list, which creates independent tasks, to `groups[].copies` (see [General Fields](osmo-to-runai.md#general-fields)). A fan-out beyond a fixed count is discussed in [Fan-Out of Independent Tasks](#fan-out-of-independent-tasks).

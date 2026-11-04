@@ -14,11 +14,12 @@ We would like to use OSMO as the reference for what a workflow system must suppo
 
 The OSMO team's evaluation ([Absorbing OSMO Into Run:ai](https://docs.google.com/document/d/1oQBrlSJcxpsUyZzkPRkL5Gz_mjLB4F6PtnKJT9bDoQc/edit?tab=t.8t99d897yg89#heading=h.a4dh5zaqtypm)) concluded that ***OSMO workflows can be expressed as Argo Workflows***. This document builds on that conclusion and lays out the technical path: a native Run:ai `workflow` workload type that Run:ai should translate into one Argo Workflow.
 
-This document focuses on three areas:
+This document focuses on four areas:
 
 1. ***Workflow submission API***: A native API for submitting workflows. The API should resemble the other native submission APIs, but tailored to what is specific to workflows: groups of tasks, dependencies between groups, and data passed between tasks.
 2. ***Workflow status***: Per-task and workflow progress and status tracking. Workflow tracking should be integrated with the existing workloads info API. Per-task status can be a sub-resource of this API.
 3. ***PodGroup management***: Needed for groups of tasks that must be gang-scheduled (all tasks start together, or none do), as discussed in [PodGroup Management](#podgroup-management).
+4. ***Workflow operations***: Restarting and canceling a workflow, and keeping its logs after it ends, as discussed in [Workflow Operations](#workflow-operations).
 
 
 ## References
@@ -95,7 +96,7 @@ spec:
 
 #### Single Task
 
-In this example there is a single task. The example is not realistic, as a single task can run as a workspace or training workload, but it demonstrates the minimal possible workflow.
+In this example there is a single task. The example is not practical, as a single task can run as a workspace or training workload, but it demonstrates the minimal possible workflow.
 
 ***OSMO Workflow***
 
@@ -122,10 +123,10 @@ spec:
   groups:
   - name: hello
     tasks:
-    - image: ubuntu:24.04   # in single task group, the task name can be taken from the group name by default.
+    - image: ubuntu:24.04  # in single task group, the task name can be taken from the group name by default.
       command: echo
       args: "Hello OSMO!"
-      computeRef: default # We may decide to allow omitting this and use "default" as the default profile
+      computeRef: default  # can be omitted if we decide "default" is the default profile
   compute:
   - name: default
     cpuCoreRequest: 1
@@ -278,9 +279,36 @@ $ aws --endpoint-url http://127.0.0.1:4566 s3 cp s3://osmo/workflows/handoff-1/b
 Goodbye from task B
 ```
 
+##### *Run:ai Supported Storage*
+
+In Run:ai, sharing data between tasks is not limited to S3: NFS and PVC (based on access mode) also qualify.
+
+Additionally, non-sharable storage can be supported to serve a task's own use, such as code, configuration, credentials and scratch space.
+
+The following table summarizes the supported datasources. For S3, there are two options, discussed in [S3 Through goofys](#s3-through-goofys) and [S3 by Copy](#s3-by-copy).
+
+| Storage type | Can be used for inter-task data sharing | Argo translation                                             | Per-workflow directory                                       |
+| ------------ | --------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| S3 (goofys)  | Yes                                     | `emptyDir` volume and a goofys sidecar                       | goofys mounts `<bucket>:{{workflow.name}}`                   |
+| S3 (copy)    | Yes                                     | Argo S3 input artifact, downloaded before the task starts, and output artifact, uploaded after it ends | A directory per task, `{{workflow.name}}/<task>/`, in the artifacts' keys |
+| NFS          | Yes                                     | `nfs` volume                                                 | `subPath: "{{workflow.name}}"` on each mount                 |
+| PVC          | Yes, limited by the access mode (below) | `persistentVolumeClaim` volume, or `volumeClaimTemplates` for a new PVC per workflow | A new PVC per workflow, or `subPath` on an existing PVC      |
+| Host path    | No, the directory is on the node.       | `hostPath` volume                                            | -                                                            |
+| Data volume  | No, mounted read-only                   | `persistentVolumeClaim` volume, read-only                    | -                                                            |
+| EmptyDir     | No, deleted with the pod                | `emptyDir` volume                                            | -                                                            |
+| Git          | No, each task clones its own copy       | Argo git input artifact                                      | -                                                            |
+| ConfigMap    | No, mounted read-only                   | `configMap` volume                                           | -                                                            |
+| Secret       | No, mounted read-only                   | `secret` volume                                              | -                                                            |
+
+*I checked each translation on an EKS cluster running Argo v4.1, except NFS (no NFS server was available), data volumes (a PVC underneath) and S3 by copy.*
+
+##### *S3 Through goofys*
+
 ***Run:ai Workflow***
 
-Run:ai has S3 datasource, allowing one task to leave files to a dependent task. To emulate the OSMO behavior, the following workload can be used:
+Same as for Run:ai's existing native workloads, S3 storage is mounted as a file system with `goofys`. To emulate the OSMO behavior, multiple tasks need to mount the same S3 storage.
+
+Note that the mounted path does not function as a full file system: a file is uploaded only when it is closed, and appending to a file or rewriting part of it isn't supported. 
 
 ```yaml
 spec:
@@ -316,14 +344,14 @@ spec:
       directorySeparation: perWorkflow # or none
 ```
 
+The storage section in the top level of the spec should hold only sharable storage. Per-task storage should be defined as part of the task's own spec.
+
 Note two suggested changes to the Run:ai API:
 
-1. The mount path is typically a parameter of the storage itself. We suggest allowing it to be specified in the task. For backward compatibility, it will also be possible to specify in the storage section as a default for any task not specifying it in its storageRef section.
+1. The mount path is typically a parameter of the `storage` section itself. We suggest allowing each task to specify its mount point. For backward compatibility, it will also be possible to specify a default mount point in the storage section, which each task can override in its `storageRef` section.
 2. Directory separation per-workflow. Run:ai's S3 storage mounts the whole bucket, so in the example above both tasks write to the bucket's root, and can overwrite the files of another workflow. OSMO avoids this by giving each task its own folder (`workflows/<workflow-id>/<task>/`). We can add a `directorySeparation` parameter requesting a dedicated directory for the current workflow by utilizing `goofys` ability to mount sub-directory of a bucket (see Argo Workflow for concrete example). All tasks of a workflow share its directory, so avoiding file name clashes between tasks is the researcher's responsibility; a researcher who wants per-task separation can have each task write to its own sub-directory. Adding `directorySeparation: perTask` is also an option, but it makes things more complicated for one task reading files of another task, therefore it is not recommended.
 
 ***Argo Workflow***
-
-Each S3 mount in a task will become three things in that task's pod: an `emptyDir` volume, a privileged goofys sidecar that mounts the workflow's folder of the bucket into it, and a mount on the main container. These are the same objects Run:ai generates for S3 storage today.
 
 ```yaml
 spec:
@@ -406,48 +434,171 @@ $ aws --endpoint-url http://127.0.0.1:4566 s3 cp s3://osmo/handoff-s3-qmf4c/good
 Goodbye from task B
 ```
 
-##### *Supported Storage Types*
+##### *S3 by Copy*
 
-In Run:ai, workflows are not limited to S3. Argo can mount every Run:ai storage type, so the composer can support all of them. The types differ in inter-task sharing: a task can pass files to a dependent task only through storage that both tasks can mount and that keeps the files after the first task ends. S3, NFS and PVC qualify.
+Instead of a goofys mount, in the S3 by copy approach the task downloads data from S3 before the main container starts, and uploads its output artifact to S3 after the main container ends. This mimics OSMO's own model: OSMO downloads a task's inputs before it runs, and uploads its outputs after it ends.
 
-Additional non-sharable storage can be considered as well. They serve a task's own use, such as code, configuration, credentials and scratch space. However, those will be added as storage to each task and not to the shared storage section.
+Compared to goofys:
 
-| Storage type | Inter-task sharing                      | Argo translation                                             | Per-workflow directory                                  |
-| ------------ | --------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------- |
-| S3           | Yes                                     | `emptyDir` volume and a goofys sidecar                       | goofys mounts `<bucket>:{{workflow.name}}`              |
-| NFS          | Yes                                     | `nfs` volume                                                 | `subPath: "{{workflow.name}}"` on each mount            |
-| PVC          | Yes, limited by the access mode (below) | `persistentVolumeClaim` volume, or `volumeClaimTemplates` for a new PVC per workflow | A new PVC per workflow, or `subPath` on an existing PVC |
-| Host path    | No, the directory is on the node.       | `hostPath` volume                                            | -                                                       |
-| Data volume  | No, mounted read-only                   | `persistentVolumeClaim` volume, read-only                    | -                                                       |
-| EmptyDir     | No, deleted with the pod                | `emptyDir` volume                                            | -                                                       |
-| Git          | No, each task clones its own copy       | Argo git input artifact                                      | -                                                       |
-| ConfigMap    | No, mounted read-only                   | `configMap` volume                                           | -                                                       |
-| Secret       | No, mounted read-only                   | `secret` volume                                              | -                                                       |
+- There is no privileged sidecar, and the task works on a local file system, so appending to a file and rewriting part of it work.
+- The task needs local disk for the data (`ephemeralStorageRequest`), the download delays the start of the main container, and outputs reach S3 only when the task ends.
 
-*I checked each translation on an EKS cluster running Argo v4.1, except NFS (no NFS server was available) and data volumes (a PVC underneath).*
+There are two ways to express S3 by copy in the native spec: 
 
-***Git*** doesn't need a custom init container. Argo's git input artifact is cloned by Argo's own `init` container into the given path before the main container starts, and it doesn't require an Argo artifact repository. Run:ai's git fields map to it directly:
+* One path for both the download and the upload, which needs a single new field.
+* Two separate paths for downloads and uploads, which is more flexible and closer to OSMO. 
 
-| Run:ai `git` field          | Argo `git` artifact field             |
-| --------------------------- | ------------------------------------- |
-| `repository`                | `repo`                                |
-| `branch`                    | `branch`                              |
-| `revision`                  | `revision`                            |
-| `path`                      | the artifact's `path`                 |
-| `secretRef` with `password` | `usernameSecret` and `passwordSecret` |
-| `secretRef` with `ssh-key`  | `sshPrivateKeySecret`                 |
+Our suggestion goes with separate paths, but note that the simpler one-path approach is also possible.
 
-***S3 through goofys*** is not a full file system: a file is uploaded only when it is closed, and appending to a file or rewriting part of it isn't supported. Tasks that need these, such as writing checkpoints in place, should use NFS or a PVC.
+***Run:ai Workflow***
 
-***For a PVC,*** the access mode decides which tasks can use it together:
+This is the [Input/Output Chain](#inputoutput-chain) example with copying instead of mounting. A goofys reference has only a `mountPath`, while a copy reference has `outputs` and `inputs`: `outputs` is the path that is uploaded after the task ends, and `inputs` lists what to download before the task starts. Each task uploads to its own directory, and each input names the task whose directory it downloads:
+
+```yaml
+spec:
+  groups:
+  - name: a
+    tasks:
+    - image: ubuntu:24.04
+      command: bash -c
+      args: ["echo 'Hello from task A' > /mnt/out/hello.txt"]
+      storageRef:
+      - name: local-s3
+        type: s3
+        outputs:                       # [new] uploaded after the task ends
+          mountPath: /mnt/out          # uploaded to <workflow>/a/
+  - name: b
+    dependsOn: [a]
+    tasks:
+    - image: ubuntu:24.04
+      command: bash -c
+      args: ["echo 'This is what A said:'; cat /mnt/in/a/hello.txt; echo 'Goodbye from task B' > /mnt/out/goodbye.txt"]
+      storageRef:
+      - name: local-s3
+        type: s3
+        outputs:
+          mountPath: /mnt/out          # uploaded to <workflow>/b/
+        inputs:                        # [new] downloaded before the task starts
+        - task: a                      # <workflow>/a/ under local-s3
+          mountPath: /mnt/in/a
+        - workflow: handoff-1          # an earlier workflow's output (default: this workflow)
+          task: a                      # handoff-1/a/
+          mountPath: /mnt/in/old-a
+  compute:
+  - name: default
+    ...
+  storage:
+    s3:
+    - accessKeySecret: localstack-s3   # contains { AccessKeyId: test, SecretKey: test }
+      bucket: osmo
+      name: local-s3
+      url: http://localstack-s3.osmo.svc.cluster.local:4566
+```
+
+The storage item is the same as for goofys. The composer builds every key, so each task gets its own directory, `<workflow>/<task>/`, as in OSMO's `workflows/<workflow-id>/<task>/`. A task doesn't need to know where another task's files are, because its input names the task, and it reads an earlier workflow's outputs the same way, by naming that workflow. Naturally, there is also no need for the `directorySeparation` parameter in the spec.
+
+***Argo Workflow***
+
+Each of `inputs` becomes an S3 input artifact with the key of the task it names, and `outputs` becomes an S3 output artifact with the task's own key. The output path is an `emptyDir` volume, because Argo's docs say output artifacts should be on a volume. Argo gives input artifacts a volume of their own.
+
+```yaml
+spec:
+  entrypoint: main
+  templates:
+  - name: main
+    dag:
+      tasks:
+      - name: a
+        template: a
+      - name: b
+        template: b
+        dependencies: [a]
+
+  - name: a
+    volumes:
+    - name: local-s3-out
+      emptyDir: {}
+    outputs:
+      artifacts:
+      - name: local-s3-out
+        path: /mnt/out                                         # outputs.mountPath
+        archive: {none: {}}                                    # store the files as they are, not as one .tgz
+        s3:
+          endpoint: localstack-s3.osmo.svc.cluster.local:4566  # url, without the scheme
+          insecure: true                                       # url is http
+          bucket: osmo
+          key: "{{workflow.name}}/a/"                          # the task's own directory; must end with "/"
+          accessKeySecret: {name: localstack-s3, key: AccessKeyId}
+          secretKeySecret: {name: localstack-s3, key: SecretKey}
+    container:
+      image: ubuntu:24.04
+      command: [bash, -c]
+      args: ["echo 'Hello from task A' > /mnt/out/hello.txt"]
+      volumeMounts:
+      - {name: local-s3-out, mountPath: /mnt/out}
+
+  - name: b
+    volumes:
+    - name: local-s3-out
+      emptyDir: {}
+    inputs:
+      artifacts:
+      - name: local-s3-a
+        path: /mnt/in/a                                        # inputs[0].mountPath
+        s3:
+          # endpoint, insecure, bucket and credentials as in task a
+          key: "{{workflow.name}}/a/"
+      - name: local-s3-old-a
+        path: /mnt/in/old-a
+        s3:
+          # endpoint, insecure, bucket and credentials as in task a
+          key: "handoff-1/a/"
+    outputs:
+      artifacts:
+      - name: local-s3-out
+        path: /mnt/out
+        archive: {none: {}}
+        s3:
+          # endpoint, insecure, bucket and credentials as in task a
+          key: "{{workflow.name}}/b/"
+    container:
+      image: ubuntu:24.04
+      command: [bash, -c]
+      args: ["echo 'This is what A said:'; cat /mnt/in/a/hello.txt; echo 'Goodbye from task B' > /mnt/out/goodbye.txt"]
+      volumeMounts:
+      - {name: local-s3-out, mountPath: /mnt/out}
+```
+
+The fields of Run:ai's S3 storage and of the storage reference map to the artifacts' fields:
+
+| Run:ai | Argo S3 artifact |
+| --- | --- |
+| `url` | `endpoint` without the scheme, and `insecure: true` for `http` |
+| `bucket` | `bucket` |
+| `accessKeySecret`, `secretKeyOfAccessKeyId`, `secretKeyOfSecretKey` | `accessKeySecret` and `secretKeySecret`, each with the Secret's name and key |
+| `storageRef[].outputs.mountPath` | the output artifact's `path`, with the key `{{workflow.name}}/<task>/` |
+| `storageRef[].inputs[].task`, `workflow` | the input artifact's key, `<workflow>/<task>/` |
+| `storageRef[].inputs[].mountPath` | the input artifact's `path` |
+
+This matches OSMO's `inputs` and its `{{input:N}}` and `{{output}}` paths. Argo's default artifact GC strategy is `Never`, so the files stay in S3 after the workflow ends, as they do with goofys.
+
+Left for the design:
+
+- Replicas and copies. The replicas of a task would upload to the same key and overwrite each other's files, so the key needs the replica's index, for example `<task>-<index>/`, and an input from a replicated task gets all of them.
+- A task that writes nothing uploads nothing, so an input that names it finds no files. Whether such an input fails the task, or is `optional`, is to be decided and tested.
+- Whether Argo uploads the outputs of a task that fails is to be tested.
+
+##### *PVC*
+
+***Run:ai Workflow***
+
+The access mode decides which tasks can use it together:
 
 - `readWriteMany` (for example EFS, or a storage class backed by NFS): tasks on any nodes read and write at the same time, as with NFS.
 - `readWriteOnce` (for example EBS `gp2`): the volume is attached to one node at a time. Tasks that run one after another can share it, but a task that starts while a task on another node holds the volume waits until the volume is released. Zonal block storage adds another limit: every task that mounts the volume must run in the volume's availability zone.
 - `readOnlyMany`: many nodes can mount it, but only for reading. It fits an input dataset, not task outputs.
 
 If the workflow asks Run:ai to create the PVC (`existingPvc: false` without a `claimName`), each run will get its own claim, so no directory separation will be needed. With `ephemeral: true` the claim will be deleted when the workflow ends, which fits intermediate files that only the next task needs. The composer should translate this to Argo's `volumeClaimTemplates`, and set `spec.volumeClaimGC.strategy: OnWorkflowCompletion`, so that Argo deletes the claim when the workflow ends, whether it succeeded or failed. Argo's default, `OnWorkflowSuccess`, keeps the claims of a failed workflow until the Workflow itself is deleted. `volumeClaimGC` applies to every claim created from `volumeClaimTemplates` and to nothing else, so only ephemeral claims should be created that way. Existing claims, mounted as `persistentVolumeClaim` volumes, aren't affected.
-
-***PVC Example - Run:ai Workflow***
 
 ```yaml
 spec:
@@ -463,7 +614,7 @@ spec:
       directorySeparation: perWorkflow # or none
 ```
 
-***PVC Example - Argo Workflow***
+***Argo Workflow***
 
 ```yaml
 spec:
@@ -1213,6 +1364,8 @@ When `expression` is set and `retryPolicy` isn't, Argo uses the `Always` policy,
 
 ![Argo retry pods](images/argo-retry-pods.png)
 
+When B fails, Argo also keeps C running. In the Argo run (`retry-zx4cf`, whose status is shown in [Workflow Status](#workflow-status)), B's last attempt failed at 16:29:50 and C ran until 16:31:27. Argo marked D as Omitted after C ended, at 16:31:37, and the workflow ended as Failed.
+
 Argo has no equivalent of `successExitCodes`: it marks a task as Failed on any non-zero exit code. We checked it with a variant of this example in which C exits with code 3 and has `COMPLETE: 1-3` in OSMO. OSMO marked C as COMPLETED ("Exit Action: COMPLETE the task for exit code 3"), while Argo marked it as Failed ("Error (exit code 3)"). The composer should provide a way to treat the listed codes as success, see [Group SuccessExitCodes](#group-successexitcodes).
 
 See also [Workflow Status](#workflow-status) for further discussion about the OSMO versus Argo returned status.
@@ -1741,6 +1894,29 @@ One possible solution is to utilize the wrapper suggested in [Group Barrier](#gr
 
 A task with `replicas` becomes several pods from one template (`withSequence`). Each replica's pod needs its own hostname, for example with the replica index (`{{item}}`) in `podSpecPatch`. But `RUNAI_HOST_<TASK>` holds a single name, while such a task has one per replica, so the design will need to define how the other tasks find each replica.
 
+#### Group Failure Policy
+
+With `ignoreNonleadStatus: false` (`failurePolicy: AnyTask`), OSMO fails a group as soon as any of its tasks fails: it marks the group's tasks as FAILED ("Task <name> Failed.") and stops the pods that are still running (`jobs.py` in OSMO's source). Argo doesn't stop them. Without `continueOn`, the group's DAG fails, but only after the tasks that are still running end, because Argo doesn't end a DAG while any of its tasks runs, and `failFast` doesn't change that. In a group with a leader, the other tasks are daemons, which Argo stops only when the DAG ends, so the group keeps running, with its GPUs, until the leader ends. This is from Argo's source, not tested.
+
+KAI's stale gang eviction would stop such a group about a minute after the task fails (see [PodGroup Management](#podgroup-management)), but the composer turns it off, since it breaks the default policy. Possible solutions:
+- Keep the eviction on for `AnyTask` groups, with a short grace period. It ends the group close to OSMO's behavior, but the evicted tasks end in Error, which the preemption retry of `terminateAfterPreemption: false` would retry, and KAI doesn't evict a group in which a task has already succeeded.
+- A Run:ai cluster component watches the Workflow's status, and when a task of an `AnyTask` group fails, deletes the group's other pods.
+
+This gap will have to be resolved in the design.
+
+#### Templates and Apps
+
+OSMO workflow specs are Jinja templates. A spec can declare variables with defaults in `default-values`, use them anywhere in the spec (`{{ variable }}`), and use Jinja's `for` and `if`. Users override the variables at submission, with `--set` and `--set-string`. An OSMO app is such a template stored in OSMO with versions, which users list and submit with their own values (`osmo app submit <app>:<version> --set ...`).
+
+Run:ai covers part of it. Run:ai stores templates for its other workload types (Experimental in the API), each in a project, department or cluster scope, and a submission with a `templateId` combines the template's values with the fields given in the request. A workflow template type can follow the same model, but:
+- Overrides are by field. A value can replace a whole field, for example a task's `args`, but it can't be substituted inside a string, as `{{ epochs }}` can in OSMO. In a workflow, an override would also have to find its field in a list, by the name of the group or task.
+- Run:ai templates have no versions.
+- Jinja's `for` and `if` have no equivalent. Loops that create identical tasks are covered by `tasks[].replicas` and `groups[].copies` (see [General Fields](#general-fields)), but other loops and conditions aren't.
+
+A cheaper option is to render the Jinja template in the CLI before submitting it, which covers only CLI users. If Run:ai adds `{{ }}` variables, it must render them before the composer, because Argo substitutes `{{...}}` in the strings of the Workflow, and rejects a tag with one of its own prefixes, such as `workflow.` or `inputs.`, that it can't resolve.
+
+This gap will have to be resolved in the design.
+
 ## Workflow Status
 
 ### Overview
@@ -2058,6 +2234,12 @@ How Run:ai will detect a preemption, and the retry limit of a preempted task tha
 
 This case hasn't been tested yet. OSMO restarts the whole group when `ignoreNonleadStatus` is false. In Argo, that would be a `retryStrategy` on the group's DAG template, and the group's PodGroup would have to accept the new pods. This is left for the design.
 
+### Large Workflows
+
+Argo keeps the whole workflow, spec and status, in one Kubernetes object, which etcd limits to about 1 MB. When the status of the tasks gets too large, Argo compresses `status.nodes` into `status.compressedNodes`, so Run:ai's status sync must read both. If the object is still too large, Argo can move the status to a database (node status offloading), and leaves both fields empty. Run:ai should keep offloading disabled, or read the database. Without it, Argo fails the workflow ("offload node status is not supported").
+
+The spec counts toward the limit too, and the composer repeats the storage mounts and the goofys sidecar in the template of every task that uses them. Using `withSequence` for replicas and copies, and `spec.templateDefaults` for what all the templates share, keeps the spec smaller, but a workflow with hundreds of tasks, as OSMO's Jinja loops can create, may still not fit. OSMO keeps workflows in its own database and has no such limit. This is from Argo's docs, not tested.
+
 ## PodGroup Management
 
 The tasks of a group with more than one task must be gang-scheduled, so their pods need one shared PodGroup. KAI's pod-grouper can't create it for Argo pods: it gives each pod its own PodGroup. So the composer should create the group's PodGroup, and mark the group's pods to skip the pod-grouper and join it, as the [Multiple Tasks In a Group](#multiple-tasks-in-a-group) example shows.
@@ -2068,6 +2250,33 @@ There are two options for creating the PodGroups:
 2. **Argo `resource` tasks.** The composer can add an Argo task that creates the group's PodGroup, and make the group's tasks depend on it, as in the [Multiple Tasks In a Group](#multiple-tasks-in-a-group) example. Each PodGroup is created just before its group starts, so it never waits without pods, and `setOwnerReference` deletes it with the Workflow. The costs are a short-lived pod for each resource task, an extra node in the workflow's status. An issue with this approach: the workflow's serviceAccount (or the default serviceAccount, if no serviceAccount specified) needs permission for creating PodGroups (I have tested it).
 
 A group with more than one task also needs a headless Service, so its tasks can reach each other (see [Inter-Task Communication](#inter-task-communication)). With Argo `resource` tasks, the composer can create it the same way as the PodGroup, as that example shows. With a WorkloadRunner plugin, the existing networking plugin can't create it, because it allows at most one Service per workload and is built for external access, so the new plugin would have to create the Services too. This favors the Argo `resource` tasks.
+
+KAI also evicts a gang group that stays below its `minMember`. A PodGroup is stale when it has running pods, fewer of them than its `minMember`, and none of its pods has succeeded. After a grace period (60 seconds by default in Run:ai), KAI evicts all the group's running pods. This breaks OSMO's default group behavior (`ignoreNonleadStatus: true`), in which a non-lead task that fails doesn't affect the group, and the other tasks keep running while a task is rescheduled. Here, KAI would evict the leader a minute after a non-lead task fails, and would evict a group whose task is retried if the new pod doesn't start within the grace period. OSMO avoids this by turning stale gang eviction off in its KAI installation (`stalegangeviction.enabled: false` in the `kai-values.yaml` that its deployment guides use). Turning it off for the whole cluster would change it for Run:ai's other gang-scheduled workloads too, so the composer should instead set `stalenessGracePeriod` on each PodGroup it creates. A negative value turns the eviction off for that PodGroup (`stalenessGracePeriod: "-1s"`). This is from KAI's source (v0.18.2), not tested. See also [Group Failure Policy](#group-failure-policy).
+
+## Workflow Operations
+
+OSMO users manage a workflow after submitting it with OSMO's CLI. This chapter covers the operations that have no Run:ai equivalent yet. Most of the others map to existing Run:ai operations or to the task's pod: `query` and `events` to the workload's status and events, `exec` and `port-forward` to the task's pod (see [External Access to Running Tasks](#external-access-to-running-tasks)), and `validate` to Run:ai's validation of the request.
+
+### Restart of a Failed Workflow
+
+OSMO can restart a failed workflow (`osmo workflow restart`). It creates a new workflow from the same spec, with only the groups that didn't complete, and points the inputs that came from completed groups to the outputs of the original workflow (`<workflow-id>:<task>`). A restarted group runs as a whole, including its tasks that succeeded in the first run (`restart_workflow` in OSMO's `workflow_service.py`).
+
+Run:ai has no restart action, and Argo has no spec field for it. There are two ways to provide it:
+
+1. **Retry in place.** Argo's CLI and server retry a failed Workflow by rewriting its status: they reset the failed tasks and the tasks that depend on them, keep the tasks that succeeded, and delete the pods of the reset tasks (`FormulateRetryWorkflow` in Argo's `workflow/util` package). Run:ai doesn't install the Argo server, so its cluster component would have to vendor this code. For a group with more than one task, the restart must reset all the group's tasks (`restartSuccessful` with a node selector), as OSMO does, because a task retried alone waits for a PodGroup that expects the whole group, and is never scheduled. The group's PodGroup task must not be reset, so that the PodGroup isn't created a second time. The workflow keeps its name, so its per-workflow directory still has the outputs of the completed groups. But the workload goes from Failed back to Running, while Failed is a final phase in Run:ai today.
+2. **A new workflow**, as OSMO does. The composer drops the completed groups and the dependencies on them. With `directorySeparation: perWorkflow`, the new workflow gets a new directory, so the composer has to also mount the original workflow's directory, or name the directory after the first workflow of the restart chain. With [S3 by Copy](#s3-by-copy), the composer can instead name the original workflow in the inputs that read from the completed groups (`inputs[].workflow`).
+
+Neither was tested. This gap will have to be resolved in the design, including whether a restart is the same workload or a new one.
+
+### Cancel
+
+OSMO cancels a queued or running workflow (`osmo workflow cancel`): it stops the workflow's pods and keeps the workflow, with its status (FAILED_CANCELED) and its logs. Run:ai has no such action. Deleting a workflow removes its pods, and their logs with them, and the workload moves to Run:ai's deleted workloads, which are kept for a limited time. Suspending it deletes the pods too, but keeps the workload so it can be resumed.
+
+Argo can stop a Workflow and keep it: `spec.shutdown: Terminate` stops the running pods, ends the workflow as Failed, and keeps the Workflow and its pods, so their status and logs stay available. A stop action for workflows, translated to `shutdown: Terminate`, would match OSMO's cancel. This is left for the design.
+
+### Logs After the Workflow Ends
+
+OSMO uploads a workflow's logs to its log storage (S3) when the workflow ends (`migrate_logs` in OSMO's `jobs.py`), so they last longer than the workflow's pods. Run:ai reads logs from the pods, so a task's logs last only as long as its pod. Argo keeps the pods until the Workflow is deleted (unless `podGC` is set), and `autoDeletionTimeAfterCompletionSeconds` deletes the Workflow. Argo can archive each task's logs (`archiveLogs`), but only to an Argo artifact repository, which the composer doesn't need otherwise. Keeping logs needs an artifact repository for logs, Run:ai's own log collection, or the cluster's log aggregation, if the customer runs one. This is left for the design.
 
 ## Fields Translation
 
@@ -2098,11 +2307,12 @@ This chapter lists the fields of the Run:ai workflow spec, and how the composer 
 | `groups[].name` **[new]** | `groups[].name` | The group's DAG task and DAG template |
 | `groups[].dependsOn` **[new]** | implied by `inputs[].task` | `dependencies` of the group's task in `main` |
 | `groups[].leader` **[new]** | `lead` (on the task) | `daemon: true` and `continueOn` on the other tasks of the group (see [Multiple Tasks In a Group](#multiple-tasks-in-a-group)). |
-| `groups[].failurePolicy` **[new]**: `Leader` or `AnyTask` | `ignoreNonleadStatus` | `Leader`: `continueOn` on the other tasks. `AnyTask`: no `continueOn` |
+| `groups[].failurePolicy` **[new]**: `Leader` or `AnyTask` | `ignoreNonleadStatus` | `Leader`: `continueOn` on the other tasks. `AnyTask`: no `continueOn`, but the group isn't stopped when a task fails, see [Group Failure Policy](#group-failure-policy). For both, a negative `stalenessGracePeriod` on the group's PodGroup, see [PodGroup Management](#podgroup-management) |
 | `groups[].barrier` **[TBD]** | `barrier` | To be designed, see [Group Barrier](#group-barrier) |
 | `groups[].nodePools` | `pool` | The annotation `runai-nodepools` and node affinity on each template, as for other types. Note that this is a group field and not a task field, as KAI gives each PodGroup a single node pool, taken from its first pod, so all the tasks of a group run in the same node pool. Tasks that need different node pools must be in different groups. |
 | `groups[].restartPolicy` (`RecreateGroupOnPodRestart` in distributed inference) | `ignoreNonleadStatus: false` with `RESCHEDULE` | `retryStrategy` on the group's DAG template (to be checked, see [Retry of a Multi-Task Group](#retry-of-a-multi-task-group)) |
 | `groups[].topology` **[new]** (`name`, `required`, `preferred`, and `subGroups[]` with `name`, `parent` and `topology`) | `topology` in a resource spec (`key`, `group`, `requirementType`) | The `topologyConstraint` and `subGroups` of the group's PodGroup, see [Group Topology](#group-topology) |
+| `groups[].copies` **[new]** (name TBD) | Jinja loops that create identical tasks in a flat `tasks` list, one group per task | `withSequence` on the group's task in `main`, so each copy is scheduled on its own. The copy's index is passed to its tasks, for example as `RUNAI_GROUP_INDEX` **[new]**, and a group with more than one task gets a PodGroup and a Service per copy, with the index in their names. The groups that depend on it wait for all the copies. Not tested |
 | `RUNAI_HOST_<TASK>` environment variables **[new]**, injected | `{{host:<task>}}` | `podSpecPatch` with hostname and subdomain, and the group's headless Service |
 | ***Task*** | | |
 | `tasks[].name` **[new]** | `name` | The task's template |
@@ -2125,7 +2335,7 @@ This chapter lists the fields of the Run:ai workflow spec, and how the composer 
 | `terminateAfterPreemption` | an exit action that reschedules exit code 3006, capped by `max_retry_per_task` | `false` (the default): a `retryStrategy` on each template that runs the task again when it ends in Error, which is how we expect Argo to mark a task whose pod KAI preempts (`expression: lastRetry.status == "Error"`, added to the task's `retry` condition). Not tested: a preempted attempt may also end as Failed, which this retry misses. `true`: nothing to translate, since Argo doesn't retry a task that ends in Error by default. See [Preemption](#preemption) |
 | `backoffLimit` | — | **Not supported**: replaced by `retry`, which can be limited to exit codes |
 | `restartPolicy` | — | **Not supported**: Argo pods always use `Never`, and a retry runs in a new pod |
-| `tasks[].replicas` **[new]** (like `numWorkers` and `workers`) | Jinja loops that create identical tasks | One template instance per replica (`withSequence`), all in the group's PodGroup |
+| `tasks[].replicas` **[new]** (like `numWorkers` and `workers`) | Jinja loops that create identical tasks inside a group | One template instance per replica (`withSequence`), all in the group's PodGroup. For loops in a flat `tasks` list, see `groups[].copies` |
 | `tasks[].segmentSize`, `tasks[].segmentTopology` **[new]** (like workers-per-segment) | — | One subgroup per segment in the group's PodGroup, and the segment's subgroup in each replica's `kai.scheduler/subgroup-name` label, through `withItems` instead of `withSequence`. See [Group Topology](#group-topology) |
 | `tasks[].files` **[new]** | `files` | `inputs.artifacts[].raw`; binary files (`base64`) through a Secret volume |
 | `ports`, `exposedUrls` | — | **Not supported**: See [External Access to Running Tasks](#external-access-to-running-tasks) |
@@ -2158,25 +2368,27 @@ An OSMO platform is a named set of node selectors and tolerations that the admin
 
 ### Storage
 
-Storage is covered in the [Input/Output Chain](#inputoutput-chain) example and its [Supported Storage Types](#supported-storage-types) table. Sharable storage is declared once in `spec.storage`, and each task that uses it mounts it through `storageRef`. Non-sharable storage is declared in the `storage` of the task that uses it.
+Storage is covered in the [Input/Output Chain](#inputoutput-chain) example and its [Run:ai Supported Storage](#runai-supported-storage) table. Sharable storage is declared once in `spec.storage`, and each task that uses it mounts it through `storageRef`. Non-sharable storage is declared in the `storage` of the task that uses it.
 
 | Run:ai field | OSMO | Argo |
 | --- | --- | --- |
 | ***Shared storage*** | | |
-| `spec.storage.<type>[]`, with the existing item schemas of the sharable types (`s3`, `nfs`, `pvc`) | the workflow data store (admin setting) | Per type, see the [Supported Storage Types](#supported-storage-types) table, on the template of each task that references it in `storageRef` |
+| `spec.storage.<type>[]`, with the existing item schemas of the sharable types (`s3`, `nfs`, `pvc`) | the workflow data store (admin setting) | Per type, see the [Run:ai Supported Storage](#runai-supported-storage) table, on the template of each task that references it in `storageRef` |
 | `spec.storage.<type>[].directorySeparation` **[new]** | each task's folder in the data store | goofys mounts `<bucket>:{{workflow.name}}`, or `subPath: "{{workflow.name}}"` on each mount |
 | `spec.storage.pvc[]` with `claimInfo` and `ephemeral` | — | `spec.volumeClaimTemplates`, with `spec.volumeClaimGC.strategy: OnWorkflowCompletion`, so the claims are deleted when the workflow ends, whether it succeeded or failed |
 | `spec.storage.s3[].accessKeySecret`, `secretKeyOfAccessKeyId`, `secretKeyOfSecretKey` | data credentials, applied automatically to matching URLs | `env` of the goofys sidecar, from `secretKeyRef` |
+| `tasks[].storageRef[].outputs` **[new]** (option, S3 only): `mountPath` | `outputs`, `{{output}}` | An S3 output artifact instead of the goofys mount, uploaded after the task ends to the task's own key, `{{workflow.name}}/<task>/`, see [S3 by Copy](#s3-by-copy). Not tested |
+| `tasks[].storageRef[].inputs[]` **[new]** (option, S3 only): `task`, `workflow` and `mountPath` | `inputs[].task`, `{{input:N}}` | An S3 input artifact per input, downloaded before the task starts, with the key `<workflow>/<task>/`, see [S3 by Copy](#s3-by-copy). Not tested |
 | `tasks[].storageRef` to a storage with `directorySeparation: none` | `inputs[].task: <workflow>:<task>` (an earlier workflow's output) | A mount of the storage's root, from which the task reads the earlier workflow's directory, named after that workflow. A PVC that Run:ai creates for each run can't be read this way |
 | ***Task storage*** | | |
-| `tasks[].storage.<type>[]`, with the existing item schemas of the non-sharable types (`hostPath`, `git`, `dataVolume`, `emptyDirVolume`, `configMapVolume`, `secretVolume`) | see below | Per type, see the [Supported Storage Types](#supported-storage-types) table, on the task's template only |
+| `tasks[].storage.<type>[]`, with the existing item schemas of the non-sharable types (`hostPath`, `git`, `dataVolume`, `emptyDirVolume`, `configMapVolume`, `secretVolume`) | see below | Per type, see the [Run:ai Supported Storage](#runai-supported-storage) table, on the task's template only |
 | `tasks[].storage.hostPath[]` | `volumeMounts` (admin `allowed_mounts`) | `hostPath` volume |
 | `tasks[].storage.secretVolume[]` (`secret`, `mountPath`) | `credentials: {<credential>: <path>}` | `secret` volume and mount |
 | `tasks[].storage.git[].secretRef` | — | `usernameSecret` and `passwordSecret`, or `sshPrivateKeySecret`, of the git artifact |
 | ***Dropped*** | | |
 | — | `inputs[].regex`, `outputs[].regex` | **Dropped**: tasks mount the whole directory |
 | — | `checkpoint[]` | **Dropped**: tasks write checkpoints directly to mounted storage |
-| — | `downloadType`, `cacheSize` | **Dropped**: storage is mounted, not downloaded |
+| — | `downloadType`, `cacheSize` | **Dropped**: storage is mounted, not downloaded, unless the option in [S3 by Copy](#s3-by-copy) is adopted |
 ### Security
 
 This table covers the task's `security` section.

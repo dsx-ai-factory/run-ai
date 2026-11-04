@@ -6,7 +6,7 @@
 
 This document collects the gaps found in [OSMO to Run:ai Workflows](osmo-to-runai.md), the research on a native Run:ai `workflow` type that the composer translates into one Argo Workflow (v4.1).
 
-A gap is an OSMO capability that the proposed workflow doesn't cover yet, a difference in behavior, or something that wasn't tested.
+A gap is an OSMO capability that the proposed workflow doesn't cover yet, or covers with a difference in behavior.
 
 Each item links to the section of the main document that discusses it.
 
@@ -34,6 +34,12 @@ A task with `replicas` spawns several pods, and each of them needs its own hostn
 
 See [Replicas and Host Names](osmo-to-runai.md#replicas-and-host-names).
 
+### Group Failure Policy
+
+With `ignoreNonleadStatus: false`, OSMO fails a group as soon as one of its tasks fails, and stops the group's other tasks. Argo fails the group only after its running tasks end, and a group with a leader keeps running, with its GPUs, until the leader ends.
+
+See [Group Failure Policy](osmo-to-runai.md#group-failure-policy).
+
 ### Preemption
 
 This case hasn't been tested yet. According to OSMO's source, OSMO detects a preemption from the pod condition `PreemptionByScheduler`, which KAI sets before it evicts the pod, and marks the task as FAILED_PREEMPTED with exit code 3006. In Argo, we expect a preempted attempt to end in the Error phase with the message "pod deleted", the same as any pod deleted outside Argo, so Argo's status alone can't tell a preemption from other deletions. This is unverified: Argo's code gives this message only when the pod is gone before the controller sees its final state, so the attempt may also end as Failed with the container's exit code.
@@ -45,6 +51,34 @@ See [Preemption](osmo-to-runai.md#preemption).
 OSMO users reach a running task on demand with `exec`, `port-forward` and `rsync`, and Run:ai can offer the same by targeting the task's pod. But Kubernetes port-forward supports only TCP, while OSMO users may need to forward UDP (for example, for the Isaac Sim livestream).
 
 See [External Access to Running Tasks](osmo-to-runai.md#external-access-to-running-tasks).
+
+## Not Covered Yet
+
+The proposed design doesn't cover these OSMO capabilities yet. As with the difficulties above, their importance should be checked with the OSMO team.
+
+### Templates and Apps
+
+OSMO specs are Jinja templates, with variables and their defaults, loops and conditions, and users override the variables at submission with `--set`. OSMO apps store such templates in OSMO, with versions. Run:ai's templates cover storing a spec and overriding whole fields at submission, but not variables inside strings, versions, or Jinja's loops and conditions, except for loops that create identical tasks.
+
+See [Templates and Apps](osmo-to-runai.md#templates-and-apps).
+
+### Restart of a Failed Workflow
+
+`osmo workflow restart` runs again the groups of a failed workflow that didn't complete, and reads the outputs of the completed groups from the original run. Run:ai has no restart action, and Argo's retry isn't a spec field: Run:ai would have to vendor Argo's retry code, or create a new workflow as OSMO does.
+
+See [Restart of a Failed Workflow](osmo-to-runai.md#restart-of-a-failed-workflow).
+
+### Cancel
+
+`osmo workflow cancel` stops a workflow and keeps it, with its status and logs. Deleting a workflow in Run:ai removes its pods, and their logs with them. A stop action, translated to Argo's `shutdown: Terminate`, would match OSMO's cancel.
+
+See [Cancel](osmo-to-runai.md#cancel).
+
+### Logs After the Workflow Ends
+
+OSMO uploads a workflow's logs to S3 when it ends, so they last longer than its pods. In Run:ai, a task's logs last only as long as its pod, and Argo can archive them only to an Argo artifact repository.
+
+See [Logs After the Workflow Ends](osmo-to-runai.md#logs-after-the-workflow-ends).
 
 ## Behavioral Differences
 
@@ -62,9 +96,10 @@ These differences from OSMO are part of the proposed design:
 - **Node pools:** KAI gives each PodGroup a single node pool, taken from its first pod, so `nodePools` is a group field, and tasks that need different node pools must be in different groups. See [General Fields](osmo-to-runai.md#general-fields).
 - **Image pull secrets:** Argo has no per-template field for them, so the composer should merge the secrets of all the tasks into `spec.imagePullSecrets`, and every pod of the workflow gets all of them. See [General Fields](osmo-to-runai.md#general-fields).
 - **Platforms:** an OSMO platform is a named set of node selectors and tolerations inside a pool. Run:ai has no such set inside a node pool, so each task sets `nodeAffinityRequired` and `tolerations`. These two fields could also be allowed in a compute profile. See [Compute and Placement](osmo-to-runai.md#compute-and-placement).
-- **Directory separation:** OSMO gives each task its own folder in the data store. `directorySeparation` gives each workflow its own directory, which all its tasks share, so avoiding file name clashes between tasks is the researcher's responsibility. See [Input/Output Chain](osmo-to-runai.md#inputoutput-chain).
-- **S3 through goofys:** a file is uploaded only when it's closed, and appending to a file or rewriting part of it isn't supported. Tasks that need these, such as writing checkpoints in place, should use NFS or a PVC. See [Supported Storage Types](osmo-to-runai.md#supported-storage-types).
-- **PVC access modes:** with `readWriteOnce`, a task that starts while a task on another node holds the volume waits until the volume is released, and zonal block storage keeps every task that mounts it in the volume's availability zone. See [Supported Storage Types](osmo-to-runai.md#supported-storage-types).
+- **Directory separation:** OSMO gives each task its own folder in the data store. `directorySeparation` gives each workflow its own directory, which all its tasks share, so avoiding file name clashes between tasks is the researcher's responsibility. The S3 copy option, if it is adopted, would give each task its own folder, as OSMO does. See [Input/Output Chain](osmo-to-runai.md#inputoutput-chain) and [S3 by Copy](osmo-to-runai.md#s3-by-copy).
+- **S3 through goofys:** a file is uploaded only when it's closed, and appending to a file or rewriting part of it isn't supported. Tasks that need these, such as writing checkpoints in place, should use NFS or a PVC, or the S3 copy option, if it is adopted. See [S3 Through goofys](osmo-to-runai.md#s3-through-goofys) and [S3 by Copy](osmo-to-runai.md#s3-by-copy).
+- **PVC access modes:** with `readWriteOnce`, a task that starts while a task on another node holds the volume waits until the volume is released, and zonal block storage keeps every task that mounts it in the volume's availability zone. See [PVC](osmo-to-runai.md#pvc).
+- **Workflow size:** Argo keeps a workflow in one Kubernetes object of about 1 MB at most, so a workflow with hundreds of tasks, as OSMO's Jinja loops can create, may not fit, and Run:ai's status sync must read Argo's compressed status. OSMO has no such limit. See [Large Workflows](osmo-to-runai.md#large-workflows).
 
 ## Dropped OSMO Capabilities
 
@@ -76,7 +111,7 @@ We don't plan to support these OSMO capabilities:
 | `kpis` | It isn't documented, and OSMO only uploads the files without reading them. A task can write such files to its storage |
 | `inputs[].regex`, `outputs[].regex` | Tasks mount the whole directory |
 | `checkpoint[]` | Tasks write checkpoints directly to mounted storage |
-| `downloadType`, `cacheSize` | Storage is mounted, not downloaded |
+| `downloadType`, `cacheSize` | Storage is mounted, not downloaded, unless the S3 copy option is adopted (see [S3 by Copy](osmo-to-runai.md#s3-by-copy)) |
 
 ## Run:ai Fields Not Supported in Workflows
 
@@ -89,8 +124,3 @@ The composer should reject these fields of the other Run:ai types in a workflow:
 | `ports`, `exposedUrls` | Left out for now, since users can reach a running task on demand (see [UDP Port Forwarding](#udp-port-forwarding)) |
 | `completions`, `parallelism` | Training only (hyperparameter optimization) |
 | `nodeType` (deprecated) | Replaced by `nodeAffinityRequired` |
-
-## Not Tested Yet
-
-- **Retry of a multi-task group:** when the lead of an OSMO group is rescheduled, the other tasks of the group are restarted with it, and OSMO restarts the whole group when `ignoreNonleadStatus` is false. In Argo, that would be a `retryStrategy` on the group's DAG template (`groups[].restartPolicy`), and the group's PodGroup would have to accept the new pods. See [Retry of a Multi-Task Group](osmo-to-runai.md#retry-of-a-multi-task-group).
-- **Segment labels:** the composer can set each replica's `kai.scheduler/subgroup-name` label through `withItems`. See [Group Topology](osmo-to-runai.md#group-topology).
