@@ -19,6 +19,7 @@ require (
 	github.com/onsi/gomega v1.41.0
 	github.com/prometheus/client_golang v1.25.0
 	github.com/prometheus/common v0.72.1
+	github.com/stretchr/testify v1.12.1
 	go.uber.org/zap v1.28.0
 	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
 	k8s.io/api v0.36.2
@@ -136,7 +137,6 @@ require (
 	github.com/spf13/cobra v1.10.2 // indirect
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
-	github.com/stretchr/testify v1.12.1 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
