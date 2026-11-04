@@ -324,7 +324,7 @@ LeaderWorkerSet:
           annotations:
             deployment.kubernetes.io/revision: "1"
             distributed-inference/role: worker
-            gpu-memory: "8589"
+            nvidia.com/container.worker.gpu-memory.request: 8Gi
           labels:
             app: leaderworkerset
             component: distributed-inference-worker
