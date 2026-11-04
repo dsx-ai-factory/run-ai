@@ -486,4 +486,4 @@ The main document sets `hostNetwork` through `podSpecPatch` (see [Security](osmo
 
 ### Jinja Loops and Replicas
 
-The main document maps a Jinja loop inside a group to `tasks[].replicas`, and a loop in OSMO's flat `tasks` list, which creates independent tasks, to `groups[].copies` (see [General Fields](osmo-to-runai.md#general-fields)). A fan-out beyond a fixed count is discussed in [Fan-Out of Independent Tasks](#fan-out-of-independent-tasks).
+The main document maps only Jinja loops that create identical tasks: a loop inside a group to `tasks[].replicas`, and a loop in OSMO's flat `tasks` list, which creates independent tasks, to `groups[].copies` (see [General Fields](osmo-to-runai.md#general-fields)). Neither can vary the image, the arguments or other task fields between iterations, so a loop whose iterations differ in such fields isn't covered. A fan-out beyond a fixed count is discussed in [Fan-Out of Independent Tasks](#fan-out-of-independent-tasks).
