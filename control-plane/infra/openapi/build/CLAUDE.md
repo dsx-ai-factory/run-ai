@@ -20,7 +20,8 @@ Targets come from the service `Makefile` plus shared includes
 | `prepare-specs` | `openapi-build-public-spec` then copy public + system-scoped specs into `_build/` |
 | `test` | No-op |
 | `lint` | No-op |
-| `validate` | `validate-openapi-public-spec` + `validate-tags` + `validate-openapi-spec-python` + `validate-openapi-backwards-compatibility` (all `continue_on_error` per metadata) |
+| `validate-openapi-build-uptodate` | Snapshot the committed merged specs, rebuild them in place, and fail if any differ (whitespace and blank lines ignored). Regenerated files are left in the working tree: commit them to fix the failure |
+| `validate` | `validate-openapi-build-uptodate` + `validate-openapi-public-spec` + `validate-tags` + `validate-openapi-spec-python` + `validate-openapi-backwards-compatibility` (blocking: `validate.continue_on_error` is `false` in `artifact-metadata.json`) |
 
 ## Key build notes
 
@@ -38,8 +39,9 @@ Targets come from the service `Makefile` plus shared includes
   now.
 - **Source specs:** `SPEC_FILE_SRC=../infra/openapi/specs/runai-public.yaml` and
   `SPEC_FILE_SRC_SYSTEM=../infra/openapi/specs/runai-system-scoped.yaml`.
-- **Validation gates:** no `x-internal`/`x-authorization` tags in the built spec;
-  spec generates a Python client; `oasdiff`
+- **Validation gates:** the committed merged specs (`_build/` and
+  `../specs/runai-*.yaml`) match a fresh build; no `x-internal`/`x-authorization`
+  tags in the built spec; spec generates a Python client; `oasdiff`
   backwards-compatibility check against the base branch.
 - **Node deps:** `scripts/cli/package.json` (openapi-merge-cli / redocly).
 

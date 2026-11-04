@@ -5,7 +5,7 @@
   "path_to_artifacts": "_build/",
   "make": {
     "validate": {
-      "continue_on_error": true
+      "continue_on_error": false
     }
   },
   "notifications": {

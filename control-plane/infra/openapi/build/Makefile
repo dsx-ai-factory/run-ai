@@ -37,8 +37,26 @@ lint: ## Run linters.
 	# no-op
 .PHONY: lint
 
-validate: openapi-build-public-spec validate-openapi-public-spec validate-tags validate-openapi-spec-python validate-openapi-backwards-compatibility
+validate: validate-openapi-build-uptodate validate-openapi-public-spec validate-tags validate-openapi-spec-python validate-openapi-backwards-compatibility
 .PHONY: validate
+
+# Generated files that openapi-build-public-spec overwrites in place.
+OPENAPI_DRIFT_FILES=_build/runaiApi.swagger.yaml _build/runai-system-scoped.yaml ${OPENAPI_CENTRAL_SPECS_PATH}/runai-public-raw.yaml ${OPENAPI_CENTRAL_SPECS_PATH}/runai-public.yaml ${OPENAPI_CENTRAL_SPECS_PATH}/runai-system-scoped.yaml
+
+# The build rewrites the committed files, so snapshot them first and compare after.
+# Replaces the plain build as the first step of validate; regenerated files are left in place.
+validate-openapi-build-uptodate:
+	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Checking the committed merged specs match a fresh build" ${BASE_CONSOLE}
+	@ snapshot=$$(mktemp -d) && trap 'rm -rf "$$snapshot"' EXIT && \
+	for f in ${OPENAPI_DRIFT_FILES}; do cp "$$f" "$$snapshot/$$(echo "$$f" | tr '/' '_')" || exit 1; done && \
+	$(MAKE) openapi-build-public-spec && \
+	drift=0 && \
+	for f in ${OPENAPI_DRIFT_FILES}; do \
+		diff -w -B "$$snapshot/$$(echo "$$f" | tr '/' '_')" "$$f" >/dev/null || { echo "ERROR: $$f differs from a fresh build"; drift=1; }; \
+	done && \
+	[ "$$drift" = 0 ] || { echo "Run 'make build' in control-plane/infra/openapi/build and commit the regenerated specs"; exit 1; }
+	${SUCCESS_MESSAGE_HANDLER}
+.PHONY: validate-openapi-build-uptodate
 
 validate-openapi-spec-python:
 	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Generating Python client code using OpenAPI Generator" ${BASE_CONSOLE}
