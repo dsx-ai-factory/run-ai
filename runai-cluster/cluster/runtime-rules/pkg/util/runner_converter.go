@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
@@ -199,6 +200,24 @@ func hasPartialGpuAnnotation(val any) bool {
 	for _, key := range partialGpuAnnotations {
 		if s, ok := annotations[key].(string); ok && s != "" {
 			return true
+		}
+	}
+	for key, value := range annotations {
+		if partialContainerGpuAnnotation(key, value) {
+			return true
+		}
+	}
+	return false
+}
+
+func partialContainerGpuAnnotation(key string, value any) bool {
+	containerAnnotation, ok := strings.CutPrefix(key, commonconstants.AnnotationGpuMemoryContainerPrefix)
+	if !ok {
+		return false
+	}
+	for _, suffix := range []string{commonconstants.AnnotationGpuMemoryRequestSuffix, commonconstants.AnnotationGpuMemoryLimitSuffix} {
+		if containerName, found := strings.CutSuffix(containerAnnotation, suffix); found && containerName != "" {
+			return isPositiveQuantity(value)
 		}
 	}
 	return false

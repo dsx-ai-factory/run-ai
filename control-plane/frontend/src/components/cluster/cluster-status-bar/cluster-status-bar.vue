@@ -4,7 +4,12 @@
 -->
 
 <template>
-  <notification-alert-bar v-if="shouldShowClusterWarning" :variant="statusWarningLevel" :message="clusterWarningMessage">
+  <notification-alert-bar
+    v-if="shouldShowClusterWarning"
+    page-banner
+    :variant="statusWarningLevel"
+    :message="clusterWarningMessage"
+  >
     <template #inline-actions>
       <router-link to="/clusters" v-if="shouldShowClustersLink">Clusters.</router-link>
     </template>

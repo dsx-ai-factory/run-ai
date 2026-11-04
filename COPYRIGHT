@@ -6990,6 +6990,7 @@ License Text(https://spdx.org/licenses/MIT.html)
 Components:
   go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
+  go.yaml.in/yaml/v3 v3.0.6
   gopkg.in/yaml.v3 v3.0.1
 
 
@@ -8112,6 +8113,7 @@ Components:
   github.com/go-playground/validator/v10 v10.26.0
   github.com/go-playground/validator/v10 v10.30.1
   github.com/go-playground/validator/v10 v10.30.5
+  github.com/go-playground/validator/v10 v10.30.6
   gopkg.in/go-playground/validator.v9 v9.31.0
 
 The MIT License (MIT)
@@ -11911,6 +11913,7 @@ Copyright Jack Christensen - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/jackc/pgx/v5 v5.11.0
+  github.com/jackc/pgx/v5 v5.12.0
 
 Copyright (c) 2013-2021 Jack Christensen
 
@@ -12391,7 +12394,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 Copyright Jonathan Picques - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/gocarina/gocsv v0.0.0-20261012193826-401c25af6907
+  github.com/gocarina/gocsv v0.0.0-20261101205459-d0dd027dcbfa
 
 The MIT License (MIT)
 
@@ -12804,7 +12807,7 @@ Copyright Klaus Post - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/klauspost/cpuid/v2 v2.4.0
-  github.com/klauspost/cpuid/v2 v2.4.1
+  github.com/klauspost/cpuid/v2 v2.4.2
 
 The MIT License (MIT)
 
@@ -13620,7 +13623,7 @@ Copyright Micah Parks - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/MicahParks/keyfunc v1.9.0
-  github.com/MicahParks/keyfunc/v3 v3.8.2
+  github.com/MicahParks/keyfunc/v3 v3.9.1
 
                                  Apache License
                            Version 2.0, January 2004
@@ -13828,7 +13831,7 @@ Components:
 Copyright Micah Parks - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
-  github.com/MicahParks/jwkset v0.11.3
+  github.com/MicahParks/jwkset v0.11.4
 
                                  Apache License
                            Version 2.0, January 2004
@@ -15657,7 +15660,7 @@ SOFTWARE.
 Copyright Olivier Lalonde <olalonde@gmail.com>, James Talmage <james@talmage.io>, Ruben Verborgh - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  follow-redirects 1.16.0
+  follow-redirects 1.16.2
 
 Copyright 2014–present Olivier Lalonde <olalonde@gmail.com>, James Talmage <james@talmage.io>, Ruben Verborgh
 
@@ -15739,7 +15742,7 @@ License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/onsi/ginkgo/v2 v2.27.2
   github.com/onsi/ginkgo/v2 v2.32.0
-  github.com/onsi/ginkgo/v2 v2.33.1
+  github.com/onsi/ginkgo/v2 v2.34.0
   github.com/onsi/gomega v1.38.2
   github.com/onsi/gomega v1.40.0
   github.com/onsi/gomega v1.41.0
@@ -18102,7 +18105,7 @@ Components:
   github.com/coreos/go-semver/semver v0.3.1
   github.com/envoyproxy/protoc-gen-validate/validate v1.3.3
   github.com/go-jose/go-jose/v4 v4.1.4
-  github.com/go-jose/go-jose/v4 v4.1.6
+  github.com/go-jose/go-jose/v4 v4.1.8
   github.com/go-openapi/analysis v1.0.1
   github.com/go-openapi/errors v0.22.9
   github.com/go-openapi/jsonpointer v0.21.0
@@ -18510,7 +18513,7 @@ Components:
   github.com/openshift/cluster-monitoring-operator/pkg v0.1.1-0.20260630153100-436164286f78
   github.com/openshift/custom-resource-status/conditions/v1 v1.1.2
   github.com/openshift/library-go/pkg v0.0.0-20260409165127-c57da2bf5720
-  github.com/prometheus/alertmanager/api/v2 v0.34.1
+  github.com/prometheus/alertmanager/api/v2 v0.34.2
   github.com/prometheus/client_golang v1.25.0
   github.com/prometheus/client_golang/prometheus v1.23.2
   github.com/prometheus/client_golang/prometheus v1.24.1
@@ -18935,7 +18938,7 @@ Copyright the authors of github.com/aws/smithy-go/ptr, github.com/awslabs/operat
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/aws/smithy-go/ptr v1.28.5
-  github.com/aws/smithy-go/ptr v1.28.7
+  github.com/aws/smithy-go/ptr v1.28.8
   github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363
   github.com/russellhaering/goxmldsig v1.6.1
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
@@ -18943,6 +18946,7 @@ Components:
   github.com/xdg-go/pbkdf2 v1.0.0
   github.com/xdg-go/scram v1.1.2
   github.com/xdg-go/scram v1.2.0
+  github.com/xdg-go/scram v1.3.0
   github.com/xdg-go/stringprep v1.0.4
 
 
@@ -21441,7 +21445,7 @@ Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/go-jose/go-jose/v4/json v4.1.4
-  github.com/go-jose/go-jose/v4/json v4.1.6
+  github.com/go-jose/go-jose/v4/json v4.1.8
   github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
   github.com/klauspost/crc32 v1.3.0
   github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
@@ -21596,8 +21600,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Copyright The Go Authors, WAKAYAMA Shirou - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
+  github.com/shirou/gopsutil/v4 v4.26.10
   github.com/shirou/gopsutil/v4 v4.26.6
-  github.com/shirou/gopsutil/v4 v4.26.9
 
 gopsutil is distributed under BSD license reproduced below.
 
@@ -25114,6 +25118,7 @@ Components:
   github.com/opencontainers/selinux v1.13.1
   go.yaml.in/yaml/v2 v2.4.3
   go.yaml.in/yaml/v2 v2.4.4
+  go.yaml.in/yaml/v2 v2.4.5
   gomodules.xyz/jsonpatch/v2 v2.5.0
   gopkg.in/yaml.v2 v2.4.0
   k8s.io/cloud-provider/volume v0.35.4
@@ -25810,7 +25815,7 @@ Copyright 2014-2015 Stripe, Inc.
 NOTICE of github.com/aws/smithy-go, github.com/awslabs/operatorpkg
 Components:
   github.com/aws/smithy-go v1.28.5
-  github.com/aws/smithy-go v1.28.7
+  github.com/aws/smithy-go v1.28.8
   github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
@@ -34902,7 +34907,7 @@ spdy/LICENSE and spdy/PATENTS.
 --------------------------------------------------------------------------------
 NOTICE of github.com/prometheus/alertmanager
 Components:
-  github.com/prometheus/alertmanager v0.34.1
+  github.com/prometheus/alertmanager v0.34.2
 
 Prometheus Alertmanager
 Copyright 2013-2015 The Prometheus Authors
@@ -35219,8 +35224,10 @@ NOTICE of go.yaml.in/yaml/v2, go.yaml.in/yaml/v3, gopkg.in/yaml.v2 and 1 others
 Components:
   go.yaml.in/yaml/v2 v2.4.3
   go.yaml.in/yaml/v2 v2.4.4
+  go.yaml.in/yaml/v2 v2.4.5
   go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
+  go.yaml.in/yaml/v3 v3.0.6
   gopkg.in/yaml.v2 v2.4.0
   gopkg.in/yaml.v3 v3.0.1
 

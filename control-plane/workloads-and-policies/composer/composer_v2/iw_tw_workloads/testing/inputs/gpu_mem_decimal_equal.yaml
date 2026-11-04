@@ -1,0 +1,13 @@
+image: ubuntu
+compute:
+  gpuDevicesRequest: 1
+  gpuRequestType: memory
+  gpuMemoryRequest: 500M
+  gpuMemoryLimit: 500M
+annotations:
+- name: gpu-memory
+  value: "524"
+- name: gpu-fraction
+  value: "0.75"
+- name: example.com/preserved
+  value: value

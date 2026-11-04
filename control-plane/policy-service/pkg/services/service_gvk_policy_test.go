@@ -1265,6 +1265,44 @@ var _ = Describe("GVK Policy Service", Ordered, func() {
 			Expect(dependenciesExistForPolicy(ctx, created.Id)).To(BeTrue(), "dependencies should exist after policy update")
 		})
 
+		It("caches the breakdown and its dependencies when the policy is created", func() {
+			created := createGvkPolicyForTest(router, tenantId, newProjectPolicy(sampleRules()))
+
+			cached, dbErr := dao.GetCachedBreakdown(ctx, created.Id)
+			Expect(dbErr).To(BeNil())
+			Expect(cached).NotTo(BeNil(), "cache entry should exist right after create, without a get")
+			Expect(cached.Fields).To(HaveKey("image"))
+			Expect(cached.Fields).To(HaveKey("imagePullPolicy"))
+			Expect(dependenciesExistForPolicy(ctx, created.Id)).To(BeTrue(), "dependencies should exist right after create")
+		})
+
+		DescribeTable("caches the breakdown of all the policy rules when the policy is patched",
+			func(patch api.UpdateGvkPolicyReq) {
+				created := createGvkPolicyForTest(router, tenantId, newProjectPolicy(sampleRules()))
+
+				patchReq, err := http.NewRequest(http.MethodPatch, gvkPolicyURL(created.Id), makePayload(patch))
+				Expect(err).To(BeNil())
+				patchReq.Header = *headerForAdmin(tenantId)
+				patchResp := httptest.NewRecorder()
+				router.ServeHTTP(patchResp, patchReq.WithContext(ctx))
+				Expect(patchResp.Code).To(Equal(http.StatusOK), patchResp.Body.String())
+
+				cached, dbErr := dao.GetCachedBreakdown(ctx, created.Id)
+				Expect(dbErr).To(BeNil())
+				Expect(cached).NotTo(BeNil())
+				Expect(cached.Fields).To(HaveKey("image"))
+				Expect(cached.Fields).To(HaveKey("imagePullPolicy"))
+			},
+			Entry("when one of the rules is patched", api.UpdateGvkPolicyReq{
+				Rules: []api.PolicyRule{
+					{Field: "image", SpecSelector: "allContainers", Enforcements: []api.PolicyRuleEnforcement{{Required: convutils.Ref(false)}}},
+				},
+			}),
+			Entry("when only the description is patched", api.UpdateGvkPolicyReq{
+				Description: convutils.Ref("renamed"),
+			}),
+		)
+
 		It("clears cache when the policy is deleted", func() {
 			created := createGvkPolicyForTest(router, tenantId, newProjectPolicy(sampleRules()))
 
@@ -1467,6 +1505,44 @@ var _ = Describe("GVK Policy Service", Ordered, func() {
 			unrelatedMapResp := httptest.NewRecorder()
 			router.ServeHTTP(unrelatedMapResp, unrelatedMapReqHttp.WithContext(ctx))
 			Expect(unrelatedMapResp.Code).To(Equal(http.StatusOK), unrelatedMapResp.Body.String())
+		})
+
+		It("keeps a degraded policy degraded when a patch leaves the broken rule in place", func() {
+			created := createGvkPolicyForTest(router, tenantId, api.CreateGvkPolicyReq{
+				WorkloadType: testGvk,
+				Scope:        api.SCOPETYPE_PROJECT,
+				ProjectId:    convutils.Ref(projectId),
+				Rules: []api.PolicyRule{
+					{Field: "testField1", SpecSelector: "specSel1", Enforcements: []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}}},
+					{Field: "testField2", SpecSelector: "specSel2", Enforcements: []api.PolicyRuleEnforcement{{Required: convutils.Ref(true)}}},
+				},
+			})
+
+			delSelHttp, err := http.NewRequest(http.MethodDelete, urlMappingsSpecSelectors, makePayload(api.MappingDeleteSpecSelectorsReq{
+				WorkloadType:  testGvk,
+				SpecSelectors: []string{"specSel2"},
+			}))
+			Expect(err).To(BeNil())
+			delSelHttp.Header = *headerForAdmin(tenantId)
+			delSelResp := httptest.NewRecorder()
+			router.ServeHTTP(delSelResp, delSelHttp.WithContext(ctx))
+			Expect(delSelResp.Code).To(Equal(http.StatusOK), delSelResp.Body.String())
+
+			patchHttp, err := http.NewRequest(http.MethodPatch, gvkPolicyURL(created.Id), makePayload(api.UpdateGvkPolicyReq{
+				Description: convutils.Ref("renamed"),
+			}))
+			Expect(err).To(BeNil())
+			patchHttp.Header = *headerForAdmin(tenantId)
+			patchResp := httptest.NewRecorder()
+			router.ServeHTTP(patchResp, patchHttp.WithContext(ctx))
+			Expect(patchResp.Code).To(Equal(http.StatusOK), patchResp.Body.String())
+
+			var patched api.Policy
+			Expect(json.Unmarshal(patchResp.Body.Bytes(), &patched)).To(Succeed())
+			Expect(patched.Status).NotTo(BeNil())
+			Expect(patched.Status.Phase).To(Equal(api.POLICYPHASE_DEGRADED))
+			Expect(patched.Status.Issues).NotTo(BeEmpty())
+			Expect(patched.Status.Issues[0]).To(ContainSubstring("specSel2"))
 		})
 
 		It("follows the full status lifecycle when specSelectors are removed and rules updated", func() {

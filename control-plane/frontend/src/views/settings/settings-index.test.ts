@@ -44,9 +44,10 @@ function buildSettingsMap(): Map<string, Setting> {
 interface CreateOptions {
   permissions?: Permission[];
   clusterSupportsNgc?: boolean;
+  routeQuery?: Record<string, string>;
 }
 
-function createWrapper({ permissions = [], clusterSupportsNgc = false }: CreateOptions = {}) {
+function createWrapper({ permissions = [], clusterSupportsNgc = false, routeQuery = {} }: CreateOptions = {}) {
   const pinia = createTestingPinia({ createSpy: vi.fn, stubActions: false });
 
   const permissionStore = usePermissionStore(pinia);
@@ -65,11 +66,16 @@ function createWrapper({ permissions = [], clusterSupportsNgc = false }: CreateO
   const wrapper = mount(SettingsIndex, {
     global: {
       plugins: [Quasar, pinia],
+      mocks: { $route: { query: routeQuery } },
       stubs: {
         AnalyticsSection: { name: "AnalyticsSection", template: "<div data-test='analytics'></div>" },
         ResourcesSection: { name: "ResourcesSection", template: "<div data-test='resources'></div>" },
         WorkloadsSection: { name: "WorkloadsSection", template: "<div data-test='workloads'></div>" },
-        SecuritySection: { name: "SecuritySection", template: "<div data-test='security'></div>" },
+        SecuritySection: {
+          name: "SecuritySection",
+          props: ["defaultOpened"],
+          template: "<div data-test='security'></div>",
+        },
         NotificationsSection: { name: "NotificationsSection", template: "<div data-test='notifications'></div>" },
         ClusterAuthenticationsSection: {
           name: "ClusterAuthenticationsSection",
@@ -283,5 +289,26 @@ describe("settings-index.vue - permission-driven section visibility", () => {
       clusterAuth: true,
       branding: false,
     });
+  });
+});
+
+describe("settings-index.vue - security section deep link", () => {
+  const securityPermissions = [permission(ResourceType.SecuritySettings, ALL_CRUD)];
+
+  function securityDefaultOpened(routeQuery: Record<string, string>): boolean {
+    const { wrapper } = createWrapper({ permissions: securityPermissions, routeQuery });
+    return wrapper.findComponent({ name: "SecuritySection" }).props("defaultOpened") as boolean;
+  }
+
+  it("?section=security → security section is expanded by default", () => {
+    expect(securityDefaultOpened({ section: "security" })).toBe(true);
+  });
+
+  it("no query → security section stays collapsed", () => {
+    expect(securityDefaultOpened({})).toBe(false);
+  });
+
+  it("unrelated section query → security section stays collapsed", () => {
+    expect(securityDefaultOpened({ section: "notifications" })).toBe(false);
   });
 });

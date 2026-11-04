@@ -72,5 +72,17 @@ func run() error {
 			app.WithPlugins(restartrules.NewBuilder(cfg.RestartAllowedServiceAccounts)),
 		)
 	}
+
+	// The operator has already decided this: Snapshot is installed and healthy
+	// in the cluster. Until then nothing is registered, so a cluster without
+	// Snapshot behaves exactly as it does today.
+	if cfg.SnapshotEnabled {
+		log.Info().
+			Str("agentNodeSelector", cfg.SnapshotAgentNodeSelector).
+			Msg("snapshot integration enabled")
+	} else {
+		log.Debug().Msg("snapshot integration inactive")
+	}
+
 	return app.RunController(ctrl.SetupSignalHandler(), options...)
 }
