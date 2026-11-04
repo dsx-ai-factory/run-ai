@@ -257,3 +257,52 @@ func TestObjectNamesFollowTheChartFullnameRule(t *testing.T) {
 		})
 	}
 }
+
+// Installed must agree with Detect, or the webhook configuration and the
+// controller serving it could disagree about whether Snapshot is there.
+func TestInstalled(t *testing.T) {
+	tests := []struct {
+		name    string
+		objects []client.Object
+		want    bool
+	}{
+		{name: "no CRD", want: false},
+		{name: "CRD present", objects: []client.Object{crd()}, want: true},
+		{
+			// Operator readiness is Detect's business. Tying registration to it
+			// would churn the webhook on every Snapshot operator restart.
+			name:    "CRD present, operator absent",
+			objects: []client.Object{crd()},
+			want:    true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			reader := build(t, tc.objects...)
+
+			got, reason := Installed(context.Background(), reader)
+			if got != tc.want {
+				t.Fatalf("Installed() = %v, want %v (reason: %q)", got, tc.want, reason)
+			}
+			if !got && reason == "" {
+				t.Error("not installed, but no reason given")
+			}
+
+			// Detect must say the same about the CRD.
+			if detected := Detect(context.Background(), reader, config()); detected.CRDInstalled != got {
+				t.Errorf("Installed() = %v but Detect().CRDInstalled = %v", got, detected.CRDInstalled)
+			}
+		})
+	}
+}
+
+func TestInstalledToleratesNilClient(t *testing.T) {
+	got, reason := Installed(context.Background(), nil)
+	if got {
+		t.Fatal("reported installed with no client")
+	}
+	if reason == "" {
+		t.Fatal("no reason given")
+	}
+}
