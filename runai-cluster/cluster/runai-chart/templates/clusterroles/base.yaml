@@ -80,6 +80,17 @@ rules:
     verbs:
       - get
       - update
+  # Detecting whether NVIDIA Snapshot is installed. Read-only and restricted to
+  # Snapshot's own CRD; the operator Deployment and agent DaemonSet it also
+  # reads are already covered by the apps rule above.
+  - apiGroups:
+      - apiextensions.k8s.io
+    resourceNames:
+      - snapshotjobs.nvidia.com
+    resources:
+      - customresourcedefinitions
+    verbs:
+      - get
   - apiGroups:
       - ""
     resources:
