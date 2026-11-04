@@ -5,7 +5,11 @@
 
 package config
 
-import "strings"
+import (
+	"strings"
+
+	"github.com/rs/zerolog/log"
+)
 
 // Config is the anyworkload-controller's controller-wide configuration. Every
 // knob owned by the restart machinery is prefixed RESTART_.
@@ -61,8 +65,10 @@ func (c *Config) AgentNodeSelector() map[string]string {
 	for _, pair := range strings.Split(c.SnapshotAgentNodeSelector, ",") {
 		key, value, found := strings.Cut(strings.TrimSpace(pair), "=")
 		if !found || key == "" {
+			log.Debug().Msgf("Agent selector %s cannot be parsed", pair)
 			continue
 		}
+		log.Debug().Msgf("Agent selector %s:%s added", key, value)
 		selector[key] = value
 	}
 	if len(selector) == 0 {
