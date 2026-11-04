@@ -57,7 +57,7 @@ var _ = Describe("KServe InferenceService status", func() {
 
 	DescribeTable("preserves Knative condition matching",
 		func(conditionsJSON string, expected karta.ResourceStatus) {
-			for _, mode := range []string{"", "Knative"} {
+			for _, mode := range []string{"", "Knative", "Serverless"} {
 				var conditions []any
 				Expect(json.Unmarshal([]byte(conditionsJSON), &conditions)).To(Succeed())
 				status := map[string]any{"conditions": conditions}
@@ -88,6 +88,7 @@ var _ = Describe("KServe InferenceService status", func() {
 		},
 		Entry("missing mode", ""),
 		Entry("Knative", "Knative"),
+		Entry("Serverless (legacy Knative)", "Serverless"),
 		Entry("ModelMesh", "ModelMesh"),
 	)
 
