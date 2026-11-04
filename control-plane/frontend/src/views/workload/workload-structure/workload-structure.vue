@@ -130,6 +130,7 @@ import { RunaiTab, RunaiTabPanels, RunaiTabPanel, type ITab } from "@/components
 import { RunaiDrawerNoData } from "@/components/common/runai-drawer-no-data";
 import { RunaiStatus } from "@/components/common/runai-status";
 import { RunaiSvgIcon } from "@/components/common/runai-svg-icon";
+import type { WorkloadHistoryType } from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.model";
 import WorkloadEventHistory from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.vue";
 import { WorkloadMetricsTab } from "@/components/workload/workload-drawer-content/tabs/workload-metrics-tab";
 import { WorkloadLogsTab } from "@/components/workload/workload-drawer-content/tabs/workload-logs-tab";
@@ -186,7 +187,7 @@ const contextPods = ref<WorkloadServicePod[]>([]);
 // for an old elementId could otherwise overwrite a newer selection's pods.
 let contextPodsRequestToken = 0;
 const elementDetailsById = ref<WorkloadElementDetailsById>({});
-const historyType = ref<"logs" | "user-actions">(route.query.tab === "activity" ? "user-actions" : "logs");
+const historyType = ref<WorkloadHistoryType>(route.query.tab === "activity" ? "user-actions" : "logs");
 const activeTab = ref<StructureTab>(tabOptions.EventHistory);
 const rightPanelWidth = ref(PANEL_DEFAULT_WIDTH);
 const originalWidth = ref(PANEL_DEFAULT_WIDTH);

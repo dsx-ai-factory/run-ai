@@ -3,4 +3,4 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export { default as WorkloadActivityTab } from "./workload-activity-tab.vue";
+export { default as WorkloadHistoryToolbar } from "./workload-history-toolbar.vue";

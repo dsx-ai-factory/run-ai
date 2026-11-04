@@ -5,7 +5,7 @@
 
 import { ECustomCell, USER_DISPLAY_NAME_COL_DEFAULTS, type ITableColumn } from "@/models/table.model";
 import type { WorkloadActionRecord, WorkloadActionType } from "@/swagger-models/workloads-client";
-import { EColumnFilterType, type IAdvancedFilterOption } from "@/models/filter.model";
+import { EColumnFilterType, type IAdvancedFilterOption, type IFilterBy } from "@/models/filter.model";
 import { dateUtil } from "@/utils/date.util";
 
 export const actionLabels = new Map<WorkloadActionType, string>([
@@ -65,3 +65,16 @@ export const workloadActivityFilterOptions: IAdvancedFilterOption[] = [
   },
   { name: "subject", field: "subject", label: "Subject", type: EColumnFilterType.FreeText },
 ];
+
+export const WORKLOAD_ACTIONS_PAGE_SIZE = 50;
+
+export function getDefaultWorkloadActionsFilters(): IFilterBy {
+  return {
+    page: 1,
+    rowsPerPage: 0,
+    rowsNumber: 0,
+    sortBy: "acceptedAt",
+    descending: true,
+    advancedFilters: [],
+  };
+}

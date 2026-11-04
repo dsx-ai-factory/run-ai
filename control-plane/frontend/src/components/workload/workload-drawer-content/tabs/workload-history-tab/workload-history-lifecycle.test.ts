@@ -34,7 +34,7 @@ function render(): VueWrapper {
       mocks: { $q: { notify } },
       stubs: {
         RunaiSelect: { name: "RunaiSelect", props: ["modelValue", "options"], template: "<div />" },
-        WorkloadActivityTab: true,
+        WorkloadUserActionsHistory: true,
         RunaiDefaultLoader: true,
         WorkloadPhaseHistoryChart: true,
         WorkloadEventHistoryTable: true,

@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createPinia } from "pinia";
 import { Quasar } from "quasar";
-import WorkloadActivityTab from "./workload-activity-tab.vue";
+import WorkloadUserActionsHistory from "./workload-user-actions-history.vue";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
 import { intervalUtil } from "@/utils/interval.util";
 import { RunaiGeneralSearch } from "@/components/common/runai-general-search";
@@ -47,7 +47,7 @@ const deferred = () => {
 };
 let wrapper: VueWrapper | undefined;
 const render = () => {
-  wrapper = mount(WorkloadActivityTab, {
+  wrapper = mount(WorkloadUserActionsHistory, {
     props: { workloadId: "w1" },
     global: { plugins: [createPinia(), Quasar], directives: { permission: {}, "click-outside": {} } },
   });
@@ -72,7 +72,7 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-describe("WorkloadActivityTab", () => {
+describe("WorkloadUserActionsHistory", () => {
   it("shows the initial loader, then exactly three columns and no actor-type column", async () => {
     const pending = deferred();
     vi.mocked(workloadService.getWorkloadActions).mockReturnValueOnce(pending.promise);

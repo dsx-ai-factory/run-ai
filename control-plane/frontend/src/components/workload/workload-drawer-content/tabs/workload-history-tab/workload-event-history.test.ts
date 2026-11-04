@@ -29,8 +29,8 @@ const render = (extra = {}) => {
           },
           template: '<div aid="logs">Logs</div>',
         }),
-        WorkloadActivityTab: defineComponent({
-          name: "WorkloadActivityTab",
+        WorkloadUserActionsHistory: defineComponent({
+          name: "WorkloadUserActionsHistory",
           setup() {
             onUnmounted(stoppedActions);
           },

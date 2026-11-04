@@ -5,21 +5,22 @@
 
 <template>
   <section class="workload-activity-tab" aid="workload-activity-tab" aria-label="Workload activity">
-    <div class="activity-filters">
-      <runai-advanced-filters
-        :filter-by="tableFilters"
-        :initial-filters-model="initialFilters"
-        :filter-options="workloadActivityFilterOptions"
-        hide-cluster-filter
-        @update-filter-by="updateFilters"
-      />
-      <runai-general-search
-        :key="workloadId"
-        :search-term="tableFilters.searchTerm || ''"
-        tooltip-text="Search events and subjects"
-        @update-search-term="updateFilters({ searchTerm: $event })"
-      />
-    </div>
+    <workload-history-toolbar
+      :key="workloadId"
+      :search-term="tableFilters.searchTerm || ''"
+      search-tooltip="Search events and subjects"
+      @update:search-term="updateFilters({ searchTerm: $event })"
+    >
+      <template #filters>
+        <runai-advanced-filters
+          :filter-by="tableFilters"
+          :initial-filters-model="initialFilters"
+          :filter-options="workloadActivityFilterOptions"
+          hide-cluster-filter
+          @update-filter-by="updateFilters"
+        />
+      </template>
+    </workload-history-toolbar>
     <runai-default-loader
       v-if="loading && !hasLoaded"
       aid="workload-activity-loading"
@@ -82,7 +83,7 @@
         </template>
       </runai-table-wrapper>
       <nav v-if="hasLoaded" class="activity-pagination" aria-label="Activity pagination">
-        <span class="activity-page-size">50 per page</span>
+        <span class="activity-page-size">{{ WORKLOAD_ACTIONS_PAGE_SIZE }} per page</span>
         <span aid="workload-activity-range" aria-live="polite">{{ pageRange }}</span>
         <runai-btn
           aid="workload-activity-previous"
@@ -111,7 +112,7 @@
 import { computed, onBeforeUnmount, ref, watch } from "vue";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
-import { RunaiGeneralSearch } from "@/components/common/runai-general-search";
+import { WorkloadHistoryToolbar } from "../workload-history-toolbar";
 import { RunaiAdvancedFilters } from "@/components/common/runai-advanced-filters";
 import type { WorkloadActionsQuery } from "@/services/cluster/workload.service/workload.service";
 import { filterService } from "@/services/filter.service/filter.service";
@@ -124,20 +125,18 @@ import type { WorkloadActionRecord } from "@/swagger-models/workloads-client";
 import { useWorkloadStore } from "@/stores/workload.store";
 import { deepCopy } from "@/utils/common.util";
 import { intervalUtil } from "@/utils/interval.util";
-import { workloadActivityColumns, workloadActivityFilterOptions } from "./workload-activity-tab.model";
+import {
+  workloadActivityColumns,
+  workloadActivityFilterOptions,
+  WORKLOAD_ACTIONS_PAGE_SIZE,
+  getDefaultWorkloadActionsFilters,
+} from "./workload-user-actions-history.model";
 
 const props = defineProps<{ workloadId: string }>();
 const workloadStore = useWorkloadStore();
 // The API supplies a next offset, not a total count. Paginate explicitly rather
 // than letting QTable paginate a single server page or invent a total.
-const tableFilters = ref<IFilterBy>({
-  page: 1,
-  rowsPerPage: 0,
-  rowsNumber: 0,
-  sortBy: "acceptedAt",
-  descending: true,
-  advancedFilters: [],
-});
+const tableFilters = ref<IFilterBy>(getDefaultWorkloadActionsFilters());
 const initialFilters = computed(() => deepCopy(tableFilters.value.advancedFilters || []));
 const queryOptions = computed<WorkloadActionsQuery>(() => {
   const { sortBy, sortOrder, filterBy } = filterService.mapColumnsFilterToFilterParams(tableFilters.value);
@@ -173,7 +172,7 @@ async function loadPage(targetPage: number, offset: number, background = false):
   else loading.value = true;
   error.value = false;
   try {
-    await workloadStore.loadWorkloadActions(props.workloadId, offset, 50, queryOptions.value);
+    await workloadStore.loadWorkloadActions(props.workloadId, offset, WORKLOAD_ACTIONS_PAGE_SIZE, queryOptions.value);
     if (current !== request) return;
     page.value = targetPage;
     pageOffsets.value = [...pageOffsets.value.slice(0, targetPage), offset];
@@ -226,14 +225,7 @@ async function resetActivity(): Promise<void> {
 watch(
   () => props.workloadId,
   () => {
-    tableFilters.value = {
-      page: 1,
-      rowsPerPage: 0,
-      rowsNumber: 0,
-      sortBy: "acceptedAt",
-      descending: true,
-      advancedFilters: [],
-    };
+    tableFilters.value = getDefaultWorkloadActionsFilters();
     void resetActivity();
   },
   { immediate: true },
@@ -252,22 +244,6 @@ onBeforeUnmount(() => {
   height: 100%;
   min-height: 0;
   color: var(--b-text-main);
-}
-
-.activity-filters {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 7px;
-  padding: 7px 16px 7px 0;
-  border-bottom: 1px solid var(--border-subtle);
-
-  :deep(.advanced-filters) {
-    flex: 1;
-    min-width: 0;
-  }
 }
 
 .activity-table-wrapper {

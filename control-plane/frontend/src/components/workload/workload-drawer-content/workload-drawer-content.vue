@@ -92,6 +92,7 @@ import { RunaiTab, RunaiTabPanels, RunaiTabPanel, type ITab } from "@/components
 import { RunaiSvgIcon } from "@/components/common/runai-svg-icon";
 import { RunaiDrawerNoData } from "@/components/common/runai-drawer-no-data";
 import { WorkloadMetricsTab } from "@/components/workload/workload-drawer-content/tabs/workload-metrics-tab/";
+import type { WorkloadHistoryType } from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.model";
 import WorkloadEventHistory from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.vue";
 import { WorkloadLogsTab } from "@/components/workload/workload-drawer-content/tabs/workload-logs-tab/";
 import { WorkloadTerminal } from "@/components/workload/workload-drawer-content/tabs/workload-terminal/";
@@ -194,7 +195,7 @@ export default defineComponent({
   },
   data() {
     return {
-      historyType: "logs" as "logs" | "user-actions",
+      historyType: "logs" as WorkloadHistoryType,
       drawerTabsOptions: EWorkloadDrawerTabs,
       drawerTab: EWorkloadDrawerTabs.EventHistory as EWorkloadDrawerTabs | null,
       clusterStore: useClusterStore(),

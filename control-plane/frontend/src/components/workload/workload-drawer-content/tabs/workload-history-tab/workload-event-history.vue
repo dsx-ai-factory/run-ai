@@ -8,7 +8,7 @@
     <div v-if="!showElementEmptyState" class="history-type-selector">
       <runai-select
         v-model="historyType"
-        :options="historyTypes"
+        :options="workloadHistoryTypes"
         label="Type"
         aid="workload-history-type"
         outlined
@@ -19,7 +19,7 @@
       />
     </div>
     <div class="history-type-content">
-      <workload-activity-tab
+      <workload-user-actions-history
         v-if="historyType === 'user-actions' && !showElementEmptyState"
         :workload-id="workload.id"
       />
@@ -35,8 +35,9 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
+import { workloadHistoryTypes, type WorkloadHistoryType } from "./workload-event-history.model";
 import { RunaiSelect } from "@/components/common/runai-select";
-import { WorkloadActivityTab } from "@/components/workload/workload-drawer-content/tabs/workload-activity-tab";
+import { WorkloadUserActionsHistory } from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-user-actions-history";
 import WorkloadHistoryTab from "./workload-history-tab.vue";
 import type { Workload } from "@/swagger-models/workloads-client";
 
@@ -45,17 +46,13 @@ const props = withDefaults(
     workload: Workload;
     drawerWidth: string;
     showElementEmptyState?: boolean;
-    initialType?: "logs" | "user-actions";
+    initialType?: WorkloadHistoryType;
   }>(),
   { showElementEmptyState: false, initialType: "logs" },
 );
 const historyType = ref(props.initialType);
-const emit = defineEmits<{ "update:initialType": [value: "logs" | "user-actions"] }>();
+const emit = defineEmits<{ "update:initialType": [value: WorkloadHistoryType] }>();
 watch(historyType, (value) => emit("update:initialType", value));
-const historyTypes = [
-  { label: "Logs", value: "logs" },
-  { label: "User actions", value: "user-actions" },
-];
 watch(
   () => props.workload.id,
   () => {

@@ -76,7 +76,7 @@ describe("WorkloadDrawerContent", () => {
           RunaiStatus: true,
           RunaiDrawerNoData: true,
           WorkloadEventHistory: true,
-          WorkloadActivityTab: true,
+          WorkloadUserActionsHistory: true,
           WorkloadMetricsTab: true,
           WorkloadLogsTab: true,
           WorkloadTerminal: true,

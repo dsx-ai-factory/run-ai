@@ -5,16 +5,21 @@
 
 <template>
   <section class="runai-event-history">
-    <section class="table-top-actions-container">
-      <runai-page-filter
-        :initial-filters-model="columnFilters"
-        :filter-by="filters"
-        @update-filter-by="$emit('update:filter-by', $event)"
-        :filter-options="filterOptions"
-        hide-cluster-filter
-      />
-      <runai-general-search :search-term="searchTerm" @update-search-term="updateFilterBy('searchTerm', $event)" />
-    </section>
+    <workload-history-toolbar
+      class="table-top-actions-container"
+      :search-term="searchTerm"
+      @update:search-term="updateFilterBy('searchTerm', $event)"
+    >
+      <template #filters>
+        <runai-page-filter
+          :initial-filters-model="columnFilters"
+          :filter-by="filters"
+          @update-filter-by="$emit('update:filter-by', $event)"
+          :filter-options="filterOptions"
+          hide-cluster-filter
+        />
+      </template>
+    </workload-history-toolbar>
     <q-table
       :="tableDefaultProps"
       :rows="historyRecords"
@@ -53,7 +58,7 @@ import type { PropType } from "vue";
 // components
 import { RunaiTableNoData } from "@/components/common/runai-table/runai-table-no-data";
 import { RunaiPageFilter } from "@/components/common/runai-page-filter";
-import { RunaiGeneralSearch } from "@/components/common/runai-general-search";
+import { WorkloadHistoryToolbar } from "../workload-history-toolbar";
 
 // models
 import type { IFilterBy } from "@/models/filter.model";
@@ -71,7 +76,7 @@ import { tableDefaultProps, type TTableDefaultProps } from "@/common/table.const
 import { RunaiStatus } from "@/components/common/runai-status";
 
 export default defineComponent({
-  components: { RunaiStatus, RunaiTableNoData, RunaiPageFilter, RunaiGeneralSearch },
+  components: { RunaiStatus, RunaiTableNoData, RunaiPageFilter, WorkloadHistoryToolbar },
   emits: ["update:filter-by"],
   props: {
     historyRecords: {
@@ -139,15 +144,6 @@ export default defineComponent({
   .table-top-actions-container {
     background-color: $white;
     border-top: 1px solid $black-12;
-    border-bottom: 1px solid $black-12;
-    padding: 7px 16px 7px 0;
-  }
-
-  .table-top-actions-container {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
   }
 }
 </style>
