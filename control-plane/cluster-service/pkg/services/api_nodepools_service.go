@@ -572,12 +572,6 @@ func parseNodepoolsForSync(request api.SyncNodepoolsStatusRequest) []models.Node
 }
 
 func (s *NodePoolsApiService) UpdateNodepool(ctx context.Context, nodepoolId string, fields api.NodepoolUpdateFields) (api.ImplResponse, error) {
-	return s.updateNodepool(ctx, nodepoolId, fields, false)
-}
-
-// updateNodepool with keepDescription keeps the stored description for callers whose request has no description field,
-// since a PUT replaces it.
-func (s *NodePoolsApiService) updateNodepool(ctx context.Context, nodepoolId string, fields api.NodepoolUpdateFields, keepDescription bool) (api.ImplResponse, error) {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Update nodepool with id %s request received", nodepoolId)
 	tenantId, subjectId, err := ParseAuthData(ctx)
 	if err != nil {
@@ -588,9 +582,6 @@ func (s *NodePoolsApiService) updateNodepool(ctx context.Context, nodepoolId str
 	if dbErr != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError,
 			fmt.Sprintf("Failed to get nodepool with id %s", nodepoolId), dbErr)), nil
-	}
-	if keepDescription {
-		fields.Description = nodepoolModel.Description
 	}
 
 	capChecker := s.clusterCapabilityCheckerFactory(nodepoolModel.ClusterId.String())
@@ -1158,7 +1149,7 @@ func (s *NodePoolsApiService) LegacyUpdateNodepool(ctx context.Context, clusterI
 		LabelValue:              &req.LabelValue,
 		SchedulingConfiguration: &api.SchedulingConfiguration{PlacementStrategy: placementStrategy},
 	}
-	return s.updateNodepool(ctx, nodepoolId, updateFields, true)
+	return s.UpdateNodepool(ctx, nodepoolId, updateFields)
 }
 
 // LegacyUpdateNodepoolLabels - Update nodepool labels (legacy)
