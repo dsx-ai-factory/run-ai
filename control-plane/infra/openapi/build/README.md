@@ -62,8 +62,8 @@ makefile targets.
 
 | Target | Description |
 |--------|-------------|
-| `make build` | `openapi-build-public-spec` (regenerate the merged public + system-scoped specs into `_build/`), then copy `_build/runaiApi.swagger.yaml` → `_build/runai-public.yaml` |
-| `make prepare-specs` | `openapi-build-public-spec`, then copy the public and system-scoped specs into `_build/` |
+| `make build` | `openapi-build-public-spec` (regenerate the merged public + system-scoped specs into `_build/`) |
+| `make prepare-specs` | `openapi-build-public-spec`, then copy the system-scoped spec into `_build/` |
 
 No local image is produced, so `openapi/build` is not part of `local-dev.sh`'s
 `CP_GO_SERVICES` build loop and no `runai-local/openapi-build` tag exists. The

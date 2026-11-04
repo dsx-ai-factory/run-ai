@@ -16,8 +16,8 @@ Targets come from the service `Makefile` plus shared includes
 
 | Target | What it does |
 |--------|-------------|
-| `build` | `openapi-build-public-spec` (regenerate merged public + system-scoped specs into `_build/`), then copy `_build/runaiApi.swagger.yaml` → `_build/runai-public.yaml` |
-| `prepare-specs` | `openapi-build-public-spec` then copy public + system-scoped specs into `_build/` |
+| `build` | `openapi-build-public-spec` (regenerate merged public + system-scoped specs into `_build/`) |
+| `prepare-specs` | `openapi-build-public-spec` then copy the system-scoped spec into `_build/` |
 | `test` | No-op |
 | `lint` | No-op |
 | `validate` | `validate-openapi-public-spec` + `validate-tags` + `validate-openapi-spec-python` + `validate-openapi-backwards-compatibility` (all `continue_on_error` per metadata) |

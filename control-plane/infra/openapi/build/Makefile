@@ -20,7 +20,6 @@ OPENAPI_CENTRAL_SPECS_PATH=../specs
 # Spec paths (relative to this folder)
 SPEC_FILE_SRC=../specs/runai-public.yaml
 SPEC_FILE_SRC_SYSTEM=../specs/runai-system-scoped.yaml
-SPEC_FILE_DST=./_build/runai-public.yaml
 SPEC_FILE_DST_SYSTEM=./_build/runai-system-scoped.yaml
 
 NODEJS_VERSION=20-alpine3.17
@@ -64,20 +63,9 @@ validate-openapi-backwards-compatibility:
 
 prepare-specs: openapi-build-public-spec
 	mkdir -p _build
-	cp ${SPEC_FILE_SRC} ${SPEC_FILE_DST}
 	cp ${SPEC_FILE_SRC_SYSTEM} ${SPEC_FILE_DST_SYSTEM}
 .PHONY: prepare-specs
 
 build: openapi-build-public-spec
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Copying built spec for local use" ${BASE_CONSOLE}
-	# Validate source file exists
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Validating source file exists: ${OPENAPI_PUBLIC_SPEC_BUILD_PATH}" ${BASE_CONSOLE}
-	@ test -f "${OPENAPI_PUBLIC_SPEC_BUILD_PATH}" || (echo "${RED_CONSOLE}ERROR: Source file ${OPENAPI_PUBLIC_SPEC_BUILD_PATH} does not exist${BASE_CONSOLE}" && exit 1)
-	# Copy built file to output location
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Copying ${OPENAPI_PUBLIC_SPEC_BUILD_PATH} to ${SPEC_FILE_DST}" ${BASE_CONSOLE}
-	cp "${OPENAPI_PUBLIC_SPEC_BUILD_PATH}" ${SPEC_FILE_DST} || ${FAILURE_MESSAGE_HANDLER}
-	# Validate copy succeeded and files are identical
-	@ ${ECHO_COMMAND} ${GREEN_CONSOLE} "${CONSOLE_PREFIX} Validating copy succeeded and files are identical" ${BASE_CONSOLE}
-	@ diff -q "${OPENAPI_PUBLIC_SPEC_BUILD_PATH}" ${SPEC_FILE_DST} || (echo "${RED_CONSOLE}ERROR: Copy failed - files are not identical${BASE_CONSOLE}" && exit 1)
 	${SUCCESS_MESSAGE_HANDLER}
 .PHONY: build
