@@ -1,5 +1,9 @@
 type: object
 properties:
+  description:
+    type: string
+    nullable: true
+    description: The description of the node pool.
   labelKey:
     type: string
     nullable: true

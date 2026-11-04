@@ -29086,6 +29086,9 @@ components:
           type: string
           example: v100
           minLength: 1
+        description:
+          type: string
+          description: The description of the node pool.
         labelKey:
           type: string
           description: >-
@@ -29478,6 +29481,10 @@ components:
           example: v100
           minLength: 1
           maxLength: 63
+        description:
+          type: string
+          nullable: true
+          description: The description of the node pool.
         labelKey:
           description: >-
             Label key for associated nodes to the Node Pool (with value as in
@@ -29518,6 +29525,10 @@ components:
     NodepoolUpdateFields:
       type: object
       properties:
+        description:
+          type: string
+          nullable: true
+          description: The description of the node pool.
         labelKey:
           type: string
           nullable: true

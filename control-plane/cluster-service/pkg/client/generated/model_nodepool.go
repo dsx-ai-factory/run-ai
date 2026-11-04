@@ -25,6 +25,8 @@ var _ MappedNullable = &Nodepool{}
 // Nodepool struct for Nodepool
 type Nodepool struct {
 	Name string `json:"name"`
+	// The description of the node pool.
+	Description *string `json:"description,omitempty"`
 	// Label key for associated nodes to the Node Pool (with value as in labelValue)
 	LabelKey string `json:"labelKey"`
 	// Label value for associated nodes to the Node Pool (with key as in labelKey)
@@ -119,6 +121,38 @@ func (o *Nodepool) GetNameOk() (*string, bool) {
 // SetName sets field value
 func (o *Nodepool) SetName(v string) {
 	o.Name = v
+}
+
+// GetDescription returns the Description field value if set, zero value otherwise.
+func (o *Nodepool) GetDescription() string {
+	if o == nil || IsNil(o.Description) {
+		var ret string
+		return ret
+	}
+	return *o.Description
+}
+
+// GetDescriptionOk returns a tuple with the Description field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *Nodepool) GetDescriptionOk() (*string, bool) {
+	if o == nil || IsNil(o.Description) {
+		return nil, false
+	}
+	return o.Description, true
+}
+
+// HasDescription returns a boolean if a field has been set.
+func (o *Nodepool) HasDescription() bool {
+	if o != nil && !IsNil(o.Description) {
+		return true
+	}
+
+	return false
+}
+
+// SetDescription gets a reference to the given string and assigns it to the Description field.
+func (o *Nodepool) SetDescription(v string) {
+	o.Description = &v
 }
 
 // GetLabelKey returns the LabelKey field value
@@ -870,6 +904,9 @@ func (o Nodepool) MarshalJSON() ([]byte, error) {
 func (o Nodepool) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+	if !IsNil(o.Description) {
+		toSerialize["description"] = o.Description
+	}
 	toSerialize["labelKey"] = o.LabelKey
 	toSerialize["labelValue"] = o.LabelValue
 	toSerialize["clusterId"] = o.ClusterId

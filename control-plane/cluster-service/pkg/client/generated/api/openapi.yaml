@@ -8154,6 +8154,9 @@ components:
           example: v100
           minLength: 1
           type: string
+        description:
+          description: The description of the node pool.
+          type: string
         labelKey:
           description: Label key for associated nodes to the Node Pool (with value
             as in labelValue)
@@ -8479,6 +8482,7 @@ components:
             device: ""
           cpuPodsPlacementStrategy:
             node: ""
+        description: description
         clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
         deletedBy: user@lab.com
         createdAt: 2000-01-23T04:56:07.000+00:00
@@ -8714,6 +8718,7 @@ components:
             device: ""
           cpuPodsPlacementStrategy:
             node: ""
+        description: description
         labelValue: type-x
         gpuNetworkAccelerationDetection: Auto
         clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
@@ -8724,6 +8729,10 @@ components:
           example: v100
           maxLength: 63
           minLength: 1
+          type: string
+        description:
+          description: The description of the node pool.
+          nullable: true
           type: string
         labelKey:
           allOf:
@@ -8795,11 +8804,16 @@ components:
             device: ""
           cpuPodsPlacementStrategy:
             node: ""
+        description: description
         labelValue: type-x
         gpuNetworkAccelerationDetection: Auto
         labelKey: node-type
         networkTopologyId: 123e4567-e89b-12d3-a456-426614174000
       properties:
+        description:
+          description: The description of the node pool.
+          nullable: true
+          type: string
         labelKey:
           allOf:
           - $ref: '#/components/schemas/LabelKey'
@@ -10551,6 +10565,7 @@ components:
               device: ""
             cpuPodsPlacementStrategy:
               node: ""
+          description: description
           clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
           deletedBy: user@lab.com
           createdAt: 2000-01-23T04:56:07.000+00:00
@@ -10655,6 +10670,7 @@ components:
               device: ""
             cpuPodsPlacementStrategy:
               node: ""
+          description: description
           clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
           deletedBy: user@lab.com
           createdAt: 2000-01-23T04:56:07.000+00:00
@@ -10811,6 +10827,7 @@ components:
               device: ""
             cpuPodsPlacementStrategy:
               node: ""
+          description: description
           clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
           deletedBy: user@lab.com
           createdAt: 2000-01-23T04:56:07.000+00:00
@@ -10915,6 +10932,7 @@ components:
               device: ""
             cpuPodsPlacementStrategy:
               node: ""
+          description: description
           clusterId: d73a738f-fab3-430a-8fa3-5241493d7128
           deletedBy: user@lab.com
           createdAt: 2000-01-23T04:56:07.000+00:00

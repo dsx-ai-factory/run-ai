@@ -1200,6 +1200,126 @@ var _ = Describe("Nodepools tests", Ordered, func() {
 		})
 	})
 
+	Context("Description", Ordered, func() {
+		const (
+			initialDescription = "GPU nodes for training"
+			updatedDescription = "GPU nodes for inference"
+			patchedDescription = "GPU nodes for research"
+		)
+		var nodepool api.Nodepool
+
+		getNodepool := func() api.Nodepool {
+			response, err := nodepoolService.GetNodepool(ctx, nodepool.Id)
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			fetched, ok := response.Body.(api.Nodepool)
+			Expect(ok).To(BeTrue())
+			return fetched
+		}
+
+		setReady := func() {
+			response, err := nodepoolService.SyncNodepoolsStatus(ctx, testClusterId, api.SyncNodepoolsStatusRequest{
+				Nodepools: []api.NodepoolSyncFields{{Name: nodepool.Name, Phase: api.NODEPOOLPHASE_READY}},
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusNoContent))
+		}
+
+		AfterAll(func() {
+			if nodepool.Id != "" {
+				_, _ = nodepoolService.DeleteNodepool(ctx, nodepool.Id)
+			}
+		})
+
+		It("Create nodepool with description", func() {
+			response, err := nodepoolService.CreateNodepool(ctx, api.NodepoolCreateFields{
+				Name:        testName + "-description",
+				Description: ptr.To(initialDescription),
+				LabelKey:    testLabelKey + "-description",
+				LabelValue:  testLabelValue + "-description",
+				ClusterId:   testClusterId,
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusCreated))
+			var ok bool
+			nodepool, ok = response.Body.(api.Nodepool)
+			Expect(ok).To(BeTrue())
+			Expect(nodepool.Description).To(Equal(initialDescription))
+		})
+
+		It("Get and list return the description", func() {
+			Expect(getNodepool().Description).To(Equal(initialDescription))
+
+			response, err := nodepoolService.GetNodepools(ctx, []string{fmt.Sprintf("name==%s", nodepool.Name)}, "", "", 0, 0)
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			list, ok := response.Body.(api.GetNodepools200Response)
+			Expect(ok).To(BeTrue())
+			Expect(list.Nodepools).To(HaveLen(1))
+			Expect(list.Nodepools[0].Description).To(Equal(initialDescription))
+		})
+
+		It("Update changes the description without moving the nodepool to Updating", func() {
+			setReady()
+
+			response, err := nodepoolService.UpdateNodepool(ctx, nodepool.Id, api.NodepoolUpdateFields{
+				Description: ptr.To(updatedDescription),
+				LabelKey:    ptr.To(nodepool.LabelKey),
+				LabelValue:  ptr.To(nodepool.LabelValue),
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			updated := response.Body.(api.Nodepool)
+			Expect(updated.Description).To(Equal(updatedDescription))
+			Expect(updated.Phase).To(Equal(api.NODEPOOLPHASE_READY))
+			Expect(getNodepool().Description).To(Equal(updatedDescription))
+		})
+
+		It("Patch without description leaves it unchanged", func() {
+			response, err := nodepoolService.PatchNodepool(ctx, nodepool.Id, api.NodepoolUpdateFields{
+				GpuNetworkAccelerationLabelKey: ptr.To(services.DefaultGpuNetworkAccelerationLabelKey),
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(getNodepool().Description).To(Equal(updatedDescription))
+		})
+
+		It("Patch with description changes it", func() {
+			response, err := nodepoolService.PatchNodepool(ctx, nodepool.Id, api.NodepoolUpdateFields{
+				Description: ptr.To(patchedDescription),
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(response.Body.(api.Nodepool).Description).To(Equal(patchedDescription))
+			Expect(getNodepool().Description).To(Equal(patchedDescription))
+		})
+
+		It("Patch with an empty description clears it", func() {
+			response, err := nodepoolService.PatchNodepool(ctx, nodepool.Id, api.NodepoolUpdateFields{
+				Description: ptr.To(""),
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(getNodepool().Description).To(BeEmpty())
+		})
+
+		It("Update without description clears it", func() {
+			_, err := nodepoolService.PatchNodepool(ctx, nodepool.Id, api.NodepoolUpdateFields{
+				Description: ptr.To(patchedDescription),
+			})
+			Expect(err).To(BeNil())
+			Expect(getNodepool().Description).To(Equal(patchedDescription))
+
+			response, err := nodepoolService.UpdateNodepool(ctx, nodepool.Id, api.NodepoolUpdateFields{
+				LabelKey:   ptr.To(nodepool.LabelKey),
+				LabelValue: ptr.To(nodepool.LabelValue),
+			})
+			Expect(err).To(BeNil())
+			Expect(response.Code).To(Equal(http.StatusOK))
+			Expect(getNodepool().Description).To(BeEmpty())
+		})
+	})
+
 	Context("SchedulingConfiguration params", Ordered, func() {
 		var schedConfig *api.SchedulingConfiguration
 		BeforeEach(func() {

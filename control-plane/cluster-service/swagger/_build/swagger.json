@@ -4978,6 +4978,11 @@
           "s3FileSystemResources": {
             "$ref": "#/components/schemas/ClusterReportedResourceRequirements"
           },
+          "s3FileSystemMountCheckImage": {
+            "type": "string",
+            "nullable": true,
+            "description": "The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled."
+          },
           "fipsMode": {
             "$ref": "#/components/schemas/FipsModeEnum"
           },
@@ -6271,6 +6276,10 @@
             "example": "v100",
             "minLength": 1
           },
+          "description": {
+            "type": "string",
+            "description": "The description of the node pool."
+          },
           "labelKey": {
             "type": "string",
             "description": "Label key for associated nodes to the Node Pool (with value as in labelValue)",
@@ -6757,6 +6766,11 @@
             "minLength": 1,
             "maxLength": 63
           },
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "The description of the node pool."
+          },
           "labelKey": {
             "description": "Label key for associated nodes to the Node Pool (with value as in labelValue)",
             "example": "node-type",
@@ -6809,6 +6823,11 @@
       "NodepoolUpdateFields": {
         "type": "object",
         "properties": {
+          "description": {
+            "type": "string",
+            "nullable": true,
+            "description": "The description of the node pool."
+          },
           "labelKey": {
             "type": "string",
             "nullable": true,
