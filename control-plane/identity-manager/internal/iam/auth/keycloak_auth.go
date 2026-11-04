@@ -144,7 +144,7 @@ func (k *KeycloakAuthenticator) getAppAdminClientID(ctx context.Context) (*strin
 	}
 	clientID, err := k.createNewAppAdminClient(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("%s. error: %w", "failed to create admin application", err)
+		return nil, fmt.Errorf("%s. error: %w", "failed to create admin client", err)
 	}
 	return &clientID, nil
 }
@@ -206,7 +206,7 @@ func (k *KeycloakAuthenticator) setNewAppSecret(ctx context.Context) error {
 func (k *KeycloakAuthenticator) setAppAdminSecret(ctx context.Context, IdOfClient string) error {
 	secret, err := k.KcClient.GetClientSecret(ctx, k.userAuth.userToken.AccessToken, MasterRealmName, IdOfClient)
 	if err != nil || secret.Value == nil {
-		return fmt.Errorf("%s. error: %w", "failed to get admin application secret", err)
+		return fmt.Errorf("%s. error: %w", "failed to get admin client secret", err)
 	}
 	k.appAuth.appSecret = secret
 	return nil
@@ -224,7 +224,7 @@ func (k *KeycloakAuthenticator) userAdminLogin(ctx context.Context) error {
 func (k *KeycloakAuthenticator) appAdminLogin(ctx context.Context) error {
 	token, err := k.KcClient.LoginClient(ctx, ServiceClientID, *k.appAuth.appSecret.Value, MasterRealmName)
 	if err != nil {
-		return fmt.Errorf("failed to login admin app. error: %w", err)
+		return fmt.Errorf("failed to login admin client. error: %w", err)
 	}
 	k.appAuth.setToken(token)
 	return nil
@@ -249,7 +249,7 @@ func (k *KeycloakAuthenticator) createNewAppAdminClient(ctx context.Context) (st
 	adminToken := k.userAuth.userToken.AccessToken
 	clientID, err := k.KcClient.CreateClient(ctx, adminToken, MasterRealmName, client)
 	if err != nil {
-		return "", fmt.Errorf("failed to create admin app client. error: %w", err)
+		return "", fmt.Errorf("failed to register admin client. error: %w", err)
 	}
 
 	serviceAccountUser, err := k.KcClient.GetClientServiceAccount(ctx, adminToken, MasterRealmName, clientID)
@@ -258,7 +258,7 @@ func (k *KeycloakAuthenticator) createNewAppAdminClient(ctx context.Context) (st
 	}
 
 	if err := k.assignAdminRolesToAdminApp(ctx, adminToken, serviceAccountUser); err != nil {
-		return "", fmt.Errorf("failed to get assign admin roles for admin app. error: %w", err)
+		return "", fmt.Errorf("failed to get assign admin roles for admin client. error: %w", err)
 	}
 	return clientID, nil
 }
@@ -290,7 +290,7 @@ func (k *KeycloakAuthenticator) assignAdminRolesToAdminApp(ctx context.Context, 
 
 	if len(rolesToAssign) > 0 {
 		if err := k.KcClient.AddRealmRoleToUser(ctx, adminToken, MasterRealmName, *serviceAccountUser.ID, rolesToAssign); err != nil {
-			return fmt.Errorf("failed to assign admin roles to admin app. error: %w", err)
+			return fmt.Errorf("failed to assign admin roles to admin client. error: %w", err)
 		}
 	}
 
