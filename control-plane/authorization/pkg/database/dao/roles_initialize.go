@@ -83,6 +83,34 @@ func renameRoleIfLegacyNotExists(oldName, newName string) {
 	}
 }
 
+// RoleToClusterRoleMap maps a role that migrateDeprecatedRoleNames renames in place to the
+// role whose name the cluster still knows.
+var RoleToClusterRoleMap = map[string]string{
+	static_roles.DepartmentAdminLegacy.Name: static_roles.DepartmentAdmin.Name,
+}
+
+// linkRenamedRolesToClusterRole points every role that was renamed in place at the role whose name
+// the cluster knows, using ClusterRolePredefinedId - the column the access rules sync already reads
+// to decide which predefined role an access rule reports to the cluster.
+func linkRenamedRolesToClusterRole() {
+	for roleName, clusterRoleName := range RoleToClusterRoleMap {
+		clusterRoleId, found := MapStaticRoleNameToRoleId[clusterRoleName]
+		if !found || clusterRoleId == 0 {
+			logging.Warnf("Cannot point role '%s' at '%s': '%s' is not initialized",
+				roleName, clusterRoleName, clusterRoleName)
+			continue
+		}
+
+		if _, err := runaidb.DB().Model(&models.Role{}).
+			Where("name = ? AND scope_type = ? AND cluster_role_predefined_id IS NULL",
+				roleName, models.ROLE_SCOPE_SYSTEM).
+			Update("cluster_role_predefined_id", clusterRoleId); err != nil {
+			logging.Warnf("Failed to point role '%s' at '%s': %v",
+				roleName, clusterRoleName, err)
+		}
+	}
+}
+
 func migrateDeprecatedRoleNames() {
 	renameRoleIfLegacyNotExists("Department administrator", "Department administrator (Legacy)")
 }
@@ -147,6 +175,8 @@ func InitStaticRoles() {
 		}
 		MapStaticRoleNameToRoleId[role.Name] = id
 	}
+
+	linkRenamedRolesToClusterRole()
 
 	logging.Infof("Initializing static roles completed")
 }

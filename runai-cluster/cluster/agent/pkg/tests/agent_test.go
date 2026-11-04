@@ -116,6 +116,7 @@ var _ = Describe("Agent tests", func() {
 
 	var existingAccessRuleToBeReconciled *v1alpha1.AccessRule
 	var accessRuleToBeDeleted *v1alpha1.AccessRule
+	var accessRuleOrphanedByRoleRename *v1alpha1.AccessRule
 
 	var existingInteractivePolicyToBeReconciled *ipv1.InteractivePolicy
 	var existingInteractivePolicyToDeleted *ipv1.InteractivePolicy
@@ -698,6 +699,9 @@ var _ = Describe("Agent tests", func() {
 
 			existingAccessRuleToBeReconciled = getBasicAccessRuleObject(AccessRule1Name, strconv.Itoa(int(BackendAccessRule2.Id)))
 			accessRuleToBeDeleted = getBasicAccessRuleObject(AccessRule5ToBeDeleted, strconv.Itoa(int(BackendAccessRule5ToBeDeleted.Id)))
+			// same access rule id as accessRuleToBeDeleted, but created under the name it had before
+			// the role was renamed - the backend never reports this name again (RUN-44340)
+			accessRuleOrphanedByRoleRename = getBasicAccessRuleObject(AccessRule5OrphanedByRoleRename, strconv.Itoa(int(BackendAccessRule5ToBeDeleted.Id)))
 
 			existingInteractivePolicyToBeReconciled = getBasicInteractivePolicyObject(policy1.name, policy1.namespace, policy1.preUpdatedCounter, policy1.scope, policy1.scopeId)
 			existingInteractivePolicyToDeleted = getBasicInteractivePolicyObject(policy5.name, policy5.namespace, policy5.preUpdatedCounter, policy5.scope, policy5.scopeId)
@@ -737,7 +741,7 @@ var _ = Describe("Agent tests", func() {
 				existingDepartmentToBeReconciled, departmentToBeDeleted,
 				existingNodePoolToBeReconciled, nodePoolToBeDeleted,
 				existingDatavolumeToBeReconciled, datavolumeToBeDeleted,
-				existingAccessRuleToBeReconciled, accessRuleToBeDeleted,
+				existingAccessRuleToBeReconciled, accessRuleToBeDeleted, accessRuleOrphanedByRoleRename,
 				existingInteractivePolicyToBeReconciled, existingInteractivePolicyToDeleted,
 				existingTrainingPolicyToBeReconciled, existingTrainingPolicyToBeDeleted,
 				existingDistributedPolicyToBeReconciled, existingDistributedPolicyToBeDeleted,
@@ -1017,6 +1021,7 @@ var _ = Describe("Agent tests", func() {
 			Expect(getAccessRuleFromClient(AccessRule3Name, k8sClient)).To(BeNil())
 			Expect(getAccessRuleFromClient(AccessRule4Name, k8sClient)).To(BeNil())
 			Expect(getAccessRuleFromClient(accessRuleToBeDeleted.Name, k8sClient)).ToNot(BeNil())
+			Expect(getAccessRuleFromClient(accessRuleOrphanedByRoleRename.Name, k8sClient)).ToNot(BeNil())
 			Expect(getAccessRuleFromClient(AccessRule6AlreadyDeleted, k8sClient)).To(BeNil())
 			Expect(getAccessRuleFromClient(AccessRule7FutureUpdateTime, k8sClient)).To(BeNil())
 
@@ -1027,6 +1032,7 @@ var _ = Describe("Agent tests", func() {
 			validateAccessRuleExistsEventually(AccessRule3Name, k8sClient)
 			validateAccessRuleExistsEventually(AccessRule4Name, k8sClient)
 			validateAccessRuleDeletedEventually(accessRuleToBeDeleted.Name, k8sClient)
+			validateAccessRuleDeletedEventually(accessRuleOrphanedByRoleRename.Name, k8sClient)
 			Expect(getAccessRuleFromClient(AccessRule6AlreadyDeleted, k8sClient)).To(BeNil())
 			Expect(getAccessRuleFromClient(AccessRule7FutureUpdateTime, k8sClient)).To(BeNil())
 
