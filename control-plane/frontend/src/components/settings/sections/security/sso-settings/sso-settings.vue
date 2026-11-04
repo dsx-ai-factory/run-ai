@@ -380,6 +380,6 @@ export default defineComponent({
   }
 }
 .idp-card-separator {
-  margin: 0 12px;
+  margin: 0 16px;
 }
 </style>
