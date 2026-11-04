@@ -103,7 +103,7 @@ func DistributedInferenceContainerFlagSet(flagsContainer *pflag.FlagSet, contain
 	flagsContainer.StringVar(&container.WorkerCommand, consts.AttributeNameWorkerCommand, "", consts.AttributeUsageWorkerCommand)
 	flagsContainer.StringVar(&container.WorkerArgs, consts.AttributeNameWorkerArgs, "", consts.AttributeUsageWorkerArgs)
 	flagsContainer.StringVar(&container.WorkerWorkingDir, consts.AttributeNameWorkerWorkingDir, "", consts.AttributeUsageWorkerWorkingDir)
-	flagsContainer.StringArrayVar(&container.WorkerEnvironmentVariables, consts.AttributeNameWorkerEnvironment, []string{}, consts.AttributeUsageWorkerEnvironment)
+	flagsContainer.StringArrayVar(&container.WorkerEnvironmentVariables, consts.AttributeNameWorkerEnvVariable, []string{}, consts.AttributeUsageWorkerEnvironment)
 	flagsContainer.StringArrayVar(&container.WorkerFieldRef, consts.AttributeNameWorkerEnvPodFieldRef, []string{}, consts.AttributeUsageWorkerEnvPodFieldRef)
 	flagsContainer.StringArrayVar(&container.WorkerEnvSecret, consts.AttributeNameWorkerEnvSecret, []string{}, consts.AttributeUsageWorkerEnvSecret)
 	flagsContainer.BoolVar(&container.WorkerCreateHomeDir, consts.AttributeNameWorkerCreateHomeDir, false, consts.AttributeUsageWorkerCreateHomeDir)

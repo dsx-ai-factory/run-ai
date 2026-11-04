@@ -406,7 +406,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 
 		It("should handle worker-specific environment variables", func() {
 			output, err := cli.RunCommand(fmt.Sprintf(
-				"inference distributed submit %s -p p301 -i %s -e LEADER_VAR=leader --worker-environment WORKER_VAR=worker --serving-port 8080 --dry-run",
+				"inference distributed submit %s -p p301 -i %s -e LEADER_VAR=leader --worker-environment-variable WORKER_VAR=worker --serving-port 8080 --dry-run",
 				DistInfWorkerName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
 
@@ -701,7 +701,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 					"--worker-as-leader=false --worker-image vllm/vllm-worker:latest "+
 					"--worker-image-pull-policy IfNotPresent --worker-command python "+
 					"--worker-working-dir /workspace/worker --worker-create-home-dir "+
-					"--worker-environment WORKER_ID=auto "+
+					"--worker-environment-variable WORKER_ID=auto "+
 					"--serving-port 8080 --dry-run",
 				DistInfFullName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
@@ -920,12 +920,49 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 		})
 	})
 
+	Context("Worker environment variable flag", func() {
+		It("preserves explicit worker variables in the request", func() {
+			output, err := cli.RunCommand(fmt.Sprintf(
+				"inference distributed submit %s -p p301 -i %s --serving-port 8080 "+
+					"--worker-environment-variable WORKER_A=a=b --worker-environment-variable WORKER_EMPTY= --dry-run",
+				DistInfMinimalName, DistInfImageName), envMap)
+			Expect(err).NotTo(HaveOccurred())
+			request := openapi.DistributedInferenceCreationRequest{}
+			Expect(json.Unmarshal([]byte(output), &request)).To(Succeed())
+			worker := request.GetSpec().Worker.Get()
+			values := make(map[string]string)
+			for _, variable := range worker.EnvironmentVariables {
+				values[*variable.Name.Get()] = *variable.Value.Get()
+			}
+			Expect(values).To(Equal(map[string]string{"WORKER_A": "a=b", "WORKER_EMPTY": ""}))
+		})
+
+		DescribeTable("rejects the removed worker-environment flag",
+			func(flags string) {
+				_, err := cli.RunCommand(fmt.Sprintf(
+					"inference distributed submit %s -p p301 -i %s --serving-port 8080 %s --dry-run",
+					DistInfMinimalName, DistInfImageName, flags), envMap)
+				Expect(err).To(MatchError(ContainSubstring("unknown flag: --worker-environment")))
+			},
+			Entry("removed flag", "--worker-environment WORKER_A=a=b"),
+			Entry("canonical then removed flag", "--worker-environment-variable WORKER_A=a=b --worker-environment WORKER_EMPTY="),
+			Entry("removed flag then canonical", "--worker-environment WORKER_A=a=b --worker-environment-variable WORKER_EMPTY="),
+		)
+
+		It("shows only the supported worker variable flag in help", func() {
+			output, err := cli.RunCommand("inference distributed submit --help", envMap)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(output).To(ContainSubstring("--worker-environment-variable stringArray"))
+			Expect(output).NotTo(ContainSubstring("--worker-environment stringArray"))
+		})
+	})
+
 	Context("Distributed Inference Submit - Worker Environment Merge Behavior", func() {
 		It("worker-as-leader=true should merge leader and worker env vars", func() {
 			output, err := cli.RunCommand(fmt.Sprintf(
 				"inference distributed submit %s -p p301 -i %s --serving-port 8080 "+
 					"--environment-variable SHARED_VAR=leader --environment-variable LEADER_ONLY=leader "+
-					"--worker-environment SHARED_VAR=worker --worker-environment WORKER_ONLY=worker "+
+					"--worker-environment-variable SHARED_VAR=worker --worker-environment-variable WORKER_ONLY=worker "+
 					"--dry-run",
 				DistInfMinimalName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
@@ -957,7 +994,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 				"inference distributed submit %s -p p301 -i %s --serving-port 8080 "+
 					"--worker-as-leader=false "+
 					"--environment-variable LEADER_VAR=leader "+
-					"--worker-environment WORKER_VAR=worker "+
+					"--worker-environment-variable WORKER_VAR=worker "+
 					"--dry-run",
 				DistInfWorkerName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())

@@ -150,8 +150,8 @@ const (
 	AttributeUsageWorkerArgs            = "Specifies the arguments to pass to worker pod command"
 	AttributeNameWorkerWorkingDir       = "worker-working-dir"
 	AttributeUsageWorkerWorkingDir      = "Working directory inside worker pods. Overrides the default working directory set in the image."
-	AttributeNameWorkerEnvironment      = "worker-environment"
-	AttributeUsageWorkerEnvironment     = "Set environment variables in worker pods. Format: --worker-environment name=value --worker-environment name-b=value-b."
+	AttributeNameWorkerEnvVariable      = "worker-environment-variable"
+	AttributeUsageWorkerEnvironment     = "Set environment variables in worker pods. Format: --worker-environment-variable name=value --worker-environment-variable name-b=value-b."
 	AttributeNameWorkerEnvPodFieldRef   = "worker-env-pod-field-ref"
 	AttributeUsageWorkerEnvPodFieldRef  = "Set an environment variable from a pod field reference for worker pods. Format: ENV_VARIABLE=FIELD_REFERENCE."
 	AttributeNameWorkerEnvSecret        = "worker-env-secret"                                                                                                      // #nosec G101 -- This is a flag name, not a credential

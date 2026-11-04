@@ -482,9 +482,9 @@ runai inference distributed submit <workload-name> \
     --environment-variable NIM_TRUST_CUSTOM_CODE=1 \
     --environment-variable NIM_MODEL_PROFILE=sglang-h100-bf16-tp8-pp2 \
     --env-pod-field-ref "NIM_NODE_RANK=metadata.labels['leaderworkerset.sigs.k8s.io/worker-index']" \
-    --worker-environment NIM_LEADER_ROLE=0 \
-    --worker-environment "OMPI_MCA_orte_keep_fqdn_hostnames=" \
-    --worker-environment "OMPI_MCA_plm_rsh_args=" \
+    --worker-environment-variable NIM_LEADER_ROLE=0 \
+    --worker-environment-variable "OMPI_MCA_orte_keep_fqdn_hostnames=" \
+    --worker-environment-variable "OMPI_MCA_plm_rsh_args=" \
     --run-as-uid 1000 \ # Required for OpenShift environments only
     --run-as-gid 1000 \ # Required for OpenShift environments only
     --run-as-non-root # Required for OpenShift environments only
