@@ -110,7 +110,8 @@
         "keycloakx",
         "quay.io/keycloak/keycloak"
       ],
-      "automerge": false
+      "automerge": false,
+      "branchName": "{{{branchPrefix}}}keycloak"
     },
     {
       "matchPackageNames": [
@@ -118,9 +119,7 @@
         "quay.io/keycloak/keycloak"
       ],
       "groupName": "keycloak",
-      "groupSlug": "keycloak",
-      "additionalBranchPrefix": "keycloak-",
-      "commitMessageSuffix": "keycloak ({{baseBranch}})"
+      "groupSlug": "keycloak"
     }
   ]
 }
