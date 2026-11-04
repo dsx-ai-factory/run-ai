@@ -18,10 +18,10 @@ func TestLegacyClientType(t *testing.T) {
 		want       string
 		wantOk     bool
 	}{
-		{name: "access key", clientType: ClientTypeUserApp, want: "user-application", wantOk: true},
-		{name: "service account", clientType: ClientTypeTenantApp, want: "tenant-application", wantOk: true},
+		{name: "access key", clientType: ClientTypeAccessKey, want: "user-application", wantOk: true},
+		{name: "service account", clientType: ClientTypeServiceAccount, want: "tenant-application", wantOk: true},
 		{name: "never renamed", clientType: ClientTypeWorkloadsAuth},
-		{name: "already legacy", clientType: LegacyClientTypeUserApp},
+		{name: "already legacy", clientType: LegacyClientTypeAccessKey},
 		{name: "empty"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -32,20 +32,20 @@ func TestLegacyClientType(t *testing.T) {
 	}
 }
 
-func TestIsUserAppClientType(t *testing.T) {
+func TestIsAccessKeyClientType(t *testing.T) {
 	for _, tc := range []struct {
 		name       string
 		clientType string
 		want       bool
 	}{
-		{name: "current value", clientType: ClientTypeUserApp, want: true},
-		{name: "legacy value", clientType: LegacyClientTypeUserApp, want: true},
-		{name: "service account", clientType: ClientTypeTenantApp},
-		{name: "legacy service account", clientType: LegacyClientTypeTenantApp},
+		{name: "current value", clientType: ClientTypeAccessKey, want: true},
+		{name: "legacy value", clientType: LegacyClientTypeAccessKey, want: true},
+		{name: "service account", clientType: ClientTypeServiceAccount},
+		{name: "legacy service account", clientType: LegacyClientTypeServiceAccount},
 		{name: "empty"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			assert.Equal(t, tc.want, IsUserAppClientType(tc.clientType))
+			assert.Equal(t, tc.want, IsAccessKeyClientType(tc.clientType))
 		})
 	}
 }

@@ -94,7 +94,7 @@ func setProtocolMappers(kcClient *gocloak.Client, client *models.Client) {
 		protocol_mapper.NewClientTypeProtocolMapper(cType),
 	}
 	if client.IsServiceAccountsEnabled() {
-		if models.IsUserAppClientType(cType) {
+		if models.IsAccessKeyClientType(cType) {
 			*kcClient.ProtocolMappers = append(*kcClient.ProtocolMappers,
 				protocol_mapper.NewCreatedByToSubProtocolMapper(*client.Attributes.CreatedBy),
 				protocol_mapper.NewCreatedByToEmailProtocolMapper(*client.Attributes.CreatedBy),
@@ -259,7 +259,7 @@ func toKcFilters(filters *models.ClientFilter) *gocloak.GetClientsParams {
 	}
 	if filters.ClientType != nil {
 		switch *filters.ClientType {
-		case models.ClientTypeUserApp, models.LegacyClientTypeUserApp:
+		case models.ClientTypeAccessKey, models.LegacyClientTypeAccessKey:
 			if filters.IsTenantAdmin {
 				if filters.CreatedBy != nil && *filters.CreatedBy != "" {
 					addKcFilter(&filtersChain, utils.CreatedBy, *filters.CreatedBy)
@@ -273,7 +273,7 @@ func toKcFilters(filters *models.ClientFilter) *gocloak.GetClientsParams {
 					addKcFilter(&filtersChain, utils.ClientTypeAttr, *filters.ClientType)
 				}
 			}
-		case models.ClientTypeTenantApp, models.LegacyClientTypeTenantApp:
+		case models.ClientTypeServiceAccount, models.LegacyClientTypeServiceAccount:
 			addKcFilter(&filtersChain, utils.IsExternal, "true")
 		default:
 		}

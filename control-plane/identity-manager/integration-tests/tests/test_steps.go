@@ -111,7 +111,7 @@ func (t *TestSteps) CreateServiceAccount(ctx context.Context, realm string, tena
 			CreatedBy: ptr.To(createdByUser),
 		},
 	}
-	realm_client.ApplyClientProfile(serviceAccount, realm_client.ClientTypeTenantApp)
+	realm_client.ApplyClientProfile(serviceAccount, realm_client.ClientTypeServiceAccount)
 	return t.iamClient.ClientService.CreateClient(ctx, realm, serviceAccount)
 }
 
@@ -132,7 +132,7 @@ func (t *TestSteps) CreateAccessKey(ctx context.Context, realm, tenantId string,
 			CreatedBy: createdBy,
 		},
 	}
-	realm_client.ApplyClientProfile(accessKey, realm_client.ClientTypeUserApp)
+	realm_client.ApplyClientProfile(accessKey, realm_client.ClientTypeAccessKey)
 	return t.iamClient.ClientService.CreateClient(ctx, realm, accessKey)
 }
 
@@ -148,7 +148,7 @@ func (t *TestSteps) CreateLegacyServiceAccount(ctx context.Context, realm string
 			CreatedBy: ptr.To(createdByUser),
 		},
 	}
-	realm_client.ApplyClientProfile(serviceAccount, realm_client.ClientTypeTenantApp)
+	realm_client.ApplyClientProfile(serviceAccount, realm_client.ClientTypeServiceAccount)
 	serviceAccount.Attributes.ClientType = ptr.To(legacyServiceAccountClientType)
 	return t.iamClient.ClientService.CreateClient(ctx, realm, serviceAccount)
 }
@@ -164,7 +164,7 @@ func (t *TestSteps) CreateLegacyAccessKey(ctx context.Context, realm, tenantId, 
 			CreatedBy: &createdBy,
 		},
 	}
-	realm_client.ApplyClientProfile(accessKey, realm_client.ClientTypeUserApp)
+	realm_client.ApplyClientProfile(accessKey, realm_client.ClientTypeAccessKey)
 	accessKey.Attributes.ClientType = ptr.To(legacyAccessKeyClientType)
 	return t.iamClient.ClientService.CreateClient(ctx, realm, accessKey)
 }

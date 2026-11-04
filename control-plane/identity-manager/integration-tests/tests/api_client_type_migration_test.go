@@ -68,14 +68,14 @@ func TestReconcile_LegacyServiceAccount_RewrittenToCurrentType(t *testing.T) {
 	require.Equal(t, "tenant-application", clientTypeOf(t, ctx, realmName, id))
 
 	// before the reconcile: lookups by the current type still find the legacy client
-	require.Contains(t, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeTenantApp), id)
+	require.Contains(t, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeServiceAccount), id)
 	require.Equal(t, "tenant-application", grantClientCredentialsClaims(t, ctx, realmName, id)["client_type"])
 
 	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, ptr.To(openapi.RECONCILERTYPE_APPS)))
 
 	require.Equal(t, "service-account", clientTypeOf(t, ctx, realmName, id))
 	require.Equal(t, "service-account", grantClientCredentialsClaims(t, ctx, realmName, id)["client_type"])
-	require.Contains(t, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeTenantApp), id)
+	require.Contains(t, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeServiceAccount), id)
 }
 
 func TestReconcile_LegacyAccessKey_RewrittenToCurrentType(t *testing.T) {
@@ -89,7 +89,7 @@ func TestReconcile_LegacyAccessKey_RewrittenToCurrentType(t *testing.T) {
 	require.Equal(t, "user-application", clientTypeOf(t, ctx, realmName, id))
 
 	// before the reconcile: lookups by the current type still find the legacy client, by id and by creator
-	require.Contains(t, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeUserApp), id)
+	require.Contains(t, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeAccessKey), id)
 	found, err := IamServices.ClientService.GetAccessKeyClientById(ctx, realmName, createdByUser, id)
 	require.NoError(t, err)
 	require.Equal(t, id, *found.ID)
@@ -124,22 +124,22 @@ func TestReconcile_MixedLegacyAndMigratedClients_AllEndOnCurrentTypeAndRerunIsSt
 	require.NoError(t, err)
 
 	// a partial earlier run leaves both formats side by side: the pull must return both
-	require.ElementsMatch(t, []string{legacyKeyId, migratedKeyId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeUserApp))
-	require.ElementsMatch(t, []string{legacyAccountId, migratedAccountId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeTenantApp))
+	require.ElementsMatch(t, []string{legacyKeyId, migratedKeyId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeAccessKey))
+	require.ElementsMatch(t, []string{legacyAccountId, migratedAccountId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeServiceAccount))
 
-	appsType := ptr.To(openapi.RECONCILERTYPE_APPS)
-	userAppsType := ptr.To(openapi.RECONCILERTYPE_USER_APPS)
+	serviceAccountsReconciler := ptr.To(openapi.RECONCILERTYPE_APPS)
+	accessKeysReconciler := ptr.To(openapi.RECONCILERTYPE_USER_APPS)
 
 	// the reconcile can run more than once: the second pass must neither fail nor drop clients
 	for run := 1; run <= 2; run++ {
-		require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, appsType), "apps run %d", run)
-		require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, userAppsType), "userApps run %d", run)
+		require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, serviceAccountsReconciler), "service accounts run %d", run)
+		require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, accessKeysReconciler), "access keys run %d", run)
 
 		require.Equal(t, "access-key", clientTypeOf(t, ctx, realmName, legacyKeyId), "run %d", run)
 		require.Equal(t, "access-key", clientTypeOf(t, ctx, realmName, migratedKeyId), "run %d", run)
 		require.Equal(t, "service-account", clientTypeOf(t, ctx, realmName, legacyAccountId), "run %d", run)
 		require.Equal(t, "service-account", clientTypeOf(t, ctx, realmName, migratedAccountId), "run %d", run)
-		require.ElementsMatch(t, []string{legacyKeyId, migratedKeyId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeUserApp), "run %d", run)
-		require.ElementsMatch(t, []string{legacyAccountId, migratedAccountId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeTenantApp), "run %d", run)
+		require.ElementsMatch(t, []string{legacyKeyId, migratedKeyId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeAccessKey), "run %d", run)
+		require.ElementsMatch(t, []string{legacyAccountId, migratedAccountId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeServiceAccount), "run %d", run)
 	}
 }

@@ -61,8 +61,8 @@ func TestKeycloakClientRepository_GetClients_ReturnsBothTypeFormats(t *testing.T
 		newVal string
 		oldVal string
 	}{
-		{name: "access keys", newVal: models.ClientTypeUserApp, oldVal: "user-application"},
-		{name: "service accounts", newVal: models.ClientTypeTenantApp, oldVal: "tenant-application"},
+		{name: "access keys", newVal: models.ClientTypeAccessKey, oldVal: "user-application"},
+		{name: "service accounts", newVal: models.ClientTypeServiceAccount, oldVal: "tenant-application"},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
@@ -88,13 +88,13 @@ func TestKeycloakClientRepository_GetClients_ReturnsBothTypeFormats(t *testing.T
 func TestKeycloakClientRepository_GetClients_DeduplicatesAcrossFormats(t *testing.T) {
 	t.Parallel()
 	repo, kcMock := newLegacyTypeTestRepo(t)
-	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeUserApp)).
-		Return([]*gocloak.Client{kcClientOfType("same", models.ClientTypeUserApp)}, nil).Once()
+	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeAccessKey)).
+		Return([]*gocloak.Client{kcClientOfType("same", models.ClientTypeAccessKey)}, nil).Once()
 	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor("user-application")).
 		Return([]*gocloak.Client{kcClientOfType("same", "user-application")}, nil).Once()
 
 	clients, err := repo.GetClients(context.Background(), "realm", &models.ClientFilter{
-		ClientType:    pointer.ToString(models.ClientTypeUserApp),
+		ClientType:    pointer.ToString(models.ClientTypeAccessKey),
 		IsTenantAdmin: true,
 	})
 
@@ -105,13 +105,13 @@ func TestKeycloakClientRepository_GetClients_DeduplicatesAcrossFormats(t *testin
 func TestKeycloakClientRepository_GetClients_RespectsMaxResultsAfterMerge(t *testing.T) {
 	t.Parallel()
 	repo, kcMock := newLegacyTypeTestRepo(t)
-	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeTenantApp)).
-		Return([]*gocloak.Client{kcClientOfType("a", models.ClientTypeTenantApp)}, nil).Once()
+	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeServiceAccount)).
+		Return([]*gocloak.Client{kcClientOfType("a", models.ClientTypeServiceAccount)}, nil).Once()
 	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor("tenant-application")).
 		Return([]*gocloak.Client{kcClientOfType("b", "tenant-application")}, nil).Once()
 
 	clients, err := repo.GetClients(context.Background(), "realm", &models.ClientFilter{
-		ClientType: pointer.ToString(models.ClientTypeTenantApp),
+		ClientType: pointer.ToString(models.ClientTypeServiceAccount),
 		MaxResults: ptr.To(1),
 	})
 
@@ -134,13 +134,13 @@ func TestKeycloakClientRepository_GetClients_UnrenamedTypeQueriesOnce(t *testing
 func TestKeycloakClientRepository_GetClientsCount_CountsBothTypeFormats(t *testing.T) {
 	t.Parallel()
 	repo, kcMock := newLegacyTypeTestRepo(t)
-	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeUserApp)).
-		Return([]*gocloak.Client{kcClientOfType("new-1", models.ClientTypeUserApp)}, nil).Once()
+	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeAccessKey)).
+		Return([]*gocloak.Client{kcClientOfType("new-1", models.ClientTypeAccessKey)}, nil).Once()
 	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor("user-application")).
 		Return([]*gocloak.Client{kcClientOfType("old-1", "user-application"), kcClientOfType("old-2", "user-application")}, nil).Once()
 
 	count, err := repo.GetClientsCount(context.Background(), "realm", &models.ClientFilter{
-		ClientType: pointer.ToString(models.ClientTypeUserApp),
+		ClientType: pointer.ToString(models.ClientTypeAccessKey),
 		CreatedBy:  pointer.ToString("creator"),
 	})
 
@@ -151,7 +151,7 @@ func TestKeycloakClientRepository_GetClientsCount_CountsBothTypeFormats(t *testi
 func TestKeycloakClientRepository_GetAccessKeyClientById_FindsLegacyAccessKey(t *testing.T) {
 	t.Parallel()
 	repo, kcMock := newLegacyTypeTestRepo(t)
-	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeUserApp)).
+	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeAccessKey)).
 		Return([]*gocloak.Client{}, nil).Once()
 	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor("user-application")).
 		Return([]*gocloak.Client{kcClientOfType("legacy-key", "user-application")}, nil).Once()
@@ -165,8 +165,8 @@ func TestKeycloakClientRepository_GetAccessKeyClientById_FindsLegacyAccessKey(t 
 func TestKeycloakClientRepository_GetAccessKeyClientById_FindsMigratedAccessKey(t *testing.T) {
 	t.Parallel()
 	repo, kcMock := newLegacyTypeTestRepo(t)
-	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeUserApp)).
-		Return([]*gocloak.Client{kcClientOfType("new-key", models.ClientTypeUserApp)}, nil).Once()
+	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor(models.ClientTypeAccessKey)).
+		Return([]*gocloak.Client{kcClientOfType("new-key", models.ClientTypeAccessKey)}, nil).Once()
 	kcMock.On("GetClients", mock.Anything, legacyTestToken, "realm", searchesFor("user-application")).
 		Return([]*gocloak.Client{}, nil).Once()
 

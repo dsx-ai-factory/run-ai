@@ -67,7 +67,7 @@ func (s *AccessKeysAPIService) CreateAccessKey(ctx context.Context, accessKeyCre
 		},
 		Attributes: &models.ClientAttributes{
 			CreatedBy:     createdBy,
-			ClientType:    ptr.To(realm_client.ClientTypeUserApp),
+			ClientType:    ptr.To(realm_client.ClientTypeAccessKey),
 			TokenLifespan: ptr.To(DefaultServiceAccountTokenLifespan),
 		},
 	}
@@ -284,11 +284,11 @@ func accessKeyModelToApiResponseAdministrator(ctx context.Context, accessKey *mo
 }
 
 func isAccessKey(app *models.Client) bool {
-	return app != nil && app.Attributes != nil && app.Attributes.ClientType != nil && models.IsUserAppClientType(*app.Attributes.ClientType)
+	return app != nil && app.Attributes != nil && app.Attributes.ClientType != nil && models.IsAccessKeyClientType(*app.Attributes.ClientType)
 }
 
 func getAccessKeyFilter(isTenantAdmin bool, createdBy *string) models.ClientFilter {
-	return models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeUserApp), IsTenantAdmin: isTenantAdmin, CreatedBy: createdBy}
+	return models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeAccessKey), IsTenantAdmin: isTenantAdmin, CreatedBy: createdBy}
 }
 
 func isAccessKeysCountValid(accessKeysCount *int) bool {

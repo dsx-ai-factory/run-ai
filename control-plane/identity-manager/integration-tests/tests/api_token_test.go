@@ -60,7 +60,7 @@ func TestGrantServiceAccountToken_HappyFlow(t *testing.T) {
 
 	if claims, ok := parsedToken.Claims.(*jwt.MapClaims); ok {
 		require.Contains(t, (*claims)["azp"], *serviceAccount.ClientID)
-		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeTenantApp)
+		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeServiceAccount)
 	}
 }
 
@@ -92,7 +92,7 @@ func TestGrantAccessKeyToken_HappyFlow(t *testing.T) {
 
 	if claims, ok := parsedToken.Claims.(*jwt.MapClaims); ok {
 		require.Contains(t, (*claims)["sub"], *accessKey.Attributes.CreatedBy)
-		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeUserApp)
+		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeAccessKey)
 	}
 }
 

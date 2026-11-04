@@ -64,7 +64,7 @@ func (k *KeycloakClientRepository) GetAccessKeyClientById(ctx context.Context, r
 	if createdBy == "" || strings.ContainsAny(createdBy, " :") {
 		return nil, fmt.Errorf("error getting access key by id %s. err: %w", id, errors.ErrInvalidInput)
 	}
-	accessKeyClients, err := k.getUserAppClientsByCreator(ctx, *token, realm, createdBy)
+	accessKeyClients, err := k.getAccessKeysByCreator(ctx, *token, realm, createdBy)
 	if err != nil {
 		return nil, errors.HandleKeyCloakError(err)
 	}
@@ -80,7 +80,7 @@ func (k *KeycloakClientRepository) GetAccessKeyClientById(ctx context.Context, r
 }
 
 func validateAccessKey(client *gocloak.Client, createdBy, id string) bool {
-	return client.ID != nil && *client.ID == id && client.Attributes != nil && models.IsUserAppClientType((*client.Attributes)[utils.ClientTypeAttr]) && (*client.Attributes)[utils.CreatedBy] == createdBy
+	return client.ID != nil && *client.ID == id && client.Attributes != nil && models.IsAccessKeyClientType((*client.Attributes)[utils.ClientTypeAttr]) && (*client.Attributes)[utils.CreatedBy] == createdBy
 }
 
 func (r *KeycloakClientRepository) SetEmailScopeOptional(ctx context.Context, realm string, idOfClient string) error {
@@ -392,12 +392,12 @@ func (k *KeycloakClientRepository) getClientsAllTypeFormats(ctx context.Context,
 	return merged, nil
 }
 
-// getUserAppClientsByCreator returns the access keys created by createdBy, whether stored with the current or the
+// getAccessKeysByCreator returns the access keys created by createdBy, whether stored with the current or the
 // legacy client type value.
-func (k *KeycloakClientRepository) getUserAppClientsByCreator(ctx context.Context, token, realm, createdBy string) ([]*gocloak.Client, error) {
+func (k *KeycloakClientRepository) getAccessKeysByCreator(ctx context.Context, token, realm, createdBy string) ([]*gocloak.Client, error) {
 	var merged []*gocloak.Client
 	seen := map[string]struct{}{}
-	for _, clientType := range []string{models.ClientTypeUserApp, models.LegacyClientTypeUserApp} {
+	for _, clientType := range []string{models.ClientTypeAccessKey, models.LegacyClientTypeAccessKey} {
 		clientsFilter := gocloak.StringP(fmt.Sprintf("%s:%s %s:%s", utils.CreatedBy, createdBy, utils.ClientTypeAttr, clientType))
 		kcClients, err := k.kcClient.GetClients(ctx, token, realm, gocloak.GetClientsParams{
 			Search:               gocloak.BoolP(true),
@@ -502,7 +502,7 @@ func (k *KeycloakClientRepository) DeleteAccessKeysByEmail(ctx context.Context, 
 	if email == "" {
 		return fmt.Errorf("error deleting user: %s access keys. err: %w", email, errors.ErrInvalidInput)
 	}
-	userAccessKeys, err := k.getUserAppClientsByCreator(ctx, *token, realm, email)
+	userAccessKeys, err := k.getAccessKeysByCreator(ctx, *token, realm, email)
 	if err != nil {
 		return errors.HandleKeyCloakError(err)
 	}

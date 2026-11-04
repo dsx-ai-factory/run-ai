@@ -102,7 +102,7 @@ func (cr *AppsReconciler) updateAccessKeysVersionAndLogError(ctx context.Context
 func (cr *AppsReconciler) reconcileAccessKeys(ctx context.Context, realm string, tenantId string) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("Reconciling access keys for realm %s", realm)
 
-	clientType := realm_client.ClientTypeUserApp
+	clientType := realm_client.ClientTypeAccessKey
 	filters := &iamModels.ClientFilter{
 		ClientType: &clientType,
 	}
@@ -115,7 +115,7 @@ func (cr *AppsReconciler) reconcileAccessKeys(ctx context.Context, realm string,
 		if app.Attributes == nil || app.Attributes.CreatedBy == nil {
 			return fmt.Errorf("failed to reconcile access key %s in realm %s. missing 'createdBy' attribute", *app.ClientID, realm)
 		}
-		runaiClient := realm_client.NewRunaiServiceAccountClient(*app.ClientID, tenantId, nil, realm_client.ClientTypeUserApp)
+		runaiClient := realm_client.NewRunaiServiceAccountClient(*app.ClientID, tenantId, nil, realm_client.ClientTypeAccessKey)
 		err := cr.reconcileApplication(ctx, realm, runaiClient)
 		if err != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to reconcile access key %s in realm %s: %+v", *app.ClientID, realm, err)

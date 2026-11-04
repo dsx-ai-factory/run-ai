@@ -47,7 +47,7 @@ func initTest(t *testing.T) (*iamMock.MockServicesContainer, *reconciler_mocks.T
 }
 
 func clientTypeFilter() *iamModels.ClientFilter {
-	clientType := realm_client.ClientTypeUserApp
+	clientType := realm_client.ClientTypeAccessKey
 	return &iamModels.ClientFilter{ClientType: &clientType}
 }
 
@@ -107,14 +107,14 @@ func TestReconcile_LegacyAndMigratedAccessKeys_AllWrittenWithCurrentType(t *test
 		},
 		{
 			ClientID:   ptr.To("migrated-key"),
-			Attributes: &iamModels.ClientAttributes{CreatedBy: ptr.To("user@example.com"), ClientType: ptr.To(realm_client.ClientTypeUserApp)},
+			Attributes: &iamModels.ClientAttributes{CreatedBy: ptr.To("user@example.com"), ClientType: ptr.To(realm_client.ClientTypeAccessKey)},
 		},
 	}
 	mockContainer.MockClientService.On("GetClients", mock.Anything, testRealm, clientTypeFilter()).Return(apps, nil)
 	mockContainer.MockClientService.On("GetClientByClientId", mock.Anything, testRealm, "legacy-key").Return(&apps[0], nil)
 	mockContainer.MockClientService.On("GetClientByClientId", mock.Anything, testRealm, "migrated-key").Return(&apps[1], nil)
 	writtenWithCurrentType := mock.MatchedBy(func(c *iamModels.Client) bool {
-		return c.Attributes != nil && c.Attributes.ClientType != nil && *c.Attributes.ClientType == realm_client.ClientTypeUserApp
+		return c.Attributes != nil && c.Attributes.ClientType != nil && *c.Attributes.ClientType == realm_client.ClientTypeAccessKey
 	})
 	mockContainer.MockClientService.On("UpdateClient", mock.Anything, testRealm, writtenWithCurrentType).Return(nil).Twice()
 

@@ -188,7 +188,7 @@ func generateClientByType(ctx context.Context, clientCreationRequest api.ClientC
 }
 
 func createExternalApplicationClient(clientCreationRequest api.ClientCreationRequest) *iamModels.Client {
-	clientHandler := realm_client.NewRunaiServiceAccountClient(clientCreationRequest.ClientId, clientCreationRequest.TenantId, nil, realm_client.ClientTypeTenantApp)
+	clientHandler := realm_client.NewRunaiServiceAccountClient(clientCreationRequest.ClientId, clientCreationRequest.TenantId, nil, realm_client.ClientTypeServiceAccount)
 	return clientHandler.GetClientData(context.Background(), nil)
 }
 
