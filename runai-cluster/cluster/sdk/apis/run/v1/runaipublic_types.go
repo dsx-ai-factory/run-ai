@@ -98,4 +98,10 @@ const (
 	RunaiPublicAdvice           = "advice"
 	RunaiPublicSnapshot         = "snapshot"
 	DistributedFrameworkSuspend = "suspend"
+
+	SnapshotComponentCRD      = "snapshotjob-crd"
+	SnapshotComponentOperator = "operator"
+
+	SnapshotJobKind      = "SnapshotJob"
+	SnapshotGroupVersion = "nvidia.com/v1alpha1"
 )

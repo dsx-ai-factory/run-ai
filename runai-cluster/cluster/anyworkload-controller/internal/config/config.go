@@ -65,7 +65,7 @@ func (c *Config) AgentNodeSelector() map[string]string {
 	for _, pair := range strings.Split(c.SnapshotAgentNodeSelector, ",") {
 		key, value, found := strings.Cut(strings.TrimSpace(pair), "=")
 		if !found || key == "" {
-			log.Debug().Msgf("Agent selector %s cannot be parsed", pair)
+			log.Warn().Msgf("Agent selector %s cannot be parsed", pair)
 			continue
 		}
 		log.Debug().Msgf("Agent selector %s:%s added", key, value)

@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 
+	runaipublic "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic"
 	admissionv1 "k8s.io/api/admissionregistration/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -18,7 +19,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/snapshot"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
@@ -58,9 +58,7 @@ func ConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 	configMap.ObjectMeta.Name = deploymentName
 	configMap.ObjectMeta.Namespace = namespace
 
-	// Snapshot is a separate Helm install. Without it the restore webhook is not
-	// registered at all, so an opt-in label routes nothing.
-	snapshotInstalled, _ := snapshot.Installed(ctx, k8sReader)
+	snapshotInstalled, _, _ := runaipublic.NewRunaiPublicHandler(ctx, k8sReader).IsSnapshotCRDInstalled()
 
 	configMap.Data = webhooksFile(runaiConfig, snapshotInstalled)
 
