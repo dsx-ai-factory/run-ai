@@ -22,8 +22,8 @@ BatchJobTarget:
       template:
         metadata:
           annotations:
-            gpu-memory: "10"
             nvidia.com/container.gpu_memory_req_and_limit.gpu-memory.limit: 11M
+            nvidia.com/container.gpu_memory_req_and_limit.gpu-memory.request: 10M
             user: tester
           labels:
             app: job

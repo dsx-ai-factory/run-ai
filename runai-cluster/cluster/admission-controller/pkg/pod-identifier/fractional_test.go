@@ -30,6 +30,15 @@ func TestIsFractionalPodMemoryAnnotation(t *testing.T) {
 	assert.True(t, IsFractionalPod(annotations, containers))
 }
 
+func TestIsFractionalPodNativeMemoryAnnotation(t *testing.T) {
+	for _, suffix := range []string{"request", "limit"} {
+		t.Run(suffix, func(t *testing.T) {
+			annotations := map[string]string{"nvidia.com/container.worker.gpu-memory." + suffix: "500M"}
+			assert.True(t, IsFractionalPod(annotations, nil))
+		})
+	}
+}
+
 func TestIsFractionalPodEnvVar(t *testing.T) {
 	annotations := map[string]string{}
 	containers := []v1.Container{
