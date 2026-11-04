@@ -113,7 +113,7 @@ func componentOf(status runv1.PublicStatus, name string) runv1.PublicStatus {
 }
 
 func available(status runv1.PublicStatus) bool {
-	return ptr.Deref((*bool)(status.Available), false)
+	return ptr.Deref(status.Available, false)
 }
 
 // A cluster with no Snapshot at all is the case that must keep behaving exactly

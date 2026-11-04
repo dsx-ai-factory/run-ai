@@ -4,9 +4,8 @@ templates:
   - templates/clusterroles/base.yaml
 
 # Snapshot is a separate Helm install the administrator owns. The operator only
-# reads it: the SnapshotJob CRD to tell whether it is installed, and the operator
-# Deployment and agent DaemonSet to tell whether it is healthy and where its
-# agent runs. The kubebuilder markers generate config/rbac/role.yaml, which the
+# reads it: the operator Deployment and agent DaemonSet to tell whether it is healthy
+# and where its agent runs. The kubebuilder markers generate config/rbac/role.yaml, which the
 # chart does not install, so the grants have to exist here or detection fails
 # closed and every cluster reports Snapshot unavailable.
 tests:
