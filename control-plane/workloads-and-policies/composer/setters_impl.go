@@ -140,6 +140,27 @@ func StringToMapString(src *string, target any, cookie any) *workloadsApi.Error 
 	return nil
 }
 
+func GpuMemoryRequestToAnnotations(src *string, target any, cookie any) *workloadsApi.Error {
+	annotations, ok := target.(*map[string]string)
+	if !ok {
+		return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("GpuMemoryRequestToAnnotations: target type %T is not *map[string]string", target))
+	}
+	key, ok := cookie.(string)
+	if !ok {
+		return workloadsApi.NewError(http.StatusInternalServerError, fmt.Sprintf("GpuMemoryRequestToAnnotations: cookie type %T is not string", cookie))
+	}
+	if err := StringToMapString(src, target, cookie); err != nil {
+		return err
+	}
+	if src != nil && key != GpuMemoryAnnotation {
+		// Old request annotations can otherwise override the composed quantity in
+		// legacy readers or conflict with KAI's per-container request validation.
+		delete(*annotations, GpuMemoryAnnotation)
+		delete(*annotations, GpuFractionAnnotation)
+	}
+	return nil
+}
+
 // StringToMapStringLabelSafe is like StringToMapString but sanitizes the value
 // to ensure it's valid for Kubernetes labels. Labels only allow alphanumeric
 // characters, '-', '_', and '.', and must start/end with alphanumeric.
