@@ -17,6 +17,9 @@ type OrgUnit struct {
 	Priority  int
 	Demand    float64
 	CreatedAt int64
+	// OmitsProjects marks a department with projects that aren't passed to Simulate. They ask for as much as they can
+	// get, and the department's fair share isn't split between its projects.
+	OmitsProjects bool
 }
 
 type Share struct {
@@ -27,8 +30,8 @@ type Share struct {
 }
 
 // Simulate splits capacity between departments and then each department's fair share between its projects, as the
-// scheduler's queue hierarchy does. A department asks for the sum of its projects' demand, and a project whose
-// demand is math.Inf(1) asks for as much as it can get. Departments' Demand is ignored.
+// scheduler's queue hierarchy does. A department asks for the sum of its projects' demand (see OmitsProjects), and a
+// project whose demand is math.Inf(1) asks for as much as it can get. Departments' Demand is ignored.
 func Simulate(capacity float64, departments, projects []OrgUnit) (departmentShares, projectShares map[string]Share) {
 	projectsOf := map[string][]OrgUnit{}
 	for _, p := range projects {
@@ -39,6 +42,9 @@ func Simulate(capacity float64, departments, projects []OrgUnit) (departmentShar
 	departmentRequests := make(map[string]float64, len(departments))
 	for _, d := range departments {
 		request := 0.0
+		if d.OmitsProjects {
+			request = math.Inf(1)
+		}
 		for _, p := range projectsOf[d.ID] {
 			request += p.Demand
 		}
@@ -52,6 +58,9 @@ func Simulate(capacity float64, departments, projects []OrgUnit) (departmentShar
 	for _, d := range departments {
 		fairShare := departmentFairShares[d.ID]
 		departmentShares[d.ID] = share(d, departmentRequests[d.ID], fairShare, capacity, capacity)
+		if d.OmitsProjects {
+			continue
+		}
 
 		children := projectsOf[d.ID]
 		queues := make([]Queue, 0, len(children))

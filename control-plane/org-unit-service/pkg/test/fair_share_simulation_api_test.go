@@ -180,6 +180,38 @@ var _ = Describe("Fair share simulation API", Ordered, func() {
 		expectShare(results, "project/"+a2, 8, 0, 12)
 	})
 
+	It("computes department rows from project counts the same as from every project", func() {
+		results := simulate(serviceFor(fullAccess), api.FairShareSimulationRequest{}, "department", "")
+
+		Expect(results).To(HaveLen(2))
+		expectShare(results, "department/"+a, 18, 4, 2)
+		expectShare(results, "department/"+b, 2, 2, 18)
+	})
+
+	It("adds a changed project's demand to its department when only department rows are returned", func() {
+		withoutB1 := simulate(serviceFor(fullAccess), api.FairShareSimulationRequest{
+			OrgUnits: []api.FairShareSimulationOrgUnit{{Id: b1, Type: "project", Demand: &api.QuotaStatusResource{Gpu: 0}}},
+		}, "department", "")
+		expectShare(withoutB1, "department/"+a, 20, 4, 0)
+		expectShare(withoutB1, "department/"+b, 0, 0, 0)
+
+		withoutA1 := simulate(serviceFor(fullAccess), api.FairShareSimulationRequest{
+			OrgUnits: []api.FairShareSimulationOrgUnit{{Id: a1, Type: "project", Demand: &api.QuotaStatusResource{Gpu: 0}}},
+		}, "department", "")
+		expectShare(withoutA1, "department/"+a, 18, 4, 2)
+		expectShare(withoutA1, "department/"+b, 2, 2, 18)
+	})
+
+	It("splits one department's share with a changed project of another department", func() {
+		results := simulate(serviceFor(fullAccess), api.FairShareSimulationRequest{
+			OrgUnits: []api.FairShareSimulationOrgUnit{{Id: b1, Type: "project", Demand: &api.QuotaStatusResource{Gpu: 0}}},
+		}, "project", a)
+
+		Expect(results).To(HaveLen(2))
+		expectShare(results, "project/"+a1, 11, 2, 9)
+		expectShare(results, "project/"+a2, 9, 0, 11)
+	})
+
 	It("returns only org units the caller can read, computed over all of them", func() {
 		s := serviceFor(authorization_api.PermittedScopes{Departments: []string{b}, Projects: []string{b1}})
 		results := simulate(s, api.FairShareSimulationRequest{}, "", "")

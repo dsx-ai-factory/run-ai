@@ -67,6 +67,20 @@ var _ = Describe("Simulate", func() {
 		Expect(shares["b"].FairShare).To(Equal(40.0))
 	})
 
+	It("treats a department's omitted projects as asking for as much as they can get", func() {
+		partial := department("a", 0, 1, 100)
+		partial.OmitsProjects = true
+		departments := []simulation.OrgUnit{partial, department("b", 0, 1, 100)}
+		projects := []simulation.OrgUnit{project("pa", "a", 0, 1, 0), project("pb", "b", 0, 1, maxDemand)}
+
+		departmentShares, projectShares := simulation.Simulate(40, departments, projects)
+
+		Expect(departmentShares["a"].FairShare).To(Equal(20.0))
+		Expect(departmentShares["b"].FairShare).To(Equal(20.0))
+		Expect(projectShares).ToNot(HaveKey("pa"))
+		Expect(projectShares["pb"].FairShare).To(Equal(20.0))
+	})
+
 	It("serves higher ranks first", func() {
 		departments := []simulation.OrgUnit{department("high", 0, 1, 210), department("low", 0, 9, 50)}
 		projects := []simulation.OrgUnit{project("ph", "high", 0, 1, 30), project("pl", "low", 0, 1, maxDemand)}

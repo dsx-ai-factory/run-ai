@@ -32,11 +32,20 @@ const (
 )
 
 type simulatedOrgUnit struct {
-	parentId  string
-	rank      string
-	resources models.ResourcesPerNodePool
-	createdAt int64
-	demand    float64
+	parentId      string
+	rank          string
+	resources     models.ResourcesPerNodePool
+	createdAt     int64
+	demand        float64
+	omitsProjects bool
+}
+
+// projectSelection names the project rows a simulation loads: all of them, or a department's projects plus the
+// changed ones. Other projects only add to their department's demand, which a count per department is enough for.
+type projectSelection struct {
+	all          bool
+	departmentId string
+	ids          []string
 }
 
 func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string, request api.FairShareSimulationRequest,
@@ -69,11 +78,21 @@ func (o OrgUnitApiService) SimulateNodePoolFairShare(ctx context.Context, nodepo
 		return HandleError(errors.New("capacity must not be negative"), http.StatusBadRequest, "Invalid capacity"), nil
 	}
 
-	departments, projects, err := loadSimulatedOrgUnits(ctx, *tenantId, nodepoolId)
+	selection := projectSelection{all: orgUnitType != orgUnitTypeDepartment && parentId == ""}
+	if orgUnitType != orgUnitTypeDepartment {
+		selection.departmentId = parentId
+	}
+	for _, change := range request.OrgUnits {
+		if change.Type == orgUnitTypeProject {
+			selection.ids = append(selection.ids, change.Id)
+		}
+	}
+
+	departments, projects, err := loadSimulatedOrgUnits(ctx, *tenantId, nodepoolId, selection)
 	if err != nil {
 		return HandleDbError(ctx, err, "Failed to get the node pool's org units"), nil
 	}
-	visibleDepartments, visibleProjects, err := o.visibleOrgUnits(ctx, *tenantId, nodepoolId)
+	visibleDepartments, visibleProjects, err := o.visibleOrgUnits(ctx, *tenantId, nodepoolId, selection)
 	if err != nil {
 		return HandleError(err, http.StatusServiceUnavailable, "Failed to get permitted scopes"), nil
 	}
@@ -122,20 +141,13 @@ func nodePoolGpuCapacity(nodePool cluster_api.NodepoolMinimal) float64 {
 
 // loadSimulatedOrgUnits ignores permitted scopes on purpose: every org unit of the node pool affects every other's
 // fair share, and only the shares of org units the caller can read are returned.
-func loadSimulatedOrgUnits(ctx context.Context, tenantId, nodepoolId string) (map[string]*simulatedOrgUnit, map[string]*simulatedOrgUnit, error) {
-	departmentFilters, err := queryapi.NewParser(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + nodepoolId})
+func loadSimulatedOrgUnits(ctx context.Context, tenantId, nodepoolId string, selection projectSelection,
+) (map[string]*simulatedOrgUnit, map[string]*simulatedOrgUnit, error) {
+	departmentRows, err := departmentNodePoolResources(ctx, tenantId, nodepoolId, nil)
 	if err != nil {
 		return nil, nil, err
 	}
-	departmentRows, err := dao.GetDepartmentNodePoolResources(ctx, tenantId, departmentFilters, "", "", 0, 0, nil, "")
-	if err != nil {
-		return nil, nil, err
-	}
-	projectFilters, err := queryapi.NewParser(models.ProjectNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + nodepoolId})
-	if err != nil {
-		return nil, nil, err
-	}
-	projectRows, err := dao.GetProjectNodePoolResources(ctx, tenantId, projectFilters, "", "", 0, 0, nil, "")
+	projectRows, err := projectNodePoolResources(ctx, tenantId, nodepoolId, selection, nil)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -150,10 +162,50 @@ func loadSimulatedOrgUnits(ctx context.Context, tenantId, nodepoolId string) (ma
 		projects[row.OrgUnitId] = &simulatedOrgUnit{parentId: row.ParentId, rank: row.Rank, resources: row.ResourcesPerNodePool,
 			createdAt: row.CreatedAt.UnixNano(), demand: math.Inf(1)}
 	}
+	if selection.all {
+		return departments, projects, nil
+	}
+
+	counts, err := dao.CountProjectNodePoolResourcesPerDepartment(ctx, tenantId, nodepoolId)
+	if err != nil {
+		return nil, nil, err
+	}
+	loaded := map[string]int64{}
+	for _, p := range projects {
+		loaded[p.parentId]++
+	}
+	for _, count := range counts {
+		if department, ok := departments[count.ParentId]; ok && count.Count > loaded[count.ParentId] {
+			department.omitsProjects = true
+		}
+	}
 	return departments, projects, nil
 }
 
-func (o OrgUnitApiService) visibleOrgUnits(ctx context.Context, tenantId, nodepoolId string) (map[string]bool, map[string]bool, error) {
+func departmentNodePoolResources(ctx context.Context, tenantId, nodepoolId string, scopes *authorization_api.PermittedScopes,
+) (*[]models.DepartmentNodePoolResources, error) {
+	filters, err := queryapi.NewParser(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + nodepoolId})
+	if err != nil {
+		return nil, err
+	}
+	return dao.GetDepartmentNodePoolResources(ctx, tenantId, filters, "", "", 0, 0, scopes, "")
+}
+
+func projectNodePoolResources(ctx context.Context, tenantId, nodepoolId string, selection projectSelection,
+	scopes *authorization_api.PermittedScopes,
+) (*[]models.ProjectNodePoolResources, error) {
+	if !selection.all {
+		return dao.GetProjectNodePoolResourcesOfDepartmentOrIds(ctx, tenantId, nodepoolId, selection.departmentId, selection.ids, scopes)
+	}
+	filters, err := queryapi.NewParser(models.ProjectNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + nodepoolId})
+	if err != nil {
+		return nil, err
+	}
+	return dao.GetProjectNodePoolResources(ctx, tenantId, filters, "", "", 0, 0, scopes, "")
+}
+
+func (o OrgUnitApiService) visibleOrgUnits(ctx context.Context, tenantId, nodepoolId string, selection projectSelection,
+) (map[string]bool, map[string]bool, error) {
 	departmentScopes, err := o.readScopes(ctx, authorization_api.RESOURCETYPE_DEPARTMENT)
 	if err != nil {
 		return nil, nil, err
@@ -163,19 +215,11 @@ func (o OrgUnitApiService) visibleOrgUnits(ctx context.Context, tenantId, nodepo
 		return nil, nil, err
 	}
 
-	departmentFilters, err := queryapi.NewParser(models.DepartmentNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + nodepoolId})
+	departmentRows, err := departmentNodePoolResources(ctx, tenantId, nodepoolId, departmentScopes)
 	if err != nil {
 		return nil, nil, err
 	}
-	departmentRows, err := dao.GetDepartmentNodePoolResources(ctx, tenantId, departmentFilters, "", "", 0, 0, departmentScopes, "")
-	if err != nil {
-		return nil, nil, err
-	}
-	projectFilters, err := queryapi.NewParser(models.ProjectNodePoolResources{}.FilterByFieldsToColumn()).Filters([]string{"nodePoolId==" + nodepoolId})
-	if err != nil {
-		return nil, nil, err
-	}
-	projectRows, err := dao.GetProjectNodePoolResources(ctx, tenantId, projectFilters, "", "", 0, 0, projectScopes, "")
+	projectRows, err := projectNodePoolResources(ctx, tenantId, nodepoolId, selection, projectScopes)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -288,14 +332,15 @@ func toSimulationOrgUnits(units map[string]*simulatedOrgUnit, capabilities clust
 			weight = nonAdjustableOverQuotaWeight(ptr.To(deserved))
 		}
 		result = append(result, simulation.OrgUnit{
-			ID:        id,
-			ParentID:  u.parentId,
-			Deserved:  deserved,
-			Limit:     limit,
-			Weight:    math.Max(0, ptr.Deref(weight, agentDefaultOverQuotaWeight)),
-			Priority:  int(MapRankToNumber(&rank)),
-			Demand:    u.demand,
-			CreatedAt: u.createdAt,
+			ID:            id,
+			ParentID:      u.parentId,
+			Deserved:      deserved,
+			Limit:         limit,
+			Weight:        math.Max(0, ptr.Deref(weight, agentDefaultOverQuotaWeight)),
+			Priority:      int(MapRankToNumber(&rank)),
+			Demand:        u.demand,
+			CreatedAt:     u.createdAt,
+			OmitsProjects: u.omitsProjects,
 		})
 	}
 	return result

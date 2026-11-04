@@ -277,6 +277,63 @@ func SumDepartmentNodePoolResources(ctx context.Context, tenantId string, nodePo
 	return &sums, nil
 }
 
+type ProjectsPerDepartment struct {
+	ParentId string
+	Count    int64
+}
+
+func CountProjectNodePoolResourcesPerDepartment(ctx context.Context, tenantId string, nodePoolId string) ([]ProjectsPerDepartment, error) {
+	counts := []ProjectsPerDepartment{}
+	query := runaidb.DB().WithContext(ctx).
+		Table(models.ProjectNodePoolResourcesView).
+		Where("tenant_id = ?", tenantId).
+		Where("node_pool_id = ?", nodePoolId).
+		Select("parent_id, COUNT(*) AS count").
+		Group("parent_id")
+	if _, err := query.Scan(&counts); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to count node pool <%s> projects per department: %v", nodePoolId, err)
+		return nil, err
+	}
+	return counts, nil
+}
+
+// GetProjectNodePoolResourcesOfDepartmentOrIds returns the node pool's projects of departmentId and those in projectIds;
+// an empty departmentId or projectIds selects none by that criterion.
+func GetProjectNodePoolResourcesOfDepartmentOrIds(ctx context.Context, tenantId string, nodePoolId string, departmentId string,
+	projectIds []string, permittedScopes *openapi.PermittedScopes,
+) (*[]models.ProjectNodePoolResources, error) {
+	nodePoolResources := &[]models.ProjectNodePoolResources{}
+	if departmentId == "" && len(projectIds) == 0 {
+		return nodePoolResources, nil
+	}
+	query := runaidb.DB().WithContext(ctx).
+		Table(models.ProjectNodePoolResourcesView).
+		Where("tenant_id = ?", tenantId).
+		Where("node_pool_id = ?", nodePoolId)
+
+	if permittedScopes != nil {
+		tenantPermitted := IsTenantPermitted(tenantId, permittedScopes)
+		if !tenantPermitted {
+			query = query.Where(getPermittedScopesForProjectResources(*permittedScopes))
+		}
+	}
+
+	switch {
+	case departmentId != "" && len(projectIds) > 0:
+		query = query.Where("(parent_id = ? OR org_unit_id IN ?)", departmentId, projectIds)
+	case departmentId != "":
+		query = query.Where("parent_id = ?", departmentId)
+	default:
+		query = query.Where("org_unit_id IN ?", projectIds)
+	}
+
+	if err := query.Find(nodePoolResources); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get node pool <%s> projects of department %s: %v", nodePoolId, departmentId, err)
+		return nil, err
+	}
+	return nodePoolResources, nil
+}
+
 func getPermittedScopesForProjectResources(permittedScopes openapi.PermittedScopes) string {
 	return GetPermittedScopesForProjectsWithColumn(permittedScopes, "org_unit_id")
 }
