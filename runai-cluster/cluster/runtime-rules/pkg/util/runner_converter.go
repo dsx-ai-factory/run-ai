@@ -203,10 +203,21 @@ func hasPartialGpuAnnotation(val any) bool {
 		}
 	}
 	for key, value := range annotations {
-		if strings.HasPrefix(key, commonconstants.AnnotationGpuMemoryContainerPrefix) &&
-			(strings.HasSuffix(key, commonconstants.AnnotationGpuMemoryRequestSuffix) || strings.HasSuffix(key, commonconstants.AnnotationGpuMemoryLimitSuffix)) &&
-			isPositiveQuantity(value) {
+		if partialContainerGpuAnnotation(key, value) {
 			return true
+		}
+	}
+	return false
+}
+
+func partialContainerGpuAnnotation(key string, value any) bool {
+	containerAnnotation, ok := strings.CutPrefix(key, commonconstants.AnnotationGpuMemoryContainerPrefix)
+	if !ok {
+		return false
+	}
+	for _, suffix := range []string{commonconstants.AnnotationGpuMemoryRequestSuffix, commonconstants.AnnotationGpuMemoryLimitSuffix} {
+		if containerName, found := strings.CutSuffix(containerAnnotation, suffix); found && containerName != "" {
+			return isPositiveQuantity(value)
 		}
 	}
 	return false
