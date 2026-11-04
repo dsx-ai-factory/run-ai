@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager
 go 1.27.3
 
 require (
-	github.com/aws/smithy-go v1.28.7
+	github.com/aws/smithy-go v1.28.8
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.14
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.1
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.9
@@ -80,7 +80,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.20.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20261102214848-0031fcd306b0 // indirect
+	github.com/google/pprof v0.0.0-20261103193413-97e8293de3c4 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
