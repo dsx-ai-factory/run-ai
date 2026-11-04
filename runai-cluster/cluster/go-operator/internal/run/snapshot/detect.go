@@ -98,6 +98,10 @@ func uncached(reader client.Reader) client.Reader {
 	return reader
 }
 
+func Installed(ctx context.Context, reader client.Reader) (bool, string) {
+	return crdInstalled(ctx, uncached(reader))
+}
+
 func crdInstalled(ctx context.Context, reader client.Reader) (bool, string) {
 	if reader == nil {
 		return false, "no client available to check for the SnapshotJob CRD"
