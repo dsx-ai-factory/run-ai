@@ -80,7 +80,7 @@ func (itc *InferenceToKnativeComposer) processComputeFields(
 			itc.fc.ComposePortionLimitEnv(&sizingInfo, &container.Env, composer.StringToEnvVar, composer.GpuPortionLimitEnvVar),
 			itc.fc.ComposeMemoryLimitAnnotation(&sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
 			itc.fc.ComposePortionLimitAnnotation(&sizingInfo, container.Name, &podMeta.Annotations, composer.StringToMapString),
-			itc.fc.ComposeMemoryReqAnnotation(&sizingInfo, &podMeta.Annotations, composer.StringToMapString, composer.GpuMemoryAnnotation),
+			itc.fc.ComposeMemoryReqAnnotation(&sizingInfo, container.Name, &podMeta.Annotations, composer.GpuMemoryRequestToAnnotations),
 			itc.fc.ComposePortionReqAnnotation(&sizingInfo, &podMeta.Annotations, composer.StringToMapString, composer.GpuFractionAnnotation),
 			itc.fc.ComposeNumDevicesAnnotation(&sizingInfo, &podMeta.Annotations, composer.StringToMapString, composer.GpuFractionDevicesAnnotation),
 		)
