@@ -8304,8 +8304,6 @@ paths:
 
 
 
-
-
           For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters.
         - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads
       tags:
@@ -13416,6 +13414,10 @@ components:
           example: gcr.io/runai/goofys:v0.24.0
         s3FileSystemResources:
           $ref: '#/components/schemas/ClusterReportedResourceRequirements'
+        s3FileSystemMountCheckImage:
+          type: string
+          nullable: true
+          description: The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
         fipsMode:
           $ref: '#/components/schemas/FipsModeEnum'
         runaiOauth2ProxyImage:
@@ -14119,8 +14121,6 @@ components:
 
 
 
-
-
              - binpack - Place as many GPU pods as possible on each GPU device to use fewer devices and maximize available capacity, minimizing GPU fraction fragmentation.
              - spread - Distribute GPU pods across as many GPU devices as possible to balance load across devices.
           allOf:
@@ -14175,8 +14175,6 @@ components:
 
 
 
-
-
              - 0.0: Ignore historical usage data (100% current usage).
              - 1.0: Historical usage data has higher impact, it may cause fairshare to be 0.
              - Values between 0.0 and 1.0 combine historical and current usage to maintain a balanced fairshare
@@ -14189,8 +14187,6 @@ components:
           pattern: ^(0|[+]?((\d+(\.\d+)?)(m|h|d))+$)
           description: |
             Set the half-life time to define the decay rate of a project’s historical resource usage. The half-life defines how long it takes for past usage to diminish to half of its original influence on a project's fairshare.
-
-
 
 
 
@@ -20206,7 +20202,7 @@ components:
           maxLength: 63
       nullable: true
     Preemptibility:
-      description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+      description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
       type: string
       minLength: 1
       enum:
@@ -28322,25 +28318,25 @@ components:
           items:
             $ref: '#/components/schemas/BatchResponseFailureItem'
     AccessRulesFilterFields:
-      required:
-        - validateSignature
       $ref: '#/components/schemas/AccessRulesSortFilterFields'
     SamlData:
       type: object
       nullable: true
+      required:
+        - validateSignature
       properties:
         signingCertificate:
           type: string
         singleSignOnServiceUrl:
           type: string
         entityId:
-        validateSignature:
-          type: boolean
-          description: Whether the signature of SAML responses from the identity provider is validated
           type: string
         serviceProviderMetadataUrl:
           type: string
           description: Service Provider (SP) metadata url
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
     MandatoryClaim:
       type: object
       nullable: true
