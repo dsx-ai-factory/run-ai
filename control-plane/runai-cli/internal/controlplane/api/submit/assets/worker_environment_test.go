@@ -15,18 +15,18 @@ import (
 	"github.com/spf13/pflag"
 )
 
-func TestWorkerEnvironmentVariableFlag(t *testing.T) {
+func TestWorkerEnvironmentAliases(t *testing.T) {
 	for _, tc := range []struct {
-		name      string
-		args      []string
-		want      []string
-		wantError bool
+		name       string
+		args       []string
+		want       []string
+		deprecated bool
 	}{
 		{name: "canonical", args: []string{"--worker-environment-variable=A=x=y", "--worker-environment-variable=B="}, want: []string{"A=x=y", "B="}},
-		{name: "removed flag", args: []string{"--worker-environment=A=1"}, wantError: true},
-		{name: "removed flag with separate value", args: []string{"--worker-environment", "A=1"}, wantError: true},
-		{name: "canonical then removed flag", args: []string{"--worker-environment-variable=A=1", "--worker-environment=B=2"}, wantError: true},
-		{name: "removed flag then canonical", args: []string{"--worker-environment=A=1", "--worker-environment-variable=B=2"}, wantError: true},
+		{name: "legacy", args: []string{"--worker-environment=A=x=y", "--worker-environment=B="}, want: []string{"A=x=y", "B="}, deprecated: true},
+		{name: "canonical then legacy", args: []string{"--worker-environment-variable=A=1", "--worker-environment=B=2"}, want: []string{"A=1", "B=2"}, deprecated: true},
+		{name: "legacy then canonical", args: []string{"--worker-environment=A=1", "--worker-environment-variable=B=2"}, want: []string{"A=1", "B=2"}, deprecated: true},
+		{name: "interleaved", args: []string{"--worker-environment=A=1", "--worker-environment-variable=B=2", "--worker-environment=C=3"}, want: []string{"A=1", "B=2", "C=3"}, deprecated: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			container := &submit.Container{}
@@ -34,28 +34,25 @@ func TestWorkerEnvironmentVariableFlag(t *testing.T) {
 			var output bytes.Buffer
 			flags.SetOutput(&output)
 			submit.DistributedInferenceContainerFlagSet(flags, container)
-			if flags.Lookup("worker-environment") != nil {
-				t.Fatal("removed flag must not be registered")
-			}
-			canonical := flags.Lookup("worker-environment-variable")
-			if canonical == nil || canonical.Hidden || canonical.Deprecated != "" {
-				t.Fatal("worker-environment-variable must remain visible and supported")
-			}
-			err := flags.Parse(tc.args)
-			if tc.wantError {
-				if err == nil || !strings.Contains(err.Error(), "unknown flag: --worker-environment") {
-					t.Fatalf("parse error = %v; want unknown flag: --worker-environment", err)
-				}
-				return
-			}
-			if err != nil {
+			if err := flags.Parse(tc.args); err != nil {
 				t.Fatal(err)
 			}
 			if !slices.Equal(container.WorkerEnvironmentVariables, tc.want) {
 				t.Fatalf("worker variables = %v; want %v", container.WorkerEnvironmentVariables, tc.want)
 			}
-			if output.Len() != 0 {
-				t.Fatalf("unexpected output: %q", output.String())
+			warning := "Flag --worker-environment has been deprecated, use --worker-environment-variable instead"
+			if strings.Contains(output.String(), warning) != tc.deprecated {
+				t.Fatalf("unexpected warning output: %q", output.String())
+			}
+			for _, name := range []string{"worker-environment-variable", "worker-environment"} {
+				values, err := flags.GetStringArray(name)
+				if err != nil || !slices.Equal(values, tc.want) {
+					t.Fatalf("%s getter = %v, %v; want %v", name, values, err, tc.want)
+				}
+			}
+			canonical, legacy := flags.Lookup("worker-environment-variable"), flags.Lookup("worker-environment")
+			if canonical.Hidden || canonical.Deprecated != "" || !legacy.Hidden || legacy.Deprecated == "" {
+				t.Fatal("canonical flag must remain visible and supported; legacy alias must be hidden and deprecated")
 			}
 		})
 	}

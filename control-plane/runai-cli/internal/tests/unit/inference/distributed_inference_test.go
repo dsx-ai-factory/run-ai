@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/auth/fake"
@@ -920,36 +921,31 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 		})
 	})
 
-	Context("Worker environment variable flag", func() {
-		It("preserves explicit worker variables in the request", func() {
-			output, err := cli.RunCommand(fmt.Sprintf(
-				"inference distributed submit %s -p p301 -i %s --serving-port 8080 "+
-					"--worker-environment-variable WORKER_A=a=b --worker-environment-variable WORKER_EMPTY= --dry-run",
-				DistInfMinimalName, DistInfImageName), envMap)
-			Expect(err).NotTo(HaveOccurred())
-			request := openapi.DistributedInferenceCreationRequest{}
-			Expect(json.Unmarshal([]byte(output), &request)).To(Succeed())
-			worker := request.GetSpec().Worker.Get()
-			values := make(map[string]string)
-			for _, variable := range worker.EnvironmentVariables {
-				values[*variable.Name.Get()] = *variable.Value.Get()
-			}
-			Expect(values).To(Equal(map[string]string{"WORKER_A": "a=b", "WORKER_EMPTY": ""}))
-		})
-
-		DescribeTable("rejects the removed worker-environment flag",
-			func(flags string) {
-				_, err := cli.RunCommand(fmt.Sprintf(
+	Context("Worker environment flag compatibility", func() {
+		DescribeTable("preserves worker variables and warns only for the deprecated spelling",
+			func(flags string, deprecated bool) {
+				output, err := cli.RunCommand(fmt.Sprintf(
 					"inference distributed submit %s -p p301 -i %s --serving-port 8080 %s --dry-run",
 					DistInfMinimalName, DistInfImageName, flags), envMap)
-				Expect(err).To(MatchError(ContainSubstring("unknown flag: --worker-environment")))
+				Expect(err).NotTo(HaveOccurred())
+				warning := "Flag --worker-environment has been deprecated, use --worker-environment-variable instead\n"
+				Expect(strings.Contains(output, warning)).To(Equal(deprecated))
+				request := openapi.DistributedInferenceCreationRequest{}
+				Expect(json.Unmarshal([]byte(strings.ReplaceAll(output, warning, "")), &request)).To(Succeed())
+				worker := request.GetSpec().Worker.Get()
+				values := make(map[string]string)
+				for _, variable := range worker.EnvironmentVariables {
+					values[*variable.Name.Get()] = *variable.Value.Get()
+				}
+				Expect(values).To(Equal(map[string]string{"WORKER_A": "a=b", "WORKER_EMPTY": ""}))
 			},
-			Entry("removed flag", "--worker-environment WORKER_A=a=b"),
-			Entry("canonical then removed flag", "--worker-environment-variable WORKER_A=a=b --worker-environment WORKER_EMPTY="),
-			Entry("removed flag then canonical", "--worker-environment WORKER_A=a=b --worker-environment-variable WORKER_EMPTY="),
+			Entry("canonical", "--worker-environment-variable WORKER_A=a=b --worker-environment-variable WORKER_EMPTY=", false),
+			Entry("legacy", "--worker-environment WORKER_A=a=b --worker-environment WORKER_EMPTY=", true),
+			Entry("canonical then legacy", "--worker-environment-variable WORKER_A=a=b --worker-environment WORKER_EMPTY=", true),
+			Entry("legacy then canonical", "--worker-environment WORKER_A=a=b --worker-environment-variable WORKER_EMPTY=", true),
 		)
 
-		It("shows only the supported worker variable flag in help", func() {
+		It("shows the canonical flag and hides the deprecated alias in help", func() {
 			output, err := cli.RunCommand("inference distributed submit --help", envMap)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(output).To(ContainSubstring("--worker-environment-variable stringArray"))
