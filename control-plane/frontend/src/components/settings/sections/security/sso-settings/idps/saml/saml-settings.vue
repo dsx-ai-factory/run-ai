@@ -24,9 +24,17 @@
           :is-new-idp="isNewIdp"
           :saml-settings="samlConfigSettings"
           @updated="updateSamlFields"
+          @certificate-details="onCertificateDetails"
           ref="samlFieldsEl"
         />
       </div>
+      <saml-idp-details
+        v-if="editCertificateDetails.expirationError"
+        class="q-mb-lg"
+        :expiration-date="editCertificateDetails.expirationDate"
+        :show-expiration-date="editCertificateDetails.showExpirationDate"
+        :expiration-error="editCertificateDetails.expirationError"
+      />
       <div class="col-12 q-mb-lg">
         <setting-readable-field label="Entity ID">
           <div class="row no-wrap items-center">
@@ -72,6 +80,20 @@
     </setting-editable-field>
     <q-separator class="idp-card-separator" />
     <notification-alert-bar
+      v-if="idpStore.isSamlSignatureValidationDisabled"
+      aid="saml-signature-validation-alert"
+      class="q-mx-sm q-mb-sm signature-validation-warning"
+      :variant="ENotificationBarVariant.Error"
+      icon-override="ph-bold ph-warning-circle"
+      orientation="vertical"
+      show-h1-content
+      title="Action required: SAML responses aren’t signature-verified"
+    >
+      Login responses can’t be confirmed as coming from the identity provider, which leaves sign-in open to forged
+      responses.<br />
+      To fix this, edit the identity provider and replace the metadata XML with an updated file.
+    </notification-alert-bar>
+    <notification-alert-bar
       v-if="certificateWarningVariant"
       class="q-mx-sm q-mb-sm certificate-warning"
       :variant="certificateWarningVariant"
@@ -79,6 +101,13 @@
       show-h1-content
       :title="certificateWarningTitle"
       message="Edit the identity provider and replace the metadata XML with an updated file."
+    />
+    <saml-idp-details
+      class="idp-details"
+      :single-sign-on-service-url="samlConfigSettings.singleSignOnServiceUrl"
+      :idp-entity-id="samlConfigSettings.idpEntityId"
+      :expiration-date="certificateExpirationDate"
+      :show-expiration-date="!!samlConfigSettings.signingCertificate"
     />
     <div v-if="hasIdpAttributes" class="redirect-url-field">
       <div>Use the following if required by the identity provider</div>
@@ -97,7 +126,12 @@
 <script lang="ts">
 import type { PropType } from "vue";
 import { defineComponent } from "vue";
-import type { IIdpMapperItem, IWrapperBoxSettingMessages, SamlConfigSettings } from "@/models/setting.model";
+import type {
+  IIdpMapperItem,
+  IWrapperBoxSettingMessages,
+  SamlCertificateDetails,
+  SamlConfigSettings,
+} from "@/models/setting.model";
 import { settingsUtil } from "@/utils/settings.util";
 import { useAuthStore } from "@/stores/auth.store";
 import { idpCommon } from "../idp-common/idp-common";
@@ -117,6 +151,7 @@ import { SettingEditableField } from "@/components/settings/setting-editable-fie
 import { SettingWrapperBox } from "@/components/settings/setting-wrapper-box";
 import { SettingReadableField } from "@/components/settings/setting-readable-field";
 import SamlFields from "@/components/settings/sections/security/sso-settings/idps/saml/saml-fields/saml-fields.vue";
+import { SamlIdpDetails } from "@/components/settings/sections/security/sso-settings/idps/saml/saml-idp-details";
 import { DOCS } from "@/constants/docs";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { ENotificationBarVariant, NotificationAlertBar } from "@/components/common/notification-alert-bar";
@@ -126,6 +161,7 @@ export default defineComponent({
   components: {
     RunaiBtn,
     SamlFields,
+    SamlIdpDetails,
     SettingEditableField,
     IdpMappers,
     SettingReadableField,
@@ -161,7 +197,13 @@ export default defineComponent({
       certificateRequestToken: 0,
       idpStore: useIdpsStore(),
       idpResources: {} as IdpResources,
+      editCertificateDetails: {
+        showExpirationDate: false,
+        expirationDate: null,
+        expirationError: "",
+      } as SamlCertificateDetails,
       DOCS,
+      ENotificationBarVariant,
     };
   },
   async created(): Promise<void> {
@@ -241,6 +283,9 @@ export default defineComponent({
       this.idpMappersItems = this._getIdpMappers();
       this.isEditMode = true;
     },
+    onCertificateDetails(details: SamlCertificateDetails): void {
+      this.editCertificateDetails = details;
+    },
     updateSamlFields(newSamlFields: SamlCreationData, isValid: boolean, idpFieldsHasChanges: boolean): void {
       this.isValidIdpFields = isValid;
       this.idpFields = newSamlFields;
@@ -306,12 +351,23 @@ export default defineComponent({
   border-radius: 4px;
   overflow: hidden;
 }
+// The title and the content share the same side inset, so they line up inside the card frame.
+.idp-card :deep(.setting-editable-field) {
+  padding-left: 16px;
+  padding-right: 16px;
+}
+.signature-validation-warning,
 .certificate-warning,
-.redirect-url-field {
-  margin: 12px;
+.redirect-url-field,
+.idp-details {
+  margin: 12px 16px;
 }
 .idp-card-separator {
-  margin: 0 12px;
+  margin: 0 16px;
+}
+// The body sits right under the title, without the gap a vertical notification bar adds by default.
+.idp-card .signature-validation-warning :deep(.notification-alert-bar__title) {
+  margin-bottom: 0;
 }
 :deep(.download-icon) {
   color: var(--icon-default);
