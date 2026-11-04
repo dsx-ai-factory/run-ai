@@ -23495,6 +23495,22 @@ spec:
                         type: object
                     type: object
                 type: object
+              snapshot:
+                description: |-
+                  Snapshot locates an existing NVIDIA Snapshot installation. Snapshot is
+                  installed and owned by the cluster administrator; Run:ai only detects it.
+                properties:
+                  namespace:
+                    description: Namespace is the namespace the Snapshot Helm release
+                      is installed in.
+                    type: string
+                  releaseName:
+                    description: |-
+                      ReleaseName is the Snapshot Helm release name. Run:ai derives the
+                      operator Deployment and agent DaemonSet names from it the same way the
+                      chart does.
+                    type: string
+                type: object
               status-updater:
                 description: StatusUpdater specifies configuration for the status-updater
                 properties:

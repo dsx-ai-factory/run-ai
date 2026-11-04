@@ -66,6 +66,7 @@ type ComposerTest struct {
 // per-role container.
 func disableGpuMemoryLimitAnnotations(o *composer.FieldsComposerOptions) {
 	o.GpuMemoryLimitAnnotationsSupported = false
+	o.GpuMemoryRequestAnnotationsSupported = false
 }
 
 // ComposerTests is the master table for the distributed-inference composer.
@@ -393,14 +394,15 @@ func runComposer(tc ComposerTest) {
 	}
 
 	options := composer.FieldsComposerOptions{
-		EmptyDirAsVolumeSupported:          true,
-		FlexiblePriorityClassesSupported:   true,
-		GpuMemoryLimitAnnotationsSupported: true,
-		NodeAffinitySupported:              true,
-		PreemptibilitySupported:            true,
-		UserCredentialsSupported:           true,
-		VolumeDefaultModeSupported:         true,
-		WorkloadV2NetworkingSupported:      true,
+		EmptyDirAsVolumeSupported:            true,
+		FlexiblePriorityClassesSupported:     true,
+		GpuMemoryLimitAnnotationsSupported:   true,
+		GpuMemoryRequestAnnotationsSupported: true,
+		NodeAffinitySupported:                true,
+		PreemptibilitySupported:              true,
+		UserCredentialsSupported:             true,
+		VolumeDefaultModeSupported:           true,
+		WorkloadV2NetworkingSupported:        true,
 	}
 	if tc.overrideOptions != nil {
 		tc.overrideOptions(&options)
