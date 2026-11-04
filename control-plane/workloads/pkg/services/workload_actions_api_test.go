@@ -135,6 +135,14 @@ var _ = Describe("Workload action history", func() {
 			filtered := read("search=" + url.QueryEscape("Z@EXAMPLE.COM") + "&filterBy=" + url.QueryEscape("action==update"))
 			Expect(filtered.Actions).To(BeEmpty())
 		})
+		It("searches stopped events using the displayed label and keeps the suspend API value", func() {
+			_, err := runaidb.DB().Model(&models.WorkloadActionHistory{}).Where("id = ?", records[0].ID).
+				Updates(map[string]interface{}{"action": "suspend"})
+			Expect(err).NotTo(HaveOccurred())
+			body := read("search=StOpPeD&filterBy=" + url.QueryEscape("action==suspend"))
+			Expect(body.Actions).To(HaveLen(1))
+			Expect(body.Actions[0].Action).To(Equal(api.WORKLOADACTIONTYPE_SUSPEND))
+		})
 		It("treats search wildcards and SQL syntax as literal text", func() {
 			Expect(read("search=" + url.QueryEscape("%")).Actions).To(BeEmpty())
 			Expect(read("search=" + url.QueryEscape("_")).Actions).To(BeEmpty())

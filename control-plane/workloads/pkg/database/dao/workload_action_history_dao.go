@@ -90,7 +90,7 @@ func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, lim
             WHEN 'create' THEN 'Created'
             WHEN 'update' THEN 'Updated'
             WHEN 'delete' THEN 'Deleted'
-            WHEN 'suspend' THEN 'Suspended'
+            WHEN 'suspend' THEN 'Stopped'
             WHEN 'resume' THEN 'Resumed'
             ELSE action END`
 		escaped := strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(term)

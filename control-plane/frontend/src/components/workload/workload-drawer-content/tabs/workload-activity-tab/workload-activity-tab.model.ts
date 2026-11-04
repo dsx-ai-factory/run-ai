@@ -12,7 +12,7 @@ export const actionLabels = new Map<WorkloadActionType, string>([
   ["create", "Created"],
   ["update", "Updated"],
   ["delete", "Deleted"],
-  ["suspend", "Suspended"],
+  ["suspend", "Stopped"],
   ["resume", "Resumed"],
 ]);
 

@@ -140,7 +140,7 @@ export default defineComponent({
     background-color: $white;
     border-top: 1px solid $black-12;
     border-bottom: 1px solid $black-12;
-    padding: 7px 0;
+    padding: 7px 16px 7px 0;
   }
 
   .table-top-actions-container {

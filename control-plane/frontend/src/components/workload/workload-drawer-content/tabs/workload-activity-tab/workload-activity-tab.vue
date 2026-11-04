@@ -261,7 +261,7 @@ onBeforeUnmount(() => {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 7px;
-  padding: 7px 0;
+  padding: 7px 16px 7px 0;
   border-bottom: 1px solid var(--border-subtle);
 
   :deep(.advanced-filters) {

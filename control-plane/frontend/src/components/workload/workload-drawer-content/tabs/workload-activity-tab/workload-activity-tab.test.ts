@@ -90,6 +90,28 @@ describe("WorkloadActivityTab", () => {
     expect(view.find('[aid="workload-activity-loading"]').exists()).toBe(false);
   });
 
+  it("displays suspend as Stopped and filters using the API action value", async () => {
+    vi.mocked(workloadService.getWorkloadActions).mockResolvedValue({ actions: [{ ...action(), action: "suspend" }] });
+    const view = render();
+    await flushPromises();
+    expect(view.find("tbody").text()).toContain("Stopped");
+    const eventFilter = view
+      .findComponent(RunaiAdvancedFilters)
+      .props("filterOptions")
+      .find((filter: { name: string }) => filter.name === "action");
+    expect(eventFilter.selectOptions).toContainEqual({ value: "suspend", label: "Stopped" });
+    view.findComponent(RunaiAdvancedFilters).vm.$emit("update-filter-by", {
+      advancedFilters: [{ ...eventFilter, selectedValues: ["suspend"] }],
+    });
+    await flushPromises();
+    expect(workloadService.getWorkloadActions).toHaveBeenLastCalledWith(
+      "w1",
+      0,
+      50,
+      expect.objectContaining({ filterBy: ["action!=create", "action!=update", "action!=delete", "action!=resume"] }),
+    );
+  });
+
   it("resets the server cursor when sorting and retains the sort on the next page", async () => {
     const view = render();
     await flushPromises();
