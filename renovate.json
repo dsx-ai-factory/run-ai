@@ -28,6 +28,7 @@
   ],
   "prConcurrentLimit": 60,
   "prHourlyLimit": 40,
+  "dependencyDashboard": false,
   "packageRules": [
     {
       "description": "frontend and frontend-v2 are two separate npm apps that happen to share a folder. Keep them in separate PRs rather than letting the folder-based group key merge them.",
