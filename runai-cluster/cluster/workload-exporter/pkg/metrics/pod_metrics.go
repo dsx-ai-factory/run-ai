@@ -145,9 +145,10 @@ func SetPodMetrics(ctx context.Context, pod *corev1.Pod, client client.Client, d
 	}
 
 	resourcesRequested, resourcesLimit := data.GetPodResources(pod)
-	if err := data.AddDRAGpus(ctx, pod, draParser, resourcesRequested, resourcesLimit); err != nil {
-		return err
-	}
+	// A failed claim read must neither block the metrics already known from the Pod nor erase the
+	// request and limit values reported earlier. The error is returned after those are updated,
+	// so the controller retries.
+	draErr := data.AddDRAGpus(ctx, pod, draParser, resourcesRequested, resourcesLimit)
 	requestedGPUs := resourcesRequested.Gpus
 	requestedGPUsMemory := resourcesRequested.GpuMemoryMegaBytes
 	limitGPUs := resourcesLimit.Gpus
@@ -159,7 +160,7 @@ func SetPodMetrics(ctx context.Context, pod *corev1.Pod, client client.Client, d
 	allocatedCPUs := allocatedResources.CpuMilliCores
 	allocatedCpuMemory := allocatedResources.CpuMemoryBytes
 
-	ResetPodMetrics(name, namespace)
+	resetPodStateMetrics(name, namespace)
 
 	podInfo.WithLabelValues(
 		name, uuid, namespace,
@@ -167,10 +168,6 @@ func SetPodMetrics(ctx context.Context, pod *corev1.Pod, client client.Client, d
 		workloadId,
 		nodeName,
 		string(phaseInfo.Phase), phaseInfo.DetailedStatus).Set(1)
-	podRequestedGpus.WithLabelValues(name, uuid, namespace, workloadId).Set(requestedGPUs)
-	podRequestedGPUMemory.WithLabelValues(name, uuid, namespace, workloadId).Set(requestedGPUsMemory)
-	podLimitGpus.WithLabelValues(name, uuid, namespace, workloadId).Set(limitGPUs)
-	podLimitGPUMemory.WithLabelValues(name, uuid, namespace, workloadId).Set(limitGPUsMemory)
 	podAllocatedGPUs.WithLabelValues(name, uuid, namespace, workloadId).Set(allocatedGPUs)
 	podAllocatedGPUMemory.WithLabelValues(name, uuid, namespace, workloadId).Set(allocatedGpuMemory)
 	podAllocatedCPUs.WithLabelValues(name, uuid, namespace, workloadId).Set(allocatedCPUs)
@@ -184,16 +181,38 @@ func SetPodMetrics(ctx context.Context, pod *corev1.Pod, client client.Client, d
 		podElements.WithLabelValues(name, namespace, uuid, workloadId, elementID, strconv.Itoa(level)).Set(1)
 	}
 
+	if draErr != nil {
+		return draErr
+	}
+
+	// The requirements were read successfully, so the previous request and limit values can be replaced.
+	resetPodRequestMetrics(name, namespace)
+	podRequestedGpus.WithLabelValues(name, uuid, namespace, workloadId).Set(requestedGPUs)
+	podRequestedGPUMemory.WithLabelValues(name, uuid, namespace, workloadId).Set(requestedGPUsMemory)
+	podLimitGpus.WithLabelValues(name, uuid, namespace, workloadId).Set(limitGPUs)
+	podLimitGPUMemory.WithLabelValues(name, uuid, namespace, workloadId).Set(limitGPUsMemory)
+
 	log.Info().Msgf("Updated Pod %s/%s metrics successfully", namespace, name)
 	return nil
 }
 
 func ResetPodMetrics(podName, podNamespace string) {
+	resetPodRequestMetrics(podName, podNamespace)
+	resetPodStateMetrics(podName, podNamespace)
+}
+
+// resetPodRequestMetrics deletes the metrics derived from the Pod's resource requirements.
+func resetPodRequestMetrics(podName, podNamespace string) {
 	podIdentifier := prometheus.Labels{NamespaceLabel: podNamespace, PodNameLabel: podName}
 	podRequestedGpus.DeletePartialMatch(podIdentifier)
 	podRequestedGPUMemory.DeletePartialMatch(podIdentifier)
 	podLimitGpus.DeletePartialMatch(podIdentifier)
 	podLimitGPUMemory.DeletePartialMatch(podIdentifier)
+}
+
+// resetPodStateMetrics deletes the metrics derived from the Pod's current state and allocation.
+func resetPodStateMetrics(podName, podNamespace string) {
+	podIdentifier := prometheus.Labels{NamespaceLabel: podNamespace, PodNameLabel: podName}
 	podAllocatedGPUs.DeletePartialMatch(podIdentifier)
 	podAllocatedGPUMemory.DeletePartialMatch(podIdentifier)
 	podAllocatedCPUs.DeletePartialMatch(podIdentifier)

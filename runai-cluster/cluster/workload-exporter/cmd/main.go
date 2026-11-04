@@ -115,7 +115,7 @@ func main() {
 	if err != nil {
 		log.Fatal().Msgf("Failed creating kubernetes client, error: %s", err.Error())
 	}
-	// mgr.GetClient() reads from the manager cache, so DRA lookups don't hit the API server per pod.
+	// Read claims and templates through the manager's cache instead of issuing an API request for each Pod lookup.
 	draParser := dra.NewDRAParser(mgr.GetClient(), kubeClient)
 
 	legacyReconcilers, err := availableLegacyReconcilers(mgr.GetRESTMapper(), []legacyReconcilerRegistration{

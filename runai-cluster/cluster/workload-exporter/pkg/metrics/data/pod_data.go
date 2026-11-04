@@ -176,23 +176,21 @@ func GetPodResources(pod *corev1.Pod) (*ResourcesInfo, *ResourcesInfo) {
 	return parseResources(requests), parseResources(limits)
 }
 
-// AddDRAGpus adds the GPUs the pod requests through DRA ResourceClaims (pod.Spec.ResourceClaims)
-// to its requested and limit GPUs, on top of any GPUs requested through the pod spec.
-// A DRA claim specifies a device count only, so GPU memory is left as configured.
-// Allocated GPUs are not touched: they come from the allocation annotations written by status-updater.
-// Lookup errors are returned so the controller retries.
-func AddDRAGpus(ctx context.Context, pod *corev1.Pod, draParser *dra.DRAParser, requested, limit *ResourcesInfo) error {
+// AddDRAGpus adds supported DRA GPU counts to the Pod's requested and limit
+// GPU values. Existing GPU-memory values are preserved.
+// Lookup errors are returned without changing either resource value.
+func AddDRAGpus(ctx context.Context, pod *corev1.Pod, draParser *dra.DRAParser, requestedResources, resourceLimits *ResourcesInfo) error {
 	if draParser == nil || len(pod.Spec.ResourceClaims) == 0 {
 		return nil
 	}
 
-	draGpus, err := draParser.ResolvePodGpuCount(ctx, pod)
+	draGpus, err := draParser.ResolvePodRequestedGpuCount(ctx, pod)
 	if err != nil {
 		return fmt.Errorf("failed resolving DRA GPUs of pod <%s/%s>: %w", pod.Namespace, pod.Name, err)
 	}
 
-	requested.Gpus += float64(draGpus)
-	limit.Gpus += float64(draGpus)
+	requestedResources.Gpus += float64(draGpus)
+	resourceLimits.Gpus += float64(draGpus)
 	return nil
 }
 

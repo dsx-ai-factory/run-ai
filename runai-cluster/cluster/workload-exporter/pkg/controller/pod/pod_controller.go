@@ -17,6 +17,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/metrics"
 	corev1 "k8s.io/api/core/v1"
+	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	"k8s.io/client-go/util/workqueue"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -95,6 +96,7 @@ func filterUpdateEvents(old, new *corev1.Pod) bool {
 		old.Spec.NodeName != new.Spec.NodeName ||
 		old.Annotations[commonconstants.PodAllocatedGpusAnnotation] != new.Annotations[commonconstants.PodAllocatedGpusAnnotation] ||
 		old.Annotations[commonconstants.PodAllocatedGpuMemoryAnnotation] != new.Annotations[commonconstants.PodAllocatedGpuMemoryAnnotation] ||
+		!apiequality.Semantic.DeepEqual(old.Status.ResourceClaimStatuses, new.Status.ResourceClaimStatuses) ||
 		old.Labels[v1alpha1.NodePoolNameLabel] != new.Labels[v1alpha1.NodePoolNameLabel] ||
 		hasElementIdLabelAdded(old.Labels, new.Labels))
 }
