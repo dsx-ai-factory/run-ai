@@ -58,6 +58,7 @@ type Nodepool struct {
 	TenantId                        int32  `gorm:"not null"`
 	LabelKey                        *string
 	LabelValue                      *string
+	Description                     *string
 	Phase                           api.NodepoolPhase
 	PhaseMessage                    *string
 	ClusterId                       uuid.UUID `gorm:"not null"`
@@ -166,6 +167,7 @@ func (np *Nodepool) DeepCopyInto(out *Nodepool) {
 	out.UpdatedAt = np.UpdatedAt
 	out.ID = np.ID
 	out.Name = np.Name
+	out.Description = np.Description
 	out.TenantId = np.TenantId
 	out.LabelKey = np.LabelKey
 	out.LabelValue = np.LabelValue
