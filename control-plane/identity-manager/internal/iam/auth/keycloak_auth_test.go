@@ -280,7 +280,7 @@ func TestSetAppLogin_CreateClientFails(t *testing.T) {
 	err := authenticator.setAppLogin(context.Background())
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to create admin application")
+	assert.Contains(t, err.Error(), "failed to create admin client")
 	mockKcClient.AssertExpectations(t)
 }
 
@@ -351,7 +351,7 @@ func TestSetAppAdminToken_LoginFails(t *testing.T) {
 	err := authenticator.setAppAdminToken(context.Background())
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to login admin app")
+	assert.Contains(t, err.Error(), "failed to login admin client")
 	mockKcClient.AssertExpectations(t)
 }
 
@@ -458,7 +458,7 @@ func TestSetAppAdminSecret_GetSecretFails(t *testing.T) {
 	err := authenticator.setAppAdminSecret(context.Background(), testClientID)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to get admin application secret")
+	assert.Contains(t, err.Error(), "failed to get admin client secret")
 	mockKcClient.AssertExpectations(t)
 }
 
@@ -472,7 +472,7 @@ func TestSetAppAdminSecret_NilSecret(t *testing.T) {
 	err := authenticator.setAppAdminSecret(context.Background(), testClientID)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to get admin application secret")
+	assert.Contains(t, err.Error(), "failed to get admin client secret")
 	mockKcClient.AssertExpectations(t)
 }
 
@@ -524,7 +524,7 @@ func TestAppAdminLogin_Failure(t *testing.T) {
 	err := authenticator.appAdminLogin(context.Background())
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to login admin app")
+	assert.Contains(t, err.Error(), "failed to login admin client")
 	mockKcClient.AssertExpectations(t)
 }
 
@@ -555,7 +555,7 @@ func TestCreateNewAppAdminClient_CreateClientFails(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Empty(t, clientID)
-	assert.Contains(t, err.Error(), "failed to create admin app client")
+	assert.Contains(t, err.Error(), "failed to register admin client")
 	mockKcClient.AssertExpectations(t)
 }
 
@@ -671,7 +671,7 @@ func TestAssignAdminRolesToAdminApp_AddRoleFails(t *testing.T) {
 	err := authenticator.assignAdminRolesToAdminApp(context.Background(), adminToken, serviceAccountUser)
 
 	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to assign admin roles to admin app")
+	assert.Contains(t, err.Error(), "failed to assign admin roles to admin client")
 	mockKcClient.AssertExpectations(t)
 }
 
@@ -878,7 +878,7 @@ func TestGetAppAdminAccessToken_ExpiredToken_LoginFails(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Nil(t, token)
-	assert.Contains(t, err.Error(), "failed to login admin app")
+	assert.Contains(t, err.Error(), "failed to login admin client")
 	mockKcClient.AssertExpectations(t)
 }
 
