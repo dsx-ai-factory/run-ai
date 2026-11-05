@@ -1,0 +1,87 @@
+{{- /*
+  POC-TEMP - DO NOT MERGE.
+  Throwaway "external" PostgreSQL used only to validate the control plane against an
+  externally managed database of a chosen major version. It stands in for a customer's
+  own server: the database and role are provisioned the way the third-party-services
+  documentation describes (CREATE DATABASE / CREATE ROLE / GRANT ALL PRIVILEGES ON DATABASE),
+  so the control plane is exercised with a non-superuser role, as in a real external setup.
+*/}}
+{{- if .Values.pocExternalPostgres.enabled }}
+{{- $auth := .Values.global.postgresql.auth }}
+{{- $name := .Values.pocExternalPostgres.name }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-init
+  namespace: {{ .Release.Namespace }}
+data:
+  10-provision.sh: |
+    #!/bin/sh
+    set -eu
+    psql -v ON_ERROR_STOP=1 -U postgres <<SQL
+    CREATE DATABASE "{{ $auth.database }}";
+    CREATE ROLE "{{ $auth.username }}" WITH LOGIN PASSWORD '${RUNAI_DB_USER_PASSWORD}';
+    GRANT ALL PRIVILEGES ON DATABASE "{{ $auth.database }}" TO "{{ $auth.username }}";
+    SQL
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: {{ $name }}
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $name }}
+  template:
+    metadata:
+      labels:
+        app: {{ $name }}
+    spec:
+      containers:
+        - name: postgres
+          image: {{ .Values.pocExternalPostgres.image | quote }}
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $auth.existingSecret }}
+                  key: {{ $auth.secretKeys.adminPasswordKey }}
+            - name: RUNAI_DB_USER_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $auth.existingSecret }}
+                  key: {{ $auth.secretKeys.userPasswordKey }}
+          ports:
+            - containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "postgres"]
+            periodSeconds: 3
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql
+            - name: init
+              mountPath: /docker-entrypoint-initdb.d
+      volumes:
+        - name: data
+          emptyDir: {}
+        - name: init
+          configMap:
+            name: {{ $name }}-init
+            defaultMode: 0755
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ $name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    app: {{ $name }}
+  ports:
+    - port: 5432
+      targetPort: 5432
+{{- end }}
