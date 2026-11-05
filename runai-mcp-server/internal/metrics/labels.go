@@ -19,7 +19,10 @@ func normalizeLabel(v string) string {
 	if len(v) <= maxLabelLen {
 		return v
 	}
-	h := fmt.Sprintf("%x", fnv1a(v))[:8]
+	// Zero pad the hash: %x drops leading zeros, so slicing its output to a
+	// fixed width panics for the roughly one in sixteen inputs whose hash starts
+	// with a zero nibble.
+	h := fmt.Sprintf("%08x", fnv1a(v))
 	return v[:48] + "~" + h
 }
 
