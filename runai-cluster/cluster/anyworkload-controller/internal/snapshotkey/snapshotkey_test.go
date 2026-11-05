@@ -477,7 +477,7 @@ func TestRestoredPodHashesLikeTheColdPod(t *testing.T) {
 	key := keyOrFail(t, cold)
 
 	restored := gpuPod()
-	SetKey(restored, key)
+	SetSnapshotKey(restored, key)
 	restored.Spec.SecurityContext = &corev1.PodSecurityContext{
 		SeccompProfile: &corev1.SeccompProfile{Type: corev1.SeccompProfileTypeLocalhost},
 	}
@@ -534,14 +534,14 @@ func TestNotKeyable(t *testing.T) {
 
 func TestKeyOfAndSetKey(t *testing.T) {
 	pod := gpuPod()
-	if _, ok := KeyOf(pod); ok {
+	if _, ok := SnapshotKeyOf(pod); ok {
 		t.Error("KeyOf found a key on an unstamped pod")
 	}
 
 	// An opted-in pod with no key means the webhook did not run.
 	pod.Labels = nil
-	SetKey(pod, "3f9a1c2b7d4e")
-	key, ok := KeyOf(pod)
+	SetSnapshotKey(pod, "3f9a1c2b7d4e")
+	key, ok := SnapshotKeyOf(pod)
 	if !ok || key != "3f9a1c2b7d4e" {
 		t.Errorf("KeyOf after SetKey = %q, %v; want the stamped key", key, ok)
 	}
@@ -549,7 +549,7 @@ func TestKeyOfAndSetKey(t *testing.T) {
 
 func TestMatchesIsFalseAfterAnEdit(t *testing.T) {
 	pod := gpuPod()
-	SetKey(pod, keyOrFail(t, pod))
+	SetSnapshotKey(pod, keyOrFail(t, pod))
 
 	pod.Spec.Containers[0].Image = "registry.example.com/llama@sha256:def"
 

@@ -181,19 +181,19 @@ func ComputeKey(pod *corev1.Pod) (string, error) {
 	return hex.EncodeToString(digest.Sum(nil))[:keyLength], nil
 }
 
-// KeyOf returns the key the webhook stamped, and whether it was present.
+// SnapshotKeyOf returns the key the webhook stamped, and whether it was present.
 //
 // Absence is meaningful: an opted-in pod with no key means the webhook did not
 // run, not that there was no snapshot.
-func KeyOf(pod *corev1.Pod) (string, bool) {
+func SnapshotKeyOf(pod *corev1.Pod) (string, bool) {
 	key, ok := pod.Labels[constants.SnapshotKeyLabel]
 	return key, ok
 }
 
-// SetKey stamps KeyLabel. The webhook is the only writer: the stored key is
+// SetSnapshotKey stamps KeyLabel. The webhook is the only writer: the stored key is
 // the record of the pod's shape at admission, and a key written later would
 // make the drift check tautological.
-func SetKey(pod *corev1.Pod, key string) {
+func SetSnapshotKey(pod *corev1.Pod, key string) {
 	if pod.Labels == nil {
 		pod.Labels = map[string]string{}
 	}
@@ -206,7 +206,7 @@ func SetKey(pod *corev1.Pod, key string) {
 // A false result disables snapshots for the workload, so call it only where
 // that is the intended response.
 func Matches(pod *corev1.Pod) (bool, error) {
-	stamped, ok := KeyOf(pod)
+	stamped, ok := SnapshotKeyOf(pod)
 	if !ok {
 		return false, fmt.Errorf("%w: pod carries no %s label", ErrNotKeyable, constants.SnapshotKeyLabel)
 	}

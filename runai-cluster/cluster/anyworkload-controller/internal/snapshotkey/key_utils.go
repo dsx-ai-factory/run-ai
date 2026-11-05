@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/kubernetes/third_party/forked/golang/expansion"
 )
@@ -24,24 +25,24 @@ import (
 // Matched exactly rather than by prefix, so a workload's own "snapshot-" volume
 // or "SNAPSHOT_" variable still counts towards its shape.
 var (
-	snapshotVolumeNames = map[string]bool{
-		"snapshot-control": true, // podcontract.SnapshotControlVolumeName
-	}
+	snapshotVolumeNames = datastructs.NewSet(
+		"snapshot-control", // podcontract.SnapshotControlVolumeName
+	)
 
-	snapshotMountPaths = map[string]bool{
-		"/snapshot-control":  true, // podcontract.SnapshotControlMountPath
-		"/tmp/snapshot-cuda": true, // podcontract.CuInterposeMountPath
-	}
+	snapshotMountPaths = datastructs.NewSet(
+		"/snapshot-control",  // podcontract.SnapshotControlMountPath
+		"/tmp/snapshot-cuda", // podcontract.CuInterposeMountPath
+	)
 
 	// The DYN_ spellings are podcontract's legacy names, written alongside the
 	// current ones. They do not share a prefix with them, so a prefix match
 	// would silently leave them in the hash.
-	snapshotEnvNames = map[string]bool{
-		"SNAPSHOT_CONTROL_DIR":         true, // podcontract.SnapshotControlDirEnv
-		"DYN_SNAPSHOT_CONTROL_DIR":     true, // podcontract.LegacySnapshotControlDirEnv
-		"SNAPSHOT_RESTORE_STANDBY":     true, // podcontract.RestoreStandbyModeEnv
-		"DYN_SNAPSHOT_RESTORE_STANDBY": true, // podcontract.LegacyRestoreStandbyModeEnv
-	}
+	snapshotEnvNames = datastructs.NewSet(
+		"SNAPSHOT_CONTROL_DIR",         // podcontract.SnapshotControlDirEnv
+		"DYN_SNAPSHOT_CONTROL_DIR",     // podcontract.LegacySnapshotControlDirEnv
+		"SNAPSHOT_RESTORE_STANDBY",     // podcontract.RestoreStandbyModeEnv
+		"DYN_SNAPSHOT_RESTORE_STANDBY", // podcontract.LegacyRestoreStandbyModeEnv
+	)
 )
 
 // serviceAccountTokenPrefix names the projected token volume Kubernetes
@@ -126,24 +127,24 @@ func stripSnapshotAdditions(spec *corev1.PodSpec) {
 // unreachable here and fall out. It also keeps the two lists symmetric - a
 // volume is hashed exactly when a mount for it is.
 func mountedVolumes(spec *corev1.PodSpec) []corev1.Volume {
-	mounted := map[string]bool{}
+	mounted := datastructs.NewSet[string]()
 	for _, containers := range [][]corev1.Container{spec.InitContainers, spec.Containers} {
 		for _, container := range containers {
 			for _, mount := range container.VolumeMounts {
-				mounted[mount.Name] = true
+				mounted.Add(mount.Name)
 			}
 			// A raw block volume is consumed through VolumeDevices and has no
 			// VolumeMount, so it would otherwise be dropped and a change to the
 			// backing claim would not change the key.
 			for _, device := range container.VolumeDevices {
-				mounted[device.Name] = true
+				mounted.Add(device.Name)
 			}
 		}
 	}
 
 	var kept []corev1.Volume
 	for _, volume := range spec.Volumes {
-		if !mounted[volume.Name] {
+		if !mounted.Has(volume.Name) {
 			continue
 		}
 		kept = append(kept, volume)
@@ -160,7 +161,7 @@ func mountedVolumes(spec *corev1.PodSpec) []corev1.Volume {
 func keptMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 	var kept []corev1.VolumeMount
 	for _, mount := range mounts {
-		if isExcludedVolumeName(mount.Name) || snapshotMountPaths[mount.MountPath] {
+		if isExcludedVolumeName(mount.Name) || snapshotMountPaths.Has(mount.MountPath) {
 			continue
 		}
 		kept = append(kept, mount)
@@ -169,7 +170,7 @@ func keptMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 }
 
 func isExcludedVolumeName(name string) bool {
-	return strings.HasPrefix(name, serviceAccountTokenPrefix) || snapshotVolumeNames[name]
+	return strings.HasPrefix(name, serviceAccountTokenPrefix) || snapshotVolumeNames.Has(name)
 }
 
 // expandsStrippedEnv reports whether a field Kubernetes expands references a
@@ -204,7 +205,7 @@ func expandsStrippedEnv(container corev1.Container) (string, bool) {
 func referencedSnapshotName(value string) (string, bool) {
 	var referenced string
 	expansion.Expand(value, func(name string) string {
-		if referenced == "" && snapshotEnvNames[name] {
+		if referenced == "" && snapshotEnvNames.Has(name) {
 			referenced = name
 		}
 		return ""
@@ -215,7 +216,7 @@ func referencedSnapshotName(value string) (string, bool) {
 func withoutSnapshotEnv(env []corev1.EnvVar) []corev1.EnvVar {
 	var kept []corev1.EnvVar
 	for _, variable := range env {
-		if snapshotEnvNames[variable.Name] {
+		if snapshotEnvNames.Has(variable.Name) {
 			continue
 		}
 		kept = append(kept, variable)
