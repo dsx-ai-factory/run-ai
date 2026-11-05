@@ -15,7 +15,7 @@
   >
     <button
       type="button"
-      class="filter-chip-edit"
+      class="filter-chip-edit row inline no-wrap items-center q-pa-none cursor-pointer"
       :aria-label="`Edit ${filter.label} filter: ${getFilterSummary(filter)}`"
       @click="$emit('select', filter)"
     >
@@ -96,13 +96,8 @@ export default defineComponent({
 
 <style scoped lang="scss">
 .filter-chip-edit {
-  display: inline-flex;
-  align-items: center;
-  padding: 0;
   border: 0;
   background: transparent;
   color: inherit;
-  font: inherit;
-  cursor: pointer;
 }
 </style>
