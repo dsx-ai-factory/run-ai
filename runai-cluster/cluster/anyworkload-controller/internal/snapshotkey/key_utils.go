@@ -164,6 +164,28 @@ func isExcludedVolumeName(name string) bool {
 	return strings.HasPrefix(name, serviceAccountTokenPrefix) || snapshotVolumeNames[name]
 }
 
+// expandsStrippedEnv reports whether a retained variable expands a
+// Snapshot-owned one, and names the first it finds.
+//
+// Removing a variable loses its position, and Kubernetes expands $(VAR) only
+// against entries declared earlier. So [SNAPSHOT_CONTROL_DIR, X=$(SNAPSHOT_CONTROL_DIR)]
+// and [X=$(SNAPSHOT_CONTROL_DIR), SNAPSHOT_CONTROL_DIR] strip to the same bytes
+// while resolving X differently - one expanded, one literal. Keying them the
+// same would let a replica restore from a checkpoint built with a different
+// environment, so such a pod is refused instead.
+func expandsStrippedEnv(container corev1.Container) (string, bool) {
+	// Snapshot's own variables are gone by now - Shape strips them before
+	// calling this - so every variable here is one the hash keeps.
+	for _, variable := range container.Env {
+		for name := range snapshotEnvNames {
+			if strings.Contains(variable.Value, "$("+name+")") {
+				return name, true
+			}
+		}
+	}
+	return "", false
+}
+
 func withoutSnapshotEnv(env []corev1.EnvVar) []corev1.EnvVar {
 	var kept []corev1.EnvVar
 	for _, variable := range env {

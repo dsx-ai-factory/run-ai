@@ -234,6 +234,42 @@ func TestExcludedFieldsDoNotChangeTheKey(t *testing.T) {
 	}
 }
 
+// Stripping a Snapshot-owned variable loses its position, and $(VAR) expands
+// only against entries declared earlier. Two orderings would strip to the same
+// bytes while resolving the reference differently - expanded in one, literal in
+// the other - so such a pod is refused rather than keyed into a false match.
+func TestEnvExpandingAStrippedVariableIsNotKeyable(t *testing.T) {
+	ordered := func(first, second corev1.EnvVar) *corev1.Pod {
+		pod := gpuPod()
+		pod.Spec.Containers[0].Env = []corev1.EnvVar{first, second}
+		return pod
+	}
+	control := corev1.EnvVar{Name: "SNAPSHOT_CONTROL_DIR", Value: "/snapshot-control"}
+	reference := corev1.EnvVar{Name: "MY_PATH", Value: "$(SNAPSHOT_CONTROL_DIR)/x"}
+
+	// Both orderings are refused: expanded in one, literal in the other.
+	for name, pod := range map[string]*corev1.Pod{
+		"reference after the variable":  ordered(control, reference),
+		"reference before the variable": ordered(reference, control),
+	} {
+		if _, err := ComputeKey(pod); !errors.Is(err, ErrNotKeyable) {
+			t.Errorf("%s: err = %v, want ErrNotKeyable", name, err)
+		}
+	}
+}
+
+// Snapshot's own variables are still stripped when nothing expands them, so a
+// restored pod keeps matching the cold pod it came from.
+func TestStrippedVariableAloneIsStillKeyable(t *testing.T) {
+	pod := gpuPod()
+	pod.Spec.Containers[0].Env = append(pod.Spec.Containers[0].Env,
+		corev1.EnvVar{Name: "SNAPSHOT_CONTROL_DIR", Value: "/snapshot-control"})
+
+	if keyOrFail(t, pod) != keyOrFail(t, gpuPod()) {
+		t.Error("a Snapshot-owned variable changed the key")
+	}
+}
+
 // A raw block volume is consumed through VolumeDevices and has no VolumeMount,
 // so it must still count as "their volume" - otherwise a change to the backing
 // claim would not change the key and a replica could restore against different
