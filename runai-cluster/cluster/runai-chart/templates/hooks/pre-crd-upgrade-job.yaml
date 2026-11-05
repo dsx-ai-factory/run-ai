@@ -33,10 +33,9 @@ spec:
             - --pre-crd-upgrade
             - --control-plane-url={{ include "controlPlane.url" . }}
             - --control-plane-client-id={{ include "controlPlane.clientID" . }}
-            - --control-plane-client-secret=@/runai/config/client_secret
-            - --control-plane-bootstrap-token={{ .Values.controlPlane.bootstrapToken }}
+            {{- include "controlPlane.credentialArgs" . | nindent 12 }}
             - --cluster-version={{ .Chart.AppVersion }}
-            - --cluster-uid={{ include "cluster.uid" . }}
+            {{- include "cluster.uidArg" . | nindent 12 }}
             - --cluster-url={{ include "cluster.url" . }}
             - --custom-ca-enabled={{ .Values.global.customCA.enabled }}
             - --custom-ca-secret-name={{ .Values.global.customCA.secret.name }}

@@ -9,7 +9,7 @@ SPDX-License-Identifier: Apache-2.0
         {{- print true -}}
     {{- else if (and
             .Values.controlPlane.url
-            .Values.cluster.uid)
+            (or .Values.cluster.uid (and .Values.controlPlane.existingSecret .Values.controlPlane.secretKeys.clusterUid)))
     -}}
         {{- print false -}}
     {{- else -}}

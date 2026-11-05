@@ -54,12 +54,58 @@ client-secret
 {{- end -}}
 {{- end -}}
 
+{{- /*
+The hooks read credentials from files projected out of controlPlane.existingSecret
+when the matching controlPlane.secretKeys entry is set, so they can be provisioned
+at runtime (e.g. by a Job) instead of being passed as Helm values.
+*/ -}}
+{{- define "controlPlane.secret.clientSecretEnabled" -}}
+{{- if or (not .Values.controlPlane.existingSecret) .Values.controlPlane.secretKeys.clientSecret -}}true{{- end -}}
+{{- end -}}
+
+{{- define "controlPlane.secret.bootstrapTokenFromSecret" -}}
+{{- if and .Values.controlPlane.existingSecret .Values.controlPlane.secretKeys.bootstrapToken -}}true{{- end -}}
+{{- end -}}
+
+{{- define "controlPlane.secret.clusterUidFromSecret" -}}
+{{- if and .Values.controlPlane.existingSecret .Values.controlPlane.secretKeys.clusterUid -}}true{{- end -}}
+{{- end -}}
+
+{{- define "controlPlane.credentialArgs" -}}
+{{- if include "controlPlane.secret.clientSecretEnabled" . }}
+- --control-plane-client-secret=@/runai/config/client_secret
+{{- end }}
+{{- if include "controlPlane.secret.bootstrapTokenFromSecret" . }}
+- --control-plane-bootstrap-token=@/runai/config/bootstrap_token
+{{- else }}
+- --control-plane-bootstrap-token={{ .Values.controlPlane.bootstrapToken }}
+{{- end }}
+{{- end -}}
+
+{{- define "cluster.uidArg" -}}
+{{- if include "controlPlane.secret.clusterUidFromSecret" . -}}
+- --cluster-uid=@/runai/config/cluster_uid
+{{- else -}}
+- --cluster-uid={{ include "cluster.uid" . }}
+{{- end -}}
+{{- end -}}
+
 {{- define "controlPlane.secret.volume" -}}
 - secret:
     name: {{ include "controlPlane.secret.name" . }}
     items:
+{{- if include "controlPlane.secret.clientSecretEnabled" . }}
       - key: {{ include "controlPlane.secret.clientSecretKey" . }}
         path: client_secret
+{{- end }}
+{{- if include "controlPlane.secret.bootstrapTokenFromSecret" . }}
+      - key: {{ .Values.controlPlane.secretKeys.bootstrapToken }}
+        path: bootstrap_token
+{{- end }}
+{{- if include "controlPlane.secret.clusterUidFromSecret" . }}
+      - key: {{ .Values.controlPlane.secretKeys.clusterUid }}
+        path: cluster_uid
+{{- end }}
 {{- end -}}
 
 {{ define "jobLabels" -}}

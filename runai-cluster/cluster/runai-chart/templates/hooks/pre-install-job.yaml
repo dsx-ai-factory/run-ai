@@ -33,9 +33,8 @@ spec:
             - --control-plane-url={{ include "controlPlane.url" . }}
             - --cluster-version={{ .Chart.AppVersion }}
             - --control-plane-client-id={{ include "controlPlane.clientID" . }}
-            - --control-plane-client-secret=@/runai/config/client_secret
-            - --control-plane-bootstrap-token={{ .Values.controlPlane.bootstrapToken }}
-            - --cluster-uid={{ include "cluster.uid" . }}
+            {{- include "controlPlane.credentialArgs" . | nindent 12 }}
+            {{- include "cluster.uidArg" . | nindent 12 }}
             - --cluster-url={{ include "cluster.url" . }}
             - --custom-ca-enabled={{ .Values.global.customCA.enabled }}
             - --custom-ca-secret-name={{ .Values.global.customCA.secret.name }}
