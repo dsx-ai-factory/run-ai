@@ -51,6 +51,12 @@ var _ = Describe("EnumSliceFlag", func() {
 				Expect(err).NotTo(HaveOccurred())
 				Expect(values).To(Equal([]string{"value2", "value3"}))
 			})
+
+			It("should store the trimmed values that were validated", func() {
+				err := ef.Set(" value1 , value2 ")
+				Expect(err).NotTo(HaveOccurred())
+				Expect(values).To(Equal([]string{"value1", "value2"}))
+			})
 		})
 
 		Context("with invalid values", func() {
