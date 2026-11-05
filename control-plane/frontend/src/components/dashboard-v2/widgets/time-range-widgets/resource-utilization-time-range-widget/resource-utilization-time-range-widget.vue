@@ -149,6 +149,7 @@ const RESOURCE_UTILIZATION_COLORS = [
   CHART_COLOR_PALETTE.PURPLE,
 ];
 const TWO_HOURS_IN_MS = 2 * 60 * 60 * 1000;
+const UTILIZATION_GRID_BOTTOM = 72;
 
 interface IResourceUtilizationLegendItem {
   name: string;
@@ -299,7 +300,7 @@ export default defineComponent({
       this.chartOptions = {
         color: RESOURCE_UTILIZATION_COLORS,
         textStyle: { fontFamily: "Roboto, sans-serif" },
-        grid: { top: 30, right: 12, bottom: 72, left: 8, containLabel: true },
+        grid: { top: 30, right: 20, bottom: UTILIZATION_GRID_BOTTOM, left: 54, containLabel: false },
         xAxis: this.getXAxisOptions(endDate),
         yAxis: {
           type: "value",
@@ -312,6 +313,7 @@ export default defineComponent({
           trigger: "axis",
           ...STANDARD_TOOLTIP_STYLE,
           ...(this.confineTooltip ? { appendToBody: false, confine: true } : {}),
+          position: chartUtil.getTooltipPositionAboveXAxis(UTILIZATION_GRID_BOTTOM),
           axisPointer: {
             ...chartUtil.getConnectedChartAxisPointer(),
           },

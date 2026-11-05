@@ -108,6 +108,7 @@ export enum EEmitName {
 }
 
 const DEPARTMENT_EMPTY_VALUE = "-1";
+const ALLOCATION_GRID_BOTTOM = 84;
 const RESOURCE_ALLOCATION_COLORS = {
   total: CHART_COLOR_PALETTE.BLUE,
   unallocated: CHART_COLOR_PALETTE.ORANGE,
@@ -260,7 +261,7 @@ export default defineComponent({
           RESOURCE_ALLOCATION_COLORS.allocated,
           RESOURCE_ALLOCATION_COLORS.quota,
         ],
-        grid: { left: 54, right: 20, top: 36, bottom: 84 },
+        grid: { left: 54, right: 20, top: 36, bottom: ALLOCATION_GRID_BOTTOM },
         xAxis: this.getXAxisOptions(),
         yAxis: {
           type: "value",
@@ -276,6 +277,7 @@ export default defineComponent({
         tooltip: {
           trigger: "axis",
           ...STANDARD_TOOLTIP_STYLE,
+          position: chartUtil.getTooltipPositionAboveXAxis(ALLOCATION_GRID_BOTTOM),
           axisPointer: {
             ...chartUtil.getConnectedChartAxisPointer(),
           },

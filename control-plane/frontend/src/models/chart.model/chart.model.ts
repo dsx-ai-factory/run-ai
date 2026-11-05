@@ -207,6 +207,8 @@ export interface IChartWidgetOptions {
   adaptiveLegendLayout?: boolean;
   /** Prevent area zoom from showing fewer than this many canonical samples. */
   minimumZoomSampleCount?: number;
+  /** Keep the tooltip above the x-axis labels; needs a numeric `grid.bottom`. */
+  tooltipAboveXAxis?: boolean;
 }
 
 export interface ITooltipPoint {
