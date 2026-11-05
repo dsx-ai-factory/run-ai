@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.operands.rbac.base.create }}
 # Run:AI AccessRule Controller
 # Allows the reading of accessrule related data, reasding other Run:AI related CRDs, and CRUD of RoleBindings.
@@ -284,5 +285,6 @@ subjects:
     name: accessrule-controller
     namespace: runai
 ---
+{{- end }}
 {{- end }}
 {{- end }}

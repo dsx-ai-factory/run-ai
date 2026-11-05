@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.userAuth.rbac.create }}
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
@@ -104,4 +105,5 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: runai-l2-researcher-runai
+{{- end }}
 {{- end }}

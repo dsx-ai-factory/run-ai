@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if and (not .Values.global.serviceAccountName) (index .Values "runai-operator" "enabled") -}}
 # Installs and maintains Run:AI installation
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1284,5 +1285,6 @@ subjects:
   - kind: ServiceAccount
     name: runai-operator
     namespace: runai
+{{- end }}
 {{- end }}
 {{- end }}

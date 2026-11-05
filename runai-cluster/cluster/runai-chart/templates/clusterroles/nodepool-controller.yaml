@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.operands.rbac.base.create }}
 # Run:AI NodePool Controller
 # KRM grants the controller everything else it needs. This one rule stays because
@@ -30,4 +31,5 @@ subjects:
   - kind: ServiceAccount
     name: nodepool-controller
     namespace: runai
+{{- end }}
 {{- end }}
