@@ -413,6 +413,49 @@ var _ = Describe("RI Migrations testing", func() {
 			Expect(row.Count).To(Equal(int64(1)))
 		})
 
+		It("upgrades the built-in KServe status mappings once", func() {
+			Expect(InitInternalKartas(context.Background())).To(Succeed())
+			wt, apiErr := dao.DbGetWorkloadTypeByNameGroup(context.Background(), "InferenceService", "serving.kserve.io")
+			Expect(apiErr).To(BeNil())
+
+			// Seed the pre-upgrade definition containing only the original Knative matchers.
+			legacy := source.BuildKServeInferenceServiceV1beta1()
+			mappings := &legacy.Spec.StructureDefinition.RootComponent.StatusDefinition.StatusMappings
+			mappings.Running = mappings.Running[:1]
+			mappings.Failed = mappings.Failed[:1]
+			content, err := json.Marshal(legacy)
+			Expect(err).NotTo(HaveOccurred())
+			previousUpdate := time.Date(2020, time.January, 1, 0, 0, 0, 0, time.UTC)
+			db := runaidb.DB()
+			rowsAffected, err := db.Exec(`UPDATE workload_type_kartas
+				SET karta = ?::jsonb, created_by = ?, updated_at = ?
+				WHERE workload_type_id = ? AND version = ? AND scope_type = 'system' AND tenant_id IS NULL`,
+				string(content), RunaiSource, previousUpdate, wt.ID, "v1beta1")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(rowsAffected).To(Equal(int64(1)))
+
+			Expect(InitInternalKartas(context.Background())).To(Succeed())
+			var updatedAt time.Time
+			err = db.Raw(`SELECT karta, updated_at FROM workload_type_kartas
+				WHERE workload_type_id = ? AND version = ? AND scope_type = 'system' AND tenant_id IS NULL`,
+				wt.ID, "v1beta1").Row().Scan(&content, &updatedAt)
+			Expect(err).NotTo(HaveOccurred())
+			var upgraded models.Karta
+			Expect(json.Unmarshal(content, &upgraded)).To(Succeed())
+			expected := source.BuildKServeInferenceServiceV1beta1()
+			Expect(upgraded.Spec.StructureDefinition.RootComponent.StatusDefinition).
+				To(Equal(expected.Spec.StructureDefinition.RootComponent.StatusDefinition))
+			Expect(updatedAt.After(previousUpdate)).To(BeTrue(), "the agent uses updated_at to detect a changed Karta")
+
+			Expect(InitInternalKartas(context.Background())).To(Succeed())
+			var unchangedAt time.Time
+			err = db.Raw(`SELECT updated_at FROM workload_type_kartas
+				WHERE workload_type_id = ? AND version = ? AND scope_type = 'system' AND tenant_id IS NULL`,
+				wt.ID, "v1beta1").Row().Scan(&unchangedAt)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(unchangedAt.Equal(updatedAt)).To(BeTrue())
+		})
+
 		It("Validate InitInternalKartas doesn't update updated_at if not needed", func() {
 			// meaning models.WorkloadTypeResourceInterface.UpdatedAt remains the same across idempotent calls
 			// First ensure baseline migration exists
