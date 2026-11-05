@@ -131,17 +131,6 @@ func Shape(pod *corev1.Pod) ([]byte, error) {
 	}
 	specForHashing.InitContainers = initContainers
 
-	// A retained variable that expands a Snapshot-owned one makes the key
-	// depend on where that variable sat, which stripping it destroys.
-	for _, containers := range [][]corev1.Container{specForHashing.InitContainers, specForHashing.Containers} {
-		for _, container := range containers {
-			if name, found := expandsStrippedEnv(container); found {
-				return nil, fmt.Errorf("%w: container %q expands %s, which the key excludes",
-					ErrNotKeyable, container.Name, name)
-			}
-		}
-	}
-
 	// "Their volumes" (design 8.3): a volume no hashed container mounts belongs
 	// to a sidecar we dropped. Hashing it would let an unrelated sidecar
 	// upgrade - a new istio or queue-proxy volume - change every opted-in

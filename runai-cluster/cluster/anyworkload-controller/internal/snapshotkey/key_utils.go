@@ -12,44 +12,12 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/kubernetes/third_party/forked/golang/expansion"
-)
-
-// Snapshot's own additions to a restore pod, named exactly as podcontract
-// writes them (api/podcontract: restore_pod.go, protocol.go). They must not
-// reach the hash: Matches runs on a Ready replica, which on the restore path is
-// a pod the webhook already rewrote. Leave them in and every restored replica
-// fails the drift check, which turns snapshots off for the workload with
-// nothing reported as an error.
-//
-// Matched exactly rather than by prefix, so a workload's own "snapshot-" volume
-// or "SNAPSHOT_" variable still counts towards its shape.
-var (
-	snapshotVolumeNames = datastructs.NewSet(
-		"snapshot-control", // podcontract.SnapshotControlVolumeName
-	)
-
-	snapshotMountPaths = datastructs.NewSet(
-		"/snapshot-control",  // podcontract.SnapshotControlMountPath
-		"/tmp/snapshot-cuda", // podcontract.CuInterposeMountPath
-	)
-
-	// The DYN_ spellings are podcontract's legacy names, written alongside the
-	// current ones. They do not share a prefix with them, so a prefix match
-	// would silently leave them in the hash.
-	snapshotEnvNames = datastructs.NewSet(
-		"SNAPSHOT_CONTROL_DIR",         // podcontract.SnapshotControlDirEnv
-		"DYN_SNAPSHOT_CONTROL_DIR",     // podcontract.LegacySnapshotControlDirEnv
-		"SNAPSHOT_RESTORE_STANDBY",     // podcontract.RestoreStandbyModeEnv
-		"DYN_SNAPSHOT_RESTORE_STANDBY", // podcontract.LegacyRestoreStandbyModeEnv
-	)
 )
 
 // serviceAccountTokenPrefix names the projected token volume Kubernetes
 // injects into every pod. Its suffix is generated per pod, so hashing it would
 // give every replica of one workload a different key and nothing could ever be
-// shared. Matched by prefix because of that suffix; everything else above is
-// matched exactly.
+// shared. Matched by prefix because of that generated suffix.
 const serviceAccountTokenPrefix = "kube-api-access-"
 
 func containerNamed(containers []corev1.Container, name string) *corev1.Container {
@@ -73,7 +41,6 @@ func stripContainer(container *corev1.Container) {
 	container.StartupProbe = nil
 	container.Lifecycle = nil
 
-	container.Env = withoutSnapshotEnv(container.Env)
 	container.VolumeMounts = keptMounts(container.VolumeMounts)
 
 	// podcontract sets a localhost seccomp profile on the restored container.
@@ -161,7 +128,7 @@ func mountedVolumes(spec *corev1.PodSpec) []corev1.Volume {
 func keptMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 	var kept []corev1.VolumeMount
 	for _, mount := range mounts {
-		if isExcludedVolumeName(mount.Name) || snapshotMountPaths.Has(mount.MountPath) {
+		if isExcludedVolumeName(mount.Name) {
 			continue
 		}
 		kept = append(kept, mount)
@@ -170,58 +137,7 @@ func keptMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 }
 
 func isExcludedVolumeName(name string) bool {
-	return strings.HasPrefix(name, serviceAccountTokenPrefix) || snapshotVolumeNames.Has(name)
-}
-
-// expandsStrippedEnv reports whether a field Kubernetes expands references a
-// Snapshot-owned variable, and names the first it finds.
-// Stripping the variable hides what it resolved to, so two pods that run
-// different commands, or mount different paths, would share a key and one
-// could restore from the other's checkpoint. Such a pod is refused instead.
-func expandsStrippedEnv(container corev1.Container) (string, bool) {
-	// Shape strips Snapshot's own variables and mounts before calling this.
-	expanded := make([]string, 0,
-		len(container.Env)+len(container.Command)+len(container.Args)+len(container.VolumeMounts))
-	for _, variable := range container.Env {
-		expanded = append(expanded, variable.Value)
-	}
-	expanded = append(expanded, container.Command...)
-	expanded = append(expanded, container.Args...)
-	for _, mount := range container.VolumeMounts {
-		expanded = append(expanded, mount.SubPathExpr)
-	}
-
-	for _, value := range expanded {
-		if name, found := referencedSnapshotName(value); found {
-			return name, true
-		}
-	}
-	return "", false
-}
-
-// referencedSnapshotName returns the first Snapshot-owned variable the value
-// actually expands. Kubernetes' own expander does the parsing, so the "$$"
-// escape and unterminated references behave exactly as the kubelet treats them.
-func referencedSnapshotName(value string) (string, bool) {
-	var referenced string
-	expansion.Expand(value, func(name string) string {
-		if referenced == "" && snapshotEnvNames.Has(name) {
-			referenced = name
-		}
-		return ""
-	})
-	return referenced, referenced != ""
-}
-
-func withoutSnapshotEnv(env []corev1.EnvVar) []corev1.EnvVar {
-	var kept []corev1.EnvVar
-	for _, variable := range env {
-		if snapshotEnvNames.Has(variable.Name) {
-			continue
-		}
-		kept = append(kept, variable)
-	}
-	return kept
+	return strings.HasPrefix(name, serviceAccountTokenPrefix)
 }
 
 // sortSpec orders what Kubernetes does not, so that map iteration or a
