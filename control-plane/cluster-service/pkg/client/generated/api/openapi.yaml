@@ -7553,6 +7553,7 @@ components:
         cpuQuota: false
         ranks: false
         quota: false
+        limits: false
       properties:
         adjustableWeights:
           default: false
@@ -7579,6 +7580,13 @@ components:
           example: false
           nullable: true
           type: boolean
+        limits:
+          default: true
+          description: "Whether to allow GPU, CPU and memory limits for the nodepool's\
+            \ resources. Only allowed when quota=true."
+          example: false
+          nullable: true
+          type: boolean
       type: object
     DefaultNodepoolConfig:
       example:
@@ -7587,6 +7595,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
       properties:
         schedulingCapabilities:
           $ref: '#/components/schemas/SchedulingCapabilitiesNullable'
@@ -7599,6 +7608,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
         domain: domain
         name: name
         tenantId: 171976544
@@ -7910,6 +7920,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         operation: Create
@@ -7933,6 +7944,7 @@ components:
         cpuQuota: false
         ranks: false
         quota: false
+        limits: false
       properties:
         adjustableWeights:
           default: false
@@ -7955,9 +7967,16 @@ components:
             allowed when allowQuota=true.
           example: false
           type: boolean
+        limits:
+          default: true
+          description: "Whether to allow GPU, CPU and memory limits for the nodepool's\
+            \ resources. Only allowed when quota=true."
+          example: false
+          type: boolean
       required:
       - adjustableWeights
       - cpuQuota
+      - limits
       - quota
       - ranks
       type: object
@@ -8491,6 +8510,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         clusterName: prod-cluster
         id: "5"
         updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -8587,6 +8607,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         name: v100
         id: "5"
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -8699,6 +8720,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         name: v100
         schedulingConfiguration:
           numaAwareScheduling: true
@@ -8787,6 +8809,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         schedulingConfiguration:
           numaAwareScheduling: true
           placementStrategy:
@@ -10576,6 +10599,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           clusterName: prod-cluster
           id: "5"
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -10681,6 +10705,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           clusterName: prod-cluster
           id: "5"
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -10774,6 +10799,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           name: v100
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -10791,6 +10817,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           name: v100
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -10838,6 +10865,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           clusterName: prod-cluster
           id: "5"
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -10943,6 +10971,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           clusterName: prod-cluster
           id: "5"
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -11037,6 +11066,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           name: v100
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -11054,6 +11084,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           name: v100
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210

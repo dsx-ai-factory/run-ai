@@ -8,12 +8,13 @@ Name | Type | Description | Notes
 **Ranks** | **bool** | Whether to allow ranks for the nodepool&#39;s resources. | [default to true]
 **Quota** | **bool** | Whether to allow GPU quota for the nodepool&#39;s resources. | [default to true]
 **CpuQuota** | **bool** | Whether to allow CPU quota for the nodepool&#39;s resources. Only allowed when allowQuota&#x3D;true. | [default to false]
+**Limits** | **bool** | Whether to allow GPU, CPU and memory limits for the nodepool&#39;s resources. Only allowed when quota&#x3D;true. | [default to true]
 
 ## Methods
 
 ### NewSchedulingCapabilities
 
-`func NewSchedulingCapabilities(adjustableWeights bool, ranks bool, quota bool, cpuQuota bool, ) *SchedulingCapabilities`
+`func NewSchedulingCapabilities(adjustableWeights bool, ranks bool, quota bool, cpuQuota bool, limits bool, ) *SchedulingCapabilities`
 
 NewSchedulingCapabilities instantiates a new SchedulingCapabilities object
 This constructor will assign default values to properties that have it defined,
@@ -106,6 +107,26 @@ and a boolean to check if the value has been set.
 `func (o *SchedulingCapabilities) SetCpuQuota(v bool)`
 
 SetCpuQuota sets CpuQuota field to given value.
+
+
+### GetLimits
+
+`func (o *SchedulingCapabilities) GetLimits() bool`
+
+GetLimits returns the Limits field if non-nil, zero value otherwise.
+
+### GetLimitsOk
+
+`func (o *SchedulingCapabilities) GetLimitsOk() (*bool, bool)`
+
+GetLimitsOk returns a tuple with the Limits field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLimits
+
+`func (o *SchedulingCapabilities) SetLimits(v bool)`
+
+SetLimits sets Limits field to given value.
 
 
 
