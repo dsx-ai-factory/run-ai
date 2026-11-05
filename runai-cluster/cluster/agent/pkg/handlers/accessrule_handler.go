@@ -6,6 +6,7 @@
 package handlers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
@@ -18,7 +19,8 @@ import (
 
 	multierror "github.com/hashicorp/go-multierror"
 	"github.com/rs/zerolog/log"
-	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/selection"
 
 	auth_openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	runaiBackendClient "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/agent/pkg/backend-client"
@@ -43,9 +45,9 @@ type AccessRulesHandler struct {
 type AccessRuleObjectInspector bool
 
 type AccessRulesExtractionResult struct {
-	clusterAccessRules  []client.Object
-	accessRulesToDelete []types.NamespacedName
-	lastUpdated         *time.Time
+	clusterAccessRules    []client.Object
+	accessRuleIdsToDelete []string
+	lastUpdated           *time.Time
 }
 
 func NewAccessRulesHandler(runaiBackendClient *runaiBackendClient.BackendClient, runaiClient client.Client,
@@ -77,15 +79,18 @@ func (h *AccessRulesHandler) Handle() error {
 	accessRulesExtractionResult, err := h.extractAccessRules(backendAccessRules)
 
 	metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionCreateOrUpdate, len(accessRulesExtractionResult.clusterAccessRules))
-	metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionDelete, len(accessRulesExtractionResult.accessRulesToDelete))
+	metrics.GetMetricsExporter().AddResourceAction(h.MetricLabel(), metrics.ActionDelete, len(accessRulesExtractionResult.accessRuleIdsToDelete))
 
-	// don't sync deleted - because we are getting the deleted objects from the backend and calling DeleteNamedObjects
+	// don't sync deleted - because we are getting the deleted objects from the backend and deleting them by id
 	_, _, innerErr := h.CreateOrUpdateObjects(accessRulesExtractionResult.clusterAccessRules)
 	if innerErr != nil {
 		err = multierror.Append(err, innerErr)
 	}
 
-	_, innerErr = h.DeleteObjects(accessRulesExtractionResult.accessRulesToDelete)
+	// Delete by the runai/accessrule-id label rather than by the generated name: the name embeds the
+	// role name, so after a role rename the object on the cluster no longer carries the name we would
+	// generate now, and a name-keyed delete can never reach it.
+	innerErr = h.deleteAccessRulesByIds(accessRulesExtractionResult.accessRuleIdsToDelete)
 	if innerErr != nil {
 		err = multierror.Append(err, innerErr)
 	}
@@ -100,6 +105,66 @@ func (h *AccessRulesHandler) Handle() error {
 	log.Debug().Msgf("Successfully handled AccessRules")
 
 	return nil
+}
+
+// listAccessRulesByIds returns the AccessRules carrying one of the given runai/accessrule-id values,
+// in a single List using a set-based "in" selector.
+//
+// One List per id would be quadratic: a label selector is only ever a post-filter over the full
+// enumeration of the kind, because the informer cache indexes namespace and explicitly registered
+// field selectors - never labels. One "in" query walks that enumeration once, matches each object
+// with a set lookup, and materializes only the AccessRules that actually match.
+//
+// The list is typed, not unstructured, so it is served by the same informer that getObject already
+// uses. Listing unstructured would start a second informer and a second watch over every AccessRule
+// in the cluster, holding a second copy of them in memory.
+func (h *AccessRulesHandler) listAccessRulesByIds(accessRuleIds []string) ([]v1alpha1.AccessRule, error) {
+	if len(accessRuleIds) == 0 {
+		return nil, nil
+	}
+
+	requirement, err := labels.NewRequirement(v1alpha1.AccessRuleIdLabel, selection.In, accessRuleIds)
+	if err != nil {
+		log.Error().Msgf("Failed building <%s in (...)> selector for AccessRules, error: %s",
+			v1alpha1.AccessRuleIdLabel, err.Error())
+		return nil, err
+	}
+
+	accessRuleList := &v1alpha1.AccessRuleList{}
+	err = h.cachedClient.List(context.Background(), accessRuleList, &client.ListOptions{
+		LabelSelector: labels.NewSelector().Add(*requirement),
+	})
+	if err != nil {
+		log.Error().Msgf("Failed listing AccessRules by <%s>, error: %s",
+			v1alpha1.AccessRuleIdLabel, err.Error())
+		return nil, err
+	}
+
+	return accessRuleList.Items, nil
+}
+
+// deleteAccessRulesByIds deletes every AccessRule carrying one of the given accessrule ids,
+// whatever name it was created under.
+//
+// Deleting by id rather than by the generated name is what makes a rename survivable: the name
+// embeds the role name, so after a rename the object in the cluster no longer carries the name we
+// would generate now, and a name-keyed delete could never reach it.
+func (h *AccessRulesHandler) deleteAccessRulesByIds(accessRuleIds []string) error {
+	accessRules, err := h.listAccessRulesByIds(accessRuleIds)
+	if err != nil {
+		return err
+	}
+
+	for index := range accessRules {
+		accessRule := &accessRules[index]
+
+		if innerErr := h.deleteObject(accessRule); innerErr != nil {
+			err = multierror.Append(err, innerErr)
+			h.createDeletionEvent(accessRule, innerErr)
+		}
+	}
+
+	return err
 }
 
 func (h *AccessRulesHandler) MetricLabel() string {
@@ -153,13 +218,13 @@ func (h *AccessRulesHandler) getBackendAccessRulesSinceLastUpdated() (
 func (h *AccessRulesHandler) extractAccessRules(backendAccessRules []auth_openapi.AccessRuleSync) (AccessRulesExtractionResult, error) {
 	var err error
 	clusterAccessRules := []client.Object{}
-	accessRulesToDelete := []types.NamespacedName{}
+	accessRuleIdsToDelete := []string{}
 	lastUpdated := h.lastUpdated
 
 	for _, backendAccessRule := range backendAccessRules {
 		if (backendAccessRule.DeletedAt.IsSet() && backendAccessRule.DeletedAt.Get() != nil) ||
 			(backendAccessRule.IsDeleting != nil && *backendAccessRule.IsDeleting) {
-			accessRulesToDelete = append(accessRulesToDelete, types.NamespacedName{Name: GenerateAccessRuleName(&backendAccessRule), Namespace: ""})
+			accessRuleIdsToDelete = append(accessRuleIdsToDelete, accessRuleIdLabelValue(&backendAccessRule))
 		} else {
 			clusterAccessRule, innerErr := convertBackendToClusterAccessRule(&backendAccessRule)
 			if innerErr != nil {
@@ -177,9 +242,9 @@ func (h *AccessRulesHandler) extractAccessRules(backendAccessRules []auth_openap
 	}
 
 	return AccessRulesExtractionResult{
-		clusterAccessRules:  clusterAccessRules,
-		accessRulesToDelete: accessRulesToDelete,
-		lastUpdated:         lastUpdated,
+		clusterAccessRules:    clusterAccessRules,
+		accessRuleIdsToDelete: accessRuleIdsToDelete,
+		lastUpdated:           lastUpdated,
 	}, err
 }
 
@@ -203,7 +268,7 @@ func convertBackendToClusterAccessRule(backendAccessRule *auth_openapi.AccessRul
 
 	accessrule.Name = GenerateAccessRuleName(backendAccessRule)
 
-	accessRuleId := strconv.FormatInt(int64(backendAccessRule.Id), 10)
+	accessRuleId := accessRuleIdLabelValue(backendAccessRule)
 
 	predefinedRoleName := getPredefinedRoleName(backendAccessRule)
 	if predefinedRoleName != nil {
@@ -250,6 +315,13 @@ func convertTimeToString(t *time.Time) string {
 		return t.UTC().Format(time.RFC3339)
 	}
 	return "nil"
+}
+
+// accessRuleIdLabelValue returns the runai/accessrule-id label value for a backend access rule.
+// This label is the only stable identity an AccessRule object has, and it is what both the agent
+// and cluster-sync key off; the object's name is not stable - see GenerateAccessRuleName.
+func accessRuleIdLabelValue(backendAccessRule *auth_openapi.AccessRuleSync) string {
+	return strconv.FormatInt(int64(backendAccessRule.Id), 10)
 }
 
 // GenerateAccessRuleName - the access rule backend object doesn't have a name;

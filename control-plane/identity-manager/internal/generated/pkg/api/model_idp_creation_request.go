@@ -51,6 +51,11 @@ type IdpCreationRequest struct {
 	//Mappers Mappers `json:"mappers,omitempty"`
 	Mappers Mappers `json:"mappers,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//DryRun bool `json:"dryRun,omitempty"`
+	DryRun bool `json:"dryRun,omitempty" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertIdpCreationRequestRequired checks if the required fields are not zero-ed
@@ -142,5 +147,10 @@ func AssertIdpCreationRequestConstraints(obj IdpCreationRequest) error {
 	if err := AssertMappersConstraints(obj.Mappers); err != nil {
 		return err
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	return nil
 }

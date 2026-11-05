@@ -6,7 +6,7 @@ require (
 	github.com/Rican7/retry v0.3.1
 	github.com/ThreeDotsLabs/watermill v1.5.3
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5
-	github.com/aws/smithy-go v1.28.7
+	github.com/aws/smithy-go v1.28.8
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9
@@ -57,8 +57,7 @@ require (
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
-	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
-	github.com/xdg-go/scram v1.2.0 // indirect
+	github.com/xdg-go/scram v1.4.0 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect

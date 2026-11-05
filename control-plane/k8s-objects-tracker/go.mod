@@ -52,9 +52,9 @@ require (
 	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/ThreeDotsLabs/watermill v1.5.3 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5 // indirect
-	github.com/andybalholm/brotli v1.2.7 // indirect
+	github.com/andybalholm/brotli v1.2.8 // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
-	github.com/aws/smithy-go v1.28.7 // indirect
+	github.com/aws/smithy-go v1.28.8 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
@@ -69,7 +69,7 @@ require (
 	github.com/docker/go-units v0.5.0 // indirect
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.1 // indirect
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.5 // indirect
-	github.com/ebitengine/purego v0.11.2 // indirect
+	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
 	github.com/fxamacker/cbor/v2 v2.10.0 // indirect
@@ -88,7 +88,7 @@ require (
 	github.com/golang-migrate/migrate/v4 v4.20.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20261102214848-0031fcd306b0 // indirect
+	github.com/google/pprof v0.0.0-20261105003125-4bf881d7fb0b // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.33.0 // indirect
 	github.com/hashicorp/go-version v1.9.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
@@ -155,8 +155,7 @@ require (
 	github.com/tklauser/numcpus v0.12.0 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
-	github.com/xdg-go/scram v1.2.0 // indirect
+	github.com/xdg-go/scram v1.4.0 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
@@ -180,8 +179,8 @@ require (
 	golang.org/x/text v0.43.0 // indirect
 	golang.org/x/tools v0.52.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20261026165753-2ffab32bce7e // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261026165753-2ffab32bce7e // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab // indirect
 	google.golang.org/grpc v1.85.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect

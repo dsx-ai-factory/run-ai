@@ -12,6 +12,146 @@ import (
 )
 
 var computeTests = []TableEntry{
+	Entry("gpu memory - equal decimal quantities (ws)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_decimal_equal",
+		expectedFname:            "gpu_mem_decimal_equal_ws",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - equal decimal quantities (tr)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:                "gpu_mem_decimal_equal",
+		expectedFname:            "gpu_mem_decimal_equal_tr",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - equal binary quantities (ws)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_binary_equal",
+		expectedFname:            "gpu_mem_binary_equal_ws",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - equal binary quantities (tr)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:                "gpu_mem_binary_equal",
+		expectedFname:            "gpu_mem_binary_equal_tr",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - a larger decimal limit (ws)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_larger_limit",
+		expectedFname:            "gpu_mem_larger_limit_ws",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - a larger decimal limit (tr)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:                "gpu_mem_larger_limit",
+		expectedFname:            "gpu_mem_larger_limit_tr",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - equivalent quantities with different units (ws)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_mixed_units",
+		expectedFname:            "gpu_mem_mixed_units_ws",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - equivalent quantities with different units (tr)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:                "gpu_mem_mixed_units",
+		expectedFname:            "gpu_mem_mixed_units_tr",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - a decimal request without a limit (ws)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_decimal_request",
+		expectedFname:            "gpu_mem_decimal_request_ws",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - a decimal request without a limit (tr)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:                "gpu_mem_decimal_request",
+		expectedFname:            "gpu_mem_decimal_request_tr",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - a binary request without a limit (ws)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_binary_request",
+		expectedFname:            "gpu_mem_binary_request_ws",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - a binary request without a limit (tr)", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:                "gpu_mem_binary_request",
+		expectedFname:            "gpu_mem_binary_request_tr",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+	}),
+
+	Entry("gpu memory - legacy environment limit", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_versions",
+		expectedFname:            "gpu_mem_versions_env",
+		clusterVersion:           "2.25.0",
+		validateGpuMemoryWithKai: false,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - legacy request with annotation limit", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_versions",
+		expectedFname:            "gpu_mem_versions_mixed",
+		clusterVersion:           "3.0.22",
+		validateGpuMemoryWithKai: false,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - new request and limit annotations", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_versions",
+		expectedFname:            "gpu_mem_versions_new",
+		clusterVersion:           "3.1.0",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
+	Entry("gpu memory - development cluster", ComposerTest{
+		workloadType:             string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:                "gpu_mem_versions",
+		expectedFname:            "gpu_mem_versions_new",
+		clusterVersion:           "0.0.0-dev",
+		validateGpuMemoryWithKai: true,
+		expectedRequirements:     composer.WorkloadRequirements{GpuOptimization: true},
+	}),
+
 	Entry("cpu memory request syntax", ComposerTest{
 		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
 		specFname:     "cpu_memory_req_syntax",
