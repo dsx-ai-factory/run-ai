@@ -72,3 +72,16 @@
   transform: translateY(-100%);
   opacity: 0;
 }
+
+// Honor the OS "reduce motion" setting (WCAG 2.3.3). Only transitions are shortened:
+// keyframe animations are left alone because loading spinners rely on them, and a
+// frozen spinner reads as a hung page. A near-zero duration (not 0) keeps
+// transitionend firing, which Vue <Transition> and Quasar use to finish enter/leave.
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+  }
+}
