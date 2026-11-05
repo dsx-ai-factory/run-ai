@@ -6,7 +6,7 @@ reference when they submit workloads. It owns environments, compute profiles,
 data sources, credentials, models, inference/training/workspace definitions and
 workload templates, persists them in its own PostgreSQL schema, and keeps the
 control-plane copy in sync with what actually exists on the clusters. It exposes
-a stable HTTP/REST API generated from an OpenAPI specification....
+a stable HTTP/REST API generated from an OpenAPI specification.
 
 ## Contents
 
