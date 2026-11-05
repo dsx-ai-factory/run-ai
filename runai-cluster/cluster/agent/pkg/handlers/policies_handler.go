@@ -374,7 +374,6 @@ func (p *PoliciesHandler) backendToClusterWorkspacePolicies(policies []policy_op
 	clusterPoliciesExtraction := clusterWorkloadsAndPoliciesUpdates{}
 
 	for idx, backendPolicy := range policies {
-		backendPolicyCounter := *backendPolicy.UpdateCounter
 		backendPolicyNamespace := constants.NamespaceRunAi // default namespace for tenant/department scope
 
 		if backendPolicy.Meta.Scope == policy_openapi.SCOPETYPE_PROJECT {
@@ -388,7 +387,7 @@ func (p *PoliciesHandler) backendToClusterWorkspacePolicies(policies []policy_op
 					continue
 				}
 			} else {
-				log.Warn().Msgf("Had an error while getting backend policy project id, name: %s, project id: %d", backendPolicy.Meta.Name, *projectIdPtr)
+				log.Warn().Msgf("Had an error while getting backend policy project id, name: %s: project id is missing", backendPolicy.Meta.Name)
 				continue
 			}
 		}
@@ -406,6 +405,18 @@ func (p *PoliciesHandler) backendToClusterWorkspacePolicies(policies []policy_op
 			clusterPoliciesExtraction.DeleteRef = append(clusterPoliciesExtraction.DeleteRef, idx)
 			continue
 		}
+
+		// The control plane stamps the counter today, but the field is optional in
+		// the policy API - the spec's `required` entry for it is misspelled - and
+		// the agent has no recover. Only composition needs it, so a policy without
+		// one is skipped here rather than dereferenced; a deletion above is still
+		// carried out, since it does not read the counter.
+		if backendPolicy.UpdateCounter == nil {
+			log.Warn().Msgf("Had an error while getting backend policy update counter, name: %s: update counter is missing", backendPolicy.Meta.Name)
+			continue
+		}
+
+		backendPolicyCounter := *backendPolicy.UpdateCounter
 
 		// the context is used for loading cluster information in the control plane, in agent we do not need it
 		clusterPolicy, err := p.composePolicy(context.Background(), &backendPolicy, backendPolicyNamespace, backendPolicyCounter)
@@ -569,14 +580,14 @@ func (p *PoliciesHandler) addPolicyLabels(objectMeta *metav1.ObjectMeta, backend
 		if departmentIdPtr != nil {
 			objectMeta.GetLabels()[constants.DepartmentScopeLabel] = *departmentIdPtr
 		} else {
-			log.Warn().Msgf("Had an error while getting backend policy scope id, name: %s, department id: %s", objectMeta.GetName(), *departmentIdPtr)
+			log.Warn().Msgf("Had an error while getting backend policy scope id, name: %s: department id is missing", objectMeta.GetName())
 		}
 	case policy_openapi.SCOPETYPE_PROJECT:
 		projectIdPtr := backendPolicyMeta.ProjectId.Get()
 		if projectIdPtr != nil {
 			objectMeta.GetLabels()[constants.ProjectScopeLabel] = strconv.Itoa(int(*projectIdPtr))
 		} else {
-			log.Warn().Msgf("Had an error while getting backend policy scope id, name: %s, project id: %d", objectMeta.GetName(), *projectIdPtr)
+			log.Warn().Msgf("Had an error while getting backend policy scope id, name: %s: project id is missing", objectMeta.GetName())
 		}
 	}
 }
