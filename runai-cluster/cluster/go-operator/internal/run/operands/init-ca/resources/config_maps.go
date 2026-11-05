@@ -263,6 +263,7 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig, snapshotInstalled bool) map[st
 				AdmissionReviewVersions: v1,
 				SideEffects:             sideEffectsNone(),
 				FailurePolicy:           failurePolicyTypeIgnore(),
+				TimeoutSeconds:          ptr.To(int32(5)),
 				NamespaceSelector:       utils.NamespaceSelectorRunaiQueue(),
 				// A pod that has not opted in is never sent here.
 				ObjectSelector: &metav1.LabelSelector{

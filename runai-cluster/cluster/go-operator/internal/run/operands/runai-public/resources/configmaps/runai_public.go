@@ -19,7 +19,6 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/utils/version"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
-	"k8s.io/cri-api/pkg/errors"
 
 	appsv1 "k8s.io/api/apps/v1"
 	"k8s.io/client-go/discovery"
@@ -464,7 +463,7 @@ func snapshotsOperatorReady(ctx context.Context, reader client.Reader, runaiConf
 	deployment := &appsv1.Deployment{}
 	err := reader.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, deployment)
 	if err != nil {
-		if errors.IsNotFound(err) {
+		if kerrors.IsNotFound(err) {
 			return false, fmt.Sprintf("Snapshot operator deployment %s/%s not found", namespace, name)
 		}
 		return false, fmt.Sprintf("failed to get Snapshot operator deployment %s/%s: %v", namespace, name, err)

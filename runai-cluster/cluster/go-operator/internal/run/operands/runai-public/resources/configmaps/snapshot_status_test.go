@@ -231,9 +231,23 @@ func TestSnapshotsOperatorReady(t *testing.T) {
 		name    string
 		objects []client.Object
 		want    bool
+		// wantReason is matched exactly, not just for being non-empty: the two
+		// unready cases are told apart only by their wording, and an IsNotFound
+		// check against the wrong errors package silently collapses them into
+		// the generic one.
+		wantReason string
 	}{
-		{name: "deployment missing", want: false},
-		{name: "no available replica", objects: []client.Object{snapshotOperator(0)}, want: false},
+		{
+			name:       "deployment missing",
+			want:       false,
+			wantReason: "Snapshot operator deployment snapshot/snapshot-operator not found",
+		},
+		{
+			name:       "no available replica",
+			objects:    []client.Object{snapshotOperator(0)},
+			want:       false,
+			wantReason: "Snapshot operator has no available replicas",
+		},
 		{name: "ready", objects: []client.Object{snapshotOperator(1)}, want: true},
 	}
 
@@ -245,8 +259,8 @@ func TestSnapshotsOperatorReady(t *testing.T) {
 			if got != tc.want {
 				t.Fatalf("ready = %v, want %v (reason: %q)", got, tc.want, reason)
 			}
-			if !got && reason == "" {
-				t.Error("not ready, but no reason given")
+			if reason != tc.wantReason {
+				t.Errorf("reason = %q, want %q", reason, tc.wantReason)
 			}
 		})
 	}
