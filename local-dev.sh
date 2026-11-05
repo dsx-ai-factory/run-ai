@@ -74,6 +74,8 @@ KIND_VERSION="v0.33.0"
 # K8s 1.35+ has no cgroup v1 support: the container runtime host must use cgroup v2.
 KIND_NODE_IMAGE="kindest/node:v1.37.0@sha256:a1ed56cfb0e7b93589bdf97c8cd566405a265939e3620fc4f5de89adff580ae5"
 GPU_OPERATOR_VERSION="${GPU_OPERATOR_VERSION:-v26.7.1}"
+# Optional registry prefix for builder images (e.g. mirror.gcr.io/ when Docker Hub is unreliable).
+DOCKERHUB_PROXY_FOR_MAKE="${DOCKERHUB_PROXY:-}"
 
 # Linux host floor: 5 Kind nodes + ~50 services + parallel builds share the host
 # directly (no VM to size). Disk: a full build leaves ~44 GB of caches (Docker build
@@ -233,7 +235,8 @@ require_cmd() {
 
 install_kind() {
   log "Installing kind ${KIND_VERSION} (${OS}/${ARCH})..."
-  local url="https://kind.sigs.k8s.io/dl/${KIND_VERSION}/kind-${OS}-${ARCH}"
+  # kind.sigs.k8s.io redirects to GitHub; fetch the release binary directly (more reliable in restricted egress).
+  local url="https://github.com/kubernetes-sigs/kind/releases/download/${KIND_VERSION}/kind-${OS}-${ARCH}"
   local tmp
   tmp="$(mktemp)"
   curl -fsSL "${url}" -o "${tmp}"
@@ -1256,7 +1259,7 @@ build_go_service() {
   for attempt in 1 2 3; do
     if (cd "${svc_dir}" && make build-go-amd \
           OS=linux ARCH=amd64 \
-          DOCKERHUB_PROXY= \
+          DOCKERHUB_PROXY="${DOCKERHUB_PROXY_FOR_MAKE}" \
           GITHUB_TOKEN= \
           >"${log_file}" 2>&1); then
       break
@@ -1308,7 +1311,7 @@ build_cli_exposer() {
   for attempt in 1 2 3; do
     if (cd "${svc_dir}" && make build-go-amd \
           OS=linux ARCH=amd64 \
-          DOCKERHUB_PROXY= \
+          DOCKERHUB_PROXY="${DOCKERHUB_PROXY_FOR_MAKE}" \
           GITHUB_TOKEN= \
           >"${log_file}" 2>&1); then
       break
@@ -1417,7 +1420,7 @@ build_keycloak_extensions() {
   # used to trigger it; a cold cache can still hit it.
   local _kc_attempt _kc_delay=20
   for _kc_attempt in 1 2 3; do
-    if (cd "${svc_dir}" && make build-gradle DOCKERHUB_PROXY= >"${log_file}" 2>&1); then
+    if (cd "${svc_dir}" && make build-gradle DOCKERHUB_PROXY="${DOCKERHUB_PROXY_FOR_MAKE}" >"${log_file}" 2>&1); then
       break
     fi
     if (( _kc_attempt == 3 )); then
@@ -1442,7 +1445,7 @@ build_keycloak_extensions() {
   for _kc_go_attempt in 1 2 3; do
     if (cd "${svc_dir}" && make build-go-amd \
           OS=linux ARCH=amd64 \
-          DOCKERHUB_PROXY= \
+          DOCKERHUB_PROXY="${DOCKERHUB_PROXY_FOR_MAKE}" \
           GITHUB_TOKEN= \
           >>"${log_file}" 2>&1); then
       break
@@ -1482,7 +1485,7 @@ build_frontend() {
 
   # Step 1: Build React app inside Node Docker container (outputs to dist/)
   if ! (cd "${svc_dir}" && make build-js \
-        DOCKERHUB_PROXY= \
+        DOCKERHUB_PROXY="${DOCKERHUB_PROXY_FOR_MAKE}" \
         >"${log_file}" 2>&1); then
     die "build-js failed for frontend. See ${log_file}"
   fi

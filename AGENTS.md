@@ -213,3 +213,23 @@ rather than documenting it as current product behavior.
 
 Documentation changes go through the same review as any other change in this
 repository; see [Code Review](CONTRIBUTING.md#code-review).
+
+## Cursor Cloud specific instructions
+
+Cloud Agents bootstrap with `scripts/cloud-agent-install.sh` (install) and
+`scripts/cloud-agent-start.sh` (starts Docker and resumes an existing Kind
+cluster). The full local platform is built and deployed with
+[`local-dev.sh`](local-dev.md); allow 30+ minutes on first run.
+
+- **Container runtime:** Docker runs inside the agent VM (`fuse-overlayfs`
+  storage driver). Use `sg docker -c '…'` in a fresh shell if
+  `docker: permission denied` appears before re-login.
+- **Builder image pulls:** Export `DOCKERHUB_PROXY=mirror.gcr.io/` when Docker
+  Hub pulls fail; `local-dev.sh` forwards this to service `make` targets.
+- **Per-service checks:** `cd <service-dir> && make test` (see [Verify Before
+  Opening a PR](#verify-before-opening-a-pr)).
+- **Private Go modules:** Set `GITHUB_TOKEN` when `github.com/run-ai/*` modules
+  are not reachable without auth.
+- **Local UI:** After `./local-dev.sh`, open `https://runai.local` (credentials
+  are printed in the script summary). Ensure `127.0.0.1 runai.local` is in
+  `/etc/hosts` (the start script adds it).
