@@ -97,7 +97,7 @@ global:
       database: backend
       port: 5432
       scheme: backend
-      host: runai-backend-postgresql
+      host: runai-backend-external-pg # POC-TEMP: was runai-backend-postgresql
       dbSslMode: disable
       secretKeys:
         adminPasswordKey: postgres-password
@@ -1511,6 +1511,12 @@ keycloakx:
       drop:
         - ALL
 
+# POC-TEMP - DO NOT MERGE: throwaway external PostgreSQL, see templates/poc-external-postgres.yaml
+pocExternalPostgres:
+  enabled: true
+  name: runai-backend-external-pg
+  image: postgres:18
+
 postgresql:
   global:
     compatibility:
@@ -1520,7 +1526,7 @@ postgresql:
   name: postgres-init
   nameOverride: postgresql
   fullnameOverride: runai-backend-postgresql
-  enabled: true
+  enabled: false # POC-TEMP: was true; the control plane uses pocExternalPostgres
   # Pre-upgrade MD5 guardrail. Disable only if the guard is causing
   # problems on a specific cluster and you have confirmed the DB is not MD5.
   md5Guard:
