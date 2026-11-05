@@ -6,9 +6,11 @@ import { computed, reactive, ref, watch, onScopeDispose } from "vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
+import { ErrorAlert } from "@/utils/error-alert.util/error-alert.util";
 import { deepCopy } from "@/utils/common.util";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { NodepoolSortFilterFields, type Nodepool } from "@/swagger-models/cluster-service-client";
+import { errorMessages } from "@/common/error-message.constant";
 import { isProportional, PROPORTIONAL_CAPABILITIES, type NodePoolCreationDraft } from "./node-pool-create-flow.model";
 
 export function useNodePoolCreation(clusterId: string) {
@@ -45,9 +47,12 @@ export function useNodePoolCreation(clusterId: string) {
         filterUtil.getEqualsFilterString(NodepoolSortFilterFields.ClusterId, draft.clusterId),
       ]);
       if (currentRequest === requestId) pools.value = result;
-    } catch {
-      if (currentRequest === requestId)
-        loadError.value = "Failed to load node pools. Retry before creating a node pool.";
+    } catch (error) {
+      if (currentRequest === requestId) {
+        const fallback = ErrorAlert.failedLoadingMessage("node pools");
+        const { message } = new ErrorAlert({ generalMessage: fallback }).getNotification(error);
+        loadError.value = `${message || fallback}. Retry before creating a node pool.`;
+      }
     } finally {
       if (currentRequest === requestId) loading.value = false;
     }
@@ -77,7 +82,7 @@ export function useNodePoolCreation(clusterId: string) {
     try {
       if (!created.value) {
         if (!(await clusterService.isNodePoolNameUnique(payload.clusterId, payload.name))) {
-          submitError.value = "This name already exists";
+          submitError.value = errorMessages.NAME_ALREADY_EXIST;
           return;
         }
         if (disposed) return;
@@ -101,10 +106,12 @@ export function useNodePoolCreation(clusterId: string) {
         }
       }
       return created.value;
-    } catch {
-      submitError.value = created.value
+    } catch (error) {
+      const context = created.value
         ? `Node pool ${payload.name} was created, but Proportional settings couldn't be applied. Retry setup.`
-        : `Node pool ${payload.name} couldn't be created`;
+        : ErrorAlert.failedCreateMessage(`node pool ${payload.name}`);
+      const { message } = new ErrorAlert({ generalMessage: context }).getNotification(error);
+      submitError.value = typeof message === "string" && message !== context ? `${context} ${message}` : context;
     } finally {
       submitting.value = false;
     }

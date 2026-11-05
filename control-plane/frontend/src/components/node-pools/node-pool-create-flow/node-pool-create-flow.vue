@@ -35,15 +35,14 @@
               :rules="[validateName, uniqueName]"
               :maxlength="40"
             />
-            <q-input
+            <runai-description-input
               v-model="draft.description"
               class="description-field q-mt-lg"
-              aid="node-pool-description"
+              custom-aid="node-pool-description"
               dense
-              label="Description"
               :disable="locked"
-              maxlength="250"
-              counter
+              :debounce="0"
+              :rules="[validateDescription]"
               no-error-icon
             />
           </runai-expansion-item>
@@ -177,6 +176,7 @@ import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-
 import RunaiExpansionWrapper from "@/components/common/runai-expansion-wrapper/runai-expansion-wrapper.vue";
 import RunaiExpansionItem from "@/components/common/runai-expansion-item/runai-expansion-item.vue";
 import RunaiClusterDropdown from "@/components/common/runai-cluster-selection/runai-cluster-dropdown/runai-cluster-dropdown.vue";
+import RunaiDescriptionInput from "@/components/common/runai-description-input/runai-description-input.vue";
 import RunaiNameValidation from "@/components/common/runai-name-validation/runai-name-validation.vue";
 import RunaiSectionTitle from "@/components/common/runai-section-title/runai-section-title.vue";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
@@ -185,15 +185,17 @@ import { useNodePoolStore } from "@/stores/node-pool.store";
 import { alertUtil } from "@/utils/alert.util";
 import { deepCopy } from "@/utils/common.util";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
-import { useNodePoolCreation } from "./use-node-pool-creation";
+import { useNodePoolCreation } from "./use-node-pool-creation.composable";
 import {
   labelOptions,
   validateName,
+  validateDescription,
   validateLabelKey,
   validateLabelValue,
   USED_LABEL_MESSAGE,
   type NodePoolCreationDraft,
 } from "./node-pool-create-flow.model";
+import { errorMessages } from "@/common/error-message.constant";
 import { NODE_POOL_LABEL_SUGGESTIONS } from "./node-pool-labels.mock";
 
 const props = withDefaults(defineProps<{ initialClusterId?: string }>(), { initialClusterId: "" });
@@ -266,7 +268,7 @@ function uniqueLabel(value: string) {
   return !unavailableValues.value.includes(value) || USED_LABEL_MESSAGE;
 }
 function uniqueName(value: string) {
-  return !pools.value.some((p) => p.name === value) || "This name already exists";
+  return !pools.value.some((p) => p.name === value) || errorMessages.NAME_ALREADY_EXIST;
 }
 function close() {
   if (busy.value) return;
@@ -326,7 +328,7 @@ async function submit(target: "close" | "continue") {
   overflow-wrap: anywhere;
 }
 .summary-heading {
-  color: rgba(0, 0, 0, 0.54);
+  color: var(--b-text-sub);
   margin-bottom: 10px;
 }
 </style>

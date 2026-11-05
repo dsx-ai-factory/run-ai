@@ -6,12 +6,21 @@ import { describe, expect, it } from "vitest";
 import {
   labelOptions,
   validateName,
+  validateDescription,
   validateLabelKey,
   validateLabelValue,
   PROPORTIONAL_CAPABILITIES,
 } from "./node-pool-create-flow.model";
 
 describe("node pool creation fields", () => {
+  it("matches the backend UTF-8 description limit", () => {
+    expect(validateDescription("")).toBe(true);
+    expect(validateDescription("a".repeat(250))).toBe(true);
+    expect(validateDescription("א".repeat(125))).toBe(true);
+    expect(validateDescription("א".repeat(126))).not.toBe(true);
+    expect(validateDescription("😀".repeat(62) + "ab")).toBe(true);
+    expect(validateDescription("😀".repeat(63))).not.toBe(true);
+  });
   it("validates required fields and name format", () => {
     expect(validateName("")).toBe("Enter a name");
     expect(validateName("1pool")).not.toBe(true);

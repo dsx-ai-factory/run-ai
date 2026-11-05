@@ -4,10 +4,11 @@
  */
 import { mount, shallowMount, flushPromises } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
-import { Quasar, QSelect } from "quasar";
+import { Quasar, QSelect, QInput } from "quasar";
 import { describe, it, expect, vi } from "vitest";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import RunaiNameValidation from "@/components/common/runai-name-validation/runai-name-validation.vue";
+import RunaiDescriptionInput from "@/components/common/runai-description-input/runai-description-input.vue";
 import NodePoolCreateFlow from "./node-pool-create-flow.vue";
 import { ENABLE_NODE_POOL_CREATE_FLOW } from "./node-pool-create-flow.model";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
@@ -26,7 +27,7 @@ describe("Step 1 form", () => {
         },
       },
     });
-    expect(wrapper.find('[aid="node-pool-description"]').exists()).toBe(true);
+    expect(wrapper.findComponent(RunaiDescriptionInput).props("customAid")).toBe("node-pool-description");
     expect(wrapper.find('[aid="node-pool-label-value"]').exists()).toBe(false);
     wrapper.findComponent(QSelect).vm.$emit("update:model-value", "node-type");
     await wrapper.vm.$nextTick();
@@ -52,6 +53,18 @@ describe("Step 1 form", () => {
       },
     });
   }
+  it("validates the shared description input before submitting without a debounce delay", async () => {
+    const wrapper = renderForm("cluster");
+    await flushPromises();
+    const description = wrapper.findAllComponents(QInput).find((input) => input.props("label") === "Description");
+    expect(description?.props("debounce")).toBe(0);
+    await description?.find("input, textarea").setValue("א".repeat(126));
+    await wrapper.find('[aid="create-node-pool-continue"]').trigger("click");
+    await flushPromises();
+    expect(wrapper.text()).toContain("Description exceeds the 250-byte limit");
+    expect(clusterService.createNodepool).not.toHaveBeenCalled();
+    wrapper.unmount();
+  });
   it("keeps the missing cluster error visible after submitting", async () => {
     const wrapper = renderForm();
     await flushPromises();

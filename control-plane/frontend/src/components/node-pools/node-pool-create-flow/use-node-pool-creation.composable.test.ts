@@ -2,12 +2,13 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
+import { BadRequestError, ForbiddenError } from "@/models/http-response.model";
 import { flushPromises } from "@vue/test-utils";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { effectScope, nextTick } from "vue";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
-import { useNodePoolCreation } from "./use-node-pool-creation";
+import { useNodePoolCreation } from "./use-node-pool-creation.composable";
 import { PROPORTIONAL_CAPABILITIES } from "./node-pool-create-flow.model";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: {
@@ -20,6 +21,9 @@ vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
 vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
   orgUnitService: { resetNodePoolQuotas: vi.fn() },
 }));
+beforeEach(() => {
+  vi.spyOn(console, "error").mockImplementation(() => {});
+});
 const scopes: ReturnType<typeof effectScope>[] = [];
 function setup() {
   vi.mocked(orgUnitService.resetNodePoolQuotas).mockResolvedValue(undefined);
@@ -35,8 +39,37 @@ afterEach(() => {
   scopes.forEach((s) => s.stop());
   scopes.length = 0;
   vi.resetAllMocks();
+  vi.restoreAllMocks();
 });
 describe("node pool creation", () => {
+  it("preserves the backend explanation when creation is rejected", async () => {
+    const state = setup();
+    state.draft.clusterId = "cluster";
+    await flushPromises();
+    vi.mocked(clusterService.createNodepool).mockRejectedValueOnce(
+      new BadRequestError("This node pool name is reserved"),
+    );
+    await state.create();
+    expect(state.submitError.value).toContain("This node pool name is reserved");
+    expect(state.created.value).toBeUndefined();
+  });
+  it("preserves partial creation context and the reason setup failed", async () => {
+    const state = setup();
+    state.draft.clusterId = "cluster";
+    await flushPromises();
+    vi.mocked(clusterService.createNodepool).mockResolvedValue({
+      id: "123",
+      schedulingCapabilities: { quota: true },
+    } as never);
+    vi.mocked(clusterService.patchNodepool).mockRejectedValueOnce(
+      new ForbiddenError("Editing scheduling capabilities is disabled"),
+    );
+    await state.create();
+    expect(state.submitError.value).toContain("was created");
+    expect(state.submitError.value).toContain("Retry setup");
+    expect(state.submitError.value).toContain("Editing scheduling capabilities is disabled");
+    expect(state.created.value?.id).toBe("123");
+  });
   it("ignores stale cluster responses and resets the selected label", async () => {
     const state = setup();
     let resolveOld!: (value: never[]) => void;
