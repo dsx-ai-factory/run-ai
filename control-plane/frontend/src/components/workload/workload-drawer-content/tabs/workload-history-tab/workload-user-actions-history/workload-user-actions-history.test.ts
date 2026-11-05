@@ -99,6 +99,7 @@ describe("WorkloadUserActionsHistory", () => {
       .findComponent(RunaiAdvancedFilters)
       .props("filterOptions")
       .find((filter: { name: string }) => filter.name === "action");
+    if (!eventFilter) throw new Error("Event filter option is missing");
     expect(eventFilter.selectOptions).toContainEqual({ value: "suspend", label: "Stopped" });
     view.findComponent(RunaiAdvancedFilters).vm.$emit("update-filter-by", {
       advancedFilters: [{ ...eventFilter, selectedValues: ["suspend"] }],
