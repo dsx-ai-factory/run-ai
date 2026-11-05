@@ -7,6 +7,8 @@ package installconfig
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/artifacts"
 	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/orchestrator2/spec"
@@ -289,13 +291,169 @@ func toSpecTLS(t *TLS) *spec.TLS {
 	return &spec.TLS{CertPath: t.CertPath, KeyPath: t.KeyPath, CAChainPath: t.CAChainPath}
 }
 
+// toStringMap renders the config's customHelmValues into the Helm --set
+// arguments the installer eventually passes to the chart. Helm addresses nested
+// values with dotted paths, so nested maps are flattened
+// (`telemetryService: {enabled: true}` becomes `telemetryService.enabled=true`)
+// and lists are rendered in Helm's brace syntax (`{a,b}`). Keys that are
+// already dotted are passed through unchanged, so both spellings keep working.
 func toStringMap(m map[string]any) map[string]string {
 	if len(m) == 0 {
 		return nil
 	}
 	out := make(map[string]string, len(m))
-	for k, v := range m {
-		out[k] = fmt.Sprintf("%v", v)
+	flattenHelmValues(out, "", m)
+
+	if len(out) == 0 {
+		return nil
 	}
 	return out
+}
+
+// flattenHelmValues walks a customHelmValues map, writing one entry per leaf
+// value. A leaf is anything that is not a nested map or list.
+func flattenHelmValues(out map[string]string, prefix string, m map[string]any) {
+	// A key can be written in dotted form (`global.foo`) or as a nested map
+	// (`global: {foo: ...}`), and the two can name the same path. Sorting makes
+	// the result independent of Go's map iteration order, and since a prefix
+	// sorts before the longer key it produces, the key the user spelled out in
+	// full is the one that survives.
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		key := k
+		if prefix != "" {
+			// A key nested in the config is a literal key, so the separators it
+			// contains are escaped: `podAnnotations: {"prometheus.io/scrape": x}`
+			// must reach the chart as that annotation, not as nested keys. A key
+			// written in dotted form at the top level stays a path on purpose.
+			key = prefix + "." + escapeHelmKey(k)
+		}
+
+		flattenHelmValue(out, key, m[k])
+	}
+}
+
+func flattenHelmValue(out map[string]string, key string, v any) {
+	switch t := v.(type) {
+	case map[string]any:
+		// An empty map has no leaves. Emitting `key=` would clear the chart
+		// default rather than leave it alone, so skip it.
+		if len(t) > 0 {
+			flattenHelmValues(out, key, t)
+		}
+	case map[string]string:
+		if len(t) > 0 {
+			nested := make(map[string]any, len(t))
+			for k, s := range t {
+				nested[k] = s
+			}
+
+			flattenHelmValues(out, key, nested)
+		}
+	case []any:
+		flattenHelmList(out, key, t)
+	case []string:
+		items := make([]any, 0, len(t))
+		for _, s := range t {
+			items = append(items, s)
+		}
+
+		flattenHelmList(out, key, items)
+	case nil:
+		// Helm parses a bare `null` as an empty value; `%v` would send it the
+		// literal "<nil>" instead.
+		out[key] = "null"
+	default:
+		// Helm parses what it is given, so a value that reads as a number, a
+		// boolean or null reaches the chart as that type. There is no way to
+		// force a string inside a --set argument; that needs --set-string
+		// (strvals' ParseIntoString) from the caller.
+		out[key] = escapeHelmValue(fmt.Sprintf("%v", v))
+	}
+}
+
+// flattenHelmList renders a list the way Helm's --set can address it. A list of
+// scalars uses the brace form; as soon as an element is itself a map or a list,
+// the brace form would hand the chart a Go map string, so the entries are
+// addressed by index instead (`key[0].sub=...`, `key[0][1]=...`).
+//
+// An empty list emits nothing: Helm has no empty-list form (`key={}` is a list
+// holding one empty string) and leaving the key out keeps the chart default,
+// exactly as an empty map does.
+func flattenHelmList(out map[string]string, key string, items []any) {
+	if len(items) == 0 {
+		return
+	}
+
+	if !helmListNeedsIndexes(items) {
+		out[key] = helmListValue(items)
+		return
+	}
+
+	for i, item := range items {
+		flattenHelmValue(out, fmt.Sprintf("%s[%d]", key, i), item)
+	}
+}
+
+// helmListNeedsIndexes reports whether an element is a map or a list, which
+// Helm's brace syntax cannot express.
+func helmListNeedsIndexes(items []any) bool {
+	for _, item := range items {
+		switch item.(type) {
+		case map[string]any, map[string]string, []any, []string:
+			return true
+		}
+	}
+
+	return false
+}
+
+// helmListValue renders a list in the brace form Helm's --set parser expects.
+// Elements are escaped so a comma or a closing brace inside one is not read as
+// the end of the list.
+func helmListValue(items []any) string {
+	parts := make([]string, 0, len(items))
+
+	for _, item := range items {
+		if item == nil {
+			parts = append(parts, "null")
+			continue
+		}
+
+		parts = append(parts, escapeHelmValue(fmt.Sprintf("%v", item)))
+	}
+
+	return "{" + strings.Join(parts, ",") + "}"
+}
+
+// escapeHelmValue backslash-escapes the characters Helm's --set parser treats
+// as separators, so a value containing them survives the round trip: a comma
+// separates list elements (and is an error on its own, "a,b" does not parse)
+// and a closing brace ends a list.
+func escapeHelmValue(s string) string {
+	return strings.NewReplacer(
+		`\`, `\\`,
+		`,`, `\,`,
+		`{`, `\{`,
+		`}`, `\}`,
+	).Replace(s)
+}
+
+// escapeHelmKey backslash-escapes the characters Helm's --set parser treats as
+// key separators, so a nested key that contains one stays a single key instead
+// of splitting into path segments: `.`, `,`, `=` and `[` all end a key there.
+func escapeHelmKey(s string) string {
+	return strings.NewReplacer(
+		`\`, `\\`,
+		`.`, `\.`,
+		`,`, `\,`,
+		`=`, `\=`,
+		`[`, `\[`,
+	).Replace(s)
 }
