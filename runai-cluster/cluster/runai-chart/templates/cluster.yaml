@@ -1,4 +1,6 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 apiVersion: run.ai/v1
 kind: Cluster
 metadata:
   name: cluster
+{{- end }}

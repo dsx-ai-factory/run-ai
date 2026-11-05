@@ -80,6 +80,19 @@ helmHooksHandler:
       cpu: 100m
       memory: 512Mi
       ephemeral-storage: 2Gi
+# Controls which parts of this chart are rendered, so the lifecycle hooks can be
+# deployed apart from the rest of the release (for example as their own Argo CD
+# applications ordered with sync waves).
+#   render: all  - the release and the hooks (default)
+#           none - the release without the hooks this chart owns
+#           only - only the hooks this chart owns, and the config they mount
+#   phase:  which hooks are rendered when hooks are rendered: all, pre, post or
+#           delete.
+# Hooks rendered by the kai-resource-management and karta subcharts are not
+# affected. Disable those subcharts when using render: only.
+hooks:
+  render: all
+  phase: all
 openShift:
   # Mode controls OpenShift-specific resource rendering:
   #   AutoDetect (default): Automatically detects OpenShift via CRD lookup (only works with 'helm install', not ArgoCD)

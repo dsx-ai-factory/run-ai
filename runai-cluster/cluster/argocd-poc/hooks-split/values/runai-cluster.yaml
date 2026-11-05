@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Values shared by the four Applications. Credentials are never written here:
+# the cluster uid and bootstrap token come from a Secret created beforehand.
+openShift:
+  mode: Disabled
+
+controlPlane:
+  url: "<CONTROL_PLANE_URL>"
+  existingSecret: runai-cluster-credentials
+  secretKeys:
+    clientSecret: ""
+    bootstrapToken: bootstrap-token
+    clusterUid: cluster-uid
+
+cluster:
+  url: "<CONTROL_PLANE_URL>"

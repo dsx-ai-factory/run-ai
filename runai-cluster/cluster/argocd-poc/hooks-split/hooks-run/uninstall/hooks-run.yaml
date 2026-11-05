@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# The resource that makes the uninstall Application go OutOfSync, so that its
+# pre-delete hook runs.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: runai-cluster-uninstall-hooks-run
+  namespace: runai
+data:
+  runId: "<RUN_ID>"

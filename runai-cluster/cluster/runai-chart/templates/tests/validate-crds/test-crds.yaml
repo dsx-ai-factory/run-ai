@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 apiVersion: v1
 kind: ServiceAccount
 metadata:
@@ -58,3 +59,4 @@ spec:
           memory: 128Mi
   serviceAccountName: runai-crd-validator
   restartPolicy: Never
+{{- end }}

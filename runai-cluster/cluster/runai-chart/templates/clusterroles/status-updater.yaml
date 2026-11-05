@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.operands.rbac.base.create }}
 # Run:AI Status Updater
 # Responsible to watch pods in the cluster and update status and usage metrics on pod, pod-group and top-owner
@@ -244,4 +245,5 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: status-updater-ro
+{{- end }}
 {{- end }}

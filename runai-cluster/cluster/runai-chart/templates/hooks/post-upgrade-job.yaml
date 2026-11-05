@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderHook" (list . (list "post"))) "true" }}
 {{- if .Values.helmHooksHandler.enabled }}
 {{- $runai_operator := index .Values "runai-operator" -}}
 apiVersion: batch/v1
@@ -76,4 +77,5 @@ spec:
             - configMap:
                 name: hooks-params
             {{- include "controlPlane.secret.volume" . | nindent 12 }}
+{{- end }}
 {{- end }}

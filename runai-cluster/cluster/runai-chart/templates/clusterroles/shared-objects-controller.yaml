@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderRelease" .) "true" }}
 {{- if .Values.operands.rbac.base.create }}
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -192,4 +193,5 @@ subjects:
   - kind: ServiceAccount
     name: shared-objects-controller
     namespace: runai
+{{- end }}
 {{- end }}

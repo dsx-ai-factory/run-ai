@@ -1,0 +1,46 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+#
+# Runs the post hooks of the runai-cluster chart (post-install, post-upgrade) as
+# their own Application, once the cluster Application is healthy.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: runai-cluster-post
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "-10"
+spec:
+  project: <ARGO_PROJECT>
+  sources:
+    - repoURL: <CHART_REPO_URL>
+      chart: runai-cluster
+      targetRevision: <CLUSTER_VERSION>
+      helm:
+        releaseName: runai-cluster
+        skipCrds: true
+        valueFiles:
+          - $values/values/runai-cluster.yaml
+        parameters:
+          # Also renders the hooks-params ConfigMap, which only these Jobs mount.
+          - name: hooks.render
+            value: only
+          - name: hooks.phase
+            value: post
+          - name: kai-resource-management.enabled
+            value: "false"
+          - name: karta.enabled
+            value: "false"
+    - repoURL: <GITOPS_REPO_URL>
+      targetRevision: <GITOPS_BRANCH>
+      path: hooks-run/post
+    - repoURL: <GITOPS_REPO_URL>
+      targetRevision: <GITOPS_BRANCH>
+      ref: values
+  destination:
+    namespace: runai
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: false
+      selfHeal: false

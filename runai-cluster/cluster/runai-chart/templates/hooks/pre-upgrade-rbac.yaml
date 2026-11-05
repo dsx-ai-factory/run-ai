@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderHook" (list . (list "pre"))) "true" }}
 {{- if and (not .Values.global.serviceAccountName) .Values.helmHooksHandler.enabled }}
 apiVersion: v1
 kind: ServiceAccount
@@ -136,4 +137,5 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: runai-pre-upgrade
+{{- end }}
 {{- end }}

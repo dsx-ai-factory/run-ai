@@ -1,3 +1,4 @@
+{{- if eq (include "runai.renderHook" (list . (list "post"))) "true" }}
 {{- if and (not .Values.global.serviceAccountName) .Values.helmHooksHandler.enabled }}
 apiVersion: v1
 kind: ServiceAccount
@@ -245,4 +246,4 @@ roleRef:
   name: runai-post-install
 {{- end }}
 {{- end }}
-
+{{- end }}
