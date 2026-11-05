@@ -161,3 +161,4 @@ To sync a new resource kind:
 3. Register the handler's init function in `handlerInitFuncs` in `pkg/runai_agent.go`.
 4. Ensure the scheme includes the resource's API version (in `cmd/main.go` and `pkg/tests/suite_test.go`).
 5. Add tests for the new resource.
+
