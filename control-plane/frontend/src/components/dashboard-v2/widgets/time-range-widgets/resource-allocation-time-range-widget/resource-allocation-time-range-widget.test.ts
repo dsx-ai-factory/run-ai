@@ -289,4 +289,58 @@ describe("resource-allocation-time-range-widget.vue", () => {
       "Arrays must have the same length.",
     );
   });
+
+  describe("GPU quota and CSV export", () => {
+    const dateEnd = new Date();
+    const filterByDates = { dateStart: new Date(dateEnd.getTime() - 24 * 60 * 60 * 1000), dateEnd, label: "" };
+    const quotaMeasurements = (value: string) => [{ value, timestamp: dateEnd.toISOString() }];
+
+    function mountWithNodePool(nodePoolName?: string) {
+      vi.mocked(clusterService.getClusterMetrics).mockResolvedValue({ measurements: [] });
+      vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
+      useClusterStore().isClusterVersionSufficient = () => true;
+      return mount(ResourceAllocationTimeRangeWidget, {
+        global: { plugins: [Quasar, pinia] },
+        props: { clusterId: "someClusterId", filterByDates, nodePoolName },
+      });
+    }
+
+    it("hides the GPU quota legend item and CSV column when there is no quota data", async () => {
+      const wrapper = mountWithNodePool();
+      await flushPromises();
+      wrapper.vm.measurementMap = { GPU_QUOTA: quotaMeasurements("-1") };
+
+      expect(wrapper.vm.resourceAllocationLegendItems.map((item) => item.name)).not.toContain(
+        "GPU quota (All departments)",
+      );
+      await wrapper.vm.exportCsv();
+      expect(vi.mocked(clusterService.getClusterMetricsCsv).mock.calls[0][3]).toEqual(["TOTAL_GPU", "ALLOCATED_GPU"]);
+    });
+
+    it("shows the GPU quota legend item and CSV column when there is quota data", async () => {
+      const wrapper = mountWithNodePool();
+      await flushPromises();
+      wrapper.vm.measurementMap = { GPU_QUOTA: quotaMeasurements("8") };
+
+      expect(wrapper.vm.resourceAllocationLegendItems.map((item) => item.name)).toContain("GPU quota (All departments)");
+      await wrapper.vm.exportCsv();
+      expect(vi.mocked(clusterService.getClusterMetricsCsv).mock.calls[0][3]).toEqual([
+        "TOTAL_GPU",
+        "ALLOCATED_GPU",
+        "GPU_QUOTA",
+      ]);
+    });
+
+    it("exports the selected node pool's metrics", async () => {
+      const wrapper = mountWithNodePool("pool-a");
+      await flushPromises();
+      await wrapper.vm.exportCsv();
+
+      expect(clusterService.getClusterMetricsCsv).not.toHaveBeenCalled();
+      const [clusterId, nodePoolName, , , , , filename] = vi.mocked(clusterService.getNodepoolMetricsCsv).mock.calls[0];
+      expect(clusterId).toEqual("someClusterId");
+      expect(nodePoolName).toEqual("pool-a");
+      expect(filename).toMatch(/^resources-allocation_pool-a_.*\.csv$/);
+    });
+  });
 });

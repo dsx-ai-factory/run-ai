@@ -75,7 +75,7 @@ describe("NodePoolFreeResourcesWidget component", () => {
   });
 
   it("should render correct title", async () => {
-    expect(wrapper.find("[aid='free-nodes-by-node-pool']").text()).toEqual("Free nodes by node pool");
+    expect(wrapper.find("[aid='free-gpu-nodes-by-node-pool']").text()).toEqual("Free GPU nodes by node pool");
   });
 
   it("renders without errors and render loading on component created", async () => {

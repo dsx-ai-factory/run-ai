@@ -7,6 +7,8 @@ import { beforeEach, afterEach, describe, expect, test, vi, it } from "vitest";
 import type { VueWrapper } from "@vue/test-utils";
 import { mount, flushPromises } from "@vue/test-utils";
 import { Quasar } from "quasar";
+import { createTestingPinia } from "@pinia/testing";
+import { setActivePinia } from "pinia";
 import ResourceUtilizationTimeRangeWidget from "./resource-utilization-time-range-widget.vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { mockClusterMetricsValues } from "./resource-utilization-time-range-widget.mock";
@@ -322,6 +324,40 @@ describe("resource-utilization-time-range-widget.vue", () => {
       const avgUtilizationItem = avgUtilizationItems[index];
       expect(avgUtilizationItem.find(".avg-title").text()).toBe(metric.name);
       expect(avgUtilizationItem.find(".avg-value").text()).toBe(metric.value);
+    });
+  });
+
+  describe("CSV export", () => {
+    const dateEnd = new Date();
+    const filterByDates = { dateStart: new Date(dateEnd.getTime() - 24 * 60 * 60 * 1000), dateEnd, label: "" };
+
+    function mountWithNodePool(nodePoolName?: string) {
+      setActivePinia(createTestingPinia({ createSpy: vi.fn }));
+      vi.mocked(clusterService.getClusterMetrics).mockResolvedValue({ measurements: [] });
+      vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
+      return mount(ResourceUtilizationTimeRangeWidget, {
+        global: { plugins: [Quasar] },
+        props: { clusterId: "someClusterId", filterByDates, nodePoolName },
+      });
+    }
+
+    it("exports cluster metrics when no node pool is selected", async () => {
+      const wrapper = mountWithNodePool();
+      await flushPromises();
+      await wrapper.vm.exportCsv();
+
+      expect(clusterService.getNodepoolMetricsCsv).not.toHaveBeenCalled();
+      expect(vi.mocked(clusterService.getClusterMetricsCsv).mock.calls[0][5]).toMatch(/^resources-utilization_.*\.csv$/);
+    });
+
+    it("exports the selected node pool's metrics", async () => {
+      const wrapper = mountWithNodePool("pool-a");
+      await flushPromises();
+      await wrapper.vm.exportCsv();
+
+      expect(clusterService.getClusterMetricsCsv).not.toHaveBeenCalled();
+      const [clusterId, nodePoolName] = vi.mocked(clusterService.getNodepoolMetricsCsv).mock.calls[0];
+      expect([clusterId, nodePoolName]).toEqual(["someClusterId", "pool-a"]);
     });
   });
 });
