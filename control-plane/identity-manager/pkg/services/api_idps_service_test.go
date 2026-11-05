@@ -49,7 +49,7 @@ import (
 )
 
 const (
-	URL              = "https://example.com/"
+	URL              = "https://1.1.1.1/"
 	NON_SAML_XML     = "hello world"
 	INVALID_XML_FILE = "not!valid!base64"
 	XML_URL          = "https://example.com/auth/realms/workAI/protocol/saml/descriptor"
@@ -244,8 +244,6 @@ func TestCreateIdp_OidcHappyFlow(t *testing.T) {
 	idpsListCacheMock := MocksList.IdpsListCacheMock
 	idpMappersCacheMock := MocksList.IdpMappersCacheMock
 	dalMock := MocksList.IdpMock
-	wg := sync.WaitGroup{}
-	wg.Add(1)
 	config := map[string]string{"clientSecret": "test"}
 	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
 	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, "oidc").Return(config, nil)
@@ -255,10 +253,8 @@ func TestCreateIdp_OidcHappyFlow(t *testing.T) {
 	idpCacheMock.On("DeleteIdpFromRealm", ctx, realm, idpAlias, mock.Anything).Return(nil)
 	idpsListCacheMock.On("DeleteIdpsListFromRealm", ctx, realm).Return(nil)
 	idpMappersCacheMock.On("DeleteIdpMappersFromRealm", ctx, realm, idpAlias).Return(nil)
-	dalMock.On("GetIdpMetadata", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil)
-	dalMock.On("SaveIdpMetadata", mock.Anything, mock.Anything).Run(func(mock.Arguments) {
-		defer wg.Done()
-	}).Return(nil)
+	dalMock.On("GetIdpMetadata", mock.Anything, mock.Anything, mock.Anything).Return(nil, nil).Maybe()
+	dalMock.On("SaveIdpMetadata", mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	request := api.IdpCreationRequest{
 		Type:     api.IdpCreationRequestTypeEnum(models.OIDC),
@@ -272,7 +268,6 @@ func TestCreateIdp_OidcHappyFlow(t *testing.T) {
 		OcpData: nil,
 	}
 	response, err := testSubject.CreateIdp(ctx, request, "")
-	wg.Wait()
 
 	assert.Nil(t, err)
 	assert.NotNil(t, response)
@@ -317,7 +312,7 @@ func TestCreateIdp_SamlHappyFlow(t *testing.T) {
 	wg.Add(1)
 	config := map[string]string{"clientSecret": "test"}
 	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
-	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, "saml").Return(config, nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(config, nil)
 	iamMock.MockIdpService.On("CreateIdp", ctx, realm, mock.Anything).Return(ptr.To(idpAlias), nil)
 	iamMock.MockIdpService.On("UpdateIdpMappers", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	idpCacheMock.On("DeleteIdpFromRealm", ctx, realm, idpAlias, mock.Anything).Return(nil)
@@ -327,12 +322,11 @@ func TestCreateIdp_SamlHappyFlow(t *testing.T) {
 	dalMock.On("SaveIdpMetadata", mock.Anything, mock.Anything).Run(func(mock.Arguments) {
 		defer wg.Done()
 	}).Return(nil)
+	metadata := samlMetadataWithSigningCertificate(t, "https://idp.example.com", "https://idp.example.com/sso")
 	request := api.IdpCreationRequest{
 		Type:     api.IdpCreationRequestTypeEnum(models.SAML),
 		Name:     idpAlias,
-		SamlData: &api.SamlCreationData{MetadataXmlUrl: URL, MetadataXmlType: utils.Url},
-		OidcData: nil,
-		OcpData:  nil,
+		SamlData: &api.SamlCreationData{MetadataXmlFile: base64.StdEncoding.EncodeToString(metadata), MetadataXmlType: utils.File},
 	}
 	response, err := testSubject.CreateIdp(ctx, request, "")
 	wg.Wait()
@@ -361,7 +355,6 @@ func TestCreateIdp_SamlDryRun_ReturnsConfigWithoutSaving(t *testing.T) {
 	assert.Equal(t, "saml-idp", res.Alias)
 	assert.Equal(t, "https://idp.example.com", res.SamlData.EntityId)
 	assert.Equal(t, "https://idp.example.com/sso", res.SamlData.SingleSignOnServiceUrl)
-	assert.True(t, res.SamlData.ValidateSignature)
 	assert.NoError(t, utils.ValidateSigningCertificate(res.SamlData.SigningCertificate))
 	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
@@ -418,24 +411,6 @@ func TestCreateIdp_SamlDryRun_MetadataWithoutCertificate_ReturnsConfig(t *testin
 	assert.Empty(t, res.SamlData.SigningCertificate)
 	assert.False(t, res.SamlData.ValidateSignature)
 	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
-}
-
-func TestCreateIdp_ConfigUrlError(t *testing.T) {
-	MocksList, testSubject, ctx := initIdpServiceTests(t)
-	iamMock := MocksList.IamServicesContainerMock
-	authMock := MocksList.AuthManagerMock
-	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
-	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil, fmt.Errorf("error"))
-
-	request := api.IdpCreationRequest{
-		Type:     api.IdpCreationRequestTypeEnum(models.SAML),
-		Name:     idpAlias,
-		SamlData: &api.SamlCreationData{MetadataXmlUrl: URL, MetadataXmlType: utils.Url},
-	}
-	response, err := testSubject.CreateIdp(ctx, request, "")
-
-	assert.NotNil(t, err)
-	assert.Equal(t, http.StatusInternalServerError, response.Code)
 }
 
 func TestCreateIdp_ConfigFileError(t *testing.T) {

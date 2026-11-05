@@ -387,18 +387,20 @@ func (s *IdpsApiService) validateIdpConfig(ctx context.Context, request api.IdpC
 	if err != nil {
 		return nil, err
 	}
+
 	if err := utils.ValidateSamlMetadata(metadata); err != nil {
 		return nil, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml metadata"}, err)
 	}
+
 	config := utils.ParseSamlIdpConfig(metadata)
 	if config.SigningCertificate == "" {
 		return config, nil
 	}
+
 	if err := utils.ValidateSigningCertificate(config.SigningCertificate); err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("rejected saml signing certificate for idp %s. err: %s", request.Name, err.Error())
 		return nil, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml signing certificate"}, err)
 	}
-	config.ValidateSignature = true
 	return config, nil
 }
 
