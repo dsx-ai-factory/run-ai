@@ -5,6 +5,7 @@
 import { describe, expect, it } from "vitest";
 import {
   labelOptions,
+  createNodePoolDraft,
   validateName,
   validateDescription,
   validateLabelKey,
@@ -13,6 +14,15 @@ import {
 } from "./node-pool-create-flow.model";
 
 describe("node pool creation fields", () => {
+  it("initializes independent drafts without sending omitted version-gated defaults", () => {
+    const first = createNodePoolDraft("cluster");
+    const second = createNodePoolDraft("cluster");
+    expect(first.gpuNetworkAccelerationDetection).toBeUndefined();
+    expect(first.schedulingConfiguration?.numaAwareScheduling).toBeUndefined();
+    expect(first.schedulingConfiguration?.gpuPodsPlacementStrategy?.device).toBeUndefined();
+    if (first.schedulingCapabilities) first.schedulingCapabilities.quota = true;
+    expect(second.schedulingCapabilities?.quota).toBe(false);
+  });
   it("matches the backend UTF-8 description limit", () => {
     expect(validateDescription("")).toBe(true);
     expect(validateDescription("a".repeat(250))).toBe(true);

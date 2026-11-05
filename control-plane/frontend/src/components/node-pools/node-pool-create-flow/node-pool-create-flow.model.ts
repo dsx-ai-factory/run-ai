@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { errorMessages } from "@/common/error-message.constant";
+import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
+import { NodepoolGPUNetworkAccelerationDetection, PlacementStrategy } from "@/swagger-models/cluster-service-client";
 import type { NodepoolCreateFields, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
 
 // Temporary frontend gate while the new flow and its backend dependencies are developed.
@@ -17,6 +19,30 @@ export const PROPORTIONAL_CAPABILITIES = Object.freeze({
 // Keep description non-null in the form draft; the API accepts an optional description.
 export interface NodePoolCreationDraft extends NodepoolCreateFields {
   description: string;
+}
+
+// Mirror defaults applied to omitted fields by cluster-service's nodepoolSetDefaults.
+// Keep optional version-gated fields out of the create payload until explicitly selected.
+export const NODE_POOL_CONFIGURATION_DEFAULTS = {
+  gpuNetworkAccelerationDetection: NodepoolGPUNetworkAccelerationDetection.Auto,
+  numaAwareScheduling: false,
+  gpuNodePlacement: PlacementStrategy.Binpack,
+  gpuDevicePlacement: PlacementStrategy.Binpack,
+  cpuNodePlacement: PlacementStrategy.Binpack,
+} as const;
+
+export function createNodePoolDraft(clusterId = ""): NodePoolCreationDraft {
+  const pool = nodePoolUtil.getEmptyNodePool(clusterId);
+  return {
+    ...pool,
+    description: "",
+    schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES },
+    schedulingConfiguration: {
+      ...pool.schedulingConfiguration,
+      gpuPodsPlacementStrategy: { node: NODE_POOL_CONFIGURATION_DEFAULTS.gpuNodePlacement },
+      cpuPodsPlacementStrategy: { node: NODE_POOL_CONFIGURATION_DEFAULTS.cpuNodePlacement },
+    },
+  };
 }
 
 export const USED_LABEL_MESSAGE = "This key-value pair is already in use by another node pool.";

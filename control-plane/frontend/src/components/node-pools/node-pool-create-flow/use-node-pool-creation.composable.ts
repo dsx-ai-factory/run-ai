@@ -5,20 +5,15 @@
 import { computed, reactive, ref, watch, onScopeDispose } from "vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
-import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 import { ErrorAlert } from "@/utils/error-alert.util/error-alert.util";
 import { deepCopy } from "@/utils/common.util";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { NodepoolSortFilterFields, type Nodepool } from "@/swagger-models/cluster-service-client";
 import { errorMessages } from "@/common/error-message.constant";
-import { isProportional, PROPORTIONAL_CAPABILITIES, type NodePoolCreationDraft } from "./node-pool-create-flow.model";
+import { isProportional, PROPORTIONAL_CAPABILITIES, createNodePoolDraft } from "./node-pool-create-flow.model";
 
 export function useNodePoolCreation(clusterId: string) {
-  const draft = reactive<NodePoolCreationDraft>({
-    ...nodePoolUtil.getEmptyNodePool(clusterId),
-    description: "",
-    schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES },
-  });
+  const draft = reactive(createNodePoolDraft(clusterId));
   const pools = ref<Nodepool[]>([]);
   const loading = ref(false);
   const loadError = ref("");

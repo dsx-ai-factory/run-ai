@@ -137,33 +137,7 @@
         </div>
       </template>
       <template #right-sidebar>
-        <div class="creation-summary">
-          <div class="summary-heading">Cluster</div>
-          <div>{{ clusterName || "None" }}</div>
-          <q-separator class="q-my-md" />
-          <div class="summary-heading">Resources</div>
-          <div>Nodes: None</div>
-          <div>GPUs: None</div>
-          <div>GPU memory: None</div>
-          <div>GPU types: None</div>
-          <q-separator class="q-my-md" />
-          <div class="summary-heading">Scheduling mode</div>
-          <template v-if="!modeMismatch"
-            ><div class="text-weight-bold q-mb-xs">Proportional</div>
-            <div>
-              GPU resources are distributed proportionally according to each department's and project's weight.
-            </div></template
-          >
-          <div v-else>Saved settings differ from Proportional</div>
-          <q-separator class="q-my-md" />
-          <div class="summary-heading">Topology & placement</div>
-          <div>Network topology: None</div>
-          <div>MNNVL: Auto detect</div>
-          <div>NUMA-aware scheduling: Disabled</div>
-          <div>GPU node placement strategy: Bin-pack</div>
-          <div>GPU device placement strategy: Bin-pack</div>
-          <div>CPU node placement strategy: Bin-pack</div>
-        </div>
+        <node-pool-wizard-summary :pool="created ?? draft" :cluster-name="clusterName" />
       </template>
     </runai-wizard-layout>
   </div>
@@ -171,6 +145,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useQuasar } from "quasar";
+import NodePoolWizardSummary from "@/components/node-pools/node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
 import RunaiExpansionWrapper from "@/components/common/runai-expansion-wrapper/runai-expansion-wrapper.vue";
@@ -320,15 +295,5 @@ async function submit(target: "close" | "continue") {
 .creation-footer {
   width: 100%;
   margin-top: 40px;
-}
-.creation-summary {
-  padding: 16px;
-  font-size: 12px;
-  line-height: 1.4;
-  overflow-wrap: anywhere;
-}
-.summary-heading {
-  color: var(--b-text-sub);
-  margin-bottom: 10px;
 }
 </style>
