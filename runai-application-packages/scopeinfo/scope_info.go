@@ -30,13 +30,17 @@ func ScopeInfoOf(scope Scope, projectId *int32, departmentId *string, clusterId 
 	result := ScopeInfo{
 		Scope: scope,
 	}
-	if scope == Project {
+	// The ids are nullable in the API models, and callers do pass nil for the
+	// ones that do not apply to the asset being scoped. Only the id that
+	// belongs to the requested scope is read, and an absent one leaves ScopeId
+	// empty instead of panicking.
+	if scope == Project && projectId != nil {
 		result.ScopeId = fmt.Sprintf("%d", *projectId)
 	}
-	if scope == Department {
+	if scope == Department && departmentId != nil {
 		result.ScopeId = *departmentId
 	}
-	if scope == Cluster {
+	if scope == Cluster && clusterId != nil {
 		result.ScopeId = *clusterId
 	}
 	if scope == Tenant && tenantId != nil {

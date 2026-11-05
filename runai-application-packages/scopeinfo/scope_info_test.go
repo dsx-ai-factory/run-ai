@@ -44,6 +44,56 @@ var _ = Describe("scope info", func() {
 				}))
 			})
 		})
+
+		Context("scope info of an org unit id", func() {
+			It("should resolve the id belonging to the scope", func() {
+				projectId := int32(7)
+				departmentId := "dept-1"
+				clusterId := "cluster-1"
+				tenantId := int32(3)
+
+				Expect(*ScopeInfoOf(Project, &projectId, &departmentId, &clusterId, &tenantId)).To(Equal(ScopeInfo{
+					Scope:   Project,
+					ScopeId: "7",
+				}))
+				Expect(*ScopeInfoOf(Department, &projectId, &departmentId, &clusterId, &tenantId)).To(Equal(ScopeInfo{
+					Scope:   Department,
+					ScopeId: "dept-1",
+				}))
+				Expect(*ScopeInfoOf(Cluster, &projectId, &departmentId, &clusterId, &tenantId)).To(Equal(ScopeInfo{
+					Scope:   Cluster,
+					ScopeId: "cluster-1",
+				}))
+				Expect(*ScopeInfoOf(Tenant, &projectId, &departmentId, &clusterId, &tenantId)).To(Equal(ScopeInfo{
+					Scope:   Tenant,
+					ScopeId: "3",
+				}))
+			})
+
+			// The API models keep every org unit id in a nullable column, so a
+			// caller that scopes an asset by project passes nil for the others.
+			It("should not panic when the id for the scope is unset", func() {
+				Expect(func() { ScopeInfoOf(Project, nil, nil, nil, nil) }).NotTo(Panic())
+				Expect(func() { ScopeInfoOf(Department, nil, nil, nil, nil) }).NotTo(Panic())
+				Expect(func() { ScopeInfoOf(Cluster, nil, nil, nil, nil) }).NotTo(Panic())
+				Expect(func() { ScopeInfoOf(Tenant, nil, nil, nil, nil) }).NotTo(Panic())
+			})
+
+			It("should leave the scope id empty when the id for the scope is unset", func() {
+				Expect(*ScopeInfoOf(Project, nil, nil, nil, nil)).To(Equal(ScopeInfo{Scope: Project}))
+				Expect(*ScopeInfoOf(Department, nil, nil, nil, nil)).To(Equal(ScopeInfo{Scope: Department}))
+				Expect(*ScopeInfoOf(Cluster, nil, nil, nil, nil)).To(Equal(ScopeInfo{Scope: Cluster}))
+				Expect(*ScopeInfoOf(Tenant, nil, nil, nil, nil)).To(Equal(ScopeInfo{Scope: Tenant}))
+			})
+
+			It("should ignore ids that do not belong to the scope", func() {
+				projectId := int32(7)
+				Expect(*ScopeInfoOf(Project, &projectId, nil, nil, nil)).To(Equal(ScopeInfo{
+					Scope:   Project,
+					ScopeId: "7",
+				}))
+			})
+		})
 	})
 
 })
