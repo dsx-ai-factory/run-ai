@@ -30,6 +30,7 @@ inference management
 * [runai inference logs](runai_inference_logs.md)	 - view logs of an inference workload
 * [runai inference nim](runai_inference_nim.md)	 - [Experimental] Runs NVIDIA NIM (NVIDIA Inference Microservices) workloads. Optimized for deploying foundation models.
 * [runai inference port-forward](runai_inference_port-forward.md)	 - forward one or more local ports to an inference workload
+* [runai inference recommend](runai_inference_recommend.md)	 - Recommend GPU allocation for a NIM test/dev workload as JSON
 * [runai inference standard](runai_inference_standard.md)	 - Runs a single inference process on one node. Suitable for smaller models or simpler inference tasks.
 * [runai inference submit](runai_inference_submit.md)	 - submit an inference workload
 * [runai inference update](runai_inference_update.md)	 - update an inference workload
