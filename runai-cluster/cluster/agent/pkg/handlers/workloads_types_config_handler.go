@@ -438,10 +438,20 @@ func (h *WorkloadTypeKartasHandler) ShouldReCreate(expected, existing client.Obj
 		return false
 	}
 
+	expectedKarta = expectedKarta.DeepCopy()
+	existingKarta = existingKarta.DeepCopy()
 	setKartaDefaultsToAvoidRecreation(expectedKarta, existingKarta)
 
-	// if the specs are not equal - means the Karta changed in the backend - need to re-create it.
-	// else - only the labels changed - no need to re-create.
+	// Status mappings do not change the watched resources or their ownership. Keep
+	// the Karta alive so existing ExternalWorkloads do not block its replacement.
+	expectedStatus := expectedKarta.Spec.StructureDefinition.RootComponent.StatusDefinition
+	existingStatus := existingKarta.Spec.StructureDefinition.RootComponent.StatusDefinition
+	if expectedStatus != nil && existingStatus != nil {
+		expectedStatus.StatusMappings = kartav1alpha1.StatusMappings{}
+		existingStatus.StatusMappings = kartav1alpha1.StatusMappings{}
+	}
+
+	// Changes outside root status mappings still require recreation.
 	return !reflect.DeepEqual(expectedKarta.Spec, existingKarta.Spec)
 }
 

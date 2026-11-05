@@ -22,6 +22,7 @@ const (
 	// CreateFromRunnerOperation builds an ExternalWorkload from the runner alone, for a
 	// workload object that was never created
 	CreateFromRunnerOperation TaskOperation = "createFromRunner"
+	RefreshKartaOperation     TaskOperation = "refreshKarta"
 )
 
 type TaskPayload[T client.Object] interface {
