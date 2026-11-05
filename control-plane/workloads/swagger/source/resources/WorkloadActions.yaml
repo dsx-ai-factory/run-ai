@@ -1,6 +1,6 @@
 get:
   summary: Get workload action history.
-  description: Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+  description: Returns accepted workload actions. Free-text search matches raw action values and subjects case-insensitively. Use the action filter for exact action selection. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
   operationId: get_workload_actions_history
   x-service: workloads
   x-test-coverage:

@@ -29,7 +29,7 @@ type WorkloadActionsAPI interface {
 	/*
 		GetWorkloadActionsHistory Get workload action history.
 
-		Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+		Returns accepted workload actions. Free-text search matches raw action values and subjects case-insensitively. Use the action filter for exact action selection. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@param workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -113,7 +113,7 @@ func (r ApiGetWorkloadActionsHistoryRequest) Execute() (*GetWorkloadActionsRespo
 /*
 GetWorkloadActionsHistory Get workload action history.
 
-Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+Returns accepted workload actions. Free-text search matches raw action values and subjects case-insensitively. Use the action filter for exact action selection. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param workloadId The  Universally Unique Identifier (UUID) of the workload.

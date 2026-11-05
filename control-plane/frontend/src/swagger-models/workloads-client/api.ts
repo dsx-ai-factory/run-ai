@@ -33484,7 +33484,7 @@ export class UnifiedApi extends BaseAPI {
 export const WorkloadActionsApiAxiosParamCreator = function (configuration?: Configuration) {
     return {
         /**
-         * Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * Returns accepted workload actions. Free-text search matches raw action values and subjects case-insensitively. Use the action filter for exact action selection. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
          * @summary Get workload action history.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -33602,7 +33602,7 @@ export const WorkloadActionsApiFp = function(configuration?: Configuration) {
     const localVarAxiosParamCreator = WorkloadActionsApiAxiosParamCreator(configuration)
     return {
         /**
-         * Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * Returns accepted workload actions. Free-text search matches raw action values and subjects case-insensitively. Use the action filter for exact action selection. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
          * @summary Get workload action history.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -33640,7 +33640,7 @@ export const WorkloadActionsApiFactory = function (configuration?: Configuration
     const localVarFp = WorkloadActionsApiFp(configuration)
     return {
         /**
-         * Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+         * Returns accepted workload actions. Free-text search matches raw action values and subjects case-insensitively. Use the action filter for exact action selection. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
          * @summary Get workload action history.
          * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
          * @param {number} [offset] The offset of the first item returned in the collection.
@@ -33676,7 +33676,7 @@ export const WorkloadActionsApiFactory = function (configuration?: Configuration
  */
 export class WorkloadActionsApi extends BaseAPI {
     /**
-     * Returns accepted workload actions. Free-text search matches event labels and subjects case-insensitively. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
+     * Returns accepted workload actions. Free-text search matches raw action values and subjects case-insensitively. Use the action filter for exact action selection. History remains available after a workload is deleted and is removed when the workload is permanently removed from the system.
      * @summary Get workload action history.
      * @param {string} workloadId The  Universally Unique Identifier (UUID) of the workload.
      * @param {number} [offset] The offset of the first item returned in the collection.

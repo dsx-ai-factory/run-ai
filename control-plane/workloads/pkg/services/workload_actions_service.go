@@ -8,7 +8,6 @@ package services
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 
@@ -86,7 +85,7 @@ func (s *WorkloadActionsService) GetWorkloadActionsHistory(ctx context.Context, 
 	if sortOrder != dao.SortOrderAsc && sortOrder != dao.SortOrderDesc {
 		return NewErrorResponse(api.NewValidationError("sortOrder must be asc or desc")), nil
 	}
-	records, hasNext, dbErr := dao.DbGetWorkloadActions(ctx, id, offset, limit, sortOrder, sortColumn, filters, search, matchingWorkloadActions(search))
+	records, hasNext, dbErr := dao.DbGetWorkloadActions(ctx, id, offset, limit, sortOrder, sortColumn, filters, search)
 	if dbErr != nil {
 		return NewErrorResponse(dbErr), nil
 	}
@@ -111,30 +110,4 @@ func buildWorkloadActionsResponse(records []models.WorkloadActionHistory, offset
 		response.Next = offset + int32(len(records))
 	}
 	return response
-}
-
-// Resolve the API's display-label search aliases before querying persistence.
-func matchingWorkloadActions(search string) []api.WorkloadActionType {
-	term := strings.ToLower(strings.TrimSpace(search))
-	if term == "" {
-		return nil
-	}
-	labels := map[api.WorkloadActionType]string{
-		api.WORKLOADACTIONTYPE_CREATE:  "Created",
-		api.WORKLOADACTIONTYPE_UPDATE:  "Updated",
-		api.WORKLOADACTIONTYPE_DELETE:  "Deleted",
-		api.WORKLOADACTIONTYPE_SUSPEND: "Stopped",
-		api.WORKLOADACTIONTYPE_RESUME:  "Resumed",
-	}
-	var matches []api.WorkloadActionType
-	for _, action := range api.AllowedWorkloadActionTypeEnumValues {
-		label, ok := labels[action]
-		if !ok {
-			label = string(action)
-		}
-		if strings.Contains(strings.ToLower(label), term) {
-			matches = append(matches, action)
-		}
-	}
-	return matches
 }

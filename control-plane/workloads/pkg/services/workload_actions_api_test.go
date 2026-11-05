@@ -120,7 +120,7 @@ var _ = Describe("Workload action history", func() {
 			Expect(body.Actions).To(HaveLen(1))
 			Expect(body.Actions[0].Id).To(Equal(testing.TestUuid1))
 			Expect(body.Next).To(BeZero())
-			searched := read("search=CrEaTeD&limit=1")
+			searched := read("search=CrEaTe&limit=1")
 			Expect(searched.Actions).To(HaveLen(1))
 			Expect(searched.Actions[0].Id).To(Equal(testing.TestUuid1))
 			Expect(searched.Next).To(BeZero())
@@ -135,25 +135,41 @@ var _ = Describe("Workload action history", func() {
 			filtered := read("search=" + url.QueryEscape("Z@EXAMPLE.COM") + "&filterBy=" + url.QueryEscape("action==update"))
 			Expect(filtered.Actions).To(BeEmpty())
 		})
-		DescribeTable("searches display labels while preserving raw action values", func(action api.WorkloadActionType, label string) {
+		DescribeTable("searches raw action values", func(action api.WorkloadActionType) {
 			_, err := runaidb.DB().Model(&models.WorkloadActionHistory{}).Where("id = ?", records[0].ID).
 				Updates(map[string]interface{}{"action": string(action)})
 			Expect(err).NotTo(HaveOccurred())
-			body := read("search=" + url.QueryEscape(strings.ToUpper(label)) + "&filterBy=" + url.QueryEscape("action=="+string(action)+",subject==z@example.com"))
+			body := read("search=" + url.QueryEscape(strings.ToUpper(string(action))) + "&filterBy=" + url.QueryEscape("subject==z@example.com"))
 			Expect(body.Actions).To(HaveLen(1))
 			Expect(body.Actions[0].Action).To(Equal(action))
 		},
-			Entry("created", api.WORKLOADACTIONTYPE_CREATE, "Created"),
-			Entry("updated", api.WORKLOADACTIONTYPE_UPDATE, "Updated"),
-			Entry("deleted", api.WORKLOADACTIONTYPE_DELETE, "Deleted"),
-			Entry("stopped", api.WORKLOADACTIONTYPE_SUSPEND, "Stopped"),
-			Entry("resumed", api.WORKLOADACTIONTYPE_RESUME, "Resumed"),
+			Entry("create", api.WORKLOADACTIONTYPE_CREATE),
+			Entry("update", api.WORKLOADACTIONTYPE_UPDATE),
+			Entry("delete", api.WORKLOADACTIONTYPE_DELETE),
+			Entry("suspend", api.WORKLOADACTIONTYPE_SUSPEND),
+			Entry("resume", api.WORKLOADACTIONTYPE_RESUME),
 		)
+		It("does not translate display labels and keeps the event filter independent", func() {
+			_, err := runaidb.DB().Model(&models.WorkloadActionHistory{}).Where("id = ?", records[0].ID).
+				Updates(map[string]interface{}{"action": "suspend"})
+			Expect(err).NotTo(HaveOccurred())
+			_, err = runaidb.DB().Model(&models.WorkloadActionHistory{}).Where("id = ?", records[1].ID).
+				Updates(map[string]interface{}{"subject": "stopped@example.com"})
+			Expect(err).NotTo(HaveOccurred())
+			searched := read("search=StOpPeD")
+			Expect(searched.Actions).To(HaveLen(1))
+			Expect(searched.Actions[0].Id).To(Equal(records[1].ID.String()))
+			filtered := read("filterBy=" + url.QueryEscape("action==suspend"))
+			Expect(filtered.Actions).To(HaveLen(1))
+			Expect(filtered.Actions[0].Action).To(Equal(api.WORKLOADACTIONTYPE_SUSPEND))
+			combined := read("search=Stopped&filterBy=" + url.QueryEscape("action==suspend"))
+			Expect(combined.Actions).To(BeEmpty())
+		})
 		It("treats search wildcards and SQL syntax as literal text", func() {
 			Expect(read("search=" + url.QueryEscape("%")).Actions).To(BeEmpty())
 			Expect(read("search=" + url.QueryEscape("_")).Actions).To(BeEmpty())
 			Expect(read("search=" + url.QueryEscape("%_\\' OR 1=1 --")).Actions).To(BeEmpty())
-			Expect(read("search=" + url.QueryEscape("  CrEaTeD  ")).Actions).To(HaveLen(1))
+			Expect(read("search=" + url.QueryEscape("  CrEaTe  ")).Actions).To(HaveLen(1))
 		})
 		It("keeps search scoped to the requested workload and tenant", func() {
 			other := records[0]
@@ -368,7 +384,7 @@ var _ = Describe("Workload action history", func() {
 	})
 
 	It("requires tenant context for DAO reads", func() {
-		_, _, apiErr := dao.DbGetWorkloadActions(context.Background(), workloadID, 0, 0, "desc", "accepted_at", nil, "", nil)
+		_, _, apiErr := dao.DbGetWorkloadActions(context.Background(), workloadID, 0, 0, "desc", "accepted_at", nil, "")
 		Expect(apiErr).NotTo(BeNil())
 		Expect(apiErr.Code).To(Equal(int32(http.StatusBadRequest)))
 
@@ -517,7 +533,7 @@ func getWorkloadActionsHistory(service api.WorkloadActionsAPIServicer, ctx conte
 
 func storedWorkloadActions(ctx context.Context, workloadID uuid.UUID, limit int32) []models.WorkloadActionHistory {
 	GinkgoHelper()
-	records, _, apiErr := dao.DbGetWorkloadActions(ctx, workloadID, 0, limit, "desc", "accepted_at", nil, "", nil)
+	records, _, apiErr := dao.DbGetWorkloadActions(ctx, workloadID, 0, limit, "desc", "accepted_at", nil, "")
 	Expect(apiErr).To(BeNil())
 	return records
 }
