@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/auth"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/auth/fake"
@@ -406,7 +407,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 
 		It("should handle worker-specific environment variables", func() {
 			output, err := cli.RunCommand(fmt.Sprintf(
-				"inference distributed submit %s -p p301 -i %s -e LEADER_VAR=leader --worker-environment WORKER_VAR=worker --serving-port 8080 --dry-run",
+				"inference distributed submit %s -p p301 -i %s -e LEADER_VAR=leader --worker-environment-variable WORKER_VAR=worker --serving-port 8080 --dry-run",
 				DistInfWorkerName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
 
@@ -701,7 +702,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 					"--worker-as-leader=false --worker-image vllm/vllm-worker:latest "+
 					"--worker-image-pull-policy IfNotPresent --worker-command python "+
 					"--worker-working-dir /workspace/worker --worker-create-home-dir "+
-					"--worker-environment WORKER_ID=auto "+
+					"--worker-environment-variable WORKER_ID=auto "+
 					"--serving-port 8080 --dry-run",
 				DistInfFullName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
@@ -920,12 +921,44 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 		})
 	})
 
+	Context("Worker environment flag compatibility", func() {
+		DescribeTable("preserves worker variables and warns only for the deprecated spelling",
+			func(flags string, deprecated bool) {
+				output, err := cli.RunCommand(fmt.Sprintf(
+					"inference distributed submit %s -p p301 -i %s --serving-port 8080 %s --dry-run",
+					DistInfMinimalName, DistInfImageName, flags), envMap)
+				Expect(err).NotTo(HaveOccurred())
+				warning := "Flag --worker-environment has been deprecated, use --worker-environment-variable instead\n"
+				Expect(strings.Contains(output, warning)).To(Equal(deprecated))
+				request := openapi.DistributedInferenceCreationRequest{}
+				Expect(json.Unmarshal([]byte(strings.ReplaceAll(output, warning, "")), &request)).To(Succeed())
+				worker := request.GetSpec().Worker.Get()
+				values := make(map[string]string)
+				for _, variable := range worker.EnvironmentVariables {
+					values[*variable.Name.Get()] = *variable.Value.Get()
+				}
+				Expect(values).To(Equal(map[string]string{"WORKER_A": "a=b", "WORKER_EMPTY": ""}))
+			},
+			Entry("canonical", "--worker-environment-variable WORKER_A=a=b --worker-environment-variable WORKER_EMPTY=", false),
+			Entry("legacy", "--worker-environment WORKER_A=a=b --worker-environment WORKER_EMPTY=", true),
+			Entry("canonical then legacy", "--worker-environment-variable WORKER_A=a=b --worker-environment WORKER_EMPTY=", true),
+			Entry("legacy then canonical", "--worker-environment WORKER_A=a=b --worker-environment-variable WORKER_EMPTY=", true),
+		)
+
+		It("shows the canonical flag and hides the deprecated alias in help", func() {
+			output, err := cli.RunCommand("inference distributed submit --help", envMap)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(output).To(ContainSubstring("--worker-environment-variable stringArray"))
+			Expect(output).NotTo(ContainSubstring("--worker-environment stringArray"))
+		})
+	})
+
 	Context("Distributed Inference Submit - Worker Environment Merge Behavior", func() {
 		It("worker-as-leader=true should merge leader and worker env vars", func() {
 			output, err := cli.RunCommand(fmt.Sprintf(
 				"inference distributed submit %s -p p301 -i %s --serving-port 8080 "+
 					"--environment-variable SHARED_VAR=leader --environment-variable LEADER_ONLY=leader "+
-					"--worker-environment SHARED_VAR=worker --worker-environment WORKER_ONLY=worker "+
+					"--worker-environment-variable SHARED_VAR=worker --worker-environment-variable WORKER_ONLY=worker "+
 					"--dry-run",
 				DistInfMinimalName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())
@@ -957,7 +990,7 @@ var _ = Describe("Distributed Inference Submit Test", Ordered, func() {
 				"inference distributed submit %s -p p301 -i %s --serving-port 8080 "+
 					"--worker-as-leader=false "+
 					"--environment-variable LEADER_VAR=leader "+
-					"--worker-environment WORKER_VAR=worker "+
+					"--worker-environment-variable WORKER_VAR=worker "+
 					"--dry-run",
 				DistInfWorkerName, DistInfImageName), envMap)
 			Expect(err).To(BeNil())

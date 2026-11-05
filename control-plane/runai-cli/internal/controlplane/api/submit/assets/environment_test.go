@@ -6,89 +6,67 @@
 package assets
 
 import (
-	"bytes"
+	"slices"
+	"strings"
+	"testing"
 
-	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/api/submit"
-
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/workload/spec/spectype"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/flags/update"
+	"github.com/spf13/pflag"
 )
 
-var _ = Describe("ProcessRawEnvironment", func() {
-	var (
-		c   *submit.Container
-		buf bytes.Buffer
-		err error
-	)
-
-	BeforeEach(func() {
-		c = &submit.Container{}
-		buf.Reset()
-	})
-
-	Describe("Environment Asset Name", func() {
-		It("should parse asset name (no = sign)", func() {
-			c.RawEnvironment = []string{"my-environment"}
-			err = c.ProcessRawEnvironment(&buf)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(c.EnvironmentAsset).To(Equal("my-environment"))
-			Expect(c.EnvironmentVariables).To(BeEmpty())
-			Expect(buf.String()).To(BeEmpty())
+func TestEnvironmentAssetFlags(t *testing.T) {
+	for _, operation := range []string{"submit", "update"} {
+		t.Run(operation, func(t *testing.T) {
+			for _, tc := range []struct {
+				name      string
+				args      []string
+				asset     string
+				variables []string
+				wantError bool
+			}{
+				{name: "omitted"},
+				{name: "variables without asset", args: []string{"--environment-variable=A=x=y", "-e", "B="}, variables: []string{"A=x=y", "B="}},
+				{name: "repeated asset uses last name", args: []string{"--environment=first", "--environment=second"}, asset: "second"},
+				{name: "existing variables survive rejected input", args: []string{"-e", "EXISTING=value", "--environment=INVALID=value"}, variables: []string{"EXISTING=value"}, wantError: true},
+				{name: "asset", args: []string{"--environment", "my-environment"}, asset: "my-environment"},
+				{name: "asset and variables", args: []string{"--environment=my-environment", "--environment-variable=A=x=y", "-e", "B="}, asset: "my-environment", variables: []string{"A=x=y", "B="}},
+				{name: "key value rejected", args: []string{"--environment", "A=value"}, wantError: true},
+				{name: "equals syntax rejected", args: []string{"--environment=A=x=y"}, wantError: true},
+				{name: "empty value rejected", args: []string{"--environment=A="}, wantError: true},
+				{name: "asset then key value rejected", args: []string{"--environment=my-environment", "--environment=A=value"}, asset: "my-environment", wantError: true},
+			} {
+				t.Run(tc.name, func(t *testing.T) {
+					c := &submit.Container{}
+					flags := pflag.NewFlagSet("test", pflag.ContinueOnError)
+					if operation == "submit" {
+						submit.ContainerFlagSet(flags, c, spectype.Training, api.UndefinedFramework)
+					} else {
+						update.ContainerUpdateFlagSet(flags, c, spectype.Inference)
+					}
+					err := flags.Parse(tc.args)
+					if tc.wantError {
+						if err == nil || !strings.Contains(err.Error(), "use --environment-variable KEY=VALUE") {
+							t.Fatalf("expected migration error, got %v", err)
+						}
+					} else if err != nil {
+						t.Fatal(err)
+					}
+					if c.EnvironmentAsset != tc.asset || !slices.Equal(c.EnvironmentVariables, tc.variables) {
+						t.Fatalf("got asset %q and variables %v; want %q and %v", c.EnvironmentAsset, c.EnvironmentVariables, tc.asset, tc.variables)
+					}
+					asset, err := flags.GetString("environment")
+					if err != nil || asset != tc.asset {
+						t.Fatalf("asset flag getter returned %q, %v; want %q", asset, err, tc.asset)
+					}
+					flag := flags.Lookup("environment")
+					if flag.Hidden || flag.Deprecated != "" {
+						t.Fatal("environment asset selector must remain visible and supported")
+					}
+				})
+			}
 		})
-
-		It("should parse env var with = sign in value", func() {
-			c.RawEnvironment = []string{"env1=x=y"}
-			err = c.ProcessRawEnvironment(&buf)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(c.EnvironmentAsset).To(BeEmpty())
-			Expect(c.EnvironmentVariables).To(ContainElement("env1=x=y"))
-			Expect(buf.String()).To(ContainSubstring(consts.DeprecatedEnvironmentKeyValueMsg))
-		})
-
-		It("should handle empty environment", func() {
-			c.RawEnvironment = []string{}
-			err = c.ProcessRawEnvironment(&buf)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(c.EnvironmentAsset).To(BeEmpty())
-		})
-	})
-
-	Describe("Environment Variable (key=value format - deprecated)", func() {
-		It("should parse key=value as environment variable and print deprecation", func() {
-			c.RawEnvironment = []string{"MY_VAR=my_value"}
-			err = c.ProcessRawEnvironment(&buf)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(c.EnvironmentVariables).To(ContainElement("MY_VAR=my_value"))
-			Expect(c.EnvironmentAsset).To(BeEmpty())
-			Expect(buf.String()).To(ContainSubstring(consts.DeprecatedEnvironmentKeyValueMsg))
-		})
-
-		It("should parse multiple env vars", func() {
-			c.RawEnvironment = []string{"VAR1=val1", "VAR2=val2"}
-			err = c.ProcessRawEnvironment(&buf)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(c.EnvironmentVariables).To(ContainElements("VAR1=val1", "VAR2=val2"))
-			Expect(buf.String()).To(ContainSubstring(consts.DeprecatedEnvironmentKeyValueMsg))
-		})
-
-		It("should append to existing environment variables", func() {
-			c.EnvironmentVariables = []string{"EXISTING=value"}
-			c.RawEnvironment = []string{"NEW_VAR=new_value"}
-			err = c.ProcessRawEnvironment(&buf)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(c.EnvironmentVariables).To(ContainElements("EXISTING=value", "NEW_VAR=new_value"))
-		})
-	})
-
-	Describe("Mixed usage", func() {
-		It("should handle both env vars and asset name", func() {
-			c.RawEnvironment = []string{"MY_VAR=value", "my-environment"}
-			err = c.ProcessRawEnvironment(&buf)
-			Expect(err).ToNot(HaveOccurred())
-			Expect(c.EnvironmentVariables).To(ContainElement("MY_VAR=value"))
-			Expect(c.EnvironmentAsset).To(Equal("my-environment"))
-			Expect(buf.String()).To(ContainSubstring(consts.DeprecatedEnvironmentKeyValueMsg))
-		})
-	})
-})
+	}
+}

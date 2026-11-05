@@ -375,7 +375,7 @@ runai inference distributed submit <workload-name> \
     --large-shm \
     --serving-port "container=8000,authorization-type=authenticatedUsers" \
     --existing-pvc "claimname=<pvc-claim-name>,path=/models" \
-    --environment "HF_HOME=/models" \
+    --environment-variable "HF_HOME=/models" \
     --env-secret "HF_TOKEN=<your-secret-name>,key=HF_TOKEN" \
     --command "sh -c \"bash /vllm-workspace/examples/online_serving/multi-node-serving.sh leader --ray_cluster_size=\$(LWS_GROUP_SIZE); python3 -m vllm.entrypoints.openai.api_server --port 8000 --model meta-llama/Llama-3.1-405B-Instruct --tensor-parallel-size 8 --pipeline_parallel_size 2\"" \
     --worker-command "sh -c \"bash /vllm-workspace/examples/online_serving/multi-node-serving.sh worker --ray_address=\$(LWS_LEADER_ADDRESS)\"" \
