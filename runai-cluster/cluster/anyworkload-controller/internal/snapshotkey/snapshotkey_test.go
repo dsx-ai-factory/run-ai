@@ -278,7 +278,7 @@ func TestExpandedFieldsReferencingAStrippedVariableAreNotKeyable(t *testing.T) {
 		},
 		"init container command": func(p *corev1.Pod) {
 			p.Spec.InitContainers = []corev1.Container{
-				{Name: "fetch", Image: "busybox", Command: []string{"$(SNAPSHOT_JOB_UID)"}},
+				{Name: "fetch", Image: "busybox", Command: []string{"$(SNAPSHOT_CONTROL_DIR)"}},
 			}
 		},
 	}
@@ -328,6 +328,25 @@ func TestDoubleEscapedReferenceIsNotKeyable(t *testing.T) {
 
 	if _, err := ComputeKey(pod); !errors.Is(err, ErrNotKeyable) {
 		t.Errorf("err = %v, want ErrNotKeyable", err)
+	}
+}
+
+// Snapshot's operator writes these onto the capture pod, which is created from
+// the SnapshotJob and never keyed. Stripping them here would only hide a
+// workload that set them itself, so they stay in the hash.
+func TestCapturePodVariablesAreHashed(t *testing.T) {
+	base := keyOrFail(t, gpuPod())
+
+	for _, name := range []string{"SNAPSHOT_JOB_UID", "SNAPSHOT_NON_TARGET_ARTIFACT_SUBDIR"} {
+		t.Run(name, func(t *testing.T) {
+			pod := gpuPod()
+			pod.Spec.Containers[0].Env = append(pod.Spec.Containers[0].Env,
+				corev1.EnvVar{Name: name, Value: "set-by-the-workload"})
+
+			if keyOrFail(t, pod) == base {
+				t.Errorf("%s did not change the key", name)
+			}
+		})
 	}
 }
 

@@ -31,9 +31,6 @@ const (
 	// configuration name, and the snapshot key hashes the pod as runai-pod
 	// leaves it. A rename breaks the key silently.
 	snapshotRestoreWebhookConfigurationName = "runai-snapshot-restore"
-
-	// Must match snapshotrestore.MutationPath in anyworkload-controller.
-	snapshotRestoreWebhookPath = "/mutate-pod-snapshot-restore"
 )
 
 func ConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
@@ -269,7 +266,7 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig, snapshotInstalled bool) map[st
 				},
 				ClientConfig: clientConfigWithNamespaceServiceAndPath(namespace,
 					anyworkloadServiceName,
-					snapshotRestoreWebhookPath),
+					constants.SnapshotRestoreWebhookPath),
 				// reinvocationPolicy unset (Never): reinvocation would void the
 				// ordering the name buys, since a reinvoked webhook can run
 				// either side of runai-pod's own.

@@ -19,4 +19,10 @@ const (
 	// SnapshotKeyLabel is stamped by the restore webhook on every opted-in
 	// pod, and is how the capture plugin finds each key's first Ready replica.
 	SnapshotKeyLabel = "run.ai/snapshot-key"
+
+	// SnapshotRestoreWebhookPath is where the restore webhook is served. The
+	// go-operator writes it into the webhook configuration's clientConfig and
+	// the anyworkload-controller registers it on its webhook server; if they
+	// disagreed the API server would call a path nothing answers.
+	SnapshotRestoreWebhookPath = "/mutate-pod-snapshot-restore"
 )

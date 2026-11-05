@@ -37,15 +37,18 @@ var (
 	// current ones. They do not share a prefix with them, so a prefix match
 	// would silently leave them in the hash.
 	snapshotEnvNames = map[string]bool{
-		"SNAPSHOT_CONTROL_DIR":                true, // podcontract.SnapshotControlDirEnv
-		"DYN_SNAPSHOT_CONTROL_DIR":            true, // podcontract.LegacySnapshotControlDirEnv
-		"SNAPSHOT_RESTORE_STANDBY":            true, // podcontract.RestoreStandbyModeEnv
-		"DYN_SNAPSHOT_RESTORE_STANDBY":        true, // podcontract.LegacyRestoreStandbyModeEnv
-		"SNAPSHOT_JOB_UID":                    true, // podcontract.SnapshotJobUIDEnv
-		"SNAPSHOT_NON_TARGET_ARTIFACT_SUBDIR": true, // podcontract.NonTargetArtifactSubdirEnv
+		"SNAPSHOT_CONTROL_DIR":         true, // podcontract.SnapshotControlDirEnv
+		"DYN_SNAPSHOT_CONTROL_DIR":     true, // podcontract.LegacySnapshotControlDirEnv
+		"SNAPSHOT_RESTORE_STANDBY":     true, // podcontract.RestoreStandbyModeEnv
+		"DYN_SNAPSHOT_RESTORE_STANDBY": true, // podcontract.LegacyRestoreStandbyModeEnv
 	}
 )
 
+// serviceAccountTokenPrefix names the projected token volume Kubernetes
+// injects into every pod. Its suffix is generated per pod, so hashing it would
+// give every replica of one workload a different key and nothing could ever be
+// shared. Matched by prefix because of that suffix; everything else above is
+// matched exactly.
 const serviceAccountTokenPrefix = "kube-api-access-"
 
 func containerNamed(containers []corev1.Container, name string) *corev1.Container {
@@ -148,6 +151,12 @@ func mountedVolumes(spec *corev1.PodSpec) []corev1.Volume {
 	return kept
 }
 
+// keptMounts drops the mounts that are not part of the pod's shape: the
+// service-account token, and the control directory podcontract mounts into a
+// restored container. Both appear on one form of a pod and not the other, so
+// keeping them would stop a restored replica matching the cold pod it came
+// from. Volumes are filtered by reachability from these mounts, so dropping a
+// mount here also drops its volume.
 func keptMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 	var kept []corev1.VolumeMount
 	for _, mount := range mounts {
@@ -160,8 +169,6 @@ func keptMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 }
 
 func isExcludedVolumeName(name string) bool {
-	// The token volume keeps its generated suffix, so it is the one name still
-	// matched by prefix.
 	return strings.HasPrefix(name, serviceAccountTokenPrefix) || snapshotVolumeNames[name]
 }
 

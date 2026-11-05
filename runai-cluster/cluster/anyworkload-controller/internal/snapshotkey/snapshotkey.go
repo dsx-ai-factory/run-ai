@@ -69,18 +69,22 @@ func OptedIn(pod *corev1.Pod) bool {
 // TargetContainer returns the one container requesting nvidia.com/gpu
 // ErrNotKeyable if there is not exactly one.
 func TargetContainer(pod *corev1.Pod) (string, error) {
-	var found []string
+	target := ""
 	for _, container := range pod.Spec.Containers {
-		if containerHasGPU(container.Resources) {
-			found = append(found, container.Name)
+		if !containerHasGPU(container.Resources) {
+			continue
 		}
+		if target != "" {
+			return "", fmt.Errorf("%w: containers %q and %q both request %s, want exactly one",
+				ErrNotKeyable, target, container.Name, nvidiaGPUResourceName)
+		}
+		target = container.Name
 	}
 
-	if len(found) != 1 {
-		return "", fmt.Errorf("%w: want exactly one container requesting %s, got %d",
-			ErrNotKeyable, nvidiaGPUResourceName, len(found))
+	if target == "" {
+		return "", fmt.Errorf("%w: no container requests %s", ErrNotKeyable, nvidiaGPUResourceName)
 	}
-	return found[0], nil
+	return target, nil
 }
 
 // Scope returns the identity the key is scoped to: the UID of the pod's
