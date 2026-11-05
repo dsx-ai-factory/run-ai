@@ -1266,7 +1266,7 @@ keycloakx:
   fullnameOverride: keycloak
   image:
     repository: quay.io/keycloak/keycloak
-    tag: "26.6.4"
+    tag: "26.8.1"
   imagePullSecrets:
     - name: runai-reg-creds
   command:
