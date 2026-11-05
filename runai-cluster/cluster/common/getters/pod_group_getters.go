@@ -62,7 +62,7 @@ func getPodsWithSelector(ctx context.Context, workloadNamespace string, readerCl
 	selector.Namespace = workloadNamespace
 	podList, err = listPods(ctx, readerClient, selector)
 	if err != nil {
-		if client.IgnoreNotFound(err) != nil {
+		if client.IgnoreNotFound(err) == nil {
 			return []corev1.Pod{}, nil
 		}
 		return nil, err
