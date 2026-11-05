@@ -21,6 +21,7 @@ export enum errorMessages {
   VALID_K8S_KEY_SHORT = "Enter a key including only a-z, 0-9, - _ . /, allowing only one /", // requires approval
   VALID_FORMAT_VALUE = "Enter a value including only a-z, 0-9, -",
   VALID_NAMESPACE = "Enter a namespace starting with a lowercase letter and including only a-z, 0-9, -",
+  DESCRIPTION_MAX_BYTES = "Description exceeds the 250-byte limit. Some characters use more than one byte.",
   NAME_NOT_EMPTY = "Enter a name",
   ENTRER_IDENTIFIER = "Enter identifier",
   PATH_NOT_EMPTY = "Enter a path",
