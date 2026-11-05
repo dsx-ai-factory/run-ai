@@ -9,6 +9,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	admissionv1 "k8s.io/api/admissionregistration/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
@@ -92,8 +93,8 @@ func TestSnapshotRestoreWebhookShape(t *testing.T) {
 	if hook.ObjectSelector == nil {
 		t.Fatal("objectSelector is nil, so every pod in a project namespace would be sent to the webhook")
 	}
-	if got := hook.ObjectSelector.MatchLabels[snapshotOptInLabel]; got != "true" {
-		t.Errorf("objectSelector[%s] = %q, want %q", snapshotOptInLabel, got, "true")
+	if got := hook.ObjectSelector.MatchLabels[constants.SnapshotOptInLabel]; got != "true" {
+		t.Errorf("objectSelector[%s] = %q, want %q", constants.SnapshotOptInLabel, got, "true")
 	}
 
 	if hook.NamespaceSelector == nil || len(hook.NamespaceSelector.MatchExpressions) != 1 ||

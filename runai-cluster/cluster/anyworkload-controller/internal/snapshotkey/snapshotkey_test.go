@@ -258,6 +258,94 @@ func TestEnvExpandingAStrippedVariableIsNotKeyable(t *testing.T) {
 	}
 }
 
+// Command, args and subPathExpr are expanded against the finished environment,
+// so stripping a Snapshot-owned variable hides whether they resolved at all:
+// two pods would run different commands, or mount different paths, under one
+// key.
+func TestExpandedFieldsReferencingAStrippedVariableAreNotKeyable(t *testing.T) {
+	cases := map[string]func(*corev1.Pod){
+		"command": func(p *corev1.Pod) {
+			p.Spec.Containers[0].Command = []string{"$(SNAPSHOT_CONTROL_DIR)/run"}
+		},
+		"args": func(p *corev1.Pod) {
+			p.Spec.Containers[0].Args = []string{"--dir", "$(SNAPSHOT_CONTROL_DIR)"}
+		},
+		"subPathExpr": func(p *corev1.Pod) {
+			p.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{
+				{Name: "models", MountPath: "/models", SubPathExpr: "$(SNAPSHOT_CONTROL_DIR)"},
+			}
+			p.Spec.Volumes = []corev1.Volume{{Name: "models"}}
+		},
+		"init container command": func(p *corev1.Pod) {
+			p.Spec.InitContainers = []corev1.Container{
+				{Name: "fetch", Image: "busybox", Command: []string{"$(SNAPSHOT_JOB_UID)"}},
+			}
+		},
+	}
+
+	for name, mutate := range cases {
+		t.Run(name, func(t *testing.T) {
+			pod := gpuPod()
+			mutate(pod)
+			if _, err := ComputeKey(pod); !errors.Is(err, ErrNotKeyable) {
+				t.Errorf("err = %v, want ErrNotKeyable", err)
+			}
+		})
+	}
+}
+
+// "$$" escapes to a literal "$", so "$$(NAME)" is text Kubernetes never
+// expands. Refusing it would cost a cold start for a pod that is perfectly
+// keyable.
+func TestEscapedReferenceIsStillKeyable(t *testing.T) {
+	keyable := map[string]string{
+		"escaped":            "$$(SNAPSHOT_CONTROL_DIR)/x",
+		"escaped in command": "literal $$(SNAPSHOT_JOB_UID) here",
+		"unterminated":       "$(SNAPSHOT_CONTROL_DIR/x",
+		"not a reference":    "$SNAPSHOT_CONTROL_DIR",
+		"other variable":     "$(HOME)/x",
+	}
+
+	for name, value := range keyable {
+		t.Run(name, func(t *testing.T) {
+			pod := gpuPod()
+			pod.Spec.Containers[0].Env = append(pod.Spec.Containers[0].Env,
+				corev1.EnvVar{Name: "MY_PATH", Value: value})
+
+			if _, err := ComputeKey(pod); err != nil {
+				t.Errorf("ComputeKey = %v, want keyable", err)
+			}
+		})
+	}
+}
+
+// A doubled escape restores the reference: "$$" is one literal "$", and the
+// "$(NAME)" that follows is expanded.
+func TestDoubleEscapedReferenceIsNotKeyable(t *testing.T) {
+	pod := gpuPod()
+	pod.Spec.Containers[0].Env = append(pod.Spec.Containers[0].Env,
+		corev1.EnvVar{Name: "MY_PATH", Value: "$$$(SNAPSHOT_CONTROL_DIR)"})
+
+	if _, err := ComputeKey(pod); !errors.Is(err, ErrNotKeyable) {
+		t.Errorf("err = %v, want ErrNotKeyable", err)
+	}
+}
+
+// A sidecar is not hashed, so what it expands cannot affect the key and must
+// not make the pod unkeyable.
+func TestSidecarExpandingAStrippedVariableIsStillKeyable(t *testing.T) {
+	pod := gpuPod()
+	pod.Spec.Containers = append(pod.Spec.Containers, corev1.Container{
+		Name:    "queue-proxy",
+		Image:   "knative/queue",
+		Command: []string{"$(SNAPSHOT_CONTROL_DIR)/run"},
+	})
+
+	if keyOrFail(t, pod) != keyOrFail(t, gpuPod()) {
+		t.Error("a sidecar's reference changed the key")
+	}
+}
+
 // Snapshot's own variables are still stripped when nothing expands them, so a
 // restored pod keeps matching the cold pod it came from.
 func TestStrippedVariableAloneIsStillKeyable(t *testing.T) {

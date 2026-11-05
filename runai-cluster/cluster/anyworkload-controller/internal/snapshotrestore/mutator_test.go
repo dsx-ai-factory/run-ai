@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,7 +25,7 @@ func optedInPod(t *testing.T) []byte {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "replica-0",
 			Namespace: "runai-proj",
-			Labels:    map[string]string{"run.ai/snapshot": "true"},
+			Labels:    map[string]string{constants.SnapshotOptInLabel: "true"},
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{{Name: "main", Image: "vllm/vllm-openai:v0.31.0"}},

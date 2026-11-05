@@ -19,6 +19,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
@@ -33,9 +34,6 @@ const (
 
 	// Must match snapshotrestore.MutationPath in anyworkload-controller.
 	snapshotRestoreWebhookPath = "/mutate-pod-snapshot-restore"
-
-	// The user's opt-in, matched by objectSelector.
-	snapshotOptInLabel = "run.ai/snapshot"
 )
 
 func ConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
@@ -267,7 +265,7 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig, snapshotInstalled bool) map[st
 				NamespaceSelector:       utils.NamespaceSelectorRunaiQueue(),
 				// A pod that has not opted in is never sent here.
 				ObjectSelector: &metav1.LabelSelector{
-					MatchLabels: map[string]string{snapshotOptInLabel: "true"},
+					MatchLabels: map[string]string{constants.SnapshotOptInLabel: "true"},
 				},
 				ClientConfig: clientConfigWithNamespaceServiceAndPath(namespace,
 					anyworkloadServiceName,

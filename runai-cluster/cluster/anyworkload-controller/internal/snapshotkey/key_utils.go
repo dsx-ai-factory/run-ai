@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/kubernetes/third_party/forked/golang/expansion"
 )
 
 // Snapshot's own additions to a restore pod, named exactly as podcontract
@@ -164,26 +165,44 @@ func isExcludedVolumeName(name string) bool {
 	return strings.HasPrefix(name, serviceAccountTokenPrefix) || snapshotVolumeNames[name]
 }
 
-// expandsStrippedEnv reports whether a retained variable expands a
-// Snapshot-owned one, and names the first it finds.
-//
-// Removing a variable loses its position, and Kubernetes expands $(VAR) only
-// against entries declared earlier. So [SNAPSHOT_CONTROL_DIR, X=$(SNAPSHOT_CONTROL_DIR)]
-// and [X=$(SNAPSHOT_CONTROL_DIR), SNAPSHOT_CONTROL_DIR] strip to the same bytes
-// while resolving X differently - one expanded, one literal. Keying them the
-// same would let a replica restore from a checkpoint built with a different
-// environment, so such a pod is refused instead.
+// expandsStrippedEnv reports whether a field Kubernetes expands references a
+// Snapshot-owned variable, and names the first it finds.
+// Stripping the variable hides what it resolved to, so two pods that run
+// different commands, or mount different paths, would share a key and one
+// could restore from the other's checkpoint. Such a pod is refused instead.
 func expandsStrippedEnv(container corev1.Container) (string, bool) {
-	// Snapshot's own variables are gone by now - Shape strips them before
-	// calling this - so every variable here is one the hash keeps.
+	// Shape strips Snapshot's own variables and mounts before calling this.
+	expanded := make([]string, 0,
+		len(container.Env)+len(container.Command)+len(container.Args)+len(container.VolumeMounts))
 	for _, variable := range container.Env {
-		for name := range snapshotEnvNames {
-			if strings.Contains(variable.Value, "$("+name+")") {
-				return name, true
-			}
+		expanded = append(expanded, variable.Value)
+	}
+	expanded = append(expanded, container.Command...)
+	expanded = append(expanded, container.Args...)
+	for _, mount := range container.VolumeMounts {
+		expanded = append(expanded, mount.SubPathExpr)
+	}
+
+	for _, value := range expanded {
+		if name, found := referencedSnapshotName(value); found {
+			return name, true
 		}
 	}
 	return "", false
+}
+
+// referencedSnapshotName returns the first Snapshot-owned variable the value
+// actually expands. Kubernetes' own expander does the parsing, so the "$$"
+// escape and unterminated references behave exactly as the kubelet treats them.
+func referencedSnapshotName(value string) (string, bool) {
+	var referenced string
+	expansion.Expand(value, func(name string) string {
+		if referenced == "" && snapshotEnvNames[name] {
+			referenced = name
+		}
+		return ""
+	})
+	return referenced, referenced != ""
 }
 
 func withoutSnapshotEnv(env []corev1.EnvVar) []corev1.EnvVar {
