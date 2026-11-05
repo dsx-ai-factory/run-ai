@@ -18,6 +18,7 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
@@ -542,11 +543,12 @@ func NewNodepoolKey(clusterId, nodepoolName string) NodepoolKey {
 }
 
 type nodepoolGpuTypeRow struct {
-	ClusterUuid    string
-	NodePool       string
-	GpuType        string
-	GpuMemoryBytes int64
-	TotalDevices   int32
+	ClusterUuid       string
+	NodePool          string
+	GpuType           string
+	GpuMemoryBytes    int64
+	TotalDevices      int32
+	MaxDevicesPerNode int64
 }
 
 // Grouping on memory as well as model is deliberate: a pool holding one model in two memory
@@ -559,14 +561,14 @@ func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes o
 		return result, nil
 	}
 
-	requested := make(map[NodepoolKey]bool, len(keys))
+	requested := datastructs.NewSet[NodepoolKey]()
 	clusterUuids := make([]string, 0, len(keys))
 	nodepoolNames := make([]string, 0, len(keys))
 	for _, key := range keys {
-		if requested[key] {
+		if requested.Has(key) {
 			continue
 		}
-		requested[key] = true
+		requested.Add(key)
 		clusterUuids = append(clusterUuids, key.ClusterUuid)
 		nodepoolNames = append(nodepoolNames, key.NodepoolName)
 	}
@@ -574,7 +576,8 @@ func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes o
 	rows := []nodepoolGpuTypeRow{}
 	query := runaidb.DB().WithContext(ctx).
 		Table(models.NodeTable).
-		Select("cluster_uuid, node_pool, gpu_type, gpu_memory_bytes, COALESCE(SUM(gpu_count), 0) as total_devices").
+		Select("cluster_uuid, node_pool, gpu_type, gpu_memory_bytes, COALESCE(SUM(gpu_count), 0) as total_devices, "+
+			"COALESCE(MAX(gpu_count), 0) as max_devices_per_node").
 		Where("tenant_id = ?", tenantId).
 		Where("gpu_type <> ''").
 		Where("cluster_uuid IN ?", clusterUuids).
@@ -595,13 +598,14 @@ func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes o
 		key := NewNodepoolKey(row.ClusterUuid, row.NodePool)
 		// The two IN clauses match every cluster/name combination, so discard rows for pairs
 		// that were never asked for — same nodepool name in two clusters would otherwise cross over.
-		if !requested[key] {
+		if !requested.Has(key) {
 			continue
 		}
 		result[key] = append(result[key], api.NodepoolGpuTypeDetails{
-			Type:           row.GpuType,
-			GpuMemoryBytes: row.GpuMemoryBytes,
-			TotalDevices:   row.TotalDevices,
+			Type:              row.GpuType,
+			GpuMemoryBytes:    row.GpuMemoryBytes,
+			TotalDevices:      row.TotalDevices,
+			MaxDevicesPerNode: row.MaxDevicesPerNode,
 		})
 	}
 

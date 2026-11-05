@@ -1,0 +1,3246 @@
+{
+  "source": {
+    "url": "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/nvidia-driver-assistant_0.62.71.10-1_all.deb",
+    "sha256": "68d24b4e8e8812ed5e6a1763e4fee0951e2a1463ab9f3bc7bac1b814edcdd7a2"
+  },
+  "devices": {
+    "Aladdin-TNT2": [
+      "00a0:10de"
+    ],
+    "GRID-K1": [
+      "0ff2:10de"
+    ],
+    "GRID-K2": [
+      "11bf:10de"
+    ],
+    "GRID-K340": [
+      "0fef:10de"
+    ],
+    "GRID-K520": [
+      "118a:10de"
+    ],
+    "GeForce-205": [
+      "0a62:10de"
+    ],
+    "GeForce-210": [
+      "0a23:10de",
+      "0a65:10de"
+    ],
+    "GeForce-256": [
+      "0100:10de"
+    ],
+    "GeForce-305M": [
+      "0a6e:10de",
+      "0a71:10de",
+      "0a73:10de"
+    ],
+    "GeForce-310": [
+      "0a63:10de",
+      "0a66:10de"
+    ],
+    "GeForce-310M": [
+      "0a70:10de",
+      "0a72:10de",
+      "0a75:10de"
+    ],
+    "GeForce-315": [
+      "0a22:10de",
+      "0a67:10de"
+    ],
+    "GeForce-315M": [
+      "0a7a:10de"
+    ],
+    "GeForce-320M": [
+      "08a0:10de",
+      "08a2:10de",
+      "08a3:10de",
+      "08a4:10de",
+      "08a5:10de"
+    ],
+    "GeForce-405": [
+      "0a26:10de",
+      "0a27:10de",
+      "0a7a:10de",
+      "10c5:10de"
+    ],
+    "GeForce-405M": [
+      "0a7a:10de"
+    ],
+    "GeForce-410M": [
+      "1054:10de",
+      "1055:10de"
+    ],
+    "GeForce-510": [
+      "1042:10de"
+    ],
+    "GeForce-605": [
+      "1048:10de"
+    ],
+    "GeForce-610": [
+      "1058:10de"
+    ],
+    "GeForce-6100": [
+      "0242:10de"
+    ],
+    "GeForce-6100-nForce-400": [
+      "03d2:10de"
+    ],
+    "GeForce-6100-nForce-405": [
+      "03d1:10de"
+    ],
+    "GeForce-6100-nForce-420": [
+      "03d5:10de"
+    ],
+    "GeForce-610M": [
+      "0dea:10de",
+      "1058:10de",
+      "1059:10de",
+      "105a:10de",
+      "1140:10de"
+    ],
+    "GeForce-615": [
+      "0dea:10de"
+    ],
+    "GeForce-6150": [
+      "0240:10de"
+    ],
+    "GeForce-6150-LE": [
+      "0241:10de"
+    ],
+    "GeForce-6150SE-nForce-430": [
+      "03d0:10de"
+    ],
+    "GeForce-6200": [
+      "00f3:10de",
+      "014f:10de",
+      "0221:10de"
+    ],
+    "GeForce-6200-A-LE": [
+      "0222:10de"
+    ],
+    "GeForce-6200-LE": [
+      "0163:10de"
+    ],
+    "GeForce-6200-TurboCacheTM": [
+      "0161:10de"
+    ],
+    "GeForce-6200SE-TurboCacheTM": [
+      "0162:10de"
+    ],
+    "GeForce-620M": [
+      "1140:10de"
+    ],
+    "GeForce-6250": [
+      "0169:10de"
+    ],
+    "GeForce-6500": [
+      "0160:10de"
+    ],
+    "GeForce-6600": [
+      "00f2:10de",
+      "0141:10de"
+    ],
+    "GeForce-6600-GT": [
+      "00f1:10de",
+      "0140:10de"
+    ],
+    "GeForce-6600-LE": [
+      "00f4:10de",
+      "0142:10de"
+    ],
+    "GeForce-6600-VE": [
+      "0143:10de"
+    ],
+    "GeForce-6610-XL": [
+      "0145:10de"
+    ],
+    "GeForce-6700-XL": [
+      "0147:10de"
+    ],
+    "GeForce-6800": [
+      "0041:10de",
+      "00c1:10de",
+      "0211:10de"
+    ],
+    "GeForce-6800-GS": [
+      "0047:10de",
+      "00c0:10de",
+      "00f6:10de"
+    ],
+    "GeForce-6800-GT": [
+      "0045:10de",
+      "0046:10de",
+      "0215:10de"
+    ],
+    "GeForce-6800-LE": [
+      "0042:10de",
+      "00c2:10de",
+      "0212:10de"
+    ],
+    "GeForce-6800-Ultra": [
+      "0040:10de",
+      "00f9:10de"
+    ],
+    "GeForce-6800-XE": [
+      "0043:10de"
+    ],
+    "GeForce-6800-XT": [
+      "0044:10de",
+      "0048:10de",
+      "00c3:10de",
+      "0218:10de"
+    ],
+    "GeForce-7000M-nForce-610M": [
+      "0533:10de"
+    ],
+    "GeForce-7025-nForce-630a": [
+      "03d6:10de",
+      "053e:10de"
+    ],
+    "GeForce-7050-PV-nForce-630a": [
+      "053a:10de",
+      "053b:10de"
+    ],
+    "GeForce-7050-nForce-610i": [
+      "07e3:10de"
+    ],
+    "GeForce-7050-nForce-620i": [
+      "07e5:10de"
+    ],
+    "GeForce-7050-nForce-630i": [
+      "07e2:10de"
+    ],
+    "GeForce-705A": [
+      "1058:10de",
+      "105b:10de",
+      "1140:10de"
+    ],
+    "GeForce-705M": [
+      "105b:10de",
+      "1140:10de"
+    ],
+    "GeForce-7100-GS": [
+      "016a:10de"
+    ],
+    "GeForce-7100-nForce-630i": [
+      "07e1:10de"
+    ],
+    "GeForce-710A": [
+      "0fec:10de",
+      "1140:10de",
+      "1295:10de"
+    ],
+    "GeForce-710M": [
+      "1140:10de",
+      "1295:10de"
+    ],
+    "GeForce-7150-nForce-630i": [
+      "07e0:10de"
+    ],
+    "GeForce-7150M-nForce-630M": [
+      "0531:10de"
+    ],
+    "GeForce-720A": [
+      "1140:10de"
+    ],
+    "GeForce-720M": [
+      "1140:10de"
+    ],
+    "GeForce-7300-GS": [
+      "01df:10de"
+    ],
+    "GeForce-7300-GT": [
+      "02e2:10de",
+      "0393:10de",
+      "0395:10de"
+    ],
+    "GeForce-7300-LE": [
+      "01d1:10de"
+    ],
+    "GeForce-7300-SE7200-GS": [
+      "01d3:10de"
+    ],
+    "GeForce-7350-LE": [
+      "01d0:10de"
+    ],
+    "GeForce-7500-LE": [
+      "01dd:10de"
+    ],
+    "GeForce-7550-LE": [
+      "01d2:10de"
+    ],
+    "GeForce-7600-GS": [
+      "02e1:10de",
+      "0392:10de"
+    ],
+    "GeForce-7600-GT": [
+      "02e0:10de",
+      "0391:10de"
+    ],
+    "GeForce-7600-LE": [
+      "0394:10de"
+    ],
+    "GeForce-7650-GS": [
+      "038b:10de",
+      "0390:10de"
+    ],
+    "GeForce-7800-GS": [
+      "0093:10de",
+      "00f5:10de"
+    ],
+    "GeForce-7800-GT": [
+      "0092:10de"
+    ],
+    "GeForce-7800-GTX": [
+      "0090:10de",
+      "0091:10de"
+    ],
+    "GeForce-7800-SLI": [
+      "0095:10de"
+    ],
+    "GeForce-7900-GS": [
+      "0292:10de",
+      "02e3:10de"
+    ],
+    "GeForce-7900-GTGTO": [
+      "0291:10de"
+    ],
+    "GeForce-7900-GTX": [
+      "0290:10de"
+    ],
+    "GeForce-7950-GT": [
+      "0295:10de",
+      "02e4:10de"
+    ],
+    "GeForce-7950-GX2": [
+      "0293:10de",
+      "0294:10de"
+    ],
+    "GeForce-800A": [
+      "1058:10de",
+      "105b:10de"
+    ],
+    "GeForce-800M": [
+      "1140:10de"
+    ],
+    "GeForce-805A": [
+      "1295:10de"
+    ],
+    "GeForce-8100-nForce-720a": [
+      "084f:10de"
+    ],
+    "GeForce-810A": [
+      "1295:10de"
+    ],
+    "GeForce-810M": [
+      "0fee:10de",
+      "1140:10de"
+    ],
+    "GeForce-8200": [
+      "0849:10de"
+    ],
+    "GeForce-8200M": [
+      "0840:10de"
+    ],
+    "GeForce-8200M-G": [
+      "0845:10de",
+      "086f:10de"
+    ],
+    "GeForce-820A": [
+      "1140:10de"
+    ],
+    "GeForce-820M": [
+      "0fed:10de",
+      "1140:10de"
+    ],
+    "GeForce-825M": [
+      "1296:10de"
+    ],
+    "GeForce-8300": [
+      "0848:10de"
+    ],
+    "GeForce-8300-GS": [
+      "0406:10de",
+      "0423:10de"
+    ],
+    "GeForce-8400": [
+      "06e2:10de"
+    ],
+    "GeForce-8400-GS": [
+      "0404:10de",
+      "0422:10de",
+      "0424:10de",
+      "06e4:10de"
+    ],
+    "GeForce-8400-SE": [
+      "0420:10de",
+      "06e3:10de"
+    ],
+    "GeForce-8400GS": [
+      "10c3:10de"
+    ],
+    "GeForce-8400M-G": [
+      "0428:10de"
+    ],
+    "GeForce-8400M-GS": [
+      "0427:10de"
+    ],
+    "GeForce-8400M-GT": [
+      "0426:10de"
+    ],
+    "GeForce-8500-GT": [
+      "0421:10de"
+    ],
+    "GeForce-8600-GS": [
+      "0403:10de"
+    ],
+    "GeForce-8600-GT": [
+      "0401:10de",
+      "0402:10de"
+    ],
+    "GeForce-8600-GTS": [
+      "0400:10de"
+    ],
+    "GeForce-8600M-GS": [
+      "0425:10de"
+    ],
+    "GeForce-8600M-GT": [
+      "0407:10de"
+    ],
+    "GeForce-8700M-GT": [
+      "0409:10de"
+    ],
+    "GeForce-8800-GS": [
+      "0606:10de",
+      "0609:10de",
+      "060d:10de"
+    ],
+    "GeForce-8800-GT": [
+      "0602:10de",
+      "0611:10de"
+    ],
+    "GeForce-8800-GTS": [
+      "0193:10de"
+    ],
+    "GeForce-8800-GTS-512": [
+      "0600:10de"
+    ],
+    "GeForce-8800-GTX": [
+      "0191:10de"
+    ],
+    "GeForce-8800-Ultra": [
+      "0194:10de"
+    ],
+    "GeForce-8800M-GTS": [
+      "0609:10de"
+    ],
+    "GeForce-8800M-GTX": [
+      "060c:10de"
+    ],
+    "GeForce-9100": [
+      "0847:10de"
+    ],
+    "GeForce-9100M-G": [
+      "0844:10de",
+      "086e:10de"
+    ],
+    "GeForce-910M": [
+      "129a:10de"
+    ],
+    "GeForce-9200": [
+      "0846:10de",
+      "084b:10de",
+      "086d:10de",
+      "0871:10de"
+    ],
+    "GeForce-9200M-GE": [
+      "06e8:10de"
+    ],
+    "GeForce-9200M-GS": [
+      "06e8:10de"
+    ],
+    "GeForce-920A": [
+      "1299:10de"
+    ],
+    "GeForce-920M": [
+      "1299:10de"
+    ],
+    "GeForce-9300": [
+      "0864:10de"
+    ],
+    "GeForce-9300-GE": [
+      "06e0:10de"
+    ],
+    "GeForce-9300-GS": [
+      "06e1:10de",
+      "10c0:10de"
+    ],
+    "GeForce-9300-SE": [
+      "06e7:10de"
+    ],
+    "GeForce-9300-nForce-730i": [
+      "086c:10de"
+    ],
+    "GeForce-9300M-G": [
+      "042e:10de"
+    ],
+    "GeForce-9300M-GS": [
+      "06e5:10de",
+      "06e9:10de"
+    ],
+    "GeForce-9400": [
+      "0860:10de",
+      "0861:10de",
+      "0867:10de",
+      "0869:10de",
+      "086a:10de",
+      "087a:10de"
+    ],
+    "GeForce-9400-GT": [
+      "042c:10de",
+      "0641:10de",
+      "065b:10de"
+    ],
+    "GeForce-9400M": [
+      "0863:10de",
+      "0866:10de",
+      "0870:10de"
+    ],
+    "GeForce-9400M-G": [
+      "0862:10de",
+      "0866:10de"
+    ],
+    "GeForce-9500-GS": [
+      "0644:10de",
+      "0645:10de"
+    ],
+    "GeForce-9500-GT": [
+      "0640:10de",
+      "0643:10de"
+    ],
+    "GeForce-9500M-G": [
+      "064b:10de"
+    ],
+    "GeForce-9500M-GS": [
+      "0405:10de"
+    ],
+    "GeForce-9600-GS": [
+      "0623:10de"
+    ],
+    "GeForce-9600-GSO": [
+      "0610:10de",
+      "0635:10de"
+    ],
+    "GeForce-9600-GSO-512": [
+      "0625:10de"
+    ],
+    "GeForce-9600-GT": [
+      "0622:10de",
+      "062d:10de",
+      "062e:10de",
+      "0637:10de"
+    ],
+    "GeForce-9600M-GS": [
+      "0648:10de"
+    ],
+    "GeForce-9600M-GT": [
+      "0647:10de",
+      "0649:10de"
+    ],
+    "GeForce-9650M-GS": [
+      "0408:10de"
+    ],
+    "GeForce-9650M-GT": [
+      "064c:10de"
+    ],
+    "GeForce-9700-S": [
+      "0630:10de"
+    ],
+    "GeForce-9700M-GT": [
+      "064a:10de"
+    ],
+    "GeForce-9700M-GTS": [
+      "062a:10de"
+    ],
+    "GeForce-9800-GT": [
+      "0601:10de",
+      "0605:10de",
+      "0614:10de"
+    ],
+    "GeForce-9800-GTX": [
+      "0613:10de"
+    ],
+    "GeForce-9800-GTX9800-GTX": [
+      "0612:10de"
+    ],
+    "GeForce-9800-GX2": [
+      "0604:10de"
+    ],
+    "GeForce-9800M-GS": [
+      "062b:10de"
+    ],
+    "GeForce-9800M-GT": [
+      "060b:10de"
+    ],
+    "GeForce-9800M-GTS": [
+      "0628:10de",
+      "062c:10de"
+    ],
+    "GeForce-9800M-GTX": [
+      "0608:10de",
+      "0617:10de"
+    ],
+    "GeForce-DDR": [
+      "0101:10de"
+    ],
+    "GeForce-FX-5100": [
+      "0327:10de"
+    ],
+    "GeForce-FX-5200": [
+      "0320:10de",
+      "0322:10de"
+    ],
+    "GeForce-FX-5200-Ultra": [
+      "0321:10de"
+    ],
+    "GeForce-FX-5200LE": [
+      "0323:10de"
+    ],
+    "GeForce-FX-5500": [
+      "0326:10de"
+    ],
+    "GeForce-FX-5600": [
+      "0312:10de"
+    ],
+    "GeForce-FX-5600-Ultra": [
+      "0311:10de"
+    ],
+    "GeForce-FX-5600XT": [
+      "0314:10de"
+    ],
+    "GeForce-FX-5700": [
+      "0342:10de"
+    ],
+    "GeForce-FX-5700-Ultra": [
+      "0341:10de"
+    ],
+    "GeForce-FX-5700LE": [
+      "0343:10de"
+    ],
+    "GeForce-FX-5700VE": [
+      "0344:10de"
+    ],
+    "GeForce-FX-5800": [
+      "0302:10de"
+    ],
+    "GeForce-FX-5800-Ultra": [
+      "0301:10de"
+    ],
+    "GeForce-FX-5900": [
+      "0331:10de"
+    ],
+    "GeForce-FX-5900-Ultra": [
+      "0330:10de"
+    ],
+    "GeForce-FX-5900XT": [
+      "0332:10de"
+    ],
+    "GeForce-FX-5900ZT": [
+      "0334:10de"
+    ],
+    "GeForce-FX-5950-Ultra": [
+      "0333:10de"
+    ],
+    "GeForce-FX-Go5100": [
+      "032d:10de"
+    ],
+    "GeForce-FX-Go5200": [
+      "0324:10de"
+    ],
+    "GeForce-FX-Go5200-32M64M": [
+      "0328:10de"
+    ],
+    "GeForce-FX-Go5250": [
+      "0325:10de"
+    ],
+    "GeForce-FX-Go53xx": [
+      "032c:10de"
+    ],
+    "GeForce-FX-Go5600": [
+      "031a:10de"
+    ],
+    "GeForce-FX-Go5650": [
+      "031b:10de"
+    ],
+    "GeForce-FX-Go5700": [
+      "0347:10de",
+      "0348:10de"
+    ],
+    "GeForce-G-103M": [
+      "06ef:10de"
+    ],
+    "GeForce-G-105M": [
+      "06ec:10de"
+    ],
+    "GeForce-G-110M": [
+      "0651:10de"
+    ],
+    "GeForce-G100": [
+      "06e6:10de"
+    ],
+    "GeForce-G102M": [
+      "0872:10de",
+      "0873:10de"
+    ],
+    "GeForce-G105M": [
+      "06f1:10de",
+      "0a68:10de",
+      "0a69:10de"
+    ],
+    "GeForce-G205M": [
+      "0872:10de",
+      "0873:10de"
+    ],
+    "GeForce-G210": [
+      "0a60:10de",
+      "0a74:10de"
+    ],
+    "GeForce-G210M": [
+      "0a74:10de"
+    ],
+    "GeForce-GT-120": [
+      "0646:10de",
+      "0655:10de",
+      "0656:10de"
+    ],
+    "GeForce-GT-120M": [
+      "0653:10de"
+    ],
+    "GeForce-GT-130": [
+      "0626:10de",
+      "062e:10de"
+    ],
+    "GeForce-GT-130M": [
+      "0652:10de"
+    ],
+    "GeForce-GT-140": [
+      "0627:10de"
+    ],
+    "GeForce-GT-220": [
+      "0a20:10de",
+      "0ca5:10de",
+      "0cac:10de"
+    ],
+    "GeForce-GT-220M": [
+      "0649:10de",
+      "0654:10de"
+    ],
+    "GeForce-GT-230": [
+      "0603:10de",
+      "0621:10de"
+    ],
+    "GeForce-GT-230M": [
+      "0a28:10de",
+      "0a2a:10de"
+    ],
+    "GeForce-GT-240": [
+      "0ca3:10de"
+    ],
+    "GeForce-GT-240M": [
+      "0a34:10de"
+    ],
+    "GeForce-GT-240M-LE": [
+      "0652:10de"
+    ],
+    "GeForce-GT-320": [
+      "0ca2:10de"
+    ],
+    "GeForce-GT-320M": [
+      "0654:10de",
+      "0a2d:10de"
+    ],
+    "GeForce-GT-325M": [
+      "0a35:10de"
+    ],
+    "GeForce-GT-330": [
+      "0410:10de",
+      "0ca0:10de",
+      "0ca7:10de"
+    ],
+    "GeForce-GT-330M": [
+      "0a29:10de",
+      "0a2b:10de"
+    ],
+    "GeForce-GT-335M": [
+      "0caf:10de"
+    ],
+    "GeForce-GT-340": [
+      "0ca4:10de"
+    ],
+    "GeForce-GT-415": [
+      "0a32:10de"
+    ],
+    "GeForce-GT-415M": [
+      "0dee:10de"
+    ],
+    "GeForce-GT-420": [
+      "0de2:10de"
+    ],
+    "GeForce-GT-420M": [
+      "0df1:10de",
+      "0df3:10de"
+    ],
+    "GeForce-GT-425M": [
+      "0df0:10de"
+    ],
+    "GeForce-GT-430": [
+      "0de1:10de"
+    ],
+    "GeForce-GT-435M": [
+      "0dd3:10de",
+      "0df2:10de"
+    ],
+    "GeForce-GT-440": [
+      "0dc0:10de",
+      "0de0:10de"
+    ],
+    "GeForce-GT-445M": [
+      "0dd2:10de"
+    ],
+    "GeForce-GT-520": [
+      "0de4:10de",
+      "1040:10de"
+    ],
+    "GeForce-GT-520M": [
+      "0ded:10de",
+      "0df7:10de",
+      "1050:10de",
+      "1052:10de"
+    ],
+    "GeForce-GT-520MX": [
+      "1051:10de"
+    ],
+    "GeForce-GT-525M": [
+      "0dec:10de",
+      "0df5:10de"
+    ],
+    "GeForce-GT-530": [
+      "0de5:10de"
+    ],
+    "GeForce-GT-540M": [
+      "0df4:10de"
+    ],
+    "GeForce-GT-545": [
+      "1241:10de",
+      "1243:10de"
+    ],
+    "GeForce-GT-550M": [
+      "0dd6:10de",
+      "0df6:10de",
+      "1246:10de"
+    ],
+    "GeForce-GT-555M": [
+      "0dcd:10de",
+      "0dce:10de",
+      "0deb:10de",
+      "1247:10de",
+      "1248:10de",
+      "124d:10de"
+    ],
+    "GeForce-GT-610": [
+      "0de7:10de",
+      "0f03:10de",
+      "104a:10de"
+    ],
+    "GeForce-GT-620": [
+      "0f01:10de",
+      "1049:10de"
+    ],
+    "GeForce-GT-620M": [
+      "0de8:10de",
+      "0de9:10de",
+      "1140:10de"
+    ],
+    "GeForce-GT-625": [
+      "104b:10de"
+    ],
+    "GeForce-GT-625-OEM": [
+      "104b:10de"
+    ],
+    "GeForce-GT-625M": [
+      "1140:10de"
+    ],
+    "GeForce-GT-630": [
+      "0f00:10de",
+      "1284:10de"
+    ],
+    "GeForce-GT-630M": [
+      "0de9:10de",
+      "0df4:10de",
+      "1140:10de"
+    ],
+    "GeForce-GT-635": [
+      "1280:10de"
+    ],
+    "GeForce-GT-635M": [
+      "0de3:10de",
+      "0de9:10de",
+      "1247:10de",
+      "124d:10de"
+    ],
+    "GeForce-GT-640": [
+      "124b:10de",
+      "1282:10de"
+    ],
+    "GeForce-GT-640M": [
+      "0fd2:10de",
+      "0fd8:10de"
+    ],
+    "GeForce-GT-640M-LE": [
+      "0de9:10de",
+      "0fce:10de",
+      "0fd2:10de",
+      "0fd3:10de"
+    ],
+    "GeForce-GT-645": [
+      "1207:10de"
+    ],
+    "GeForce-GT-645M": [
+      "0fd9:10de"
+    ],
+    "GeForce-GT-650M": [
+      "0fd1:10de",
+      "0fd5:10de"
+    ],
+    "GeForce-GT-705": [
+      "104c:10de"
+    ],
+    "GeForce-GT-710": [
+      "1281:10de",
+      "1289:10de",
+      "128b:10de"
+    ],
+    "GeForce-GT-710M": [
+      "1140:10de"
+    ],
+    "GeForce-GT-720": [
+      "1286:10de",
+      "1288:10de"
+    ],
+    "GeForce-GT-720A": [
+      "1140:10de"
+    ],
+    "GeForce-GT-720M": [
+      "1140:10de",
+      "1298:10de"
+    ],
+    "GeForce-GT-730": [
+      "0f02:10de",
+      "0fc9:10de",
+      "1287:10de",
+      "1299:10de"
+    ],
+    "GeForce-GT-730A": [
+      "1290:10de"
+    ],
+    "GeForce-GT-730M": [
+      "0fe1:10de",
+      "1290:10de",
+      "1293:10de"
+    ],
+    "GeForce-GT-735M": [
+      "1291:10de"
+    ],
+    "GeForce-GT-740": [
+      "0fc8:10de",
+      "11c5:10de",
+      "11cb:10de"
+    ],
+    "GeForce-GT-740A": [
+      "1292:10de"
+    ],
+    "GeForce-GT-740M": [
+      "0fdf:10de",
+      "1292:10de"
+    ],
+    "GeForce-GT-745A": [
+      "0fe3:10de"
+    ],
+    "GeForce-GT-745M": [
+      "0fe2:10de",
+      "0fe3:10de"
+    ],
+    "GeForce-GT-750M": [
+      "0fe4:10de",
+      "0fe9:10de"
+    ],
+    "GeForce-GT-755M": [
+      "0fcd:10de",
+      "0fea:10de"
+    ],
+    "GeForce-GT-820M": [
+      "1140:10de"
+    ],
+    "GeForce-GTS-150M": [
+      "0632:10de"
+    ],
+    "GeForce-GTS-160M": [
+      "0631:10de"
+    ],
+    "GeForce-GTS-240": [
+      "0607:10de"
+    ],
+    "GeForce-GTS-250": [
+      "0615:10de"
+    ],
+    "GeForce-GTS-250M": [
+      "0ca9:10de"
+    ],
+    "GeForce-GTS-260M": [
+      "0ca8:10de"
+    ],
+    "GeForce-GTS-350M": [
+      "0cb0:10de"
+    ],
+    "GeForce-GTS-360M": [
+      "0cb1:10de"
+    ],
+    "GeForce-GTS-450": [
+      "0dc4:10de",
+      "0dc5:10de",
+      "0dc6:10de",
+      "1245:10de",
+      "1249:10de"
+    ],
+    "GeForce-GTX-260": [
+      "05e2:10de",
+      "05ea:10de"
+    ],
+    "GeForce-GTX-260M": [
+      "0618:10de"
+    ],
+    "GeForce-GTX-275": [
+      "05e6:10de"
+    ],
+    "GeForce-GTX-280": [
+      "05e1:10de"
+    ],
+    "GeForce-GTX-280M": [
+      "060a:10de"
+    ],
+    "GeForce-GTX-285": [
+      "05e3:10de"
+    ],
+    "GeForce-GTX-285M": [
+      "060f:10de"
+    ],
+    "GeForce-GTX-295": [
+      "05e0:10de",
+      "05eb:10de"
+    ],
+    "GeForce-GTX-460": [
+      "0e22:10de",
+      "0e24:10de"
+    ],
+    "GeForce-GTX-460-SE": [
+      "0e23:10de"
+    ],
+    "GeForce-GTX-460-SE-v2": [
+      "1203:10de"
+    ],
+    "GeForce-GTX-460-v2": [
+      "1205:10de"
+    ],
+    "GeForce-GTX-460M": [
+      "0dd1:10de"
+    ],
+    "GeForce-GTX-465": [
+      "06c4:10de"
+    ],
+    "GeForce-GTX-470": [
+      "06cd:10de"
+    ],
+    "GeForce-GTX-470M": [
+      "0e30:10de"
+    ],
+    "GeForce-GTX-480": [
+      "06c0:10de"
+    ],
+    "GeForce-GTX-480M": [
+      "06ca:10de"
+    ],
+    "GeForce-GTX-485M": [
+      "0e31:10de"
+    ],
+    "GeForce-GTX-550-Ti": [
+      "1244:10de"
+    ],
+    "GeForce-GTX-555": [
+      "1206:10de"
+    ],
+    "GeForce-GTX-560": [
+      "1084:10de",
+      "1201:10de"
+    ],
+    "GeForce-GTX-560-SE": [
+      "1208:10de"
+    ],
+    "GeForce-GTX-560-Ti": [
+      "1082:10de",
+      "1087:10de",
+      "1200:10de"
+    ],
+    "GeForce-GTX-560M": [
+      "1251:10de"
+    ],
+    "GeForce-GTX-570": [
+      "1081:10de",
+      "1086:10de"
+    ],
+    "GeForce-GTX-570M": [
+      "1210:10de"
+    ],
+    "GeForce-GTX-580": [
+      "1080:10de",
+      "1089:10de",
+      "108b:10de"
+    ],
+    "GeForce-GTX-580M": [
+      "1211:10de"
+    ],
+    "GeForce-GTX-590": [
+      "1088:10de"
+    ],
+    "GeForce-GTX-645": [
+      "11c4:10de"
+    ],
+    "GeForce-GTX-650": [
+      "0fc6:10de",
+      "11c8:10de"
+    ],
+    "GeForce-GTX-650-Ti": [
+      "11c3:10de",
+      "11c6:10de"
+    ],
+    "GeForce-GTX-650-Ti-BOOST": [
+      "11c2:10de"
+    ],
+    "GeForce-GTX-660": [
+      "1185:10de",
+      "1195:10de",
+      "11c0:10de"
+    ],
+    "GeForce-GTX-660-Ti": [
+      "1183:10de"
+    ],
+    "GeForce-GTX-660M": [
+      "0fd4:10de",
+      "0fe0:10de"
+    ],
+    "GeForce-GTX-670": [
+      "1189:10de"
+    ],
+    "GeForce-GTX-670M": [
+      "1213:10de"
+    ],
+    "GeForce-GTX-670MX": [
+      "11a1:10de"
+    ],
+    "GeForce-GTX-675M": [
+      "1212:10de"
+    ],
+    "GeForce-GTX-675MX": [
+      "11a2:10de",
+      "11a7:10de"
+    ],
+    "GeForce-GTX-680": [
+      "1180:10de"
+    ],
+    "GeForce-GTX-680M": [
+      "11a0:10de"
+    ],
+    "GeForce-GTX-680MX": [
+      "11a3:10de"
+    ],
+    "GeForce-GTX-690": [
+      "1188:10de"
+    ],
+    "GeForce-GTX-760": [
+      "1185:10de",
+      "1187:10de",
+      "1199:10de"
+    ],
+    "GeForce-GTX-760-192-bit": [
+      "118e:10de"
+    ],
+    "GeForce-GTX-760-Ti-OEM": [
+      "1189:10de",
+      "1193:10de"
+    ],
+    "GeForce-GTX-760A": [
+      "11e3:10de"
+    ],
+    "GeForce-GTX-760M": [
+      "11e3:10de"
+    ],
+    "GeForce-GTX-765M": [
+      "11e1:10de",
+      "11e2:10de"
+    ],
+    "GeForce-GTX-770": [
+      "1184:10de"
+    ],
+    "GeForce-GTX-770M": [
+      "11e0:10de"
+    ],
+    "GeForce-GTX-775M": [
+      "119d:10de"
+    ],
+    "GeForce-GTX-780": [
+      "1004:10de",
+      "1007:10de"
+    ],
+    "GeForce-GTX-780-Ti": [
+      "1008:10de",
+      "100a:10de"
+    ],
+    "GeForce-GTX-780M": [
+      "119e:10de",
+      "119f:10de"
+    ],
+    "GeForce-GTX-860M": [
+      "119a:10de"
+    ],
+    "GeForce-GTX-870M": [
+      "1199:10de"
+    ],
+    "GeForce-GTX-880M": [
+      "1198:10de"
+    ],
+    "GeForce-GTX-TITAN": [
+      "1005:10de"
+    ],
+    "GeForce-GTX-TITAN-Black": [
+      "100c:10de"
+    ],
+    "GeForce-GTX-TITAN-Z": [
+      "1001:10de"
+    ],
+    "GeForce-Go-6100": [
+      "0247:10de"
+    ],
+    "GeForce-Go-6150": [
+      "0244:10de"
+    ],
+    "GeForce-Go-6200": [
+      "0164:10de",
+      "0167:10de"
+    ],
+    "GeForce-Go-6400": [
+      "0166:10de",
+      "0168:10de"
+    ],
+    "GeForce-Go-6600": [
+      "0144:10de",
+      "0148:10de"
+    ],
+    "GeForce-Go-6600-GT": [
+      "0149:10de"
+    ],
+    "GeForce-Go-6600-TE6200-TE": [
+      "0146:10de"
+    ],
+    "GeForce-Go-6800": [
+      "00c8:10de"
+    ],
+    "GeForce-Go-6800-Ultra": [
+      "00c9:10de"
+    ],
+    "GeForce-Go-7200": [
+      "01d6:10de"
+    ],
+    "GeForce-Go-7300": [
+      "01d7:10de"
+    ],
+    "GeForce-Go-7400": [
+      "01d8:10de"
+    ],
+    "GeForce-Go-7600": [
+      "0398:10de"
+    ],
+    "GeForce-Go-7600-GT": [
+      "0399:10de"
+    ],
+    "GeForce-Go-7700": [
+      "0397:10de"
+    ],
+    "GeForce-Go-7800": [
+      "0098:10de"
+    ],
+    "GeForce-Go-7800-GTX": [
+      "0099:10de"
+    ],
+    "GeForce-Go-7900-GS": [
+      "0298:10de"
+    ],
+    "GeForce-Go-7950-GTX": [
+      "0297:10de"
+    ],
+    "GeForce-PCX-5750": [
+      "00fa:10de"
+    ],
+    "GeForce-PCX-5900": [
+      "00fb:10de"
+    ],
+    "GeForce2-GTSGeForce2-Pro": [
+      "0150:10de"
+    ],
+    "GeForce2-Go": [
+      "0112:10de"
+    ],
+    "GeForce2-Integrated-GPU": [
+      "01a0:10de"
+    ],
+    "GeForce2-MX-100200": [
+      "0111:10de"
+    ],
+    "GeForce2-MXMX-400": [
+      "0110:10de"
+    ],
+    "GeForce2-Ti": [
+      "0151:10de"
+    ],
+    "GeForce2-Ultra": [
+      "0152:10de"
+    ],
+    "GeForce3": [
+      "0200:10de"
+    ],
+    "GeForce3-Ti-200": [
+      "0201:10de"
+    ],
+    "GeForce3-Ti-500": [
+      "0202:10de"
+    ],
+    "GeForce4-410-Go-16M": [
+      "017d:10de"
+    ],
+    "GeForce4-420-Go": [
+      "0175:10de"
+    ],
+    "GeForce4-420-Go-32M": [
+      "0176:10de"
+    ],
+    "GeForce4-4200-Go": [
+      "0286:10de"
+    ],
+    "GeForce4-440-Go": [
+      "0174:10de"
+    ],
+    "GeForce4-440-Go-64M": [
+      "0179:10de"
+    ],
+    "GeForce4-460-Go": [
+      "0177:10de"
+    ],
+    "GeForce4-MX-4000": [
+      "0185:10de"
+    ],
+    "GeForce4-MX-420": [
+      "0172:10de"
+    ],
+    "GeForce4-MX-420-with-AGP8X": [
+      "0183:10de"
+    ],
+    "GeForce4-MX-440": [
+      "0171:10de"
+    ],
+    "GeForce4-MX-440-SE": [
+      "0173:10de"
+    ],
+    "GeForce4-MX-440-with-AGP8X": [
+      "0181:10de"
+    ],
+    "GeForce4-MX-440SE-with-AGP8X": [
+      "0182:10de"
+    ],
+    "GeForce4-MX-460": [
+      "0170:10de"
+    ],
+    "GeForce4-MX-Integrated-GPU": [
+      "01f0:10de"
+    ],
+    "GeForce4-Ti-4200": [
+      "0253:10de"
+    ],
+    "GeForce4-Ti-4200-with-AGP8X": [
+      "0281:10de"
+    ],
+    "GeForce4-Ti-4400": [
+      "0251:10de"
+    ],
+    "GeForce4-Ti-4600": [
+      "0250:10de"
+    ],
+    "GeForce4-Ti-4800": [
+      "0280:10de"
+    ],
+    "GeForce4-Ti-4800-SE": [
+      "0282:10de"
+    ],
+    "HICx16-Graphics": [
+      "06ff:10de"
+    ],
+    "HICx8-Graphics": [
+      "06ff:10de"
+    ],
+    "ION": [
+      "0865:10de",
+      "0874:10de",
+      "0876:10de",
+      "087d:10de"
+    ],
+    "ION-LE": [
+      "087e:10de",
+      "087f:10de"
+    ],
+    "Matrox-D-Series-D1450": [
+      "1cfb:10de"
+    ],
+    "Matrox-D-Series-D1480": [
+      "1cfb:10de"
+    ],
+    "Matrox-D-Series-D2450": [
+      "1f76:10de"
+    ],
+    "Matrox-D-Series-D2480": [
+      "1f76:10de"
+    ],
+    "NVIDIA-A10": [
+      "2236:10de"
+    ],
+    "NVIDIA-A100-80GB-PCIe": [
+      "20b5:10de"
+    ],
+    "NVIDIA-A100-PCIE-40GB": [
+      "20f1:10de"
+    ],
+    "NVIDIA-A100-PG509-200": [
+      "20b0:10de"
+    ],
+    "NVIDIA-A100-SXM-64GB": [
+      "20b3:10de"
+    ],
+    "NVIDIA-A100-SXM4-40GB": [
+      "20b0:10de"
+    ],
+    "NVIDIA-A100-SXM4-80GB": [
+      "20b2:10de"
+    ],
+    "NVIDIA-A10G": [
+      "2237:10de"
+    ],
+    "NVIDIA-A10M": [
+      "2238:10de"
+    ],
+    "NVIDIA-A16": [
+      "25b6:10de"
+    ],
+    "NVIDIA-A2": [
+      "25b6:10de"
+    ],
+    "NVIDIA-A30": [
+      "20b7:10de"
+    ],
+    "NVIDIA-A40": [
+      "2235:10de"
+    ],
+    "NVIDIA-A800-40GB-Active": [
+      "20f6:10de"
+    ],
+    "NVIDIA-A800-80GB-PCIe": [
+      "20f5:10de"
+    ],
+    "NVIDIA-A800-80GB-PCIe-LC": [
+      "20f5:10de"
+    ],
+    "NVIDIA-A800-SXM4-40GB": [
+      "20bd:10de"
+    ],
+    "NVIDIA-A800-SXM4-80GB": [
+      "20f3:10de"
+    ],
+    "NVIDIA-AX800": [
+      "20fd:10de"
+    ],
+    "NVIDIA-B200": [
+      "2901:10de",
+      "2909:10de"
+    ],
+    "NVIDIA-B300-SXM6-AC": [
+      "3182:10de"
+    ],
+    "NVIDIA-CMP-30HX": [
+      "2189:10de"
+    ],
+    "NVIDIA-CMP-40HX": [
+      "1f0b:10de"
+    ],
+    "NVIDIA-CMP-50HX": [
+      "1e09:10de"
+    ],
+    "NVIDIA-CMP-70HX": [
+      "248a:10de"
+    ],
+    "NVIDIA-CMP-90HX": [
+      "220d:10de"
+    ],
+    "NVIDIA-DGX-Display": [
+      "1fb0:10de"
+    ],
+    "NVIDIA-DRIVE-P2021": [
+      "29bb:10de"
+    ],
+    "NVIDIA-GB10": [
+      "2e12:10de"
+    ],
+    "NVIDIA-GB200": [
+      "2941:10de"
+    ],
+    "NVIDIA-GB300": [
+      "31c2:10de",
+      "31c3:10de"
+    ],
+    "NVIDIA-GH200-120GB": [
+      "2342:10de"
+    ],
+    "NVIDIA-GH200-144G-HBM3e": [
+      "2348:10de"
+    ],
+    "NVIDIA-GH200-480GB": [
+      "2342:10de"
+    ],
+    "NVIDIA-GeForce-830A": [
+      "1340:10de"
+    ],
+    "NVIDIA-GeForce-830M": [
+      "1340:10de"
+    ],
+    "NVIDIA-GeForce-840A": [
+      "1341:10de"
+    ],
+    "NVIDIA-GeForce-840M": [
+      "1341:10de",
+      "1393:10de"
+    ],
+    "NVIDIA-GeForce-845M": [
+      "1344:10de",
+      "1390:10de",
+      "1398:10de"
+    ],
+    "NVIDIA-GeForce-920MX": [
+      "134f:10de"
+    ],
+    "NVIDIA-GeForce-930A": [
+      "1346:10de",
+      "1349:10de"
+    ],
+    "NVIDIA-GeForce-930M": [
+      "1346:10de",
+      "1349:10de"
+    ],
+    "NVIDIA-GeForce-930MX": [
+      "134e:10de"
+    ],
+    "NVIDIA-GeForce-940A": [
+      "1347:10de",
+      "137d:10de"
+    ],
+    "NVIDIA-GeForce-940M": [
+      "1347:10de",
+      "139c:10de"
+    ],
+    "NVIDIA-GeForce-940MX": [
+      "134b:10de",
+      "134d:10de",
+      "179c:10de"
+    ],
+    "NVIDIA-GeForce-945A": [
+      "1348:10de"
+    ],
+    "NVIDIA-GeForce-945M": [
+      "1348:10de",
+      "1399:10de"
+    ],
+    "NVIDIA-GeForce-GPU": [
+      "1392:10de"
+    ],
+    "NVIDIA-GeForce-GT-1010": [
+      "1d02:10de"
+    ],
+    "NVIDIA-GeForce-GT-1030": [
+      "1d01:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1050": [
+      "1c22:10de",
+      "1c62:10de",
+      "1c81:10de",
+      "1c83:10de",
+      "1c8d:10de",
+      "1c91:10de",
+      "1c92:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1050-Ti": [
+      "1c21:10de",
+      "1c61:10de",
+      "1c82:10de",
+      "1c8c:10de",
+      "1c8f:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1050-Ti-with-Max-Q-Design": [
+      "1c8c:10de",
+      "1c8f:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1050-with-Max-Q-Design": [
+      "1c8d:10de",
+      "1c91:10de",
+      "1c92:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1060": [
+      "1c20:10de",
+      "1c23:10de",
+      "1c60:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1060-3GB": [
+      "1b84:10de",
+      "1c02:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1060-5GB": [
+      "1c04:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1060-6GB": [
+      "1b83:10de",
+      "1c03:10de",
+      "1c06:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1060-with-Max-Q-Design": [
+      "1c20:10de",
+      "1c60:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1070": [
+      "1b81:10de",
+      "1ba1:10de",
+      "1ba2:10de",
+      "1be1:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1070-Ti": [
+      "1b82:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1070-with-Max-Q-Design": [
+      "1ba1:10de",
+      "1be1:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1080": [
+      "1b80:10de",
+      "1ba0:10de",
+      "1be0:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1080-Ti": [
+      "1b06:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1080-with-Max-Q-Design": [
+      "1ba0:10de",
+      "1be0:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1630": [
+      "1f83:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1650": [
+      "1f0a:10de",
+      "1f82:10de",
+      "1f91:10de",
+      "1f96:10de",
+      "1f99:10de",
+      "1f9d:10de",
+      "1fdd:10de",
+      "2188:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1650-SUPER": [
+      "2187:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1650-Ti": [
+      "1f95:10de",
+      "2192:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1650-Ti-with-Max-Q-Design": [
+      "1f95:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1650-with-Max-Q-Design": [
+      "1f91:10de",
+      "1f96:10de",
+      "1f99:10de",
+      "1f9d:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1660": [
+      "2184:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1660-SUPER": [
+      "21c4:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1660-Ti": [
+      "2182:10de",
+      "2191:10de",
+      "21d1:10de"
+    ],
+    "NVIDIA-GeForce-GTX-1660-Ti-with-Max-Q-Design": [
+      "2191:10de"
+    ],
+    "NVIDIA-GeForce-GTX-745": [
+      "1382:10de"
+    ],
+    "NVIDIA-GeForce-GTX-750": [
+      "1381:10de",
+      "1407:10de"
+    ],
+    "NVIDIA-GeForce-GTX-750-Ti": [
+      "1380:10de",
+      "1392:10de",
+      "139b:10de",
+      "139d:10de"
+    ],
+    "NVIDIA-GeForce-GTX-750Ti": [
+      "139b:10de"
+    ],
+    "NVIDIA-GeForce-GTX-850A": [
+      "1391:10de"
+    ],
+    "NVIDIA-GeForce-GTX-850M": [
+      "1391:10de"
+    ],
+    "NVIDIA-GeForce-GTX-860M": [
+      "1392:10de",
+      "139b:10de"
+    ],
+    "NVIDIA-GeForce-GTX-950": [
+      "1402:10de",
+      "1427:10de"
+    ],
+    "NVIDIA-GeForce-GTX-950A": [
+      "139a:10de"
+    ],
+    "NVIDIA-GeForce-GTX-950M": [
+      "139a:10de"
+    ],
+    "NVIDIA-GeForce-GTX-960": [
+      "13d8:10de",
+      "1401:10de",
+      "1406:10de"
+    ],
+    "NVIDIA-GeForce-GTX-960A": [
+      "139b:10de"
+    ],
+    "NVIDIA-GeForce-GTX-960M": [
+      "139b:10de"
+    ],
+    "NVIDIA-GeForce-GTX-965M": [
+      "13d9:10de",
+      "1427:10de",
+      "1619:10de",
+      "1667:10de"
+    ],
+    "NVIDIA-GeForce-GTX-970": [
+      "13c2:10de"
+    ],
+    "NVIDIA-GeForce-GTX-970M": [
+      "13d8:10de",
+      "1618:10de"
+    ],
+    "NVIDIA-GeForce-GTX-980": [
+      "13c0:10de",
+      "13da:10de",
+      "161a:10de"
+    ],
+    "NVIDIA-GeForce-GTX-980-Ti": [
+      "17c8:10de"
+    ],
+    "NVIDIA-GeForce-GTX-980M": [
+      "13d7:10de",
+      "1617:10de"
+    ],
+    "NVIDIA-GeForce-GTX-TITAN-X": [
+      "17c2:10de"
+    ],
+    "NVIDIA-GeForce-MX110": [
+      "174e:10de"
+    ],
+    "NVIDIA-GeForce-MX130": [
+      "174d:10de"
+    ],
+    "NVIDIA-GeForce-MX150": [
+      "1c90:10de",
+      "1d10:10de",
+      "1d12:10de"
+    ],
+    "NVIDIA-GeForce-MX230": [
+      "1d11:10de"
+    ],
+    "NVIDIA-GeForce-MX250": [
+      "1c90:10de",
+      "1d13:10de",
+      "1d52:10de"
+    ],
+    "NVIDIA-GeForce-MX330": [
+      "1d16:10de"
+    ],
+    "NVIDIA-GeForce-MX350": [
+      "1c94:10de",
+      "1c96:10de"
+    ],
+    "NVIDIA-GeForce-MX450": [
+      "1f97:10de",
+      "1f98:10de",
+      "1f9c:10de"
+    ],
+    "NVIDIA-GeForce-MX550": [
+      "1f9f:10de",
+      "1fa0:10de"
+    ],
+    "NVIDIA-GeForce-MX570": [
+      "25a6:10de"
+    ],
+    "NVIDIA-GeForce-MX570-A": [
+      "25aa:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2050": [
+      "25a7:10de",
+      "25a9:10de",
+      "25ad:10de",
+      "25ed:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2060": [
+      "1e89:10de",
+      "1f03:10de",
+      "1f08:10de",
+      "1f11:10de",
+      "1f12:10de",
+      "1f15:10de",
+      "1f51:10de",
+      "1f55:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2060-SUPER": [
+      "1f06:10de",
+      "1f42:10de",
+      "1f47:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2060-with-Max-Q-Design": [
+      "1f12:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2070": [
+      "1f02:10de",
+      "1f07:10de",
+      "1f10:10de",
+      "1f14:10de",
+      "1f50:10de",
+      "1f54:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2070-SUPER": [
+      "1e84:10de",
+      "1ec2:10de",
+      "1ec7:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2070-Super": [
+      "1e91:10de",
+      "1ed1:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2070-Super-with-Max-Q-Design": [
+      "1e91:10de",
+      "1ed1:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2070-with-Max-Q-Design": [
+      "1f10:10de",
+      "1f14:10de",
+      "1f50:10de",
+      "1f54:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2080": [
+      "1e82:10de",
+      "1e87:10de",
+      "1e90:10de",
+      "1ed0:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2080-SUPER": [
+      "1e81:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2080-Super": [
+      "1e93:10de",
+      "1ed3:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2080-Super-with-Max-Q-Design": [
+      "1e93:10de",
+      "1ed3:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2080-Ti": [
+      "1e04:10de",
+      "1e07:10de"
+    ],
+    "NVIDIA-GeForce-RTX-2080-with-Max-Q-Design": [
+      "1e90:10de",
+      "1ed0:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3050": [
+      "2507:10de",
+      "2582:10de",
+      "2584:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3050-4GB-Laptop-GPU": [
+      "25ab:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3050-6GB-Laptop-GPU": [
+      "25ac:10de",
+      "25ec:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3050-A-Laptop-GPU": [
+      "2822:10de",
+      "28a3:10de",
+      "28e3:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3050-Laptop-GPU": [
+      "25a2:10de",
+      "25a5:10de",
+      "25e2:10de",
+      "25e5:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3050-OEM": [
+      "2508:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3050-Ti-Laptop-GPU": [
+      "2523:10de",
+      "2563:10de",
+      "25a0:10de",
+      "25a2:10de",
+      "25e0:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3050Ti-Laptop-GPU": [
+      "25a0:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3060": [
+      "2487:10de",
+      "24c7:10de",
+      "2503:10de",
+      "2504:10de",
+      "2544:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3060-Laptop-GPU": [
+      "249c:10de",
+      "24a0:10de",
+      "2520:10de",
+      "2521:10de",
+      "2560:10de",
+      "25a0:10de",
+      "25a2:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3060-Ti": [
+      "2414:10de",
+      "2486:10de",
+      "2489:10de",
+      "24c9:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3070": [
+      "2484:10de",
+      "2488:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3070-Laptop-GPU": [
+      "249d:10de",
+      "24dd:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3070-Ti": [
+      "2207:10de",
+      "2482:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3070-Ti-Laptop-GPU": [
+      "24a0:10de",
+      "24e0:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3080": [
+      "2206:10de",
+      "220a:10de",
+      "2216:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3080-Laptop-GPU": [
+      "249c:10de",
+      "24dc:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3080-Ti": [
+      "2208:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3080-Ti-Laptop-GPU": [
+      "2420:10de",
+      "2460:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3090": [
+      "2204:10de"
+    ],
+    "NVIDIA-GeForce-RTX-3090-Ti": [
+      "2203:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4050-Laptop-GPU": [
+      "28a1:10de",
+      "28e1:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4060": [
+      "2808:10de",
+      "2882:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4060-Laptop-GPU": [
+      "28a0:10de",
+      "28e0:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4060-Ti": [
+      "2788:10de",
+      "2803:10de",
+      "2805:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4070": [
+      "2709:10de",
+      "2786:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4070-Laptop-GPU": [
+      "2820:10de",
+      "2860:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4070-SUPER": [
+      "2783:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4070-Ti": [
+      "2782:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4070-Ti-SUPER": [
+      "2689:10de",
+      "2705:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4080": [
+      "2704:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4080-Laptop-GPU": [
+      "27a0:10de",
+      "27e0:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4080-SUPER": [
+      "2702:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4090": [
+      "2684:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4090-D": [
+      "2685:10de"
+    ],
+    "NVIDIA-GeForce-RTX-4090-Laptop-GPU": [
+      "2717:10de",
+      "2757:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5050": [
+      "2d83:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5050-Laptop-GPU": [
+      "2d98:10de",
+      "2dd8:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5060": [
+      "2d05:10de",
+      "2f06:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5060-Laptop-GPU": [
+      "2d19:10de",
+      "2d59:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5060-Ti": [
+      "2d04:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5070": [
+      "2c09:10de",
+      "2f04:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5070-Laptop-GPU": [
+      "2d18:10de",
+      "2d58:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5070-Ti": [
+      "2c05:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5070-Ti-Laptop-GPU": [
+      "2f18:10de",
+      "2f58:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5080": [
+      "2c02:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5080-Laptop-GPU": [
+      "2c19:10de",
+      "2c59:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5090": [
+      "2b85:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5090-D": [
+      "2b87:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5090-D-v2": [
+      "2b8c:10de"
+    ],
+    "NVIDIA-GeForce-RTX-5090-Laptop-GPU": [
+      "2c18:10de",
+      "2c58:10de"
+    ],
+    "NVIDIA-H100": [
+      "2339:10de"
+    ],
+    "NVIDIA-H100-80GB-HBM3": [
+      "2330:10de"
+    ],
+    "NVIDIA-H100-NVL": [
+      "2321:10de"
+    ],
+    "NVIDIA-H100-PCIe": [
+      "2331:10de"
+    ],
+    "NVIDIA-H20": [
+      "2329:10de"
+    ],
+    "NVIDIA-H20-3e": [
+      "232c:10de"
+    ],
+    "NVIDIA-H20-NVL16": [
+      "230e:10de"
+    ],
+    "NVIDIA-H200": [
+      "2335:10de"
+    ],
+    "NVIDIA-H200-NVL": [
+      "233b:10de"
+    ],
+    "NVIDIA-H800": [
+      "2324:10de"
+    ],
+    "NVIDIA-H800-NVL": [
+      "233a:10de"
+    ],
+    "NVIDIA-H800-PCIe": [
+      "2322:10de"
+    ],
+    "NVIDIA-L2": [
+      "27b6:10de"
+    ],
+    "NVIDIA-L20": [
+      "26ba:10de"
+    ],
+    "NVIDIA-L4": [
+      "27b8:10de"
+    ],
+    "NVIDIA-L40": [
+      "26b5:10de"
+    ],
+    "NVIDIA-L40S": [
+      "26b9:10de"
+    ],
+    "NVIDIA-N15M-Q3": [
+      "137a:10de"
+    ],
+    "NVIDIA-P104-100": [
+      "1b87:10de"
+    ],
+    "NVIDIA-P104-101-GP104": [
+      "1bc7:10de"
+    ],
+    "NVIDIA-P106-090": [
+      "1c09:10de"
+    ],
+    "NVIDIA-P106-100": [
+      "1c07:10de"
+    ],
+    "NVIDIA-PG506-232": [
+      "20b6:10de"
+    ],
+    "NVIDIA-PG509-210": [
+      "20b2:10de"
+    ],
+    "NVIDIA-RTX-1000-Ada-Generation-Laptop-GPU": [
+      "28b9:10de"
+    ],
+    "NVIDIA-RTX-2000-Ada-Generation": [
+      "28b0:10de"
+    ],
+    "NVIDIA-RTX-2000-Ada-Generation-Embedded-GPU": [
+      "28f8:10de"
+    ],
+    "NVIDIA-RTX-2000-Ada-Generation-Laptop-GPU": [
+      "28b8:10de"
+    ],
+    "NVIDIA-RTX-2000E-Ada-Generation": [
+      "28b0:10de"
+    ],
+    "NVIDIA-RTX-3000-Ada-Generation-Laptop-GPU": [
+      "2838:10de"
+    ],
+    "NVIDIA-RTX-3500-Ada-Generation-Embedded-GPU": [
+      "27fb:10de"
+    ],
+    "NVIDIA-RTX-3500-Ada-Generation-Laptop-GPU": [
+      "27bb:10de"
+    ],
+    "NVIDIA-RTX-4000-Ada-Generation": [
+      "27b2:10de"
+    ],
+    "NVIDIA-RTX-4000-Ada-Generation-Laptop-GPU": [
+      "27ba:10de"
+    ],
+    "NVIDIA-RTX-4000-SFF-Ada-Generation": [
+      "27b0:10de"
+    ],
+    "NVIDIA-RTX-4500-Ada-Generation": [
+      "27b1:10de"
+    ],
+    "NVIDIA-RTX-500-Ada-Generation-Laptop-GPU": [
+      "28ba:10de",
+      "28bb:10de"
+    ],
+    "NVIDIA-RTX-5000-Ada-Generation": [
+      "26b2:10de"
+    ],
+    "NVIDIA-RTX-5000-Ada-Generation-Embedded-GPU": [
+      "2770:10de"
+    ],
+    "NVIDIA-RTX-5000-Ada-Generation-Laptop-GPU": [
+      "2730:10de"
+    ],
+    "NVIDIA-RTX-5880-Ada-Generation": [
+      "26b3:10de"
+    ],
+    "NVIDIA-RTX-6000-Ada-Generation": [
+      "26b1:10de"
+    ],
+    "NVIDIA-RTX-6000D": [
+      "2bb9:10de"
+    ],
+    "NVIDIA-RTX-A1000": [
+      "25b0:10de"
+    ],
+    "NVIDIA-RTX-A1000-6GB-Laptop-GPU": [
+      "25bc:10de"
+    ],
+    "NVIDIA-RTX-A1000-Embedded-GPU": [
+      "25f9:10de"
+    ],
+    "NVIDIA-RTX-A1000-Laptop-GPU": [
+      "25b9:10de"
+    ],
+    "NVIDIA-RTX-A2000": [
+      "2531:10de"
+    ],
+    "NVIDIA-RTX-A2000-12GB": [
+      "2571:10de"
+    ],
+    "NVIDIA-RTX-A2000-8GB-Laptop-GPU": [
+      "25ba:10de"
+    ],
+    "NVIDIA-RTX-A2000-Embedded-GPU": [
+      "25fa:10de"
+    ],
+    "NVIDIA-RTX-A2000-Laptop-GPU": [
+      "25b8:10de"
+    ],
+    "NVIDIA-RTX-A3000-12GB-Laptop-GPU": [
+      "24b9:10de",
+      "24bb:10de"
+    ],
+    "NVIDIA-RTX-A3000-Laptop-GPU": [
+      "24b8:10de"
+    ],
+    "NVIDIA-RTX-A400": [
+      "25b2:10de"
+    ],
+    "NVIDIA-RTX-A4000": [
+      "24b0:10de"
+    ],
+    "NVIDIA-RTX-A4000-Laptop-GPU": [
+      "24b7:10de"
+    ],
+    "NVIDIA-RTX-A4000H": [
+      "24b1:10de"
+    ],
+    "NVIDIA-RTX-A4500": [
+      "2232:10de"
+    ],
+    "NVIDIA-RTX-A4500-Embedded-GPU": [
+      "24fa:10de"
+    ],
+    "NVIDIA-RTX-A4500-Laptop-GPU": [
+      "24ba:10de"
+    ],
+    "NVIDIA-RTX-A500-Embedded-GPU": [
+      "25fb:10de"
+    ],
+    "NVIDIA-RTX-A500-Laptop-GPU": [
+      "25bb:10de",
+      "25bd:10de"
+    ],
+    "NVIDIA-RTX-A5000": [
+      "2231:10de"
+    ],
+    "NVIDIA-RTX-A5000-Laptop-GPU": [
+      "24b6:10de"
+    ],
+    "NVIDIA-RTX-A5500": [
+      "2233:10de"
+    ],
+    "NVIDIA-RTX-A5500-Laptop-GPU": [
+      "2438:10de"
+    ],
+    "NVIDIA-RTX-A6000": [
+      "2230:10de"
+    ],
+    "NVIDIA-RTX-PRO-1000-Blackwell-Generation-Laptop-GPU": [
+      "2db8:10de"
+    ],
+    "NVIDIA-RTX-PRO-2000-Blackwell": [
+      "2d30:10de"
+    ],
+    "NVIDIA-RTX-PRO-2000-Blackwell-Embedded-GPU": [
+      "2d79:10de"
+    ],
+    "NVIDIA-RTX-PRO-2000-Blackwell-Generation-Laptop-GPU": [
+      "2d39:10de"
+    ],
+    "NVIDIA-RTX-PRO-3000-Blackwell-Generation-Laptop-GPU": [
+      "2f38:10de"
+    ],
+    "NVIDIA-RTX-PRO-4000-Blackwell": [
+      "2c34:10de"
+    ],
+    "NVIDIA-RTX-PRO-4000-Blackwell-Embedded-GPU": [
+      "2c79:10de"
+    ],
+    "NVIDIA-RTX-PRO-4000-Blackwell-Generation-Laptop-GPU": [
+      "2c39:10de"
+    ],
+    "NVIDIA-RTX-PRO-4000-Blackwell-SFF-Edition": [
+      "2c33:10de"
+    ],
+    "NVIDIA-RTX-PRO-4500-Blackwell": [
+      "2c31:10de"
+    ],
+    "NVIDIA-RTX-PRO-4500-Blackwell-Server-Edition": [
+      "2c3a:10de"
+    ],
+    "NVIDIA-RTX-PRO-500-Blackwell-Embedded-GPU": [
+      "2df9:10de"
+    ],
+    "NVIDIA-RTX-PRO-500-Blackwell-Generation-Laptop-GPU": [
+      "2db9:10de"
+    ],
+    "NVIDIA-RTX-PRO-5000-72GB-Blackwell": [
+      "2bb3:10de"
+    ],
+    "NVIDIA-RTX-PRO-5000-Blackwell": [
+      "2bb3:10de"
+    ],
+    "NVIDIA-RTX-PRO-5000-Blackwell-Embedded-GPU": [
+      "2c77:10de"
+    ],
+    "NVIDIA-RTX-PRO-5000-Blackwell-Generation-Laptop-GPU": [
+      "2c38:10de"
+    ],
+    "NVIDIA-RTX-PRO-6000-Blackwell-Max-Q-Workstation-Edition": [
+      "2bb4:10de"
+    ],
+    "NVIDIA-RTX-PRO-6000-Blackwell-Server-Edition": [
+      "2bb5:10de"
+    ],
+    "NVIDIA-RTX-PRO-6000-Blackwell-Workstation-Edition": [
+      "2bb1:10de"
+    ],
+    "NVIDIA-T1000": [
+      "1fb0:10de"
+    ],
+    "NVIDIA-T1000-8GB": [
+      "1ff0:10de"
+    ],
+    "NVIDIA-T1200-Laptop-GPU": [
+      "1fbc:10de"
+    ],
+    "NVIDIA-T400": [
+      "1fb2:10de"
+    ],
+    "NVIDIA-T400-4GB": [
+      "1ff2:10de"
+    ],
+    "NVIDIA-T400E": [
+      "1ff2:10de"
+    ],
+    "NVIDIA-T500": [
+      "1fbb:10de"
+    ],
+    "NVIDIA-T550-Laptop-GPU": [
+      "1fb7:10de"
+    ],
+    "NVIDIA-T600": [
+      "1fb1:10de"
+    ],
+    "NVIDIA-T600-Laptop-GPU": [
+      "1fb6:10de",
+      "1fba:10de"
+    ],
+    "NVIDIA-TITAN-RTX": [
+      "1e02:10de"
+    ],
+    "NVIDIA-TITAN-V": [
+      "1d81:10de"
+    ],
+    "NVIDIA-TITAN-V-JHH-Special-Edition": [
+      "1dba:10de"
+    ],
+    "NVIDIA-TITAN-X-Pascal": [
+      "1b00:10de"
+    ],
+    "NVIDIA-TITAN-Xp": [
+      "1b02:10de"
+    ],
+    "NVIDIA-TITAN-Xp-COLLECTORS-EDITION": [
+      "1b02:10de"
+    ],
+    "NVS-2100M": [
+      "0a6a:10de"
+    ],
+    "NVS-300": [
+      "10d8:10de"
+    ],
+    "NVS-310": [
+      "107d:10de"
+    ],
+    "NVS-3100M": [
+      "0a6c:10de"
+    ],
+    "NVS-315": [
+      "107c:10de"
+    ],
+    "NVS-4200M": [
+      "1056:10de",
+      "1057:10de"
+    ],
+    "NVS-510": [
+      "0ffd:10de"
+    ],
+    "NVS-5100M": [
+      "0a2c:10de"
+    ],
+    "NVS-5200M": [
+      "0dfc:10de",
+      "1140:10de"
+    ],
+    "NVS-5400M": [
+      "0def:10de"
+    ],
+    "NVS-810": [
+      "13b9:10de"
+    ],
+    "Quadro": [
+      "0103:10de"
+    ],
+    "Quadro-1000M": [
+      "0dfa:10de"
+    ],
+    "Quadro-2000": [
+      "0dd8:10de"
+    ],
+    "Quadro-2000D": [
+      "0dd8:10de"
+    ],
+    "Quadro-2000M": [
+      "0dda:10de"
+    ],
+    "Quadro-3000M": [
+      "0e3a:10de"
+    ],
+    "Quadro-400": [
+      "0a38:10de"
+    ],
+    "Quadro-4000": [
+      "06dd:10de"
+    ],
+    "Quadro-4000M": [
+      "0e3b:10de"
+    ],
+    "Quadro-410": [
+      "0fff:10de"
+    ],
+    "Quadro-5000": [
+      "06d9:10de"
+    ],
+    "Quadro-5000M": [
+      "06da:10de"
+    ],
+    "Quadro-500M": [
+      "0df9:10de"
+    ],
+    "Quadro-5010M": [
+      "109a:10de"
+    ],
+    "Quadro-600": [
+      "0df8:10de"
+    ],
+    "Quadro-6000": [
+      "06d8:10de",
+      "06dc:10de"
+    ],
+    "Quadro-7000": [
+      "109b:10de"
+    ],
+    "Quadro-CX": [
+      "05f9:10de"
+    ],
+    "Quadro-DCC": [
+      "0203:10de"
+    ],
+    "Quadro-FX-1000": [
+      "0309:10de"
+    ],
+    "Quadro-FX-1100": [
+      "034e:10de"
+    ],
+    "Quadro-FX-1300": [
+      "00fe:10de"
+    ],
+    "Quadro-FX-1400": [
+      "00ce:10de"
+    ],
+    "Quadro-FX-1500": [
+      "029e:10de"
+    ],
+    "Quadro-FX-1500M": [
+      "029b:10de"
+    ],
+    "Quadro-FX-1600M": [
+      "040d:10de"
+    ],
+    "Quadro-FX-1700": [
+      "040f:10de"
+    ],
+    "Quadro-FX-1700M": [
+      "065a:10de"
+    ],
+    "Quadro-FX-1800": [
+      "0638:10de"
+    ],
+    "Quadro-FX-1800M": [
+      "0cbc:10de"
+    ],
+    "Quadro-FX-2000": [
+      "0308:10de"
+    ],
+    "Quadro-FX-2500M": [
+      "029a:10de"
+    ],
+    "Quadro-FX-2700M": [
+      "063a:10de"
+    ],
+    "Quadro-FX-2800M": [
+      "061d:10de"
+    ],
+    "Quadro-FX-3000": [
+      "0338:10de"
+    ],
+    "Quadro-FX-330GeForce-PCX-5300": [
+      "00fc:10de"
+    ],
+    "Quadro-FX-330Quadro-NVS-280-PCI-E": [
+      "00fd:10de"
+    ],
+    "Quadro-FX-3400Quadro-FX-4000": [
+      "00f8:10de"
+    ],
+    "Quadro-FX-34504000-SDI": [
+      "00cd:10de"
+    ],
+    "Quadro-FX-350": [
+      "01de:10de"
+    ],
+    "Quadro-FX-3500": [
+      "029d:10de"
+    ],
+    "Quadro-FX-350M": [
+      "01dc:10de"
+    ],
+    "Quadro-FX-3600M": [
+      "061c:10de"
+    ],
+    "Quadro-FX-360M": [
+      "042d:10de"
+    ],
+    "Quadro-FX-370": [
+      "040a:10de"
+    ],
+    "Quadro-FX-370-LP": [
+      "06f9:10de"
+    ],
+    "Quadro-FX-370-Low-Profile": [
+      "06f9:10de"
+    ],
+    "Quadro-FX-3700": [
+      "061a:10de"
+    ],
+    "Quadro-FX-3700M": [
+      "061e:10de"
+    ],
+    "Quadro-FX-370M": [
+      "06fb:10de"
+    ],
+    "Quadro-FX-380": [
+      "0658:10de"
+    ],
+    "Quadro-FX-380-LP": [
+      "0a78:10de"
+    ],
+    "Quadro-FX-3800": [
+      "05ff:10de"
+    ],
+    "Quadro-FX-3800M": [
+      "061f:10de"
+    ],
+    "Quadro-FX-380M": [
+      "0a7c:10de"
+    ],
+    "Quadro-FX-4000": [
+      "004e:10de"
+    ],
+    "Quadro-FX-4500": [
+      "009d:10de"
+    ],
+    "Quadro-FX-4500-X2": [
+      "029f:10de"
+    ],
+    "Quadro-FX-4600": [
+      "019e:10de"
+    ],
+    "Quadro-FX-4700-X2": [
+      "0619:10de"
+    ],
+    "Quadro-FX-4800": [
+      "05fe:10de"
+    ],
+    "Quadro-FX-500FX-600": [
+      "032b:10de"
+    ],
+    "Quadro-FX-540": [
+      "014e:10de"
+    ],
+    "Quadro-FX-540M": [
+      "014c:10de"
+    ],
+    "Quadro-FX-550": [
+      "014d:10de"
+    ],
+    "Quadro-FX-5500": [
+      "029c:10de"
+    ],
+    "Quadro-FX-560": [
+      "039e:10de"
+    ],
+    "Quadro-FX-5600": [
+      "019d:10de"
+    ],
+    "Quadro-FX-560M": [
+      "039c:10de"
+    ],
+    "Quadro-FX-570": [
+      "040e:10de"
+    ],
+    "Quadro-FX-570M": [
+      "040c:10de"
+    ],
+    "Quadro-FX-580": [
+      "0659:10de"
+    ],
+    "Quadro-FX-5800": [
+      "05fd:10de"
+    ],
+    "Quadro-FX-700": [
+      "033f:10de"
+    ],
+    "Quadro-FX-770M": [
+      "065c:10de"
+    ],
+    "Quadro-FX-880M": [
+      "0a3c:10de"
+    ],
+    "Quadro-FX-Go1000": [
+      "034c:10de"
+    ],
+    "Quadro-FX-Go1400": [
+      "00cc:10de"
+    ],
+    "Quadro-FX-Go700": [
+      "031c:10de"
+    ],
+    "Quadro-GP100": [
+      "15f0:10de"
+    ],
+    "Quadro-GV100": [
+      "1dba:10de"
+    ],
+    "Quadro-K1000M": [
+      "0ffc:10de"
+    ],
+    "Quadro-K1100M": [
+      "0ff6:10de"
+    ],
+    "Quadro-K1200": [
+      "13bc:10de"
+    ],
+    "Quadro-K2000": [
+      "0ffe:10de"
+    ],
+    "Quadro-K2000D": [
+      "0ff9:10de"
+    ],
+    "Quadro-K2000M": [
+      "0ffb:10de"
+    ],
+    "Quadro-K2100M": [
+      "11fc:10de"
+    ],
+    "Quadro-K2200": [
+      "13ba:10de"
+    ],
+    "Quadro-K2200M": [
+      "13b3:10de"
+    ],
+    "Quadro-K3000M": [
+      "11be:10de"
+    ],
+    "Quadro-K3100M": [
+      "11b6:10de"
+    ],
+    "Quadro-K4000": [
+      "11fa:10de"
+    ],
+    "Quadro-K4000M": [
+      "11bd:10de"
+    ],
+    "Quadro-K4100M": [
+      "11b7:10de"
+    ],
+    "Quadro-K4200": [
+      "11b4:10de"
+    ],
+    "Quadro-K5000": [
+      "11ba:10de"
+    ],
+    "Quadro-K5000M": [
+      "11bc:10de"
+    ],
+    "Quadro-K500M": [
+      "0ff8:10de"
+    ],
+    "Quadro-K5100M": [
+      "11b8:10de"
+    ],
+    "Quadro-K510M": [
+      "12ba:10de"
+    ],
+    "Quadro-K5200": [
+      "103c:10de"
+    ],
+    "Quadro-K600": [
+      "0ffa:10de"
+    ],
+    "Quadro-K6000": [
+      "103a:10de"
+    ],
+    "Quadro-K610M": [
+      "12b9:10de"
+    ],
+    "Quadro-K620": [
+      "13bb:10de"
+    ],
+    "Quadro-K620M": [
+      "137a:10de"
+    ],
+    "Quadro-M1000M": [
+      "13b1:10de"
+    ],
+    "Quadro-M1200": [
+      "13b6:10de"
+    ],
+    "Quadro-M2000": [
+      "1430:10de"
+    ],
+    "Quadro-M2000M": [
+      "13b0:10de"
+    ],
+    "Quadro-M2200": [
+      "1436:10de"
+    ],
+    "Quadro-M3000-SE": [
+      "13fa:10de"
+    ],
+    "Quadro-M3000M": [
+      "13fa:10de"
+    ],
+    "Quadro-M4000": [
+      "13f1:10de"
+    ],
+    "Quadro-M4000M": [
+      "13f9:10de"
+    ],
+    "Quadro-M5000": [
+      "13f0:10de"
+    ],
+    "Quadro-M5000-SE": [
+      "13f8:10de"
+    ],
+    "Quadro-M5000M": [
+      "13f8:10de"
+    ],
+    "Quadro-M500M": [
+      "137a:10de"
+    ],
+    "Quadro-M520": [
+      "137b:10de"
+    ],
+    "Quadro-M5500": [
+      "13fb:10de"
+    ],
+    "Quadro-M6000": [
+      "17f0:10de"
+    ],
+    "Quadro-M6000-24GB": [
+      "17f1:10de"
+    ],
+    "Quadro-M600M": [
+      "13b2:10de"
+    ],
+    "Quadro-M620": [
+      "13b4:10de"
+    ],
+    "Quadro-NVS-110M": [
+      "01da:10de"
+    ],
+    "Quadro-NVS-120M": [
+      "01db:10de"
+    ],
+    "Quadro-NVS-130M": [
+      "042a:10de"
+    ],
+    "Quadro-NVS-135M": [
+      "042b:10de"
+    ],
+    "Quadro-NVS-140M": [
+      "0429:10de"
+    ],
+    "Quadro-NVS-150M": [
+      "06ea:10de"
+    ],
+    "Quadro-NVS-160M": [
+      "06eb:10de"
+    ],
+    "Quadro-NVS-210S-GeForce-6150LE": [
+      "0245:10de"
+    ],
+    "Quadro-NVS-280-SD": [
+      "018a:10de"
+    ],
+    "Quadro-NVS-285": [
+      "0165:10de"
+    ],
+    "Quadro-NVS-290": [
+      "042f:10de"
+    ],
+    "Quadro-NVS-295": [
+      "06fd:10de"
+    ],
+    "Quadro-NVS-320M": [
+      "040b:10de"
+    ],
+    "Quadro-NVS-400": [
+      "017a:10de"
+    ],
+    "Quadro-NVS-420": [
+      "06f8:10de"
+    ],
+    "Quadro-NVS-440": [
+      "014a:10de"
+    ],
+    "Quadro-NVS-450": [
+      "06fa:10de"
+    ],
+    "Quadro-NVS-50-PCI": [
+      "018c:10de"
+    ],
+    "Quadro-NVS-510M": [
+      "0299:10de"
+    ],
+    "Quadro-NVS-55280-PCI": [
+      "032a:10de"
+    ],
+    "Quadro-P1000": [
+      "1cb1:10de",
+      "1cbb:10de",
+      "1cfb:10de"
+    ],
+    "Quadro-P2000": [
+      "1c30:10de",
+      "1cba:10de",
+      "1cfa:10de"
+    ],
+    "Quadro-P2000-with-Max-Q-Design": [
+      "1cba:10de"
+    ],
+    "Quadro-P2200": [
+      "1c31:10de"
+    ],
+    "Quadro-P3000": [
+      "1bb8:10de"
+    ],
+    "Quadro-P3200": [
+      "1bbb:10de"
+    ],
+    "Quadro-P3200-with-Max-Q-Design": [
+      "1bbb:10de"
+    ],
+    "Quadro-P400": [
+      "1cb3:10de"
+    ],
+    "Quadro-P4000": [
+      "1bb1:10de",
+      "1bb7:10de"
+    ],
+    "Quadro-P4000-with-Max-Q-Design": [
+      "1bb7:10de"
+    ],
+    "Quadro-P4200": [
+      "1bb9:10de"
+    ],
+    "Quadro-P4200-with-Max-Q-Design": [
+      "1bb9:10de"
+    ],
+    "Quadro-P500": [
+      "1d33:10de"
+    ],
+    "Quadro-P5000": [
+      "1bb0:10de",
+      "1bb6:10de"
+    ],
+    "Quadro-P520": [
+      "1d34:10de"
+    ],
+    "Quadro-P5200": [
+      "1bb5:10de"
+    ],
+    "Quadro-P5200-with-Max-Q-Design": [
+      "1bb5:10de"
+    ],
+    "Quadro-P600": [
+      "1cb2:10de",
+      "1cbc:10de"
+    ],
+    "Quadro-P6000": [
+      "1b30:10de"
+    ],
+    "Quadro-P620": [
+      "1cb6:10de",
+      "1cbd:10de"
+    ],
+    "Quadro-RTX-3000": [
+      "1f36:10de",
+      "1f76:10de"
+    ],
+    "Quadro-RTX-3000-with-Max-Q-Design": [
+      "1f36:10de"
+    ],
+    "Quadro-RTX-4000": [
+      "1eb1:10de",
+      "1eb6:10de"
+    ],
+    "Quadro-RTX-4000-with-Max-Q-Design": [
+      "1eb6:10de"
+    ],
+    "Quadro-RTX-5000": [
+      "1eb0:10de",
+      "1eb5:10de",
+      "1ef5:10de"
+    ],
+    "Quadro-RTX-5000-with-Max-Q-Design": [
+      "1eb5:10de"
+    ],
+    "Quadro-RTX-6000": [
+      "1e30:10de",
+      "1e36:10de",
+      "1e78:10de"
+    ],
+    "Quadro-RTX-8000": [
+      "1e30:10de",
+      "1e78:10de"
+    ],
+    "Quadro-T1000": [
+      "1fb9:10de",
+      "1ff9:10de"
+    ],
+    "Quadro-T1000-with-Max-Q-Design": [
+      "1fb9:10de"
+    ],
+    "Quadro-T2000": [
+      "1fb8:10de"
+    ],
+    "Quadro-T2000-with-Max-Q-Design": [
+      "1fb8:10de"
+    ],
+    "Quadro-VX-200": [
+      "061b:10de"
+    ],
+    "Quadro2-MXREXGo": [
+      "0113:10de"
+    ],
+    "Quadro2-Pro": [
+      "0153:10de"
+    ],
+    "Quadro4-380-XGL": [
+      "018b:10de"
+    ],
+    "Quadro4-500-GoGL": [
+      "017c:10de"
+    ],
+    "Quadro4-550-XGL": [
+      "0178:10de"
+    ],
+    "Quadro4-580-XGL": [
+      "0188:10de"
+    ],
+    "Quadro4-700-GoGL": [
+      "028c:10de"
+    ],
+    "Quadro4-700-XGL": [
+      "025b:10de"
+    ],
+    "Quadro4-750-XGL": [
+      "0259:10de"
+    ],
+    "Quadro4-780-XGL": [
+      "0289:10de"
+    ],
+    "Quadro4-900-XGL": [
+      "0258:10de"
+    ],
+    "Quadro4-980-XGL": [
+      "0288:10de"
+    ],
+    "Quadroplex-2200-D2": [
+      "05ed:10de"
+    ],
+    "Quadroplex-2200-S4": [
+      "05f8:10de"
+    ],
+    "RIVA-TNT": [
+      "0020:10de"
+    ],
+    "RIVA-TNT2-Model-64Model-64-Pro": [
+      "002d:10de"
+    ],
+    "RIVA-TNT2-Ultra": [
+      "0029:10de"
+    ],
+    "RIVA-TNT2TNT2-Pro": [
+      "0028:10de"
+    ],
+    "Second-Generation-ION": [
+      "0a64:10de",
+      "0a6e:10de",
+      "0a6f:10de",
+      "0a70:10de",
+      "0a73:10de",
+      "0a75:10de",
+      "0a76:10de"
+    ],
+    "Tesla-C1060": [
+      "05e7:10de"
+    ],
+    "Tesla-C2050": [
+      "06d1:10de",
+      "1096:10de"
+    ],
+    "Tesla-C2050-C2070": [
+      "06d1:10de"
+    ],
+    "Tesla-C2070": [
+      "06d1:10de"
+    ],
+    "Tesla-C2075": [
+      "1096:10de"
+    ],
+    "Tesla-C870": [
+      "0197:10de"
+    ],
+    "Tesla-K10": [
+      "118f:10de"
+    ],
+    "Tesla-K20Xm": [
+      "1021:10de"
+    ],
+    "Tesla-K20c": [
+      "1022:10de"
+    ],
+    "Tesla-K20m": [
+      "1028:10de"
+    ],
+    "Tesla-K20s": [
+      "1026:10de"
+    ],
+    "Tesla-K40c": [
+      "1024:10de"
+    ],
+    "Tesla-K40m": [
+      "1023:10de"
+    ],
+    "Tesla-K40s": [
+      "1029:10de"
+    ],
+    "Tesla-K40st": [
+      "1027:10de"
+    ],
+    "Tesla-K40t": [
+      "102a:10de"
+    ],
+    "Tesla-K8": [
+      "1194:10de"
+    ],
+    "Tesla-K80": [
+      "102d:10de"
+    ],
+    "Tesla-M1060": [
+      "05e7:10de"
+    ],
+    "Tesla-M2050": [
+      "06de:10de"
+    ],
+    "Tesla-M2070": [
+      "06d2:10de"
+    ],
+    "Tesla-M2070-Q": [
+      "06df:10de"
+    ],
+    "Tesla-M2075": [
+      "1094:10de"
+    ],
+    "Tesla-M2090": [
+      "1091:10de"
+    ],
+    "Tesla-M4": [
+      "1431:10de"
+    ],
+    "Tesla-M40": [
+      "17fd:10de"
+    ],
+    "Tesla-M40-24GB": [
+      "17fd:10de"
+    ],
+    "Tesla-M6": [
+      "13f3:10de"
+    ],
+    "Tesla-M60": [
+      "13f2:10de"
+    ],
+    "Tesla-P100-PCIE-12GB": [
+      "15f7:10de"
+    ],
+    "Tesla-P100-PCIE-16GB": [
+      "15f8:10de"
+    ],
+    "Tesla-P100-SXM2-16GB": [
+      "15f9:10de"
+    ],
+    "Tesla-P4": [
+      "1bb3:10de"
+    ],
+    "Tesla-P40": [
+      "1b38:10de"
+    ],
+    "Tesla-P6": [
+      "1bb4:10de"
+    ],
+    "Tesla-PG500-216": [
+      "1df0:10de"
+    ],
+    "Tesla-PG503-216": [
+      "1df2:10de"
+    ],
+    "Tesla-S2050": [
+      "06de:10de"
+    ],
+    "Tesla-T10-Processor": [
+      "05e7:10de"
+    ],
+    "Tesla-T20-Processor": [
+      "06de:10de"
+    ],
+    "Tesla-T4": [
+      "1eb8:10de"
+    ],
+    "Tesla-V100-DGXS-32GB": [
+      "1db7:10de"
+    ],
+    "Tesla-V100-FHHL-16GB": [
+      "1db3:10de"
+    ],
+    "Tesla-V100-PCIE-16GB": [
+      "1db4:10de"
+    ],
+    "Tesla-V100-PCIE-16GB-LS": [
+      "1db4:10de"
+    ],
+    "Tesla-V100-PCIE-32GB": [
+      "1db6:10de"
+    ],
+    "Tesla-V100-SXM2-16GB": [
+      "1db1:10de",
+      "1df5:10de"
+    ],
+    "Tesla-V100-SXM2-16GB-LS": [
+      "1db1:10de"
+    ],
+    "Tesla-V100-SXM2-32GB": [
+      "1db5:10de"
+    ],
+    "Tesla-V100-SXM2-32GB-LS": [
+      "1db5:10de"
+    ],
+    "Tesla-V100-SXM3-32GB": [
+      "1db8:10de"
+    ],
+    "Tesla-V100-SXM3-32GB-H": [
+      "1db8:10de"
+    ],
+    "Tesla-V100S-PCIE-32GB": [
+      "1df6:10de"
+    ],
+    "Tesla-X2070": [
+      "06d2:10de",
+      "06de:10de"
+    ],
+    "Tesla-X2090": [
+      "1091:10de"
+    ],
+    "VantaVanta-LT": [
+      "002c:10de"
+    ],
+    "nForce-730a": [
+      "084a:10de"
+    ],
+    "nForce-750a-SLI": [
+      "084d:10de"
+    ],
+    "nForce-760i-SLI": [
+      "0868:10de"
+    ],
+    "nForce-980a780a-SLI": [
+      "084c:10de"
+    ]
+  }
+}

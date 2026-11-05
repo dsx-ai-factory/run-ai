@@ -1,0 +1,36 @@
+type: object
+required: [gpuType, status]
+properties:
+  gpuType:
+    type: string
+  gpuMemoryCapacityBytes:
+    type: integer
+    format: int64
+    description: Reported per-device capacity, not free memory or a quota guarantee.
+  status:
+    $ref: './RightSizingStatus.yaml'
+  minimumGpuMemoryPerDeviceGb:
+    type: number
+    format: double
+    description: Published NGC minimum for the source profile, before allocation rounding.
+  profileId:
+    type: string
+  precision:
+    type: string
+  inferenceBackend:
+    type: string
+  tensorParallelSize:
+    type: integer
+    format: int64
+    minimum: 1
+    description: Explicit tensor parallel size from the selected published profile.
+  pipelineParallelSize:
+    type: integer
+    format: int64
+    minimum: 1
+    description: Explicit pipeline parallel size from the selected published profile.
+  reason:
+    type: string
+    description: Explanation when sizing cannot be recommended.
+  recommendation:
+    $ref: './RightSizingRecommendation.yaml'

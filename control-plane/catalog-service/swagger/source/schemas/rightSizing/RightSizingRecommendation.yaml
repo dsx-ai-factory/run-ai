@@ -1,0 +1,14 @@
+type: object
+nullable: true
+required: [allocationType, gpuCount]
+properties:
+  allocationType:
+    $ref: './RightSizingAllocationType.yaml'
+  gpuCount:
+    type: integer
+    format: int64
+    minimum: 1
+  gpuMemoryPerDeviceBytes:
+    type: integer
+    format: int64
+    minimum: 1

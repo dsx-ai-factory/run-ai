@@ -43,6 +43,8 @@ const (
 	ngcImagesCacheKey     = "ngc_images"
 	ngcTagsCacheKeyPrefix = "ngc_image_tags"
 	ngcImagesPageSize     = 500
+	ngcFilterFieldKey     = "field"
+	ngcFilterValueKey     = "value"
 )
 
 // NGC API types
@@ -149,17 +151,17 @@ func (c *ngcClient) sendNgcImagesRequest(ctx context.Context, registryUrl string
 	// We filter the images by isPublic and guestAccess only for NGC catalog, otherwise it's user private registry, no need to filter.
 	if isNgcCatalog {
 		filters = append(filters, map[string]interface{}{
-			"field":    "isPublic",
-			"value":    "true",
-			"operator": "EQ",
+			ngcFilterFieldKey: "isPublic",
+			ngcFilterValueKey: "true",
+			"operator":        "EQ",
 		})
 
 		// If no api key provided, we query only the public and guest access images.
 		if apiKey == "" {
 			filters = append(filters, map[string]interface{}{
-				"field":    "guestAccess",
-				"value":    "true",
-				"operator": "EQ",
+				ngcFilterFieldKey: "guestAccess",
+				ngcFilterValueKey: "true",
+				"operator":        "EQ",
 			})
 		}
 	}
@@ -175,8 +177,8 @@ func (c *ngcClient) sendNgcImagesRequest(ctx context.Context, registryUrl string
 				resourceID += "*"
 			}
 			filters = append(filters, map[string]interface{}{
-				"field": "resourceId",
-				"value": resourceID,
+				ngcFilterFieldKey: "resourceId",
+				ngcFilterValueKey: resourceID,
 			})
 		} else {
 			query["query"] = search

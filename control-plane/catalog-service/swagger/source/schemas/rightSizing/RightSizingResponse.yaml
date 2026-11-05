@@ -1,0 +1,11 @@
+type: object
+required: [image, tag, results]
+properties:
+  image:
+    type: string
+  tag:
+    type: string
+  results:
+    type: array
+    items:
+      $ref: './RightSizingResult.yaml'
