@@ -34,6 +34,8 @@ const (
 	hasQuotaQueryCondition = `(gpu_deserved <> 0 OR gpu_limit <> -1 OR 
 					 cpu_deserved <> -1 OR cpu_limit <> -1 OR 
 					 memory_deserved <> -1 OR memory_limit <> -1)`
+
+	hasLimitQueryCondition = `(gpu_limit <> -1 OR cpu_limit <> -1 OR memory_limit <> -1)`
 )
 
 var nonDefaultRankQueryCondition = fmt.Sprintf(`(resources.priority <> '%s')`, models.DefaultResourceRank)
@@ -45,6 +47,7 @@ const (
 	RanksToDefault    = ResetResourcesAction(api.RESOURCESRESETACTION_RANKS_TO_DEFAULT)
 	WeightsToDefault  = ResetResourcesAction(api.RESOURCESRESETACTION_WEIGHTS_TO_DEFAULT)
 	WeightsToDeserved = ResetResourcesAction(api.RESOURCESRESETACTION_WEIGHTS_TO_DESERVED)
+	LimitsToDefault   = ResetResourcesAction(api.RESOURCESRESETACTION_LIMITS_TO_DEFAULT)
 
 	CpuQuotasToDefault = ResetResourcesAction(api.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT)
 )
@@ -151,6 +154,8 @@ func getOrgUnitsNodepoolSummaryInternal(ctx context.Context, tenantId, nodepoolI
 		query = query.Where(hasQuotaQueryCondition)
 	case api.ORGUNITSNODEPOOLSUMMARYTYPE_NON_DEFAULT_RANK:
 		query = query.Where(nonDefaultRankQueryCondition)
+	case api.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT:
+		query = query.Where(hasLimitQueryCondition)
 	default:
 		return nil, fmt.Errorf("invalid nodepool summary type: %s", nodepoolSummaryType)
 	}
@@ -182,6 +187,9 @@ func getResetResourcesResourcesQuery(projects bool, action ResetResourcesAction,
 	case RanksToDefault:
 		setQuery = fmt.Sprintf(`priority = '%s', updated_at=now()`, models.DefaultResourceRank)
 		conditionQuery = nonDefaultRankQueryCondition
+	case LimitsToDefault:
+		setQuery = `gpu_limit = NULL, cpu_limit = NULL, memory_limit = NULL, updated_at=now()`
+		conditionQuery = hasLimitQueryCondition
 	case WeightsToDefault:
 		// set gpu_over_quota_weight to default always, set cpu_over_quota_weight and memory_over_quota_weight to default only if not null
 		setQuery = fmt.Sprintf(`gpu_over_quota_weight = %f, 
