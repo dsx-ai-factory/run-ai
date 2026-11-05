@@ -74,10 +74,24 @@ func (l *locker) lock(ctx context.Context, ttl time.Duration) error {
 		case <-ctx.Done():
 			return fmt.Errorf("key %s.%s already locked", l.store.Name, l.name)
 		default:
-			if acquired, err := l.cacheClient.SetIfAbsent(context.WithoutCancel(ctx), l.store.Name, l.name, valBytes, &ttl); acquired {
-				return nil
-			} else if err != nil {
+			acquired, err := l.cacheClient.SetIfAbsent(context.WithoutCancel(ctx), l.store.Name, l.name, valBytes, &ttl)
+			if err != nil {
+				// A client can report the key as taken together with an error,
+				// for example when it stored the lock but failed to apply the
+				// TTL. Releasing it first keeps a lock without an expiry from
+				// outliving the caller that failed to take it. The release is
+				// conditional because the key may have expired in the meantime
+				// and another caller may hold it by now: only the lock this
+				// attempt stored may be removed.
+				if acquired {
+					if delErr := l.cacheClient.DeleteIf(context.WithoutCancel(ctx), l.store.Name, l.name, l.lockIdComparator()); delErr != nil {
+						return fmt.Errorf("failed to lock key %s.%s: %w (and failed to release it: %w)", l.store.Name, l.name, err, delErr)
+					}
+				}
 				return fmt.Errorf("failed to lock key %s.%s: %w", l.store.Name, l.name, err)
+			}
+			if acquired {
+				return nil
 			}
 
 			time.Sleep(time.Millisecond * 100)
