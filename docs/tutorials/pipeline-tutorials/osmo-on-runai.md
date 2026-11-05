@@ -2,6 +2,14 @@
 
 This tutorial demonstrates how to run NVIDIA OSMO workflows on an NVIDIA Run:ai-managed Kubernetes cluster, with an OSMO backend and pool for each [NVIDIA Run:ai project](../../platform-management/aiinitiatives/organization/projects.md). OSMO runs each workflow task as a Kubernetes pod, and NVIDIA Run:ai schedules those pods under the [quota](../../platform-management/runai-scheduler/scheduling/concepts-and-principles.md#quota) of the project. You can adapt this workflow for other teams, NVIDIA Run:ai projects, and OSMO pools.
 
+<Note>
+
+**Note**
+
+This tutorial is written for OSMO 6.3.1. The links to the OSMO documentation point to the 6.3 version. A later OSMO release can use different values and steps.
+
+</Note>
+
 In this tutorial, you will learn how to:
 
 * Create NVIDIA Run:ai projects for OSMO workflows
@@ -184,13 +192,13 @@ This step connects the `osmo-high` project to OSMO. Repeat it to connect the `os
      name: osmo-high
      backendName: osmo-high
      backendNamespace: runai-osmo-high
-     includeNamespaceUsage: runai-osmo-high
+     includeNamespaceUsage: "runai-osmo-high,runai-osmo-low"
    ```
 
    * `name` - The name of this deployment. If you leave it out, the chart uses the Helm release name.
    * `backendName` - The name of the backend from item 1.
    * `backendNamespace` - The namespace of the NVIDIA Run:ai project, where the workflow pods run. It must match `k8s_namespace` in item 1.
-   * `includeNamespaceUsage` - The namespaces whose pods OSMO counts as workflow pods when it reports node usage. This tutorial sets it to the namespace of the project.
+   * `includeNamespaceUsage` - The namespaces whose pods OSMO counts as workflow pods when it reports node usage. This tutorial lists the namespaces of both projects in both releases, so that each release counts the pods of the other project as workflow pods.
 
    The release also needs the values that connect it to the OSMO service:
 
@@ -217,7 +225,7 @@ This step connects the `osmo-high` project to OSMO. Repeat it to connect the `os
      --wait --timeout 10m
    ```
 
-9. **Repeat for the other project.** To connect `osmo-low`, repeat this step with the names `osmo-low` and `runai-osmo-low`, and use the same token Secret. A Kubernetes PriorityClass gives a priority level a name that pods can use. PriorityClass objects belong to the whole cluster, so only one release should create them. The release for `osmo-high` creates them. In the release for `osmo-low`, turn off their creation:
+9. **Repeat for the other project.** To connect `osmo-low`, repeat this step with the names `osmo-low` and `runai-osmo-low`, and use the same token Secret. Keep the same `includeNamespaceUsage` value, which lists both namespaces. A Kubernetes PriorityClass gives a priority level a name that pods can use. PriorityClass objects belong to the whole cluster, so only one release should create them. The release for `osmo-high` creates them. In the release for `osmo-low`, turn off their creation:
 
    ```yaml
    global:
