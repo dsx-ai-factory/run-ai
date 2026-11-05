@@ -256,10 +256,7 @@ func TestSAMLIdp_Create_FileUpload_FromDisk(t *testing.T) {
 	alias := GenerateRandomString("saml-idp-file-disk")
 	entityId := "urn:test:idp"
 	fileName := "test-metadata.xml"
-	// Use a hardcoded XML string instead of reading from disk
-	xmlContent := `<EntityDescriptor entityID="urn:test:idp" xmlns="urn:oasis:names:tc:SAML:2.0:metadata">
-  <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"/>
-</EntityDescriptor>`
+	xmlContent, _ := samlMetadataWithValidity(t, entityId, "https://idp.example.com/sso", time.Now().Add(-time.Hour), time.Now().Add(time.Hour))
 	mappers := GetDefaultIDPMappers()
 	idpRequest := makeSamlIdpFileRequest(alias, entityId, fileName, xmlContent, mappers)
 	defer deleteIDP(t, ctx, alias)
