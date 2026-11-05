@@ -268,3 +268,12 @@ Usage: include "control-plane.ingress.annotations" (dict "ingressClass" "nginx" 
 {{- $merged := merge $customAnnotations $baseAnnotations -}}
 {{- toYaml $merged -}}
 {{- end -}}
+
+{{/*
+Postgres image registry resolver:
+Uses global.postgresImage.registry if explicitly set, otherwise falls back to global.image.registry.
+*/}}
+{{- define "control-plane.postgresImage.registry" -}}
+{{- .Values.global.postgresImage.registry | default .Values.global.image.registry | default "docker.io" -}}
+{{- end -}}
+
