@@ -15,6 +15,12 @@ describe("dashboardUtil.getCsvFileName", () => {
     );
   });
 
+  it("replaces characters that are not filename-safe", () => {
+    expect(dashboardUtil.getCsvFileName("Resources utilization", "Prod (EU)/a", "pool:1", date)).toBe(
+      "resources-utilization_prod-eu-a_pool-1_2026-02-10_09-05.csv",
+    );
+  });
+
   it("omits the cluster and node pool when they are not set", () => {
     expect(dashboardUtil.getCsvFileName("Workloads by status", undefined, undefined, date)).toBe(
       "workloads-by-status_2026-02-10_09-05.csv",
