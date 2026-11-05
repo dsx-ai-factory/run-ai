@@ -21,7 +21,7 @@
 // class.
 //
 // Not hashed: metadata, sidecars, the service-account token volume, probes,
-// lifecycle hooks, scheduling, and Snapshot's own additions.
+// lifecycle hooks, scheduling.
 //
 // The list is an exclude-list, not an allow-list: a field this package does
 // not name stays in the hash. A new Kubernetes field therefore enters the key
@@ -139,7 +139,6 @@ func Shape(pod *corev1.Pod) ([]byte, error) {
 
 	stripDebugContainers(specForHashing)
 	stripScheduling(specForHashing)
-	stripSnapshotAdditions(specForHashing)
 	sortSpec(specForHashing)
 
 	return json.Marshal(specForHashing)

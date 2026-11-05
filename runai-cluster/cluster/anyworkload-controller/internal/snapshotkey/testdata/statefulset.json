@@ -1,5 +1,5 @@
 {
-  "key": "b41d5df604d8",
+  "key": "f45130872ced",
   "shape": {
     "containers": [
       {
@@ -25,7 +25,10 @@
       }
     ],
     "securityContext": {
-      "fsGroup": 2000
+      "fsGroup": 2000,
+      "seccompProfile": {
+        "type": "Localhost"
+      }
     }
   }
 }

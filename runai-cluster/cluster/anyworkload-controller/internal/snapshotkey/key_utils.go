@@ -6,7 +6,6 @@
 package snapshotkey
 
 import (
-	"reflect"
 	"sort"
 	"strings"
 
@@ -43,15 +42,6 @@ func stripContainer(container *corev1.Container) {
 
 	container.VolumeMounts = keptMounts(container.VolumeMounts)
 
-	// podcontract sets a localhost seccomp profile on the restored container.
-	if container.SecurityContext != nil {
-		container.SecurityContext.SeccompProfile = nil
-		if reflect.DeepEqual(*container.SecurityContext, corev1.SecurityContext{}) {
-			// An emptied struct still serialises as {}, which a cold pod's
-			// absent one does not.
-			container.SecurityContext = nil
-		}
-	}
 }
 
 // stripScheduling removes where the pod runs. Scheduling is not part of the
@@ -75,16 +65,6 @@ func stripScheduling(spec *corev1.PodSpec) {
 // snapshots off for the whole workload.
 func stripDebugContainers(spec *corev1.PodSpec) {
 	spec.EphemeralContainers = nil
-}
-
-// stripSnapshotAdditions removes the pod-level fields podcontract adds.
-func stripSnapshotAdditions(spec *corev1.PodSpec) {
-	if spec.SecurityContext != nil {
-		spec.SecurityContext.SeccompProfile = nil
-		if reflect.DeepEqual(*spec.SecurityContext, corev1.PodSecurityContext{}) {
-			spec.SecurityContext = nil
-		}
-	}
 }
 
 // mountedVolumes keeps only the volumes some hashed container mounts.

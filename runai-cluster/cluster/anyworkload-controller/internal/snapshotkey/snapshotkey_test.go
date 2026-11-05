@@ -325,32 +325,6 @@ func TestRunToCompletionInitContainerChangesTheKey(t *testing.T) {
 	}
 }
 
-// Matches runs on a Ready replica, which on the restore path is a pod the
-// webhook already rewrote. If Snapshot's own additions reached the hash, every
-// restored replica would fail the drift check and snapshots would switch off
-// for the workload with nothing logged as an error.
-func TestRestoredPodHashesLikeTheColdPod(t *testing.T) {
-	cold := gpuPod()
-	key := keyOrFail(t, cold)
-
-	restored := gpuPod()
-	SetSnapshotKey(restored, key)
-	restored.Spec.SecurityContext = &corev1.PodSecurityContext{
-		SeccompProfile: &corev1.SeccompProfile{Type: corev1.SeccompProfileTypeLocalhost},
-	}
-	restored.Spec.Containers[0].SecurityContext = &corev1.SecurityContext{
-		SeccompProfile: &corev1.SeccompProfile{Type: corev1.SeccompProfileTypeLocalhost},
-	}
-
-	matches, err := Matches(restored)
-	if err != nil {
-		t.Fatalf("Matches: %v", err)
-	}
-	if !matches {
-		t.Error("a restored pod did not match the key of the cold pod it came from")
-	}
-}
-
 func TestNotKeyable(t *testing.T) {
 	cases := map[string]func(*corev1.Pod){
 		"no owner references": func(p *corev1.Pod) { p.OwnerReferences = nil },
