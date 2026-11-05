@@ -1,0 +1,31 @@
+{
+  "key": "a7804e4e6e89",
+  "shape": {
+    "containers": [
+      {
+        "name": "ranker",
+        "image": "registry.example.com/ranker@sha256:123",
+        "envFrom": [
+          {
+            "configMapRef": {
+              "name": "settings"
+            }
+          },
+          {
+            "secretRef": {
+              "name": "creds"
+            }
+          }
+        ],
+        "resources": {
+          "limits": {
+            "nvidia.com/gpu": "1"
+          }
+        }
+      }
+    ],
+    "securityContext": {
+      "fsGroup": 2000
+    }
+  }
+}
