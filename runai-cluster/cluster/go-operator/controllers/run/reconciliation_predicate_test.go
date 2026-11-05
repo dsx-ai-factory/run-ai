@@ -7,6 +7,7 @@ package run
 
 import (
 	"testing"
+	"time"
 
 	runaiv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/stretchr/testify/assert"
@@ -44,6 +45,25 @@ func TestReconciliationPredicate_Delete(t *testing.T) {
 
 func TestReconciliationPredicate_Update(t *testing.T) {
 	predicate := &reconciliationPredicate{}
+
+	t.Run("RunaiConfig - should trigger reconciliation when deletion starts", func(t *testing.T) {
+		oldConfig := &runaiv1.RunaiConfig{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:       "test-config",
+				Namespace:  runaiv1.DefaultNamespace,
+				Generation: 1,
+				Finalizers: []string{runaiv1.Finalizer},
+			},
+		}
+		newConfig := oldConfig.DeepCopy()
+		deletionTime := metav1.NewTime(time.Now())
+		newConfig.DeletionTimestamp = &deletionTime
+
+		assert.True(t, predicate.Update(event.UpdateEvent{
+			ObjectOld: oldConfig,
+			ObjectNew: newConfig,
+		}))
+	})
 
 	t.Run("RunaiConfig - should trigger reconciliation when generation changes", func(t *testing.T) {
 		oldConfig := &runaiv1.RunaiConfig{
