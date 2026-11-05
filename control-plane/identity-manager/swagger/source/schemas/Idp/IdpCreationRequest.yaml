@@ -18,3 +18,6 @@ properties:
     $ref: './OcpCreationData.yaml'
   mappers:
     $ref: './Mappers.yaml'
+  dryRun:
+    type: boolean
+    default: false

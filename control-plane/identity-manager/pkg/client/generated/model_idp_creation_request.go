@@ -30,6 +30,7 @@ type IdpCreationRequest struct {
 	OidcData NullableOidcCreationData   `json:"oidcData,omitempty"`
 	OcpData  NullableOcpCreationData    `json:"ocpData,omitempty"`
 	Mappers  *Mappers                   `json:"mappers,omitempty"`
+	DryRun   *bool                      `json:"dryRun,omitempty"`
 }
 
 type _IdpCreationRequest IdpCreationRequest
@@ -41,6 +42,8 @@ type _IdpCreationRequest IdpCreationRequest
 func NewIdpCreationRequest(type_ IdpCreationRequestTypeEnum) *IdpCreationRequest {
 	this := IdpCreationRequest{}
 	this.Type = type_
+	var dryRun bool = false
+	this.DryRun = &dryRun
 	return &this
 }
 
@@ -49,6 +52,8 @@ func NewIdpCreationRequest(type_ IdpCreationRequestTypeEnum) *IdpCreationRequest
 // but it doesn't guarantee that properties required by API are set
 func NewIdpCreationRequestWithDefaults() *IdpCreationRequest {
 	this := IdpCreationRequest{}
+	var dryRun bool = false
+	this.DryRun = &dryRun
 	return &this
 }
 
@@ -269,6 +274,38 @@ func (o *IdpCreationRequest) SetMappers(v Mappers) {
 	o.Mappers = &v
 }
 
+// GetDryRun returns the DryRun field value if set, zero value otherwise.
+func (o *IdpCreationRequest) GetDryRun() bool {
+	if o == nil || IsNil(o.DryRun) {
+		var ret bool
+		return ret
+	}
+	return *o.DryRun
+}
+
+// GetDryRunOk returns a tuple with the DryRun field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *IdpCreationRequest) GetDryRunOk() (*bool, bool) {
+	if o == nil || IsNil(o.DryRun) {
+		return nil, false
+	}
+	return o.DryRun, true
+}
+
+// HasDryRun returns a boolean if a field has been set.
+func (o *IdpCreationRequest) HasDryRun() bool {
+	if o != nil && !IsNil(o.DryRun) {
+		return true
+	}
+
+	return false
+}
+
+// SetDryRun gets a reference to the given bool and assigns it to the DryRun field.
+func (o *IdpCreationRequest) SetDryRun(v bool) {
+	o.DryRun = &v
+}
+
 func (o IdpCreationRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -294,6 +331,9 @@ func (o IdpCreationRequest) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Mappers) {
 		toSerialize["mappers"] = o.Mappers
+	}
+	if !IsNil(o.DryRun) {
+		toSerialize["dryRun"] = o.DryRun
 	}
 	return toSerialize, nil
 }
