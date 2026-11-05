@@ -60,12 +60,11 @@ export const ARGS_PREFIX_FOR_VLLM = "--model";
 
 export enum EServerType {
   VLLM = "vLLM",
-  TGI = "TGI",
   Nim = "NVIDIA NIM",
   Custom = "Custom",
 }
 
-export type TInferenceServerSelection = EServerType.Custom | EServerType.Nim | EServerType.VLLM | EServerType.TGI;
+export type TInferenceServerSelection = EServerType.Custom | EServerType.Nim | EServerType.VLLM;
 
 // old values
 export const OLD_LLM_ENVIRONMENT_FOR_HUGGING_FACE = "llm-server";

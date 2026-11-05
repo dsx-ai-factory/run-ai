@@ -172,9 +172,6 @@ export default defineComponent({
       });
 
       switch (this.inference.serverType) {
-        case EServerType.TGI:
-          this.$router.push({ name: WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INFERENCE_TGI });
-          break;
         case EServerType.VLLM:
           this.$router.push({ name: WORKLOAD_TEMPLATE_ROUTE_NAMES.WORKLOAD_TEMPLATE_INFERENCE_VLLM });
           break;
