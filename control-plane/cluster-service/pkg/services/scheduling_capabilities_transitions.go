@@ -23,8 +23,8 @@ import (
 
 const maxBlockingOrgUnitsInMessage = 10
 
-// validateSchedulingCapabilitiesChangeAndResetOrgUnits refuses turning quota or ranks off while org units still
-// use them, and resets the org units' CPU quotas when cpuQuota is turned off.
+// validateSchedulingCapabilitiesChangeAndResetOrgUnits refuses turning quota, ranks or limits off while org units
+// still use them, and resets the org units' CPU quotas when cpuQuota is turned off.
 func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUnits(ctx context.Context,
 	before, after models.Nodepool,
 ) ([]string, *api.Error) {
@@ -43,6 +43,13 @@ func (s *NodePoolsApiService) validateSchedulingCapabilitiesChangeAndResetOrgUni
 	if before.AllowRanks && !after.AllowRanks {
 		if apiErr := s.validateCanTurnOffSchedulingCapability(ctx, after, "ranks",
 			openapi.ORGUNITSNODEPOOLSUMMARYTYPE_NON_DEFAULT_RANK, "RANKS_TO_DEFAULT"); apiErr != nil {
+			return nil, apiErr
+		}
+	}
+
+	if before.AllowLimits && !after.AllowLimits {
+		if apiErr := s.validateCanTurnOffSchedulingCapability(ctx, after, "limits",
+			openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, "LIMITS_TO_DEFAULT"); apiErr != nil {
 			return nil, apiErr
 		}
 	}
@@ -84,7 +91,8 @@ func schedulingCapabilitiesChanged(before, after models.Nodepool) bool {
 	return before.AllowQuota != after.AllowQuota ||
 		before.AllowRanks != after.AllowRanks ||
 		before.AllowCpuQuota != after.AllowCpuQuota ||
-		before.AllowAdjustableWeights != after.AllowAdjustableWeights
+		before.AllowAdjustableWeights != after.AllowAdjustableWeights ||
+		before.AllowLimits != after.AllowLimits
 }
 
 func describeOrgUnits(orgUnits []openapi.OrgUnitsNodepoolSummaryInner) string {

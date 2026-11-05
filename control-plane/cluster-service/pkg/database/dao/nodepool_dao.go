@@ -32,7 +32,7 @@ const (
 var nodepoolMinimalFields = []string{
 	"id", models.NameColumn, models.ClusterIdColumn, models.PhaseColumn,
 	models.StatusGpuNetworkAccelerationDetectedColumn, models.AdjustableWeightsColumn,
-	models.RanksColumn, models.QuotaColumn, models.CpuQuotaColumn,
+	models.RanksColumn, models.QuotaColumn, models.CpuQuotaColumn, models.LimitsColumn,
 }
 
 // GetNodepoolMinimalFields returns the list of basic metadata fields for nodepools
