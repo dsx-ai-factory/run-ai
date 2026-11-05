@@ -105,7 +105,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
-	github.com/emersion/go-smtp v0.25.0
+	github.com/emersion/go-smtp v0.25.1
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-openapi/loads v0.25.3
 	github.com/go-openapi/runtime v0.33.4
