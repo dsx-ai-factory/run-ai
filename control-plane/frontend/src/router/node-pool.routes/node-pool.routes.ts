@@ -9,6 +9,8 @@ import type { RunaiRouteRecord } from "vue-router";
 import { NODE_POOL_ROUTE_NAMES } from "@/router/node-pool.routes/node-pool.routes.names";
 import { EMenuSubjectNames } from "@/components/infra/runai-layout/routes-model/routes-model";
 
+import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/components/node-pools/node-pool-create-flow/node-pool-create-flow.model";
+
 import { NodePoolIndex } from "@/views/node-pools";
 
 export const nodePoolRoutes: RunaiRouteRecord = {
@@ -33,7 +35,9 @@ export const nodePoolRoutes: RunaiRouteRecord = {
     {
       path: "new",
       name: NODE_POOL_ROUTE_NAMES.NODE_POOL_NEW,
-      component: () => import("@/views/node-pools/node-pool-edit/node-pool-edit.vue"),
+      component: ENABLE_NODE_POOL_CREATE_FLOW
+        ? () => import("@/views/node-pools/node-pool-create/node-pool-create.vue")
+        : () => import("@/views/node-pools/node-pool-edit/node-pool-edit.vue"),
       meta: {
         location: "node-pools/new",
         backPageName: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX,
