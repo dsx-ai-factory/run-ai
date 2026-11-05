@@ -1,0 +1,21 @@
+type: object
+properties:
+  nodePool:
+    type: object
+    nullable: true
+    properties:
+      capacity:
+        description: Resources to split. Defaults to the node pool's capacity.
+        nullable: true
+        allOf:
+          - $ref: "../QuotaStatusResource.yaml"
+      schedulingCapabilities:
+        nullable: true
+        allOf:
+          - $ref: "./FairShareSimulationSchedulingCapabilities.yaml"
+  orgUnits:
+    type: array
+    maxItems: 100
+    description: Org units to simulate with other values than their stored ones. Others keep their stored values and ask for the most GPUs they can get.
+    items:
+      $ref: "./FairShareSimulationOrgUnit.yaml"

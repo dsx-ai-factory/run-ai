@@ -3649,6 +3649,86 @@
         }
       }
     },
+    "/api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation": {
+      "x-internal": true,
+      "post": {
+        "summary": "Simulate the fair share of a node pool's org units",
+        "operationId": "simulate_node_pool_fair_share",
+        "x-service": "org-unit-service",
+        "description": "Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their\nsettings and demand, and for the node pool's scheduling capabilities. The calculation covers every org unit of the node\npool; the response holds the ones the caller can read. Nothing is saved.\n",
+        "x-no-authorization": true,
+        "x-test-coverage": [
+          "control-plane/org-unit-service/pkg/services/simulation/simulate_test.go"
+        ],
+        "tags": [
+          "Org unit"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/NodepoolId"
+          },
+          {
+            "name": "orgUnitType",
+            "in": "query",
+            "required": false,
+            "description": "Return only org units of this type.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "department",
+                "project"
+              ]
+            }
+          },
+          {
+            "name": "parentId",
+            "in": "query",
+            "required": false,
+            "description": "Return only projects of this department.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FairShareSimulationRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The simulated fair share of each org unit.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FairShareSimulationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/400BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/401Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/403Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/404NotFound"
+          },
+          "503": {
+            "$ref": "#/components/responses/503ServiceUnavailable"
+          }
+        }
+      }
+    },
     "/api/v1/org-unit/projects/node-pool-resources": {
       "get": {
         "summary": "Get projects node pool resources",
@@ -8074,6 +8154,205 @@
           "deservedSum": {
             "type": "number",
             "format": "double"
+          }
+        }
+      },
+      "FairShareSimulationSchedulingCapabilities": {
+        "type": "object",
+        "description": "The node pool's scheduling capabilities to simulate. Defaults to the node pool's saved capabilities.",
+        "required": [
+          "quota",
+          "ranks",
+          "adjustableWeights",
+          "cpuQuota"
+        ],
+        "properties": {
+          "quota": {
+            "type": "boolean"
+          },
+          "ranks": {
+            "type": "boolean"
+          },
+          "adjustableWeights": {
+            "type": "boolean"
+          },
+          "cpuQuota": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FairShareSimulationOrgUnit": {
+        "type": "object",
+        "required": [
+          "id",
+          "type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4500014"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "department",
+              "project"
+            ]
+          },
+          "rank": {
+            "type": "string",
+            "description": "Sent together with resources. Replaces the stored rank.",
+            "example": "High"
+          },
+          "resources": {
+            "description": "Sent together with rank. Replaces the stored resources; -1 means unlimited.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ResourcesPerNodePool"
+              }
+            ]
+          },
+          "demand": {
+            "description": "Resources a project asks for. Without it the project asks for the most it can get. Not allowed on departments, which ask for the sum of their projects' demand.",
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/QuotaStatusResource"
+              }
+            ]
+          }
+        }
+      },
+      "FairShareSimulationRequest": {
+        "type": "object",
+        "properties": {
+          "nodePool": {
+            "type": "object",
+            "nullable": true,
+            "properties": {
+              "capacity": {
+                "description": "Resources to split. Defaults to the node pool's capacity.",
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/QuotaStatusResource"
+                  }
+                ]
+              },
+              "schedulingCapabilities": {
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FairShareSimulationSchedulingCapabilities"
+                  }
+                ]
+              }
+            }
+          },
+          "orgUnits": {
+            "type": "array",
+            "maxItems": 100,
+            "description": "Org units to simulate with other values than their stored ones. Others keep their stored values and ask for the most GPUs they can get.",
+            "items": {
+              "$ref": "#/components/schemas/FairShareSimulationOrgUnit"
+            }
+          }
+        }
+      },
+      "FairShareSimulationResources": {
+        "type": "object",
+        "required": [
+          "gpu"
+        ],
+        "properties": {
+          "gpu": {
+            "type": "number",
+            "format": "double",
+            "example": 4
+          }
+        }
+      },
+      "FairShareSimulationResult": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "fairShare",
+          "guaranteed",
+          "overQuota",
+          "unmet"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "4500014"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "department",
+              "project"
+            ]
+          },
+          "parentId": {
+            "type": "string",
+            "nullable": true
+          },
+          "fairShare": {
+            "description": "Resources the scheduler would give the org unit, the sum of guaranteed and overQuota.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FairShareSimulationResources"
+              }
+            ]
+          },
+          "guaranteed": {
+            "description": "The part of the fair share that comes from the org unit's quota.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FairShareSimulationResources"
+              }
+            ]
+          },
+          "overQuota": {
+            "description": "The part of the fair share above the org unit's quota.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FairShareSimulationResources"
+              }
+            ]
+          },
+          "unmet": {
+            "description": "Demand the fair share does not cover.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FairShareSimulationResources"
+              }
+            ]
+          }
+        }
+      },
+      "FairShareSimulationResponse": {
+        "type": "object",
+        "required": [
+          "capacity",
+          "orgUnits"
+        ],
+        "properties": {
+          "capacity": {
+            "description": "The resources the simulation split.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FairShareSimulationResources"
+              }
+            ]
+          },
+          "orgUnits": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FairShareSimulationResult"
+            }
           }
         }
       },
