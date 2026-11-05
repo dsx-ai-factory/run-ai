@@ -82,7 +82,7 @@ func (s *IdpsApiService) CreateIdp(ctx context.Context, idpCreationRequest api.I
 
 	config, err := s.validateIdpConfig(ctx, idpCreationRequest)
 	if err != nil {
-		return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
+		return api.Response(http.StatusBadRequest, api.IdpPostResponse{Alias: idpCreationRequest.Name, SamlData: config}), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
 	}
 	if idpCreationRequest.DryRun {
 		return api.Response(http.StatusOK, api.IdpPostResponse{Alias: idpCreationRequest.Name, SamlData: config}), nil
@@ -133,10 +133,16 @@ func (s *IdpsApiService) UpdateIdp(ctx context.Context, idpAlias string, idpUpda
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp url for tenant: %v. err: %v", *realm, err.Error())
 			return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
 		}
-		if _, err := s.validateIdpConfig(ctx, idpUpdateRequest); err != nil {
+
+		config, err := s.validateIdpConfig(ctx, idpUpdateRequest)
+		if err != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp configuration for tenant: %v. err: %v", *realm, err.Error())
-			return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
+			return api.Response(http.StatusBadRequest, api.IdpPostResponse{Alias: idpAlias, SamlData: config}), nil
 		}
+		if idpUpdateRequest.DryRun {
+			return api.Response(http.StatusOK, api.IdpPostResponse{Alias: idpAlias, SamlData: config}), nil
+		}
+
 		idpRequest, err := models.GenerateIdpData(idpAlias, idpUpdateRequest, true)
 		if err != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to update idp with configuration %v for tenant %s. err: %v", idpUpdateRequest, *realm, err.Error())
@@ -394,12 +400,12 @@ func (s *IdpsApiService) validateIdpConfig(ctx context.Context, request api.IdpC
 
 	config := utils.ParseSamlIdpConfig(metadata)
 	if config.SigningCertificate == "" {
-		return config, nil
+		return config, utils.Error{Code: http.StatusBadRequest, Message: "saml metadata requires a signing certificate"}
 	}
 
 	if err := utils.ValidateSigningCertificate(config.SigningCertificate); err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("rejected saml signing certificate for idp %s. err: %s", request.Name, err.Error())
-		return nil, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml signing certificate"}, err)
+		return config, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml signing certificate"}, err)
 	}
 	return config, nil
 }
