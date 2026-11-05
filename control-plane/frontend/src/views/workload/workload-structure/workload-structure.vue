@@ -119,6 +119,7 @@
 </template>
 
 <script setup lang="ts">
+import { EWorkloadDrawerTabs } from "@/models/workload.model";
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { TouchPanValue } from "quasar";
@@ -130,7 +131,10 @@ import { RunaiTab, RunaiTabPanels, RunaiTabPanel, type ITab } from "@/components
 import { RunaiDrawerNoData } from "@/components/common/runai-drawer-no-data";
 import { RunaiStatus } from "@/components/common/runai-status";
 import { RunaiSvgIcon } from "@/components/common/runai-svg-icon";
-import type { WorkloadHistoryType } from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.model";
+import {
+  EWorkloadHistoryType,
+  type WorkloadHistoryType,
+} from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.model";
 import WorkloadEventHistory from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.vue";
 import { WorkloadMetricsTab } from "@/components/workload/workload-drawer-content/tabs/workload-metrics-tab";
 import { WorkloadLogsTab } from "@/components/workload/workload-drawer-content/tabs/workload-logs-tab";
@@ -158,13 +162,13 @@ const PANEL_MIN_WIDTH = 654;
 const PANEL_MAX_WIDTH_RATIO = 0.8;
 
 const tabOptions = {
-  EventHistory: "event history",
-  Metrics: "metrics",
-  Pods: "pods",
-  Logs: "logs",
-  Terminal: "terminal",
-  Yaml: "yaml",
-  Details: "details",
+  EventHistory: EWorkloadDrawerTabs.EventHistory,
+  Metrics: EWorkloadDrawerTabs.Metrics,
+  Pods: EWorkloadDrawerTabs.Pods,
+  Logs: EWorkloadDrawerTabs.Logs,
+  Terminal: EWorkloadDrawerTabs.Terminal,
+  Yaml: EWorkloadDrawerTabs.Yaml,
+  Details: EWorkloadDrawerTabs.Details,
 } as const;
 
 type StructureTab = (typeof tabOptions)[keyof typeof tabOptions];
@@ -187,7 +191,9 @@ const contextPods = ref<WorkloadServicePod[]>([]);
 // for an old elementId could otherwise overwrite a newer selection's pods.
 let contextPodsRequestToken = 0;
 const elementDetailsById = ref<WorkloadElementDetailsById>({});
-const historyType = ref<WorkloadHistoryType>(route.query.tab === "activity" ? "user-actions" : "logs");
+const historyType = ref<WorkloadHistoryType>(
+  route.query.tab === EWorkloadDrawerTabs.Activity ? EWorkloadHistoryType.UserActions : EWorkloadHistoryType.Logs,
+);
 const activeTab = ref<StructureTab>(tabOptions.EventHistory);
 const rightPanelWidth = ref(PANEL_DEFAULT_WIDTH);
 const originalWidth = ref(PANEL_DEFAULT_WIDTH);
@@ -270,7 +276,7 @@ const selectedElementName = computed(() => {
 const childIncompatibleTabs: StructureTab[] = [tabOptions.EventHistory];
 
 const getRouteTab = (): StructureTab => {
-  const tab = route.query.tab === "activity" ? tabOptions.EventHistory : route.query.tab;
+  const tab = route.query.tab === EWorkloadDrawerTabs.Activity ? tabOptions.EventHistory : route.query.tab;
   const tabs = Object.values(tabOptions);
   const resolved =
     typeof tab === "string" && tabs.includes(tab as StructureTab) ? (tab as StructureTab) : tabOptions.EventHistory;
@@ -428,7 +434,7 @@ const startRefreshInterval = (): void => {
 watch(
   () => route.query.tab,
   () => {
-    if (route.query.tab === "activity") historyType.value = "user-actions";
+    if (route.query.tab === EWorkloadDrawerTabs.Activity) historyType.value = EWorkloadHistoryType.UserActions;
     activeTab.value = getRouteTab();
   },
   { immediate: true },

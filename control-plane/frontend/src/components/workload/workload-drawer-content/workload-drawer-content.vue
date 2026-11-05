@@ -86,13 +86,17 @@
 
 <script lang="ts">
 import { defineComponent, type PropType } from "vue";
+import { EWorkloadDrawerTabs } from "@/models/workload.model";
 // cmps
 import { RunaiDrawerContent } from "@/components/common/runai-drawer-content";
 import { RunaiTab, RunaiTabPanels, RunaiTabPanel, type ITab } from "@/components/common/runai-tab";
 import { RunaiSvgIcon } from "@/components/common/runai-svg-icon";
 import { RunaiDrawerNoData } from "@/components/common/runai-drawer-no-data";
 import { WorkloadMetricsTab } from "@/components/workload/workload-drawer-content/tabs/workload-metrics-tab/";
-import type { WorkloadHistoryType } from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.model";
+import {
+  EWorkloadHistoryType,
+  type WorkloadHistoryType,
+} from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.model";
 import WorkloadEventHistory from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-event-history.vue";
 import { WorkloadLogsTab } from "@/components/workload/workload-drawer-content/tabs/workload-logs-tab/";
 import { WorkloadTerminal } from "@/components/workload/workload-drawer-content/tabs/workload-terminal/";
@@ -116,17 +120,6 @@ import { filterUtil } from "@/utils/filter.util/filter.util";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 // services
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
-
-export enum EWorkloadDrawerTabs {
-  Details = "details",
-  EventHistory = "event history",
-  Metrics = "metrics",
-  Pods = "pods",
-  Logs = "logs",
-  Terminal = "terminal",
-  Yaml = "yaml",
-  Structure = "structure",
-}
 
 export default defineComponent({
   components: {
@@ -195,7 +188,7 @@ export default defineComponent({
   },
   data() {
     return {
-      historyType: "logs" as WorkloadHistoryType,
+      historyType: EWorkloadHistoryType.Logs as WorkloadHistoryType,
       drawerTabsOptions: EWorkloadDrawerTabs,
       drawerTab: EWorkloadDrawerTabs.EventHistory as EWorkloadDrawerTabs | null,
       clusterStore: useClusterStore(),
@@ -443,7 +436,7 @@ export default defineComponent({
         // Handle workload change for pods
         const workloadChanged = newWorkload?.id !== prevWorkload?.id;
         if (workloadChanged) {
-          this.historyType = "logs";
+          this.historyType = EWorkloadHistoryType.Logs;
           this.selectedStructureElementId = null;
           this.resetPodState();
 
@@ -480,11 +473,11 @@ export default defineComponent({
 
         // Map tab type to drawer tab enum
         const allTabs = Object.values(EWorkloadDrawerTabs);
-        if (payload.tab === "activity") {
-          this.historyType = "user-actions";
+        if (payload.tab === EWorkloadDrawerTabs.Activity) {
+          this.historyType = EWorkloadHistoryType.UserActions;
           this.drawerTab = this.drawerTabsOptions.EventHistory;
         } else if (allTabs.includes(payload.tab as EWorkloadDrawerTabs)) {
-          if (payload.tab === this.drawerTabsOptions.EventHistory) this.historyType = "logs";
+          if (payload.tab === this.drawerTabsOptions.EventHistory) this.historyType = EWorkloadHistoryType.Logs;
           this.drawerTab = payload.tab as EWorkloadDrawerTabs;
         }
 

@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { EWorkloadActionSortField } from "@/models/workload-action.model";
 import { workloadServiceApi } from "@/services/infra/client-apis/workloads-service-api/workloads-service-api";
 import { workloadsManagerApi } from "@/services/infra/client-apis/workloads-manager-api/workloads-manager-api";
 import {
@@ -62,7 +63,7 @@ import {
 } from "@/models/workload.model";
 import { EWorkloadType } from "@/models/workload.model";
 
-import type { IFilterBy, IPaginationFilter } from "@/models/filter.model";
+import type { ESortOrder, IFilterBy, IPaginationFilter } from "@/models/filter.model";
 import { controlPlaneService } from "@/services/control-plane/control-plane.service/control-plane.service";
 import type {
   GetWorkloadHistory200Response,
@@ -490,8 +491,8 @@ async function getWorkloadHistory(workloadId: string, clusterUuid: string): Prom
 }
 
 export interface WorkloadActionsQuery {
-  sortBy?: "acceptedAt" | "action" | "subject";
-  sortOrder?: "asc" | "desc";
+  sortBy?: EWorkloadActionSortField;
+  sortOrder?: ESortOrder;
   filterBy?: string[];
   search?: string;
 }

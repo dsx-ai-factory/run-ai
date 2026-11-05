@@ -20,7 +20,7 @@
     </div>
     <div class="history-type-content">
       <workload-user-actions-history
-        v-if="historyType === 'user-actions' && !showElementEmptyState"
+        v-if="historyType === EWorkloadHistoryType.UserActions && !showElementEmptyState"
         :workload-id="workload.id"
       />
       <workload-history-tab
@@ -35,7 +35,7 @@
 
 <script setup lang="ts">
 import { ref, watch } from "vue";
-import { workloadHistoryTypes, type WorkloadHistoryType } from "./workload-event-history.model";
+import { EWorkloadHistoryType, workloadHistoryTypes, type WorkloadHistoryType } from "./workload-event-history.model";
 import { RunaiSelect } from "@/components/common/runai-select";
 import { WorkloadUserActionsHistory } from "@/components/workload/workload-drawer-content/tabs/workload-history-tab/workload-user-actions-history";
 import WorkloadHistoryTab from "./workload-history-tab.vue";
@@ -48,7 +48,7 @@ const props = withDefaults(
     showElementEmptyState?: boolean;
     initialType?: WorkloadHistoryType;
   }>(),
-  { showElementEmptyState: false, initialType: "logs" },
+  { showElementEmptyState: false, initialType: EWorkloadHistoryType.Logs },
 );
 const historyType = ref(props.initialType);
 const emit = defineEmits<{ "update:initialType": [value: WorkloadHistoryType] }>();
@@ -56,7 +56,7 @@ watch(historyType, (value) => emit("update:initialType", value));
 watch(
   () => props.workload.id,
   () => {
-    historyType.value = "logs";
+    historyType.value = EWorkloadHistoryType.Logs;
   },
 );
 watch(

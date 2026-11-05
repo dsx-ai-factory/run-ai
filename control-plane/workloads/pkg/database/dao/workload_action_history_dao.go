@@ -66,7 +66,7 @@ func DbInsertRegisteredWorkloadActions(ctx context.Context, records []models.Wor
 	return DbInsertWorkloadActions(ctx, records)
 }
 
-func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, limit int32, sortOrder, sortColumn string, filters []queryapi.Filter, search string) ([]models.WorkloadActionHistory, bool, *api.Error) {
+func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, limit int32, sortOrder, sortColumn string, filters []queryapi.Filter, search string, matchingActions []api.WorkloadActionType) ([]models.WorkloadActionHistory, bool, *api.Error) {
 	records := []models.WorkloadActionHistory{}
 	tenantID, apiErr := services_utils.ParseTenantId(ctx)
 	if apiErr != nil {
@@ -85,17 +85,9 @@ func DbGetWorkloadActions(ctx context.Context, workloadID uuid.UUID, offset, lim
 		Where("tenant_id = ? AND workload_id = ?", tenantID, workloadID).
 		WithEnricher(querydbenrich.Filters(filters))
 	if term := strings.TrimSpace(search); term != "" {
-		// Match the event labels shown in the UI, including their past-tense suffixes.
-		const eventLabel = `CASE action
-            WHEN 'create' THEN 'Created'
-            WHEN 'update' THEN 'Updated'
-            WHEN 'delete' THEN 'Deleted'
-            WHEN 'suspend' THEN 'Stopped'
-            WHEN 'resume' THEN 'Resumed'
-            ELSE action END`
 		escaped := strings.NewReplacer(`\`, `\\`, "%", `\%`, "_", `\_`).Replace(term)
 		pattern := "%" + escaped + "%"
-		query = query.Where("(subject ILIKE ? OR ("+eventLabel+") ILIKE ?)", pattern, pattern)
+		query = query.Where("(subject ILIKE ? OR action IN ?)", pattern, matchingActions)
 	}
 	err := query.Order(querydbenrich.FormatSortClause(sortColumn, sortOrder)).
 		Order("id DESC").

@@ -4,23 +4,24 @@
  */
 
 import { ECustomCell, USER_DISPLAY_NAME_COL_DEFAULTS, type ITableColumn } from "@/models/table.model";
-import type { WorkloadActionRecord, WorkloadActionType } from "@/swagger-models/workloads-client";
+import { type WorkloadActionRecord, WorkloadActionType } from "@/swagger-models/workloads-client";
 import { EColumnFilterType, type IAdvancedFilterOption, type IFilterBy } from "@/models/filter.model";
+import { EWorkloadActionSortField } from "@/models/workload-action.model";
 import { dateUtil } from "@/utils/date.util";
 
 export const actionLabels = new Map<WorkloadActionType, string>([
-  ["create", "Created"],
-  ["update", "Updated"],
-  ["delete", "Deleted"],
-  ["suspend", "Stopped"],
-  ["resume", "Resumed"],
+  [WorkloadActionType.Create, "Created"],
+  [WorkloadActionType.Update, "Updated"],
+  [WorkloadActionType.Delete, "Deleted"],
+  [WorkloadActionType.Suspend, "Stopped"],
+  [WorkloadActionType.Resume, "Resumed"],
 ]);
 
 export const workloadActivityColumns: ITableColumn[] = [
   {
-    name: "acceptedAt",
+    name: EWorkloadActionSortField.AcceptedAt,
     label: "Date & time",
-    field: "acceptedAt",
+    field: EWorkloadActionSortField.AcceptedAt,
     align: "left",
     sortable: true,
     style: "width: 38%",
@@ -30,18 +31,18 @@ export const workloadActivityColumns: ITableColumn[] = [
     },
   },
   {
-    name: "action",
+    name: EWorkloadActionSortField.Action,
     label: "Event",
-    field: "action",
+    field: EWorkloadActionSortField.Action,
     align: "left",
     sortable: true,
     style: "width: 22%",
     format: (value: WorkloadActionType) => actionLabels.get(value) || value || "-",
   },
   {
-    name: "subject",
+    name: EWorkloadActionSortField.Subject,
     label: "Subject",
-    field: "subject",
+    field: EWorkloadActionSortField.Subject,
     align: "left",
     sortable: true,
     ...USER_DISPLAY_NAME_COL_DEFAULTS,
@@ -55,15 +56,25 @@ export const workloadActivityColumns: ITableColumn[] = [
 ];
 
 export const workloadActivityFilterOptions: IAdvancedFilterOption[] = [
-  { name: "acceptedAt", field: "acceptedAt", label: "Date & time", type: EColumnFilterType.Date },
   {
-    name: "action",
-    field: "action",
+    name: EWorkloadActionSortField.AcceptedAt,
+    field: EWorkloadActionSortField.AcceptedAt,
+    label: "Date & time",
+    type: EColumnFilterType.Date,
+  },
+  {
+    name: EWorkloadActionSortField.Action,
+    field: EWorkloadActionSortField.Action,
     label: "Event",
     type: EColumnFilterType.EnumBased,
     selectOptions: [...actionLabels].map(([value, label]) => ({ value, label })),
   },
-  { name: "subject", field: "subject", label: "Subject", type: EColumnFilterType.FreeText },
+  {
+    name: EWorkloadActionSortField.Subject,
+    field: EWorkloadActionSortField.Subject,
+    label: "Subject",
+    type: EColumnFilterType.FreeText,
+  },
 ];
 
 export const WORKLOAD_ACTIONS_PAGE_SIZE = 50;
@@ -73,7 +84,7 @@ export function getDefaultWorkloadActionsFilters(): IFilterBy {
     page: 1,
     rowsPerPage: 0,
     rowsNumber: 0,
-    sortBy: "acceptedAt",
+    sortBy: EWorkloadActionSortField.AcceptedAt,
     descending: true,
     advancedFilters: [],
   };

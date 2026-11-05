@@ -3,9 +3,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type WorkloadHistoryType = "logs" | "user-actions";
+export enum EWorkloadHistoryType {
+  Logs = "logs",
+  UserActions = "user-actions",
+}
+
+export type WorkloadHistoryType = `${EWorkloadHistoryType}`;
 
 export const workloadHistoryTypes: { label: string; value: WorkloadHistoryType }[] = [
-  { label: "Logs", value: "logs" },
-  { label: "User actions", value: "user-actions" },
+  { label: "Logs", value: EWorkloadHistoryType.Logs },
+  { label: "User actions", value: EWorkloadHistoryType.UserActions },
 ];

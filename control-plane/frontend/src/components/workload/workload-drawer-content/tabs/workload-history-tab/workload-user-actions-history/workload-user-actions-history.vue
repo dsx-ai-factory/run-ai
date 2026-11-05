@@ -110,6 +110,7 @@
 
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from "vue";
+import { EWorkloadActionSortField } from "@/models/workload-action.model";
 import { RunaiBtn } from "@/components/common/runai-btn";
 import { RunaiDefaultLoader } from "@/components/common/runai-default-loader";
 import { WorkloadHistoryToolbar } from "../workload-history-toolbar";
@@ -141,7 +142,12 @@ const initialFilters = computed(() => deepCopy(tableFilters.value.advancedFilter
 const queryOptions = computed<WorkloadActionsQuery>(() => {
   const { sortBy, sortOrder, filterBy } = filterService.mapColumnsFilterToFilterParams(tableFilters.value);
   return {
-    sortBy: sortBy === "action" || sortBy === "subject" ? sortBy : "acceptedAt",
+    sortBy:
+      sortBy === EWorkloadActionSortField.Action
+        ? EWorkloadActionSortField.Action
+        : sortBy === EWorkloadActionSortField.Subject
+          ? EWorkloadActionSortField.Subject
+          : EWorkloadActionSortField.AcceptedAt,
     sortOrder,
     filterBy,
     ...(tableFilters.value.searchTerm ? { search: tableFilters.value.searchTerm } : {}),
