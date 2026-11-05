@@ -18,6 +18,7 @@ type ClientService interface {
 	UpdateClient(ctx context.Context, realm string, client *models.Client) error
 	UpdateRedirectUris(ctx context.Context, realm string, ID string, redirectUris []string) error
 	DeleteClient(ctx context.Context, realm string, ID string) error
+	DisableClient(ctx context.Context, realm string, ID string) error
 	GetClients(ctx context.Context, realm string, filter *models.ClientFilter) ([]models.Client, error)
 	GetClientSecret(ctx context.Context, realm string, ID string) (string, error)
 	GetClientByClientId(ctx context.Context, realm string, clientId string) (*models.Client, error)
@@ -57,6 +58,10 @@ func (c *clientService) UpdateRedirectUris(ctx context.Context, realm string, ID
 
 func (c *clientService) DeleteClient(ctx context.Context, realm string, ID string) error {
 	return c.clientRepository.DeleteClient(ctx, realm, ID)
+}
+
+func (c *clientService) DisableClient(ctx context.Context, realm string, ID string) error {
+	return c.clientRepository.DisableClient(ctx, realm, ID)
 }
 
 func (c *clientService) GetClients(ctx context.Context, realm string, filter *models.ClientFilter) ([]models.Client, error) {

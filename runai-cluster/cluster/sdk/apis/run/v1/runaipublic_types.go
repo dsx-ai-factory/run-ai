@@ -57,6 +57,9 @@ type PublicConfiguration struct {
 	ExternalAuthUrlEnabled                 *bool                       `yaml:"externalAuthUrlEnabled,omitempty"`
 	OpenshiftRouteTerminationPolicy        *string                     `yaml:"openshiftRouteTerminationPolicy,omitempty"`
 
+	// SnapshotAgentNodeSelector is the node selector on the NVIDIA Snapshot agent DaemonSet.
+	SnapshotAgentNodeSelector *string `yaml:"snapshotAgentNodeSelector,omitempty"`
+
 	// DistGPUNetworkAcceleration mirrors AnyWorkload's GPUNetworkAccelerationEnabled for distributed training.
 	DistGPUNetworkAcceleration *bool `yaml:"distGPUNetworkAcceleration,omitempty"`
 	// DinfGPUNetworkAcceleration mirrors AnyWorkload's GPUNetworkAccelerationEnabled for distributed inference.
@@ -93,5 +96,6 @@ const (
 	RunaiPublicJax              = "jax"
 	RunaiPublicGatewayAPI       = "gateway-api"
 	RunaiPublicAdvice           = "advice"
+	RunaiPublicSnapshot         = "snapshot"
 	DistributedFrameworkSuspend = "suspend"
 )

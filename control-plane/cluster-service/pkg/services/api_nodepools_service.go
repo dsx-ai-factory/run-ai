@@ -136,6 +136,7 @@ func (s *NodePoolsApiService) CreateNodepool(ctx context.Context, fields api.Nod
 			UpdatedAt: time.Now(),
 		},
 		Name:                            fields.Name,
+		Description:                     fields.Description,
 		TenantId:                        tenantId,
 		LabelKey:                        &fields.LabelKey,
 		LabelValue:                      &fields.LabelValue,
@@ -740,6 +741,7 @@ func mapUpdateFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, 
 	result := &models.Nodepool{}
 	(&nodepoolModel).DeepCopyInto(result)
 
+	result.Description = updateFields.Description
 	result.LabelKey = updateFields.LabelKey
 	result.LabelValue = updateFields.LabelValue
 
@@ -762,6 +764,9 @@ func mapPatchFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, p
 	result := &models.Nodepool{}
 	(&nodepoolModel).DeepCopyInto(result)
 
+	if patchFields.Description != nil {
+		result.Description = patchFields.Description
+	}
 	if patchFields.LabelKey != nil {
 		result.LabelKey = patchFields.LabelKey
 	}
@@ -849,6 +854,7 @@ func gpuTypesOf(
 func nodepoolDaoToApi(nodepool models.Nodepool) api.Nodepool {
 	apiNodepool := api.Nodepool{
 		Name:                            nodepool.Name,
+		Description:                     convutils.Deref(nodepool.Description, ""),
 		LabelKey:                        convutils.Deref(nodepool.LabelKey, ""),
 		LabelValue:                      convutils.Deref(nodepool.LabelValue, ""),
 		ClusterId:                       nodepool.ClusterId.String(),

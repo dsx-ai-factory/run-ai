@@ -1,7 +1,5 @@
-/*
- * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
- * SPDX-License-Identifier: Apache-2.0
- */
+// SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
 
 package main
 
@@ -271,7 +269,7 @@ func main() {
 			log.Println("File system has been successfully mounted.")
 			if readyFile != "" {
 				if err := os.WriteFile(readyFile, nil, 0600); err != nil {
-					// The scratch image has no fusermount helper.
+					// Unmount directly before returning a readiness publication error.
 					if unmountErr := unmount(flags.MountPoint, 0); unmountErr != nil {
 						log.Errorf("Failed to unmount after readiness error: %v", unmountErr)
 					}

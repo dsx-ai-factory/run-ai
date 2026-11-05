@@ -29124,6 +29124,9 @@ components:
           type: string
           example: v100
           minLength: 1
+        description:
+          type: string
+          description: The description of the node pool.
         labelKey:
           type: string
           description: >-
@@ -29526,6 +29529,11 @@ components:
           example: v100
           minLength: 1
           maxLength: 63
+        description:
+          type: string
+          nullable: true
+          maxLength: 250
+          description: The description of the node pool.
         labelKey:
           description: >-
             Label key for associated nodes to the Node Pool (with value as in
@@ -29566,6 +29574,11 @@ components:
     NodepoolUpdateFields:
       type: object
       properties:
+        description:
+          type: string
+          nullable: true
+          maxLength: 250
+          description: The description of the node pool.
         labelKey:
           type: string
           nullable: true
@@ -49586,6 +49599,8 @@ components:
     SamlData:
       type: object
       nullable: true
+      required:
+        - validateSignature
       properties:
         signingCertificate:
           type: string
@@ -49596,6 +49611,11 @@ components:
         serviceProviderMetadataUrl:
           type: string
           description: Service Provider (SP) metadata url
+        validateSignature:
+          type: boolean
+          description: >-
+            Whether the signature of SAML responses from the identity provider
+            is validated
     MandatoryClaim:
       type: object
       nullable: true
@@ -49821,6 +49841,9 @@ components:
           $ref: '#/components/schemas/OcpCreationData'
         mappers:
           $ref: '#/components/schemas/Mappers'
+        dryRun:
+          type: boolean
+          default: false
     IdpPostResponse:
       type: object
       required:

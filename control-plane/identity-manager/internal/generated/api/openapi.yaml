@@ -5563,6 +5563,7 @@ components:
       type: object
     SamlData:
       example:
+        validateSignature: true
         signingCertificate: signingCertificate
         serviceProviderMetadataUrl: serviceProviderMetadataUrl
         singleSignOnServiceUrl: singleSignOnServiceUrl
@@ -5578,6 +5579,12 @@ components:
         serviceProviderMetadataUrl:
           description: Service Provider (SP) metadata url
           type: string
+        validateSignature:
+          description: Whether the signature of SAML responses from the identity provider
+            is validated
+          type: boolean
+      required:
+      - validateSignature
       type: object
     MandatoryClaim:
       example:
@@ -5700,6 +5707,7 @@ components:
       example:
         redirectUri: redirectUri
         samlData:
+          validateSignature: true
           signingCertificate: signingCertificate
           serviceProviderMetadataUrl: serviceProviderMetadataUrl
           singleSignOnServiceUrl: singleSignOnServiceUrl
@@ -5901,6 +5909,7 @@ components:
           metadataXmlFile: metadataXmlFile
           metadataXmlType: ""
           entityId: entityId
+        dryRun: false
         name: name
         ocpData:
           clientId: clientId
@@ -5954,6 +5963,9 @@ components:
           $ref: '#/components/schemas/OcpCreationData'
         mappers:
           $ref: '#/components/schemas/Mappers'
+        dryRun:
+          default: false
+          type: boolean
       required:
       - data
       - type

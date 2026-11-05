@@ -53,8 +53,8 @@ LeaderWorkerSet:
       leaderTemplate:
         metadata:
           annotations:
-            gpu-memory: "10"
             nvidia.com/container.leader.gpu-memory.limit: 11M
+            nvidia.com/container.leader.gpu-memory.request: 10M
           labels:
             app: leaderworkerset
             createdBy: LeaderWorkerSet
@@ -86,8 +86,8 @@ LeaderWorkerSet:
       workerTemplate:
         metadata:
           annotations:
-            gpu-memory: "20"
             nvidia.com/container.worker.gpu-memory.limit: 22M
+            nvidia.com/container.worker.gpu-memory.request: 20M
           labels:
             app: leaderworkerset
             createdBy: LeaderWorkerSet

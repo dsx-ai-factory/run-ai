@@ -129,7 +129,8 @@ test-asset-admission:
 	fi; \
 	test -x "$$assets/kube-apiserver" && test -x "$$assets/etcd"; \
 	KUBEBUILDER_ASSETS="$$assets" go test ./internal/run/operands/agent/resources \
-		-run '^TestAssetIdentityAdmissionPolicies$$' -count=1 -timeout=3m -v
+		./internal/run/operands/external-workload-integrator/resources \
+		-run '^(TestAssetIdentityAdmissionPolicies|TestPodOwnershipPolicyAdmission)$$' -count=1 -timeout=3m -v
 
 .PHONY: test-unit  
 test-unit: test-go ## Run unit tests only

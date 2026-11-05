@@ -1410,7 +1410,7 @@ spec:
                       S3FileSystemMountCheckEnabled overrides startup-probe support for the configured S3 image.
                       When unset, only the bundled goofys image from this operator build is enabled.
                       Custom images must implement goofys --ready-file and --check-ready before opting in.
-                      Enabling probes requires a writable /runai-goofys-ready on the sidecar root filesystem.
+                      Readiness markers use a writable volume mounted only into the S3 sidecar.
                     type: boolean
                   storagePluginEnabled:
                     description: |-
@@ -23494,6 +23494,22 @@ spec:
                             type: string
                         type: object
                     type: object
+                type: object
+              snapshot:
+                description: |-
+                  Snapshot locates an existing NVIDIA Snapshot installation. Snapshot is
+                  installed and owned by the cluster administrator; Run:ai only detects it.
+                properties:
+                  namespace:
+                    description: Namespace is the namespace the Snapshot Helm release
+                      is installed in.
+                    type: string
+                  releaseName:
+                    description: |-
+                      ReleaseName is the Snapshot Helm release name. Run:ai derives the
+                      operator Deployment and agent DaemonSet names from it the same way the
+                      chart does.
+                    type: string
                 type: object
               status-updater:
                 description: StatusUpdater specifies configuration for the status-updater
