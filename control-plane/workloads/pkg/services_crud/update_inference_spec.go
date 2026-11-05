@@ -314,6 +314,10 @@ func composeInferenceUpdateNative(
 		return composer.WorkloadRequirements{}, NewSubmissionErrorWithDetails(composerErr.Code, composerErr.Message, composerErr.Details)
 	}
 
+	if err := services_utils.CheckZeroInitialReplicas(ctx, workload.ClusterId, workload.Spec.Autoscaling.Get()); err != nil {
+		return composer.WorkloadRequirements{}, ToSubmissionError(err)
+	}
+
 	return jobSpecComposer.WorkloadRequirements, nil
 }
 

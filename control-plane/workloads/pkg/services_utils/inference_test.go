@@ -7,6 +7,12 @@ package services_utils
 
 import (
 	"context"
+	"net/http"
+
+	clusterApi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
+	cache_testing "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/workloadutils"
@@ -109,6 +115,57 @@ var _ = Describe("inference utils testing", func() {
 				NodeType:    false,
 			}
 			Expect(CheckKnativeAvailable(ctx, uuid.NewString(), features)).To(Not(BeNil()))
+		})
+	})
+
+	Context("zero initial replicas", func() {
+		setReportedCapability := func(available *bool) {
+			cluster := testing.BuildDisplayedClusterWithKnative(randoms.ClusterId, testing.TestDefaultClusterVersion, true, true, true)
+			components := (*cluster.Status.Get().GetDependencies().Optional[checker.KnativeDependency].Components)[checker.KnativeDependency].Components
+			if available != nil {
+				(*components)[checker.ZeroInitialScaleDependency] = clusterApi.ClusterDependencyStatus{Available: *available}
+			}
+			checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().WithCluster(randoms.ClusterId, cluster))
+		}
+
+		DescribeTable("checks explicit zero against the reported capability",
+			func(initial *int32, available *bool, rejected bool) {
+				setReportedCapability(available)
+				autoscaling := workloadsApi.NewAutoScaling()
+				if initial != nil {
+					autoscaling.SetInitialReplicas(*initial)
+				}
+				err := CheckZeroInitialReplicas(ctx, randoms.ClusterId, autoscaling)
+				if rejected {
+					Expect(err).NotTo(BeNil())
+					Expect(int(err.Code)).To(Equal(http.StatusBadRequest))
+					Expect(err.Message).To(ContainSubstring("allow-zero-initial-scale=true"))
+				} else {
+					Expect(err).To(BeNil())
+				}
+			},
+			Entry("disabled rejects explicit zero", convutils.Ref(int32(0)), convutils.Ref(false), true),
+			Entry("enabled accepts explicit zero", convutils.Ref(int32(0)), convutils.Ref(true), false),
+			Entry("older cluster keeps admission behavior", convutils.Ref(int32(0)), nil, false),
+			Entry("unset does not require the feature", nil, convutils.Ref(false), false),
+			Entry("positive does not require the feature", convutils.Ref(int32(1)), convutils.Ref(false), false),
+		)
+
+		It("does not check the capability when autoscaling is absent", func() {
+			Expect(CheckZeroInitialReplicas(ctx, uuid.NewString(), nil)).To(BeNil())
+		})
+
+		It("refreshes a disabled cached capability before rejecting", func() {
+			cache_testing.EnableCache()
+			DeferCleanup(cache_testing.DisableCache)
+			setReportedCapability(convutils.Ref(false))
+			configuration, err := checker.NewClusterCapabilitiesChecker(randoms.ClusterId).ClusterConfiguration(ctx)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(configuration.KnativeZeroInitialScaleAvailable).To(Equal(convutils.Ref(false)))
+			setReportedCapability(convutils.Ref(true))
+			autoscaling := workloadsApi.NewAutoScaling()
+			autoscaling.SetInitialReplicas(0)
+			Expect(CheckZeroInitialReplicas(ctx, randoms.ClusterId, autoscaling)).To(BeNil())
 		})
 	})
 

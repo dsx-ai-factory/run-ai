@@ -654,6 +654,42 @@ var _ = Describe("InferenceToKnativeComposer", func() {
 		}),
 	)
 
+	DescribeTable("preserves explicit initial replicas in the composed revision",
+		func(initial *int32, expected string, invalid bool) {
+			specYaml, err := testutils.LoadInputFile("basic", ".")
+			Expect(err).NotTo(HaveOccurred())
+			var src workloadsApi.InferenceSpecSpec
+			Expect(yaml.Unmarshal(specYaml, &src)).To(Succeed())
+			autoscaling := workloadsApi.NewAutoScaling()
+			autoscaling.SetMinReplicas(0)
+			autoscaling.SetMaxReplicas(1)
+			if initial != nil {
+				autoscaling.SetInitialReplicas(*initial)
+			}
+			src.Autoscaling.Set(autoscaling)
+			infComposer := NewInferenceToKnativeComposer("my-llm", "team-a", "runai-team-a", "tester", nil, composer.FieldsComposerOptions{})
+			target := NewMinimalKnativeServiceTarget()
+			composeErr := infComposer.Compose(context.Background(), &src, target)()
+			if invalid {
+				Expect(composeErr).NotTo(BeNil())
+				Expect(composeErr.Code).To(Equal(int32(400)))
+				return
+			}
+			Expect(composeErr).To(BeNil())
+			Expect(target.Service.Spec.Template.Annotations).To(HaveKeyWithValue(annotationAutoscalingMin, "0"))
+			if initial == nil {
+				Expect(target.Service.Spec.Template.Annotations).NotTo(HaveKey(annotationAutoscalingInitial))
+			} else {
+				Expect(target.Service.Spec.Template.Annotations).To(HaveKeyWithValue(annotationAutoscalingInitial, expected))
+			}
+		},
+		Entry("unset keeps Knative's default", nil, "", false),
+		Entry("explicit zero", convutils.Ref(int32(0)), "0", false),
+		Entry("explicit positive value", convutils.Ref(int32(1)), "1", false),
+		Entry("below the minimum remains invalid", convutils.Ref(int32(-1)), "", true),
+		Entry("above the maximum remains invalid", convutils.Ref(int32(2)), "", true),
+	)
+
 	DescribeTable("maps API autoscaling metrics to Knative metrics",
 		func(metric, expectedMetric, expectedClass string) {
 			autoscaling := workloadsApi.NewAutoScaling()
