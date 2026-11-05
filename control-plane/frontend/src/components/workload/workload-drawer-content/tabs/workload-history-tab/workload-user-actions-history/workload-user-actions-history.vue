@@ -215,6 +215,9 @@ async function resetActivity(): Promise<void> {
   await initial;
   if (current !== request) return;
   intervalUtil.startInterval(EIntervalLabels.WorkloadActivityTab, () => {
+    // Keep older pages still while reading. Offset pagination can still overlap
+    // across page navigation when new actions arrive; it is not a snapshot.
+    if (page.value !== 0) return;
     // Preserve an unsuccessful navigation's Retry destination until the user
     // retries it or chooses a different page.
     if (error.value && failedPage !== page.value) return;

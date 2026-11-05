@@ -308,10 +308,8 @@ describe("WorkloadUserActionsHistory", () => {
     });
   });
 
-  it("keeps the current page visible while refreshing and refreshes its offset", async () => {
+  it("refreshes page 1 without hiding the current rows", async () => {
     const view = render();
-    await flushPromises();
-    await view.get('[aid="workload-activity-next"]').trigger("click");
     await flushPromises();
     const pending = deferred();
     vi.mocked(workloadService.getWorkloadActions).mockReturnValueOnce(pending.promise);
@@ -319,7 +317,7 @@ describe("WorkloadUserActionsHistory", () => {
     await flushPromises();
     expect(view.text()).toContain("admin@example.com");
     expect(view.find('[aid="workload-activity-loading"]').exists()).toBe(false);
-    expect(workloadService.getWorkloadActions).toHaveBeenLastCalledWith("w1", 50, 50, {
+    expect(workloadService.getWorkloadActions).toHaveBeenLastCalledWith("w1", 0, 50, {
       sortBy: "acceptedAt",
       sortOrder: "desc",
       filterBy: [],
@@ -327,6 +325,31 @@ describe("WorkloadUserActionsHistory", () => {
     pending.resolve({ actions: [{ ...action(), subject: "updated@example.com" }] });
     await tick;
     expect(view.text()).toContain("updated@example.com");
+  });
+
+  it("keeps older pages still and resumes refreshing after returning to page 1", async () => {
+    const view = render();
+    await flushPromises();
+    await view.get('[aid="workload-activity-next"]').trigger("click");
+    await flushPromises();
+    const calls = vi.mocked(workloadService.getWorkloadActions).mock.calls.length;
+    const rows = view.find("tbody").text();
+    await refresh();
+    await refresh();
+    expect(workloadService.getWorkloadActions).toHaveBeenCalledTimes(calls);
+    expect(view.get('[aid="workload-activity-range"]').text()).toBe("51–51");
+    expect(view.find("tbody").text()).toBe(rows);
+
+    await view.get('[aid="workload-activity-previous"]').trigger("click");
+    await flushPromises();
+    const callsAfterNavigation = vi.mocked(workloadService.getWorkloadActions).mock.calls.length;
+    await refresh();
+    expect(workloadService.getWorkloadActions).toHaveBeenCalledTimes(callsAfterNavigation + 1);
+    expect(workloadService.getWorkloadActions).toHaveBeenLastCalledWith("w1", 0, 50, {
+      sortBy: "acceptedAt",
+      sortOrder: "desc",
+      filterBy: [],
+    });
   });
 
   it("shows the empty state and disables pagination when no actions are available", async () => {
