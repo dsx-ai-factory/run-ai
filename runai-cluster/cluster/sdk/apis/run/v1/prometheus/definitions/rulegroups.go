@@ -2188,8 +2188,17 @@ func amdMetricsRule(amdMetric string) string {
 }
 
 func dcgmMetricsRule(dcgmMetric string) string {
+	return fmt.Sprintf(`(%s) or (%s)`, hostDcgmMetricsRule(dcgmMetric), guestDcgmMetricsRule(dcgmMetric))
+}
+
+func hostDcgmMetricsRule(dcgmMetric string) string {
 	return fmt.Sprintf(`label_replace(label_replace(label_replace(label_replace(%s, "pod_ip", "$1", "instance", "(.*):(.*)"), "pod_name", "$1", "exported_pod", "(.+)"), "pod_namespace", "$1", "exported_namespace", "(.+)"), "gpu_instance_id",
 	"$1", "GPU_I_ID", "(.+)") * on (pod_ip) group_left(node) kube_pod_info{created_by_name=~".*dcgm-exporter", pod_ip!=""} * on(node) group_left(nodepool) runai_node_nodepool_excluded`, dcgmMetric)
+}
+
+func guestDcgmMetricsRule(dcgmMetric string) string {
+	return fmt.Sprintf(`label_replace(label_replace(label_replace(label_replace(%s, "pod_ip", "$1", "instance", "(.*):(.*)"), "pod_name", "$1", "pod", "(.+)"), "pod_namespace", "$1", "namespace", "(.+)"), "gpu_instance_id",
+	"$1", "GPU_I_ID", "(.+)") * on (pod, namespace) group_left(node) kube_pod_info{pod_ip!=""} * on(node) group_left(nodepool) runai_node_nodepool_excluded`, dcgmMetric)
 }
 
 func gpuMetricsPerWholePodRule(runaiDcgmMetric string) string {

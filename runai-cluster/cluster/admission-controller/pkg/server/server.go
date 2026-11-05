@@ -38,6 +38,7 @@ type Server struct {
 	scheduleWorkflowPods           bool
 	specificClusterType            string
 	overProvisioningRoute          bool
+	confidentialComputing          bool
 }
 
 func NewServer() *Server {
@@ -65,6 +66,9 @@ func NewServer() *Server {
 	flag.BoolVar(&server.overProvisioningRoute,
 		"overprovisioning-route", false,
 		"Specifies if route capability of over provisioning is enabled")
+	flag.BoolVar(&server.confidentialComputing,
+		"confidential-computing", false,
+		"Specifies if the cluster runs confidential workloads")
 	flag.Parse()
 
 	return &server
@@ -97,6 +101,7 @@ func (server *Server) Start(ctx context.Context) error {
 		server.scheduleWorkflowPods,
 		server.specificClusterType,
 		server.overProvisioningRoute,
+		server.confidentialComputing,
 	)
 	// Pod handlers
 	mux.HandleFunc("/mutate-pod", requestHandler.HandleMutatePod)

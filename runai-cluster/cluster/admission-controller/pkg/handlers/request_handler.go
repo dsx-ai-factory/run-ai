@@ -44,6 +44,7 @@ func NewRequestHandler(
 	scheduleWorkflowPods bool,
 	specificClusterType string,
 	overProvisioningRoute bool,
+	confidentialComputing bool,
 ) *RequestHandler {
 	handlerParams := &types.MutatingParams{
 		MinAllocationEnforcementBytes:  minAllocationEnforcementBytes,
@@ -57,6 +58,7 @@ func NewRequestHandler(
 		ScheduleWorkflowPods:           scheduleWorkflowPods,
 		SpecificClusterType:            specificClusterType,
 		OverProvisioningRoute:          overProvisioningRoute,
+		ConfidentialComputing:          confidentialComputing,
 	}
 
 	client, err := kube_client2.NewClient(getClientConfig(), initScheme())

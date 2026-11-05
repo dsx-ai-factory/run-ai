@@ -381,7 +381,7 @@ func TestObject_Platform(t *testing.T) {
 
 func TestGpuStackField(t *testing.T) {
 	kbClient := createKubeClientMock()
-	status := getGpuStackStatus(&ContextMock{}, kbClient)
+	status := getGpuStackStatus(&ContextMock{}, kbClient, false)
 	assert.Equal(t, false, *status.Components["nvidia"].Available)
 	assert.NotEmpty(t, status.Components["nvidia"].Reason)
 	assert.NotEmpty(t, status.Components["nvidia"].Components)

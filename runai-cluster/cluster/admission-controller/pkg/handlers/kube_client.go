@@ -12,6 +12,7 @@ import (
 	kube_client "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/admission-controller/pkg/kube-client"
 
 	v1 "k8s.io/api/core/v1"
+	nodev1 "k8s.io/api/node/v1"
 	resourcev1 "k8s.io/api/resource/v1"
 	resourcev1beta1 "k8s.io/api/resource/v1beta1"
 	resourcev1beta2 "k8s.io/api/resource/v1beta2"
@@ -50,6 +51,7 @@ func initScheme() *runtime.Scheme {
 		resourcev1beta1.AddToScheme,
 		resourcev1beta2.AddToScheme,
 		schedulingv1.AddToScheme,
+		nodev1.AddToScheme,
 		(&scheme.Builder{GroupVersion: nodePoolsGroupVersion}).AddToScheme,
 		(&scheme.Builder{GroupVersion: projectsGroupVersion}).AddToScheme,
 	}

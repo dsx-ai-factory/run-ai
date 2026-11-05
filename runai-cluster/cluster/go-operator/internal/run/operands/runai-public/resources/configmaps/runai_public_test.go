@@ -511,7 +511,7 @@ var _ = Describe("getGpuStackStatus", func() {
 			newGpuFractioningConfigWithReadyCondition("True", "all components are healthy"),
 		).Build()
 
-		status := getGpuStackStatus(ctx, kbClient)
+		status := getGpuStackStatus(ctx, kbClient, false)
 		Expect(*status.Available).To(BeTrue())
 		Expect(status.Reason).To(BeEmpty())
 	})
@@ -522,7 +522,7 @@ var _ = Describe("getGpuStackStatus", func() {
 			newGpuFractioningConfigWithReadyCondition("False", "NVIDIA GPU Operator version v25.3.0 is below minimum supported version v26.7.1"),
 		).Build()
 
-		status := getGpuStackStatus(ctx, kbClient)
+		status := getGpuStackStatus(ctx, kbClient, false)
 		Expect(*status.Available).To(BeFalse())
 		Expect(status.Reason).To(Equal("NVIDIA GPU Operator version v25.3.0 is below minimum supported version v26.7.1"))
 	})
@@ -532,7 +532,7 @@ var _ = Describe("getGpuStackStatus", func() {
 			newGpuFractioningConfigWithReadyCondition("False", "gpu-fractioning failure reason"),
 		).Build()
 
-		status := getGpuStackStatus(ctx, kbClient)
+		status := getGpuStackStatus(ctx, kbClient, false)
 		Expect(*status.Available).To(BeFalse())
 		Expect(status.Reason).To(Equal("gpu-fractioning failure reason"))
 
@@ -545,7 +545,7 @@ var _ = Describe("getGpuStackStatus", func() {
 			newGpuFractioningConfigWithReadyCondition("True", "all components are healthy"),
 		).Build()
 
-		status := getGpuStackStatus(ctx, kbClient)
+		status := getGpuStackStatus(ctx, kbClient, false)
 		Expect(*status.Available).To(BeFalse())
 		Expect(status.Reason).To(ContainSubstring("dcgm-exporter service not found"))
 	})

@@ -58,6 +58,10 @@ func (s *ServiceMonitor) Object(ctx context.Context) (client.Object, error) {
 	serviceMonitor.ObjectMeta.Name = name
 	serviceMonitor.ObjectMeta.Namespace = namespace
 
+	if !s.Enabled() {
+		return serviceMonitor, nil
+	}
+
 	if serviceMonitor.Labels == nil {
 		serviceMonitor.Labels = map[string]string{}
 	}
@@ -106,5 +110,8 @@ func (s *ServiceMonitor) Status(ctx context.Context) error {
 }
 
 func (s *ServiceMonitor) Enabled() bool {
+	if s.runaiConfig.IsConfidentialComputing() {
+		return false
+	}
 	return *s.runaiConfig.Spec.Global.NvidiaDcgmExporter.ServiceMonitor.Enabled
 }

@@ -56,6 +56,7 @@ type MutatingParams struct {
 	ScheduleWorkflowPods           bool
 	SpecificClusterType            string
 	OverProvisioningRoute          bool
+	ConfidentialComputing          bool
 }
 
 func (pcc *PodControllerCommon) DeepCopy() *PodControllerCommon {

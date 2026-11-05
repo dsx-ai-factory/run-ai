@@ -39,6 +39,14 @@ rules:
     verbs:
       - get
       - list
+  {{- if .Values.global.confidentialComputing.enabled }}
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - list
+  {{- end }}
   - apiGroups:
       - admissionregistration.k8s.io
     resources:
@@ -703,6 +711,14 @@ rules:
       - scheduling.k8s.io
     resources:
       - priorityclasses
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - node.k8s.io
+    resources:
+      - runtimeclasses
     verbs:
       - get
       - list
