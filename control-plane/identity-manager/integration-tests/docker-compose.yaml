@@ -40,7 +40,7 @@ services:
     profiles:
       - localdebug
     container_name: keycloak
-    image: quay.io/keycloak/keycloak:26.7.4
+    image: quay.io/keycloak/keycloak:26.8.1
     env_file: config/keycloak/config.yaml
     command:
       - start-dev
