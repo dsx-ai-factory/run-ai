@@ -81,7 +81,7 @@ Dependencies
 | `github.com/golang-jwt/jwt/v4` | v4.5.2 | MIT | https://pkg.go.dev/github.com/golang-jwt/jwt/v4@v4.5.2?tab=licenses |
 | `github.com/google/s2a-go` | v0.1.11 | Apache-2.0 | https://github.com/google/s2a-go/blob/v0.1.11/LICENSE.md |
 | `github.com/google/uuid` | v1.6.0 | BSD-3-Clause | https://github.com/google/uuid/blob/v1.6.0/LICENSE |
-| `github.com/googleapis/enterprise-certificate-proxy/client` | v0.3.24 | Apache-2.0 | https://github.com/googleapis/enterprise-certificate-proxy/blob/v0.3.24/LICENSE |
+| `github.com/googleapis/enterprise-certificate-proxy/client` | v0.3.25 | Apache-2.0 | https://github.com/googleapis/enterprise-certificate-proxy/blob/v0.3.25/LICENSE |
 | `github.com/googleapis/gax-go/v2` | v2.27.0 | BSD-3-Clause | https://pkg.go.dev/github.com/googleapis/gax-go/v2@v2.27.0?tab=licenses |
 | `github.com/jacobsa/fuse` | v0.0.0-20260630194014-a124548f6da7 | Apache-2.0 | https://github.com/jacobsa/fuse/blob/a124548f6da7/LICENSE |
 | `github.com/jmespath/go-jmespath` | v0.4.0 | Apache-2.0 | https://github.com/jmespath/go-jmespath/blob/v0.4.0/LICENSE |
@@ -127,9 +127,9 @@ Dependencies
 | `golang.org/x/time/rate` | v0.16.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/time@v0.16.0?tab=licenses |
 | `google.golang.org/api` | v0.307.0 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/api@v0.307.0?tab=licenses |
 | `google.golang.org/api/internal/third_party/uritemplates` | v0.307.0 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/api@v0.307.0?tab=licenses |
-| `google.golang.org/genproto/googleapis/api` | v0.0.0-20261026165753-2ffab32bce7e | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261026165753-2ffab32bce7e?tab=licenses |
-| `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261026165753-2ffab32bce7e | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261026165753-2ffab32bce7e?tab=licenses |
-| `google.golang.org/genproto/googleapis/type` | v0.0.0-20261026165753-2ffab32bce7e | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto@v0.0.0-20261026165753-2ffab32bce7e?tab=licenses |
+| `google.golang.org/genproto/googleapis/api` | v0.0.0-20261104224025-d1e00e9f33ab | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261104224025-d1e00e9f33ab?tab=licenses |
+| `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261104224025-d1e00e9f33ab | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261104224025-d1e00e9f33ab?tab=licenses |
+| `google.golang.org/genproto/googleapis/type` | v0.0.0-20261104224025-d1e00e9f33ab | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto@v0.0.0-20261104224025-d1e00e9f33ab?tab=licenses |
 | `google.golang.org/grpc` | v1.85.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.85.0?tab=licenses |
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
 | `gopkg.in/ini.v1` | v1.67.3 | Apache-2.0 | https://pkg.go.dev/gopkg.in/ini.v1@v1.67.3?tab=licenses |
