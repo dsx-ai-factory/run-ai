@@ -38,10 +38,11 @@ const MOCK_PROJECTS_RANKING_RECORDS: ProjectGetRanking[] = [
 const mockRouter = {
   push: vi.fn(),
 };
+const { routerPushMock } = vi.hoisted(() => ({ routerPushMock: vi.fn() }));
 vi.mock("vue-router", () => ({
   useRoute: vi.fn(),
   useRouter: vi.fn(() => ({
-    push: vi.fn(),
+    push: routerPushMock,
   })),
 }));
 let wrapper: VueWrapper<InstanceType<typeof OrgUnitRankingWidget>>;
@@ -151,5 +152,16 @@ describe("org-unit-ranking-widget", () => {
     mountComponent();
     await flushPromises();
     expect(departmentCountSpy).toHaveBeenCalled();
+  });
+
+  it("links to projects filtered by allocated GPUs for the allocation metric", async () => {
+    vi.mocked(orgUnitService.getProjectsRanking).mockResolvedValue(MOCK_PROJECTS_RANKING_RECORDS);
+    mountComponent();
+    await flushPromises();
+    wrapper.vm.redirectToEntityIndex();
+    const [advancedFilter] = JSON.parse(routerPushMock.mock.lastCall?.[0].query.advancedFilters);
+    expect(advancedFilter).toEqual(
+      expect.objectContaining({ name: "gpuAllocated", label: "Allocated GPUs", operator: ">=", minValue: "1" }),
+    );
   });
 });

@@ -78,11 +78,11 @@ export default defineComponent({
       breadcrumbs: [] as string[],
       clusterStore: useClusterStore(),
       wrapperOptions: {
-        title: "Free nodes by node pool",
+        title: "Free GPU nodes by node pool",
         linkText: "All nodes",
         entityType: EWidgetEntity.Nodepool,
         tooltipText:
-          "The number of nodes that are free<br/>, to ensure large workloads are<br/> being scheduled efficiently",
+          "The number of GPU nodes that are free,<br/> to ensure large workloads are<br/> being scheduled efficiently",
         emptyMessage: EWidgetEmptyMessages.NoNodes,
       } as IWidgetWrapperOptions,
       freeGpusError: false as boolean,
@@ -154,7 +154,12 @@ export default defineComponent({
         const groupBy = this.isScatterChart
           ? [ENodeTelemetryGroupBy.Nodepool, ENodeTelemetryGroupBy.Node]
           : [ENodeTelemetryGroupBy.Node];
-        await clusterService.getNodeTelemetryCsv(telemetryType, this.clusterId, this.nodePoolName, groupBy);
+        const filename = dashboardUtil.getCsvFileName(
+          this.wrapperOptions.title ?? "",
+          this.clusterStore.clusterNameByUuid(this.clusterId),
+          this.nodePoolName,
+        );
+        await clusterService.getNodeTelemetryCsv(telemetryType, this.clusterId, this.nodePoolName, groupBy, filename);
       } catch (error: unknown) {
         this.$q.notify(dashboardUtil.getCsvErrorMessage());
         this.handleError(error);

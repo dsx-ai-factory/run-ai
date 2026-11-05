@@ -109,6 +109,7 @@ import { ChartWidgetWrapper } from "@/components/dashboard-v2/widgets/common/wid
 import { ChartZoomControls } from "@/components/common/charts/chart-zoom-controls";
 import { ChartAreaZoomControls } from "@/components/common/charts/chart-area-zoom-controls";
 import { RunaiTooltipWrapper } from "@/components/common/runai-tooltip-wrapper";
+import { useClusterStore } from "@/stores/cluster.store";
 
 import type { EChartsOption } from "echarts";
 import type { LineSeriesOption } from "echarts/charts";
@@ -385,14 +386,26 @@ export default defineComponent({
 
       try {
         const samples = this.timeframes.length;
-
-        await clusterService.getClusterMetricsCsv(
-          this.clusterId,
-          dateUtil.convertDateToISO(this.filterByDates.dateStart),
-          dateUtil.convertDateToISO(this.filterByDates.dateEnd),
-          metricType,
-          samples,
+        const start = dateUtil.convertDateToISO(this.filterByDates.dateStart);
+        const end = dateUtil.convertDateToISO(this.filterByDates.dateEnd);
+        const filename = dashboardUtil.getCsvFileName(
+          this.wrapperOptions.title ?? "",
+          useClusterStore().clusterNameByUuid(this.clusterId),
+          this.nodePoolName,
         );
+        if (this.nodePoolName) {
+          await clusterService.getNodepoolMetricsCsv(
+            this.clusterId,
+            this.nodePoolName,
+            start,
+            end,
+            metricType,
+            samples,
+            filename,
+          );
+        } else {
+          await clusterService.getClusterMetricsCsv(this.clusterId, start, end, metricType, samples, filename);
+        }
       } catch (error: unknown) {
         this.$q.notify(dashboardUtil.getCsvErrorMessage());
         console.error(error);

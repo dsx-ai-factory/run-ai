@@ -12,7 +12,7 @@
     :error="error"
     slot-wrapper-class=""
     hide-actions
-    @link-clicked="redirectToWorkloads"
+    @link-clicked="redirectToWorkloads()"
     is-grid
   >
     <runai-table
@@ -46,10 +46,11 @@ import { idleGpuWorkloadColumns, workloadIndexColumns } from "@/table-models/wor
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import { useRouter } from "vue-router";
 import { RunaiTable } from "@/components/common";
-import { EFilterOperator, type IFilterBy } from "@/models/filter.model";
+import type { IFilterBy } from "@/models/filter.model";
 import { filterService } from "@/services/filter.service/filter.service";
 import { ETableFilters } from "@/models/table.model";
 import { filterUtil } from "@/utils/filter.util/filter.util";
+import { MIN_IDLE_GPUS_FILTER_VALUE, widgetUtil } from "@/utils/widget.util";
 import { ChartWidgetWrapper } from "@/components/dashboard-v2/widgets/common/widget-wrapper/chart-widget-wrapper";
 import { RunaiTableNoData } from "@/components/common/runai-table/runai-table-no-data";
 import { useRefresh } from "@/composables/use-refresh.composable";
@@ -81,7 +82,7 @@ export default defineComponent({
       linkText: "All workloads",
       title: "Idle workloads",
       entityType: EWidgetEntity.Workload,
-      tooltipText: "Workloads with the highest number of idle GPU devices.",
+      tooltipText: `The ${NUMBER_OF_WORKLOADS} workloads with the highest number of idle GPU devices.<br/>Updated about every 20 minutes, so it may lag behind the idle allocated GPU devices count.`,
     });
 
     const getWorkloads = async () => {
@@ -106,7 +107,10 @@ export default defineComponent({
 
     const getFilters = (): string[] => {
       const filters = [
-        filterUtil.getGreaterThanOrEqualFilterString(WorkloadSortFilterFields.IdleAllocatedGpus, 1),
+        filterUtil.getGreaterThanOrEqualFilterString(
+          WorkloadSortFilterFields.IdleAllocatedGpus,
+          MIN_IDLE_GPUS_FILTER_VALUE,
+        ),
         filterUtil.getEqualsFilterString(WorkloadSortFilterFields.ClusterId, props.clusterId),
       ];
       if (props.nodePoolName) {
@@ -116,20 +120,11 @@ export default defineComponent({
     };
 
     const getQueryParams = (workloadName?: string) => {
-      const queryParams = {
+      return {
         sortBy: WorkloadSortFilterFields.IdleAllocatedGpus,
         descending: "true",
-        advancedFilters: "",
+        advancedFilters: widgetUtil.getIdleWorkloadsAdvancedFilters(props.nodePoolName, workloadName),
       };
-      if (workloadName) {
-        queryParams.advancedFilters = `[${filterUtil.getFreeTextFilterQuery(
-          WorkloadSortFilterFields.Name,
-          workloadName,
-          "Workload",
-          EFilterOperator.Equals,
-        )}]`;
-      }
-      return queryParams;
     };
 
     const redirectToWorkloads = (workloadName?: string) => {

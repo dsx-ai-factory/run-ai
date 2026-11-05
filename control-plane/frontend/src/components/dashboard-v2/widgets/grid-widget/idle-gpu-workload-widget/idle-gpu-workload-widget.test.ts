@@ -99,7 +99,7 @@ describe("idle-gpu-workload-widget", () => {
     mountComponent("test-node-pool");
     await flushPromises();
     expect(workloadService.getWorkloads).toHaveBeenCalledWith(false, undefined, 5, "desc", "idleAllocatedGpus", [
-      "idleAllocatedGpus>=1",
+      "idleAllocatedGpus>=0.01",
       "clusterId==test-cluster",
       "nodepool==test-node-pool",
     ]);

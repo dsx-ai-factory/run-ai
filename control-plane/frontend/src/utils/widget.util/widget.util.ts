@@ -16,6 +16,9 @@ import {
 } from "@/models/workload.model";
 import type { GroupedMeasurementResponseValuesInner, MetricsResponse } from "@/swagger-models/cluster-service-client";
 import { WIDGET_AVERAGE_LINE_LABEL } from "@/models/chart.model";
+import { EFilterOperator } from "@/models/filter.model";
+import { WorkloadSortFilterFields } from "@/swagger-models/workloads-client";
+import { filterUtil } from "@/utils/filter.util/filter.util";
 
 export interface IEChartsSeriesOption {
   name?: string;
@@ -28,6 +31,9 @@ export interface IEChartsSeriesOption {
 }
 
 const MAX_DISPLAYED_PROJECTS = 20;
+// `!=` maps to SQL IS DISTINCT FROM, which lets workloads with no idle data through; a small positive
+// lower bound excludes them while keeping fractional-GPU workloads.
+export const MIN_IDLE_GPUS_FILTER_VALUE = 0.01;
 interface ProjectPhaseCount {
   projectName: string;
   phaseCount: number;
@@ -44,6 +50,7 @@ export const widgetUtil = {
   getWorkloadTelemetryDrilldownOptions,
   combineDistributedTelemetryIntoTraining,
   gpuUtilizationPerNodeParser,
+  getIdleWorkloadsAdvancedFilters,
 };
 
 function aggregateTelemetryGroupedDataForECharts(
@@ -377,4 +384,31 @@ function gpuUtilizationPerNodeParser(
     });
 
   return measurementMap;
+}
+
+function getIdleWorkloadsAdvancedFilters(nodePoolName?: string, workloadName?: string): string {
+  const filters = [
+    filterUtil.getNumericFilterQuery(
+      WorkloadSortFilterFields.IdleAllocatedGpus,
+      "Idle GPU devices",
+      EFilterOperator.GreaterThanOrEqual,
+      MIN_IDLE_GPUS_FILTER_VALUE,
+    ),
+  ];
+  if (nodePoolName) {
+    filters.push(
+      filterUtil.getFreeTextFilterQuery(
+        WorkloadSortFilterFields.Nodepool,
+        nodePoolName,
+        "Node pool",
+        EFilterOperator.Equals,
+      ),
+    );
+  }
+  if (workloadName) {
+    filters.push(
+      filterUtil.getFreeTextFilterQuery(WorkloadSortFilterFields.Name, workloadName, "Workload", EFilterOperator.Equals),
+    );
+  }
+  return `[${filters.join(",")}]`;
 }
