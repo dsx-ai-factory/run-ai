@@ -24,7 +24,8 @@ var _ MappedNullable = &IdpPostResponse{}
 
 // IdpPostResponse struct for IdpPostResponse
 type IdpPostResponse struct {
-	Alias string `json:"alias"`
+	Alias    string           `json:"alias"`
+	SamlData NullableSamlData `json:"samlData,omitempty"`
 }
 
 type _IdpPostResponse IdpPostResponse
@@ -71,6 +72,49 @@ func (o *IdpPostResponse) SetAlias(v string) {
 	o.Alias = v
 }
 
+// GetSamlData returns the SamlData field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *IdpPostResponse) GetSamlData() SamlData {
+	if o == nil || IsNil(o.SamlData.Get()) {
+		var ret SamlData
+		return ret
+	}
+	return *o.SamlData.Get()
+}
+
+// GetSamlDataOk returns a tuple with the SamlData field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *IdpPostResponse) GetSamlDataOk() (*SamlData, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.SamlData.Get(), o.SamlData.IsSet()
+}
+
+// HasSamlData returns a boolean if a field has been set.
+func (o *IdpPostResponse) HasSamlData() bool {
+	if o != nil && o.SamlData.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetSamlData gets a reference to the given NullableSamlData and assigns it to the SamlData field.
+func (o *IdpPostResponse) SetSamlData(v SamlData) {
+	o.SamlData.Set(&v)
+}
+
+// SetSamlDataNil sets the value for SamlData to be an explicit nil
+func (o *IdpPostResponse) SetSamlDataNil() {
+	o.SamlData.Set(nil)
+}
+
+// UnsetSamlData ensures that no value is present for SamlData, not even an explicit nil
+func (o *IdpPostResponse) UnsetSamlData() {
+	o.SamlData.Unset()
+}
+
 func (o IdpPostResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -82,6 +126,9 @@ func (o IdpPostResponse) MarshalJSON() ([]byte, error) {
 func (o IdpPostResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["alias"] = o.Alias
+	if o.SamlData.IsSet() {
+		toSerialize["samlData"] = o.SamlData.Get()
+	}
 	return toSerialize, nil
 }
 

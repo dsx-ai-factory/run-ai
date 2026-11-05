@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/crewjam/saml"
+	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	"github.com/google/uuid"
@@ -259,6 +260,104 @@ func ByteArrayToReader(data []byte) io.Reader {
 	return bytes.NewReader(data)
 }
 
+// LoadSamlMetadata returns SAML metadata from a base64 file or a URL.
+func LoadSamlMetadata(ctx context.Context, metadataType, metadataFile, metadataURL string) ([]byte, error) {
+	switch metadataType {
+	case File:
+		decoded, err := DecodeBase64String(metadataFile)
+		if err != nil {
+			return nil, fmt.Errorf("%w:%w", Error{Code: http.StatusBadRequest, Message: "failed to decode base64 string"}, err)
+		}
+		return *decoded, nil
+	case Url:
+		content, err := ReadUrlContent(ctx, metadataURL)
+		if err != nil || content == nil {
+			if err == nil {
+				err = fmt.Errorf("empty saml metadata response")
+			}
+			return nil, fmt.Errorf("%w:%w", Error{Code: http.StatusBadRequest, Message: "failed to read saml metadata from url"}, err)
+		}
+		return *content, nil
+	default:
+		return nil, Error{Code: http.StatusBadRequest, Message: "saml idp requires metadata from a file or url"}
+	}
+}
+
+func ParseSamlIdpConfig(metadata []byte) *api.SamlData {
+	var entity saml.EntityDescriptor
+	if err := xml.Unmarshal(metadata, &entity); err == nil && (entity.EntityID != "" || len(entity.IDPSSODescriptors) > 0) {
+		return samlDataFromEntity(&entity)
+	}
+	var entities saml.EntitiesDescriptor
+	if err := xml.Unmarshal(metadata, &entities); err != nil {
+		return &api.SamlData{}
+	}
+	if config := samlDataFromEntities(&entities); config != nil {
+		return config
+	}
+	return &api.SamlData{}
+}
+
+func samlDataFromEntities(entities *saml.EntitiesDescriptor) *api.SamlData {
+	for i := range entities.EntityDescriptors {
+		if config := samlDataFromEntity(&entities.EntityDescriptors[i]); config.EntityId != "" || config.SigningCertificate != "" || config.SingleSignOnServiceUrl != "" {
+			return config
+		}
+	}
+	for i := range entities.EntitiesDescriptors {
+		if config := samlDataFromEntities(&entities.EntitiesDescriptors[i]); config != nil {
+			return config
+		}
+	}
+	return nil
+}
+
+func samlDataFromEntity(entity *saml.EntityDescriptor) *api.SamlData {
+	config := &api.SamlData{EntityId: entity.EntityID}
+	for _, idp := range entity.IDPSSODescriptors {
+		if config.SingleSignOnServiceUrl == "" {
+			config.SingleSignOnServiceUrl = singleSignOnURL(idp)
+		}
+		if config.SigningCertificate == "" {
+			config.SigningCertificate = signingCertificate(idp)
+		}
+	}
+	return config
+}
+
+func singleSignOnURL(idp saml.IDPSSODescriptor) string {
+	var fallback string
+	for _, binding := range []string{saml.HTTPPostBinding, saml.HTTPRedirectBinding} {
+		for _, endpoint := range idp.SingleSignOnServices {
+			if endpoint.Location == "" {
+				continue
+			}
+			if fallback == "" {
+				fallback = endpoint.Location
+			}
+			if endpoint.Binding == binding {
+				return endpoint.Location
+			}
+		}
+	}
+	return fallback
+}
+
+func signingCertificate(idp saml.IDPSSODescriptor) string {
+	for _, descriptor := range idp.KeyDescriptors {
+		if descriptor.Use != "" && descriptor.Use != "signing" {
+			continue
+		}
+		for _, cert := range descriptor.KeyInfo.X509Data.X509Certificates {
+			compact := strings.Join(strings.Fields(cert.Data), "")
+			if compact != "" {
+				return compact
+			}
+		}
+	}
+	return ""
+}
+
 func ValidateSamlMetadata(metadata []byte) error {
 	// 1. Attempt to parse as a standard single EntityDescriptor
 	var entity saml.EntityDescriptor
@@ -277,17 +376,39 @@ func ValidateSamlMetadata(metadata []byte) error {
 		return fmt.Errorf("invalid XML formatting or layout schema: %w", entityErr)
 	}
 
-	// 3. Ensure the aggregate actually contains descriptors to read
-	if len(entities.EntityDescriptors) == 0 {
+	// An EntitiesDescriptor may contain another EntitiesDescriptor. The IdP entity can sit only in that inner aggregate.
+	if err := validateEntitiesDescriptor(&entities); err != nil {
+		return err
+	}
+	return nil
+}
+
+func validateEntitiesDescriptor(entities *saml.EntitiesDescriptor) error {
+	found, err := entityDescriptorInAggregate(entities)
+	if err != nil {
+		return err
+	}
+	if !found {
 		return fmt.Errorf("SAML structural validation error: EntitiesDescriptor aggregate contains no child EntityDescriptor blocks")
 	}
-
-	// 4. Validate the first child element
-	if entities.EntityDescriptors[0].EntityID == "" {
-		return fmt.Errorf("SAML structural validation error: the first entity descriptor in the aggregate is missing a mandatory 'entityID'")
-	}
-
 	return nil
+}
+
+func entityDescriptorInAggregate(entities *saml.EntitiesDescriptor) (bool, error) {
+	found := len(entities.EntityDescriptors) > 0
+	for _, entity := range entities.EntityDescriptors {
+		if entity.EntityID == "" {
+			return false, fmt.Errorf("SAML structural validation error: an entity descriptor in the aggregate is missing a mandatory 'entityID'")
+		}
+	}
+	for i := range entities.EntitiesDescriptors {
+		nestedFound, err := entityDescriptorInAggregate(&entities.EntitiesDescriptors[i])
+		if err != nil {
+			return false, err
+		}
+		found = found || nestedFound
+	}
+	return found, nil
 }
 
 func DecodeBase64ToReader(encodedBase64 string) (io.Reader, error) {
