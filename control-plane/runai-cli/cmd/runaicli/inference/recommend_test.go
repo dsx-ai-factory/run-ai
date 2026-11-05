@@ -12,6 +12,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 
@@ -75,6 +76,93 @@ func TestRecommendationHTTPContract(t *testing.T) {
 			}
 			if result.Results[1]["recommendation"] != nil {
 				t.Fatalf("invented recommendation: %s", output.String())
+			}
+		})
+	}
+}
+
+func TestRecommendationJSONPreservesResults(t *testing.T) {
+	for _, tc := range []struct {
+		name        string
+		response    string
+		wantResults []map[string]interface{}
+	}{
+		{
+			name:        "empty results",
+			response:    `{"image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","results":[]}`,
+			wantResults: []map[string]interface{}{},
+		},
+		{
+			name:     "all results have no recommendation",
+			response: `{"image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","results":[{"gpuType":"A100","gpuMemoryCapacityBytes":40000000000,"status":"no_recommendation","reason":"No applicable published profile fits"},{"gpuType":"T4","status":"no_recommendation","reason":"GPU memory capacity is not reported by the cluster"}]}`,
+			wantResults: []map[string]interface{}{
+				{
+					"gpuType":                "A100",
+					"gpuMemoryCapacityBytes": json.Number("40000000000"),
+					"status":                 "no_recommendation",
+					"reason":                 "No applicable published profile fits",
+				},
+				{
+					"gpuType": "T4",
+					"status":  "no_recommendation",
+					"reason":  "GPU memory capacity is not reported by the cluster",
+				},
+			},
+		},
+		{
+			name:     "multi-GPU profile and allocation values",
+			response: `{"image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","results":[{"gpuType":"H100","gpuMemoryCapacityBytes":80000000000,"status":"recommended","minimumGpuMemoryPerDeviceGb":57,"profileId":"published-fp8-tp2-pp1","precision":"fp8","inferenceBackend":"trtllm","tensorParallelSize":2,"pipelineParallelSize":1,"recommendation":{"allocationType":"gpu_count","gpuCount":2,"gpuMemoryPerDeviceBytes":80000000000}}]}`,
+			wantResults: []map[string]interface{}{
+				{
+					"gpuType":                     "H100",
+					"gpuMemoryCapacityBytes":      json.Number("80000000000"),
+					"status":                      "recommended",
+					"minimumGpuMemoryPerDeviceGb": json.Number("57"),
+					"profileId":                   "published-fp8-tp2-pp1",
+					"precision":                   "fp8",
+					"inferenceBackend":            "trtllm",
+					"tensorParallelSize":          json.Number("2"),
+					"pipelineParallelSize":        json.Number("1"),
+					"recommendation": map[string]interface{}{
+						"allocationType":          "gpu_count",
+						"gpuCount":                json.Number("2"),
+						"gpuMemoryPerDeviceBytes": json.Number("80000000000"),
+					},
+				},
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.Header().Set("Content-Type", "application/json")
+				if _, err := w.Write([]byte(tc.response)); err != nil {
+					t.Errorf("write API response: %v", err)
+				}
+			}))
+			defer server.Close()
+			request := catalog.NewRightSizingRequest("cluster-id", "nvcr.io/nim/nvidia/example", "1.2.3")
+			var output bytes.Buffer
+			if err := runRecommendation(context.Background(), server.URL, "<test-token>", *request, &output); err != nil {
+				t.Fatal(err)
+			}
+			if !json.Valid(output.Bytes()) {
+				t.Fatalf("invalid JSON output: %s", output.String())
+			}
+			var got struct {
+				Image   string                   `json:"image"`
+				Tag     string                   `json:"tag"`
+				Results []map[string]interface{} `json:"results"`
+			}
+			decoder := json.NewDecoder(&output)
+			decoder.UseNumber()
+			if err := decoder.Decode(&got); err != nil {
+				t.Fatal(err)
+			}
+			if got.Image != "nvcr.io/nim/nvidia/example" || got.Tag != "1.2.3" {
+				t.Fatalf("model identity changed: image=%q tag=%q", got.Image, got.Tag)
+			}
+			if !reflect.DeepEqual(got.Results, tc.wantResults) {
+				t.Fatalf("recommendation results changed: got %#v, want %#v", got.Results, tc.wantResults)
 			}
 		})
 	}
