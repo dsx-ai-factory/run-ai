@@ -31,12 +31,21 @@ export type NodePoolSchedulingMode = "Unknown" | "Guaranteed quota" | "Ranked" |
 
 export function getSchedulingMode(capabilities?: SchedulingCapabilitiesNullable): NodePoolSchedulingMode {
   if (!capabilities) return "Unknown";
-  if (capabilities.quota) return "Guaranteed quota";
-  if (capabilities.quota === false && capabilities.ranks) return "Ranked";
+  if (capabilities.quota && capabilities.ranks) return "Guaranteed quota";
+  if (
+    capabilities.quota === false &&
+    capabilities.ranks &&
+    capabilities.adjustableWeights &&
+    capabilities.cpuQuota === false
+  )
+    return "Ranked";
   if (isProportional(capabilities)) return "Proportional";
   return "Custom";
 }
 
 export const SCHEDULING_MODE_DESCRIPTIONS: Partial<Record<NodePoolSchedulingMode, string>> = {
   Proportional: "GPU resources are distributed proportionally according to each department's and project's weight.",
+  Ranked: "GPU resources are distributed by rank, then by weight within each rank.",
+  "Guaranteed quota":
+    "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
 };

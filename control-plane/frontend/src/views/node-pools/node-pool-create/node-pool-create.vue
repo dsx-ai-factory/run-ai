@@ -49,11 +49,9 @@ async function onCreated(pool: Nodepool, draft: NodePoolCreationDraft, destinati
     });
   } else {
     store.handoff = { pool, draft };
-    // The new scheduling step will replace this handoff; keep the saved pool editable meanwhile.
     await router.push({
-      name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT,
+      name: NODE_POOL_ROUTE_NAMES.NODE_POOL_SCHEDULING,
       params: { id: pool.id },
-      query: { step: "scheduling" },
     });
   }
 }

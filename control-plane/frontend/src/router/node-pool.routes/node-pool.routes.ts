@@ -66,5 +66,25 @@ export const nodePoolRoutes: RunaiRouteRecord = {
         requestToLeave: true,
       },
     },
+    ...(ENABLE_NODE_POOL_CREATE_FLOW
+      ? [
+          {
+            path: "new/:id/scheduling",
+            name: NODE_POOL_ROUTE_NAMES.NODE_POOL_SCHEDULING,
+            component: () => import("@/views/node-pools/node-pool-scheduling/node-pool-scheduling.vue"),
+            meta: {
+              location: "node-pools/new/:id/scheduling",
+              backPageName: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX,
+              pageTitle: "New node pool",
+              resourceType: ResourceType.Nodepools,
+              minPermittedActions: [Action.Update],
+              parentSubject: EMenuSubjectNames.RESOURCES,
+              requiresAuth: true,
+              fullWidth: true,
+              requestToLeave: true,
+            },
+          },
+        ]
+      : []),
   ],
 };
