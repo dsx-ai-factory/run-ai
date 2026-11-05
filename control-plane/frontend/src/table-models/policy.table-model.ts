@@ -12,14 +12,9 @@ import {
 } from "@/models/table.model";
 import { autocompleteUtil } from "@/utils/autocomplete.util/autocomplete.util";
 import { ScopeType } from "@/swagger-models/authorization-client";
-import {
-  PolicyType,
-  type PolicyListEntry,
-  type PolicySyncStatus,
-  type PolicySyncStatusOfClusterStatusEnum,
-} from "@/swagger-models/policy-service-client";
+import { PolicyType, type PolicyListEntry } from "@/swagger-models/policy-service-client";
 import { dateUtil } from "@/utils/date.util";
-import { policyUtil, policyStatusMap } from "@/utils/policy.util/policy.util";
+import { policyUtil } from "@/utils/policy.util/policy.util";
 import { policyModelUtil } from "@/utils/policy.util/policy-model.util";
 import { capitalizeString } from "@/utils/string.util/string.util";
 
@@ -184,24 +179,15 @@ export const allPolicyColumnsMap: Record<string, ITableColumn> = {
   status: {
     name: "status",
     label: "Status",
-    field: (row) => row.status,
+    field: (row: PolicyListEntry) => policyUtil.getPolicyListStatusColOptions(row).status,
     sortable: true,
     align: "left",
-    format: (status: PolicySyncStatus | undefined): IStatusColOptions => {
-      // Backend-verified: native + GVK rows share the unified per-cluster sync status.
-      const currentClusterStatus: PolicySyncStatusOfClusterStatusEnum | undefined = status?.clusters?.[0]?.status;
-      const message: string | undefined = status?.clusters?.[0]?.errorMessage || undefined;
-      return policyUtil.getPolicyStatusColOptions(currentClusterStatus, message);
-    },
+    format: (_status: string, row: PolicyListEntry): IStatusColOptions => policyUtil.getPolicyListStatusColOptions(row),
     filterKey: "status",
     customCell: ECustomCell.STATUS_COL,
     filter: {
       type: EColumnFilterType.FreeText,
-      autocompleteOptionsFn: autocompleteUtil.policies((p) => {
-        const clusterStatus = p.status?.clusters?.[0]?.status;
-        if (!clusterStatus) return "-";
-        return policyStatusMap[clusterStatus]?.status;
-      }),
+      autocompleteOptionsFn: autocompleteUtil.policies((p) => policyUtil.getPolicyListStatusColOptions(p).status),
     },
   },
   scope: {
