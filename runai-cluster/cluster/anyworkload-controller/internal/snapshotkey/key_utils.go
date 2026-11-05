@@ -13,20 +13,38 @@ import (
 	corev1 "k8s.io/api/core/v1"
 )
 
-// Snapshot's own additions to a restore pod, which podcontract.Build writes.
-// They must not reach the hash: Matches runs on a Ready replica, which on the
-// restore path is a pod the webhook already rewrote. Leave them in and every
-// restored replica fails the drift check, which turns snapshots off for the
-// workload with nothing reported as an error.
-const (
-	snapshotVolumePrefix    = "snapshot-"
-	snapshotEnvPrefix       = "SNAPSHOT_"
-	snapshotMountPathPrefix = "/var/run/snapshot"
+// Snapshot's own additions to a restore pod, named exactly as podcontract
+// writes them (api/podcontract: restore_pod.go, protocol.go). They must not
+// reach the hash: Matches runs on a Ready replica, which on the restore path is
+// a pod the webhook already rewrote. Leave them in and every restored replica
+// fails the drift check, which turns snapshots off for the workload with
+// nothing reported as an error.
+//
+// Matched exactly rather than by prefix, so a workload's own "snapshot-" volume
+// or "SNAPSHOT_" variable still counts towards its shape.
+var (
+	snapshotVolumeNames = map[string]bool{
+		"snapshot-control": true, // podcontract.SnapshotControlVolumeName
+	}
+
+	snapshotMountPaths = map[string]bool{
+		"/snapshot-control":  true, // podcontract.SnapshotControlMountPath
+		"/tmp/snapshot-cuda": true, // podcontract.CuInterposeMountPath
+	}
+
+	// The DYN_ spellings are podcontract's legacy names, written alongside the
+	// current ones. They do not share a prefix with them, so a prefix match
+	// would silently leave them in the hash.
+	snapshotEnvNames = map[string]bool{
+		"SNAPSHOT_CONTROL_DIR":                true, // podcontract.SnapshotControlDirEnv
+		"DYN_SNAPSHOT_CONTROL_DIR":            true, // podcontract.LegacySnapshotControlDirEnv
+		"SNAPSHOT_RESTORE_STANDBY":            true, // podcontract.RestoreStandbyModeEnv
+		"DYN_SNAPSHOT_RESTORE_STANDBY":        true, // podcontract.LegacyRestoreStandbyModeEnv
+		"SNAPSHOT_JOB_UID":                    true, // podcontract.SnapshotJobUIDEnv
+		"SNAPSHOT_NON_TARGET_ARTIFACT_SUBDIR": true, // podcontract.NonTargetArtifactSubdirEnv
+	}
 )
 
-// serviceAccountTokenPrefix is the generated name of the projected token
-// volume. It is excluded because it is remounted per pod and would otherwise
-// change the key on every replica.
 const serviceAccountTokenPrefix = "kube-api-access-"
 
 func containerNamed(containers []corev1.Container, name string) *corev1.Container {
@@ -110,6 +128,12 @@ func mountedVolumes(spec *corev1.PodSpec) []corev1.Volume {
 			for _, mount := range container.VolumeMounts {
 				mounted[mount.Name] = true
 			}
+			// A raw block volume is consumed through VolumeDevices and has no
+			// VolumeMount, so it would otherwise be dropped and a change to the
+			// backing claim would not change the key.
+			for _, device := range container.VolumeDevices {
+				mounted[device.Name] = true
+			}
 		}
 	}
 
@@ -126,7 +150,7 @@ func mountedVolumes(spec *corev1.PodSpec) []corev1.Volume {
 func keptMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 	var kept []corev1.VolumeMount
 	for _, mount := range mounts {
-		if isExcludedVolumeName(mount.Name) || strings.HasPrefix(mount.MountPath, snapshotMountPathPrefix) {
+		if isExcludedVolumeName(mount.Name) || snapshotMountPaths[mount.MountPath] {
 			continue
 		}
 		kept = append(kept, mount)
@@ -135,14 +159,15 @@ func keptMounts(mounts []corev1.VolumeMount) []corev1.VolumeMount {
 }
 
 func isExcludedVolumeName(name string) bool {
-	return strings.HasPrefix(name, serviceAccountTokenPrefix) ||
-		strings.HasPrefix(name, snapshotVolumePrefix)
+	// The token volume keeps its generated suffix, so it is the one name still
+	// matched by prefix.
+	return strings.HasPrefix(name, serviceAccountTokenPrefix) || snapshotVolumeNames[name]
 }
 
 func withoutSnapshotEnv(env []corev1.EnvVar) []corev1.EnvVar {
 	var kept []corev1.EnvVar
 	for _, variable := range env {
-		if strings.HasPrefix(variable.Name, snapshotEnvPrefix) {
+		if snapshotEnvNames[variable.Name] {
 			continue
 		}
 		kept = append(kept, variable)
@@ -163,28 +188,22 @@ func sortSpec(spec *corev1.PodSpec) {
 	}
 }
 
+// Env and EnvFrom are deliberately left in order. Kubernetes expands $(VAR) in
+// env only against entries that appear earlier, and applies envFrom sources in
+// order with the last duplicate key winning - so two orderings of the same
+// entries are two different effective environments. Sorting them would give
+// both the same key, and a replica could restore from a checkpoint built with
+// different configuration.
+//
+// This narrows design 8.3's "env, mounts, and volumes sorted": mounts and
+// volumes carry no meaning in their order, and env does.
 func sortContainer(container *corev1.Container) {
-	sort.Slice(container.Env, func(i, j int) bool { return container.Env[i].Name < container.Env[j].Name })
 	sort.Slice(container.VolumeMounts, func(i, j int) bool {
 		if container.VolumeMounts[i].MountPath != container.VolumeMounts[j].MountPath {
 			return container.VolumeMounts[i].MountPath < container.VolumeMounts[j].MountPath
 		}
 		return container.VolumeMounts[i].Name < container.VolumeMounts[j].Name
 	})
-	sort.Slice(container.EnvFrom, func(i, j int) bool {
-		return envFromKey(container.EnvFrom[i]) < envFromKey(container.EnvFrom[j])
-	})
-}
-
-func envFromKey(source corev1.EnvFromSource) string {
-	switch {
-	case source.ConfigMapRef != nil:
-		return "c/" + source.ConfigMapRef.Name
-	case source.SecretRef != nil:
-		return "s/" + source.SecretRef.Name
-	default:
-		return source.Prefix
-	}
 }
 
 func containerHasGPU(resources corev1.ResourceRequirements) bool {

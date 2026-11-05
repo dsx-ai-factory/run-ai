@@ -1,5 +1,5 @@
 {
-  "key": "a7804e4e6e89",
+  "key": "b41d5df604d8",
   "shape": {
     "containers": [
       {
@@ -7,13 +7,13 @@
         "image": "registry.example.com/ranker@sha256:123",
         "envFrom": [
           {
-            "configMapRef": {
-              "name": "settings"
+            "secretRef": {
+              "name": "creds"
             }
           },
           {
-            "secretRef": {
-              "name": "creds"
+            "configMapRef": {
+              "name": "settings"
             }
           }
         ],

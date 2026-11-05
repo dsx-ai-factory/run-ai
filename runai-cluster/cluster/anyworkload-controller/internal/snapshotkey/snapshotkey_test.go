@@ -124,12 +124,6 @@ func TestReorderingDoesNotChangeTheKey(t *testing.T) {
 	base := keyOrFail(t, gpuPod())
 
 	reorders := map[string]func(*corev1.Pod){
-		"env": func(p *corev1.Pod) {
-			p.Spec.Containers[0].Env = []corev1.EnvVar{
-				{Name: "PORT", Value: "8000"},
-				{Name: "MODEL", Value: "llama-3"},
-			}
-		},
 		"volumes and mounts": func(p *corev1.Pod) {
 			p.Spec.Volumes = []corev1.Volume{{Name: "b"}, {Name: "a"}}
 			p.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{
@@ -156,6 +150,42 @@ func TestReorderingDoesNotChangeTheKey(t *testing.T) {
 		if keyOrFail(t, pod) != want {
 			t.Errorf("reordering %s changed the key", name)
 		}
+	}
+}
+
+// Env order is meaning, not presentation: Kubernetes expands $(VAR) only
+// against earlier entries, so [A=x, B=$(A)] and [B=$(A), A=x] are different
+// effective environments. Sorting them would let a replica restore from a
+// checkpoint built with different configuration.
+func TestReorderingEnvChangesTheKey(t *testing.T) {
+	base := keyOrFail(t, gpuPod())
+
+	reversed := gpuPod()
+	reversed.Spec.Containers[0].Env = []corev1.EnvVar{
+		{Name: "PORT", Value: "8000"},
+		{Name: "MODEL", Value: "llama-3"},
+	}
+
+	if keyOrFail(t, reversed) == base {
+		t.Error("reordering env did not change the key")
+	}
+}
+
+// The same for envFrom, where the last source wins a duplicated key.
+func TestReorderingEnvFromChangesTheKey(t *testing.T) {
+	withSources := func(names ...string) *corev1.Pod {
+		pod := gpuPod()
+		for _, name := range names {
+			pod.Spec.Containers[0].EnvFrom = append(pod.Spec.Containers[0].EnvFrom,
+				corev1.EnvFromSource{ConfigMapRef: &corev1.ConfigMapEnvSource{
+					LocalObjectReference: corev1.LocalObjectReference{Name: name},
+				}})
+		}
+		return pod
+	}
+
+	if keyOrFail(t, withSources("cm1", "cm2")) == keyOrFail(t, withSources("cm2", "cm1")) {
+		t.Error("reordering envFrom did not change the key")
 	}
 }
 
@@ -200,6 +230,53 @@ func TestExcludedFieldsDoNotChangeTheKey(t *testing.T) {
 		mutate(pod)
 		if keyOrFail(t, pod) != base {
 			t.Errorf("%s changed the key but is excluded", name)
+		}
+	}
+}
+
+// A raw block volume is consumed through VolumeDevices and has no VolumeMount,
+// so it must still count as "their volume" - otherwise a change to the backing
+// claim would not change the key and a replica could restore against different
+// storage.
+func TestVolumeDeviceVolumeIsHashed(t *testing.T) {
+	withClaim := func(claim string) *corev1.Pod {
+		pod := gpuPod()
+		pod.Spec.Containers[0].VolumeDevices = []corev1.VolumeDevice{{Name: "block", DevicePath: "/dev/xvda"}}
+		pod.Spec.Volumes = []corev1.Volume{{
+			Name: "block",
+			VolumeSource: corev1.VolumeSource{
+				PersistentVolumeClaim: &corev1.PersistentVolumeClaimVolumeSource{ClaimName: claim},
+			},
+		}}
+		return pod
+	}
+
+	if keyOrFail(t, withClaim("data-a")) == keyOrFail(t, withClaim("data-b")) {
+		t.Error("changing the claim behind a VolumeDevice did not change the key")
+	}
+}
+
+// Snapshot's additions are matched by exact name, so a workload's own
+// similarly-named fields still count towards its shape.
+func TestUserOwnedSnapshotLikeFieldsAreHashed(t *testing.T) {
+	base := keyOrFail(t, gpuPod())
+
+	cases := map[string]func(*corev1.Pod){
+		"env named SNAPSHOT_SOMETHING": func(p *corev1.Pod) {
+			p.Spec.Containers[0].Env = append(p.Spec.Containers[0].Env,
+				corev1.EnvVar{Name: "SNAPSHOT_TUNING", Value: "on"})
+		},
+		"volume named snapshot-cache": func(p *corev1.Pod) {
+			p.Spec.Containers[0].VolumeMounts = []corev1.VolumeMount{{Name: "snapshot-cache", MountPath: "/cache"}}
+			p.Spec.Volumes = []corev1.Volume{{Name: "snapshot-cache"}}
+		},
+	}
+
+	for name, mutate := range cases {
+		pod := gpuPod()
+		mutate(pod)
+		if keyOrFail(t, pod) == base {
+			t.Errorf("%s did not change the key", name)
 		}
 	}
 }
@@ -264,11 +341,19 @@ func TestRestoredPodHashesLikeTheColdPod(t *testing.T) {
 	restored.Spec.Containers[0].SecurityContext = &corev1.SecurityContext{
 		SeccompProfile: &corev1.SeccompProfile{Type: corev1.SeccompProfileTypeLocalhost},
 	}
-	restored.Spec.Containers[0].Env = append(restored.Spec.Containers[0].Env,
-		corev1.EnvVar{Name: "SNAPSHOT_RESTORE_STANDBY", Value: "1"})
+	// Exactly what podcontract.Build writes, legacy spellings included: the
+	// DYN_ names share no prefix with the current ones, so a prefix match would
+	// leave them in the hash and every restored replica would fail this check.
+	for _, name := range []string{
+		"SNAPSHOT_RESTORE_STANDBY", "DYN_SNAPSHOT_RESTORE_STANDBY",
+		"SNAPSHOT_CONTROL_DIR", "DYN_SNAPSHOT_CONTROL_DIR",
+	} {
+		restored.Spec.Containers[0].Env = append(restored.Spec.Containers[0].Env,
+			corev1.EnvVar{Name: name, Value: "/snapshot-control"})
+	}
 	restored.Spec.Volumes = append(restored.Spec.Volumes, corev1.Volume{Name: "snapshot-control"})
 	restored.Spec.Containers[0].VolumeMounts = append(restored.Spec.Containers[0].VolumeMounts,
-		corev1.VolumeMount{Name: "snapshot-control", MountPath: "/var/run/snapshot"})
+		corev1.VolumeMount{Name: "snapshot-control", MountPath: "/snapshot-control"})
 
 	matches, err := Matches(restored)
 	if err != nil {
