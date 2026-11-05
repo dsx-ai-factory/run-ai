@@ -5976,6 +5976,8 @@ components:
       properties:
         alias:
           type: string
+        samlData:
+          $ref: '#/components/schemas/SamlData'
       required:
       - alias
       type: object

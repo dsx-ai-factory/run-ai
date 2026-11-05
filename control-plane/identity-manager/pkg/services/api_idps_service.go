@@ -79,6 +79,15 @@ func (s *IdpsApiService) CreateIdp(ctx context.Context, idpCreationRequest api.I
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp url for tenant: %v. err: %v", *realm, err.Error())
 		return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
 	}
+
+	config, err := s.validateIdpConfig(ctx, idpCreationRequest)
+	if err != nil {
+		return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
+	}
+	if idpCreationRequest.DryRun {
+		return api.Response(http.StatusOK, api.IdpPostResponse{Alias: idpCreationRequest.Name, SamlData: config}), nil
+	}
+
 	idpRequest, err := models.GenerateIdpData(idpCreationRequest.Name, idpCreationRequest, false)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to create idp with configuration %v for tenant %s. err: %v", idpCreationRequest, *realm, err.Error())
@@ -122,6 +131,10 @@ func (s *IdpsApiService) UpdateIdp(ctx context.Context, idpAlias string, idpUpda
 	if !isEmptyIdpData(idpUpdateRequest) {
 		if err := validateIdpURLs(idpUpdateRequest); err != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp url for tenant: %v. err: %v", *realm, err.Error())
+			return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
+		}
+		if _, err := s.validateIdpConfig(ctx, idpUpdateRequest); err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp configuration for tenant: %v. err: %v", *realm, err.Error())
 			return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
 		}
 		idpRequest, err := models.GenerateIdpData(idpAlias, idpUpdateRequest, true)
@@ -362,6 +375,33 @@ func (s *IdpsApiService) addIdpDataByIdpType(ctx context.Context, res *api.Idp, 
 	}
 }
 
+func (s *IdpsApiService) validateIdpConfig(ctx context.Context, request api.IdpCreationRequest) (*api.SamlData, error) {
+	if request.Type != api.IdpCreationRequestTypeEnum(models.SAML) {
+		return nil, nil
+	}
+	if request.SamlData == nil {
+		return nil, utils.Error{Code: http.StatusBadRequest, Message: "saml idp requires metadata"}
+	}
+
+	metadata, err := utils.LoadSamlMetadata(ctx, string(request.SamlData.MetadataXmlType), request.SamlData.MetadataXmlFile, request.SamlData.MetadataXmlUrl)
+	if err != nil {
+		return nil, err
+	}
+	if err := utils.ValidateSamlMetadata(metadata); err != nil {
+		return nil, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml metadata"}, err)
+	}
+	config := utils.ParseSamlIdpConfig(metadata)
+	if config.SigningCertificate == "" {
+		return config, nil
+	}
+	if err := utils.ValidateSigningCertificate(config.SigningCertificate); err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("rejected saml signing certificate for idp %s. err: %s", request.Name, err.Error())
+		return nil, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml signing certificate"}, err)
+	}
+	config.ValidateSignature = true
+	return config, nil
+}
+
 func (s *IdpsApiService) createIdp(ctx context.Context, realm string, idpRequest *models.IdpData) (identity_provider.IdpRepresentationer, error) {
 	rep, err := s.idpRepresentationFactory.GetIdpRepresentationer(ctx, idpRequest.Idp)
 	if err != nil {
@@ -408,27 +448,6 @@ func (s *IdpsApiService) updateIdp(ctx context.Context, realm string, idpRequest
 }
 
 func (s *IdpsApiService) getIdpConfig(ctx context.Context, realm string, idpRequest *models.IdpData) (map[string]string, error) {
-	config, err := s.loadIdpConfig(ctx, realm, idpRequest)
-	if err != nil {
-		return nil, err
-	}
-	if config == nil {
-		config = map[string]string{}
-	}
-	if idpRequest.Idp != models.SAML {
-		return config, nil
-	}
-
-	if err := utils.ValidateSigningCertificate(config[utils.SigningCertificate]); err != nil {
-		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("rejected saml signing certificate for idp %s. err: %s", idpRequest.Alias, err.Error())
-		return nil, err
-	}
-
-	config[utils.ValidateSignature] = "true"
-	return config, nil
-}
-
-func (s *IdpsApiService) loadIdpConfig(ctx context.Context, realm string, idpRequest *models.IdpData) (map[string]string, error) {
 	if isIdpXmlWithFileType(*idpRequest) {
 		metadata, err := getValidatedSamlMetadata(idpRequest.Resource)
 		if err != nil {

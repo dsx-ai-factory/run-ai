@@ -816,6 +816,12 @@ export interface IdpPostResponse {
      * @memberof IdpPostResponse
      */
     'alias': string;
+    /**
+     * 
+     * @type {SamlData}
+     * @memberof IdpPostResponse
+     */
+    'samlData'?: SamlData | null;
 }
 /**
  * 

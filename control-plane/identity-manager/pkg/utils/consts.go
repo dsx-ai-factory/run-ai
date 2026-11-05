@@ -110,7 +110,6 @@ const (
 	SigningCertificate     = "signingCertificate"
 	ValidateSignature      = "validateSignature"
 	SingleSignOnServiceUrl = "singleSignOnServiceUrl"
-	ValidateSignature      = "validateSignature"
 )
 
 // OIDC config fields

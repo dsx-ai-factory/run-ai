@@ -315,8 +315,7 @@ func TestCreateIdp_SamlHappyFlow(t *testing.T) {
 	dalMock := MocksList.IdpMock
 	wg := sync.WaitGroup{}
 	wg.Add(1)
-	config := signedSamlConfig(t)
-	config["clientSecret"] = "test"
+	config := map[string]string{"clientSecret": "test"}
 	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
 	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, "saml").Return(config, nil)
 	iamMock.MockIdpService.On("CreateIdp", ctx, realm, mock.Anything).Return(ptr.To(idpAlias), nil)
@@ -342,6 +341,83 @@ func TestCreateIdp_SamlHappyFlow(t *testing.T) {
 	assert.Equal(t, http.StatusOK, response.Code)
 	res := response.Body.(api.IdpPostResponse)
 	assert.Equal(t, idpAlias, res.Alias)
+}
+
+func TestCreateIdp_SamlDryRun_ReturnsConfigWithoutSaving(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+
+	metadata := samlMetadataWithSigningCertificate(t, "https://idp.example.com", "https://idp.example.com/sso")
+	request := getSAMLIdpCreationRequest(utils.File, base64.StdEncoding.EncodeToString(metadata))
+	request.DryRun = true
+
+	response, err := testSubject.CreateIdp(ctx, request, "")
+
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, response.Code)
+	res := response.Body.(api.IdpPostResponse)
+	assert.Equal(t, "saml-idp", res.Alias)
+	assert.Equal(t, "https://idp.example.com", res.SamlData.EntityId)
+	assert.Equal(t, "https://idp.example.com/sso", res.SamlData.SingleSignOnServiceUrl)
+	assert.True(t, res.SamlData.ValidateSignature)
+	assert.NoError(t, utils.ValidateSigningCertificate(res.SamlData.SigningCertificate))
+	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
+	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
+	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfig")
+}
+
+func TestCreateIdp_SamlDryRun_ExpiredCertificateRejected(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+
+	metadata := samlMetadataWithCertificate(t, "https://idp.example.com", "https://idp.example.com/sso", expiredSigningCertificate(t))
+	request := getSAMLIdpCreationRequest(utils.File, base64.StdEncoding.EncodeToString(metadata))
+	request.DryRun = true
+
+	response, err := testSubject.CreateIdp(ctx, request, "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
+	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
+	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
+}
+
+func TestCreateIdp_ExpiredCertificateRejected(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+
+	metadata := samlMetadataWithCertificate(t, "https://idp.example.com", "https://idp.example.com/sso", expiredSigningCertificate(t))
+	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, base64.StdEncoding.EncodeToString(metadata)), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, response.Code)
+	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
+	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
+}
+
+func TestCreateIdp_SamlDryRun_MetadataWithoutCertificate_ReturnsConfig(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", ctx, "").Return(ptr.To(realm), ptr.To(tenantID), nil)
+
+	request := getSAMLIdpCreationRequest(utils.File, XML_FILE)
+	request.DryRun = true
+	response, err := testSubject.CreateIdp(ctx, request, "")
+
+	assert.Nil(t, err)
+	assert.Equal(t, http.StatusOK, response.Code)
+	res := response.Body.(api.IdpPostResponse)
+	assert.Equal(t, "https://idp.example.com", res.SamlData.EntityId)
+	assert.Empty(t, res.SamlData.SigningCertificate)
+	assert.False(t, res.SamlData.ValidateSignature)
+	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
 }
 
 func TestCreateIdp_ConfigUrlError(t *testing.T) {
@@ -557,11 +633,10 @@ func TestGetIdpConfig_SAML_File(t *testing.T) {
 	}
 	idpData := getIdpMetadataModel(idpAlias, XML_FILE, utils.File, models.SAML, map[string]string{}, conf)
 	iamMock := MocksList.IamServicesContainerMock
-	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
 	config, err := testSubject.getIdpConfig(ctx, "runai", &idpData)
 	assert.Nil(t, err)
-	assert.Equal(t, "true", config[utils.ValidateSignature])
-	assert.NoError(t, utils.ValidateSigningCertificate(config[utils.SigningCertificate]))
+	assert.Equal(t, map[string]string{}, config)
 }
 
 func TestGetIdpConfig_SAML_Url(t *testing.T) {
@@ -575,11 +650,10 @@ func TestGetIdpConfig_SAML_Url(t *testing.T) {
 	}
 	idpData := getIdpMetadataModel(idpAlias, "fromUrl", utils.Url, models.SAML, map[string]string{}, conf)
 	iamMock := MocksList.IamServicesContainerMock
-	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
+	iamMock.MockIdpService.On("GetIdpConfig", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
 	config, err := testSubject.getIdpConfig(ctx, "runai", &idpData)
 	assert.Nil(t, err)
-	assert.Equal(t, "true", config[utils.ValidateSignature])
-	assert.NoError(t, utils.ValidateSigningCertificate(config[utils.SigningCertificate]))
+	assert.Equal(t, map[string]string{}, config)
 }
 
 func TestGetIdpConfig_OIDC_Url(t *testing.T) {
@@ -678,7 +752,7 @@ func TestUpdateIdp_HappyFlow(t *testing.T) {
 
 	mappers := generateMapperConfigArray()
 	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
-	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
 	iamMock.MockIdpService.On("UpdateIdp", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	iamMock.MockIdpService.On("GetIdp", mock.Anything, mock.Anything, mock.Anything).Return(&iamModels.Idp{}, nil)
 	iamMock.MockIdpService.On("GetIdpMappers", mock.Anything, mock.Anything, mock.Anything).Return(mappers, nil)
@@ -870,6 +944,21 @@ func TestUpdateIdp_Config_Error(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestUpdateIdp_ExpiredCertificateRejected(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	authMock := MocksList.AuthManagerMock
+	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
+
+	metadata := samlMetadataWithCertificate(t, "https://idp.example.com", "https://idp.example.com/sso", expiredSigningCertificate(t))
+	res, err := testSubject.UpdateIdp(ctx, "saml-idp", getSAMLIdpCreationRequest(utils.File, base64.StdEncoding.EncodeToString(metadata)), "")
+
+	assert.NotNil(t, err)
+	assert.Equal(t, http.StatusBadRequest, res.Code)
+	iamMock.MockIdpService.AssertNotCalled(t, "UpdateIdp")
+	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
+}
+
 func TestUpdateIdp_InvalidBase64MetadataFile(t *testing.T) {
 	MocksList, testSubject, ctx := initIdpServiceTests(t)
 	authMock := MocksList.AuthManagerMock
@@ -902,7 +991,7 @@ func TestUpdateIdp_IdpNotFound(t *testing.T) {
 	iamMock := MocksList.IamServicesContainerMock
 	authMock := MocksList.AuthManagerMock
 	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
-	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
 	iamMock.MockIdpService.On("UpdateIdp", mock.Anything, mock.Anything, mock.Anything, mock.Anything).
 		Return(fmt.Errorf("failed to get idp: %w", iamError.HandleKeyCloakError(&gocloak.APIError{Code: http.StatusNotFound, Message: "404 Not Found"})))
 
@@ -932,7 +1021,7 @@ func TestUpdateIdp_Update_Error(t *testing.T) {
 	iamMock := MocksList.IamServicesContainerMock
 	authMock := MocksList.AuthManagerMock
 	authMock.On("GetRealmAndTenantID", mock.Anything, mock.Anything).Return(ptr.To(realm), ptr.To(tenantID), nil)
-	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(signedSamlConfig(t), nil)
+	iamMock.MockIdpService.On("GetIdpConfigFromFile", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(map[string]string{}, nil)
 	iamMock.MockIdpService.On("UpdateIdp", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(fmt.Errorf("error"))
 	res, err := testSubject.UpdateIdp(ctx, mock.Anything, getSAMLIdpCreationRequest(utils.File, XML_FILE), "")
 	assert.Equal(t, http.StatusInternalServerError, res.Code)
@@ -1341,22 +1430,46 @@ func TestSetIdpSettings_SpacesInMandatoryClaimValues(t *testing.T) {
 	iamMock.MockIdpService.AssertNotCalled(t, "SetMandatotyClaimMapper")
 }
 
-func signedSamlConfig(t *testing.T) map[string]string {
+func samlMetadataWithSigningCertificate(t *testing.T, entityID, ssoURL string) []byte {
 	t.Helper()
-	return map[string]string{
-		utils.SigningCertificate: selfSignedSigningCertificate(t),
-	}
+	return samlMetadataWithCertificate(t, entityID, ssoURL, selfSignedSigningCertificate(t))
+}
+
+func samlMetadataWithCertificate(t *testing.T, entityID, ssoURL, certificate string) []byte {
+	t.Helper()
+	return []byte(`<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="` + entityID + `">
+  <IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol">
+    <KeyDescriptor use="signing">
+      <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+        <X509Data>
+          <X509Certificate>` + certificate + `</X509Certificate>
+        </X509Data>
+      </KeyInfo>
+    </KeyDescriptor>
+    <SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="` + ssoURL + `"/>
+  </IDPSSODescriptor>
+</EntityDescriptor>`)
 }
 
 func selfSignedSigningCertificate(t *testing.T) string {
+	t.Helper()
+	return signingCertificateWithValidity(t, time.Now().Add(-time.Hour), time.Now().Add(time.Hour))
+}
+
+func expiredSigningCertificate(t *testing.T) string {
+	t.Helper()
+	return signingCertificateWithValidity(t, time.Now().Add(-2*time.Hour), time.Now().Add(-time.Hour))
+}
+
+func signingCertificateWithValidity(t *testing.T, notBefore, notAfter time.Time) string {
 	t.Helper()
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	assert.NoError(t, err)
 	template := &x509.Certificate{
 		SerialNumber: big.NewInt(1),
 		Subject:      pkix.Name{CommonName: "test-idp"},
-		NotBefore:    time.Now().Add(-time.Hour),
-		NotAfter:     time.Now().Add(time.Hour),
+		NotBefore:    notBefore,
+		NotAfter:     notAfter,
 		KeyUsage:     x509.KeyUsageDigitalSignature,
 	}
 	der, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
