@@ -10745,7 +10745,7 @@ SOFTWARE.
 Copyright emersion, Gleez Technologies, Proton Technologies AG and 1 others - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/emersion/go-smtp v0.25.0
+  github.com/emersion/go-smtp v0.25.1
 
 The MIT License (MIT)
 
