@@ -726,7 +726,21 @@ export interface ICanSubmitWorkload {
 }
 
 /** Drawer Navigation **/
-export type TWorkloadDrawerTab = "logs" | "terminal" | "metrics" | "pods" | "event history" | "details" | "structure";
+export enum EWorkloadDrawerTabs {
+  Details = "details",
+  EventHistory = "event history",
+  Metrics = "metrics",
+  Pods = "pods",
+  Logs = "logs",
+  Terminal = "terminal",
+  Yaml = "yaml",
+  Structure = "structure",
+  // Navigation alias only: Activity opens Event history in User actions mode.
+  Activity = "activity",
+}
+
+export type TWorkloadDrawerTab = `${EWorkloadDrawerTabs}`;
+export const workloadDrawerTabs: readonly TWorkloadDrawerTab[] = Object.values(EWorkloadDrawerTabs);
 
 export interface IWorkloadDrawerNavigationPayload {
   tab: TWorkloadDrawerTab;
