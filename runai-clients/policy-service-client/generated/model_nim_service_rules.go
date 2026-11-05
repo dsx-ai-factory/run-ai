@@ -31,10 +31,13 @@ type NimServiceRules struct {
 	ImagePullPolicy      NullableImagePullPolicyRules            `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets     NullableImagePullSecretsRules           `json:"imagePullSecrets,omitempty"`
 	Labels               NullableInstancesRules                  `json:"labels,omitempty"`
+	LoadAwareRouting     NullableBooleanRules                    `json:"loadAwareRouting,omitempty"`
+	ModelRewrites        NullableArbitraryRules                  `json:"modelRewrites,omitempty"`
 	ModelStore           NullableNimServiceRulesAllOfModelStore  `json:"modelStore,omitempty"`
 	MultiNode            NullableNimServiceMultiNodeRules        `json:"multiNode,omitempty"`
 	NgcAuthSecret        NullableStringRules                     `json:"ngcAuthSecret,omitempty"`
 	NodePools            NullableArrayRules                      `json:"nodePools,omitempty"`
+	ObjectivePriority    NullableIntegerRules                    `json:"objectivePriority,omitempty"`
 	Preemptibility       NullablePreemptibilityRules             `json:"preemptibility,omitempty"`
 	PriorityClass        NullableStringRules                     `json:"priorityClass,omitempty"`
 	Probes               NullableProbesRules                     `json:"probes,omitempty"`
@@ -448,6 +451,92 @@ func (o *NimServiceRules) UnsetLabels() {
 	o.Labels.Unset()
 }
 
+// GetLoadAwareRouting returns the LoadAwareRouting field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRules) GetLoadAwareRouting() BooleanRules {
+	if o == nil || IsNil(o.LoadAwareRouting.Get()) {
+		var ret BooleanRules
+		return ret
+	}
+	return *o.LoadAwareRouting.Get()
+}
+
+// GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRules) GetLoadAwareRoutingOk() (*BooleanRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.LoadAwareRouting.Get(), o.LoadAwareRouting.IsSet()
+}
+
+// HasLoadAwareRouting returns a boolean if a field has been set.
+func (o *NimServiceRules) HasLoadAwareRouting() bool {
+	if o != nil && o.LoadAwareRouting.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLoadAwareRouting gets a reference to the given NullableBooleanRules and assigns it to the LoadAwareRouting field.
+func (o *NimServiceRules) SetLoadAwareRouting(v BooleanRules) {
+	o.LoadAwareRouting.Set(&v)
+}
+
+// SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+func (o *NimServiceRules) SetLoadAwareRoutingNil() {
+	o.LoadAwareRouting.Set(nil)
+}
+
+// UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+func (o *NimServiceRules) UnsetLoadAwareRouting() {
+	o.LoadAwareRouting.Unset()
+}
+
+// GetModelRewrites returns the ModelRewrites field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRules) GetModelRewrites() ArbitraryRules {
+	if o == nil || IsNil(o.ModelRewrites.Get()) {
+		var ret ArbitraryRules
+		return ret
+	}
+	return *o.ModelRewrites.Get()
+}
+
+// GetModelRewritesOk returns a tuple with the ModelRewrites field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRules) GetModelRewritesOk() (*ArbitraryRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ModelRewrites.Get(), o.ModelRewrites.IsSet()
+}
+
+// HasModelRewrites returns a boolean if a field has been set.
+func (o *NimServiceRules) HasModelRewrites() bool {
+	if o != nil && o.ModelRewrites.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetModelRewrites gets a reference to the given NullableArbitraryRules and assigns it to the ModelRewrites field.
+func (o *NimServiceRules) SetModelRewrites(v ArbitraryRules) {
+	o.ModelRewrites.Set(&v)
+}
+
+// SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+func (o *NimServiceRules) SetModelRewritesNil() {
+	o.ModelRewrites.Set(nil)
+}
+
+// UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
+func (o *NimServiceRules) UnsetModelRewrites() {
+	o.ModelRewrites.Unset()
+}
+
 // GetModelStore returns the ModelStore field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *NimServiceRules) GetModelStore() NimServiceRulesAllOfModelStore {
 	if o == nil || IsNil(o.ModelStore.Get()) {
@@ -618,6 +707,49 @@ func (o *NimServiceRules) SetNodePoolsNil() {
 // UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
 func (o *NimServiceRules) UnsetNodePools() {
 	o.NodePools.Unset()
+}
+
+// GetObjectivePriority returns the ObjectivePriority field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRules) GetObjectivePriority() IntegerRules {
+	if o == nil || IsNil(o.ObjectivePriority.Get()) {
+		var ret IntegerRules
+		return ret
+	}
+	return *o.ObjectivePriority.Get()
+}
+
+// GetObjectivePriorityOk returns a tuple with the ObjectivePriority field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRules) GetObjectivePriorityOk() (*IntegerRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ObjectivePriority.Get(), o.ObjectivePriority.IsSet()
+}
+
+// HasObjectivePriority returns a boolean if a field has been set.
+func (o *NimServiceRules) HasObjectivePriority() bool {
+	if o != nil && o.ObjectivePriority.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetObjectivePriority gets a reference to the given NullableIntegerRules and assigns it to the ObjectivePriority field.
+func (o *NimServiceRules) SetObjectivePriority(v IntegerRules) {
+	o.ObjectivePriority.Set(&v)
+}
+
+// SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+func (o *NimServiceRules) SetObjectivePriorityNil() {
+	o.ObjectivePriority.Set(nil)
+}
+
+// UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
+func (o *NimServiceRules) UnsetObjectivePriority() {
+	o.ObjectivePriority.Unset()
 }
 
 // GetPreemptibility returns the Preemptibility field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -958,6 +1090,12 @@ func (o NimServiceRules) ToMap() (map[string]interface{}, error) {
 	if o.Labels.IsSet() {
 		toSerialize["labels"] = o.Labels.Get()
 	}
+	if o.LoadAwareRouting.IsSet() {
+		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
+	}
+	if o.ModelRewrites.IsSet() {
+		toSerialize["modelRewrites"] = o.ModelRewrites.Get()
+	}
 	if o.ModelStore.IsSet() {
 		toSerialize["modelStore"] = o.ModelStore.Get()
 	}
@@ -969,6 +1107,9 @@ func (o NimServiceRules) ToMap() (map[string]interface{}, error) {
 	}
 	if o.NodePools.IsSet() {
 		toSerialize["nodePools"] = o.NodePools.Get()
+	}
+	if o.ObjectivePriority.IsSet() {
+		toSerialize["objectivePriority"] = o.ObjectivePriority.Get()
 	}
 	if o.Preemptibility.IsSet() {
 		toSerialize["preemptibility"] = o.Preemptibility.Get()

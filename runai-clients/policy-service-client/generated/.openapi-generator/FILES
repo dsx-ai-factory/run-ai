@@ -238,6 +238,8 @@ docs/MatchExpression.md
 docs/MatchExpressionOperator.md
 docs/MetricThresholdField.md
 docs/MetricThresholdPercentageField.md
+docs/ModelRewrite.md
+docs/ModelRewriteTarget.md
 docs/MpiLauncherCreationPolicy.md
 docs/MpiLauncherCreationPolicyOptions.md
 docs/MpiLauncherCreationPolicyOptionsOptionsInner.md
@@ -698,6 +700,8 @@ model_match_expression.go
 model_match_expression_operator.go
 model_metric_threshold_field.go
 model_metric_threshold_percentage_field.go
+model_model_rewrite.go
+model_model_rewrite_target.go
 model_mpi_launcher_creation_policy.go
 model_mpi_launcher_creation_policy_options.go
 model_mpi_launcher_creation_policy_options_options_inner.go

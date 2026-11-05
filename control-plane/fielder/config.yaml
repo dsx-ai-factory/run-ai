@@ -2526,6 +2526,66 @@ fields:
           - NimServiceDefaults
           - NimServiceRules
 
+  objectivePriority:
+    name: objectivePriority
+    variants:
+      - name: dinf
+        spec: inferences/ObjectivePriority.yaml
+        defaults: inferences/ObjectivePriority.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+      - name: nim_service
+        spec: inferences/ObjectivePriority.yaml
+        defaults: inferences/ObjectivePriority.yaml
+        rules: ../policy_rules/IntegerRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
+  modelRewrites:
+    name: modelRewrites
+    variants:
+      - name: dinf
+        spec: inferences/ModelRewrites.yaml
+        defaults: inferences/ModelRewrites.yaml
+        rules: ../policy_rules/ArbitraryRules.yaml
+        targets:
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+      - name: nim_service
+        spec: inferences/ModelRewrites.yaml
+        defaults: inferences/ModelRewrites.yaml
+        rules: ../policy_rules/ArbitraryRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
+  loadAwareRouting:
+    name: loadAwareRouting
+    variants:
+      - name: dinf
+        spec: inferences/LoadAwareRouting.yaml
+        defaults: inferences/LoadAwareRouting.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - DinfCommonSpec
+          - DinfCommonDefaults
+          - DinfCommonRules
+      - name: nim_service
+        spec: inferences/LoadAwareRouting.yaml
+        defaults: inferences/LoadAwareRouting.yaml
+        rules: ../policy_rules/BooleanRules.yaml
+        targets:
+          - NimServiceSpec
+          - NimServiceDefaults
+          - NimServiceRules
+
   metric:
      name: autoscaling.metric
      variants:

@@ -169,6 +169,9 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 		configuration.GatewayName = &gw.Name
 		configuration.GatewayNamespace = &gw.Namespace
 	}
+	if rp.inferenceEndpointIntegrationAvailable(ctx) {
+		configuration.InferenceEndpointSchemaVersion = ptr.To(runv1.InferenceEndpointIntegrationV1)
+	}
 
 	if selector := snapshotsAgentNodeSelector(ctx, rp.kbClient, rp.runaiConfig); selector != "" {
 		configuration.SnapshotAgentNodeSelector = ptr.To(selector)

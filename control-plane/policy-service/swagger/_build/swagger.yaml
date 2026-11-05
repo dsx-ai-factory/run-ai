@@ -4253,6 +4253,67 @@ components:
       type: string
       nullable: true
       pattern: .*
+    LoadAwareRouting:
+      description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+      type: boolean
+      default: false
+      nullable: true
+    ModelRewriteTarget:
+      type: object
+      description: One served model name of a model rewrite rule and its traffic share.
+      properties:
+        model:
+          description: The model name sent to the serving pod in place of the requested one.
+          type: string
+          minLength: 1
+          maxLength: 10000
+          pattern: .*
+        weight:
+          description: The share of requests for this target, relative to the other targets of the same rule. Weights do not need to sum to 100.
+          type: integer
+          format: int32
+          minimum: 1
+      required:
+        - model
+        - weight
+    ModelRewrite:
+      type: object
+      description: A rule that maps one requested model name to one or more served model names.
+      properties:
+        model:
+          description: The exact model name that clients put in the request body.
+          type: string
+          minLength: 1
+          maxLength: 10000
+          pattern: .*
+        targets:
+          description: The served model names and their traffic shares.
+          type: array
+          items:
+            $ref: '#/components/schemas/ModelRewriteTarget'
+          minItems: 1
+          maxItems: 1000
+      required:
+        - model
+        - targets
+    ModelRewrites:
+      description: Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+      type: array
+      items:
+        $ref: '#/components/schemas/ModelRewrite'
+      maxItems: 1000
+      nullable: true
+      example:
+        - model: llama
+          targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+        - model: chat
+          targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
     NodePools:
       description: A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
       type: array
@@ -4264,6 +4325,12 @@ components:
       example:
         - my-node-pool-a
         - my-node-pool-b
+      nullable: true
+    ObjectivePriority:
+      description: The priority of this workload's inference objective. The project policy sets the maximum value.
+      type: integer
+      format: int32
+      minimum: 0
       nullable: true
     Preemptibility:
       description: Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. Semi-preemptible is intended for multi-pod workloads. Replicas up to the configured minimum are non-preemptible, while replicas above that minimum are preemptible. On single-pod workloads with a fixed replica count of one, semi-preemptible behaves as non-preemptible. The API continues to accept semi-preemptible for these workloads. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
@@ -4413,8 +4480,14 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
+            modelRewrites:
+              $ref: '#/components/schemas/ModelRewrites'
             nodePools:
               $ref: '#/components/schemas/NodePools'
+            objectivePriority:
+              $ref: '#/components/schemas/ObjectivePriority'
             preemptibility:
               $ref: '#/components/schemas/Preemptibility'
             priorityClass:
@@ -6275,8 +6348,14 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/StringRules'
+            loadAwareRouting:
+              $ref: '#/components/schemas/BooleanRules'
+            modelRewrites:
+              $ref: '#/components/schemas/ArbitraryRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
+            objectivePriority:
+              $ref: '#/components/schemas/IntegerRules'
             preemptibility:
               $ref: '#/components/schemas/PreemptibilityRules'
             priorityClass:
@@ -8494,6 +8573,10 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsDefaults'
             labels:
               $ref: '#/components/schemas/LabelsDefaults'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
+            modelRewrites:
+              $ref: '#/components/schemas/ModelRewrites'
             modelStore:
               nullable: true
               properties:
@@ -8508,6 +8591,8 @@ components:
               $ref: '#/components/schemas/NimServiceNgcAuthSecret'
             nodePools:
               $ref: '#/components/schemas/NodePools'
+            objectivePriority:
+              $ref: '#/components/schemas/ObjectivePriority'
             preemptibility:
               $ref: '#/components/schemas/Preemptibility'
             priorityClass:
@@ -8706,6 +8791,10 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsRules'
             labels:
               $ref: '#/components/schemas/InstancesRules'
+            loadAwareRouting:
+              $ref: '#/components/schemas/BooleanRules'
+            modelRewrites:
+              $ref: '#/components/schemas/ArbitraryRules'
             modelStore:
               nullable: true
               properties:
@@ -8720,6 +8809,8 @@ components:
               $ref: '#/components/schemas/StringRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
+            objectivePriority:
+              $ref: '#/components/schemas/IntegerRules'
             preemptibility:
               $ref: '#/components/schemas/PreemptibilityRules'
             priorityClass:

@@ -13,10 +13,13 @@ Name | Type | Description | Notes
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicy**](ImagePullPolicy.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**NullableImagePullSecretsDefaults**](ImagePullSecretsDefaults.md) |  | [optional] 
 **Labels** | Pointer to [**NullableLabelsDefaults**](LabelsDefaults.md) |  | [optional] 
+**LoadAwareRouting** | Pointer to **NullableBool** | Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it. | [optional] [default to false]
+**ModelRewrites** | Pointer to [**[]ModelRewrite**](ModelRewrite.md) | Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight. | [optional] 
 **ModelStore** | Pointer to [**NullableNimServiceDefaultsAllOfModelStore**](NimServiceDefaultsAllOfModelStore.md) |  | [optional] 
 **MultiNode** | Pointer to [**NullableNimServiceMultiNode**](NimServiceMultiNode.md) |  | [optional] 
 **NgcAuthSecret** | Pointer to **NullableString** | The name of a Kubernetes secret containing the NGC access credentials. The secret must contain a key named NGC_API_KEY with the API key as the value. | [optional] 
 **NodePools** | Pointer to **[]string** | A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available. | [optional] 
+**ObjectivePriority** | Pointer to **NullableInt32** | The priority of this workload&#39;s inference objective. The project policy sets the maximum value. | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibility**](Preemptibility.md) |  | [optional] 
 **PriorityClass** | Pointer to **NullableString** | Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value. | [optional] 
 **Probes** | Pointer to [**NullableProbes**](Probes.md) |  | [optional] 
@@ -359,6 +362,76 @@ HasLabels returns a boolean if a field has been set.
 `func (o *NimServiceDefaults) UnsetLabels()`
 
 UnsetLabels ensures that no value is present for Labels, not even an explicit nil
+### GetLoadAwareRouting
+
+`func (o *NimServiceDefaults) GetLoadAwareRouting() bool`
+
+GetLoadAwareRouting returns the LoadAwareRouting field if non-nil, zero value otherwise.
+
+### GetLoadAwareRoutingOk
+
+`func (o *NimServiceDefaults) GetLoadAwareRoutingOk() (*bool, bool)`
+
+GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLoadAwareRouting
+
+`func (o *NimServiceDefaults) SetLoadAwareRouting(v bool)`
+
+SetLoadAwareRouting sets LoadAwareRouting field to given value.
+
+### HasLoadAwareRouting
+
+`func (o *NimServiceDefaults) HasLoadAwareRouting() bool`
+
+HasLoadAwareRouting returns a boolean if a field has been set.
+
+### SetLoadAwareRoutingNil
+
+`func (o *NimServiceDefaults) SetLoadAwareRoutingNil(b bool)`
+
+ SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+
+### UnsetLoadAwareRouting
+`func (o *NimServiceDefaults) UnsetLoadAwareRouting()`
+
+UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+### GetModelRewrites
+
+`func (o *NimServiceDefaults) GetModelRewrites() []ModelRewrite`
+
+GetModelRewrites returns the ModelRewrites field if non-nil, zero value otherwise.
+
+### GetModelRewritesOk
+
+`func (o *NimServiceDefaults) GetModelRewritesOk() (*[]ModelRewrite, bool)`
+
+GetModelRewritesOk returns a tuple with the ModelRewrites field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetModelRewrites
+
+`func (o *NimServiceDefaults) SetModelRewrites(v []ModelRewrite)`
+
+SetModelRewrites sets ModelRewrites field to given value.
+
+### HasModelRewrites
+
+`func (o *NimServiceDefaults) HasModelRewrites() bool`
+
+HasModelRewrites returns a boolean if a field has been set.
+
+### SetModelRewritesNil
+
+`func (o *NimServiceDefaults) SetModelRewritesNil(b bool)`
+
+ SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+
+### UnsetModelRewrites
+`func (o *NimServiceDefaults) UnsetModelRewrites()`
+
+UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
 ### GetModelStore
 
 `func (o *NimServiceDefaults) GetModelStore() NimServiceDefaultsAllOfModelStore`
@@ -499,6 +572,41 @@ HasNodePools returns a boolean if a field has been set.
 `func (o *NimServiceDefaults) UnsetNodePools()`
 
 UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
+### GetObjectivePriority
+
+`func (o *NimServiceDefaults) GetObjectivePriority() int32`
+
+GetObjectivePriority returns the ObjectivePriority field if non-nil, zero value otherwise.
+
+### GetObjectivePriorityOk
+
+`func (o *NimServiceDefaults) GetObjectivePriorityOk() (*int32, bool)`
+
+GetObjectivePriorityOk returns a tuple with the ObjectivePriority field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetObjectivePriority
+
+`func (o *NimServiceDefaults) SetObjectivePriority(v int32)`
+
+SetObjectivePriority sets ObjectivePriority field to given value.
+
+### HasObjectivePriority
+
+`func (o *NimServiceDefaults) HasObjectivePriority() bool`
+
+HasObjectivePriority returns a boolean if a field has been set.
+
+### SetObjectivePriorityNil
+
+`func (o *NimServiceDefaults) SetObjectivePriorityNil(b bool)`
+
+ SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+
+### UnsetObjectivePriority
+`func (o *NimServiceDefaults) UnsetObjectivePriority()`
+
+UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
 ### GetPreemptibility
 
 `func (o *NimServiceDefaults) GetPreemptibility() Preemptibility`

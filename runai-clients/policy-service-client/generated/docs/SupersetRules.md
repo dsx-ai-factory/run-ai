@@ -9,7 +9,10 @@ Name | Type | Description | Notes
 **Leader** | Pointer to [**NullableDistributedInferenceLeaderWorkerRulesV2**](DistributedInferenceLeaderWorkerRulesV2.md) | Defines the pod specification for the leader. Must always be provided, regardless of the number of workers. | [optional] 
 **Worker** | Pointer to [**NullableDistributedInferenceLeaderWorkerRulesV2**](DistributedInferenceLeaderWorkerRulesV2.md) | Defines the pod specification for the workers. Required only if the number of workers is greater than 0. | [optional] 
 **Category** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
+**LoadAwareRouting** | Pointer to [**NullableBooleanRules**](BooleanRules.md) |  | [optional] 
+**ModelRewrites** | Pointer to [**NullableArbitraryRules**](ArbitraryRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
+**ObjectivePriority** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibilityRules**](PreemptibilityRules.md) |  | [optional] 
 **PriorityClass** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **RestartPolicy** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
@@ -249,6 +252,76 @@ HasCategory returns a boolean if a field has been set.
 `func (o *SupersetRules) UnsetCategory()`
 
 UnsetCategory ensures that no value is present for Category, not even an explicit nil
+### GetLoadAwareRouting
+
+`func (o *SupersetRules) GetLoadAwareRouting() BooleanRules`
+
+GetLoadAwareRouting returns the LoadAwareRouting field if non-nil, zero value otherwise.
+
+### GetLoadAwareRoutingOk
+
+`func (o *SupersetRules) GetLoadAwareRoutingOk() (*BooleanRules, bool)`
+
+GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLoadAwareRouting
+
+`func (o *SupersetRules) SetLoadAwareRouting(v BooleanRules)`
+
+SetLoadAwareRouting sets LoadAwareRouting field to given value.
+
+### HasLoadAwareRouting
+
+`func (o *SupersetRules) HasLoadAwareRouting() bool`
+
+HasLoadAwareRouting returns a boolean if a field has been set.
+
+### SetLoadAwareRoutingNil
+
+`func (o *SupersetRules) SetLoadAwareRoutingNil(b bool)`
+
+ SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+
+### UnsetLoadAwareRouting
+`func (o *SupersetRules) UnsetLoadAwareRouting()`
+
+UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+### GetModelRewrites
+
+`func (o *SupersetRules) GetModelRewrites() ArbitraryRules`
+
+GetModelRewrites returns the ModelRewrites field if non-nil, zero value otherwise.
+
+### GetModelRewritesOk
+
+`func (o *SupersetRules) GetModelRewritesOk() (*ArbitraryRules, bool)`
+
+GetModelRewritesOk returns a tuple with the ModelRewrites field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetModelRewrites
+
+`func (o *SupersetRules) SetModelRewrites(v ArbitraryRules)`
+
+SetModelRewrites sets ModelRewrites field to given value.
+
+### HasModelRewrites
+
+`func (o *SupersetRules) HasModelRewrites() bool`
+
+HasModelRewrites returns a boolean if a field has been set.
+
+### SetModelRewritesNil
+
+`func (o *SupersetRules) SetModelRewritesNil(b bool)`
+
+ SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+
+### UnsetModelRewrites
+`func (o *SupersetRules) UnsetModelRewrites()`
+
+UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
 ### GetNodePools
 
 `func (o *SupersetRules) GetNodePools() ArrayRules`
@@ -284,6 +357,41 @@ HasNodePools returns a boolean if a field has been set.
 `func (o *SupersetRules) UnsetNodePools()`
 
 UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
+### GetObjectivePriority
+
+`func (o *SupersetRules) GetObjectivePriority() IntegerRules`
+
+GetObjectivePriority returns the ObjectivePriority field if non-nil, zero value otherwise.
+
+### GetObjectivePriorityOk
+
+`func (o *SupersetRules) GetObjectivePriorityOk() (*IntegerRules, bool)`
+
+GetObjectivePriorityOk returns a tuple with the ObjectivePriority field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetObjectivePriority
+
+`func (o *SupersetRules) SetObjectivePriority(v IntegerRules)`
+
+SetObjectivePriority sets ObjectivePriority field to given value.
+
+### HasObjectivePriority
+
+`func (o *SupersetRules) HasObjectivePriority() bool`
+
+HasObjectivePriority returns a boolean if a field has been set.
+
+### SetObjectivePriorityNil
+
+`func (o *SupersetRules) SetObjectivePriorityNil(b bool)`
+
+ SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+
+### UnsetObjectivePriority
+`func (o *SupersetRules) UnsetObjectivePriority()`
+
+UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
 ### GetPreemptibility
 
 `func (o *SupersetRules) GetPreemptibility() PreemptibilityRules`

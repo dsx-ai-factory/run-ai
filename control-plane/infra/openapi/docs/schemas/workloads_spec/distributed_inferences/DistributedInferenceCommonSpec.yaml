@@ -7,8 +7,14 @@ allOf:
   properties:
     category:
       $ref: ../resources/Category.yaml
+    loadAwareRouting:
+      $ref: ../inferences/LoadAwareRouting.yaml
+    modelRewrites:
+      $ref: ../inferences/ModelRewrites.yaml
     nodePools:
       $ref: ../resources/NodePools.yaml
+    objectivePriority:
+      $ref: ../inferences/ObjectivePriority.yaml
     preemptibility:
       $ref: ../advanced/Preemptibility.yaml
     priorityClass:

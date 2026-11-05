@@ -1,0 +1,16 @@
+type: object
+nullable: true
+additionalProperties: false
+description: >-
+  Inference routing fields from the policy-validated workload spec. Set only by the workloads service on the internal
+  create API; rejected in public workload submissions. Workloads Manager resolves them into externalAccess.inference
+  on the serving endpoint.
+properties:
+  loadAwareRouting:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml'
+  objectivePriority:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ObjectivePriority.yaml'
+  modelRewrites:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ModelRewrites.yaml'
+  servingPortAuthorizationType:
+    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ServingPortAccessAuthorizationTypeEnum.yaml'

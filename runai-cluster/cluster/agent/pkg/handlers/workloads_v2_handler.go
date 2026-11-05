@@ -631,7 +631,6 @@ func wrapWithWorkloadRunner(manifest client.Object, workloadId string, configura
 	if configuration == nil {
 		return runner, nil
 	}
-
 	hasMnnvl := configuration.Mnnvl != nil && configuration.Mnnvl.Mode != nil
 	hasNetworkingEndpoints := hasNetworkingEndpointsConfiguration(configuration)
 	hasLegacyNetworking := !hasNetworkingEndpoints && hasLegacyNetworkingConfiguration(configuration)

@@ -1,0 +1,18 @@
+# Derived from test/testdata/golden/06-phase1-inferenceobjective.yaml. One InferenceObjective per objective. The
+# GIE v1alpha2 spec has no model field: the EPP selects the lane by object name, from the
+# x-gateway-inference-objective request header. The EPP watches these objects at runtime, so changes apply
+# without a restart.
+{{- range .Objectives }}
+---
+apiVersion: inference.networking.x-k8s.io/v1alpha2
+kind: InferenceObjective
+metadata:
+  name: {{ printf "%s-objective-%s" $.Name (dnsLabel .Model) | toJSON }}
+  namespace: {{ $.Namespace | toJSON }}
+spec:
+  poolRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: {{ printf "%s-pool" $.Name | toJSON }}
+  priority: {{ .Priority }}
+{{- end }}

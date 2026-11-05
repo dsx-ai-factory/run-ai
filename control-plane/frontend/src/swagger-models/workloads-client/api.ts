@@ -3164,11 +3164,29 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonDefaultsV2
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceCommonDefaultsV2
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonDefaultsV2
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceCommonDefaultsV2
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -3226,10 +3244,28 @@ export interface DistributedInferenceCommonRulesV2 {
     'category'?: StringRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceCommonRulesV2
+     */
+    'loadAwareRouting'?: BooleanRules | null;
+    /**
+     * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceCommonRulesV2
+     */
+    'modelRewrites'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {ArrayRules}
      * @memberof DistributedInferenceCommonRulesV2
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof DistributedInferenceCommonRulesV2
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -3287,10 +3323,28 @@ export interface DistributedInferenceCommonRulesV2AllOf {
     'category'?: StringRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceCommonRulesV2AllOf
+     */
+    'loadAwareRouting'?: BooleanRules | null;
+    /**
+     * 
+     * @type {ArbitraryRules}
+     * @memberof DistributedInferenceCommonRulesV2AllOf
+     */
+    'modelRewrites'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {ArrayRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof DistributedInferenceCommonRulesV2AllOf
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -3329,11 +3383,29 @@ export interface DistributedInferenceCommonSpec {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonSpec
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceCommonSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonSpec
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceCommonSpec
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -3390,11 +3462,29 @@ export interface DistributedInferenceCommonSpecAllOf {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonSpecAllOf
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceCommonSpecAllOf
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonSpecAllOf
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceCommonSpecAllOf
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -5208,11 +5298,29 @@ export interface DistributedInferenceSpecSpec {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferenceSpecSpec
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceSpecSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceSpecSpec
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceSpecSpec
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -5478,11 +5586,29 @@ export interface DistributedInferenceTemplateSpec {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof DistributedInferenceTemplateSpec
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof DistributedInferenceTemplateSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceTemplateSpec
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof DistributedInferenceTemplateSpec
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -12365,6 +12491,44 @@ export interface ModelError {
     'details'?: string;
 }
 /**
+ * A rule that maps one requested model name to one or more served model names.
+ * @export
+ * @interface ModelRewrite
+ */
+export interface ModelRewrite {
+    /**
+     * The exact model name that clients put in the request body.
+     * @type {string}
+     * @memberof ModelRewrite
+     */
+    'model': string;
+    /**
+     * The served model names and their traffic shares.
+     * @type {Array<ModelRewriteTarget>}
+     * @memberof ModelRewrite
+     */
+    'targets': Array<ModelRewriteTarget>;
+}
+/**
+ * One served model name of a model rewrite rule and its traffic share.
+ * @export
+ * @interface ModelRewriteTarget
+ */
+export interface ModelRewriteTarget {
+    /**
+     * The model name sent to the serving pod in place of the requested one.
+     * @type {string}
+     * @memberof ModelRewriteTarget
+     */
+    'model': string;
+    /**
+     * The share of requests for this target, relative to the other targets of the same rule. Weights do not need to sum to 100.
+     * @type {number}
+     * @memberof ModelRewriteTarget
+     */
+    'weight': number;
+}
+/**
  * Define whether the MPI Launcher is created in parallel with the workers, or if its creation is postponed until all workers are in  Ready state. This prevents failures when the launcher attempts to connect to workers that are not yet ready.
  * @export
  * @enum {string}
@@ -16540,11 +16704,29 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof SupersetDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof SupersetDefaults
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof SupersetDefaults
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof SupersetDefaults
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -17354,10 +17536,28 @@ export interface SupersetRules {
     'category'?: StringRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof SupersetRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
+    /**
+     * 
+     * @type {ArbitraryRules}
+     * @memberof SupersetRules
+     */
+    'modelRewrites'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {ArrayRules}
      * @memberof SupersetRules
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof SupersetRules
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -18323,11 +18523,29 @@ export interface SupersetSpec {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof SupersetSpec
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof SupersetSpec
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof SupersetSpec
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof SupersetSpec
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -21296,11 +21514,29 @@ export interface UnifiedPolicyInfoPerReplicaTypeDefaults {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}
@@ -21605,10 +21841,28 @@ export interface UnifiedPolicyInfoPerReplicaTypeRules {
     'category'?: StringRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
+    /**
+     * 
+     * @type {ArbitraryRules}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeRules
+     */
+    'modelRewrites'?: ArbitraryRules | null;
+    /**
+     * 
      * @type {ArrayRules}
      * @memberof UnifiedPolicyInfoPerReplicaTypeRules
      */
     'nodePools'?: ArrayRules | null;
+    /**
+     * 
+     * @type {IntegerRules}
+     * @memberof UnifiedPolicyInfoPerReplicaTypeRules
+     */
+    'objectivePriority'?: IntegerRules | null;
     /**
      * 
      * @type {PreemptibilityRules}
@@ -22141,11 +22395,29 @@ export interface UnifiedSpecWorker {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+     * @type {boolean}
+     * @memberof UnifiedSpecWorker
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
+     * Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+     * @type {Array<ModelRewrite>}
+     * @memberof UnifiedSpecWorker
+     */
+    'modelRewrites'?: Array<ModelRewrite> | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof UnifiedSpecWorker
      */
     'nodePools'?: Array<string> | null;
+    /**
+     * The priority of this workload\'s inference objective. The project policy sets the maximum value.
+     * @type {number}
+     * @memberof UnifiedSpecWorker
+     */
+    'objectivePriority'?: number | null;
     /**
      * 
      * @type {Preemptibility}

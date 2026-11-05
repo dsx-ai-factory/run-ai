@@ -1534,6 +1534,53 @@ components:
       - None
       example: Required
       type: string
+    ExternalAccessInference:
+      additionalProperties: false
+      description: |-
+        Server-resolved inference routing for this endpoint. Set only by the control plane; rejected in workload submissions.
+        Requires httpRoute and one created Service on the same endpoint. The cluster then creates an InferenceEndpoint instead of the HTTPRoute,
+        and derives its workload selector, target port, Gateway, hostnames and default backend from that Service and httpRoute.
+      example:
+        rewrites:
+        - key: ""
+        - key: ""
+        - key: ""
+        - key: ""
+        - key: ""
+        epp:
+          key: ""
+        objectives:
+        - key: ""
+        - key: ""
+        - key: ""
+        - key: ""
+        - key: ""
+      nullable: true
+      properties:
+        epp:
+          additionalProperties: true
+          description: "InferenceEndpoint spec.epp, for example the EPP profile. Validated\
+            \ against the installed CRD when applied."
+          type: object
+        objectives:
+          description: InferenceEndpoint spec.objectives. Omitted when there are none.
+          items:
+            additionalProperties: true
+            type: object
+          maxItems: 1000
+          nullable: true
+          type: array
+        rewrites:
+          description: InferenceEndpoint spec.rewrites. Omitted when there are none.
+          items:
+            additionalProperties: true
+            type: object
+          maxItems: 1000
+          nullable: true
+          type: array
+      required:
+      - epp
+      type: object
     ExternalAccess:
       description: "External access configuration. Same shape as the networking plugin.\
         \ Include ingress (Kubernetes), route (OpenShift), or httpRoute (Gateway API).\
@@ -1541,6 +1588,21 @@ components:
       example:
         ingress: "{}"
         route: "{}"
+        inference:
+          rewrites:
+          - key: ""
+          - key: ""
+          - key: ""
+          - key: ""
+          - key: ""
+          epp:
+            key: ""
+          objectives:
+          - key: ""
+          - key: ""
+          - key: ""
+          - key: ""
+          - key: ""
         httpRoute: "{}"
       nullable: true
       properties:
@@ -1559,6 +1621,8 @@ components:
             Used when cluster uses Gateway API.
           nullable: true
           type: object
+        inference:
+          $ref: '#/components/schemas/ExternalAccessInference'
       type: object
     ServiceType:
       default: ClusterIP
@@ -1909,6 +1973,21 @@ components:
         externalAccess:
           ingress: "{}"
           route: "{}"
+          inference:
+            rewrites:
+            - key: ""
+            - key: ""
+            - key: ""
+            - key: ""
+            - key: ""
+            epp:
+              key: ""
+            objectives:
+            - key: ""
+            - key: ""
+            - key: ""
+            - key: ""
+            - key: ""
           httpRoute: "{}"
       properties:
         externalAccess:
@@ -2051,7 +2130,7 @@ components:
             storage: 1Gi
         accessModes:
         - ReadWriteOnce
-        volumeMode: ""
+        volumeMode: volumeMode
       properties:
         accessModes:
           description: Access modes the volume should support. At least one is required.
@@ -2079,6 +2158,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode'
           nullable: true
+          type: string
       required:
       - accessModes
       - resources
@@ -2103,7 +2183,7 @@ components:
               storage: 1Gi
           accessModes:
           - ReadWriteOnce
-          volumeMode: ""
+          volumeMode: volumeMode
       properties:
         metadata:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcMetadata'
@@ -2128,10 +2208,179 @@ components:
           nullable: true
           type: boolean
       type: object
+    LoadAwareRouting:
+      default: false
+      description: "Route requests to the serving port through the endpoint picker,\
+        \ which picks a Pod by load. Setting objectivePriority or modelRewrites also\
+        \ enables it."
+      nullable: true
+      type: boolean
+    ObjectivePriority:
+      description: The priority of this workload's inference objective. The project
+        policy sets the maximum value.
+      format: int32
+      minimum: 0
+      nullable: true
+      type: integer
+    ModelRewriteTarget:
+      description: One served model name of a model rewrite rule and its traffic share.
+      properties:
+        model:
+          description: The model name sent to the serving pod in place of the requested
+            one.
+          maxLength: 10000
+          minLength: 1
+          pattern: .*
+          type: string
+        weight:
+          description: "The share of requests for this target, relative to the other\
+            \ targets of the same rule. Weights do not need to sum to 100."
+          format: int32
+          minimum: 1
+          type: integer
+      required:
+      - model
+      - weight
+      type: object
+    ModelRewrite:
+      description: A rule that maps one requested model name to one or more served
+        model names.
+      properties:
+        model:
+          description: The exact model name that clients put in the request body.
+          maxLength: 10000
+          minLength: 1
+          pattern: .*
+          type: string
+        targets:
+          description: The served model names and their traffic shares.
+          items:
+            $ref: '#/components/schemas/ModelRewriteTarget'
+          maxItems: 1000
+          minItems: 1
+          type: array
+      required:
+      - model
+      - targets
+      type: object
+    ModelRewrites:
+      description: Model name rewrites that the inference endpoint applies at runtime.
+        Each rule maps a model name that clients request to one or more served model
+        names. One target makes an alias; several targets split traffic by weight.
+      example:
+      - model: llama
+        targets:
+        - model: llama-3.1-8b-instruct
+          weight: 1
+      - model: chat
+        targets:
+        - model: chat-v1
+          weight: 90
+        - model: chat-v2
+          weight: 10
+      items:
+        $ref: '#/components/schemas/ModelRewrite'
+      maxItems: 1000
+      nullable: true
+      type: array
+    ServingPortAccessAuthorizationTypeEnum:
+      description: |
+        Specifies who can send inference requests to the serving endpoint:
+
+        Possible values:
+        - `public`: No authorization is required. (Default)
+        - `authenticatedUsers`: Any NVIDIA Run:ai authenticated user and service account can send requests.
+        - `authorizedUsers`: Only users listed in the authorizedUsers field can send requests.
+        - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field can send requests.
+        - `authorizedUsersOrGroups`: Requires either authorizedUsers or authorizedGroups to be provided; if neither is set, or if both are set, a mutual exclusion error is reported. Supported from cluster version 2.19.
+      enum:
+      - public
+      - authenticatedUsers
+      - authorizedUsers
+      - authorizedGroups
+      - authorizedUsersOrGroups
+      nullable: true
+      type: string
+    WorkloadV2ConfigurationInferenceRouting:
+      additionalProperties: false
+      description: Inference routing fields from the policy-validated workload spec.
+        Set only by the workloads service on the internal create API; rejected in
+        public workload submissions. Workloads Manager resolves them into externalAccess.inference
+        on the serving endpoint.
+      example:
+        objectivePriority: 0
+        servingPortAuthorizationType: public
+        loadAwareRouting: false
+        modelRewrites:
+        - model: llama
+          targets:
+          - model: llama-3.1-8b-instruct
+            weight: 1
+        - model: chat
+          targets:
+          - model: chat-v1
+            weight: 90
+          - model: chat-v2
+            weight: 10
+      nullable: true
+      properties:
+        loadAwareRouting:
+          default: false
+          description: "Route requests to the serving port through the endpoint picker,\
+            \ which picks a Pod by load. Setting objectivePriority or modelRewrites\
+            \ also enables it."
+          nullable: true
+          type: boolean
+        objectivePriority:
+          description: The priority of this workload's inference objective. The project
+            policy sets the maximum value.
+          format: int32
+          minimum: 0
+          nullable: true
+          type: integer
+        modelRewrites:
+          description: Model name rewrites that the inference endpoint applies at
+            runtime. Each rule maps a model name that clients request to one or more
+            served model names. One target makes an alias; several targets split traffic
+            by weight.
+          example:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          items:
+            $ref: '#/components/schemas/ModelRewrite'
+          maxItems: 1000
+          nullable: true
+          type: array
+        servingPortAuthorizationType:
+          $ref: '#/components/schemas/ServingPortAccessAuthorizationTypeEnum'
+      type: object
     WorkloadV2Configuration:
       description: Specifies the features configuration to apply to a workload.
       example:
         mnnvl: mnnvl
+        inferenceRouting:
+          objectivePriority: 0
+          servingPortAuthorizationType: public
+          loadAwareRouting: false
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
         pvcs:
         - metadata:
             name: my-pytorch-pvc
@@ -2146,7 +2395,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2160,7 +2409,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2174,7 +2423,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2188,7 +2437,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2202,7 +2451,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         userCredentials:
           sources:
           - ref: my-hf-token-abc1234567
@@ -2254,6 +2503,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2298,6 +2562,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2342,6 +2621,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2386,6 +2680,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         - services:
           - authorization:
@@ -2430,6 +2739,21 @@ components:
           externalAccess:
             ingress: "{}"
             route: "{}"
+            inference:
+              rewrites:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              epp:
+                key: ""
+              objectives:
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
+              - key: ""
             httpRoute: "{}"
         pvcsConfig:
           cleanupOnCompletion: true
@@ -2458,15 +2782,31 @@ components:
           maxItems: 1000
           nullable: true
           type: array
-          x-internal: true
         pvcsConfig:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig'
+        inferenceRouting:
+          $ref: '#/components/schemas/WorkloadV2ConfigurationInferenceRouting'
       type: object
     WorkloadV2MetadataCreateParams:
       example:
         preemptibility: preemptible
         configuration:
           mnnvl: mnnvl
+          inferenceRouting:
+            objectivePriority: 0
+            servingPortAuthorizationType: public
+            loadAwareRouting: false
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
           pvcs:
           - metadata:
               name: my-pytorch-pvc
@@ -2481,7 +2821,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2495,7 +2835,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2509,7 +2849,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2523,7 +2863,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2537,7 +2877,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           userCredentials:
             sources:
             - ref: my-hf-token-abc1234567
@@ -2589,6 +2929,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2633,6 +2988,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2677,6 +3047,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2721,6 +3106,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -2765,6 +3165,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           pvcsConfig:
             cleanupOnCompletion: true
@@ -2861,6 +3276,21 @@ components:
           preemptibility: preemptible
           configuration:
             mnnvl: mnnvl
+            inferenceRouting:
+              objectivePriority: 0
+              servingPortAuthorizationType: public
+              loadAwareRouting: false
+              modelRewrites:
+              - model: llama
+                targets:
+                - model: llama-3.1-8b-instruct
+                  weight: 1
+              - model: chat
+                targets:
+                - model: chat-v1
+                  weight: 90
+                - model: chat-v2
+                  weight: 10
             pvcs:
             - metadata:
                 name: my-pytorch-pvc
@@ -2875,7 +3305,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2889,7 +3319,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2903,7 +3333,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2917,7 +3347,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2931,7 +3361,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -2983,6 +3413,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3027,6 +3472,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3071,6 +3531,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3115,6 +3590,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3159,6 +3649,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true
@@ -3424,6 +3929,21 @@ components:
         updatedBy: user@run.ai
         configuration:
           mnnvl: mnnvl
+          inferenceRouting:
+            objectivePriority: 0
+            servingPortAuthorizationType: public
+            loadAwareRouting: false
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
           pvcs:
           - metadata:
               name: my-pytorch-pvc
@@ -3438,7 +3958,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3452,7 +3972,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3466,7 +3986,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3480,7 +4000,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3494,7 +4014,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           userCredentials:
             sources:
             - ref: my-hf-token-abc1234567
@@ -3546,6 +4066,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3590,6 +4125,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3634,6 +4184,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3678,6 +4243,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           - services:
             - authorization:
@@ -3722,6 +4302,21 @@ components:
             externalAccess:
               ingress: "{}"
               route: "{}"
+              inference:
+                rewrites:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                epp:
+                  key: ""
+                objectives:
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
+                - key: ""
               httpRoute: "{}"
           pvcsConfig:
             cleanupOnCompletion: true
@@ -3776,6 +4371,21 @@ components:
           updatedBy: user@run.ai
           configuration:
             mnnvl: mnnvl
+            inferenceRouting:
+              objectivePriority: 0
+              servingPortAuthorizationType: public
+              loadAwareRouting: false
+              modelRewrites:
+              - model: llama
+                targets:
+                - model: llama-3.1-8b-instruct
+                  weight: 1
+              - model: chat
+                targets:
+                - model: chat-v1
+                  weight: 90
+                - model: chat-v2
+                  weight: 10
             pvcs:
             - metadata:
                 name: my-pytorch-pvc
@@ -3790,7 +4400,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3804,7 +4414,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3818,7 +4428,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3832,7 +4442,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3846,7 +4456,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -3898,6 +4508,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3942,6 +4567,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -3986,6 +4626,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -4030,6 +4685,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -4074,6 +4744,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true
@@ -4237,6 +4922,21 @@ components:
             updatedBy: user@run.ai
             configuration:
               mnnvl: mnnvl
+              inferenceRouting:
+                objectivePriority: 0
+                servingPortAuthorizationType: public
+                loadAwareRouting: false
+                modelRewrites:
+                - model: llama
+                  targets:
+                  - model: llama-3.1-8b-instruct
+                    weight: 1
+                - model: chat
+                  targets:
+                  - model: chat-v1
+                    weight: 90
+                  - model: chat-v2
+                    weight: 10
               pvcs:
               - metadata:
                   name: my-pytorch-pvc
@@ -4251,7 +4951,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4265,7 +4965,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4279,7 +4979,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4293,7 +4993,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4307,7 +5007,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               userCredentials:
                 sources:
                 - ref: my-hf-token-abc1234567
@@ -4359,6 +5059,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4403,6 +5118,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4447,6 +5177,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4491,6 +5236,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               - services:
                 - authorization:
@@ -4535,6 +5295,21 @@ components:
                 externalAccess:
                   ingress: "{}"
                   route: "{}"
+                  inference:
+                    rewrites:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    epp:
+                      key: ""
+                    objectives:
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
+                    - key: ""
                   httpRoute: "{}"
               pvcsConfig:
                 cleanupOnCompletion: true
@@ -6318,6 +7093,10 @@ components:
             $ref: '#/components/schemas/ImagePullSecrets'
           labels:
             $ref: '#/components/schemas/Labels'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
+          modelRewrites:
+            $ref: '#/components/schemas/ModelRewrites'
           modelStore:
             $ref: '#/components/schemas/NimServiceSpec_allOf_modelStore'
           multiNode:
@@ -6326,6 +7105,8 @@ components:
             $ref: '#/components/schemas/NimServiceNgcAuthSecret'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -6392,7 +7173,19 @@ components:
         - name: billing
           exclude: false
           value: my-billing-unit
+        loadAwareRouting: null
         priorityClass: null
+        modelRewrites:
+        - model: llama
+          targets:
+          - model: llama-3.1-8b-instruct
+            weight: 1
+        - model: chat
+          targets:
+          - model: chat-v1
+            weight: 90
+          - model: chat-v2
+            weight: 10
         labels:
         - name: stage
           exclude: false
@@ -6423,6 +7216,7 @@ components:
           gpuMemoryPortionRequest: 0.5
           cpuCoreRequest: 0.5
           gpuPortionLimit: 0.5
+        objectivePriority: null
         preemptibility: preemptible
         security:
           runAsGid: 30
@@ -6649,7 +7443,19 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: null
           priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
           labels:
           - name: stage
             exclude: false
@@ -6680,6 +7486,7 @@ components:
             gpuMemoryPortionRequest: 0.5
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
+          objectivePriority: null
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -6865,6 +7672,21 @@ components:
           updatedBy: user@run.ai
           configuration:
             mnnvl: mnnvl
+            inferenceRouting:
+              objectivePriority: 0
+              servingPortAuthorizationType: public
+              loadAwareRouting: false
+              modelRewrites:
+              - model: llama
+                targets:
+                - model: llama-3.1-8b-instruct
+                  weight: 1
+              - model: chat
+                targets:
+                - model: chat-v1
+                  weight: 90
+                - model: chat-v2
+                  weight: 10
             pvcs:
             - metadata:
                 name: my-pytorch-pvc
@@ -6879,7 +7701,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6893,7 +7715,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6907,7 +7729,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6921,7 +7743,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6935,7 +7757,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -6987,6 +7809,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7031,6 +7868,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7075,6 +7927,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7119,6 +7986,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             - services:
               - authorization:
@@ -7163,6 +8045,21 @@ components:
               externalAccess:
                 ingress: "{}"
                 route: "{}"
+                inference:
+                  rewrites:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  epp:
+                    key: ""
+                  objectives:
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
+                  - key: ""
                 httpRoute: "{}"
             pvcsConfig:
               cleanupOnCompletion: true
@@ -7237,7 +8134,19 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: null
           priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
           labels:
           - name: stage
             exclude: false
@@ -7268,6 +8177,7 @@ components:
             gpuMemoryPortionRequest: 0.5
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
+          objectivePriority: null
           preemptibility: preemptible
           security:
             runAsGid: 30
@@ -7561,7 +8471,19 @@ components:
           - name: billing
             exclude: false
             value: my-billing-unit
+          loadAwareRouting: null
           priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
           labels:
           - name: stage
             exclude: false
@@ -7592,6 +8514,7 @@ components:
             gpuMemoryPortionRequest: 0.5
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
+          objectivePriority: null
           preemptibility: preemptible
           security:
             runAsGid: 30

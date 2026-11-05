@@ -1,0 +1,19 @@
+type: object
+description: A rule that maps one requested model name to one or more served model names.
+properties:
+  model:
+    description: The exact model name that clients put in the request body.
+    type: string
+    minLength: 1
+    maxLength: 10000
+    pattern: .*
+  targets:
+    description: The served model names and their traffic shares.
+    type: array
+    items:
+      $ref: "./ModelRewriteTarget.yaml"
+    minItems: 1
+    maxItems: 1000
+required:
+  - model
+  - targets

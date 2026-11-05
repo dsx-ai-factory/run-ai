@@ -1,0 +1,4 @@
+# Preserve verbatim upstream licenses and pinned test manifests.
+NOTICE -whitespace linguist-generated
+test/crds/*.yaml -whitespace linguist-vendored
+config/crd/bases/*.yaml linguist-generated

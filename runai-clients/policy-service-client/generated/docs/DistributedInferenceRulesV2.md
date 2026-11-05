@@ -5,7 +5,10 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Category** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
+**LoadAwareRouting** | Pointer to [**NullableBooleanRules**](BooleanRules.md) |  | [optional] 
+**ModelRewrites** | Pointer to [**NullableArbitraryRules**](ArbitraryRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
+**ObjectivePriority** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibilityRules**](PreemptibilityRules.md) |  | [optional] 
 **PriorityClass** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **RestartPolicy** | Pointer to [**NullableDistributedInferenceRestartPolicyRules**](DistributedInferenceRestartPolicyRules.md) |  | [optional] 
@@ -70,6 +73,76 @@ HasCategory returns a boolean if a field has been set.
 `func (o *DistributedInferenceRulesV2) UnsetCategory()`
 
 UnsetCategory ensures that no value is present for Category, not even an explicit nil
+### GetLoadAwareRouting
+
+`func (o *DistributedInferenceRulesV2) GetLoadAwareRouting() BooleanRules`
+
+GetLoadAwareRouting returns the LoadAwareRouting field if non-nil, zero value otherwise.
+
+### GetLoadAwareRoutingOk
+
+`func (o *DistributedInferenceRulesV2) GetLoadAwareRoutingOk() (*BooleanRules, bool)`
+
+GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLoadAwareRouting
+
+`func (o *DistributedInferenceRulesV2) SetLoadAwareRouting(v BooleanRules)`
+
+SetLoadAwareRouting sets LoadAwareRouting field to given value.
+
+### HasLoadAwareRouting
+
+`func (o *DistributedInferenceRulesV2) HasLoadAwareRouting() bool`
+
+HasLoadAwareRouting returns a boolean if a field has been set.
+
+### SetLoadAwareRoutingNil
+
+`func (o *DistributedInferenceRulesV2) SetLoadAwareRoutingNil(b bool)`
+
+ SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+
+### UnsetLoadAwareRouting
+`func (o *DistributedInferenceRulesV2) UnsetLoadAwareRouting()`
+
+UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+### GetModelRewrites
+
+`func (o *DistributedInferenceRulesV2) GetModelRewrites() ArbitraryRules`
+
+GetModelRewrites returns the ModelRewrites field if non-nil, zero value otherwise.
+
+### GetModelRewritesOk
+
+`func (o *DistributedInferenceRulesV2) GetModelRewritesOk() (*ArbitraryRules, bool)`
+
+GetModelRewritesOk returns a tuple with the ModelRewrites field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetModelRewrites
+
+`func (o *DistributedInferenceRulesV2) SetModelRewrites(v ArbitraryRules)`
+
+SetModelRewrites sets ModelRewrites field to given value.
+
+### HasModelRewrites
+
+`func (o *DistributedInferenceRulesV2) HasModelRewrites() bool`
+
+HasModelRewrites returns a boolean if a field has been set.
+
+### SetModelRewritesNil
+
+`func (o *DistributedInferenceRulesV2) SetModelRewritesNil(b bool)`
+
+ SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+
+### UnsetModelRewrites
+`func (o *DistributedInferenceRulesV2) UnsetModelRewrites()`
+
+UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
 ### GetNodePools
 
 `func (o *DistributedInferenceRulesV2) GetNodePools() ArrayRules`
@@ -105,6 +178,41 @@ HasNodePools returns a boolean if a field has been set.
 `func (o *DistributedInferenceRulesV2) UnsetNodePools()`
 
 UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
+### GetObjectivePriority
+
+`func (o *DistributedInferenceRulesV2) GetObjectivePriority() IntegerRules`
+
+GetObjectivePriority returns the ObjectivePriority field if non-nil, zero value otherwise.
+
+### GetObjectivePriorityOk
+
+`func (o *DistributedInferenceRulesV2) GetObjectivePriorityOk() (*IntegerRules, bool)`
+
+GetObjectivePriorityOk returns a tuple with the ObjectivePriority field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetObjectivePriority
+
+`func (o *DistributedInferenceRulesV2) SetObjectivePriority(v IntegerRules)`
+
+SetObjectivePriority sets ObjectivePriority field to given value.
+
+### HasObjectivePriority
+
+`func (o *DistributedInferenceRulesV2) HasObjectivePriority() bool`
+
+HasObjectivePriority returns a boolean if a field has been set.
+
+### SetObjectivePriorityNil
+
+`func (o *DistributedInferenceRulesV2) SetObjectivePriorityNil(b bool)`
+
+ SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+
+### UnsetObjectivePriority
+`func (o *DistributedInferenceRulesV2) UnsetObjectivePriority()`
+
+UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
 ### GetPreemptibility
 
 `func (o *DistributedInferenceRulesV2) GetPreemptibility() PreemptibilityRules`

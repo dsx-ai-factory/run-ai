@@ -13,10 +13,13 @@ Name | Type | Description | Notes
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicyRules**](ImagePullPolicyRules.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**NullableImagePullSecretsRules**](ImagePullSecretsRules.md) |  | [optional] 
 **Labels** | Pointer to [**NullableInstancesRules**](InstancesRules.md) |  | [optional] 
+**LoadAwareRouting** | Pointer to [**NullableBooleanRules**](BooleanRules.md) |  | [optional] 
+**ModelRewrites** | Pointer to [**NullableArbitraryRules**](ArbitraryRules.md) |  | [optional] 
 **ModelStore** | Pointer to [**NullableNimServiceRulesAllOfModelStore**](NimServiceRulesAllOfModelStore.md) |  | [optional] 
 **MultiNode** | Pointer to [**NullableNimServiceMultiNodeRules**](NimServiceMultiNodeRules.md) |  | [optional] 
 **NgcAuthSecret** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
+**ObjectivePriority** | Pointer to [**NullableIntegerRules**](IntegerRules.md) |  | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibilityRules**](PreemptibilityRules.md) |  | [optional] 
 **PriorityClass** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **Probes** | Pointer to [**NullableProbesRules**](ProbesRules.md) |  | [optional] 
@@ -359,6 +362,76 @@ HasLabels returns a boolean if a field has been set.
 `func (o *NimServiceRules) UnsetLabels()`
 
 UnsetLabels ensures that no value is present for Labels, not even an explicit nil
+### GetLoadAwareRouting
+
+`func (o *NimServiceRules) GetLoadAwareRouting() BooleanRules`
+
+GetLoadAwareRouting returns the LoadAwareRouting field if non-nil, zero value otherwise.
+
+### GetLoadAwareRoutingOk
+
+`func (o *NimServiceRules) GetLoadAwareRoutingOk() (*BooleanRules, bool)`
+
+GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLoadAwareRouting
+
+`func (o *NimServiceRules) SetLoadAwareRouting(v BooleanRules)`
+
+SetLoadAwareRouting sets LoadAwareRouting field to given value.
+
+### HasLoadAwareRouting
+
+`func (o *NimServiceRules) HasLoadAwareRouting() bool`
+
+HasLoadAwareRouting returns a boolean if a field has been set.
+
+### SetLoadAwareRoutingNil
+
+`func (o *NimServiceRules) SetLoadAwareRoutingNil(b bool)`
+
+ SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+
+### UnsetLoadAwareRouting
+`func (o *NimServiceRules) UnsetLoadAwareRouting()`
+
+UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+### GetModelRewrites
+
+`func (o *NimServiceRules) GetModelRewrites() ArbitraryRules`
+
+GetModelRewrites returns the ModelRewrites field if non-nil, zero value otherwise.
+
+### GetModelRewritesOk
+
+`func (o *NimServiceRules) GetModelRewritesOk() (*ArbitraryRules, bool)`
+
+GetModelRewritesOk returns a tuple with the ModelRewrites field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetModelRewrites
+
+`func (o *NimServiceRules) SetModelRewrites(v ArbitraryRules)`
+
+SetModelRewrites sets ModelRewrites field to given value.
+
+### HasModelRewrites
+
+`func (o *NimServiceRules) HasModelRewrites() bool`
+
+HasModelRewrites returns a boolean if a field has been set.
+
+### SetModelRewritesNil
+
+`func (o *NimServiceRules) SetModelRewritesNil(b bool)`
+
+ SetModelRewritesNil sets the value for ModelRewrites to be an explicit nil
+
+### UnsetModelRewrites
+`func (o *NimServiceRules) UnsetModelRewrites()`
+
+UnsetModelRewrites ensures that no value is present for ModelRewrites, not even an explicit nil
 ### GetModelStore
 
 `func (o *NimServiceRules) GetModelStore() NimServiceRulesAllOfModelStore`
@@ -499,6 +572,41 @@ HasNodePools returns a boolean if a field has been set.
 `func (o *NimServiceRules) UnsetNodePools()`
 
 UnsetNodePools ensures that no value is present for NodePools, not even an explicit nil
+### GetObjectivePriority
+
+`func (o *NimServiceRules) GetObjectivePriority() IntegerRules`
+
+GetObjectivePriority returns the ObjectivePriority field if non-nil, zero value otherwise.
+
+### GetObjectivePriorityOk
+
+`func (o *NimServiceRules) GetObjectivePriorityOk() (*IntegerRules, bool)`
+
+GetObjectivePriorityOk returns a tuple with the ObjectivePriority field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetObjectivePriority
+
+`func (o *NimServiceRules) SetObjectivePriority(v IntegerRules)`
+
+SetObjectivePriority sets ObjectivePriority field to given value.
+
+### HasObjectivePriority
+
+`func (o *NimServiceRules) HasObjectivePriority() bool`
+
+HasObjectivePriority returns a boolean if a field has been set.
+
+### SetObjectivePriorityNil
+
+`func (o *NimServiceRules) SetObjectivePriorityNil(b bool)`
+
+ SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+
+### UnsetObjectivePriority
+`func (o *NimServiceRules) UnsetObjectivePriority()`
+
+UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
 ### GetPreemptibility
 
 `func (o *NimServiceRules) GetPreemptibility() PreemptibilityRules`

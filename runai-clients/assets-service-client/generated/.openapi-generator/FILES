@@ -297,6 +297,8 @@ docs/ModelInferenceCreationRequestV2.md
 docs/ModelInferenceCreationRequestV2Assets.md
 docs/ModelInferenceV2.md
 docs/ModelListResponse.md
+docs/ModelRewrite.md
+docs/ModelRewriteTarget.md
 docs/ModelUpdateRequest.md
 docs/MpiLauncherCreationPolicy.md
 docs/NFSAPI.md
@@ -754,6 +756,8 @@ model_model_inference_creation_request_v2.go
 model_model_inference_creation_request_v2_assets.go
 model_model_inference_v2.go
 model_model_list_response.go
+model_model_rewrite.go
+model_model_rewrite_target.go
 model_model_update_request.go
 model_mpi_launcher_creation_policy.go
 model_nfs.go

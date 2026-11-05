@@ -31032,6 +31032,81 @@ components:
             if the number of workers is greater than 0.
           nullable: true
           type: object
+    LoadAwareRouting:
+      default: false
+      description: "Route requests to the serving port through the endpoint picker,\
+        \ which picks a Pod by load. Setting objectivePriority or modelRewrites also\
+        \ enables it."
+      nullable: true
+      type: boolean
+    ModelRewriteTarget:
+      description: One served model name of a model rewrite rule and its traffic share.
+      properties:
+        model:
+          description: The model name sent to the serving pod in place of the requested
+            one.
+          maxLength: 10000
+          minLength: 1
+          pattern: .*
+          type: string
+        weight:
+          description: "The share of requests for this target, relative to the other\
+            \ targets of the same rule. Weights do not need to sum to 100."
+          format: int32
+          minimum: 1
+          type: integer
+      required:
+      - model
+      - weight
+      type: object
+    ModelRewrite:
+      description: A rule that maps one requested model name to one or more served
+        model names.
+      properties:
+        model:
+          description: The exact model name that clients put in the request body.
+          maxLength: 10000
+          minLength: 1
+          pattern: .*
+          type: string
+        targets:
+          description: The served model names and their traffic shares.
+          items:
+            $ref: '#/components/schemas/ModelRewriteTarget'
+          maxItems: 1000
+          minItems: 1
+          type: array
+      required:
+      - model
+      - targets
+      type: object
+    ModelRewrites:
+      description: Model name rewrites that the inference endpoint applies at runtime.
+        Each rule maps a model name that clients request to one or more served model
+        names. One target makes an alias; several targets split traffic by weight.
+      example:
+      - model: llama
+        targets:
+        - model: llama-3.1-8b-instruct
+          weight: 1
+      - model: chat
+        targets:
+        - model: chat-v1
+          weight: 90
+        - model: chat-v2
+          weight: 10
+      items:
+        $ref: '#/components/schemas/ModelRewrite'
+      maxItems: 1000
+      nullable: true
+      type: array
+    ObjectivePriority:
+      description: The priority of this workload's inference objective. The project
+        policy sets the maximum value.
+      format: int32
+      minimum: 0
+      nullable: true
+      type: integer
     DistributedInferenceRestartPolicy:
       default: RecreateGroupOnPodRestart
       description: |
@@ -31191,8 +31266,14 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
+          modelRewrites:
+            $ref: '#/components/schemas/ModelRewrites'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -32466,6 +32547,7 @@ components:
             name: storage-instance-a
             readOnly: true
             exclude: false
+        loadAwareRouting: null
         ports:
         - container: 8080
           serviceType: LoadBalancer
@@ -32502,6 +32584,17 @@ components:
           exclude: false
           toolType: pytorch
           toolName: my-pytorch
+        modelRewrites:
+        - model: llama
+          targets:
+          - model: llama-3.1-8b-instruct
+            weight: 1
+        - model: chat
+          targets:
+          - model: chat-v1
+            weight: 90
+          - model: chat-v2
+            weight: 10
         security:
           privileged: ""
           capabilities:
@@ -32539,6 +32632,7 @@ components:
         completions: 1
         restartPolicy: null
         command: python
+        objectivePriority: null
         args: -x my-script.py
         environmentVariables:
         - podFieldRef:
@@ -35683,6 +35777,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: null
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -35719,6 +35814,17 @@ components:
             exclude: false
             toolType: pytorch
             toolName: my-pytorch
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
           security:
             privileged: ""
             capabilities:
@@ -35756,6 +35862,7 @@ components:
           completions: 1
           restartPolicy: null
           command: python
+          objectivePriority: null
           args: -x my-script.py
           environmentVariables:
           - podFieldRef:
@@ -37643,6 +37750,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -37679,6 +37787,17 @@ components:
               exclude: false
               toolType: pytorch
               toolName: my-pytorch
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
             security:
               privileged: ""
               capabilities:
@@ -37716,6 +37835,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -39614,6 +39734,7 @@ components:
                   name: storage-instance-a
                   readOnly: true
                   exclude: false
+              loadAwareRouting: null
               ports:
               - container: 8080
                 serviceType: LoadBalancer
@@ -39650,6 +39771,17 @@ components:
                 exclude: false
                 toolType: pytorch
                 toolName: my-pytorch
+              modelRewrites:
+              - model: llama
+                targets:
+                - model: llama-3.1-8b-instruct
+                  weight: 1
+              - model: chat
+                targets:
+                - model: chat-v1
+                  weight: 90
+                - model: chat-v2
+                  weight: 10
               security:
                 privileged: ""
                 capabilities:
@@ -39687,6 +39819,7 @@ components:
               completions: 1
               restartPolicy: null
               command: python
+              objectivePriority: null
               args: -x my-script.py
               environmentVariables:
               - podFieldRef:
@@ -41572,6 +41705,7 @@ components:
                   name: storage-instance-a
                   readOnly: true
                   exclude: false
+              loadAwareRouting: null
               ports:
               - container: 8080
                 serviceType: LoadBalancer
@@ -41608,6 +41742,17 @@ components:
                 exclude: false
                 toolType: pytorch
                 toolName: my-pytorch
+              modelRewrites:
+              - model: llama
+                targets:
+                - model: llama-3.1-8b-instruct
+                  weight: 1
+              - model: chat
+                targets:
+                - model: chat-v1
+                  weight: 90
+                - model: chat-v2
+                  weight: 10
               security:
                 privileged: ""
                 capabilities:
@@ -41645,6 +41790,7 @@ components:
               completions: 1
               restartPolicy: null
               command: python
+              objectivePriority: null
               args: -x my-script.py
               environmentVariables:
               - podFieldRef:
@@ -49664,7 +49810,6 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields'
       - $ref: '#/components/schemas/DistributedInferenceWorkerSpecFields'
       example:
-        preemptibility: preemptible
         startupPolicy: LeaderCreated
         leader: "{}"
         servingPort:
@@ -49680,13 +49825,27 @@ components:
           exposeExternally: true
           exposedUrl: exposedUrl
         replicas: 2
+        loadAwareRouting: null
+        priorityClass: null
+        modelRewrites:
+        - model: llama
+          targets:
+          - model: llama-3.1-8b-instruct
+            weight: 1
+        - model: chat
+          targets:
+          - model: chat-v1
+            weight: 90
+          - model: chat-v2
+            weight: 10
+        restartPolicy: RecreateGroupOnPodRestart
+        objectivePriority: null
+        preemptibility: preemptible
         nodePools:
         - my-node-pool-a
         - my-node-pool-b
         category: null
-        priorityClass: null
         worker: "{}"
-        restartPolicy: RecreateGroupOnPodRestart
         workers: 4
     DistributedInferenceSpec:
       description: The specifications of the distributed inference to be created.
@@ -49719,7 +49878,6 @@ components:
         templateId: 550e8400-e29b-41d4-a716-446655440000
         projectId: "1"
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -49735,13 +49893,27 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInference:
       allOf:
@@ -49760,7 +49932,6 @@ components:
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
         projectId: "1"
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -49776,13 +49947,27 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     UpdateSpec:
       description: The specifications of the inference to be updated.
@@ -57994,6 +58179,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: null
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -58030,6 +58216,17 @@ components:
             exclude: false
             toolType: pytorch
             toolName: my-pytorch
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
           security:
             privileged: ""
             capabilities:
@@ -58067,6 +58264,7 @@ components:
           completions: 1
           restartPolicy: null
           command: python
+          objectivePriority: null
           args: -x my-script.py
           environmentVariables:
           - podFieldRef:
@@ -59922,6 +60120,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: null
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -59958,6 +60157,17 @@ components:
             exclude: false
             toolType: pytorch
             toolName: my-pytorch
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
           security:
             privileged: ""
             capabilities:
@@ -59995,6 +60205,7 @@ components:
           completions: 1
           restartPolicy: null
           command: python
+          objectivePriority: null
           args: -x my-script.py
           environmentVariables:
           - podFieldRef:
@@ -61895,6 +62106,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -61931,6 +62143,17 @@ components:
               exclude: false
               toolType: pytorch
               toolName: my-pytorch
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
             security:
               privileged: ""
               capabilities:
@@ -61968,6 +62191,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -63823,6 +64047,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -63859,6 +64084,17 @@ components:
               exclude: false
               toolType: pytorch
               toolName: my-pytorch
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
             security:
               privileged: ""
               capabilities:
@@ -63896,6 +64132,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -65775,6 +66012,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -65811,6 +66049,17 @@ components:
               exclude: false
               toolType: pytorch
               toolName: my-pytorch
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
             security:
               privileged: ""
               capabilities:
@@ -65848,6 +66097,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -67703,6 +67953,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -67739,6 +67990,17 @@ components:
               exclude: false
               toolType: pytorch
               toolName: my-pytorch
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
             security:
               privileged: ""
               capabilities:
@@ -67776,6 +68038,7 @@ components:
             completions: 1
             restartPolicy: null
             command: python
+            objectivePriority: null
             args: -x my-script.py
             environmentVariables:
             - podFieldRef:
@@ -124358,7 +124621,6 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceLeaderTemplateSpecFields'
       - $ref: '#/components/schemas/DistributedInferenceWorkerTemplateSpecFields'
       example:
-        preemptibility: preemptible
         startupPolicy: LeaderCreated
         leader: "{}"
         servingPort:
@@ -124374,13 +124636,27 @@ components:
           exposeExternally: true
           exposedUrl: exposedUrl
         replicas: 2
+        loadAwareRouting: null
+        priorityClass: null
+        modelRewrites:
+        - model: llama
+          targets:
+          - model: llama-3.1-8b-instruct
+            weight: 1
+        - model: chat
+          targets:
+          - model: chat-v1
+            weight: 90
+          - model: chat-v2
+            weight: 10
+        restartPolicy: RecreateGroupOnPodRestart
+        objectivePriority: null
+        preemptibility: preemptible
         nodePools:
         - my-node-pool-a
         - my-node-pool-b
         category: null
-        priorityClass: null
         worker: "{}"
-        restartPolicy: RecreateGroupOnPodRestart
         workers: 4
     DistributedInferenceTemplate:
       allOf:
@@ -124415,7 +124691,6 @@ components:
           workloadType: Workspace
           updatedAt: 2022-01-01T03:49:52.531Z
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124431,16 +124706,29 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
         combinedSpec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124456,13 +124744,27 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInferenceTemplatesListResponseItem:
       allOf:
@@ -124494,7 +124796,6 @@ components:
           rule: min
           details: details
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124510,16 +124811,29 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
         combinedSpec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124535,13 +124849,27 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInferenceTemplatesListResponse:
       example:
@@ -124571,7 +124899,6 @@ components:
             rule: min
             details: details
           spec:
-            preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
             servingPort:
@@ -124587,16 +124914,29 @@ components:
               exposeExternally: true
               exposedUrl: exposedUrl
             replicas: 2
+            loadAwareRouting: null
+            priorityClass: null
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
+            restartPolicy: RecreateGroupOnPodRestart
+            objectivePriority: null
+            preemptibility: preemptible
             nodePools:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            priorityClass: null
             worker: "{}"
-            restartPolicy: RecreateGroupOnPodRestart
             workers: 4
           combinedSpec:
-            preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
             servingPort:
@@ -124612,13 +124952,27 @@ components:
               exposeExternally: true
               exposedUrl: exposedUrl
             replicas: 2
+            loadAwareRouting: null
+            priorityClass: null
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
+            restartPolicy: RecreateGroupOnPodRestart
+            objectivePriority: null
+            preemptibility: preemptible
             nodePools:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            priorityClass: null
             worker: "{}"
-            restartPolicy: RecreateGroupOnPodRestart
             workers: 4
         - runnable:
             isRunnable: false
@@ -124645,7 +124999,6 @@ components:
             rule: min
             details: details
           spec:
-            preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
             servingPort:
@@ -124661,16 +125014,29 @@ components:
               exposeExternally: true
               exposedUrl: exposedUrl
             replicas: 2
+            loadAwareRouting: null
+            priorityClass: null
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
+            restartPolicy: RecreateGroupOnPodRestart
+            objectivePriority: null
+            preemptibility: preemptible
             nodePools:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            priorityClass: null
             worker: "{}"
-            restartPolicy: RecreateGroupOnPodRestart
             workers: 4
           combinedSpec:
-            preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
             servingPort:
@@ -124686,13 +125052,27 @@ components:
               exposeExternally: true
               exposedUrl: exposedUrl
             replicas: 2
+            loadAwareRouting: null
+            priorityClass: null
+            modelRewrites:
+            - model: llama
+              targets:
+              - model: llama-3.1-8b-instruct
+                weight: 1
+            - model: chat
+              targets:
+              - model: chat-v1
+                weight: 90
+              - model: chat-v2
+                weight: 10
+            restartPolicy: RecreateGroupOnPodRestart
+            objectivePriority: null
+            preemptibility: preemptible
             nodePools:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            priorityClass: null
             worker: "{}"
-            restartPolicy: RecreateGroupOnPodRestart
             workers: 4
         pagination:
           offset: 6.027456183070403
@@ -124719,7 +125099,6 @@ components:
           name: my-template-name
           description: description of my template.
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124735,13 +125114,27 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInferenceTemplateUpdateRequest:
       allOf:
@@ -124755,7 +125148,6 @@ components:
           name: my-template-name
           description: description of my template.
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124771,13 +125163,27 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInferenceTemplatePatchRequest:
       allOf:
@@ -124795,7 +125201,6 @@ components:
         - spec.image
         - spec.image
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124811,13 +125216,27 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          modelRewrites:
+          - model: llama
+            targets:
+            - model: llama-3.1-8b-instruct
+              weight: 1
+          - model: chat
+            targets:
+            - model: chat-v1
+              weight: 90
+            - model: chat-v2
+              weight: 10
+          restartPolicy: RecreateGroupOnPodRestart
+          objectivePriority: null
+          preemptibility: preemptible
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     UnifiedWorkloadRequest:
       description: parameters for unified workload request workloadType and projectId
@@ -125329,8 +125748,14 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
+          modelRewrites:
+            $ref: '#/components/schemas/ModelRewrites'
           nodePools:
             $ref: '#/components/schemas/NodePools'
+          objectivePriority:
+            $ref: '#/components/schemas/ObjectivePriority'
           preemptibility:
             $ref: '#/components/schemas/Preemptibility'
           priorityClass:
@@ -126508,8 +126933,14 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/StringRules'
+          loadAwareRouting:
+            $ref: '#/components/schemas/BooleanRules'
+          modelRewrites:
+            $ref: '#/components/schemas/ArbitraryRules'
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
+          objectivePriority:
+            $ref: '#/components/schemas/IntegerRules'
           preemptibility:
             $ref: '#/components/schemas/PreemptibilityRules'
           priorityClass:

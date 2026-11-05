@@ -1,0 +1,98 @@
+# Track A step 2 · ✅ pod owner's job. On the page this is "Run:ai schedules vLLM pods".
+# Here: 3 CPU-only vLLM simulators. The ONLY contract with the routing stack is the label app: vllm-llama3.
+#
+# The sim answers to model "llama3" and to LoRA "llama3-v2", so the Phase 1 canary rewrite has a real target.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-llama3
+  namespace: model-serving
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: vllm-llama3
+  template:
+    metadata:
+      labels:
+        app: vllm-llama3                                   # <- InferencePool selector matches this
+        inference.networking.k8s.io/engine-type: vllm      # label GIE v1.5 EPP uses to pick the vLLM parser
+        llm-d.ai/engine-type: vllm                         # same thing, llm-d v0.10 naming (for the EPP swap test)
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+      - name: vllm-sim
+        image: ghcr.io/llm-d/llm-d-inference-sim:v0.11.2
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          readOnlyRootFilesystem: true
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop: [ALL]
+        args:
+        - --model
+        - llama3
+        - --port
+        - "8000"
+        - --max-loras
+        - "2"
+        - --lora-modules
+        - '{"name": "llama3-v2"}'
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        resources:
+          requests:
+            cpu: 50m
+            memory: 64Mi
+          limits:
+            memory: 256Mi
+        # --- Optional step 6b: make Run:ai the pod owner on fake GPUs. ---
+        # The sim never touches CUDA, so requesting a fake GPU only exercises scheduling.
+        # Uncomment the three blocks below (resources.limits, schedulerName, labels) and
+        # create a Run:ai project first.
+        #   resources:
+        #     limits:
+        #       nvidia.com/gpu: 1
+      # schedulerName: runai-scheduler
+      # (and add to template.metadata.labels)  runai/queue: <project-name>
+
+---
+# The simulator only accepts model traffic from the lab Gateway and metrics
+# scrapes from EPP pods in this namespace. It requires no outbound connections.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: vllm-llama3
+  namespace: model-serving
+spec:
+  podSelector:
+    matchLabels:
+      app: vllm-llama3
+  policyTypes: [Ingress, Egress]
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          gateway.networking.k8s.io/gateway-name: inference-agw
+    - podSelector:
+        matchLabels:
+          inference.networking.k8s.io/igw-mode: inferencepool
+    ports:
+    - protocol: TCP
+      port: 8000
+  egress: []

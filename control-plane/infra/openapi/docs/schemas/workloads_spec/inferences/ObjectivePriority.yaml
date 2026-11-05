@@ -1,0 +1,5 @@
+description: The priority of this workload's inference objective. The project policy sets the maximum value.
+type: integer
+format: int32
+minimum: 0
+nullable: true

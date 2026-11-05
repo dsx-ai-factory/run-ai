@@ -24,9 +24,15 @@ var _ MappedNullable = &DistributedInferenceTemplateSpec{}
 type DistributedInferenceTemplateSpec struct {
 	// Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform.
 	Category NullableString `json:"category,omitempty" validate:"regexp=.*"`
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
+	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+	ModelRewrites []ModelRewrite `json:"modelRewrites,omitempty"`
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
-	NodePools      []string               `json:"nodePools,omitempty"`
-	Preemptibility NullablePreemptibility `json:"preemptibility,omitempty"`
+	NodePools []string `json:"nodePools,omitempty"`
+	// The priority of this workload's inference objective. The project policy sets the maximum value.
+	ObjectivePriority NullableInt32          `json:"objectivePriority,omitempty"`
+	Preemptibility    NullablePreemptibility `json:"preemptibility,omitempty"`
 	// Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
 	PriorityClass NullableString                            `json:"priorityClass,omitempty" validate:"regexp=.*"`
 	RestartPolicy NullableDistributedInferenceRestartPolicy `json:"restartPolicy,omitempty"`
@@ -48,6 +54,8 @@ type DistributedInferenceTemplateSpec struct {
 // will change when the set of required properties is changed
 func NewDistributedInferenceTemplateSpec() *DistributedInferenceTemplateSpec {
 	this := DistributedInferenceTemplateSpec{}
+	var loadAwareRouting bool = false
+	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
@@ -64,6 +72,8 @@ func NewDistributedInferenceTemplateSpec() *DistributedInferenceTemplateSpec {
 // but it doesn't guarantee that properties required by API are set
 func NewDistributedInferenceTemplateSpecWithDefaults() *DistributedInferenceTemplateSpec {
 	this := DistributedInferenceTemplateSpec{}
+	var loadAwareRouting bool = false
+	this.LoadAwareRouting = *NewNullableBool(&loadAwareRouting)
 	var restartPolicy DistributedInferenceRestartPolicy = DISTRIBUTEDINFERENCERESTARTPOLICY_RECREATE_GROUP_ON_POD_RESTART
 	this.RestartPolicy = *NewNullableDistributedInferenceRestartPolicy(&restartPolicy)
 	var startupPolicy DistributedInferenceStartupPolicy = DISTRIBUTEDINFERENCESTARTUPPOLICY_LEADER_CREATED
@@ -118,6 +128,82 @@ func (o *DistributedInferenceTemplateSpec) UnsetCategory() {
 	o.Category.Unset()
 }
 
+// GetLoadAwareRouting returns the LoadAwareRouting field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceTemplateSpec) GetLoadAwareRouting() bool {
+	if o == nil || IsNil(o.LoadAwareRouting.Get()) {
+		var ret bool
+		return ret
+	}
+	return *o.LoadAwareRouting.Get()
+}
+
+// GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceTemplateSpec) GetLoadAwareRoutingOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.LoadAwareRouting.Get(), o.LoadAwareRouting.IsSet()
+}
+
+// HasLoadAwareRouting returns a boolean if a field has been set.
+func (o *DistributedInferenceTemplateSpec) HasLoadAwareRouting() bool {
+	if o != nil && o.LoadAwareRouting.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLoadAwareRouting gets a reference to the given NullableBool and assigns it to the LoadAwareRouting field.
+func (o *DistributedInferenceTemplateSpec) SetLoadAwareRouting(v bool) {
+	o.LoadAwareRouting.Set(&v)
+}
+
+// SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+func (o *DistributedInferenceTemplateSpec) SetLoadAwareRoutingNil() {
+	o.LoadAwareRouting.Set(nil)
+}
+
+// UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+func (o *DistributedInferenceTemplateSpec) UnsetLoadAwareRouting() {
+	o.LoadAwareRouting.Unset()
+}
+
+// GetModelRewrites returns the ModelRewrites field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceTemplateSpec) GetModelRewrites() []ModelRewrite {
+	if o == nil {
+		var ret []ModelRewrite
+		return ret
+	}
+	return o.ModelRewrites
+}
+
+// GetModelRewritesOk returns a tuple with the ModelRewrites field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceTemplateSpec) GetModelRewritesOk() ([]ModelRewrite, bool) {
+	if o == nil || IsNil(o.ModelRewrites) {
+		return nil, false
+	}
+	return o.ModelRewrites, true
+}
+
+// HasModelRewrites returns a boolean if a field has been set.
+func (o *DistributedInferenceTemplateSpec) HasModelRewrites() bool {
+	if o != nil && !IsNil(o.ModelRewrites) {
+		return true
+	}
+
+	return false
+}
+
+// SetModelRewrites gets a reference to the given []ModelRewrite and assigns it to the ModelRewrites field.
+func (o *DistributedInferenceTemplateSpec) SetModelRewrites(v []ModelRewrite) {
+	o.ModelRewrites = v
+}
+
 // GetNodePools returns the NodePools field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *DistributedInferenceTemplateSpec) GetNodePools() []string {
 	if o == nil {
@@ -149,6 +235,49 @@ func (o *DistributedInferenceTemplateSpec) HasNodePools() bool {
 // SetNodePools gets a reference to the given []string and assigns it to the NodePools field.
 func (o *DistributedInferenceTemplateSpec) SetNodePools(v []string) {
 	o.NodePools = v
+}
+
+// GetObjectivePriority returns the ObjectivePriority field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceTemplateSpec) GetObjectivePriority() int32 {
+	if o == nil || IsNil(o.ObjectivePriority.Get()) {
+		var ret int32
+		return ret
+	}
+	return *o.ObjectivePriority.Get()
+}
+
+// GetObjectivePriorityOk returns a tuple with the ObjectivePriority field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceTemplateSpec) GetObjectivePriorityOk() (*int32, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.ObjectivePriority.Get(), o.ObjectivePriority.IsSet()
+}
+
+// HasObjectivePriority returns a boolean if a field has been set.
+func (o *DistributedInferenceTemplateSpec) HasObjectivePriority() bool {
+	if o != nil && o.ObjectivePriority.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetObjectivePriority gets a reference to the given NullableInt32 and assigns it to the ObjectivePriority field.
+func (o *DistributedInferenceTemplateSpec) SetObjectivePriority(v int32) {
+	o.ObjectivePriority.Set(&v)
+}
+
+// SetObjectivePriorityNil sets the value for ObjectivePriority to be an explicit nil
+func (o *DistributedInferenceTemplateSpec) SetObjectivePriorityNil() {
+	o.ObjectivePriority.Set(nil)
+}
+
+// UnsetObjectivePriority ensures that no value is present for ObjectivePriority, not even an explicit nil
+func (o *DistributedInferenceTemplateSpec) UnsetObjectivePriority() {
+	o.ObjectivePriority.Unset()
 }
 
 // GetPreemptibility returns the Preemptibility field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -551,8 +680,17 @@ func (o DistributedInferenceTemplateSpec) ToMap() (map[string]interface{}, error
 	if o.Category.IsSet() {
 		toSerialize["category"] = o.Category.Get()
 	}
+	if o.LoadAwareRouting.IsSet() {
+		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
+	}
+	if o.ModelRewrites != nil {
+		toSerialize["modelRewrites"] = o.ModelRewrites
+	}
 	if o.NodePools != nil {
 		toSerialize["nodePools"] = o.NodePools
+	}
+	if o.ObjectivePriority.IsSet() {
+		toSerialize["objectivePriority"] = o.ObjectivePriority.Get()
 	}
 	if o.Preemptibility.IsSet() {
 		toSerialize["preemptibility"] = o.Preemptibility.Get()

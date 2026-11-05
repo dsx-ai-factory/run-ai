@@ -73,6 +73,18 @@ type NimServiceDefaults struct {
 	Labels *LabelsDefaults `json:"labels,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. Setting objectivePriority or modelRewrites also enables it.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRouting *bool `json:"loadAwareRouting,omitempty"`
+	LoadAwareRouting *bool `json:"loadAwareRouting,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Model name rewrites that the inference endpoint applies at runtime. Each rule maps a model name that clients request to one or more served model names. One target makes an alias; several targets split traffic by weight.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ModelRewrites *[]ModelRewrite `json:"modelRewrites,omitempty"`
+	ModelRewrites *[]ModelRewrite `json:"modelRewrites,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ModelStore *NimServiceDefaultsAllOfModelStore `json:"modelStore,omitempty"`
 	ModelStore *NimServiceDefaultsAllOfModelStore `json:"modelStore,omitempty" gorm:"serializer:json; type:jsonb;"`
@@ -93,6 +105,12 @@ type NimServiceDefaults struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//NodePools *[]string `json:"nodePools,omitempty"`
 	NodePools *[]string `json:"nodePools,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The priority of this workload's inference objective. The project policy sets the maximum value.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ObjectivePriority *int32 `json:"objectivePriority,omitempty"`
+	ObjectivePriority *int32 `json:"objectivePriority,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -163,6 +181,13 @@ func AssertNimServiceDefaultsRequired(obj NimServiceDefaults) error {
 	if obj.Labels != nil {
 		if err := AssertLabelsDefaultsRequired(*obj.Labels); err != nil {
 			return err
+		}
+	}
+	if obj.ModelRewrites != nil {
+		for _, el := range *obj.ModelRewrites {
+			if err := AssertModelRewriteRequired(el); err != nil {
+				return err
+			}
 		}
 	}
 	if obj.ModelStore != nil {
@@ -298,6 +323,26 @@ func AssertNimServiceDefaultsConstraints(obj NimServiceDefaults) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxItemsErr := runaihttp.AssertMaxItems(obj.ModelRewrites, "ModelRewrites", 1000); maxItemsErr != nil {
+		return &ParsingError{Param: "ModelRewrites", Err: maxItemsErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ModelRewrites != nil {
+		for _, el := range *obj.ModelRewrites {
+			if err := AssertModelRewriteConstraints(el); err != nil {
+				return err
+			}
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.ModelStore != nil {
 		if err := AssertNimServiceDefaultsAllOfModelStoreConstraints(*obj.ModelStore); err != nil {
 			return err
@@ -325,6 +370,14 @@ func AssertNimServiceDefaultsConstraints(obj NimServiceDefaults) error {
 	if maxItemsErr := runaihttp.AssertMaxItems(obj.NodePools, "NodePools", 1000); maxItemsErr != nil {
 		return &ParsingError{Param: "NodePools", Err: maxItemsErr}
 	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ObjectivePriority != nil && *obj.ObjectivePriority < 0 {
+		return &ParsingError{Param: "ObjectivePriority", Err: errors.New(errMsgMinValueConstraint)}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 

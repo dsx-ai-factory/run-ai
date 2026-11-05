@@ -1,0 +1,15 @@
+# Track A step 6 · 🔜 Phase 1. The page's "priority lane" for the llama3 model.
+# The GIE v1alpha2 InferenceObjective has no model field; the EPP looks the lane up by object
+# name from the x-gateway-inference-objective request header. Requests in this lane are served
+# before priority-0 requests (the value used when no lane is named) when the pool is saturated.
+apiVersion: inference.networking.x-k8s.io/v1alpha2
+kind: InferenceObjective
+metadata:
+  name: llama3-objective-llama3
+  namespace: model-serving
+spec:
+  poolRef:
+    group: inference.networking.k8s.io
+    kind: InferencePool
+    name: llama3-pool
+  priority: 10

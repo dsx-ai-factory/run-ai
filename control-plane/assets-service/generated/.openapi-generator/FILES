@@ -309,6 +309,8 @@ pkg/api/model_model_inference_creation_request_v2.go
 pkg/api/model_model_inference_creation_request_v2_assets.go
 pkg/api/model_model_inference_v2.go
 pkg/api/model_model_list_response.go
+pkg/api/model_model_rewrite.go
+pkg/api/model_model_rewrite_target.go
 pkg/api/model_model_update_request.go
 pkg/api/model_mpi_launcher_creation_policy.go
 pkg/api/model_nfs.go

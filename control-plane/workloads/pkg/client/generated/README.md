@@ -552,6 +552,8 @@ Class | Method | HTTP request | Description
  - [MetricThresholdPercentageField](docs/MetricThresholdPercentageField.md)
  - [MetricsCompositeResponse](docs/MetricsCompositeResponse.md)
  - [MetricsResponse](docs/MetricsResponse.md)
+ - [ModelRewrite](docs/ModelRewrite.md)
+ - [ModelRewriteTarget](docs/ModelRewriteTarget.md)
  - [MpiLauncherCreationPolicy](docs/MpiLauncherCreationPolicy.md)
  - [MpiLauncherCreationPolicyOptions](docs/MpiLauncherCreationPolicyOptions.md)
  - [MpiLauncherCreationPolicyOptionsOptionsInner](docs/MpiLauncherCreationPolicyOptionsOptionsInner.md)

@@ -7,8 +7,10 @@ package controller
 
 import (
 	"context"
+	"encoding/json"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/networking"
 	clusterconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
@@ -27,14 +29,18 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	networkingv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes/scheme"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	gatewayv1 "sigs.k8s.io/gateway-api/apis/v1"
 	jobsetv1alpha2 "sigs.k8s.io/jobset/api/jobset/v1alpha2"
 )
 
@@ -452,6 +458,141 @@ var _ = Describe("Networking Plugin Endpoints (annotation-driven) Integration Te
 			Eventually(func() error {
 				return k8sClient.Get(managerCtx, types.NamespacedName{Name: "annot-only-svc", Namespace: endpointsNs}, &corev1.Service{})
 			}, timeout, interval).Should(Succeed())
+		})
+	})
+
+	Context("inference routing", func() {
+		BeforeEach(func() {
+			_ = os.Setenv(workloadconfig.EnvVarGatewayName, "runai-gateway")
+			_ = os.Setenv(workloadconfig.EnvVarGatewayNamespace, "runai")
+			DeferCleanup(func() {
+				_ = os.Unsetenv(workloadconfig.EnvVarGatewayName)
+				_ = os.Unsetenv(workloadconfig.EnvVarGatewayNamespace)
+			})
+		})
+
+		inferenceConfig := func(workloadName string, epp string) *endpoints.Config {
+			pathType := gatewayv1.PathMatchPathPrefix
+			gatewayNamespace := gatewayv1.Namespace("runai")
+			port := gatewayv1.PortNumber(8000)
+			return &endpoints.Config{Endpoints: []endpoints.Endpoint{{
+				Services: []endpoints.Service{makeEndpointService(workloadName+"-leader", 8000, workloadName)},
+				ExternalAccess: &endpoints.ExternalAccess{
+					HTTPRoute: &gatewayv1.HTTPRoute{
+						ObjectMeta: metav1.ObjectMeta{Name: workloadName},
+						Spec: gatewayv1.HTTPRouteSpec{
+							CommonRouteSpec: gatewayv1.CommonRouteSpec{ParentRefs: []gatewayv1.ParentReference{{
+								Name: "runai-gateway", Namespace: &gatewayNamespace,
+							}}},
+							Hostnames: []gatewayv1.Hostname{gatewayv1.Hostname(workloadName + ".example.com")},
+							Rules: []gatewayv1.HTTPRouteRule{{
+								Matches: []gatewayv1.HTTPRouteMatch{{Path: &gatewayv1.HTTPPathMatch{Type: &pathType, Value: ptr.To("/")}}},
+								BackendRefs: []gatewayv1.HTTPBackendRef{{BackendRef: gatewayv1.BackendRef{
+									BackendObjectReference: gatewayv1.BackendObjectReference{
+										Name: gatewayv1.ObjectName(workloadName + "-leader"), Port: &port,
+									},
+								}}},
+							}},
+						},
+					},
+					Inference: &endpoints.InferenceConfig{Epp: json.RawMessage(epp)},
+				},
+			}}}
+		}
+		networkingStatus := func(runner *dromosv1alpha1.WorkloadRunner) *dromosv1alpha1.PluginStatus {
+			Expect(k8sClient.Get(managerCtx, client.ObjectKeyFromObject(runner), runner)).To(Succeed())
+			return runner.Status.Plugins[networking.PluginName]
+		}
+		readyCondition := func(runner *dromosv1alpha1.WorkloadRunner) metav1.ConditionStatus {
+			status := networkingStatus(runner)
+			if status == nil {
+				return ""
+			}
+			if condition := meta.FindStatusCondition(status.Conditions, endpoints.InferenceEndpointReadyCondition); condition != nil {
+				return condition.Status
+			}
+			return ""
+		}
+
+		It("creates, repairs, reports and removes the InferenceEndpoint through the networking plugin", func() {
+			workloadName := "inference-model"
+			jobset := test.NewJobSetBuilder(workloadName, endpointsNs).WithDefault().Build()
+			_ = createKartaWithStatus(managerCtx, k8sClient, newKartaWithValidStatus(test.NewValidJobSetKarta()))
+			runner := createEndpointsRunner(managerCtx, k8sClient, "runner-inference", endpointsNs, jobset,
+				inferenceConfig(workloadName, `{"profile":"gie-v1.5"}`))
+
+			name, err := endpoints.InferenceEndpointName(runner)
+			Expect(err).NotTo(HaveOccurred())
+			key := types.NamespacedName{Namespace: endpointsNs, Name: name}
+			inferenceEndpoint := &unstructured.Unstructured{}
+			inferenceEndpoint.SetGroupVersionKind(endpoints.InferenceEndpointGVK)
+			Eventually(func() error { return k8sClient.Get(managerCtx, key, inferenceEndpoint) }, timeout, interval).Should(Succeed())
+			Expect(metav1.IsControlledBy(inferenceEndpoint, runner)).To(BeTrue())
+			Expect(inferenceEndpoint.Object["spec"]).To(HaveKeyWithValue("routing", map[string]any{
+				"gatewayRef":        map[string]any{"name": "runai-gateway", "namespace": "runai"},
+				"hostnames":         []any{workloadName + ".example.com"},
+				"defaultBackendRef": map[string]any{"name": workloadName + "-leader", "port": int64(8000)},
+			}))
+			Eventually(func() error {
+				return k8sClient.Get(managerCtx, types.NamespacedName{Name: workloadName + "-leader", Namespace: endpointsNs}, &corev1.Service{})
+			}, timeout, interval).Should(Succeed())
+			Eventually(readyCondition).WithArguments(runner).WithTimeout(timeout).WithPolling(interval).
+				Should(Equal(metav1.ConditionFalse))
+
+			inferenceEndpoint.Object["status"] = map[string]any{
+				"observedGeneration": inferenceEndpoint.GetGeneration(),
+				"conditions": []any{map[string]any{
+					"type": "Ready", "status": "True", "observedGeneration": inferenceEndpoint.GetGeneration(),
+					"reason": "RouteAccepted", "message": "routing ready", "lastTransitionTime": metav1.Now().Format(time.RFC3339),
+				}},
+			}
+			Expect(k8sClient.Status().Update(managerCtx, inferenceEndpoint)).To(Succeed())
+			Eventually(readyCondition).WithArguments(runner).WithTimeout(timeout).WithPolling(interval).
+				Should(Equal(metav1.ConditionTrue))
+
+			previousUID := inferenceEndpoint.GetUID()
+			Expect(k8sClient.Delete(managerCtx, inferenceEndpoint)).To(Succeed())
+			Eventually(func() bool {
+				err := k8sClient.Get(managerCtx, key, inferenceEndpoint)
+				return err == nil && inferenceEndpoint.GetUID() != previousUID
+			}, timeout, interval).Should(BeTrue())
+
+			Eventually(func() error {
+				if err := k8sClient.Get(managerCtx, client.ObjectKeyFromObject(runner), runner); err != nil {
+					return err
+				}
+				generation := runner.Generation
+				if err := endpoints.Set(runner, &endpoints.Config{Endpoints: []endpoints.Endpoint{{
+					Services: []endpoints.Service{makeEndpointService(workloadName+"-leader", 8000, workloadName)},
+				}}}); err != nil {
+					return err
+				}
+				if err := k8sClient.Update(managerCtx, runner); err != nil {
+					return err
+				}
+				Expect(runner.Generation).To(Equal(generation))
+				return nil
+			}, timeout, interval).Should(Succeed())
+			Eventually(func() bool {
+				return errors.IsNotFound(k8sClient.Get(managerCtx, key, inferenceEndpoint))
+			}, timeout, interval).Should(BeTrue())
+			Expect(k8sClient.Get(managerCtx, client.ObjectKeyFromObject(jobset), &jobsetv1alpha2.JobSet{})).To(Succeed())
+		})
+
+		It("reports EPP fields the installed CRD does not define instead of reapplying pruned intent", func() {
+			workloadName := "inference-invalid"
+			jobset := test.NewJobSetBuilder(workloadName, endpointsNs).WithDefault().Build()
+			_ = createKartaWithStatus(managerCtx, k8sClient, newKartaWithValidStatus(test.NewValidJobSetKarta()))
+			runner := createEndpointsRunner(managerCtx, k8sClient, "runner-inference-invalid", endpointsNs, jobset,
+				inferenceConfig(workloadName, `{"profile":"gie-v1.5","unknownOption":true}`))
+
+			Eventually(func() dromosv1alpha1.PluginPhase {
+				if status := networkingStatus(runner); status != nil {
+					return status.Phase
+				}
+				return ""
+			}, timeout, interval).Should(Equal(dromosv1alpha1.PluginPhaseFailed))
+			Expect(readyCondition(runner)).To(Equal(metav1.ConditionFalse))
 		})
 	})
 })

@@ -63,6 +63,10 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsDefaults.yaml
     labels:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/LabelsDefaults.yaml
+    loadAwareRouting:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml
+    modelRewrites:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ModelRewrites.yaml
     modelStore:
       nullable: true
       properties:
@@ -77,6 +81,8 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/nim_services/NimServiceNgcAuthSecret.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodePools.yaml
+    objectivePriority:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/ObjectivePriority.yaml
     preemptibility:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/Preemptibility.yaml
     priorityClass:

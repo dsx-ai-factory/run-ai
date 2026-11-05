@@ -68,6 +68,16 @@ type NimServiceRules struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRouting *BooleanRules `json:"loadAwareRouting,omitempty"`
+	LoadAwareRouting *BooleanRules `json:"loadAwareRouting,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ModelRewrites *ArbitraryRules `json:"modelRewrites,omitempty"`
+	ModelRewrites *ArbitraryRules `json:"modelRewrites,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ModelStore *NimServiceRulesAllOfModelStore `json:"modelStore,omitempty"`
 	ModelStore *NimServiceRulesAllOfModelStore `json:"modelStore,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -85,6 +95,11 @@ type NimServiceRules struct {
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//NodePools *ArrayRules `json:"nodePools,omitempty"`
 	NodePools *ArrayRules `json:"nodePools,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ObjectivePriority *IntegerRules `json:"objectivePriority,omitempty"`
+	ObjectivePriority *IntegerRules `json:"objectivePriority,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -170,6 +185,16 @@ func AssertNimServiceRulesRequired(obj NimServiceRules) error {
 			return err
 		}
 	}
+	if obj.LoadAwareRouting != nil {
+		if err := AssertBooleanRulesRequired(*obj.LoadAwareRouting); err != nil {
+			return err
+		}
+	}
+	if obj.ModelRewrites != nil {
+		if err := AssertArbitraryRulesRequired(*obj.ModelRewrites); err != nil {
+			return err
+		}
+	}
 	if obj.ModelStore != nil {
 		if err := AssertNimServiceRulesAllOfModelStoreRequired(*obj.ModelStore); err != nil {
 			return err
@@ -187,6 +212,11 @@ func AssertNimServiceRulesRequired(obj NimServiceRules) error {
 	}
 	if obj.NodePools != nil {
 		if err := AssertArrayRulesRequired(*obj.NodePools); err != nil {
+			return err
+		}
+	}
+	if obj.ObjectivePriority != nil {
+		if err := AssertIntegerRulesRequired(*obj.ObjectivePriority); err != nil {
 			return err
 		}
 	}
@@ -325,6 +355,26 @@ func AssertNimServiceRulesConstraints(obj NimServiceRules) error {
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.LoadAwareRouting != nil {
+		if err := AssertBooleanRulesConstraints(*obj.LoadAwareRouting); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ModelRewrites != nil {
+		if err := AssertArbitraryRulesConstraints(*obj.ModelRewrites); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	if obj.ModelStore != nil {
 		if err := AssertNimServiceRulesAllOfModelStoreConstraints(*obj.ModelStore); err != nil {
 			return err
@@ -357,6 +407,16 @@ func AssertNimServiceRulesConstraints(obj NimServiceRules) error {
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.NodePools != nil {
 		if err := AssertArrayRulesConstraints(*obj.NodePools); err != nil {
+			return err
+		}
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.ObjectivePriority != nil {
+		if err := AssertIntegerRulesConstraints(*obj.ObjectivePriority); err != nil {
 			return err
 		}
 	}

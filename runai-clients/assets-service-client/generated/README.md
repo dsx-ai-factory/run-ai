@@ -474,6 +474,8 @@ Class | Method | HTTP request | Description
  - [ModelInferenceCreationRequestV2Assets](docs/ModelInferenceCreationRequestV2Assets.md)
  - [ModelInferenceV2](docs/ModelInferenceV2.md)
  - [ModelListResponse](docs/ModelListResponse.md)
+ - [ModelRewrite](docs/ModelRewrite.md)
+ - [ModelRewriteTarget](docs/ModelRewriteTarget.md)
  - [ModelUpdateRequest](docs/ModelUpdateRequest.md)
  - [MpiLauncherCreationPolicy](docs/MpiLauncherCreationPolicy.md)
  - [NFSAsset](docs/NFSAsset.md)

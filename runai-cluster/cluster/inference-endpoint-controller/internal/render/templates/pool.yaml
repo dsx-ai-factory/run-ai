@@ -1,0 +1,24 @@
+# Derived from test/testdata/golden/03-inferencepool.yaml. Type is upstream GIE, the instance is ours.
+apiVersion: inference.networking.k8s.io/v1
+kind: InferencePool
+metadata:
+  name: {{ printf "%s-pool" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+spec:
+  selector:
+    matchLabels:
+{{- range $k, $v := .Selector }}
+      {{ $k | toJSON }}: {{ $v | toJSON }}
+{{- end }}
+  targetPorts:
+  - number: {{ .Port }}
+  appProtocol: http
+  endpointPickerRef:
+    name: {{ printf "%s-epp" .Name | toJSON }}
+    port:
+      number: 9002                    # agentgateway requires the port to be explicit
+{{- if .RuntimeProfiles }}
+    failureMode: FailClose            # never silently bypass the selected scheduling profile
+{{- else }}
+    failureMode: FailOpen             # if the EPP is down, fall back to plain routing instead of 5xx
+{{- end }}
