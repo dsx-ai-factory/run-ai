@@ -107,6 +107,7 @@ func StartExternalWorkloadIntegrator(ctx context.Context, stopCh <-chan struct{}
 	setupWorkloadRunnerWatcher(ctx, cachedClient, externalWorkloadHandler)
 	// The Run:ai Inference and DistributedInference calculators consume pod status directly.
 	setupRunaiStatusPodWatcher(ctx, cachedClient, externalWorkloadHandler)
+	setupKartaStatusWatcher(ctx, cachedClient, externalWorkloadHandler)
 
 	go cachedClient.StartInformers(ctx)
 
@@ -148,6 +149,8 @@ func processNextItem(ctx context.Context, ewh *ExternalWorkloadHandler) bool {
 
 	log.Debug().Msgf("Start Task <%s> for <%s>", task.GetOperation(), task.GVK.String())
 	switch task.GetOperation() {
+	case string(utils.RefreshKartaOperation):
+		ewh.retryOrForget(task, ewh.refreshKartaWorkloads(ctx, task))
 	case string(utils.AddOperation):
 		obj, err := ewh.GetFreshObject(ctx, task.Key, task.GVK)
 		if err != nil || utils.IsObjectNilOrEmpty(obj) {
