@@ -28,7 +28,7 @@ runai inference update <workload-name> -p <project-name> --max-replicas=5 --min-
       --cpu-memory-limit string                    Maximum memory allowed (e.g. 1G, 500M).
       --cpu-memory-request string                  Amount of memory to request (e.g. 1G, 500M).
       --create-home-dir                            Create a temporary home directory for the container. Defaults to true when --run-as-user is set, false otherwise.
-      --environment stringArray                    Specifies the environment asset to use for the workload.
+      --environment string                         Specifies the environment asset to use for the workload.
   -e, --environment-variable stringArray           Set environment variables in the container. Format: --environment-variable name=value --environment-variable name-b=value-b.
       --exclude-node stringArray                   Nodes that will be excluded from use by the scheduler. Format: --exclude-node node-a --exclude-node node-b
       --extended-resource stringArray              Request access to a Kubernetes extended resource. Format: resource_name=quantity.
