@@ -41,6 +41,7 @@ const (
 )
 
 type Fields struct {
+	GpuType          *string  `json:"gpuType,omitempty"`
 	Image            *string  `json:"image,omitempty"`
 	NgcAuthSecret    *string  `json:"ngcAuthSecret,omitempty"`
 	Category         *string  `json:"category,omitempty"`
@@ -186,6 +187,7 @@ func BuildFromSpec(spec *nimclient.NimServiceSpec) *Fields {
 	}
 
 	builder := NewBuilder()
+	builder.fields.GpuType = spec.GpuType.Get()
 
 	if spec.Image.IsSet() {
 		builder.Image(spec.GetImage())

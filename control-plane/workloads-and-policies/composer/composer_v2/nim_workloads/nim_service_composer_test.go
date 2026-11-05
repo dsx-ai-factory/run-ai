@@ -9,6 +9,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	corev1 "k8s.io/api/core/v1"
 	"os"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
@@ -702,6 +703,39 @@ var _ = Describe("NimServiceComposer", func() {
 			RunNimServiceComposerTest(testDetails, ".")
 		}, NimServiceComposerTests)
 	})
+
+	Context("GPU type placement", func() {
+		It("places the NIM on the requested product without replacing other selectors", func() {
+			input, err := os.ReadFile("testing/inputs/image_with_tag.yaml")
+			Expect(err).NotTo(HaveOccurred())
+			var spec api.NimServiceSpec
+			Expect(yaml.Unmarshal(input, &spec)).To(Succeed())
+			Expect(json.Unmarshal([]byte(`{"gpuType":"NVIDIA-H100-80GB-HBM3"}`), &spec)).To(Succeed())
+			cluster := mockClustersClientInfo("test-cluster", false, "", false, "nvidia", "3.0.0")
+			converter := NewNimServiceComposer("test-workload", "tester", cluster, "test-project", composer.OptionsForNimService())
+			actual := nimv1alpha1.NIMServiceSpec{NodeSelector: map[string]string{"existing": "restriction"}}
+			Expect(converter.Compose(context.Background(), &spec, &actual)()).To(BeNil())
+			Expect(actual.Affinity).NotTo(BeNil())
+			Expect(actual.Affinity.NodeAffinity.RequiredDuringSchedulingIgnoredDuringExecution.NodeSelectorTerms).To(Equal([]corev1.NodeSelectorTerm{{MatchExpressions: []corev1.NodeSelectorRequirement{{Key: composer.NvidiaGPUProductLabel, Operator: corev1.NodeSelectorOpIn, Values: []string{"NVIDIA-H100-80GB-HBM3"}}}}}))
+			Expect(actual.NodeSelector).To(Equal(map[string]string{
+				"existing": "restriction",
+			}))
+		})
+	})
+
+	DescribeTable("rejects invalid GPU product labels", func(gpuType string) {
+		input, err := os.ReadFile("testing/inputs/image_with_tag.yaml")
+		Expect(err).NotTo(HaveOccurred())
+		var spec api.NimServiceSpec
+		Expect(yaml.Unmarshal(input, &spec)).To(Succeed())
+		spec.SetGpuType(gpuType)
+		cluster := mockClustersClientInfo("test-cluster", false, "", false, "nvidia", "3.0.0")
+		converter := NewNimServiceComposer("test-workload", "tester", cluster, "test-project", composer.OptionsForNimService())
+		var actual nimv1alpha1.NIMServiceSpec
+		failure := converter.Compose(context.Background(), &spec, &actual)()
+		Expect(failure).NotTo(BeNil())
+		Expect(failure.Error()).To(ContainSubstring("gpuType"))
+	}, Entry("empty", ""), Entry("display name with spaces", "NVIDIA H100"), Entry("label key instead of value", "nvidia.com/gpu.product"))
 
 	Context("serialized replica configuration", func() {
 		DescribeTable("preserves the replica configuration accepted by NIM", func(tc NimReplicaCompositionTest) {

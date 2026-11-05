@@ -27,6 +27,7 @@ type NimServiceRules struct {
 	Category             NullableStringRules                     `json:"category,omitempty"`
 	Compute              NullableNimServiceRulesAllOfCompute     `json:"compute,omitempty"`
 	EnvironmentVariables NullableInstancesRules                  `json:"environmentVariables,omitempty"`
+	GpuType              NullableStringRules                     `json:"gpuType,omitempty"`
 	Image                NullableStringRules                     `json:"image,omitempty"`
 	ImagePullPolicy      NullableImagePullPolicyRules            `json:"imagePullPolicy,omitempty"`
 	ImagePullSecrets     NullableImagePullSecretsRules           `json:"imagePullSecrets,omitempty"`
@@ -274,6 +275,49 @@ func (o *NimServiceRules) SetEnvironmentVariablesNil() {
 // UnsetEnvironmentVariables ensures that no value is present for EnvironmentVariables, not even an explicit nil
 func (o *NimServiceRules) UnsetEnvironmentVariables() {
 	o.EnvironmentVariables.Unset()
+}
+
+// GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NimServiceRules) GetGpuType() StringRules {
+	if o == nil || IsNil(o.GpuType.Get()) {
+		var ret StringRules
+		return ret
+	}
+	return *o.GpuType.Get()
+}
+
+// GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NimServiceRules) GetGpuTypeOk() (*StringRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.GpuType.Get(), o.GpuType.IsSet()
+}
+
+// HasGpuType returns a boolean if a field has been set.
+func (o *NimServiceRules) HasGpuType() bool {
+	if o != nil && o.GpuType.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetGpuType gets a reference to the given NullableStringRules and assigns it to the GpuType field.
+func (o *NimServiceRules) SetGpuType(v StringRules) {
+	o.GpuType.Set(&v)
+}
+
+// SetGpuTypeNil sets the value for GpuType to be an explicit nil
+func (o *NimServiceRules) SetGpuTypeNil() {
+	o.GpuType.Set(nil)
+}
+
+// UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
+func (o *NimServiceRules) UnsetGpuType() {
+	o.GpuType.Unset()
 }
 
 // GetImage returns the Image field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -945,6 +989,9 @@ func (o NimServiceRules) ToMap() (map[string]interface{}, error) {
 	}
 	if o.EnvironmentVariables.IsSet() {
 		toSerialize["environmentVariables"] = o.EnvironmentVariables.Get()
+	}
+	if o.GpuType.IsSet() {
+		toSerialize["gpuType"] = o.GpuType.Get()
 	}
 	if o.Image.IsSet() {
 		toSerialize["image"] = o.Image.Get()

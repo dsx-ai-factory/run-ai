@@ -29,6 +29,7 @@ Name | Type | Description | Notes
 **DistributedFramework** | Pointer to [**NullableDistributedFramework**](DistributedFramework.md) |  | [optional] 
 **EnvironmentVariables** | Pointer to [**[]EnvironmentVariable**](EnvironmentVariable.md) | Set of environment variables to populate into the container running the workload. | [optional] 
 **ExposedUrls** | Pointer to [**[]ExposedUrl**](ExposedUrl.md) | Set of container ports that the workload exposes via URLs. | [optional] 
+**GpuType** | Pointer to **NullableString** | Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload. | [optional]
 **Image** | Pointer to **NullableString** | Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload. | [optional] 
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicy**](ImagePullPolicy.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**[]ImagePullSecret**](ImagePullSecret.md) | A list of references to Kubernetes secrets in the same namespace used for pulling container images. | [optional] 
@@ -950,6 +951,41 @@ HasExposedUrls returns a boolean if a field has been set.
 `func (o *SupersetSpec) UnsetExposedUrls()`
 
 UnsetExposedUrls ensures that no value is present for ExposedUrls, not even an explicit nil
+### GetGpuType
+
+`func (o *SupersetSpec) GetGpuType() string`
+
+GetGpuType returns the GpuType field if non-nil, zero value otherwise.
+
+### GetGpuTypeOk
+
+`func (o *SupersetSpec) GetGpuTypeOk() (*string, bool)`
+
+GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetGpuType
+
+`func (o *SupersetSpec) SetGpuType(v string)`
+
+SetGpuType sets GpuType field to given value.
+
+### HasGpuType
+
+`func (o *SupersetSpec) HasGpuType() bool`
+
+HasGpuType returns a boolean if a field has been set.
+
+### SetGpuTypeNil
+
+`func (o *SupersetSpec) SetGpuTypeNil(b bool)`
+
+ SetGpuTypeNil sets the value for GpuType to be an explicit nil
+
+### UnsetGpuType
+`func (o *SupersetSpec) UnsetGpuType()`
+
+UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
 ### GetImage
 
 `func (o *SupersetSpec) GetImage() string`

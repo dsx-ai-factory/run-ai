@@ -208,15 +208,11 @@ func clampPageSize(pageSize int32) int32 {
 }
 
 func GetNodeLister(domain, token string) (*BackendNodeService, error) {
-	var err error
-	if lister == nil {
-		lister, err = clients.NewClusterService(domain, token)
-		if err != nil {
-			return nil, err
-		}
+	if lister != nil {
 		return NewBackendNodeService(lister), nil
 	}
-	return NewBackendNodeService(lister), nil
+	// Keep real clients scoped to the current credentials; lister is for test injection.
+	return CreateBackendNodeService(domain, token)
 }
 
 func GetNodeList(ctx context.Context, domain, token, clusterUuid string, opts apilist.PageOptions) (*list.Output, error) {

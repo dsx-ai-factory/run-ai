@@ -55,6 +55,8 @@ allOf:
       type: object
     environmentVariables:
       $ref: ../workloads_spec/container/EnvironmentVariables.yaml
+    gpuType:
+      $ref: ../workloads_spec/resources/GpuType.yaml
     image:
       $ref: ../workloads_spec/container/Image.yaml
     imagePullPolicy:

@@ -1,0 +1,20 @@
+suite: Workloads manager catalog URL
+
+templates:
+  - templates/workloads-manager/configmap.yaml
+
+tests:
+  - it: uses default catalog service URL
+    asserts:
+      - equal:
+          path: data.CATALOG_SERVICE_URL
+          value: http://runai-backend-catalog-service:8080
+  - it: follows customized prefix, catalog name, and port
+    set:
+      fullnameOverride: custom-cp
+      catalogService.name: custom-catalog
+      catalogService.service.port: 9097
+    asserts:
+      - equal:
+          path: data.CATALOG_SERVICE_URL
+          value: http://custom-cp-custom-catalog:9097

@@ -5295,6 +5295,12 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
     /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof FallbackPolicyDefaultsAndRulesDefaults
+     */
+    'gpuType'?: string | null;
+    /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
@@ -5602,6 +5608,12 @@ export interface FallbackPolicyDefaultsAndRulesRules {
      * @memberof FallbackPolicyDefaultsAndRulesRules
      */
     'exposedUrls'?: ExposedUrlsRules | null;
+    /**
+     *
+     * @type {StringRules}
+     * @memberof FallbackPolicyDefaultsAndRulesRules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -9638,6 +9650,12 @@ export interface NimServiceDefaults {
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
     /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof NimServiceDefaults
+     */
+    'gpuType'?: string | null;
+    /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
      * @memberof NimServiceDefaults
@@ -9764,6 +9782,12 @@ export interface NimServiceDefaultsAllOf {
      * @memberof NimServiceDefaultsAllOf
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
+    /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof NimServiceDefaultsAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -10167,6 +10191,12 @@ export interface NimServicePolicyDefaultsAndRulesDefaults {
      */
     'environmentVariables'?: EnvironmentVariablesDefaults | null;
     /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof NimServicePolicyDefaultsAndRulesDefaults
+     */
+    'gpuType'?: string | null;
+    /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
      * @memberof NimServicePolicyDefaultsAndRulesDefaults
@@ -10293,6 +10323,12 @@ export interface NimServicePolicyDefaultsAndRulesRules {
      * @memberof NimServicePolicyDefaultsAndRulesRules
      */
     'environmentVariables'?: InstancesRules | null;
+    /**
+     *
+     * @type {StringRules}
+     * @memberof NimServicePolicyDefaultsAndRulesRules
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -10471,6 +10507,12 @@ export interface NimServiceRules {
      */
     'environmentVariables'?: InstancesRules | null;
     /**
+     *
+     * @type {StringRules}
+     * @memberof NimServiceRules
+     */
+    'gpuType'?: StringRules | null;
+    /**
      * 
      * @type {StringRules}
      * @memberof NimServiceRules
@@ -10597,6 +10639,12 @@ export interface NimServiceRulesAllOf {
      * @memberof NimServiceRulesAllOf
      */
     'environmentVariables'?: InstancesRules | null;
+    /**
+     *
+     * @type {StringRules}
+     * @memberof NimServiceRulesAllOf
+     */
+    'gpuType'?: StringRules | null;
     /**
      * 
      * @type {StringRules}
@@ -15324,6 +15372,12 @@ export interface SupersetDefaults {
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
     /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof SupersetDefaults
+     */
+    'gpuType'?: string | null;
+    /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
      * @memberof SupersetDefaults
@@ -15559,6 +15613,12 @@ export interface SupersetDefaultsAllOf {
      * @memberof SupersetDefaultsAllOf
      */
     'exposedUrls'?: ExposedUrlsDefaults | null;
+    /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof SupersetDefaultsAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
@@ -16156,6 +16216,12 @@ export interface SupersetRules {
      */
     'exposedUrls'?: ExposedUrlsRules | null;
     /**
+     *
+     * @type {StringRules}
+     * @memberof SupersetRules
+     */
+    'gpuType'?: StringRules | null;
+    /**
      * 
      * @type {StringRules}
      * @memberof SupersetRules
@@ -16392,6 +16458,12 @@ export interface SupersetRulesAllOf {
     'exposedUrls'?: ExposedUrlsRules | null;
     /**
      * 
+     * @type {StringRules}
+     * @memberof SupersetRulesAllOf
+     */
+    'gpuType'?: StringRules | null;
+    /**
+     *
      * @type {StringRules}
      * @memberof SupersetRulesAllOf
      */

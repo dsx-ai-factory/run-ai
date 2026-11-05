@@ -11379,6 +11379,13 @@ components:
         - XGBoost
         - JAX
       nullable: true
+    GpuType:
+      description: Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+      type: string
+      nullable: true
+      minLength: 1
+      maxLength: 63
+      pattern: ^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$
     MaxReplicas:
       description: the upper limit for the number of worker pods that can be set by the autoscaler. Cannot be smaller than MinReplicas. (applicable only for PyTorch)
       type: integer
@@ -11539,6 +11546,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariables'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrls'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -14732,6 +14741,8 @@ components:
               $ref: '#/components/schemas/EnvironmentVariablesDefaults'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsDefaults'
+            gpuType:
+              $ref: '#/components/schemas/GpuType'
             image:
               $ref: '#/components/schemas/Image'
             imagePullPolicy:
@@ -16191,6 +16202,8 @@ components:
               $ref: '#/components/schemas/InstancesRules'
             exposedUrls:
               $ref: '#/components/schemas/ExposedUrlsRules'
+            gpuType:
+              $ref: '#/components/schemas/StringRules'
             image:
               $ref: '#/components/schemas/StringRules'
             imagePullPolicy:
