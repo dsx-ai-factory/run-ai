@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Description** | Pointer to **NullableString** | The description of the node pool. | [optional] 
 **LabelKey** | Pointer to **NullableString** | Label key for associated nodes to the Node Pool (with value as in labelValue) | [optional] 
 **LabelValue** | Pointer to **NullableString** | Label value for associated nodes to the Node Pool (with key as in labelKey) | [optional] 
 **SchedulingCapabilities** | Pointer to [**SchedulingCapabilitiesNullable**](SchedulingCapabilitiesNullable.md) |  | [optional] 
@@ -31,6 +32,41 @@ NewNodepoolUpdateFieldsWithDefaults instantiates a new NodepoolUpdateFields obje
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
+### GetDescription
+
+`func (o *NodepoolUpdateFields) GetDescription() string`
+
+GetDescription returns the Description field if non-nil, zero value otherwise.
+
+### GetDescriptionOk
+
+`func (o *NodepoolUpdateFields) GetDescriptionOk() (*string, bool)`
+
+GetDescriptionOk returns a tuple with the Description field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetDescription
+
+`func (o *NodepoolUpdateFields) SetDescription(v string)`
+
+SetDescription sets Description field to given value.
+
+### HasDescription
+
+`func (o *NodepoolUpdateFields) HasDescription() bool`
+
+HasDescription returns a boolean if a field has been set.
+
+### SetDescriptionNil
+
+`func (o *NodepoolUpdateFields) SetDescriptionNil(b bool)`
+
+ SetDescriptionNil sets the value for Description to be an explicit nil
+
+### UnsetDescription
+`func (o *NodepoolUpdateFields) UnsetDescription()`
+
+UnsetDescription ensures that no value is present for Description, not even an explicit nil
 ### GetLabelKey
 
 `func (o *NodepoolUpdateFields) GetLabelKey() string`
