@@ -36,6 +36,7 @@ import (
 	"errors"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
@@ -171,7 +172,7 @@ func ComputeKey(pod *corev1.Pod) (string, error) {
 	// which plain concatenation would allow.
 	digest := sha256.New()
 	for _, part := range [][]byte{[]byte(Version), []byte(scope), shape} {
-		fmt.Fprintf(digest, "%d:", len(part))
+		digest.Write([]byte(strconv.Itoa(len(part)) + ":"))
 		digest.Write(part)
 	}
 
@@ -246,7 +247,6 @@ func stripContainer(container *corev1.Container) {
 	container.Lifecycle = nil
 
 	container.VolumeMounts = keptMounts(container.VolumeMounts)
-
 }
 
 // stripScheduling removes where the pod runs. Scheduling is not part of the

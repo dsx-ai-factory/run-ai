@@ -124,8 +124,8 @@ func TestSnapshotRestoreWebhookShape(t *testing.T) {
 	if got := hook.ClientConfig.Service.Name; got != "anyworkload-controller" {
 		t.Errorf("service = %q, want anyworkload-controller", got)
 	}
-	if got := ptr.Deref(hook.ClientConfig.Service.Path, ""); got != snapshotRestoreWebhookPath {
-		t.Errorf("path = %q, want %q", got, snapshotRestoreWebhookPath)
+	if got := ptr.Deref(hook.ClientConfig.Service.Path, ""); got != constants.SnapshotRestoreWebhookPath {
+		t.Errorf("path = %q, want %q", got, constants.SnapshotRestoreWebhookPath)
 	}
 }
 
