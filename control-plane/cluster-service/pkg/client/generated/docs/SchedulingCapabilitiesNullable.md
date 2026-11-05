@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **Ranks** | Pointer to **NullableBool** | Whether to allow ranks for the nodepool&#39;s resources. | [optional] [default to true]
 **Quota** | Pointer to **NullableBool** | Whether to allow GPU quota for the nodepool&#39;s resources. | [optional] [default to true]
 **CpuQuota** | Pointer to **NullableBool** | Whether to allow CPU quota for the nodepool&#39;s resources. Only allowed when allowQuota&#x3D;true. | [optional] [default to false]
+**Limits** | Pointer to **NullableBool** | Whether to allow GPU, CPU and memory limits for the nodepool&#39;s resources. Only allowed when quota&#x3D;true. | [optional] [default to true]
 
 ## Methods
 
@@ -168,6 +169,41 @@ HasCpuQuota returns a boolean if a field has been set.
 `func (o *SchedulingCapabilitiesNullable) UnsetCpuQuota()`
 
 UnsetCpuQuota ensures that no value is present for CpuQuota, not even an explicit nil
+### GetLimits
+
+`func (o *SchedulingCapabilitiesNullable) GetLimits() bool`
+
+GetLimits returns the Limits field if non-nil, zero value otherwise.
+
+### GetLimitsOk
+
+`func (o *SchedulingCapabilitiesNullable) GetLimitsOk() (*bool, bool)`
+
+GetLimitsOk returns a tuple with the Limits field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLimits
+
+`func (o *SchedulingCapabilitiesNullable) SetLimits(v bool)`
+
+SetLimits sets Limits field to given value.
+
+### HasLimits
+
+`func (o *SchedulingCapabilitiesNullable) HasLimits() bool`
+
+HasLimits returns a boolean if a field has been set.
+
+### SetLimitsNil
+
+`func (o *SchedulingCapabilitiesNullable) SetLimitsNil(b bool)`
+
+ SetLimitsNil sets the value for Limits to be an explicit nil
+
+### UnsetLimits
+`func (o *SchedulingCapabilitiesNullable) UnsetLimits()`
+
+UnsetLimits ensures that no value is present for Limits, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

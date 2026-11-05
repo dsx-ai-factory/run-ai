@@ -16289,6 +16289,7 @@ components:
         - RANKS_TO_DEFAULT
         - WEIGHTS_TO_DEFAULT
         - WEIGHTS_TO_DESERVED
+        - LIMITS_TO_DEFAULT
     DepartmentsResourcesResetRequest:
       type: object
       required:

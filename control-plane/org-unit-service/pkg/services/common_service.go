@@ -306,6 +306,7 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 	cpuQuotaFlag := npSchedulingCapabilities.CpuQuota
 	quotaFlag := npSchedulingCapabilities.Quota
 	ranksFlag := npSchedulingCapabilities.Ranks
+	limitsFlag := npSchedulingCapabilities.Limits
 
 	if quotaFlag && nodePoolResources.Gpu.Deserved == nil {
 		return nil, fmt.Errorf("quota is enabled on nodepool id <%s>. GPU deserved is required", nodepoolId)
@@ -314,6 +315,10 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 	gpuDeserved := ptr.Deref(nodePoolResources.Gpu.Deserved, 0)
 	if !quotaFlag && (gpuDeserved > 0 || (nodePoolResources.Gpu.Limit != nil && *nodePoolResources.Gpu.Limit != -1)) {
 		return nil, fmt.Errorf("quota is not enabled on nodepool id <%s>. GPU deserved should be 0 or omitted, and GPU limit should be -1, null or omitted", nodepoolId)
+	}
+
+	if !limitsFlag && hasNodePoolResourcesLimit(nodePoolResources) {
+		return nil, fmt.Errorf("limits are not enabled on nodepool id <%s>. GPU, CPU and memory limits should be -1, null or omitted", nodepoolId)
 	}
 
 	if !adjustableWeightsFlag && nodePoolResources.Gpu.OverQuotaWeight != nil && !IsValidNonAdjustableOverQuotaWeight(*nodePoolResources.Gpu.OverQuotaWeight, &gpuDeserved) {
@@ -349,6 +354,13 @@ func validateNodePoolResources(nodePoolResources api.ResourcesNullable, nodePool
 	}
 
 	return deservedLimitPairs, nil
+}
+
+func hasNodePoolResourcesLimit(nodePoolResources api.ResourcesNullable) bool {
+	isLimited := func(limit *float64) bool { return limit != nil && *limit != -1 }
+	return isLimited(nodePoolResources.Gpu.Limit) ||
+		(nodePoolResources.Cpu != nil && isLimited(nodePoolResources.Cpu.Limit)) ||
+		(nodePoolResources.Memory != nil && isLimited(nodePoolResources.Memory.Limit))
 }
 
 func ValidateResources(ctx context.Context, resources []api.ResourcesNullable, nodePoolsMetadata map[string]apiClusters.NodepoolMinimal) error {
@@ -402,6 +414,7 @@ func defaultSchedulingCapabilities() *apiClusters.SchedulingCapabilities {
 		CpuQuota:          false,
 		Quota:             true,
 		Ranks:             true,
+		Limits:            true,
 	}
 }
 

@@ -1047,6 +1047,9 @@ func validateSchedulingMode(nodepool models.Nodepool) error {
 	if nodepool.AllowCpuQuota && !nodepool.AllowQuota {
 		return fmt.Errorf("SchedulingCapabilities.CpuQuota can only be enabled when SchedulingCapabilities.Quota is enabled")
 	}
+	if nodepool.AllowLimits && !nodepool.AllowQuota {
+		return fmt.Errorf("SchedulingCapabilities.Limits can only be enabled when SchedulingCapabilities.Quota is enabled")
+	}
 	return nil
 }
 

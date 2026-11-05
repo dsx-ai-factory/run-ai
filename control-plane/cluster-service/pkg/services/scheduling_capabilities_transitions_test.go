@@ -190,7 +190,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
 
-		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false)})
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(false)})
 		Expect(response.Code).To(Equal(http.StatusBadRequest))
 		Expect(storedCapabilities(np.Id).Quota).To(BeTrue())
 	})
@@ -202,7 +202,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 			{Type: ptr.To("department"), Name: ptr.To("research")},
 		}, nil)
 
-		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false)})
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(false)})
 		Expect(response.Code).To(Equal(http.StatusBadRequest))
 		message := response.Body.(api.Error).Message
 		Expect(message).To(ContainSubstring("project team-a, department research"))
@@ -217,7 +217,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 			{Type: ptr.To("project"), Name: ptr.To("team-a")},
 		}, nil)
 
-		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false)})
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false), Limits: ptr.To(false)})
 		Expect(response.Code).To(Equal(http.StatusBadRequest))
 		orgClient.AssertNotCalled(GinkgoT(), "NodePoolResetResources", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
 		Expect(storedCapabilities(np.Id).CpuQuota).To(BeTrue())
@@ -227,14 +227,52 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
 		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, nil, nil)
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
 
-		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false)})
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false), Limits: ptr.To(false)})
 		Expect(response.Code).To(Equal(http.StatusOK))
 
 		stored := storedCapabilities(np.Id)
 		Expect(stored.Quota).To(BeFalse())
 		Expect(stored.CpuQuota).To(BeFalse())
+		Expect(stored.Limits).To(BeFalse())
+	})
+
+	It("refuses to turn limits off while org units have limits, and lists them", func() {
+		np := createNodepool(clusterId)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, []openapi.OrgUnitsNodepoolSummaryInner{
+			{Type: ptr.To("project"), Name: ptr.To("team-c")},
+		}, nil)
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusBadRequest))
+		message := response.Body.(api.Error).Message
+		Expect(message).To(ContainSubstring("project team-c"))
+		Expect(message).To(ContainSubstring("LIMITS_TO_DEFAULT"))
+		Expect(storedCapabilities(np.Id).Limits).To(BeTrue())
+	})
+
+	It("turns limits off and on again when no org unit has limits", func() {
+		np := createNodepool(clusterId)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, nil, nil)
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusOK))
+		Expect(storedCapabilities(np.Id).Limits).To(BeFalse())
+
+		response = patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Limits: ptr.To(true)})
+		Expect(response.Code).To(Equal(http.StatusOK))
+		Expect(storedCapabilities(np.Id).Limits).To(BeTrue())
+	})
+
+	It("refuses to turn quota off while limits stays on", func() {
+		np := createNodepool(clusterId)
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusBadRequest))
+		Expect(storedCapabilities(np.Id).Quota).To(BeTrue())
+		Expect(storedCapabilities(np.Id).Limits).To(BeTrue())
 	})
 
 	It("refuses to turn ranks off while org units have a non-default rank", func() {

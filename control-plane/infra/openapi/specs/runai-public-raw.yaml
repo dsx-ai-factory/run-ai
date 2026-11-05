@@ -28602,6 +28602,14 @@ components:
           example: false
           default: false
           nullable: true
+        limits:
+          type: boolean
+          description: >-
+            Whether to allow GPU, CPU and memory limits for the nodepool's
+            resources. Only allowed when quota=true.
+          example: false
+          default: true
+          nullable: true
     DefaultNodepoolConfig:
       type: object
       x-internal: true
@@ -28858,6 +28866,7 @@ components:
         - ranks
         - quota
         - cpuQuota
+        - limits
       properties:
         adjustableWeights:
           type: boolean
@@ -28881,6 +28890,13 @@ components:
             allowed when allowQuota=true.
           example: false
           default: false
+        limits:
+          type: boolean
+          description: >-
+            Whether to allow GPU, CPU and memory limits for the nodepool's
+            resources. Only allowed when quota=true.
+          example: false
+          default: true
     NodepoolGPUNetworkAccelerationDetection:
       type: string
       enum:
@@ -30850,6 +30866,7 @@ components:
       enum:
         - HAS_QUOTA
         - NON_DEFAULT_RANK
+        - HAS_LIMIT
     OrgUnitsNodepoolSummary:
       type: array
       description: >-
@@ -32528,6 +32545,7 @@ components:
         - RANKS_TO_DEFAULT
         - WEIGHTS_TO_DEFAULT
         - WEIGHTS_TO_DESERVED
+        - LIMITS_TO_DEFAULT
     DepartmentsResourcesResetRequest:
       type: object
       required:
