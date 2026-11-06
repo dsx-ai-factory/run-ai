@@ -139,7 +139,6 @@ Release cadence, branch naming, and who cuts a release are documented in [Releas
 - **[Support](SUPPORT.md)** - Supported versions and where to get help, including commercial support.
 - **Slack** - `#run-ai` in the DSX AI Factory workspace. [Get an invite](https://inviter.co/dsx-ai-factory).
 - **Mailing list** - [run-ai@dsxaifactory.com](https://groups.google.com/a/dsxaifactory.com/g/run-ai) for announcements and meeting invites.
-- **Community meeting** - Public and recorded. Dates will be announced on the mailing list.
 - **Meeting notes and recordings** - [Meeting notes](https://docs.google.com/document/d/1JbbBnGL-E0OS0pH0bjf7OSCYNRJyyMpzSkg2s12qHcc/edit), [recordings](https://drive.google.com/drive/folders/1YDLcF6aOM9d2WbAy5iXJ_6Xry5H4B30Z).
 
 ## Security & Support
