@@ -10,6 +10,7 @@ import (
 	"fmt"
 
 	clustercommonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/resourceutils/resources"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
@@ -173,6 +174,24 @@ func GetPodResources(pod *corev1.Pod) (*ResourcesInfo, *ResourcesInfo) {
 
 	requests, limits := getPodResources(podTemplateSpec)
 	return parseResources(requests), parseResources(limits)
+}
+
+// AddDRAGpus adds supported DRA GPU counts to the Pod's requested and limit
+// GPU values. Existing GPU-memory values are preserved.
+// Lookup errors are returned without changing either resource value.
+func AddDRAGpus(ctx context.Context, pod *corev1.Pod, draParser *dra.DRAParser, requestedResources, resourceLimits *ResourcesInfo) error {
+	if draParser == nil || len(pod.Spec.ResourceClaims) == 0 {
+		return nil
+	}
+
+	draGpus, err := draParser.ResolvePodRequestedGpuCount(ctx, pod)
+	if err != nil {
+		return fmt.Errorf("failed resolving DRA GPUs of pod <%s/%s>: %w", pod.Namespace, pod.Name, err)
+	}
+
+	requestedResources.Gpus += float64(draGpus)
+	resourceLimits.Gpus += float64(draGpus)
+	return nil
 }
 
 func parseResources(resources corev1.ResourceList) *ResourcesInfo {

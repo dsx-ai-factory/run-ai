@@ -20,6 +20,7 @@ import (
 	dinfw "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
 	infwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/inferenceworkload/v2alpha1"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra"
 	scheme_init "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/scheme-init"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
 	diwv2 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedworkload/v2alpha1"
@@ -27,7 +28,7 @@ import (
 	twv2a1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/trainingworkload/v2alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/node"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/pod"
-	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/podGroup"
+	podgroup "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/podGroup"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/controller/workload"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/metrics"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-exporter/pkg/metrics/data"
@@ -37,11 +38,15 @@ import (
 	. "github.com/onsi/gomega"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
+	dto "github.com/prometheus/client_model/go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	corev1 "k8s.io/api/core/v1"
+	resourcev1 "k8s.io/api/resource/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	kubefake "k8s.io/client-go/kubernetes/fake"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
@@ -298,7 +303,7 @@ var _ = Describe("TestWorkloadExporter", Ordered, func() {
 		}).Build()
 		err := k8sClient.Create(ctx, getWorkloadsConfigMapEntity())
 		Expect(err).To(BeNil())
-		podController = pod.NewPodController(k8sClient)
+		podController = pod.NewPodController(k8sClient, nil)
 		pgController = podgroup.NewPodGroupController(k8sClient)
 		nodeController = node.NewNodeController(k8sClient)
 
@@ -594,6 +599,226 @@ var _ = Describe("TestWorkloadExporter", Ordered, func() {
 
 		gauge1, _ := metrics.GetPodElementsMetric().GetMetricWithLabelValues(pod.Name, pod.Namespace, string(pod.UID), "elem-wl-id", "e1-uuid", "1")
 		Expect(testutil.ToFloat64(gauge1)).To(BeEquivalentTo(0))
+	})
+
+	// Pods that request GPUs through DRA claims (their pod spec has no GPU resource).
+	draClaimSpec := func(gpus int64) resourcev1.ResourceClaimSpec {
+		return resourcev1.ResourceClaimSpec{Devices: resourcev1.DeviceClaim{Requests: []resourcev1.DeviceRequest{{
+			Name: "gpu",
+			Exactly: &resourcev1.ExactDeviceRequest{
+				DeviceClassName: "gpu.nvidia.com",
+				AllocationMode:  resourcev1.DeviceAllocationModeExactCount,
+				Count:           gpus,
+			},
+		}}}}
+	}
+	claimByName := func(claimName string) corev1.PodResourceClaim {
+		return corev1.PodResourceClaim{Name: "gpu", ResourceClaimName: ptr.To(claimName)}
+	}
+	claimFromTemplate := func(templateName string) corev1.PodResourceClaim {
+		return corev1.PodResourceClaim{Name: "gpu", ResourceClaimTemplateName: ptr.To(templateName)}
+	}
+	newDRAController := func(claimReadFailures *int) *pod.PodController {
+		var claimReader client.Reader = k8sClient
+		if claimReadFailures != nil {
+			claimReader = failingClaimReader{Reader: k8sClient, failures: claimReadFailures}
+		}
+		return pod.NewPodController(k8sClient, dra.NewDRAParser(claimReader, kubefake.NewClientset()))
+	}
+	newDRAPod := func(name, node, phase string, claimRefs ...corev1.PodResourceClaim) *corev1.Pod {
+		draPod := buildPod(name, TestNamespaceName, name+"-workload-id", node, phase)
+		// The GPUs of a DRA pod come from its claims, not from the pod spec.
+		delete(draPod.Spec.Containers[0].Resources.Requests, constants.GpuResourceName)
+		delete(draPod.Spec.Containers[0].Resources.Limits, constants.GpuResourceName)
+		draPod.Spec.ResourceClaims = claimRefs
+		for _, claimRef := range claimRefs {
+			draPod.Spec.Containers[0].Resources.Claims = append(draPod.Spec.Containers[0].Resources.Claims,
+				corev1.ResourceClaim{Name: claimRef.Name})
+		}
+		return draPod
+	}
+	createDRATemplate := func(name string, gpus int64) {
+		template := &resourcev1.ResourceClaimTemplate{
+			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: TestNamespaceName},
+			Spec:       resourcev1.ResourceClaimTemplateSpec{Spec: draClaimSpec(gpus)},
+		}
+		Expect(k8sClient.Create(ctx, template)).To(Succeed())
+		testCreatedObjects = append(testCreatedObjects, template)
+	}
+	// createDRAClaim creates a claim. ownerPod is set for a claim generated from a template for that Pod.
+	createDRAClaim := func(name string, gpus int64, ownerPod *corev1.Pod) *resourcev1.ResourceClaim {
+		claim := &resourcev1.ResourceClaim{
+			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: TestNamespaceName},
+			Spec:       draClaimSpec(gpus),
+		}
+		if ownerPod != nil {
+			claim.OwnerReferences = []metav1.OwnerReference{{
+				APIVersion: "v1", Kind: "Pod", Name: ownerPod.Name, UID: ownerPod.UID, Controller: ptr.To(true),
+			}}
+		}
+		Expect(k8sClient.Create(ctx, claim)).To(Succeed())
+		testCreatedObjects = append(testCreatedObjects, claim)
+		return claim
+	}
+	createDRAPod := func(draPod *corev1.Pod) {
+		Expect(k8sClient.Create(ctx, draPod)).To(Succeed())
+		testCreatedObjects = append(testCreatedObjects, draPod)
+		podIdentifiersToReset[draPod.Name] = draPod.Namespace
+	}
+	reconcileDRAPod := func(draController *pod.PodController, draPod *corev1.Pod) error {
+		_, err := draController.Reconcile(ctx, getReconcileRequest(draPod.Name, draPod.Namespace))
+		return err
+	}
+	// podMetricValue returns the value of the Pod's series in the metric and whether that series exists.
+	// GetMetricWith is not used because it creates a missing series with the value zero.
+	podMetricValue := func(podMetric *prometheus.GaugeVec, podName string) (float64, bool) {
+		collected := make(chan prometheus.Metric)
+		go func() {
+			podMetric.Collect(collected)
+			close(collected)
+		}()
+		value, found := 0.0, false
+		for collectedMetric := range collected {
+			var written dto.Metric
+			Expect(collectedMetric.Write(&written)).To(Succeed())
+			for _, label := range written.GetLabel() {
+				if label.GetName() == metrics.PodNameLabel && label.GetValue() == podName {
+					value, found = written.GetGauge().GetValue(), true
+				}
+			}
+		}
+		return value, found
+	}
+	expectDRAPodMetrics := func(draPod *corev1.Pod, expected *ExpectedPodMetricValues) {
+		Eventually(func(g Gomega) {
+			for i, podMetric := range metrics.GetPodResourcesMetrics() {
+				value, found := podMetricValue(podMetric, draPod.Name)
+				g.Expect(found).To(BeTrue(), "metric is missing: %s", expectedPodMetricValueNames[i])
+				g.Expect(value).To(Equal(getExpectedMetricValue(expected, i)), "metric: %s", expectedPodMetricValueNames[i])
+			}
+		}, 3*time.Second, 200*time.Millisecond).Should(Succeed())
+	}
+	pendingDRAPodMetrics := &ExpectedPodMetricValues{requestedGpus: 2, limitGpus: 2}
+	runningDRAPodMetrics := func(allocatedGpus, allocatedGpuMemory float64) *ExpectedPodMetricValues {
+		return &ExpectedPodMetricValues{requestedGpus: 2, limitGpus: 2, allocatedGpus: allocatedGpus,
+			allocatedGPUMemory: allocatedGpuMemory, allocatedCpus: 100, allocatedCpuMemory: 1000}
+	}
+
+	It("Two-GPU claim: reports two requested GPUs and GPU limit two", func() {
+		createDRAClaim("dra-gpu-claim", 2, nil)
+		draPod := newDRAPod("dra-claim-pod", "", string(corev1.PodPending), claimByName("dra-gpu-claim"))
+		createDRAPod(draPod)
+
+		Expect(reconcileDRAPod(newDRAController(nil), draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, pendingDRAPodMetrics)
+	})
+
+	It("Two-GPU template and unscheduled Pod: reports two requested GPUs and nothing allocated", func() {
+		createDRATemplate("dra-gpu-template", 2)
+		draPod := newDRAPod("dra-template-pod", "", string(corev1.PodPending), claimFromTemplate("dra-gpu-template"))
+		createDRAPod(draPod)
+
+		Expect(reconcileDRAPod(newDRAController(nil), draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, pendingDRAPodMetrics)
+	})
+
+	It("Generated three-GPU claim named in the Pod status: reports three GPUs instead of the template's two", func() {
+		createDRATemplate("dra-gpu-template", 2)
+		draPod := newDRAPod("dra-generated-pod", "", string(corev1.PodPending), claimFromTemplate("dra-gpu-template"))
+		draPod.Status.ResourceClaimStatuses = []corev1.PodResourceClaimStatus{
+			{Name: "gpu", ResourceClaimName: ptr.To("dra-generated-pod-gpu-abcde")},
+		}
+		createDRAClaim("dra-generated-pod-gpu-abcde", 3, draPod)
+		createDRAPod(draPod)
+
+		Expect(reconcileDRAPod(newDRAController(nil), draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, &ExpectedPodMetricValues{requestedGpus: 3, limitGpus: 3})
+	})
+
+	It("Running Pod with allocation annotations: reports allocated GPUs, GPU memory and CPU", func() {
+		createDRATemplate("dra-gpu-template", 2)
+		draPod := newDRAPod("dra-running-pod", TestNodeName, string(corev1.PodRunning), claimFromTemplate("dra-gpu-template"))
+		draPod.Annotations[constants.PodAllocatedGpusAnnotation] = "2"
+		createDRAPod(draPod)
+
+		Expect(reconcileDRAPod(newDRAController(nil), draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, runningDRAPodMetrics(2, 10000))
+	})
+
+	It("Claim read recovers: reports correct metrics", func() {
+		createDRAClaim("dra-gpu-claim", 2, nil)
+		draPod := newDRAPod("dra-recovery-pod", "", string(corev1.PodPending), claimByName("dra-gpu-claim"))
+		createDRAPod(draPod)
+		claimReadFailures := 1
+		draController := newDRAController(&claimReadFailures)
+
+		Expect(reconcileDRAPod(draController, draPod)).To(HaveOccurred())
+		_, found := podMetricValue(metrics.GetPodResourcesMetrics()[0], draPod.Name)
+		Expect(found).To(BeFalse(), "requested GPUs must not be reported before the claim could be read")
+
+		Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, pendingDRAPodMetrics)
+	})
+
+	It("GPU allocation changes: updates allocated GPUs and preserves requests", func() {
+		createDRATemplate("dra-gpu-template", 2)
+		draPod := newDRAPod("dra-gpu-update-pod", TestNodeName, string(corev1.PodRunning), claimFromTemplate("dra-gpu-template"))
+		draPod.Annotations[constants.PodAllocatedGpusAnnotation] = "2"
+		createDRAPod(draPod)
+		draController := newDRAController(nil)
+
+		Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, runningDRAPodMetrics(2, 10000))
+
+		draPod.Annotations[constants.PodAllocatedGpusAnnotation] = "1"
+		Expect(k8sClient.Update(ctx, draPod)).To(Succeed())
+		Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, runningDRAPodMetrics(1, 10000))
+	})
+
+	It("GPU memory changes: updates memory and preserves GPU count", func() {
+		createDRATemplate("dra-gpu-template", 2)
+		draPod := newDRAPod("dra-memory-update-pod", TestNodeName, string(corev1.PodRunning), claimFromTemplate("dra-gpu-template"))
+		draPod.Annotations[constants.PodAllocatedGpusAnnotation] = "2"
+		createDRAPod(draPod)
+		draController := newDRAController(nil)
+
+		Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, runningDRAPodMetrics(2, 10000))
+
+		draPod.Annotations[constants.PodAllocatedGpuMemoryAnnotation] = "20000"
+		Expect(k8sClient.Update(ctx, draPod)).To(Succeed())
+		Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+		expectDRAPodMetrics(draPod, runningDRAPodMetrics(2, 20000))
+	})
+
+	DescribeTable("Pod finishes and its claim is deleted: reports zero allocation, keeps requests and reconciles successfully",
+		func(finishedPhase corev1.PodPhase) {
+			claim := createDRAClaim("dra-gpu-claim", 2, nil)
+			draPod := newDRAPod("dra-finished-pod", TestNodeName, string(corev1.PodRunning), claimByName("dra-gpu-claim"))
+			draPod.Annotations[constants.PodAllocatedGpusAnnotation] = "2"
+			createDRAPod(draPod)
+			draController := newDRAController(nil)
+			Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+			expectDRAPodMetrics(draPod, runningDRAPodMetrics(2, 10000))
+
+			Expect(k8sClient.Delete(ctx, claim)).To(Succeed())
+			draPod.Status.Phase = finishedPhase
+			Expect(k8sClient.Status().Update(ctx, draPod)).To(Succeed())
+			Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+			expectDRAPodMetrics(draPod, pendingDRAPodMetrics)
+		},
+		Entry("Succeeded Pod whose claim was deleted: reports zero allocation and reconciles successfully", corev1.PodSucceeded),
+		Entry("Failed Pod whose claim was deleted: reports zero allocation and reconciles successfully", corev1.PodFailed),
+	)
+
+	It("Traditional GPU Pod on a cluster without DRA: reports its GPUs without reading any claim", func() {
+		claimReadFailures := 1000 // every claim read would fail, as on a cluster that does not serve the DRA API
+		traditionalPod := buildPod("no-dra-pod", TestNamespaceName, "no-dra-pod-workload-id", TestNodeName, string(corev1.PodRunning))
+		createDRAPod(traditionalPod)
+		Expect(reconcileDRAPod(newDRAController(&claimReadFailures), traditionalPod)).To(Succeed())
+		Expect(claimReadFailures).To(Equal(1000), "no claim may be read for a Pod without claims")
+		expectDRAPodMetrics(traditionalPod, TestPodExpectedPodMetricValues)
 	})
 
 	It("Pod elements metric - pod without element IDs", func() {
@@ -1227,4 +1452,21 @@ func getExpectedMetricValue(expectedPodMetricValues *ExpectedPodMetricValues, in
 	default:
 		return 0
 	}
+}
+
+// failingClaimReader fails the next *failures reads of ResourceClaims and ResourceClaimTemplates.
+type failingClaimReader struct {
+	client.Reader
+	failures *int
+}
+
+func (r failingClaimReader) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+	switch obj.(type) {
+	case *resourcev1.ResourceClaim, *resourcev1.ResourceClaimTemplate:
+		if *r.failures > 0 {
+			*r.failures--
+			return errors.NewServiceUnavailable("temporary read failure")
+		}
+	}
+	return r.Reader.Get(ctx, key, obj, opts...)
 }

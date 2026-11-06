@@ -53,6 +53,24 @@ func TestPendingRequestedGpuCountPerCluster(t *testing.T) {
 	})
 }
 
+func TestPendingRequestedGpuCountPerWorkload_TwoGpuWorkloadStopsCountingAfterLeavingPending(t *testing.T) {
+	newTester(t).Test(TestCase{
+		Interval: "1m",
+		Inputs: []Input{
+			// A pod that requests two GPUs, for example through a DRA claim.
+			{Series: `runai_scheduler_requested_gpus_per_pod_unique{pod_uuid="pod-1", workload_id="wl-1"}`, Values: "2 2 2 2"},
+			// The workload is Pending for the first two minutes, then Running.
+			{Series: `runai_workload_info_enriched{workload_id="wl-1", queue_name="q1", project="p1", department="d1", nodepool="np1", status="Pending", detailed_status="Pending"}`, Values: "1 1 stale stale"},
+			{Series: `runai_workload_info_enriched{workload_id="wl-1", queue_name="q1", project="p1", department="d1", nodepool="np1", status="Running", detailed_status="Running"}`, Values: "_ _ 1 1"},
+		},
+		Tests: []Test{
+			{Expr: `sum(runai_pending_requested_gpu_count_per_workload{workload_id="wl-1"})`, EvalTime: "1m", Samples: []Sample{{Value: 2}}},
+			{Expr: `sum(runai_pending_requested_gpu_count_per_queue{queue_name="q1"})`, EvalTime: "1m", Samples: []Sample{{Value: 2}}},
+			{Expr: `sum(runai_pending_requested_gpu_count_per_workload{workload_id="wl-1"})`, EvalTime: "3m", Samples: nil},
+		},
+	})
+}
+
 // --- Allocated GPUs ---
 
 func TestAllocatedGpuCountPerPod(t *testing.T) {
