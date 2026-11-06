@@ -782,6 +782,12 @@ export interface IdpCreationRequest {
      * @memberof IdpCreationRequest
      */
     'mappers'?: Mappers;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof IdpCreationRequest
+     */
+    'dryRun'?: boolean;
 }
 /**
  * 

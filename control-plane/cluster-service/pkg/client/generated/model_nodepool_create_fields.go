@@ -24,6 +24,8 @@ var _ MappedNullable = &NodepoolCreateFields{}
 // NodepoolCreateFields struct for NodepoolCreateFields
 type NodepoolCreateFields struct {
 	Name string `json:"name"`
+	// The description of the node pool.
+	Description NullableString `json:"description,omitempty"`
 	// Label key for associated nodes to the Node Pool (with value as in labelValue)
 	LabelKey string `json:"labelKey"`
 	// Label value for associated nodes to the Node Pool (with key as in labelKey)
@@ -87,6 +89,49 @@ func (o *NodepoolCreateFields) GetNameOk() (*string, bool) {
 // SetName sets field value
 func (o *NodepoolCreateFields) SetName(v string) {
 	o.Name = v
+}
+
+// GetDescription returns the Description field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *NodepoolCreateFields) GetDescription() string {
+	if o == nil || IsNil(o.Description.Get()) {
+		var ret string
+		return ret
+	}
+	return *o.Description.Get()
+}
+
+// GetDescriptionOk returns a tuple with the Description field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *NodepoolCreateFields) GetDescriptionOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Description.Get(), o.Description.IsSet()
+}
+
+// HasDescription returns a boolean if a field has been set.
+func (o *NodepoolCreateFields) HasDescription() bool {
+	if o != nil && o.Description.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetDescription gets a reference to the given NullableString and assigns it to the Description field.
+func (o *NodepoolCreateFields) SetDescription(v string) {
+	o.Description.Set(&v)
+}
+
+// SetDescriptionNil sets the value for Description to be an explicit nil
+func (o *NodepoolCreateFields) SetDescriptionNil() {
+	o.Description.Set(nil)
+}
+
+// UnsetDescription ensures that no value is present for Description, not even an explicit nil
+func (o *NodepoolCreateFields) UnsetDescription() {
+	o.Description.Unset()
 }
 
 // GetLabelKey returns the LabelKey field value
@@ -376,6 +421,9 @@ func (o NodepoolCreateFields) MarshalJSON() ([]byte, error) {
 func (o NodepoolCreateFields) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["name"] = o.Name
+	if o.Description.IsSet() {
+		toSerialize["description"] = o.Description.Get()
+	}
 	toSerialize["labelKey"] = o.LabelKey
 	toSerialize["labelValue"] = o.LabelValue
 	toSerialize["clusterId"] = o.ClusterId

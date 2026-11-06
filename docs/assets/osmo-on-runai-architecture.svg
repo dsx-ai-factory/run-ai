@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560">
+  <defs>
+    <style>
+      text { font-family: 'Segoe UI', Arial, sans-serif; }
+    </style>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#64748B"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="560" fill="#FFFFFF" rx="6"/>
+  <text x="450" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="#1E293B">OSMO on NVIDIA Run:ai</text>
+
+  <rect x="300" y="50" width="300" height="44" rx="8" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5"/>
+  <rect x="300" y="50" width="5" height="44" rx="4" fill="#94A3B8"/>
+  <text x="450.0" y="77" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">Laptop / CI / OSMO CLI</text>
+  <line x1="450" y1="94" x2="450" y2="146" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="460" y="124.0" font-size="11" font-weight="600" fill="#64748B">HTTPS + WSS</text>
+  <rect x="40" y="146" width="820" height="110" rx="10" fill="#F8FAFC" stroke="#94A3B8" stroke-width="2" stroke-dasharray="8 4"/>
+  <rect x="52" y="138" width="150" height="20" rx="4" fill="#94A3B8"/>
+  <text x="127" y="152" text-anchor="middle" font-size="11" font-weight="600" fill="#FFFFFF">OSMO service</text>
+  <rect x="60" y="176" width="240" height="64" rx="8" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5"/>
+  <rect x="60" y="176" width="5" height="64" rx="4" fill="#94A3B8"/>
+  <text x="180.0" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">OSMO API and UI</text>
+  <text x="180.0" y="219" text-anchor="middle" font-size="11" fill="#64748B">Service, worker, and logger</text>
+  <rect x="330" y="176" width="240" height="64" rx="8" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5"/>
+  <rect x="330" y="176" width="5" height="64" rx="4" fill="#94A3B8"/>
+  <text x="450.0" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">osmo-router</text>
+  <text x="450.0" y="219" text-anchor="middle" font-size="11" fill="#64748B">WebSocket, through /api/router</text>
+  <rect x="600" y="176" width="240" height="64" rx="8" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5"/>
+  <rect x="600" y="176" width="5" height="64" rx="4" fill="#94A3B8"/>
+  <text x="720.0" y="200" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">Data stores</text>
+  <text x="720.0" y="219" text-anchor="middle" font-size="11" fill="#64748B">PostgreSQL, Redis, object storage</text>
+  <line x1="250" y1="256" x2="250" y2="300" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="260" y="282.0" font-size="11" font-weight="600" fill="#64748B"></text>
+  <rect x="80" y="300" width="340" height="72" rx="8" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5"/>
+  <rect x="80" y="300" width="5" height="72" rx="4" fill="#94A3B8"/>
+  <text x="250.0" y="324" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">Backend operator: osmo-high</text>
+  <text x="250.0" y="343" text-anchor="middle" font-size="11" fill="#64748B">namespace: osmo</text>
+  <text x="250.0" y="360" text-anchor="middle" font-size="11" fill="#64748B">backendNamespace: runai-osmo-high</text>
+  <line x1="250" y1="372" x2="250" y2="420" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="260" y="400.0" font-size="11" font-weight="600" fill="#64748B"></text>
+  <rect x="60" y="420" width="380" height="76" rx="8" fill="#F1F8E9" stroke="#AED581" stroke-width="1.5"/>
+  <rect x="72" y="412" width="300" height="18" rx="4" fill="#8BB85B"/>
+  <text x="222" y="425" text-anchor="middle" font-size="11" font-weight="600" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai project: osmo-high</text>
+  <text x="250" y="456" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">scheduler: runai-scheduler</text>
+  <text x="250" y="476" text-anchor="middle" font-size="11" fill="#64748B">Namespace: runai-osmo-high</text>
+  <line x1="650" y1="256" x2="650" y2="300" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="660" y="282.0" font-size="11" font-weight="600" fill="#64748B"></text>
+  <rect x="480" y="300" width="340" height="72" rx="8" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5"/>
+  <rect x="480" y="300" width="5" height="72" rx="4" fill="#94A3B8"/>
+  <text x="650.0" y="324" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">Backend operator: osmo-low</text>
+  <text x="650.0" y="343" text-anchor="middle" font-size="11" fill="#64748B">namespace: osmo</text>
+  <text x="650.0" y="360" text-anchor="middle" font-size="11" fill="#64748B">backendNamespace: runai-osmo-low</text>
+  <line x1="650" y1="372" x2="650" y2="420" stroke="#64748B" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <text x="660" y="400.0" font-size="11" font-weight="600" fill="#64748B"></text>
+  <rect x="460" y="420" width="380" height="76" rx="8" fill="#F1F8E9" stroke="#AED581" stroke-width="1.5"/>
+  <rect x="472" y="412" width="300" height="18" rx="4" fill="#8BB85B"/>
+  <text x="622" y="425" text-anchor="middle" font-size="11" font-weight="600" fill="#000000" fill-opacity="0.87">NVIDIA Run:ai project: osmo-low</text>
+  <text x="650" y="456" text-anchor="middle" font-size="13" font-weight="700" fill="#000000" fill-opacity="0.87">scheduler: runai-scheduler</text>
+  <text x="650" y="476" text-anchor="middle" font-size="11" fill="#64748B">Namespace: runai-osmo-low</text>
+
+  <rect x="40" y="524" width="14" height="14" rx="3" fill="#FFFFFF" stroke="#94A3B8" stroke-width="1.5"/>
+  <text x="62" y="535" font-size="11" fill="#64748B">OSMO</text>
+  <rect x="130" y="524" width="14" height="14" rx="3" fill="#F1F8E9" stroke="#AED581" stroke-width="1.5"/>
+  <text x="152" y="535" font-size="11" fill="#64748B">NVIDIA Run:ai</text>
+</svg>

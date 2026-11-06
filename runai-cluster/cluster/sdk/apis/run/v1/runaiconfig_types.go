@@ -22,6 +22,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/knative"
 	krm_operator "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/krm-operator"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/lws"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/snapshot"
 	metrics_exporter "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/metrics-exporter"
 	node_scale_adjuster "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/node-scale-adjuster"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/prometheus"
@@ -341,6 +342,11 @@ type RunaiConfigSpec struct {
 	// +kubebuilder:validation:Optional
 	ClusterRedis *cluster_redis.ClusterRedis `json:"cluster-redis,omitempty"`
 
+	// Snapshot locates an existing NVIDIA Snapshot installation. Snapshot is
+	// installed and owned by the cluster administrator; Run:ai only detects it.
+	// +kubebuilder:validation:Optional
+	Snapshot *snapshot.Snapshot `json:"snapshot,omitempty"`
+
 	// Internal specifies internal configuration for the Run:AI deployment. Do not manually set this field.
 	// +kubebuilder:validation:Optional
 	Internal *internal.Internal `json:"__internal,omitempty" jsonschema:"-"`
@@ -459,6 +465,9 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	if spec.ClusterRedis == nil {
 		spec.ClusterRedis = &cluster_redis.ClusterRedis{}
 	}
+	if spec.Snapshot == nil {
+		spec.Snapshot = &snapshot.Snapshot{}
+	}
 	if spec.Internal == nil {
 		spec.Internal = &internal.Internal{}
 	}
@@ -497,6 +506,7 @@ func (runaiConfig *RunaiConfig) SetDefaultsWhereNeeded() {
 	spec.Knative.SetDefaultsWhereNeeded()
 	spec.LWS.SetDefaultsWhereNeeded()
 	spec.ClusterRedis.SetDefaultsWhereNeeded(spec.Internal, spec.Global)
+	spec.Snapshot.SetDefaultsWhereNeeded()
 }
 
 // getGroupResources returns the group-level Resources for a given ServiceGroup

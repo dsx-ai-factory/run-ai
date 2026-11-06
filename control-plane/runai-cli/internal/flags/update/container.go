@@ -26,6 +26,5 @@ func ContainerUpdateFlagSet(containerFlags *pflag.FlagSet, containerSpec *submit
 	containerFlags.StringVar(&containerSpec.WorkingDir, consts.AttributeNameWorkingDir, "", consts.AttributeUsageWorkingDir)
 	containerFlags.BoolVar(&containerSpec.CreateHomeDir, consts.AttributeNameCreateHomeDir, false, consts.AttributeUsageCreateHomeDir)
 	containerFlags.StringArrayVarP(&containerSpec.EnvironmentVariables, consts.AttributeNameEnvironmentVariables, "e", []string{}, consts.AttributeUsageEnvironmentVariables)
-	// --environment flag: for environment asset name or environment variables
-	containerFlags.StringArrayVar(&containerSpec.RawEnvironment, consts.AttributeNameEnvironment, []string{}, consts.AttributeUsageEnvironmentAsset)
+	submit.EnvironmentAssetFlagSet(containerFlags, containerSpec)
 }

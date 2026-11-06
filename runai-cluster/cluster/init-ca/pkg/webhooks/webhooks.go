@@ -32,6 +32,7 @@ const (
 	applicationControllerWebhookName    = "application-validation"           /* #nosec */
 	adviceRestartControllerWebhookName  = "runai-advice-restart-dw-mutation" /* #nosec */
 	restartRequestValidationWebhookName = "runai-restartrequest-validation"  /* #nosec */
+	snapshotRestoreWebhookName          = "runai-snapshot-restore"           /* #nosec */
 	workloadOwnershipValidationName     = "runai-workload-ownership-protection-validation"
 	inferenceOwnershipValidationName    = "runai-inference-workload-ownership-protection-validation"
 	workloadOwnershipMutationName       = "runai-workload-ownership-mutation"
@@ -287,7 +288,7 @@ func chooseCertificateDetails(name string, webhookCertificates *WebhookCertifica
 	if name == adviceRestartControllerWebhookName {
 		return webhookCertificates.AdviceRestartControllerCertificateDetails
 	}
-	if name == restartRequestValidationWebhookName {
+	if name == restartRequestValidationWebhookName || name == snapshotRestoreWebhookName {
 		// served by the anyworkload-controller, so its CA bundle must match that serving certificate
 		return webhookCertificates.AnyworkloadControllerCertificateDetails
 	}

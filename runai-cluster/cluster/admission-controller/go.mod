@@ -5,8 +5,8 @@ go 1.27.3
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261101114321-1fee5ece7eaa
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261101114321-1fee5ece7eaa
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261105144943-bd80ac2b6a8a
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261105144943-bd80ac2b6a8a
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.5
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
@@ -58,7 +58,7 @@ require (
 	github.com/go-openapi/swag/yamlutils v0.29.2 // indirect
 	github.com/go-playground/locales v0.14.2 // indirect
 	github.com/go-playground/universal-translator v0.18.2 // indirect
-	github.com/go-playground/validator/v10 v10.30.5 // indirect
+	github.com/go-playground/validator/v10 v10.30.6 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
@@ -91,7 +91,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	go.yaml.in/yaml/v2 v2.4.4 // indirect
+	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/net v0.61.0 // indirect
