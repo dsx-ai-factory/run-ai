@@ -199,3 +199,23 @@ func TestDRAPodAllocation(t *testing.T) {
 		}
 	})
 }
+
+func TestAddDRAGpusFinishedPodWithDeletedClaim(t *testing.T) {
+	for _, phase := range []corev1.PodPhase{corev1.PodSucceeded, corev1.PodFailed} {
+		t.Run(string(phase)+" Pod whose template was deleted: reports ErrClaimDeleted and preserves existing resources", func(t *testing.T) {
+			pod := newDRATestPod()
+			pod.Status.Phase = phase
+			pod.Spec.ResourceClaims[0].ResourceClaimTemplateName = ptr.To("deleted-template")
+			requested := &ResourcesInfo{Gpus: 1, GpuMemoryMegaBytes: 500}
+			limits := &ResourcesInfo{Gpus: 1, GpuMemoryMegaBytes: 700}
+
+			err := AddDRAGpus(context.Background(), pod, newDRATestParser(nil, 2), requested, limits)
+			if !errors.Is(err, dra.ErrClaimDeleted) {
+				t.Fatalf("expected ErrClaimDeleted, got %v", err)
+			}
+			if requested.Gpus != 1 || limits.Gpus != 1 || requested.GpuMemoryMegaBytes != 500 || limits.GpuMemoryMegaBytes != 700 {
+				t.Fatalf("got requested=%+v limits=%+v, want them unchanged", *requested, *limits)
+			}
+		})
+	}
+}

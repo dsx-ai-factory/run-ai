@@ -193,3 +193,70 @@ func TestResolvePodRequestedGpuCountRecoversWhenGeneratedClaimReachesCache(t *te
 		t.Errorf("ResolvePodRequestedGpuCount() = %d, want 3", got)
 	}
 }
+
+func TestResolvePodRequestedGpuCountForFinishedPods(t *testing.T) {
+	ctx := context.Background()
+	// No objects exist: the claims and the template were deleted after the Pods finished.
+	parser := newPodTestParser(nil)
+
+	deletedClaimRef := corev1.PodResourceClaim{Name: "gpu", ResourceClaimName: ptr.To("deleted-claim")}
+	deletedTemplateRef := corev1.PodResourceClaim{Name: "gpu", ResourceClaimTemplateName: ptr.To("deleted-template")}
+	deletedGeneratedClaimStatuses := []corev1.PodResourceClaimStatus{{Name: "gpu", ResourceClaimName: ptr.To("deleted-generated-claim")}}
+
+	tests := []struct {
+		name             string
+		phase            corev1.PodPhase
+		claimStatuses    []corev1.PodResourceClaimStatus
+		claimRef         corev1.PodResourceClaim
+		wantClaimDeleted bool
+	}{
+		{"Succeeded Pod whose claim was deleted: returns ErrClaimDeleted",
+			corev1.PodSucceeded, nil, deletedClaimRef, true},
+		{"Failed Pod whose claim was deleted: returns ErrClaimDeleted",
+			corev1.PodFailed, nil, deletedClaimRef, true},
+		{"Succeeded Pod whose template was deleted: returns ErrClaimDeleted",
+			corev1.PodSucceeded, nil, deletedTemplateRef, true},
+		{"Failed Pod whose generated claim was deleted: returns ErrClaimDeleted",
+			corev1.PodFailed, deletedGeneratedClaimStatuses, deletedTemplateRef, true},
+		{"Running Pod whose claim is missing: returns an error that is not ErrClaimDeleted",
+			corev1.PodRunning, nil, deletedClaimRef, false},
+		{"Pending Pod whose generated claim is missing: returns an error that is not ErrClaimDeleted",
+			corev1.PodPending, deletedGeneratedClaimStatuses, deletedTemplateRef, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pod := newPodWithClaims(tt.claimStatuses, tt.claimRef)
+			pod.Status.Phase = tt.phase
+			got, err := parser.ResolvePodRequestedGpuCount(ctx, pod)
+			if err == nil {
+				t.Fatal("expected an error, got nil")
+			}
+			if errors.Is(err, ErrClaimDeleted) != tt.wantClaimDeleted {
+				t.Errorf("errors.Is(err, ErrClaimDeleted) = %v, want %v (err: %v)", !tt.wantClaimDeleted, tt.wantClaimDeleted, err)
+			}
+			if got != 0 {
+				t.Errorf("ResolvePodRequestedGpuCount() = %d, want 0", got)
+			}
+		})
+	}
+}
+
+func TestResolvePodRequestedGpuCountRetriesTemporaryFailuresOfFinishedPods(t *testing.T) {
+	ctx := context.Background()
+	failures := 1
+	parser := newPodTestParser(&failures, testClaim("existing", 4))
+	pod := newPodWithClaims(nil, corev1.PodResourceClaim{Name: "gpu", ResourceClaimName: ptr.To("existing")})
+	pod.Status.Phase = corev1.PodSucceeded
+
+	_, err := parser.ResolvePodRequestedGpuCount(ctx, pod)
+	if err == nil || errors.Is(err, ErrClaimDeleted) {
+		t.Fatalf("expected a retryable error that is not ErrClaimDeleted, got %v", err)
+	}
+	got, err := parser.ResolvePodRequestedGpuCount(ctx, pod)
+	if err != nil {
+		t.Fatalf("unexpected error after recovery: %v", err)
+	}
+	if got != 4 {
+		t.Errorf("ResolvePodRequestedGpuCount() = %d, want 4", got)
+	}
+}

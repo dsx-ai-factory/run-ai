@@ -7,6 +7,7 @@ package metrics
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -182,6 +183,12 @@ func SetPodMetrics(ctx context.Context, pod *corev1.Pod, client client.Client, d
 	}
 
 	if draErr != nil {
+		if errors.Is(draErr, dra.ErrClaimDeleted) {
+			// The claims of a finished Pod were deleted, so its requests cannot be read again and a retry cannot help.
+			// The request and limit values reported earlier stay in place.
+			log.Debug().Msgf("Pod %s/%s finished and its claims were deleted, keeping its reported requests", namespace, name)
+			return nil
+		}
 		return draErr
 	}
 

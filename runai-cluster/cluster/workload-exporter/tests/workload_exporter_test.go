@@ -792,22 +792,33 @@ var _ = Describe("TestWorkloadExporter", Ordered, func() {
 		expectDRAPodMetrics(draPod, runningDRAPodMetrics(2, 20000))
 	})
 
-	It("Pod completes and claim is removed: reports zero allocation and keeps requests", func() {
-		claim := createDRAClaim("dra-gpu-claim", 2, nil)
-		draPod := newDRAPod("dra-completed-pod", TestNodeName, string(corev1.PodRunning), claimByName("dra-gpu-claim"))
-		draPod.Annotations[constants.PodAllocatedGpusAnnotation] = "2"
-		createDRAPod(draPod)
-		draController := newDRAController(nil)
+	DescribeTable("Pod finishes and its claim is deleted: reports zero allocation, keeps requests and reconciles successfully",
+		func(finishedPhase corev1.PodPhase) {
+			claim := createDRAClaim("dra-gpu-claim", 2, nil)
+			draPod := newDRAPod("dra-finished-pod", TestNodeName, string(corev1.PodRunning), claimByName("dra-gpu-claim"))
+			draPod.Annotations[constants.PodAllocatedGpusAnnotation] = "2"
+			createDRAPod(draPod)
+			draController := newDRAController(nil)
+			Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+			expectDRAPodMetrics(draPod, runningDRAPodMetrics(2, 10000))
 
-		Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
-		expectDRAPodMetrics(draPod, runningDRAPodMetrics(2, 10000))
+			Expect(k8sClient.Delete(ctx, claim)).To(Succeed())
+			draPod.Status.Phase = finishedPhase
+			Expect(k8sClient.Status().Update(ctx, draPod)).To(Succeed())
+			Expect(reconcileDRAPod(draController, draPod)).To(Succeed())
+			expectDRAPodMetrics(draPod, pendingDRAPodMetrics)
+		},
+		Entry("Succeeded Pod whose claim was deleted: reports zero allocation and reconciles successfully", corev1.PodSucceeded),
+		Entry("Failed Pod whose claim was deleted: reports zero allocation and reconciles successfully", corev1.PodFailed),
+	)
 
-		Expect(k8sClient.Delete(ctx, claim)).To(Succeed())
-		draPod.Status.Phase = corev1.PodSucceeded
-		Expect(k8sClient.Update(ctx, draPod)).To(Succeed())
-
-		Expect(reconcileDRAPod(draController, draPod)).To(HaveOccurred())
-		expectDRAPodMetrics(draPod, pendingDRAPodMetrics)
+	It("Traditional GPU Pod on a cluster without DRA: reports its GPUs without reading any claim", func() {
+		claimReadFailures := 1000 // every claim read would fail, as on a cluster that does not serve the DRA API
+		traditionalPod := buildPod("no-dra-pod", TestNamespaceName, "no-dra-pod-workload-id", TestNodeName, string(corev1.PodRunning))
+		createDRAPod(traditionalPod)
+		Expect(reconcileDRAPod(newDRAController(&claimReadFailures), traditionalPod)).To(Succeed())
+		Expect(claimReadFailures).To(Equal(1000), "no claim may be read for a Pod without claims")
+		expectDRAPodMetrics(traditionalPod, TestPodExpectedPodMetricValues)
 	})
 
 	It("Pod elements metric - pod without element IDs", func() {
