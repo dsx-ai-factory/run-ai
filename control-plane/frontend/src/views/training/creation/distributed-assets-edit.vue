@@ -1064,11 +1064,7 @@ const DistributedAssetsEdit = defineComponent({
     },
     async loadFromExistingTraining(trainingId: string): Promise<void> {
       try {
-        const trainingModel: TrainingV2 = await trainingService.getTrainingMergedWithPolicy(
-          undefined,
-          trainingId,
-          undefined,
-        );
+        const trainingModel: TrainingV2 = await trainingService.getTrainingMergedWithPolicy(undefined, trainingId);
         this.trainingStore.setLoadedTrainingModelWithDefaults(deepCopy(trainingModel));
         let uiVolumes: Array<IUIVolume> | undefined;
         if (trainingModel.assets.workloadVolumes?.length) {

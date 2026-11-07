@@ -407,12 +407,7 @@ const TrainingNew = defineComponent({
       }
     },
     async loadTrainingModel(projectId: string, isDistributed?: boolean): Promise<void> {
-      const trainingModel = await trainingService.getTrainingMergedWithPolicy(
-        projectId,
-        undefined,
-        undefined,
-        isDistributed,
-      );
+      const trainingModel = await trainingService.getTrainingMergedWithPolicy(projectId, undefined, isDistributed);
       this.trainingStore.setLoadedTrainingModelWithDefaults(deepCopy(trainingModel));
       this.training = workloadUtil.convertWorkloadToWorkloadUI({
         ...trainingModel,

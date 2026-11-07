@@ -938,7 +938,6 @@ type ApiGetTrainingMergedRequest struct {
 	ApiService             TrainingsAPI
 	projectId              *string
 	workloadId             *string
-	templateId             *string
 	isDistributed          *bool
 	isDistributedInference *bool
 }
@@ -952,12 +951,6 @@ func (r ApiGetTrainingMergedRequest) ProjectId(projectId string) ApiGetTrainingM
 // The id of the workload
 func (r ApiGetTrainingMergedRequest) WorkloadId(workloadId string) ApiGetTrainingMergedRequest {
 	r.workloadId = &workloadId
-	return r
-}
-
-// The id of the template
-func (r ApiGetTrainingMergedRequest) TemplateId(templateId string) ApiGetTrainingMergedRequest {
-	r.templateId = &templateId
 	return r
 }
 
@@ -1020,9 +1013,6 @@ func (a *TrainingsAPIService) GetTrainingMergedExecute(r ApiGetTrainingMergedReq
 	}
 	if r.workloadId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "workloadId", r.workloadId, "form", "")
-	}
-	if r.templateId != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "templateId", r.templateId, "form", "")
 	}
 	if r.isDistributed != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "isDistributed", r.isDistributed, "form", "")

@@ -816,7 +816,6 @@ func validateUsageInfoOfCredentials(_ string, assetMeta api.AssetMeta, usedBy *a
 
 	Expect(usedBy.Workspaces).To(BeNil())
 	Expect(usedBy.Trainings).To(BeNil())
-	Expect(usedBy.Templates).To(BeNil())
 	Expect(usedBy.Assets).NotTo(BeNil())
 	Expect(usedBy.Assets.Environment).To(BeNil())
 	Expect(usedBy.Assets.Compute).To(BeNil())

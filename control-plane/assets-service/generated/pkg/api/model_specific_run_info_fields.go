@@ -20,7 +20,7 @@ var dummySpecificRunInfoFields = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// SpecificRunInfoFields - Information about the set of assets which comprises a workspace, training or template, and an optional set of specific run parameters.
+// SpecificRunInfoFields - Information about the set of assets which comprises a workspace or training workload, and an optional set of specific run parameters.
 type SpecificRunInfoFields struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////

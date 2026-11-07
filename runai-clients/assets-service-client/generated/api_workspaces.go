@@ -962,7 +962,6 @@ type ApiGetWorkspaceMergedRequest struct {
 	ApiService WorkspacesAPI
 	projectId  *string
 	workloadId *string
-	templateId *string
 }
 
 // The id of the project
@@ -974,12 +973,6 @@ func (r ApiGetWorkspaceMergedRequest) ProjectId(projectId string) ApiGetWorkspac
 // The id of the workload
 func (r ApiGetWorkspaceMergedRequest) WorkloadId(workloadId string) ApiGetWorkspaceMergedRequest {
 	r.workloadId = &workloadId
-	return r
-}
-
-// The id of the template
-func (r ApiGetWorkspaceMergedRequest) TemplateId(templateId string) ApiGetWorkspaceMergedRequest {
-	r.templateId = &templateId
 	return r
 }
 
@@ -1030,9 +1023,6 @@ func (a *WorkspacesAPIService) GetWorkspaceMergedExecute(r ApiGetWorkspaceMerged
 	}
 	if r.workloadId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "workloadId", r.workloadId, "form", "")
-	}
-	if r.templateId != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "templateId", r.templateId, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

@@ -33867,7 +33867,6 @@ components:
       - nfs
       - pvc
       - hostPath
-      - workload-template
       - model
       - config-map
       - secret-volume

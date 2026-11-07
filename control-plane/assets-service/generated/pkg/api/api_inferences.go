@@ -512,14 +512,7 @@ func (c *InferencesAPIController) GetInferenceMerged(w http.ResponseWriter, r *h
 		workloadIdParam = param
 	} else {
 	}
-	var templateIdParam string
-	if query.Has("templateId") {
-		param := query.Get("templateId")
-
-		templateIdParam = param
-	} else {
-	}
-	result, err := c.service.GetInferenceMerged(r.Context(), projectIdParam, workloadIdParam, templateIdParam)
+	result, err := c.service.GetInferenceMerged(r.Context(), projectIdParam, workloadIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

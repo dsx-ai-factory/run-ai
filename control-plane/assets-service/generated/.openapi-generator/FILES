@@ -42,8 +42,6 @@ pkg/api/api_secret.go
 pkg/api/api_secret_service.go
 pkg/api/api_synchronization.go
 pkg/api/api_synchronization_service.go
-pkg/api/api_template.go
-pkg/api/api_template_service.go
 pkg/api/api_trainings.go
 pkg/api/api_trainings_service.go
 pkg/api/api_workload.go
@@ -439,7 +437,6 @@ pkg/api/model_specific_run_auto_scaling.go
 pkg/api/model_specific_run_auto_scaling_auto_scaling.go
 pkg/api/model_specific_run_connection_info.go
 pkg/api/model_specific_run_connections.go
-pkg/api/model_specific_run_creation_fields.go
 pkg/api/model_specific_run_info_fields.go
 pkg/api/model_specific_run_metric_fields.go
 pkg/api/model_specific_run_param_attr_defaults.go
@@ -487,10 +484,6 @@ pkg/api/model_workload_ref_and_status.go
 pkg/api/model_workload_state.go
 pkg/api/model_workload_status_update.go
 pkg/api/model_workload_supported_types.go
-pkg/api/model_workload_template.go
-pkg/api/model_workload_template_creation_request.go
-pkg/api/model_workload_template_list_response.go
-pkg/api/model_workload_template_update_request.go
 pkg/api/model_workload_type.go
 pkg/api/model_workspace.go
 pkg/api/model_workspace_creation_request_v2.go

@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	autoDelSelect = `SELECT assets_metadata.*, assets_supported_workload_types.* FROM assets_metadata left join assets_supported_workload_types on assets_supported_workload_types.asset_id = assets_metadata.id WHERE COALESCE(assets_metadata.private, FALSE) = false AND (assets_metadata.auto_delete = ? AND assets_metadata.kind = ? AND assets_metadata.tenant_id = ?) AND (assets_metadata.scope = ? OR assets_metadata.tenant_id = ?) AND id NOT in (select contained_asset_id from assets_template_content) AND id NOT in (select asset_id from workloads_assets) AND assets_metadata.created_at < ? AND assets_metadata.deleted_at IS NULL`
+	autoDelSelect = `SELECT assets_metadata.*, assets_supported_workload_types.* FROM assets_metadata left join assets_supported_workload_types on assets_supported_workload_types.asset_id = assets_metadata.id WHERE COALESCE(assets_metadata.private, FALSE) = false AND (assets_metadata.auto_delete = ? AND assets_metadata.kind = ? AND assets_metadata.tenant_id = ?) AND (assets_metadata.scope = ? OR assets_metadata.tenant_id = ?) AND id NOT in (select asset_id from workloads_assets) AND assets_metadata.created_at < ? AND assets_metadata.deleted_at IS NULL`
 
 	autoDelSoft   = `UPDATE assets_metadata SET deleted_at=? WHERE id in (?) AND assets_metadata.deleted_at IS NULL`
 	autoDelPvc    = `DELETE FROM assets_pvc WHERE asset_id in (?)`

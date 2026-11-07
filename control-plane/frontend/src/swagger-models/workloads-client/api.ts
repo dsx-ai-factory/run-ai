@@ -1228,7 +1228,6 @@ export const AssetKind = {
     Nfs: 'nfs',
     Pvc: 'pvc',
     HostPath: 'hostPath',
-    WorkloadTemplate: 'workload-template',
     Model: 'model',
     ConfigMap: 'config-map',
     SecretVolume: 'secret-volume',

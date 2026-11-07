@@ -47,12 +47,6 @@ type AssetUsageInfo struct {
 	Inferences []WorkloadRefAndStatus `json:"inferences,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// templates that rely on this asset.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Templates []AssetRef `json:"templates,omitempty"`
-	Templates []AssetRef `json:"templates,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Assets AssetsUsageRef `json:"assets,omitempty"`
 	Assets AssetsUsageRef `json:"assets,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
@@ -84,11 +78,6 @@ func AssertAssetUsageInfoRequired(obj AssetUsageInfo) error {
 	}
 	for _, el := range obj.Inferences {
 		if err := AssertWorkloadRefAndStatusRequired(el); err != nil {
-			return err
-		}
-	}
-	for _, el := range obj.Templates {
-		if err := AssertAssetRefRequired(el); err != nil {
 			return err
 		}
 	}
@@ -137,16 +126,6 @@ func AssertAssetUsageInfoConstraints(obj AssetUsageInfo) error {
 	//////////////////////// RUNAI END //////////////////////////
 	for _, el := range obj.Inferences {
 		if err := AssertWorkloadRefAndStatusConstraints(el); err != nil {
-			return err
-		}
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	for _, el := range obj.Templates {
-		if err := AssertAssetRefConstraints(el); err != nil {
 			return err
 		}
 	}

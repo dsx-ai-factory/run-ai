@@ -13,7 +13,6 @@ get:
   parameters:
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ProjectIdOptional.yaml"
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/WorkloadIdOptional.yaml"
-    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TemplateIdOptional.yaml"
     - $ref: "../parameters/query/optional/IsDistributedQuery.yaml"
     - $ref: "../parameters/query/optional/IsDistributedInferenceQuery.yaml"
   responses:
