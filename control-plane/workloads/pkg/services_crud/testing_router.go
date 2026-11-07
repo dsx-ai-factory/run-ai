@@ -42,7 +42,7 @@ func createRouterInt(tenantSettingsClient clients.TenantSettingsClient) chi.Rout
 	UnifiedWorkloadService := NewUnifiedAPIService()
 	UnifiedWorkloadAPIController := api.NewUnifiedAPIController(UnifiedWorkloadService)
 
-	TemplatesService := NewTemplatesService(tenantSettingsClient)
+	TemplatesService := NewTemplatesService()
 	TemplatesAPIController := api.NewWorkloadTemplatesAPIController(TemplatesService)
 
 	// Add routes to the router for each of the controllers

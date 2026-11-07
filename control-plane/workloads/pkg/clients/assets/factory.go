@@ -20,8 +20,6 @@ import (
 type ClientInterface interface {
 	RequestAssetFlatFormat(ctx context.Context, request assetsApi.AssetFlatRequest) (*assetsApi.AssetFlatResponse, *assetsApi.Error)
 
-	ListTemplatesOfTenant(ctx context.Context) (*assetsApi.WorkloadTemplateListResponse, *assetsApi.Error)
-
 	ListCredentialsAssets(ctx context.Context, privateOnly bool) (*assetsApi.CredentialsListResponse, *assetsApi.Error)
 }
 
