@@ -6,8 +6,7 @@ A workload template is a reusable setup that defines all the required configurat
 
 **Note**
 
-* Flexible workload templates is enabled by default and applies only to flexible workload submission (enabled by default). If unavailable, contact your administrator to enable it under **General settings** → Workloads → Flexible workload templates.
-* Templates (legacy) is deprecated and will be removed in a future release. See [Workspace Templates (Legacy)](workspace-templates/workspace-templates-legacy.md) for more details.
+Workload templates apply to flexible workload submission. If unavailable, contact your administrator to enable **Flexible workload submission** under **General settings** → **Workloads**.
 
 </Note>
 
@@ -92,17 +91,19 @@ To delete a template:
 2. Click **DELETE**
 3. Confirm you want to delete the template
 
-## Migrating Legacy Templates
+## Legacy Template Removal
 
-If you previously created templates before the introduction of flexible workload templates, these templates are automatically migrated. Your legacy templates will appear in the new grid and will be separated by workload type - **Workspace** and **Training**.
+<Warning>
 
-<Note>
+**Important**
 
-**Note**
+Legacy asset-based templates and their automatic migration process have been removed. The setting for switching between legacy and flexible templates is no longer available.
 
-You will not lose your existing templates. All legacy templates remain available and can be viewed by toggling **Flexible workload templates** off. Contact your administrator to disable it under **General settings** → Workloads → Flexible workload templates.
+</Warning>
 
-</Note>
+Templates migrated previously remain available as flexible workload templates. Legacy templates that were not migrated are no longer accessible and are not migrated during upgrade. Recreate any required templates using [Adding a New Template](#adding-a-new-template).
+
+The legacy `/api/v1/asset/workload-template` endpoints are no longer available. Use the workload templates API linked below.
 
 ## Using APIs
 
