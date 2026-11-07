@@ -28,7 +28,6 @@ import { clusters, emptyMergedWorkload, projects } from "./inference-new.test.mo
 import { inferenceWorkloadUtil } from "@/utils/inference-workload.util/inference-workload.util";
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
 import { EServerType } from "@/models/inference.model";
-import { SettingKeys } from "@/models/setting.model";
 import { INFERENCE_ROUTE_NAMES } from "@/router/inference.routes/inference.routes.names";
 
 // Mock services
@@ -137,8 +136,8 @@ describe("inference-new.vue", () => {
 
       expect(wrapper.vm.inferenceNewModel.name).toBe("");
       expect(wrapper.vm.inferenceNewModel.serverType).toBe(EServerType.Custom);
-      expect(wrapper.vm.inferenceNewModel.templateId).toBeNull();
-      expect(wrapper.vm.showTemplates).toBe(false);
+      expect(wrapper.vm.inferenceNewModel.templateId).toBe("-1");
+      expect(wrapper.vm.showTemplates).toBe(true);
       expect(wrapper.vm.inferenceNewModel.projectId.toString()).toBe(projects[0].id);
       expect(wrapper.vm.showInferenceTypeSelection).toBe(false);
     });
@@ -150,9 +149,6 @@ describe("inference-new.vue", () => {
         entries: [],
       });
       vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
-      vi.mocked(settingStore.isFeatureEnabled).mockImplementation(
-        (value: SettingKeys) => value === SettingKeys.EnableTemplatesV2,
-      );
 
       wrapper = createWrapper();
       await flushPromises();

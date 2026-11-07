@@ -495,7 +495,7 @@ const DistributedAssetsEdit = defineComponent({
         this.updateCreatedPvc(createdDataSourceId, relevantForm);
       }
 
-      this.computeSectionOptions.applyPolicyDefaults = !!fromCopyId || !!this.trainingStore.templateId;
+      this.computeSectionOptions.applyPolicyDefaults = !!fromCopyId;
     } catch (error: unknown) {
       this.$q.notify(alertUtil.getError("Failed to load assets"));
       console.error(error);

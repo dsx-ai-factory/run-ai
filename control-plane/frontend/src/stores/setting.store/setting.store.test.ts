@@ -52,8 +52,6 @@ vi.mock("@/services/control-plane/workloads-service-settings.service/workloads-s
     updateEnablePolicies: vi.fn(),
     getEnableHybridSubmission: vi.fn(),
     updateEnableHybridSubmission: vi.fn(),
-    getEnableTemplatesV2: vi.fn(),
-    updateEnableTemplatesV2: vi.fn(),
     getGpuOverProvisioning: vi.fn(),
     updateGpuOverProvisioning: vi.fn(),
   },
@@ -617,7 +615,6 @@ describe("setting.store", () => {
       const mockSettings = {
         enablePolicies: { value: true, displayName: "Policies", description: "desc" },
         enableHybridSubmission: { value: true, displayName: "Flexible submission", description: "desc" },
-        enableTemplatesV2: { value: false, displayName: "Templates", description: "desc" },
         gpuOverProvisioning: { value: false, displayName: "GPU opt", description: "desc", stage: "Beta" },
       };
       vi.mocked(workloadsServiceSettingsService.getAll).mockResolvedValue(mockSettings);
@@ -627,7 +624,6 @@ describe("setting.store", () => {
       expect(workloadsServiceSettingsService.getAll).toHaveBeenCalled();
       expect(store.enablePolicies).toEqual(mockSettings.enablePolicies);
       expect(store.enableHybridSubmission).toEqual(mockSettings.enableHybridSubmission);
-      expect(store.enableTemplatesV2).toEqual(mockSettings.enableTemplatesV2);
       expect(store.gpuOverProvisioning).toEqual(mockSettings.gpuOverProvisioning);
     });
 
@@ -772,18 +768,6 @@ describe("setting.store", () => {
   });
 
   describe("refreshLocalSetting with migrated settings", () => {
-    it("should refresh enableTemplatesV2 from workloads service", async () => {
-      const store = useSettingStore();
-      store.enableTemplatesV2 = { value: true };
-      const refreshed = { value: false, displayName: "Templates", description: "desc" };
-      vi.mocked(workloadsServiceSettingsService.getEnableTemplatesV2).mockResolvedValue(refreshed);
-
-      await store.refreshLocalSetting(SettingKeys.EnableTemplatesV2);
-
-      expect(workloadsServiceSettingsService.getEnableTemplatesV2).toHaveBeenCalled();
-      expect(store.enableTemplatesV2).toEqual(refreshed);
-    });
-
     it("should refresh enableDataVolumes from datavolumes service", async () => {
       const store = useSettingStore();
       store.enableDataVolumes = { value: true };

@@ -107,7 +107,6 @@ export default defineComponent({
         nim: this.getSettingValue(SettingKeys.EnableNIM),
         allowGPT2Model: this.getSettingValue(SettingKeys.AllowGPT2Model),
         hybridSubmission: this.getSettingValue(SettingKeys.EnableHybridSubmission),
-        templatesV2: this.getSettingValue(SettingKeys.EnableTemplatesV2),
         dataVolumes: this.getSettingValue(SettingKeys.EnableDataVolumes),
         // The yaml submission setting is loaded inside the component, it is implemented in the new settings convention, not in the old backend.
         // This is a placeholder just to keep it in the right order - the value will be loaded inside the component

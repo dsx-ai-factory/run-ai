@@ -32,7 +32,7 @@
 
             <transition-group name="fade">
               <template v-if="selectedProjectId && selectedProjectId !== -1">
-                <template v-if="showTemplatesV2">
+                <template v-if="isHybridSupported">
                   <runai-expansion-item
                     disable-closing
                     class="multi-node-section"
@@ -86,13 +86,6 @@
                     :multi-node-section-model="selectedDistributedDetails"
                     @update-multi-node-section-model="updateMultiNodeSection"
                     :cluster-id="selectedClusterId"
-                  />
-                  <template-section
-                    aid="template-section"
-                    :templates="templates"
-                    :loading="loadingTemplate"
-                    @template-changed="onSelectedTemplate"
-                    :template-id="selectedTemplateId"
                   />
                 </template>
                 <workload-name-section
@@ -154,7 +147,6 @@ import { defineComponent, type DefineComponent } from "vue";
 // store
 import { useTrainingStore } from "@/stores/training.store";
 import { useClusterStore } from "@/stores/cluster.store";
-import { useWorkloadTemplateStore } from "@/stores/workload-template.store";
 import { useAppStore } from "@/stores/app.store";
 import { useSettingStore } from "@/stores/setting.store";
 import { useEnvironmentStore } from "@/stores/environment.store";
@@ -163,7 +155,6 @@ import { useAuthStore } from "@/stores/auth.store";
 // services
 import { alertUtil } from "@/utils/alert.util";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
-import { dataSourceService } from "@/services/control-plane/data-source.service/data-source.service";
 import { urlService } from "@/services/url.service/url.service";
 import { trainingService } from "@/services/control-plane/training.service/training.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
@@ -173,7 +164,6 @@ import { RunaiFormWrapper } from "@/components/common/runai-form-wrapper";
 import { RunaiExpansionWrapper } from "@/components/common/runai-expansion-wrapper";
 import { WorkloadNameSection } from "@/components/section/workload-name-section";
 import { ProjectSection } from "@/components/section/project-section";
-import { TemplateSection } from "@/components/section/template-section";
 import { MultiNodeSection } from "@/components/section/multi-node-section";
 import { RunaiClusterSection } from "@/components/common/runai-cluster-selection/runai-cluster-section";
 import { RunaiBtn } from "@/components/common/runai-btn";
@@ -181,14 +171,8 @@ import { TemplateSectionV2 } from "@/components/section/template-section-v2";
 import { RunaiExpansionItem } from "@/components/common/runai-expansion-item";
 import { QuickSubmissionDropdown } from "@/components/workload-creation/quick-submission-dropdown";
 // models
-import {
-  type WorkloadTemplate,
-  type PVCAsset,
-  UidGidSource,
-  DistributedFramework,
-} from "@/swagger-models/assets-service-client";
+import { UidGidSource, DistributedFramework } from "@/swagger-models/assets-service-client";
 import type { IUIDistributed, IUIWorkloadCreation } from "@/models/workload.model";
-import type { IAssetsFilter } from "@/models/filter.model";
 import type { Project, ProjectMetadata } from "@/swagger-models/org-unit-service-client";
 import type { ICardQuery } from "@/components/common/runai-card-list/runai-card-list.model";
 // constant
@@ -201,7 +185,6 @@ import { TRAINING_ROUTE_NAMES } from "@/router/training.routes/training.routes.n
 
 // utils
 import { workloadUtil } from "@/utils/workload.util/workload.util";
-import { dataSourceUtil } from "@/utils/data-source.util";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import { deepCopy } from "@/utils/common.util";
 import {
@@ -211,7 +194,6 @@ import {
 import type { LocationQueryRaw } from "vue-router";
 import type { ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
-import { SettingKeys } from "@/models/setting.model";
 import type { DistributedTemplate } from "@/swagger-models/workloads-client";
 import { WorkloadType } from "@/swagger-models/workloads-client";
 import { EDistributedFormType } from "@/components/section/multi-node-section/distributed-selection/distributed-selection.vue";
@@ -229,7 +211,6 @@ const TrainingNew = defineComponent({
     RunaiFormWrapper,
     ProjectSection,
     WorkloadNameSection,
-    TemplateSection,
     MultiNodeSection,
     RunaiBtn,
     TemplateSectionV2,
@@ -242,7 +223,6 @@ const TrainingNew = defineComponent({
   data() {
     return {
       trainingStore: useTrainingStore(),
-      workloadTemplateStore: useWorkloadTemplateStore(),
       appStore: useAppStore(),
       clusterStore: useClusterStore(),
       settingStore: useSettingStore(),
@@ -309,23 +289,8 @@ const TrainingNew = defineComponent({
     }
   },
   computed: {
-    templates(): Array<WorkloadTemplate> {
-      return this.workloadTemplateStore.workloadTemplateList;
-    },
     isClusterVersionSupportDistributedTraining(): boolean {
       return this.clusterStore.isVersionSupportDistributedTraining(this.selectedClusterId);
-    },
-    templatesFilter(): IAssetsFilter {
-      const templatesFilter: IAssetsFilter = {
-        projectId: this.selectedProjectId,
-        isTraining: true,
-      };
-      if (this.selectedDistributedDetails) {
-        templatesFilter.isDistributed = true;
-        if (this.selectedDistributedDetails?.distFramework)
-          templatesFilter.distributedFramework = this.selectedDistributedDetails.distFramework;
-      }
-      return templatesFilter;
     },
     isHybridSupported(): boolean {
       return (
@@ -334,9 +299,6 @@ const TrainingNew = defineComponent({
           MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
         ) && this.settingStore.isHybridSubmissionEnabled
       );
-    },
-    showTemplatesV2(): boolean {
-      return this.isHybridSupported && this.settingStore.isFeatureEnabled(SettingKeys.EnableTemplatesV2);
     },
     showMasterConfigurationSection(): boolean {
       return (
@@ -351,7 +313,7 @@ const TrainingNew = defineComponent({
       return !!(template as DistributedTemplate)?.spec?.distributedFramework;
     },
     showQuickSubmissionDropdown(): boolean {
-      if (!this.showTemplatesV2 || !this.isHybridSupported) return false;
+      if (!this.isHybridSupported) return false;
 
       // show the dropdown only if an actual template is selected
       return this.selectedTemplateId !== "-1" && !!this.selectedTemplateId;
@@ -412,35 +374,22 @@ const TrainingNew = defineComponent({
       }
     },
     async loadTemplates(applyOffset = false, amountRequired?: number): Promise<void> {
+      if (!this.isHybridSupported) {
+        this.selectedTemplateId = "-1";
+        this.setTemplates([]);
+        return;
+      }
       try {
         this.loadingTemplate = true;
+        if (!this.selectedProjectId) return;
 
-        if (this.showTemplatesV2) {
-          if (!this.selectedProjectId) return;
-
-          // no reason to call count if all we need is the next batch
-          const workloadType = this.selectedDistributedDetails ? WorkloadType.Distributed : WorkloadType.Training;
-          await this.list(workloadType, this.selectedProjectId.toString(), applyOffset, amountRequired);
-
-          if (!applyOffset) this.selectedTemplateId = null;
-        } else {
-          await this.workloadTemplateStore.loadWorkloadTemplates(this.templatesFilter);
-        }
-
-        const templates = this.showTemplatesV2 ? this.flatTemplates : this.templates;
-
-        if (templates.length === 0 && !this.selectedTemplateId) {
+        const workloadType = this.selectedDistributedDetails ? WorkloadType.Distributed : WorkloadType.Training;
+        await this.list(workloadType, this.selectedProjectId.toString(), applyOffset, amountRequired);
+        if (!applyOffset) this.selectedTemplateId = null;
+        if (this.flatTemplates.length === 0 && !this.selectedTemplateId) {
           this.selectedTemplateId = "-1";
-        } else if (
-          !this.showTemplatesV2 &&
-          this.trainingStore.templateId &&
-          (this.trainingStore.templateId === "-1" ||
-            templates.find((template) => template.meta.id === this.trainingStore.templateId))
-        ) {
-          this.selectedTemplateId = this.trainingStore.templateId;
         }
       } catch (error: unknown) {
-        // could happen if the user try to search for templates with non-english characters
         this.setTemplates([]);
         console.error(error);
       } finally {
@@ -457,12 +406,11 @@ const TrainingNew = defineComponent({
         console.error(error);
       }
     },
-    async loadTrainingModel(projectId: string, templateId?: string | null, isDistributed?: boolean): Promise<void> {
-      const tempId = templateId === "-1" ? undefined : templateId;
+    async loadTrainingModel(projectId: string, isDistributed?: boolean): Promise<void> {
       const trainingModel = await trainingService.getTrainingMergedWithPolicy(
         projectId,
         undefined,
-        tempId || undefined,
+        undefined,
         isDistributed,
       );
       this.trainingStore.setLoadedTrainingModelWithDefaults(deepCopy(trainingModel));
@@ -481,12 +429,11 @@ const TrainingNew = defineComponent({
     },
     onSelectedTemplate(templateId: string | null): void {
       this.selectedTemplateId = templateId;
-      if (this.showTemplatesV2 && !!this.selectedDistributedDetails) {
+      if (this.isHybridSupported && !!this.selectedDistributedDetails) {
         const template = this.flatTemplates.find((template) => template.meta.id === templateId);
         const distFramework = (template as DistributedTemplate)?.spec?.distributedFramework || null;
         this.setDistributedFramework(distFramework);
       }
-      this.trainingStore.setTemplate(templateId);
     },
     updateMultiNodeSection(distributed: IUIDistributed): void {
       this.selectedDistributedDetails = distributed || null;
@@ -529,21 +476,9 @@ const TrainingNew = defineComponent({
         return;
       }
 
-      await this.loadTrainingModel(
-        this.selectedProjectId.toString(),
-        this.selectedTemplateId,
-        !!this.selectedDistributedDetails,
-      );
+      await this.loadTrainingModel(this.selectedProjectId.toString(), !!this.selectedDistributedDetails);
 
       await this.setSpecificUserGidUidIfNeeded();
-
-      const template: WorkloadTemplate | undefined = this.templates.find(
-        (template) => template.meta.id === this.selectedTemplateId,
-      );
-      if (template?.spec.assets.workloadVolumes?.length) {
-        const pvcs: Array<PVCAsset> = await dataSourceService.loadPVCAssets(template.spec.assets.workloadVolumes);
-        this.training.assets.uiVolumes = dataSourceUtil.mapPvcsToUiVolumes(pvcs);
-      }
 
       this.trainingStore.setTraining(this.training);
 

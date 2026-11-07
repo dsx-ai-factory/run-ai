@@ -267,7 +267,7 @@ export default defineComponent({
       return !!(this.inferenceNewModel.projectId && this.inferenceNewModel.projectId !== PROJECT_AS_UNSELECTED);
     },
     showTemplates(): boolean {
-      return this.settingStore.isFeatureEnabled(SettingKeys.EnableTemplatesV2) && this.isStandardArchitecture;
+      return this.isStandardArchitecture;
     },
     clusterList(): Array<ClustersMinimalData> {
       return this.clusterStore.clusterList;
