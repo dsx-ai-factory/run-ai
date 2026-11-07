@@ -39,7 +39,6 @@ const (
 	SettingKeyEnableHybridSubmission        = "tenant.enable_hybrid_submission"
 	SettingKeyEnableCustomRoles             = "tenant.enable_custom_roles"
 	SettingKeyEnableDataVolumes             = "tenant.enable_data_volumes"
-	SettingKeyEnableTemplatesV2             = "tenant.enable_templates_v2"
 	SettingKeyEnableNgcIntegration          = "tenant.enable_ngc_integration"
 )
 

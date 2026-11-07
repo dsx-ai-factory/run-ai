@@ -7789,19 +7789,6 @@ export interface EnablePoliciesSetting {
 /**
  * 
  * @export
- * @interface EnableTemplatesV2Setting
- */
-export interface EnableTemplatesV2Setting {
-    /**
-     * 
-     * @type {boolean}
-     * @memberof EnableTemplatesV2Setting
-     */
-    'enabled'?: boolean;
-}
-/**
- * 
- * @export
  * @interface Endpoint
  */
 export interface Endpoint {
@@ -8602,37 +8589,6 @@ export interface GetEnableSettingsValue {
      * @memberof GetEnableSettingsValue
      */
     'enabled'?: boolean | null;
-}
-/**
- * 
- * @export
- * @interface GetEnableTemplatesV2
- */
-export interface GetEnableTemplatesV2 {
-    /**
-     * 
-     * @type {GetEnableSettingsValue}
-     * @memberof GetEnableTemplatesV2
-     */
-    'value'?: GetEnableSettingsValue;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableTemplatesV2
-     */
-    'displayName'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableTemplatesV2
-     */
-    'description'?: string;
-    /**
-     * 
-     * @type {string}
-     * @memberof GetEnableTemplatesV2
-     */
-    'stage'?: string;
 }
 /**
  * 
@@ -25740,12 +25696,6 @@ export interface WorkloadsSettingsGetResponse {
     'workloadSubmissionV2Enabled'?: GetWorkloadSubmissionV2Enabled;
     /**
      * 
-     * @type {GetEnableTemplatesV2}
-     * @memberof WorkloadsSettingsGetResponse
-     */
-    'enableTemplatesV2'?: GetEnableTemplatesV2;
-    /**
-     * 
      * @type {GetEnableHybridSubmission}
      * @memberof WorkloadsSettingsGetResponse
      */
@@ -25772,7 +25722,6 @@ export interface WorkloadsSettingsGetResponse {
 export const WorkloadsSettingsKeyEnum = {
     EnablePolicies: 'enablePolicies',
     WorkloadSubmissionV2Enabled: 'workloadSubmissionV2Enabled',
-    EnableTemplatesV2: 'enableTemplatesV2',
     EnableHybridSubmission: 'enableHybridSubmission',
     GpuOverProvisioning: 'gpuOverProvisioning',
     ApplicationSubmission: 'applicationSubmission'
