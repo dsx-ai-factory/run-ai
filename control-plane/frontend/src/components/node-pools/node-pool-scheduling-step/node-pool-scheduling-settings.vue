@@ -308,7 +308,7 @@ header .q-btn {
   max-width: 245px;
 }
 .settings-body > .runtime-section:last-child {
-  padding-bottom: 10px !important;
+  padding-bottom: 12px !important;
 }
 .settings-body :deep(.runai-radio-options) {
   margin-top: 7px;
@@ -320,6 +320,12 @@ header .q-btn {
   font-size: 14px;
   font-weight: 400;
   line-height: 20px;
+}
+.duration-grid :deep(.q-field--with-bottom) {
+  padding-bottom: 16px;
+}
+.duration-grid :deep(input[type="number"]::-webkit-inner-spin-button) {
+  opacity: 1;
 }
 .duration-grid :deep(.q-field__bottom) {
   min-height: 16px;
