@@ -35,6 +35,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/cachedclient"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/controllers"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/gpuinventory"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/handlers"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/logger"
 	dinfwv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
@@ -55,10 +56,18 @@ import (
 
 func init() {
 	logger.InitLogger()
-	config.Init()
+	if os.Getenv("GPU_PCI_COLLECTOR") != "true" {
+		config.Init()
+	}
 }
 
 func main() {
+	if os.Getenv("GPU_PCI_COLLECTOR") == "true" {
+		if err := gpuinventory.RunInCluster(ctrl.SetupSignalHandler()); err != nil {
+			zap.S().Fatalw("GPU identity collector failed", "error", err)
+		}
+		return
+	}
 	zap.L().Info("Cluster Sync service has started")
 	kubeConfig, err := rest.InClusterConfig()
 	if err != nil {
@@ -191,7 +200,7 @@ func startWatchClients(kubeConfig *rest.Config, scheme *apiruntime.Scheme, ctx c
 	nodeHandler := handlers.NewNodeHandler(runaiBackendClient, cachedClient)
 	numaNodeHandler := handlers.NewNumaNodeHandler(runaiBackendClient, cachedClient)
 	podHandler := handlers.NewPodHandler(runaiBackendClient, cachedClient)
-	controllers.AddNodeHandlerToCache(runaiBackendClient, cachedClient, nodeHandler)
+	nodeController := controllers.AddNodeHandlerToCache(runaiBackendClient, cachedClient, nodeHandler)
 	if controllers.AddNumaNodeHandlerToCache(cachedClient, numaNodeHandler) {
 		nodeHandler.SetNumaNodeHandler(numaNodeHandler)
 	}
@@ -228,6 +237,7 @@ func startWatchClients(kubeConfig *rest.Config, scheme *apiruntime.Scheme, ctx c
 	controllers.AddPolicyHandlerToCache(cachedClient, policyHandler)
 
 	cachedClient.Start(ctx, ctx.Done())
+	go controllers.StartGPUInventoryExpiration(ctx, cachedClient, nodeController)
 
 	//go accessRuleController.Start(stopper)
 

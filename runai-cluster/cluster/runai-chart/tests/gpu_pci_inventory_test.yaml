@@ -1,0 +1,123 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+suite: GPU PCI inventory permissions
+tests:
+  - it: grants only node get and patch to the dedicated service account
+    templates:
+      - templates/clusterroles/gpu-pci-inventory.yaml
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: rules
+          value:
+            - apiGroups: [""]
+              resources: [nodes]
+              verbs: [get, patch]
+  - it: binds the collector without sharing cluster-sync credentials
+    templates:
+      - templates/clusterroles/gpu-pci-inventory.yaml
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: subjects
+          value:
+            - kind: ServiceAccount
+              name: gpu-pci-inventory
+              namespace: runai
+      - equal:
+          path: roleRef.name
+          value: gpu-pci-inventory
+  - it: respects externally managed RBAC
+    templates:
+      - templates/clusterroles/gpu-pci-inventory.yaml
+    set:
+      operands.rbac.base.create: false
+    asserts:
+      - hasDocuments:
+          count: 0
+  - it: limits OpenShift host access to the two read-only directories
+    templates:
+      - templates/ocp/gpu-pci-inventory-scc.yaml
+    set:
+      openShift.mode: Enabled
+    documentIndex: 0
+    asserts:
+      - equal:
+          path: allowedHostPaths
+          value:
+            - pathPrefix: /sys
+              readOnly: true
+            - pathPrefix: /proc/driver/nvidia/gpus
+              readOnly: true
+      - equal:
+          path: runAsUser
+          value:
+            type: MustRunAs
+            uid: 65532
+      - equal:
+          path: readOnlyRootFilesystem
+          value: true
+      - equal:
+          path: allowPrivilegedContainer
+          value: false
+      - equal:
+          path: allowPrivilegeEscalation
+          value: false
+      - equal:
+          path: requiredDropCapabilities
+          value: [ALL]
+      - equal:
+          path: seLinuxContext.type
+          value: RunAsAny
+  - it: grants SCC use only to the inventory service account
+    templates:
+      - templates/ocp/gpu-pci-inventory-scc.yaml
+    set:
+      openShift.mode: Enabled
+    documentIndex: 2
+    asserts:
+      - equal:
+          path: subjects
+          value:
+            - kind: ServiceAccount
+              name: gpu-pci-inventory
+              namespace: runai
+      - equal:
+          path: roleRef
+          value:
+            apiGroup: rbac.authorization.k8s.io
+            kind: Role
+            name: gpu-pci-inventory-scc
+  - it: supports an externally provisioned SCC
+    templates:
+      - templates/ocp/gpu-pci-inventory-scc.yaml
+    set:
+      openShift.mode: Enabled
+      openShift.securityContextConstraints.create: false
+    asserts:
+      - hasDocuments:
+          count: 2
+  - it: omits OpenShift resources on Kubernetes
+    templates:
+      - templates/ocp/gpu-pci-inventory-scc.yaml
+    set:
+      openShift.mode: Disabled
+    asserts:
+      - hasDocuments:
+          count: 0
+
+  - it: restricts SCC use to the single inventory SCC
+    templates:
+      - templates/ocp/gpu-pci-inventory-scc.yaml
+    set:
+      openShift.mode: Enabled
+    documentIndex: 1
+    asserts:
+      - equal:
+          path: rules
+          value:
+            - apiGroups: [security.openshift.io]
+              resources: [securitycontextconstraints]
+              resourceNames: [gpu-pci-inventory]
+              verbs: [use]

@@ -17,6 +17,7 @@ import (
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/common/shared_data"
 	gpu_fractioning_metrics "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/gpu-fractioning-metrics"
+	gpu_pci_inventory "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/gpu-pci-inventory"
 	init_ca "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/init-ca"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/knative"
 	legacy_workload_cleanup "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/legacy-workload-cleanup"
@@ -125,6 +126,7 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 
 	// The below operands are deployed to the remote cluster (tenant cluster) in a dual-cluster setup
 	// TODO start migrating all operands to this
+	mo.addRemoteCluster(gpu_pci_inventory.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(advice_restart_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(runai_public.Operand(remoteClusterClient, *runaiConfig))
 	mo.addRemoteCluster(encryption_key.Operand(remoteClusterClient, *runaiConfig))

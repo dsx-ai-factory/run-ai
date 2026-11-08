@@ -23,6 +23,8 @@ var _ MappedNullable = &NodepoolGpuTypeDetails{}
 
 // NodepoolGpuTypeDetails struct for NodepoolGpuTypeDetails
 type NodepoolGpuTypeDetails struct {
+	// NVIDIA PCI device and vendor ID from reported physical hardware; omitted when unknown.
+	PciDeviceId *string `json:"pciDeviceId,omitempty" validate:"regexp=^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"`
 	// The GPU model, as reported by the GPU vendor labels on the node pool's nodes.
 	Type string `json:"type"`
 	// Memory of a single GPU device of this type, in bytes. Omitted when the node pool's nodes do not report GPU memory.
@@ -50,6 +52,38 @@ func NewNodepoolGpuTypeDetails(type_ string, totalDevices int32) *NodepoolGpuTyp
 func NewNodepoolGpuTypeDetailsWithDefaults() *NodepoolGpuTypeDetails {
 	this := NodepoolGpuTypeDetails{}
 	return &this
+}
+
+// GetPciDeviceId returns the PciDeviceId field value if set, zero value otherwise.
+func (o *NodepoolGpuTypeDetails) GetPciDeviceId() string {
+	if o == nil || IsNil(o.PciDeviceId) {
+		var ret string
+		return ret
+	}
+	return *o.PciDeviceId
+}
+
+// GetPciDeviceIdOk returns a tuple with the PciDeviceId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *NodepoolGpuTypeDetails) GetPciDeviceIdOk() (*string, bool) {
+	if o == nil || IsNil(o.PciDeviceId) {
+		return nil, false
+	}
+	return o.PciDeviceId, true
+}
+
+// HasPciDeviceId returns a boolean if a field has been set.
+func (o *NodepoolGpuTypeDetails) HasPciDeviceId() bool {
+	if o != nil && !IsNil(o.PciDeviceId) {
+		return true
+	}
+
+	return false
+}
+
+// SetPciDeviceId gets a reference to the given string and assigns it to the PciDeviceId field.
+func (o *NodepoolGpuTypeDetails) SetPciDeviceId(v string) {
+	o.PciDeviceId = &v
 }
 
 // GetType returns the Type field value
@@ -142,6 +176,9 @@ func (o NodepoolGpuTypeDetails) MarshalJSON() ([]byte, error) {
 
 func (o NodepoolGpuTypeDetails) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.PciDeviceId) {
+		toSerialize["pciDeviceId"] = o.PciDeviceId
+	}
 	toSerialize["type"] = o.Type
 	if !IsNil(o.GpuMemoryBytes) {
 		toSerialize["gpuMemoryBytes"] = o.GpuMemoryBytes

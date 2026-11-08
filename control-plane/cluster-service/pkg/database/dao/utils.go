@@ -7,6 +7,7 @@ package dao
 
 import (
 	"context"
+	"time"
 
 	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/orm"
@@ -56,6 +57,8 @@ func NodeInfoToNodeDao(tenantId int32, clusterUuid, nodeName string, nodeInfo ap
 		node.GpuType = nodeInfo.GpuInfo.GpuType
 		node.GpuCount = nodeInfo.GpuInfo.GpuCount
 		node.GpuMemoryBytes = nodeInfo.GpuInfo.GpuMemoryBytes
+		node.GpuPciDeviceId, node.GpuPciDeviceIdObservedAt = models.NormalizeGpuPciIdentity(
+			nodeInfo.GpuInfo.PciDeviceId, nodeInfo.GpuInfo.PciDeviceIdObservedAt, time.Now())
 	}
 
 	if nodeInfo.NetworkTopologyLabels != nil {

@@ -14,6 +14,7 @@ package api
 
 import (
 	"errors"
+	"time"
 )
 
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
@@ -24,6 +25,18 @@ var dummyGpuInfo = runaihttp.AssertPattern
 ////////////////////////// RUNAI END ////////////////////////////
 
 type GpuInfo struct {
+
+	// NVIDIA PCI device and vendor ID from reported physical hardware; omitted when unknown.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//PciDeviceId string `json:"pciDeviceId,omitempty" validate:"regexp=^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"`
+	PciDeviceId string `json:"pciDeviceId,omitempty" gorm:"not null;" validate:"regexp=^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Time the hardware collector observed pciDeviceId. Identity is unknown without a paired observation within five minutes and at most one minute in the future. This timestamp is never replaced by the control-plane ingestion time.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//PciDeviceIdObservedAt *time.Time `json:"pciDeviceIdObservedAt,omitempty"`
+	PciDeviceIdObservedAt *time.Time `json:"pciDeviceIdObservedAt,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuType string `json:"gpuType"`
@@ -59,6 +72,19 @@ func AssertGpuInfoRequired(obj GpuInfo) error {
 
 // AssertGpuInfoConstraints checks if the values respects the defined constraints
 func AssertGpuInfoConstraints(obj GpuInfo) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.PciDeviceId, "PciDeviceId", "/^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$/"); patternErr != nil {
+		return &ParsingError{Param: "PciDeviceId", Err: patternErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

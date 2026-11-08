@@ -19,7 +19,7 @@ import (
 )
 
 func AddNodeHandlerToCache(backendClient *backendclient.BackendClient, cachedClient cachedclient.CachedClient,
-	nodeHandler *handlers.NodeHandler) {
+	nodeHandler *handlers.NodeHandler) *cachedclient.RateLimitedController {
 	backendClient.RegisterSyncHandler(nodeHandler)
 
 	rateLimitedController := cachedClient.NewRateLimitedController(cachedclient.NodeRL, nodeHandler)
@@ -70,6 +70,7 @@ func AddNodeHandlerToCache(backendClient *backendclient.BackendClient, cachedCli
 	}
 
 	zap.S().Debug("Node handling has started")
+	return rateLimitedController
 }
 
 // The fractioning verdict lives in the cluster-info ConfigMap, not on the Node objects whose

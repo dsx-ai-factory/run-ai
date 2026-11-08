@@ -28300,6 +28300,25 @@ components:
         - gpuType
         - gpuCount
       properties:
+        pciDeviceId:
+          type: string
+          pattern: >-
+            ^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$
+          x-internal: true
+          description: >-
+            NVIDIA PCI device and vendor ID from reported physical hardware;
+            omitted when unknown.
+          example: '1eb8:10de'
+        pciDeviceIdObservedAt:
+          type: string
+          format: date-time
+          nullable: true
+          x-internal: true
+          description: >-
+            Time the hardware collector observed pciDeviceId. Identity is
+            unknown without a paired observation within five minutes and at most
+            one minute in the future. This timestamp is never replaced by the
+            control-plane ingestion time.
         gpuType:
           type: string
           example: Tesla-V100
@@ -29285,6 +29304,15 @@ components:
         - type
         - totalDevices
       properties:
+        pciDeviceId:
+          type: string
+          pattern: >-
+            ^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$
+          x-internal: true
+          description: >-
+            NVIDIA PCI device and vendor ID from reported physical hardware;
+            omitted when unknown.
+          example: '1eb8:10de'
         type:
           type: string
           description: >-

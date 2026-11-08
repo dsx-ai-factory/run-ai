@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**PciDeviceId** | Pointer to **string** | NVIDIA PCI device and vendor ID from reported physical hardware; omitted when unknown. | [optional] 
 **Type** | **string** | The GPU model, as reported by the GPU vendor labels on the node pool&#39;s nodes. | 
 **GpuMemoryBytes** | Pointer to **int64** | Memory of a single GPU device of this type, in bytes. Omitted when the node pool&#39;s nodes do not report GPU memory. | [optional] 
 **TotalDevices** | **int32** | Total number of GPU devices of this type across the node pool&#39;s nodes. | 
@@ -26,6 +27,31 @@ will change when the set of required properties is changed
 NewNodepoolGpuTypeDetailsWithDefaults instantiates a new NodepoolGpuTypeDetails object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetPciDeviceId
+
+`func (o *NodepoolGpuTypeDetails) GetPciDeviceId() string`
+
+GetPciDeviceId returns the PciDeviceId field if non-nil, zero value otherwise.
+
+### GetPciDeviceIdOk
+
+`func (o *NodepoolGpuTypeDetails) GetPciDeviceIdOk() (*string, bool)`
+
+GetPciDeviceIdOk returns a tuple with the PciDeviceId field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetPciDeviceId
+
+`func (o *NodepoolGpuTypeDetails) SetPciDeviceId(v string)`
+
+SetPciDeviceId sets PciDeviceId field to given value.
+
+### HasPciDeviceId
+
+`func (o *NodepoolGpuTypeDetails) HasPciDeviceId() bool`
+
+HasPciDeviceId returns a boolean if a field has been set.
 
 ### GetType
 

@@ -4,6 +4,12 @@ required:
   - type
   - totalDevices
 properties:
+  pciDeviceId:
+    type: string
+    pattern: "^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"
+    x-internal: true
+    description: NVIDIA PCI device and vendor ID from reported physical hardware; omitted when unknown.
+    example: "1eb8:10de"
   type:
     type: string
     description: The GPU model, as reported by the GPU vendor labels on the node pool's nodes.

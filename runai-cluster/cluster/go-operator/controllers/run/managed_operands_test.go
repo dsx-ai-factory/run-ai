@@ -15,6 +15,7 @@ import (
 	internalv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/ptr"
 )
@@ -397,4 +398,42 @@ func (m *testMockOperand) Status(ctx context.Context) (operands.Status, error) {
 
 func (m *testMockOperand) Enabled() bool {
 	return m.enabled
+}
+
+func TestManagedOperandsGPUInventoryUsesRemoteClusterAndCleansUpWhenSyncDisabled(t *testing.T) {
+	ctx := context.Background()
+	local := createEmptyKubeClientMock(ctx)
+	remote := createEmptyKubeClientMock(ctx)
+	localClient, remoteClient := kc.New(local, local, nil), kc.New(remote, remote, nil)
+	config := createTestRunaiConfig()
+	existing := &appsv1.DaemonSet{ObjectMeta: metav1.ObjectMeta{Name: "gpu-pci-inventory", Namespace: config.Namespace, Annotations: map[string]string{"cluster": "remote"}}}
+	require.NoError(t, remote.Create(ctx, existing))
+	for _, tc := range []struct {
+		name    string
+		enabled bool
+	}{
+		{name: "enabled", enabled: true},
+		{name: "disabled", enabled: false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			config.Spec.ClusterSync.Enabled = ptr.To(tc.enabled)
+			managed := NewManagedOperands(ctx, localClient, remoteClient, &config)
+			require.Nil(t, findOperandByName(managed.GetLocalClusterOperands(), "gpu-pci-inventory"))
+			inventory := findOperandByName(managed.GetRemoteClusterOperands(), "gpu-pci-inventory")
+			require.NotNil(t, inventory)
+			assert.Equal(t, tc.enabled, inventory.Enabled())
+			obj, err := inventory.Resources()[0].Object(ctx)
+			require.NoError(t, err)
+			assert.Equal(t, "remote", obj.GetAnnotations()["cluster"])
+			desired, err := ResourcesForOperands(ctx, []operands.Operand{inventory})
+			require.NoError(t, err)
+			if tc.enabled {
+				assert.Len(t, desired.CreateOrUpdate, 2)
+				assert.Empty(t, desired.Delete)
+			} else {
+				assert.Empty(t, desired.CreateOrUpdate)
+				assert.Len(t, desired.Delete, 2)
+			}
+		})
+	}
 }

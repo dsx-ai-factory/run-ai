@@ -7073,11 +7073,29 @@ components:
       x-schema-name: NodeTaint
     GpuInfo:
       example:
+        pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+        pciDeviceId: 1eb8:10de
         gpuMemoryBytes: 85899345920
         gpuCount: 0
         gpuType: Tesla-V100
       nullable: true
       properties:
+        pciDeviceId:
+          description: NVIDIA PCI device and vendor ID from reported physical hardware;
+            omitted when unknown.
+          example: 1eb8:10de
+          pattern: "^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"
+          type: string
+          x-internal: true
+        pciDeviceIdObservedAt:
+          description: Time the hardware collector observed pciDeviceId. Identity
+            is unknown without a paired observation within five minutes and at most
+            one minute in the future. This timestamp is never replaced by the control-plane
+            ingestion time.
+          format: date-time
+          nullable: true
+          type: string
+          x-internal: true
         gpuType:
           example: Tesla-V100
           type: string
@@ -7181,6 +7199,8 @@ components:
           type: type
           message: container runtime status check may not have completed yet
         gpuInfo:
+          pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+          pciDeviceId: 1eb8:10de
           gpuMemoryBytes: 85899345920
           gpuCount: 0
           gpuType: Tesla-V100
@@ -7288,6 +7308,8 @@ components:
             type: type
             message: container runtime status check may not have completed yet
           gpuInfo:
+            pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             gpuCount: 0
             gpuType: Tesla-V100
@@ -7324,6 +7346,8 @@ components:
               type: type
               message: container runtime status check may not have completed yet
             gpuInfo:
+              pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+              pciDeviceId: 1eb8:10de
               gpuMemoryBytes: 85899345920
               gpuCount: 0
               gpuType: Tesla-V100
@@ -7356,6 +7380,8 @@ components:
               type: type
               message: container runtime status check may not have completed yet
             gpuInfo:
+              pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+              pciDeviceId: 1eb8:10de
               gpuMemoryBytes: 85899345920
               gpuCount: 0
               gpuType: Tesla-V100
@@ -8349,9 +8375,17 @@ components:
     NodepoolGpuTypeDetails:
       example:
         totalDevices: 16
+        pciDeviceId: 1eb8:10de
         gpuMemoryBytes: 85899345920
         type: NVIDIA-H100-80GB-HBM3
       properties:
+        pciDeviceId:
+          description: NVIDIA PCI device and vendor ID from reported physical hardware;
+            omitted when unknown.
+          example: 1eb8:10de
+          pattern: "^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"
+          type: string
+          x-internal: true
         type:
           description: "The GPU model, as reported by the GPU vendor labels on the\
             \ node pool's nodes."
@@ -8564,9 +8598,11 @@ components:
             status: "True"
         gpuTypes:
         - totalDevices: 16
+          pciDeviceId: 1eb8:10de
           gpuMemoryBytes: 85899345920
           type: NVIDIA-H100-80GB-HBM3
         - totalDevices: 16
+          pciDeviceId: 1eb8:10de
           gpuMemoryBytes: 85899345920
           type: NVIDIA-H100-80GB-HBM3
     NodepoolId:
@@ -8593,9 +8629,11 @@ components:
         gpuNetworkAccelerationDetected: true
         gpuTypes:
         - totalDevices: 16
+          pciDeviceId: 1eb8:10de
           gpuMemoryBytes: 85899345920
           type: NVIDIA-H100-80GB-HBM3
         - totalDevices: 16
+          pciDeviceId: 1eb8:10de
           gpuMemoryBytes: 85899345920
           type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -9453,6 +9491,8 @@ components:
           value: bar
           key: foo
         gpuInfo:
+          pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+          pciDeviceId: 1eb8:10de
           gpuMemoryBytes: 85899345920
           gpuCount: 0
           gpuType: Tesla-V100
@@ -9491,6 +9531,8 @@ components:
             value: bar
             key: foo
           gpuInfo:
+            pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             gpuCount: 0
             gpuType: Tesla-V100
@@ -9525,6 +9567,8 @@ components:
             value: bar
             key: foo
           gpuInfo:
+            pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             gpuCount: 0
             gpuType: Tesla-V100
@@ -9623,6 +9667,8 @@ components:
           value: bar
           key: foo
         gpuInfo:
+          pciDeviceIdObservedAt: 2000-01-23T04:56:07.000+00:00
+          pciDeviceId: 1eb8:10de
           gpuMemoryBytes: 85899345920
           gpuCount: 0
           gpuType: Tesla-V100
@@ -10649,9 +10695,11 @@ components:
               status: "True"
           gpuTypes:
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
         - schedulingConfiguration:
@@ -10754,9 +10802,11 @@ components:
               status: "True"
           gpuTypes:
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -10780,9 +10830,11 @@ components:
           gpuNetworkAccelerationDetected: true
           gpuTypes:
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
         - phase: Creating
@@ -10797,9 +10849,11 @@ components:
           gpuNetworkAccelerationDetected: true
           gpuTypes:
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -10911,9 +10965,11 @@ components:
               status: "True"
           gpuTypes:
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
         - schedulingConfiguration:
@@ -11016,9 +11072,11 @@ components:
               status: "True"
           gpuTypes:
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
       properties:
@@ -11043,9 +11101,11 @@ components:
           gpuNetworkAccelerationDetected: true
           gpuTypes:
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
         - phase: Creating
@@ -11060,9 +11120,11 @@ components:
           gpuNetworkAccelerationDetected: true
           gpuTypes:
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
           - totalDevices: 16
+            pciDeviceId: 1eb8:10de
             gpuMemoryBytes: 85899345920
             type: NVIDIA-H100-80GB-HBM3
       properties:

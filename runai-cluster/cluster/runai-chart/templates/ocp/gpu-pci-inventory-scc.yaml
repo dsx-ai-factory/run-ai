@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+{{- if eq (include "isOpenShift" .) "true" }}
+{{- if .Values.openShift.securityContextConstraints.create }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+metadata:
+  name: gpu-pci-inventory
+allowPrivilegedContainer: false
+allowPrivilegeEscalation: false
+defaultAllowPrivilegeEscalation: false
+allowHostDirVolumePlugin: true
+allowHostNetwork: false
+allowHostPID: false
+allowHostIPC: false
+allowHostPorts: false
+readOnlyRootFilesystem: true
+requiredDropCapabilities: [ALL]
+allowedCapabilities: []
+allowedHostPaths:
+  - pathPrefix: /sys
+    readOnly: true
+  - pathPrefix: /proc/driver/nvidia/gpus
+    readOnly: true
+volumes:
+  - hostPath
+  - projected
+  - secret
+  - configMap
+  - downwardAPI
+runAsUser:
+  type: MustRunAs
+  uid: 65532
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+seccompProfiles: [runtime/default]
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: gpu-pci-inventory-scc
+  namespace: runai
+rules:
+  - apiGroups: [security.openshift.io]
+    resources: [securitycontextconstraints]
+    resourceNames: [gpu-pci-inventory]
+    verbs: [use]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: gpu-pci-inventory-scc
+  namespace: runai
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gpu-pci-inventory-scc
+subjects:
+  - kind: ServiceAccount
+    name: gpu-pci-inventory
+    namespace: runai
+{{- end }}

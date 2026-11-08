@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
@@ -68,6 +69,8 @@ type Node struct {
 	NodePool                   string                      `gorm:"not null"`
 	GpuType                    string                      `gorm:"not null"`
 	GpuCount                   int32                       `gorm:"not null"`
+	GpuPciDeviceIdObservedAt   *time.Time                  `gorm:""`
+	GpuPciDeviceId             string                      `gorm:"not null;default:''"`
 	GpuMemoryBytes             int64                       `gorm:"not null"`
 	Name                       string                      `gorm:"uniqueIndex:unique_node_name_per_cluster;not null"`
 	ClusterUuid                string                      `gorm:"uniqueIndex:unique_node_name_per_cluster;index:idx_cluster;not null"`
@@ -100,7 +103,7 @@ func (Node) ColumnsToUpdate() []string {
 	return []string{
 		"updated_at", "status", "conditions", "taints", "node_pool", "gpu_type", "gpu_count", "gpu_memory_bytes", "tenant_id",
 		"nv_link_clique_id", "nv_link_domain_uid", "network_topology_label_values", "network_topology_labels",
-		"topology_manager_policy",
+		"topology_manager_policy", "gpu_pci_device_id", "gpu_pci_device_id_observed_at",
 	}
 }
 
@@ -111,7 +114,7 @@ func (n Node) InsertColumns() []string {
 		"node_pool", "gpu_type", "gpu_count", "gpu_memory_bytes", "created_at", "updated_at",
 		"nv_link_domain_uid", "nv_link_clique_id",
 		"network_topology_label_values", "network_topology_labels",
-		"topology_manager_policy",
+		"topology_manager_policy", "gpu_pci_device_id", "gpu_pci_device_id_observed_at",
 	}
 }
 
@@ -251,10 +254,13 @@ func (n *Node) ToApiModel() api.Node {
 	}
 
 	if n.GpuType != "" || n.GpuCount != 0 {
+		pciDeviceId, observedAt := NormalizeGpuPciIdentity(n.GpuPciDeviceId, n.GpuPciDeviceIdObservedAt, time.Now())
 		nodeInfo.GpuInfo = &api.GpuInfo{
-			GpuType:        n.GpuType,
-			GpuCount:       n.GpuCount,
-			GpuMemoryBytes: n.GpuMemoryBytes,
+			GpuType:               n.GpuType,
+			GpuCount:              n.GpuCount,
+			GpuMemoryBytes:        n.GpuMemoryBytes,
+			PciDeviceId:           pciDeviceId,
+			PciDeviceIdObservedAt: observedAt,
 		}
 	}
 

@@ -25,6 +25,12 @@ var dummyNodepoolGpuTypeDetails = runaihttp.AssertPattern
 
 type NodepoolGpuTypeDetails struct {
 
+	// NVIDIA PCI device and vendor ID from reported physical hardware; omitted when unknown.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//PciDeviceId string `json:"pciDeviceId,omitempty" validate:"regexp=^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"`
+	PciDeviceId string `json:"pciDeviceId,omitempty" gorm:"not null;" validate:"regexp=^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// The GPU model, as reported by the GPU vendor labels on the node pool's nodes.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Type string `json:"type"`
@@ -61,6 +67,14 @@ func AssertNodepoolGpuTypeDetailsRequired(obj NodepoolGpuTypeDetails) error {
 
 // AssertNodepoolGpuTypeDetailsConstraints checks if the values respects the defined constraints
 func AssertNodepoolGpuTypeDetailsConstraints(obj NodepoolGpuTypeDetails) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.PciDeviceId, "PciDeviceId", "/^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$/"); patternErr != nil {
+		return &ParsingError{Param: "PciDeviceId", Err: patternErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
