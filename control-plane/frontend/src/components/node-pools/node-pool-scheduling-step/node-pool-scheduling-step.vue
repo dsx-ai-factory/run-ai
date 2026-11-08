@@ -12,7 +12,11 @@
     right-width="200px"
     hide-right-on-small-screen
   >
-    <runai-form-wrapper :form-state="previewPool" full-width @leave-page="emit('leave-approved')">
+    <runai-form-wrapper
+      :form-state="{ pool: previewPool, departments: draft.departments }"
+      full-width
+      @leave-page="emit('leave-approved')"
+    >
       <runai-expansion-wrapper no-first-top-padding>
         <runai-expansion-item label="Scheduling mode" default-opened disable-closing>
           <div class="capacity-label text-b-subtitle1">Total node pool capacity</div>
@@ -42,7 +46,61 @@
             </runai-segmented-button>
           </div>
         </runai-expansion-item>
+        <div v-if="!canViewDepartments" class="q-pa-lg" role="status">
+          You do not have permission to view departments.
+        </div>
+        <template v-else>
+          <q-banner v-if="loadError" class="text-negative q-ma-md" role="alert"
+            >{{ loadError
+            }}<template #action
+              ><runai-btn aid="retry-departments" flat label="Retry" @click="emit('refresh')" /></template
+          ></q-banner>
+          <p v-if="telemetryError" class="q-px-md text-b-subtitle2" role="status">{{ telemetryError }}</p>
+          <node-pool-department-table
+            :key="`department-draft-${resetRevision}`"
+            :rows="rows"
+            :draft="draft"
+            :aggregates="aggregates"
+            :ranks="ranks"
+            :rank-counts="rankCounts"
+            :capacity="resources?.gpus"
+            :readonly="!canEditDepartments"
+            :totals-complete="totalsComplete"
+            :raw-weights-available="pool.schedulingCapabilities?.adjustableWeights === true"
+            :can-edit-department="canEditDepartment"
+            :loading="!!loading"
+            :has-more="hasMore"
+            :has-error="!!loadError"
+            :search-term="searchTerm"
+            :rank-filter="rankFilter"
+            :load-quota-context="loadQuotaContext"
+            @edit="applyEdit"
+            @search="emit('search', $event)"
+            @filter-rank="emit('filter-rank', $event)"
+            @load-more="emit('load-more')"
+            @load-rank="emit('load-rank', $event)"
+            @refresh="emit('refresh')"
+            @automatic-weights="draft.automaticWeights = $event"
+          />
+          <p v-if="draft.mode === 'guaranteed'" class="q-pa-md text-b-subtitle2">
+            Limit projects from exceeding department quota:
+            {{ quotaPolicy === undefined ? "Unknown" : quotaPolicy ? "On" : "Off" }}. This organization-wide policy is
+            read-only here.
+          </p>
+        </template>
       </runai-expansion-wrapper>
+      <runai-base-dialog v-if="pendingMode" :model-value="true" size="width-sm" @close="cancelModeChange">
+        <template #header>Change Mode?</template>
+        <template #body
+          ><div class="q-px-md q-py-lg">
+            You have unsaved changes. If you change the mode, they will be lost.
+          </div></template
+        >
+        <template #footer>
+          <runai-btn aid="stay-scheduling-mode" flat label="Stay" color="primary" @click="cancelModeChange" />
+          <runai-btn aid="confirm-scheduling-mode" label="Change mode" color="primary" @click="confirmModeChange" />
+        </template>
+      </runai-base-dialog>
     </runai-form-wrapper>
     <template #content-footer>
       <div class="scheduling-footer">
@@ -61,7 +119,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
+import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
+import NodePoolDepartmentTable from "./node-pool-department-table.vue";
+import { useNodePoolSchedulingDraft } from "./use-node-pool-scheduling-draft.composable";
+import {
+  toSchedulingCapabilities,
+  type SchedulingMode,
+  type DepartmentSchedulingEdit,
+  type SchedulingTotals,
+  type DepartmentValidationContext,
+} from "./node-pool-scheduling.model";
+import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
 import RunaiFormWrapper from "@/components/common/runai-form-wrapper/runai-form-wrapper.vue";
 import RunaiExpansionWrapper from "@/components/common/runai-expansion-wrapper/runai-expansion-wrapper.vue";
@@ -74,11 +143,46 @@ import {
   getSchedulingMode,
   type INodePoolSummaryResources,
 } from "../node-pool-wizard-summary/node-pool-wizard-summary.model";
-import type { Nodepool, SchedulingCapabilities } from "@/swagger-models/cluster-service-client";
-import { PROPORTIONAL_CAPABILITIES } from "../node-pool-create-flow/node-pool-create-flow.model";
+import type { Nodepool } from "@/swagger-models/cluster-service-client";
 
-const props = defineProps<{ pool: Nodepool; resources?: INodePoolSummaryResources }>();
-const emit = defineEmits<{ "leave-approved": [] }>();
+const props = withDefaults(
+  defineProps<{
+    pool: Nodepool;
+    resources?: INodePoolSummaryResources;
+    rows?: DepartmentNodePoolResources[];
+    aggregates?: Record<string, SchedulingTotals>;
+    ranks?: string[];
+    rankCounts?: Record<string, number>;
+    canViewDepartments?: boolean;
+    canEditDepartments?: boolean;
+    totalsComplete?: boolean;
+    canEditDepartment?: (id: string) => boolean;
+    loading?: boolean;
+    loadError?: string;
+    telemetryError?: string;
+    hasMore?: boolean;
+    searchTerm?: string;
+    rankFilter?: string;
+    quotaPolicy?: boolean;
+    loadQuotaContext?: (id: string) => Promise<DepartmentValidationContext>;
+  }>(),
+  {
+    rows: () => [],
+    aggregates: () => ({}),
+    ranks: () => [],
+    canViewDepartments: true,
+    canEditDepartments: true,
+    totalsComplete: true,
+  },
+);
+const emit = defineEmits<{
+  "leave-approved": [];
+  refresh: [];
+  search: [string];
+  "filter-rank": [string | undefined];
+  "load-more": [];
+  "load-rank": [string];
+}>();
 const steps = [
   { name: "identity", title: "Cluster & name", done: true, disabled: true },
   { name: "scheduling", title: "Scheduling mode", done: false },
@@ -107,20 +211,29 @@ const options = [
     aid: "mode-guaranteed",
   },
 ];
-const presets = new Map<string, SchedulingCapabilities>([
-  ["proportional", { ...PROPORTIONAL_CAPABILITIES }],
-  ["ranked", { adjustableWeights: true, quota: false, ranks: true, cpuQuota: false }],
-  ["guaranteed", { adjustableWeights: false, quota: true, ranks: true, cpuQuota: false }],
-]);
-const capabilities = ref(props.pool.schedulingCapabilities ? { ...props.pool.schedulingCapabilities } : undefined);
-const selectedMode = computed(() => {
-  const mode = getSchedulingMode(capabilities.value);
-  return options.find((option) => option.label === mode)?.value ?? null;
-});
-const previewPool = computed(() => ({ ...props.pool, schedulingCapabilities: capabilities.value }));
+const savedMode = getSchedulingMode(props.pool.schedulingCapabilities);
+const mode = (
+  { Proportional: "proportional", Ranked: "ranked", "Guaranteed quota": "guaranteed" } as Record<string, SchedulingMode>
+)[savedMode];
+const { draft, pendingMode, resetRevision, requestMode, confirmModeChange, cancelModeChange } =
+  useNodePoolSchedulingDraft({
+    mode,
+    automaticWeights: props.pool.schedulingCapabilities?.adjustableWeights === false,
+    cpuQuota: props.pool.schedulingCapabilities?.cpuQuota === true,
+    capabilities: props.pool.schedulingCapabilities,
+    departments: {},
+  });
+const selectedMode = computed(() => draft.value.mode ?? null);
+const previewPool = computed(() => ({
+  ...props.pool,
+  schedulingCapabilities: draft.value.mode ? toSchedulingCapabilities(draft.value) : draft.value.capabilities,
+}));
 function selectMode(value: string | number | boolean | null) {
-  const preset = typeof value === "string" ? presets.get(value) : undefined;
-  if (preset) capabilities.value = { ...preset };
+  if (value === "proportional" || value === "ranked" || value === "guaranteed") requestMode(value);
+}
+function applyEdit(edit: DepartmentSchedulingEdit) {
+  if (!props.canEditDepartments) return;
+  draft.value.departments[edit.id] = { ...draft.value.departments[edit.id], ...edit };
 }
 </script>
 

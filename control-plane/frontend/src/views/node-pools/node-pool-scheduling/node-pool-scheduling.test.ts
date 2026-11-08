@@ -16,7 +16,28 @@ import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { useAppStore } from "@/stores/app.store";
 
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
-  clusterService: { getNodepool: vi.fn(), createNodepool: vi.fn(), patchNodepool: vi.fn(), updateNodepool: vi.fn() },
+  clusterService: {
+    getNodepoolMetrics: vi.fn().mockResolvedValue({ measurements: [] }),
+    getNodepool: vi.fn(),
+    createNodepool: vi.fn(),
+    patchNodepool: vi.fn(),
+    updateNodepool: vi.fn(),
+  },
+}));
+vi.mock("@/services/control-plane/org-unit.service/org-unit.service", () => ({
+  orgUnitService: {
+    getDepartmentNodePoolResources: vi.fn().mockResolvedValue({ nodePoolResources: [] }),
+    countDepartmentNodePoolResources: vi.fn().mockResolvedValue(0),
+    sumDepartmentNodePoolResources: vi.fn().mockResolvedValue({ weightsSum: 0, deservedSum: 0 }),
+  },
+}));
+vi.mock("@/services/control-plane/org-unit-settings.service/org-unit-settings.service", () => ({
+  orgUnitSettingsService: { getLimitQuotaOverSubscription: vi.fn().mockResolvedValue({ value: false }) },
+}));
+vi.mock("@/services/authorization/permission.service/permission.service", () => ({
+  permissionService: {
+    getPermittedScopesForAction: vi.fn().mockResolvedValue({ read: { system: true }, update: { system: true } }),
+  },
 }));
 const pool = { ...createNodePoolDraft("cluster"), id: "one", name: "training", clusterName: "Tokyo" } as Nodepool;
 async function render(realStep = false) {
@@ -32,6 +53,7 @@ async function render(realStep = false) {
   const wrapper = mount(RouterView, {
     global: {
       plugins: [router, Quasar, createTestingPinia({ createSpy: vi.fn })],
+      directives: { "click-outside": {} },
       stubs: realStep ? {} : { NodePoolSchedulingStep: true },
     },
   });

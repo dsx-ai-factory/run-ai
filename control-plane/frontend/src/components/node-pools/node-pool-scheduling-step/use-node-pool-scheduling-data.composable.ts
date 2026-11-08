@@ -2,15 +2,22 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { computed, ref, watch, type Ref } from "vue";
+import { computed, getCurrentScope, onScopeDispose, ref, watch, type Ref } from "vue";
+import { permissionService } from "@/services/authorization/permission.service/permission.service";
+import { useAuthStore } from "@/stores/auth.store";
+import type { PermittedScopes } from "@/swagger-models/authorization-client";
+import type { SchedulingTotals } from "./node-pool-scheduling.model";
 import { usePermissionStore } from "@/stores/permissions.store";
+import { useSettingStore } from "@/stores/setting.store";
+import { orgUnitSettingsService } from "@/services/control-plane/org-unit-settings.service/org-unit-settings.service";
 import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
-import type { DepartmentNodePoolResources, DepartmentSumResponse } from "@/swagger-models/org-unit-service-client";
+import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
 import type { INodePoolSummaryResources } from "../node-pool-wizard-summary/node-pool-wizard-summary.model";
 import {
+  loadSchedulingWeightTotals,
   loadSchedulingPool,
   loadDepartmentPage,
   loadSchedulingTotals,
@@ -21,93 +28,218 @@ import { extractErrorMessages } from "@/utils/error-alert.util";
 
 export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const permissionStore = usePermissionStore();
+  const settingStore = useSettingStore();
+  const authStore = useAuthStore();
+  const departmentScopes = ref<Partial<Record<Action, PermittedScopes>>>({});
+  function coversCluster(scopes?: PermittedScopes): boolean {
+    return !!(
+      scopes?.system ||
+      (authStore.currentUser.tenantId != null && scopes?.tenants?.includes(String(authStore.currentUser.tenantId))) ||
+      (snapshot.value && scopes?.clusters?.includes(snapshot.value.clusterId))
+    );
+  }
+  const totalsComplete = computed(() => coversCluster(departmentScopes.value[Action.Read]));
+  function canEditDepartment(id: string): boolean {
+    const scopes = departmentScopes.value[Action.Update];
+    return permissions.value.edit && (coversCluster(scopes) || !!scopes?.departments?.includes(id));
+  }
   const permissions = computed(() => ({
     view: permissionStore.hasPermission(ResourceType.Department, Action.Read),
     edit: permissionStore.hasPermission(ResourceType.Department, Action.Update),
   }));
   const snapshot = ref<Nodepool>();
   const pages = ref<DepartmentNodePoolResources[]>([]);
-  const aggregates = ref<Record<string, DepartmentSumResponse>>({});
+  const aggregates = ref<Record<string, SchedulingTotals>>({});
+  const rankCounts = ref<Record<string, number>>({});
   const resources = ref<INodePoolSummaryResources>();
+  const quotaPolicy = ref<boolean>();
+  const policyError = ref("");
   const loadError = ref("");
   const telemetryError = ref("");
-  const loading = ref(false);
+  const poolLoading = ref(false);
+  const rowsLoading = ref(false);
+  const loading = computed(() => poolLoading.value || rowsLoading.value);
   const search = ref("");
   const rank = ref<string>();
   const count = ref(0);
-  let version = 0;
+  const loadingRanks = new Set<string>();
+  let globalOffset = 0;
+  let scopeVersion = 0;
+  let rowsVersion = 0;
+  let appending = false;
   async function loadRows(append = false) {
     const pool = snapshot.value;
-    if (!pool || !permissions.value.view) return;
-    const current = ++version;
-    loading.value = true;
+    if (!pool || !permissions.value.view || (append && appending)) return;
+    const current = ++rowsVersion;
+    const scopeRequest = scopeVersion;
+    if (append) appending = true;
+    rowsLoading.value = true;
     loadError.value = "";
     const scope = { poolId: pool.id, clusterId: pool.clusterId, rank: rank.value };
     try {
       const [rows, total] = await Promise.all([
-        loadDepartmentPage({ ...scope, search: search.value, offset: append ? pages.value.length : 0, limit: 50 }),
+        loadDepartmentPage({ ...scope, search: search.value, offset: append ? globalOffset : 0, limit: 50 }),
         orgUnitService.countDepartmentNodePoolResources(schedulingFilters(scope), search.value),
       ]);
-      if (version !== current) return;
-      pages.value = append ? [...pages.value, ...rows] : rows;
+      if (rowsVersion !== current || scopeVersion !== scopeRequest) return;
+      globalOffset = (append ? globalOffset : 0) + rows.length;
+      pages.value = append
+        ? [
+            ...pages.value,
+            ...rows.filter((row) => !pages.value.some((existing) => existing.orgUnitId === row.orgUnitId)),
+          ]
+        : rows;
       count.value = total;
     } catch (error) {
-      if (version === current) loadError.value = extractErrorMessages(error, "Failed to load departments.").join(" ");
+      if (rowsVersion === current && scopeVersion === scopeRequest)
+        loadError.value = extractErrorMessages(error, "Failed to load departments.").join(" ");
     } finally {
-      if (version === current) loading.value = false;
+      if (rowsVersion === current) {
+        rowsLoading.value = false;
+        appending = false;
+      }
+    }
+  }
+  async function loadRank(rankValue: string) {
+    const pool = snapshot.value;
+    if (!pool || !permissions.value.view || loadingRanks.has(rankValue)) return;
+    const scopeRequest = scopeVersion;
+    const rowRequest = rowsVersion;
+    const offset = pages.value.filter((row) => row.rank === rankValue).length;
+    loadingRanks.add(rankValue);
+    try {
+      const rows = await loadDepartmentPage({
+        poolId: pool.id,
+        clusterId: pool.clusterId,
+        rank: rankValue,
+        search: search.value,
+        offset,
+        limit: 50,
+      });
+      if (scopeVersion !== scopeRequest || rowsVersion !== rowRequest) return;
+      pages.value = [
+        ...pages.value,
+        ...rows.filter((row) => !pages.value.some((existing) => existing.orgUnitId === row.orgUnitId)),
+      ];
+    } catch (error) {
+      if (scopeVersion === scopeRequest && rowsVersion === rowRequest)
+        loadError.value = extractErrorMessages(error, "Failed to load rank departments.").join(" ");
+    } finally {
+      loadingRanks.delete(rankValue);
     }
   }
   async function refresh() {
-    const current = ++version;
+    const current = ++scopeVersion;
+    rowsVersion++;
+    appending = false;
+    loadingRanks.clear();
     const id = poolId.value;
-    if (snapshot.value?.id !== id) snapshot.value = undefined;
+    globalOffset = 0;
+    if (snapshot.value?.id !== id) {
+      snapshot.value = undefined;
+      search.value = "";
+      rank.value = undefined;
+    }
     pages.value = [];
     aggregates.value = {};
+    rankCounts.value = {};
     resources.value = undefined;
+    quotaPolicy.value = undefined;
+    departmentScopes.value = {};
     loadError.value = "";
     telemetryError.value = "";
-    loading.value = true;
+    policyError.value = "";
+    poolLoading.value = true;
     try {
       const pool = await loadSchedulingPool(id);
-      if (version !== current) return;
+      if (scopeVersion !== current) return;
       snapshot.value = pool;
-      if (!permissions.value.view) {
-        loading.value = false;
-        return;
-      }
       const scope = { poolId: id, clusterId: pool.clusterId };
-      const totals = await Promise.all([
-        loadSchedulingTotals(scope),
-        ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
-      ]);
-      if (version !== current) return;
-      aggregates.value = Object.fromEntries([
-        ["all", totals[0]],
-        ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [option.value, totals[i + 1]]),
-      ]);
-      try {
-        const result = await loadSchedulingResources(pool);
-        if (version === current) resources.value = result;
-      } catch (error) {
-        if (version === current)
-          telemetryError.value = extractErrorMessages(error, "Capacity is unavailable.").join(" ");
-      }
-      if (version === current) await loadRows();
+      const telemetry = async () => {
+        try {
+          const result = await loadSchedulingResources(pool);
+          if (scopeVersion === current) resources.value = result;
+        } catch (error) {
+          if (scopeVersion === current)
+            telemetryError.value = extractErrorMessages(error, "Capacity is unavailable.").join(" ");
+        }
+      };
+      const policy = async () => {
+        try {
+          const result = await orgUnitSettingsService.getLimitQuotaOverSubscription();
+          if (scopeVersion === current) {
+            settingStore.limitQuotaOverSubscription = result;
+            quotaPolicy.value = settingStore.isLimitQuotaOverSubscriptionEnabled;
+          }
+        } catch (error) {
+          if (scopeVersion === current)
+            policyError.value = extractErrorMessages(error, "Quota policy is unavailable.").join(" ");
+        }
+      };
+      const departments = async () => {
+        if (!permissions.value.view) return;
+        const [totals, counts, weightTotals, scopes] = await Promise.all([
+          Promise.all([
+            loadSchedulingTotals(scope),
+            ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
+          ]),
+          Promise.all(
+            ENTITY_PRIORITY_SELECT_OPTIONS.map((option) =>
+              orgUnitService.countDepartmentNodePoolResources(schedulingFilters({ ...scope, rank: option.value })),
+            ),
+          ),
+          loadSchedulingWeightTotals(scope, pool.schedulingCapabilities?.adjustableWeights === true),
+          permissionService.getPermittedScopesForAction(ResourceType.Department),
+        ]);
+        if (scopeVersion !== current) return;
+        departmentScopes.value = scopes;
+        aggregates.value = Object.fromEntries([
+          ["all", { ...totals[0], ...weightTotals.all }],
+          ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [
+            option.value,
+            {
+              ...totals[i + 1],
+              ...(weightTotals[option.value] ?? {
+                rawWeightsSum: pool.schedulingCapabilities?.adjustableWeights === true ? 0 : undefined,
+                automaticWeightsSum: 0,
+              }),
+            },
+          ]),
+        ]);
+        rankCounts.value = Object.fromEntries(
+          ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [option.value, counts[i]]),
+        );
+        await loadRows();
+      };
+      await Promise.all([telemetry(), policy(), departments()]);
     } catch (error) {
-      if (version === current) {
+      if (scopeVersion === current)
         loadError.value = extractErrorMessages(error, "Failed to load scheduling data.").join(" ");
-        loading.value = false;
-      }
+    } finally {
+      if (scopeVersion === current) poolLoading.value = false;
     }
   }
   watch(poolId, refresh, { immediate: true });
-  watch([search, rank], () => loadRows());
+  watch([search, rank], () => {
+    appending = false;
+    void loadRows();
+  });
+  if (getCurrentScope())
+    onScopeDispose(() => {
+      scopeVersion++;
+      rowsVersion++;
+    });
   return {
     snapshot,
     pages,
     aggregates,
+    rankCounts,
     resources,
     permissions,
+    totalsComplete,
+    canEditDepartment,
+    quotaPolicy,
+    policyError,
     loadError,
     telemetryError,
     loading,
@@ -115,6 +247,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     rank,
     count,
     refresh,
+    loadRank,
     loadMore: () => loadRows(true),
   };
 }

@@ -5,6 +5,8 @@
 import { mount, flushPromises } from "@vue/test-utils";
 import { Quasar } from "quasar";
 import { describe, expect, it } from "vitest";
+import Table from "./node-pool-department-table.vue";
+import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import { createNodePoolDraft } from "../node-pool-create-flow/node-pool-create-flow.model";
@@ -19,7 +21,10 @@ const pool = {
 } as Nodepool;
 
 function render(input = pool) {
-  return mount(NodePoolSchedulingStep, { props: { pool: input }, global: { plugins: [Quasar] } });
+  return mount(NodePoolSchedulingStep, {
+    props: { pool: input },
+    global: { plugins: [Quasar], directives: { "click-outside": {} } },
+  });
 }
 
 describe("scheduling step foundation", () => {
@@ -90,6 +95,30 @@ describe("scheduling step foundation", () => {
     expect(wrapper.get('[aid="scheduling-save-continue"]').attributes("disabled")).toBeDefined();
     expect(wrapper.text()).toContain("Changes are not saved in this preview.");
     await flushPromises();
+    wrapper.unmount();
+  });
+  it("keeps applied edits on Stay and discards them on Change mode", async () => {
+    const wrapper = render();
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
+    await wrapper.vm.$nextTick();
+    await wrapper.get('[aid="mode-ranked"]').trigger("click");
+    expect(wrapper.findComponent(RunaiBaseDialog).exists()).toBe(true);
+    expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
+    wrapper.findComponent(RunaiBaseDialog).vm.$emit("close");
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findComponent(Table).props("draft").departments.a.weight).toBe(5);
+    await wrapper.get('[aid="mode-ranked"]').trigger("click");
+    (document.querySelector('[aid="confirm-scheduling-mode"]') as HTMLButtonElement).click();
+    await flushPromises();
+    expect(wrapper.findComponent(Table).props("draft").departments).toEqual({});
+    expect(wrapper.get('[aid="mode-ranked"]').attributes("aria-checked")).toBe("true");
+    wrapper.unmount();
+  });
+  it("shows permission denial instead of an empty department table", async () => {
+    const wrapper = render();
+    await wrapper.setProps({ canViewDepartments: false });
+    expect(wrapper.text()).toContain("permission to view departments");
+    expect(wrapper.findComponent(Table).exists()).toBe(false);
     wrapper.unmount();
   });
 });
