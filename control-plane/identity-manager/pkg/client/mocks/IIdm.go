@@ -576,6 +576,80 @@ func (_c *IIdm_CreateRealm_Call) RunAndReturn(run func(ctx context.Context, real
 	return _c
 }
 
+// CreateServiceAccountClient provides a mock function for the type IIdm
+func (_mock *IIdm) CreateServiceAccountClient(ctx context.Context, name string, tenantId *string) (*string, error) {
+	ret := _mock.Called(ctx, name, tenantId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateServiceAccountClient")
+	}
+
+	var r0 *string
+	var r1 error
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, *string) (*string, error)); ok {
+		return returnFunc(ctx, name, tenantId)
+	}
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string, *string) *string); ok {
+		r0 = returnFunc(ctx, name, tenantId)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*string)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(context.Context, string, *string) error); ok {
+		r1 = returnFunc(ctx, name, tenantId)
+	} else {
+		r1 = ret.Error(1)
+	}
+	return r0, r1
+}
+
+// IIdm_CreateServiceAccountClient_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateServiceAccountClient'
+type IIdm_CreateServiceAccountClient_Call struct {
+	*mock.Call
+}
+
+// CreateServiceAccountClient is a helper method to define mock.On call
+//   - ctx context.Context
+//   - name string
+//   - tenantId *string
+func (_e *IIdm_Expecter) CreateServiceAccountClient(ctx any, name any, tenantId any) *IIdm_CreateServiceAccountClient_Call {
+	return &IIdm_CreateServiceAccountClient_Call{Call: _e.mock.On("CreateServiceAccountClient", ctx, name, tenantId)}
+}
+
+func (_c *IIdm_CreateServiceAccountClient_Call) Run(run func(ctx context.Context, name string, tenantId *string)) *IIdm_CreateServiceAccountClient_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		var arg2 *string
+		if args[2] != nil {
+			arg2 = args[2].(*string)
+		}
+		run(
+			arg0,
+			arg1,
+			arg2,
+		)
+	})
+	return _c
+}
+
+func (_c *IIdm_CreateServiceAccountClient_Call) Return(s *string, err error) *IIdm_CreateServiceAccountClient_Call {
+	_c.Call.Return(s, err)
+	return _c
+}
+
+func (_c *IIdm_CreateServiceAccountClient_Call) RunAndReturn(run func(ctx context.Context, name string, tenantId *string) (*string, error)) *IIdm_CreateServiceAccountClient_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // CreateServiceAccountInternally provides a mock function for the type IIdm
 func (_mock *IIdm) CreateServiceAccountInternally(ctx context.Context, name string, realmName string) (*openapi.ServiceAccountPostResponse, error) {
 	ret := _mock.Called(ctx, name, realmName)

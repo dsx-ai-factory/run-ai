@@ -60,7 +60,7 @@ func TestGrantServiceAccountToken_HappyFlow(t *testing.T) {
 
 	if claims, ok := parsedToken.Claims.(*jwt.MapClaims); ok {
 		require.Contains(t, (*claims)["azp"], *serviceAccount.ClientID)
-		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeTenantApp)
+		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeServiceAccount)
 	}
 }
 
@@ -92,7 +92,7 @@ func TestGrantAccessKeyToken_HappyFlow(t *testing.T) {
 
 	if claims, ok := parsedToken.Claims.(*jwt.MapClaims); ok {
 		require.Contains(t, (*claims)["sub"], *accessKey.Attributes.CreatedBy)
-		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeUserApp)
+		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeAccessKey)
 	}
 }
 
@@ -829,9 +829,9 @@ func TestExternalTokenExchange_UserFlow(t *testing.T) {
 	require.Equal(t, username, *exchangedUser.Email)
 }
 
-func TestExternalTokenExchange_ApplicationFlow(t *testing.T) {
+func TestExternalTokenExchange_ClientCredentialsFlow(t *testing.T) {
 	ctx := TestStepsClient.SetContextValues(context.Background(), BaseTenantId)
-	client, clientId, _, _, cleanup := setupExternalTokenExchangeTest(t, ctx, "external-token-app")
+	client, clientId, _, _, cleanup := setupExternalTokenExchangeTest(t, ctx, "external-token-client-credentials")
 	defer cleanup()
 
 	tokenURL := fmt.Sprintf(keycloakTokenEndpoint, MasterRealmName)
@@ -839,10 +839,10 @@ func TestExternalTokenExchange_ApplicationFlow(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, clientToken)
 
-	exchangedAppToken, resp, err := exchangeExternalToken(ctx, clientToken)
+	exchangedToken, resp, err := exchangeExternalToken(ctx, clientToken)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
-	require.NotNil(t, exchangedAppToken)
+	require.NotNil(t, exchangedToken)
 }
 
 func TestGrantTokenV2_ExternalTokenExchange_UserFlow(t *testing.T) {
