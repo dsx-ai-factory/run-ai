@@ -12,6 +12,25 @@ const popup = {
   emits: ["apply", "reset", "opened"],
 };
 describe("department resource editor", () => {
+  it("blocks a maximum below quota and preserves Unlimited without project-quota reads", async () => {
+    const wrapper = mount(Editor, {
+      props: { value: -1, kind: "limit", quota: 5, id: "a" },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    const menu = wrapper.findComponent(popup);
+    menu.vm.$emit("opened");
+    await wrapper.vm.$nextTick();
+    expect((wrapper.get("input").element as HTMLInputElement).value).toBe("Unlimited");
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toEqual([[-1]]);
+    await wrapper.get("input").setValue("4");
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toHaveLength(1);
+    await wrapper.get("input").setValue("5.5");
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")?.[1]).toEqual([5.5]);
+    wrapper.unmount();
+  });
   it("only applies valid values, and cancel resets without mutation", async () => {
     const wrapper = mount(Editor, {
       props: { value: 2, kind: "weight", id: "a" },

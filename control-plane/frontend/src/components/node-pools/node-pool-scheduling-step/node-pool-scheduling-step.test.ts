@@ -4,7 +4,10 @@
  */
 import { mount, flushPromises } from "@vue/test-utils";
 import { Quasar } from "quasar";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { createTestingPinia } from "@pinia/testing";
+import { requestToLeave } from "@/services/infra/router.service/router.service";
+import Settings from "./node-pool-scheduling-settings.vue";
 import Table from "./node-pool-department-table.vue";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
@@ -23,11 +26,39 @@ const pool = {
 function render(input = pool) {
   return mount(NodePoolSchedulingStep, {
     props: { pool: input },
-    global: { plugins: [Quasar], directives: { "click-outside": {} } },
+    global: {
+      plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+      directives: { "click-outside": {}, permission: {} },
+    },
   });
 }
 
 describe("scheduling step foundation", () => {
+  it.each([
+    { maxAllocation: true },
+    { timeFairshare: true },
+    { historicalWeight: 2 },
+    { historicalWindow: { Days: 2 } },
+    { minimumRuntime: { Minutes: 5 } },
+  ])("warns before leaving when only advanced settings changed: %j", async (patch) => {
+    const wrapper = render();
+    await flushPromises();
+    await wrapper.get('[aid="advanced-settings"]').trigger("click");
+    wrapper.findComponent(Settings).vm.$emit("patch", patch);
+    await flushPromises();
+    const leave = requestToLeave();
+    await flushPromises();
+    expect(document.querySelector('[aid="leave-page-modal-stay-btn"]')).not.toBeNull();
+    (document.querySelector('[aid="leave-page-modal-stay-btn"]') as HTMLButtonElement).click();
+    expect(await leave).toBe(false);
+    wrapper.unmount();
+  });
+  it("renders the department controls in the live document, outside native template elements", () => {
+    const wrapper = render();
+    expect(wrapper.find("template").exists()).toBe(false);
+    expect(wrapper.get('[aid="new-department"]').element.closest("template")).toBeNull();
+    wrapper.unmount();
+  });
   it("previews every mode in the summary without mutating the saved pool or topology", async () => {
     const wrapper = render();
     const before = JSON.stringify(pool);
@@ -117,8 +148,8 @@ describe("scheduling step foundation", () => {
   it("shows permission denial instead of an empty department table", async () => {
     const wrapper = render();
     await wrapper.setProps({ canViewDepartments: false });
-    expect(wrapper.text()).toContain("permission to view departments");
-    expect(wrapper.findComponent(Table).exists()).toBe(false);
+    expect(wrapper.text()).toContain("permissions to view departments");
+    expect(wrapper.findComponent(Table).props("canView")).toBe(false);
     wrapper.unmount();
   });
   it("clears the server rank filter only when Proportional actually takes effect", async () => {

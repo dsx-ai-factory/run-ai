@@ -4,6 +4,7 @@
 -->
 <template>
   <runai-wizard-layout
+    class="node-pool-scheduling-wizard"
     :steps="steps"
     active-step="scheduling"
     width="1000px"
@@ -13,90 +14,115 @@
     hide-right-on-small-screen
   >
     <runai-form-wrapper
-      :form-state="{ pool: previewPool, departments: draft.departments }"
+      :form-state="{ pool: previewPool, scheduling: draft }"
       full-width
       @leave-page="emit('leave-approved')"
     >
       <runai-expansion-wrapper no-first-top-padding>
-        <runai-expansion-item label="Scheduling mode" default-opened disable-closing>
-          <div class="capacity-label text-b-subtitle1">Total node pool capacity</div>
-          <div class="capacity q-mt-xs" aid="pool-gpu-capacity">
-            <template v-if="resources?.gpus != null">
-              <span class="text-h5 text-weight-medium">{{ resources.gpus }}</span> <span>GPUs</span>
-            </template>
-            <span v-else class="text-h5 text-weight-medium">Unknown</span>
-          </div>
-          <div class="mode-selector">
-            <runai-section-title
-              title="Set how GPU capacity is split between departments in this node pool"
-              tooltip-text="Choose how this node pool distributes GPU capacity between departments."
-            />
-            <runai-segmented-button
-              :model-value="selectedMode"
-              :options="options"
-              class="mode-cards"
-              spread
-              aria-label="Scheduling mode"
-              aid="scheduling-mode-options"
-              @update:model-value="selectMode"
-            >
-              <template #option-end="{ selected }">
-                <q-icon v-if="selected" name="ph ph-check" size="16px" class="mode-check" aria-hidden="true" />
+        <runai-expansion-item label="Scheduling mode" default-opened disable-closing body-no-padding>
+          <template #header
+            ><span>Scheduling mode</span
+            ><span v-if="!canEditDepartments || !canViewDepartments" class="view-only"
+              ><q-icon name="ph ph-eye" /> View only</span
+            ></template
+          >
+          <div class="scheduling-overview">
+            <div class="capacity-label text-b-subtitle1">Total node pool capacity</div>
+            <div class="capacity q-mt-xs" aid="pool-gpu-capacity">
+              <template v-if="resources?.gpus != null">
+                <span class="text-h5 text-weight-medium">{{ resources.gpus }}</span> <span>GPUs</span>
               </template>
-            </runai-segmented-button>
+              <span v-else class="text-h5 text-weight-medium">Unknown</span>
+            </div>
+            <div class="mode-selector">
+              <runai-section-title
+                title="Set how GPU capacity is split between departments in this node pool"
+                tooltip-text="The scheduling mode determines each department’s share of GPU capacity in this node pool, including how unused capacity is shared. The selection applies to the projects within each department, too."
+              />
+              <runai-segmented-button
+                :model-value="selectedMode"
+                :options="options"
+                class="mode-cards"
+                spread
+                :disable="!canEditDepartments || !canViewDepartments"
+                aria-label="Scheduling mode"
+                aid="scheduling-mode-options"
+                @update:model-value="selectMode"
+              >
+                <template #option-end="{ selected, option }">
+                  <span class="mode-explanation">{{ modeExplanations[String(option.value)] }}</span>
+                  <q-icon v-if="selected" name="ph ph-check" size="16px" class="mode-check" aria-hidden="true" />
+                </template>
+              </runai-segmented-button>
+            </div>
+          </div>
+          <div class="department-scheduling-body">
+            <q-banner v-if="loadError" class="text-negative q-ma-md" role="alert"
+              >{{ loadError
+              }}<template #action
+                ><runai-btn aid="retry-departments" flat label="Retry" @click="emit('refresh')" /></template
+            ></q-banner>
+            <p v-if="telemetryError" class="q-px-md text-b-subtitle2" role="status">{{ telemetryError }}</p>
+            <div class="scheduling-content">
+              <node-pool-department-table
+                :key="`department-draft-${resetRevision}`"
+                :rows="rows"
+                :baseline-rows="baselineRows"
+                :draft="draft"
+                :aggregates="aggregates"
+                :ranks="ranks"
+                :rank-counts="rankCounts"
+                :capacity="resources?.gpus"
+                :readonly="!canEditDepartments || !canViewDepartments"
+                :can-view="canViewDepartments"
+                :totals-complete="totalsComplete"
+                :raw-weights-available="pool.schedulingCapabilities?.adjustableWeights === true"
+                :can-edit-department="canEditDepartment"
+                :loading="!!loading"
+                :has-more="hasMore"
+                :has-error="!!loadError"
+                :search-term="searchTerm"
+                :rank-filter="rankFilter"
+                :load-quota-context="loadQuotaContext"
+                @edit="applyEdit"
+                @search="emit('search', $event)"
+                @filter-rank="emit('filter-rank', $event)"
+                @load-more="emit('load-more')"
+                @load-rank="emit('load-rank', $event)"
+                @refresh="emit('refresh')"
+                @automatic-weights="draft.automaticWeights = $event"
+                @advanced-settings="showSettings = !showSettings"
+                @new-department="showNewDepartment = true"
+              >
+                <template #settings
+                  ><node-pool-scheduling-settings
+                    v-if="showSettings"
+                    :draft="draft"
+                    :quota-policy="quotaPolicy"
+                    :readonly="!canEditDepartments"
+                    @close="showSettings = false"
+                    @patch="Object.assign(draft, $event)"
+                /></template>
+              </node-pool-department-table>
+            </div>
+            <node-pool-new-department-dialog
+              v-if="showNewDepartment && canEditDepartments && canViewDepartments"
+              :cluster-id="pool.clusterId"
+              :cluster-name="pool.clusterName"
+              @close="showNewDepartment = false"
+            />
           </div>
         </runai-expansion-item>
-        <div v-if="!canViewDepartments" class="q-pa-lg" role="status">
-          You do not have permission to view departments.
-        </div>
-        <template v-else>
-          <q-banner v-if="loadError" class="text-negative q-ma-md" role="alert"
-            >{{ loadError
-            }}<template #action
-              ><runai-btn aid="retry-departments" flat label="Retry" @click="emit('refresh')" /></template
-          ></q-banner>
-          <p v-if="telemetryError" class="q-px-md text-b-subtitle2" role="status">{{ telemetryError }}</p>
-          <node-pool-department-table
-            :key="`department-draft-${resetRevision}`"
-            :rows="rows"
-            :baseline-rows="baselineRows"
-            :draft="draft"
-            :aggregates="aggregates"
-            :ranks="ranks"
-            :rank-counts="rankCounts"
-            :capacity="resources?.gpus"
-            :readonly="!canEditDepartments"
-            :totals-complete="totalsComplete"
-            :raw-weights-available="pool.schedulingCapabilities?.adjustableWeights === true"
-            :can-edit-department="canEditDepartment"
-            :loading="!!loading"
-            :has-more="hasMore"
-            :has-error="!!loadError"
-            :search-term="searchTerm"
-            :rank-filter="rankFilter"
-            :load-quota-context="loadQuotaContext"
-            @edit="applyEdit"
-            @search="emit('search', $event)"
-            @filter-rank="emit('filter-rank', $event)"
-            @load-more="emit('load-more')"
-            @load-rank="emit('load-rank', $event)"
-            @refresh="emit('refresh')"
-            @automatic-weights="draft.automaticWeights = $event"
-          />
-          <p v-if="draft.mode === 'guaranteed'" class="q-pa-md text-b-subtitle2">
-            Limit projects from exceeding department quota:
-            {{ quotaPolicy === undefined ? "Unknown" : quotaPolicy ? "On" : "Off" }}. This organization-wide policy is
-            read-only here.
-          </p>
-        </template>
       </runai-expansion-wrapper>
-      <runai-base-dialog v-if="pendingMode" :model-value="true" size="width-sm" @close="cancelModeChange">
+      <runai-base-dialog
+        v-if="pendingMode"
+        :model-value="true"
+        size="width-sm"
+        custom-class="scheduling-confirm"
+        @close="cancelModeChange"
+      >
         <template #header>Change Mode?</template>
-        <template #body
-          ><div class="q-px-md q-py-lg">
-            You have unsaved changes. If you change the mode, they will be lost.
-          </div></template
-        >
+        <template #body><div>You have unsaved changes. If you change the mode, they will be lost.</div></template>
         <template #footer>
           <runai-btn aid="stay-scheduling-mode" flat label="Stay" color="primary" @click="cancelModeChange" />
           <runai-btn aid="confirm-scheduling-mode" label="Change mode" color="primary" @click="confirmModeChange" />
@@ -120,9 +146,12 @@
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed, ref, watch } from "vue";
+import { dateUtil } from "@/utils/date.util/date.util";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import NodePoolDepartmentTable from "./node-pool-department-table.vue";
+import NodePoolSchedulingSettings from "./node-pool-scheduling-settings.vue";
+import NodePoolNewDepartmentDialog from "./node-pool-new-department-dialog.vue";
 import { useNodePoolSchedulingDraft } from "./use-node-pool-scheduling-draft.composable";
 import {
   toSchedulingCapabilities,
@@ -185,6 +214,14 @@ const emit = defineEmits<{
   "load-more": [];
   "load-rank": [string];
 }>();
+const showSettings = ref(false);
+const showNewDepartment = ref(false);
+const modeExplanations: Record<string, string> = {
+  proportional: "GPU resources are distributed proportionally according to each department’s and project’s weight.",
+  ranked:
+    "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
+  guaranteed: "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
+};
 const steps = [
   { name: "identity", title: "Cluster & name", done: true, disabled: true },
   { name: "scheduling", title: "Scheduling mode", done: false },
@@ -213,6 +250,15 @@ const options = [
     aid: "mode-guaranteed",
   },
 ];
+function durationFields(value: string | null | undefined) {
+  const seconds = dateUtil.parseDurationStringToSeconds(value ?? "");
+  return {
+    Days: Math.floor(seconds / 86400),
+    Hours: Math.floor((seconds % 86400) / 3600),
+    Minutes: Math.floor((seconds % 3600) / 60),
+    Seconds: seconds % 60,
+  };
+}
 const savedMode = getSchedulingMode(props.pool.schedulingCapabilities);
 const mode = (
   { Proportional: "proportional", Ranked: "ranked", "Guaranteed quota": "guaranteed" } as Record<string, SchedulingMode>
@@ -222,6 +268,11 @@ const { draft, pendingMode, resetRevision, requestMode, confirmModeChange, cance
     mode,
     automaticWeights: props.pool.schedulingCapabilities?.adjustableWeights === false,
     cpuQuota: props.pool.schedulingCapabilities?.cpuQuota === true,
+    maxAllocation: false,
+    timeFairshare: props.pool.schedulingConfiguration?.timeBasedFairShare?.enabled === true,
+    historicalWeight: props.pool.schedulingConfiguration?.timeBasedFairShare?.historicalUsageWeight ?? null,
+    historicalWindow: durationFields(props.pool.schedulingConfiguration?.timeBasedFairShare?.windowDuration),
+    minimumRuntime: durationFields(props.pool.schedulingConfiguration?.minGuaranteedRuntime),
     capabilities: props.pool.schedulingCapabilities,
     departments: {},
   });
@@ -246,6 +297,20 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
 </script>
 
 <style scoped lang="scss">
+.node-pool-scheduling-wizard :deep(.wizard-step-item) {
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step-title) {
+  white-space: nowrap;
+  font-weight: 400;
+}
+.node-pool-scheduling-wizard :deep(.wizard-step--disabled .wizard-step-item) {
+  opacity: 1 !important;
+}
+.scheduling-overview {
+  padding: 18px 19px 40px;
+}
 .capacity-label,
 .preview-notice {
   color: var(--b-text-sub);
@@ -256,8 +321,14 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
   gap: 10px;
 }
 .mode-selector {
-  margin-top: 48px;
-  margin-bottom: 20px;
+  margin-top: 38px;
+  margin-bottom: 0;
+}
+.node-pool-scheduling-wizard :deep(.runai-expansion-header) {
+  height: 46px;
+}
+.mode-selector :deep(.runai-section-title) {
+  margin-bottom: 10px;
 }
 .mode-cards {
   align-items: stretch;
@@ -268,6 +339,9 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
   :deep(.runai-segment) {
     position: relative;
     min-width: 0;
+    min-height: 61px;
+    height: 61px;
+    overflow: visible;
     border: 1px solid var(--border-subtle);
     border-radius: 5px;
     padding: 10px 16px;
@@ -276,7 +350,7 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
   }
   :deep(.runai-segment--selected) {
     border-color: var(--border-pressed);
-    box-shadow: inset 0 0 0 2px var(--border-pressed);
+    box-shadow: inset 0 0 0 1px var(--border-pressed);
   }
   :deep(.runai-segment__label) {
     font-weight: 500;
@@ -305,10 +379,82 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
   color: white;
 }
 .scheduling-footer {
-  padding: 24px 0 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 40px 0 8px;
 }
 .preview-notice {
-  text-align: right;
+  flex: 1;
+  margin: 0;
+  text-align: left;
+  font-size: 12px;
+}
+.scheduling-content {
+  display: block;
+}
+.scheduling-content > .department-section {
+  flex: 1;
+  min-width: 0;
+}
+.mode-explanation {
+  display: none;
+  position: absolute;
+  top: 57px;
+  left: -1px;
+  right: -1px;
+  padding: 4px 14px 14px;
+  min-height: 62px;
+  white-space: normal;
+  background: white;
+  border: 1px solid var(--border-subtle);
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+  color: var(--b-text-sub);
+  font-size: 12px;
+  line-height: 16px;
+  z-index: 5;
+}
+.mode-cards :deep(.runai-segment:hover),
+.mode-cards :deep(.runai-segment:focus-visible) {
+  border-radius: 4px 4px 0 0;
+}
+.mode-cards :deep(.runai-segment:hover) .mode-explanation,
+.mode-cards :deep(.runai-segment:focus-visible) .mode-explanation {
+  display: block;
+}
+.mode-cards :deep(.runai-segment--selected) .mode-explanation {
+  border: 2px solid var(--border-pressed);
+  border-top: 0;
+  left: -2px;
+  right: -2px;
+}
+.view-only {
+  margin-left: 10px;
+  border: 1px solid var(--border-default);
+  color: var(--b-text-sub);
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 2px;
+}
+@media (min-width: 1240px) and (max-width: 1439px) {
+  .node-pool-scheduling-wizard {
+    width: 1220px;
+  }
+  .node-pool-scheduling-wizard :deep(.runai-panels-layout) {
+    grid-template-columns: 200px minmax(0, 1fr);
+  }
+  .node-pool-scheduling-wizard :deep(.panel-right) {
+    display: none !important;
+  }
+}
+.mode-cards :deep(.runai-segment--disabled) {
+  background: #eee;
+}
+.mode-cards :deep(.runai-segment--selected.runai-segment--disabled) {
+  border-color: var(--border-pressed);
+  color: var(--interactive-secondary-default-text);
 }
 @media (max-width: 767px) {
   .mode-cards {

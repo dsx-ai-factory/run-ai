@@ -3,12 +3,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { mount } from "@vue/test-utils";
-import { describe, expect, it } from "vitest";
-import { QCheckbox, Quasar } from "quasar";
+import { describe, expect, it, vi } from "vitest";
+import { createTestingPinia } from "@pinia/testing";
+import { QCheckbox, QToggle, Quasar } from "quasar";
 import type { SchedulingDraft } from "./node-pool-scheduling.model";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import MoveToRankModal from "@/components/org-unit/v2/common/peer-org-unit-rank-list/move-to-rank-modal/move-to-rank-modal.vue";
-import { RunaiSelect } from "@/components/common/runai-select";
+import { RunaiPageActions } from "@/components/common/runai-page-actions";
 import Table from "./node-pool-department-table.vue";
 const rows: DepartmentNodePoolResources[] = [
   {
@@ -24,6 +25,40 @@ const rows: DepartmentNodePoolResources[] = [
 ];
 const draft: SchedulingDraft = { mode: "proportional", automaticWeights: false, cpuQuota: false, departments: {} };
 describe("scheduling department table", () => {
+  it("initializes keyboard demand controls at capacity and clears fixture results after any configuration edit", async () => {
+    const fixtureRows = Array.from({ length: 5 }, (_, index) => ({
+      ...rows[0],
+      orgUnitId: `preview-department-${index + 1}`,
+      orgUnitName: `department ${index + 1}`,
+      resources: { gpu: { deserved: 0, overQuotaWeight: 2, limit: -1 } },
+    }));
+    const wrapper = mount(Table, {
+      props: {
+        rows: fixtureRows,
+        baselineRows: fixtureRows,
+        draft,
+        capacity: 144,
+        aggregates: { all: { weightsSum: 10, deservedSum: 0 } },
+        ranks: [],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(".allocated")).toHaveLength(5);
+    expect((wrapper.get('input[type="range"]').element as HTMLInputElement).value).toBe("144");
+    await wrapper.setProps({
+      draft: { ...draft, departments: { "preview-department-1": { id: "preview-department-1", weight: 4 } } },
+    });
+    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    expect(wrapper.text()).toContain("Simulation preview — mock results");
+    wrapper.unmount();
+  });
   it("displays a whole-pool percentage and preserves pending edits when pages change", async () => {
     const wrapper = mount(Table, {
       props: {
@@ -34,7 +69,10 @@ describe("scheduling department table", () => {
         readonly: false,
         loading: false,
       },
-      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
     });
     expect(wrapper.text()).toContain("20%");
     await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 5 } } } });
@@ -46,10 +84,13 @@ describe("scheduling department table", () => {
   it("shows unknown totals and read-only cells", () => {
     const wrapper = mount(Table, {
       props: { rows, draft, aggregates: {}, ranks: [], readonly: true, loading: false },
-      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
     });
     expect(wrapper.text()).toContain("Unknown");
-    expect(wrapper.text()).toContain("View only");
+    expect(wrapper.find('[aria-disabled="true"]').exists()).toBe(true);
   });
   it("selects departments across ranks and moves them together", async () => {
     const wrapper = mount(Table, {
@@ -61,7 +102,10 @@ describe("scheduling department table", () => {
         readonly: false,
         loading: false,
       },
-      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
     });
     expect(wrapper.text()).toContain("Alpha");
     expect(wrapper.text()).not.toContain("Beta");
@@ -96,13 +140,16 @@ describe("scheduling department table", () => {
         readonly: false,
         loading: false,
       },
-      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
     });
     expect(wrapper.text()).toContain("25%");
     expect(wrapper.find('[aria-disabled="true"]').exists()).toBe(true);
     wrapper.unmount();
   });
-  it("emits a server rank filter and hides percentages for restricted visibility", async () => {
+  it("filters ranks through shared controls and hides percentages for restricted visibility", async () => {
     const wrapper = mount(Table, {
       props: {
         rows,
@@ -113,12 +160,17 @@ describe("scheduling department table", () => {
         readonly: true,
         loading: false,
       },
-      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
     });
-    wrapper.findComponent(RunaiSelect).vm.$emit("update:modelValue", "High");
-    expect(wrapper.emitted("filter-rank")).toEqual([["High"]]);
+    wrapper.findComponent(RunaiPageActions).vm.$emit("filters-changed", {
+      advancedFilters: [{ name: "rank", type: "EnumBased", selectedValues: ["High"], selectOptions: [], label: "Rank" }],
+    });
+    await wrapper.vm.$nextTick();
+    expect(wrapper.text()).not.toContain("Alpha");
     expect(wrapper.text()).toContain("cannot view every department");
-    expect(wrapper.text()).toContain("Unknown");
     wrapper.unmount();
   });
   it("does not present an automatic quota as a saved adjustable weight", () => {
@@ -132,7 +184,10 @@ describe("scheduling department table", () => {
         readonly: false,
         loading: false,
       },
-      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
     });
     expect(wrapper.text()).toContain("Raw weights are unavailable");
     expect(wrapper.text()).toContain("Unknown");
@@ -152,7 +207,10 @@ describe("scheduling department table", () => {
         readonly: false,
         loading: false,
       },
-      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
     });
     expect(wrapper.emitted("load-rank")).toBeUndefined();
     wrapper.unmount();
@@ -167,7 +225,10 @@ describe("scheduling department table", () => {
         readonly: false,
         loading: false,
       },
-      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
     });
     const beta = {
       ...rows[0],

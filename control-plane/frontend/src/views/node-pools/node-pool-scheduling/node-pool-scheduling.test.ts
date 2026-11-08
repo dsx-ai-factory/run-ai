@@ -53,7 +53,7 @@ async function render(realStep = false) {
   const wrapper = mount(RouterView, {
     global: {
       plugins: [router, Quasar, createTestingPinia({ createSpy: vi.fn })],
-      directives: { "click-outside": {} },
+      directives: { "click-outside": {}, permission: {} },
       stubs: realStep ? {} : { NodePoolSchedulingStep: true },
     },
   });

@@ -4,7 +4,14 @@
 -->
 
 <template>
-  <runai-page-filter-wrapper display :title="filter.label" @save="saveFilter" @close="$emit('close')" max-width="250px">
+  <runai-page-filter-wrapper
+    display
+    :title="filter.label"
+    @save="saveFilter"
+    @close="$emit('close')"
+    :max-width="filter.maxWidth ?? '250px'"
+    :width="filter.maxWidth"
+  >
     <template #body>
       <div class="row">
         <div class="col">

@@ -140,6 +140,7 @@
             stack
             @click="toggleDetailsDrawer"
           />
+          <slot name="right-actions" />
         </div>
       </div>
     </Transition>

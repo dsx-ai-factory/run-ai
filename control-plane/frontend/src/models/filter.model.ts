@@ -174,6 +174,7 @@ export interface IEnumBasedFilterModel extends IFilterColumnModel {
 }
 
 export interface IFreeTextFilterModel extends IFilterColumnModel {
+  maxWidth?: string;
   term: string;
   value: EFilterOperator;
   excludeOperators?: EFilterOperator[];

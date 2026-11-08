@@ -4,14 +4,20 @@
 -->
 
 <template>
-  <runai-expansion-item label="Department name & description" default-opened :section-invalid="sectionInvalid">
+  <runai-expansion-item
+    :label="compact ? 'Department name and description' : 'Department name & description'"
+    default-opened
+    :section-invalid="sectionInvalid"
+    :body-no-padding="compact"
+    :disable-closing="compact"
+  >
     <template #subheader>
       <span>
         {{ departmentName || "&lt;Department name&gt;" }}
       </span>
     </template>
     <div class="row">
-      <div class="col-7">
+      <div :class="compact ? 'col-8' : 'col-7'">
         <runai-tooltip-wrapper :display-tooltip="isInputDisabled" tooltip-text="This can't be modified">
           <runai-name-validation
             aid="department-name-input"
@@ -25,7 +31,7 @@
     </div>
 
     <div class="row q-mt-md">
-      <div class="col-11">
+      <div :class="compact ? 'col-12' : 'col-11'">
         <q-input
           aid="department-description-input"
           :model-value="description"
@@ -59,6 +65,7 @@ export default defineComponent({
   },
   emits: ["update:departmentName", "is-section-invalid", "update:description"],
   props: {
+    compact: { type: Boolean, default: false },
     departmentName: {
       type: String as PropType<string>,
       required: true,

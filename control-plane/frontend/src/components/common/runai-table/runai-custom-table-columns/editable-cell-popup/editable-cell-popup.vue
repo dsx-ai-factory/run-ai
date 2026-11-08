@@ -22,12 +22,15 @@
       anchor="bottom middle"
       self="top middle"
       class="editable-cell-popup-menu"
+      :class="popupClass"
       @show="emit('opened')"
       @hide="handleMenuHide"
     >
-      <q-card class="popup-card">
+      <q-card class="popup-card" :style="popupWidth ? { width: popupWidth } : undefined">
         <q-card-section class="row justify-between items-center q-py-sm">
-          <div class="text-weight-medium">{{ title }}</div>
+          <div class="text-weight-medium">
+            <slot name="title">{{ title }}</slot>
+          </div>
           <q-btn flat icon="ph-bold ph-x" class="q-pa-xs runai-icon-btn--default" round v-close-popup />
         </q-card-section>
 
@@ -53,6 +56,8 @@ defineOptions({ name: "EditableCellPopup" });
 const props = withDefaults(
   defineProps<{
     title: string;
+    popupClass?: string;
+    popupWidth?: string;
     displayValue?: string | number;
     state?: EditableCellState;
     isSubmitDisabled?: boolean; // Disables the Apply/Submit button (e.g., when validation fails)
@@ -78,6 +83,8 @@ const isOpen = ref(false);
 
 const cellClass = computed(() => {
   if (props.disabled) return "cell--disabled";
+  if (props.state === "error") return "cell--error";
+  if (props.state === "warning") return "cell--warning";
   if (isOpen.value) return "cell--active";
   return "";
 });

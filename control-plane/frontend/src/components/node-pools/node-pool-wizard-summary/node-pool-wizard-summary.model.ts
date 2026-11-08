@@ -45,7 +45,8 @@ export function getSchedulingMode(capabilities?: SchedulingCapabilitiesNullable)
 
 export const SCHEDULING_MODE_DESCRIPTIONS: Partial<Record<NodePoolSchedulingMode, string>> = {
   Proportional: "GPU resources are distributed proportionally according to each department's and project's weight.",
-  Ranked: "GPU resources are distributed by rank, then by weight within each rank.",
+  Ranked:
+    "Higher-ranked departments and projects receive GPU resources first. Remaining capacity goes to lower-ranked ones, in rank order.",
   "Guaranteed quota":
     "Each department has a guaranteed GPU quota. Any unused quota is redistributed by rank and weight.",
 };

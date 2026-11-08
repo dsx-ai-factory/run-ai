@@ -16,6 +16,11 @@ export interface SchedulingSnapshot {
   mode?: SchedulingMode;
   automaticWeights: boolean;
   cpuQuota: boolean;
+  maxAllocation?: boolean;
+  timeFairshare?: boolean;
+  historicalWeight?: number | null;
+  historicalWindow?: Record<string, number | null>;
+  minimumRuntime?: Record<string, number | null>;
   departments: Record<string, DepartmentSchedulingEdit>;
   capabilities?: SchedulingCapabilitiesNullable;
 }
@@ -35,6 +40,7 @@ export function toSchedulingCapabilities(draft: SchedulingDraft): SchedulingCapa
 
 export interface DepartmentValidationContext {
   childQuotaSum?: number;
+  nonPreemptibleUsage?: number;
   enforceChildQuota?: boolean;
   capacity?: number;
   totalQuota?: number;
