@@ -154,16 +154,12 @@ func validateNimServingPortAuthSupportedForClusterVersion(ctx context.Context, c
 	return api.NewError(http.StatusBadRequest, "servingPort authorization fields are supported for cluster version 2.25 and above", nil)
 }
 
-// nimInferenceRouting returns the routing carrier for a NIM spec that set a
-// load-aware routing field, and nil otherwise, so a NIM that did not opt in
-// submits the same workload request as before. A path prefix without the opt-in
-// is carried so that the workload request is rejected instead of ignoring it.
+// nimInferenceRouting returns the routing carrier for a NIM spec that opted in to
+// load-aware routing, and nil otherwise, so a NIM that did not opt in submits
+// the same workload request as before.
 func nimInferenceRouting(spec api.NimServiceSpec) *api.WorkloadV2ConfigurationInferenceRouting {
-	routing := &api.WorkloadV2ConfigurationInferenceRouting{
-		LoadAwareRouting:           spec.LoadAwareRouting,
-		LoadAwareRoutingPathPrefix: spec.LoadAwareRoutingPathPrefix,
-	}
-	if !inferenceRoutingOptedIn(routing) && routing.LoadAwareRoutingPathPrefix == nil {
+	routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: spec.LoadAwareRouting}
+	if !inferenceRoutingOptedIn(routing) {
 		return nil
 	}
 	return routing

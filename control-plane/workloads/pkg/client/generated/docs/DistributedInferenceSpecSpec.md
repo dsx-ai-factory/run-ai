@@ -6,7 +6,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Category** | Pointer to **NullableString** | Specify the workload category assigned to the workload. Categories are used to classify and monitor different types of workloads within the NVIDIA Run:ai platform. | [optional] 
 **LoadAwareRouting** | Pointer to **NullableBool** | Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. | [optional] [default to false]
-**LoadAwareRoutingPathPrefix** | Pointer to **NullableString** | The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1. | [optional] 
 **NodePools** | Pointer to **[]string** | A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available. | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibility**](Preemptibility.md) |  | [optional] 
 **PriorityClass** | Pointer to **NullableString** | Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value. | [optional] 
@@ -107,41 +106,6 @@ HasLoadAwareRouting returns a boolean if a field has been set.
 `func (o *DistributedInferenceSpecSpec) UnsetLoadAwareRouting()`
 
 UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
-### GetLoadAwareRoutingPathPrefix
-
-`func (o *DistributedInferenceSpecSpec) GetLoadAwareRoutingPathPrefix() string`
-
-GetLoadAwareRoutingPathPrefix returns the LoadAwareRoutingPathPrefix field if non-nil, zero value otherwise.
-
-### GetLoadAwareRoutingPathPrefixOk
-
-`func (o *DistributedInferenceSpecSpec) GetLoadAwareRoutingPathPrefixOk() (*string, bool)`
-
-GetLoadAwareRoutingPathPrefixOk returns a tuple with the LoadAwareRoutingPathPrefix field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetLoadAwareRoutingPathPrefix
-
-`func (o *DistributedInferenceSpecSpec) SetLoadAwareRoutingPathPrefix(v string)`
-
-SetLoadAwareRoutingPathPrefix sets LoadAwareRoutingPathPrefix field to given value.
-
-### HasLoadAwareRoutingPathPrefix
-
-`func (o *DistributedInferenceSpecSpec) HasLoadAwareRoutingPathPrefix() bool`
-
-HasLoadAwareRoutingPathPrefix returns a boolean if a field has been set.
-
-### SetLoadAwareRoutingPathPrefixNil
-
-`func (o *DistributedInferenceSpecSpec) SetLoadAwareRoutingPathPrefixNil(b bool)`
-
- SetLoadAwareRoutingPathPrefixNil sets the value for LoadAwareRoutingPathPrefix to be an explicit nil
-
-### UnsetLoadAwareRoutingPathPrefix
-`func (o *DistributedInferenceSpecSpec) UnsetLoadAwareRoutingPathPrefix()`
-
-UnsetLoadAwareRoutingPathPrefix ensures that no value is present for LoadAwareRoutingPathPrefix, not even an explicit nil
 ### GetNodePools
 
 `func (o *DistributedInferenceSpecSpec) GetNodePools() []string`

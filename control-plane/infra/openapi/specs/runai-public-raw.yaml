@@ -40885,15 +40885,6 @@ components:
       type: boolean
       default: false
       nullable: true
-    LoadAwareRoutingPathPrefix:
-      description: >-
-        The path whose requests go through the endpoint picker. Requests outside
-        it are not routed and return 404. It must start with a slash and can be
-        set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-      type: string
-      maxLength: 1024
-      nullable: true
-      example: /v1
     DistributedInferenceRestartPolicy:
       description: >
         Determines the behavior when a pod fails.
@@ -41070,8 +41061,6 @@ components:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
               $ref: '#/components/schemas/LoadAwareRouting'
-            loadAwareRoutingPathPrefix:
-              $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -42548,8 +42537,6 @@ components:
               $ref: '#/components/schemas/Category'
             loadAwareRouting:
               $ref: '#/components/schemas/LoadAwareRouting'
-            loadAwareRoutingPathPrefix:
-              $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -43233,8 +43220,6 @@ components:
               $ref: '#/components/schemas/StringRules'
             loadAwareRouting:
               $ref: '#/components/schemas/BooleanRules'
-            loadAwareRoutingPathPrefix:
-              $ref: '#/components/schemas/StringRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
             preemptibility:
@@ -45316,8 +45301,6 @@ components:
               $ref: '#/components/schemas/LabelsDefaults'
             loadAwareRouting:
               $ref: '#/components/schemas/LoadAwareRouting'
-            loadAwareRoutingPathPrefix:
-              $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
             modelStore:
               nullable: true
               properties:
@@ -45532,8 +45515,6 @@ components:
               $ref: '#/components/schemas/InstancesRules'
             loadAwareRouting:
               $ref: '#/components/schemas/BooleanRules'
-            loadAwareRoutingPathPrefix:
-              $ref: '#/components/schemas/StringRules'
             modelStore:
               nullable: true
               properties:
@@ -57784,8 +57765,8 @@ components:
           type: string
           maxLength: 1024
           description: >-
-            The path whose requests go through the endpoint picker. When
-            omitted, the prefix is /v1.
+            The path whose requests go through the endpoint picker. Set by the
+            control plane to /v1.
     ExternalAccess:
       type: object
       description: >-
@@ -58220,8 +58201,6 @@ components:
       properties:
         loadAwareRouting:
           $ref: '#/components/schemas/LoadAwareRouting'
-        loadAwareRoutingPathPrefix:
-          $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
     WorkloadV2Configuration:
       type: object
       description: Specifies the features configuration to apply to a workload.
@@ -58814,8 +58793,6 @@ components:
               $ref: '#/components/schemas/Labels'
             loadAwareRouting:
               $ref: '#/components/schemas/LoadAwareRouting'
-            loadAwareRoutingPathPrefix:
-              $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
             modelStore:
               nullable: true
               properties:

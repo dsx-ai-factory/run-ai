@@ -873,14 +873,6 @@ var _ = Describe("NIM load-aware routing", func() {
 		Entry("loadAwareRouting false", api.NimServiceSpec{LoadAwareRouting: convutils.Ref(false)}, nil),
 		Entry("loadAwareRouting true", api.NimServiceSpec{LoadAwareRouting: convutils.Ref(true)},
 			&api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: convutils.Ref(true)}),
-		Entry("loadAwareRouting true with a path prefix",
-			api.NimServiceSpec{LoadAwareRouting: convutils.Ref(true), LoadAwareRoutingPathPrefix: convutils.Ref("/openai/v1")},
-			&api.WorkloadV2ConfigurationInferenceRouting{
-				LoadAwareRouting: convutils.Ref(true), LoadAwareRoutingPathPrefix: convutils.Ref("/openai/v1"),
-			}),
-		Entry("a path prefix without the opt-in is carried so that it is rejected",
-			api.NimServiceSpec{LoadAwareRoutingPathPrefix: convutils.Ref("/openai/v1")},
-			&api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRoutingPathPrefix: convutils.Ref("/openai/v1")}),
 	)
 
 	DescribeTable("accepts a public HTTP serving port that is exposed externally",

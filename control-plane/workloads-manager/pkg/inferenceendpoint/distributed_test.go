@@ -72,24 +72,15 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		endpoint.ExternalAccess = &api.ExternalAccess{HttpRoute: &object}
 	}
 
-	It("returns an epp-only inference block for a validated topology without a path prefix", func() {
+	It("returns the inference block for a validated topology with the /v1 path prefix", func() {
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, "", defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(intent).NotTo(BeNil())
 		raw, err := json.Marshal(intent)
 		Expect(err).NotTo(HaveOccurred())
 		// Selector, port, Gateway and hostnames are derived on the cluster.
-		Expect(string(raw)).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
-	})
-
-	It("carries the path prefix of the workload", func() {
-		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, "/openai/v1", defaults)
-		Expect(err).NotTo(HaveOccurred())
-		raw, err := json.Marshal(intent)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(string(raw)).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/openai/v1"}`))
+		Expect(string(raw)).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
 	})
 
 	composeNative := func(authorizationType *workloadsapi.DistributedInferenceServingPortAccessAuthorizationTypeEnum) (*lwsv1.LeaderWorkerSet, api.NetworkingEndpoint) {
@@ -127,10 +118,10 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 
 	It("accepts the resolved output of the native distributed-inference composer", func() {
 		composed, resolved := composeNative(nil)
-		intent, err := BuildDistributedInferenceIntent(composed, resolved, "", defaults)
+		intent, err := BuildDistributedInferenceIntent(composed, resolved, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		setRoute()
-		expected, err := BuildDistributedInferenceIntent(lws, endpoint, "", defaults)
+		expected, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(intent).To(Equal(expected))
 	})
@@ -142,7 +133,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Expect(service.Authorization).To(BeNil())
 		Expect(*service.Spec.Ports[0].TargetPort).To(Equal(composer.Oauth2ContainerDefaultPort))
 
-		_, err := BuildDistributedInferenceIntent(composed, resolved, "", defaults)
+		_, err := BuildDistributedInferenceIntent(composed, resolved, defaults)
 		Expect(err).To(MatchError(ContainSubstring("public distributed inference must not target the auth proxy port")))
 	})
 
@@ -151,14 +142,14 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Labels = map[string]string{ownerLabel: "workload-123"}
 		(*(*endpoint.Services)[0].Spec.Selector)[ownerLabel] = "workload-123"
 		setRoute()
-		_, err := BuildDistributedInferenceIntent(lws, endpoint, "", defaults)
+		_, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
 	DescribeTable("rejects unsupported serving topology", func(mutate func()) {
 		setRoute()
 		mutate()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, "", defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
 		Expect(err).To(HaveOccurred())
 		Expect(intent).To(BeNil())
 	},
@@ -180,7 +171,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 	DescribeTable("rejects a serving port that targets the auth proxy", func(mutate func()) {
 		mutate()
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, "", defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
 		Expect(err).To(HaveOccurred())
 		Expect(err.Error()).To(ContainSubstring("port"))
 		Expect(intent).To(BeNil())
@@ -204,7 +195,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 	DescribeTable("rejects routing constraints that the endpoint CR cannot preserve", func(mutate func()) {
 		mutate()
 		setRoute()
-		intent, err := BuildDistributedInferenceIntent(lws, endpoint, "", defaults)
+		intent, err := BuildDistributedInferenceIntent(lws, endpoint, defaults)
 		Expect(err).To(HaveOccurred())
 		Expect(intent).To(BeNil())
 	},

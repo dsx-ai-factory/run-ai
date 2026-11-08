@@ -3170,12 +3170,6 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferenceCommonDefaultsV2
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonDefaultsV2
@@ -3242,12 +3236,6 @@ export interface DistributedInferenceCommonRulesV2 {
      * @memberof DistributedInferenceCommonRulesV2
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof DistributedInferenceCommonRulesV2
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -3317,12 +3305,6 @@ export interface DistributedInferenceCommonRulesV2AllOf {
     'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
-     * @type {StringRules}
-     * @memberof DistributedInferenceCommonRulesV2AllOf
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
-    /**
-     * 
      * @type {ArrayRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
@@ -3370,12 +3352,6 @@ export interface DistributedInferenceCommonSpec {
      * @memberof DistributedInferenceCommonSpec
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferenceCommonSpec
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -3443,12 +3419,6 @@ export interface DistributedInferenceCommonSpecAllOf {
      * @memberof DistributedInferenceCommonSpecAllOf
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferenceCommonSpecAllOf
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -5274,12 +5244,6 @@ export interface DistributedInferenceSpecSpec {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferenceSpecSpec
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceSpecSpec
@@ -5555,12 +5519,6 @@ export interface DistributedInferenceTemplateSpec {
      * @memberof DistributedInferenceTemplateSpec
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferenceTemplateSpec
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -16630,12 +16588,6 @@ export interface SupersetDefaults {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof SupersetDefaults
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof SupersetDefaults
@@ -17454,12 +17406,6 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof SupersetRules
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -18436,12 +18382,6 @@ export interface SupersetSpec {
      * @memberof SupersetSpec
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof SupersetSpec
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -21422,12 +21362,6 @@ export interface UnifiedPolicyInfoPerReplicaTypeDefaults {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof UnifiedPolicyInfoPerReplicaTypeDefaults
@@ -21741,12 +21675,6 @@ export interface UnifiedPolicyInfoPerReplicaTypeRules {
      * @memberof UnifiedPolicyInfoPerReplicaTypeRules
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof UnifiedPolicyInfoPerReplicaTypeRules
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -22290,12 +22218,6 @@ export interface UnifiedSpecWorker {
      * @memberof UnifiedSpecWorker
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof UnifiedSpecWorker
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}

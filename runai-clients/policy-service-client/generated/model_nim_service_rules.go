@@ -22,28 +22,27 @@ var _ MappedNullable = &NimServiceRules{}
 
 // NimServiceRules struct for NimServiceRules
 type NimServiceRules struct {
-	Annotations                NullableInstancesRules                  `json:"annotations,omitempty"`
-	Autoscaling                NullableNimServiceRulesAllOfAutoscaling `json:"autoscaling,omitempty"`
-	Category                   NullableStringRules                     `json:"category,omitempty"`
-	Compute                    NullableNimServiceRulesAllOfCompute     `json:"compute,omitempty"`
-	EnvironmentVariables       NullableInstancesRules                  `json:"environmentVariables,omitempty"`
-	Image                      NullableStringRules                     `json:"image,omitempty"`
-	ImagePullPolicy            NullableImagePullPolicyRules            `json:"imagePullPolicy,omitempty"`
-	ImagePullSecrets           NullableImagePullSecretsRules           `json:"imagePullSecrets,omitempty"`
-	Labels                     NullableInstancesRules                  `json:"labels,omitempty"`
-	LoadAwareRouting           NullableBooleanRules                    `json:"loadAwareRouting,omitempty"`
-	LoadAwareRoutingPathPrefix NullableStringRules                     `json:"loadAwareRoutingPathPrefix,omitempty"`
-	ModelStore                 NullableNimServiceRulesAllOfModelStore  `json:"modelStore,omitempty"`
-	MultiNode                  NullableNimServiceMultiNodeRules        `json:"multiNode,omitempty"`
-	NgcAuthSecret              NullableStringRules                     `json:"ngcAuthSecret,omitempty"`
-	NodePools                  NullableArrayRules                      `json:"nodePools,omitempty"`
-	Preemptibility             NullablePreemptibilityRules             `json:"preemptibility,omitempty"`
-	PriorityClass              NullableStringRules                     `json:"priorityClass,omitempty"`
-	Probes                     NullableProbesRules                     `json:"probes,omitempty"`
-	Replicas                   NullableIntegerRules                    `json:"replicas,omitempty"`
-	Security                   NullableNimServiceRulesAllOfSecurity    `json:"security,omitempty"`
-	ServingPort                NullableNimServiceServingPortRules      `json:"servingPort,omitempty"`
-	Tolerations                NullableTolerationsRules                `json:"tolerations,omitempty"`
+	Annotations          NullableInstancesRules                  `json:"annotations,omitempty"`
+	Autoscaling          NullableNimServiceRulesAllOfAutoscaling `json:"autoscaling,omitempty"`
+	Category             NullableStringRules                     `json:"category,omitempty"`
+	Compute              NullableNimServiceRulesAllOfCompute     `json:"compute,omitempty"`
+	EnvironmentVariables NullableInstancesRules                  `json:"environmentVariables,omitempty"`
+	Image                NullableStringRules                     `json:"image,omitempty"`
+	ImagePullPolicy      NullableImagePullPolicyRules            `json:"imagePullPolicy,omitempty"`
+	ImagePullSecrets     NullableImagePullSecretsRules           `json:"imagePullSecrets,omitempty"`
+	Labels               NullableInstancesRules                  `json:"labels,omitempty"`
+	LoadAwareRouting     NullableBooleanRules                    `json:"loadAwareRouting,omitempty"`
+	ModelStore           NullableNimServiceRulesAllOfModelStore  `json:"modelStore,omitempty"`
+	MultiNode            NullableNimServiceMultiNodeRules        `json:"multiNode,omitempty"`
+	NgcAuthSecret        NullableStringRules                     `json:"ngcAuthSecret,omitempty"`
+	NodePools            NullableArrayRules                      `json:"nodePools,omitempty"`
+	Preemptibility       NullablePreemptibilityRules             `json:"preemptibility,omitempty"`
+	PriorityClass        NullableStringRules                     `json:"priorityClass,omitempty"`
+	Probes               NullableProbesRules                     `json:"probes,omitempty"`
+	Replicas             NullableIntegerRules                    `json:"replicas,omitempty"`
+	Security             NullableNimServiceRulesAllOfSecurity    `json:"security,omitempty"`
+	ServingPort          NullableNimServiceServingPortRules      `json:"servingPort,omitempty"`
+	Tolerations          NullableTolerationsRules                `json:"tolerations,omitempty"`
 }
 
 // NewNimServiceRules instantiates a new NimServiceRules object
@@ -491,49 +490,6 @@ func (o *NimServiceRules) SetLoadAwareRoutingNil() {
 // UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
 func (o *NimServiceRules) UnsetLoadAwareRouting() {
 	o.LoadAwareRouting.Unset()
-}
-
-// GetLoadAwareRoutingPathPrefix returns the LoadAwareRoutingPathPrefix field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *NimServiceRules) GetLoadAwareRoutingPathPrefix() StringRules {
-	if o == nil || IsNil(o.LoadAwareRoutingPathPrefix.Get()) {
-		var ret StringRules
-		return ret
-	}
-	return *o.LoadAwareRoutingPathPrefix.Get()
-}
-
-// GetLoadAwareRoutingPathPrefixOk returns a tuple with the LoadAwareRoutingPathPrefix field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *NimServiceRules) GetLoadAwareRoutingPathPrefixOk() (*StringRules, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.LoadAwareRoutingPathPrefix.Get(), o.LoadAwareRoutingPathPrefix.IsSet()
-}
-
-// HasLoadAwareRoutingPathPrefix returns a boolean if a field has been set.
-func (o *NimServiceRules) HasLoadAwareRoutingPathPrefix() bool {
-	if o != nil && o.LoadAwareRoutingPathPrefix.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetLoadAwareRoutingPathPrefix gets a reference to the given NullableStringRules and assigns it to the LoadAwareRoutingPathPrefix field.
-func (o *NimServiceRules) SetLoadAwareRoutingPathPrefix(v StringRules) {
-	o.LoadAwareRoutingPathPrefix.Set(&v)
-}
-
-// SetLoadAwareRoutingPathPrefixNil sets the value for LoadAwareRoutingPathPrefix to be an explicit nil
-func (o *NimServiceRules) SetLoadAwareRoutingPathPrefixNil() {
-	o.LoadAwareRoutingPathPrefix.Set(nil)
-}
-
-// UnsetLoadAwareRoutingPathPrefix ensures that no value is present for LoadAwareRoutingPathPrefix, not even an explicit nil
-func (o *NimServiceRules) UnsetLoadAwareRoutingPathPrefix() {
-	o.LoadAwareRoutingPathPrefix.Unset()
 }
 
 // GetModelStore returns the ModelStore field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -1048,9 +1004,6 @@ func (o NimServiceRules) ToMap() (map[string]interface{}, error) {
 	}
 	if o.LoadAwareRouting.IsSet() {
 		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
-	}
-	if o.LoadAwareRoutingPathPrefix.IsSet() {
-		toSerialize["loadAwareRoutingPathPrefix"] = o.LoadAwareRoutingPathPrefix.Get()
 	}
 	if o.ModelStore.IsSet() {
 		toSerialize["modelStore"] = o.ModelStore.Get()

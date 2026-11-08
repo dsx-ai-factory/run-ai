@@ -26,8 +26,6 @@ type DistributedInferenceDefaultsV2 struct {
 	Category NullableString `json:"category,omitempty" validate:"regexp=.*"`
 	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
 	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
-	// The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-	LoadAwareRoutingPathPrefix NullableString `json:"loadAwareRoutingPathPrefix,omitempty"`
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
 	NodePools      []string               `json:"nodePools,omitempty"`
 	Preemptibility NullablePreemptibility `json:"preemptibility,omitempty"`
@@ -167,49 +165,6 @@ func (o *DistributedInferenceDefaultsV2) SetLoadAwareRoutingNil() {
 // UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
 func (o *DistributedInferenceDefaultsV2) UnsetLoadAwareRouting() {
 	o.LoadAwareRouting.Unset()
-}
-
-// GetLoadAwareRoutingPathPrefix returns the LoadAwareRoutingPathPrefix field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *DistributedInferenceDefaultsV2) GetLoadAwareRoutingPathPrefix() string {
-	if o == nil || IsNil(o.LoadAwareRoutingPathPrefix.Get()) {
-		var ret string
-		return ret
-	}
-	return *o.LoadAwareRoutingPathPrefix.Get()
-}
-
-// GetLoadAwareRoutingPathPrefixOk returns a tuple with the LoadAwareRoutingPathPrefix field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *DistributedInferenceDefaultsV2) GetLoadAwareRoutingPathPrefixOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.LoadAwareRoutingPathPrefix.Get(), o.LoadAwareRoutingPathPrefix.IsSet()
-}
-
-// HasLoadAwareRoutingPathPrefix returns a boolean if a field has been set.
-func (o *DistributedInferenceDefaultsV2) HasLoadAwareRoutingPathPrefix() bool {
-	if o != nil && o.LoadAwareRoutingPathPrefix.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetLoadAwareRoutingPathPrefix gets a reference to the given NullableString and assigns it to the LoadAwareRoutingPathPrefix field.
-func (o *DistributedInferenceDefaultsV2) SetLoadAwareRoutingPathPrefix(v string) {
-	o.LoadAwareRoutingPathPrefix.Set(&v)
-}
-
-// SetLoadAwareRoutingPathPrefixNil sets the value for LoadAwareRoutingPathPrefix to be an explicit nil
-func (o *DistributedInferenceDefaultsV2) SetLoadAwareRoutingPathPrefixNil() {
-	o.LoadAwareRoutingPathPrefix.Set(nil)
-}
-
-// UnsetLoadAwareRoutingPathPrefix ensures that no value is present for LoadAwareRoutingPathPrefix, not even an explicit nil
-func (o *DistributedInferenceDefaultsV2) UnsetLoadAwareRoutingPathPrefix() {
-	o.LoadAwareRoutingPathPrefix.Unset()
 }
 
 // GetNodePools returns the NodePools field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -647,9 +602,6 @@ func (o DistributedInferenceDefaultsV2) ToMap() (map[string]interface{}, error) 
 	}
 	if o.LoadAwareRouting.IsSet() {
 		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
-	}
-	if o.LoadAwareRoutingPathPrefix.IsSet() {
-		toSerialize["loadAwareRoutingPathPrefix"] = o.LoadAwareRoutingPathPrefix.Get()
 	}
 	if o.NodePools != nil {
 		toSerialize["nodePools"] = o.NodePools

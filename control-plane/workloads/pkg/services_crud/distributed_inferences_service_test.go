@@ -184,10 +184,6 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 				}
 			},
 			Entry("loadAwareRouting true", "routing-native-load-aware", func(spec *api.DistributedInferenceSpecSpec) { spec.LoadAwareRouting = convutils.Ref(true) }, http.StatusBadRequest),
-			Entry("path prefix", "routing-native-prefix", func(spec *api.DistributedInferenceSpecSpec) {
-				spec.LoadAwareRouting = convutils.Ref(true)
-				spec.LoadAwareRoutingPathPrefix = convutils.Ref("/openai/v1")
-			}, http.StatusBadRequest),
 			Entry("loadAwareRouting false keeps native submission", "routing-native-not-opted-in", func(spec *api.DistributedInferenceSpecSpec) { spec.LoadAwareRouting = convutils.Ref(false) }, http.StatusAccepted),
 		)
 
@@ -808,10 +804,7 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 				Expect(marshalErr).NotTo(HaveOccurred())
 				Expect(raw).To(MatchJSON(expectedRouting))
 			},
-			Entry("opted in", func(spec *workloadsApi.SupersetSpec) {
-				spec.SetLoadAwareRouting(true)
-				spec.SetLoadAwareRoutingPathPrefix("/openai/v1")
-			}, `{"loadAwareRouting":true,"loadAwareRoutingPathPrefix":"/openai/v1"}`),
+			Entry("opted in", func(spec *workloadsApi.SupersetSpec) { spec.SetLoadAwareRouting(true) }, `{"loadAwareRouting":true}`),
 			Entry("not opted in", func(spec *workloadsApi.SupersetSpec) { spec.SetLoadAwareRouting(false) }, ""),
 		)
 

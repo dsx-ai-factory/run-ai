@@ -1235,7 +1235,7 @@
           "pathPrefix": {
             "type": "string",
             "maxLength": 1024,
-            "description": "The path whose requests go through the endpoint picker. When omitted, the prefix is /v1."
+            "description": "The path whose requests go through the endpoint picker. Set by the control plane to /v1."
           }
         }
       },
@@ -1738,13 +1738,6 @@
         "default": false,
         "nullable": true
       },
-      "LoadAwareRoutingPathPrefix": {
-        "description": "The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.",
-        "type": "string",
-        "maxLength": 1024,
-        "nullable": true,
-        "example": "/v1"
-      },
       "WorkloadV2ConfigurationInferenceRouting": {
         "type": "object",
         "nullable": true,
@@ -1753,9 +1746,6 @@
         "properties": {
           "loadAwareRouting": {
             "$ref": "#/components/schemas/LoadAwareRouting"
-          },
-          "loadAwareRoutingPathPrefix": {
-            "$ref": "#/components/schemas/LoadAwareRoutingPathPrefix"
           }
         }
       },
@@ -3637,9 +3627,6 @@
               },
               "loadAwareRouting": {
                 "$ref": "#/components/schemas/LoadAwareRouting"
-              },
-              "loadAwareRoutingPathPrefix": {
-                "$ref": "#/components/schemas/LoadAwareRoutingPathPrefix"
               },
               "modelStore": {
                 "nullable": true,

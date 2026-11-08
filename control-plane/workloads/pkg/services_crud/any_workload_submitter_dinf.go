@@ -235,16 +235,14 @@ func (s *AnyWorkloadSubmitterDinf) Update(ctx context.Context, wc *workloadConte
 	}, nil
 }
 
-// dinfLoadAwareRoutingRequested reports whether the spec sets a load-aware routing
-// field. A path prefix without the opt-in is carried too, so that workloads-manager
-// rejects it instead of ignoring it.
+// dinfLoadAwareRoutingRequested is the opt-in rule that workloads-manager applies
+// to inferenceRouting.
 func dinfLoadAwareRoutingRequested(spec *workloadsApi.DistributedInferenceSpecSpec) bool {
-	return spec != nil &&
-		(convutils.Deref(spec.LoadAwareRouting.Get(), false) || spec.LoadAwareRoutingPathPrefix.Get() != nil)
+	return spec != nil && convutils.Deref(spec.LoadAwareRouting.Get(), false)
 }
 
 // setDinfInferenceRouting sets the inferenceRouting carrier on the request
-// configuration when the spec sets a load-aware routing field.
+// configuration when the workload opts in.
 func setDinfInferenceRouting(spec *workloadsApi.DistributedInferenceSpecSpec, configuration *workloadMgrApi.WorkloadV2Configuration) {
 	if routing := dinfInferenceRouting(spec); routing != nil {
 		configuration.SetInferenceRouting(*routing)
@@ -253,7 +251,7 @@ func setDinfInferenceRouting(spec *workloadsApi.DistributedInferenceSpecSpec, co
 
 // dinfInferenceRouting carries the policy-validated spec fields that workloads-manager
 // needs to build the InferenceEndpoint intent. It returns nil when the workload did
-// not set a load-aware routing field, so the request stays unchanged.
+// not opt in, so the request stays unchanged.
 func dinfInferenceRouting(spec *workloadsApi.DistributedInferenceSpecSpec) *workloadMgrApi.WorkloadV2ConfigurationInferenceRouting {
 	if !dinfLoadAwareRoutingRequested(spec) {
 		return nil
@@ -261,9 +259,6 @@ func dinfInferenceRouting(spec *workloadsApi.DistributedInferenceSpecSpec) *work
 	routing := workloadMgrApi.NewWorkloadV2ConfigurationInferenceRouting()
 	if loadAwareRouting := spec.LoadAwareRouting.Get(); loadAwareRouting != nil {
 		routing.SetLoadAwareRouting(*loadAwareRouting)
-	}
-	if pathPrefix := spec.LoadAwareRoutingPathPrefix.Get(); pathPrefix != nil {
-		routing.SetLoadAwareRoutingPathPrefix(*pathPrefix)
 	}
 	return routing
 }

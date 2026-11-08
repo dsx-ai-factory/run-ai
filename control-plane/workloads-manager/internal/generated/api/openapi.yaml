@@ -1553,8 +1553,8 @@ components:
             \ against the installed CRD when applied."
           type: object
         pathPrefix:
-          description: "The path whose requests go through the endpoint picker. When\
-            \ omitted, the prefix is /v1."
+          description: The path whose requests go through the endpoint picker. Set
+            by the control plane to /v1.
           maxLength: 1024
           type: string
       required:
@@ -2171,15 +2171,6 @@ components:
         \ which picks a Pod by load. It can be set only when the workload is created."
       nullable: true
       type: boolean
-    LoadAwareRoutingPathPrefix:
-      description: "The path whose requests go through the endpoint picker. Requests\
-        \ outside it are not routed and return 404. It must start with a slash and\
-        \ can be set only when loadAwareRouting is true. When omitted, the prefix\
-        \ is /v1."
-      example: /v1
-      maxLength: 1024
-      nullable: true
-      type: string
     WorkloadV2ConfigurationInferenceRouting:
       additionalProperties: false
       description: Inference routing fields from the policy-validated workload spec.
@@ -2187,7 +2178,6 @@ components:
         public workload submissions. Workloads Manager resolves them into externalAccess.inference
         on the serving endpoint.
       example:
-        loadAwareRoutingPathPrefix: /v1
         loadAwareRouting: false
       nullable: true
       properties:
@@ -2197,22 +2187,12 @@ components:
             \ which picks a Pod by load. It can be set only when the workload is created."
           nullable: true
           type: boolean
-        loadAwareRoutingPathPrefix:
-          description: "The path whose requests go through the endpoint picker. Requests\
-            \ outside it are not routed and return 404. It must start with a slash\
-            \ and can be set only when loadAwareRouting is true. When omitted, the\
-            \ prefix is /v1."
-          example: /v1
-          maxLength: 1024
-          nullable: true
-          type: string
       type: object
     WorkloadV2Configuration:
       description: Specifies the features configuration to apply to a workload.
       example:
         mnnvl: mnnvl
         inferenceRouting:
-          loadAwareRoutingPathPrefix: /v1
           loadAwareRouting: false
         pvcs:
         - metadata:
@@ -2571,7 +2551,6 @@ components:
         configuration:
           mnnvl: mnnvl
           inferenceRouting:
-            loadAwareRoutingPathPrefix: /v1
             loadAwareRouting: false
           pvcs:
           - metadata:
@@ -2988,7 +2967,6 @@ components:
           configuration:
             mnnvl: mnnvl
             inferenceRouting:
-              loadAwareRoutingPathPrefix: /v1
               loadAwareRouting: false
             pvcs:
             - metadata:
@@ -3574,7 +3552,6 @@ components:
         configuration:
           mnnvl: mnnvl
           inferenceRouting:
-            loadAwareRoutingPathPrefix: /v1
             loadAwareRouting: false
           pvcs:
           - metadata:
@@ -3949,7 +3926,6 @@ components:
           configuration:
             mnnvl: mnnvl
             inferenceRouting:
-              loadAwareRoutingPathPrefix: /v1
               loadAwareRouting: false
             pvcs:
             - metadata:
@@ -4433,7 +4409,6 @@ components:
             configuration:
               mnnvl: mnnvl
               inferenceRouting:
-                loadAwareRoutingPathPrefix: /v1
                 loadAwareRouting: false
               pvcs:
               - metadata:
@@ -6538,8 +6513,6 @@ components:
             $ref: '#/components/schemas/Labels'
           loadAwareRouting:
             $ref: '#/components/schemas/LoadAwareRouting'
-          loadAwareRoutingPathPrefix:
-            $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
           modelStore:
             $ref: '#/components/schemas/NimServiceSpec_allOf_modelStore'
           multiNode:
@@ -6647,7 +6620,6 @@ components:
           cpuCoreRequest: 0.5
           gpuPortionLimit: 0.5
         preemptibility: preemptible
-        loadAwareRoutingPathPrefix: /v1
         security:
           runAsGid: 30
           runAsUid: 500
@@ -6906,7 +6878,6 @@ components:
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
           preemptibility: preemptible
-          loadAwareRoutingPathPrefix: /v1
           security:
             runAsGid: 30
             runAsUid: 500
@@ -7092,7 +7063,6 @@ components:
           configuration:
             mnnvl: mnnvl
             inferenceRouting:
-              loadAwareRoutingPathPrefix: /v1
               loadAwareRouting: false
             pvcs:
             - metadata:
@@ -7519,7 +7489,6 @@ components:
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
           preemptibility: preemptible
-          loadAwareRoutingPathPrefix: /v1
           security:
             runAsGid: 30
             runAsUid: 500
@@ -7845,7 +7814,6 @@ components:
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
           preemptibility: preemptible
-          loadAwareRoutingPathPrefix: /v1
           security:
             runAsGid: 30
             runAsUid: 500

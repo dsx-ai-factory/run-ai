@@ -65,8 +65,6 @@ allOf:
       $ref: ../workloads_spec/advanced/Labels.yaml
     loadAwareRouting:
       $ref: ../workloads_spec/inferences/LoadAwareRouting.yaml
-    loadAwareRoutingPathPrefix:
-      $ref: ../workloads_spec/inferences/LoadAwareRoutingPathPrefix.yaml
     modelStore:
       nullable: true
       properties:

@@ -186,21 +186,6 @@ func TestDinfInferenceRouting(t *testing.T) {
 			mutate: func(spec *workloadsApi.DistributedInferenceSpecSpec) { spec.SetLoadAwareRouting(true) },
 			want:   `{"loadAwareRouting":true}`,
 		},
-		{
-			name: "loadAwareRouting true with a path prefix",
-			mutate: func(spec *workloadsApi.DistributedInferenceSpecSpec) {
-				spec.SetLoadAwareRouting(true)
-				spec.SetLoadAwareRoutingPathPrefix("/openai/v1")
-			},
-			want: `{"loadAwareRouting":true,"loadAwareRoutingPathPrefix":"/openai/v1"}`,
-		},
-		{
-			name: "a path prefix without the opt-in is carried so that it is rejected",
-			mutate: func(spec *workloadsApi.DistributedInferenceSpecSpec) {
-				spec.SetLoadAwareRoutingPathPrefix("/openai/v1")
-			},
-			want: `{"loadAwareRouting":false,"loadAwareRoutingPathPrefix":"/openai/v1"}`,
-		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			spec := newDinfSpecForTest()
@@ -226,13 +211,12 @@ func TestAnyWorkloadSubmitterDinfCreateCarriesInferenceRouting(t *testing.T) {
 		optedIn bool
 	}{
 		{name: "not opted in", optedIn: false},
-		{name: "opted in with a path prefix", optedIn: true},
+		{name: "opted in", optedIn: true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			spec := newDinfSpecForTest()
 			if tc.optedIn {
 				spec.SetLoadAwareRouting(true)
-				spec.SetLoadAwareRoutingPathPrefix("/openai/v1")
 			}
 			wc, _ := newDinfCreateContextForTest(t, spec)
 
@@ -246,7 +230,6 @@ func TestAnyWorkloadSubmitterDinfCreateCarriesInferenceRouting(t *testing.T) {
 			if tc.optedIn {
 				routing := configuration.GetInferenceRouting()
 				require.True(t, routing.GetLoadAwareRouting())
-				require.Equal(t, "/openai/v1", routing.GetLoadAwareRoutingPathPrefix())
 			}
 		})
 	}

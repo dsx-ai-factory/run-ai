@@ -48,11 +48,6 @@ type DistributedInferenceCommonRulesV2 struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//LoadAwareRoutingPathPrefix *StringRules `json:"loadAwareRoutingPathPrefix,omitempty"`
-	LoadAwareRoutingPathPrefix *StringRules `json:"loadAwareRoutingPathPrefix,omitempty" gorm:"serializer:json; type:jsonb;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//NodePools *ArrayRules `json:"nodePools,omitempty"`
 	NodePools *ArrayRules `json:"nodePools,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -102,11 +97,6 @@ func AssertDistributedInferenceCommonRulesV2Required(obj DistributedInferenceCom
 	}
 	if obj.LoadAwareRouting != nil {
 		if err := AssertBooleanRulesRequired(*obj.LoadAwareRouting); err != nil {
-			return err
-		}
-	}
-	if obj.LoadAwareRoutingPathPrefix != nil {
-		if err := AssertStringRulesRequired(*obj.LoadAwareRoutingPathPrefix); err != nil {
 			return err
 		}
 	}
@@ -187,16 +177,6 @@ func AssertDistributedInferenceCommonRulesV2Constraints(obj DistributedInference
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.LoadAwareRouting != nil {
 		if err := AssertBooleanRulesConstraints(*obj.LoadAwareRouting); err != nil {
-			return err
-		}
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if obj.LoadAwareRoutingPathPrefix != nil {
-		if err := AssertStringRulesConstraints(*obj.LoadAwareRoutingPathPrefix); err != nil {
 			return err
 		}
 	}

@@ -30,7 +30,6 @@ type SupersetRules struct {
 	Worker                                 NullableDistributedInferenceLeaderWorkerRulesV2                  `json:"worker,omitempty"`
 	Category                               NullableStringRules                                              `json:"category,omitempty"`
 	LoadAwareRouting                       NullableBooleanRules                                             `json:"loadAwareRouting,omitempty"`
-	LoadAwareRoutingPathPrefix             NullableStringRules                                              `json:"loadAwareRoutingPathPrefix,omitempty"`
 	NodePools                              NullableArrayRules                                               `json:"nodePools,omitempty"`
 	Preemptibility                         NullablePreemptibilityRules                                      `json:"preemptibility,omitempty"`
 	PriorityClass                          NullableStringRules                                              `json:"priorityClass,omitempty"`
@@ -351,49 +350,6 @@ func (o *SupersetRules) SetLoadAwareRoutingNil() {
 // UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
 func (o *SupersetRules) UnsetLoadAwareRouting() {
 	o.LoadAwareRouting.Unset()
-}
-
-// GetLoadAwareRoutingPathPrefix returns the LoadAwareRoutingPathPrefix field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *SupersetRules) GetLoadAwareRoutingPathPrefix() StringRules {
-	if o == nil || IsNil(o.LoadAwareRoutingPathPrefix.Get()) {
-		var ret StringRules
-		return ret
-	}
-	return *o.LoadAwareRoutingPathPrefix.Get()
-}
-
-// GetLoadAwareRoutingPathPrefixOk returns a tuple with the LoadAwareRoutingPathPrefix field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *SupersetRules) GetLoadAwareRoutingPathPrefixOk() (*StringRules, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.LoadAwareRoutingPathPrefix.Get(), o.LoadAwareRoutingPathPrefix.IsSet()
-}
-
-// HasLoadAwareRoutingPathPrefix returns a boolean if a field has been set.
-func (o *SupersetRules) HasLoadAwareRoutingPathPrefix() bool {
-	if o != nil && o.LoadAwareRoutingPathPrefix.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetLoadAwareRoutingPathPrefix gets a reference to the given NullableStringRules and assigns it to the LoadAwareRoutingPathPrefix field.
-func (o *SupersetRules) SetLoadAwareRoutingPathPrefix(v StringRules) {
-	o.LoadAwareRoutingPathPrefix.Set(&v)
-}
-
-// SetLoadAwareRoutingPathPrefixNil sets the value for LoadAwareRoutingPathPrefix to be an explicit nil
-func (o *SupersetRules) SetLoadAwareRoutingPathPrefixNil() {
-	o.LoadAwareRoutingPathPrefix.Set(nil)
-}
-
-// UnsetLoadAwareRoutingPathPrefix ensures that no value is present for LoadAwareRoutingPathPrefix, not even an explicit nil
-func (o *SupersetRules) UnsetLoadAwareRoutingPathPrefix() {
-	o.LoadAwareRoutingPathPrefix.Unset()
 }
 
 // GetNodePools returns the NodePools field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -2358,9 +2314,6 @@ func (o SupersetRules) ToMap() (map[string]interface{}, error) {
 	}
 	if o.LoadAwareRouting.IsSet() {
 		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
-	}
-	if o.LoadAwareRoutingPathPrefix.IsSet() {
-		toSerialize["loadAwareRoutingPathPrefix"] = o.LoadAwareRoutingPathPrefix.Get()
 	}
 	if o.NodePools.IsSet() {
 		toSerialize["nodePools"] = o.NodePools.Get()

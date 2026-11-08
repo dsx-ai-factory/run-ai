@@ -13,6 +13,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation"
 )
 
+// PathPrefix is the request path whose requests go through the endpoint picker. The
+// control plane sets it for the supported workload types; users do not choose it.
+const PathPrefix = "/v1"
+
 // Defaults are cluster administrator choices shared by supported workload
 // adapters. They do not establish runtime, authentication or URL compatibility.
 type Defaults struct {

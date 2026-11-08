@@ -26,7 +26,7 @@ var _ MappedNullable = &ExternalAccessInference{}
 type ExternalAccessInference struct {
 	// InferenceEndpoint spec.epp, for example the EPP profile. Validated against the installed CRD when applied.
 	Epp map[string]interface{} `json:"epp"`
-	// The path whose requests go through the endpoint picker. When omitted, the prefix is /v1.
+	// The path whose requests go through the endpoint picker. Set by the control plane to /v1.
 	PathPrefix *string `json:"pathPrefix,omitempty"`
 }
 

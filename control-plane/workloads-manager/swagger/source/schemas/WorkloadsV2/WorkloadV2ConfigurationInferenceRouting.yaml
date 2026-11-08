@@ -8,5 +8,3 @@ description: >-
 properties:
   loadAwareRouting:
     $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml'
-  loadAwareRoutingPathPrefix:
-    $ref: '../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRoutingPathPrefix.yaml'

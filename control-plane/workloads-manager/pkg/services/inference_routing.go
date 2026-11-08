@@ -9,7 +9,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	clustersapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer"
@@ -27,7 +26,6 @@ const (
 	loadAwareRoutingUnavailableMessage          = "load-aware routing is not available on this cluster"
 	inferenceRoutingNetworkingOnlyUpdateMessage = "the networking of a workload with load-aware routing can change only through a workload update"
 	inferenceRoutingFixedAtCreationMessage      = "load-aware routing is chosen when the workload is created and cannot be turned on or off by an update"
-	inferenceRoutingPathPrefixMessage           = "loadAwareRoutingPathPrefix must start with '/' and can be set only when loadAwareRouting is true"
 	inferenceRoutingUnsupportedWorkloadMessage  = "load-aware routing is supported only for distributed inference and NIM service workloads"
 )
 
@@ -61,18 +59,6 @@ func inferenceRoutingOptedIn(routing *api.WorkloadV2ConfigurationInferenceRoutin
 	return routing != nil && convutils.Deref(routing.LoadAwareRouting, false)
 }
 
-// validateInferenceRoutingPathPrefix rejects a path prefix that does not start
-// with a slash, or one set without the opt-in.
-func validateInferenceRoutingPathPrefix(routing *api.WorkloadV2ConfigurationInferenceRouting) *api.SubmissionErrorV2 {
-	if routing == nil || routing.LoadAwareRoutingPathPrefix == nil {
-		return nil
-	}
-	if !inferenceRoutingOptedIn(routing) || !strings.HasPrefix(*routing.LoadAwareRoutingPathPrefix, "/") {
-		return NewConfigurationError(inferenceRoutingPathPrefixMessage)
-	}
-	return nil
-}
-
 // validateInferenceRoutingOrigin rejects inferenceRouting outside the internal API
 // and the in-process NIM API. Both fill it from the spec after project policy ran;
 // a caller of the public API could otherwise bypass the project policy.
@@ -91,9 +77,6 @@ func resolveInferenceRoutingDefaults(
 	clusterId string,
 	adapter inferenceRoutingAdapter,
 ) (*inferenceendpoint.Defaults, *api.SubmissionErrorV2) {
-	if err := validateInferenceRoutingPathPrefix(routing); err != nil {
-		return nil, err
-	}
 	if !inferenceRoutingOptedIn(routing) {
 		return nil, nil
 	}
@@ -135,7 +118,6 @@ func applyInferenceRouting(
 	}
 
 	endpoint := &(*configuration.Networking)[0]
-	pathPrefix := convutils.Deref(routing.LoadAwareRoutingPathPrefix, "")
 	var inference *api.ExternalAccessInference
 	var err error
 	switch adapter {
@@ -144,9 +126,9 @@ func applyInferenceRouting(
 		if decodeErr != nil {
 			return NewManifestError(fmt.Sprintf("load-aware routing: %v", decodeErr))
 		}
-		inference, err = inferenceendpoint.BuildDistributedInferenceIntent(lws, *endpoint, pathPrefix, defaults)
+		inference, err = inferenceendpoint.BuildDistributedInferenceIntent(lws, *endpoint, defaults)
 	case inferenceRoutingNIMService:
-		inference, err = inferenceendpoint.BuildNIMServiceIntent(*endpoint, workloadName, pathPrefix, defaults)
+		inference, err = inferenceendpoint.BuildNIMServiceIntent(*endpoint, workloadName, defaults)
 	default:
 		return NewConfigurationError(inferenceRoutingUnsupportedWorkloadMessage)
 	}

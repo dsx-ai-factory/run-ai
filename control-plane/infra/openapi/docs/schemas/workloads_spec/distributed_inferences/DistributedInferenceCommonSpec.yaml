@@ -9,8 +9,6 @@ allOf:
       $ref: ../resources/Category.yaml
     loadAwareRouting:
       $ref: ../inferences/LoadAwareRouting.yaml
-    loadAwareRoutingPathPrefix:
-      $ref: ../inferences/LoadAwareRoutingPathPrefix.yaml
     nodePools:
       $ref: ../resources/NodePools.yaml
     preemptibility:

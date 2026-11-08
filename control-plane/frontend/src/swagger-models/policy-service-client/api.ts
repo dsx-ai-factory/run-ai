@@ -1560,12 +1560,6 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferenceCommonDefaultsV2
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonDefaultsV2
@@ -1633,12 +1627,6 @@ export interface DistributedInferenceCommonDefaultsV2AllOf {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferenceCommonDefaultsV2AllOf
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonDefaultsV2AllOf
@@ -1687,12 +1675,6 @@ export interface DistributedInferenceCommonRulesV2 {
      * @memberof DistributedInferenceCommonRulesV2
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof DistributedInferenceCommonRulesV2
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -1762,12 +1744,6 @@ export interface DistributedInferenceCommonRulesV2AllOf {
     'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
-     * @type {StringRules}
-     * @memberof DistributedInferenceCommonRulesV2AllOf
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
-    /**
-     * 
      * @type {ArrayRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
@@ -1815,12 +1791,6 @@ export interface DistributedInferenceDefaultsV2 {
      * @memberof DistributedInferenceDefaultsV2
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferenceDefaultsV2
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -2729,12 +2699,6 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Defaults {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
@@ -2813,12 +2777,6 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Rules {
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -3057,12 +3015,6 @@ export interface DistributedInferenceRulesV2 {
      * @memberof DistributedInferenceRulesV2
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof DistributedInferenceRulesV2
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -5277,12 +5229,6 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof FallbackPolicyDefaultsAndRulesDefaults
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
@@ -5596,12 +5542,6 @@ export interface FallbackPolicyDefaultsAndRulesRules {
      * @memberof FallbackPolicyDefaultsAndRulesRules
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof FallbackPolicyDefaultsAndRulesRules
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -9788,12 +9728,6 @@ export interface NimServiceDefaults {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof NimServiceDefaults
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
      * @memberof NimServiceDefaults
@@ -9926,12 +9860,6 @@ export interface NimServiceDefaultsAllOf {
      * @memberof NimServiceDefaultsAllOf
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof NimServiceDefaultsAllOf
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
     /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
@@ -10341,12 +10269,6 @@ export interface NimServicePolicyDefaultsAndRulesDefaults {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof NimServicePolicyDefaultsAndRulesDefaults
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
      * @memberof NimServicePolicyDefaultsAndRulesDefaults
@@ -10479,12 +10401,6 @@ export interface NimServicePolicyDefaultsAndRulesRules {
      * @memberof NimServicePolicyDefaultsAndRulesRules
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof NimServicePolicyDefaultsAndRulesRules
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {NimServiceRulesAllOfModelStore}
@@ -10670,12 +10586,6 @@ export interface NimServiceRules {
     'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
-     * @type {StringRules}
-     * @memberof NimServiceRules
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
-    /**
-     * 
      * @type {NimServiceRulesAllOfModelStore}
      * @memberof NimServiceRules
      */
@@ -10807,12 +10717,6 @@ export interface NimServiceRulesAllOf {
      * @memberof NimServiceRulesAllOf
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof NimServiceRulesAllOf
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {NimServiceRulesAllOfModelStore}
@@ -15402,12 +15306,6 @@ export interface SupersetDefaults {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof SupersetDefaults
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof SupersetDefaults
@@ -16245,12 +16143,6 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'loadAwareRouting'?: BooleanRules | null;
-    /**
-     * 
-     * @type {StringRules}
-     * @memberof SupersetRules
-     */
-    'loadAwareRoutingPathPrefix'?: StringRules | null;
     /**
      * 
      * @type {ArrayRules}

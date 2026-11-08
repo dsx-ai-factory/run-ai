@@ -33,8 +33,7 @@ const distributedInferenceKind = "distributed inference"
 // a future submission caller must establish both before selecting this adapter,
 // and must set the block after validating the caller's networking, which rejects it.
 // Only the public HTTP, root-hostname topology is representable in this version.
-// pathPrefix is the workload's loadAwareRoutingPathPrefix, empty for the default.
-func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, pathPrefix string, defaults *Defaults) (*api.ExternalAccessInference, error) {
+func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, defaults *Defaults) (*api.ExternalAccessInference, error) {
 	if !validDefaults(defaults) {
 		return nil, fmt.Errorf("distributed inference requires valid administrator Gateway defaults and the gie-v1.5 EPP profile")
 	}
@@ -49,7 +48,7 @@ func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.Ne
 	if _, err := servingHostname(distributedInferenceKind, endpoint.ExternalAccess, service.Name, service.Ports[0].Port, defaults); err != nil {
 		return nil, err
 	}
-	return newInferenceIntent(defaults, pathPrefix), nil
+	return newInferenceIntent(defaults), nil
 }
 
 func validDefaults(defaults *Defaults) bool {
@@ -57,10 +56,8 @@ func validDefaults(defaults *Defaults) bool {
 		defaults.GatewayNamespace != "" && len(validation.IsDNS1123Label(defaults.GatewayNamespace)) == 0 && defaults.EPPProfile == "gie-v1.5"
 }
 
-// newInferenceIntent omits pathPrefix when it is empty so the cluster applies the
-// default of the InferenceEndpoint CRD.
-func newInferenceIntent(defaults *Defaults, pathPrefix string) *api.ExternalAccessInference {
-	return &api.ExternalAccessInference{Epp: map[string]interface{}{"profile": defaults.EPPProfile}, PathPrefix: pathPrefix}
+func newInferenceIntent(defaults *Defaults) *api.ExternalAccessInference {
+	return &api.ExternalAccessInference{Epp: map[string]interface{}{"profile": defaults.EPPProfile}, PathPrefix: PathPrefix}
 }
 
 func distributedServingService(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint) (*api.ServiceSpec, error) {

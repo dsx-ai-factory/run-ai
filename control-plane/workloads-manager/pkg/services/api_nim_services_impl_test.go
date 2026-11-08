@@ -552,7 +552,6 @@ var _ = Describe("NimServicesImpl", func() {
 			spec := sampleNimServiceSpec
 			spec.ServingPort = publicServingPort()
 			spec.LoadAwareRouting = convutils.Ref(true)
-			spec.LoadAwareRoutingPathPrefix = convutils.Ref("/openai/v1")
 			return spec
 		}
 		createRequest := func(name string, spec api.NimServiceSpec) *api.NimServiceCreateRequest {
@@ -585,7 +584,7 @@ var _ = Describe("NimServicesImpl", func() {
 			Expect(endpoint.ExternalAccess.Route).To(BeNil())
 			inference, err := json.Marshal(endpoint.ExternalAccess.Inference)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(inference).To(MatchJSON(`{"epp": {"profile": "gie-v1.5"}, "pathPrefix": "/openai/v1"}`))
+			Expect(inference).To(MatchJSON(`{"epp": {"profile": "gie-v1.5"}, "pathPrefix": "/v1"}`))
 		})
 
 		It("keeps the networking of a public NIM that did not opt in", func() {
@@ -662,13 +661,13 @@ var _ = Describe("NimServicesImpl", func() {
 			id, _ := createNimServiceForTest(router, randoms, createRequest("nim-routed-update", routedSpec()))
 
 			updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{
-				Spec: api.NimServiceSpec{LoadAwareRoutingPathPrefix: convutils.Ref("/updated/v1")},
+				Spec: api.NimServiceSpec{Replicas: convutils.Ref(int32(3))},
 			})
 
 			endpoint := servingEndpoint(id)
 			Expect(*endpoint.Services).To(Equal([]api.NetworkingService{{Ref: &api.ServiceRef{Name: "nim-routed-update", Port: 8000}}}))
 			Expect(endpoint.ExternalAccess.Inference).NotTo(BeNil())
-			Expect(endpoint.ExternalAccess.Inference.PathPrefix).To(Equal("/updated/v1"))
+			Expect(endpoint.ExternalAccess.Inference.PathPrefix).To(Equal("/v1"))
 		})
 
 		DescribeTable("rejects an update that turns the routing on or off",
