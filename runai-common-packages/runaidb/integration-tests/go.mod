@@ -3,9 +3,9 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb/integratio
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.21
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb v1.0.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.22
 	github.com/jackc/pgx/v5 v5.12.0
 	github.com/stretchr/testify v1.12.1
 )
@@ -31,8 +31,8 @@ require (
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.8.2 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.10 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.33 // indirect
 	github.com/ebitengine/purego v0.11.3 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect
