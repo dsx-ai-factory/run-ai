@@ -47,51 +47,58 @@
           />
         </div>
         <div v-if="draft.timeFairshare" class="historical-fields">
-          <runai-section-title
-            title="Set the weight value that determines how a project's historical resource usage affects its fairshare"
-            width="473px"
-            tooltip-text="This determines how strongly historical resource usage influences fairshare scores: 0 — History is ignored; fairshare is based on current weight only. 0–1 — History has partial influence; lower values reduce its effect. 1 — History and current weight are balanced equally. >1 — History dominates; higher values amplify its effect."
-            ><template #tooltip-content
-              >This determines how strongly historical resource usage influences fairshare scores:
-              <ul class="historical-weight-help">
-                <li>0 — History is ignored; fairshare is based on current weight only.</li>
-                <li>0–1 — History has partial influence; lower values reduce its effect.</li>
-                <li>1 — History and current weight are balanced equally.</li>
-                <li>&gt;1 — History dominates; higher values amplify its effect.</li>
-              </ul>
-            </template></runai-section-title
-          >
-          <q-input
-            :model-value="draft.historicalWeight"
-            @update:model-value="patch({ historicalWeight: number($event) })"
-            type="number"
-            min="0"
-            label="Historical usage weight"
-            :disable="readonly"
-            :error="invalid(draft.historicalWeight)"
-            error-message="Enter a value equal to or above 0"
-            no-error-icon
-          />
-          <runai-section-title
-            class="q-mt-lg"
-            title="Set the duration of the historical usage window"
-            width="372px"
-            tooltip-text="This defines the duration of the sliding window used to calculate historical resource usage. At any given moment, the system looks only at usage within this duration from the current time. As time passes, the window slides forward continuously, including new usage and dropping old usage that falls outside the window."
-          />
-          <div class="duration-grid historical-window">
+          <div class="historical-weight-group">
+            <runai-section-title
+              flat
+              class="historical-weight-title"
+              title="Set the weight value that determines how a project's historical resource usage affects its fairshare"
+              width="473px"
+              tooltip-text="This determines how strongly historical resource usage influences fairshare scores: 0 — History is ignored; fairshare is based on current weight only. 0–1 — History has partial influence; lower values reduce its effect. 1 — History and current weight are balanced equally. >1 — History dominates; higher values amplify its effect."
+              ><template #tooltip-content
+                >This determines how strongly historical resource usage influences fairshare scores:
+                <ul class="historical-weight-help">
+                  <li>0 — History is ignored; fairshare is based on current weight only.</li>
+                  <li>0–1 — History has partial influence; lower values reduce its effect.</li>
+                  <li>1 — History and current weight are balanced equally.</li>
+                  <li>&gt;1 — History dominates; higher values amplify its effect.</li>
+                </ul>
+              </template></runai-section-title
+            >
             <q-input
-              v-for="unit in windowUnits"
-              :key="unit"
-              :model-value="draft.historicalWindow?.[unit] ?? 0"
-              @update:model-value="setDuration('historicalWindow', unit, $event)"
+              class="historical-weight-input"
+              :model-value="draft.historicalWeight"
+              @update:model-value="patch({ historicalWeight: number($event) })"
               type="number"
               min="0"
-              :label="unit"
+              label="Historical usage weight"
               :disable="readonly"
-              :error="invalid(draft.historicalWindow?.[unit])"
-              :error-message="`Enter a timeframe of at least 0 ${unit.toLowerCase()}`"
+              :error="invalid(draft.historicalWeight)"
+              error-message="Enter a value equal to or above 0"
               no-error-icon
             />
+          </div>
+          <div class="historical-window-group">
+            <runai-section-title
+              flat
+              title="Set the duration of the historical usage window"
+              width="372px"
+              tooltip-text="This defines the duration of the sliding window used to calculate historical resource usage. At any given moment, the system looks only at usage within this duration from the current time. As time passes, the window slides forward continuously, including new usage and dropping old usage that falls outside the window."
+            />
+            <div class="duration-grid historical-window">
+              <q-input
+                v-for="unit in windowUnits"
+                :key="unit"
+                :model-value="draft.historicalWindow?.[unit] ?? 0"
+                @update:model-value="setDuration('historicalWindow', unit, $event)"
+                type="number"
+                min="0"
+                :label="unit"
+                :disable="readonly"
+                :error="invalid(draft.historicalWindow?.[unit])"
+                :error-message="`Enter a timeframe of at least 0 ${unit.toLowerCase()}`"
+                no-error-icon
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -340,13 +347,70 @@ header .q-btn {
 }
 .historical-window {
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 20px;
+  margin-top: 0;
 }
 .runtime-section {
   padding-bottom: 36px !important;
 }
 .historical-fields {
   margin-top: 26px;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+}
+.historical-weight-group,
+.historical-window-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.historical-weight-input {
+  width: 190px;
+  max-width: 100%;
+  align-self: flex-start;
+}
+.historical-weight-input :deep(.q-field__label) {
+  font-size: 16px;
+}
+.historical-fields :deep(.runai-section-title > .row) {
+  flex-wrap: nowrap;
+  width: 100%;
+  justify-content: space-between;
+  gap: 7px;
+}
+.historical-fields :deep(.runai-section-title > .row > span) {
+  flex: 1;
+  min-width: 0;
+}
+.historical-weight-title :deep(> .row > span) {
+  max-width: 280px;
+}
+.historical-fields :deep(.runai-section-title .q-btn) {
+  flex-shrink: 0;
+  height: 20px;
+  width: 20px;
+  min-height: 20px;
+  padding: 0;
+}
+.settings-body :deep(.q-field--error) {
+  padding-bottom: 0;
+}
+.settings-body :deep(.q-field--error .q-field__bottom) {
+  position: static;
+  transform: none;
+  bottom: auto;
+  min-height: 0;
+  padding: 7px 0 0;
+  font-size: 12px;
+  line-height: 16.8px;
+}
+.settings-body :deep(.q-field--error .q-field__messages),
+.settings-body :deep(.q-field--error .q-field__messages > div) {
+  font-size: 12px;
+  line-height: 16.8px;
 }
 .duration-grid :deep(.q-field__label) {
   font-size: 16px;

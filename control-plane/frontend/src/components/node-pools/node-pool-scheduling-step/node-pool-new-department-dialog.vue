@@ -140,8 +140,9 @@ async function reviewPreview() {
 }
 .new-department-form .department-cluster {
   width: 85%;
-  margin-top: 24px;
-  margin-bottom: 44px;
+  margin-top: 31px;
+  margin-bottom: 26px;
+  padding-bottom: 24px;
 }
 .new-department-form .department-cluster .q-field__control:before {
   border-bottom-style: solid;
@@ -189,6 +190,19 @@ async function reviewPreview() {
 }
 .add-administrator {
   margin-top: 26px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+.add-administrator .q-icon {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  margin-right: 10px;
 }
 .department-preview-note {
   color: var(--b-text-sub);

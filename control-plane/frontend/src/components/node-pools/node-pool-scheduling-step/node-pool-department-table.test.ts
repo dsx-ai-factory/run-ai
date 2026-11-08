@@ -25,6 +25,21 @@ const rows: DepartmentNodePoolResources[] = [
 ];
 const draft: SchedulingDraft = { mode: "proportional", automaticWeights: false, cpuQuota: false, departments: {} };
 describe("scheduling department table", () => {
+  it("uses the reference zero-state copy and only changes the settings label for no matches", async () => {
+    const wrapper = mount(Table, {
+      props: { rows: [], draft, aggregates: {}, ranks: [], readonly: false, loading: false },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    expect(wrapper.get(".scheduling-empty").text()).toBe("No departments yet");
+    expect(wrapper.get('[aid="advanced-settings"]').text()).toBe("Advanced settings");
+    await wrapper.setProps({ searchTerm: "missing" });
+    expect(wrapper.get(".scheduling-empty").text()).toBe("No departments match your filters.");
+    expect(wrapper.get('[aid="advanced-settings"]').text()).toBe("Show settings");
+    wrapper.unmount();
+  });
   it.each([
     { automaticWeights: true },
     { cpuQuota: true },

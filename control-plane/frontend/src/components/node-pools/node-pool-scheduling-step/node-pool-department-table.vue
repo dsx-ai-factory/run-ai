@@ -52,7 +52,7 @@
           stack
           size="sm"
           icon="ph ph-gear-six"
-          label="Advanced settings"
+          :label="noMatchingDepartments ? 'Show settings' : 'Advanced settings'"
           :disable="readonly"
           @click="emit('advanced-settings')"
       /></template>
@@ -245,7 +245,7 @@
                       ? "Department data is unavailable."
                       : searchTerm || rankFilter || filters.advancedFilters?.length
                         ? "No departments match your filters."
-                        : "No departments yet."
+                        : "No departments yet"
               }}
             </div></template
           >
@@ -543,6 +543,16 @@ const effectiveRows = computed(() => {
         matchesSchedulingFilters(row, filters.value.advancedFilters ?? []),
     );
 });
+const noMatchingDepartments = computed(
+  () =>
+    !!(
+      props.canView &&
+      !props.loading &&
+      !props.hasError &&
+      (props.searchTerm || props.rankFilter || filters.value.advancedFilters?.length) &&
+      !effectiveRows.value.length
+    ),
+);
 const displayRows = computed(() => {
   if (!ranked.value) return effectiveRows.value;
   const ranks = [
