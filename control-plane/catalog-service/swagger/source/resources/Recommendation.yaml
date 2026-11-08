@@ -1,4 +1,5 @@
 post:
+  x-internal: true
   summary: Recommend GPU allocation for a NIM test/dev workload.
   description: >-
     Returns recommendations without deploying or reserving resources. Evaluates

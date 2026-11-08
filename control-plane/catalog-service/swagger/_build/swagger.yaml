@@ -589,6 +589,7 @@ paths:
           $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/inference/right-sizing/recommendation:
     post:
+      x-internal: true
       summary: Recommend GPU allocation for a NIM test/dev workload.
       description: Returns recommendations without deploying or reserving resources. Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic profiles. GPU model compatibility is not verified. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
       operationId: recommend_inference_resources
