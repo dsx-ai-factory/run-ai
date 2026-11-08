@@ -883,7 +883,7 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		}
 		trustedConvertedFromNative := options.skipAuth && qRecord.TranslatedFromV1 && isConvertedFromNativeWorkload(manifestResourceInfo.Labels)
 		routingAdapter := inferenceRoutingAdapterFor(trustedConvertedFromNative, false, manifestResourceInfo)
-		inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, qRecord.ClusterId, routingAdapter)
+		inferenceDefaults, routingErr := resolveInferenceRoutingDefaultsForUpdate(ctx, inferenceRouting, qRecord.ClusterId, routingAdapter)
 		if routingErr != nil {
 			return nil, SubmissionErrorToApiError(routingErr)
 		}

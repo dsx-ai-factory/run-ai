@@ -610,6 +610,16 @@ var _ = Describe("WorkloadsV2Impl", func() {
 					expectInferenceBlock(optedInBlock)
 				})
 
+				It("updates while an inference operand is not ready", func() {
+					cluster := inferenceIntegrationClusterForTest()
+					(*cluster.Status.Get().Operands)["inference-endpoint-controller"] = clustersapi.ClusterReportedStatusOperandsValue{Ready: false}
+					csclient.WithCluster(randoms.ClusterId, cluster)
+
+					resp := update(optedIn())
+					Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+					expectInferenceBlock(optedInBlock)
+				})
+
 				It("rejects an update that turns load-aware routing off", func() {
 					resp := update(api.WorkloadV2Configuration{})
 					Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())

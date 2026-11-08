@@ -77,6 +77,27 @@ func resolveInferenceRoutingDefaults(
 	clusterId string,
 	adapter inferenceRoutingAdapter,
 ) (*inferenceendpoint.Defaults, *api.SubmissionErrorV2) {
+	return resolveInferenceRoutingDefaultsWith(ctx, routing, clusterId, adapter, inferenceendpoint.ResolveDefaults)
+}
+
+// resolveInferenceRoutingDefaultsForUpdate is for updates of a workload that keeps
+// its opt-in; it does not fail while an operand is not ready.
+func resolveInferenceRoutingDefaultsForUpdate(
+	ctx context.Context,
+	routing *api.WorkloadV2ConfigurationInferenceRouting,
+	clusterId string,
+	adapter inferenceRoutingAdapter,
+) (*inferenceendpoint.Defaults, *api.SubmissionErrorV2) {
+	return resolveInferenceRoutingDefaultsWith(ctx, routing, clusterId, adapter, inferenceendpoint.ResolveDefaultsForUpdate)
+}
+
+func resolveInferenceRoutingDefaultsWith(
+	ctx context.Context,
+	routing *api.WorkloadV2ConfigurationInferenceRouting,
+	clusterId string,
+	adapter inferenceRoutingAdapter,
+	resolve func(*clustersapi.ClusterReportedStatus) (*inferenceendpoint.Defaults, error),
+) (*inferenceendpoint.Defaults, *api.SubmissionErrorV2) {
 	if !inferenceRoutingOptedIn(routing) {
 		return nil, nil
 	}
@@ -88,7 +109,7 @@ func resolveInferenceRoutingDefaults(
 	if clusterErr != nil {
 		return nil, NewSubmissionError(int(clusterErr.Code), fmt.Sprintf("failed to get cluster info: %s", clusterErr.Message), nil)
 	}
-	defaults, err := inferenceendpoint.ResolveDefaults(reportedClusterStatus(cluster.Status.Get()))
+	defaults, err := resolve(reportedClusterStatus(cluster.Status.Get()))
 	if err != nil {
 		return nil, NewConfigurationError(fmt.Sprintf("load-aware routing: %v", err))
 	}
@@ -161,7 +182,7 @@ func resolveNIMServiceInferenceRouting(
 	networking *[]api.NetworkingEndpoint,
 ) (*models.NetworkingConfiguration, *api.SubmissionErrorV2) {
 	configuration := &models.WorkloadConfiguration{Networking: cloneNetworkingConfig(networking)}
-	defaults, err := resolveInferenceRoutingDefaults(ctx, routing, clusterId, inferenceRoutingNIMService)
+	defaults, err := resolveInferenceRoutingDefaultsForUpdate(ctx, routing, clusterId, inferenceRoutingNIMService)
 	if err != nil {
 		return nil, err
 	}

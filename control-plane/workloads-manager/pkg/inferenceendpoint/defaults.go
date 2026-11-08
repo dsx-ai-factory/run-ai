@@ -29,6 +29,19 @@ type Defaults struct {
 // A declared but unavailable or misconfigured integration returns an error;
 // callers must not silently fall back after selecting inference routing.
 func ResolveDefaults(status *clustersapi.ClusterReportedStatus) (*Defaults, error) {
+	return resolveDefaults(status, true)
+}
+
+// ResolveDefaultsForUpdate is ResolveDefaults for a workload that already
+// opted in. It does not require the operands to be ready: an operand that
+// restarts or rolls out must not block ordinary updates of a running workload,
+// and the update is queued for the cluster either way. The integration version and
+// the Gateway settings are still checked, because the update rebuilds the block.
+func ResolveDefaultsForUpdate(status *clustersapi.ClusterReportedStatus) (*Defaults, error) {
+	return resolveDefaults(status, false)
+}
+
+func resolveDefaults(status *clustersapi.ClusterReportedStatus, requireReadyOperands bool) (*Defaults, error) {
 	if status == nil || status.Config.Get() == nil {
 		return nil, nil
 	}
@@ -42,10 +55,12 @@ func ResolveDefaults(status *clustersapi.ClusterReportedStatus) (*Defaults, erro
 	}
 	// Operand status is keyed by the operator's operand name, not the Deployment
 	// name: the agent reports as "agent" while its Deployment is runai-agent.
-	operands := status.GetOperands()
-	for _, name := range []string{"agent", "anyworkload-controller", "inference-endpoint-controller"} {
-		if operand, found := operands[name]; !found || !operand.Ready {
-			return nil, fmt.Errorf("inference endpoint integration requires ready operand %s", name)
+	if requireReadyOperands {
+		operands := status.GetOperands()
+		for _, name := range []string{"agent", "anyworkload-controller", "inference-endpoint-controller"} {
+			if operand, found := operands[name]; !found || !operand.Ready {
+				return nil, fmt.Errorf("inference endpoint integration requires ready operand %s", name)
+			}
 		}
 	}
 	if enabled := config.GatewayAPIEnabled.Get(); enabled == nil || !*enabled {
