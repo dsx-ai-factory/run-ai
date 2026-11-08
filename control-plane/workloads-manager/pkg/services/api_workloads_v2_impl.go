@@ -255,6 +255,11 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 			Configuration:     configuration,
 		}
 		enableNetworkingOwnershipContract(&dryRunRecord.Configuration)
+		// Run the same serving topology checks as submission, before the ownership
+		// binding adds the workload ID to the serving Service selector.
+		if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, dryRunRecord.EffectiveManifest, dryRunRecord.Configuration, name); routingErr != nil {
+			validationErrors.Add(routingErr)
+		}
 		if bindingErr := applyNetworkingOwnershipBinding(ctx, dryRunRecord, workloadType); bindingErr != nil {
 			validationErrors.Add(NewConfigurationError(fmt.Sprintf("failed to apply networking ownership binding: %v", bindingErr)))
 		}
