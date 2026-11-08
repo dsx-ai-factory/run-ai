@@ -11,6 +11,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands/utils"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/templates/resources/configmaps"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/templates/resources/pod_monitors"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/operands/templates/resources/service_monitors"
 	kc "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/kube-client"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
@@ -65,6 +66,7 @@ func Operand(kbClient kc.HybridClient, runaiConfig runv1.RunaiConfig) operands.O
 			configmaps.NewNvidiaDevicePlugin(name, kbClient, runaiConfig),
 			configmaps.NewOAuth2Templates(name, kbClient, runaiConfig),
 			service_monitors.NewServiceMonitor(name, kbClient, runaiConfig),
+			pod_monitors.NewPodMonitor(name, kbClient, runaiConfig),
 		},
 	}
 }

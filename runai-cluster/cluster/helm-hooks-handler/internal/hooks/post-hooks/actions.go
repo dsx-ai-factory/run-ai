@@ -250,6 +250,8 @@ func commitRunaiconfigToCluster(ctx context.Context, k8s client.Client, runaicon
 	updateRbacEscalation(runaiconfig, params.EnableRbacEscalation)
 	updateNMCParams(runaiconfig, params)
 	updateFipsMode(runaiconfig, params.FipsMode)
+	updateConfidentialComputing(runaiconfig, params.ConfidentialComputing)
+	updateConfidentialComputingInitdata(runaiconfig, params.ConfidentialComputingInitdataConfigMap)
 	persistVersion(runaiconfig, params.Version)
 
 	if foundInCluster {
@@ -339,6 +341,36 @@ func updateFipsMode(runaiconfig *runaiv1.RunaiConfig, fipsMode string) {
 	}
 
 	runaiconfig.Spec.Internal.Global.FipsMode = fipsMode
+}
+
+func updateConfidentialComputing(runaiconfig *runaiv1.RunaiConfig, enabled bool) {
+	if runaiconfig == nil {
+		return
+	}
+
+	if runaiconfig.Spec.Internal == nil {
+		runaiconfig.Spec.Internal = &runaiv1_internal.Internal{}
+	}
+	if runaiconfig.Spec.Internal.Global == nil {
+		runaiconfig.Spec.Internal.Global = &runaiv1_internal.Global{}
+	}
+
+	runaiconfig.Spec.Internal.Global.ConfidentialComputing = enabled
+}
+
+func updateConfidentialComputingInitdata(runaiconfig *runaiv1.RunaiConfig, configMapName string) {
+	if runaiconfig == nil {
+		return
+	}
+
+	if runaiconfig.Spec.Internal == nil {
+		runaiconfig.Spec.Internal = &runaiv1_internal.Internal{}
+	}
+	if runaiconfig.Spec.Internal.Global == nil {
+		runaiconfig.Spec.Internal.Global = &runaiv1_internal.Global{}
+	}
+
+	runaiconfig.Spec.Internal.Global.ConfidentialComputingInitdataConfigMap = configMapName
 }
 
 func updateRbacEscalation(runaiconfig *runaiv1.RunaiConfig, enableRbacEscalation bool) {

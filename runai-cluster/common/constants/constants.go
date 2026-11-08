@@ -26,6 +26,8 @@ const (
 	// ClusterTopOwnerUidLabel - The k8s UID of the top owner workload object of the resource
 	ClusterTopOwnerUidLabel = "run.ai/cluster-top-owner-uid"
 
+	ConfidentialComputingLabel = "run.ai/confidential"
+
 	RunaiSchedulerName = "runai-scheduler"
 
 	EnforceSchedulerAnnotationName = "runai/enforce-scheduler-name"
