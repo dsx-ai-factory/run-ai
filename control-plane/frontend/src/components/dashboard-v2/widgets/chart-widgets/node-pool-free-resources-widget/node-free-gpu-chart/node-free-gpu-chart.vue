@@ -61,6 +61,11 @@ export default defineComponent({
   created() {
     this.loadBubbleChart(this.nodePoolFreeGpusTelemetry, this.nodePoolName, this.nodePoolColor);
   },
+  computed: {
+    accessibleDescription(): string {
+      return `Free GPU devices for ${this.nodePoolName || "the selected node pool"}.`;
+    },
+  },
   methods: {
     loadBubbleChart(
       telemetryData: TelemetryResponseValuesInner[],
@@ -204,11 +209,6 @@ export default defineComponent({
         ),
       );
       return node ? parseFloat(node.value) : 0;
-    },
-  },
-  computed: {
-    accessibleDescription(): string {
-      return `Free GPU devices for ${this.nodePoolName || "the selected node pool"}.`;
     },
   },
 });

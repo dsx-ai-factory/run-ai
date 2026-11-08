@@ -31,8 +31,8 @@ vi.mock("vue-echarts", async () => {
   return {
     default: defineComponent({
       name: "VChart",
-      props: { option: { type: Object, default: () => ({}) }, autoresize: Boolean },
       emits: ["click"],
+      props: { option: { type: Object, default: () => ({}) }, autoresize: Boolean },
       setup(props) {
         return () => h("div", { class: "mock-echarts", "data-option": JSON.stringify(props.option) });
       },

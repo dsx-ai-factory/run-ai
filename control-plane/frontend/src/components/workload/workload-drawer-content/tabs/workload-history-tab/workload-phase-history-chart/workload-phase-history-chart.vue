@@ -44,6 +44,11 @@ export default defineComponent({
       chartOptions: null as null | EChartsOption,
     };
   },
+  computed: {
+    accessibleDescription(): string {
+      return `Workload status history over time. ${this.phaseUpdateRecords.length} status records shown.`;
+    },
+  },
   methods: {
     setChartOptions(): void {
       this.chartOptions = {
@@ -56,11 +61,6 @@ export default defineComponent({
         const chartRef = this.$refs["workload-status-history-chart"] as InstanceType<typeof VChart> | undefined;
         chartRef?.resize();
       });
-    },
-  },
-  computed: {
-    accessibleDescription(): string {
-      return `Workload status history over time. ${this.phaseUpdateRecords.length} status records shown.`;
     },
   },
   watch: {
