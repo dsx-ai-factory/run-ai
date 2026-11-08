@@ -1637,6 +1637,12 @@ export interface SamlData {
      * @memberof SamlData
      */
     'validateSignature': boolean;
+    /**
+     * The expiration date of the signing certificate
+     * @type {string}
+     * @memberof SamlData
+     */
+    'certificateExpirationDate'?: string;
 }
 /**
  * 

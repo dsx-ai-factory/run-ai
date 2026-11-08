@@ -24,7 +24,8 @@ func TestValidateSigningCertificate_Base64DER(t *testing.T) {
 	t.Parallel()
 	signed := createCertificate(t, true)
 
-	require.NoError(t, ValidateSigningCertificate(base64.StdEncoding.EncodeToString(signed)))
+	_, err := ValidateSigningCertificate(base64.StdEncoding.EncodeToString(signed))
+	require.NoError(t, err)
 }
 
 func TestValidateSigningCertificate_PEM(t *testing.T) {
@@ -32,7 +33,8 @@ func TestValidateSigningCertificate_PEM(t *testing.T) {
 	signed := createCertificate(t, true)
 	encoded := pem.EncodeToMemory(&pem.Block{Type: CERTIFICATE, Bytes: signed})
 
-	require.NoError(t, ValidateSigningCertificate(string(encoded)))
+	_, err := ValidateSigningCertificate(string(encoded))
+	require.NoError(t, err)
 }
 
 func TestValidateSigningCertificate_CommaSeparatedBase64(t *testing.T) {
@@ -40,8 +42,10 @@ func TestValidateSigningCertificate_CommaSeparatedBase64(t *testing.T) {
 	first := base64.StdEncoding.EncodeToString(createCertificate(t, true))
 	second := base64.StdEncoding.EncodeToString(createCertificate(t, true))
 
-	require.NoError(t, ValidateSigningCertificate(first+","+second))
-	require.NoError(t, ValidateSigningCertificate(first+", "+second))
+	_, err := ValidateSigningCertificate(first + "," + second)
+	require.NoError(t, err)
+	_, err = ValidateSigningCertificate(first + ", " + second)
+	require.NoError(t, err)
 }
 
 func TestValidateSigningCertificate_CommaSeparatedReturnsFirstError(t *testing.T) {
@@ -49,17 +53,18 @@ func TestValidateSigningCertificate_CommaSeparatedReturnsFirstError(t *testing.T
 	valid := base64.StdEncoding.EncodeToString(createCertificate(t, true))
 	unsigned := base64.StdEncoding.EncodeToString(createCertificate(t, false))
 
-	err := ValidateSigningCertificate("not-a-certificate," + unsigned)
+	_, err := ValidateSigningCertificate("not-a-certificate," + unsigned)
 	require.ErrorIs(t, err, ErrUnsignedCertificate)
 	require.ErrorContains(t, err, "invalid")
 
-	require.NoError(t, ValidateSigningCertificate(valid+","+unsigned))
+	_, err = ValidateSigningCertificate(valid + "," + unsigned)
+	require.NoError(t, err)
 }
 
 func TestValidateSigningCertificate_Missing(t *testing.T) {
 	t.Parallel()
 
-	err := ValidateSigningCertificate("  ")
+	_, err := ValidateSigningCertificate("  ")
 	require.ErrorIs(t, err, ErrUnsignedCertificate)
 	require.ErrorContains(t, err, "required")
 }
@@ -67,7 +72,7 @@ func TestValidateSigningCertificate_Missing(t *testing.T) {
 func TestValidateSigningCertificate_NotACertificate(t *testing.T) {
 	t.Parallel()
 
-	err := ValidateSigningCertificate("not-a-certificate")
+	_, err := ValidateSigningCertificate("not-a-certificate")
 	require.ErrorIs(t, err, ErrUnsignedCertificate)
 	require.ErrorContains(t, err, "invalid")
 	var corrupt base64.CorruptInputError
@@ -80,7 +85,8 @@ func TestValidateSigningCertificate_TamperedSignatureStillParses(t *testing.T) {
 	tampered := append([]byte(nil), signed...)
 	tampered[len(tampered)-2] ^= 0xff
 
-	require.NoError(t, ValidateSigningCertificate(base64.StdEncoding.EncodeToString(tampered)))
+	_, err := ValidateSigningCertificate(base64.StdEncoding.EncodeToString(tampered))
+	require.NoError(t, err)
 }
 
 func TestValidateSigningCertificate_SelfSignedOutsideValidityWindow(t *testing.T) {
@@ -97,23 +103,29 @@ func TestValidateSigningCertificate_SelfSignedOutsideValidityWindow(t *testing.T
 		key := newKey(t)
 		der, err := x509.CreateCertificate(rand.Reader, template, template, &key.PublicKey, key)
 		require.NoError(t, err)
-		err = ValidateSigningCertificate(base64.StdEncoding.EncodeToString(der))
+		certs, err := ValidateSigningCertificate(base64.StdEncoding.EncodeToString(der))
 		require.ErrorIs(t, err, ErrUnsignedCertificate)
 		require.ErrorContains(t, err, "validity window")
+		require.Len(t, certs, 1)
+		parsed, parseErr := x509.ParseCertificate(der)
+		require.NoError(t, parseErr)
+		require.True(t, certs[0].ExpirationDate.Equal(parsed.NotAfter))
 	}
 }
 
 func TestValidateSigningCertificate_SignedByDifferentKeyIsAccepted(t *testing.T) {
 	t.Parallel()
 
-	require.NoError(t, ValidateSigningCertificate(base64.StdEncoding.EncodeToString(createCertificate(t, false))))
+	_, err := ValidateSigningCertificate(base64.StdEncoding.EncodeToString(createCertificate(t, false)))
+	require.NoError(t, err)
 }
 
 func TestValidateSigningCertificate_LeafSignedByTrustedPublicCA(t *testing.T) {
 	t.Parallel()
 	leaf, _ := trustedPublicLeaf(t)
 
-	require.NoError(t, ValidateSigningCertificate(base64.StdEncoding.EncodeToString(leaf)))
+	_, err := ValidateSigningCertificate(base64.StdEncoding.EncodeToString(leaf))
+	require.NoError(t, err)
 }
 
 func TestValidateSigningCertificate_IntermediateIncludedWithLeaf(t *testing.T) {
@@ -127,14 +139,16 @@ func TestValidateSigningCertificate_IntermediateIncludedWithLeaf(t *testing.T) {
 	chain := pem.EncodeToMemory(&pem.Block{Type: CERTIFICATE, Bytes: leafDER})
 	chain = append(chain, pem.EncodeToMemory(&pem.Block{Type: CERTIFICATE, Bytes: intermediateDER})...)
 
-	require.NoError(t, ValidateSigningCertificate(string(chain)))
+	_, err = ValidateSigningCertificate(string(chain))
+	require.NoError(t, err)
 }
 
 func TestValidateSigningCertificate_SignedByPrivateCA(t *testing.T) {
 	t.Parallel()
 	leaf, _ := trustedPublicLeaf(t)
 
-	require.NoError(t, ValidateSigningCertificate(base64.StdEncoding.EncodeToString(leaf)))
+	_, err := ValidateSigningCertificate(base64.StdEncoding.EncodeToString(leaf))
+	require.NoError(t, err)
 }
 
 func trustedPublicLeaf(t *testing.T) ([]byte, *x509.CertPool) {

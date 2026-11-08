@@ -20,29 +20,49 @@ const (
 	END_CERTIFICATE   = "END " + CERTIFICATE
 )
 
+type CertificateData struct {
+	SigningAlgorithm string
+	ExpirationDate   time.Time
+}
+
 // ValidateSigningCertificate parses a SAML IdP signing certificate and checks that it is inside its validity window.
 // The certificate's signature and issuer are not checked. A private CA does not publish its certificate in the IdP metadata,
 // so a leaf signed by that CA cannot be distinguished from a certificate whose signature does not verify.
 // PEM values may include further certificates. Any other value may list several certificates separated by commas; each is validated on its own.
-func ValidateSigningCertificate(raw string) error {
+func ValidateSigningCertificate(raw string) ([]CertificateData, error) {
 	trimmed := strings.TrimSpace(raw)
 	if strings.Contains(trimmed, BEGIN_CERTIFICATE) {
-		return validateSigningCertificate(trimmed)
+		parsed, err := validateSigningCertificate(trimmed)
+		if parsed == nil {
+			return nil, err
+		}
+		return []CertificateData{*parsed}, err
 	}
+	certificatesData := []CertificateData{}
 	for _, part := range strings.Split(trimmed, ",") {
-		if err := validateSigningCertificate(part); err != nil {
-			return err
+		parsed, err := validateSigningCertificate(part)
+		if parsed != nil {
+			certificatesData = append(certificatesData, *parsed)
+		}
+		if err != nil {
+			return certificatesData, err
 		}
 	}
-	return nil
+	return certificatesData, nil
 }
 
-func validateSigningCertificate(raw string) error {
+func validateSigningCertificate(raw string) (*CertificateData, error) {
 	certs, err := parseSigningCertificates(raw)
-	if err != nil {
-		return err
+	if err != nil || len(certs) == 0 {
+		return nil, err
 	}
-	return leafCurrentlyValid(certs[0])
+
+	certificateData := &CertificateData{
+		SigningAlgorithm: certs[0].SignatureAlgorithm.String(),
+		ExpirationDate:   certs[0].NotAfter.UTC(),
+	}
+
+	return certificateData, leafCurrentlyValid(certs[0])
 }
 
 func leafCurrentlyValid(leaf *x509.Certificate) error {

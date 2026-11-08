@@ -375,7 +375,10 @@ func TestCreateIdp_SamlDryRun_ReturnsConfigWithoutSaving(t *testing.T) {
 	assert.Equal(t, "saml-idp", res.Alias)
 	assert.Equal(t, "https://idp.example.com", res.SamlData.EntityId)
 	assert.Equal(t, "https://idp.example.com/sso", res.SamlData.SingleSignOnServiceUrl)
-	assert.NoError(t, utils.ValidateSigningCertificate(res.SamlData.SigningCertificate))
+	_, certErr := utils.ValidateSigningCertificate(res.SamlData.SigningCertificate)
+	assert.NoError(t, certErr)
+	assert.False(t, res.SamlData.CertificateExpirationDate.IsZero())
+	assert.True(t, res.SamlData.CertificateExpirationDate.After(time.Now()))
 	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfig")
@@ -395,6 +398,9 @@ func TestCreateIdp_SamlDryRun_ExpiredCertificateRejected(t *testing.T) {
 
 	assert.NotNil(t, err)
 	assert.Equal(t, http.StatusBadRequest, response.Code)
+	body := response.Body.(api.IdpPostResponse)
+	assert.False(t, body.SamlData.CertificateExpirationDate.IsZero())
+	assert.True(t, body.SamlData.CertificateExpirationDate.Before(time.Now()))
 	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
 }
@@ -954,7 +960,10 @@ func TestUpdateIdp_DryRun_ReturnsConfigWithoutSaving(t *testing.T) {
 	assert.Equal(t, "saml-idp", body.Alias)
 	assert.Equal(t, "https://idp.example.com", body.SamlData.EntityId)
 	assert.Equal(t, "https://idp.example.com/sso", body.SamlData.SingleSignOnServiceUrl)
-	assert.NoError(t, utils.ValidateSigningCertificate(body.SamlData.SigningCertificate))
+	_, certErr := utils.ValidateSigningCertificate(body.SamlData.SigningCertificate)
+	assert.NoError(t, certErr)
+	assert.False(t, body.SamlData.CertificateExpirationDate.IsZero())
+	assert.True(t, body.SamlData.CertificateExpirationDate.After(time.Now()))
 	iamMock.MockIdpService.AssertNotCalled(t, "UpdateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
 }
@@ -973,6 +982,8 @@ func TestUpdateIdp_ExpiredCertificateRejected(t *testing.T) {
 	body := res.Body.(api.IdpPostResponse)
 	assert.Equal(t, "saml-idp", body.Alias)
 	assert.NotEmpty(t, body.SamlData.SigningCertificate)
+	assert.False(t, body.SamlData.CertificateExpirationDate.IsZero())
+	assert.True(t, body.SamlData.CertificateExpirationDate.Before(time.Now()))
 	iamMock.MockIdpService.AssertNotCalled(t, "UpdateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
 }
