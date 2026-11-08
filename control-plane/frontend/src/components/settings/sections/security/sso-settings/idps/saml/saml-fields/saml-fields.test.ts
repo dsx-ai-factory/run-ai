@@ -21,11 +21,16 @@ vi.mock("@/services/control-plane/idp.service/idp.service", () => ({
   idpService: { dryRunIdp: vi.fn() },
 }));
 
+const validExpirationDate = "2030-05-17T00:00:00.000Z";
+const expiredExpirationDate = "2020-01-01T00:00:00.000Z";
 const acceptedMetadata = {
   alias: "saml",
-  samlData: { signingCertificate: "fake-cert-content" },
+  samlData: { signingCertificate: "fake-cert-content", certificateExpirationDate: validExpirationDate },
 };
-const rejectedMetadata = { message: "invalid saml signing certificate" };
+const rejectedMetadata = {
+  message: "invalid saml signing certificate",
+  samlData: { signingCertificate: "expired-cert", certificateExpirationDate: expiredExpirationDate },
+};
 
 describe("saml-fields.vue", () => {
   const validSamlSettings: SamlConfigSettings = {
@@ -154,7 +159,7 @@ describe("saml-fields.vue", () => {
     const lastCertificateDetails = (wrapper: ReturnType<typeof factory>["wrapper"]) =>
       wrapper.emitted("certificate-details")?.at(-1)?.[0];
 
-    it("reports the identity-manager error for an uploaded file, and hides it once the file is cleared", async () => {
+    it("reports the expired-file message for an uploaded file, and hides the date once it's cleared", async () => {
       vi.mocked(idpService.dryRunIdp).mockRejectedValue(rejectedMetadata);
 
       const { wrapper } = factory({ isNewIdp: true });
@@ -171,7 +176,8 @@ describe("saml-fields.vue", () => {
       });
       expect(lastCertificateDetails(wrapper)).toMatchObject({
         showExpirationDate: true,
-        expirationError: rejectedMetadata.message,
+        expirationDate: new Date(expiredExpirationDate),
+        expirationError: "Certificate expired. Replace the metadata file above.",
       });
 
       (wrapper.vm as unknown as { clearFile: () => void }).clearFile();
@@ -180,37 +186,32 @@ describe("saml-fields.vue", () => {
       expect(lastCertificateDetails(wrapper)).toMatchObject({ showExpirationDate: false, expirationError: "" });
     });
 
-    it("keeps the parsed identity provider fields when identity-manager rejects the file", async () => {
-      vi.mocked(idpService.dryRunIdp).mockRejectedValue({
-        message: rejectedMetadata.message,
-        samlData: {
-          entityId: "https://idp.example.com",
-          singleSignOnServiceUrl: "https://idp.example.com/sso",
-          signingCertificate: "expired-cert",
+    it("reports the expired-URL message for a stored signing certificate", async () => {
+      const { wrapper } = factory(
+        {
+          isNewIdp: false,
+          hasSigningCertificate: true,
+          certificateExpirationDate: new Date(expiredExpirationDate),
         },
-      });
+        { samlSource: SamlCreationDataMetadataXmlTypeEnum.Url },
+      );
+      await flushPromises();
 
+      expect(idpService.dryRunIdp).not.toHaveBeenCalled();
+      expect(lastCertificateDetails(wrapper)).toMatchObject({
+        showExpirationDate: true,
+        expirationDate: new Date(expiredExpirationDate),
+        expirationError: "Certificate expired. Replace the metadata URL above.",
+      });
+    });
+
+    it("reports the expiration date and no error when identity-manager accepts the file", async () => {
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
 
       expect(lastCertificateDetails(wrapper)).toMatchObject({
         showExpirationDate: true,
-        expirationError: rejectedMetadata.message,
-        idpEntityId: "https://idp.example.com",
-        singleSignOnServiceUrl: "https://idp.example.com/sso",
-      });
-      expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(false);
-      expect((wrapper.vm as unknown as { samlFields: { entityId?: string } }).samlFields.entityId).toBe(
-        "https://idp.example.com",
-      );
-    });
-
-    it("reports no local certificate error when identity-manager accepts the file", async () => {
-      const { wrapper } = factory({ isNewIdp: true });
-      await uploadFile(wrapper);
-
-      expect(lastCertificateDetails(wrapper)).toMatchObject({
-        showExpirationDate: false,
+        expirationDate: new Date(validExpirationDate),
         expirationError: "",
       });
     });
@@ -301,7 +302,7 @@ describe("saml-fields.vue", () => {
       const vm = wrapper.vm as unknown as {
         setFileContent: (n: string, c: string, t?: number) => Promise<void>;
         fileSelectionToken: number;
-        metadataAccepted: boolean;
+        expirationDate: Date | null;
       };
 
       const firstCall = vm.setFileContent("first.xml", fakeMetadataXml, 0);
@@ -311,8 +312,8 @@ describe("saml-fields.vue", () => {
       await firstCall;
       await wrapper.vm.$nextTick();
 
-      expect(vm.metadataAccepted).toBe(false);
-      expect(wrapper.text()).not.toContain(rejectedMetadata.message);
+      expect(vm.expirationDate).toBeNull();
+      expect(wrapper.text()).not.toContain("Certificate expired");
     });
   });
 
@@ -339,23 +340,16 @@ describe("saml-fields.vue", () => {
       );
     });
 
-    it("asks identity-manager to validate a changed metadata URL", async () => {
+    it("accepts a metadata URL without asking identity-manager to validate it", async () => {
       const { wrapper } = factory({ isNewIdp: true });
       (wrapper.vm as unknown as { samlSource: string }).samlSource = SamlCreationDataMetadataXmlTypeEnum.Url;
       await flushPromises();
 
-      await (wrapper.vm as unknown as { updateMetadataXmlUrl: (url: string) => Promise<void> }).updateMetadataXmlUrl(
+      (wrapper.vm as unknown as { updateMetadataXmlUrl: (url: string) => void }).updateMetadataXmlUrl(
         "https://idp.example.com/metadata",
       );
 
-      expect(idpService.dryRunIdp).toHaveBeenCalledWith({
-        type: IdpCreationRequestTypeEnum.Saml,
-        samlData: expect.objectContaining({
-          metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.Url,
-          metadataXmlUrl: "https://idp.example.com/metadata",
-        }),
-        dryRun: true,
-      });
+      expect(idpService.dryRunIdp).not.toHaveBeenCalled();
       expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(true);
     });
 

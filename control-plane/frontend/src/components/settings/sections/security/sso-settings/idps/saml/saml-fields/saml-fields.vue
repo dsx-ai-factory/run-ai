@@ -47,7 +47,7 @@
               ref="metadataFileInput"
               class="col-12"
               @update:model-value="getFileContent"
-              :rules="[isValidFile, metadataStatus]"
+              :rules="[isValidFile]"
               no-error-icon
               :disable="readonly || disabled"
             >
@@ -68,7 +68,7 @@
               :model-value="samlFields.metadataXmlUrl"
               placeholder="Enter URL"
               debounce="300"
-              :rules="[isValidUrl, metadataStatus]"
+              :rules="[isValidUrl]"
               no-error-icon
               @update:model-value="updateMetadataXmlUrl"
               stack-label
@@ -114,6 +114,7 @@ import { HTMLUtil } from "@/utils/html.util/html.util";
 import {
   DEFAULT_METADATA_FILE_NAME,
   DEFAULT_METADATA_FILE_TYPE,
+  idpCommon,
 } from "@/components/settings/sections/security/sso-settings/idps/idp-common/idp-common";
 import { urlHintMessage } from "@/models/setting.model";
 import { SettingReadonlyInput } from "@/components/settings/setting-readonly-input";
@@ -137,6 +138,14 @@ export default defineComponent({
       type: String as PropType<string>,
       required: false,
     },
+    certificateExpirationDate: {
+      type: Date as PropType<Date | null>,
+      required: false,
+    },
+    hasSigningCertificate: {
+      type: Boolean as PropType<boolean>,
+      default: false,
+    },
     isDisplayDownloadButton: {
       type: Boolean as PropType<boolean>,
       default: true,
@@ -151,16 +160,15 @@ export default defineComponent({
   data() {
     return {
       samlFields: {} as SamlCreationData,
+      expirationDate: null as Date | null,
       samlSource: SamlCreationDataMetadataXmlTypeEnum.File as SamlCreationDataMetadataXmlTypeEnum,
       metadataFile: null as File | null,
       originalSamlFields: {} as SamlCreationData,
       fileSelectionToken: 0,
-      metadataAccepted: false,
-      validationError: "",
-      returnedSaml: null as SamlData | null,
     };
   },
   async created() {
+    this.expirationDate = this.storedExpirationDate();
     if (!this.isNewIdp && this.idpResources?.resource) {
       await this.setSamlResources();
     }
@@ -175,12 +183,12 @@ export default defineComponent({
       return SamlCreationDataMetadataXmlTypeEnum;
     },
     certificateDetails(): SamlCertificateDetails {
+      const showExpirationDate = this.isFileSource ? !!this.metadataFile : this.hasSigningCertificate;
+      const validity = this.iValidCertificateDate();
       return {
-        showExpirationDate: !!this.validationError,
-        expirationDate: null,
-        expirationError: this.validationError,
-        idpEntityId: this.returnedSaml?.entityId || "",
-        singleSignOnServiceUrl: this.returnedSaml?.singleSignOnServiceUrl || "",
+        showExpirationDate,
+        expirationDate: this.expirationDate,
+        expirationError: showExpirationDate && typeof validity === "string" ? validity : "",
       };
     },
     isFileSource(): boolean {
@@ -194,6 +202,9 @@ export default defineComponent({
     fileName(): string {
       return this.samlFields.fileName || "";
     },
+    isValidCertificate(): boolean {
+      return idpCommon.iValidCertificateDate(this.expirationDate as Date);
+    },
     securityResourceType(): keyof typeof ResourceType {
       return "SecuritySettings";
     },
@@ -201,11 +212,10 @@ export default defineComponent({
   methods: {
     async validate(): Promise<boolean> {
       if (this.samlSource === SamlCreationDataMetadataXmlTypeEnum.File) {
-        await (this.$refs.metadataFileInput as typeof QFile)?.validate();
-        return this.isValidInput();
+        (this.$refs.metadataFileInput as typeof QFile)?.validate();
+        return !!this.metadataFile && this.isValidCertificate;
       }
-      const urlValid = await (this.$refs.samlUrlInput as QInput).validate();
-      return urlValid !== false && this.isValidInput();
+      return (this.$refs.samlUrlInput as QInput).validate();
     },
     isEmpty(): boolean {
       switch (this.samlSource) {
@@ -239,45 +249,27 @@ export default defineComponent({
     isValidFile(file: string): boolean | string {
       return !!file || "Upload a file";
     },
-    metadataStatus(): boolean | string {
-      if (this.validationError) return this.validationError;
-      if (this.requiresDryRun() && !this.metadataAccepted) return "Checking metadata";
-      return true;
-    },
-    requiresDryRun(): boolean {
-      if (this.isFileSource) return !!this.samlFields.metadataXmlFile;
-      const url = this.samlFields.metadataXmlUrl || "";
-      return !!url && url !== this.originalSamlFields.metadataXmlUrl && this.isValidUrl(url) === true;
-    },
-    async updateMetadataXmlUrl(url: string | null | number): Promise<void> {
-      const token = ++this.fileSelectionToken;
+    updateMetadataXmlUrl(url: string | null | number): void {
       this.samlFields.metadataXmlUrl = url as string;
       this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.Url;
-      this.metadataAccepted = false;
-      this.validationError = "";
-      this.returnedSaml = null;
-      if (!this.samlFields.metadataXmlUrl || this.isValidUrl(this.samlFields.metadataXmlUrl) !== true) {
-        this.onUpdated();
-        return;
-      }
-      if (this.samlFields.metadataXmlUrl === this.originalSamlFields.metadataXmlUrl) {
-        this.onUpdated();
-        return;
-      }
-      await this.validateMetadata(token);
+      this.onUpdated();
     },
     onUpdated(): void {
       this.$emit("updated", this.samlFields, this.isValidInput(), this.hasChanges());
     },
     isValidInput(): boolean {
-      if (this.validationError) return false;
-      if (this.isFileSource) {
-        return !!this.metadataFile && !!this.samlFields.metadataXmlFile && this.metadataAccepted;
-      }
-      const url = this.samlFields.metadataXmlUrl || "";
-      if (this.isValidUrl(url) !== true) return false;
-      if (!url || url === this.originalSamlFields.metadataXmlUrl) return true;
-      return this.metadataAccepted;
+      return this.isFileSource
+        ? !!this.metadataFile && this.isValidCertificate
+        : this.isValidUrl(this.samlFields.metadataXmlUrl || "") === true;
+    },
+    iValidCertificateDate(): boolean | string {
+      if (this.isValidCertificate) return true;
+      return this.isFileSource
+        ? "Certificate expired. Replace the metadata file above."
+        : "Certificate expired. Replace the metadata URL above.";
+    },
+    storedExpirationDate(): Date | null {
+      return this.certificateExpirationDate ? new Date(this.certificateExpirationDate.getTime()) : null;
     },
     clearFile(): void {
       this.fileSelectionToken++;
@@ -292,9 +284,7 @@ export default defineComponent({
       this.metadataFile = file;
       this.samlFields.metadataXmlFile = "";
       this.samlFields.fileName = "";
-      this.metadataAccepted = false;
-      this.validationError = "";
-      this.returnedSaml = null;
+      this.expirationDate = null;
       (this.$refs.metadataFileInput as typeof QFile)?.validate();
       this.onUpdated();
       const reader = new FileReader();
@@ -312,8 +302,6 @@ export default defineComponent({
       this.samlFields.fileName = fileName;
       this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.File;
       this.samlFields.metadataXmlUrl = "";
-      this.metadataAccepted = false;
-      this.validationError = "";
       await this.validateMetadata(token);
     },
     async validateMetadata(token: number): Promise<void> {
@@ -327,57 +315,28 @@ export default defineComponent({
           ? await idpService.dryRunIdp(request, this.idpAlias)
           : await idpService.dryRunIdp(request);
         if (token !== this.fileSelectionToken) return;
-        this.applyReturnedSaml(response.samlData);
-        this.metadataAccepted = true;
-        this.validationError = "";
+        this.applyReturnedExpiration(response.samlData);
       } catch (err: unknown) {
         if (token !== this.fileSelectionToken) return;
-        this.applyReturnedSaml(this.samlDataFromError(err));
-        this.metadataAccepted = false;
-        this.validationError = this.validationMessage(err);
+        this.applyReturnedExpiration(this.samlDataFromError(err));
       }
       this.onUpdated();
-      await this.$nextTick();
-      if (this.isFileSource) {
-        (this.$refs.metadataFileInput as typeof QFile)?.validate();
-      } else {
-        (this.$refs.samlUrlInput as QInput)?.validate();
-      }
     },
-    applyReturnedSaml(samlData?: SamlData): void {
-      this.returnedSaml = samlData ?? null;
-      if (samlData?.entityId) this.samlFields.entityId = samlData.entityId;
+    applyReturnedExpiration(samlData?: SamlData): void {
+      this.expirationDate = samlData?.certificateExpirationDate ? new Date(samlData.certificateExpirationDate) : null;
     },
     samlDataFromError(err: unknown): SamlData | undefined {
       if (typeof err !== "object" || err === null || !("samlData" in err)) return undefined;
       return (err as { samlData?: SamlData }).samlData;
     },
-    validationMessage(err: unknown): string {
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "message" in err &&
-        typeof err.message === "string" &&
-        err.message
-      ) {
-        return err.message;
-      }
-      return "SAML metadata is invalid";
-    },
     clearFileContent(): void {
       this.samlFields.metadataXmlFile = "";
       this.samlFields.fileName = "";
-      this.metadataAccepted = false;
-      this.validationError = "";
-      this.returnedSaml = null;
+      this.expirationDate = this.storedExpirationDate();
       this.onUpdated();
     },
     clearUrlContent(): void {
-      this.fileSelectionToken++;
       this.samlFields.metadataXmlUrl = "";
-      this.metadataAccepted = false;
-      this.validationError = "";
-      this.returnedSaml = null;
       this.onUpdated();
     },
     downloadFile(): void {

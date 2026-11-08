@@ -223,8 +223,6 @@ export interface SamlCertificateDetails {
   showExpirationDate: boolean;
   expirationDate: Date | null;
   expirationError: string;
-  idpEntityId?: string;
-  singleSignOnServiceUrl?: string;
 }
 
 export const autoRedirectSSOSetting: Setting = {

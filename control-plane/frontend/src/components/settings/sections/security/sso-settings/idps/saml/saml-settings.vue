@@ -23,23 +23,19 @@
           :idp-resources="idpResources"
           :is-new-idp="isNewIdp"
           :idp-alias="isNewIdp ? undefined : idp?.alias"
+          :certificate-expiration-date="certificateExpirationDate"
+          :has-signing-certificate="!!samlConfigSettings.signingCertificate"
           @updated="updateSamlFields"
           @certificate-details="onCertificateDetails"
           ref="samlFieldsEl"
         />
       </div>
       <saml-idp-details
-        v-if="
-          editCertificateDetails.expirationError ||
-          editCertificateDetails.idpEntityId ||
-          editCertificateDetails.singleSignOnServiceUrl
-        "
+        v-if="editCertificateDetails.expirationError"
         class="q-mb-lg"
         :expiration-date="editCertificateDetails.expirationDate"
         :show-expiration-date="editCertificateDetails.showExpirationDate"
         :expiration-error="editCertificateDetails.expirationError"
-        :idp-entity-id="editCertificateDetails.idpEntityId"
-        :single-sign-on-service-url="editCertificateDetails.singleSignOnServiceUrl"
       />
       <div class="col-12 q-mb-lg">
         <setting-readable-field label="Entity ID">
@@ -329,10 +325,13 @@ export default defineComponent({
     },
     async refreshCertificateExpiration(): Promise<void> {
       const signingCertificate = this.idp?.samlData?.signingCertificate;
+      const returnedExpirationDate = this.idp?.samlData?.certificateExpirationDate;
       const requestToken = ++this.certificateRequestToken;
-      const expirationDate = signingCertificate
-        ? await idpCommon.getCertificateExpirationDate(signingCertificate)
-        : null;
+      const expirationDate = returnedExpirationDate
+        ? new Date(returnedExpirationDate)
+        : signingCertificate
+          ? await idpCommon.getCertificateExpirationDate(signingCertificate)
+          : null;
       if (requestToken !== this.certificateRequestToken) return;
       this.certificateExpirationDate = expirationDate;
       this.$emit("certificate-status", {
@@ -346,6 +345,9 @@ export default defineComponent({
       this.$emit("edit-mode-changed", newValue);
     },
     "idp.samlData.signingCertificate"(): void {
+      this.refreshCertificateExpiration();
+    },
+    "idp.samlData.certificateExpirationDate"(): void {
       this.refreshCertificateExpiration();
     },
   },

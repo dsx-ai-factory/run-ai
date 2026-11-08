@@ -22,7 +22,9 @@ const metadataXml =
   '<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:X509Data><ds:X509Certificate>fake-cert</ds:X509Certificate>' +
   "</ds:X509Data></ds:KeyInfo></md:KeyDescriptor></md:IDPSSODescriptor></md:EntityDescriptor>";
 
-const REJECTED_MESSAGE = "invalid saml signing certificate";
+const EXPIRED_MESSAGE = "Certificate expired. Replace the metadata file above.";
+const validExpirationDate = "2030-05-17T00:00:00.000Z";
+const expiredExpirationDate = "2020-01-01T00:00:00.000Z";
 
 describe("saml-metadata.vue (onboarding)", () => {
   // Onboarding renders every step inside one q-form and validates it when moving to the next step.
@@ -52,7 +54,7 @@ describe("saml-metadata.vue (onboarding)", () => {
   beforeEach(() => {
     vi.mocked(idpService.dryRunIdp).mockResolvedValue({
       alias: "saml",
-      samlData: { signingCertificate: "fake-cert" },
+      samlData: { signingCertificate: "fake-cert", certificateExpirationDate: validExpirationDate },
     });
   });
 
@@ -60,21 +62,26 @@ describe("saml-metadata.vue (onboarding)", () => {
     vi.restoreAllMocks();
   });
 
-  it("shows the identity-manager error and blocks the form when metadata is rejected", async () => {
-    vi.mocked(idpService.dryRunIdp).mockRejectedValue({ message: REJECTED_MESSAGE });
+  it("shows the certificate error and blocks the form when the uploaded certificate is expired", async () => {
+    vi.mocked(idpService.dryRunIdp).mockRejectedValue({
+      message: "invalid saml signing certificate",
+      samlData: { certificateExpirationDate: expiredExpirationDate },
+    });
     const wrapper = mountInForm();
     await uploadMetadataFile(wrapper);
 
-    expect(wrapper.text()).toContain(REJECTED_MESSAGE);
+    expect(wrapper.text()).toContain(EXPIRED_MESSAGE);
+    expect(wrapper.text()).toContain("Certificate expiration date");
     expect(await validateForm(wrapper)).toBe(false);
     wrapper.unmount();
   });
 
-  it("accepts the form when identity-manager accepts the metadata", async () => {
+  it("shows the expiration date and accepts the form when identity-manager accepts the metadata", async () => {
     const wrapper = mountInForm();
     await uploadMetadataFile(wrapper);
 
-    expect(wrapper.text()).not.toContain(REJECTED_MESSAGE);
+    expect(wrapper.text()).toContain("Certificate expiration date");
+    expect(wrapper.text()).not.toContain("Certificate expired");
     expect(await validateForm(wrapper)).toBe(true);
     wrapper.unmount();
   });
