@@ -20,6 +20,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/mnnvlconv"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/ownership"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/restart"
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/snapshotrestore"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/networking"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/personalcreds"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/plugins/restartrules"
@@ -73,13 +74,14 @@ func run() error {
 		)
 	}
 
-	// The operator has already decided this: Snapshot is installed and healthy
-	// in the cluster. Until then nothing is registered, so a cluster without
-	// Snapshot behaves exactly as it does today.
+	// Set by the operator from Snapshot's CRDs being present — the same fact that
+	// gates the webhook configuration, so the configuration and the path it
+	// routes to appear and disappear together.
 	if cfg.SnapshotEnabled {
 		log.Info().
 			Str("agentNodeSelector", cfg.SnapshotAgentNodeSelector).
 			Msg("snapshot integration enabled")
+		options = append(options, app.WithManagerSetup(snapshotrestore.NewSetup()))
 	} else {
 		log.Debug().Msg("snapshot integration inactive")
 	}
