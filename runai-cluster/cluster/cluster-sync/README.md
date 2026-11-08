@@ -120,13 +120,15 @@ The operator deploys `gpu-pci-inventory` on Linux GPU nodes when cluster-sync is
 
 Every minute, the collector associates NVIDIA driver GPU UUIDs, bus addresses and models from `/proc/driver/nvidia/gpus` with the vendor/device IDs in PCI sysfs. Those host directories are mounted read-only. The process runs as non-root, requests no GPUs and needs only node `get`/`patch` permissions. IDs use lowercase `device:vendor`, for example `2237:10de`. They are never inferred from GPU names. GPU count and memory retain their existing NVIDIA-label source; the observation records that label snapshot and rejects mismatches or mixed hardware.
 
+On OpenShift, a dedicated SCC permits hostPath volumes and is bound only to the collector service account. The operator-owned DaemonSet defines the exact read-only host paths; the SCC does not restrict individual host paths. The service account cannot create pods.
+
 The versioned `run.ai/gpu-pci-devices` node annotation binds the observation to the node UID, kernel boot ID and collection time. Failed collection removes the previous observation with a resource-version guard. Missing driver files, unsupported devices, CPU-only nodes and inconsistent observations leave identity unknown; they do not block normal cluster reporting.
 
 Node updates and full sync forward optional `gpuInfo.pciDeviceId` and `gpuInfo.pciDeviceIdObservedAt`. A collector heartbeat updates the observation time even when the ID is unchanged. Evidence expires after five minutes; timestamps more than one minute ahead are rejected. A periodic scan queues expired nodes through the normal retry path even without node events. Cluster-service also enforces expiry on reads, so a stopped cluster-sync cannot keep an old identity visible indefinitely.
 
 Consumers read `pciDeviceId` from existing node or node-pool GPU inventory. Node-pool aggregation keeps fresh identities separate for the same model and memory; unknown identities remain unlabelled and expired identities join the unknown group. Recommendation logic and model metadata are not part of this producer. Consumers must tolerate an omitted ID and must not treat inventory capacity as free or allocatable capacity.
 
-For diagnostics, inspect the `gpu-pci-inventory` pods/logs and the node annotation, then compare the node inventory's ID and observation time. Both the collector and cluster-sync must be upgraded alongside the cluster-service schema/migration; older reporters continue to work with unknown identity. Disabling cluster-sync removes its collector through the operator; any final observation expires without requiring a cleanup command.
+For diagnostics, inspect the `gpu-pci-inventory` pods/logs and the node annotation, then compare the node inventory's ID and observation time. Upgrade the control plane, including the cluster-service schema/migration, before upgrading cluster components (the collector and cluster-sync). Older reporters continue to work with unknown identity. Disabling cluster-sync removes its collector through the operator; any final observation expires without requiring a cleanup command.
 
 ## Configuration
 

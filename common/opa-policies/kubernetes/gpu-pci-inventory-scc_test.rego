@@ -18,10 +18,6 @@ gpu_pci_inventory_scc_fixture = {
     "readOnlyRootFilesystem": true,
     "allowedCapabilities": [],
     "requiredDropCapabilities": ["ALL"],
-    "allowedHostPaths": [
-        {"pathPrefix": "/sys", "readOnly": true},
-        {"pathPrefix": "/proc/driver/nvidia/gpus", "readOnly": true},
-    ],
     "volumes": ["hostPath", "projected", "secret", "configMap", "downwardAPI"],
     "runAsUser": {"type": "MustRunAs", "uid": 65532},
     "seLinuxContext": {"type": "RunAsAny"},
@@ -52,16 +48,8 @@ test_gpu_pci_inventory_exception_rejects_unsafe_changes {
         {"allowedCapabilities": ["SYS_ADMIN"]},
         {"defaultAddCapabilities": ["SYS_ADMIN"]},
         {"requiredDropCapabilities": []},
-        {"allowedHostPaths": [{"pathPrefix": "/", "readOnly": true}]},
-        {"allowedHostPaths": [
-            {"pathPrefix": "/sys", "readOnly": false},
-            {"pathPrefix": "/proc/driver/nvidia/gpus", "readOnly": true},
-        ]},
-        {"allowedHostPaths": [
-            {"pathPrefix": "/sys", "readOnly": true},
-            {"pathPrefix": "/proc/driver/nvidia/gpus", "readOnly": true},
-            {"pathPrefix": "/etc", "readOnly": true},
-        ]},
+        {"users": ["system:serviceaccount:runai:other-reader"]},
+        {"groups": ["system:authenticated"]},
         {"runAsUser": {"type": "RunAsAny"}},
         {"runAsUser": {"type": "MustRunAs", "uid": 0}},
         {"seLinuxContext": {"type": "RunAsAny", "seLinuxOptions": {"type": "spc_t"}}},
@@ -80,7 +68,7 @@ test_gpu_pci_inventory_exception_requires_explicit_security_fields {
     fields := ["allowHostNetwork", "allowHostPID", "allowHostIPC", "allowHostPorts",
         "allowPrivilegedContainer", "allowPrivilegeEscalation", "defaultAllowPrivilegeEscalation",
         "readOnlyRootFilesystem", "allowedCapabilities", "requiredDropCapabilities",
-        "allowedHostPaths", "runAsUser", "seLinuxContext", "volumes", "seccompProfiles"]
+        "runAsUser", "seLinuxContext", "volumes", "seccompProfiles"]
     accepted := [field |
         field := fields[_]
         modified := object.remove(gpu_pci_inventory_scc_fixture, [field])

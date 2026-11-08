@@ -80,8 +80,8 @@ exception[rules] {
     rules := ["allowed_scc"]
 }
 
-# This hardware reader needs hostPath access while retaining the collector's
-# complete restrictions; its name alone must never exempt an expanded SCC.
+# This hardware reader needs hostPath access with fixed UID, privilege, capability
+# and host-namespace restrictions; its name alone must never exempt an expanded SCC.
 exception[rules] {
     input.apiVersion == "security.openshift.io/v1"
     input.kind == "SecurityContextConstraints"
@@ -101,10 +101,8 @@ exception[rules] {
     input.runAsUser == {"type": "MustRunAs", "uid": 65532}
     input.seLinuxContext == {"type": "RunAsAny"}
     input.seccompProfiles == ["runtime/default"]
-    input.allowedHostPaths == [
-        {"pathPrefix": "/sys", "readOnly": true},
-        {"pathPrefix": "/proc/driver/nvidia/gpus", "readOnly": true},
-    ]
+    object.get(input, "users", []) == []
+    object.get(input, "groups", []) == []
     input.volumes == ["hostPath", "projected", "secret", "configMap", "downwardAPI"]
     rules := ["allowed_scc"]
 }

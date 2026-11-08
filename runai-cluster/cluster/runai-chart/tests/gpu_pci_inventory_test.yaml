@@ -36,7 +36,7 @@ tests:
     asserts:
       - hasDocuments:
           count: 0
-  - it: limits OpenShift host access to the two read-only directories
+  - it: permits hostPath with fixed nonroot security restrictions
     templates:
       - templates/ocp/gpu-pci-inventory-scc.yaml
     set:
@@ -44,12 +44,15 @@ tests:
     documentIndex: 0
     asserts:
       - equal:
-          path: allowedHostPaths
-          value:
-            - pathPrefix: /sys
-              readOnly: true
-            - pathPrefix: /proc/driver/nvidia/gpus
-              readOnly: true
+          path: allowHostDirVolumePlugin
+          value: true
+      - equal:
+          path: volumes
+          value: [hostPath, projected, secret, configMap, downwardAPI]
+      - notExists:
+          path: users
+      - notExists:
+          path: groups
       - equal:
           path: runAsUser
           value:

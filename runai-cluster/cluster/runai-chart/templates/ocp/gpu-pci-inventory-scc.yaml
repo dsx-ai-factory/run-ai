@@ -18,11 +18,6 @@ allowHostPorts: false
 readOnlyRootFilesystem: true
 requiredDropCapabilities: [ALL]
 allowedCapabilities: []
-allowedHostPaths:
-  - pathPrefix: /sys
-    readOnly: true
-  - pathPrefix: /proc/driver/nvidia/gpus
-    readOnly: true
 volumes:
   - hostPath
   - projected
