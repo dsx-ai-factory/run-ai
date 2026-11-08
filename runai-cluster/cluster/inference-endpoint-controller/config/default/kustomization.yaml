@@ -1,0 +1,30 @@
+# Adds namespace to all resources.
+namespace: inference-endpoint-controller-system
+
+# Value of this field is prepended to the
+# names of all resources, e.g. a deployment named
+# "wordpress" becomes "alices-wordpress".
+# Note that it should also match with the prefix (text before '-') of the namespace
+# field above.
+# Short prefix: the full project name pushes the metrics Service name past the 63-character limit.
+namePrefix: inc-
+
+resources:
+- ../crd
+- ../rbac
+- ../manager
+# [METRICS] Expose the controller manager metrics service.
+- metrics_service.yaml
+
+patches:
+# [METRICS] The following patch will enable the metrics endpoint using HTTPS and the port :8443.
+# More info: https://book.kubebuilder.io/reference/metrics
+- path: manager_metrics_patch.yaml
+  target:
+    kind: Deployment
+
+# Webhooks, cert-manager, Prometheus ServiceMonitor and NetworkPolicy are not used in v0.
+# Re-scaffold them with `kubebuilder create webhook` / `kubebuilder edit` when needed.
+# Do not remove the following scaffold markers; the CLI injects config at them.
+# +kubebuilder:scaffold:crdkustomizecainjectionns
+# +kubebuilder:scaffold:crdkustomizecainjectionname
