@@ -873,13 +873,11 @@ func applyCurrentNodepoolFilter(query orm.DB, nodepoolName string) orm.DB {
 	return query.Where("? = ANY(current_nodepools)", nodepoolName)
 }
 
-// Must mirror the negated operators in queryapi's operatorsInfoMap.
 var negatedNodepoolOperators = map[string]string{
 	"is distinct from": "=",
 	"NOT ILIKE":        "ILIKE",
 }
 
-// The nodepool mapping's current_nodepools[1] serves sorting only; filtering must match any of the workload's pools.
 func workloadFilters(filters []queryapi.Filter) orm.Enricher {
 	return func(db orm.DB) orm.DB {
 		var otherFilters []queryapi.Filter
