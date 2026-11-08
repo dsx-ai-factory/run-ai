@@ -1,3 +1,7 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { computed, ref } from "vue";
 import { createSchedulingDraft, type SchedulingMode, type SchedulingSnapshot } from "./node-pool-scheduling.model";
 

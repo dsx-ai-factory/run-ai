@@ -1,3 +1,7 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
 import { describe, expect, it } from "vitest";
 import { createSchedulingDraft, toSchedulingCapabilities } from "./node-pool-scheduling.model";
 import { useNodePoolSchedulingDraft } from "./use-node-pool-scheduling-draft.composable";
