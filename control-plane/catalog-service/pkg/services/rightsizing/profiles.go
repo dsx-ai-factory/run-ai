@@ -10,49 +10,59 @@ import (
 )
 
 type profileCandidate struct {
-	profile      *ngcmetadata.Profile
-	count        int64
-	minimumBytes int64
+	profile                     *ngcmetadata.Profile
+	gpuCount                    int64
+	minimumMemoryPerDeviceBytes int64
 }
 
-// selectProfile uses GPU-agnostic profiles while GPU identity matching is
-// deferred. Each candidate must fit memory on every device and its published
-// TP × PP count on one node; neither ranking nor allocation relaxes these checks.
-func selectProfile(profiles []ngcmetadata.Profile, capacity, nodeCount int64) *profileCandidate {
-	var chosen *profileCandidate
+// selectFittingProfile ranks only profiles whose published memory and TP × PP
+// requirements fit this hardware. Allocation never relaxes those requirements.
+func selectFittingProfile(profiles []ngcmetadata.Profile, capacityBytes, maxDevicesPerNode int64) *profileCandidate {
+	var selected *profileCandidate
 	for i := range profiles {
-		profile := &profiles[i]
-		// An explicit hardware target needs identity validation, which is outside
-		// this API version. Tested-device lists are informational, not allowlists.
-		if profile.GPU != "" || profile.GPUDevice != "" {
+		candidate := fittingCandidate(&profiles[i], capacityBytes, maxDevicesPerNode)
+		if candidate == nil {
 			continue
 		}
-		count, valid := profileDeviceCount(profile)
-		if !valid || count > nodeCount || profile.ID == "" || profile.MinimumVRAMPerDeviceGB == nil {
-			continue
-		}
-		minimum := *profile.MinimumVRAMPerDeviceGB
-		if math.IsNaN(minimum) || math.IsInf(minimum, 0) || minimum <= 0 || minimum >= float64(math.MaxInt64)/1e9 {
-			continue
-		}
-		// NGC minima are per device in decimal GB. Never divide a TP1 floor
-		// across GPUs or infer another parallel layout from a memory deficit.
-		minimumBytes := int64(math.Ceil(minimum * 1e9))
-		if minimumBytes > capacity {
-			continue
-		}
-		candidate := &profileCandidate{
-			profile:      profile,
-			count:        count,
-			minimumBytes: minimumBytes,
-		}
-		if chosen == nil || candidate.precedes(chosen) {
-			chosen = candidate
+		if selected == nil || candidate.preferredTo(selected) {
+			selected = candidate
 		}
 	}
-	return chosen
+	return selected
 }
 
+// fittingCandidate establishes eligibility and per-device/single-node fit.
+// Nil means the profile lacks usable evidence or does not fit this hardware.
+func fittingCandidate(profile *ngcmetadata.Profile, capacityBytes, maxDevicesPerNode int64) *profileCandidate {
+	// An explicit hardware target needs identity validation, which is outside
+	// this API version. Tested-device lists are informational, not allowlists.
+	if profile.GPU != "" || profile.GPUDevice != "" {
+		return nil
+	}
+	gpuCount, valid := profileDeviceCount(profile)
+	if !valid || gpuCount > maxDevicesPerNode || profile.ID == "" || profile.MinimumVRAMPerDeviceGB == nil {
+		return nil
+	}
+	minimum := *profile.MinimumVRAMPerDeviceGB
+	if math.IsNaN(minimum) || math.IsInf(minimum, 0) || minimum <= 0 || minimum >= float64(math.MaxInt64)/1e9 {
+		return nil
+	}
+	// NGC minima are per device in decimal GB. Never divide a TP1 floor
+	// across GPUs or infer another parallel layout from a memory deficit.
+	minimumBytes := int64(math.Ceil(minimum * 1e9))
+	if minimumBytes > capacityBytes {
+		return nil
+	}
+	return &profileCandidate{
+		profile:                     profile,
+		gpuCount:                    gpuCount,
+		minimumMemoryPerDeviceBytes: minimumBytes,
+	}
+}
+
+// TP and PP are the published tensor- and pipeline-parallel sizes. Their
+// product is the GPU count for this exact profile; missing sizes cannot
+// establish a layout and must not default to one.
 func profileDeviceCount(profile *ngcmetadata.Profile) (int64, bool) {
 	if profile.TensorParallelSize == nil || profile.PipelineParallelSize == nil {
 		return 0, false
@@ -68,12 +78,12 @@ func profileDeviceCount(profile *ngcmetadata.Profile) (int64, bool) {
 	return count, true
 }
 
-func (c *profileCandidate) precedes(other *profileCandidate) bool {
+func (c *profileCandidate) preferredTo(other *profileCandidate) bool {
 	// Prefer fewer GPUs, including a fitting single-GPU profile, then a lower
 	// per-device minimum and stable profile ID. A smaller minimum can require
 	// more GPUs, so memory alone must not decide the parallel layout.
-	if c.count != other.count {
-		return c.count < other.count
+	if c.gpuCount != other.gpuCount {
+		return c.gpuCount < other.gpuCount
 	}
 	if *c.profile.MinimumVRAMPerDeviceGB != *other.profile.MinimumVRAMPerDeviceGB {
 		return *c.profile.MinimumVRAMPerDeviceGB < *other.profile.MinimumVRAMPerDeviceGB

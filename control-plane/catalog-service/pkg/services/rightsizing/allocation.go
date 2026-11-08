@@ -15,9 +15,10 @@ type Allocation struct {
 	WholeGPU             bool
 }
 
-// SingleGPUAllocation applies the cutoff to an already resolved, compatible
-// single-device requirement. Both inputs must use the same byte units. Hardware
-// compatibility, usable capacity, and parallel-profile selection are separate concerns.
+// SingleGPUAllocation applies the cutoff to a resolved single-device memory
+// requirement. Both inputs must use the same byte units. Profile eligibility
+// and parallel-profile selection are separate concerns.
+// The cutoff decides whether to share the GPU; the minimum is used as published.
 func SingleGPUAllocation(minimumBytes, capacityBytes, cutoffPercent int64) (Allocation, *api.Error) {
 	if cutoffPercent < 1 || cutoffPercent > 100 {
 		return Allocation{}, api.NewValidationError("whole-GPU sharing cutoff must be between 1 and 100 percent")
@@ -41,4 +42,31 @@ func SingleGPUAllocation(minimumBytes, capacityBytes, cutoffPercent int64) (Allo
 		allocation.AllocatedMemoryBytes = capacityBytes
 	}
 	return allocation, nil
+}
+
+// allocateProfile constructs the allocation for a profile that already fits.
+// Parallel profiles use their published GPU count and full device capacity.
+// Only single-GPU profiles use the sharing cutoff; it changes allocation size,
+// never the published minimum or the selected profile.
+func allocateProfile(selected *profileCandidate, capacityBytes, cutoffPercent int64) (*api.Recommendation, *api.Error) {
+	if selected.gpuCount > 1 {
+		return &api.Recommendation{
+			AllocationType:          api.RECOMMENDATIONALLOCATIONTYPE_GPU_COUNT,
+			GpuCount:                selected.gpuCount,
+			GpuMemoryPerDeviceBytes: capacityBytes,
+		}, nil
+	}
+	allocation, err := SingleGPUAllocation(selected.minimumMemoryPerDeviceBytes, capacityBytes, cutoffPercent)
+	if err != nil {
+		return nil, err
+	}
+	allocationType := api.RECOMMENDATIONALLOCATIONTYPE_GPU_MEMORY
+	if allocation.WholeGPU {
+		allocationType = api.RECOMMENDATIONALLOCATIONTYPE_GPU_COUNT
+	}
+	return &api.Recommendation{
+		AllocationType:          allocationType,
+		GpuCount:                1,
+		GpuMemoryPerDeviceBytes: allocation.AllocatedMemoryBytes,
+	}, nil
 }
