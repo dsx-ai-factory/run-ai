@@ -103,7 +103,7 @@ Dependencies
 | `github.com/moby/term` | v0.5.2 | Apache-2.0 | https://github.com/moby/term/blob/v0.5.2/LICENSE |
 | `github.com/munnerz/goautoneg` | v0.0.0-20191010083416-a7dc8b61c822 | BSD-3-Clause | https://github.com/munnerz/goautoneg/blob/a7dc8b61c822/LICENSE |
 | `github.com/nats-io/nats.go` | v1.55.0 | Apache-2.0 | https://github.com/nats-io/nats.go/blob/v1.55.0/LICENSE |
-| `github.com/nats-io/nkeys` | v0.4.16 | Apache-2.0 | https://github.com/nats-io/nkeys/blob/v0.4.16/LICENSE |
+| `github.com/nats-io/nkeys` | v0.4.17 | Apache-2.0 | https://github.com/nats-io/nkeys/blob/v0.4.17/LICENSE |
 | `github.com/nats-io/nuid` | v1.0.1 | Apache-2.0 | https://github.com/nats-io/nuid/blob/v1.0.1/LICENSE |
 | `github.com/oklog/ulid` | v1.3.1 | Apache-2.0 | https://github.com/oklog/ulid/blob/v1.3.1/LICENSE |
 | `github.com/opencontainers/go-digest` | v1.0.0 | Apache-2.0 | https://github.com/opencontainers/go-digest/blob/v1.0.0/LICENSE |
@@ -133,15 +133,15 @@ Dependencies
 | `github.com/sony/gobreaker` | v1.0.0 | MIT | https://github.com/sony/gobreaker/blob/v1.0.0/LICENSE |
 | `github.com/spf13/afero` | v1.15.0 | Apache-2.0 | https://github.com/spf13/afero/blob/v1.15.0/LICENSE.txt |
 | `github.com/spf13/cast` | v1.10.0 | MIT | https://github.com/spf13/cast/blob/v1.10.0/LICENSE |
-| `github.com/spf13/pflag` | v1.0.10 | BSD-3-Clause | https://github.com/spf13/pflag/blob/v1.0.10/LICENSE |
+| `github.com/spf13/pflag` | v1.1.0 | BSD-3-Clause | https://github.com/spf13/pflag/blob/v1.1.0/LICENSE |
 | `github.com/spf13/viper` | v1.21.0 | MIT | https://github.com/spf13/viper/blob/v1.21.0/LICENSE |
 | `github.com/stretchr/objx` | v0.5.3 | MIT | https://github.com/stretchr/objx/blob/v0.5.3/LICENSE |
 | `github.com/stretchr/testify` | v1.12.1 | MIT | https://github.com/stretchr/testify/blob/v1.12.1/LICENSE |
 | `github.com/stretchr/testify/internal/difflib` | v1.12.1 | BSD-3-Clause | https://github.com/stretchr/testify/blob/v1.12.1/internal/difflib/LICENSE |
 | `github.com/stretchr/testify/internal/spew` | v1.12.1 | ISC | https://github.com/stretchr/testify/blob/v1.12.1/internal/spew/LICENSE |
 | `github.com/subosito/gotenv` | v1.6.0 | MIT | https://github.com/subosito/gotenv/blob/v1.6.0/LICENSE |
-| `github.com/testcontainers/testcontainers-go` | v0.44.0 | MIT | https://github.com/testcontainers/testcontainers-go/blob/v0.44.0/LICENSE |
-| `github.com/testcontainers/testcontainers-go/modules/postgres` | v0.44.0 | MIT | https://github.com/testcontainers/testcontainers-go/blob/modules/postgres/v0.44.0/modules/postgres/LICENSE |
+| `github.com/testcontainers/testcontainers-go` | v0.45.0 | MIT | https://github.com/testcontainers/testcontainers-go/blob/v0.45.0/LICENSE |
+| `github.com/testcontainers/testcontainers-go/modules/postgres` | v0.45.0 | MIT | https://github.com/testcontainers/testcontainers-go/blob/modules/postgres/v0.45.0/modules/postgres/LICENSE |
 | `github.com/tklauser/go-sysconf` | v0.4.0 | BSD-3-Clause | https://github.com/tklauser/go-sysconf/blob/v0.4.0/LICENSE |
 | `github.com/tklauser/numcpus` | v0.12.0 | Apache-2.0 | https://github.com/tklauser/numcpus/blob/v0.12.0/LICENSE |
 | `github.com/vmihailenco/msgpack` | v4.0.4+incompatible | BSD-2-Clause | https://github.com/vmihailenco/msgpack/blob/v4.0.4/LICENSE |
@@ -161,7 +161,7 @@ Dependencies
 | `go.uber.org/atomic` | v1.12.0 | MIT | https://pkg.go.dev/go.uber.org/atomic@v1.12.0?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
 | `golang.org/x/crypto` | v0.58.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.58.0?tab=licenses |
-| `golang.org/x/exp` | v0.0.0-20261014143641-f0251eb4aa3e | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261014143641-f0251eb4aa3e?tab=licenses |
+| `golang.org/x/exp` | v0.0.0-20261106192419-47ce03d25ef0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261106192419-47ce03d25ef0?tab=licenses |
 | `golang.org/x/net` | v0.61.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.61.0?tab=licenses |
 | `golang.org/x/sync/semaphore` | v0.24.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.24.0?tab=licenses |
 | `golang.org/x/sys` | v0.49.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.49.0?tab=licenses |
