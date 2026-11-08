@@ -419,6 +419,13 @@ const filterColumns = computed<ITableColumn[]>(() => [
     filter: {
       type: EColumnFilterType.FreeText,
       maxWidth: "282px",
+      operatorMenuWidth: "208px",
+      operatorLabels: {
+        [EFilterOperator.Contains]: "Contains",
+        [EFilterOperator.DoesNotContain]: "Does not contain",
+        [EFilterOperator.Equals]: "Equals",
+        [EFilterOperator.NotEquals]: "Does not equal",
+      },
       excludeOperators: [EFilterOperator.StartsWith, EFilterOperator.EndsWith],
     },
   },
@@ -498,6 +505,10 @@ const headerTooltips = computed<Record<string, string>>(() => ({
   result:
     "View a visual summary of each department’s resource settings. Turn on Simulate workload demand to see how GPUs would be allocated based on real-time demand.",
 }));
+function rankHeading(rank: string) {
+  const label = entityPriorityMap[rank] ?? rank;
+  return label.charAt(0) + label.slice(1).toLowerCase();
+}
 function order(name: string) {
   if (name === "quota") return "#1";
   if (name === "department") return ranked.value ? (props.draft.mode === "guaranteed" ? "#2" : "#1") : "";
@@ -555,7 +566,7 @@ const displayRows = computed(() => {
         key: `rank-${rank}`,
         group: true,
         rank,
-        name: entityPriorityMap[rank] ?? rank,
+        name: rankHeading(rank),
         count: Math.max(count, rows.length),
       },
       ...(expanded.value.has(rank) ? rows : []),
@@ -626,8 +637,56 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   min-height: 60px;
   height: 60px;
 }
+.scheduling-actions :deep([aid="new-department"]) {
+  height: 38px;
+  min-height: 38px;
+  width: 174px;
+  padding: 0 10px;
+  font-weight: 500;
+  line-height: 20px;
+  letter-spacing: 0;
+}
+.scheduling-actions :deep([aid="new-department"] .q-icon) {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+  margin-right: 10px;
+}
+.scheduling-actions :deep(.runai-general-search .icon-container) {
+  height: 40px;
+  padding: 0 10px;
+  gap: 3px;
+}
+.scheduling-actions :deep(.runai-general-search .icon-container i) {
+  font-size: 20px;
+  line-height: 20px;
+}
+.scheduling-actions :deep(.runai-general-search .icon-container span) {
+  font-size: 10px;
+  line-height: 14px;
+}
+.scheduling-actions :deep(.runai-general-search:not(.focus):not(.filled)) {
+  width: 59px;
+}
 .scheduling-actions :deep(.main-actions) {
   height: 40px;
+}
+.scheduling-actions :deep(.right-actions-container > .q-btn) {
+  height: 40px;
+  min-height: 40px;
+  padding: 0 10px;
+}
+.scheduling-actions :deep(.right-actions-container > .q-btn .q-btn__content) {
+  gap: 3px;
+}
+.scheduling-actions :deep(.right-actions-container > .q-btn .q-icon) {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+.scheduling-actions :deep(.right-actions-container > .q-btn .q-btn__content > span.block) {
+  font-size: 10px;
+  line-height: 14px;
 }
 .scheduling-actions :deep(.right-actions-container) {
   flex-shrink: 0;
@@ -647,7 +706,10 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   width: 100%;
   max-width: 100%;
 }
-.settings-open .scheduling-table :deep(.column-department) {
+.settings-open .scheduling-table :deep(th.column-selection) {
+  border-right: 1px solid var(--border-subtle);
+}
+.scheduling-table :deep(.column-department) {
   width: 150px;
 }
 .settings-open .rank-row .rank-label-quota {
@@ -669,6 +731,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .scheduling-table :deep(td) {
   height: 60px;
+  font-size: 14px;
+  line-height: 19.5px;
   padding: 4px 10px;
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -724,6 +788,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .rank-header td {
   height: 60px !important;
+  font-size: 12px;
+  line-height: 16.8px;
 }
 .rank-row {
   display: flex;
@@ -738,7 +804,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   margin-left: 150px;
 }
 .scheduling-table :deep(.q-checkbox__inner) {
-  font-size: 32px;
+  font-size: 40px;
 }
 .scheduling-table :deep(.cell-trigger) {
   height: 50px;

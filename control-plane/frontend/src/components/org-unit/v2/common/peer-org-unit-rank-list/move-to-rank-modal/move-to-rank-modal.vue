@@ -33,7 +33,7 @@
     </template>
 
     <template #footer>
-      <q-btn label="Cancel" color="grey-7" flat @click="$emit('close')" />
+      <q-btn label="Cancel" :color="compact ? 'primary' : 'grey-7'" flat @click="$emit('close')" />
       <q-btn
         :label="`Move ${selectedCount} ${entityType}${selectedCount !== 1 ? 's' : ''}`"
         color="primary"
@@ -71,6 +71,7 @@ const emit = defineEmits<{
 }>();
 
 const selectedRank = ref<string | null>(null);
+const unsupportedNoOverQuota = "__unsupported_no_over_quota__";
 
 const rankOptions = computed<ISelectOption[]>(() => {
   const options = props.descending ? [...ENTITY_PRIORITY_SELECT_OPTIONS].reverse() : ENTITY_PRIORITY_SELECT_OPTIONS;
@@ -80,7 +81,7 @@ const rankOptions = computed<ISelectOption[]>(() => {
       ? [
           {
             label: "No over quota",
-            value: null,
+            value: unsupportedNoOverQuota,
             disable: true,
             disabledTooltip: "This rank is not supported by the current department API.",
           },
@@ -90,7 +91,11 @@ const rankOptions = computed<ISelectOption[]>(() => {
 });
 
 const handleMove = () => {
-  if (selectedRank.value) {
+  if (
+    selectedRank.value &&
+    selectedRank.value !== props.currentRank &&
+    ENTITY_PRIORITY_SELECT_OPTIONS.some((option) => option.value === selectedRank.value)
+  ) {
     emit("move", selectedRank.value);
   }
 };

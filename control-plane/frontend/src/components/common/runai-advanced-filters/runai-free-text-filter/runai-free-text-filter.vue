@@ -20,6 +20,8 @@
             outlined
             v-model="selectedOption"
             :options="options"
+            :menu-shrink="!!filter.operatorMenuWidth"
+            :popup-content-style="filter.operatorMenuWidth ? { width: filter.operatorMenuWidth } : undefined"
             :disable="isOperatorSelectDisabled"
             class="q-mb-lg"
           />
@@ -75,12 +77,9 @@ export default defineComponent({
   },
   computed: {
     options(): IFreeTextFilterSelectOption[] {
-      if (!this.filter.excludeOperators) {
-        return freeTextFilterSelectOptions;
-      }
-      return freeTextFilterSelectOptions.filter((option: IFreeTextFilterSelectOption) => {
-        return !this.filter?.excludeOperators?.includes(option.value);
-      });
+      return freeTextFilterSelectOptions
+        .filter((option) => !this.filter.excludeOperators?.includes(option.value))
+        .map((option) => ({ ...option, label: this.filter.operatorLabels?.[option.value] ?? option.label }));
     },
     isOperatorSelectDisabled(): boolean {
       return this.options.length <= 1;

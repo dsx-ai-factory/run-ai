@@ -9,7 +9,7 @@ import { EColumnFilterType, EFilterOperator, EFilterOperatorLabel, filterOperato
 import type { VueWrapper } from "@vue/test-utils";
 import { mount } from "@vue/test-utils";
 import RunaiFreeTextFilter from "@/components/common/runai-advanced-filters/runai-free-text-filter/runai-free-text-filter.vue";
-import { Quasar } from "quasar";
+import { QSelect, Quasar } from "quasar";
 import { unitTestUtil } from "@/utils/unit-test.util";
 
 describe("RunaiFreeTextFilter", () => {
@@ -30,6 +30,21 @@ describe("RunaiFreeTextFilter", () => {
     wrapper.unmount();
   });
 
+  test("supports scheduling-specific operator labels and menu width without changing defaults", async () => {
+    const filter = {
+      type: EColumnFilterType.FreeText,
+      name: "department",
+      label: "Department",
+      term: "",
+      value: EFilterOperator.Contains,
+      operatorLabels: { [EFilterOperator.Contains]: "Contains" },
+      operatorMenuWidth: "208px",
+    };
+    await mountComponent(filter);
+    expect(wrapper.findComponent(QSelect).props("options")?.[0].label).toBe("Contains");
+    expect(wrapper.findComponent(QSelect).props("menuShrink")).toBe(true);
+    expect(wrapper.findComponent(QSelect).props("popupContentStyle")).toEqual({ width: "208px" });
+  });
   test("renders the component correctly", async () => {
     const filter: IFreeTextFilterModel = {
       type: EColumnFilterType.FreeText,

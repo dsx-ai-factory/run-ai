@@ -322,7 +322,7 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
   gap: 10px;
 }
 .mode-selector {
-  margin-top: 38px;
+  margin-top: 36px;
   margin-bottom: 0;
 }
 .node-pool-scheduling-wizard :deep(.runai-expansion-header) {

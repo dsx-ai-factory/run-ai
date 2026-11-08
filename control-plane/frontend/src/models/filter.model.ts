@@ -138,6 +138,8 @@ export enum EFilterOperatorLabel {
 }
 
 export interface IAdvancedFilterOption extends IFilterOption {
+  operatorLabels?: Partial<Record<EFilterOperator, string>>;
+  operatorMenuWidth?: string;
   type: EColumnFilterType;
   selectOptions?: ISelectOption[];
   excludeOperators?: EFilterOperator[];
@@ -174,6 +176,8 @@ export interface IEnumBasedFilterModel extends IFilterColumnModel {
 }
 
 export interface IFreeTextFilterModel extends IFilterColumnModel {
+  operatorLabels?: Partial<Record<EFilterOperator, string>>;
+  operatorMenuWidth?: string;
   maxWidth?: string;
   term: string;
   value: EFilterOperator;
@@ -195,7 +199,7 @@ export interface INumericFilterModel extends IFilterColumnModel {
 export type IAdvancedFilterModel = IEnumBasedFilterModel | IFreeTextFilterModel | IDateFilterModel | INumericFilterModel;
 
 export interface IFreeTextFilterSelectOption extends Omit<ISelectOption, "value" | "label"> {
-  label: EFilterOperatorLabel;
+  label: string;
   value: EFilterOperator;
 }
 
