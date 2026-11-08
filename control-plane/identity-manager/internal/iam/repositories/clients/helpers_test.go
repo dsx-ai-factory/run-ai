@@ -492,7 +492,7 @@ func TestSetProtocolMappers(t *testing.T) {
 					ServiceAccountsEnabled: pointer.ToBool(true),
 				},
 				Attributes: &models.ClientAttributes{
-					ClientType: pointer.ToString(models.ClientTypeUserApp),
+					ClientType: pointer.ToString(models.ClientTypeAccessKey),
 					CreatedBy:  pointer.ToString("user@example.com"),
 				},
 			},
