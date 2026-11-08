@@ -7,6 +7,7 @@ package utils_test
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"reflect"
 	"testing"
@@ -273,8 +274,22 @@ func TestValidateSamlMetadata(t *testing.T) {
 			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntityDescriptor entityID="https://idp.example.com"/></EntitiesDescriptor>`,
 		},
 		{
+			name:     "nested entities descriptor aggregate",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntitiesDescriptor Name="partner"><EntityDescriptor entityID="https://idp.example.com"><IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"/></EntityDescriptor></EntitiesDescriptor></EntitiesDescriptor>`,
+		},
+		{
+			name:     "nested entities descriptor without entity id",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntitiesDescriptor><EntityDescriptor/></EntitiesDescriptor></EntitiesDescriptor>`,
+			wantErr:  true,
+		},
+		{
 			name:     "entities descriptor without children",
 			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"></EntitiesDescriptor>`,
+			wantErr:  true,
+		},
+		{
+			name:     "nested entities descriptor without children",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntitiesDescriptor Name="partner"></EntitiesDescriptor></EntitiesDescriptor>`,
 			wantErr:  true,
 		},
 		{
@@ -539,4 +554,59 @@ func TestJsonToMap_InvalidInput(t *testing.T) {
 	res, err := utils.JsonToMap("invalid")
 	assert.Nil(t, res)
 	assert.NotNil(t, err)
+}
+
+func TestLoadSamlMetadata_File(t *testing.T) {
+	metadata := []byte(`<EntityDescriptor entityID="https://idp.example.com"/>`)
+	got, err := utils.LoadSamlMetadata(context.Background(), utils.File, base64.StdEncoding.EncodeToString(metadata), "")
+	assert.NoError(t, err)
+	assert.Equal(t, metadata, got)
+}
+
+func TestLoadSamlMetadata_InvalidFile(t *testing.T) {
+	_, err := utils.LoadSamlMetadata(context.Background(), utils.File, "not!valid", "")
+	assert.Error(t, err)
+	var apiErr utils.Error
+	assert.ErrorAs(t, err, &apiErr)
+	assert.Equal(t, 400, apiErr.Code)
+}
+
+func TestLoadSamlMetadata_MissingSource(t *testing.T) {
+	_, err := utils.LoadSamlMetadata(context.Background(), "", "", "")
+	assert.Error(t, err)
+	var apiErr utils.Error
+	assert.ErrorAs(t, err, &apiErr)
+	assert.Equal(t, 400, apiErr.Code)
+}
+
+func TestParseSamlIdpConfig(t *testing.T) {
+	tests := []struct {
+		name     string
+		metadata string
+		entityID string
+		ssoURL   string
+		cert     string
+	}{
+		{
+			name:     "entity descriptor",
+			metadata: `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com"><IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><KeyDescriptor use="encryption"><KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"><X509Data><X509Certificate>enc-cert</X509Certificate></X509Data></KeyInfo></KeyDescriptor><KeyDescriptor use="signing"><KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"><X509Data><X509Certificate>sign cert</X509Certificate></X509Data></KeyInfo></KeyDescriptor><SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://idp.example.com/redirect"/><SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.example.com/post"/></IDPSSODescriptor></EntityDescriptor>`,
+			entityID: "https://idp.example.com",
+			ssoURL:   "https://idp.example.com/post",
+			cert:     "signcert",
+		},
+		{
+			name:     "entities descriptor aggregate",
+			metadata: `<EntitiesDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata"><EntityDescriptor entityID="https://partner.example.com"><IDPSSODescriptor protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://partner.example.com/sso"/></IDPSSODescriptor></EntityDescriptor></EntitiesDescriptor>`,
+			entityID: "https://partner.example.com",
+			ssoURL:   "https://partner.example.com/sso",
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			config := utils.ParseSamlIdpConfig([]byte(tc.metadata))
+			assert.Equal(t, tc.entityID, config.EntityId)
+			assert.Equal(t, tc.ssoURL, config.SingleSignOnServiceUrl)
+			assert.Equal(t, tc.cert, config.SigningCertificate)
+		})
+	}
 }
