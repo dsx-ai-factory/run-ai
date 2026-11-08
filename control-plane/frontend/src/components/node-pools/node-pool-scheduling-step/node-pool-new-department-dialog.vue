@@ -152,13 +152,22 @@ async function reviewPreview() {
   color: var(--text-disabled, rgba(0, 0, 0, 0.4));
 }
 .new-department-form .administrator-title {
+  height: 20px;
   line-height: 20px;
 }
-.new-department-form .administrator-title .q-btn {
+.new-department-form .administrator-title > .row {
   height: 20px;
-  width: 20px;
-  min-height: 20px;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+.new-department-form .administrator-title .q-btn {
+  height: 32px;
+  width: 32px;
+  min-height: 32px;
   padding: 0;
+}
+.new-department-form .administrator-title .q-icon {
+  font-size: 20px;
 }
 .new-department-form .runai-expansion-item {
   border: 0;
