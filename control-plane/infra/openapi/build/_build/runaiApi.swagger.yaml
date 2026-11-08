@@ -13365,10 +13365,6 @@ components:
       description: Holds cluster configuration values.
       type: object
       properties:
-        inferenceEndpointSchemaVersion:
-          type: string
-          nullable: true
-          description: InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. v1 means the Agent and the Anyworkload networking plugin understand the externalAccess.inference block in networking endpoints. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads.
         workloadOwnershipProtection:
           type: boolean
           nullable: true
@@ -22093,11 +22089,6 @@ components:
             - $ref: '#/components/schemas/DistributedInferenceLeaderWorkerSpec1'
           nullable: true
           type: object
-    LoadAwareRouting:
-      description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
-      type: boolean
-      default: false
-      nullable: true
     DistributedInferenceRestartPolicy:
       description: |
         Determines the behavior when a pod fails.
@@ -22227,8 +22218,6 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
-            loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -23456,8 +23445,6 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
-            loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -24111,8 +24098,6 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/StringRules'
-            loadAwareRouting:
-              $ref: '#/components/schemas/BooleanRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
             preemptibility:
@@ -25922,8 +25907,6 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsDefaults'
             labels:
               $ref: '#/components/schemas/LabelsDefaults'
-            loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
             modelStore:
               nullable: true
               properties:
@@ -26136,8 +26119,6 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsRules'
             labels:
               $ref: '#/components/schemas/InstancesRules'
-            loadAwareRouting:
-              $ref: '#/components/schemas/BooleanRules'
             modelStore:
               nullable: true
               properties:
@@ -34588,8 +34569,6 @@ components:
               $ref: '#/components/schemas/ImagePullSecrets'
             labels:
               $ref: '#/components/schemas/Labels'
-            loadAwareRouting:
-              $ref: '#/components/schemas/LoadAwareRouting'
             modelStore:
               nullable: true
               properties:
