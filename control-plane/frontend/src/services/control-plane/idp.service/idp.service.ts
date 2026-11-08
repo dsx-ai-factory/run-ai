@@ -71,7 +71,7 @@ function samlDataFromError(err: unknown): SamlData | undefined {
   if (typeof err !== "object" || err === null || !("response" in err)) return undefined;
   const data = (err as { response?: { data?: unknown } }).response?.data;
   if (typeof data !== "object" || data === null || !("samlData" in data)) return undefined;
-  return (data as IdpPostResponse).samlData;
+  return (data as IdpPostResponse).samlData ?? undefined;
 }
 
 async function updateIdp(idpAlias: string, idpCreationRequest: IdpCreationRequest): Promise<void> {

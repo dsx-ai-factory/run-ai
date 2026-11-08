@@ -54,7 +54,11 @@ describe("saml-metadata.vue (onboarding)", () => {
   beforeEach(() => {
     vi.mocked(idpService.dryRunIdp).mockResolvedValue({
       alias: "saml",
-      samlData: { signingCertificate: "fake-cert", certificateExpirationDate: validExpirationDate },
+      samlData: {
+        signingCertificate: "fake-cert",
+        certificateExpirationDate: validExpirationDate,
+        validateSignature: false,
+      },
     });
   });
 

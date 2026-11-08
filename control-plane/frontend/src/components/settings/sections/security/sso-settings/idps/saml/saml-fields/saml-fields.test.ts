@@ -10,7 +10,7 @@ import { createTestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
 import { markRaw } from "vue";
 import SamlFields from "./saml-fields.vue";
-import type { SamlConfigSettings } from "@/models/setting.model";
+import type { IdpPostResponse } from "@/swagger-models/identity-manager-client";
 import {
   IdpCreationRequestTypeEnum,
   SamlCreationDataMetadataXmlTypeEnum,
@@ -23,9 +23,13 @@ vi.mock("@/services/control-plane/idp.service/idp.service", () => ({
 
 const validExpirationDate = "2030-05-17T00:00:00.000Z";
 const expiredExpirationDate = "2020-01-01T00:00:00.000Z";
-const acceptedMetadata = {
+const acceptedMetadata: IdpPostResponse = {
   alias: "saml",
-  samlData: { signingCertificate: "fake-cert-content", certificateExpirationDate: validExpirationDate },
+  samlData: {
+    signingCertificate: "fake-cert-content",
+    certificateExpirationDate: validExpirationDate,
+    validateSignature: false,
+  },
 };
 const rejectedMetadata = {
   message: "invalid saml signing certificate",
@@ -33,12 +37,6 @@ const rejectedMetadata = {
 };
 
 describe("saml-fields.vue", () => {
-  const validSamlSettings: SamlConfigSettings = {
-    idpEntityId: "runai-app.run.ai/bgu",
-    singleSignOnServiceUrl: "http://test.com/sso",
-    signingCertificate: "test-cert",
-  };
-
   const factory = (
     props: Partial<InstanceType<typeof SamlFields>["$props"]> = {},
     dataOverrides: Record<string, unknown> = {},
@@ -87,7 +85,7 @@ describe("saml-fields.vue", () => {
 
   describe("isValidFile", () => {
     it("requires a file even for an existing IdP once the field is empty", () => {
-      const { wrapper } = factory({ samlSettings: validSamlSettings, isNewIdp: false });
+      const { wrapper } = factory({ isNewIdp: false });
 
       expect((wrapper.vm as unknown as { isValidFile: (f: string) => boolean | string }).isValidFile("")).toBe(
         "Upload a file",
@@ -123,7 +121,6 @@ describe("saml-fields.vue", () => {
   describe("isValidUrl", () => {
     it("requires a URL when switching an existing file-sourced IdP to URL", () => {
       const { wrapper } = factory({
-        samlSettings: validSamlSettings,
         isNewIdp: false,
         idpResources: { resourceName: "idp.xml", resource: fakeMetadataXml },
       });
@@ -135,7 +132,6 @@ describe("saml-fields.vue", () => {
 
     it("allows leaving the URL blank for an existing URL-sourced IdP", () => {
       const { wrapper } = factory({
-        samlSettings: validSamlSettings,
         isNewIdp: false,
         idpResources: {
           resourceName: SamlCreationDataMetadataXmlTypeEnum.Url,
@@ -217,7 +213,7 @@ describe("saml-fields.vue", () => {
     });
 
     it("no longer renders the read-only identity provider fields", () => {
-      const { wrapper } = factory({ samlSettings: validSamlSettings, isNewIdp: false });
+      const { wrapper } = factory({ isNewIdp: false });
 
       expect(wrapper.text()).not.toContain("Identity provider URL");
       expect(wrapper.text()).not.toContain("Certificate expiration date");
@@ -227,7 +223,6 @@ describe("saml-fields.vue", () => {
   describe("setSamlResources", () => {
     it("initializes metadataXmlUrl for an existing URL-sourced IdP so mapper-only updates aren't blocked", async () => {
       const { wrapper } = factory({
-        samlSettings: validSamlSettings,
         isNewIdp: false,
         idpResources: {
           resourceName: SamlCreationDataMetadataXmlTypeEnum.Url,
@@ -242,7 +237,6 @@ describe("saml-fields.vue", () => {
 
     it("fills the URL field when the stored resource of a URL-sourced IdP is a URL", async () => {
       const { wrapper } = factory({
-        samlSettings: validSamlSettings,
         isNewIdp: false,
         idpResources: {
           resourceName: SamlCreationDataMetadataXmlTypeEnum.Url,
@@ -258,7 +252,6 @@ describe("saml-fields.vue", () => {
 
     it("leaves the URL field empty when the stored resource of a URL-sourced IdP is the metadata XML", async () => {
       const { wrapper } = factory({
-        samlSettings: validSamlSettings,
         isNewIdp: false,
         idpResources: { resourceName: SamlCreationDataMetadataXmlTypeEnum.Url, resource: fakeMetadataXml },
       });
@@ -279,7 +272,6 @@ describe("saml-fields.vue", () => {
 
     it("does not report changes for an untouched, existing file-sourced IdP right after mount", async () => {
       const { wrapper } = factory({
-        samlSettings: validSamlSettings,
         isNewIdp: false,
         idpResources: { resourceName: "idp.xml", resource: fakeMetadataXml },
       });
@@ -291,7 +283,7 @@ describe("saml-fields.vue", () => {
 
   describe("stale metadata validation guard", () => {
     it("ignores a dry-run result that resolves after a newer file selection has started", async () => {
-      let resolveStale: (response: typeof acceptedMetadata) => void = () => {};
+      let resolveStale: (value: IdpPostResponse | PromiseLike<IdpPostResponse>) => void = () => {};
       vi.mocked(idpService.dryRunIdp).mockReturnValue(
         new Promise((resolve) => {
           resolveStale = resolve;

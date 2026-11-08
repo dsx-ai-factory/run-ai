@@ -296,15 +296,15 @@ export default defineComponent({
       reader.readAsText(file);
     },
     async setFileContent(fileName: string, fileContent: string, selectionToken?: number): Promise<void> {
-      const token = selectionToken ?? this.fileSelectionToken;
-      if (token !== this.fileSelectionToken) return;
+      const selected = selectionToken ?? this.fileSelectionToken;
+      if (selected !== this.fileSelectionToken) return;
       this.samlFields.metadataXmlFile = stringUtil.stringToBase64(fileContent);
       this.samlFields.fileName = fileName;
       this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.File;
       this.samlFields.metadataXmlUrl = "";
-      await this.validateMetadata(token);
+      await this.validateMetadata(selected);
     },
-    async validateMetadata(token: number): Promise<void> {
+    async validateMetadata(selectionToken: number): Promise<void> {
       const request = {
         type: IdpCreationRequestTypeEnum.Saml,
         samlData: { ...this.samlFields },
@@ -314,15 +314,15 @@ export default defineComponent({
         const response = this.idpAlias
           ? await idpService.dryRunIdp(request, this.idpAlias)
           : await idpService.dryRunIdp(request);
-        if (token !== this.fileSelectionToken) return;
+        if (selectionToken !== this.fileSelectionToken) return;
         this.applyReturnedExpiration(response.samlData);
       } catch (err: unknown) {
-        if (token !== this.fileSelectionToken) return;
+        if (selectionToken !== this.fileSelectionToken) return;
         this.applyReturnedExpiration(this.samlDataFromError(err));
       }
       this.onUpdated();
     },
-    applyReturnedExpiration(samlData?: SamlData): void {
+    applyReturnedExpiration(samlData?: SamlData | null): void {
       this.expirationDate = samlData?.certificateExpirationDate ? new Date(samlData.certificateExpirationDate) : null;
     },
     samlDataFromError(err: unknown): SamlData | undefined {
