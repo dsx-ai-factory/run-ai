@@ -23,6 +23,8 @@
           :read-only="false"
         />
         <runai-section-title
+          flat
+          class="administrator-title"
           title="Set the department administrator(s)"
           tooltip-text="Department administrators can manage the department and its projects. Adding them here enables an access rule scoped to the department. It can be edited later in the department."
         />
@@ -62,13 +64,6 @@
           aid="add-department-administrator"
           @click="administrator = true"
         />
-        <p class="department-preview-note" role="status">
-          {{
-            reviewed
-              ? "Preview only. This department has not been created."
-              : "Preview only — department creation is not available in this preview."
-          }}
-        </p>
       </q-form>
     </template>
     <template #footer
@@ -113,11 +108,21 @@ async function reviewPreview() {
   max-width: calc(100vw - 40px) !important;
 }
 .scheduling-new-department .runai-base-dialog-header {
+  height: 64px;
   min-height: 64px;
   padding: 16px;
 }
+.scheduling-new-department .runai-base-dialog-header b {
+  font-weight: 500;
+  line-height: 28px;
+}
+.scheduling-new-department .runai-base-dialog-close-btn {
+  height: 32px;
+  width: 32px;
+  min-height: 32px;
+}
 .scheduling-new-department .runai-base-dialog-body {
-  padding: 32px 16px 24px;
+  padding: 26px 16px;
 }
 .scheduling-new-department .runai-base-dialog-footer {
   min-height: 70px;
@@ -128,26 +133,26 @@ async function reviewPreview() {
   margin-top: 24px;
   margin-bottom: 44px;
 }
+.new-department-form .department-cluster .q-field__control:before {
+  border-style: solid;
+}
+.new-department-form .department-cluster .q-field__label,
+.new-department-form .department-cluster .q-field__native {
+  color: var(--text-disabled, rgba(0, 0, 0, 0.4));
+}
+.new-department-form .administrator-title {
+  line-height: 20px;
+}
+.new-department-form .administrator-title .q-btn {
+  height: 20px;
+  width: 20px;
+  min-height: 20px;
+  padding: 0;
+}
 .new-department-form .runai-expansion-item {
   border: 0;
   box-shadow: none;
   margin: 0 0 26px;
-}
-.new-department-form .runai-expansion-item .q-item {
-  padding: 0;
-  min-height: 30px;
-}
-.new-department-form .runai-expansion-item .q-item__section--side {
-  display: none;
-}
-.new-department-form .runai-expansion-item .q-expansion-item__content > div {
-  padding: 0;
-}
-.new-department-form .runai-expansion-item .col-7 {
-  width: 66.6667%;
-}
-.new-department-form .runai-expansion-item .col-11 {
-  width: 100%;
 }
 .new-department-form .runai-section-title {
   font-weight: 400;
@@ -160,7 +165,8 @@ async function reviewPreview() {
 }
 .administrator-rule .subject-select,
 .administrator-rule .role-select {
-  width: 52%;
+  width: 380px;
+  max-width: 100%;
 }
 .administrator-rule .subject-addable-multi-select {
   margin: 26px 0 16px;
@@ -177,6 +183,6 @@ async function reviewPreview() {
 .department-preview-note {
   color: var(--b-text-sub);
   font-size: 12px;
-  margin: 16px 0 0;
+  margin: 0;
 }
 </style>

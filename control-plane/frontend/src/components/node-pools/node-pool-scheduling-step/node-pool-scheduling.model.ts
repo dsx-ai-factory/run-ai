@@ -39,6 +39,7 @@ export function toSchedulingCapabilities(draft: SchedulingDraft): SchedulingCapa
 }
 
 export interface DepartmentValidationContext {
+  totalsComplete?: boolean;
   childQuotaSum?: number;
   nonPreemptibleUsage?: number;
   enforceChildQuota?: boolean;
@@ -46,6 +47,35 @@ export interface DepartmentValidationContext {
   totalQuota?: number;
   finiteQuotaSum?: number;
   unlimitedQuotaCount?: number;
+}
+export function recommendedDepartmentQuotaMinimum(context: DepartmentValidationContext) {
+  const known = [context.childQuotaSum, context.nonPreemptibleUsage].filter(
+    (value): value is number => value != null && Number.isFinite(value) && value >= 0,
+  );
+  return known.length ? Math.max(...known) : undefined;
+}
+export function departmentQuotaBudget(originalQuota: number | undefined, context: DepartmentValidationContext) {
+  const { capacity, finiteQuotaSum, unlimitedQuotaCount } = context;
+  if (
+    context.totalsComplete === false ||
+    capacity == null ||
+    !Number.isFinite(capacity) ||
+    capacity < 0 ||
+    finiteQuotaSum == null ||
+    !Number.isFinite(finiteQuotaSum) ||
+    finiteQuotaSum < 0 ||
+    unlimitedQuotaCount == null ||
+    !Number.isInteger(unlimitedQuotaCount) ||
+    unlimitedQuotaCount < 0 ||
+    originalQuota == null ||
+    !Number.isFinite(originalQuota) ||
+    (originalQuota < 0 && originalQuota !== -1)
+  )
+    return undefined;
+  const otherUnlimited = unlimitedQuotaCount - (originalQuota === -1 ? 1 : 0);
+  const otherFiniteQuota = finiteQuotaSum - (originalQuota >= 0 ? originalQuota : 0);
+  if (otherUnlimited !== 0 || otherFiniteQuota < 0) return undefined;
+  return { available: Math.max(0, capacity - otherFiniteQuota), otherFiniteQuota };
 }
 export function weightPercentage(weight: number, total: number | undefined): number | undefined {
   if (total == null || !Number.isFinite(total) || total < 0 || !Number.isFinite(weight)) return undefined;
@@ -74,7 +104,11 @@ export function validateDepartmentEdit(edit: DepartmentSchedulingEdit, context: 
     errors.push("Maximum allocation must be 0 or greater.");
   if (finiteLimit != null && edit.quota != null && finiteLimit < edit.quota)
     errors.push("Maximum allocation must be at least guaranteed GPUs.");
-  if (context.capacity != null && context.totalQuota != null && context.totalQuota > context.capacity)
+  if (
+    context.capacity != null &&
+    ((context.totalsComplete !== false && context.totalQuota != null && context.totalQuota > context.capacity) ||
+      (edit.quota != null && edit.quota > context.capacity))
+  )
     warnings.push("Assigned quota exceeds node pool capacity.");
   return { errors, warnings };
 }

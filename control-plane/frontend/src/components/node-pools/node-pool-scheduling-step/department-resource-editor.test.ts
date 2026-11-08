@@ -4,7 +4,7 @@
  */
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
-import { Quasar } from "quasar";
+import { QInput, Quasar } from "quasar";
 import Editor from "./department-resource-editor.vue";
 const popup = {
   template: '<td><slot name="input" /></td>',
@@ -12,6 +12,82 @@ const popup = {
   emits: ["apply", "reset", "opened"],
 };
 describe("department resource editor", () => {
+  it("uses a supplied non-preemptible usage floor in quota recommendations", () => {
+    const wrapper = mount(Editor, {
+      props: { value: 12, kind: "quota", id: "a", context: { childQuotaSum: 3, nonPreemptibleUsage: 10 } },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    expect(wrapper.get(".quota-hint").text()).toContain("from 10");
+    wrapper.unmount();
+  });
+  it("recommends and warns against the capacity remaining after other finite quotas", async () => {
+    const wrapper = mount(Editor, {
+      props: {
+        value: 6,
+        kind: "quota",
+        id: "a",
+        context: { childQuotaSum: 0, capacity: 144, totalQuota: 30, finiteQuotaSum: 30, unlimitedQuotaCount: 0 },
+      },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    expect(wrapper.get(".quota-hint").text()).toContain("to 120");
+    await wrapper.get("input").setValue("130");
+    expect(wrapper.get("p.text-warning").text()).toContain("up to 120 GPUs");
+    wrapper.unmount();
+  });
+  it("does not invent a remaining maximum when other quotas are unlimited or aggregates are incomplete", async () => {
+    const wrapper = mount(Editor, {
+      props: {
+        value: 6,
+        kind: "quota",
+        id: "a",
+        context: { childQuotaSum: 0, capacity: 144, finiteQuotaSum: 30, unlimitedQuotaCount: 1 },
+      },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    expect(wrapper.get(".quota-hint").text()).not.toContain(" to ");
+    await wrapper.get("input").setValue("200");
+    expect(wrapper.get("p.text-warning").text()).not.toContain("up to");
+    wrapper.unmount();
+    const incomplete = mount(Editor, {
+      props: { value: 6, kind: "quota", id: "a", context: { childQuotaSum: 0, capacity: 144 } },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    expect(incomplete.get(".quota-hint").text()).not.toContain(" to ");
+    incomplete.unmount();
+  });
+  it("reclaims the edited department's own unlimited sentinel without counting it as another unlimited quota", async () => {
+    const wrapper = mount(Editor, {
+      props: {
+        value: -1,
+        kind: "quota",
+        id: "default",
+        context: { childQuotaSum: 0, capacity: 144, finiteQuotaSum: 24, unlimitedQuotaCount: 1 },
+      },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    await wrapper.get("input").setValue("6");
+    expect(wrapper.get(".quota-hint").text()).toContain("to 120");
+    wrapper.unmount();
+  });
+  it("shows only blocking errors for an invalid quota, restoring advisories for a valid value", async () => {
+    const wrapper = mount(Editor, {
+      props: { value: 6, kind: "quota", id: "a", context: { childQuotaSum: 10, enforceChildQuota: false } },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    const menu = wrapper.findComponent(popup);
+    await wrapper.get("input").setValue("-2");
+    expect(wrapper.text()).toContain("Enter a value equal to or above 0");
+    expect(wrapper.find(".text-warning").exists()).toBe(false);
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toBeUndefined();
+    await wrapper.get("input").setValue("6");
+    expect(wrapper.find(".text-warning").exists()).toBe(true);
+    expect(wrapper.findComponent(QInput).props("color")).toBe("warning");
+    menu.vm.$emit("apply");
+    expect(wrapper.emitted("apply")).toEqual([[6]]);
+    wrapper.unmount();
+  });
   it("renders the saved unlimited quota sentinel as Unlimited", () => {
     const wrapper = mount(Editor, { props: { value: -1, kind: "quota", id: "default" }, global: { plugins: [Quasar] } });
     expect(wrapper.get('[role="button"]').text()).toBe("Unlimited");

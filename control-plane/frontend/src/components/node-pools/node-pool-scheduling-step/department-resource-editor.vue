@@ -49,6 +49,8 @@
         :suffix="kind === 'weight' && displayValue ? `(${displayValue})` : undefined"
         :placeholder="kind === 'limit' ? 'Unlimited' : undefined"
         :error="validation.errors.length > 0"
+        :color="!validation.errors.length && validation.warnings.length ? 'warning' : 'primary'"
+        :class="{ 'resource-input-warning': !validation.errors.length && validation.warnings.length }"
         :error-message="errorMessage"
         no-error-icon
       />
@@ -56,9 +58,9 @@
         v-if="kind === 'quota' && !loading && !validation.errors.length && !validation.warnings.length"
         class="quota-hint"
       >
-        <template v-if="context.childQuotaSum != null"
-          >Recommended: from {{ context.childQuotaSum
-          }}<template v-if="context.capacity != null"> to {{ context.capacity }}</template
+        <template v-if="recommendedMinimum != null"
+          >Recommended: from {{ recommendedMinimum
+          }}<template v-if="quotaBudget"> to {{ quotaBudget.available }}</template
           >.<br
         /></template>
         Non-preemptible workload usage:
@@ -66,16 +68,23 @@
         <template v-if="context.capacity != null">Node pool’s total: {{ context.capacity }} GPUs.</template>
       </p>
       <p v-if="loading" role="status">Loading project quotas…</p>
-      <p v-for="warning in validation.warnings" :key="warning" class="text-warning" role="status">
-        {{ warningMessage(warning) }}
-      </p>
+      <template v-if="!validation.errors.length">
+        <p v-for="warning in validation.warnings" :key="warning" class="text-warning" role="status">
+          {{ warningMessage(warning) }}
+        </p>
+      </template>
     </template>
   </editable-cell-popup>
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { EditableCellPopup } from "@/components/common/runai-table/runai-custom-table-columns/editable-cell-popup";
-import { validateDepartmentEdit, type DepartmentValidationContext } from "./node-pool-scheduling.model";
+import {
+  recommendedDepartmentQuotaMinimum,
+  departmentQuotaBudget,
+  validateDepartmentEdit,
+  type DepartmentValidationContext,
+} from "./node-pool-scheduling.model";
 const props = defineProps<{
   id: string;
   value?: number;
@@ -106,6 +115,8 @@ const parsedValue = () =>
       : Number(input.value);
 const input = ref<string | number>(props.value ?? "");
 const context = ref<DepartmentValidationContext>(props.context ?? {});
+const recommendedMinimum = computed(() => recommendedDepartmentQuotaMinimum(context.value));
+const quotaBudget = computed(() => departmentQuotaBudget(props.value, context.value));
 const errorMessage = computed(() =>
   validation.value.errors
     .map((message) => {
@@ -122,11 +133,10 @@ function childQuotaMessage() {
 }
 function warningMessage(message: string) {
   if (message === "Guaranteed GPUs are below the child project quota sum.") return childQuotaMessage();
-  if (
-    message === "Assigned quota exceeds node pool capacity." &&
-    Number(input.value) > (context.value.capacity ?? Infinity)
-  )
-    return `The department’s quota exceeds the node pool’s total. To remain within the limit, enter a number up to ${context.value.capacity} GPUs.`;
+  if (message === "Assigned quota exceeds node pool capacity.")
+    return quotaBudget.value
+      ? `The assigned quota exceeds the node pool’s total. To remain within the limit, enter a number up to ${quotaBudget.value.available} GPUs.`
+      : "The assigned quota exceeds the node pool’s total. Reduce the department’s quota to remain within the limit.";
   return message;
 }
 const loading = ref(false);
@@ -147,9 +157,11 @@ const validation = computed(() => {
     {
       ...context.value,
       totalQuota:
-        context.value.totalQuota != null && props.value != null
-          ? context.value.totalQuota + value - props.value
-          : undefined,
+        props.kind === "quota" && quotaBudget.value
+          ? quotaBudget.value.otherFiniteQuota + value
+          : context.value.totalsComplete !== false && context.value.totalQuota != null && props.value != null
+            ? context.value.totalQuota + value - props.value
+            : undefined,
     },
   );
   if (props.kind === "limit" && value !== -1 && props.quota != null && value < props.quota)
@@ -192,7 +204,7 @@ watch(() => props.value, reset);
 <style scoped lang="scss">
 p {
   font-size: 12px;
-  line-height: 16px;
+  line-height: 16.8px;
   margin: 12px 0 0;
 }
 </style>
@@ -213,6 +225,25 @@ p {
 }
 .scheduling-resource-popup .q-field__control {
   height: 38px;
+}
+.resource-input-warning .q-field__control:before {
+  border-color: var(--q-warning);
+}
+.scheduling-resource-popup .q-field--error {
+  padding-bottom: 0;
+}
+.scheduling-resource-popup .q-field--error .q-field__bottom {
+  position: static;
+  transform: none;
+  bottom: auto;
+  min-height: 0;
+  padding-top: 8px;
+}
+.scheduling-resource-popup .q-field__bottom,
+.scheduling-resource-popup .q-field__messages,
+.scheduling-resource-popup .q-field__messages > div {
+  font-size: 12px;
+  line-height: 16.8px;
 }
 .scheduling-resource-popup .q-field__bottom {
   padding-left: 0;

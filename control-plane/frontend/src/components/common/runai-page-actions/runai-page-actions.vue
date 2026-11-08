@@ -67,6 +67,7 @@
           :hide-cluster-filter="hideClusterFilter"
         ></runai-page-filter>
         <runai-advanced-filters
+          :menu-width="filterMenuWidth"
           v-else
           @update-filter-by="updateFilterBy($event)"
           :filter-options="advancedFilterOptions"
@@ -219,6 +220,7 @@ export default defineComponent({
     "refresh-data",
   ],
   props: {
+    filterMenuWidth: { type: String, default: undefined },
     advancedFilters: {
       type: Boolean as PropType<boolean>,
       default: false,

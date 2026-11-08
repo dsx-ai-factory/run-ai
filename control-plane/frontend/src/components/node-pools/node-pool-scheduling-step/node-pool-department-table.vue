@@ -19,6 +19,7 @@
       :columns="filterColumns"
       :filters="{ ...filters, searchTerm }"
       advanced-filters
+      filter-menu-width="208px"
       hide-cluster-filter
       hide-columns-btn
       hide-export-csv
@@ -611,8 +612,9 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   return {
     ...result,
     capacity: props.capacity,
-    finiteQuotaSum: totals.value.all?.finiteQuotaSum,
-    unlimitedQuotaCount: totals.value.all?.unlimitedQuotaCount,
+    totalsComplete: props.totalsComplete !== false,
+    finiteQuotaSum: props.totalsComplete !== false ? totals.value.all?.finiteQuotaSum : undefined,
+    unlimitedQuotaCount: props.totalsComplete !== false ? totals.value.all?.unlimitedQuotaCount : undefined,
     totalQuota:
       props.totalsComplete !== false && totals.value.all?.deservedSum >= 0 ? totals.value.all.deservedSum : undefined,
   };

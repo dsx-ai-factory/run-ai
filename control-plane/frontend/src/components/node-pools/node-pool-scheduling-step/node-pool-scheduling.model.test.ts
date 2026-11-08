@@ -3,8 +3,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, expect, it } from "vitest";
-import { weightPercentage, validateDepartmentEdit, schedulingTotalsWithEdits } from "./node-pool-scheduling.model";
+import {
+  recommendedDepartmentQuotaMinimum,
+  departmentQuotaBudget,
+  weightPercentage,
+  validateDepartmentEdit,
+  schedulingTotalsWithEdits,
+} from "./node-pool-scheduling.model";
 describe("department scheduling validation", () => {
+  it("recommends the maximum known project quota and non-preemptible usage floor", () => {
+    expect(recommendedDepartmentQuotaMinimum({ childQuotaSum: 3, nonPreemptibleUsage: 10 })).toBe(10);
+    expect(recommendedDepartmentQuotaMinimum({ childQuotaSum: 3 })).toBe(3);
+    expect(recommendedDepartmentQuotaMinimum({})).toBeUndefined();
+  });
+  it("keeps quota budgets unknown for partial totals and clamps known exhausted capacity to zero", () => {
+    expect(
+      departmentQuotaBudget(6, { capacity: 144, finiteQuotaSum: 30, unlimitedQuotaCount: 0, totalsComplete: false }),
+    ).toBeUndefined();
+    expect(departmentQuotaBudget(6, { capacity: 144, finiteQuotaSum: 206, unlimitedQuotaCount: 0 })).toEqual({
+      available: 0,
+      otherFiniteQuota: 200,
+    });
+    expect(departmentQuotaBudget(6, { capacity: 0, finiteQuotaSum: 6, unlimitedQuotaCount: 0 })).toEqual({
+      available: 0,
+      otherFiniteQuota: 0,
+    });
+  });
   it("uses known server denominators including zero", () => {
     expect(weightPercentage(2, 10)).toBe(20);
     expect(weightPercentage(2, 0)).toBe(0);

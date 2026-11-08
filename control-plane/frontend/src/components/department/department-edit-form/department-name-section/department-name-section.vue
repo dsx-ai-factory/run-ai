@@ -5,6 +5,7 @@
 
 <template>
   <runai-expansion-item
+    :class="{ 'department-name-section--compact': compact }"
     :label="compact ? 'Department name and description' : 'Department name & description'"
     default-opened
     :section-invalid="sectionInvalid"
@@ -133,4 +134,27 @@ export default defineComponent({
 });
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.department-name-section--compact {
+  padding: 0 !important;
+}
+.department-name-section--compact :deep(> .q-expansion-item__container) {
+  border: 0;
+  box-shadow: none;
+}
+.department-name-section--compact :deep(.runai-expansion-header) {
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+  font-weight: 400;
+  line-height: 20px;
+}
+.department-name-section--compact :deep(.q-item__section--side),
+.department-name-section--compact :deep(.runai-expansion-divider),
+.department-name-section--compact :deep(.q-expansion-item__border) {
+  display: none;
+}
+.department-name-section--compact :deep(.runai-expansion-body) {
+  padding: 12px 0 0 !important;
+}
+</style>
