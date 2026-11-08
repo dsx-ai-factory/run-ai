@@ -49,6 +49,18 @@ type DistributedInferenceCommonSpec struct {
 	Category *string `json:"category,omitempty" gorm:"" validate:"regexp=.*"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRouting *bool `json:"loadAwareRouting,omitempty"`
+	LoadAwareRouting *bool `json:"loadAwareRouting,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRoutingPathPrefix *string `json:"loadAwareRoutingPathPrefix,omitempty"`
+	LoadAwareRoutingPathPrefix *string `json:"loadAwareRoutingPathPrefix,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//NodePools *[]string `json:"nodePools,omitempty"`
@@ -125,6 +137,19 @@ func AssertDistributedInferenceCommonSpecConstraints(obj DistributedInferenceCom
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if patternErr := runaihttp.AssertPattern(obj.Category, "Category", "/.*/"); patternErr != nil {
 		return &ParsingError{Param: "Category", Err: patternErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.LoadAwareRoutingPathPrefix, "LoadAwareRoutingPathPrefix", 1024); maxLengthErr != nil {
+		return &ParsingError{Param: "LoadAwareRoutingPathPrefix", Err: maxLengthErr}
 	}
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

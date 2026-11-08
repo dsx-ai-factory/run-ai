@@ -63,6 +63,10 @@ allOf:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/ImagePullSecretsDefaults.yaml
     labels:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/advanced/LabelsDefaults.yaml
+    loadAwareRouting:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml
+    loadAwareRoutingPathPrefix:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRoutingPathPrefix.yaml
     modelStore:
       nullable: true
       properties:

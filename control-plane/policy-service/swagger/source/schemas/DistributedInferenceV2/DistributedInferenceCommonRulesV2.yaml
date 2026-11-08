@@ -7,6 +7,10 @@ allOf:
   properties:
     category:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
+    loadAwareRouting:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/BooleanRules.yaml
+    loadAwareRoutingPathPrefix:
+      $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/StringRules.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/policy_rules/ArrayRules.yaml
     preemptibility:

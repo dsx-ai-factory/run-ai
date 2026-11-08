@@ -16091,6 +16091,19 @@
           }
         }
       },
+      "LoadAwareRouting": {
+        "description": "Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.",
+        "type": "boolean",
+        "default": false,
+        "nullable": true
+      },
+      "LoadAwareRoutingPathPrefix": {
+        "description": "The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.",
+        "type": "string",
+        "maxLength": 1024,
+        "nullable": true,
+        "example": "/v1"
+      },
       "DistributedInferenceRestartPolicy": {
         "description": "Determines the behavior when a pod fails.\n- `RecreateGroupOnPodRestart`: Restarts all pods in the group if any pod fails.\n- `None`: No automatic restart behavior is applied.\n",
         "type": "string",
@@ -16249,6 +16262,12 @@
             "properties": {
               "category": {
                 "$ref": "#/components/schemas/Category"
+              },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/LoadAwareRouting"
+              },
+              "loadAwareRoutingPathPrefix": {
+                "$ref": "#/components/schemas/LoadAwareRoutingPathPrefix"
               },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
@@ -21523,6 +21542,12 @@
               "category": {
                 "$ref": "#/components/schemas/Category"
               },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/LoadAwareRouting"
+              },
+              "loadAwareRoutingPathPrefix": {
+                "$ref": "#/components/schemas/LoadAwareRoutingPathPrefix"
+              },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
               },
@@ -23363,6 +23388,12 @@
             "nullable": true,
             "properties": {
               "category": {
+                "$ref": "#/components/schemas/StringRules"
+              },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/BooleanRules"
+              },
+              "loadAwareRoutingPathPrefix": {
                 "$ref": "#/components/schemas/StringRules"
               },
               "nodePools": {

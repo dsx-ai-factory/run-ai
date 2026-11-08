@@ -1,0 +1,5 @@
+description: The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
+type: string
+maxLength: 1024
+nullable: true
+example: /v1

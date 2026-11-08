@@ -27,7 +27,8 @@ type ExternalAccess struct {
 	// Full OpenShift Route resource (route.openshift.io/v1). Used when cluster uses Route.
 	Route map[string]interface{} `json:"route,omitempty"`
 	// Full Gateway API HTTPRoute resource (gateway.networking.k8s.io/v1). Used when cluster uses Gateway API.
-	HttpRoute map[string]interface{} `json:"httpRoute,omitempty"`
+	HttpRoute map[string]interface{}          `json:"httpRoute,omitempty"`
+	Inference NullableExternalAccessInference `json:"inference,omitempty"`
 }
 
 // NewExternalAccess instantiates a new ExternalAccess object
@@ -146,6 +147,49 @@ func (o *ExternalAccess) SetHttpRoute(v map[string]interface{}) {
 	o.HttpRoute = v
 }
 
+// GetInference returns the Inference field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *ExternalAccess) GetInference() ExternalAccessInference {
+	if o == nil || IsNil(o.Inference.Get()) {
+		var ret ExternalAccessInference
+		return ret
+	}
+	return *o.Inference.Get()
+}
+
+// GetInferenceOk returns a tuple with the Inference field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *ExternalAccess) GetInferenceOk() (*ExternalAccessInference, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Inference.Get(), o.Inference.IsSet()
+}
+
+// HasInference returns a boolean if a field has been set.
+func (o *ExternalAccess) HasInference() bool {
+	if o != nil && o.Inference.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetInference gets a reference to the given NullableExternalAccessInference and assigns it to the Inference field.
+func (o *ExternalAccess) SetInference(v ExternalAccessInference) {
+	o.Inference.Set(&v)
+}
+
+// SetInferenceNil sets the value for Inference to be an explicit nil
+func (o *ExternalAccess) SetInferenceNil() {
+	o.Inference.Set(nil)
+}
+
+// UnsetInference ensures that no value is present for Inference, not even an explicit nil
+func (o *ExternalAccess) UnsetInference() {
+	o.Inference.Unset()
+}
+
 func (o ExternalAccess) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -164,6 +208,9 @@ func (o ExternalAccess) ToMap() (map[string]interface{}, error) {
 	}
 	if o.HttpRoute != nil {
 		toSerialize["httpRoute"] = o.HttpRoute
+	}
+	if o.Inference.IsSet() {
+		toSerialize["inference"] = o.Inference.Get()
 	}
 	return toSerialize, nil
 }
