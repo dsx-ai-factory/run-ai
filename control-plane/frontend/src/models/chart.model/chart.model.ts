@@ -363,6 +363,10 @@ export interface IGenericMetricWidgetConfig {
 
 export const WIDGET_AVERAGE_LINE_LABEL = "Average";
 
+// `!=` maps to SQL IS DISTINCT FROM, which lets workloads with no idle data through; a small positive
+// lower bound excludes them while keeping fractional-GPU workloads.
+export const MIN_IDLE_GPUS_FILTER_VALUE = 0.01;
+
 export type THistogramMetricData = Record<string, Array<GroupedMeasurementResponseValuesInner>>;
 
 export type THistogramMetricParser = (metricsResponse: MetricsCompositeResponse) => THistogramMetricData;

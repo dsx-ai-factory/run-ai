@@ -27,8 +27,8 @@ function getCsvErrorMessage(): QNotifyCreateOptions {
 
 function getCsvFileName(widgetTitle: string, clusterName?: string, nodePoolName?: string, date = new Date()): string {
   const parts = [widgetTitle, clusterName, nodePoolName]
-    .filter((part): part is string => !!part)
-    .map((part) => toFileNameSegment(part));
+    .map((part) => toFileNameSegment(part ?? ""))
+    .filter(Boolean);
   parts.push(dateUtil.dateFormat(date, DATE_FORMATS.FILE_NAME_DATE_TIME));
   return `${parts.join("_")}.csv`;
 }

@@ -430,17 +430,16 @@ describe("widgetUtil", () => {
   });
 
   describe("getIdleWorkloadsAdvancedFilters", () => {
-    test("filters by idle GPU devices only when no node pool or workload is given", () => {
+    test("filters by idle GPU devices only when no node pool is given", () => {
       expect(JSON.parse(widgetUtil.getIdleWorkloadsAdvancedFilters())).toEqual([
         expect.objectContaining({ name: "idleAllocatedGpus", operator: ">=", minValue: "0.01", type: "Numeric" }),
       ]);
     });
 
-    test("adds node pool and workload name filters when given", () => {
-      const filters = JSON.parse(widgetUtil.getIdleWorkloadsAdvancedFilters("pool-a", "train-1"));
-      expect(filters).toHaveLength(3);
+    test("adds the node pool filter when given", () => {
+      const filters = JSON.parse(widgetUtil.getIdleWorkloadsAdvancedFilters("pool-a"));
+      expect(filters).toHaveLength(2);
       expect(filters[1]).toEqual(expect.objectContaining({ name: "nodepool", term: "pool-a", value: "==" }));
-      expect(filters[2]).toEqual(expect.objectContaining({ name: "name", term: "train-1", value: "==" }));
     });
   });
 });

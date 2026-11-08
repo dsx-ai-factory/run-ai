@@ -12,7 +12,7 @@
     :error="error"
     slot-wrapper-class=""
     hide-actions
-    @link-clicked="redirectToWorkloads()"
+    @link-clicked="redirectToWorkloads"
     is-grid
   >
     <runai-table
@@ -39,18 +39,23 @@
 </template>
 <script lang="ts">
 import { defineComponent, type PropType, type Ref, ref, watch } from "vue";
-import { EWidgetEmptyMessages, EWidgetEntity, type IWidgetWrapperOptions } from "@/models/chart.model";
+import {
+  EWidgetEmptyMessages,
+  EWidgetEntity,
+  type IWidgetWrapperOptions,
+  MIN_IDLE_GPUS_FILTER_VALUE,
+} from "@/models/chart.model";
 import { type Workload, WorkloadSortFilterFields } from "@/swagger-models/workloads-client";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
 import { idleGpuWorkloadColumns, workloadIndexColumns } from "@/table-models/workload.table-model";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import { useRouter } from "vue-router";
 import { RunaiTable } from "@/components/common";
-import type { IFilterBy } from "@/models/filter.model";
+import { EFilterOperator, type IFilterBy } from "@/models/filter.model";
 import { filterService } from "@/services/filter.service/filter.service";
 import { ETableFilters } from "@/models/table.model";
 import { filterUtil } from "@/utils/filter.util/filter.util";
-import { MIN_IDLE_GPUS_FILTER_VALUE, widgetUtil } from "@/utils/widget.util";
+import { widgetUtil } from "@/utils/widget.util";
 import { ChartWidgetWrapper } from "@/components/dashboard-v2/widgets/common/widget-wrapper/chart-widget-wrapper";
 import { RunaiTableNoData } from "@/components/common/runai-table/runai-table-no-data";
 import { useRefresh } from "@/composables/use-refresh.composable";
@@ -119,11 +124,19 @@ export default defineComponent({
       return filters;
     };
 
+    // A row click targets one workload; the idle filter is left out because the table can be ~20 minutes stale.
     const getQueryParams = (workloadName?: string) => {
       return {
         sortBy: WorkloadSortFilterFields.IdleAllocatedGpus,
         descending: "true",
-        advancedFilters: widgetUtil.getIdleWorkloadsAdvancedFilters(props.nodePoolName, workloadName),
+        advancedFilters: workloadName
+          ? `[${filterUtil.getFreeTextFilterQuery(
+              WorkloadSortFilterFields.Name,
+              workloadName,
+              "Workload",
+              EFilterOperator.Equals,
+            )}]`
+          : widgetUtil.getIdleWorkloadsAdvancedFilters(props.nodePoolName),
       };
     };
 

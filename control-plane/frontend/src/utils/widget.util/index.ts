@@ -3,5 +3,5 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { MIN_IDLE_GPUS_FILTER_VALUE, widgetUtil } from "./widget.util";
-export { MIN_IDLE_GPUS_FILTER_VALUE, widgetUtil };
+import { widgetUtil } from "./widget.util";
+export { widgetUtil };

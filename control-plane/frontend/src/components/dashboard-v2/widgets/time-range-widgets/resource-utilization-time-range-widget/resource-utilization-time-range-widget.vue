@@ -223,6 +223,7 @@ export default defineComponent({
   },
   data() {
     return {
+      clusterStore: useClusterStore(),
       helpIcon: toQuasarIconName(runaiIcons.object.help),
       wrapperOptions: {
         title: "Resources utilization",
@@ -392,7 +393,7 @@ export default defineComponent({
         const end = dateUtil.convertDateToISO(this.filterByDates.dateEnd);
         const filename = dashboardUtil.getCsvFileName(
           this.wrapperOptions.title ?? "",
-          useClusterStore().clusterNameByUuid(this.clusterId),
+          this.clusterStore.clusterNameByUuid(this.clusterId),
           this.nodePoolName,
         );
         if (this.nodePoolName) {

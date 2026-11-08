@@ -47,7 +47,7 @@ describe("resource-utilization-time-range-widget.vue", () => {
 
     return mount(ResourceUtilizationTimeRangeWidget, {
       global: {
-        plugins: [Quasar],
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
       },
       props: {
         clusterId: props.clusterId,

@@ -21,7 +21,13 @@ describe("dashboardUtil.getCsvFileName", () => {
     );
   });
 
-  it("omits the cluster and node pool when they are not set", () => {
+  it("omits parts that have no filename-safe characters", () => {
+    expect(dashboardUtil.getCsvFileName("Resources allocation", "集群", "pool-a", date)).toBe(
+      "resources-allocation_pool-a_2026-02-10_09-05.csv",
+    );
+  });
+
+    it("omits the cluster and node pool when they are not set", () => {
     expect(dashboardUtil.getCsvFileName("Workloads by status", undefined, undefined, date)).toBe(
       "workloads-by-status_2026-02-10_09-05.csv",
     );
