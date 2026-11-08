@@ -22,6 +22,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	discoveryv1 "k8s.io/api/discovery/v1"
 	networkingv1 "k8s.io/api/networking/v1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -45,6 +46,8 @@ type Plugin struct {
 	reader           client.Reader
 	ownershipReader  client.Reader
 	enforceOwnership bool
+	// mapper reports whether the InferenceEndpoint API is installed.
+	mapper meta.RESTMapper
 }
 
 // Integration owns the networking plugin's anyworkload-controller-specific
@@ -74,11 +77,15 @@ func NewPlugin(reader client.Reader) *Plugin {
 }
 
 func newPlugin(reader, ownershipReader client.Reader) *Plugin {
-	return &Plugin{
+	plugin := &Plugin{
 		reader:           reader,
 		ownershipReader:  ownershipReader,
 		enforceOwnership: true,
 	}
+	if mapped, ok := reader.(interface{ RESTMapper() meta.RESTMapper }); ok {
+		plugin.mapper = mapped.RESTMapper()
+	}
+	return plugin
 }
 
 // Build is the framework.PluginBuilder for this integration. Setup must run
@@ -159,7 +166,15 @@ func (p *Plugin) Watchers(bldr *builder.Builder) (*builder.Builder, error) {
 		bldr = bldr.Watches(&gatewayv1.HTTPRoute{}, exposureEnqueue)
 	}
 
-	return bldr, nil
+	if err := p.inferenceEndpointAvailable(); err != nil {
+		if meta.IsNoMatchError(err) {
+			return bldr, nil
+		}
+		return nil, err
+	}
+	inferenceEndpoint := &unstructured.Unstructured{}
+	inferenceEndpoint.SetGroupVersionKind(endpoints.InferenceEndpointGVK)
+	return bldr.Owns(inferenceEndpoint), nil
 }
 
 func ownerReferencesChangedPredicate() predicate.Predicate {
