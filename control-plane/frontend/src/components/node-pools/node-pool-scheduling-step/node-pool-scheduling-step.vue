@@ -405,8 +405,8 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
   top: 57px;
   left: -1px;
   right: -1px;
-  padding: 4px 14px 14px;
-  min-height: 62px;
+  padding: 4px 14px 7px;
+  min-height: 64px;
   white-space: normal;
   background: white;
   border: 1px solid var(--border-subtle);
@@ -414,7 +414,7 @@ function applyEdit(edit: DepartmentSchedulingEdit) {
   border-radius: 0 0 4px 4px;
   color: var(--b-text-sub);
   font-size: 12px;
-  line-height: 16px;
+  line-height: 16.8px;
   z-index: 5;
 }
 .mode-cards :deep(.runai-segment:hover),
