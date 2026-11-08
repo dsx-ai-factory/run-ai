@@ -111,17 +111,13 @@
       "matchPackageNames": [
         "runai-telemetry"
       ],
-      "separateMinorPatch": true
-    },
-    {
-      "matchPackageNames": [
-        "runai-telemetry"
-      ],
-      "matchUpdateTypes": [
-        "minor",
-        "major"
-      ],
-      "enabled": false
+      "separateMinorPatch": true,
+      "minor": {
+        "enabled": false
+      },
+      "major": {
+        "enabled": false
+      }
     }
   ]
 }
