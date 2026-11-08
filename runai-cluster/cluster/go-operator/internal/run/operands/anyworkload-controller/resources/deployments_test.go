@@ -11,6 +11,10 @@ import (
 	"reflect"
 	"testing"
 
+	"gopkg.in/yaml.v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants/oauth2proxy"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
@@ -21,6 +25,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
+
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
@@ -33,7 +38,7 @@ func TestBuildEnvVarsUsesAnyworkloadOpenShiftRouteConfiguration(t *testing.T) {
 		}
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, false, "")
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -93,7 +98,7 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 			runaiConfig.Spec.Global.GatewayAPI.Namespace = "gateway-system"
 			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+			envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, false, "")
 			if err != nil {
 				t.Fatalf("buildEnvVars() error = %v", err)
 			}
@@ -117,7 +122,7 @@ func TestBuildEnvVarsIncludesNetworkingCapabilityFlags(t *testing.T) {
 func TestBuildEnvVarsIncludesOAuth2ProxyTemplates(t *testing.T) {
 	runaiConfig := utils.GetDefaultRunaiConfig()
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, false, "")
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -155,7 +160,7 @@ func TestBuildEnvVarsRejectsIncompleteGatewayConfiguration(t *testing.T) {
 			runaiConfig.Spec.Global.GatewayAPI.Namespace = tt.namespace
 			resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-			_, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+			_, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, false, "")
 			if err == nil {
 				t.Fatal("buildEnvVars() accepted an incomplete enabled Gateway configuration")
 			}
@@ -172,7 +177,7 @@ func TestBuildEnvVarsDoesNotInjectIngressAnnotationDefaults(t *testing.T) {
 	runaiConfig.Spec.Global.Ingress.Annotations = map[string]string{"example.com/default": "value"}
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, false, "")
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -221,7 +226,7 @@ func TestBuildEnvVarsIncludesWorkloadInjectedContainerResources(t *testing.T) {
 	}
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, false, "")
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -237,7 +242,7 @@ func TestBuildEnvVarsOmitsUnconfiguredWorkloadInjectedContainerResources(t *test
 	runaiConfig.SetDefaultsWhereNeeded()
 	resource := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
 
-	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal)
+	envVars, err := resource.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, false, "")
 	if err != nil {
 		t.Fatalf("buildEnvVars() error = %v", err)
 	}
@@ -325,7 +330,7 @@ func TestRestartAllowedServiceAccounts(t *testing.T) {
 			config.Spec.Internal.Global.NMC.ServiceAccountName = tc.agentServiceAccount
 			config.Spec.Internal.Global.NMC.AllowedServiceAccounts = tc.extra
 			resource := NewDeploymentResource("anyworkload-controller", nil, config)
-			variables, err := resource.buildEnvVars(config.Spec.AnyworkloadController, config.Spec.Internal)
+			variables, err := resource.buildEnvVars(config.Spec.AnyworkloadController, config.Spec.Internal, false, "")
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -333,6 +338,160 @@ func TestRestartAllowedServiceAccounts(t *testing.T) {
 			if !found || value != tc.want {
 				t.Fatalf("restart identities = %q, want %q", value, tc.want)
 			}
+		})
+	}
+}
+
+// SNAPSHOT_ENABLED and SNAPSHOT_AGENT_NODE_SELECTOR are what carry Snapshot's
+// detected state from the runai-public ConfigMap to the controller. Which half
+// of the detection gates the integration is decided in runai-public and tested
+// there; here the two values only have to reach the environment intact.
+func TestBuildEnvVarsSnapshot(t *testing.T) {
+	tests := []struct {
+		name           string
+		crdInstalled   bool
+		nodeSelector   string
+		wantEnabled    string
+		wantNodeSelect string
+	}{
+		{
+			name:           "no snapshot in the cluster",
+			wantEnabled:    "false",
+			wantNodeSelect: "",
+		},
+		{
+			name:           "snapshot installed",
+			crdInstalled:   true,
+			nodeSelector:   "nvidia.com/gpu.present=true",
+			wantEnabled:    "true",
+			wantNodeSelect: "nvidia.com/gpu.present=true",
+		},
+		{
+			// The selector reaches the controller exactly as runai-public rendered
+			// it, already sorted, so an unchanged cluster never produces a changed
+			// deployment and an endless reconcile loop.
+			name:           "a multi-key selector is passed through verbatim",
+			crdInstalled:   true,
+			nodeSelector:   "a=1,b=2",
+			wantEnabled:    "true",
+			wantNodeSelect: "a=1,b=2",
+		},
+		{
+			// Snapshot can be installed without pinning its agent anywhere.
+			name:           "installed with no selector constrains nothing",
+			crdInstalled:   true,
+			wantEnabled:    "true",
+			wantNodeSelect: "",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			runaiConfig := &runaiv1.RunaiConfig{}
+			runaiConfig.SetDefaultsWhereNeeded()
+			res := NewDeploymentResource("anyworkload-controller", nil, runaiConfig)
+
+			envVars, err := res.buildEnvVars(runaiConfig.Spec.AnyworkloadController, runaiConfig.Spec.Internal, tc.crdInstalled, tc.nodeSelector)
+			if err != nil {
+				t.Fatalf("buildEnvVars() error = %v", err)
+			}
+
+			for name, want := range map[string]string{
+				"SNAPSHOT_ENABLED":             tc.wantEnabled,
+				"SNAPSHOT_AGENT_NODE_SELECTOR": tc.wantNodeSelect,
+			} {
+				got, found := envValue(envVars, name)
+				if !found {
+					t.Errorf("%s env var not found", name)
+					continue
+				}
+				if got != want {
+					t.Errorf("%s = %q, want %q", name, got, want)
+				}
+			}
+		})
+	}
+}
+
+// runaiPublicConfigMap is what the runai-public operand writes; this resource
+// reads Snapshot's detected state back out of it rather than detecting itself.
+func runaiPublicConfigMap(t *testing.T, public runaiv1.RunaiPublic) *corev1.ConfigMap {
+	t.Helper()
+	raw, err := yaml.Marshal(&public)
+	if err != nil {
+		t.Fatalf("marshal runai-public: %v", err)
+	}
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      constants.RunaiPublicConfigMapName,
+			Namespace: constants.NamespaceRunAi,
+		},
+		Data: map[string]string{constants.RunaiPublicConfigMapName: string(raw)},
+	}
+}
+
+func snapshotRunaiPublic(crdInstalled bool, nodeSelector string) runaiv1.RunaiPublic {
+	public := runaiv1.RunaiPublic{
+		Dependencies: &runaiv1.PublicDependencies{
+			Optional: map[string]runaiv1.PublicStatus{
+				"snapshot": {
+					Available: runaiv1.AvailableStatus(crdInstalled),
+					Components: map[string]runaiv1.PublicStatus{
+						"snapshotjob-crd": {Available: runaiv1.AvailableStatus(crdInstalled)},
+					},
+				},
+			},
+		},
+		Configuration: &runaiv1.PublicConfiguration{},
+	}
+	if nodeSelector != "" {
+		public.Configuration.SnapshotAgentNodeSelector = &nodeSelector
+	}
+	return public
+}
+
+func TestSnapshotSettingsComeFromRunaiPublic(t *testing.T) {
+	tests := []struct {
+		name           string
+		objects        []client.Object
+		wantEnabled    string
+		wantNodeSelect string
+	}{
+		{
+			// A fresh install reconciles this deployment before runai-public
+			// exists. That must look like "no Snapshot", not a failed build.
+			name:           "no runai-public ConfigMap yet",
+			objects:        nil,
+			wantEnabled:    "false",
+			wantNodeSelect: "",
+		},
+		{
+			name:           "runai-public reports no Snapshot",
+			objects:        []client.Object{runaiPublicConfigMap(t, snapshotRunaiPublic(false, ""))},
+			wantEnabled:    "false",
+			wantNodeSelect: "",
+		},
+		{
+			name:           "runai-public reports Snapshot and where its agent runs",
+			objects:        []client.Object{runaiPublicConfigMap(t, snapshotRunaiPublic(true, "nvidia.com/gpu.present=true"))},
+			wantEnabled:    "true",
+			wantNodeSelect: "nvidia.com/gpu.present=true",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			k8sClient := fake.NewClientBuilder().WithObjects(tc.objects...).Build()
+
+			object, err := NewDeploymentResource("anyworkload-controller", k8sClient,
+				utils.GetDefaultRunaiConfig()).Object(context.Background())
+			if err != nil {
+				t.Fatalf("build deployment: %v", err)
+			}
+
+			envVars := object.(*appsv1.Deployment).Spec.Template.Spec.Containers[0].Env
+			assertEnvValue(t, envVars, "SNAPSHOT_ENABLED", tc.wantEnabled)
+			assertEnvValue(t, envVars, "SNAPSHOT_AGENT_NODE_SELECTOR", tc.wantNodeSelect)
 		})
 	}
 }

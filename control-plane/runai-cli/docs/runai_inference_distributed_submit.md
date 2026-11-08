@@ -31,7 +31,8 @@ runai inference distributed submit <workload-name> -p <project-name> -i tiangolo
 runai inference distributed submit <workload-name> -p <project-name> --template <template-name>
 
 # Submit a workload where workers inherit leader settings but override specific fields
-runai inference distributed submit <workload-name> -p <project-name> -i tiangolo/uvicorn-gunicorn-fastapi:python3.9 --environment ROLE=LEADER --replicas 3 --workers 7 -g 2 --serving-port 80 --worker-environment ROLE=WORKER
+runai inference distributed submit <workload-name> -p <project-name> -i tiangolo/uvicorn-gunicorn-fastapi:python3.9 \
+    --environment-variable ROLE=LEADER --replicas 3 --workers 7 -g 2 --serving-port 80 --worker-environment-variable ROLE=WORKER
 
 # Submit a workload with a different worker setup (workers not based on leader configuration)
 runai inference distributed submit <workload-name> -p <project-name> -i tiangolo/uvicorn-gunicorn-fastapi:python3.9 --replicas 4 --workers 1 -g 8 --serving-port 80 --existing-pvc claimname=my-pvc,path=/data --worker-as-leader=false --worker-image tiangolo/uvicorn-gunicorn-fastapi:python3.9 --worker-gpu-devices-request 8
@@ -57,7 +58,7 @@ runai inference distributed submit <workload-name> -p <project-name> -i tiangolo
       --env-my-credentials stringArray                        Set an environment variable from a user credential. Format: type=<dockerRegistry|genericSecret|ngcApiKey>,name=<ENV_VAR>,credential-name=<CREDENTIAL_NAME>[,key=<KEY>]. Key is required only for type=genericSecret. Requires cluster version 2.22+ (2.23+ for ngcApiKey).
       --env-pod-field-ref stringArray                         Set an environment variable from a pod field reference. Format: ENV_VARIABLE=FIELD_REFERENCE.
       --env-secret stringArray                                Set an environment variable from a Kubernetes secret. Format: ENV_VARIABLE=secret-name,key=secret-key.
-      --environment stringArray                               Specifies the environment asset to use for the workload.
+      --environment string                                    Specifies the environment asset to use for the workload.
   -e, --environment-variable stringArray                      Set environment variables in the container. Format: --environment-variable name=value --environment-variable name-b=value-b.
       --exclude-node stringArray                              Nodes that will be excluded from use by the scheduler. Format: --exclude-node node-a --exclude-node node-b
       --existing-pvc stringArray                              Mount an existing PersistentVolumeClaim. Format: claimname=CLAIM_NAME,path=PATH. Auto-complete supported.
@@ -121,7 +122,7 @@ runai inference distributed submit <workload-name> -p <project-name> -i tiangolo
       --worker-empty-dir-volume stringArray                   Mount an empty directory as a volume for worker pods. Format: path=PATH,medium=MEDIUM,size-limit=SIZE.
       --worker-env-pod-field-ref stringArray                  Set an environment variable from a pod field reference for worker pods. Format: ENV_VARIABLE=FIELD_REFERENCE.
       --worker-env-secret stringArray                         Set an environment variable from a Kubernetes secret for worker pods. Format: ENV_VARIABLE=secret-name,key=secret-key.
-      --worker-environment stringArray                        Set environment variables in worker pods. Format: --worker-environment name=value --worker-environment name-b=value-b.
+      --worker-environment-variable stringArray               Set environment variables in worker pods. Format: --worker-environment-variable name=value --worker-environment-variable name-b=value-b.
       --worker-exclude-node stringArray                       Nodes that will be excluded from use by worker pods. Format: --worker-exclude-node node-a --worker-exclude-node node-b
       --worker-existing-pvc stringArray                       Mount an existing PersistentVolumeClaim for worker pods. Format: claimname=CLAIM_NAME,path=PATH. Auto-complete supported.
       --worker-extended-resource stringArray                  Request access to a Kubernetes extended resource per worker pod. Format: resource_name=quantity.

@@ -55,7 +55,7 @@ require (
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/mattn/go-colorable v0.1.16 // indirect
 	github.com/mattn/go-isatty v0.0.24 // indirect
-	github.com/mattn/go-sqlite3 v1.14.52 // indirect
+	github.com/mattn/go-sqlite3 v1.14.53 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
@@ -68,13 +68,13 @@ require (
 	github.com/prometheus/procfs v0.22.0 // indirect
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	go.uber.org/zap v1.28.0 // indirect
-	go.yaml.in/yaml/v2 v2.4.4 // indirect
+	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
@@ -101,15 +101,15 @@ require (
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/JohannesKaufmann/html-to-markdown/v2 v2.5.2
-	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.5
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
+	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.6
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
 	github.com/emersion/go-sasl v0.0.0-20241020182733-b788ff22d5a6
-	github.com/emersion/go-smtp v0.25.0
+	github.com/emersion/go-smtp v0.25.1
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/go-openapi/loads v0.25.3
 	github.com/go-openapi/runtime v0.33.4
-	github.com/go-playground/validator/v10 v10.30.5
+	github.com/go-playground/validator/v10 v10.30.6
 	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.12.0
 	github.com/lib/pq v1.12.3
@@ -125,7 +125,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	github.com/stretchr/testify v1.12.1
 	github.com/xyproto/jpath v0.7.0
-	golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
+	golang.org/x/exp v0.0.0-20261106192419-47ce03d25ef0
 	gorm.io/datatypes v1.2.7
 	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2

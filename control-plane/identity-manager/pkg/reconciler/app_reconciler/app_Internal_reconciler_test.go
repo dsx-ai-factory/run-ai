@@ -72,14 +72,14 @@ func TestSameVersion_NeedToReconcile(t *testing.T) {
 	versionsDaoMock.On("GetReconcilerVersionsByTenantId", mock.Anything, TenantId).Return(&versionRes, nil)
 	versionsDaoMock.On("UpdateInternalServiceAccountsReconcilerVersions", mock.Anything, TenantId, testSubject.version).Return(nil)
 
-	internalApps := test_utils.GetInternalApplicationsArray()
-	defaultIamMockSetup(iamMock, internalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalApps, nil)
+	internalClients := test_utils.GetInternalClientsArray()
+	defaultIamMockSetup(iamMock, internalClients, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalClients, nil)
 	err := testSubject.Reconcile(context.Background(), realmName, false)
 	assert.Nil(t, err)
 	tenantResolverMock.AssertNumberOfCalls(t, "CreateApp", 0)
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
-	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(internalApps))
+	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(internalClients))
 	iamMock.MockClientService.AssertNumberOfCalls(t, "GetClients", 1)
 }
 
@@ -94,16 +94,16 @@ func TestMissingVersion_NeedToReconcile(t *testing.T) {
 	versionsDaoMock.On("GetReconcilerVersionsByTenantId", mock.Anything, TenantId).Return(&versionRes, nil)
 	versionsDaoMock.On("UpdateInternalServiceAccountsReconcilerVersions", mock.Anything, TenantId, testSubject.version).Return(nil)
 
-	internalApps := test_utils.GetInternalApplicationsArray()
-	defaultIamMockSetup(iamMock, internalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalApps, nil)
+	internalClients := test_utils.GetInternalClientsArray()
+	defaultIamMockSetup(iamMock, internalClients, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalClients, nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, false)
 	assert.Nil(t, err)
 	tenantResolverMock.AssertNumberOfCalls(t, "CreateApp", 0)
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	iamMock.MockClientService.AssertNumberOfCalls(t, "GetClients", 1)
-	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(internalApps))
+	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(internalClients))
 }
 
 func TestErrorVersion_NeedToReconcile(t *testing.T) {
@@ -115,9 +115,9 @@ func TestErrorVersion_NeedToReconcile(t *testing.T) {
 	versionsDaoMock.On("GetReconcilerVersionsByTenantId", mock.Anything, TenantId).Return(nil, errors.New("error"))
 	versionsDaoMock.On("UpdateInternalServiceAccountsReconcilerVersions", mock.Anything, TenantId, testSubject.version).Return(nil)
 
-	internalApps := test_utils.GetInternalApplicationsArray()
-	defaultIamMockSetup(iamMock, internalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalApps, nil)
+	internalClients := test_utils.GetInternalClientsArray()
+	defaultIamMockSetup(iamMock, internalClients, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(false)}).Return(internalClients, nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, false)
 	assert.Nil(t, err)

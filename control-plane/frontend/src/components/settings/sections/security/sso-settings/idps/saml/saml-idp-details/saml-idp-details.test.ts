@@ -1,0 +1,130 @@
+/*
+ * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import { describe, expect, it } from "vitest";
+import { h } from "vue";
+import { flushPromises, mount } from "@vue/test-utils";
+import { QForm, Quasar } from "quasar";
+import SamlIdpDetails from "./saml-idp-details.vue";
+
+type Props = InstanceType<typeof SamlIdpDetails>["$props"];
+
+const createWrapper = (props: Props = {}) => mount(SamlIdpDetails, { global: { plugins: [Quasar] }, props });
+
+describe("saml-idp-details.vue", () => {
+  it("shows the identity provider URL, entity ID and expiration date", () => {
+    const wrapper = createWrapper({
+      singleSignOnServiceUrl: "https://idp.example.com/sso",
+      idpEntityId: "idp-entity",
+      expirationDate: new Date("2030-05-17T00:00:00.000Z"),
+      showExpirationDate: true,
+    });
+
+    expect(wrapper.text()).toContain("Identity provider URL");
+    expect(wrapper.text()).toContain("Identity provider Entity ID (issuer)");
+    expect(wrapper.text()).toContain("Certificate expiration date");
+    expect(wrapper.find<HTMLInputElement>("input[value='https://idp.example.com/sso']").exists()).toBe(true);
+    expect(wrapper.find<HTMLInputElement>("input[value='idp-entity']").exists()).toBe(true);
+  });
+
+  it("shows the certificate expiration date first, then the identity provider URL and the entity ID", () => {
+    const wrapper = createWrapper({
+      singleSignOnServiceUrl: "https://idp.example.com/sso",
+      idpEntityId: "idp-entity",
+      expirationDate: new Date("2030-05-17T00:00:00.000Z"),
+      showExpirationDate: true,
+    });
+
+    const text = wrapper.text();
+    const certificate = text.indexOf("Certificate expiration date");
+    const url = text.indexOf("Identity provider URL");
+    const entityId = text.indexOf("Identity provider Entity ID (issuer)");
+
+    expect(certificate).toBeGreaterThanOrEqual(0);
+    expect(certificate).toBeLessThan(url);
+    expect(url).toBeLessThan(entityId);
+  });
+
+  it("hides the fields that have no value", () => {
+    const wrapper = createWrapper({ singleSignOnServiceUrl: "https://idp.example.com/sso" });
+
+    expect(wrapper.text()).toContain("Identity provider URL");
+    expect(wrapper.text()).not.toContain("Identity provider Entity ID (issuer)");
+    expect(wrapper.text()).not.toContain("Certificate expiration date");
+  });
+
+  it("shows the expiration error message", () => {
+    const wrapper = createWrapper({
+      showExpirationDate: true,
+      expirationDate: new Date("2020-01-01T00:00:00.000Z"),
+      expirationError: "Certificate expired. Replace the metadata file above.",
+    });
+
+    expect(wrapper.text()).toContain("Certificate expired. Replace the metadata file above.");
+  });
+
+  it("shows no error when there is none", () => {
+    const wrapper = createWrapper({ showExpirationDate: true, expirationDate: new Date("2030-05-17T00:00:00.000Z") });
+
+    expect(wrapper.text()).not.toContain("Certificate expired");
+  });
+
+  it("keeps the same spacing between the fields: no space is reserved under the certificate field while it is valid", () => {
+    const wrapper = createWrapper({
+      singleSignOnServiceUrl: "https://idp.example.com/sso",
+      idpEntityId: "idp-entity",
+      expirationDate: new Date("2030-05-17T00:00:00.000Z"),
+      showExpirationDate: true,
+    });
+
+    const fields = wrapper.findAll(".q-field");
+    expect(fields).toHaveLength(3);
+    fields.forEach((field) => expect(field.classes()).not.toContain("q-field--with-bottom"));
+  });
+
+  it("gives the certificate field the same look as the disabled fields only while the certificate is fine", async () => {
+    const valid = createWrapper({ showExpirationDate: true, expirationDate: new Date("2030-05-17T00:00:00.000Z") });
+    expect(valid.find(".q-field").classes()).toContain("certificate-valid");
+
+    const expired = createWrapper({
+      showExpirationDate: true,
+      expirationDate: new Date("2020-01-01T00:00:00.000Z"),
+      expirationError: "Certificate expired. Replace the metadata file above.",
+    });
+    expect(expired.find(".q-field").classes()).not.toContain("certificate-valid");
+  });
+
+  describe("certificate expiration field in a form", () => {
+    const mountInForm = (props: Props) =>
+      mount(QForm, {
+        global: { plugins: [Quasar] },
+        slots: { default: () => h(SamlIdpDetails, props) },
+        attachTo: document.body,
+      });
+    const validate = (wrapper: ReturnType<typeof mountInForm>) =>
+      (wrapper.vm as unknown as { validate: () => Promise<boolean> }).validate();
+
+    it("does not block the form while the certificate is valid", async () => {
+      const wrapper = mountInForm({ showExpirationDate: true, expirationDate: new Date("2030-05-17T00:00:00.000Z") });
+      await flushPromises();
+
+      expect(await validate(wrapper)).toBe(true);
+      wrapper.unmount();
+    });
+
+    it("blocks the form when the certificate is expired", async () => {
+      const wrapper = mountInForm({
+        showExpirationDate: true,
+        expirationDate: new Date("2020-01-01T00:00:00.000Z"),
+        expirationError: "Certificate expired. Replace the metadata file above.",
+      });
+      await flushPromises();
+
+      expect(await validate(wrapper)).toBe(false);
+      expect(wrapper.text()).toContain("Certificate expired. Replace the metadata file above.");
+      wrapper.unmount();
+    });
+  });
+});

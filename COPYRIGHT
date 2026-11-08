@@ -4762,6 +4762,7 @@ Copyright Alex Ogier, The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/spf13/pflag v1.0.10
+  github.com/spf13/pflag v1.1.0
 
 Copyright (c) 2012 Alex Ogier. All rights reserved.
 Copyright (c) 2012 The Go Authors. All rights reserved.
@@ -6564,7 +6565,7 @@ Copyright by the Brotli Authors - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/andybalholm/brotli v1.2.6
-  github.com/andybalholm/brotli v1.2.7
+  github.com/andybalholm/brotli v1.2.8
 
 Copyright (c) 2009, 2010, 2013-2016 by the Brotli Authors.
 
@@ -8113,6 +8114,7 @@ Components:
   github.com/go-playground/validator/v10 v10.26.0
   github.com/go-playground/validator/v10 v10.30.1
   github.com/go-playground/validator/v10 v10.30.5
+  github.com/go-playground/validator/v10 v10.30.6
   gopkg.in/go-playground/validator.v9 v9.31.0
 
 The MIT License (MIT)
@@ -10744,7 +10746,7 @@ SOFTWARE.
 Copyright emersion, Gleez Technologies, Proton Technologies AG and 1 others - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/emersion/go-smtp v0.25.0
+  github.com/emersion/go-smtp v0.25.1
 
 The MIT License (MIT)
 
@@ -11239,8 +11241,9 @@ Copyright Gianluca Arbezzano - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/testcontainers/testcontainers-go v0.44.0
+  github.com/testcontainers/testcontainers-go v0.45.0
   github.com/testcontainers/testcontainers-go/modules/postgres v0.43.0
-  github.com/testcontainers/testcontainers-go/modules/postgres v0.44.0
+  github.com/testcontainers/testcontainers-go/modules/postgres v0.45.0
 
 The MIT License (MIT)
 
@@ -12806,7 +12809,7 @@ Copyright Klaus Post - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/klauspost/cpuid/v2 v2.4.0
-  github.com/klauspost/cpuid/v2 v2.4.1
+  github.com/klauspost/cpuid/v2 v2.4.2
 
 The MIT License (MIT)
 
@@ -15741,7 +15744,7 @@ License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/onsi/ginkgo/v2 v2.27.2
   github.com/onsi/ginkgo/v2 v2.32.0
-  github.com/onsi/ginkgo/v2 v2.33.1
+  github.com/onsi/ginkgo/v2 v2.34.0
   github.com/onsi/gomega v1.38.2
   github.com/onsi/gomega v1.40.0
   github.com/onsi/gomega v1.41.0
@@ -18075,7 +18078,7 @@ Components:
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
-  cloud.google.com/go/auth v0.24.2
+  cloud.google.com/go/auth v0.24.3
   cloud.google.com/go/auth/oauth2adapt v0.2.8
   cloud.google.com/go/auth/oauth2adapt v0.3.1
   cloud.google.com/go/compute/metadata v0.10.0
@@ -18104,7 +18107,7 @@ Components:
   github.com/coreos/go-semver/semver v0.3.1
   github.com/envoyproxy/protoc-gen-validate/validate v1.3.3
   github.com/go-jose/go-jose/v4 v4.1.4
-  github.com/go-jose/go-jose/v4 v4.1.7
+  github.com/go-jose/go-jose/v4 v4.1.9
   github.com/go-openapi/analysis v1.0.1
   github.com/go-openapi/errors v0.22.9
   github.com/go-openapi/jsonpointer v0.21.0
@@ -18168,7 +18171,7 @@ Components:
   github.com/google/s2a-go v0.1.11
   github.com/google/s2a-go v0.1.9
   github.com/googleapis/enterprise-certificate-proxy/client v0.3.15
-  github.com/googleapis/enterprise-certificate-proxy/client v0.3.24
+  github.com/googleapis/enterprise-certificate-proxy/client v0.3.25
   github.com/googleapis/google-cloud-go-testing/storage/stiface v0.0.0-20210719221736-1c9a4c676720
   github.com/jmespath/go-jmespath v0.4.1-0.20220621161143-b0104c826a24
   github.com/kai-scheduler/KAI-scheduler/pkg v0.18.2
@@ -18195,15 +18198,15 @@ Components:
   go.opencensus.io v0.24.0
   go.uber.org/mock/gomock v0.6.0
   google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941
-  google.golang.org/genproto/googleapis/api v0.0.0-20261026165753-2ffab32bce7e
+  google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/api/expr/v1alpha1 v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261012220534-4341edf3f941
-  google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261026165753-2ffab32bce7e
+  google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941
-  google.golang.org/genproto/googleapis/rpc v0.0.0-20261026165753-2ffab32bce7e
+  google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/rpc/status v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/type v0.0.0-20260319201613-d00831a3d3e7
-  google.golang.org/genproto/googleapis/type v0.0.0-20261026165753-2ffab32bce7e
+  google.golang.org/genproto/googleapis/type v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/grpc v1.84.0
   google.golang.org/grpc v1.85.0
   k8s.io/api v0.35.4
@@ -18506,6 +18509,7 @@ Components:
   github.com/nats-io/nats.go v1.54.0
   github.com/nats-io/nats.go v1.55.0
   github.com/nats-io/nkeys v0.4.16
+  github.com/nats-io/nkeys v0.4.17
   github.com/nats-io/nuid v1.0.1
   github.com/oklog/ulid v1.3.1
   github.com/oklog/ulid/v2 v2.1.2
@@ -18937,7 +18941,7 @@ Copyright the authors of github.com/aws/smithy-go/ptr, github.com/awslabs/operat
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/aws/smithy-go/ptr v1.28.5
-  github.com/aws/smithy-go/ptr v1.28.7
+  github.com/aws/smithy-go/ptr v1.28.8
   github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363
   github.com/russellhaering/goxmldsig v1.6.1
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
@@ -18945,6 +18949,7 @@ Components:
   github.com/xdg-go/pbkdf2 v1.0.0
   github.com/xdg-go/scram v1.1.2
   github.com/xdg-go/scram v1.2.0
+  github.com/xdg-go/scram v1.4.0
   github.com/xdg-go/stringprep v1.0.4
 
 
@@ -21152,8 +21157,10 @@ Components:
   golang.org/x/crypto/sha3 v0.58.0
   golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329
   golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
+  golang.org/x/exp v0.0.0-20261106192419-47ce03d25ef0
   golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp/slices v0.0.0-20261014143641-f0251eb4aa3e
+  golang.org/x/exp/slices v0.0.0-20261106192419-47ce03d25ef0
   golang.org/x/mod/semver v0.42.0
   golang.org/x/net v0.56.0
   golang.org/x/net v0.59.0
@@ -21181,6 +21188,7 @@ Components:
   golang.org/x/time/rate v0.16.0
   golang.org/x/time/rate v0.9.0
   golang.org/x/tools v0.52.0
+  golang.org/x/tools v0.52.1-0.20261106210606-4f7264d11672
 
 Copyright 2009 The Go Authors.
 
@@ -21443,7 +21451,7 @@ Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/go-jose/go-jose/v4/json v4.1.4
-  github.com/go-jose/go-jose/v4/json v4.1.7
+  github.com/go-jose/go-jose/v4/json v4.1.9
   github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
   github.com/klauspost/crc32 v1.3.0
   github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
@@ -25116,6 +25124,7 @@ Components:
   github.com/opencontainers/selinux v1.13.1
   go.yaml.in/yaml/v2 v2.4.3
   go.yaml.in/yaml/v2 v2.4.4
+  go.yaml.in/yaml/v2 v2.4.5
   gomodules.xyz/jsonpatch/v2 v2.5.0
   gopkg.in/yaml.v2 v2.4.0
   k8s.io/cloud-provider/volume v0.35.4
@@ -25812,7 +25821,7 @@ Copyright 2014-2015 Stripe, Inc.
 NOTICE of github.com/aws/smithy-go, github.com/awslabs/operatorpkg
 Components:
   github.com/aws/smithy-go v1.28.5
-  github.com/aws/smithy-go v1.28.7
+  github.com/aws/smithy-go v1.28.8
   github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
@@ -35221,6 +35230,7 @@ NOTICE of go.yaml.in/yaml/v2, go.yaml.in/yaml/v3, gopkg.in/yaml.v2 and 1 others
 Components:
   go.yaml.in/yaml/v2 v2.4.3
   go.yaml.in/yaml/v2 v2.4.4
+  go.yaml.in/yaml/v2 v2.4.5
   go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
   go.yaml.in/yaml/v3 v3.0.6
