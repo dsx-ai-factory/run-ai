@@ -4,9 +4,24 @@
  */
 import { describe, expect, it } from "vitest";
 import { matchesSchedulingFilters } from "./node-pool-scheduling-filters";
-import { getMockSchedulingResult, MOCK_SCHEDULING_IDS } from "./node-pool-scheduling-simulation.mock";
+import {
+  getMockSchedulingResult,
+  MOCK_SCHEDULING_IDS,
+  MOCK_SCHEDULING_TEN_IDS,
+} from "./node-pool-scheduling-simulation.mock";
 import { EColumnFilterType, EFilterOperator } from "@/models/filter.model";
 describe("scheduling preview boundaries", () => {
+  it("keeps the authored overcommit output internally consistent and separates guaranteed allocation from over-quota", () => {
+    const result = getMockSchedulingResult(MOCK_SCHEDULING_TEN_IDS, 144, {}, "guaranteed-overcommit");
+    expect(result).toBeDefined();
+    const outputs = Object.values(result ?? {});
+    expect(outputs.reduce((sum, row) => sum + row.allocated, 0)).toBe(144);
+    expect(
+      outputs.every(
+        (row) => row.guaranteed === row.allocated && row.overQuota === 0 && row.allocated + row.unmet === 144,
+      ),
+    ).toBe(true);
+  });
   it("applies multiple ranks and a negative name condition together", () => {
     const filters = [
       {

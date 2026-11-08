@@ -25,6 +25,48 @@ const rows: DepartmentNodePoolResources[] = [
 ];
 const draft: SchedulingDraft = { mode: "proportional", automaticWeights: false, cpuQuota: false, departments: {} };
 describe("scheduling department table", () => {
+  it("renders only the exact authored overcommit profile and clears bars for nearby quotas, modes and live IDs", async () => {
+    const profile = Array.from({ length: 10 }, (_, index) => ({
+      ...rows[0],
+      id: `fixture-resource-${index + 1}`,
+      orgUnitId: `preview-department-${index + 1}`,
+      orgUnitName: `department ${index + 1}`,
+      resources: { gpu: { deserved: index === 0 ? 24 : 16, overQuotaWeight: 2, limit: -1 } },
+    }));
+    const guaranteed = { ...draft, mode: "guaranteed" as const };
+    const wrapper = mount(Table, {
+      props: {
+        rows: profile,
+        baselineRows: profile,
+        draft: guaranteed,
+        capacity: 144,
+        aggregates: { all: { weightsSum: 20, deservedSum: 168 }, MediumLow: { weightsSum: 20, deservedSum: 168 } },
+        ranks: ["MediumLow"],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(".allocated")).toHaveLength(10);
+    expect(wrapper.get(".quota-warning").text()).toContain("exceeds");
+    expect(wrapper.text()).toContain("Simulation preview — mock results");
+    const nearby = profile.map((row, index) =>
+      index ? row : { ...row, resources: { gpu: { ...row.resources.gpu, deserved: 25 } } },
+    );
+    await wrapper.setProps({ rows: nearby, baselineRows: nearby });
+    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    await wrapper.setProps({ rows: profile, baselineRows: profile, draft: { ...guaranteed, mode: "ranked" } });
+    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    const live = profile.map((row, index) => ({ ...row, orgUnitId: `live-department-${index + 1}` }));
+    await wrapper.setProps({ rows: live, baselineRows: live, draft: guaranteed });
+    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    wrapper.unmount();
+  });
   it("uses the reference zero-state copy and only changes the settings label for no matches", async () => {
     const wrapper = mount(Table, {
       props: { rows: [], draft, aggregates: {}, ranks: [], readonly: false, loading: false },

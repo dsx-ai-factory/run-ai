@@ -19,6 +19,7 @@
       :columns="filterColumns"
       :filters="{ ...filters, searchTerm }"
       advanced-filters
+      search-tooltip-text="Search departments"
       filter-menu-width="208px"
       hide-cluster-filter
       hide-columns-btn
@@ -212,9 +213,18 @@
                       <template v-if="simulationResults?.[row.id]">
                         <br />{{
                           draft.mode === "guaranteed" ? "Expected over-quota GPU allocation" : "Expected GPU allocation"
-                        }}: {{ simulationResults[row.id].allocated }} <br />Unmet GPU demand:
-                        {{ simulationResults[row.id].unmet }} <br />Simulated real-time GPU demand:
-                        {{ demand[row.id] ?? capacity }} <br />Authored example scenario; not a scheduler prediction.
+                        }}:
+                        {{
+                          draft.mode === "guaranteed"
+                            ? simulationResults[row.id].overQuota
+                            : simulationResults[row.id].allocated
+                        }}
+                        <template v-if="simulationResults[row.id].guaranteed"
+                          ><br />Expected guaranteed GPU allocation: {{ simulationResults[row.id].guaranteed }}</template
+                        >
+                        <br />Unmet GPU demand: {{ simulationResults[row.id].unmet }} <br />Simulated real-time GPU
+                        demand: {{ demand[row.id] ?? capacity }} <br />Authored example scenario; not a scheduler
+                        prediction.
                       </template>
                       <template v-else><br />Mock preview not available for these values.</template>
                     </template>
@@ -300,7 +310,11 @@ import { RunaiActionButton } from "@/components/common/runai-page-actions/runai-
 import { EColumnFilterType, EFilterOperator, type IFilterBy } from "@/models/filter.model";
 import type { ITableColumn } from "@/models/table.model";
 import { matchesSchedulingFilters } from "./node-pool-scheduling-filters";
-import { getMockSchedulingResult } from "./node-pool-scheduling-simulation.mock";
+import {
+  getMockSchedulingResult,
+  MOCK_SCHEDULING_TEN_IDS,
+  MOCK_GUARANTEED_OVERCOMMIT_QUOTAS,
+} from "./node-pool-scheduling-simulation.mock";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import MoveToRankModal from "@/components/org-unit/v2/common/peer-org-unit-rank-list/move-to-rank-modal/move-to-rank-modal.vue";
 import {
@@ -475,12 +489,23 @@ const simulationResults = computed(() => {
     Object.values(props.draft.minimumRuntime ?? {}).some((value) => value != null && value !== 0) ||
     Object.keys(props.draft.departments).length ||
     Object.values(baseline.value).some(
-      (row) =>
-        row.quota !== 0 || row.weight !== 2 || row.rank !== "MediumLow" || (row.limit != null && row.limit !== -1),
+      (row) => row.weight !== 2 || row.rank !== "MediumLow" || (row.limit != null && row.limit !== -1),
     )
   )
     return undefined;
-  return getMockSchedulingResult(Object.keys(baseline.value), props.capacity, demand.value);
+  const ids = Object.keys(baseline.value);
+  const zeroQuota = Object.values(baseline.value).every((row) => row.quota === 0);
+  const guaranteedOvercommit =
+    props.draft.mode === "guaranteed" &&
+    ids.length === 10 &&
+    MOCK_SCHEDULING_TEN_IDS.every((id) => baseline.value[id]?.quota === MOCK_GUARANTEED_OVERCOMMIT_QUOTAS[id]);
+  if (!zeroQuota && !guaranteedOvercommit) return undefined;
+  return getMockSchedulingResult(
+    ids,
+    props.capacity,
+    demand.value,
+    guaranteedOvercommit ? "guaranteed-overcommit" : "zero-quota",
+  );
 });
 const currentRank = computed(() => {
   const ranks = new Set([...selected.value].map((id) => props.draft.departments[id]?.rank ?? baseline.value[id]?.rank));
@@ -676,6 +701,16 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .scheduling-actions :deep(.runai-general-search:not(.focus):not(.filled)) {
   width: 59px;
+}
+.scheduling-actions :deep(.left-actions) {
+  margin-right: 26px;
+  flex-shrink: 0;
+}
+.scheduling-actions :deep(.add-filter-btn) {
+  margin-left: 0;
+  height: 38px;
+  min-height: 38px;
+  padding: 0 10px;
 }
 .scheduling-actions :deep(.main-actions) {
   height: 40px;
