@@ -23,20 +23,23 @@ func (rp *RunaiPublic) inferenceEndpointIntegrationAvailable(ctx context.Context
 	if agent == nil || aw == nil || endpoint == nil || !ptr.Deref(agent.Enabled, false) || !ptr.Deref(aw.Enabled, false) || !ptr.Deref(endpoint.Enabled, false) {
 		return false
 	}
+	// The agent runs in the local cluster; the other two run in the cluster that
+	// hosts this ConfigMap. The two differ in a dual-cluster setup.
 	for _, component := range []struct {
-		name  string
-		image *common.Image
+		name   string
+		image  *common.Image
+		reader client.Reader
 	}{
-		{operands.RunaiAgentName, agent.Image},
-		{operands.RunaiAnyworkloadControllerName, aw.Image},
-		{operands.RunaiInferenceEndpointControllerName, endpoint.Image},
+		{operands.RunaiAgentName, agent.Image, rp.localClusterReader},
+		{operands.RunaiAnyworkloadControllerName, aw.Image, rp.kbClient},
+		{operands.RunaiInferenceEndpointControllerName, endpoint.Image, rp.kbClient},
 	} {
 		expectedImage := formatImageRef(component.image)
 		if expectedImage == nil {
 			return false
 		}
 		deployment := &appsv1.Deployment{}
-		if err := rp.kbClient.Get(ctx, client.ObjectKey{Namespace: rp.runaiConfig.Namespace, Name: component.name}, deployment); err != nil {
+		if err := component.reader.Get(ctx, client.ObjectKey{Namespace: rp.runaiConfig.Namespace, Name: component.name}, deployment); err != nil {
 			return false
 		}
 		replicas := ptr.Deref(deployment.Spec.Replicas, 1)
