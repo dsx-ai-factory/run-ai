@@ -60,7 +60,7 @@ func prepareNodeForUpsert(node *models.Node) []any {
 		node.GpuType, node.GpuCount, node.GpuMemoryBytes, node.CreatedAt, node.UpdatedAt,
 		node.NvLinkDomainUid, node.NvLinkCliqueId,
 		node.NetworkTopologyLabelValues, networkTopologyLabelsJSON,
-		node.TopologyManagerPolicy,
+		node.TopologyManagerPolicy, node.Labels,
 	}
 }
 

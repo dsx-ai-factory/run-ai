@@ -32,6 +32,7 @@ func GetPermittedScopesFilter(permittedScopes openapi.PermittedScopes, clusterId
 
 func NodeInfoToNodeDao(tenantId int32, clusterUuid, nodeName string, nodeInfo api.NodeInfo) *models.Node {
 	node := &models.Node{
+		Labels: models.NodeLabels(nodeInfo.Labels),
 		Common: models.Common{
 			CreatedAt: nodeInfo.CreatedAt,
 		},

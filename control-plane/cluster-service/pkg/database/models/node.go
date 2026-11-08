@@ -30,6 +30,7 @@ var NodeQueryParser = queryapi.NewParser(nodeColumnMapping())
 type (
 	NodeStatusConditionsDetails  []api.NodeStatusConditionDetails
 	NodeTaints                   []api.NodeTaint
+	NodeLabels                   map[string]string
 	NetworkTopologyLabels        []NetworkTopologyLabel
 	NetworkTopologyLabelsAdapter NetworkTopologyLabels
 )
@@ -59,6 +60,7 @@ func (ta NetworkTopologyLabelsAdapter) ToApiModels() *[]api.NetworkTopologyLabel
 }
 
 type Node struct {
+	Labels                     NodeLabels `gorm:"serializer:json;type:jsonb"`
 	Common                     `gorm:"embedded"`
 	ID                         uuid.UUID `gorm:"primaryKey"`
 	TenantId                   int32
@@ -100,7 +102,7 @@ func (Node) ColumnsToUpdate() []string {
 	return []string{
 		"updated_at", "status", "conditions", "taints", "node_pool", "gpu_type", "gpu_count", "gpu_memory_bytes", "tenant_id",
 		"nv_link_clique_id", "nv_link_domain_uid", "network_topology_label_values", "network_topology_labels",
-		"topology_manager_policy",
+		"topology_manager_policy", "labels",
 	}
 }
 
@@ -111,7 +113,7 @@ func (n Node) InsertColumns() []string {
 		"node_pool", "gpu_type", "gpu_count", "gpu_memory_bytes", "created_at", "updated_at",
 		"nv_link_domain_uid", "nv_link_clique_id",
 		"network_topology_label_values", "network_topology_labels",
-		"topology_manager_policy",
+		"topology_manager_policy", "labels",
 	}
 }
 
