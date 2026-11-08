@@ -19,6 +19,7 @@
     "NOTE: the rest of this list is added at run time. runai-actions .github/workflows/renovate.yml runs renovate/scan_candidates, which adds every Go module it finds safe to bump. Keep only entries it cannot work out from the module layout, such as a folder holding no Go module. This line is not a path and is dropped before the list reaches Renovate.",
     "control-plane/frontend/**",
     "control-plane/keycloak-extensions/**",
+    "control-plane/control-plane-chart/**",
     "build/makefile/**"
   ],
   "ignorePaths": [
@@ -76,6 +77,34 @@
         "control-plane/frontend/**"
       ],
       "enabled": false
+    },
+    {
+      "matchManagers": [
+        "helmv3"
+      ],
+      "matchFileNames": [
+        "control-plane/control-plane-chart/Chart.yaml"
+      ],
+      "matchPackageNames": [
+        "!keycloakx"
+      ],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": [
+        "keycloakx",
+        "quay.io/keycloak/keycloak"
+      ],
+      "matchFileNames": [
+        "control-plane/control-plane-chart/Chart.yaml",
+        "control-plane/control-plane-chart/values.yaml",
+        "control-plane/identity-manager/integration-tests/docker-compose.yaml"
+      ],
+      "enabled": true,
+      "groupName": "keycloak",
+      "groupSlug": "keycloak",
+      "automerge": false,
+      "branchName": "{{{branchPrefix}}}keycloak"
     }
   ]
 }
