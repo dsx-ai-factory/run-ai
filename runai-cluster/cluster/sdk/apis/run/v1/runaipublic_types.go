@@ -35,6 +35,9 @@ type PublicPlatform struct {
 }
 
 type PublicConfiguration struct {
+	// InferenceEndpointSchemaVersion declares the installed integration contract;
+	// operand readiness and administrator Gateway settings are checked separately.
+	InferenceEndpointSchemaVersion         *string                     `yaml:"inferenceEndpointSchemaVersion,omitempty"`
 	WorkloadOwnershipProtection            *bool                       `yaml:"workloadOwnershipProtection,omitempty"`
 	SubdomainEnabled                       *bool                       `yaml:"subdomainEnabled,omitempty"`
 	IngressClass                           *string                     `yaml:"ingressClass,omitempty"`
