@@ -90,8 +90,10 @@ global:
       dbUseServiceSession: "true"
   postgresql:
     auth:
-      postgresPassword: ""
-      password: ""
+      # POC-TEMP: explicit values are required because the bundled postgresql is disabled
+      # (the secret generator will not invent passwords for an external database).
+      postgresPassword: "poc-temp-admin" # was ""
+      password: "poc-temp-user" # was ""
       existingSecret: "runai-backend-gen-postgresql"
       username: user
       database: backend

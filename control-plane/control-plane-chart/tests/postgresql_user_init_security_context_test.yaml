@@ -3,6 +3,10 @@ suite: Test PostgreSQL User Init Security Context
 templates:
   - templates/helm-hooks/postgresql-user-init/job.yaml
 
+# POC-TEMP: the chart default for postgresql.enabled is temporarily false; this hook only renders with the bundled database.
+set:
+  postgresql.enabled: true
+
 tests:
   - it: should omit runAsUser on OpenShift
     set:
