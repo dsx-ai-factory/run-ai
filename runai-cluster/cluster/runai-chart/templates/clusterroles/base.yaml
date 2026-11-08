@@ -80,17 +80,6 @@ rules:
     verbs:
       - get
       - update
-  # Detecting whether NVIDIA Snapshot is installed. Read-only and restricted to
-  # Snapshot's own CRD; the operator Deployment and agent DaemonSet it also
-  # reads are already covered by the apps rule above.
-  - apiGroups:
-      - apiextensions.k8s.io
-    resourceNames:
-      - snapshotjobs.nvidia.com
-    resources:
-      - customresourcedefinitions
-    verbs:
-      - get
   - apiGroups:
       - ""
     resources:
@@ -882,7 +871,7 @@ rules:
       - patch
       - delete
     # Keep legacy webhook names so init-ca can remove them during upgrades.
-    resourceNames: ["assets-sync", "application-validation", "runai-assets-sync-validation", "runai-secret-pvc-validation", "runai-pod", "runai-pod-controller-mutation", "runai-interactive-workload-mutation", "runai-training-workload-mutation", "runai-distributed-workload-mutation", "runai-inference-workload-mutation", "runai-inference-workload-mutation-old", "runai-distributed-inference-workload-mutation", "runai-pod-group-mutation", "runai-workload-ownership-mutation", "inference-workload-ownership-mutation", "runai-anyworkload-mutation", "runai-pod-controller-validation", "runai-interactive-policy-validation", "runai-interactive-workload-validation", "runai-training-policy-validation", "runai-training-workload-validation", "runai-distributed-policy-validation", "runai-distributed-workload-validation", "runai-inference-policy-validation-old", "runai-inference-policy-validation", "runai-inference-workload-validation-old", "runai-inference-workload-validation", "runai-distributed-inference-workload-validation", "runai-accessrule-validation", "runai-workload-ownership-protection-validation","runai-inference-workload-ownership-mutation", "runai-inference-workload-ownership-protection-validation", "runai-queue-validation", "runai-queue-validation-v2", "runai-queue-validation-v2alpha1", "runai-queue-validation-v2alpha2", "runai-project-validation", "runai-anyworkload-validation", "runai-restartrequest-validation", "runai-advice-restart-dw-mutation"]
+    resourceNames: ["assets-sync", "application-validation", "runai-assets-sync-validation", "runai-secret-pvc-validation", "runai-pod", "runai-pod-controller-mutation", "runai-interactive-workload-mutation", "runai-training-workload-mutation", "runai-distributed-workload-mutation", "runai-inference-workload-mutation", "runai-inference-workload-mutation-old", "runai-distributed-inference-workload-mutation", "runai-pod-group-mutation", "runai-workload-ownership-mutation", "inference-workload-ownership-mutation", "runai-anyworkload-mutation", "runai-pod-controller-validation", "runai-interactive-policy-validation", "runai-interactive-workload-validation", "runai-training-policy-validation", "runai-training-workload-validation", "runai-distributed-policy-validation", "runai-distributed-workload-validation", "runai-inference-policy-validation-old", "runai-inference-policy-validation", "runai-inference-workload-validation-old", "runai-inference-workload-validation", "runai-distributed-inference-workload-validation", "runai-accessrule-validation", "runai-workload-ownership-protection-validation","runai-inference-workload-ownership-mutation", "runai-inference-workload-ownership-protection-validation", "runai-queue-validation", "runai-queue-validation-v2", "runai-queue-validation-v2alpha1", "runai-queue-validation-v2alpha2", "runai-project-validation", "runai-anyworkload-validation", "runai-restartrequest-validation", "runai-advice-restart-dw-mutation", "runai-snapshot-restore"]
 
   - apiGroups: [""]
     resources: ["configmaps"]
