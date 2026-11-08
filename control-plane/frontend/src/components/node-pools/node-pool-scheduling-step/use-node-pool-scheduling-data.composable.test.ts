@@ -194,4 +194,51 @@ describe("scoped scheduling reads", () => {
     await pending;
     expect(data.pages.value).toEqual([]);
   });
+  it("waits for a replacement first page before appending an expanded selected rank", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue({ id: "p", clusterId: "c", name: "pool" } as never);
+    vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
+    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 300, deservedSum: 0 });
+    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockImplementation(async (filters) =>
+      filters?.includes("rank==High") ? 100 : 150,
+    );
+    const make = (i: number, rank: string) => ({
+      id: `${rank}${i}`,
+      orgUnitId: `${rank}${i}`,
+      orgUnitName: `${rank} ${i}`,
+      clusterId: "c",
+      nodePoolId: "p",
+      nodePoolName: "pool",
+      rank,
+      resources: { gpu: { overQuotaWeight: 2, deserved: 0 } },
+    });
+    let resolveFirst!: (value: { nodePoolResources: ReturnType<typeof make>[] }) => void;
+    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
+      async (filters, _sort, _order, offset, limit) => {
+        if (limit === 100) return { nodePoolResources: [] };
+        if (filters?.includes("rank==High") && offset === 0)
+          return new Promise((resolve) => {
+            resolveFirst = resolve;
+          });
+        const rank = filters?.includes("rank==High") ? "High" : "Low";
+        return { nodePoolResources: Array.from({ length: 50 }, (_, i) => make((offset ?? 0) + i, rank)) };
+      },
+    );
+    const data = useNodePoolSchedulingData(ref("p"));
+    await flushPromises();
+    expect(data.pages.value).toHaveLength(50);
+    data.rank.value = "High";
+    await flushPromises();
+    const calls = vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.length;
+    await data.loadRank("High");
+    await data.loadMore();
+    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.length).toBe(calls);
+    expect(data.hasMore.value).toBe(false);
+    resolveFirst({ nodePoolResources: Array.from({ length: 50 }, (_, i) => make(i, "High")) });
+    await flushPromises();
+    expect(data.pages.value.map((row) => row.orgUnitId)).toEqual(Array.from({ length: 50 }, (_, i) => `High${i}`));
+    expect(data.hasMore.value).toBe(true);
+    await data.loadRank("High");
+    expect(data.pages.value.map((row) => row.orgUnitId)).toEqual(Array.from({ length: 100 }, (_, i) => `High${i}`));
+    expect(data.hasMore.value).toBe(false);
+  });
 });

@@ -65,13 +65,27 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const count = ref(0);
   const loadingRanks = new Map<string, string>();
   const globalOffset = ref(0);
-  const hasMore = computed(() => globalOffset.value < count.value);
+  const queryKey = computed(() => JSON.stringify([poolId.value, search.value, rank.value]));
+  const completedQuery = ref<string>();
+  const hasMore = computed(() => completedQuery.value === queryKey.value && globalOffset.value < count.value);
   let scopeVersion = 0;
   let rowsVersion = 0;
   let appending = false;
   async function loadRows(append = false) {
     const pool = snapshot.value;
-    if (!pool || !permissions.value.view || (append && appending)) return;
+    if (
+      !pool ||
+      !permissions.value.view ||
+      (append && (appending || rowsLoading.value || completedQuery.value !== queryKey.value))
+    )
+      return;
+    const requestQuery = queryKey.value;
+    if (!append) {
+      completedQuery.value = undefined;
+      globalOffset.value = 0;
+      count.value = 0;
+      pages.value = [];
+    }
     const current = ++rowsVersion;
     const scopeRequest = scopeVersion;
     if (append) appending = true;
@@ -85,6 +99,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       ]);
       if (rowsVersion !== current || scopeVersion !== scopeRequest) return;
       globalOffset.value = (append ? globalOffset.value : 0) + rows.length;
+      completedQuery.value = requestQuery;
       pages.value = append
         ? [
             ...pages.value,
@@ -108,6 +123,8 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     if (
       !pool ||
       !permissions.value.view ||
+      rowsLoading.value ||
+      completedQuery.value !== queryKey.value ||
       loadingRanks.get(rankValue) === requestIdentity ||
       (rank.value && rank.value !== rankValue)
     )
@@ -139,6 +156,8 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     }
   }
   async function refresh() {
+    completedQuery.value = undefined;
+    rowsLoading.value = false;
     const current = ++scopeVersion;
     rowsVersion++;
     appending = false;
