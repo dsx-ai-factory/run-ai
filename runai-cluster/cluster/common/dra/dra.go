@@ -77,6 +77,16 @@ func (p *DRAParser) ResolvePodRequestedGpuCount(ctx context.Context, pod *corev1
 	return totalGpuCount, nil
 }
 
+// ResolveDRAGpuCount resolves the total NVIDIA GPU count from pod-level resource claims.
+// Deprecated: prefer ResolvePodRequestedGpuCount, which de-duplicates claims and returns errors.
+func (p *DRAParser) ResolveDRAGpuCount(ctx context.Context, namespace string, podResourceClaims []corev1.PodResourceClaim) int64 {
+	var totalGpuCount int64
+	for _, prc := range podResourceClaims {
+		totalGpuCount += p.ResolveNamedClaimGpuCount(ctx, namespace, prc.ResourceClaimName, prc.ResourceClaimTemplateName)
+	}
+	return totalGpuCount
+}
+
 // fetchPodClaimSpec reads the requested resource specification from a claim
 // or template. It also returns a key used to prevent counting the same request twice.
 func (p *DRAParser) fetchPodClaimSpec(ctx context.Context, pod *corev1.Pod, claimRef corev1.PodResourceClaim) (string, *resourcev1.ResourceClaimSpec, error) {
