@@ -4,15 +4,28 @@
  */
 
 import { flushPromises, mount } from "@vue/test-utils";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Quasar } from "quasar";
 import { createTestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
 import { markRaw } from "vue";
 import SamlFields from "./saml-fields.vue";
 import type { SamlConfigSettings } from "@/models/setting.model";
-import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
-import { idpCommon } from "../../idp-common/idp-common";
+import {
+  IdpCreationRequestTypeEnum,
+  SamlCreationDataMetadataXmlTypeEnum,
+} from "@/swagger-models/identity-manager-client";
+import { idpService } from "@/services/control-plane/idp.service/idp.service";
+
+vi.mock("@/services/control-plane/idp.service/idp.service", () => ({
+  idpService: { dryRunIdp: vi.fn() },
+}));
+
+const acceptedMetadata = {
+  alias: "saml",
+  samlData: { signingCertificate: "fake-cert-content" },
+};
+const rejectedMetadata = { message: "invalid saml signing certificate" };
 
 describe("saml-fields.vue", () => {
   const validSamlSettings: SamlConfigSettings = {
@@ -49,9 +62,7 @@ describe("saml-fields.vue", () => {
     "<ds:X509Certificate>fake-cert-content</ds:X509Certificate>" +
     "</ds:X509Data></ds:KeyInfo></md:KeyDescriptor></md:IDPSSODescriptor></md:EntityDescriptor>";
 
-  // Simulates picking a file without going through the real FileReader flow:
-  // sets metadataFile (as the real file-picker handler does) and directly
-  // invokes the same certificate-parsing path setFileContent triggers.
+  // Simulates picking a file without going through the real FileReader flow.
   const uploadFile = async (wrapper: ReturnType<typeof factory>["wrapper"], fileName = "idp.xml") => {
     (wrapper.vm as unknown as { metadataFile: File | null }).metadataFile = markRaw(
       new File([fakeMetadataXml], fileName),
@@ -66,10 +77,7 @@ describe("saml-fields.vue", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    vi.useRealTimers();
+    vi.mocked(idpService.dryRunIdp).mockResolvedValue(acceptedMetadata);
   });
 
   describe("isValidFile", () => {
@@ -146,23 +154,24 @@ describe("saml-fields.vue", () => {
     const lastCertificateDetails = (wrapper: ReturnType<typeof factory>["wrapper"]) =>
       wrapper.emitted("certificate-details")?.at(-1)?.[0];
 
-    const now = new Date("2026-01-01T00:00:00.000Z");
-    const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-
-    beforeEach(() => {
-      vi.useFakeTimers();
-      vi.setSystemTime(now);
-    });
-
-    it("reports the expired-file message for an uploaded file, and hides the date once it's cleared", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
+    it("reports the identity-manager error for an uploaded file, and hides it once the file is cleared", async () => {
+      vi.mocked(idpService.dryRunIdp).mockRejectedValue(rejectedMetadata);
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
 
+      expect(idpService.dryRunIdp).toHaveBeenCalledWith({
+        type: IdpCreationRequestTypeEnum.Saml,
+        samlData: expect.objectContaining({
+          metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File,
+          metadataXmlFile: btoa(fakeMetadataXml),
+          fileName: "idp.xml",
+        }),
+        dryRun: true,
+      });
       expect(lastCertificateDetails(wrapper)).toMatchObject({
         showExpirationDate: true,
-        expirationError: "Certificate expired. Replace the metadata file above.",
+        expirationError: rejectedMetadata.message,
       });
 
       (wrapper.vm as unknown as { clearFile: () => void }).clearFile();
@@ -171,30 +180,37 @@ describe("saml-fields.vue", () => {
       expect(lastCertificateDetails(wrapper)).toMatchObject({ showExpirationDate: false, expirationError: "" });
     });
 
-    it("reports the expired-URL message when sourced from a URL", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
-
-      const { wrapper } = factory(
-        { samlSettings: validSamlSettings, isNewIdp: false },
-        { samlSource: SamlCreationDataMetadataXmlTypeEnum.Url },
-      );
-      await flushPromises();
-
-      expect(lastCertificateDetails(wrapper)).toMatchObject({
-        showExpirationDate: true,
-        expirationError: "Certificate expired. Replace the metadata URL above.",
+    it("keeps the parsed identity provider fields when identity-manager rejects the file", async () => {
+      vi.mocked(idpService.dryRunIdp).mockRejectedValue({
+        message: rejectedMetadata.message,
+        samlData: {
+          entityId: "https://idp.example.com",
+          singleSignOnServiceUrl: "https://idp.example.com/sso",
+          signingCertificate: "expired-cert",
+        },
       });
-    });
-
-    it("reports no error for a certificate that is still valid", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
 
       expect(lastCertificateDetails(wrapper)).toMatchObject({
         showExpirationDate: true,
-        expirationDate: daysFromNow(120),
+        expirationError: rejectedMetadata.message,
+        idpEntityId: "https://idp.example.com",
+        singleSignOnServiceUrl: "https://idp.example.com/sso",
+      });
+      expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(false);
+      expect((wrapper.vm as unknown as { samlFields: { entityId?: string } }).samlFields.entityId).toBe(
+        "https://idp.example.com",
+      );
+    });
+
+    it("reports no local certificate error when identity-manager accepts the file", async () => {
+      const { wrapper } = factory({ isNewIdp: true });
+      await uploadFile(wrapper);
+
+      expect(lastCertificateDetails(wrapper)).toMatchObject({
+        showExpirationDate: false,
         expirationError: "",
       });
     });
@@ -220,6 +236,7 @@ describe("saml-fields.vue", () => {
       await flushPromises();
 
       expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(true);
+      expect(idpService.dryRunIdp).not.toHaveBeenCalled();
     });
 
     it("fills the URL field when the stored resource of a URL-sourced IdP is a URL", async () => {
@@ -271,48 +288,37 @@ describe("saml-fields.vue", () => {
     });
   });
 
-  describe("stale certificate validation guard", () => {
-    it("ignores a validation result that resolves after a newer file selection has started", async () => {
-      let resolveStale: (d: Date | null) => void = () => {};
-      const stalePromise = new Promise<Date | null>((resolve) => {
-        resolveStale = resolve;
-      });
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockReturnValueOnce(stalePromise);
+  describe("stale metadata validation guard", () => {
+    it("ignores a dry-run result that resolves after a newer file selection has started", async () => {
+      let resolveStale: (response: typeof acceptedMetadata) => void = () => {};
+      vi.mocked(idpService.dryRunIdp).mockReturnValue(
+        new Promise((resolve) => {
+          resolveStale = resolve;
+        }),
+      );
 
       const { wrapper } = factory({ isNewIdp: true });
       const vm = wrapper.vm as unknown as {
         setFileContent: (n: string, c: string, t?: number) => Promise<void>;
         fileSelectionToken: number;
-        expirationDate: Date | null;
+        metadataAccepted: boolean;
       };
 
-      // Start validating a "first" file selection (token 0), but its lookup hasn't resolved yet.
       const firstCall = vm.setFileContent("first.xml", fakeMetadataXml, 0);
-
-      // A newer selection supersedes it before the first lookup resolves.
       vm.fileSelectionToken = 1;
 
-      // The stale lookup finally resolves with an (irrelevant) expired date.
-      resolveStale(new Date("2020-01-01T00:00:00.000Z"));
+      resolveStale(acceptedMetadata);
       await firstCall;
       await wrapper.vm.$nextTick();
 
-      expect(vm.expirationDate).toBeNull();
-      expect(wrapper.text()).not.toContain("Certificate expired");
+      expect(vm.metadataAccepted).toBe(false);
+      expect(wrapper.text()).not.toContain(rejectedMetadata.message);
     });
   });
 
   describe("isValidInput", () => {
-    const now = new Date("2026-01-01T00:00:00.000Z");
-    const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-
-    beforeEach(() => {
-      vi.useFakeTimers();
-      vi.setSystemTime(now);
-    });
-
-    it("is invalid when the uploaded file's certificate is already expired", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
+    it("is invalid when identity-manager rejects the uploaded file", async () => {
+      vi.mocked(idpService.dryRunIdp).mockRejectedValue(rejectedMetadata);
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
@@ -320,9 +326,40 @@ describe("saml-fields.vue", () => {
       expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(false);
     });
 
-    it("is valid when the uploaded file's certificate is still valid", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
+    it("validates an existing identity provider through the update dry-run", async () => {
+      const { wrapper } = factory({ isNewIdp: false, idpAlias: "saml-idp" });
+      await uploadFile(wrapper);
 
+      expect(idpService.dryRunIdp).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: IdpCreationRequestTypeEnum.Saml,
+          dryRun: true,
+        }),
+        "saml-idp",
+      );
+    });
+
+    it("asks identity-manager to validate a changed metadata URL", async () => {
+      const { wrapper } = factory({ isNewIdp: true });
+      (wrapper.vm as unknown as { samlSource: string }).samlSource = SamlCreationDataMetadataXmlTypeEnum.Url;
+      await flushPromises();
+
+      await (wrapper.vm as unknown as { updateMetadataXmlUrl: (url: string) => Promise<void> }).updateMetadataXmlUrl(
+        "https://idp.example.com/metadata",
+      );
+
+      expect(idpService.dryRunIdp).toHaveBeenCalledWith({
+        type: IdpCreationRequestTypeEnum.Saml,
+        samlData: expect.objectContaining({
+          metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.Url,
+          metadataXmlUrl: "https://idp.example.com/metadata",
+        }),
+        dryRun: true,
+      });
+      expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(true);
+    });
+
+    it("is valid when identity-manager accepts the uploaded file", async () => {
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
 

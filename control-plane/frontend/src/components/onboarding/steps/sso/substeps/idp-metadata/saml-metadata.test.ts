@@ -11,19 +11,20 @@ import { setActivePinia } from "pinia";
 import { h, markRaw } from "vue";
 import SamlMetadata from "./saml-metadata.vue";
 import SamlFields from "@/components/settings/sections/security/sso-settings/idps/saml/saml-fields/saml-fields.vue";
-import { idpCommon } from "@/components/settings/sections/security/sso-settings/idps/idp-common/idp-common";
+import { idpService } from "@/services/control-plane/idp.service/idp.service";
+
+vi.mock("@/services/control-plane/idp.service/idp.service", () => ({
+  idpService: { dryRunIdp: vi.fn() },
+}));
 
 const metadataXml =
   '<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"><md:IDPSSODescriptor><md:KeyDescriptor use="signing">' +
   '<ds:KeyInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#"><ds:X509Data><ds:X509Certificate>fake-cert</ds:X509Certificate>' +
   "</ds:X509Data></ds:KeyInfo></md:KeyDescriptor></md:IDPSSODescriptor></md:EntityDescriptor>";
 
-const EXPIRED_MESSAGE = "Certificate expired. Replace the metadata file above.";
+const REJECTED_MESSAGE = "invalid saml signing certificate";
 
 describe("saml-metadata.vue (onboarding)", () => {
-  const now = new Date("2026-06-01T00:00:00.000Z");
-  const daysFromNow = (days: number): Date => new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-
   // Onboarding renders every step inside one q-form and validates it when moving to the next step.
   const mountInForm = () => {
     setActivePinia(createTestingPinia({ createSpy: vi.fn }));
@@ -49,32 +50,31 @@ describe("saml-metadata.vue (onboarding)", () => {
     (wrapper.vm as unknown as { validate: () => Promise<boolean> }).validate();
 
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(now);
+    vi.mocked(idpService.dryRunIdp).mockResolvedValue({
+      alias: "saml",
+      samlData: { signingCertificate: "fake-cert" },
+    });
   });
 
   afterEach(() => {
-    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
-  it("shows the certificate error and blocks the form when the uploaded certificate is expired", async () => {
-    vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
+  it("shows the identity-manager error and blocks the form when metadata is rejected", async () => {
+    vi.mocked(idpService.dryRunIdp).mockRejectedValue({ message: REJECTED_MESSAGE });
     const wrapper = mountInForm();
     await uploadMetadataFile(wrapper);
 
-    expect(wrapper.text()).toContain(EXPIRED_MESSAGE);
+    expect(wrapper.text()).toContain(REJECTED_MESSAGE);
     expect(await validateForm(wrapper)).toBe(false);
     wrapper.unmount();
   });
 
-  it("shows the expiration date and accepts the form when the certificate is valid", async () => {
-    vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
+  it("accepts the form when identity-manager accepts the metadata", async () => {
     const wrapper = mountInForm();
     await uploadMetadataFile(wrapper);
 
-    expect(wrapper.text()).toContain("Certificate expiration date");
-    expect(wrapper.text()).not.toContain("Certificate expired");
+    expect(wrapper.text()).not.toContain(REJECTED_MESSAGE);
     expect(await validateForm(wrapper)).toBe(true);
     wrapper.unmount();
   });

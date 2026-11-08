@@ -22,18 +22,24 @@
         <saml-fields
           :idp-resources="idpResources"
           :is-new-idp="isNewIdp"
-          :saml-settings="samlConfigSettings"
+          :idp-alias="isNewIdp ? undefined : idp?.alias"
           @updated="updateSamlFields"
           @certificate-details="onCertificateDetails"
           ref="samlFieldsEl"
         />
       </div>
       <saml-idp-details
-        v-if="editCertificateDetails.expirationError"
+        v-if="
+          editCertificateDetails.expirationError ||
+          editCertificateDetails.idpEntityId ||
+          editCertificateDetails.singleSignOnServiceUrl
+        "
         class="q-mb-lg"
         :expiration-date="editCertificateDetails.expirationDate"
         :show-expiration-date="editCertificateDetails.showExpirationDate"
         :expiration-error="editCertificateDetails.expirationError"
+        :idp-entity-id="editCertificateDetails.idpEntityId"
+        :single-sign-on-service-url="editCertificateDetails.singleSignOnServiceUrl"
       />
       <div class="col-12 q-mb-lg">
         <setting-readable-field label="Entity ID">

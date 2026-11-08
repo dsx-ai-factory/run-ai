@@ -20,6 +20,8 @@
         :expiration-date="certificateDetails.expirationDate"
         :show-expiration-date="certificateDetails.showExpirationDate"
         :expiration-error="certificateDetails.expirationError"
+        :idp-entity-id="certificateDetails.idpEntityId"
+        :single-sign-on-service-url="certificateDetails.singleSignOnServiceUrl"
       />
     </div>
 
