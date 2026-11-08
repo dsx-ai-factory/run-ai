@@ -56,6 +56,13 @@ spec:
                   key: {{ $auth.secretKeys.userPasswordKey }}
           ports:
             - containerPort: 5432
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
           readinessProbe:
             exec:
               command: ["pg_isready", "-U", "postgres"]
