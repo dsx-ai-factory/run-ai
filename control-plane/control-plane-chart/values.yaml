@@ -1517,7 +1517,7 @@ keycloakx:
 pocExternalPostgres:
   enabled: true
   name: runai-backend-external-pg
-  image: postgres:18
+  image: postgres:17
 
 postgresql:
   global:
