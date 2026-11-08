@@ -6617,11 +6617,14 @@ components:
       minItems: 0
       type: array
     ClientType:
+      description: The kind of client to create. Application is a deprecated alias
+        of ServiceAccount and is kept so existing callers keep working; use ServiceAccount.
       enum:
       - Agent
       - WorkloadsAuth
-      - Application
       - Installer
+      - ServiceAccount
+      - Application
       type: string
     ClientAttributeCreationRequest:
       properties:

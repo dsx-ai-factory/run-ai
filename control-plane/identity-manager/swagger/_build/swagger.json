@@ -5374,11 +5374,13 @@
       },
       "ClientType": {
         "type": "string",
+        "description": "The kind of client to create. Application is a deprecated alias of ServiceAccount and is kept so existing callers keep working; use ServiceAccount.",
         "enum": [
           "Agent",
           "WorkloadsAuth",
-          "Application",
-          "Installer"
+          "Installer",
+          "ServiceAccount",
+          "Application"
         ]
       },
       "ClientAttributeCreationRequest": {

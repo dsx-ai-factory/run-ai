@@ -136,10 +136,10 @@ func (client *IdmClient) CreateClient(ctx context.Context, name string, clientTy
 }
 
 // CreateServiceAccountClient creates a service-account client through the internal clients API.
-// That API still names this type "Application"; the mapping is kept here so callers use the current
-// terminology and only this line changes when the API enum is renamed.
+// It needs an identity-manager that knows the ServiceAccount client type; older servers only accept
+// the deprecated Application value.
 func (client *IdmClient) CreateServiceAccountClient(ctx context.Context, name string, tenantId *string) (*string, error) {
-	return client.createClient(ctx, name, openapi.CLIENTTYPE_APPLICATION, tenantId)
+	return client.createClient(ctx, name, openapi.CLIENTTYPE_SERVICE_ACCOUNT, tenantId)
 }
 
 func (client *IdmClient) createClient(ctx context.Context, name string, clientType openapi.ClientType, tenantId *string) (*string, error) {

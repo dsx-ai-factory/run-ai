@@ -443,7 +443,7 @@ export interface ClientRedirectUrisUpdateRequest {
     'redirectUris': Array<string>;
 }
 /**
- * 
+ * The kind of client to create. Application is a deprecated alias of ServiceAccount and is kept so existing callers keep working; use ServiceAccount.
  * @export
  * @enum {string}
  */
@@ -451,8 +451,9 @@ export interface ClientRedirectUrisUpdateRequest {
 export const ClientType = {
     Agent: 'Agent',
     WorkloadsAuth: 'WorkloadsAuth',
-    Application: 'Application',
-    Installer: 'Installer'
+    Installer: 'Installer',
+    ServiceAccount: 'ServiceAccount',
+    Application: 'Application'
 } as const;
 
 export type ClientType = typeof ClientType[keyof typeof ClientType];

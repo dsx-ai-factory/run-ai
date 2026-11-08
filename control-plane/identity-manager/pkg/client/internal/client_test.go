@@ -145,7 +145,7 @@ func TestCreateClient_HappyFlow(t *testing.T) {
 	}
 	clientServiceMock.On("CreateInternalClient", mock.Anything).Return(openapi.ApiCreateInternalClientRequest{})
 	clientServiceMock.On("CreateInternalClientExecute", mock.Anything).Return(resp, httpResp, nil)
-	clientId, err := testSubject.CreateClient(context.Background(), "name", "Application", ptr.To("ID"))
+	clientId, err := testSubject.CreateClient(context.Background(), "name", "ServiceAccount", ptr.To("ID"))
 	assert.Equal(t, "ID", *clientId)
 	assert.Nil(t, err)
 }
@@ -157,7 +157,7 @@ func TestCreateClient_Error(t *testing.T) {
 	}
 	clientServiceMock.On("CreateInternalClient", mock.Anything).Return(openapi.ApiCreateInternalClientRequest{})
 	clientServiceMock.On("CreateInternalClientExecute", mock.Anything).Return(resp, nil, fmt.Errorf("error"))
-	clientId, err := testSubject.CreateClient(context.Background(), "name", "Application", ptr.To("ID"))
+	clientId, err := testSubject.CreateClient(context.Background(), "name", "ServiceAccount", ptr.To("ID"))
 	assert.Nil(t, clientId)
 	assert.NotNil(t, err)
 }
@@ -172,7 +172,7 @@ func TestCreateClient_HttpError(t *testing.T) {
 	}
 	clientServiceMock.On("CreateInternalClient", mock.Anything).Return(openapi.ApiCreateInternalClientRequest{})
 	clientServiceMock.On("CreateInternalClientExecute", mock.Anything).Return(resp, httpResp, fmt.Errorf("error"))
-	clientId, err := testSubject.CreateClient(context.Background(), "name", "Application", ptr.To("ID"))
+	clientId, err := testSubject.CreateClient(context.Background(), "name", "ServiceAccount", ptr.To("ID"))
 	assert.Nil(t, clientId)
 	assert.NotNil(t, err)
 }
@@ -184,7 +184,7 @@ func TestCreateClient_CreatedStatus(t *testing.T) {
 	clientServiceMock.On("CreateInternalClientExecute", mock.Anything).
 		Return(&openapi.CreateInternalClient201Response{Id: ptr.To("ID")}, &http.Response{StatusCode: http.StatusCreated}, nil)
 
-	clientId, err := testSubject.CreateClient(context.Background(), "name", "Application", ptr.To("ID"))
+	clientId, err := testSubject.CreateClient(context.Background(), "name", "ServiceAccount", ptr.To("ID"))
 
 	assert.NoError(t, err)
 	assert.Equal(t, "ID", *clientId)
