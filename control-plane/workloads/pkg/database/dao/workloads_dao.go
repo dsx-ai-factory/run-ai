@@ -366,7 +366,7 @@ func (w *WorkloadsDao) DbCountWorkloads(ctx context.Context, tenantId uint, perm
 		query = query.Where("deleted_at IS NULL")
 	}
 
-	query = query.WithEnricher(querydbenrich.Filters(filterBy))
+	query = query.WithEnricher(workloadFilters(filterBy))
 
 	if search != "" {
 		query = query.WithEnricher(dbenrich.TSSearch(search, "search_vector"))
@@ -572,7 +572,7 @@ func (w *WorkloadsDao) DbGetWorkloads(
 		query = query.Unscoped().Where("deleted_at IS NOT NULL")
 	}
 
-	query = query.WithEnricher(querydbenrich.Filters(filterBy))
+	query = query.WithEnricher(workloadFilters(filterBy))
 
 	if sortBy != "" {
 		query = query.Order(querydbenrich.FormatSortClause(sortBy, sortOrder))
@@ -871,6 +871,50 @@ func applyRequestedNodepoolFilter(query orm.DB, nodepoolName string) orm.DB {
 // Includes workloads that are currently running in the specified nodepool.
 func applyCurrentNodepoolFilter(query orm.DB, nodepoolName string) orm.DB {
 	return query.Where("? = ANY(current_nodepools)", nodepoolName)
+}
+
+var negatedNodepoolOperators = map[string]string{
+	"is distinct from": "=",
+	"NOT ILIKE":        "ILIKE",
+}
+
+// workloadFilters applies the nodepool filter to every pool in current_nodepools rather than its first element
+// (which the mapping keeps for sorting), so a multi-pool workload matches each of its pools, as in telemetry.
+func workloadFilters(filters []queryapi.Filter) orm.Enricher {
+	return func(db orm.DB) orm.DB {
+		var otherFilters []queryapi.Filter
+		for _, filter := range filters {
+			if filter.Field != models.NodepoolFilterColumn || len(filter.Values) == 0 {
+				otherFilters = append(otherFilters, filter)
+				continue
+			}
+
+			operator, negated := negatedNodepoolOperators[filter.Operator]
+			if !negated {
+				operator = filter.Operator
+			}
+			condition := fmt.Sprintf("EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np %s ?)", operator)
+			if negated {
+				condition = "NOT " + condition
+			}
+
+			conditions := make([]string, 0, len(filter.Values))
+			values := make([]interface{}, 0, len(filter.Values))
+			for _, value := range filter.Values {
+				conditions = append(conditions, condition)
+				values = append(values, formatFilterValue(filter, value))
+			}
+			db = db.Where(strings.Join(conditions, " OR "), values...)
+		}
+		return querydbenrich.Filters(otherFilters)(db)
+	}
+}
+
+func formatFilterValue(filter queryapi.Filter, value string) string {
+	if filter.ValueFormat == "" {
+		return value
+	}
+	return fmt.Sprintf(filter.ValueFormat, value)
 }
 
 // buildTelemetryQuery builds a base query with common filters and GROUP BY for telemetry queries.
