@@ -3632,6 +3632,12 @@ export interface Nodepool {
      */
     'name': string;
     /**
+     * The description of the node pool.
+     * @type {string}
+     * @memberof Nodepool
+     */
+    'description'?: string;
+    /**
      * Label key for associated nodes to the Node Pool (with value as in labelValue)
      * @type {string}
      * @memberof Nodepool
@@ -3908,6 +3914,12 @@ export interface NodepoolCreateFields {
      */
     'name': string;
     /**
+     * The description of the node pool.
+     * @type {string}
+     * @memberof NodepoolCreateFields
+     */
+    'description'?: string | null;
+    /**
      * Label key for associated nodes to the Node Pool (with value as in labelValue)
      * @type {string}
      * @memberof NodepoolCreateFields
@@ -3968,6 +3980,12 @@ export interface NodepoolCreateResponseFields {
      * @memberof NodepoolCreateResponseFields
      */
     'name': string;
+    /**
+     * The description of the node pool.
+     * @type {string}
+     * @memberof NodepoolCreateResponseFields
+     */
+    'description'?: string;
     /**
      * Label key for associated nodes to the Node Pool (with value as in labelValue)
      * @type {string}
@@ -4414,6 +4432,12 @@ export interface NodepoolSyncUpdateFieldsPlacementStrategy {
  * @interface NodepoolUpdateFields
  */
 export interface NodepoolUpdateFields {
+    /**
+     * The description of the node pool.
+     * @type {string}
+     * @memberof NodepoolUpdateFields
+     */
+    'description'?: string | null;
     /**
      * Label key for associated nodes to the Node Pool (with value as in labelValue)
      * @type {string}

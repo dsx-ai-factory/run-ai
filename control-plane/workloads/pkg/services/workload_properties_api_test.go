@@ -5523,52 +5523,7 @@ func validateExpectedKserveInferenceService(actual map[string]interface{}) {
 						Version: "v1beta1",
 						Kind:    "InferenceService",
 					},
-					StatusDefinition: &kartav1alpha1.StatusDefinition{
-						ConditionsDefinition: &kartav1alpha1.ConditionsDefinition{
-							Path:             ".status.conditions",
-							TypeFieldName:    "type",
-							StatusFieldName:  "status",
-							MessageFieldName: ptr.To("message"),
-						},
-						StatusMappings: kartav1alpha1.StatusMappings{
-							Running: []kartav1alpha1.StatusMatcher{
-								{
-									ByConditions: []kartav1alpha1.ExpectedCondition{
-										{
-											Type:   "PredictorReady",
-											Status: ptr.To("True"),
-										},
-										{
-											Type:   "RoutesReady",
-											Status: ptr.To("True"),
-										},
-										{
-											Type:   "LatestDeploymentReady",
-											Status: ptr.To("True"),
-										},
-									},
-								},
-							},
-							Failed: []kartav1alpha1.StatusMatcher{
-								{
-									ByConditions: []kartav1alpha1.ExpectedCondition{
-										{
-											Type:   "PredictorReady",
-											Status: ptr.To("False"),
-										},
-										{
-											Type:   "PredictorConfigurationReady",
-											Status: ptr.To("False"),
-										},
-										{
-											Type:   "RoutesReady",
-											Status: ptr.To("False"),
-										},
-									},
-								},
-							},
-						},
-					},
+					StatusDefinition: source.BuildKServeInferenceServiceV1beta1().Spec.StructureDefinition.RootComponent.StatusDefinition,
 				},
 				ChildComponents: []kartav1alpha1.ComponentDefinition{
 					{

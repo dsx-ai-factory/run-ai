@@ -9,6 +9,7 @@ import (
 	"context"
 	"fmt"
 
+	runaipublic "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/runaipublic"
 	admissionv1 "k8s.io/api/admissionregistration/v1"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -18,10 +19,18 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/yaml"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/utils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/operands"
 	runv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	runv1internal "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1/runai-internal"
+)
+
+const (
+	// Must sort after "runai-pod": the API server orders mutating webhooks by
+	// configuration name, and the snapshot key hashes the pod as runai-pod
+	// leaves it. A rename breaks the key silently.
+	snapshotRestoreWebhookConfigurationName = "runai-snapshot-restore"
 )
 
 func ConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
@@ -44,7 +53,9 @@ func ConfigMapForRunaiConfig(ctx context.Context, k8sReader client.Reader,
 	configMap.ObjectMeta.Name = deploymentName
 	configMap.ObjectMeta.Namespace = namespace
 
-	configMap.Data = webhooksFile(runaiConfig)
+	snapshotInstalled, _, _ := runaipublic.NewRunaiPublicHandler(ctx, k8sReader).IsSnapshotCRDInstalled()
+
+	configMap.Data = webhooksFile(runaiConfig, snapshotInstalled)
 
 	return configMap, nil
 }
@@ -64,7 +75,7 @@ func ConfigMapStatus(ctx context.Context,
 	return operands.ReadyStatus(), nil
 }
 
-func webhooksFile(runaiConfig *runv1.RunaiConfig) map[string]string {
+func webhooksFile(runaiConfig *runv1.RunaiConfig, snapshotInstalled bool) map[string]string {
 	var (
 		namespace = runaiConfig.Namespace
 
@@ -231,6 +242,51 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig) map[string]string {
 			},
 		},
 	}
+	// Turns an opted-in replica into a restore pod. It has to run before the pod
+	// exists, because Snapshot's NRI plugin replaces the container command at
+	// container creation. Fails open: an outage means cold starts, not blocked
+	// pods.
+	snapshotRestoreMutatingWebhook := &admissionv1.MutatingWebhookConfiguration{
+		TypeMeta: mutatingWebhookTypeMeta,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   snapshotRestoreWebhookConfigurationName,
+			Labels: labels,
+		},
+		Webhooks: []admissionv1.MutatingWebhook{
+			{
+				Name:                    anyworkloadWebhookName,
+				AdmissionReviewVersions: v1,
+				SideEffects:             sideEffectsNone(),
+				FailurePolicy:           failurePolicyTypeIgnore(),
+				TimeoutSeconds:          ptr.To(int32(5)),
+				NamespaceSelector:       utils.NamespaceSelectorRunaiQueue(),
+				// A pod that has not opted in is never sent here.
+				ObjectSelector: &metav1.LabelSelector{
+					MatchLabels: map[string]string{constants.SnapshotOptInLabel: "true"},
+				},
+				ClientConfig: clientConfigWithNamespaceServiceAndPath(namespace,
+					anyworkloadServiceName,
+					constants.SnapshotRestoreWebhookPath),
+				// reinvocationPolicy unset (Never): reinvocation would void the
+				// ordering the name buys, since a reinvoked webhook can run
+				// either side of runai-pod's own.
+				Rules: []admissionv1.RuleWithOperations{
+					{
+						Operations: []admissionv1.OperationType{
+							admissionv1.Create,
+						},
+						Rule: admissionv1.Rule{
+							APIGroups:   star,
+							APIVersions: star,
+							Resources:   []string{"pods"},
+							Scope:       scopeTypeNamespaced(),
+						},
+					},
+				},
+			},
+		},
+	}
+
 	ownershipRule := func(operations []admissionv1.OperationType, version string, resources []string) admissionv1.RuleWithOperations {
 		return admissionv1.RuleWithOperations{
 			Operations: operations,
@@ -353,11 +409,12 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig) map[string]string {
 	}
 
 	if runaiConfig.Spec.Internal.Global.Platform.KubernetesFlavor == runv1internal.KubernetesFlavorOpenShift {
-		ownershipWebhooks := append([]client.Object{
+		anyworkloadServedWebhooks := append([]client.Object{
 			anyworkloadRunnerValidationWebhook,
 			anyworkloadRunnerMutationWebhook,
+			snapshotRestoreMutatingWebhook,
 		}, legacyOwnershipWebhooks...)
-		for _, webhook := range ownershipWebhooks {
+		for _, webhook := range anyworkloadServedWebhooks {
 			annotations := webhook.GetAnnotations()
 			if annotations == nil {
 				annotations = map[string]string{}
@@ -543,6 +600,10 @@ func webhooksFile(runaiConfig *runv1.RunaiConfig) map[string]string {
 	}
 
 	appendWebhookToFile(applicationValidationWebhook, fileData)
+
+	if snapshotInstalled {
+		appendWebhookToFile(snapshotRestoreMutatingWebhook, fileData)
+	}
 
 	return map[string]string{
 		"webhooks.yaml": *fileData,

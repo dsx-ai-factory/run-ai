@@ -65,7 +65,7 @@ runai training mpi submit <workload-name> -p <project-name> -i ubuntu --master-c
       --env-my-credentials stringArray                      Set an environment variable from a user credential. Format: type=<dockerRegistry|genericSecret|ngcApiKey>,name=<ENV_VAR>,credential-name=<CREDENTIAL_NAME>[,key=<KEY>]. Key is required only for type=genericSecret. Requires cluster version 2.22+ (2.23+ for ngcApiKey).
       --env-pod-field-ref stringArray                       Set an environment variable from a pod field reference. Format: ENV_VARIABLE=FIELD_REFERENCE.
       --env-secret stringArray                              Set an environment variable from a Kubernetes secret. Format: ENV_VARIABLE=secret-name,key=secret-key.
-      --environment stringArray                             Specifies the environment asset to use for the workload.
+      --environment string                                  Specifies the environment asset to use for the workload.
   -e, --environment-variable stringArray                    Set environment variables in the container. Format: --environment-variable name=value --environment-variable name-b=value-b.
       --exclude-node stringArray                            Nodes that will be excluded from use by the scheduler. Format: --exclude-node node-a --exclude-node node-b
       --existing-pvc stringArray                            Mount an existing PersistentVolumeClaim. Format: claimname=CLAIM_NAME,path=PATH. Auto-complete supported.
