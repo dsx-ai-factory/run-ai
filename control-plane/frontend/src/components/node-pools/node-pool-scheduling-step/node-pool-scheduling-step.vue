@@ -141,7 +141,7 @@
       </div>
     </template>
     <template #right-sidebar>
-      <node-pool-wizard-summary :pool="previewPool" :resources="resources" />
+      <node-pool-wizard-summary scheduling :pool="previewPool" :resources="resources" />
     </template>
   </runai-wizard-layout>
 </template>

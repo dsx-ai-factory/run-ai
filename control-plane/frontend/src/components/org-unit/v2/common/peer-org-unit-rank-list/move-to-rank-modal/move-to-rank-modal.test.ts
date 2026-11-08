@@ -21,7 +21,8 @@ describe("move-to-rank unsupported option", () => {
       .find(
         (option): option is ISelectOption =>
           typeof option === "object" && option !== null && option.label === "No over quota",
-      )!;
+      );
+    if (!unsupported) throw new Error("Unsupported rank explanation is missing");
     expect(unsupported.disable).toBe(true);
     expect(unsupported.value).not.toBe(select.props("modelValue"));
     expect(document.querySelector(".q-field__native")?.textContent).not.toContain("No over quota");
@@ -38,7 +39,8 @@ describe("move-to-rank unsupported option", () => {
     await wrapper.vm.$nextTick();
     const move = Array.from(document.querySelectorAll("button"))
       .filter((button) => button.textContent?.includes("Move 2"))
-      .at(-1)!;
+      .at(-1);
+    if (!move) throw new Error("Move action is missing");
     move.click();
     expect(wrapper.emitted("move")).toBeUndefined();
     select.vm.$emit("update:modelValue", "Highest");

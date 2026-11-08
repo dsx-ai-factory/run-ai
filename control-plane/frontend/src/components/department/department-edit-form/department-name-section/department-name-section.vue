@@ -22,6 +22,7 @@
         <runai-tooltip-wrapper :display-tooltip="isInputDisabled" tooltip-text="This can't be modified">
           <runai-name-validation
             aid="department-name-input"
+            :auto-focus="autoFocus"
             :disable="isInputDisabled"
             :model-value="departmentName"
             @update:model-value="$emit('update:departmentName', $event)"
@@ -67,6 +68,7 @@ export default defineComponent({
   emits: ["update:departmentName", "is-section-invalid", "update:description"],
   props: {
     compact: { type: Boolean, default: false },
+    autoFocus: { type: Boolean, default: false },
     departmentName: {
       type: String as PropType<string>,
       required: true,

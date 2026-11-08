@@ -39,7 +39,7 @@
           icon="ph ph-plus"
           label="New department"
           :disable="readonly"
-          @click="emit('newDepartment')"
+          @click="emit('new-department')"
       /></template>
       <template #selected-rows-actions
         ><runai-action-button btn-action="moveToRank" aid="move-departments" @click="showMove = true"
@@ -54,7 +54,7 @@
           icon="ph ph-gear-six"
           label="Advanced settings"
           :disable="readonly"
-          @click="emit('advancedSettings')"
+          @click="emit('advanced-settings')"
       /></template>
     </runai-page-actions>
     <div class="table-settings-layout" :class="{ 'settings-open': settingsOpen }">
@@ -95,8 +95,8 @@
                       ><q-tooltip max-width="340px">{{ headerTooltips[col.name] }}</q-tooltip></q-icon
                     >
                   </div>
-                  <label v-if="col.name === 'result'" class="simulation-control"
-                    >Simulate workload demand
+                  <div v-if="col.name === 'result'" class="simulation-control">
+                    Simulate workload demand
                     <q-toggle
                       v-model="simulation"
                       dense
@@ -105,7 +105,7 @@
                       aid="simulate-demand"
                       aria-label="Simulate workload demand"
                     />
-                  </label>
+                  </div>
                 </template>
               </q-th> </q-tr
           ></template>
@@ -350,8 +350,8 @@ const emit = defineEmits<{
   "load-more": [];
   "load-rank": [string];
   refresh: [];
-  newDepartment: [];
-  advancedSettings: [];
+  "new-department": [];
+  "advanced-settings": [];
   "automatic-weights": [boolean];
 }>();
 const baseline = ref<Record<string, DepartmentSchedulingEdit>>({});
@@ -603,9 +603,6 @@ function move(rank: string) {
   expanded.value = new Set([...expanded.value, rank]);
   showMove.value = false;
   selected.value = new Set();
-}
-function search(value: string) {
-  emit("search", value);
 }
 async function quotaContext(row: DepartmentSchedulingEdit) {
   const result = await props.loadQuotaContext?.(row.id);

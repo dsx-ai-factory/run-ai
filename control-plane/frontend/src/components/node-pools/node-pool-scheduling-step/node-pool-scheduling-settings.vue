@@ -233,7 +233,8 @@ function confirmDisable() {
   if (confirmation.value === "maxAllocation") {
     const departments = Object.fromEntries(
       Object.entries(props.draft.departments).map(([id, edit]) => {
-        const { limit: _limit, ...rest } = edit;
+        const rest = { ...edit };
+        delete rest.limit;
         return [id, rest];
       }),
     );

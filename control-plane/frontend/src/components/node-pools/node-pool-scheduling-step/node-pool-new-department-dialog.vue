@@ -17,6 +17,7 @@
         />
         <department-name-section
           compact
+          auto-focus
           v-model:department-name="name"
           v-model:description="description"
           :cluster-id="clusterId"
@@ -66,6 +67,15 @@
         />
       </q-form>
     </template>
+    <template #footer-left>
+      <p class="department-preview-note" role="status">
+        {{
+          reviewed
+            ? "Preview only. This department has not been created."
+            : "Preview only — department creation is not available in this preview."
+        }}
+      </p>
+    </template>
     <template #footer
       ><runai-btn aid="cancel-new-department" flat color="primary" label="Cancel" @click="emit('close')" /><runai-btn
         color="primary"
@@ -77,7 +87,7 @@
 </template>
 <script setup lang="ts">
 import { ref } from "vue";
-import type { QForm } from "quasar";
+import { QForm } from "quasar";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
 import { RunaiSectionTitle } from "@/components/common/runai-section-title";

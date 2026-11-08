@@ -21,7 +21,8 @@ describe("scheduling settings draft interactions", () => {
     const wrapper = mount(Settings, { props: { draft, quotaPolicy: true }, global: { plugins: [Quasar] } });
     const toggle = wrapper
       .findAllComponents(RunaiToggle)
-      .find((toggle) => toggle.props("aid") === "max-allocation-toggle")!;
+      .find((toggle) => toggle.props("aid") === "max-allocation-toggle");
+    if (!toggle) throw new Error("Maximum allocation toggle is missing");
     toggle.vm.$emit("update:model-value", false);
     await wrapper.vm.$nextTick();
     expect(wrapper.emitted("patch")).toBeUndefined();
@@ -42,7 +43,8 @@ describe("scheduling settings draft interactions", () => {
     const wrapper = mount(Settings, { props: { draft, quotaPolicy: true }, global: { plugins: [Quasar] } });
     const policy = wrapper
       .findAllComponents(RunaiToggle)
-      .find((toggle) => toggle.props("aid") === "project-quota-policy")!;
+      .find((toggle) => toggle.props("aid") === "project-quota-policy");
+    if (!policy) throw new Error("Project quota policy toggle is missing");
     expect(policy.props("disable")).toBe(true);
     expect(policy.props("modelValue")).toBe(true);
     expect(wrapper.emitted("patch")).toBeUndefined();
