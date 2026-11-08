@@ -1,11 +1,11 @@
-# RightSizingAllocationType
+# RecommendationStatus
 
 ## Enum
 
 
-* `GPU_MEMORY` (value: `"gpu_memory"`)
+* `RECOMMENDED` (value: `"recommended"`)
 
-* `GPU_COUNT` (value: `"gpu_count"`)
+* `NO_RECOMMENDATION` (value: `"no_recommendation"`)
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

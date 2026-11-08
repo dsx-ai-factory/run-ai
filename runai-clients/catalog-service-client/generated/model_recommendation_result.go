@@ -19,52 +19,58 @@ import (
 	"fmt"
 )
 
-// checks if the RightSizingResult type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &RightSizingResult{}
+// checks if the RecommendationResult type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &RecommendationResult{}
 
-// RightSizingResult struct for RightSizingResult
-type RightSizingResult struct {
+// RecommendationResult struct for RecommendationResult
+type RecommendationResult struct {
+	// Exact GPU type reported by the cluster inventory. Different memory capacities for the same GPU type produce separate results.
 	GpuType string `json:"gpuType"`
-	// Reported per-device capacity, not free memory or a quota guarantee.
-	GpuMemoryCapacityBytes *int64            `json:"gpuMemoryCapacityBytes,omitempty"`
-	Status                 RightSizingStatus `json:"status"`
-	// Published NGC minimum for the source profile, before allocation rounding.
+	// Reported memory capacity of each GPU, in bytes. Omitted when capacity is unknown. Does not represent free memory or a quota guarantee.
+	GpuMemoryCapacityBytes *int64 `json:"gpuMemoryCapacityBytes,omitempty"`
+	// Whether an allocation was recommended for this GPU type and memory capacity.
+	Status RecommendationStatus `json:"status"`
+	// Published minimum memory per GPU for the selected NGC profile, in decimal GB (1 GB = 1,000,000,000 bytes), before allocation rounding. Omitted when no profile is selected.
 	MinimumGpuMemoryPerDeviceGb *float64 `json:"minimumGpuMemoryPerDeviceGb,omitempty"`
-	ProfileId                   *string  `json:"profileId,omitempty"`
-	Precision                   *string  `json:"precision,omitempty"`
-	InferenceBackend            *string  `json:"inferenceBackend,omitempty"`
-	// Explicit tensor parallel size from the selected published profile.
+	// Identifier of the selected published NGC execution profile. Omitted when no profile is selected.
+	ProfileId *string `json:"profileId,omitempty"`
+	// Model precision reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report precision.
+	Precision *string `json:"precision,omitempty"`
+	// Inference backend reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report a backend.
+	InferenceBackend *string `json:"inferenceBackend,omitempty"`
+	// Number of GPUs participating in tensor parallelism in the selected NGC profile. Omitted when no profile is selected.
 	TensorParallelSize *int64 `json:"tensorParallelSize,omitempty"`
-	// Explicit pipeline parallel size from the selected published profile.
+	// Number of pipeline parallel stages in the selected NGC profile. Omitted when no profile is selected.
 	PipelineParallelSize *int64 `json:"pipelineParallelSize,omitempty"`
-	// Explanation when sizing cannot be recommended.
-	Reason         *string                           `json:"reason,omitempty"`
-	Recommendation NullableRightSizingRecommendation `json:"recommendation,omitempty"`
+	// Explanation of why no allocation could be recommended. Omitted for a recommended allocation.
+	Reason *string `json:"reason,omitempty"`
+	// Recommended allocation for this result. Absent or null when no allocation could be recommended.
+	Recommendation NullableRecommendation `json:"recommendation,omitempty"`
 }
 
-type _RightSizingResult RightSizingResult
+type _RecommendationResult RecommendationResult
 
-// NewRightSizingResult instantiates a new RightSizingResult object
+// NewRecommendationResult instantiates a new RecommendationResult object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingResult(gpuType string, status RightSizingStatus) *RightSizingResult {
-	this := RightSizingResult{}
+func NewRecommendationResult(gpuType string, status RecommendationStatus) *RecommendationResult {
+	this := RecommendationResult{}
 	this.GpuType = gpuType
 	this.Status = status
 	return &this
 }
 
-// NewRightSizingResultWithDefaults instantiates a new RightSizingResult object
+// NewRecommendationResultWithDefaults instantiates a new RecommendationResult object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRightSizingResultWithDefaults() *RightSizingResult {
-	this := RightSizingResult{}
+func NewRecommendationResultWithDefaults() *RecommendationResult {
+	this := RecommendationResult{}
 	return &this
 }
 
 // GetGpuType returns the GpuType field value
-func (o *RightSizingResult) GetGpuType() string {
+func (o *RecommendationResult) GetGpuType() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -75,7 +81,7 @@ func (o *RightSizingResult) GetGpuType() string {
 
 // GetGpuTypeOk returns a tuple with the GpuType field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetGpuTypeOk() (*string, bool) {
+func (o *RecommendationResult) GetGpuTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -83,12 +89,12 @@ func (o *RightSizingResult) GetGpuTypeOk() (*string, bool) {
 }
 
 // SetGpuType sets field value
-func (o *RightSizingResult) SetGpuType(v string) {
+func (o *RecommendationResult) SetGpuType(v string) {
 	o.GpuType = v
 }
 
 // GetGpuMemoryCapacityBytes returns the GpuMemoryCapacityBytes field value if set, zero value otherwise.
-func (o *RightSizingResult) GetGpuMemoryCapacityBytes() int64 {
+func (o *RecommendationResult) GetGpuMemoryCapacityBytes() int64 {
 	if o == nil || IsNil(o.GpuMemoryCapacityBytes) {
 		var ret int64
 		return ret
@@ -98,7 +104,7 @@ func (o *RightSizingResult) GetGpuMemoryCapacityBytes() int64 {
 
 // GetGpuMemoryCapacityBytesOk returns a tuple with the GpuMemoryCapacityBytes field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetGpuMemoryCapacityBytesOk() (*int64, bool) {
+func (o *RecommendationResult) GetGpuMemoryCapacityBytesOk() (*int64, bool) {
 	if o == nil || IsNil(o.GpuMemoryCapacityBytes) {
 		return nil, false
 	}
@@ -106,7 +112,7 @@ func (o *RightSizingResult) GetGpuMemoryCapacityBytesOk() (*int64, bool) {
 }
 
 // HasGpuMemoryCapacityBytes returns a boolean if a field has been set.
-func (o *RightSizingResult) HasGpuMemoryCapacityBytes() bool {
+func (o *RecommendationResult) HasGpuMemoryCapacityBytes() bool {
 	if o != nil && !IsNil(o.GpuMemoryCapacityBytes) {
 		return true
 	}
@@ -115,14 +121,14 @@ func (o *RightSizingResult) HasGpuMemoryCapacityBytes() bool {
 }
 
 // SetGpuMemoryCapacityBytes gets a reference to the given int64 and assigns it to the GpuMemoryCapacityBytes field.
-func (o *RightSizingResult) SetGpuMemoryCapacityBytes(v int64) {
+func (o *RecommendationResult) SetGpuMemoryCapacityBytes(v int64) {
 	o.GpuMemoryCapacityBytes = &v
 }
 
 // GetStatus returns the Status field value
-func (o *RightSizingResult) GetStatus() RightSizingStatus {
+func (o *RecommendationResult) GetStatus() RecommendationStatus {
 	if o == nil {
-		var ret RightSizingStatus
+		var ret RecommendationStatus
 		return ret
 	}
 
@@ -131,7 +137,7 @@ func (o *RightSizingResult) GetStatus() RightSizingStatus {
 
 // GetStatusOk returns a tuple with the Status field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetStatusOk() (*RightSizingStatus, bool) {
+func (o *RecommendationResult) GetStatusOk() (*RecommendationStatus, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -139,12 +145,12 @@ func (o *RightSizingResult) GetStatusOk() (*RightSizingStatus, bool) {
 }
 
 // SetStatus sets field value
-func (o *RightSizingResult) SetStatus(v RightSizingStatus) {
+func (o *RecommendationResult) SetStatus(v RecommendationStatus) {
 	o.Status = v
 }
 
 // GetMinimumGpuMemoryPerDeviceGb returns the MinimumGpuMemoryPerDeviceGb field value if set, zero value otherwise.
-func (o *RightSizingResult) GetMinimumGpuMemoryPerDeviceGb() float64 {
+func (o *RecommendationResult) GetMinimumGpuMemoryPerDeviceGb() float64 {
 	if o == nil || IsNil(o.MinimumGpuMemoryPerDeviceGb) {
 		var ret float64
 		return ret
@@ -154,7 +160,7 @@ func (o *RightSizingResult) GetMinimumGpuMemoryPerDeviceGb() float64 {
 
 // GetMinimumGpuMemoryPerDeviceGbOk returns a tuple with the MinimumGpuMemoryPerDeviceGb field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetMinimumGpuMemoryPerDeviceGbOk() (*float64, bool) {
+func (o *RecommendationResult) GetMinimumGpuMemoryPerDeviceGbOk() (*float64, bool) {
 	if o == nil || IsNil(o.MinimumGpuMemoryPerDeviceGb) {
 		return nil, false
 	}
@@ -162,7 +168,7 @@ func (o *RightSizingResult) GetMinimumGpuMemoryPerDeviceGbOk() (*float64, bool) 
 }
 
 // HasMinimumGpuMemoryPerDeviceGb returns a boolean if a field has been set.
-func (o *RightSizingResult) HasMinimumGpuMemoryPerDeviceGb() bool {
+func (o *RecommendationResult) HasMinimumGpuMemoryPerDeviceGb() bool {
 	if o != nil && !IsNil(o.MinimumGpuMemoryPerDeviceGb) {
 		return true
 	}
@@ -171,12 +177,12 @@ func (o *RightSizingResult) HasMinimumGpuMemoryPerDeviceGb() bool {
 }
 
 // SetMinimumGpuMemoryPerDeviceGb gets a reference to the given float64 and assigns it to the MinimumGpuMemoryPerDeviceGb field.
-func (o *RightSizingResult) SetMinimumGpuMemoryPerDeviceGb(v float64) {
+func (o *RecommendationResult) SetMinimumGpuMemoryPerDeviceGb(v float64) {
 	o.MinimumGpuMemoryPerDeviceGb = &v
 }
 
 // GetProfileId returns the ProfileId field value if set, zero value otherwise.
-func (o *RightSizingResult) GetProfileId() string {
+func (o *RecommendationResult) GetProfileId() string {
 	if o == nil || IsNil(o.ProfileId) {
 		var ret string
 		return ret
@@ -186,7 +192,7 @@ func (o *RightSizingResult) GetProfileId() string {
 
 // GetProfileIdOk returns a tuple with the ProfileId field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetProfileIdOk() (*string, bool) {
+func (o *RecommendationResult) GetProfileIdOk() (*string, bool) {
 	if o == nil || IsNil(o.ProfileId) {
 		return nil, false
 	}
@@ -194,7 +200,7 @@ func (o *RightSizingResult) GetProfileIdOk() (*string, bool) {
 }
 
 // HasProfileId returns a boolean if a field has been set.
-func (o *RightSizingResult) HasProfileId() bool {
+func (o *RecommendationResult) HasProfileId() bool {
 	if o != nil && !IsNil(o.ProfileId) {
 		return true
 	}
@@ -203,12 +209,12 @@ func (o *RightSizingResult) HasProfileId() bool {
 }
 
 // SetProfileId gets a reference to the given string and assigns it to the ProfileId field.
-func (o *RightSizingResult) SetProfileId(v string) {
+func (o *RecommendationResult) SetProfileId(v string) {
 	o.ProfileId = &v
 }
 
 // GetPrecision returns the Precision field value if set, zero value otherwise.
-func (o *RightSizingResult) GetPrecision() string {
+func (o *RecommendationResult) GetPrecision() string {
 	if o == nil || IsNil(o.Precision) {
 		var ret string
 		return ret
@@ -218,7 +224,7 @@ func (o *RightSizingResult) GetPrecision() string {
 
 // GetPrecisionOk returns a tuple with the Precision field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetPrecisionOk() (*string, bool) {
+func (o *RecommendationResult) GetPrecisionOk() (*string, bool) {
 	if o == nil || IsNil(o.Precision) {
 		return nil, false
 	}
@@ -226,7 +232,7 @@ func (o *RightSizingResult) GetPrecisionOk() (*string, bool) {
 }
 
 // HasPrecision returns a boolean if a field has been set.
-func (o *RightSizingResult) HasPrecision() bool {
+func (o *RecommendationResult) HasPrecision() bool {
 	if o != nil && !IsNil(o.Precision) {
 		return true
 	}
@@ -235,12 +241,12 @@ func (o *RightSizingResult) HasPrecision() bool {
 }
 
 // SetPrecision gets a reference to the given string and assigns it to the Precision field.
-func (o *RightSizingResult) SetPrecision(v string) {
+func (o *RecommendationResult) SetPrecision(v string) {
 	o.Precision = &v
 }
 
 // GetInferenceBackend returns the InferenceBackend field value if set, zero value otherwise.
-func (o *RightSizingResult) GetInferenceBackend() string {
+func (o *RecommendationResult) GetInferenceBackend() string {
 	if o == nil || IsNil(o.InferenceBackend) {
 		var ret string
 		return ret
@@ -250,7 +256,7 @@ func (o *RightSizingResult) GetInferenceBackend() string {
 
 // GetInferenceBackendOk returns a tuple with the InferenceBackend field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetInferenceBackendOk() (*string, bool) {
+func (o *RecommendationResult) GetInferenceBackendOk() (*string, bool) {
 	if o == nil || IsNil(o.InferenceBackend) {
 		return nil, false
 	}
@@ -258,7 +264,7 @@ func (o *RightSizingResult) GetInferenceBackendOk() (*string, bool) {
 }
 
 // HasInferenceBackend returns a boolean if a field has been set.
-func (o *RightSizingResult) HasInferenceBackend() bool {
+func (o *RecommendationResult) HasInferenceBackend() bool {
 	if o != nil && !IsNil(o.InferenceBackend) {
 		return true
 	}
@@ -267,12 +273,12 @@ func (o *RightSizingResult) HasInferenceBackend() bool {
 }
 
 // SetInferenceBackend gets a reference to the given string and assigns it to the InferenceBackend field.
-func (o *RightSizingResult) SetInferenceBackend(v string) {
+func (o *RecommendationResult) SetInferenceBackend(v string) {
 	o.InferenceBackend = &v
 }
 
 // GetTensorParallelSize returns the TensorParallelSize field value if set, zero value otherwise.
-func (o *RightSizingResult) GetTensorParallelSize() int64 {
+func (o *RecommendationResult) GetTensorParallelSize() int64 {
 	if o == nil || IsNil(o.TensorParallelSize) {
 		var ret int64
 		return ret
@@ -282,7 +288,7 @@ func (o *RightSizingResult) GetTensorParallelSize() int64 {
 
 // GetTensorParallelSizeOk returns a tuple with the TensorParallelSize field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetTensorParallelSizeOk() (*int64, bool) {
+func (o *RecommendationResult) GetTensorParallelSizeOk() (*int64, bool) {
 	if o == nil || IsNil(o.TensorParallelSize) {
 		return nil, false
 	}
@@ -290,7 +296,7 @@ func (o *RightSizingResult) GetTensorParallelSizeOk() (*int64, bool) {
 }
 
 // HasTensorParallelSize returns a boolean if a field has been set.
-func (o *RightSizingResult) HasTensorParallelSize() bool {
+func (o *RecommendationResult) HasTensorParallelSize() bool {
 	if o != nil && !IsNil(o.TensorParallelSize) {
 		return true
 	}
@@ -299,12 +305,12 @@ func (o *RightSizingResult) HasTensorParallelSize() bool {
 }
 
 // SetTensorParallelSize gets a reference to the given int64 and assigns it to the TensorParallelSize field.
-func (o *RightSizingResult) SetTensorParallelSize(v int64) {
+func (o *RecommendationResult) SetTensorParallelSize(v int64) {
 	o.TensorParallelSize = &v
 }
 
 // GetPipelineParallelSize returns the PipelineParallelSize field value if set, zero value otherwise.
-func (o *RightSizingResult) GetPipelineParallelSize() int64 {
+func (o *RecommendationResult) GetPipelineParallelSize() int64 {
 	if o == nil || IsNil(o.PipelineParallelSize) {
 		var ret int64
 		return ret
@@ -314,7 +320,7 @@ func (o *RightSizingResult) GetPipelineParallelSize() int64 {
 
 // GetPipelineParallelSizeOk returns a tuple with the PipelineParallelSize field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetPipelineParallelSizeOk() (*int64, bool) {
+func (o *RecommendationResult) GetPipelineParallelSizeOk() (*int64, bool) {
 	if o == nil || IsNil(o.PipelineParallelSize) {
 		return nil, false
 	}
@@ -322,7 +328,7 @@ func (o *RightSizingResult) GetPipelineParallelSizeOk() (*int64, bool) {
 }
 
 // HasPipelineParallelSize returns a boolean if a field has been set.
-func (o *RightSizingResult) HasPipelineParallelSize() bool {
+func (o *RecommendationResult) HasPipelineParallelSize() bool {
 	if o != nil && !IsNil(o.PipelineParallelSize) {
 		return true
 	}
@@ -331,12 +337,12 @@ func (o *RightSizingResult) HasPipelineParallelSize() bool {
 }
 
 // SetPipelineParallelSize gets a reference to the given int64 and assigns it to the PipelineParallelSize field.
-func (o *RightSizingResult) SetPipelineParallelSize(v int64) {
+func (o *RecommendationResult) SetPipelineParallelSize(v int64) {
 	o.PipelineParallelSize = &v
 }
 
 // GetReason returns the Reason field value if set, zero value otherwise.
-func (o *RightSizingResult) GetReason() string {
+func (o *RecommendationResult) GetReason() string {
 	if o == nil || IsNil(o.Reason) {
 		var ret string
 		return ret
@@ -346,7 +352,7 @@ func (o *RightSizingResult) GetReason() string {
 
 // GetReasonOk returns a tuple with the Reason field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingResult) GetReasonOk() (*string, bool) {
+func (o *RecommendationResult) GetReasonOk() (*string, bool) {
 	if o == nil || IsNil(o.Reason) {
 		return nil, false
 	}
@@ -354,7 +360,7 @@ func (o *RightSizingResult) GetReasonOk() (*string, bool) {
 }
 
 // HasReason returns a boolean if a field has been set.
-func (o *RightSizingResult) HasReason() bool {
+func (o *RecommendationResult) HasReason() bool {
 	if o != nil && !IsNil(o.Reason) {
 		return true
 	}
@@ -363,14 +369,14 @@ func (o *RightSizingResult) HasReason() bool {
 }
 
 // SetReason gets a reference to the given string and assigns it to the Reason field.
-func (o *RightSizingResult) SetReason(v string) {
+func (o *RecommendationResult) SetReason(v string) {
 	o.Reason = &v
 }
 
 // GetRecommendation returns the Recommendation field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *RightSizingResult) GetRecommendation() RightSizingRecommendation {
+func (o *RecommendationResult) GetRecommendation() Recommendation {
 	if o == nil || IsNil(o.Recommendation.Get()) {
-		var ret RightSizingRecommendation
+		var ret Recommendation
 		return ret
 	}
 	return *o.Recommendation.Get()
@@ -379,7 +385,7 @@ func (o *RightSizingResult) GetRecommendation() RightSizingRecommendation {
 // GetRecommendationOk returns a tuple with the Recommendation field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RightSizingResult) GetRecommendationOk() (*RightSizingRecommendation, bool) {
+func (o *RecommendationResult) GetRecommendationOk() (*Recommendation, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -387,7 +393,7 @@ func (o *RightSizingResult) GetRecommendationOk() (*RightSizingRecommendation, b
 }
 
 // HasRecommendation returns a boolean if a field has been set.
-func (o *RightSizingResult) HasRecommendation() bool {
+func (o *RecommendationResult) HasRecommendation() bool {
 	if o != nil && o.Recommendation.IsSet() {
 		return true
 	}
@@ -395,22 +401,22 @@ func (o *RightSizingResult) HasRecommendation() bool {
 	return false
 }
 
-// SetRecommendation gets a reference to the given NullableRightSizingRecommendation and assigns it to the Recommendation field.
-func (o *RightSizingResult) SetRecommendation(v RightSizingRecommendation) {
+// SetRecommendation gets a reference to the given NullableRecommendation and assigns it to the Recommendation field.
+func (o *RecommendationResult) SetRecommendation(v Recommendation) {
 	o.Recommendation.Set(&v)
 }
 
 // SetRecommendationNil sets the value for Recommendation to be an explicit nil
-func (o *RightSizingResult) SetRecommendationNil() {
+func (o *RecommendationResult) SetRecommendationNil() {
 	o.Recommendation.Set(nil)
 }
 
 // UnsetRecommendation ensures that no value is present for Recommendation, not even an explicit nil
-func (o *RightSizingResult) UnsetRecommendation() {
+func (o *RecommendationResult) UnsetRecommendation() {
 	o.Recommendation.Unset()
 }
 
-func (o RightSizingResult) MarshalJSON() ([]byte, error) {
+func (o RecommendationResult) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -418,7 +424,7 @@ func (o RightSizingResult) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o RightSizingResult) ToMap() (map[string]interface{}, error) {
+func (o RecommendationResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["gpuType"] = o.GpuType
 	if !IsNil(o.GpuMemoryCapacityBytes) {
@@ -452,7 +458,7 @@ func (o RightSizingResult) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *RightSizingResult) UnmarshalJSON(data []byte) (err error) {
+func (o *RecommendationResult) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -480,55 +486,55 @@ func (o *RightSizingResult) UnmarshalJSON(data []byte) (err error) {
 	//
 	fmt.Sprintf("dummy")
 
-	varRightSizingResult := _RightSizingResult{}
+	varRecommendationResult := _RecommendationResult{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	// RUNAI
 	// decoder.DisallowUnknownFields()
 	//
-	err = decoder.Decode(&varRightSizingResult)
+	err = decoder.Decode(&varRecommendationResult)
 
 	if err != nil {
 		return err
 	}
 
-	*o = RightSizingResult(varRightSizingResult)
+	*o = RecommendationResult(varRecommendationResult)
 
 	return err
 }
 
-type NullableRightSizingResult struct {
-	value *RightSizingResult
+type NullableRecommendationResult struct {
+	value *RecommendationResult
 	isSet bool
 }
 
-func (v NullableRightSizingResult) Get() *RightSizingResult {
+func (v NullableRecommendationResult) Get() *RecommendationResult {
 	return v.value
 }
 
-func (v *NullableRightSizingResult) Set(val *RightSizingResult) {
+func (v *NullableRecommendationResult) Set(val *RecommendationResult) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRightSizingResult) IsSet() bool {
+func (v NullableRecommendationResult) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRightSizingResult) Unset() {
+func (v *NullableRecommendationResult) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRightSizingResult(val *RightSizingResult) *NullableRightSizingResult {
-	return &NullableRightSizingResult{value: val, isSet: true}
+func NewNullableRecommendationResult(val *RecommendationResult) *NullableRecommendationResult {
+	return &NullableRecommendationResult{value: val, isSet: true}
 }
 
-func (v NullableRightSizingResult) MarshalJSON() ([]byte, error) {
+func (v NullableRecommendationResult) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRightSizingResult) UnmarshalJSON(src []byte) error {
+func (v *NullableRecommendationResult) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

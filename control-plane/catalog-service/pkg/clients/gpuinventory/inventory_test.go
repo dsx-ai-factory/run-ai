@@ -12,12 +12,12 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strconv"
-	"testing"
 	"time"
 
 	clusterclient "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
-
 	clusterapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 type nodePoolsFunc func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error)
@@ -26,9 +26,13 @@ func (f nodePoolsFunc) GetNodePoolsMinimalByCluster(ctx context.Context, id stri
 	return f(ctx, id)
 }
 
+func (f nodePoolsFunc) GetClusterMinimalDataById(context.Context, string) (*clusterapi.ClustersMinimalData, error) {
+	return &clusterapi.ClustersMinimalData{}, nil
+}
+
 const clusterID = "4b94efde-b05a-4118-a03a-1dedff81fa8e"
 
-func TestInventoryMergesPerNodeCountsByMaximumWithinEachCapacity(t *testing.T) {
+var _ = It("inventory merges per node counts by maximum within each capacity", func() {
 	small, large, two, four, six := int64(40_000_000_000), int64(80_000_000_000), int64(2), int64(4), int64(6)
 	client := New(nodePoolsFunc(func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
 		return &clusterapi.GetNodepoolsMinimal200Response{Nodepools: []clusterapi.NodepoolMinimal{
@@ -44,33 +48,32 @@ func TestInventoryMergesPerNodeCountsByMaximumWithinEachCapacity(t *testing.T) {
 		}}, nil
 	}), 30*time.Second)
 	got, err := client.Get(context.Background(), clusterID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(got) != 3 || got[0].MaxDevicesPerNode != 2 || got[1].MaxDevicesPerNode != 6 || got[2].MaxDevicesPerNode != 0 {
-		t.Fatalf("counts were summed, mixed between capacities, or inferred: %+v", got)
-	}
-}
+	Expect(err).To(BeNil())
+	Expect(got).To(HaveLen(3))
+	Expect(got[0].MaxDevicesPerNode).To(BeNumerically("==", 2))
+	Expect(got[1].MaxDevicesPerNode).To(BeNumerically("==", 6))
+	Expect(got[2].MaxDevicesPerNode).To(BeNumerically("==", 0))
+})
 
-func TestInventoryRejectsImpossiblePerNodeCounts(t *testing.T) {
+var _ = It("inventory rejects impossible per node counts", func() {
 	for _, count := range []int64{-1, 0, 3} {
 		client := New(nodePoolsFunc(func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
 			return &clusterapi.GetNodepoolsMinimal200Response{Nodepools: []clusterapi.NodepoolMinimal{{GpuTypes: []clusterapi.NodepoolGpuTypeDetails{
 				{Type: "A100", TotalDevices: 2, MaxDevicesPerNode: &count},
 			}}}}, nil
 		}), 30*time.Second)
-		if got, err := client.Get(context.Background(), clusterID); err == nil || got != nil {
-			t.Fatalf("accepted per-node count %d for a two-device pool: %+v %v", count, got, err)
+		{
+			got, err := client.Get(context.Background(), clusterID)
+			Expect(err).NotTo(BeNil())
+			Expect(got).To(BeNil())
 		}
 	}
-}
+})
 
-func TestInventoryKeepsDistinctCapacitiesWithoutClaimingAvailability(t *testing.T) {
+var _ = It("inventory keeps distinct capacities without claiming availability", func() {
 	small, large := int64(40_000_000_000), int64(80_000_000_000)
 	client := New(nodePoolsFunc(func(_ context.Context, id string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
-		if id != clusterID {
-			t.Fatalf("wrong cluster: %s", id)
-		}
+		Expect(id).To(Equal(clusterID))
 		return &clusterapi.GetNodepoolsMinimal200Response{Nodepools: []clusterapi.NodepoolMinimal{
 			{GpuTypes: []clusterapi.NodepoolGpuTypeDetails{
 				{Type: "A100", GpuMemoryBytes: &large, TotalDevices: 8},
@@ -83,44 +86,50 @@ func TestInventoryKeepsDistinctCapacitiesWithoutClaimingAvailability(t *testing.
 		}}, nil
 	}), 30*time.Second)
 	got, err := client.Get(context.Background(), clusterID)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(got) != 3 || got[0].Type != "A100" || got[0].MemoryBytes == nil || *got[0].MemoryBytes != small ||
-		got[1].MemoryBytes == nil || *got[1].MemoryBytes != large || got[2].Type != "T4" || got[2].MemoryBytes != nil {
-		t.Fatalf("inventory lost a capacity or invented memory: %+v", got)
-	}
-}
+	Expect(err).To(BeNil())
+	Expect(got).To(HaveLen(3))
+	Expect(got[0].Type).To(Equal("A100"))
+	Expect(got[0].MemoryBytes).NotTo(BeNil())
+	Expect(*got[0].MemoryBytes).To(Equal(small))
+	Expect(got[1].MemoryBytes).NotTo(BeNil())
+	Expect(*got[1].MemoryBytes).To(Equal(large))
+	Expect(got[2].Type).To(Equal("T4"))
+	Expect(got[2].MemoryBytes).To(BeNil())
+})
 
-func TestInventoryFailureIsNotAnEmptyCluster(t *testing.T) {
+var _ = It("inventory failure is not an empty cluster", func() {
 	upstream := errors.New("cluster service unavailable")
 	client := New(nodePoolsFunc(func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
 		return nil, upstream
 	}), 30*time.Second)
-	if _, err := client.Get(context.Background(), clusterID); !errors.Is(err, upstream) {
-		t.Fatalf("upstream failure lost: %v", err)
+	{
+		_, err := client.Get(context.Background(), clusterID)
+		Expect(err).NotTo(BeNil())
+		Expect(err.Details).To(Equal(upstream.Error()))
 	}
 	client = New(nodePoolsFunc(func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
 		return nil, nil
 	}), 30*time.Second)
-	if _, err := client.Get(context.Background(), clusterID); err == nil {
-		t.Fatal("nil upstream response was accepted as an empty cluster")
+	{
+		_, err := client.Get(context.Background(), clusterID)
+		Expect(err).NotTo(BeNil())
 	}
-}
+})
 
-func TestInventoryValidatesClusterBeforeBuildingFilter(t *testing.T) {
+var _ = It("inventory validates cluster before building filter", func() {
 	client := New(nodePoolsFunc(func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
-		t.Fatal("invalid cluster reached inventory")
+		Fail("invalid cluster reached inventory")
 		return nil, nil
 	}), 30*time.Second)
 	for _, id := range []string{"", "cluster-id,tenantId==other"} {
-		if _, err := client.Get(context.Background(), id); err == nil {
-			t.Fatalf("accepted %q", id)
+		{
+			_, err := client.Get(context.Background(), id)
+			Expect(err).NotTo(BeNil())
 		}
 	}
-}
+})
 
-func TestInventoryReadsEveryNodepoolPage(t *testing.T) {
+var _ = Describe("inventory reads every nodepool page", func() {
 	for _, tc := range []struct {
 		name       string
 		total      int
@@ -128,13 +137,18 @@ func TestInventoryReadsEveryNodepoolPage(t *testing.T) {
 	}{
 		{"GPU on second page", 51, false}, {"exact full page", 50, false}, {"empty cluster", 0, false}, {"second page fails", 51, true},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
+		It(tc.name, func() {
 			calls := 0
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				calls++
-				if r.URL.Query().Get("filterBy") != "clusterId=="+clusterID {
-					t.Errorf("wrong cluster filter: %s", r.URL.RawQuery)
+				defer GinkgoRecover()
+				if r.URL.Path == "/api/v1/clusters/"+clusterID+"/minimal" {
+					w.Header().Set("Content-Type", "application/json")
+					_, err := w.Write([]byte(`{}`))
+					Expect(err).To(BeNil())
+					return
 				}
+				calls++
+				Expect(r.URL.Query().Get("filterBy")).To(Equal("clusterId==" + clusterID))
 				offset, _ := strconv.Atoi(r.URL.Query().Get("offset"))
 				limit, _ := strconv.Atoi(r.URL.Query().Get("limit"))
 				if limit == 0 {
@@ -154,35 +168,35 @@ func TestInventoryReadsEveryNodepoolPage(t *testing.T) {
 					pools = append(pools, pool)
 				}
 				w.Header().Set("Content-Type", "application/json")
-				if err := json.NewEncoder(w).Encode(clusterapi.GetNodepoolsMinimal200Response{Nodepools: pools}); err != nil {
-					t.Error(err)
+				{
+					err := json.NewEncoder(w).Encode(clusterapi.GetNodepoolsMinimal200Response{Nodepools: pools})
+					Expect(err).To(BeNil())
 				}
 			}))
 			defer server.Close()
 			hardware, err := New(clusterclient.NewClusterClient(server.URL), 30*time.Second).Get(context.Background(), clusterID)
 			if tc.failSecond {
-				if err == nil || hardware != nil {
-					t.Fatalf("partial inventory returned: %+v %v", hardware, err)
-				}
+				Expect(err).NotTo(BeNil())
+				Expect(hardware).To(BeNil())
 				return
 			}
-			if err != nil {
-				t.Fatal(err)
+			Expect(err).To(BeNil())
+			if tc.total > 0 {
+				Expect(hardware).To(HaveLen(1))
+				Expect(hardware[0].Type).To(Equal("A100"))
 			}
-			if tc.total > 0 && (len(hardware) != 1 || hardware[0].Type != "A100") {
-				t.Fatalf("lost GPU from last nodepool: %+v", hardware)
+			if tc.total == 50 {
+				Expect(calls).To(BeNumerically("==", 2))
 			}
-			if tc.total == 50 && calls != 2 {
-				t.Fatalf("full page must be followed by empty page: calls=%d", calls)
-			}
-			if tc.total == 0 && (len(hardware) != 0 || calls != 1) {
-				t.Fatalf("empty inventory: %+v calls=%d", hardware, calls)
+			if tc.total == 0 {
+				Expect(hardware).To(HaveLen(0))
+				Expect(calls).To(BeNumerically("==", 1))
 			}
 		})
 	}
-}
+})
 
-func TestInventoryRejectsMalformedRecordsWithoutPartialSuccess(t *testing.T) {
+var _ = It("inventory rejects malformed records without partial success", func() {
 	memory := int64(80_000_000_000)
 	for _, invalid := range []clusterapi.NodepoolGpuTypeDetails{
 		{Type: "A100", TotalDevices: -1}, {Type: "", TotalDevices: 1}, {Type: "  ", TotalDevices: 1},
@@ -192,26 +206,29 @@ func TestInventoryRejectsMalformedRecordsWithoutPartialSuccess(t *testing.T) {
 				{Type: "A100", GpuMemoryBytes: &memory, TotalDevices: 2}, invalid,
 			}}}}, nil
 		}), 30*time.Second)
-		if hardware, err := client.Get(context.Background(), clusterID); err == nil || hardware != nil {
-			t.Fatalf("malformed inventory became partial success: %+v %v", hardware, err)
+		{
+			hardware, err := client.Get(context.Background(), clusterID)
+			Expect(err).NotTo(BeNil())
+			Expect(hardware).To(BeNil())
 		}
 	}
-}
+})
 
-func TestInventoryAddsDeadlineForCallerWithoutOne(t *testing.T) {
+var _ = It("inventory adds deadline for caller without one", func() {
 	client := New(nodePoolsFunc(func(ctx context.Context, _ string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
 		if _, bounded := ctx.Deadline(); !bounded {
-			t.Error("inventory upstream received an unbounded context")
+			Fail("inventory upstream received an unbounded context")
 			return nil, errors.New("missing deadline")
 		}
 		return &clusterapi.GetNodepoolsMinimal200Response{}, nil
 	}), 30*time.Second)
-	if _, err := client.Get(context.Background(), clusterID); err != nil {
-		t.Fatalf("inventory lookup with an added deadline failed: %v", err)
+	{
+		_, err := client.Get(context.Background(), clusterID)
+		Expect(err).To(BeNil())
 	}
-}
+})
 
-func TestInventoryTimeoutCancelsBlockedDependency(t *testing.T) {
+var _ = It("inventory timeout cancels blocked dependency", func() {
 	for _, callerDeadline := range []bool{false, true} {
 		ctx := context.Background()
 		if callerDeadline {
@@ -224,17 +241,23 @@ func TestInventoryTimeoutCancelsBlockedDependency(t *testing.T) {
 			return nil, ctx.Err()
 		}), 20*time.Millisecond)
 		start := time.Now()
-		if result, err := client.Get(ctx, clusterID); result != nil || !errors.Is(err, context.DeadlineExceeded) || time.Since(start) > time.Second {
-			t.Fatalf("blocked dependency was not bounded: %+v %v", result, err)
+		{
+			result, err := client.Get(ctx, clusterID)
+			Expect(result).To(BeNil())
+			Expect(err).NotTo(BeNil())
+			Expect(err.Details).To(ContainSubstring(context.DeadlineExceeded.Error()))
+			Expect(time.Since(start)).To(BeNumerically("<=", time.Second))
 		}
 	}
-}
+})
 
-func TestInventoryZeroDevicesRemainAbsent(t *testing.T) {
+var _ = It("inventory zero devices remain absent", func() {
 	client := New(nodePoolsFunc(func(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error) {
 		return &clusterapi.GetNodepoolsMinimal200Response{Nodepools: []clusterapi.NodepoolMinimal{{GpuTypes: []clusterapi.NodepoolGpuTypeDetails{{TotalDevices: 0}, {Type: "A100", TotalDevices: 0}}}}}, nil
 	}), time.Second)
-	if result, err := client.Get(context.Background(), clusterID); err != nil || len(result) != 0 {
-		t.Fatalf("zero-device absence treated as malformed: %+v %v", result, err)
+	{
+		result, err := client.Get(context.Background(), clusterID)
+		Expect(err).To(BeNil())
+		Expect(result).To(HaveLen(0))
 	}
-}
+})

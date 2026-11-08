@@ -61,4 +61,4 @@ paths:
     x-scope: [ system, tenant ]
     $ref: "./resources/Settings/CatalogSettingsByKey.yaml"
   /api/v1/inference/right-sizing/recommendation:
-    $ref: "./resources/RightSizing.yaml"
+    $ref: "./resources/Recommendation.yaml"

@@ -7,135 +7,133 @@ package rightsizing
 
 import (
 	"context"
-	"errors"
-	"testing"
+	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/gpuinventory"
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/ngcmetadata"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-type inventoryFunc func(context.Context, string) ([]gpuinventory.Hardware, error)
+type inventoryFunc func(context.Context, string) ([]gpuinventory.Hardware, *api.Error)
 
-func (f inventoryFunc) Get(ctx context.Context, id string) ([]gpuinventory.Hardware, error) {
+func (f inventoryFunc) Get(ctx context.Context, id string) ([]gpuinventory.Hardware, *api.Error) {
 	return f(ctx, id)
 }
 
-type metadataFunc func(context.Context, string, string) (ngcmetadata.Metadata, error)
+type metadataFunc func(context.Context, string, string) (ngcmetadata.Metadata, *api.Error)
 
-func (f metadataFunc) Get(ctx context.Context, image, tag string) (ngcmetadata.Metadata, error) {
+func (f metadataFunc) Get(ctx context.Context, image, tag string) (ngcmetadata.Metadata, *api.Error) {
 	return f(ctx, image, tag)
 }
 
-func TestRecommendKeepsCapacitiesAndAppliesCutoff(t *testing.T) {
+var _ = It("recommend keeps capacities and applies cutoff", func() {
 	small, large, minimum, one := int64(40_000_000_000), int64(80_000_000_000), 36.0, 1
-	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) {
+	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, *api.Error) {
 		return []gpuinventory.Hardware{{Type: "NVIDIA-A100", MemoryBytes: &small, MaxDevicesPerNode: 8}, {Type: "NVIDIA-A100", MemoryBytes: &large, MaxDevicesPerNode: 8}, {Type: "T4"}}, nil
-	}), metadataFunc(func(_ context.Context, image, tag string) (ngcmetadata.Metadata, error) {
-		if image != "nvcr.io/nim/nvidia/example" || tag != "2.1.4" {
-			t.Fatalf("wrong image/tag: %s %s", image, tag)
-		}
+	}), metadataFunc(func(_ context.Context, image, tag string) (ngcmetadata.Metadata, *api.Error) {
+		Expect(image).To(Equal("nvcr.io/nim/nvidia/example"))
+		Expect(tag).To(Equal("2.1.4"))
 		return ngcmetadata.Metadata{Profiles: []ngcmetadata.Profile{{ID: "profile", Precision: "bf16", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}}, nil
 	}), 90)
 	result, err := s.Recommend(context.Background(), validRequest())
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(result.Results) != 3 {
-		t.Fatalf("results=%+v", result.Results)
-	}
-	if result.Results[0].Recommendation.AllocationType != "gpu_count" || result.Results[1].Recommendation.AllocationType != "gpu_memory" ||
-		result.Results[1].Recommendation.GpuMemoryPerDeviceBytes != 36_000_000_000 || result.Results[2].Status != "no_recommendation" {
-		t.Fatalf("wrong allocations: %+v", result.Results)
-	}
+	Expect(err).To(BeNil())
+	Expect(result.Results).To(HaveLen(3))
+	Expect(string(result.Results[0].Recommendation.AllocationType)).To(Equal("gpu_count"))
+	Expect(string(result.Results[1].Recommendation.AllocationType)).To(Equal("gpu_memory"))
+	Expect(result.Results[1].Recommendation.GpuMemoryPerDeviceBytes).To(BeNumerically("==", 36_000_000_000))
+	Expect(string(result.Results[2].Status)).To(Equal("no_recommendation"))
 	gpu := "NVIDIA-A100"
 	request := validRequest()
 	request.GpuType = &gpu
 	filtered, err := s.Recommend(context.Background(), request)
-	if err != nil || len(filtered.Results) != 2 {
-		t.Fatalf("filtered=%+v err=%v", filtered, err)
-	}
-}
+	Expect(err).To(BeNil())
+	Expect(filtered.Results).To(HaveLen(2))
+})
 
-func TestRecommendUsesMultiDeviceMinimumPerDevice(t *testing.T) {
+var _ = It("recommend uses multi device minimum per device", func() {
 	capacity, minimum, tp, pp := int64(80_000_000_000), 35.0, 4, 1
-	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) {
+	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, *api.Error) {
 		return []gpuinventory.Hardware{{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}}, nil
 	}),
-		metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
+		metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, *api.Error) {
 			return ngcmetadata.Metadata{Profiles: []ngcmetadata.Profile{{ID: "tp4", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &tp, PipelineParallelSize: &pp}}}, nil
 		}), 90)
 	result, err := s.Recommend(context.Background(), validRequest())
-	if err != nil {
-		t.Fatal(err)
-	}
+	Expect(err).To(BeNil())
 	allocation := result.Results[0].Recommendation
-	if allocation == nil || allocation.GpuCount != 4 || allocation.GpuMemoryPerDeviceBytes != capacity || result.Results[0].MinimumGpuMemoryPerDeviceGb != minimum {
-		t.Fatalf("multi-device minimum or count changed: %+v", result)
-	}
-}
+	Expect(allocation).NotTo(BeNil())
+	Expect(allocation.GpuCount).To(BeNumerically("==", 4))
+	Expect(allocation.GpuMemoryPerDeviceBytes).To(Equal(capacity))
+	Expect(result.Results[0].MinimumGpuMemoryPerDeviceGb).To(Equal(minimum))
+})
 
-func TestRecommendMissingMetadataAndUpstreamErrors(t *testing.T) {
+var _ = It("recommend missing metadata and upstream errors", func() {
 	capacity := int64(80_000_000_000)
-	inventory := inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) {
+	inventory := inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, *api.Error) {
 		return []gpuinventory.Hardware{{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}}, nil
 	})
-	s := New(inventory, metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
+	s := New(inventory, metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, *api.Error) {
 		return ngcmetadata.Metadata{}, nil
 	}), 90)
 	result, err := s.Recommend(context.Background(), validRequest())
-	if err != nil || result.Results[0].Status != "no_recommendation" {
-		t.Fatalf("missing data=%+v %v", result, err)
-	}
-	failure := errors.New("upstream unavailable")
-	s = New(inventory, metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
+	Expect(err).To(BeNil())
+	Expect(string(result.Results[0].Status)).To(Equal("no_recommendation"))
+	failure := api.NewError(http.StatusServiceUnavailable, "upstream unavailable", nil)
+	s = New(inventory, metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, *api.Error) {
 		return ngcmetadata.Metadata{}, failure
 	}), 90)
-	if _, err = s.Recommend(context.Background(), validRequest()); err == nil || err.Code != 503 {
-		t.Fatalf("metadata failure hidden: %v", err)
+	{
+		_, err = s.Recommend(context.Background(), validRequest())
+		Expect(err).NotTo(BeNil())
+		Expect(err.Code).To(BeNumerically("==", 503))
 	}
-	s = New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) { return nil, failure }), nil, 90)
-	if _, err = s.Recommend(context.Background(), validRequest()); err == nil || err.Code != 503 {
-		t.Fatalf("inventory failure hidden: %v", err)
+	s = New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, *api.Error) { return nil, failure }), nil, 90)
+	{
+		_, err = s.Recommend(context.Background(), validRequest())
+		Expect(err).NotTo(BeNil())
+		Expect(err.Code).To(BeNumerically("==", 503))
 	}
-}
+})
 
-func TestRecommendRejectsInvalidContextBeforeLookup(t *testing.T) {
+var _ = It("recommend rejects invalid context before lookup", func() {
 	s := New(nil, nil, 90)
 	request := validRequest()
 	request.ClusterId = "invalid"
-	if _, err := s.Recommend(context.Background(), request); err == nil || err.Code != 400 {
-		t.Fatalf("invalid cluster accepted: %v", err)
+	{
+		_, err := s.Recommend(context.Background(), request)
+		Expect(err).NotTo(BeNil())
+		Expect(err.Code).To(BeNumerically("==", 400))
 	}
+})
+
+func validRequest() api.RecommendationRequest {
+	return api.RecommendationRequest{ClusterId: "4b94efde-b05a-4118-a03a-1dedff81fa8e", Image: "nvcr.io/nim/nvidia/example", Tag: "2.1.4"}
 }
 
-func validRequest() api.RightSizingRequest {
-	return api.RightSizingRequest{ClusterId: "4b94efde-b05a-4118-a03a-1dedff81fa8e", Image: "nvcr.io/nim/nvidia/example", Tag: "2.1.4"}
-}
-
-func TestRejectsUnverifiedTargetedProfiles(t *testing.T) {
+var _ = Describe("rejects unverified targeted profiles", func() {
 	capacity, minimum, one := int64(80_000_000_000), 36.0, 1
 	for _, tc := range []struct{ name, gpu, device string }{
-		{"display name only", "A100", ""}, {"PCI only", "", "20b2:10de"}, {"matching name different PCI", "A100", "ffff:10de"},
+		{"display name only", "A100", ""}, {"device target only", "", "20b2:10de"}, {"GPU and device target", "A100", "ffff:10de"},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
+		It(tc.name, func() {
 			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{{ID: "targeted", GPU: tc.gpu, GPUDevice: tc.device, MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, 90)
-			if result.Status != "no_recommendation" || result.Recommendation != nil {
-				t.Fatalf("unverified hardware recommended: %+v", result)
-			}
+			Expect(string(result.Status)).To(Equal("no_recommendation"))
+			Expect(result.Recommendation).To(BeNil())
 		})
 	}
-}
+})
 
-func TestOversizedSingleDeviceBaselineDoesNotProduceEstimate(t *testing.T) {
+var _ = It("oversized single device baseline does not produce estimate", func() {
 	capacity, minimum, one := int64(40_000_000_000), 81.0, 1
 	result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{{ID: "generic", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, 90)
-	if result.Status != "no_recommendation" || result.Recommendation != nil || result.Reason == "" {
-		t.Fatalf("unsupported estimate: %+v", result)
-	}
-}
+	Expect(string(result.Status)).To(Equal("no_recommendation"))
+	Expect(result.Recommendation).To(BeNil())
+	Expect(result.Reason).NotTo(BeEmpty())
+})
 
-func TestProfileSelectionRequiresEvidenceAndIsDeterministic(t *testing.T) {
+var _ = Describe("profile selection requires evidence and is deterministic", func() {
 	capacity, one, minimum, larger := int64(80_000_000_000), 1, 16.0, 32.0
 	baseline := ngcmetadata.Profile{ID: "b", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}
 	for _, tc := range []struct {
@@ -148,29 +146,29 @@ func TestProfileSelectionRequiresEvidenceAndIsDeterministic(t *testing.T) {
 		{"smallest memory then stable profile ID", []ngcmetadata.Profile{baseline, {ID: "larger", MinimumVRAMPerDeviceGB: &larger, TensorParallelSize: &one, PipelineParallelSize: &one}, {ID: "a", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}}, "a"},
 		{"tested devices are history", []ngcmetadata.Profile{{ID: "generic", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one, TestedGPUDevices: []string{"different-pci"}}}, "generic"},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
+		It(tc.name, func() {
 			result := recommendForHardware(gpuinventory.Hardware{Type: "A100", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, tc.profiles, 90)
-			if result.ProfileId != tc.want {
-				t.Fatalf("profile=%q want=%q", result.ProfileId, tc.want)
-			}
-			if tc.want == "" && result.Recommendation != nil {
-				t.Fatal("missing evidence produced allocation")
+			Expect(result.ProfileId).To(Equal(tc.want))
+			if tc.want == "" {
+				Expect(result.Recommendation).To(BeNil())
 			}
 		})
 	}
-}
+})
 
-func TestUnavailableRequestedGPUFailsBeforeMetadata(t *testing.T) {
-	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) { return nil, nil }), nil, 90)
+var _ = It("unavailable requested GPU fails before metadata", func() {
+	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, *api.Error) { return nil, nil }), nil, 90)
 	request := validRequest()
 	missing := "missing"
 	request.GpuType = &missing
-	if _, err := s.Recommend(context.Background(), request); err == nil || err.Code != 400 {
-		t.Fatalf("unknown type: %v", err)
+	{
+		_, err := s.Recommend(context.Background(), request)
+		Expect(err).NotTo(BeNil())
+		Expect(err.Code).To(BeNumerically("==", 400))
 	}
 	request.GpuType = nil
 	response, err := s.Recommend(context.Background(), request)
-	if err != nil || response.Results == nil || len(response.Results) != 0 {
-		t.Fatalf("empty inventory: %+v %v", response, err)
-	}
-}
+	Expect(err).To(BeNil())
+	Expect(response.Results).NotTo(BeNil())
+	Expect(response.Results).To(HaveLen(0))
+})

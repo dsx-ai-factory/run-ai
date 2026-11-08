@@ -6,41 +6,43 @@ import (
 	catalogconfig "github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/services/rightsizing"
 	sharedconfig "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
-	"testing"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func TestSharingCutoffConfigurationChangesAllocation(t *testing.T) {
+var _ = Describe("sharing cutoff configuration changes allocation", func() {
 	for _, tc := range []struct {
 		name, value string
 		whole       bool
 	}{
 		{"default 90 percent", "", false}, {"override to 80 percent", "80", true},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
-			t.Setenv("WHOLE_GPU_CUTOFF_PERCENT", tc.value)
+		It(tc.name, func() {
+			GinkgoT().Setenv("WHOLE_GPU_CUTOFF_PERCENT", tc.value)
 			sharedconfig.FlushAll()
-			t.Cleanup(sharedconfig.FlushAll)
-			if err := sharedconfig.Register[*catalogconfig.Services](); err != nil {
-				t.Fatal(err)
+			DeferCleanup(sharedconfig.FlushAll)
+			{
+				err := sharedconfig.Register[*catalogconfig.Services]()
+				Expect(err).To(BeNil())
 			}
 			cutoff := sharedconfig.Get[*catalogconfig.Services]().WholeGPUCutoffPercent
 			result, err := rightsizing.SingleGPUAllocation(85, 100, cutoff)
-			if err != nil || result.WholeGPU != tc.whole {
-				t.Fatalf("cutoff=%d allocation=%+v error=%v", cutoff, result, err)
-			}
+			Expect(err).To(BeNil())
+			Expect(result.WholeGPU).To(Equal(tc.whole))
 		})
 	}
-}
+})
 
-func TestSharingCutoffConfigurationRejectsInvalidPercentages(t *testing.T) {
+var _ = Describe("sharing cutoff configuration rejects invalid percentages", func() {
 	for _, value := range []string{"0", "-1", "101"} {
-		t.Run(value, func(t *testing.T) {
-			t.Setenv("WHOLE_GPU_CUTOFF_PERCENT", value)
+		It(value, func() {
+			GinkgoT().Setenv("WHOLE_GPU_CUTOFF_PERCENT", value)
 			sharedconfig.FlushAll()
-			t.Cleanup(sharedconfig.FlushAll)
-			if err := sharedconfig.Register[*catalogconfig.Services](); err == nil {
-				t.Fatalf("accepted invalid percentage %q", value)
+			DeferCleanup(sharedconfig.FlushAll)
+			{
+				err := sharedconfig.Register[*catalogconfig.Services]()
+				Expect(err).NotTo(BeNil())
 			}
 		})
 	}
-}
+})

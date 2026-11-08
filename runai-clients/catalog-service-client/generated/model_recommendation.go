@@ -19,41 +19,44 @@ import (
 	"fmt"
 )
 
-// checks if the RightSizingRecommendation type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &RightSizingRecommendation{}
+// checks if the Recommendation type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &Recommendation{}
 
-// RightSizingRecommendation struct for RightSizingRecommendation
-type RightSizingRecommendation struct {
-	AllocationType          RightSizingAllocationType `json:"allocationType"`
-	GpuCount                int64                     `json:"gpuCount"`
-	GpuMemoryPerDeviceBytes *int64                    `json:"gpuMemoryPerDeviceBytes,omitempty"`
+// Recommendation struct for Recommendation
+type Recommendation struct {
+	// Whether the allocation requests GPU memory (`gpu_memory`) or whole GPUs (`gpu_count`).
+	AllocationType RecommendationAllocationType `json:"allocationType"`
+	// Number of GPUs used by the allocation. Always 1 for `gpu_memory`; for `gpu_count`, equals the selected profile’s tensor parallel size multiplied by its pipeline parallel size.
+	GpuCount int64 `json:"gpuCount"`
+	// Recommended memory per GPU, in bytes. For `gpu_memory`, this is the published minimum rounded up to whole bytes. For `gpu_count`, this is the reported capacity of each GPU.
+	GpuMemoryPerDeviceBytes *int64 `json:"gpuMemoryPerDeviceBytes,omitempty"`
 }
 
-type _RightSizingRecommendation RightSizingRecommendation
+type _Recommendation Recommendation
 
-// NewRightSizingRecommendation instantiates a new RightSizingRecommendation object
+// NewRecommendation instantiates a new Recommendation object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingRecommendation(allocationType RightSizingAllocationType, gpuCount int64) *RightSizingRecommendation {
-	this := RightSizingRecommendation{}
+func NewRecommendation(allocationType RecommendationAllocationType, gpuCount int64) *Recommendation {
+	this := Recommendation{}
 	this.AllocationType = allocationType
 	this.GpuCount = gpuCount
 	return &this
 }
 
-// NewRightSizingRecommendationWithDefaults instantiates a new RightSizingRecommendation object
+// NewRecommendationWithDefaults instantiates a new Recommendation object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRightSizingRecommendationWithDefaults() *RightSizingRecommendation {
-	this := RightSizingRecommendation{}
+func NewRecommendationWithDefaults() *Recommendation {
+	this := Recommendation{}
 	return &this
 }
 
 // GetAllocationType returns the AllocationType field value
-func (o *RightSizingRecommendation) GetAllocationType() RightSizingAllocationType {
+func (o *Recommendation) GetAllocationType() RecommendationAllocationType {
 	if o == nil {
-		var ret RightSizingAllocationType
+		var ret RecommendationAllocationType
 		return ret
 	}
 
@@ -62,7 +65,7 @@ func (o *RightSizingRecommendation) GetAllocationType() RightSizingAllocationTyp
 
 // GetAllocationTypeOk returns a tuple with the AllocationType field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingRecommendation) GetAllocationTypeOk() (*RightSizingAllocationType, bool) {
+func (o *Recommendation) GetAllocationTypeOk() (*RecommendationAllocationType, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -70,12 +73,12 @@ func (o *RightSizingRecommendation) GetAllocationTypeOk() (*RightSizingAllocatio
 }
 
 // SetAllocationType sets field value
-func (o *RightSizingRecommendation) SetAllocationType(v RightSizingAllocationType) {
+func (o *Recommendation) SetAllocationType(v RecommendationAllocationType) {
 	o.AllocationType = v
 }
 
 // GetGpuCount returns the GpuCount field value
-func (o *RightSizingRecommendation) GetGpuCount() int64 {
+func (o *Recommendation) GetGpuCount() int64 {
 	if o == nil {
 		var ret int64
 		return ret
@@ -86,7 +89,7 @@ func (o *RightSizingRecommendation) GetGpuCount() int64 {
 
 // GetGpuCountOk returns a tuple with the GpuCount field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingRecommendation) GetGpuCountOk() (*int64, bool) {
+func (o *Recommendation) GetGpuCountOk() (*int64, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -94,12 +97,12 @@ func (o *RightSizingRecommendation) GetGpuCountOk() (*int64, bool) {
 }
 
 // SetGpuCount sets field value
-func (o *RightSizingRecommendation) SetGpuCount(v int64) {
+func (o *Recommendation) SetGpuCount(v int64) {
 	o.GpuCount = v
 }
 
 // GetGpuMemoryPerDeviceBytes returns the GpuMemoryPerDeviceBytes field value if set, zero value otherwise.
-func (o *RightSizingRecommendation) GetGpuMemoryPerDeviceBytes() int64 {
+func (o *Recommendation) GetGpuMemoryPerDeviceBytes() int64 {
 	if o == nil || IsNil(o.GpuMemoryPerDeviceBytes) {
 		var ret int64
 		return ret
@@ -109,7 +112,7 @@ func (o *RightSizingRecommendation) GetGpuMemoryPerDeviceBytes() int64 {
 
 // GetGpuMemoryPerDeviceBytesOk returns a tuple with the GpuMemoryPerDeviceBytes field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *RightSizingRecommendation) GetGpuMemoryPerDeviceBytesOk() (*int64, bool) {
+func (o *Recommendation) GetGpuMemoryPerDeviceBytesOk() (*int64, bool) {
 	if o == nil || IsNil(o.GpuMemoryPerDeviceBytes) {
 		return nil, false
 	}
@@ -117,7 +120,7 @@ func (o *RightSizingRecommendation) GetGpuMemoryPerDeviceBytesOk() (*int64, bool
 }
 
 // HasGpuMemoryPerDeviceBytes returns a boolean if a field has been set.
-func (o *RightSizingRecommendation) HasGpuMemoryPerDeviceBytes() bool {
+func (o *Recommendation) HasGpuMemoryPerDeviceBytes() bool {
 	if o != nil && !IsNil(o.GpuMemoryPerDeviceBytes) {
 		return true
 	}
@@ -126,11 +129,11 @@ func (o *RightSizingRecommendation) HasGpuMemoryPerDeviceBytes() bool {
 }
 
 // SetGpuMemoryPerDeviceBytes gets a reference to the given int64 and assigns it to the GpuMemoryPerDeviceBytes field.
-func (o *RightSizingRecommendation) SetGpuMemoryPerDeviceBytes(v int64) {
+func (o *Recommendation) SetGpuMemoryPerDeviceBytes(v int64) {
 	o.GpuMemoryPerDeviceBytes = &v
 }
 
-func (o RightSizingRecommendation) MarshalJSON() ([]byte, error) {
+func (o Recommendation) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -138,7 +141,7 @@ func (o RightSizingRecommendation) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o RightSizingRecommendation) ToMap() (map[string]interface{}, error) {
+func (o Recommendation) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["allocationType"] = o.AllocationType
 	toSerialize["gpuCount"] = o.GpuCount
@@ -148,7 +151,7 @@ func (o RightSizingRecommendation) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *RightSizingRecommendation) UnmarshalJSON(data []byte) (err error) {
+func (o *Recommendation) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -176,55 +179,55 @@ func (o *RightSizingRecommendation) UnmarshalJSON(data []byte) (err error) {
 	//
 	fmt.Sprintf("dummy")
 
-	varRightSizingRecommendation := _RightSizingRecommendation{}
+	varRecommendation := _Recommendation{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	// RUNAI
 	// decoder.DisallowUnknownFields()
 	//
-	err = decoder.Decode(&varRightSizingRecommendation)
+	err = decoder.Decode(&varRecommendation)
 
 	if err != nil {
 		return err
 	}
 
-	*o = RightSizingRecommendation(varRightSizingRecommendation)
+	*o = Recommendation(varRecommendation)
 
 	return err
 }
 
-type NullableRightSizingRecommendation struct {
-	value *RightSizingRecommendation
+type NullableRecommendation struct {
+	value *Recommendation
 	isSet bool
 }
 
-func (v NullableRightSizingRecommendation) Get() *RightSizingRecommendation {
+func (v NullableRecommendation) Get() *Recommendation {
 	return v.value
 }
 
-func (v *NullableRightSizingRecommendation) Set(val *RightSizingRecommendation) {
+func (v *NullableRecommendation) Set(val *Recommendation) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRightSizingRecommendation) IsSet() bool {
+func (v NullableRecommendation) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRightSizingRecommendation) Unset() {
+func (v *NullableRecommendation) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRightSizingRecommendation(val *RightSizingRecommendation) *NullableRightSizingRecommendation {
-	return &NullableRightSizingRecommendation{value: val, isSet: true}
+func NewNullableRecommendation(val *Recommendation) *NullableRecommendation {
+	return &NullableRecommendation{value: val, isSet: true}
 }
 
-func (v NullableRightSizingRecommendation) MarshalJSON() ([]byte, error) {
+func (v NullableRecommendation) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRightSizingRecommendation) UnmarshalJSON(src []byte) error {
+func (v *NullableRecommendation) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

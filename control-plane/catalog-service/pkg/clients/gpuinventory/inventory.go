@@ -9,16 +9,19 @@ package gpuinventory
 
 import (
 	"context"
-	"fmt"
+	"errors"
+	"net/http"
 	"sort"
 	"strings"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/internal/generated/pkg/api"
 	clusterapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/google/uuid"
 )
 
-type NodePoolsClient interface {
+type ClusterClient interface {
+	GetClusterMinimalDataById(context.Context, string) (*clusterapi.ClustersMinimalData, error)
 	GetNodePoolsMinimalByCluster(context.Context, string) (*clusterapi.GetNodepoolsMinimal200Response, error)
 }
 
@@ -31,29 +34,38 @@ type Hardware struct {
 }
 
 type Client struct {
-	nodePools      NodePoolsClient
+	cluster        ClusterClient
 	requestTimeout time.Duration
 }
 
-func New(nodePools NodePoolsClient, requestTimeout time.Duration) *Client {
+func New(cluster ClusterClient, requestTimeout time.Duration) *Client {
 	return &Client{
-		nodePools:      nodePools,
+		cluster:        cluster,
 		requestTimeout: requestTimeout,
 	}
 }
 
-func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) {
+func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, *api.Error) {
 	if err := uuid.Validate(clusterID); err != nil {
-		return nil, fmt.Errorf("invalid cluster ID: %w", err)
+		return nil, api.NewError(http.StatusBadRequest, "Invalid cluster ID", err)
 	}
 	ctx, cancel := context.WithTimeout(ctx, c.requestTimeout)
 	defer cancel()
-	pools, err := c.nodePools.GetNodePoolsMinimalByCluster(ctx, clusterID)
+	// An empty filtered list cannot establish cluster existence. Use the
+	// existing authorized minimal lookup before reading node-pool inventory.
+	cluster, err := c.cluster.GetClusterMinimalDataById(ctx, clusterID)
 	if err != nil {
-		return nil, fmt.Errorf("retrieve cluster GPU inventory: %w", err)
+		return nil, inventoryError(err)
+	}
+	if cluster == nil {
+		return nil, api.NewError(http.StatusServiceUnavailable, "Cluster lookup returned no response", nil)
+	}
+	pools, err := c.cluster.GetNodePoolsMinimalByCluster(ctx, clusterID)
+	if err != nil {
+		return nil, inventoryError(err)
 	}
 	if pools == nil {
-		return nil, fmt.Errorf("cluster GPU inventory returned no response")
+		return nil, api.NewError(http.StatusServiceUnavailable, "cluster GPU inventory returned no response", nil)
 	}
 	type hardwareKey struct {
 		gpuType string
@@ -65,13 +77,13 @@ func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) 
 		for _, gpu := range pool.GpuTypes {
 			name := strings.TrimSpace(gpu.Type)
 			if gpu.TotalDevices < 0 || (gpu.TotalDevices > 0 && name == "") {
-				return nil, fmt.Errorf("cluster GPU inventory contains an invalid device count or missing GPU type")
+				return nil, api.NewError(http.StatusServiceUnavailable, "cluster GPU inventory contains an invalid device count or missing GPU type", nil)
 			}
 			var maxPerNode int64
 			if gpu.MaxDevicesPerNode != nil {
 				maxPerNode = *gpu.MaxDevicesPerNode
 				if maxPerNode <= 0 || maxPerNode > int64(gpu.TotalDevices) {
-					return nil, fmt.Errorf("cluster GPU inventory contains an invalid per-node device count")
+					return nil, api.NewError(http.StatusServiceUnavailable, "cluster GPU inventory contains an invalid per-node device count", nil)
 				}
 			}
 			if gpu.TotalDevices == 0 {
@@ -115,4 +127,18 @@ func (c *Client) Get(ctx context.Context, clusterID string) ([]Hardware, error) 
 		return *result[i].MemoryBytes < *result[j].MemoryBytes
 	})
 	return result, nil
+}
+
+// Preserve caller-facing access and existence errors. Dependency failures
+// remain unavailable; an upstream HTTP status is not a sizing outcome.
+func inventoryError(err error) *api.Error {
+	status := http.StatusServiceUnavailable
+	var upstream *clusterapi.Error
+	if errors.As(err, &upstream) {
+		switch upstream.Code {
+		case http.StatusUnauthorized, http.StatusForbidden, http.StatusNotFound:
+			status = int(upstream.Code)
+		}
+	}
+	return &api.Error{Code: int32(status), Message: "Cluster GPU inventory is not available", Details: err.Error()}
 }

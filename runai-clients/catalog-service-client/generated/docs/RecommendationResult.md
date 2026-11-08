@@ -1,313 +1,313 @@
-# RightSizingResult
+# RecommendationResult
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**GpuType** | **string** |  | 
-**GpuMemoryCapacityBytes** | Pointer to **int64** | Reported per-device capacity, not free memory or a quota guarantee. | [optional] 
-**Status** | [**RightSizingStatus**](RightSizingStatus.md) |  | 
-**MinimumGpuMemoryPerDeviceGb** | Pointer to **float64** | Published NGC minimum for the source profile, before allocation rounding. | [optional] 
-**ProfileId** | Pointer to **string** |  | [optional] 
-**Precision** | Pointer to **string** |  | [optional] 
-**InferenceBackend** | Pointer to **string** |  | [optional] 
-**TensorParallelSize** | Pointer to **int64** | Explicit tensor parallel size from the selected published profile. | [optional] 
-**PipelineParallelSize** | Pointer to **int64** | Explicit pipeline parallel size from the selected published profile. | [optional] 
-**Reason** | Pointer to **string** | Explanation when sizing cannot be recommended. | [optional] 
-**Recommendation** | Pointer to [**NullableRightSizingRecommendation**](RightSizingRecommendation.md) |  | [optional] 
+**GpuType** | **string** | Exact GPU type reported by the cluster inventory. Different memory capacities for the same GPU type produce separate results. | 
+**GpuMemoryCapacityBytes** | Pointer to **int64** | Reported memory capacity of each GPU, in bytes. Omitted when capacity is unknown. Does not represent free memory or a quota guarantee. | [optional] 
+**Status** | [**RecommendationStatus**](RecommendationStatus.md) | Whether an allocation was recommended for this GPU type and memory capacity. | 
+**MinimumGpuMemoryPerDeviceGb** | Pointer to **float64** | Published minimum memory per GPU for the selected NGC profile, in decimal GB (1 GB &#x3D; 1,000,000,000 bytes), before allocation rounding. Omitted when no profile is selected. | [optional] 
+**ProfileId** | Pointer to **string** | Identifier of the selected published NGC execution profile. Omitted when no profile is selected. | [optional] 
+**Precision** | Pointer to **string** | Model precision reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report precision. | [optional] 
+**InferenceBackend** | Pointer to **string** | Inference backend reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report a backend. | [optional] 
+**TensorParallelSize** | Pointer to **int64** | Number of GPUs participating in tensor parallelism in the selected NGC profile. Omitted when no profile is selected. | [optional] 
+**PipelineParallelSize** | Pointer to **int64** | Number of pipeline parallel stages in the selected NGC profile. Omitted when no profile is selected. | [optional] 
+**Reason** | Pointer to **string** | Explanation of why no allocation could be recommended. Omitted for a recommended allocation. | [optional] 
+**Recommendation** | Pointer to [**NullableRecommendation**](Recommendation.md) | Recommended allocation for this result. Absent or null when no allocation could be recommended. | [optional] 
 
 ## Methods
 
-### NewRightSizingResult
+### NewRecommendationResult
 
-`func NewRightSizingResult(gpuType string, status RightSizingStatus, ) *RightSizingResult`
+`func NewRecommendationResult(gpuType string, status RecommendationStatus, ) *RecommendationResult`
 
-NewRightSizingResult instantiates a new RightSizingResult object
+NewRecommendationResult instantiates a new RecommendationResult object
 This constructor will assign default values to properties that have it defined,
 and makes sure properties required by API are set, but the set of arguments
 will change when the set of required properties is changed
 
-### NewRightSizingResultWithDefaults
+### NewRecommendationResultWithDefaults
 
-`func NewRightSizingResultWithDefaults() *RightSizingResult`
+`func NewRecommendationResultWithDefaults() *RecommendationResult`
 
-NewRightSizingResultWithDefaults instantiates a new RightSizingResult object
+NewRecommendationResultWithDefaults instantiates a new RecommendationResult object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
 
 ### GetGpuType
 
-`func (o *RightSizingResult) GetGpuType() string`
+`func (o *RecommendationResult) GetGpuType() string`
 
 GetGpuType returns the GpuType field if non-nil, zero value otherwise.
 
 ### GetGpuTypeOk
 
-`func (o *RightSizingResult) GetGpuTypeOk() (*string, bool)`
+`func (o *RecommendationResult) GetGpuTypeOk() (*string, bool)`
 
 GetGpuTypeOk returns a tuple with the GpuType field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetGpuType
 
-`func (o *RightSizingResult) SetGpuType(v string)`
+`func (o *RecommendationResult) SetGpuType(v string)`
 
 SetGpuType sets GpuType field to given value.
 
 
 ### GetGpuMemoryCapacityBytes
 
-`func (o *RightSizingResult) GetGpuMemoryCapacityBytes() int64`
+`func (o *RecommendationResult) GetGpuMemoryCapacityBytes() int64`
 
 GetGpuMemoryCapacityBytes returns the GpuMemoryCapacityBytes field if non-nil, zero value otherwise.
 
 ### GetGpuMemoryCapacityBytesOk
 
-`func (o *RightSizingResult) GetGpuMemoryCapacityBytesOk() (*int64, bool)`
+`func (o *RecommendationResult) GetGpuMemoryCapacityBytesOk() (*int64, bool)`
 
 GetGpuMemoryCapacityBytesOk returns a tuple with the GpuMemoryCapacityBytes field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetGpuMemoryCapacityBytes
 
-`func (o *RightSizingResult) SetGpuMemoryCapacityBytes(v int64)`
+`func (o *RecommendationResult) SetGpuMemoryCapacityBytes(v int64)`
 
 SetGpuMemoryCapacityBytes sets GpuMemoryCapacityBytes field to given value.
 
 ### HasGpuMemoryCapacityBytes
 
-`func (o *RightSizingResult) HasGpuMemoryCapacityBytes() bool`
+`func (o *RecommendationResult) HasGpuMemoryCapacityBytes() bool`
 
 HasGpuMemoryCapacityBytes returns a boolean if a field has been set.
 
 ### GetStatus
 
-`func (o *RightSizingResult) GetStatus() RightSizingStatus`
+`func (o *RecommendationResult) GetStatus() RecommendationStatus`
 
 GetStatus returns the Status field if non-nil, zero value otherwise.
 
 ### GetStatusOk
 
-`func (o *RightSizingResult) GetStatusOk() (*RightSizingStatus, bool)`
+`func (o *RecommendationResult) GetStatusOk() (*RecommendationStatus, bool)`
 
 GetStatusOk returns a tuple with the Status field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetStatus
 
-`func (o *RightSizingResult) SetStatus(v RightSizingStatus)`
+`func (o *RecommendationResult) SetStatus(v RecommendationStatus)`
 
 SetStatus sets Status field to given value.
 
 
 ### GetMinimumGpuMemoryPerDeviceGb
 
-`func (o *RightSizingResult) GetMinimumGpuMemoryPerDeviceGb() float64`
+`func (o *RecommendationResult) GetMinimumGpuMemoryPerDeviceGb() float64`
 
 GetMinimumGpuMemoryPerDeviceGb returns the MinimumGpuMemoryPerDeviceGb field if non-nil, zero value otherwise.
 
 ### GetMinimumGpuMemoryPerDeviceGbOk
 
-`func (o *RightSizingResult) GetMinimumGpuMemoryPerDeviceGbOk() (*float64, bool)`
+`func (o *RecommendationResult) GetMinimumGpuMemoryPerDeviceGbOk() (*float64, bool)`
 
 GetMinimumGpuMemoryPerDeviceGbOk returns a tuple with the MinimumGpuMemoryPerDeviceGb field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetMinimumGpuMemoryPerDeviceGb
 
-`func (o *RightSizingResult) SetMinimumGpuMemoryPerDeviceGb(v float64)`
+`func (o *RecommendationResult) SetMinimumGpuMemoryPerDeviceGb(v float64)`
 
 SetMinimumGpuMemoryPerDeviceGb sets MinimumGpuMemoryPerDeviceGb field to given value.
 
 ### HasMinimumGpuMemoryPerDeviceGb
 
-`func (o *RightSizingResult) HasMinimumGpuMemoryPerDeviceGb() bool`
+`func (o *RecommendationResult) HasMinimumGpuMemoryPerDeviceGb() bool`
 
 HasMinimumGpuMemoryPerDeviceGb returns a boolean if a field has been set.
 
 ### GetProfileId
 
-`func (o *RightSizingResult) GetProfileId() string`
+`func (o *RecommendationResult) GetProfileId() string`
 
 GetProfileId returns the ProfileId field if non-nil, zero value otherwise.
 
 ### GetProfileIdOk
 
-`func (o *RightSizingResult) GetProfileIdOk() (*string, bool)`
+`func (o *RecommendationResult) GetProfileIdOk() (*string, bool)`
 
 GetProfileIdOk returns a tuple with the ProfileId field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetProfileId
 
-`func (o *RightSizingResult) SetProfileId(v string)`
+`func (o *RecommendationResult) SetProfileId(v string)`
 
 SetProfileId sets ProfileId field to given value.
 
 ### HasProfileId
 
-`func (o *RightSizingResult) HasProfileId() bool`
+`func (o *RecommendationResult) HasProfileId() bool`
 
 HasProfileId returns a boolean if a field has been set.
 
 ### GetPrecision
 
-`func (o *RightSizingResult) GetPrecision() string`
+`func (o *RecommendationResult) GetPrecision() string`
 
 GetPrecision returns the Precision field if non-nil, zero value otherwise.
 
 ### GetPrecisionOk
 
-`func (o *RightSizingResult) GetPrecisionOk() (*string, bool)`
+`func (o *RecommendationResult) GetPrecisionOk() (*string, bool)`
 
 GetPrecisionOk returns a tuple with the Precision field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetPrecision
 
-`func (o *RightSizingResult) SetPrecision(v string)`
+`func (o *RecommendationResult) SetPrecision(v string)`
 
 SetPrecision sets Precision field to given value.
 
 ### HasPrecision
 
-`func (o *RightSizingResult) HasPrecision() bool`
+`func (o *RecommendationResult) HasPrecision() bool`
 
 HasPrecision returns a boolean if a field has been set.
 
 ### GetInferenceBackend
 
-`func (o *RightSizingResult) GetInferenceBackend() string`
+`func (o *RecommendationResult) GetInferenceBackend() string`
 
 GetInferenceBackend returns the InferenceBackend field if non-nil, zero value otherwise.
 
 ### GetInferenceBackendOk
 
-`func (o *RightSizingResult) GetInferenceBackendOk() (*string, bool)`
+`func (o *RecommendationResult) GetInferenceBackendOk() (*string, bool)`
 
 GetInferenceBackendOk returns a tuple with the InferenceBackend field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetInferenceBackend
 
-`func (o *RightSizingResult) SetInferenceBackend(v string)`
+`func (o *RecommendationResult) SetInferenceBackend(v string)`
 
 SetInferenceBackend sets InferenceBackend field to given value.
 
 ### HasInferenceBackend
 
-`func (o *RightSizingResult) HasInferenceBackend() bool`
+`func (o *RecommendationResult) HasInferenceBackend() bool`
 
 HasInferenceBackend returns a boolean if a field has been set.
 
 ### GetTensorParallelSize
 
-`func (o *RightSizingResult) GetTensorParallelSize() int64`
+`func (o *RecommendationResult) GetTensorParallelSize() int64`
 
 GetTensorParallelSize returns the TensorParallelSize field if non-nil, zero value otherwise.
 
 ### GetTensorParallelSizeOk
 
-`func (o *RightSizingResult) GetTensorParallelSizeOk() (*int64, bool)`
+`func (o *RecommendationResult) GetTensorParallelSizeOk() (*int64, bool)`
 
 GetTensorParallelSizeOk returns a tuple with the TensorParallelSize field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetTensorParallelSize
 
-`func (o *RightSizingResult) SetTensorParallelSize(v int64)`
+`func (o *RecommendationResult) SetTensorParallelSize(v int64)`
 
 SetTensorParallelSize sets TensorParallelSize field to given value.
 
 ### HasTensorParallelSize
 
-`func (o *RightSizingResult) HasTensorParallelSize() bool`
+`func (o *RecommendationResult) HasTensorParallelSize() bool`
 
 HasTensorParallelSize returns a boolean if a field has been set.
 
 ### GetPipelineParallelSize
 
-`func (o *RightSizingResult) GetPipelineParallelSize() int64`
+`func (o *RecommendationResult) GetPipelineParallelSize() int64`
 
 GetPipelineParallelSize returns the PipelineParallelSize field if non-nil, zero value otherwise.
 
 ### GetPipelineParallelSizeOk
 
-`func (o *RightSizingResult) GetPipelineParallelSizeOk() (*int64, bool)`
+`func (o *RecommendationResult) GetPipelineParallelSizeOk() (*int64, bool)`
 
 GetPipelineParallelSizeOk returns a tuple with the PipelineParallelSize field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetPipelineParallelSize
 
-`func (o *RightSizingResult) SetPipelineParallelSize(v int64)`
+`func (o *RecommendationResult) SetPipelineParallelSize(v int64)`
 
 SetPipelineParallelSize sets PipelineParallelSize field to given value.
 
 ### HasPipelineParallelSize
 
-`func (o *RightSizingResult) HasPipelineParallelSize() bool`
+`func (o *RecommendationResult) HasPipelineParallelSize() bool`
 
 HasPipelineParallelSize returns a boolean if a field has been set.
 
 ### GetReason
 
-`func (o *RightSizingResult) GetReason() string`
+`func (o *RecommendationResult) GetReason() string`
 
 GetReason returns the Reason field if non-nil, zero value otherwise.
 
 ### GetReasonOk
 
-`func (o *RightSizingResult) GetReasonOk() (*string, bool)`
+`func (o *RecommendationResult) GetReasonOk() (*string, bool)`
 
 GetReasonOk returns a tuple with the Reason field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetReason
 
-`func (o *RightSizingResult) SetReason(v string)`
+`func (o *RecommendationResult) SetReason(v string)`
 
 SetReason sets Reason field to given value.
 
 ### HasReason
 
-`func (o *RightSizingResult) HasReason() bool`
+`func (o *RecommendationResult) HasReason() bool`
 
 HasReason returns a boolean if a field has been set.
 
 ### GetRecommendation
 
-`func (o *RightSizingResult) GetRecommendation() RightSizingRecommendation`
+`func (o *RecommendationResult) GetRecommendation() Recommendation`
 
 GetRecommendation returns the Recommendation field if non-nil, zero value otherwise.
 
 ### GetRecommendationOk
 
-`func (o *RightSizingResult) GetRecommendationOk() (*RightSizingRecommendation, bool)`
+`func (o *RecommendationResult) GetRecommendationOk() (*Recommendation, bool)`
 
 GetRecommendationOk returns a tuple with the Recommendation field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetRecommendation
 
-`func (o *RightSizingResult) SetRecommendation(v RightSizingRecommendation)`
+`func (o *RecommendationResult) SetRecommendation(v Recommendation)`
 
 SetRecommendation sets Recommendation field to given value.
 
 ### HasRecommendation
 
-`func (o *RightSizingResult) HasRecommendation() bool`
+`func (o *RecommendationResult) HasRecommendation() bool`
 
 HasRecommendation returns a boolean if a field has been set.
 
 ### SetRecommendationNil
 
-`func (o *RightSizingResult) SetRecommendationNil(b bool)`
+`func (o *RecommendationResult) SetRecommendationNil(b bool)`
 
  SetRecommendationNil sets the value for Recommendation to be an explicit nil
 
 ### UnsetRecommendation
-`func (o *RightSizingResult) UnsetRecommendation()`
+`func (o *RecommendationResult) UnsetRecommendation()`
 
 UnsetRecommendation ensures that no value is present for Recommendation, not even an explicit nil
 

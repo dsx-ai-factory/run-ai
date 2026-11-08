@@ -11,15 +11,22 @@ import (
 
 type profileCandidate struct {
 	profile      *ngcmetadata.Profile
-	match        hardwareMatch
 	count        int64
 	minimumBytes int64
 }
 
-func selectProfile(profiles []ngcmetadata.Profile, pciDevice string, capacity, nodeCount int64) *profileCandidate {
+// selectProfile uses GPU-agnostic profiles while GPU identity matching is
+// deferred. Each candidate must fit memory on every device and its published
+// TP × PP count on one node; neither ranking nor allocation relaxes these checks.
+func selectProfile(profiles []ngcmetadata.Profile, capacity, nodeCount int64) *profileCandidate {
 	var chosen *profileCandidate
 	for i := range profiles {
 		profile := &profiles[i]
+		// An explicit hardware target needs identity validation, which is outside
+		// this API version. Tested-device lists are informational, not allowlists.
+		if profile.GPU != "" || profile.GPUDevice != "" {
+			continue
+		}
 		count, valid := profileDeviceCount(profile)
 		if !valid || count > nodeCount || profile.ID == "" || profile.MinimumVRAMPerDeviceGB == nil {
 			continue
@@ -31,13 +38,11 @@ func selectProfile(profiles []ngcmetadata.Profile, pciDevice string, capacity, n
 		// NGC minima are per device in decimal GB. Never divide a TP1 floor
 		// across GPUs or infer another parallel layout from a memory deficit.
 		minimumBytes := int64(math.Ceil(minimum * 1e9))
-		match := matchHardware(*profile, pciDevice)
-		if minimumBytes > capacity || match == noHardwareMatch {
+		if minimumBytes > capacity {
 			continue
 		}
 		candidate := &profileCandidate{
 			profile:      profile,
-			match:        match,
 			count:        count,
 			minimumBytes: minimumBytes,
 		}
@@ -64,14 +69,9 @@ func profileDeviceCount(profile *ngcmetadata.Profile) (int64, bool) {
 }
 
 func (c *profileCandidate) precedes(other *profileCandidate) bool {
-	// Retain the fitting single-device path before considering parallel
-	// layouts. Within each path prefer hardware evidence, then fewer GPUs.
-	if (c.count == 1) != (other.count == 1) {
-		return c.count == 1
-	}
-	if c.match != other.match {
-		return c.match < other.match
-	}
+	// Prefer fewer GPUs, including a fitting single-GPU profile, then a lower
+	// per-device minimum and stable profile ID. A smaller minimum can require
+	// more GPUs, so memory alone must not decide the parallel layout.
 	if c.count != other.count {
 		return c.count < other.count
 	}

@@ -20,75 +20,81 @@ import (
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
-var dummyRightSizingResult = runaihttp.AssertPattern
+var dummyRecommendationResult = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-type RightSizingResult struct {
+type RecommendationResult struct {
 
+	// Exact GPU type reported by the cluster inventory. Different memory capacities for the same GPU type produce separate results.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuType string `json:"gpuType"`
 	GpuType string `json:"gpuType" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Reported per-device capacity, not free memory or a quota guarantee.
+	// Reported memory capacity of each GPU, in bytes. Omitted when capacity is unknown. Does not represent free memory or a quota guarantee.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuMemoryCapacityBytes int64 `json:"gpuMemoryCapacityBytes,omitempty"`
 	GpuMemoryCapacityBytes int64 `json:"gpuMemoryCapacityBytes,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Whether an allocation was recommended for this GPU type and memory capacity.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Status RightSizingStatus `json:"status"`
-	Status RightSizingStatus `json:"status" gorm:"not null;"`
+	//Status RecommendationStatus `json:"status"`
+	Status RecommendationStatus `json:"status" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Published NGC minimum for the source profile, before allocation rounding.
+	// Published minimum memory per GPU for the selected NGC profile, in decimal GB (1 GB = 1,000,000,000 bytes), before allocation rounding. Omitted when no profile is selected.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//MinimumGpuMemoryPerDeviceGb float64 `json:"minimumGpuMemoryPerDeviceGb,omitempty"`
 	MinimumGpuMemoryPerDeviceGb float64 `json:"minimumGpuMemoryPerDeviceGb,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Identifier of the selected published NGC execution profile. Omitted when no profile is selected.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ProfileId string `json:"profileId,omitempty"`
 	ProfileId string `json:"profileId,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Model precision reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report precision.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Precision string `json:"precision,omitempty"`
 	Precision string `json:"precision,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Inference backend reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report a backend.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//InferenceBackend string `json:"inferenceBackend,omitempty"`
 	InferenceBackend string `json:"inferenceBackend,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Explicit tensor parallel size from the selected published profile.
+	// Number of GPUs participating in tensor parallelism in the selected NGC profile. Omitted when no profile is selected.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//TensorParallelSize int64 `json:"tensorParallelSize,omitempty"`
 	TensorParallelSize int64 `json:"tensorParallelSize,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Explicit pipeline parallel size from the selected published profile.
+	// Number of pipeline parallel stages in the selected NGC profile. Omitted when no profile is selected.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//PipelineParallelSize int64 `json:"pipelineParallelSize,omitempty"`
 	PipelineParallelSize int64 `json:"pipelineParallelSize,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Explanation when sizing cannot be recommended.
+	// Explanation of why no allocation could be recommended. Omitted for a recommended allocation.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Reason string `json:"reason,omitempty"`
 	Reason string `json:"reason,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Recommended allocation for this result. Absent or null when no allocation could be recommended.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Recommendation *RightSizingRecommendation `json:"recommendation,omitempty"`
-	Recommendation *RightSizingRecommendation `json:"recommendation,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//Recommendation *Recommendation `json:"recommendation,omitempty"`
+	Recommendation *Recommendation `json:"recommendation,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
-// AssertRightSizingResultRequired checks if the required fields are not zero-ed
-func AssertRightSizingResultRequired(obj RightSizingResult) error {
+// AssertRecommendationResultRequired checks if the required fields are not zero-ed
+func AssertRecommendationResultRequired(obj RecommendationResult) error {
 	elements := map[string]interface{}{
 		"gpuType": obj.GpuType,
 		"status":  obj.Status,
@@ -100,15 +106,15 @@ func AssertRightSizingResultRequired(obj RightSizingResult) error {
 	}
 
 	if obj.Recommendation != nil {
-		if err := AssertRightSizingRecommendationRequired(*obj.Recommendation); err != nil {
+		if err := AssertRecommendationRequired(*obj.Recommendation); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// AssertRightSizingResultConstraints checks if the values respects the defined constraints
-func AssertRightSizingResultConstraints(obj RightSizingResult) error {
+// AssertRecommendationResultConstraints checks if the values respects the defined constraints
+func AssertRecommendationResultConstraints(obj RecommendationResult) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
@@ -175,7 +181,7 @@ func AssertRightSizingResultConstraints(obj RightSizingResult) error {
 
 	//////////////////////// RUNAI END //////////////////////////
 	if obj.Recommendation != nil {
-		if err := AssertRightSizingRecommendationConstraints(*obj.Recommendation); err != nil {
+		if err := AssertRecommendationConstraints(*obj.Recommendation); err != nil {
 			return err
 		}
 	}

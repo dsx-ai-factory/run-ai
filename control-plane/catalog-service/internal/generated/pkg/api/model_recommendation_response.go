@@ -16,43 +16,37 @@ package api
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
-var dummyRightSizingRequest = runaihttp.AssertPattern
+var dummyRecommendationResponse = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-type RightSizingRequest struct {
+type RecommendationResponse struct {
 
-	// Cluster whose node-pool hardware metadata is evaluated.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//ClusterId string `json:"clusterId"`
-	ClusterId string `json:"clusterId" gorm:"not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Untagged public nvcr.io/nim/organization/model image reference.
+	// Untagged NIM image reference supplied in the request.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Image string `json:"image"`
 	Image string `json:"image" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Exact image tag. NGC does not automatically refresh latest metadata.
+	// Exact NIM image tag supplied in the request.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Tag string `json:"tag"`
 	Tag string `json:"tag" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Exact inventory GPU type. Omitted or null evaluates all reported types and capacities.
+	// One result per evaluated GPU type and per-device memory capacity. Empty when the cluster has no reported GPUs and no GPU type was requested.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//GpuType *string `json:"gpuType,omitempty"`
-	GpuType *string `json:"gpuType,omitempty" gorm:""`
+	//Results []RecommendationResult `json:"results"`
+	Results []RecommendationResult `json:"results" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
-// AssertRightSizingRequestRequired checks if the required fields are not zero-ed
-func AssertRightSizingRequestRequired(obj RightSizingRequest) error {
+// AssertRecommendationResponseRequired checks if the required fields are not zero-ed
+func AssertRecommendationResponseRequired(obj RecommendationResponse) error {
 	elements := map[string]interface{}{
-		"clusterId": obj.ClusterId,
-		"image":     obj.Image,
-		"tag":       obj.Tag,
+		"image":   obj.Image,
+		"tag":     obj.Tag,
+		"results": obj.Results,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -60,11 +54,16 @@ func AssertRightSizingRequestRequired(obj RightSizingRequest) error {
 		}
 	}
 
+	for _, el := range obj.Results {
+		if err := AssertRecommendationResultRequired(el); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
-// AssertRightSizingRequestConstraints checks if the values respects the defined constraints
-func AssertRightSizingRequestConstraints(obj RightSizingRequest) error {
+// AssertRecommendationResponseConstraints checks if the values respects the defined constraints
+func AssertRecommendationResponseConstraints(obj RecommendationResponse) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
@@ -76,17 +75,14 @@ func AssertRightSizingRequestConstraints(obj RightSizingRequest) error {
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
-	if minLengthErr := runaihttp.AssertMinLength(obj.Tag, "Tag", 1); minLengthErr != nil {
-		return &ParsingError{Param: "Tag", Err: minLengthErr}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	for _, el := range obj.Results {
+		if err := AssertRecommendationResultConstraints(el); err != nil {
+			return err
+		}
 	}
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
 	return nil
 }

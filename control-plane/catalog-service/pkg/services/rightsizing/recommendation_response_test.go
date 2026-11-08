@@ -5,14 +5,14 @@ package rightsizing
 
 import (
 	"encoding/json"
-	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/gpuinventory"
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/ngcmetadata"
-	"github.com/stretchr/testify/require"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func TestRecommendationResponseContainsOnlyAllocationFields(t *testing.T) {
+var _ = Describe("recommendation response contains only allocation fields", func() {
 	capacity := int64(80_000_000_000)
 	for _, tc := range []struct {
 		name, precision, want string
@@ -24,7 +24,7 @@ func TestRecommendationResponseContainsOnlyAllocationFields(t *testing.T) {
 		{"parallel profile", "fp8", `{"allocationType":"gpu_count","gpuCount":2,"gpuMemoryPerDeviceBytes":80000000000}`, 57, 2},
 		{"NVFP4 profile", "nvfp4", `{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":24000000000}`, 24, 1},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
+		It(tc.name, func() {
 			one := 1
 			profile := ngcmetadata.Profile{
 				ID: "published-profile", Precision: tc.precision, InferenceBackend: "vllm",
@@ -33,10 +33,10 @@ func TestRecommendationResponseContainsOnlyAllocationFields(t *testing.T) {
 			result := recommendForHardware(gpuinventory.Hardware{
 				Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8,
 			}, []ngcmetadata.Profile{profile}, 90)
-			require.Equal(t, "recommended", string(result.Status))
+			Expect(string(result.Status)).To(Equal("recommended"))
 			body, err := json.Marshal(result.Recommendation)
-			require.NoError(t, err)
-			require.JSONEq(t, tc.want, string(body))
+			Expect(err).To(BeNil())
+			Expect(string(body)).To(MatchJSON(tc.want))
 		})
 	}
-}
+})

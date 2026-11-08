@@ -16,34 +16,43 @@ package api
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
-var dummyRightSizingResponse = runaihttp.AssertPattern
+var dummyRecommendationRequest = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-type RightSizingResponse struct {
+type RecommendationRequest struct {
 
+	// Cluster whose node-pool hardware metadata is evaluated.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ClusterId string `json:"clusterId"`
+	ClusterId string `json:"clusterId" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Untagged public nvcr.io/nim/organization/model image reference.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Image string `json:"image"`
 	Image string `json:"image" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Exact image tag. NGC does not automatically refresh latest metadata.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Tag string `json:"tag"`
 	Tag string `json:"tag" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Exact inventory GPU type. Omitted or null evaluates all reported types and capacities.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Results []RightSizingResult `json:"results"`
-	Results []RightSizingResult `json:"results" gorm:"serializer:json; type:jsonb;not null;"`
+	//GpuType *string `json:"gpuType,omitempty"`
+	GpuType *string `json:"gpuType,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
-// AssertRightSizingResponseRequired checks if the required fields are not zero-ed
-func AssertRightSizingResponseRequired(obj RightSizingResponse) error {
+// AssertRecommendationRequestRequired checks if the required fields are not zero-ed
+func AssertRecommendationRequestRequired(obj RecommendationRequest) error {
 	elements := map[string]interface{}{
-		"image":   obj.Image,
-		"tag":     obj.Tag,
-		"results": obj.Results,
+		"clusterId": obj.ClusterId,
+		"image":     obj.Image,
+		"tag":       obj.Tag,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -51,16 +60,11 @@ func AssertRightSizingResponseRequired(obj RightSizingResponse) error {
 		}
 	}
 
-	for _, el := range obj.Results {
-		if err := AssertRightSizingResultRequired(el); err != nil {
-			return err
-		}
-	}
 	return nil
 }
 
-// AssertRightSizingResponseConstraints checks if the values respects the defined constraints
-func AssertRightSizingResponseConstraints(obj RightSizingResponse) error {
+// AssertRecommendationRequestConstraints checks if the values respects the defined constraints
+func AssertRecommendationRequestConstraints(obj RecommendationRequest) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
@@ -72,14 +76,17 @@ func AssertRightSizingResponseConstraints(obj RightSizingResponse) error {
 
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	for _, el := range obj.Results {
-		if err := AssertRightSizingResultConstraints(el); err != nil {
-			return err
-		}
+	if minLengthErr := runaihttp.AssertMinLength(obj.Tag, "Tag", 1); minLengthErr != nil {
+		return &ParsingError{Param: "Tag", Err: minLengthErr}
 	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	return nil
 }

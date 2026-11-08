@@ -17,11 +17,11 @@ import (
 )
 
 type Inventory interface {
-	Get(context.Context, string) ([]gpuinventory.Hardware, error)
+	Get(context.Context, string) ([]gpuinventory.Hardware, *api.Error)
 }
 
 type Metadata interface {
-	Get(context.Context, string, string) (ngcmetadata.Metadata, error)
+	Get(context.Context, string, string) (ngcmetadata.Metadata, *api.Error)
 }
 
 type Service struct {
@@ -38,24 +38,29 @@ func New(inventory Inventory, metadata Metadata, cutoffPercent int64) *Service {
 	}
 }
 
-func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest) (api.RightSizingResponse, *api.Error) {
-	response := api.RightSizingResponse{
+// Recommend validates the request, reads fresh cluster inventory, and loads
+// published profiles for the exact image/tag (metadata may be cached). Each
+// type/capacity is evaluated independently: filter GPU-agnostic profiles by memory
+// and single-node fit, rank them, then apply the allocation policy.
+// Missing sizing evidence is a result; retrieval/access failures are API errors.
+func (s *Service) Recommend(ctx context.Context, request api.RecommendationRequest) (api.RecommendationResponse, *api.Error) {
+	response := api.RecommendationResponse{
 		Image:   request.Image,
 		Tag:     request.Tag,
-		Results: []api.RightSizingResult{},
+		Results: []api.RecommendationResult{},
 	}
 	if err := uuid.Validate(request.ClusterId); err != nil {
 		return response, api.NewError(http.StatusBadRequest, "Invalid cluster ID", err)
 	}
 	if err := ngcmetadata.Validate(request.Image, request.Tag); err != nil {
-		return response, api.NewError(http.StatusBadRequest, err.Error(), nil)
+		return response, err
 	}
 	if request.GpuType != nil && strings.TrimSpace(*request.GpuType) == "" {
 		return response, api.NewError(http.StatusBadRequest, "GPU type must be nonempty or null", nil)
 	}
 	hardware, err := s.inventory.Get(ctx, request.ClusterId)
 	if err != nil {
-		return response, api.NewError(http.StatusServiceUnavailable, "Cluster GPU inventory unavailable", err)
+		return response, err
 	}
 	selected := make([]gpuinventory.Hardware, 0, len(hardware))
 	for _, gpu := range hardware {
@@ -71,7 +76,7 @@ func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest)
 	}
 	metadata, err := s.metadata.Get(ctx, request.Image, request.Tag)
 	if err != nil {
-		return response, api.NewError(http.StatusServiceUnavailable, "NGC sizing metadata unavailable", err)
+		return response, err
 	}
 	for _, gpu := range selected {
 		response.Results = append(response.Results, recommendForHardware(gpu, metadata.Profiles, s.cutoffPercent))
@@ -79,10 +84,13 @@ func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest)
 	return response, nil
 }
 
-func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Profile, cutoffPercent int64) api.RightSizingResult {
-	result := api.RightSizingResult{
+// recommendForHardware keeps the published profile evidence in the result.
+// Parallel profiles allocate exactly TP × PP whole GPUs. Single-GPU profiles
+// use the configured sharing cutoff to choose memory or a whole GPU.
+func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Profile, cutoffPercent int64) api.RecommendationResult {
+	result := api.RecommendationResult{
 		GpuType: gpu.Type,
-		Status:  api.RIGHTSIZINGSTATUS_NO_RECOMMENDATION,
+		Status:  api.RECOMMENDATIONSTATUS_NO_RECOMMENDATION,
 	}
 	if gpu.MemoryBytes == nil || *gpu.MemoryBytes <= 0 {
 		result.Reason = "GPU memory capacity is not reported by the cluster"
@@ -93,13 +101,9 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 		result.Reason = "Matching single-node GPU count is not reported by the cluster"
 		return result
 	}
-	pciDevice, pciError := gpuinventory.ResolvePCIDevice(gpu.Type)
-	chosen := selectProfile(profiles, pciDevice, *gpu.MemoryBytes, gpu.MaxDevicesPerNode)
+	chosen := selectProfile(profiles, *gpu.MemoryBytes, gpu.MaxDevicesPerNode)
 	if chosen == nil {
-		result.Reason = "No applicable published profile with explicit TP/PP and a positive minimum fits per-device memory and the matching GPU count on one node"
-		if pciError != nil {
-			result.Reason += "; " + pciError.Error()
-		}
+		result.Reason = "No GPU-agnostic published profile with explicit TP/PP and a positive minimum fits per-device memory and the matching GPU count on one node"
 		return result
 	}
 	profile := chosen.profile
@@ -110,9 +114,9 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 	result.TensorParallelSize = int64(*profile.TensorParallelSize)
 	result.PipelineParallelSize = int64(*profile.PipelineParallelSize)
 	if chosen.count > 1 {
-		result.Status = api.RIGHTSIZINGSTATUS_RECOMMENDED
-		result.Recommendation = &api.RightSizingRecommendation{
-			AllocationType:          api.RIGHTSIZINGALLOCATIONTYPE_GPU_COUNT,
+		result.Status = api.RECOMMENDATIONSTATUS_RECOMMENDED
+		result.Recommendation = &api.Recommendation{
+			AllocationType:          api.RECOMMENDATIONALLOCATIONTYPE_GPU_COUNT,
 			GpuCount:                chosen.count,
 			GpuMemoryPerDeviceBytes: *gpu.MemoryBytes,
 		}
@@ -123,43 +127,15 @@ func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Prof
 		result.Reason = "GPU allocation sharing policy is invalid"
 		return result
 	}
-	result.Status = api.RIGHTSIZINGSTATUS_RECOMMENDED
-	allocationType := api.RIGHTSIZINGALLOCATIONTYPE_GPU_MEMORY
+	result.Status = api.RECOMMENDATIONSTATUS_RECOMMENDED
+	allocationType := api.RECOMMENDATIONALLOCATIONTYPE_GPU_MEMORY
 	if allocation.WholeGPU {
-		allocationType = api.RIGHTSIZINGALLOCATIONTYPE_GPU_COUNT
+		allocationType = api.RECOMMENDATIONALLOCATIONTYPE_GPU_COUNT
 	}
-	result.Recommendation = &api.RightSizingRecommendation{
+	result.Recommendation = &api.Recommendation{
 		AllocationType:          allocationType,
 		GpuCount:                1,
 		GpuMemoryPerDeviceBytes: allocation.AllocatedMemoryBytes,
 	}
 	return result
-}
-
-type hardwareMatch int
-
-const (
-	directHardwareMatch hardwareMatch = iota
-	testedHardwareMatch
-	genericHardwareMatch
-	noHardwareMatch
-)
-
-func matchHardware(profile ngcmetadata.Profile, pciDevice string) hardwareMatch {
-	if pciDevice != "" {
-		if strings.EqualFold(profile.GPUDevice, pciDevice) {
-			return directHardwareMatch
-		}
-		for _, tested := range profile.TestedGPUDevices {
-			if strings.EqualFold(tested, pciDevice) {
-				return testedHardwareMatch
-			}
-		}
-	}
-	// NGC treats an untargeted profile as GPU-agnostic. A tested-device list
-	// records validation history; it does not turn this into a SKU allowlist.
-	if profile.GPU == "" && profile.GPUDevice == "" {
-		return genericHardwareMatch
-	}
-	return noHardwareMatch
 }

@@ -19,40 +19,43 @@ import (
 	"fmt"
 )
 
-// checks if the RightSizingResponse type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &RightSizingResponse{}
+// checks if the RecommendationResponse type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &RecommendationResponse{}
 
-// RightSizingResponse struct for RightSizingResponse
-type RightSizingResponse struct {
-	Image   string              `json:"image"`
-	Tag     string              `json:"tag"`
-	Results []RightSizingResult `json:"results"`
+// RecommendationResponse struct for RecommendationResponse
+type RecommendationResponse struct {
+	// Untagged NIM image reference supplied in the request.
+	Image string `json:"image"`
+	// Exact NIM image tag supplied in the request.
+	Tag string `json:"tag"`
+	// One result per evaluated GPU type and per-device memory capacity. Empty when the cluster has no reported GPUs and no GPU type was requested.
+	Results []RecommendationResult `json:"results"`
 }
 
-type _RightSizingResponse RightSizingResponse
+type _RecommendationResponse RecommendationResponse
 
-// NewRightSizingResponse instantiates a new RightSizingResponse object
+// NewRecommendationResponse instantiates a new RecommendationResponse object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingResponse(image string, tag string, results []RightSizingResult) *RightSizingResponse {
-	this := RightSizingResponse{}
+func NewRecommendationResponse(image string, tag string, results []RecommendationResult) *RecommendationResponse {
+	this := RecommendationResponse{}
 	this.Image = image
 	this.Tag = tag
 	this.Results = results
 	return &this
 }
 
-// NewRightSizingResponseWithDefaults instantiates a new RightSizingResponse object
+// NewRecommendationResponseWithDefaults instantiates a new RecommendationResponse object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRightSizingResponseWithDefaults() *RightSizingResponse {
-	this := RightSizingResponse{}
+func NewRecommendationResponseWithDefaults() *RecommendationResponse {
+	this := RecommendationResponse{}
 	return &this
 }
 
 // GetImage returns the Image field value
-func (o *RightSizingResponse) GetImage() string {
+func (o *RecommendationResponse) GetImage() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -63,7 +66,7 @@ func (o *RightSizingResponse) GetImage() string {
 
 // GetImageOk returns a tuple with the Image field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponse) GetImageOk() (*string, bool) {
+func (o *RecommendationResponse) GetImageOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -71,12 +74,12 @@ func (o *RightSizingResponse) GetImageOk() (*string, bool) {
 }
 
 // SetImage sets field value
-func (o *RightSizingResponse) SetImage(v string) {
+func (o *RecommendationResponse) SetImage(v string) {
 	o.Image = v
 }
 
 // GetTag returns the Tag field value
-func (o *RightSizingResponse) GetTag() string {
+func (o *RecommendationResponse) GetTag() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -87,7 +90,7 @@ func (o *RightSizingResponse) GetTag() string {
 
 // GetTagOk returns a tuple with the Tag field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponse) GetTagOk() (*string, bool) {
+func (o *RecommendationResponse) GetTagOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -95,14 +98,14 @@ func (o *RightSizingResponse) GetTagOk() (*string, bool) {
 }
 
 // SetTag sets field value
-func (o *RightSizingResponse) SetTag(v string) {
+func (o *RecommendationResponse) SetTag(v string) {
 	o.Tag = v
 }
 
 // GetResults returns the Results field value
-func (o *RightSizingResponse) GetResults() []RightSizingResult {
+func (o *RecommendationResponse) GetResults() []RecommendationResult {
 	if o == nil {
-		var ret []RightSizingResult
+		var ret []RecommendationResult
 		return ret
 	}
 
@@ -111,7 +114,7 @@ func (o *RightSizingResponse) GetResults() []RightSizingResult {
 
 // GetResultsOk returns a tuple with the Results field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingResponse) GetResultsOk() ([]RightSizingResult, bool) {
+func (o *RecommendationResponse) GetResultsOk() ([]RecommendationResult, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -119,11 +122,11 @@ func (o *RightSizingResponse) GetResultsOk() ([]RightSizingResult, bool) {
 }
 
 // SetResults sets field value
-func (o *RightSizingResponse) SetResults(v []RightSizingResult) {
+func (o *RecommendationResponse) SetResults(v []RecommendationResult) {
 	o.Results = v
 }
 
-func (o RightSizingResponse) MarshalJSON() ([]byte, error) {
+func (o RecommendationResponse) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -131,7 +134,7 @@ func (o RightSizingResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o RightSizingResponse) ToMap() (map[string]interface{}, error) {
+func (o RecommendationResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["image"] = o.Image
 	toSerialize["tag"] = o.Tag
@@ -139,7 +142,7 @@ func (o RightSizingResponse) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *RightSizingResponse) UnmarshalJSON(data []byte) (err error) {
+func (o *RecommendationResponse) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -168,55 +171,55 @@ func (o *RightSizingResponse) UnmarshalJSON(data []byte) (err error) {
 	//
 	fmt.Sprintf("dummy")
 
-	varRightSizingResponse := _RightSizingResponse{}
+	varRecommendationResponse := _RecommendationResponse{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	// RUNAI
 	// decoder.DisallowUnknownFields()
 	//
-	err = decoder.Decode(&varRightSizingResponse)
+	err = decoder.Decode(&varRecommendationResponse)
 
 	if err != nil {
 		return err
 	}
 
-	*o = RightSizingResponse(varRightSizingResponse)
+	*o = RecommendationResponse(varRecommendationResponse)
 
 	return err
 }
 
-type NullableRightSizingResponse struct {
-	value *RightSizingResponse
+type NullableRecommendationResponse struct {
+	value *RecommendationResponse
 	isSet bool
 }
 
-func (v NullableRightSizingResponse) Get() *RightSizingResponse {
+func (v NullableRecommendationResponse) Get() *RecommendationResponse {
 	return v.value
 }
 
-func (v *NullableRightSizingResponse) Set(val *RightSizingResponse) {
+func (v *NullableRecommendationResponse) Set(val *RecommendationResponse) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRightSizingResponse) IsSet() bool {
+func (v NullableRecommendationResponse) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRightSizingResponse) Unset() {
+func (v *NullableRecommendationResponse) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRightSizingResponse(val *RightSizingResponse) *NullableRightSizingResponse {
-	return &NullableRightSizingResponse{value: val, isSet: true}
+func NewNullableRecommendationResponse(val *RecommendationResponse) *NullableRecommendationResponse {
+	return &NullableRecommendationResponse{value: val, isSet: true}
 }
 
-func (v NullableRightSizingResponse) MarshalJSON() ([]byte, error) {
+func (v NullableRecommendationResponse) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRightSizingResponse) UnmarshalJSON(src []byte) error {
+func (v *NullableRecommendationResponse) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

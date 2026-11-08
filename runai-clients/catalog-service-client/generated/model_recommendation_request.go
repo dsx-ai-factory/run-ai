@@ -19,11 +19,11 @@ import (
 	"fmt"
 )
 
-// checks if the RightSizingRequest type satisfies the MappedNullable interface at compile time
-var _ MappedNullable = &RightSizingRequest{}
+// checks if the RecommendationRequest type satisfies the MappedNullable interface at compile time
+var _ MappedNullable = &RecommendationRequest{}
 
-// RightSizingRequest struct for RightSizingRequest
-type RightSizingRequest struct {
+// RecommendationRequest struct for RecommendationRequest
+type RecommendationRequest struct {
 	// Cluster whose node-pool hardware metadata is evaluated.
 	ClusterId string `json:"clusterId"`
 	// Untagged public nvcr.io/nim/organization/model image reference.
@@ -34,30 +34,30 @@ type RightSizingRequest struct {
 	GpuType NullableString `json:"gpuType,omitempty"`
 }
 
-type _RightSizingRequest RightSizingRequest
+type _RecommendationRequest RecommendationRequest
 
-// NewRightSizingRequest instantiates a new RightSizingRequest object
+// NewRecommendationRequest instantiates a new RecommendationRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewRightSizingRequest(clusterId string, image string, tag string) *RightSizingRequest {
-	this := RightSizingRequest{}
+func NewRecommendationRequest(clusterId string, image string, tag string) *RecommendationRequest {
+	this := RecommendationRequest{}
 	this.ClusterId = clusterId
 	this.Image = image
 	this.Tag = tag
 	return &this
 }
 
-// NewRightSizingRequestWithDefaults instantiates a new RightSizingRequest object
+// NewRecommendationRequestWithDefaults instantiates a new RecommendationRequest object
 // This constructor will only assign default values to properties that have it defined,
 // but it doesn't guarantee that properties required by API are set
-func NewRightSizingRequestWithDefaults() *RightSizingRequest {
-	this := RightSizingRequest{}
+func NewRecommendationRequestWithDefaults() *RecommendationRequest {
+	this := RecommendationRequest{}
 	return &this
 }
 
 // GetClusterId returns the ClusterId field value
-func (o *RightSizingRequest) GetClusterId() string {
+func (o *RecommendationRequest) GetClusterId() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -68,7 +68,7 @@ func (o *RightSizingRequest) GetClusterId() string {
 
 // GetClusterIdOk returns a tuple with the ClusterId field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingRequest) GetClusterIdOk() (*string, bool) {
+func (o *RecommendationRequest) GetClusterIdOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -76,12 +76,12 @@ func (o *RightSizingRequest) GetClusterIdOk() (*string, bool) {
 }
 
 // SetClusterId sets field value
-func (o *RightSizingRequest) SetClusterId(v string) {
+func (o *RecommendationRequest) SetClusterId(v string) {
 	o.ClusterId = v
 }
 
 // GetImage returns the Image field value
-func (o *RightSizingRequest) GetImage() string {
+func (o *RecommendationRequest) GetImage() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -92,7 +92,7 @@ func (o *RightSizingRequest) GetImage() string {
 
 // GetImageOk returns a tuple with the Image field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingRequest) GetImageOk() (*string, bool) {
+func (o *RecommendationRequest) GetImageOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -100,12 +100,12 @@ func (o *RightSizingRequest) GetImageOk() (*string, bool) {
 }
 
 // SetImage sets field value
-func (o *RightSizingRequest) SetImage(v string) {
+func (o *RecommendationRequest) SetImage(v string) {
 	o.Image = v
 }
 
 // GetTag returns the Tag field value
-func (o *RightSizingRequest) GetTag() string {
+func (o *RecommendationRequest) GetTag() string {
 	if o == nil {
 		var ret string
 		return ret
@@ -116,7 +116,7 @@ func (o *RightSizingRequest) GetTag() string {
 
 // GetTagOk returns a tuple with the Tag field value
 // and a boolean to check if the value has been set.
-func (o *RightSizingRequest) GetTagOk() (*string, bool) {
+func (o *RecommendationRequest) GetTagOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -124,12 +124,12 @@ func (o *RightSizingRequest) GetTagOk() (*string, bool) {
 }
 
 // SetTag sets field value
-func (o *RightSizingRequest) SetTag(v string) {
+func (o *RecommendationRequest) SetTag(v string) {
 	o.Tag = v
 }
 
 // GetGpuType returns the GpuType field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *RightSizingRequest) GetGpuType() string {
+func (o *RecommendationRequest) GetGpuType() string {
 	if o == nil || IsNil(o.GpuType.Get()) {
 		var ret string
 		return ret
@@ -140,7 +140,7 @@ func (o *RightSizingRequest) GetGpuType() string {
 // GetGpuTypeOk returns a tuple with the GpuType field value if set, nil otherwise
 // and a boolean to check if the value has been set.
 // NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *RightSizingRequest) GetGpuTypeOk() (*string, bool) {
+func (o *RecommendationRequest) GetGpuTypeOk() (*string, bool) {
 	if o == nil {
 		return nil, false
 	}
@@ -148,7 +148,7 @@ func (o *RightSizingRequest) GetGpuTypeOk() (*string, bool) {
 }
 
 // HasGpuType returns a boolean if a field has been set.
-func (o *RightSizingRequest) HasGpuType() bool {
+func (o *RecommendationRequest) HasGpuType() bool {
 	if o != nil && o.GpuType.IsSet() {
 		return true
 	}
@@ -157,21 +157,21 @@ func (o *RightSizingRequest) HasGpuType() bool {
 }
 
 // SetGpuType gets a reference to the given NullableString and assigns it to the GpuType field.
-func (o *RightSizingRequest) SetGpuType(v string) {
+func (o *RecommendationRequest) SetGpuType(v string) {
 	o.GpuType.Set(&v)
 }
 
 // SetGpuTypeNil sets the value for GpuType to be an explicit nil
-func (o *RightSizingRequest) SetGpuTypeNil() {
+func (o *RecommendationRequest) SetGpuTypeNil() {
 	o.GpuType.Set(nil)
 }
 
 // UnsetGpuType ensures that no value is present for GpuType, not even an explicit nil
-func (o *RightSizingRequest) UnsetGpuType() {
+func (o *RecommendationRequest) UnsetGpuType() {
 	o.GpuType.Unset()
 }
 
-func (o RightSizingRequest) MarshalJSON() ([]byte, error) {
+func (o RecommendationRequest) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
 		return []byte{}, err
@@ -179,7 +179,7 @@ func (o RightSizingRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(toSerialize)
 }
 
-func (o RightSizingRequest) ToMap() (map[string]interface{}, error) {
+func (o RecommendationRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["clusterId"] = o.ClusterId
 	toSerialize["image"] = o.Image
@@ -190,7 +190,7 @@ func (o RightSizingRequest) ToMap() (map[string]interface{}, error) {
 	return toSerialize, nil
 }
 
-func (o *RightSizingRequest) UnmarshalJSON(data []byte) (err error) {
+func (o *RecommendationRequest) UnmarshalJSON(data []byte) (err error) {
 	// This validates that all required properties are included in the JSON object
 	// by unmarshalling the object into a generic map with string keys and checking
 	// that every required field exists as a key in the generic map.
@@ -219,55 +219,55 @@ func (o *RightSizingRequest) UnmarshalJSON(data []byte) (err error) {
 	//
 	fmt.Sprintf("dummy")
 
-	varRightSizingRequest := _RightSizingRequest{}
+	varRecommendationRequest := _RecommendationRequest{}
 
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	// RUNAI
 	// decoder.DisallowUnknownFields()
 	//
-	err = decoder.Decode(&varRightSizingRequest)
+	err = decoder.Decode(&varRecommendationRequest)
 
 	if err != nil {
 		return err
 	}
 
-	*o = RightSizingRequest(varRightSizingRequest)
+	*o = RecommendationRequest(varRecommendationRequest)
 
 	return err
 }
 
-type NullableRightSizingRequest struct {
-	value *RightSizingRequest
+type NullableRecommendationRequest struct {
+	value *RecommendationRequest
 	isSet bool
 }
 
-func (v NullableRightSizingRequest) Get() *RightSizingRequest {
+func (v NullableRecommendationRequest) Get() *RecommendationRequest {
 	return v.value
 }
 
-func (v *NullableRightSizingRequest) Set(val *RightSizingRequest) {
+func (v *NullableRecommendationRequest) Set(val *RecommendationRequest) {
 	v.value = val
 	v.isSet = true
 }
 
-func (v NullableRightSizingRequest) IsSet() bool {
+func (v NullableRecommendationRequest) IsSet() bool {
 	return v.isSet
 }
 
-func (v *NullableRightSizingRequest) Unset() {
+func (v *NullableRecommendationRequest) Unset() {
 	v.value = nil
 	v.isSet = false
 }
 
-func NewNullableRightSizingRequest(val *RightSizingRequest) *NullableRightSizingRequest {
-	return &NullableRightSizingRequest{value: val, isSet: true}
+func NewNullableRecommendationRequest(val *RecommendationRequest) *NullableRecommendationRequest {
+	return &NullableRecommendationRequest{value: val, isSet: true}
 }
 
-func (v NullableRightSizingRequest) MarshalJSON() ([]byte, error) {
+func (v NullableRecommendationRequest) MarshalJSON() ([]byte, error) {
 	return json.Marshal(v.value)
 }
 
-func (v *NullableRightSizingRequest) UnmarshalJSON(src []byte) error {
+func (v *NullableRecommendationRequest) UnmarshalJSON(src []byte) error {
 	v.isSet = true
 	return json.Unmarshal(src, &v.value)
 }

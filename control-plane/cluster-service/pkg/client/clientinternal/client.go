@@ -236,12 +236,17 @@ func (client *ClusterClient) GetNodePoolsByCluster(ctx context.Context, clusterU
 func (client *ClusterClient) GetClusterMinimalDataById(ctx context.Context, clusterId string) (*openapi.ClustersMinimalData, error) {
 	clusterMinimalData, response, err := client.ApiClient.ClustersAPI.GetClusterMinimalDataById(ctx, clusterId).
 		Execute()
+	if response != nil && response.Body != nil {
+		defer response.Body.Close()
+	}
+	if response != nil && response.StatusCode != http.StatusOK {
+		return nil, openapi.NewErrorFromResponse(response, err)
+	}
 	if err != nil {
 		return nil, err
 	}
-	if response.StatusCode != http.StatusOK {
-		err = errors.New(fmt.Sprintf("Failed to get cluster minimal data. status is %s", response.Status))
-		return nil, err
+	if response == nil || clusterMinimalData == nil {
+		return nil, fmt.Errorf("cluster minimal data returned no response")
 	}
 	return clusterMinimalData, nil
 }
@@ -274,6 +279,9 @@ func (client *ClusterClient) GetNodePoolsMinimalByCluster(ctx context.Context, c
 			Execute()
 		if response != nil && response.Body != nil {
 			response.Body.Close()
+		}
+		if response != nil && response.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("get nodepools minimal at offset %d: %w", offset, openapi.NewErrorFromResponse(response, err))
 		}
 		if err != nil {
 			return nil, fmt.Errorf("get nodepools minimal at offset %d: %w", offset, err)

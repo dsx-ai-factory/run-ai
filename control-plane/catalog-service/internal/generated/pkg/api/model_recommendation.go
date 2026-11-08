@@ -20,30 +20,33 @@ import (
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
-var dummyRightSizingRecommendation = runaihttp.AssertPattern
+var dummyRecommendation = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-type RightSizingRecommendation struct {
+type Recommendation struct {
 
+	// Whether the allocation requests GPU memory (`gpu_memory`) or whole GPUs (`gpu_count`).
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//AllocationType RightSizingAllocationType `json:"allocationType"`
-	AllocationType RightSizingAllocationType `json:"allocationType" gorm:"not null;"`
+	//AllocationType RecommendationAllocationType `json:"allocationType"`
+	AllocationType RecommendationAllocationType `json:"allocationType" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Number of GPUs used by the allocation. Always 1 for `gpu_memory`; for `gpu_count`, equals the selected profile’s tensor parallel size multiplied by its pipeline parallel size.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuCount int64 `json:"gpuCount"`
 	GpuCount int64 `json:"gpuCount" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Recommended memory per GPU, in bytes. For `gpu_memory`, this is the published minimum rounded up to whole bytes. For `gpu_count`, this is the reported capacity of each GPU.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//GpuMemoryPerDeviceBytes int64 `json:"gpuMemoryPerDeviceBytes,omitempty"`
 	GpuMemoryPerDeviceBytes int64 `json:"gpuMemoryPerDeviceBytes,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
-// AssertRightSizingRecommendationRequired checks if the required fields are not zero-ed
-func AssertRightSizingRecommendationRequired(obj RightSizingRecommendation) error {
+// AssertRecommendationRequired checks if the required fields are not zero-ed
+func AssertRecommendationRequired(obj Recommendation) error {
 	elements := map[string]interface{}{
 		"allocationType": obj.AllocationType,
 		"gpuCount":       obj.GpuCount,
@@ -57,8 +60,8 @@ func AssertRightSizingRecommendationRequired(obj RightSizingRecommendation) erro
 	return nil
 }
 
-// AssertRightSizingRecommendationConstraints checks if the values respects the defined constraints
-func AssertRightSizingRecommendationConstraints(obj RightSizingRecommendation) error {
+// AssertRecommendationConstraints checks if the values respects the defined constraints
+func AssertRecommendationConstraints(obj Recommendation) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
