@@ -27,7 +27,7 @@ describe("dashboardUtil.getCsvFileName", () => {
     );
   });
 
-    it("omits the cluster and node pool when they are not set", () => {
+  it("omits the cluster and node pool when they are not set", () => {
     expect(dashboardUtil.getCsvFileName("Workloads by status", undefined, undefined, date)).toBe(
       "workloads-by-status_2026-02-10_09-05.csv",
     );
