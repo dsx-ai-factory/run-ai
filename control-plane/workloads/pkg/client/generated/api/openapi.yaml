@@ -31032,6 +31032,21 @@ components:
             if the number of workers is greater than 0.
           nullable: true
           type: object
+    LoadAwareRouting:
+      default: false
+      description: "Route requests to the serving port through the endpoint picker,\
+        \ which picks a Pod by load. It can be set only when the workload is created."
+      nullable: true
+      type: boolean
+    LoadAwareRoutingPathPrefix:
+      description: "The path whose requests go through the endpoint picker. Requests\
+        \ outside it are not routed and return 404. It must start with a slash and\
+        \ can be set only when loadAwareRouting is true. When omitted, the prefix\
+        \ is /v1."
+      example: /v1
+      maxLength: 1024
+      nullable: true
+      type: string
     DistributedInferenceRestartPolicy:
       default: RecreateGroupOnPodRestart
       description: |
@@ -31191,6 +31206,10 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
+          loadAwareRoutingPathPrefix:
+            $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -31770,6 +31789,7 @@ components:
           cpuCoreRequest: 0.5
           gpuPortionLimit: 0.5
         cleanPodPolicy: None
+        loadAwareRoutingPathPrefix: /v1
         servingConfiguration:
           requestTimeoutSeconds: 1
           initializationTimeoutSeconds: 1
@@ -32466,6 +32486,7 @@ components:
             name: storage-instance-a
             readOnly: true
             exclude: false
+        loadAwareRouting: null
         ports:
         - container: 8080
           serviceType: LoadBalancer
@@ -34987,6 +35008,7 @@ components:
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
           cleanPodPolicy: None
+          loadAwareRoutingPathPrefix: /v1
           servingConfiguration:
             requestTimeoutSeconds: 1
             initializationTimeoutSeconds: 1
@@ -35683,6 +35705,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: null
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -36947,6 +36970,7 @@ components:
               cpuCoreRequest: 0.5
               gpuPortionLimit: 0.5
             cleanPodPolicy: None
+            loadAwareRoutingPathPrefix: /v1
             servingConfiguration:
               requestTimeoutSeconds: 1
               initializationTimeoutSeconds: 1
@@ -37643,6 +37667,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -38918,6 +38943,7 @@ components:
                 cpuCoreRequest: 0.5
                 gpuPortionLimit: 0.5
               cleanPodPolicy: None
+              loadAwareRoutingPathPrefix: /v1
               servingConfiguration:
                 requestTimeoutSeconds: 1
                 initializationTimeoutSeconds: 1
@@ -39614,6 +39640,7 @@ components:
                   name: storage-instance-a
                   readOnly: true
                   exclude: false
+              loadAwareRouting: null
               ports:
               - container: 8080
                 serviceType: LoadBalancer
@@ -40876,6 +40903,7 @@ components:
                 cpuCoreRequest: 0.5
                 gpuPortionLimit: 0.5
               cleanPodPolicy: None
+              loadAwareRoutingPathPrefix: /v1
               servingConfiguration:
                 requestTimeoutSeconds: 1
                 initializationTimeoutSeconds: 1
@@ -41572,6 +41600,7 @@ components:
                   name: storage-instance-a
                   readOnly: true
                   exclude: false
+              loadAwareRouting: null
               ports:
               - container: 8080
                 serviceType: LoadBalancer
@@ -49664,7 +49693,6 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceLeaderSpecFields'
       - $ref: '#/components/schemas/DistributedInferenceWorkerSpecFields'
       example:
-        preemptibility: preemptible
         startupPolicy: LeaderCreated
         leader: "{}"
         servingPort:
@@ -49680,13 +49708,16 @@ components:
           exposeExternally: true
           exposedUrl: exposedUrl
         replicas: 2
+        loadAwareRouting: null
+        priorityClass: null
+        restartPolicy: RecreateGroupOnPodRestart
+        preemptibility: preemptible
+        loadAwareRoutingPathPrefix: /v1
         nodePools:
         - my-node-pool-a
         - my-node-pool-b
         category: null
-        priorityClass: null
         worker: "{}"
-        restartPolicy: RecreateGroupOnPodRestart
         workers: 4
     DistributedInferenceSpec:
       description: The specifications of the distributed inference to be created.
@@ -49719,7 +49750,6 @@ components:
         templateId: 550e8400-e29b-41d4-a716-446655440000
         projectId: "1"
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -49735,13 +49765,16 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInference:
       allOf:
@@ -49760,7 +49793,6 @@ components:
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
         projectId: "1"
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -49776,13 +49808,16 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     UpdateSpec:
       description: The specifications of the inference to be updated.
@@ -57298,6 +57333,7 @@ components:
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
           cleanPodPolicy: None
+          loadAwareRoutingPathPrefix: /v1
           servingConfiguration:
             requestTimeoutSeconds: 1
             initializationTimeoutSeconds: 1
@@ -57994,6 +58030,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: null
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -59226,6 +59263,7 @@ components:
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
           cleanPodPolicy: None
+          loadAwareRoutingPathPrefix: /v1
           servingConfiguration:
             requestTimeoutSeconds: 1
             initializationTimeoutSeconds: 1
@@ -59922,6 +59960,7 @@ components:
               name: storage-instance-a
               readOnly: true
               exclude: false
+          loadAwareRouting: null
           ports:
           - container: 8080
             serviceType: LoadBalancer
@@ -61199,6 +61238,7 @@ components:
               cpuCoreRequest: 0.5
               gpuPortionLimit: 0.5
             cleanPodPolicy: None
+            loadAwareRoutingPathPrefix: /v1
             servingConfiguration:
               requestTimeoutSeconds: 1
               initializationTimeoutSeconds: 1
@@ -61895,6 +61935,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -63127,6 +63168,7 @@ components:
               cpuCoreRequest: 0.5
               gpuPortionLimit: 0.5
             cleanPodPolicy: None
+            loadAwareRoutingPathPrefix: /v1
             servingConfiguration:
               requestTimeoutSeconds: 1
               initializationTimeoutSeconds: 1
@@ -63823,6 +63865,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -65079,6 +65122,7 @@ components:
               cpuCoreRequest: 0.5
               gpuPortionLimit: 0.5
             cleanPodPolicy: None
+            loadAwareRoutingPathPrefix: /v1
             servingConfiguration:
               requestTimeoutSeconds: 1
               initializationTimeoutSeconds: 1
@@ -65775,6 +65819,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -67007,6 +67052,7 @@ components:
               cpuCoreRequest: 0.5
               gpuPortionLimit: 0.5
             cleanPodPolicy: None
+            loadAwareRoutingPathPrefix: /v1
             servingConfiguration:
               requestTimeoutSeconds: 1
               initializationTimeoutSeconds: 1
@@ -67703,6 +67749,7 @@ components:
                 name: storage-instance-a
                 readOnly: true
                 exclude: false
+            loadAwareRouting: null
             ports:
             - container: 8080
               serviceType: LoadBalancer
@@ -124358,7 +124405,6 @@ components:
       - $ref: '#/components/schemas/DistributedInferenceLeaderTemplateSpecFields'
       - $ref: '#/components/schemas/DistributedInferenceWorkerTemplateSpecFields'
       example:
-        preemptibility: preemptible
         startupPolicy: LeaderCreated
         leader: "{}"
         servingPort:
@@ -124374,13 +124420,16 @@ components:
           exposeExternally: true
           exposedUrl: exposedUrl
         replicas: 2
+        loadAwareRouting: null
+        priorityClass: null
+        restartPolicy: RecreateGroupOnPodRestart
+        preemptibility: preemptible
+        loadAwareRoutingPathPrefix: /v1
         nodePools:
         - my-node-pool-a
         - my-node-pool-b
         category: null
-        priorityClass: null
         worker: "{}"
-        restartPolicy: RecreateGroupOnPodRestart
         workers: 4
     DistributedInferenceTemplate:
       allOf:
@@ -124415,7 +124464,6 @@ components:
           workloadType: Workspace
           updatedAt: 2022-01-01T03:49:52.531Z
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124431,16 +124479,18 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
         combinedSpec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124456,13 +124506,16 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInferenceTemplatesListResponseItem:
       allOf:
@@ -124494,7 +124547,6 @@ components:
           rule: min
           details: details
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124510,16 +124562,18 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
         combinedSpec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124535,13 +124589,16 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInferenceTemplatesListResponse:
       example:
@@ -124571,7 +124628,6 @@ components:
             rule: min
             details: details
           spec:
-            preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
             servingPort:
@@ -124587,16 +124643,18 @@ components:
               exposeExternally: true
               exposedUrl: exposedUrl
             replicas: 2
+            loadAwareRouting: null
+            priorityClass: null
+            restartPolicy: RecreateGroupOnPodRestart
+            preemptibility: preemptible
+            loadAwareRoutingPathPrefix: /v1
             nodePools:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            priorityClass: null
             worker: "{}"
-            restartPolicy: RecreateGroupOnPodRestart
             workers: 4
           combinedSpec:
-            preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
             servingPort:
@@ -124612,13 +124670,16 @@ components:
               exposeExternally: true
               exposedUrl: exposedUrl
             replicas: 2
+            loadAwareRouting: null
+            priorityClass: null
+            restartPolicy: RecreateGroupOnPodRestart
+            preemptibility: preemptible
+            loadAwareRoutingPathPrefix: /v1
             nodePools:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            priorityClass: null
             worker: "{}"
-            restartPolicy: RecreateGroupOnPodRestart
             workers: 4
         - runnable:
             isRunnable: false
@@ -124645,7 +124706,6 @@ components:
             rule: min
             details: details
           spec:
-            preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
             servingPort:
@@ -124661,16 +124721,18 @@ components:
               exposeExternally: true
               exposedUrl: exposedUrl
             replicas: 2
+            loadAwareRouting: null
+            priorityClass: null
+            restartPolicy: RecreateGroupOnPodRestart
+            preemptibility: preemptible
+            loadAwareRoutingPathPrefix: /v1
             nodePools:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            priorityClass: null
             worker: "{}"
-            restartPolicy: RecreateGroupOnPodRestart
             workers: 4
           combinedSpec:
-            preemptibility: preemptible
             startupPolicy: LeaderCreated
             leader: "{}"
             servingPort:
@@ -124686,13 +124748,16 @@ components:
               exposeExternally: true
               exposedUrl: exposedUrl
             replicas: 2
+            loadAwareRouting: null
+            priorityClass: null
+            restartPolicy: RecreateGroupOnPodRestart
+            preemptibility: preemptible
+            loadAwareRoutingPathPrefix: /v1
             nodePools:
             - my-node-pool-a
             - my-node-pool-b
             category: null
-            priorityClass: null
             worker: "{}"
-            restartPolicy: RecreateGroupOnPodRestart
             workers: 4
         pagination:
           offset: 6.027456183070403
@@ -124719,7 +124784,6 @@ components:
           name: my-template-name
           description: description of my template.
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124735,13 +124799,16 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInferenceTemplateUpdateRequest:
       allOf:
@@ -124755,7 +124822,6 @@ components:
           name: my-template-name
           description: description of my template.
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124771,13 +124837,16 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     DistributedInferenceTemplatePatchRequest:
       allOf:
@@ -124795,7 +124864,6 @@ components:
         - spec.image
         - spec.image
         spec:
-          preemptibility: preemptible
           startupPolicy: LeaderCreated
           leader: "{}"
           servingPort:
@@ -124811,13 +124879,16 @@ components:
             exposeExternally: true
             exposedUrl: exposedUrl
           replicas: 2
+          loadAwareRouting: null
+          priorityClass: null
+          restartPolicy: RecreateGroupOnPodRestart
+          preemptibility: preemptible
+          loadAwareRoutingPathPrefix: /v1
           nodePools:
           - my-node-pool-a
           - my-node-pool-b
           category: null
-          priorityClass: null
           worker: "{}"
-          restartPolicy: RecreateGroupOnPodRestart
           workers: 4
     UnifiedWorkloadRequest:
       description: parameters for unified workload request workloadType and projectId
@@ -125329,6 +125400,10 @@ components:
         properties:
           category:
             $ref: '#/components/schemas/Category'
+          loadAwareRouting:
+            $ref: '#/components/schemas/LoadAwareRouting'
+          loadAwareRoutingPathPrefix:
+            $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -126507,6 +126582,10 @@ components:
       - nullable: true
         properties:
           category:
+            $ref: '#/components/schemas/StringRules'
+          loadAwareRouting:
+            $ref: '#/components/schemas/BooleanRules'
+          loadAwareRoutingPathPrefix:
             $ref: '#/components/schemas/StringRules'
           nodePools:
             $ref: '#/components/schemas/ArrayRules'

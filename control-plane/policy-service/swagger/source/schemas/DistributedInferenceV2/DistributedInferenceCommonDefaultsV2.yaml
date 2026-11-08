@@ -7,6 +7,10 @@ allOf:
   properties:
     category:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/Category.yaml
+    loadAwareRouting:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRouting.yaml
+    loadAwareRoutingPathPrefix:
+      $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/inferences/LoadAwareRoutingPathPrefix.yaml
     nodePools:
       $ref: ../../../../../infra/openapi/docs/schemas/workloads_spec/resources/NodePools.yaml
     preemptibility:

@@ -4253,6 +4253,17 @@ components:
       type: string
       nullable: true
       pattern: .*
+    LoadAwareRouting:
+      description: Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+      type: boolean
+      default: false
+      nullable: true
+    LoadAwareRoutingPathPrefix:
+      description: The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
+      type: string
+      maxLength: 1024
+      nullable: true
+      example: /v1
     NodePools:
       description: A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
       type: array
@@ -4413,6 +4424,10 @@ components:
           properties:
             category:
               $ref: '#/components/schemas/Category'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
+            loadAwareRoutingPathPrefix:
+              $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
             nodePools:
               $ref: '#/components/schemas/NodePools'
             preemptibility:
@@ -6274,6 +6289,10 @@ components:
         - nullable: true
           properties:
             category:
+              $ref: '#/components/schemas/StringRules'
+            loadAwareRouting:
+              $ref: '#/components/schemas/BooleanRules'
+            loadAwareRoutingPathPrefix:
               $ref: '#/components/schemas/StringRules'
             nodePools:
               $ref: '#/components/schemas/ArrayRules'
@@ -8494,6 +8513,10 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsDefaults'
             labels:
               $ref: '#/components/schemas/LabelsDefaults'
+            loadAwareRouting:
+              $ref: '#/components/schemas/LoadAwareRouting'
+            loadAwareRoutingPathPrefix:
+              $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
             modelStore:
               nullable: true
               properties:
@@ -8706,6 +8729,10 @@ components:
               $ref: '#/components/schemas/ImagePullSecretsRules'
             labels:
               $ref: '#/components/schemas/InstancesRules'
+            loadAwareRouting:
+              $ref: '#/components/schemas/BooleanRules'
+            loadAwareRoutingPathPrefix:
+              $ref: '#/components/schemas/StringRules'
             modelStore:
               nullable: true
               properties:

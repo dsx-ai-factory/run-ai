@@ -77,6 +77,18 @@ type NimServiceSpec struct {
 	Labels *[]Label `json:"labels,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRouting *bool `json:"loadAwareRouting,omitempty"`
+	LoadAwareRouting *bool `json:"loadAwareRouting,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//LoadAwareRoutingPathPrefix *string `json:"loadAwareRoutingPathPrefix,omitempty"`
+	LoadAwareRoutingPathPrefix *string `json:"loadAwareRoutingPathPrefix,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//ModelStore *NimServiceSpecAllOfModelStore `json:"modelStore,omitempty"`
 	ModelStore *NimServiceSpecAllOfModelStore `json:"modelStore,omitempty" gorm:"serializer:json; type:jsonb;"`
@@ -328,6 +340,19 @@ func AssertNimServiceSpecConstraints(obj NimServiceSpec) error {
 			}
 		}
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.LoadAwareRoutingPathPrefix, "LoadAwareRoutingPathPrefix", 1024); maxLengthErr != nil {
+		return &ParsingError{Param: "LoadAwareRoutingPathPrefix", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
