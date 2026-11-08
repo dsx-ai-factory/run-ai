@@ -358,6 +358,8 @@ var _ = Describe("Render", func() {
 			Expect(err).To(HaveOccurred())
 		},
 		Entry("no name", func(in *render.Input) { in.Name = "" }),
+		Entry("name too long for the EPP Service", func(in *render.Input) { in.Name = strings.Repeat("a", 60) }),
+		Entry("name with a dot", func(in *render.Input) { in.Name = "llama3.1" }),
 		Entry("no namespace", func(in *render.Input) { in.Namespace = "" }),
 		Entry("no selector", func(in *render.Input) { in.Selector = nil }),
 		Entry("no hostnames", func(in *render.Input) { in.Hostnames = nil }),
@@ -368,6 +370,13 @@ var _ = Describe("Render", func() {
 		Entry("zero port", func(in *render.Input) { in.Port = 0 }),
 		Entry("scorer without plugin", func(in *render.Input) { in.Scorers = []render.Scorer{{Plugin: "", Weight: 1}} }),
 	)
+
+	It("accepts the longest name whose EPP Service is still a DNS label", func() {
+		in := llama3Input()
+		in.Name = strings.Repeat("a", 59)
+		_, err := render.Render(in)
+		Expect(err).NotTo(HaveOccurred())
+	})
 
 	It("defaults the gateway namespace to the endpoint namespace", func() {
 		in := llama3Input()

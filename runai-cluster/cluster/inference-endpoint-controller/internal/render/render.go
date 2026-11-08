@@ -128,8 +128,17 @@ type Input struct {
 
 func (in *Input) validate() error {
 	var errs []error
-	if in.Name == "" {
+	// The longest name that has to be a DNS label is the "<name>-epp" Service, which
+	// also becomes a label value. A direct InferenceEndpoint can have a dotted or
+	// longer name, so reject it here to report it in status instead of failing the apply.
+	const maxEndpointName = maxDNSLabel - len("-epp")
+	switch {
+	case in.Name == "":
 		errs = append(errs, errors.New("name is required"))
+	case len(in.Name) > maxEndpointName:
+		errs = append(errs, fmt.Errorf("name %q is longer than %d characters", in.Name, maxEndpointName))
+	case strings.Contains(in.Name, "."):
+		errs = append(errs, fmt.Errorf("name %q must not contain dots", in.Name))
 	}
 	if in.Namespace == "" {
 		errs = append(errs, errors.New("namespace is required"))
