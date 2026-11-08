@@ -93,23 +93,16 @@
       "enabled": false
     },
     {
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchFileNames": [
-        "control-plane/control-plane-chart/values.yaml",
-        "control-plane/identity-manager/integration-tests/docker-compose.yaml"
-      ],
-      "matchPackageNames": [
-        "quay.io/keycloak/keycloak"
-      ],
-      "enabled": true
-    },
-    {
       "matchPackageNames": [
         "keycloakx",
         "quay.io/keycloak/keycloak"
       ],
+      "matchFileNames": [
+        "control-plane/control-plane-chart/Chart.yaml",
+        "control-plane/control-plane-chart/values.yaml",
+        "control-plane/identity-manager/integration-tests/docker-compose.yaml"
+      ],
+      "enabled": true,
       "groupName": "keycloak",
       "groupSlug": "keycloak",
       "automerge": false,
