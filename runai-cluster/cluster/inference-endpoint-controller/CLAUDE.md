@@ -13,4 +13,4 @@ Independent Go module and container artifact under `runai-cluster/cluster`.
 - Run `make build test lint validate`; `make test-dev` provides local envtest.
 - Keep embedded templates in the Go binary. Docker packages the built binary and NOTICE.
 - No external cluster is needed for unit/envtest tests. `make test-e2e` uses a disposable Kind cluster.
-- The enabled-by-default decision has a TODO in the SDK to revisit before merge.
+- The controller is opt-in (`enabled: false` by default) because the Gateway API and GIE CRDs are prerequisites.
