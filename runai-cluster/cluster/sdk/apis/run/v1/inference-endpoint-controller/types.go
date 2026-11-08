@@ -31,6 +31,8 @@ type InferenceEndpointController struct {
 	// MetricsScrapeNamespace is the namespace Prometheus scrapes from. Each endpoint-picker
 	// NetworkPolicy admits metrics traffic only from this namespace.
 	// +kubebuilder:validation:Optional
+	// +kubebuilder:validation:MaxLength=63
+	// +kubebuilder:validation:Pattern=`^[a-z0-9]([-a-z0-9]*[a-z0-9])?$`
 	MetricsScrapeNamespace *string `json:"metricsScrapeNamespace,omitempty"`
 	// +kubebuilder:validation:Optional
 	// +kubebuilder:validation:Schemaless

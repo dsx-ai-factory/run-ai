@@ -5158,6 +5158,8 @@ spec:
                     description: |-
                       MetricsScrapeNamespace is the namespace Prometheus scrapes from. Each endpoint-picker
                       NetworkPolicy admits metrics traffic only from this namespace.
+                    maxLength: 63
+                    pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
                     type: string
                   replicas:
                     format: int32
