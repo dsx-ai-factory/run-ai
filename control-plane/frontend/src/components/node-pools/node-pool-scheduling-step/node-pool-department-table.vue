@@ -56,7 +56,7 @@
           @click="emit('advancedSettings')"
       /></template>
     </runai-page-actions>
-    <div class="table-settings-layout">
+    <div class="table-settings-layout" :class="{ 'settings-open': settingsOpen }">
       <div class="department-table-content">
         <q-table
           flat
@@ -69,7 +69,7 @@
           :pagination="{ rowsPerPage: 0 }"
           hide-pagination
           :rows-per-page-options="[0]"
-          :table-style="{ minWidth: draft.maxAllocation ? '1000px' : '960px' }"
+          :style="{ '--scheduling-table-min-width': draft.maxAllocation ? '1000px' : '960px' }"
         >
           <template #header="{ cols }"
             ><q-tr>
@@ -127,7 +127,7 @@
                     @click="toggle(row.rank)"
                   />
                   <span :class="{ 'rank-label-quota': draft.mode === 'guaranteed' }"
-                    >{{ row.name }} ({{ row.count }} departments)</span
+                    >{{ row.name }} ({{ row.count }} {{ row.count === 1 ? "department" : "departments" }})</span
                   >
                   <runai-btn
                     v-if="expanded.has(row.rank) && rows.filter((item) => item.rank === row.rank).length < row.count"
@@ -332,6 +332,7 @@ const props = withDefaults(
     capacity?: number;
     readonly: boolean;
     canView?: boolean;
+    settingsOpen?: boolean;
     totalsComplete?: boolean;
     rawWeightsAvailable?: boolean;
     canEditDepartment?: (id: string) => boolean;
@@ -460,8 +461,18 @@ const simulation = ref(false);
 const demand = ref<Record<string, number>>({});
 const simulationResults = computed(() => {
   if (
+    !props.draft.mode ||
+    props.draft.automaticWeights ||
+    props.draft.cpuQuota ||
+    props.draft.timeFairshare ||
+    (props.draft.historicalWeight != null && props.draft.historicalWeight !== 0) ||
+    Object.values(props.draft.historicalWindow ?? {}).some((value) => value != null && value !== 0) ||
+    Object.values(props.draft.minimumRuntime ?? {}).some((value) => value != null && value !== 0) ||
     Object.keys(props.draft.departments).length ||
-    Object.values(baseline.value).some((row) => row.quota !== 0 || row.weight !== 2 || row.rank !== "MediumLow")
+    Object.values(baseline.value).some(
+      (row) =>
+        row.quota !== 0 || row.weight !== 2 || row.rank !== "MediumLow" || (row.limit != null && row.limit !== -1),
+    )
   )
     return undefined;
   return getMockSchedulingResult(Object.keys(baseline.value), props.capacity, demand.value);
@@ -604,7 +615,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .department-table-content {
   min-width: 0;
-  flex: 1;
+  flex: 1 1 0;
+  overflow: hidden;
   padding-bottom: 40px;
 }
 .department-section {
@@ -631,7 +643,19 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 .scheduling-actions :deep(.right-actions-container .q-btn__label) {
   font-size: 10px;
 }
+.scheduling-table {
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+}
+.settings-open .scheduling-table :deep(.column-department) {
+  width: 150px;
+}
+.settings-open .rank-row .rank-label-quota {
+  margin-left: 150px;
+}
 .scheduling-table :deep(table) {
+  min-width: var(--scheduling-table-min-width);
   table-layout: fixed;
   width: 100%;
 }
@@ -651,6 +675,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 }
 .scheduling-table :deep(.q-table__middle) {
   overflow-x: auto;
+  min-width: 0;
+  max-width: 100%;
 }
 .scheduling-table :deep(.column-selection) {
   width: 56px;

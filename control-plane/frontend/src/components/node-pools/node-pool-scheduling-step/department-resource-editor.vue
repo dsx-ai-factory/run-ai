@@ -17,7 +17,9 @@
         : 'default'
     "
     :display-value="
-      kind === 'limit' && (value == null || value === -1) ? 'Unlimited' : (displayValue ?? value ?? 'Unknown')
+      (kind === 'limit' && value == null) || (kind !== 'weight' && value === -1)
+        ? 'Unlimited'
+        : (displayValue ?? value ?? 'Unknown')
     "
     :disabled="disabled"
     :disabled-tooltip="disabledTooltip"

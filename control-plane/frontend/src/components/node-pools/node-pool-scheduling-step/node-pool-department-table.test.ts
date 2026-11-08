@@ -25,6 +25,43 @@ const rows: DepartmentNodePoolResources[] = [
 ];
 const draft: SchedulingDraft = { mode: "proportional", automaticWeights: false, cpuQuota: false, departments: {} };
 describe("scheduling department table", () => {
+  it.each([
+    { automaticWeights: true },
+    { cpuQuota: true },
+    { timeFairshare: true },
+    { historicalWeight: 1 },
+    { historicalWindow: { Days: 1 } },
+    { minimumRuntime: { Minutes: 1 } },
+  ])("clears authored results when advanced inputs no longer match: %j", async (patch) => {
+    const fixtureRows = Array.from({ length: 5 }, (_, index) => ({
+      ...rows[0],
+      orgUnitId: `preview-department-${index + 1}`,
+      orgUnitName: `department ${index + 1}`,
+      resources: { gpu: { deserved: 0, overQuotaWeight: 2, limit: -1 } },
+    }));
+    const wrapper = mount(Table, {
+      props: {
+        rows: fixtureRows,
+        baselineRows: fixtureRows,
+        draft,
+        capacity: 144,
+        aggregates: { all: { weightsSum: 10, deservedSum: 0 } },
+        ranks: [],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(".allocated")).toHaveLength(5);
+    await wrapper.setProps({ draft: { ...draft, ...patch } });
+    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    wrapper.unmount();
+  });
   it("initializes keyboard demand controls at capacity and clears fixture results after any configuration edit", async () => {
     const fixtureRows = Array.from({ length: 5 }, (_, index) => ({
       ...rows[0],

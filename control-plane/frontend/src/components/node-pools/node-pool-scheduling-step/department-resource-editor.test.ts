@@ -12,6 +12,11 @@ const popup = {
   emits: ["apply", "reset", "opened"],
 };
 describe("department resource editor", () => {
+  it("renders the saved unlimited quota sentinel as Unlimited", () => {
+    const wrapper = mount(Editor, { props: { value: -1, kind: "quota", id: "default" }, global: { plugins: [Quasar] } });
+    expect(wrapper.get('[role="button"]').text()).toBe("Unlimited");
+    wrapper.unmount();
+  });
   it("blocks a maximum below quota and preserves Unlimited without project-quota reads", async () => {
     const wrapper = mount(Editor, {
       props: { value: -1, kind: "limit", quota: 5, id: "a" },

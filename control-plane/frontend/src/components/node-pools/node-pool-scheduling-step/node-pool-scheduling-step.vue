@@ -75,6 +75,7 @@
                 :capacity="resources?.gpus"
                 :readonly="!canEditDepartments || !canViewDepartments"
                 :can-view="canViewDepartments"
+                :settings-open="showSettings"
                 :totals-complete="totalsComplete"
                 :raw-weights-available="pool.schedulingCapabilities?.adjustableWeights === true"
                 :can-edit-department="canEditDepartment"
