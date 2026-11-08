@@ -93,6 +93,9 @@ type RoutingSpec struct {
 	// endpoints on the same Gateway never collide on the shared path prefix.
 	// +required
 	// +kubebuilder:validation:MinItems=1
+	// +kubebuilder:validation:MaxItems=16
+	// +kubebuilder:validation:items:MaxLength=253
+	// +kubebuilder:validation:items:Pattern=`^(\*\.)?[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
 	// +listType=set
 	Hostnames []string `json:"hostnames"`
 

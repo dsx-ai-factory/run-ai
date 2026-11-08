@@ -129,7 +129,10 @@ spec:
                       hostnames the HTTPRoute matches. At least one is required so that two
                       endpoints on the same Gateway never collide on the shared path prefix.
                     items:
+                      maxLength: 253
+                      pattern: ^(\*\.)?[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
                       type: string
+                    maxItems: 16
                     minItems: 1
                     type: array
                     x-kubernetes-list-type: set
