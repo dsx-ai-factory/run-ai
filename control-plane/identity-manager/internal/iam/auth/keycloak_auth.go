@@ -23,6 +23,7 @@ const (
 	DefaultServiceAccountTokenLifespan = 10 * time.Minute
 	AdminRole                          = "admin"
 	DefaultMasterRole                  = "default-roles-master"
+	AdminAPIScopeName                  = "kc-admin-api"
 )
 
 const (
@@ -123,6 +124,10 @@ func (k *KeycloakAuthenticator) getUserAdminAccessToken(ctx context.Context) (*s
 
 func (k *KeycloakAuthenticator) setAppLogin(ctx context.Context) error {
 	idOfClient, err := k.getAppAdminClientID(ctx)
+	if err != nil {
+		return err
+	}
+	err = k.ensureAdminAPIScope(ctx, *idOfClient)
 	if err != nil {
 		return err
 	}
@@ -294,6 +299,39 @@ func (k *KeycloakAuthenticator) assignAdminRolesToAdminApp(ctx context.Context, 
 		}
 	}
 
+	return nil
+}
+
+func (k *KeycloakAuthenticator) ensureAdminAPIScope(ctx context.Context, idOfClient string) error {
+	adminToken := k.userAuth.userToken.AccessToken
+	scopes, err := k.KcClient.GetClientScopes(ctx, adminToken, MasterRealmName)
+	if err != nil {
+		return fmt.Errorf("failed to get client scopes. error: %w", err)
+	}
+	scopeID := ""
+	for _, scope := range scopes {
+		if scope != nil && scope.Name != nil && *scope.Name == AdminAPIScopeName && scope.ID != nil {
+			scopeID = *scope.ID
+			break
+		}
+	}
+	if scopeID == "" {
+		return nil
+	}
+
+	defaultScopes, err := k.KcClient.GetClientsDefaultScopes(ctx, adminToken, MasterRealmName, idOfClient)
+	if err != nil {
+		return fmt.Errorf("failed to get default scopes of admin app. error: %w", err)
+	}
+	for _, scope := range defaultScopes {
+		if scope != nil && scope.ID != nil && *scope.ID == scopeID {
+			return nil
+		}
+	}
+
+	if err := k.KcClient.AddDefaultScopeToClient(ctx, adminToken, MasterRealmName, idOfClient, scopeID); err != nil {
+		return fmt.Errorf("failed to add %s scope to admin app. error: %w", AdminAPIScopeName, err)
+	}
 	return nil
 }
 
