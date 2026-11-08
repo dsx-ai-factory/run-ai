@@ -8,7 +8,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.10
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.0
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.11
