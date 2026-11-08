@@ -7,9 +7,11 @@ package v1alpha1
 
 import (
 	"context"
+	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -104,6 +106,12 @@ var _ = Describe("InferenceEndpoint CRD validation", func() {
 		Expect(ie.Spec.Routing.PathPrefix).To(Equal("/openai/v1"))
 	})
 
+	It("accepts a wildcard hostname", func() {
+		ie := validEndpoint()
+		ie.Spec.Routing.Hostnames = []string{"*.models.example.com", "llama"}
+		Expect(k8sClient.Create(ctx, ie)).To(Succeed())
+	})
+
 	It("accepts scheduling scorers", func() {
 		ie := validEndpoint()
 		ie.Spec.Epp.Scheduling = &SchedulingSpec{Scorers: []ScorerSpec{
@@ -146,6 +154,16 @@ var _ = Describe("InferenceEndpoint CRD validation", func() {
 		Entry("port above 65535", func(ie *InferenceEndpoint) { ie.Spec.Workload.Port = 65536 }),
 		Entry("no gateway name", func(ie *InferenceEndpoint) { ie.Spec.Routing.GatewayRef.Name = "" }),
 		Entry("no hostnames", func(ie *InferenceEndpoint) { ie.Spec.Routing.Hostnames = nil }),
+		Entry("hostname with a space", func(ie *InferenceEndpoint) { ie.Spec.Routing.Hostnames = []string{"foo bar"} }),
+		Entry("upper case hostname", func(ie *InferenceEndpoint) { ie.Spec.Routing.Hostnames = []string{"Llama.example.com"} }),
+		Entry("hostname longer than 253 characters", func(ie *InferenceEndpoint) {
+			ie.Spec.Routing.Hostnames = []string{strings.Repeat("a", 254)}
+		}),
+		Entry("more than 16 hostnames", func(ie *InferenceEndpoint) {
+			for i := 0; i < 17; i++ {
+				ie.Spec.Routing.Hostnames = append(ie.Spec.Routing.Hostnames, fmt.Sprintf("h%d.example.com", i))
+			}
+		}),
 		Entry("path prefix without a leading slash", func(ie *InferenceEndpoint) {
 			ie.Spec.Routing.PathPrefix = "v1"
 		}),
