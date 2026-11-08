@@ -759,9 +759,9 @@ identityManager:
     ignoredRealms: ''
     dbScheme: identity_manager
     migrationFiles: file:///migrations
-    serviceAccountsVersion: v3
+    serviceAccountsVersion: v4
     internalServiceAccountsVersion: v2
-    accessKeysVersion: v5
+    accessKeysVersion: v6
     secretsMountPath: /etc/secrets
     loginTheme: 'runai-theme'
     clientCachingCleanup: 60
@@ -1266,7 +1266,7 @@ keycloakx:
   fullnameOverride: keycloak
   image:
     repository: quay.io/keycloak/keycloak
-    tag: "26.6"
+    tag: "26.6.4"
   imagePullSecrets:
     - name: runai-reg-creds
   command:

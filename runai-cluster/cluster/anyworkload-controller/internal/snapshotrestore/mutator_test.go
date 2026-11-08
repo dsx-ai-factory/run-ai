@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -24,7 +25,7 @@ func optedInPod(t *testing.T) []byte {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "replica-0",
 			Namespace: "runai-proj",
-			Labels:    map[string]string{"run.ai/snapshot": "true"},
+			Labels:    map[string]string{constants.SnapshotOptInLabel: "true"},
 		},
 		Spec: corev1.PodSpec{
 			Containers: []corev1.Container{{Name: "main", Image: "vllm/vllm-openai:v0.31.0"}},
@@ -78,10 +79,14 @@ func TestMutatorAdmitsPodsUnchanged(t *testing.T) {
 	}
 }
 
-// Different modules, so only matching literals keep the path and the
-// configuration together.
-func TestMutationPathMatchesTheRegisteredConfiguration(t *testing.T) {
-	if MutationPath != "/mutate-pod-snapshot-restore" {
-		t.Fatalf("MutationPath = %q; the go-operator registers /mutate-pod-snapshot-restore", MutationPath)
+// The go-operator writes this path into the webhook configuration and this
+// package serves it, so the shared constant keeps them together. The literal is
+// pinned as well because it is cluster-visible: changing it leaves every
+// already-applied configuration pointing at a path nothing answers until
+// init-ca reapplies them.
+func TestRegisteredPathIsTheConfiguredOne(t *testing.T) {
+	if constants.SnapshotRestoreWebhookPath != "/mutate-pod-snapshot-restore" {
+		t.Fatalf("SnapshotRestoreWebhookPath = %q, want /mutate-pod-snapshot-restore",
+			constants.SnapshotRestoreWebhookPath)
 	}
 }

@@ -46,7 +46,7 @@ func TestServiceAccount_CreateServiceAccount_HappyFlow(t *testing.T) {
 	require.NotNil(t, newServiceAccount.Attributes.CreatedAt)
 	require.Nil(t, newServiceAccount.Attributes.LastLogin)
 	require.Equal(t, 30*time.Minute, *newServiceAccount.Attributes.TokenLifespan)
-	require.Equal(t, realm_client.ClientTypeTenantApp, *newServiceAccount.Attributes.ClientType)
+	require.Equal(t, realm_client.ClientTypeServiceAccount, *newServiceAccount.Attributes.ClientType)
 	require.Equal(t, createdByUser, *newServiceAccount.Attributes.CreatedBy)
 }
 
