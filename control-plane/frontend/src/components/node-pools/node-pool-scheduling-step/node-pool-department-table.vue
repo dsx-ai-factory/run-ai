@@ -90,12 +90,8 @@
                   <div v-if="order(col.name)" :class="`column-order order-${col.name}`">{{ order(col.name) }}</div>
                   <div class="column-label">
                     {{ col.label }}
-                    <q-icon name="ph ph-question" size="16px"
-                      ><q-tooltip max-width="340px">{{
-                        col.name === "weight" && ranked
-                          ? "The weight determines each department’s proportional share of the over-quota resources within its rank. Unused capacity flows down to the next rank, where it is distributed by weight."
-                          : headerTooltips[col.name]
-                      }}</q-tooltip></q-icon
+                    <q-icon v-if="col.name !== 'department' || ranked" name="ph ph-question" size="16px"
+                      ><q-tooltip max-width="340px">{{ headerTooltips[col.name] }}</q-tooltip></q-icon
                     >
                   </div>
                   <label v-if="col.name === 'result'" class="simulation-control"
@@ -196,14 +192,15 @@
                     v-else-if="percentage(row) !== 'Unknown'"
                     class="quota-marker"
                     :style="{
-                      left: '30px',
+                      left: `${Math.min(100, Math.max(0, parseFloat(percentage(row))))}%`,
                     }"
                   />
                   <q-tooltip max-width="320px">
                     <strong>{{ row.name }}</strong
                     ><br />{{ ranked ? "Weight within rank" : "Weight" }}: {{ percentage(row) }}
                     <template v-if="draft.mode === 'guaranteed'"
-                      ><br />Guaranteed GPU allocation: {{ row.quota ?? "Unknown" }}</template
+                      ><br />Guaranteed GPU allocation:
+                      {{ row.quota === -1 ? "Unlimited" : (row.quota ?? "Unknown") }}</template
                     >
                     <template v-if="draft.maxAllocation"
                       ><br />Max GPU allocation:
@@ -247,7 +244,7 @@
                       ? "Department data is unavailable."
                       : searchTerm || rankFilter || filters.advancedFilters?.length
                         ? "No departments match your filters."
-                        : "No departments yet"
+                        : "No departments yet."
               }}
             </div></template
           >
@@ -487,18 +484,20 @@ const allSelected = computed(
 function selectAll(value: boolean) {
   for (const row of effectiveRows.value) if (props.canEditDepartment?.(row.id) !== false) select(row.id, value);
 }
-const headerTooltips: Record<string, string> = {
+const headerTooltips = computed<Record<string, string>>(() => ({
   selection: "The numbers indicate the order in which the Scheduler considers resource allocation in real time.",
   quota:
     "These GPUs are guaranteed to the department and allocated before any sharing whenever its workloads request them. Cluster conditions such as fragmentation can occasionally prevent the full quota from being allocated. Across all departments, quota cannot exceed the node pool capacity.",
   department:
     "The highest rank receives over-quota capacity first. Unused capacity flows down to the next rank, where it is distributed proportionally by weight within the rank. Select departments to move them to another rank.",
-  weight: "The weight determines each department’s proportional share of the resources.",
+  weight: ranked.value
+    ? "The weight determines each department’s proportional share of the over-quota resources within its rank. Unused capacity flows down to the next rank, where it is distributed by weight."
+    : "The weight determines each department’s proportional share of the resources.",
   limit:
     "This is the upper limit of GPUs a department can consume from a node pool, combining assigned quota and over-quota.",
   result:
     "View a visual summary of each department’s resource settings. Turn on Simulate workload demand to see how GPUs would be allocated based on real-time demand.",
-};
+}));
 function order(name: string) {
   if (name === "quota") return "#1";
   if (name === "department") return ranked.value ? (props.draft.mode === "guaranteed" ? "#2" : "#1") : "";

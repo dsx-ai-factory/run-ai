@@ -112,8 +112,10 @@ describe("scheduling department table", () => {
       },
     });
     expect(wrapper.text()).toContain("20%");
+    expect(wrapper.get(".quota-marker").attributes("style")).toContain("left: 20%");
     await wrapper.setProps({ draft: { ...draft, departments: { a: { id: "a", weight: 5 } } } });
     expect(wrapper.text()).toContain("38.46%");
+    expect(wrapper.get(".quota-marker").attributes("style")).toContain("left: 38.46%");
     await wrapper.setProps({ rows: [] });
     await wrapper.setProps({ rows });
     expect(wrapper.text()).toContain("38.46%");

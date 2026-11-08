@@ -12,6 +12,7 @@
       <section v-if="draft.mode === 'guaranteed'">
         <runai-section-title
           title="Weight within rank"
+          tooltip-icon="ph ph-info"
           tooltip-text="Set the proportion of unused resources a project or department can get on top of its quota."
         />
         <runai-radio-options
@@ -22,7 +23,7 @@
         />
       </section>
       <section class="toggle-section">
-        <runai-section-title title="Max GPU allocation" :tooltip-text="maxHelp" />
+        <runai-section-title title="Max GPU allocation" tooltip-icon="ph ph-info" :tooltip-text="maxHelp" />
         <runai-toggle
           :model-value="!!draft.maxAllocation"
           :disable="readonly"
@@ -34,7 +35,9 @@
         <div class="toggle-section">
           <runai-section-title
             title="Time-based fairshare"
-            tooltip-text="When enabled, the Scheduler adjusts fairshare scores based on each project's weight and historical usage records. To use this feature, persistent data must be enabled."
+            tooltip-icon="ph ph-info"
+            width="425px"
+            tooltip-text="When enabled, the Scheduler adjusts fairshare scores based on each project's weight and historical usage records. To use this feature, persistent data must be enabled. When disabled, the Scheduler uses the default fairshare, with scheduling fairness based on the current project's weight and resource usage. For more information, see the Time-based fairshare guide."
           />
           <runai-toggle
             :model-value="!!draft.timeFairshare"
@@ -46,8 +49,18 @@
         <div v-if="draft.timeFairshare" class="historical-fields">
           <runai-section-title
             title="Set the weight value that determines how a project's historical resource usage affects its fairshare"
-            tooltip-text="This determines how strongly historical resource usage influences fairshare scores. Zero ignores history; values above one amplify its effect."
-          />
+            width="473px"
+            tooltip-text="This determines how strongly historical resource usage influences fairshare scores: 0 — History is ignored; fairshare is based on current weight only. 0–1 — History has partial influence; lower values reduce its effect. 1 — History and current weight are balanced equally. >1 — History dominates; higher values amplify its effect."
+            ><template #tooltip-content
+              >This determines how strongly historical resource usage influences fairshare scores:
+              <ul class="historical-weight-help">
+                <li>0 — History is ignored; fairshare is based on current weight only.</li>
+                <li>0–1 — History has partial influence; lower values reduce its effect.</li>
+                <li>1 — History and current weight are balanced equally.</li>
+                <li>&gt;1 — History dominates; higher values amplify its effect.</li>
+              </ul>
+            </template></runai-section-title
+          >
           <q-input
             :model-value="draft.historicalWeight"
             @update:model-value="patch({ historicalWeight: number($event) })"
@@ -62,7 +75,8 @@
           <runai-section-title
             class="q-mt-lg"
             title="Set the duration of the historical usage window"
-            tooltip-text="This defines the duration of the sliding window used to calculate historical resource usage."
+            width="372px"
+            tooltip-text="This defines the duration of the sliding window used to calculate historical resource usage. At any given moment, the system looks only at usage within this duration from the current time. As time passes, the window slides forward continuously, including new usage and dropping old usage that falls outside the window."
           />
           <div class="duration-grid historical-window">
             <q-input
@@ -84,6 +98,7 @@
       <section class="runtime-section">
         <runai-section-title
           title="Set the minimum guaranteed runtime"
+          tooltip-icon="ph ph-info"
           tooltip-text="This defines the minimum time a preemptible workload is guaranteed to run once it is scheduled in this node pool, before it can be preempted and its resources reallocated to other workloads."
         />
         <div class="duration-grid">
@@ -106,7 +121,8 @@
         <section class="toggle-section">
           <runai-section-title
             title="CPU quota"
-            tooltip-text="When enabled, CPU resources can be set per department or project."
+            tooltip-icon="ph ph-info"
+            tooltip-text="When enabled, CPU resources can be set per department or project. For more information, see the Departments guide and Projects guide."
           />
           <runai-toggle
             :model-value="draft.cpuQuota"
@@ -115,10 +131,11 @@
             @update:model-value="setCpu"
           />
         </section>
-        <section class="toggle-section">
+        <section class="toggle-section quota-policy-section">
           <runai-section-title
             title="Limit projects from exceeding department quota"
-            tooltip-text="When enabled, the projects' total quota cannot exceed the department's quota or be less than the total usage by non-preemptible workloads."
+            tooltip-icon="ph ph-info"
+            tooltip-text="When enabled, the projects' total quota cannot exceed the department's quota or be less than the total usage by non-preemptible workloads. For more information, see The NVIDIA Run:ai Scheduler: Concepts and Principles guide."
           />
           <runai-toggle
             :model-value="quotaPolicy ?? false"
@@ -178,7 +195,7 @@ const weightOptions = [
     label: "Automatic",
     value: "automatic",
     toolTip:
-      "A project or department gets a proportion of unused resources relative to its quota, and it cannot be modified.",
+      "A project or department gets a proportion of unused resources relative to its quota, and it can't be modified.",
   },
   {
     label: "Custom",
@@ -253,6 +270,9 @@ header .q-btn {
 .settings-body > section:first-child {
   padding-top: 0;
 }
+.settings-body > .toggle-section:first-child {
+  padding-top: 26px;
+}
 .settings-body > section:last-child {
   border-bottom: 0;
   padding-bottom: 0;
@@ -262,10 +282,33 @@ header .q-btn {
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  min-height: 32px;
+  min-height: 31px;
 }
 .toggle-section :deep(.runai-section-title) {
   flex: 1;
+  margin-bottom: 0;
+}
+.toggle-section :deep(.q-toggle) {
+  max-height: 31px;
+}
+.toggle-section :deep(.runai-section-title > .row) {
+  display: inline;
+}
+.toggle-section :deep(.runai-section-title > .row > span) {
+  display: inline;
+}
+.toggle-section :deep(.runai-section-title > .row > .q-btn) {
+  vertical-align: middle;
+  height: 20px;
+  width: 20px;
+  min-height: 20px;
+  padding: 0;
+}
+.quota-policy-section :deep(.runai-section-title) {
+  max-width: 245px;
+}
+.settings-body > .runtime-section:last-child {
+  padding-bottom: 10px !important;
 }
 .settings-body :deep(.runai-radio-options) {
   margin-top: 7px;
@@ -276,6 +319,11 @@ header .q-btn {
 .settings-body :deep(.runai-section-title) {
   font-size: 14px;
   font-weight: 400;
+  line-height: 20px;
+}
+.duration-grid :deep(.q-field__bottom) {
+  min-height: 16px;
+  padding-top: 0;
 }
 .duration-grid {
   display: grid;
@@ -294,10 +342,14 @@ header .q-btn {
   margin-top: 26px;
 }
 .duration-grid :deep(.q-field__label) {
-  font-size: 12px;
+  font-size: 16px;
 }
 </style>
 <style lang="scss">
+.historical-weight-help {
+  margin: 0;
+  padding-left: 20px;
+}
 .scheduling-confirm {
   width: 500px !important;
 }
