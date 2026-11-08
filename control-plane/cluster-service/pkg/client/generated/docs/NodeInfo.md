@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**Labels** | Pointer to **map[string]string** | Labels assigned to the node. | [optional] 
 **Status** | **string** | The calculated status of the node. | 
 **Conditions** | Pointer to [**[]NodeStatusConditionDetails**](NodeStatusConditionDetails.md) |  | [optional] 
 **Taints** | Pointer to [**[]NodeTaint**](NodeTaint.md) |  | [optional] 
@@ -33,6 +34,31 @@ will change when the set of required properties is changed
 NewNodeInfoWithDefaults instantiates a new NodeInfo object
 This constructor will only assign default values to properties that have it defined,
 but it doesn't guarantee that properties required by API are set
+
+### GetLabels
+
+`func (o *NodeInfo) GetLabels() map[string]string`
+
+GetLabels returns the Labels field if non-nil, zero value otherwise.
+
+### GetLabelsOk
+
+`func (o *NodeInfo) GetLabelsOk() (*map[string]string, bool)`
+
+GetLabelsOk returns a tuple with the Labels field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLabels
+
+`func (o *NodeInfo) SetLabels(v map[string]string)`
+
+SetLabels sets Labels field to given value.
+
+### HasLabels
+
+`func (o *NodeInfo) HasLabels() bool`
+
+HasLabels returns a boolean if a field has been set.
 
 ### GetStatus
 

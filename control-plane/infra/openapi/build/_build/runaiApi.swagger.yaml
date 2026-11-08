@@ -84,6 +84,75 @@ tags:
   - name: Synchronization
     description: Internal interface for synchronizing assets between the clusters and the control plane.
 paths:
+  /api/v1/clusters/{clusterUuid}/nodes/labels/keys:
+    get:
+      summary: Get node label keys.
+      description: Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+      operationId: get_node_label_keys
+      tags:
+        - Nodes
+      parameters:
+        - $ref: '#/components/parameters/ClusterUuid'
+        - $ref: '#/components/parameters/NodeLabelContains'
+        - $ref: '#/components/parameters/NodeLabelOffset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Matching label keys. Returns an empty array when no keys match.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - gpu-type
+                - nvidia.com/gpu.product
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/clusters/{clusterUuid}/nodes/labels/values:
+    get:
+      summary: Get node label values.
+      description: Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
+      operationId: get_node_label_values
+      tags:
+        - Nodes
+      parameters:
+        - $ref: '#/components/parameters/ClusterUuid'
+        - $ref: '#/components/parameters/NodeLabelKey'
+        - $ref: '#/components/parameters/NodeLabelContains'
+        - $ref: '#/components/parameters/NodeLabelOffset'
+        - $ref: '#/components/parameters/Limit'
+      responses:
+        '200':
+          description: Matching label values. Returns an empty array when no values match.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+              example:
+                - a100
+                - a30
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/clusters/{clusterUuid}/nodes/count:
     get:
       summary: Count nodes
@@ -13763,6 +13832,12 @@ components:
         - nodePool
         - createdAt
       properties:
+        labels:
+          writeOnly: true
+          type: object
+          additionalProperties:
+            type: string
+          description: Labels assigned to the node.
         status:
           type: string
           enum:
@@ -36071,6 +36146,43 @@ components:
         format: uuid
         minLength: 1
         example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+    NodeLabelContains:
+      name: contains
+      in: query
+      description: Return options containing this literal text.
+      schema:
+        type: string
+      example: a
+    NodeLabelOffset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        example: 100
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 500
+    NodeLabelKey:
+      name: key
+      in: query
+      required: true
+      description: The exact label key whose values to return.
+      schema:
+        type: string
+        minLength: 1
+      example: gpu-type
     NodesFilter:
       name: filterBy
       in: query
@@ -36144,17 +36256,6 @@ components:
         type: integer
         format: int32
         example: 100
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of entries to return.
-      schema:
-        type: integer
-        format: int32
-        default: 50
-        minimum: 1
-        maximum: 500
     QueryForceDelete:
       name: force
       in: query

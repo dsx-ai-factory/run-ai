@@ -3236,6 +3236,12 @@ components:
         - nodePool
         - createdAt
       properties:
+        labels:
+          writeOnly: true
+          type: object
+          additionalProperties:
+            type: string
+          description: Labels assigned to the node.
         status:
           type: string
           enum:
@@ -6260,6 +6266,17 @@ components:
         format: uuid
         minLength: 1
         example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 500
     Search:
       name: search
       in: query
@@ -6319,17 +6336,6 @@ components:
         type: integer
         format: int32
         example: 100
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of entries to return.
-      schema:
-        type: integer
-        format: int32
-        default: 50
-        minimum: 1
-        maximum: 500
     QueryForceDelete:
       name: force
       in: query

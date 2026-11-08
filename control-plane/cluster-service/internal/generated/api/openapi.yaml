@@ -344,6 +344,247 @@ paths:
       x-test-coverage:
       - cluster-service/pkg/services/api_clusters_service_test.go
     x-internal: true
+  /api/v1/clusters/{clusterUuid}/nodes/labels/keys:
+    get:
+      description: "Return unique, sorted label keys up to 253 characters long from\
+        \ nodes in the selected cluster."
+      operationId: get_node_label_keys
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      - description: Return options containing this literal text.
+        example: a
+        explode: true
+        in: query
+        name: contains
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          minimum: 0
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - gpu-type
+              - nvidia.com/gpu.product
+              schema:
+                items:
+                  type: string
+                type: array
+          description: Matching label keys. Returns an empty array when no keys match.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get node label keys.
+      tags:
+      - Nodes
+      x-service: cluster-service
+      x-test-coverage:
+      - control-plane/cluster-service/pkg/services/api_nodes_labels_test.go
+      x-authorize:
+        resource-type: nodes
+        action: read
+  /api/v1/clusters/{clusterUuid}/nodes/labels/values:
+    get:
+      description: "Return unique, sorted nonempty values for an exact label key up\
+        \ to 253 characters long from nodes in the selected cluster."
+      operationId: get_node_label_values
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      - description: The exact label key whose values to return.
+        example: gpu-type
+        explode: true
+        in: query
+        name: key
+        required: true
+        schema:
+          minLength: 1
+          type: string
+        style: form
+      - description: Return options containing this literal text.
+        example: a
+        explode: true
+        in: query
+        name: contains
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          minimum: 0
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - a100
+              - a30
+              schema:
+                items:
+                  type: string
+                type: array
+          description: Matching label values. Returns an empty array when no values
+            match.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get node label values.
+      tags:
+      - Nodes
+      x-service: cluster-service
+      x-test-coverage:
+      - control-plane/cluster-service/pkg/services/api_nodes_labels_test.go
+      x-authorize:
+        resource-type: nodes
+        action: read
   /api/v1/clusters/{clusterUuid}/nodes/count:
     get:
       description: Count nodes
@@ -5960,6 +6201,52 @@ components:
       schema:
         type: boolean
       style: form
+    NodeLabelContains:
+      description: Return options containing this literal text.
+      example: a
+      explode: true
+      in: query
+      name: contains
+      required: false
+      schema:
+        type: string
+      style: form
+    NodeLabelOffset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 100
+        format: int32
+        minimum: 0
+        type: integer
+      style: form
+    Limit:
+      description: The maximum number of entries to return.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        format: int32
+        maximum: 500
+        minimum: 1
+        type: integer
+      style: form
+    NodeLabelKey:
+      description: The exact label key whose values to return.
+      example: gpu-type
+      explode: true
+      in: query
+      name: key
+      required: true
+      schema:
+        minLength: 1
+        type: string
+      style: form
     NodesFilter:
       description: "Filter results by a parameter. Use the format field-name operator\
         \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
@@ -6063,19 +6350,6 @@ components:
       schema:
         example: 100
         format: int32
-        type: integer
-      style: form
-    Limit:
-      description: The maximum number of entries to return.
-      explode: true
-      in: query
-      name: limit
-      required: false
-      schema:
-        default: 50
-        format: int32
-        maximum: 500
-        minimum: 1
         type: integer
       style: form
     QueryForceDelete:
@@ -7186,8 +7460,16 @@ components:
           gpuType: Tesla-V100
         nvLinkDomainUid: nvlink-domain-uid
         nvLinkCliqueId: clique-id
+        labels:
+          key: labels
         status: Ready
       properties:
+        labels:
+          additionalProperties:
+            type: string
+          description: Labels assigned to the node.
+          type: object
+          writeOnly: true
         status:
           description: The calculated status of the node.
           enum:
@@ -7293,6 +7575,8 @@ components:
             gpuType: Tesla-V100
           nvLinkDomainUid: nvlink-domain-uid
           nvLinkCliqueId: clique-id
+          labels:
+            key: labels
           status: Ready
       x-schema-name: NodeForSync
     NodesSyncRequest:
@@ -7329,6 +7613,8 @@ components:
               gpuType: Tesla-V100
             nvLinkDomainUid: nvlink-domain-uid
             nvLinkCliqueId: clique-id
+            labels:
+              key: labels
             status: Ready
         - name: worker-node-1
           nodeInfo:
@@ -7361,6 +7647,8 @@ components:
               gpuType: Tesla-V100
             nvLinkDomainUid: nvlink-domain-uid
             nvLinkCliqueId: clique-id
+            labels:
+              key: labels
             status: Ready
         from: worker-node-0
         to: worker-node-3
@@ -9457,6 +9745,8 @@ components:
           gpuCount: 0
           gpuType: Tesla-V100
         nvLinkCliqueId: clique-id
+        labels:
+          key: labels
         nodePool: node-pool-1
         createdAt: 2000-01-23T04:56:07.000+00:00
         networkTopologyLabels:
@@ -9495,6 +9785,8 @@ components:
             gpuCount: 0
             gpuType: Tesla-V100
           nvLinkCliqueId: clique-id
+          labels:
+            key: labels
           nodePool: node-pool-1
           createdAt: 2000-01-23T04:56:07.000+00:00
           networkTopologyLabels:
@@ -9529,6 +9821,8 @@ components:
             gpuCount: 0
             gpuType: Tesla-V100
           nvLinkCliqueId: clique-id
+          labels:
+            key: labels
           nodePool: node-pool-1
           createdAt: 2000-01-23T04:56:07.000+00:00
           networkTopologyLabels:
@@ -9627,6 +9921,8 @@ components:
           gpuCount: 0
           gpuType: Tesla-V100
         nvLinkCliqueId: clique-id
+        labels:
+          key: labels
         nodePool: node-pool-1
         createdAt: 2000-01-23T04:56:07.000+00:00
         networkTopologyLabels:

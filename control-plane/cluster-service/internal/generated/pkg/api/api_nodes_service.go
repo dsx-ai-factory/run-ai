@@ -34,6 +34,58 @@ func NewNodesAPIService() *NodesAPIService {
 	return &NodesAPIService{}
 }
 
+// GetNodeLabelKeys - Get node label keys.
+func (s *NodesAPIService) GetNodeLabelKeys(ctx context.Context, clusterUuid string, contains string, offset int32, limit int32) (ImplResponse, error) {
+	// TODO - update GetNodeLabelKeys with the required logic for this service method.
+	// Add api_nodes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, []string{}) or use other options such as http.Ok ...
+	// return Response(200, []string{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("GetNodeLabelKeys method not implemented")
+}
+
+// GetNodeLabelValues - Get node label values.
+func (s *NodesAPIService) GetNodeLabelValues(ctx context.Context, clusterUuid string, key string, contains string, offset int32, limit int32) (ImplResponse, error) {
+	// TODO - update GetNodeLabelValues with the required logic for this service method.
+	// Add api_nodes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, []string{}) or use other options such as http.Ok ...
+	// return Response(200, []string{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(500, Error{}) or use other options such as http.Ok ...
+	// return Response(500, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("GetNodeLabelValues method not implemented")
+}
+
 // CountNodes - Count nodes
 func (s *NodesAPIService) CountNodes(ctx context.Context, clusterUuid string, filterBy []string, search string) (ImplResponse, error) {
 	// TODO - update CountNodes with the required logic for this service method.
