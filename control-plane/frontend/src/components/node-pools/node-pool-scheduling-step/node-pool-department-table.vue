@@ -667,6 +667,7 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   min-width: 0;
 }
 .scheduling-actions {
+  padding-right: 16px;
   border-top: 1px solid var(--border-subtle);
   min-height: 60px;
   height: 60px;
@@ -731,6 +732,9 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
 .scheduling-actions :deep(.right-actions-container > .q-btn .q-btn__content > span.block) {
   font-size: 10px;
   line-height: 14px;
+}
+.scheduling-actions :deep([aid="refresh-data-button"]) {
+  margin-inline: 16px;
 }
 .scheduling-actions :deep(.right-actions-container) {
   flex-shrink: 0;
