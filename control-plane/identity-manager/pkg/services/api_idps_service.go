@@ -404,7 +404,11 @@ func (s *IdpsApiService) validateIdpConfig(ctx context.Context, request api.IdpC
 		return config, utils.Error{Code: http.StatusBadRequest, Message: "saml metadata requires a signing certificate"}
 	}
 
-	if err := utils.ValidateSigningCertificate(config.SigningCertificate); err != nil {
+	certificates, err := utils.ValidateSigningCertificate(config.SigningCertificate)
+	if len(certificates) > 0 {
+		config.CertificateExpirationDate = certificates[0].ExpirationDate
+	}
+	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("rejected saml signing certificate for idp %s. err: %s", request.Name, err.Error())
 		return config, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml signing certificate"}, err)
 	}
