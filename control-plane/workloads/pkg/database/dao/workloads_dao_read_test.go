@@ -8,6 +8,7 @@ package dao
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -40,8 +41,10 @@ const (
 	wlReadListFullSelect    = "SELECT * FROM workloads_view WHERE tenant_id = ? AND ((false OR project_id IN ( 'p1'))) AND deleted_at IS NOT NULL AND name = ? AND (search_vector @@ to_tsquery('english', ? || ':*')) ORDER BY name DESC NULLS LAST,id DESC LIMIT ? OFFSET ?"
 	wlReadListAscSelect     = "SELECT * FROM workloads_view WHERE tenant_id = ? AND workloads_view.deleted_at IS NULL ORDER BY name ASC NULLS FIRST,id DESC"
 
-	wlReadListNodepoolSelect        = "SELECT * FROM workloads_view WHERE tenant_id = ? AND (EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np = ?) OR EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np = ?)) AND name = ? AND workloads_view.deleted_at IS NULL ORDER BY id DESC"
-	wlReadListNodepoolNegatedSelect = "SELECT * FROM workloads_view WHERE tenant_id = ? AND NOT EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np = ?) AND workloads_view.deleted_at IS NULL ORDER BY id DESC"
+	wlReadListNodepoolSelect     = "SELECT * FROM workloads_view WHERE tenant_id = ? AND (EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np = ?) OR EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np = ?)) AND name = ? AND workloads_view.deleted_at IS NULL ORDER BY id DESC"
+	wlReadListNodepoolOpSelect   = "SELECT * FROM workloads_view WHERE tenant_id = ? AND %s AND workloads_view.deleted_at IS NULL ORDER BY id DESC"
+	wlReadCountNodepoolSelect    = "SELECT count(*) FROM workloads_view WHERE tenant_id = ? AND deleted_at IS NULL AND EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np = ?)"
+	wlReadMatchAnyNodepoolClause = "EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np %s ?)"
 
 	wlReadTelemetryCountSelect       = "SELECT COUNT(id) as data FROM workloads_view WHERE tenant_id = ? AND deleted_at IS NULL"
 	wlReadTelemetryCountGroupsSelect = "SELECT COUNT(id) as data, cluster_id as group1_main_value, cluster_name as group1_secondary_value, project_id as group2_main_value FROM workloads_view WHERE tenant_id = ? AND deleted_at IS NULL AND ((false OR project_id IN ( 'p1'))) AND cluster_id = ? AND ? = ANY(current_nodepools) AND department_id = ? AND project_id = ? AND phase IN (?) GROUP BY cluster_id,cluster_name,project_id"
@@ -136,8 +139,10 @@ func wlReadFilters() []queryapi.Filter {
 	return []queryapi.Filter{{Field: "name", Operator: "=", Values: []string{"a"}}}
 }
 
-func wlReadNodepoolFilters(operator string, nodepools ...string) []queryapi.Filter {
-	return []queryapi.Filter{{Field: models.NodepoolFilterColumn, Operator: operator, ValueFormat: "%s", Values: nodepools}}
+func wlReadNodepoolFilters(filterBy string) []queryapi.Filter {
+	filters, err := queryapi.NewParser(models.WorkloadView{}.FilterFieldsToColumn()).Filters([]string{filterBy})
+	Expect(err).NotTo(HaveOccurred())
+	return filters
 }
 
 func wlReadCtxWithSubject(tenantId uint, subject string) context.Context {
@@ -244,6 +249,16 @@ var _ = Describe("DbCountWorkloads", func() {
 
 		Expect(apiErr).To(BeNil())
 		Expect(count).To(Equal(int64(3)))
+	})
+
+	It("counts workloads in any of their current nodepools", func() {
+		m := setupDaoMock(GinkgoT())
+		m.ExpectQuery(wlReadCountNodepoolSelect, 1, "np1").Returns([]countRow{{Count: 2}})
+
+		count, apiErr := wlReadDao().DbCountWorkloads(testCtx(1), 1, nil, false, wlReadNodepoolFilters("nodepool==np1"), "", false, false)
+
+		Expect(apiErr).To(BeNil())
+		Expect(count).To(Equal(int64(2)))
 	})
 
 	It("counts workloads from the base table", func() {
@@ -399,22 +414,32 @@ var _ = Describe("DbGetWorkloads", func() {
 		m := setupDaoMock(GinkgoT())
 		m.ExpectQuery(wlReadListNodepoolSelect, 1, "np1", "np2", "a").Returns([]wlReadViewRow{})
 
-		filters := append(wlReadNodepoolFilters("=", "np1", "np2"), wlReadFilters()...)
+		filters := append(wlReadNodepoolFilters("nodepool==np1||np2"), wlReadFilters()...)
 		workloads, apiErr := wlReadDao().DbGetWorkloads(testCtx(1), 1, nil, false, 0, 0, "", "", filters, "")
 
 		Expect(apiErr).To(BeNil())
 		Expect(*workloads).To(BeEmpty())
 	})
 
-	It("excludes workloads that run in any of the excluded nodepools", func() {
-		m := setupDaoMock(GinkgoT())
-		m.ExpectQuery(wlReadListNodepoolNegatedSelect, 1, "np1").Returns([]wlReadViewRow{})
+	DescribeTable("applies every filter operator to all current nodepools",
+		func(filterBy string, condition string, value string) {
+			m := setupDaoMock(GinkgoT())
+			m.ExpectQuery(fmt.Sprintf(wlReadListNodepoolOpSelect, condition), 1, value).Returns([]wlReadViewRow{})
 
-		workloads, apiErr := wlReadDao().DbGetWorkloads(testCtx(1), 1, nil, false, 0, 0, "", "", wlReadNodepoolFilters("is distinct from", "np1"), "")
+			workloads, apiErr := wlReadDao().DbGetWorkloads(testCtx(1), 1, nil, false, 0, 0, "", "", wlReadNodepoolFilters(filterBy), "")
 
-		Expect(apiErr).To(BeNil())
-		Expect(*workloads).To(BeEmpty())
-	})
+			Expect(apiErr).To(BeNil())
+			Expect(*workloads).To(BeEmpty())
+		},
+		Entry("equals", "nodepool==np", fmt.Sprintf(wlReadMatchAnyNodepoolClause, "="), "np"),
+		Entry("not equals", "nodepool!=np", "NOT "+fmt.Sprintf(wlReadMatchAnyNodepoolClause, "="), "np"),
+		Entry("less or equal", "nodepool<=np", fmt.Sprintf(wlReadMatchAnyNodepoolClause, "<="), "np"),
+		Entry("greater or equal", "nodepool>=np", fmt.Sprintf(wlReadMatchAnyNodepoolClause, ">="), "np"),
+		Entry("contains", "nodepool=@np", fmt.Sprintf(wlReadMatchAnyNodepoolClause, "ILIKE"), "%np%"),
+		Entry("does not contain", "nodepool!@np", "NOT "+fmt.Sprintf(wlReadMatchAnyNodepoolClause, "ILIKE"), "%np%"),
+		Entry("starts with", "nodepool=^np", fmt.Sprintf(wlReadMatchAnyNodepoolClause, "ILIKE"), "np%"),
+		Entry("ends with", "nodepool=$np", fmt.Sprintf(wlReadMatchAnyNodepoolClause, "ILIKE"), "%np"),
+	)
 
 	It("sorts in ascending order", func() {
 		m := setupDaoMock(GinkgoT())

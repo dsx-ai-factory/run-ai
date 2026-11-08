@@ -873,13 +873,15 @@ func applyCurrentNodepoolFilter(query orm.DB, nodepoolName string) orm.DB {
 	return query.Where("? = ANY(current_nodepools)", nodepoolName)
 }
 
+// Must mirror the negated operators of queryapi's operatorsInfoMap: a negated filter excludes a workload when any of
+// its nodepools matches, so it needs NOT EXISTS over the positive operator rather than EXISTS over the negated one.
 var negatedNodepoolOperators = map[string]string{
 	"is distinct from": "=",
 	"NOT ILIKE":        "ILIKE",
 }
 
-// workloadFilters applies the nodepool filter to every pool in current_nodepools rather than its first element
-// (which the mapping keeps for sorting), so a multi-pool workload matches each of its pools, as in telemetry.
+// workloadFilters matches nodepool filters against every element of current_nodepools; the mapping's
+// current_nodepools[1] is kept only for sorting.
 func workloadFilters(filters []queryapi.Filter) orm.Enricher {
 	return func(db orm.DB) orm.DB {
 		var otherFilters []queryapi.Filter
@@ -888,33 +890,27 @@ func workloadFilters(filters []queryapi.Filter) orm.Enricher {
 				otherFilters = append(otherFilters, filter)
 				continue
 			}
-
-			operator, negated := negatedNodepoolOperators[filter.Operator]
-			if !negated {
-				operator = filter.Operator
-			}
-			condition := fmt.Sprintf("EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np %s ?)", operator)
-			if negated {
-				condition = "NOT " + condition
-			}
-
-			conditions := make([]string, 0, len(filter.Values))
-			values := make([]interface{}, 0, len(filter.Values))
-			for _, value := range filter.Values {
-				conditions = append(conditions, condition)
-				values = append(values, formatFilterValue(filter, value))
-			}
-			db = db.Where(strings.Join(conditions, " OR "), values...)
+			db = applyNodepoolFilter(db, filter)
 		}
 		return querydbenrich.Filters(otherFilters)(db)
 	}
 }
 
-func formatFilterValue(filter queryapi.Filter, value string) string {
-	if filter.ValueFormat == "" {
-		return value
+func applyNodepoolFilter(db orm.DB, filter queryapi.Filter) orm.DB {
+	const matchAnyNodepool = "EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np %s ?)"
+	condition := fmt.Sprintf(matchAnyNodepool, filter.Operator)
+	if operator, negated := negatedNodepoolOperators[filter.Operator]; negated {
+		condition = "NOT " + fmt.Sprintf(matchAnyNodepool, operator)
 	}
-	return fmt.Sprintf(filter.ValueFormat, value)
+
+	orConditions := clause.OrConditions{}
+	for _, value := range filter.Values {
+		if filter.ValueFormat != "" {
+			value = fmt.Sprintf(filter.ValueFormat, value)
+		}
+		orConditions.Exprs = append(orConditions.Exprs, clause.Expr{SQL: condition, Vars: []interface{}{value}})
+	}
+	return db.Where(clause.Where{Exprs: []clause.Expression{orConditions}})
 }
 
 // buildTelemetryQuery builds a base query with common filters and GROUP BY for telemetry queries.
