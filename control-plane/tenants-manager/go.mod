@@ -7,7 +7,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.15
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.10
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.0
 	github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.26
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.8

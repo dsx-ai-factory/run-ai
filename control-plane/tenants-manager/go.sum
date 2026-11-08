@@ -67,8 +67,8 @@ github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.15 
 github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.15/go.mod h1:TJwfvDcbz4OiyUuNR+BkbXNQteQSNB/oo/qgyNm7HGw=
 github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.10 h1:dVJWeX8bHFmlRNdGBJrDvdZMGx+gMoj8QEThUTBQN2I=
 github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.10/go.mod h1:XJGXR1ofG+gymjJn8iMqDrxDoiv3Z+r7T6OxHeWsQ9U=
-github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21 h1:af399FNxZWW/J7nONKzNFgJ8V2Hj6sLC21zJEnSsWB4=
-github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21/go.mod h1:MQ0rhnOPGpwKG5KmgddCy88Ss0oWe9rZtSDQ4xEYN4s=
+github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.0 h1:remMm3uGa2zskL380BDg00dF61ugFMm+co/hoszBdmM=
+github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.0/go.mod h1:MlblK4HvqnOkQs6pU9ANOx9p8inktKSn9XlREuXENU0=
 github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.26 h1:8jtqEqekmEdm2oxhZ9CmCu8Oe7Z7krQiQfhlrWKYPlc=
 github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client v1.0.26/go.mod h1:XojH0QFSltLDmVF65U6duVKp6fHP776ZxMCLaFvyYVU=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.8 h1:kzeqvLVJIQSqy7rJVFb/FSba8Zwpzqo4cTSpi3Ac/Yc=
