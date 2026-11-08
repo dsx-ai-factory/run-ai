@@ -18,6 +18,7 @@
     :pool="pool"
     :resources="resources"
     :rows="pages"
+    :baseline-rows="baselineRows"
     :aggregates="aggregates"
     :ranks="ranks"
     :rank-counts="rankCounts"
@@ -28,7 +29,7 @@
     :can-edit-departments="permissions.edit"
     :totals-complete="totalsComplete"
     :can-edit-department="canEditDepartment"
-    :has-more="pages.length < count"
+    :has-more="hasMore"
     :search-term="search"
     :rank-filter="rank"
     :quota-policy="quotaPolicy"
@@ -60,6 +61,8 @@ const poolId = computed(() => (typeof route.params.id === "string" ? route.param
 const {
   snapshot: pool,
   pages,
+  baselineRows,
+  hasMore,
   aggregates,
   rankCounts,
   resources,
@@ -73,7 +76,6 @@ const {
   loading,
   search,
   rank,
-  count,
   refresh,
   loadMore,
   loadRank,

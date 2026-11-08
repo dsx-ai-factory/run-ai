@@ -17,7 +17,7 @@ import { orgUnitService } from "@/services/control-plane/org-unit.service/org-un
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
 import type { INodePoolSummaryResources } from "../node-pool-wizard-summary/node-pool-wizard-summary.model";
 import {
-  loadSchedulingWeightTotals,
+  loadSchedulingDepartmentSnapshot,
   loadSchedulingPool,
   loadDepartmentPage,
   loadSchedulingTotals,
@@ -49,6 +49,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   }));
   const snapshot = ref<Nodepool>();
   const pages = ref<DepartmentNodePoolResources[]>([]);
+  const baselineRows = ref<DepartmentNodePoolResources[]>([]);
   const aggregates = ref<Record<string, SchedulingTotals>>({});
   const rankCounts = ref<Record<string, number>>({});
   const resources = ref<INodePoolSummaryResources>();
@@ -62,8 +63,9 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   const search = ref("");
   const rank = ref<string>();
   const count = ref(0);
-  const loadingRanks = new Set<string>();
-  let globalOffset = 0;
+  const loadingRanks = new Map<string, string>();
+  const globalOffset = ref(0);
+  const hasMore = computed(() => globalOffset.value < count.value);
   let scopeVersion = 0;
   let rowsVersion = 0;
   let appending = false;
@@ -78,11 +80,11 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     const scope = { poolId: pool.id, clusterId: pool.clusterId, rank: rank.value };
     try {
       const [rows, total] = await Promise.all([
-        loadDepartmentPage({ ...scope, search: search.value, offset: append ? globalOffset : 0, limit: 50 }),
+        loadDepartmentPage({ ...scope, search: search.value, offset: append ? globalOffset.value : 0, limit: 50 }),
         orgUnitService.countDepartmentNodePoolResources(schedulingFilters(scope), search.value),
       ]);
       if (rowsVersion !== current || scopeVersion !== scopeRequest) return;
-      globalOffset = (append ? globalOffset : 0) + rows.length;
+      globalOffset.value = (append ? globalOffset.value : 0) + rows.length;
       pages.value = append
         ? [
             ...pages.value,
@@ -102,11 +104,19 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   }
   async function loadRank(rankValue: string) {
     const pool = snapshot.value;
-    if (!pool || !permissions.value.view || loadingRanks.has(rankValue)) return;
+    const requestIdentity = `${scopeVersion}:${rowsVersion}`;
+    if (
+      !pool ||
+      !permissions.value.view ||
+      loadingRanks.get(rankValue) === requestIdentity ||
+      (rank.value && rank.value !== rankValue)
+    )
+      return;
+    if (rank.value === rankValue) return loadRows(true);
     const scopeRequest = scopeVersion;
     const rowRequest = rowsVersion;
     const offset = pages.value.filter((row) => row.rank === rankValue).length;
-    loadingRanks.add(rankValue);
+    loadingRanks.set(rankValue, requestIdentity);
     try {
       const rows = await loadDepartmentPage({
         poolId: pool.id,
@@ -125,7 +135,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       if (scopeVersion === scopeRequest && rowsVersion === rowRequest)
         loadError.value = extractErrorMessages(error, "Failed to load rank departments.").join(" ");
     } finally {
-      loadingRanks.delete(rankValue);
+      if (loadingRanks.get(rankValue) === requestIdentity) loadingRanks.delete(rankValue);
     }
   }
   async function refresh() {
@@ -134,7 +144,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
     appending = false;
     loadingRanks.clear();
     const id = poolId.value;
-    globalOffset = 0;
+    globalOffset.value = 0;
     if (snapshot.value?.id !== id) {
       snapshot.value = undefined;
       search.value = "";
@@ -178,7 +188,7 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
       };
       const departments = async () => {
         if (!permissions.value.view) return;
-        const [totals, counts, weightTotals, scopes] = await Promise.all([
+        const [totals, counts, departmentSnapshot, scopes] = await Promise.all([
           Promise.all([
             loadSchedulingTotals(scope),
             ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option) => loadSchedulingTotals({ ...scope, rank: option.value })),
@@ -188,11 +198,13 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
               orgUnitService.countDepartmentNodePoolResources(schedulingFilters({ ...scope, rank: option.value })),
             ),
           ),
-          loadSchedulingWeightTotals(scope, pool.schedulingCapabilities?.adjustableWeights === true),
+          loadSchedulingDepartmentSnapshot(scope, pool.schedulingCapabilities?.adjustableWeights === true),
           permissionService.getPermittedScopesForAction(ResourceType.Department),
         ]);
         if (scopeVersion !== current) return;
         departmentScopes.value = scopes;
+        const weightTotals = departmentSnapshot.totals;
+        baselineRows.value = departmentSnapshot.rows;
         aggregates.value = Object.fromEntries([
           ["all", { ...totals[0], ...weightTotals.all }],
           ...ENTITY_PRIORITY_SELECT_OPTIONS.map((option, i) => [
@@ -202,6 +214,9 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
               ...(weightTotals[option.value] ?? {
                 rawWeightsSum: pool.schedulingCapabilities?.adjustableWeights === true ? 0 : undefined,
                 automaticWeightsSum: 0,
+                finiteQuotaSum: 0,
+                unlimitedQuotaCount: 0,
+                deservedSum: 0,
               }),
             },
           ]),
@@ -232,6 +247,8 @@ export function useNodePoolSchedulingData(poolId: Ref<string>) {
   return {
     snapshot,
     pages,
+    baselineRows,
+    hasMore,
     aggregates,
     rankCounts,
     resources,

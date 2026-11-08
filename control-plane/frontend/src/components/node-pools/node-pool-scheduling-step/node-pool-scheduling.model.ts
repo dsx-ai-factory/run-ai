@@ -38,6 +38,8 @@ export interface DepartmentValidationContext {
   enforceChildQuota?: boolean;
   capacity?: number;
   totalQuota?: number;
+  finiteQuotaSum?: number;
+  unlimitedQuotaCount?: number;
 }
 export function weightPercentage(weight: number, total: number | undefined): number | undefined {
   if (total == null || !Number.isFinite(total) || total < 0 || !Number.isFinite(weight)) return undefined;
@@ -61,9 +63,10 @@ export function validateDepartmentEdit(edit: DepartmentSchedulingEdit, context: 
     else if (edit.quota < context.childQuotaSum)
       (context.enforceChildQuota ? errors : warnings).push("Guaranteed GPUs are below the child project quota sum.");
   }
-  if (edit.limit != null && (!Number.isFinite(edit.limit) || edit.limit < 0))
+  const finiteLimit = edit.limit === -1 ? undefined : edit.limit;
+  if (finiteLimit != null && (!Number.isFinite(finiteLimit) || finiteLimit < 0))
     errors.push("Maximum allocation must be 0 or greater.");
-  if (edit.limit != null && edit.quota != null && edit.limit < edit.quota)
+  if (finiteLimit != null && edit.quota != null && finiteLimit < edit.quota)
     errors.push("Maximum allocation must be at least guaranteed GPUs.");
   if (context.capacity != null && context.totalQuota != null && context.totalQuota > context.capacity)
     warnings.push("Assigned quota exceeds node pool capacity.");
@@ -74,6 +77,8 @@ export interface SchedulingTotals {
   automaticWeightsSum?: number;
   weightsSum: number;
   deservedSum: number;
+  finiteQuotaSum?: number;
+  unlimitedQuotaCount?: number;
 }
 export function schedulingTotalsWithEdits(
   server: Record<string, SchedulingTotals>,
@@ -105,8 +110,22 @@ export function schedulingTotalsWithEdits(
       const after = key === "all" || key === merged.rank;
       if (beforeWeight != null && afterWeight != null && total.weightsSum != null)
         total.weightsSum += (after ? afterWeight : 0) - (before ? beforeWeight : 0);
-      if (original.quota != null && merged.quota != null)
+      if (total.finiteQuotaSum != null && total.unlimitedQuotaCount != null) {
+        const beforeFinite = original.quota != null && original.quota >= 0;
+        const afterFinite = merged.quota != null && merged.quota >= 0;
+        total.finiteQuotaSum +=
+          (after && afterFinite ? (merged.quota ?? 0) : 0) - (before && beforeFinite ? (original.quota ?? 0) : 0);
+        total.unlimitedQuotaCount += (after && !afterFinite ? 1 : 0) - (before && !beforeFinite ? 1 : 0);
+        total.deservedSum = total.unlimitedQuotaCount > 0 ? -1 : total.finiteQuotaSum;
+      } else if (
+        total.deservedSum >= 0 &&
+        original.quota != null &&
+        original.quota >= 0 &&
+        merged.quota != null &&
+        merged.quota >= 0
+      ) {
         total.deservedSum += (after ? merged.quota : 0) - (before ? original.quota : 0);
+      }
     }
   }
   return totals;

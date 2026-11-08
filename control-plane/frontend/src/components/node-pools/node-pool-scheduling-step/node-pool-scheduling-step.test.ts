@@ -121,4 +121,19 @@ describe("scheduling step foundation", () => {
     expect(wrapper.findComponent(Table).exists()).toBe(false);
     wrapper.unmount();
   });
+  it("clears the server rank filter only when Proportional actually takes effect", async () => {
+    const wrapper = render({
+      ...pool,
+      schedulingCapabilities: { adjustableWeights: true, quota: false, ranks: true, cpuQuota: false },
+    });
+    await wrapper.setProps({ rankFilter: "High" });
+    wrapper.findComponent(Table).vm.$emit("edit", { id: "a", weight: 5 });
+    await wrapper.vm.$nextTick();
+    await wrapper.get('[aid="mode-proportional"]').trigger("click");
+    expect(wrapper.emitted("filter-rank")).toBeUndefined();
+    (document.querySelector('[aid="confirm-scheduling-mode"]') as HTMLButtonElement).click();
+    await flushPromises();
+    expect(wrapper.emitted("filter-rank")).toEqual([[undefined]]);
+    wrapper.unmount();
+  });
 });

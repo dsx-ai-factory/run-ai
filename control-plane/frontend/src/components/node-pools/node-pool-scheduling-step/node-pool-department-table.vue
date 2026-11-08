@@ -192,6 +192,7 @@ import {
 const props = withDefaults(
   defineProps<{
     rows: DepartmentNodePoolResources[];
+    baselineRows?: DepartmentNodePoolResources[];
     draft: SchedulingDraft;
     aggregates: Record<string, SchedulingTotals>;
     ranks: string[];
@@ -223,19 +224,30 @@ const emit = defineEmits<{
 }>();
 const baseline = ref<Record<string, DepartmentSchedulingEdit>>({});
 const knownRows = ref<Record<string, DepartmentNodePoolResources>>({});
+function baselineRecord(row: DepartmentNodePoolResources): DepartmentSchedulingEdit {
+  return {
+    id: row.orgUnitId,
+    weight: props.rawWeightsAvailable ? (row.resources.gpu?.overQuotaWeight ?? undefined) : undefined,
+    quota: row.resources.gpu?.deserved ?? undefined,
+    limit: row.resources.gpu?.limit,
+    rank: row.rank,
+  };
+}
+watch(
+  () => props.baselineRows,
+  (rows) => {
+    if (!rows) return;
+    baseline.value = Object.fromEntries(rows.map((row) => [row.orgUnitId, baselineRecord(row)]));
+    for (const row of rows) knownRows.value[row.orgUnitId] = row;
+  },
+  { immediate: true },
+);
 watch(
   () => props.rows,
   (rows) => {
     for (const row of rows) {
       knownRows.value[row.orgUnitId] = row;
-      // Page replacement must not replace the original values underlying pending deltas.
-      baseline.value[row.orgUnitId] = {
-        id: row.orgUnitId,
-        weight: props.rawWeightsAvailable ? (row.resources.gpu?.overQuotaWeight ?? undefined) : undefined,
-        quota: row.resources.gpu?.deserved ?? undefined,
-        limit: row.resources.gpu?.limit,
-        rank: row.rank,
-      };
+      if (!props.baselineRows) baseline.value[row.orgUnitId] = baselineRecord(row);
     }
   },
   { immediate: true },
@@ -249,10 +261,17 @@ const totals = computed(() =>
   schedulingTotalsWithEdits(props.aggregates, baseline.value, props.draft.departments, automatic.value),
 );
 watch(
-  [ranked, () => props.rankCounts?.[ENTITY_PRIORITY_DEFAULT_VALUE], () => props.rows.length],
+  [
+    ranked,
+    () => props.rankCounts?.[ENTITY_PRIORITY_DEFAULT_VALUE],
+    () => props.rows.length,
+    () => props.rankFilter,
+    () => props.searchTerm,
+  ],
   () => {
     if (
       ranked.value &&
+      !props.rankFilter &&
       (props.rankCounts?.[ENTITY_PRIORITY_DEFAULT_VALUE] ?? 0) > 0 &&
       !props.rows.some((row) => row.rank === ENTITY_PRIORITY_DEFAULT_VALUE)
     )
@@ -362,6 +381,8 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   return {
     ...result,
     capacity: props.capacity,
+    finiteQuotaSum: totals.value.all?.finiteQuotaSum,
+    unlimitedQuotaCount: totals.value.all?.unlimitedQuotaCount,
     totalQuota:
       props.totalsComplete !== false && totals.value.all?.deservedSum >= 0 ? totals.value.all.deservedSum : undefined,
   };

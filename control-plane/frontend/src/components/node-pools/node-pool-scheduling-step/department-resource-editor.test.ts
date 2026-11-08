@@ -30,4 +30,14 @@ describe("department resource editor", () => {
     wrapper.findComponent(popup).vm.$emit("apply");
     expect(wrapper.emitted("apply")?.[0]).toEqual([0]);
   });
+  it("applies finite quota with saved unlimited maximum allocation", async () => {
+    const wrapper = mount(Editor, {
+      props: { value: 2, kind: "quota", id: "a", limit: -1, context: { childQuotaSum: 0 } },
+      global: { plugins: [Quasar], stubs: { EditableCellPopup: popup } },
+    });
+    await wrapper.get("input").setValue("5");
+    wrapper.findComponent(popup).vm.$emit("apply");
+    expect(wrapper.emitted("apply")?.[0]).toEqual([5]);
+    wrapper.unmount();
+  });
 });

@@ -58,4 +58,18 @@ describe("department scheduling validation", () => {
     expect(schedulingTotalsWithEdits(totals, {}, {}, false).all.weightsSum).toBeUndefined();
     expect(schedulingTotalsWithEdits(totals, {}, {}, true).all.weightsSum).toBe(12);
   });
+  it("recomputes finite quotas when the final unlimited department becomes finite", () => {
+    const server = { all: { weightsSum: 4, deservedSum: -1, finiteQuotaSum: 10, unlimitedQuotaCount: 1 } };
+    const baseline = { a: { id: "a", quota: -1, weight: 2 }, b: { id: "b", quota: 10, weight: 2 } };
+    expect(schedulingTotalsWithEdits(server, baseline, { a: { id: "a", quota: 5 } }, false).all.deservedSum).toBe(15);
+    expect(schedulingTotalsWithEdits(server, baseline, { b: { id: "b", quota: 12 } }, false).all.deservedSum).toBe(-1);
+    expect(
+      schedulingTotalsWithEdits(
+        { all: { weightsSum: 4, deservedSum: -1 } },
+        baseline,
+        { b: { id: "b", quota: 12 } },
+        false,
+      ).all.deservedSum,
+    ).toBe(-1);
+  });
 });

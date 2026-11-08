@@ -41,10 +41,20 @@ export function loadSchedulingTotals(scope: SchedulingScope) {
 }
 // Sum APIs use the saved capability's weight semantics. Read all scoped pages to
 // obtain both denominators while previewing an unsaved mode change.
-export async function loadSchedulingWeightTotals(scope: SchedulingScope, rawWeightsAvailable = true) {
-  const totals: Record<string, { rawWeightsSum?: number; automaticWeightsSum: number }> = {
-    all: { rawWeightsSum: 0, automaticWeightsSum: 0 },
+export async function loadSchedulingDepartmentSnapshot(scope: SchedulingScope, rawWeightsAvailable = true) {
+  const totals: Record<
+    string,
+    {
+      rawWeightsSum?: number;
+      automaticWeightsSum: number;
+      finiteQuotaSum: number;
+      unlimitedQuotaCount: number;
+      deservedSum: number;
+    }
+  > = {
+    all: { rawWeightsSum: 0, automaticWeightsSum: 0, finiteQuotaSum: 0, unlimitedQuotaCount: 0, deservedSum: 0 },
   };
+  const rows: Awaited<ReturnType<typeof loadDepartmentPage>> = [];
   let offset: number | undefined = 0;
   do {
     const response = await orgUnitService.getDepartmentNodePoolResources(
@@ -54,15 +64,27 @@ export async function loadSchedulingWeightTotals(scope: SchedulingScope, rawWeig
       offset,
       100,
     );
+    rows.push(...response.nodePoolResources);
     for (const row of response.nodePoolResources) {
       for (const key of ["all", row.rank]) {
-        const total = totals[key] ?? (totals[key] = { rawWeightsSum: 0, automaticWeightsSum: 0 });
+        const total =
+          totals[key] ??
+          (totals[key] = {
+            rawWeightsSum: 0,
+            automaticWeightsSum: 0,
+            finiteQuotaSum: 0,
+            unlimitedQuotaCount: 0,
+            deservedSum: 0,
+          });
         const raw = row.resources.gpu?.overQuotaWeight;
         if (raw == null || !Number.isFinite(raw) || raw < 0) total.rawWeightsSum = undefined;
         else if (total.rawWeightsSum !== undefined) total.rawWeightsSum += raw;
         const quota = row.resources.gpu?.deserved;
         // Matches backend SumDepartmentNodePoolResources: unlimited/null have effective weight 0.
-        if (quota != null && Number.isFinite(quota) && quota >= 0) total.automaticWeightsSum += quota;
+        if (quota != null && Number.isFinite(quota) && quota >= 0) {
+          total.automaticWeightsSum += quota;
+          total.finiteQuotaSum += quota;
+        } else total.unlimitedQuotaCount++;
       }
     }
     if (response.next != null && response.next <= offset)
@@ -70,7 +92,17 @@ export async function loadSchedulingWeightTotals(scope: SchedulingScope, rawWeig
     offset = response.next;
   } while (offset != null);
   if (!rawWeightsAvailable) for (const total of Object.values(totals)) total.rawWeightsSum = undefined;
-  return totals;
+  for (const total of Object.values(totals)) total.deservedSum = total.unlimitedQuotaCount ? -1 : total.finiteQuotaSum;
+  return { totals, rows };
+}
+export async function loadSchedulingWeightTotals(scope: SchedulingScope, rawWeightsAvailable = true) {
+  const snapshot = await loadSchedulingDepartmentSnapshot(scope, rawWeightsAvailable);
+  return Object.fromEntries(
+    Object.entries(snapshot.totals).map(([key, { rawWeightsSum, automaticWeightsSum }]) => [
+      key,
+      { rawWeightsSum, automaticWeightsSum },
+    ]),
+  );
 }
 export async function loadChildQuotaSum(scope: SchedulingScope, departmentId: string): Promise<number> {
   const department = await orgUnitService.getDepartment(departmentId);

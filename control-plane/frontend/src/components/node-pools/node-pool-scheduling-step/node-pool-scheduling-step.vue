@@ -59,6 +59,7 @@
           <node-pool-department-table
             :key="`department-draft-${resetRevision}`"
             :rows="rows"
+            :baseline-rows="baselineRows"
             :draft="draft"
             :aggregates="aggregates"
             :ranks="ranks"
@@ -119,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import NodePoolDepartmentTable from "./node-pool-department-table.vue";
 import { useNodePoolSchedulingDraft } from "./use-node-pool-scheduling-draft.composable";
@@ -150,6 +151,7 @@ const props = withDefaults(
     pool: Nodepool;
     resources?: INodePoolSummaryResources;
     rows?: DepartmentNodePoolResources[];
+    baselineRows?: DepartmentNodePoolResources[];
     aggregates?: Record<string, SchedulingTotals>;
     ranks?: string[];
     rankCounts?: Record<string, number>;
@@ -223,6 +225,12 @@ const { draft, pendingMode, resetRevision, requestMode, confirmModeChange, cance
     capabilities: props.pool.schedulingCapabilities,
     departments: {},
   });
+watch(
+  () => draft.value.mode,
+  (mode, previous) => {
+    if (mode === "proportional" && previous && previous !== "proportional") emit("filter-rank", undefined);
+  },
+);
 const selectedMode = computed(() => draft.value.mode ?? null);
 const previewPool = computed(() => ({
   ...props.pool,

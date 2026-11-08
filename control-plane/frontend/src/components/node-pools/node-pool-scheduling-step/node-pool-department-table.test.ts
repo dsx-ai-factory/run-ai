@@ -139,4 +139,54 @@ describe("scheduling department table", () => {
     expect(wrapper.findComponent({ name: "EditableCellPopup" }).props("displayValue")).toBe("Unknown");
     wrapper.unmount();
   });
+  it("does not prefetch the default rank under another active rank filter", () => {
+    const wrapper = mount(Table, {
+      props: {
+        rows: [],
+        draft: { ...draft, mode: "ranked" },
+        aggregates: {},
+        ranks: ["High", "MediumLow"],
+        rankCounts: { High: 60, MediumLow: 10 },
+        rankFilter: "High",
+        searchTerm: "match",
+        readonly: false,
+        loading: false,
+      },
+      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+    });
+    expect(wrapper.emitted("load-rank")).toBeUndefined();
+    wrapper.unmount();
+  });
+  it("rebases hidden edits from the same complete snapshot as refreshed totals", async () => {
+    const wrapper = mount(Table, {
+      props: {
+        rows,
+        draft: { ...draft, departments: { a: { id: "a", weight: 5 } } },
+        aggregates: { all: { weightsSum: 10, deservedSum: 3 } },
+        ranks: [],
+        readonly: false,
+        loading: false,
+      },
+      global: { plugins: [Quasar], directives: { "click-outside": {} } },
+    });
+    const beta = {
+      ...rows[0],
+      id: "rb",
+      orgUnitId: "b",
+      orgUnitName: "Beta",
+      resources: { gpu: { overQuotaWeight: 8, deserved: 0 } },
+    };
+    await wrapper.setProps({ rows: [beta], searchTerm: "Beta" });
+    await wrapper.setProps({
+      aggregates: { all: { weightsSum: 12, deservedSum: 3 } },
+      baselineRows: [{ ...rows[0], resources: { gpu: { overQuotaWeight: 4, deserved: 3 } } }, beta],
+    } as never);
+    expect(wrapper.text()).toContain("61.54%");
+    await wrapper.setProps({
+      rows: [...rows.map((row) => ({ ...row, resources: { gpu: { overQuotaWeight: 4, deserved: 3 } } })), beta],
+      searchTerm: "",
+    });
+    expect(wrapper.text()).toContain("61.54%");
+    wrapper.unmount();
+  });
 });

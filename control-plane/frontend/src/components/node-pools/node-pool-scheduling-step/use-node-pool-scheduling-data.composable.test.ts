@@ -122,4 +122,76 @@ describe("scoped scheduling reads", () => {
     });
     expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.at(-1)?.[3]).toBe(1);
   });
+  it("keeps filtered pagination independent of unrelated rank reads", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue({
+      id: "p",
+      clusterId: "c",
+      name: "pool",
+      schedulingCapabilities: { adjustableWeights: true },
+    } as never);
+    vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
+    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 120, deservedSum: 0 });
+    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockImplementation(async (filters) =>
+      filters?.includes("rank==High") ? 60 : filters?.includes("rank==MediumLow") ? 10 : 70,
+    );
+    const make = (id: number, rank: string) => ({
+      id: String(id),
+      orgUnitId: String(id),
+      orgUnitName: `match ${id}`,
+      clusterId: "c",
+      nodePoolId: "p",
+      nodePoolName: "pool",
+      rank,
+      resources: { gpu: { overQuotaWeight: 2, deserved: 0 } },
+    });
+    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
+      async (filters, _sort, _order, offset, limit) => {
+        if (limit === 100) return { nodePoolResources: [] };
+        if (filters?.includes("rank==MediumLow"))
+          return { nodePoolResources: Array.from({ length: 10 }, (_, i) => make(100 + i, "MediumLow")) };
+        return {
+          nodePoolResources: Array.from({ length: offset ? 10 : 50 }, (_, i) => make((offset ?? 0) + i, "High")),
+        };
+      },
+    );
+    const data = useNodePoolSchedulingData(ref("p"));
+    await flushPromises();
+    data.search.value = "match";
+    data.rank.value = "High";
+    await flushPromises();
+    await data.loadRank("MediumLow");
+    expect(data.pages.value.every((row) => row.rank === "High")).toBe(true);
+    expect(data.hasMore.value).toBe(true);
+    await data.loadMore();
+    expect(data.pages.value).toHaveLength(60);
+    expect(data.hasMore.value).toBe(false);
+  });
+  it("ignores delayed rank rows after query replacement and permits fresh rank reads", async () => {
+    vi.mocked(clusterService.getNodepool).mockResolvedValue({ id: "p", clusterId: "c", name: "pool" } as never);
+    vi.mocked(clusterService.getNodepoolMetrics).mockResolvedValue({ measurements: [] });
+    vi.mocked(orgUnitService.sumDepartmentNodePoolResources).mockResolvedValue({ weightsSum: 0, deservedSum: 0 });
+    vi.mocked(orgUnitService.countDepartmentNodePoolResources).mockResolvedValue(0);
+    let resolveOld!: (value: { nodePoolResources: never[] }) => void;
+    vi.mocked(orgUnitService.getDepartmentNodePoolResources).mockImplementation(
+      async (filters, _sort, _order, _offset, limit, search) => {
+        if (limit === 50 && filters?.includes("rank==MediumLow") && !search)
+          return new Promise((resolve) => {
+            resolveOld = resolve;
+          });
+        return { nodePoolResources: [] };
+      },
+    );
+    const data = useNodePoolSchedulingData(ref("p"));
+    await flushPromises();
+    const pending = data.loadRank("MediumLow");
+    await flushPromises();
+    data.search.value = "new query";
+    await flushPromises();
+    const before = vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.length;
+    await data.loadRank("MediumLow");
+    expect(vi.mocked(orgUnitService.getDepartmentNodePoolResources).mock.calls.length).toBe(before + 1);
+    resolveOld({ nodePoolResources: [{ orgUnitId: "stale", rank: "MediumLow" } as never] });
+    await pending;
+    expect(data.pages.value).toEqual([]);
+  });
 });
