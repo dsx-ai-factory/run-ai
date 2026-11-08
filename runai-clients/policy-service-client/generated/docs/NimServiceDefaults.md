@@ -14,7 +14,6 @@ Name | Type | Description | Notes
 **ImagePullSecrets** | Pointer to [**NullableImagePullSecretsDefaults**](ImagePullSecretsDefaults.md) |  | [optional] 
 **Labels** | Pointer to [**NullableLabelsDefaults**](LabelsDefaults.md) |  | [optional] 
 **LoadAwareRouting** | Pointer to **NullableBool** | Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. | [optional] [default to false]
-**LoadAwareRoutingPathPrefix** | Pointer to **NullableString** | The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1. | [optional] 
 **ModelStore** | Pointer to [**NullableNimServiceDefaultsAllOfModelStore**](NimServiceDefaultsAllOfModelStore.md) |  | [optional] 
 **MultiNode** | Pointer to [**NullableNimServiceMultiNode**](NimServiceMultiNode.md) |  | [optional] 
 **NgcAuthSecret** | Pointer to **NullableString** | The name of a Kubernetes secret containing the NGC access credentials. The secret must contain a key named NGC_API_KEY with the API key as the value. | [optional] 
@@ -396,41 +395,6 @@ HasLoadAwareRouting returns a boolean if a field has been set.
 `func (o *NimServiceDefaults) UnsetLoadAwareRouting()`
 
 UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
-### GetLoadAwareRoutingPathPrefix
-
-`func (o *NimServiceDefaults) GetLoadAwareRoutingPathPrefix() string`
-
-GetLoadAwareRoutingPathPrefix returns the LoadAwareRoutingPathPrefix field if non-nil, zero value otherwise.
-
-### GetLoadAwareRoutingPathPrefixOk
-
-`func (o *NimServiceDefaults) GetLoadAwareRoutingPathPrefixOk() (*string, bool)`
-
-GetLoadAwareRoutingPathPrefixOk returns a tuple with the LoadAwareRoutingPathPrefix field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetLoadAwareRoutingPathPrefix
-
-`func (o *NimServiceDefaults) SetLoadAwareRoutingPathPrefix(v string)`
-
-SetLoadAwareRoutingPathPrefix sets LoadAwareRoutingPathPrefix field to given value.
-
-### HasLoadAwareRoutingPathPrefix
-
-`func (o *NimServiceDefaults) HasLoadAwareRoutingPathPrefix() bool`
-
-HasLoadAwareRoutingPathPrefix returns a boolean if a field has been set.
-
-### SetLoadAwareRoutingPathPrefixNil
-
-`func (o *NimServiceDefaults) SetLoadAwareRoutingPathPrefixNil(b bool)`
-
- SetLoadAwareRoutingPathPrefixNil sets the value for LoadAwareRoutingPathPrefix to be an explicit nil
-
-### UnsetLoadAwareRoutingPathPrefix
-`func (o *NimServiceDefaults) UnsetLoadAwareRoutingPathPrefix()`
-
-UnsetLoadAwareRoutingPathPrefix ensures that no value is present for LoadAwareRoutingPathPrefix, not even an explicit nil
 ### GetModelStore
 
 `func (o *NimServiceDefaults) GetModelStore() NimServiceDefaultsAllOfModelStore`

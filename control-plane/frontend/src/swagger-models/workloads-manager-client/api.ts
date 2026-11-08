@@ -537,7 +537,7 @@ export interface ExternalAccessInference {
      */
     'epp': { [key: string]: any; };
     /**
-     * The path whose requests go through the endpoint picker. When omitted, the prefix is /v1.
+     * The path whose requests go through the endpoint picker. Set by the control plane to /v1.
      * @type {string}
      * @memberof ExternalAccessInference
      */
@@ -1110,12 +1110,6 @@ export interface NimServiceSpec {
      */
     'loadAwareRouting'?: boolean | null;
     /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof NimServiceSpec
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
-    /**
      * 
      * @type {NimServiceSpecAllOfModelStore}
      * @memberof NimServiceSpec
@@ -1248,12 +1242,6 @@ export interface NimServiceSpecAllOf {
      * @memberof NimServiceSpecAllOf
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof NimServiceSpecAllOf
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
     /**
      * 
      * @type {NimServiceSpecAllOfModelStore}
@@ -2162,12 +2150,6 @@ export interface WorkloadV2ConfigurationInferenceRouting {
      * @memberof WorkloadV2ConfigurationInferenceRouting
      */
     'loadAwareRouting'?: boolean | null;
-    /**
-     * The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-     * @type {string}
-     * @memberof WorkloadV2ConfigurationInferenceRouting
-     */
-    'loadAwareRoutingPathPrefix'?: string | null;
 }
 /**
  * 

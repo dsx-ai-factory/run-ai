@@ -391,8 +391,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 	Context("inference routing carrier", func() {
 		optedIn := func() api.WorkloadV2Configuration {
 			return api.WorkloadV2Configuration{InferenceRouting: &api.WorkloadV2ConfigurationInferenceRouting{
-				LoadAwareRouting:           convutils.Ref(true),
-				LoadAwareRoutingPathPrefix: convutils.Ref("/openai/v1"),
+				LoadAwareRouting: convutils.Ref(true),
 			}}
 		}
 		queuedRecords := func() []models.WorkloadsQueueRecord {
@@ -504,7 +503,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				Expect(*endpoints).To(HaveLen(1))
 				raw, err := json.Marshal((*endpoints)[0].ExternalAccess.Inference)
 				Expect(err).NotTo(HaveOccurred())
-				Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/openai/v1"}`))
+				Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
 			})
 
 			It("rejects an opt-in on a cluster without the integration", func() {
@@ -529,7 +528,7 @@ var _ = Describe("WorkloadsV2Impl", func() {
 			})
 
 			Context("update", func() {
-				const optedInBlock = `{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/openai/v1"}`
+				const optedInBlock = `{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`
 				var id string
 
 				clusterInferenceBlock := func() *api.ExternalAccessInference {
@@ -570,10 +569,9 @@ var _ = Describe("WorkloadsV2Impl", func() {
 
 				It("resolves the inference block again when the updated workload still opts in", func() {
 					configuration := optedIn()
-					configuration.InferenceRouting.LoadAwareRoutingPathPrefix = convutils.Ref("/updated/v1")
 					resp := update(configuration)
 					Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
-					expectInferenceBlock(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/updated/v1"}`)
+					expectInferenceBlock(optedInBlock)
 				})
 
 				It("rejects an update that turns load-aware routing off", func() {

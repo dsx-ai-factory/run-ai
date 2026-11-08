@@ -101,32 +101,6 @@ var _ = Describe("inference routing", func() {
 		Entry("no routing fields", nil, false),
 		Entry("loadAwareRouting false", &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(false)}, false),
 		Entry("loadAwareRouting true", &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}, true),
-		Entry("path prefix only", &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRoutingPathPrefix: ptr.To("/v1")}, false),
-	)
-
-	DescribeTable("validates the path prefix",
-		func(routing *api.WorkloadV2ConfigurationInferenceRouting, valid bool) {
-			err := validateInferenceRoutingPathPrefix(routing)
-			if valid {
-				Expect(err).To(BeNil())
-				return
-			}
-			Expect(err).NotTo(BeNil())
-			Expect(err.Code).To(BeEquivalentTo(http.StatusBadRequest))
-			Expect(err.Message).To(Equal(inferenceRoutingPathPrefixMessage))
-		},
-		Entry("no routing fields", nil, true),
-		Entry("no path prefix", &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}, true),
-		Entry("with the opt-in", &api.WorkloadV2ConfigurationInferenceRouting{
-			LoadAwareRouting: ptr.To(true), LoadAwareRoutingPathPrefix: ptr.To("/openai/v1"),
-		}, true),
-		Entry("without the opt-in", &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRoutingPathPrefix: ptr.To("/openai/v1")}, false),
-		Entry("with loadAwareRouting false", &api.WorkloadV2ConfigurationInferenceRouting{
-			LoadAwareRouting: ptr.To(false), LoadAwareRoutingPathPrefix: ptr.To("/openai/v1"),
-		}, false),
-		Entry("without a leading slash", &api.WorkloadV2ConfigurationInferenceRouting{
-			LoadAwareRouting: ptr.To(true), LoadAwareRoutingPathPrefix: ptr.To("v1"),
-		}, false),
 	)
 
 	It("accepts inferenceRouting only from the trusted internal caller", func() {
@@ -243,10 +217,7 @@ var _ = Describe("inference routing", func() {
 				Expect(raw).To(MatchJSON(expected))
 			},
 			Entry("loadAwareRouting", &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)},
-				`{"epp":{"profile":"gie-v1.5"}}`),
-			Entry("loadAwareRoutingPathPrefix", &api.WorkloadV2ConfigurationInferenceRouting{
-				LoadAwareRouting: ptr.To(true), LoadAwareRoutingPathPrefix: ptr.To("/openai/v1"),
-			}, `{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/openai/v1"}`),
+				`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`),
 		)
 
 		It("rejects the composed protected serving port", func() {
@@ -288,12 +259,12 @@ var _ = Describe("inference routing", func() {
 
 		It("sets the inference block on the composed NIM serving endpoint", func() {
 			configuration := &models.WorkloadConfiguration{Networking: cloneNetworkingConfig(nimGatewayNetworking(publicServingPort("https://my-nim.example.com"), true))}
-			routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true), LoadAwareRoutingPathPrefix: ptr.To("/openai/v1")}
+			routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}
 			Expect(applyInferenceRouting(inferenceRoutingNIMService, routing, defaults, nil, configuration, "my-nim")).To(BeNil())
 
 			raw, err := json.Marshal((*configuration.Networking)[0].ExternalAccess.Inference)
 			Expect(err).NotTo(HaveOccurred())
-			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/openai/v1"}`))
+			Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
 		})
 
 		It("rejects the composed path-based NIM endpoint", func() {

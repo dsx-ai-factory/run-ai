@@ -24,8 +24,6 @@ var _ MappedNullable = &WorkloadV2ConfigurationInferenceRouting{}
 type WorkloadV2ConfigurationInferenceRouting struct {
 	// Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
 	LoadAwareRouting NullableBool `json:"loadAwareRouting,omitempty"`
-	// The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.
-	LoadAwareRoutingPathPrefix NullableString `json:"loadAwareRoutingPathPrefix,omitempty"`
 }
 
 // NewWorkloadV2ConfigurationInferenceRouting instantiates a new WorkloadV2ConfigurationInferenceRouting object
@@ -92,49 +90,6 @@ func (o *WorkloadV2ConfigurationInferenceRouting) UnsetLoadAwareRouting() {
 	o.LoadAwareRouting.Unset()
 }
 
-// GetLoadAwareRoutingPathPrefix returns the LoadAwareRoutingPathPrefix field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *WorkloadV2ConfigurationInferenceRouting) GetLoadAwareRoutingPathPrefix() string {
-	if o == nil || IsNil(o.LoadAwareRoutingPathPrefix.Get()) {
-		var ret string
-		return ret
-	}
-	return *o.LoadAwareRoutingPathPrefix.Get()
-}
-
-// GetLoadAwareRoutingPathPrefixOk returns a tuple with the LoadAwareRoutingPathPrefix field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *WorkloadV2ConfigurationInferenceRouting) GetLoadAwareRoutingPathPrefixOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.LoadAwareRoutingPathPrefix.Get(), o.LoadAwareRoutingPathPrefix.IsSet()
-}
-
-// HasLoadAwareRoutingPathPrefix returns a boolean if a field has been set.
-func (o *WorkloadV2ConfigurationInferenceRouting) HasLoadAwareRoutingPathPrefix() bool {
-	if o != nil && o.LoadAwareRoutingPathPrefix.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetLoadAwareRoutingPathPrefix gets a reference to the given NullableString and assigns it to the LoadAwareRoutingPathPrefix field.
-func (o *WorkloadV2ConfigurationInferenceRouting) SetLoadAwareRoutingPathPrefix(v string) {
-	o.LoadAwareRoutingPathPrefix.Set(&v)
-}
-
-// SetLoadAwareRoutingPathPrefixNil sets the value for LoadAwareRoutingPathPrefix to be an explicit nil
-func (o *WorkloadV2ConfigurationInferenceRouting) SetLoadAwareRoutingPathPrefixNil() {
-	o.LoadAwareRoutingPathPrefix.Set(nil)
-}
-
-// UnsetLoadAwareRoutingPathPrefix ensures that no value is present for LoadAwareRoutingPathPrefix, not even an explicit nil
-func (o *WorkloadV2ConfigurationInferenceRouting) UnsetLoadAwareRoutingPathPrefix() {
-	o.LoadAwareRoutingPathPrefix.Unset()
-}
-
 func (o WorkloadV2ConfigurationInferenceRouting) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -147,9 +102,6 @@ func (o WorkloadV2ConfigurationInferenceRouting) ToMap() (map[string]interface{}
 	toSerialize := map[string]interface{}{}
 	if o.LoadAwareRouting.IsSet() {
 		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
-	}
-	if o.LoadAwareRoutingPathPrefix.IsSet() {
-		toSerialize["loadAwareRoutingPathPrefix"] = o.LoadAwareRoutingPathPrefix.Get()
 	}
 	return toSerialize, nil
 }

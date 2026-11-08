@@ -15,7 +15,7 @@ import (
 )
 
 var _ = Describe("Networking endpoint inference transport", func() {
-	const inference = `{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/openai/v1"}`
+	const inference = `{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`
 	const stored = `{"networking":[{"services":[{"spec":{"name":"model","selector":{"app":"model"},"ports":[{"port":80,"targetPort":8000}]}}],` +
 		`"externalAccess":{"httpRoute":{"spec":{"hostnames":["model.example.test"]}},"inference":` + inference + `}}]}`
 

@@ -151,7 +151,6 @@ func (nsi *NimServicesImpl) CreateNimService(ctx context.Context, request api.Ni
 	// fields; otherwise an opt-in from policy defaults would be lost on update.
 	if inferenceRouting != nil {
 		submittedSpec.LoadAwareRouting = inferenceRouting.LoadAwareRouting
-		submittedSpec.LoadAwareRoutingPathPrefix = inferenceRouting.LoadAwareRoutingPathPrefix
 	}
 	ctx, ctxErr := nsi.updateContextWithMergedSpec(ctx, &request.Metadata, submittedSpec)
 	if ctxErr != nil {

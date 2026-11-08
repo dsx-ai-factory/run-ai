@@ -16,4 +16,4 @@ properties:
   pathPrefix:
     type: string
     maxLength: 1024
-    description: The path whose requests go through the endpoint picker. When omitted, the prefix is /v1.
+    description: The path whose requests go through the endpoint picker. Set by the control plane to /v1.

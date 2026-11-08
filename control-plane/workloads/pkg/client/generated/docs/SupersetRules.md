@@ -10,7 +10,6 @@ Name | Type | Description | Notes
 **Worker** | Pointer to [**NullableDistributedInferenceLeaderWorkerRulesV2**](DistributedInferenceLeaderWorkerRulesV2.md) | Defines the pod specification for the workers. Required only if the number of workers is greater than 0. | [optional] 
 **Category** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **LoadAwareRouting** | Pointer to [**NullableBooleanRules**](BooleanRules.md) |  | [optional] 
-**LoadAwareRoutingPathPrefix** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
 **NodePools** | Pointer to [**NullableArrayRules**](ArrayRules.md) |  | [optional] 
 **Preemptibility** | Pointer to [**NullablePreemptibilityRules**](PreemptibilityRules.md) |  | [optional] 
 **PriorityClass** | Pointer to [**NullableStringRules**](StringRules.md) |  | [optional] 
@@ -286,41 +285,6 @@ HasLoadAwareRouting returns a boolean if a field has been set.
 `func (o *SupersetRules) UnsetLoadAwareRouting()`
 
 UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
-### GetLoadAwareRoutingPathPrefix
-
-`func (o *SupersetRules) GetLoadAwareRoutingPathPrefix() StringRules`
-
-GetLoadAwareRoutingPathPrefix returns the LoadAwareRoutingPathPrefix field if non-nil, zero value otherwise.
-
-### GetLoadAwareRoutingPathPrefixOk
-
-`func (o *SupersetRules) GetLoadAwareRoutingPathPrefixOk() (*StringRules, bool)`
-
-GetLoadAwareRoutingPathPrefixOk returns a tuple with the LoadAwareRoutingPathPrefix field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetLoadAwareRoutingPathPrefix
-
-`func (o *SupersetRules) SetLoadAwareRoutingPathPrefix(v StringRules)`
-
-SetLoadAwareRoutingPathPrefix sets LoadAwareRoutingPathPrefix field to given value.
-
-### HasLoadAwareRoutingPathPrefix
-
-`func (o *SupersetRules) HasLoadAwareRoutingPathPrefix() bool`
-
-HasLoadAwareRoutingPathPrefix returns a boolean if a field has been set.
-
-### SetLoadAwareRoutingPathPrefixNil
-
-`func (o *SupersetRules) SetLoadAwareRoutingPathPrefixNil(b bool)`
-
- SetLoadAwareRoutingPathPrefixNil sets the value for LoadAwareRoutingPathPrefix to be an explicit nil
-
-### UnsetLoadAwareRoutingPathPrefix
-`func (o *SupersetRules) UnsetLoadAwareRoutingPathPrefix()`
-
-UnsetLoadAwareRoutingPathPrefix ensures that no value is present for LoadAwareRoutingPathPrefix, not even an explicit nil
 ### GetNodePools
 
 `func (o *SupersetRules) GetNodePools() ArrayRules`

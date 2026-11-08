@@ -6382,13 +6382,6 @@
         "default": false,
         "nullable": true
       },
-      "LoadAwareRoutingPathPrefix": {
-        "description": "The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1.",
-        "type": "string",
-        "maxLength": 1024,
-        "nullable": true,
-        "example": "/v1"
-      },
       "NodePools": {
         "description": "A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.",
         "type": "array",
@@ -6582,9 +6575,6 @@
               },
               "loadAwareRouting": {
                 "$ref": "#/components/schemas/LoadAwareRouting"
-              },
-              "loadAwareRoutingPathPrefix": {
-                "$ref": "#/components/schemas/LoadAwareRoutingPathPrefix"
               },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
@@ -9248,9 +9238,6 @@
               },
               "loadAwareRouting": {
                 "$ref": "#/components/schemas/BooleanRules"
-              },
-              "loadAwareRoutingPathPrefix": {
-                "$ref": "#/components/schemas/StringRules"
               },
               "nodePools": {
                 "$ref": "#/components/schemas/ArrayRules"
@@ -12572,9 +12559,6 @@
               "loadAwareRouting": {
                 "$ref": "#/components/schemas/LoadAwareRouting"
               },
-              "loadAwareRoutingPathPrefix": {
-                "$ref": "#/components/schemas/LoadAwareRoutingPathPrefix"
-              },
               "modelStore": {
                 "nullable": true,
                 "properties": {
@@ -12907,9 +12891,6 @@
               },
               "loadAwareRouting": {
                 "$ref": "#/components/schemas/BooleanRules"
-              },
-              "loadAwareRoutingPathPrefix": {
-                "$ref": "#/components/schemas/StringRules"
               },
               "modelStore": {
                 "nullable": true,

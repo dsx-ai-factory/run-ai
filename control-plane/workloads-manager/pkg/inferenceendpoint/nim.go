@@ -23,10 +23,9 @@ const nimServiceKind = "NIM service"
 // only through the administrator Gateway at a root hostname.
 // Only public serving is representable in this version: protected NIM puts the
 // auth proxy in front of the Service, and the endpoint picker would bypass it.
-// pathPrefix is the workload's loadAwareRoutingPathPrefix, empty for the default.
 // It does not establish trusted submission origin or the serving protocol; the
 // caller must establish both, because gRPC serving is not visible in the endpoint.
-func BuildNIMServiceIntent(endpoint api.NetworkingEndpoint, workloadName string, pathPrefix string, defaults *Defaults) (*api.ExternalAccessInference, error) {
+func BuildNIMServiceIntent(endpoint api.NetworkingEndpoint, workloadName string, defaults *Defaults) (*api.ExternalAccessInference, error) {
 	if !validDefaults(defaults) {
 		return nil, fmt.Errorf("NIM service requires valid administrator Gateway defaults and the gie-v1.5 EPP profile")
 	}
@@ -44,5 +43,5 @@ func BuildNIMServiceIntent(endpoint api.NetworkingEndpoint, workloadName string,
 	if _, err := servingHostname(nimServiceKind, endpoint.ExternalAccess, service.Ref.Name, service.Ref.Port, defaults); err != nil {
 		return nil, err
 	}
-	return newInferenceIntent(defaults, pathPrefix), nil
+	return newInferenceIntent(defaults), nil
 }

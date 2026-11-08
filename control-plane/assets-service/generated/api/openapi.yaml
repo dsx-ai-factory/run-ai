@@ -59702,15 +59702,6 @@ components:
         \ which picks a Pod by load. It can be set only when the workload is created."
       nullable: true
       type: boolean
-    LoadAwareRoutingPathPrefix:
-      description: "The path whose requests go through the endpoint picker. Requests\
-        \ outside it are not routed and return 404. It must start with a slash and\
-        \ can be set only when loadAwareRouting is true. When omitted, the prefix\
-        \ is /v1."
-      example: /v1
-      maxLength: 1024
-      nullable: true
-      type: string
     DistributedInferenceRestartPolicy:
       default: RecreateGroupOnPodRestart
       description: |
@@ -59872,8 +59863,6 @@ components:
             $ref: '#/components/schemas/Category'
           loadAwareRouting:
             $ref: '#/components/schemas/LoadAwareRouting'
-          loadAwareRoutingPathPrefix:
-            $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -60774,7 +60763,6 @@ components:
           cpuCoreRequest: 0.5
           gpuPortionLimit: 0.5
         cleanPodPolicy: None
-        loadAwareRoutingPathPrefix: /v1
         servingConfiguration:
           requestTimeoutSeconds: 1
           initializationTimeoutSeconds: 1
@@ -63007,7 +62995,6 @@ components:
             cpuCoreRequest: 0.5
             gpuPortionLimit: 0.5
           cleanPodPolicy: None
-          loadAwareRoutingPathPrefix: /v1
           servingConfiguration:
             requestTimeoutSeconds: 1
             initializationTimeoutSeconds: 1

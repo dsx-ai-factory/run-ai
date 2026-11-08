@@ -53,26 +53,17 @@ var _ = Describe("NIM service endpoint intent", func() {
 
 	It("returns an epp-only inference block for a public root-hostname endpoint", func() {
 		setRoute()
-		intent, err := BuildNIMServiceIntent(endpoint, workloadName, "", defaults)
+		intent, err := BuildNIMServiceIntent(endpoint, workloadName, defaults)
 		Expect(err).NotTo(HaveOccurred())
 		raw, err := json.Marshal(intent)
 		Expect(err).NotTo(HaveOccurred())
-		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"}}`))
-	})
-
-	It("carries the path prefix of the workload", func() {
-		setRoute()
-		intent, err := BuildNIMServiceIntent(endpoint, workloadName, "/openai/v1", defaults)
-		Expect(err).NotTo(HaveOccurred())
-		raw, err := json.Marshal(intent)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/openai/v1"}`))
+		Expect(raw).To(MatchJSON(`{"epp":{"profile":"gie-v1.5"},"pathPrefix":"/v1"}`))
 	})
 
 	DescribeTable("rejects an endpoint that the InferenceEndpoint cannot serve", func(mutate func(), message string) {
 		setRoute()
 		mutate()
-		intent, err := BuildNIMServiceIntent(endpoint, workloadName, "", defaults)
+		intent, err := BuildNIMServiceIntent(endpoint, workloadName, defaults)
 		Expect(err).To(MatchError(ContainSubstring(message)))
 		Expect(intent).To(BeNil())
 	},
@@ -97,7 +88,7 @@ var _ = Describe("NIM service endpoint intent", func() {
 	DescribeTable("rejects routing constraints that the endpoint CR cannot preserve", func(mutate func(), message string) {
 		mutate()
 		setRoute()
-		intent, err := BuildNIMServiceIntent(endpoint, workloadName, "", defaults)
+		intent, err := BuildNIMServiceIntent(endpoint, workloadName, defaults)
 		Expect(err).To(MatchError(ContainSubstring(message)))
 		Expect(intent).To(BeNil())
 	},

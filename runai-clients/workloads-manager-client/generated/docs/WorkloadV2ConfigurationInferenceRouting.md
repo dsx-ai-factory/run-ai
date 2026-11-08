@@ -5,7 +5,6 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **LoadAwareRouting** | Pointer to **NullableBool** | Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. | [optional] [default to false]
-**LoadAwareRoutingPathPrefix** | Pointer to **NullableString** | The path whose requests go through the endpoint picker. Requests outside it are not routed and return 404. It must start with a slash and can be set only when loadAwareRouting is true. When omitted, the prefix is /v1. | [optional] 
 
 ## Methods
 
@@ -61,41 +60,6 @@ HasLoadAwareRouting returns a boolean if a field has been set.
 `func (o *WorkloadV2ConfigurationInferenceRouting) UnsetLoadAwareRouting()`
 
 UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
-### GetLoadAwareRoutingPathPrefix
-
-`func (o *WorkloadV2ConfigurationInferenceRouting) GetLoadAwareRoutingPathPrefix() string`
-
-GetLoadAwareRoutingPathPrefix returns the LoadAwareRoutingPathPrefix field if non-nil, zero value otherwise.
-
-### GetLoadAwareRoutingPathPrefixOk
-
-`func (o *WorkloadV2ConfigurationInferenceRouting) GetLoadAwareRoutingPathPrefixOk() (*string, bool)`
-
-GetLoadAwareRoutingPathPrefixOk returns a tuple with the LoadAwareRoutingPathPrefix field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetLoadAwareRoutingPathPrefix
-
-`func (o *WorkloadV2ConfigurationInferenceRouting) SetLoadAwareRoutingPathPrefix(v string)`
-
-SetLoadAwareRoutingPathPrefix sets LoadAwareRoutingPathPrefix field to given value.
-
-### HasLoadAwareRoutingPathPrefix
-
-`func (o *WorkloadV2ConfigurationInferenceRouting) HasLoadAwareRoutingPathPrefix() bool`
-
-HasLoadAwareRoutingPathPrefix returns a boolean if a field has been set.
-
-### SetLoadAwareRoutingPathPrefixNil
-
-`func (o *WorkloadV2ConfigurationInferenceRouting) SetLoadAwareRoutingPathPrefixNil(b bool)`
-
- SetLoadAwareRoutingPathPrefixNil sets the value for LoadAwareRoutingPathPrefix to be an explicit nil
-
-### UnsetLoadAwareRoutingPathPrefix
-`func (o *WorkloadV2ConfigurationInferenceRouting) UnsetLoadAwareRoutingPathPrefix()`
-
-UnsetLoadAwareRoutingPathPrefix ensures that no value is present for LoadAwareRoutingPathPrefix, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

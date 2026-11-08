@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Epp** | **map[string]interface{}** | InferenceEndpoint spec.epp, for example the EPP profile. Validated against the installed CRD when applied. | 
-**PathPrefix** | Pointer to **string** | The path whose requests go through the endpoint picker. When omitted, the prefix is /v1. | [optional] 
+**PathPrefix** | Pointer to **string** | The path whose requests go through the endpoint picker. Set by the control plane to /v1. | [optional] 
 
 ## Methods
 

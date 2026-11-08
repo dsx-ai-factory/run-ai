@@ -10092,15 +10092,6 @@ components:
         \ which picks a Pod by load. It can be set only when the workload is created."
       nullable: true
       type: boolean
-    LoadAwareRoutingPathPrefix:
-      description: "The path whose requests go through the endpoint picker. Requests\
-        \ outside it are not routed and return 404. It must start with a slash and\
-        \ can be set only when loadAwareRouting is true. When omitted, the prefix\
-        \ is /v1."
-      example: /v1
-      maxLength: 1024
-      nullable: true
-      type: string
     NodePools:
       description: A prioritized list of node pools for the scheduler to run the workload
         on. The scheduler will always try to use the first node pool before moving
@@ -10294,8 +10285,6 @@ components:
             $ref: '#/components/schemas/Category'
           loadAwareRouting:
             $ref: '#/components/schemas/LoadAwareRouting'
-          loadAwareRoutingPathPrefix:
-            $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
           nodePools:
             $ref: '#/components/schemas/NodePools'
           preemptibility:
@@ -14061,8 +14050,6 @@ components:
             $ref: '#/components/schemas/StringRules'
           loadAwareRouting:
             $ref: '#/components/schemas/BooleanRules'
-          loadAwareRoutingPathPrefix:
-            $ref: '#/components/schemas/StringRules'
           nodePools:
             $ref: '#/components/schemas/ArrayRules'
           preemptibility:
@@ -61748,8 +61735,6 @@ components:
             $ref: '#/components/schemas/LabelsDefaults'
           loadAwareRouting:
             $ref: '#/components/schemas/LoadAwareRouting'
-          loadAwareRoutingPathPrefix:
-            $ref: '#/components/schemas/LoadAwareRoutingPathPrefix'
           modelStore:
             $ref: '#/components/schemas/NimServiceDefaults_allOf_modelStore'
           multiNode:
@@ -61881,8 +61866,6 @@ components:
             $ref: '#/components/schemas/InstancesRules'
           loadAwareRouting:
             $ref: '#/components/schemas/BooleanRules'
-          loadAwareRoutingPathPrefix:
-            $ref: '#/components/schemas/StringRules'
           modelStore:
             $ref: '#/components/schemas/NimServiceRules_allOf_modelStore'
           multiNode:
