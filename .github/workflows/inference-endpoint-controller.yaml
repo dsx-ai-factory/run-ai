@@ -6,6 +6,9 @@ on:
   pull_request:
     paths:
       - 'runai-cluster/cluster/inference-endpoint-controller/**'
+      - 'runai-cluster/cluster/runai-chart/charts/crds/crds/inference.platform.run.ai_inferenceendpoints.yaml'
+      - 'runai-cluster/cluster/runai-crd-upgrader/crds/inference.platform.run.ai_inferenceendpoints.yaml'
+      - 'runai-cluster/cluster/runai-chart/templates/clusterroles/inference-endpoint-controller.yaml'
       - '.github/workflows/inference-endpoint-controller.yaml'
       - 'build/makefile/**'
   workflow_dispatch:
