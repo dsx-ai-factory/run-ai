@@ -78,7 +78,7 @@ export default defineComponent({
       breadcrumbs: [] as string[],
       clusterStore: useClusterStore(),
       wrapperOptions: {
-        title: "Free GPU nodes by node pool",
+        title: "Free nodes by node pool",
         linkText: "All nodes",
         entityType: EWidgetEntity.Nodepool,
         tooltipText:
