@@ -18380,7 +18380,7 @@ Components:
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
-  cloud.google.com/go/auth v0.24.2
+  cloud.google.com/go/auth v0.24.3
   cloud.google.com/go/auth/oauth2adapt v0.2.8
   cloud.google.com/go/auth/oauth2adapt v0.3.1
   cloud.google.com/go/compute/metadata v0.10.0
@@ -18410,7 +18410,7 @@ Components:
   github.com/coreos/go-semver/semver v0.3.1
   github.com/envoyproxy/protoc-gen-validate/validate v1.3.3
   github.com/go-jose/go-jose/v4 v4.1.4
-  github.com/go-jose/go-jose/v4 v4.1.8
+  github.com/go-jose/go-jose/v4 v4.1.9
   github.com/go-openapi/analysis v1.0.1
   github.com/go-openapi/errors v0.22.9
   github.com/go-openapi/jsonpointer v0.21.0
@@ -21761,7 +21761,7 @@ Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/go-jose/go-jose/v4/json v4.1.4
-  github.com/go-jose/go-jose/v4/json v4.1.8
+  github.com/go-jose/go-jose/v4/json v4.1.9
   github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
   github.com/klauspost/crc32 v1.3.0
   github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
