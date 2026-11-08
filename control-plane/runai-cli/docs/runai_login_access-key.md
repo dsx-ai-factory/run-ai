@@ -25,9 +25,9 @@ runai login access-key [flags]
 
 ```
       --client-id string     client ID for service account or user
-  -h, --help                 help for access-key
+  -h, --help[=true|false]    help for access-key
       --interactive enable   set interactive mode (enabled|disabled)
-      --save                 save access key credentials in config file
+      --save[=true|false]    save access key credentials in config file
       --secret string        access key secret
       --secret-file string   use access key secret from file
 ```
@@ -35,11 +35,11 @@ runai login access-key [flags]
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO
