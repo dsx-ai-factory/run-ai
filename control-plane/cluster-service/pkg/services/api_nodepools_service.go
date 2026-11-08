@@ -172,7 +172,7 @@ func (s *NodePoolsApiService) CreateNodepool(ctx context.Context, fields api.Nod
 	if err := setSchedulingConfigurationFieldsOnCreate(ctx, &nodepoolModel, fields, capChecker); err != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on create", err)), nil
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities, true)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities, false)
 
 	nodepoolSetDefaults(&nodepoolModel)
 
@@ -697,6 +697,7 @@ func (s *NodePoolsApiService) createDefaultNodepool(ctx context.Context, cluster
 		CpuPlacementStrategy:       "",
 		MinGuaranteedRuntime:       nil,
 	}
+	// the default nodepool keeps the defaults: org-unit-service gives its default department unlimited quota
 	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, clusterNotification.SchedulingCapabilities, true)
 	nodepoolSetDefaults(&nodepoolModel)
 

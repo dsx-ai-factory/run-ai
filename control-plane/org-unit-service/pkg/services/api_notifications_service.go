@@ -14,6 +14,7 @@ import (
 	"time"
 
 	cluster_service_client "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client"
+	apiClusters "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
@@ -88,7 +89,11 @@ func (s *NotificationsApiService) NodePoolUpdated(ctx context.Context, default_ 
 		}
 	} else {
 		unlimitedDeserved := s.setUnlimitedDeserved(ctx, clusterId, tenantId)
-		err = handleNonDefaultNodePool(ctx, nodePool, tenantId, clusterId, unlimitedDeserved)
+		var capabilities *apiClusters.SchedulingCapabilities
+		if nodePool.Operation == CreatedOperation {
+			capabilities = s.getSchedulingCapabilities(ctx, nodePoolId)
+		}
+		err = handleNonDefaultNodePool(ctx, nodePool, tenantId, clusterId, unlimitedDeserved, capabilities)
 		if err != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("NotificationsApiService: failed to add resources for node pool %s: %v", nodePoolId, err.Error())
 			return HandleError(err, http.StatusInternalServerError, fmt.Sprintf("failed to add resources for node pool %s", nodePoolId)), nil
@@ -106,6 +111,16 @@ func (s *NotificationsApiService) setUnlimitedDeserved(ctx context.Context, clus
 		return false
 	}
 	return unlimitedGpuDepartmentExists
+}
+
+// getSchedulingCapabilities returns nil when the node pool can't be read, which keeps the quota-mode defaults.
+func (s *NotificationsApiService) getSchedulingCapabilities(ctx context.Context, nodePoolId string) *apiClusters.SchedulingCapabilities {
+	nodePool, err := s.clustersClient.GetNodepoolMinimal(ctx, nodePoolId)
+	if err != nil || nodePool == nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("NotificationsApiService: failed to get scheduling capabilities of node pool %s, using the defaults. error: %v", nodePoolId, err)
+		return nil
+	}
+	return nodePool.SchedulingCapabilities
 }
 
 func (s *NotificationsApiService) ClusterDeleted(ctx context.Context, clusterUuid string) (api.ImplResponse, error) {
@@ -172,7 +187,7 @@ func getNodepoolId(nodePool api.NodePool) string {
 	return strconv.FormatFloat(float64(nodePool.Uid), 'f', -1, 32)
 }
 
-func handleNonDefaultNodePool(ctx context.Context, nodePool api.NodePool, tenantId *string, clusterId uuid.UUID, unlimitedDeserved bool) error {
+func handleNonDefaultNodePool(ctx context.Context, nodePool api.NodePool, tenantId *string, clusterId uuid.UUID, unlimitedDeserved bool, capabilities *apiClusters.SchedulingCapabilities) error {
 	departments, err := dao.GetDepartmentsByCluster(ctx, *tenantId, clusterId, nil, models.SlimVerbosity)
 	if err != nil {
 		return err
@@ -189,7 +204,7 @@ func handleNonDefaultNodePool(ctx context.Context, nodePool api.NodePool, tenant
 		return errors.Join(err, removeDeletedNodePoolResources(ctx, nodePool, departments, projects))
 	}
 	if nodePool.Operation == CreatedOperation {
-		return addCreatedNodePoolResources(ctx, nodePool, departments, projects, unlimitedDeserved)
+		return addCreatedNodePoolResources(ctx, nodePool, departments, projects, unlimitedDeserved, capabilities)
 	}
 	return nil
 }
@@ -269,7 +284,7 @@ func validateNodePoolCreation(orgUnitData models.OrgUnitData, nodePoolId string)
 	return nil
 }
 
-func addCreatedNodePoolResources(ctx context.Context, nodePool api.NodePool, departments *[]models.Department, projects []*models.Project, unlimitedDeserved bool) error {
+func addCreatedNodePoolResources(ctx context.Context, nodePool api.NodePool, departments *[]models.Department, projects []*models.Project, unlimitedDeserved bool, capabilities *apiClusters.SchedulingCapabilities) error {
 	nodePoolId := getNodepoolId(nodePool)
 	resourcesToAdd := []*models.Resources{}
 	for _, department := range *departments {
@@ -278,7 +293,7 @@ func addCreatedNodePoolResources(ctx context.Context, nodePool api.NodePool, dep
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("NotificationsApiService: Department %d already has nodepool %s resources", department.ID, nodePoolId)
 		} else {
 			resourcesToAdd = append(resourcesToAdd, GetDepartmentResourcesToAdd(department.OrgUnitData,
-				unlimitedDeserved && department.Name == DefaultDepartmentName, nodePoolId, nodePool.Name))
+				unlimitedDeserved && department.Name == DefaultDepartmentName, nodePoolId, nodePool.Name, capabilities))
 		}
 	}
 	for _, project := range projects {
@@ -305,7 +320,18 @@ func GetProjectResourcesToAdd(orgUnitData models.OrgUnitData, nodePoolId string,
 	return getResourcesToAdd(orgUnitData, nodePoolId, nodePoolName, 0, 2)
 }
 
-func GetDepartmentResourcesToAdd(orgUnitData models.OrgUnitData, setUnlimitedDeserved bool, nodePoolId string, nodePoolName string) *models.Resources {
+func GetDepartmentResourcesToAdd(orgUnitData models.OrgUnitData, setUnlimitedDeserved bool, nodePoolId string, nodePoolName string,
+	capabilities *apiClusters.SchedulingCapabilities,
+) *models.Resources {
+	if capabilities != nil && !capabilities.Quota {
+		// With adjustable weights the stored weight reaches the scheduler as is, and a 0 would give the department no share.
+		// Without them the weight is derived from the quota, so storing 0 keeps reads and updates consistent.
+		weight := float64(0)
+		if capabilities.AdjustableWeights {
+			weight = models.DefaultOverQuotaWeight
+		}
+		return getResourcesToAdd(orgUnitData, nodePoolId, nodePoolName, 0, weight)
+	}
 	if setUnlimitedDeserved {
 		return getResourcesToAdd(orgUnitData, nodePoolId, nodePoolName, -1, -1)
 	} else {

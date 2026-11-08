@@ -802,6 +802,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				nodePool3Id = "33"
 
 				clusterServiceClient = mocks.IClusterClient{}
+				clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, nil)
 				// cluster version supports priorities/weights
 				clusterServiceClient.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
 					Uuid:    clusterId,
@@ -858,6 +859,7 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			AfterAll(func() {
 				// revert to previous state with 2 nodepools
 				clusterServiceClient = mocks.IClusterClient{}
+				clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, nil)
 				// cluster version supports priorities/weights
 				clusterServiceClient.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
 					Uuid:    clusterId,
