@@ -144,7 +144,7 @@ async function reviewPreview() {
   margin-bottom: 44px;
 }
 .new-department-form .department-cluster .q-field__control:before {
-  border-style: solid;
+  border-bottom-style: solid;
 }
 .new-department-form .department-cluster .q-field__label,
 .new-department-form .department-cluster .q-field__native {
