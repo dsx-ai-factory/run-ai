@@ -515,6 +515,42 @@ var _ = Describe("WorkloadsV2Impl", func() {
 				Expect(queuedRecords()).To(BeEmpty())
 			})
 
+			Context("internal dry-run", func() {
+				dryRun := func(manifest map[string]interface{}, networking *[]api.NetworkingEndpoint) *httptest.ResponseRecorder {
+					configuration := optedIn()
+					configuration.Networking = networking
+					req := httptest.NewRequest(http.MethodPost, testHost+urlInternalWorkloads+"?dryRun=true", makePayload(&api.WorkloadV2CreateRequest{
+						Metadata: api.WorkloadV2MetadataCreateParams{Name: "model", ProjectId: randoms.ProjectIdStr, Configuration: configuration},
+						Manifest: manifest,
+					}))
+					req.Header = *headerForAdmin(randoms)
+					resp := httptest.NewRecorder()
+					router.ServeHTTP(resp, req)
+					return resp
+				}
+
+				BeforeEach(func() {
+					csclient.WithCluster(randoms.ClusterId, inferenceIntegrationClusterForTest())
+				})
+
+				It("accepts a serving topology that submission accepts", func() {
+					resp := dryRun(manifest, &networking)
+					Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
+					Expect(queuedRecords()).To(BeEmpty())
+				})
+
+				It("rejects a serving topology that submission rejects", func() {
+					authenticated := workloadsApi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_AUTHENTICATED_USERS
+					protectedManifest, protectedConfiguration := composeDistributedInferenceForTest(&authenticated)
+
+					protectedNetworking := []api.NetworkingEndpoint(*protectedConfiguration.Networking)
+					resp := dryRun(protectedManifest, &protectedNetworking)
+					Expect(resp.Code).To(Equal(http.StatusBadRequest), resp.Body.String())
+					Expect(resp.Body.String()).To(ContainSubstring("must not target the auth proxy port"))
+					Expect(queuedRecords()).To(BeEmpty())
+				})
+			})
+
 			It("keeps the composed HTTPRoute when the workload did not opt in", func() {
 				resp := submit(api.WorkloadV2Configuration{})
 				Expect(resp.Code).To(Equal(http.StatusAccepted), resp.Body.String())
