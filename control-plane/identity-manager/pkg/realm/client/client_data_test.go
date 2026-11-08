@@ -288,19 +288,19 @@ func TestWorkloadsAuthClient_GetClientData_ExistingClient(t *testing.T) {
 // RunaiApplicationClient
 
 func TestRunaiApplicationClient_GetClientID(t *testing.T) {
-	c := NewRunaiServiceAccountClient("my-app", testTenantId, nil, ClientTypeUserApp)
+	c := NewRunaiServiceAccountClient("my-app", testTenantId, nil, ClientTypeAccessKey)
 	assert.Equal(t, "my-app", c.GetClientID())
 }
 
-func TestRunaiApplicationClient_GetClientData_UserApp(t *testing.T) {
-	c := NewRunaiServiceAccountClient("my-app", testTenantId, nil, ClientTypeUserApp)
+func TestRunaiApplicationClient_GetClientData_AccessKey(t *testing.T) {
+	c := NewRunaiServiceAccountClient("my-app", testTenantId, nil, ClientTypeAccessKey)
 	result := c.GetClientData(context.Background(), nil)
 
 	require.NotNil(t, result)
 	assert.Equal(t, "my-app", *result.ClientID)
 	assert.Equal(t, testTenantId, *result.TenantId)
 	assert.Equal(t, "my-app", *result.Name)
-	assert.Equal(t, ClientTypeUserApp, *result.Attributes.ClientType)
+	assert.Equal(t, ClientTypeAccessKey, *result.Attributes.ClientType)
 	assert.False(t, *result.ClientConfig.PublicClient)
 	assert.False(t, *result.ClientConfig.DirectAccessGrantsEnabled)
 	assert.True(t, *result.ClientConfig.StandardFlowEnabled)
@@ -348,14 +348,14 @@ func TestRunaiApplicationClient_GetClientData_InstallerApp(t *testing.T) {
 	assert.True(t, *result.ClientConfig.ServiceAccountsEnabled)
 }
 
-func TestRunaiApplicationClient_GetClientData_TenantApp(t *testing.T) {
-	c := NewRunaiServiceAccountClient("my-tenant-app", testTenantId, nil, ClientTypeTenantApp)
+func TestRunaiApplicationClient_GetClientData_ServiceAccount(t *testing.T) {
+	c := NewRunaiServiceAccountClient("my-tenant-app", testTenantId, nil, ClientTypeServiceAccount)
 	result := c.GetClientData(context.Background(), nil)
 
 	require.NotNil(t, result)
 	assert.Equal(t, "my-tenant-app", *result.ClientID)
 	assert.Equal(t, testTenantId, *result.TenantId)
-	assert.Equal(t, ClientTypeTenantApp, *result.Attributes.ClientType)
+	assert.Equal(t, ClientTypeServiceAccount, *result.Attributes.ClientType)
 	assert.True(t, *result.Attributes.IsExternal)
 	assert.False(t, *result.ClientConfig.PublicClient)
 	assert.False(t, *result.ClientConfig.DirectAccessGrantsEnabled)
@@ -364,7 +364,7 @@ func TestRunaiApplicationClient_GetClientData_TenantApp(t *testing.T) {
 }
 
 func TestRunaiApplicationClient_GetClientData_PreservesExistingName(t *testing.T) {
-	c := NewRunaiServiceAccountClient("my-app", testTenantId, nil, ClientTypeUserApp)
+	c := NewRunaiServiceAccountClient("my-app", testTenantId, nil, ClientTypeAccessKey)
 	existing := &iamModels.Client{
 		Name: ptr.To("custom-name"),
 	}
