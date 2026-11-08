@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/s3
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20
 	github.com/minio/minio-go/v7 v7.4.1
 )
 
@@ -35,7 +35,7 @@ require (
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/tinylib/msgp v1.6.5 // indirect

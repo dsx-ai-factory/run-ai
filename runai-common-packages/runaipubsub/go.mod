@@ -7,10 +7,10 @@ require (
 	github.com/ThreeDotsLabs/watermill v1.5.3
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5
 	github.com/aws/smithy-go v1.28.8
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.10
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
 	github.com/google/uuid v1.6.0
 	github.com/nats-io/nats.go v1.55.0
 	github.com/pkg/errors v0.9.1
@@ -38,7 +38,7 @@ require (
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/munnerz/goautoneg v0.0.0-20191010083416-a7dc8b61c822 // indirect
-	github.com/nats-io/nkeys v0.4.16 // indirect
+	github.com/nats-io/nkeys v0.4.17 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
@@ -52,7 +52,7 @@ require (
 	github.com/sony/gobreaker v1.0.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
