@@ -110,16 +110,10 @@
         "keycloakx",
         "quay.io/keycloak/keycloak"
       ],
+      "groupName": "keycloak",
+      "groupSlug": "keycloak",
       "automerge": false,
       "branchName": "{{{branchPrefix}}}keycloak"
-    },
-    {
-      "matchPackageNames": [
-        "keycloakx",
-        "quay.io/keycloak/keycloak"
-      ],
-      "groupName": "keycloak",
-      "groupSlug": "keycloak"
     }
   ]
 }
