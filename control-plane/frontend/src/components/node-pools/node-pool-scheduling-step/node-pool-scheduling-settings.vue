@@ -64,18 +64,21 @@
                 </ul>
               </template></runai-section-title
             >
-            <q-input
-              class="historical-weight-input"
-              :model-value="draft.historicalWeight"
-              @update:model-value="patch({ historicalWeight: number($event) })"
-              type="number"
-              min="0"
-              label="Historical usage weight"
-              :disable="readonly"
-              :error="invalid(draft.historicalWeight)"
-              error-message="Enter a value equal to or above 0"
-              no-error-icon
-            />
+            <div class="historical-weight-field">
+              <q-input
+                stack-label
+                class="historical-weight-input"
+                :model-value="draft.historicalWeight"
+                @update:model-value="patch({ historicalWeight: number($event) })"
+                type="number"
+                min="0"
+                label="Historical usage weight"
+                :disable="readonly"
+                :error="invalid(draft.historicalWeight)"
+                error-message="Enter a value equal to or above 0"
+                no-error-icon
+              />
+            </div>
           </div>
           <div class="historical-window-group">
             <runai-section-title
@@ -367,13 +370,37 @@ header .q-btn {
   flex-direction: column;
   gap: 10px;
 }
-.historical-weight-input {
-  width: 190px;
+.historical-weight-field {
+  width: 192px;
   max-width: 100%;
   align-self: flex-start;
+  padding: 5px 0;
+}
+.historical-weight-input {
+  width: 100%;
+  padding-bottom: 24px;
+}
+.historical-weight-input :deep(.q-field__control) {
+  height: 53px;
+  min-height: 53px;
 }
 .historical-weight-input :deep(.q-field__label) {
-  font-size: 16px;
+  top: 0;
+  transform: none;
+  font-size: 12px;
+  line-height: 16.8px;
+}
+.historical-weight-input :deep(.q-field__native) {
+  min-height: 0;
+  padding: 22px 0 10px;
+  font-size: 14px;
+  line-height: 19.5px;
+}
+.historical-weight-input :deep(input[type="number"]::-webkit-inner-spin-button) {
+  opacity: 1;
+}
+.historical-fields :deep(.runai-section-title) {
+  line-height: 19.5px;
 }
 .historical-fields :deep(.runai-section-title > .row) {
   flex-wrap: nowrap;
@@ -390,10 +417,13 @@ header .q-btn {
 }
 .historical-fields :deep(.runai-section-title .q-btn) {
   flex-shrink: 0;
-  height: 20px;
-  width: 20px;
-  min-height: 20px;
+  height: 32px;
+  width: 32px;
+  min-height: 32px;
   padding: 0;
+}
+.historical-fields :deep(.runai-section-title .q-icon) {
+  font-size: 20px;
 }
 .settings-body :deep(.q-field--error) {
   padding-bottom: 0;

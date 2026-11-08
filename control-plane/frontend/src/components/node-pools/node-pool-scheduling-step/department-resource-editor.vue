@@ -28,17 +28,18 @@
     @reset="reset"
     @apply="apply"
   >
-    <template #title
-      >{{ editorTitle }}
-      <q-icon v-if="kind === 'weight'" name="ph ph-question" size="16px" class="q-ml-xs text-grey-7"
-        ><q-tooltip max-width="320px"
-          >Weight determines a department’s share relative to the other departments{{
-            title === "Weight within rank" ? " in the same rank" : ""
-          }}. A higher weight means a larger portion of the resources. The percentage is calculated from the total
-          weight.</q-tooltip
-        ></q-icon
-      ></template
-    >
+    <template #title>
+      <span class="resource-editor-title">
+        {{ editorTitle }}
+        <runai-tooltip
+          v-if="kind === 'weight'"
+          class="weight-editor-help q-ml-xs"
+          icon="ph ph-question"
+          width="320px"
+          :tooltip-text="weightHelp"
+        />
+      </span>
+    </template>
     <template #input>
       <q-input
         v-model="input"
@@ -78,6 +79,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import { EditableCellPopup } from "@/components/common/runai-table/runai-custom-table-columns/editable-cell-popup";
 import {
   recommendedDepartmentQuotaMinimum,
@@ -103,6 +105,10 @@ const editorTitle = computed(
   () =>
     props.title ??
     (props.kind === "weight" ? "Weight" : props.kind === "limit" ? "Max GPU allocation" : "Guaranteed GPUs"),
+);
+const weightHelp = computed(
+  () =>
+    `Weight determines a department’s share relative to the other departments${props.title === "Weight within rank" ? " in the same rank" : ""}. A higher weight means a larger portion of the resources. The percentage is calculated from the total weight.`,
 );
 const initialInput = () =>
   props.kind === "limit" && (props.value == null || props.value === -1) ? "Unlimited" : (props.value ?? "");
@@ -202,6 +208,20 @@ watch(() => props.value, reset);
 </script>
 
 <style scoped lang="scss">
+.resource-editor-title {
+  display: inline-flex;
+  align-items: center;
+}
+.weight-editor-help {
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0;
+  :deep(.q-icon) {
+    font-size: 20px;
+  }
+}
+
 p {
   font-size: 12px;
   line-height: 16.8px;

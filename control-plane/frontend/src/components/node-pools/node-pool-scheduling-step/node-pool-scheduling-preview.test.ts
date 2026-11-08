@@ -11,6 +11,17 @@ import {
 } from "./node-pool-scheduling-simulation.mock";
 import { EColumnFilterType, EFilterOperator } from "@/models/filter.model";
 describe("scheduling preview boundaries", () => {
+  it("uses authored guaranteed and over-quota values for the five-row Automatic profile", () => {
+    const result = getMockSchedulingResult(MOCK_SCHEDULING_IDS, 144, {}, "guaranteed-automatic");
+    expect(result).toBeDefined();
+    const outputs = Object.values(result ?? {});
+    expect(outputs.reduce((sum, row) => sum + row.allocated, 0)).toBe(144);
+    expect(outputs.map((row) => row.guaranteed)).toEqual([20, 20, 20, 20, 20]);
+    expect(outputs.map((row) => row.overQuota)).toEqual([9, 9, 9, 9, 8]);
+    expect(
+      outputs.every((row) => row.guaranteed + row.overQuota === row.allocated && row.allocated + row.unmet === 144),
+    ).toBe(true);
+  });
   it("keeps the authored overcommit output internally consistent and separates guaranteed allocation from over-quota", () => {
     const result = getMockSchedulingResult(MOCK_SCHEDULING_TEN_IDS, 144, {}, "guaranteed-overcommit");
     expect(result).toBeDefined();

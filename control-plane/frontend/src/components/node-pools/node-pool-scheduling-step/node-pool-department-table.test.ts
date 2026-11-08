@@ -25,6 +25,47 @@ const rows: DepartmentNodePoolResources[] = [
 ];
 const draft: SchedulingDraft = { mode: "proportional", automaticWeights: false, cpuQuota: false, departments: {} };
 describe("scheduling department table", () => {
+  it("renders the exact Guaranteed Automatic profile with truthful quota-derived percentages only", async () => {
+    const profile = Array.from({ length: 5 }, (_, index) => ({
+      ...rows[0],
+      id: `fixture-auto-${index + 1}`,
+      orgUnitId: `preview-department-${index + 1}`,
+      orgUnitName: `department ${index + 1}`,
+      resources: { gpu: { deserved: 20, overQuotaWeight: 2, limit: -1 } },
+    }));
+    const automatic = { ...draft, mode: "guaranteed" as const, automaticWeights: true };
+    const wrapper = mount(Table, {
+      props: {
+        rows: profile,
+        baselineRows: profile,
+        draft: automatic,
+        capacity: 144,
+        aggregates: { all: { weightsSum: 10, deservedSum: 100 }, MediumLow: { weightsSum: 10, deservedSum: 100 } },
+        ranks: ["MediumLow"],
+        readonly: false,
+        loading: false,
+      },
+      global: {
+        plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
+        directives: { "click-outside": {}, permission: {} },
+      },
+    });
+    wrapper.findComponent(QToggle).vm.$emit("update:modelValue", true);
+    await wrapper.vm.$nextTick();
+    expect(wrapper.findAll(".allocated")).toHaveLength(5);
+    expect(wrapper.text()).toContain("20%");
+    await wrapper.setProps({ draft: { ...automatic, automaticWeights: false } });
+    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    const nearby = profile.map((row, index) =>
+      index ? row : { ...row, resources: { gpu: { ...row.resources.gpu, deserved: 21 } } },
+    );
+    await wrapper.setProps({ rows: nearby, baselineRows: nearby, draft: automatic });
+    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    const live = profile.map((row, index) => ({ ...row, orgUnitId: `live-auto-${index + 1}` }));
+    await wrapper.setProps({ rows: live, baselineRows: live });
+    expect(wrapper.findAll(".allocated")).toHaveLength(0);
+    wrapper.unmount();
+  });
   it("renders only the exact authored overcommit profile and clears bars for nearby quotas, modes and live IDs", async () => {
     const profile = Array.from({ length: 10 }, (_, index) => ({
       ...rows[0],
@@ -54,6 +95,7 @@ describe("scheduling department table", () => {
     await wrapper.vm.$nextTick();
     expect(wrapper.findAll(".allocated")).toHaveLength(10);
     expect(wrapper.get(".quota-warning").text()).toContain("exceeds");
+    expect(wrapper.get(".quota-warning").text()).toContain("by 24 GPUs");
     expect(wrapper.text()).toContain("Simulation preview — mock results");
     const nearby = profile.map((row, index) =>
       index ? row : { ...row, resources: { gpu: { ...row.resources.gpu, deserved: 25 } } },
@@ -67,7 +109,7 @@ describe("scheduling department table", () => {
     expect(wrapper.findAll(".allocated")).toHaveLength(0);
     wrapper.unmount();
   });
-  it("uses the reference zero-state copy and only changes the settings label for no matches", async () => {
+  it("uses the reference zero-state copy and uses Show settings during search, including matching rows", async () => {
     const wrapper = mount(Table, {
       props: { rows: [], draft, aggregates: {}, ranks: [], readonly: false, loading: false },
       global: {
@@ -78,7 +120,10 @@ describe("scheduling department table", () => {
     expect(wrapper.get(".scheduling-empty").text()).toBe("No departments yet");
     expect(wrapper.get('[aid="advanced-settings"]').text()).toBe("Advanced settings");
     await wrapper.setProps({ searchTerm: "missing" });
-    expect(wrapper.get(".scheduling-empty").text()).toBe("No departments match your filters.");
+    expect(wrapper.get(".scheduling-empty").text()).toBe("No departments match your filters");
+    expect(wrapper.get('[aid="advanced-settings"]').text()).toBe("Show settings");
+    await wrapper.setProps({ rows, searchTerm: "Alpha" });
+    expect(wrapper.find(".scheduling-empty").exists()).toBe(false);
     expect(wrapper.get('[aid="advanced-settings"]').text()).toBe("Show settings");
     wrapper.unmount();
   });

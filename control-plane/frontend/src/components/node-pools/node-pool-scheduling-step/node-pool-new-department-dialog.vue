@@ -42,6 +42,7 @@
           <runai-select
             v-model="subject"
             :options="subjectTypeOptionsWithSSO"
+            hide-bottom-space
             label="Subject"
             class="subject-select"
             @update:model-value="subjects = []"
@@ -53,7 +54,7 @@
             @update:selected-subjects="subjects = $event"
             @add-subject="subjects = [...subjects, $event]"
           />
-          <runai-select v-model="role" :options="roleOptions" label="Role" class="role-select" />
+          <runai-select hide-bottom-space v-model="role" :options="roleOptions" label="Role" class="role-select" />
         </div>
         <runai-btn
           v-else
@@ -189,7 +190,7 @@ async function reviewPreview() {
   max-width: 100%;
 }
 .administrator-rule .subject-addable-multi-select {
-  margin: 26px 0 16px;
+  margin: 26px 0;
   width: 90%;
 }
 .administrator-rule .remove-administrator {

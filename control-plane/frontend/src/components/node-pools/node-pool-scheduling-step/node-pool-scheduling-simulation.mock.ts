@@ -14,7 +14,10 @@ export const MOCK_SCHEDULING_TEN_IDS = Array.from({ length: 10 }, (_, index) => 
 export const MOCK_GUARANTEED_OVERCOMMIT_QUOTAS = Object.fromEntries(
   MOCK_SCHEDULING_TEN_IDS.map((id, index) => [id, index === 0 ? 24 : 16]),
 );
-type MockSchedulingProfile = "zero-quota" | "guaranteed-overcommit";
+export const MOCK_GUARANTEED_AUTOMATIC_QUOTAS = Object.fromEntries(MOCK_SCHEDULING_IDS.map((id) => [id, 20]));
+const automaticGuaranteed = [20, 20, 20, 20, 20];
+const automaticOverQuota = [9, 9, 9, 9, 8];
+type MockSchedulingProfile = "zero-quota" | "guaranteed-overcommit" | "guaranteed-automatic";
 const fixtures = [
   { ids: MOCK_SCHEDULING_IDS, allocation: [29, 29, 29, 29, 28] },
   { ids: MOCK_SCHEDULING_TEN_IDS, allocation: [15, 15, 15, 15, 14, 14, 14, 14, 14, 14] },
@@ -31,6 +34,7 @@ export function getMockSchedulingResult(
   if (
     !fixture ||
     (profile === "guaranteed-overcommit" && fixture.ids.length !== 10) ||
+    (profile === "guaranteed-automatic" && fixture.ids.length !== 5) ||
     capacity !== 144 ||
     Object.entries(demand).some(([id, value]) => !fixture.ids.includes(id) || value !== 144)
   )
@@ -41,8 +45,18 @@ export function getMockSchedulingResult(
       {
         allocated: fixture.allocation[index],
         unmet: 144 - fixture.allocation[index],
-        guaranteed: profile === "guaranteed-overcommit" ? fixture.allocation[index] : 0,
-        overQuota: profile === "guaranteed-overcommit" ? 0 : fixture.allocation[index],
+        guaranteed:
+          profile === "guaranteed-overcommit"
+            ? fixture.allocation[index]
+            : profile === "guaranteed-automatic"
+              ? automaticGuaranteed[index]
+              : 0,
+        overQuota:
+          profile === "guaranteed-overcommit"
+            ? 0
+            : profile === "guaranteed-automatic"
+              ? automaticOverQuota[index]
+              : fixture.allocation[index],
       },
     ]),
   );

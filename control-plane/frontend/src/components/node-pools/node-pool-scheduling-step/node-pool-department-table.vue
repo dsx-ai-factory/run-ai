@@ -4,15 +4,11 @@
 -->
 <template>
   <section class="department-section" aria-label="Department scheduling">
-    <q-banner
-      v-if="
-        draft.mode === 'guaranteed' && totalsComplete !== false && capacity != null && totals.all?.deservedSum > capacity
-      "
-      class="quota-warning"
-      role="status"
-      >The total assigned quota exceeds the node pool’s total capacity. Update departments to stay within the
-      limit.</q-banner
-    >
+    <q-banner v-if="quotaExcess != null" class="quota-warning" role="status">
+      <template #avatar><q-icon name="ph ph-warning-circle" size="20px" class="quota-warning-icon" /></template>
+      The total assigned quota exceeds the node pool’s total by {{ quotaExcess }} GPUs. Departments may not receive their
+      full guaranteed quota.
+    </q-banner>
     <runai-page-actions
       class="scheduling-actions"
       :class="{ 'actions-readonly': readonly }"
@@ -53,7 +49,7 @@
           stack
           size="sm"
           icon="ph ph-gear-six"
-          :label="noMatchingDepartments ? 'Show settings' : 'Advanced settings'"
+          :label="props.searchTerm || noMatchingDepartments ? 'Show settings' : 'Advanced settings'"
           :disable="readonly"
           @click="emit('advanced-settings')"
       /></template>
@@ -254,7 +250,7 @@
                     : hasError
                       ? "Department data is unavailable."
                       : searchTerm || rankFilter || filters.advancedFilters?.length
-                        ? "No departments match your filters."
+                        ? "No departments match your filters"
                         : "No departments yet"
               }}
             </div></template
@@ -312,7 +308,9 @@ import type { ITableColumn } from "@/models/table.model";
 import { matchesSchedulingFilters } from "./node-pool-scheduling-filters";
 import {
   getMockSchedulingResult,
+  MOCK_SCHEDULING_IDS,
   MOCK_SCHEDULING_TEN_IDS,
+  MOCK_GUARANTEED_AUTOMATIC_QUOTAS,
   MOCK_GUARANTEED_OVERCOMMIT_QUOTAS,
 } from "./node-pool-scheduling-simulation.mock";
 import RunaiBtn from "@/components/common/runai-btn/runai-btn.vue";
@@ -406,6 +404,25 @@ const automatic = computed(() => props.draft.mode === "guaranteed" && props.draf
 const totals = computed(() =>
   schedulingTotalsWithEdits(props.aggregates, baseline.value, props.draft.departments, automatic.value),
 );
+const quotaExcess = computed(() => {
+  const capacity = props.capacity;
+  const assigned = totals.value.all;
+  if (
+    props.draft.mode !== "guaranteed" ||
+    !props.canView ||
+    props.totalsComplete === false ||
+    capacity == null ||
+    !Number.isFinite(capacity) ||
+    capacity < 0 ||
+    !assigned ||
+    !Number.isFinite(assigned.deservedSum) ||
+    assigned.deservedSum <= capacity
+  )
+    return undefined;
+  const finiteTotal = assigned.finiteQuotaSum ?? assigned.deservedSum;
+  return Number.isFinite(finiteTotal) && finiteTotal > capacity ? finiteTotal - capacity : undefined;
+});
+
 watch(
   [
     ranked,
@@ -481,7 +498,6 @@ const demand = ref<Record<string, number>>({});
 const simulationResults = computed(() => {
   if (
     !props.draft.mode ||
-    props.draft.automaticWeights ||
     props.draft.cpuQuota ||
     props.draft.timeFairshare ||
     (props.draft.historicalWeight != null && props.draft.historicalWeight !== 0) ||
@@ -494,17 +510,23 @@ const simulationResults = computed(() => {
   )
     return undefined;
   const ids = Object.keys(baseline.value);
-  const zeroQuota = Object.values(baseline.value).every((row) => row.quota === 0);
+  const zeroQuota = !props.draft.automaticWeights && Object.values(baseline.value).every((row) => row.quota === 0);
   const guaranteedOvercommit =
     props.draft.mode === "guaranteed" &&
+    !props.draft.automaticWeights &&
     ids.length === 10 &&
     MOCK_SCHEDULING_TEN_IDS.every((id) => baseline.value[id]?.quota === MOCK_GUARANTEED_OVERCOMMIT_QUOTAS[id]);
-  if (!zeroQuota && !guaranteedOvercommit) return undefined;
+  const guaranteedAutomatic =
+    props.draft.mode === "guaranteed" &&
+    props.draft.automaticWeights &&
+    ids.length === 5 &&
+    MOCK_SCHEDULING_IDS.every((id) => baseline.value[id]?.quota === MOCK_GUARANTEED_AUTOMATIC_QUOTAS[id]);
+  if (!zeroQuota && !guaranteedOvercommit && !guaranteedAutomatic) return undefined;
   return getMockSchedulingResult(
     ids,
     props.capacity,
     demand.value,
-    guaranteedOvercommit ? "guaranteed-overcommit" : "zero-quota",
+    guaranteedOvercommit ? "guaranteed-overcommit" : guaranteedAutomatic ? "guaranteed-automatic" : "zero-quota",
   );
 });
 const currentRank = computed(() => {
@@ -942,8 +964,20 @@ async function quotaContext(row: DepartmentSchedulingEdit) {
   font-size: 12px;
 }
 .quota-warning {
-  background: #fff8e1;
-  color: #805b00;
+  background: #ffeecc;
+  color: var(--b-text-main);
+  min-height: 50px;
+  padding: 0 16px;
   font-size: 12px;
+  line-height: 16.8px;
+  align-items: center;
+}
+.quota-warning :deep(.q-banner__avatar) {
+  min-width: 20px;
+  padding-right: 10px;
+  align-self: center;
+}
+.quota-warning-icon {
+  color: #ffab00;
 }
 </style>
