@@ -113,7 +113,6 @@ func (s *NotificationsApiService) setUnlimitedDeserved(ctx context.Context, clus
 	return unlimitedGpuDepartmentExists
 }
 
-// getSchedulingCapabilities returns nil when the node pool can't be read, which keeps the quota-mode defaults.
 func (s *NotificationsApiService) getSchedulingCapabilities(ctx context.Context, nodePoolId string) *apiClusters.SchedulingCapabilities {
 	nodePool, err := s.clustersClient.GetNodepoolMinimal(ctx, nodePoolId)
 	if err != nil || nodePool == nil {
@@ -324,8 +323,6 @@ func GetDepartmentResourcesToAdd(orgUnitData models.OrgUnitData, setUnlimitedDes
 	capabilities *apiClusters.SchedulingCapabilities,
 ) *models.Resources {
 	if capabilities != nil && !capabilities.Quota {
-		// With adjustable weights the stored weight reaches the scheduler as is, and a 0 would give the department no share.
-		// Without them the weight is derived from the quota, so storing 0 keeps reads and updates consistent.
 		weight := float64(0)
 		if capabilities.AdjustableWeights {
 			weight = models.DefaultOverQuotaWeight
