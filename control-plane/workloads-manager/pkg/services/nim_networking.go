@@ -36,6 +36,10 @@ const (
 	backendProtocolGRPCNginx          = "GRPC"
 	backendProtocolGRPCHAProxy        = "grpc"
 	haproxyForwardedUriHeader         = "X-Forwarded-Uri %[req.uri]"
+
+	nimLoadAwareRoutingProtectedMessage  = "load-aware routing is not available yet for NIM services with a protected serving port"
+	nimLoadAwareRoutingNotExposedMessage = "load-aware routing requires servingPort.exposeExternally to be true"
+	nimLoadAwareRoutingGRPCMessage       = "load-aware routing is not available for NIM services that serve gRPC"
 )
 
 type nimServiceNetworkingInfo struct {
@@ -150,7 +154,41 @@ func validateNimServingPortAuthSupportedForClusterVersion(ctx context.Context, c
 	return api.NewError(http.StatusBadRequest, "servingPort authorization fields are supported for cluster version 2.25 and above", nil)
 }
 
-func nimServingPortToNetworkingConfig(workloadName string, sp *api.NimServiceServingPort, info nimServiceNetworkingInfo) (*[]api.NetworkingEndpoint, *api.Error) {
+// nimInferenceRouting returns the routing carrier for a NIM spec that set a
+// load-aware routing field, and nil otherwise, so a NIM that did not opt in
+// submits the same workload request as before. A path prefix without the opt-in
+// is carried so that the workload request is rejected instead of ignoring it.
+func nimInferenceRouting(spec api.NimServiceSpec) *api.WorkloadV2ConfigurationInferenceRouting {
+	routing := &api.WorkloadV2ConfigurationInferenceRouting{
+		LoadAwareRouting:           spec.LoadAwareRouting,
+		LoadAwareRoutingPathPrefix: spec.LoadAwareRoutingPathPrefix,
+	}
+	if !inferenceRoutingOptedIn(routing) && routing.LoadAwareRoutingPathPrefix == nil {
+		return nil
+	}
+	return routing
+}
+
+// validateNimInferenceRouting rejects the serving port settings that the endpoint
+// picker cannot serve, before any networking is composed. The Gateway, hostname
+// and path checks depend on the cluster and run when the intent is built.
+func validateNimInferenceRouting(sp *api.NimServiceServingPort) *api.Error {
+	switch {
+	case sp != nil && hasNimServingPortAuth(sp):
+		return api.NewError(http.StatusBadRequest, nimLoadAwareRoutingProtectedMessage, nil)
+	case !nimServingPortExposureWanted(sp):
+		return api.NewError(http.StatusBadRequest, nimLoadAwareRoutingNotExposedMessage, nil)
+	case (sp.GrpcPort != nil && *sp.GrpcPort > 0) || resolveProtocol(sp) == api.SERVINGPORTEXPOSEDPROTOCOL_GRPC:
+		// The plugin reads the target port from the operator Service, which also
+		// carries the gRPC port when one is set.
+		return api.NewError(http.StatusBadRequest, nimLoadAwareRoutingGRPCMessage, nil)
+	}
+	return nil
+}
+
+// inferenceRouting adds the reference to the operator Service even when the serving
+// port is public, because the InferenceEndpoint selects the serving Pods through it.
+func nimServingPortToNetworkingConfig(workloadName string, sp *api.NimServiceServingPort, info nimServiceNetworkingInfo, inferenceRouting bool) (*[]api.NetworkingEndpoint, *api.Error) {
 	if sp == nil || sp.Port == nil || *sp.Port < 1 {
 		return nil, nil
 	}
@@ -164,7 +202,7 @@ func nimServingPortToNetworkingConfig(workloadName string, sp *api.NimServiceSer
 	port := int32(*sp.Port)
 	endpoint := api.NetworkingEndpoint{}
 
-	if hasAuth {
+	if hasAuth || inferenceRouting {
 		// ServiceRef is set to workloadName because the NIM operator creates a K8s Service named after the workload.
 		svc := api.NetworkingService{
 			Ref: &api.ServiceRef{
