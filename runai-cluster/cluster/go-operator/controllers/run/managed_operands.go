@@ -129,7 +129,7 @@ func NewManagedOperands(ctx context.Context, localClusterClient kc.HybridClient,
 	// The controller uses its in-cluster client to manage the serving stack on the workload cluster.
 	mo.addRemoteCluster(inference_endpoint_controller.Operand(remoteClusterClient, runaiConfig))
 	mo.addRemoteCluster(advice_restart_controller.Operand(remoteClusterClient, runaiConfig))
-	mo.addRemoteCluster(runai_public.Operand(remoteClusterClient, *runaiConfig))
+	mo.addRemoteCluster(runai_public.Operand(localClusterClient, remoteClusterClient, *runaiConfig))
 	mo.addRemoteCluster(encryption_key.Operand(remoteClusterClient, *runaiConfig))
 	mo.addRemoteCluster(templates.Operand(remoteClusterClient, *runaiConfig))
 	mo.addRemoteCluster(prometheus.Operand(remoteClusterClient, runaiConfig, promSharedData))

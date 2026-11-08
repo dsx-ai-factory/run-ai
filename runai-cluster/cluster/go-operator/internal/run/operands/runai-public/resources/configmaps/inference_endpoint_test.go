@@ -42,6 +42,24 @@ var _ = Describe("Inference endpoint capability publication", func() {
 		}
 	}, Entry("all enabled", ""), Entry("agent disabled", "agent"), Entry("anyworkload disabled", "anyworkload-controller"), Entry("endpoint controller disabled", "inference-endpoint-controller"))
 
+	It("reads the agent from the local cluster and the controllers from the remote cluster", func() {
+		config := getRunaiConfig()
+		config.Spec.Agent.Enabled = ptr.To(true)
+		config.Spec.AnyworkloadController.Enabled = ptr.To(true)
+		config.Spec.InferenceEndpointController.Enabled = ptr.To(true)
+		objects := inferenceCapabilityDeployments(&config)
+		localClient := createKubeClientMock(objects[0])
+		remoteClient := createKubeClientMock(append([]client.Object{}, objects[1:]...)...)
+		kc := kcfake.New(remoteClient, remoteClient, createDynamicClient())
+		obj, err := NewRunaiPublic("test", kc, config).WithLocalClusterReader(localClient).Object(context.Background())
+		Expect(err).NotTo(HaveOccurred())
+		var public struct {
+			Configuration map[string]interface{} `yaml:"configuration"`
+		}
+		Expect(yaml.Unmarshal([]byte(obj.(*corev1.ConfigMap).Data["runai-public"]), &public)).To(Succeed())
+		Expect(public.Configuration).To(HaveKeyWithValue("inferenceEndpointSchemaVersion", "v1"))
+	})
+
 	DescribeTable("withholds capability until every desired component has rolled out", func(index int, change func(*appsv1.Deployment)) {
 		config := getRunaiConfig()
 		config.Spec.Agent.Enabled = ptr.To(true)
