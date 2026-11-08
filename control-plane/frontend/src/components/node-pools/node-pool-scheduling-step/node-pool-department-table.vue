@@ -67,7 +67,7 @@
           :pagination="{ rowsPerPage: 0 }"
           hide-pagination
           :rows-per-page-options="[0]"
-          :style="{ '--scheduling-table-min-width': draft.maxAllocation ? '1000px' : '960px' }"
+          :style="{ '--scheduling-table-min-width': draft.maxAllocation ? '998px' : '960px' }"
         >
           <template #header="{ cols }"
             ><q-tr>
