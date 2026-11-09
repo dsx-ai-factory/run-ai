@@ -186,8 +186,12 @@ func (r *RunAIConfigReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	res = requeue()
 	defer func() {
+		// Finalizing RunaiConfig must retain its result so incomplete cleanup can retry.
+		if !runaiConfig.GetDeletionTimestamp().IsZero() {
+			return
+		}
 		res, retErr = r.controllerDeferFunction(ctx, runaiConfig, multiErr, res)
-		if clusterResource != nil {
+		if clusterResource != nil && clusterResource.GetDeletionTimestamp().IsZero() {
 			res, retErr = r.controllerDeferFunction(ctx, clusterResource, multiErr, res)
 		}
 	}()
