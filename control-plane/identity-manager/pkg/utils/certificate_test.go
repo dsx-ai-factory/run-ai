@@ -20,6 +20,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestSigningCertificateExpiration(t *testing.T) {
+	t.Parallel()
+	der := createCertificate(t, true)
+	parsed, err := x509.ParseCertificate(der)
+	require.NoError(t, err)
+
+	expiration := SigningCertificateExpiration(base64.StdEncoding.EncodeToString(der))
+	require.True(t, expiration.Equal(parsed.NotAfter.UTC()))
+
+	expiration = SigningCertificateExpiration("not-a-certificate")
+	require.Equal(t, expiration, time.Time{})
+}
+
 func TestValidateSigningCertificate_Base64DER(t *testing.T) {
 	t.Parallel()
 	signed := createCertificate(t, true)

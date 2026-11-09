@@ -22,52 +22,67 @@ const (
 
 type CertificateData struct {
 	SigningAlgorithm string
+	NotBefore        time.Time
 	ExpirationDate   time.Time
 }
 
-// ValidateSigningCertificate parses a SAML IdP signing certificate and checks that it is inside its validity window.
-// The certificate's signature and issuer are not checked. A private CA does not publish its certificate in the IdP metadata,
-// so a leaf signed by that CA cannot be distinguished from a certificate whose signature does not verify.
-// PEM values may include further certificates. Any other value may list several certificates separated by commas; each is validated on its own.
-func ValidateSigningCertificate(raw string) ([]CertificateData, error) {
-	trimmed := strings.TrimSpace(raw)
-	if strings.Contains(trimmed, BEGIN_CERTIFICATE) {
-		parsed, err := validateSigningCertificate(trimmed)
-		if parsed == nil {
-			return nil, err
-		}
-		return []CertificateData{*parsed}, err
+func SigningCertificateExpiration(raw string) time.Time {
+	certificates, err := parseSigningCertificate(raw)
+	if err != nil || len(certificates) == 0 {
+		return time.Time{}
 	}
-	certificatesData := []CertificateData{}
-	for _, part := range strings.Split(trimmed, ",") {
-		parsed, err := validateSigningCertificate(part)
-		if parsed != nil {
-			certificatesData = append(certificatesData, *parsed)
+	return certificates[0].ExpirationDate
+}
+
+func ValidateSigningCertificate(raw string) ([]CertificateData, error) {
+	certificates, err := parseSigningCertificate(raw)
+	if err != nil {
+		return certificates, err
+	}
+	for _, certificate := range certificates {
+		if err := certificateCurrentlyValid(certificate); err != nil {
+			return certificates, err
+		}
+	}
+	return certificates, nil
+}
+
+func parseSigningCertificate(raw string) ([]CertificateData, error) {
+	var certificatesData []CertificateData
+	for _, part := range signingCertificateParts(raw) {
+		certs, err := parseSigningCertificates(part)
+		if len(certs) > 0 {
+			certificatesData = append(certificatesData, CertificateData{
+				SigningAlgorithm: certs[0].SignatureAlgorithm.String(),
+				NotBefore:        certs[0].NotBefore.UTC(),
+				ExpirationDate:   certs[0].NotAfter.UTC(),
+			})
 		}
 		if err != nil {
 			return certificatesData, err
 		}
 	}
+	if len(certificatesData) == 0 {
+		return nil, fmt.Errorf("signing certificate is required: %w", ErrUnsignedCertificate)
+	}
 	return certificatesData, nil
 }
 
-func validateSigningCertificate(raw string) (*CertificateData, error) {
-	certs, err := parseSigningCertificates(raw)
-	if err != nil || len(certs) == 0 {
-		return nil, err
-	}
 
-	certificateData := &CertificateData{
-		SigningAlgorithm: certs[0].SignatureAlgorithm.String(),
-		ExpirationDate:   certs[0].NotAfter.UTC(),
+func signingCertificateParts(raw string) []string {
+	trimmed := strings.TrimSpace(raw)
+	if trimmed == "" {
+		return nil
 	}
-
-	return certificateData, leafCurrentlyValid(certs[0])
+	if strings.Contains(trimmed, BEGIN_CERTIFICATE) {
+		return []string{trimmed}
+	}
+	return strings.Split(trimmed, ",")
 }
 
-func leafCurrentlyValid(leaf *x509.Certificate) error {
+func certificateCurrentlyValid(certificate CertificateData) error {
 	now := time.Now()
-	if now.Before(leaf.NotBefore) || now.After(leaf.NotAfter) {
+	if now.Before(certificate.NotBefore) || now.After(certificate.ExpirationDate) {
 		return fmt.Errorf("signing certificate is outside its validity window: %w", ErrUnsignedCertificate)
 	}
 	return nil
