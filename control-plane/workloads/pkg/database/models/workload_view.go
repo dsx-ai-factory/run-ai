@@ -111,6 +111,8 @@ type WorkloadView struct {
 const (
 	createdAtField      = "createdAt"
 	phaseUpdatedAtField = "phaseUpdatedAt"
+
+	NodepoolFilterColumn = "current_nodepools[1]"
 )
 
 func (WorkloadView) TableName() string {
@@ -139,7 +141,7 @@ func (WorkloadView) FilterFieldsToColumn() queryapi.APIFieldsMapping {
 		"clusterId":               queryapi.NewFieldMapping("cluster_id"),
 		"completedAt":             queryapi.NewFieldMapping("completed_at"),
 		"allocatedGPU":            queryapi.NewFieldMapping("allocated_gpu"),
-		"nodepool":                queryapi.NewFieldMapping("current_nodepools[1]"),
+		"nodepool":                queryapi.NewFieldMapping(NodepoolFilterColumn),
 		"distributedFramework":    queryapi.NewFieldMapping("distributed_framework"),
 		"idleAllocatedGpus":       queryapi.NewFieldMapping("idle_allocated_gpus"),
 		"phaseUpdatedAt":          queryapi.NewFieldMapping("phase_updated_at"),
