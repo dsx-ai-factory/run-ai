@@ -38,7 +38,7 @@ var _ = Describe("setSchedulingCapabilitiesOnCreateUpdate", func() {
 	It("applies the requested capabilities to a new nodepool while the gate is on", func() {
 		setGate(true)
 		nodepool := models.Nodepool{}
-		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, proportional, false)
+		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, proportional)
 		Expect(nodepool.GetSchedulingCapabilities()).To(Equal(api.SchedulingCapabilities{
 			AdjustableWeights: true, Quota: false, Ranks: false, CpuQuota: false,
 		}))
@@ -47,7 +47,7 @@ var _ = Describe("setSchedulingCapabilitiesOnCreateUpdate", func() {
 	It("keeps the defaults for omitted capabilities", func() {
 		setGate(true)
 		nodepool := models.Nodepool{}
-		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, api.SchedulingCapabilitiesNullable{}, false)
+		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, api.SchedulingCapabilitiesNullable{})
 		Expect(nodepool.AllowQuota).To(Equal(models.DefaultAllowQuota))
 		Expect(nodepool.AllowRanks).To(Equal(models.DefaultAllowRanks))
 	})
@@ -55,15 +55,7 @@ var _ = Describe("setSchedulingCapabilitiesOnCreateUpdate", func() {
 	It("ignores the requested capabilities while the gate is off", func() {
 		setGate(false)
 		nodepool := models.Nodepool{}
-		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, proportional, false)
-		Expect(nodepool.AllowQuota).To(BeTrue())
-		Expect(nodepool.AllowRanks).To(BeTrue())
-	})
-
-	It("ignores the requested capabilities when told to", func() {
-		setGate(true)
-		nodepool := models.Nodepool{}
-		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, proportional, true)
+		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, proportional)
 		Expect(nodepool.AllowQuota).To(BeTrue())
 		Expect(nodepool.AllowRanks).To(BeTrue())
 	})

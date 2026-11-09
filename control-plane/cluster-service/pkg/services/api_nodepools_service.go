@@ -172,7 +172,7 @@ func (s *NodePoolsApiService) CreateNodepool(ctx context.Context, fields api.Nod
 	if err := setSchedulingConfigurationFieldsOnCreate(ctx, &nodepoolModel, fields, capChecker); err != nil {
 		return NewErrorResponse(api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on create", err)), nil
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities, false)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, fields.SchedulingCapabilities)
 
 	nodepoolSetDefaults(&nodepoolModel)
 
@@ -698,7 +698,7 @@ func (s *NodePoolsApiService) createDefaultNodepool(ctx context.Context, cluster
 		MinGuaranteedRuntime:       nil,
 	}
 	// the default nodepool keeps the defaults: org-unit-service gives its default department unlimited quota
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, clusterNotification.SchedulingCapabilities, true)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, &nodepoolModel, api.SchedulingCapabilitiesNullable{})
 	nodepoolSetDefaults(&nodepoolModel)
 
 	nodepoolModel.ClusterId = uuid.MustParse(clusterNotification.Id)
@@ -752,7 +752,7 @@ func mapUpdateFieldsToModel(ctx context.Context, nodepoolModel models.Nodepool, 
 	if err := setSchedulingConfigurationFieldsOnUpdate(ctx, result, updateFields, capChecker); err != nil {
 		return nil, api.NewError(http.StatusInternalServerError, "Failed to apply scheduling configuration on update", err)
 	}
-	setSchedulingCapabilitiesOnCreateUpdate(ctx, result, updateFields.SchedulingCapabilities, false)
+	setSchedulingCapabilitiesOnCreateUpdate(ctx, result, updateFields.SchedulingCapabilities)
 
 	ntErr := setNetworkTopology(ctx, nodepoolModel.TenantId, result, updateFields.NetworkTopologyId)
 	if ntErr != nil {
