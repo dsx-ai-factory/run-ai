@@ -58,7 +58,7 @@
 </template>
 <script lang="ts">
 import "@/plugins/echarts";
-import { defineComponent, type PropType } from "vue";
+import { defineComponent, markRaw, type PropType } from "vue";
 import VChart from "vue-echarts";
 
 import {
@@ -176,6 +176,7 @@ export default defineComponent({
       measurementMap: {} as Record<string, Array<GroupedMeasurementResponseValuesInner>>,
       error: false as boolean,
       loading: false as boolean,
+      pendingChartData: null as Promise<void> | null,
       isInitialLoader: true as boolean,
       gpuQuotaTitle: "GPU quota (All departments)",
       timeframes: [] as Array<string>,
@@ -329,7 +330,11 @@ export default defineComponent({
 
       return differenceArray;
     },
-    async loadChartData(): Promise<void> {
+    loadChartData(): Promise<void> {
+      this.pendingChartData = markRaw(this.fetchChartData());
+      return this.pendingChartData;
+    },
+    async fetchChartData(): Promise<void> {
       if (this.chartOptions === null) return;
 
       try {
@@ -398,6 +403,7 @@ export default defineComponent({
         this.$q.notify(dashboardUtil.getCsvErrorMessage());
         return;
       }
+      await this.pendingChartData;
       const metricType: Array<MetricsType> = [MetricsType.TotalGpu, MetricsType.AllocatedGpu];
       if (this.hasGpuQuotaData) {
         metricType.push(MetricsType.GpuQuota);

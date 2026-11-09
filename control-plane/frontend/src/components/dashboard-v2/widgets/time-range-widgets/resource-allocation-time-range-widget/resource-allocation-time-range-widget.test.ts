@@ -342,5 +342,30 @@ describe("resource-allocation-time-range-widget.vue", () => {
       expect(nodePoolName).toEqual("pool-a");
       expect(filename).toMatch(/^resources-allocation_pool-a_.*\.csv$/);
     });
+
+    it("waits for the new selection's metrics before choosing the CSV columns", async () => {
+      const wrapper = mountWithNodePool();
+      await flushPromises();
+      wrapper.vm.measurementMap = { GPU_QUOTA: quotaMeasurements("-1") };
+
+      let resolveNodePoolMetrics: (value: MetricsResponse) => void = () => undefined;
+      vi.mocked(clusterService.getNodepoolMetrics).mockReturnValue(
+        new Promise((resolve) => {
+          resolveNodePoolMetrics = resolve;
+        }),
+      );
+      await wrapper.setProps({ nodePoolName: "pool-a" });
+      const exported = wrapper.vm.exportCsv();
+      resolveNodePoolMetrics({
+        measurements: [{ type: "GPU_QUOTA", values: quotaMeasurements("8") }],
+      } as MetricsResponse);
+      await exported;
+
+      expect(vi.mocked(clusterService.getNodepoolMetricsCsv).mock.calls[0][4]).toEqual([
+        "TOTAL_GPU",
+        "ALLOCATED_GPU",
+        "GPU_QUOTA",
+      ]);
+    });
   });
 });
