@@ -31,7 +31,7 @@
         />
       </div>
       <saml-idp-details
-        v-if="editCertificateDetails.expirationError"
+        v-if="editCertificateDetails.showExpirationDate"
         class="q-mb-lg"
         :expiration-date="editCertificateDetails.expirationDate"
         :show-expiration-date="editCertificateDetails.showExpirationDate"

@@ -275,17 +275,28 @@ describe("saml-settings.vue", () => {
       expect(details.props("expirationDate")).toEqual(new Date("2030-05-17T00:00:00.000Z"));
     });
 
-    it("does not show the identity provider URL, entity ID or expiration date while editing", async () => {
+    it("shows the certificate expiration date while editing when the metadata is valid", async () => {
       const { wrapper } = factory(mockIdp, true);
+      const expirationDate = new Date("2036-10-14T12:25:09Z");
 
       wrapper.findComponent({ name: "saml-fields" }).vm.$emit("certificate-details", {
         showExpirationDate: true,
-        expirationDate: new Date("2030-05-17T00:00:00.000Z"),
+        expirationDate,
         expirationError: "",
       });
       await wrapper.vm.$nextTick();
 
-      expect(wrapper.findComponent({ name: "SamlIdpDetails" }).exists()).toBe(false);
+      const details = wrapper.findComponent({ name: "SamlIdpDetails" });
+      expect(details.exists()).toBe(true);
+      expect(details.props("singleSignOnServiceUrl")).toBeUndefined();
+      expect(details.props("idpEntityId")).toBeUndefined();
+      expect(details.props()).toMatchObject({
+        showExpirationDate: true,
+        expirationError: "",
+      });
+      expect(details.props("expirationDate")).toEqual(expirationDate);
+      expect(details.text()).toContain("Certificate expiration date");
+      expect(details.find<HTMLInputElement>("input").element.value).toBe("14/10/2036");
     });
 
     it("shows only the certificate expiration error while editing when the certificate is expired", async () => {

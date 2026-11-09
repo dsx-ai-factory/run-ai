@@ -212,6 +212,27 @@ describe("saml-fields.vue", () => {
       });
     });
 
+    it("parses the expiration date identity-manager returns without fractional seconds", async () => {
+      const expirationDate = "2036-10-14T12:25:09Z";
+      vi.mocked(idpService.dryRunIdp).mockResolvedValue({
+        alias: "",
+        samlData: {
+          signingCertificate: "fake-cert-content",
+          certificateExpirationDate: expirationDate,
+          validateSignature: false,
+        },
+      });
+
+      const { wrapper } = factory({ isNewIdp: true });
+      await uploadFile(wrapper);
+
+      expect(lastCertificateDetails(wrapper)).toMatchObject({
+        showExpirationDate: true,
+        expirationDate: new Date(expirationDate),
+        expirationError: "",
+      });
+    });
+
     it("no longer renders the read-only identity provider fields", () => {
       const { wrapper } = factory({ isNewIdp: false });
 
