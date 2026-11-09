@@ -321,7 +321,7 @@ var _ = Describe("test", Ordered, func() {
 			})
 
 			It("projects", func() {
-				err := handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, false)
+				err := handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, nil, false)
 				Expect(err).To(BeNil())
 
 				projectId, err := strconv.ParseInt(project1Cluster1.Id, 10, 64)
@@ -330,7 +330,7 @@ var _ = Describe("test", Ordered, func() {
 				Expect(err).To(BeNil())
 				validateAllResources(project1ById.OrgUnitData.Resources)
 
-				err = handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster2Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, false)
+				err = handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster2Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, nil, false)
 				Expect(err).To(BeNil())
 
 				projectId, err = strconv.ParseInt(project1Cluster2.Id, 10, 64)
@@ -340,8 +340,30 @@ var _ = Describe("test", Ordered, func() {
 				validateAllResources(project2ById.OrgUnitData.Resources)
 			})
 
+			It("departments of a node pool in weights mode", func() {
+				capabilities := map[string]*clustersOpenapi.SchedulingCapabilities{
+					fmt.Sprint(nodePool3Id): {AdjustableWeights: true},
+				}
+				err := handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, capabilities, true)
+				Expect(err).To(BeNil())
+
+				departmentId, err := strconv.ParseInt(defaultDepartmentCluster1.Id, 10, 64)
+				Expect(err).To(BeNil())
+				department, err := dao.GetDepartmentById(ctx, departmentId, "1", models.SlimVerbosity, nil)
+				Expect(err).To(BeNil())
+				var added *models.Resources
+				for i := range department.OrgUnitData.Resources {
+					if department.OrgUnitData.Resources[i].NodePoolId == fmt.Sprint(nodePool3Id) {
+						added = &department.OrgUnitData.Resources[i]
+					}
+				}
+				Expect(added).NotTo(BeNil())
+				Expect(*added.GpuDeserved).To(Equal(float64(0)))
+				Expect(*added.GpuOverQuotaWeight).To(Equal(models.DefaultOverQuotaWeight))
+			})
+
 			It("departments", func() {
-				err := handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, false)
+				err := handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, nil, false)
 				Expect(err).To(BeNil())
 
 				departmentId, err := strconv.ParseInt(defaultDepartmentCluster1.Id, 10, 64)
@@ -350,7 +372,7 @@ var _ = Describe("test", Ordered, func() {
 				Expect(err).To(BeNil())
 				validateAllResources(department.OrgUnitData.Resources)
 
-				err = handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster2Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, false)
+				err = handleMissingResources(ctx, runaidb.DB(), testing.TestTenant, cluster2Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, nil, false)
 				Expect(err).To(BeNil())
 
 				departmentId, err = strconv.ParseInt(department1Cluster2.Id, 10, 64)
@@ -402,14 +424,14 @@ var _ = Describe("test", Ordered, func() {
 				Expect(err).To(BeNil())
 				department, err := dao.GetDepartmentById(ctx, departmentId, "1", models.SlimVerbosity, nil)
 				Expect(err).To(BeNil())
-				resourcesAdd = append(resourcesAdd, services.GetDepartmentResourcesToAdd(department.OrgUnitData, true, dummyNodePoolId, dummyNodePoolName))
+				resourcesAdd = append(resourcesAdd, services.GetDepartmentResourcesToAdd(department.OrgUnitData, true, dummyNodePoolId, dummyNodePoolName, nil))
 
 				departmentId, err = strconv.ParseInt(department1Cluster2.Id, 10, 64)
 				Expect(err).To(BeNil())
 				department, err = dao.GetDepartmentById(ctx, departmentId, "1", models.SlimVerbosity, nil)
 				Expect(err).To(BeNil())
-				resourcesAdd = append(resourcesAdd, services.GetDepartmentResourcesToAdd(department.OrgUnitData, false, dummyNodePoolId, dummyNodePoolName))
-				resourcesAdd = append(resourcesAdd, services.GetDepartmentResourcesToAdd(department.OrgUnitData, false, dummy2NodePoolId, dummy2NodePoolName))
+				resourcesAdd = append(resourcesAdd, services.GetDepartmentResourcesToAdd(department.OrgUnitData, false, dummyNodePoolId, dummyNodePoolName, nil))
+				resourcesAdd = append(resourcesAdd, services.GetDepartmentResourcesToAdd(department.OrgUnitData, false, dummy2NodePoolId, dummy2NodePoolName, nil))
 
 				err = dao.AddResources(ctx, resourcesAdd)
 				Expect(err).To(BeNil())
@@ -546,7 +568,7 @@ var _ = Describe("test", Ordered, func() {
 			})
 
 			It("projects", func() {
-				err := handleNoResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, false)
+				err := handleNoResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, nil, false)
 				Expect(err).To(BeNil())
 
 				projectId, err := strconv.ParseInt(project1Cluster1.Id, 10, 64)
@@ -555,7 +577,7 @@ var _ = Describe("test", Ordered, func() {
 				Expect(err).To(BeNil())
 				validateAllResources(project1ById.OrgUnitData.Resources)
 
-				err = handleNoResources(ctx, runaidb.DB(), testing.TestTenant, cluster2Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, false)
+				err = handleNoResources(ctx, runaidb.DB(), testing.TestTenant, cluster2Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, nil, false)
 				Expect(err).To(BeNil())
 
 				projectId, err = strconv.ParseInt(project1Cluster2.Id, 10, 64)
@@ -566,7 +588,7 @@ var _ = Describe("test", Ordered, func() {
 			})
 
 			It("departments", func() {
-				err := handleNoResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, false)
+				err := handleNoResources(ctx, runaidb.DB(), testing.TestTenant, cluster1Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, nil, false)
 				Expect(err).To(BeNil())
 
 				departmentId, err := strconv.ParseInt(defaultDepartmentCluster1.Id, 10, 64)
@@ -575,7 +597,7 @@ var _ = Describe("test", Ordered, func() {
 				Expect(err).To(BeNil())
 				validateAllResources(department.OrgUnitData.Resources)
 
-				err = handleNoResources(ctx, runaidb.DB(), testing.TestTenant, cluster2Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, false)
+				err = handleNoResources(ctx, runaidb.DB(), testing.TestTenant, cluster2Id, []string{fmt.Sprint(defaultNodePoolId), fmt.Sprint(nodePool2Id), fmt.Sprint(nodePool3Id)}, []string{defaultNodePoolName, nodePool2Name, nodePool3Name}, nil, false)
 				Expect(err).To(BeNil())
 
 				departmentId, err = strconv.ParseInt(department1Cluster2.Id, 10, 64)

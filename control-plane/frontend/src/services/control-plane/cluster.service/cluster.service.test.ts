@@ -6,6 +6,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
+import { fileService } from "@/services/file.service/file.service";
+import { MetricsType } from "@/swagger-models/cluster-service-client";
 
 const getNetworkTopologies = vi.fn();
 
@@ -45,5 +47,31 @@ describe("clusterService.getNetworkTopologyLevelsByName", () => {
     getNetworkTopologies.mockRejectedValue(new Error("network error"));
 
     await expect(clusterService.getNetworkTopologyLevelsByName("my-gb200-topology", "cluster-123")).rejects.toThrow();
+  });
+});
+
+describe("clusterService.getNodepoolMetricsCsv", () => {
+  it("downloads the node pool metrics as CSV with an encoded node pool name", async () => {
+    const downloadFileSpy = vi.spyOn(fileService, "downloadFile").mockResolvedValue();
+
+    await clusterService.getNodepoolMetricsCsv(
+      "cluster-1",
+      "pool a/b",
+      "2026-01-01T00:00:00.000Z",
+      "2026-01-02T00:00:00.000Z",
+      [MetricsType.TotalGpu],
+      10,
+      "pool.csv",
+    );
+
+    const [path, , filename, query] = downloadFileSpy.mock.calls[0];
+    expect(path).toMatch(/\/clusters\/cluster-1\/nodepools\/pool%20a%2Fb\/metrics$/);
+    expect(filename).toEqual("pool.csv");
+    expect(query).toEqual({
+      metricType: [MetricsType.TotalGpu],
+      start: "2026-01-01T00:00:00.000Z",
+      end: "2026-01-02T00:00:00.000Z",
+      numberOfSamples: 10,
+    });
   });
 });

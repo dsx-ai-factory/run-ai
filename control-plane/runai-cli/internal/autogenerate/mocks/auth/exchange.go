@@ -39,36 +39,6 @@ func (m *MockTokenApi) EXPECT() *MockTokenApiMockRecorder {
 	return m.recorder
 }
 
-// AppToken mocks base method.
-func (m *MockTokenApi) AppToken(ctx context.Context) openapi.ApiAppTokenRequest {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AppToken", ctx)
-	ret0, _ := ret[0].(openapi.ApiAppTokenRequest)
-	return ret0
-}
-
-// AppToken indicates an expected call of AppToken.
-func (mr *MockTokenApiMockRecorder) AppToken(ctx interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppToken", reflect.TypeOf((*MockTokenApi)(nil).AppToken), ctx)
-}
-
-// AppTokenExecute mocks base method.
-func (m *MockTokenApi) AppTokenExecute(r openapi.ApiAppTokenRequest) (*openapi.AppTokenResponse, *http.Response, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AppTokenExecute", r)
-	ret0, _ := ret[0].(*openapi.AppTokenResponse)
-	ret1, _ := ret[1].(*http.Response)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// AppTokenExecute indicates an expected call of AppTokenExecute.
-func (mr *MockTokenApiMockRecorder) AppTokenExecute(r interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AppTokenExecute", reflect.TypeOf((*MockTokenApi)(nil).AppTokenExecute), r)
-}
-
 // GrantToken mocks base method.
 func (m *MockTokenApi) GrantToken(ctx context.Context) openapi.ApiGrantTokenRequest {
 	m.ctrl.T.Helper()

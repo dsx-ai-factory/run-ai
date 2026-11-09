@@ -8,7 +8,7 @@ require (
 	github.com/crewjam/saml v0.5.1
 	github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client v1.0.15
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.0
 	github.com/dsx-ai-factory/run-ai/control-plane/notifications-service/pkg/client v1.0.6
 	github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager/pkg/client v1.0.11
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/async-events v1.0.8
@@ -35,8 +35,8 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
-	github.com/ClickHouse/ch-go v0.74.0 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.50.0 // indirect
+	github.com/ClickHouse/ch-go v0.75.0 // indirect
+	github.com/ClickHouse/clickhouse-go/v2 v2.51.0 // indirect
 	github.com/Rican7/retry v0.3.1 // indirect
 	github.com/ThreeDotsLabs/watermill v1.5.3 // indirect
 	github.com/ThreeDotsLabs/watermill-redisstream v1.4.5 // indirect
@@ -71,7 +71,7 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jonboulle/clockwork v0.5.0 // indirect
-	github.com/klauspost/compress v1.20.3 // indirect
+	github.com/klauspost/compress v1.20.4 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lib/pq v1.12.3 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
@@ -87,7 +87,7 @@ require (
 	github.com/nats-io/nuid v1.0.1 // indirect
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/paulmach/orb v0.13.0 // indirect
+	github.com/paulmach/orb v0.14.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.33 // indirect
 	github.com/prometheus/client_golang v1.25.0 // indirect
@@ -127,7 +127,7 @@ require (
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
 	golang.org/x/exp v0.0.0-20261106192419-47ce03d25ef0 // indirect
-	golang.org/x/net v0.61.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
