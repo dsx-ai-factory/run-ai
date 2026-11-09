@@ -139,6 +139,23 @@ var _ = Describe("ExternalWorkloadsCachedClient", func() {
 			Expect(ShouldDropWorkload(obj)).To(BeFalse())
 		})
 
+		It("ShouldDropOwnedBy matches InferenceEndpoint owners of any version", func() {
+			for _, apiVersion := range []string{"inference.platform.run.ai/v1alpha1", "inference.platform.run.ai/v1"} {
+				Expect(ShouldDropOwnedBy(metav1.OwnerReference{APIVersion: apiVersion, Kind: "InferenceEndpoint"})).To(BeTrue())
+			}
+		})
+
+		It("ShouldDropOwnedBy ignores other owners", func() {
+			for _, ref := range []metav1.OwnerReference{
+				{APIVersion: "apps/v1", Kind: "Deployment"},
+				{APIVersion: "inference.platform.run.ai/v1alpha1", Kind: "Other"},
+				{APIVersion: "example.com/v1", Kind: "InferenceEndpoint"},
+				{APIVersion: "not/a/valid/version", Kind: "InferenceEndpoint"},
+			} {
+				Expect(ShouldDropOwnedBy(ref)).To(BeFalse(), ref.APIVersion+"/"+ref.Kind)
+			}
+		})
+
 		It("AdditionalGroupKind counter increments and decrements correctly", func() {
 			gk := schema.GroupKind{Group: "apps", Kind: "Deployment"}
 			// starts empty

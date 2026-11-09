@@ -7,16 +7,27 @@ package externalworkloads
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/cachedclient"
 	topowner "github.com/dsx-ai-factory/run-ai/runai-cluster/common/top-owner"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
+// errOwnedByDroppedKind is returned when the owner chain reaches an owner kind from cachedclient.ownerKindsToDrop.
+var errOwnedByDroppedKind = errors.New("object is owned by a kind that must not get an externalworkload")
+
+func isOwnedByDroppedKind(err error) bool {
+	return errors.Is(err, errOwnedByDroppedKind)
+}
+
 // getTopResourceOwnerWithHandler will go up the OwnerReferences chain,
 // to find the last known top owner + the last top owner that has a handler.
 // If found more than 1 owner reference - will return an error.
+// If an owner in the chain is of a kind that must be dropped (see cachedclient.ShouldDropOwnedBy) -
+// will return errOwnedByDroppedKind, without reading that owner.
 // If there was an error retrieving an owner instance,
 // will return the error,
 // together with the last known owner instance (that is not self).
@@ -37,6 +48,10 @@ func (h *ExternalWorkloadHandler) getTopResourceOwnerWithHandler(ctx context.Con
 	var lastOwnerInstance *metav1.PartialObjectMetadata
 	var lastOwnerInstanceWithHandler *metav1.PartialObjectMetadata
 	for nextOwner = &ownerRefs[0]; nextOwner != nil; {
+		if cachedclient.ShouldDropOwnedBy(*nextOwner) {
+			return nil, nil, errOwnedByDroppedKind
+		}
+
 		ownerInstance, err := topowner.GetOwnerInstance(ctx, nextOwner, object.GetNamespace(), h.cachedClient)
 		if err != nil {
 			return lastOwnerInstance, lastOwnerInstanceWithHandler, err

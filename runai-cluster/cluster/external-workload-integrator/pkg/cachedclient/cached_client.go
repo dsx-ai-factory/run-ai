@@ -11,6 +11,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/endpoints"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/constants"
 	v1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/sdk/apis/run/v1alpha1"
@@ -19,6 +20,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/fields"
 	apiruntime "k8s.io/apimachinery/pkg/runtime"
@@ -37,6 +39,22 @@ var kindsToDrop = map[schema.GroupKind]bool{
 	{Group: "run.ai", Kind: "InferenceWorkload"}:            true,
 	{Group: "run.ai", Kind: "DistributedInferenceWorkload"}: true,
 	{Group: "run.ai", Kind: "DistributedWorkload"}:          true,
+}
+
+// ownerKindsToDrop - kinds that Run:ai creates under a workload that is already reported through its own object.
+// Whatever they own is part of that workload, so it must not get an ExternalWorkload of its own.
+// Unlike kindsToDrop, the owner is matched by its reference only: the integrator does not read these kinds.
+var ownerKindsToDrop = map[schema.GroupKind]bool{
+	endpoints.InferenceEndpointGVK.GroupKind(): true,
+}
+
+// ShouldDropOwnedBy returns true if the owner reference points to a kind in ownerKindsToDrop.
+func ShouldDropOwnedBy(ownerRef metav1.OwnerReference) bool {
+	gv, err := schema.ParseGroupVersion(ownerRef.APIVersion)
+	if err != nil {
+		return false
+	}
+	return ownerKindsToDrop[schema.GroupKind{Group: gv.Group, Kind: ownerRef.Kind}]
 }
 
 type CachedClient interface {
