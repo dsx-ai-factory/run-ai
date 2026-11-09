@@ -11,7 +11,7 @@ dependencies:
     version: 1.0.62
   - name: postgresql
     repository: https://charts.bitnami.com/bitnami
-    version: 15.5.38
+    version: 18.12.18 # POC-TEMP: was 15.5.38
     condition: postgresql.enabled
   - name: keycloakx
     repository: https://codecentric.github.io/helm-charts
