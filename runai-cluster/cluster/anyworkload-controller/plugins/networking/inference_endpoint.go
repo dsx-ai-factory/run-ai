@@ -414,10 +414,24 @@ func (p *Plugin) probeInferenceEndpoint(
 	return set(dromosv1alpha1.PluginPhaseInitializing, metav1.ConditionFalse, "EndpointNotReady", ready.Message)
 }
 
+// inferenceEndpointURLs returns the URLs the InferenceEndpoint's route serves: the
+// hostnames of the composed HTTPRoute under the endpoint's path prefix. The composed
+// route itself matches "/", so its own paths would hide the prefix.
+func inferenceEndpointURLs(httpRoute *gatewayv1.HTTPRoute, pathPrefix string) []string {
+	if httpRoute == nil {
+		return nil
+	}
+	urls := make([]string, 0, len(httpRoute.Spec.Hostnames))
+	for _, hostname := range httpRoute.Spec.Hostnames {
+		urls = append(urls, fmt.Sprintf("https://%s%s", hostname, normalizeURLPath(pathPrefix)))
+	}
+	return urls
+}
+
 // inferenceExternalAccessProbe reports the InferenceEndpoint in place of the
-// composed HTTPRoute. URLs still come from the httpRoute hostnames, which the
-// InferenceEndpoint's own route serves.
-func inferenceExternalAccessProbe(probe inferenceEndpointProbe, httpRoute *gatewayv1.HTTPRoute) externalAccessProbeResult {
+// composed HTTPRoute. Hostnames come from the composed httpRoute, which the
+// InferenceEndpoint's own route serves under pathPrefix.
+func inferenceExternalAccessProbe(probe inferenceEndpointProbe, httpRoute *gatewayv1.HTTPRoute, pathPrefix string) externalAccessProbeResult {
 	reason := InferenceEndpointNotReadyReason
 	switch probe.phase {
 	case dromosv1alpha1.PluginPhaseReady:
@@ -431,11 +445,12 @@ func inferenceExternalAccessProbe(probe inferenceEndpointProbe, httpRoute *gatew
 	if probe.phase == dromosv1alpha1.PluginPhaseReady {
 		message = fmt.Sprintf("inferenceendpoint %s is ready", probe.name)
 		conditionMessage = fmt.Sprintf("InferenceEndpoint %s is ready", probe.name)
-		if url := httpRouteURL(httpRoute); url != "" {
-			message = fmt.Sprintf("%s, url: %s", message, url)
-			conditionMessage = fmt.Sprintf("%s, url: %s", conditionMessage, url)
+		routeURLs := inferenceEndpointURLs(httpRoute, pathPrefix)
+		if len(routeURLs) > 0 {
+			message = fmt.Sprintf("%s, url: %s", message, routeURLs[0])
+			conditionMessage = fmt.Sprintf("%s, url: %s", conditionMessage, routeURLs[0])
 		}
-		urls = serviceURLs(endpoints.ExternalAccessKindInferenceEndpoint, probe.name, httpRouteURLs(httpRoute))
+		urls = serviceURLs(endpoints.ExternalAccessKindInferenceEndpoint, probe.name, routeURLs)
 	}
 	result := endpointPhaseResult{phase: probe.phase, reason: reason, message: message}
 	resource := endpoints.ExternalAccessResourceStatus{

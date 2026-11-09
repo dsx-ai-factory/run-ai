@@ -341,14 +341,14 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseReady))
 		access := findEndpointsCondition(status, ExternalAccessReadyConditionName)
 		Expect(access.Status).To(Equal(metav1.ConditionTrue))
-		Expect(access.Message).To(HaveSuffix(", url: https://" + testInferenceHost + "/"))
+		Expect(access.Message).To(HaveSuffix(", url: https://" + testInferenceHost + endpoints.DefaultInferencePathPrefix))
 
 		details, err := endpoints.NetworkingStatusFromRawExtension(status.AdditionalInfo)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(details.Endpoints).To(HaveLen(1))
 		Expect(details.Endpoints[0].ExternalAccess.Resources).To(ConsistOf(HaveField("Kind", endpoints.ExternalAccessKindInferenceEndpoint)))
 		Expect(details.Endpoints[0].Services[0].URLs).To(ConsistOf(endpoints.ServiceURLStatus{
-			URL:        "https://" + testInferenceHost + "/",
+			URL:        "https://" + testInferenceHost + endpoints.DefaultInferencePathPrefix,
 			SourceKind: endpoints.ExternalAccessKindInferenceEndpoint,
 			SourceName: testInferenceEndpointID,
 		}))
@@ -356,6 +356,23 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 9000, inferenceTestBlock()))
 		Expect(plugin.Status(ctx, runner, k8sClient, status, state)).To(Succeed())
 		Expect(findEndpointsCondition(status, endpoints.InferenceEndpointReadyCondition).Status).To(Equal(metav1.ConditionFalse))
+	})
+
+	It("reports the URL under the path prefix of the InferenceEndpoint, not the composed route path", func() {
+		block := inferenceTestBlock()
+		block.PathPrefix = "/openai"
+		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 8000, block))
+		Expect(reconcileRunner()).To(Succeed())
+		markReady(metav1.ConditionTrue)
+
+		status := newPluginStatus()
+		Expect(plugin.Status(ctx, runner, k8sClient, status, state)).To(Succeed())
+		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseReady))
+		Expect(findEndpointsCondition(status, ExternalAccessReadyConditionName).Message).
+			To(HaveSuffix(", url: https://" + testInferenceHost + "/openai"))
+		details, err := endpoints.NetworkingStatusFromRawExtension(status.AdditionalInfo)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(details.Endpoints[0].Services[0].URLs).To(ConsistOf(HaveField("URL", "https://"+testInferenceHost+"/openai")))
 	})
 
 	It("does not trust Ready on an InferenceEndpoint it does not control", func() {
