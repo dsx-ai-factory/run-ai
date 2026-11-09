@@ -187,6 +187,7 @@ func TestSetLoginType_AppLoginType_Success(t *testing.T) {
 
 	mockKcClient.On("LoginAdmin", mock.Anything, testUsername, testPassword, MasterRealmName).Return(getMockJWT(adminToken, 3600), nil)
 	mockKcClient.On("GetClients", mock.Anything, adminToken, MasterRealmName, mock.Anything).Return([]*gocloak.Client{getMockClient(ServiceClientID, clientSecret)}, nil)
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return([]*gocloak.ClientScope{}, nil)
 	mockKcClient.On("GetClientSecret", mock.Anything, adminToken, MasterRealmName, mock.Anything).Return(getMockCredential(clientSecret), nil)
 	mockKcClient.On("LoginClient", mock.Anything, ServiceClientID, clientSecret, MasterRealmName).Return(getMockJWT(testServiceAccountToken, 3600), nil)
 
@@ -238,6 +239,7 @@ func TestSetAppLogin_Success(t *testing.T) {
 	authenticator.userAuth.userToken = getMockJWT(adminToken, 3600)
 
 	mockKcClient.On("GetClients", mock.Anything, adminToken, MasterRealmName, mock.Anything).Return([]*gocloak.Client{getMockClient(ServiceClientID, clientSecret)}, nil)
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return([]*gocloak.ClientScope{}, nil)
 	mockKcClient.On("GetClientSecret", mock.Anything, adminToken, MasterRealmName, mock.Anything).Return(getMockCredential(clientSecret), nil)
 	mockKcClient.On("LoginClient", mock.Anything, ServiceClientID, clientSecret, MasterRealmName).Return(getMockJWT(testServiceAccountToken, 3600), nil)
 
@@ -259,6 +261,7 @@ func TestSetAppLogin_CreateNewClient(t *testing.T) {
 	mockKcClient.On("GetRealmRole", mock.Anything, adminToken, MasterRealmName, AdminRole).Return(getMockRole(AdminRole), nil)
 	mockKcClient.On("GetRealmRole", mock.Anything, adminToken, MasterRealmName, DefaultMasterRole).Return(getMockRole(DefaultMasterRole), nil)
 	mockKcClient.On("AddRealmRoleToUser", mock.Anything, adminToken, MasterRealmName, serviceAccountID, mock.Anything).Return(nil)
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return([]*gocloak.ClientScope{}, nil)
 	mockKcClient.On("GetClientSecret", mock.Anything, adminToken, MasterRealmName, testClientID).Return(getMockCredential(newClientSecret), nil)
 	mockKcClient.On("LoginClient", mock.Anything, ServiceClientID, newClientSecret, MasterRealmName).Return(getMockJWT(testServiceAccountToken, 3600), nil)
 
@@ -281,6 +284,100 @@ func TestSetAppLogin_CreateClientFails(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "failed to create admin client")
+	mockKcClient.AssertExpectations(t)
+}
+
+const adminAPIScopeID = "admin-api-scope-id"
+
+func getMockScope(id, name string) *gocloak.ClientScope {
+	return &gocloak.ClientScope{ID: ptr.To(id), Name: ptr.To(name)}
+}
+
+func TestEnsureAdminAPIScope_ScopeDoesNotExist_NoOp(t *testing.T) {
+	authenticator, mockKcClient := initTest(t)
+	authenticator.userAuth.userToken = getMockJWT(adminToken, 3600)
+
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return([]*gocloak.ClientScope{getMockScope("other-id", "profile")}, nil)
+
+	err := authenticator.ensureAdminAPIScope(context.Background(), testClientID)
+
+	assert.NoError(t, err)
+	mockKcClient.AssertNotCalled(t, "GetClientsDefaultScopes", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+	mockKcClient.AssertNotCalled(t, "AddDefaultScopeToClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+	mockKcClient.AssertExpectations(t)
+}
+
+func TestEnsureAdminAPIScope_AlreadyAssigned_NoOp(t *testing.T) {
+	authenticator, mockKcClient := initTest(t)
+	authenticator.userAuth.userToken = getMockJWT(adminToken, 3600)
+
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return([]*gocloak.ClientScope{getMockScope(adminAPIScopeID, AdminAPIScopeName)}, nil)
+	mockKcClient.On("GetClientsDefaultScopes", mock.Anything, adminToken, MasterRealmName, testClientID).Return([]*gocloak.ClientScope{getMockScope(adminAPIScopeID, AdminAPIScopeName)}, nil)
+
+	err := authenticator.ensureAdminAPIScope(context.Background(), testClientID)
+
+	assert.NoError(t, err)
+	mockKcClient.AssertNotCalled(t, "AddDefaultScopeToClient", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+	mockKcClient.AssertExpectations(t)
+}
+
+func TestEnsureAdminAPIScope_NotAssigned_AddsScope(t *testing.T) {
+	authenticator, mockKcClient := initTest(t)
+	authenticator.userAuth.userToken = getMockJWT(adminToken, 3600)
+
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return([]*gocloak.ClientScope{getMockScope(adminAPIScopeID, AdminAPIScopeName)}, nil)
+	mockKcClient.On("GetClientsDefaultScopes", mock.Anything, adminToken, MasterRealmName, testClientID).Return([]*gocloak.ClientScope{getMockScope("other-id", "profile")}, nil)
+	mockKcClient.On("AddDefaultScopeToClient", mock.Anything, adminToken, MasterRealmName, testClientID, adminAPIScopeID).Return(nil)
+
+	err := authenticator.ensureAdminAPIScope(context.Background(), testClientID)
+
+	assert.NoError(t, err)
+	mockKcClient.AssertExpectations(t)
+}
+
+func TestEnsureAdminAPIScope_GetClientScopesFails(t *testing.T) {
+	authenticator, mockKcClient := initTest(t)
+	authenticator.userAuth.userToken = getMockJWT(adminToken, 3600)
+
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return(nil, errors.New("keycloak down"))
+
+	err := authenticator.ensureAdminAPIScope(context.Background(), testClientID)
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to get client scopes")
+	mockKcClient.AssertExpectations(t)
+}
+
+func TestEnsureAdminAPIScope_AddScopeFails(t *testing.T) {
+	authenticator, mockKcClient := initTest(t)
+	authenticator.userAuth.userToken = getMockJWT(adminToken, 3600)
+
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return([]*gocloak.ClientScope{getMockScope(adminAPIScopeID, AdminAPIScopeName)}, nil)
+	mockKcClient.On("GetClientsDefaultScopes", mock.Anything, adminToken, MasterRealmName, testClientID).Return([]*gocloak.ClientScope{}, nil)
+	mockKcClient.On("AddDefaultScopeToClient", mock.Anything, adminToken, MasterRealmName, testClientID, adminAPIScopeID).Return(errors.New("forbidden"))
+
+	err := authenticator.ensureAdminAPIScope(context.Background(), testClientID)
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to add kc-admin-api scope")
+	mockKcClient.AssertExpectations(t)
+}
+
+func TestSetAppLogin_ExistingClientWithoutScope_AddsScopeBeforeLogin(t *testing.T) {
+	authenticator, mockKcClient := initTest(t)
+	authenticator.userAuth.userToken = getMockJWT(adminToken, 3600)
+
+	existing := getMockClient(ServiceClientID, clientSecret)
+	mockKcClient.On("GetClients", mock.Anything, adminToken, MasterRealmName, mock.Anything).Return([]*gocloak.Client{existing}, nil)
+	mockKcClient.On("GetClientScopes", mock.Anything, adminToken, MasterRealmName).Return([]*gocloak.ClientScope{getMockScope(adminAPIScopeID, AdminAPIScopeName)}, nil)
+	mockKcClient.On("GetClientsDefaultScopes", mock.Anything, adminToken, MasterRealmName, *existing.ID).Return([]*gocloak.ClientScope{}, nil)
+	mockKcClient.On("AddDefaultScopeToClient", mock.Anything, adminToken, MasterRealmName, *existing.ID, adminAPIScopeID).Return(nil)
+	mockKcClient.On("GetClientSecret", mock.Anything, adminToken, MasterRealmName, mock.Anything).Return(getMockCredential(clientSecret), nil)
+	mockKcClient.On("LoginClient", mock.Anything, ServiceClientID, clientSecret, MasterRealmName).Return(getMockJWT(testServiceAccountToken, 3600), nil)
+
+	err := authenticator.setAppLogin(context.Background())
+
+	assert.NoError(t, err)
 	mockKcClient.AssertExpectations(t)
 }
 
