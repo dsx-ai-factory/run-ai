@@ -1,0 +1,13 @@
+type: object
+required:
+  - capacity
+  - orgUnits
+properties:
+  capacity:
+    description: The resources the simulation split.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  orgUnits:
+    type: array
+    items:
+      $ref: "./FairShareSimulationResult.yaml"

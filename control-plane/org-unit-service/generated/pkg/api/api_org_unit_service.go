@@ -206,3 +206,29 @@ func (s *OrgUnitAPIService) GetRanks(ctx context.Context) (ImplResponse, error) 
 
 	return Response(http.StatusNotImplemented, nil), errors.New("GetRanks method not implemented")
 }
+
+// SimulateNodePoolFairShare - Simulate the fair share of a node pool&#39;s org units
+func (s *OrgUnitAPIService) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string, fairShareSimulationRequest FairShareSimulationRequest, orgUnitType string, parentId string) (ImplResponse, error) {
+	// TODO - update SimulateNodePoolFairShare with the required logic for this service method.
+	// Add api_org_unit_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, FairShareSimulationResponse{}) or use other options such as http.Ok ...
+	// return Response(200, FairShareSimulationResponse{}), nil
+
+	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
+	// return Response(400, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(401, Error{}) or use other options such as http.Ok ...
+	// return Response(401, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
+	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
+	// return Response(404, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
+	// return Response(503, Error{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("SimulateNodePoolFairShare method not implemented")
+}

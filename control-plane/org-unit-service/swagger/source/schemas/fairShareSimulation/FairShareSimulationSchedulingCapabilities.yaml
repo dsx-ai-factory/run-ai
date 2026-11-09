@@ -1,0 +1,16 @@
+type: object
+description: The node pool's scheduling capabilities to simulate. Defaults to the node pool's saved capabilities.
+required:
+  - quota
+  - ranks
+  - adjustableWeights
+  - cpuQuota
+properties:
+  quota:
+    type: boolean
+  ranks:
+    type: boolean
+  adjustableWeights:
+    type: boolean
+  cpuQuota:
+    type: boolean

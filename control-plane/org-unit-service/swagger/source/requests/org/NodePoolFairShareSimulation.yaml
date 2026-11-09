@@ -1,0 +1,53 @@
+post:
+  summary: Simulate the fair share of a node pool's org units
+  operationId: simulate_node_pool_fair_share
+  x-service: org-unit-service
+  description: |
+    Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their
+    settings and demand, and for the node pool's scheduling capabilities. The calculation covers every org unit of the node
+    pool; the response holds the ones the caller can read. Nothing is saved.
+  x-no-authorization: true
+  x-test-coverage:
+    - control-plane/org-unit-service/pkg/services/simulation/simulate_test.go
+  tags:
+    - Org unit
+  parameters:
+    - $ref: "../../parameters/NodepoolId.yaml"
+    - name: orgUnitType
+      in: query
+      required: false
+      description: Return only org units of this type.
+      schema:
+        type: string
+        enum:
+          - department
+          - project
+    - name: parentId
+      in: query
+      required: false
+      description: Return only projects of this department.
+      schema:
+        type: string
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: "../../schemas/fairShareSimulation/FairShareSimulationRequest.yaml"
+  responses:
+    200:
+      description: The simulated fair share of each org unit.
+      content:
+        application/json:
+          schema:
+            $ref: "../../schemas/fairShareSimulation/FairShareSimulationResponse.yaml"
+    400:
+      $ref: '../../../../../infra/openapi/docs/responses/400BadRequest.yaml'
+    401:
+      $ref: '../../../../../infra/openapi/docs/responses/401Unauthorized.yaml'
+    403:
+      $ref: '../../../../../infra/openapi/docs/responses/403Forbidden.yaml'
+    404:
+      $ref: '../../../../../infra/openapi/docs/responses/404NotFound.yaml'
+    503:
+      $ref: '../../../../../infra/openapi/docs/responses/503ServiceUnavailable.yaml'
