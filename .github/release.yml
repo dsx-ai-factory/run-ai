@@ -1,0 +1,50 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+# Layout of the "Generate release notes" output on GitHub releases.
+# https://docs.github.com/en/repositories/releasing-projects-on-github/automatically-generated-release-notes
+#
+# GitHub puts each pull request in the FIRST category whose labels match, and
+# renders the categories in the order listed here. So every category above the
+# last one excludes the `renovate` label, and the Renovate updates (opened by
+# devops-runai, always labelled `renovate`) all land in the final section.
+#
+# The type/* labels come from the PR title's conventional-commit prefix
+# (feat:, fix(scope):, [release-3.0] docs: ...) and are applied by
+# .github/workflows/label-pr-type.yaml. The older GitHub default labels
+# (bug, enhancement, documentation) are honoured too, for PRs labelled by hand.
+
+changelog:
+  categories:
+    - title: 💥 Breaking Changes
+      labels: [type/breaking]
+      exclude:
+        labels: [renovate]
+
+    - title: 🚀 Features & Improvements
+      labels: [type/feat, type/perf, enhancement]
+      exclude:
+        labels: [renovate]
+
+    - title: 🐛 Bug Fixes
+      labels: [type/fix, type/revert, bug]
+      exclude:
+        labels: [renovate]
+
+    - title: 📚 Documentation
+      labels: [type/docs, documentation]
+      exclude:
+        labels: [renovate]
+
+    - title: 🛠️ Build, CI, Tests & Chores
+      labels: [type/build, type/ci, type/test, type/chore, type/refactor, type/style]
+      exclude:
+        labels: [renovate]
+
+    - title: 💬 Other Changes
+      labels: ["*"]
+      exclude:
+        labels: [renovate]
+
+    - title: 📦 Dependency Updates (Renovate)
+      labels: [renovate]
