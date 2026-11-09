@@ -89,6 +89,7 @@ export enum EIntervalLabels {
   /**** Other ****/
   AiApplicationDrawerWorkloads = "ai-application-drawer-workloads",
   WorkloadHistoryTab = "workload-history-tab",
+  WorkloadActivityTab = "workload-activity-tab",
   WorkloadPods = "workload-pods",
   WorkloadStructure = "workload-structure",
   WorkloadMetricsLiveEndDate = "workload-metrics-live-end-date",
@@ -188,6 +189,7 @@ export const intervalLabelTimeMap: { [key in EIntervalLabels]: number } = {
   [EIntervalLabels.WorkloadIndexCount]: EIntervalTime.FiftySeconds,
   [EIntervalLabels.AIApplicationsIndex]: EIntervalTime.ThirtySeconds,
   [EIntervalLabels.WorkloadHistoryTab]: EIntervalTime.FiftySeconds,
+  [EIntervalLabels.WorkloadActivityTab]: EIntervalTime.FiftySeconds,
   [EIntervalLabels.IndexPostCreationRefreshRate]: EIntervalTime.FifteenSeconds,
   [EIntervalLabels.DataSourcesIndex]: EIntervalTime.ThirtySeconds,
   [EIntervalLabels.DataVolumeIndex]: EIntervalTime.ThirtySeconds,

@@ -8,6 +8,7 @@ package models
 import (
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	"github.com/google/uuid"
 )
 
@@ -31,3 +32,11 @@ type WorkloadActionHistory struct {
 }
 
 func (WorkloadActionHistory) TableName() string { return "workloads_action_history" }
+
+func (WorkloadActionHistory) SortAndFilterFieldsToColumn() queryapi.APIFieldsMapping {
+	return queryapi.APIFieldsMapping{
+		"acceptedAt": queryapi.NewFieldMapping("accepted_at", queryapi.DateValidator{}),
+		"action":     queryapi.NewFieldMapping("action"),
+		"subject":    queryapi.NewFieldMapping("subject"),
+	}
+}
