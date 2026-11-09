@@ -108,8 +108,8 @@ const (
 	FileName               = "fileName"
 	MetadataXmlType        = "metadataXmlType"
 	SigningCertificate     = "signingCertificate"
-	SingleSignOnServiceUrl = "singleSignOnServiceUrl"
 	ValidateSignature      = "validateSignature"
+	SingleSignOnServiceUrl = "singleSignOnServiceUrl"
 )
 
 // OIDC config fields
