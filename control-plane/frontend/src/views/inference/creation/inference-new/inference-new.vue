@@ -267,7 +267,7 @@ export default defineComponent({
       return !!(this.inferenceNewModel.projectId && this.inferenceNewModel.projectId !== PROJECT_AS_UNSELECTED);
     },
     showTemplates(): boolean {
-      return this.isStandardArchitecture;
+      return this.isHybridSupported && this.isStandardArchitecture;
     },
     clusterList(): Array<ClustersMinimalData> {
       return this.clusterStore.clusterList;
@@ -582,6 +582,9 @@ export default defineComponent({
     async updateClusterId(clusterId: string, payload: { disabled: boolean }): Promise<void> {
       this.displayFormHint = false;
       this.inferenceNewModel.clusterId = clusterId;
+      if (!this.isHybridSupported) {
+        this.inferenceNewModel.templateId = null;
+      }
       this.isClusterSectionValid = !payload.disabled && this.canSubmitWorkload(clusterId);
       this.inferenceNewModel.projectId = PROJECT_AS_UNSELECTED;
 

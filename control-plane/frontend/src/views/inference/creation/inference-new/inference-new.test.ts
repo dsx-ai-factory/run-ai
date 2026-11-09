@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
@@ -29,6 +29,7 @@ import { inferenceWorkloadUtil } from "@/utils/inference-workload.util/inference
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
 import { EServerType } from "@/models/inference.model";
 import { INFERENCE_ROUTE_NAMES } from "@/router/inference.routes/inference.routes.names";
+import { MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION } from "@/common/version.constant";
 
 // Mock services
 vi.mock("@/services/infra/unleash.service/unleash.service");
@@ -57,9 +58,14 @@ describe("inference-new.vue", () => {
   const authStore = useAuthStore(pinia);
 
   beforeEach(() => {
+    vi.clearAllMocks();
     vi.mocked(orgUnitService.getProjectsMetadata).mockResolvedValue(projects);
     clusterStore.$patch({ clusters });
     clusterStore.$patch({ selectedCluster: clusters[0] });
+    vi.mocked(clusterStore.isClusterVersionSufficient).mockImplementation(
+      (_, version) => version === MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
+    );
+    settingStore.$patch({ enableHybridSubmission: { value: true } });
 
     inferenceStore.$patch({
       inference: inferenceWorkloadUtil.getEmptyUIInferenceCreation(),
@@ -67,6 +73,10 @@ describe("inference-new.vue", () => {
 
     appStore.$patch({ pageLoading: false });
     authStore.$patch({ orgUnits: [] });
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
   });
 
   function createWrapper() {
@@ -95,7 +105,7 @@ describe("inference-new.vue", () => {
             emits: ["project-changed"],
           },
           TemplateSectionV2: {
-            template: "<div>Template Section V2</div>",
+            template: "<div :aid='aid'>Template Section V2</div>",
             props: ["aid", "templates", "totalTemplatesCount", "loading", "listQuery", "templateId"],
             emits: ["template-changed", "query-changed", "get-next-batch"],
           },
@@ -154,6 +164,98 @@ describe("inference-new.vue", () => {
       await flushPromises();
 
       expect(wrapper.vm.showTemplates).toBe(true);
+    });
+  });
+
+  describe("Flexible template availability", () => {
+    beforeEach(() => {
+      vi.mocked(settingStore.isFeatureEnabled).mockReturnValue(false);
+      vi.mocked(workloadTemplateService.inferenceTemplatesList).mockResolvedValue({
+        pagination: { limit: 5 },
+        entries: [],
+      });
+      vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
+    });
+
+    it.each([
+      { enabled: true, supported: true },
+      { enabled: false, supported: true },
+      { enabled: true, supported: false },
+    ])(
+      "only offers and loads templates when submission is supported ($enabled, $supported)",
+      async ({ enabled, supported }) => {
+        settingStore.$patch({ enableHybridSubmission: { value: enabled } });
+        vi.mocked(clusterStore.isClusterVersionSufficient).mockImplementation(
+          (_, version) => supported && version === MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
+        );
+
+        wrapper = createWrapper();
+        await flushPromises();
+
+        expect(wrapper.find("[aid=template-section]").exists()).toBe(enabled && supported);
+        if (enabled && supported) {
+          expect(workloadTemplateService.inferenceTemplatesList).toHaveBeenCalled();
+        } else {
+          expect(workloadTemplateService.inferenceTemplatesList).not.toHaveBeenCalled();
+        }
+      },
+    );
+
+    it("passes the selected template to flexible inference submission", async () => {
+      wrapper = createWrapper();
+      await flushPromises();
+      wrapper.vm.onSelectedTemplate("template-123");
+
+      await wrapper.vm.continueToCustom();
+
+      expect(mockRouter.push).toHaveBeenCalledWith({
+        name: INFERENCE_ROUTE_NAMES.INFERENCE_FLAT_HYBRID,
+        query: {
+          clusterId: clusters[0].uuid,
+          projectId: projects[0].id,
+          inferenceName: "",
+          templateId: "template-123",
+        },
+      });
+      expect(inferenceService.getInferenceMergedWithPolicy).not.toHaveBeenCalled();
+    });
+
+    it("clears a selected template when switching to a cluster without flexible submission", async () => {
+      wrapper = createWrapper();
+      await flushPromises();
+      wrapper.vm.onSelectedTemplate("template-123");
+      const unsupportedCluster = { ...clusters[0], uuid: "unsupported-cluster", version: "2.17.0" };
+      clusterStore.$patch({ clusters: [...clusters, unsupportedCluster] });
+      vi.mocked(clusterStore.isClusterVersionSufficient).mockImplementation(
+        (id, version) => id === clusters[0].uuid && version === MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION,
+      );
+      vi.mocked(workloadTemplateService.inferenceTemplatesList).mockClear();
+
+      await wrapper.vm.updateClusterId(unsupportedCluster.uuid, { disabled: false });
+      await flushPromises();
+
+      expect(wrapper.vm.inferenceNewModel.templateId).toBeNull();
+      expect(wrapper.find("[aid=template-section]").exists()).toBe(false);
+      expect(workloadTemplateService.inferenceTemplatesList).not.toHaveBeenCalled();
+
+      await wrapper.vm.updateClusterId(clusters[0].uuid, { disabled: false });
+      await flushPromises();
+
+      expect(wrapper.vm.inferenceNewModel.templateId).toBe("-1");
+      expect(wrapper.find("[aid=template-section]").exists()).toBe(true);
+      expect(workloadTemplateService.inferenceTemplatesList).toHaveBeenCalledOnce();
+    });
+
+    it("clears a restored template when flexible submission is disabled", async () => {
+      settingStore.$patch({ enableHybridSubmission: { value: false } });
+      inferenceStore.$patch({ inference: { templateId: "template-123", clusterId: clusters[0].uuid } });
+
+      wrapper = createWrapper();
+      await flushPromises();
+
+      expect(wrapper.vm.inferenceNewModel.templateId).toBeNull();
+      expect(wrapper.find("[aid=template-section]").exists()).toBe(false);
+      expect(workloadTemplateService.inferenceTemplatesList).not.toHaveBeenCalled();
     });
   });
 
@@ -245,6 +347,7 @@ describe("inference-new.vue", () => {
 
           wrapper.vm.inferenceNewModel.serverType = EServerType.Custom;
           vi.spyOn(wrapper.vm, "supportingServingPortAccess", "get").mockReturnValue(true);
+          vi.spyOn(wrapper.vm, "isHybridSupported", "get").mockReturnValue(false);
 
           await wrapper.vm.onContinue();
           expect(inferenceStore.inference?.specificEnv?.servingPortAccess).toBeDefined();
