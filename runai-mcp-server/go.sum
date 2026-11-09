@@ -11,8 +11,8 @@ github.com/cespare/xxhash/v2 v2.3.0/go.mod h1:VGX0DQ3Q6kWi7AoAeZDth3/j3BFtOZR5XL
 github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
 github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.10 h1:dVJWeX8bHFmlRNdGBJrDvdZMGx+gMoj8QEThUTBQN2I=
 github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.10/go.mod h1:XJGXR1ofG+gymjJn8iMqDrxDoiv3Z+r7T6OxHeWsQ9U=
-github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21 h1:af399FNxZWW/J7nONKzNFgJ8V2Hj6sLC21zJEnSsWB4=
-github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21/go.mod h1:MQ0rhnOPGpwKG5KmgddCy88Ss0oWe9rZtSDQ4xEYN4s=
+github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.0 h1:remMm3uGa2zskL380BDg00dF61ugFMm+co/hoszBdmM=
+github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.0/go.mod h1:MlblK4HvqnOkQs6pU9ANOx9p8inktKSn9XlREuXENU0=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.5 h1:9dgTV+b0OBLp/3sC87gWKwf/Yhj9TpuaKt2bNJV9Rrg=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/client-utils v1.0.5/go.mod h1:Cd5juNgbkdMSS/M6bXiwgkhNcubBjhAhtYC/4tYqV1c=
 github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.11 h1:hTb/rmDh9oBUjUPit1u7+uO3qJwhRSnC0yX9WHRaXEc=
@@ -170,5 +170,5 @@ gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c h1:Hei/4ADfdWqJk1ZMxUNpqntN
 gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c/go.mod h1:JHkPIbrfpd72SG/EVd6muEfDQjcINNoR0C8j2r3qZ4Q=
 gopkg.in/yaml.v3 v3.0.1 h1:fxVm/GzAzEWqLHuvctI91KS9hhNmmWOoWu0XTYJS7CA=
 gopkg.in/yaml.v3 v3.0.1/go.mod h1:K4uyk7z7BCEPqu6E+C64Yfv1cQ7kz7rIZviUmN+EgEM=
-k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3 h1:jVkFFVfXdXP74B/zbO3hM3hpSFD0xvhQ5U686DPurkE=
-k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3/go.mod h1:M2s5JB1lIYP3jzZdorPLHXIPJzt9vv2muW5a6L9DtNM=
+k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab h1:pjQrNLaF//ytZtWwCAHtW+pqwSKjtWDqzA8+TCX37RI=
+k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab/go.mod h1:DdQ0BJxlQtuMlKDqdg7X5IMMQCXIk2b3d1/4M9OhUYo=

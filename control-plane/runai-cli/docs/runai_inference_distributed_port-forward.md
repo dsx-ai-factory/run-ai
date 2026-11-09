@@ -27,7 +27,7 @@ runai inference distributed port-forward <workload-name> --port 8080:8090 --port
 
 ```
       --address string                 Bind the workload to a specific local interface or host. E.g., --address localhost or --address 0.0.0.0. (default "localhost")
-  -h, --help                           help for port-forward
+  -h, --help[=true|false]              help for port-forward
       --pod string                     Workload pod ID for port-forward, default: random
       --pod-running-timeout duration   Timeout for pod to reach running state (e.g. 5s, 2m, 3h).
       --port stringArray               port
@@ -37,11 +37,11 @@ runai inference distributed port-forward <workload-name> --port 8080:8090 --port
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

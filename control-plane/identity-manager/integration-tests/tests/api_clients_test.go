@@ -77,8 +77,12 @@ func createServiceAccountClient(t *testing.T, ctx context.Context, clientName st
 }
 
 func createServiceAccountClientWithTenant(t *testing.T, ctx context.Context, clientName string, tenantId string) string {
+	return createClientOfType(t, ctx, clientName, tenantId, openapi.CLIENTTYPE_SERVICE_ACCOUNT)
+}
+
+func createClientOfType(t *testing.T, ctx context.Context, clientName string, tenantId string, clientType openapi.ClientType) string {
 	clientRequest := openapi.ClientCreationRequest{
-		Type:     openapi.CLIENTTYPE_APPLICATION,
+		Type:     clientType,
 		ClientId: clientName,
 		TenantId: ptr.To(tenantId),
 	}
@@ -218,6 +222,13 @@ func TestClient_CreateInternalClient_DifferentClientTypes(t *testing.T) {
 		},
 		{
 			name:           "Service account client type",
+			clientType:     openapi.CLIENTTYPE_SERVICE_ACCOUNT,
+			expectType:     "service-account",
+			expectExternal: true,
+		},
+		{
+			// deprecated alias of ServiceAccount, kept so existing callers keep working
+			name:           "Deprecated Application client type",
 			clientType:     openapi.CLIENTTYPE_APPLICATION,
 			expectType:     "service-account",
 			expectExternal: true,
@@ -233,8 +244,10 @@ func TestClient_CreateInternalClient_DifferentClientTypes(t *testing.T) {
 				createAgentClient(t, ctx, clientId, nil)
 			case openapi.CLIENTTYPE_WORKLOADS_AUTH:
 				createWorkloadsClient(t, ctx, clientId, "test-cluster-456")
-			case openapi.CLIENTTYPE_APPLICATION:
+			case openapi.CLIENTTYPE_SERVICE_ACCOUNT:
 				createServiceAccountClient(t, ctx, clientId)
+			case openapi.CLIENTTYPE_APPLICATION:
+				createClientOfType(t, ctx, clientId, BaseTenantId, openapi.CLIENTTYPE_APPLICATION)
 			}
 
 			clients := getAllClients(t, ctx)
