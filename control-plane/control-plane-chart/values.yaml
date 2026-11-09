@@ -1528,7 +1528,7 @@ postgresql:
   image:
     registry: docker.io
     repository: bitnamilegacy/postgresql
-    tag: "16"
+    tag: "17" # POC-TEMP: was "16"
     debug: false
   tls:
     enabled: false
