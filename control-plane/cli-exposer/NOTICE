@@ -53,11 +53,11 @@ Dependencies
 | `github.com/jinzhu/inflection` | v1.0.0 | MIT | https://github.com/jinzhu/inflection/blob/v1.0.0/LICENSE |
 | `github.com/jinzhu/now` | v1.1.5 | MIT | https://github.com/jinzhu/now/blob/v1.1.5/License |
 | `github.com/joho/godotenv` | v1.5.1 | MIT | https://github.com/joho/godotenv/blob/v1.5.1/LICENCE |
-| `github.com/klauspost/compress` | v1.20.3 | Apache-2.0 | https://github.com/klauspost/compress/blob/v1.20.3/LICENSE |
-| `github.com/klauspost/compress/internal/snapref` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/internal/snapref/LICENSE |
-| `github.com/klauspost/compress/s2` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/s2/LICENSE |
-| `github.com/klauspost/compress/snappy` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/snappy/LICENSE |
-| `github.com/klauspost/compress/zstd/internal/xxhash` | v1.20.3 | MIT | https://github.com/klauspost/compress/blob/v1.20.3/zstd/internal/xxhash/LICENSE.txt |
+| `github.com/klauspost/compress` | v1.20.4 | Apache-2.0 | https://github.com/klauspost/compress/blob/v1.20.4/LICENSE |
+| `github.com/klauspost/compress/internal/snapref` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/internal/snapref/LICENSE |
+| `github.com/klauspost/compress/s2` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/s2/LICENSE |
+| `github.com/klauspost/compress/snappy` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/snappy/LICENSE |
+| `github.com/klauspost/compress/zstd/internal/xxhash` | v1.20.4 | MIT | https://github.com/klauspost/compress/blob/v1.20.4/zstd/internal/xxhash/LICENSE.txt |
 | `github.com/leodido/go-urn` | v1.5.0 | MIT | https://github.com/leodido/go-urn/blob/v1.5.0/LICENSE |
 | `github.com/lithammer/shortuuid/v3` | v3.0.7 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v3@v3.0.7?tab=licenses |
 | `github.com/lithammer/shortuuid/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v4@v4.3.0?tab=licenses |

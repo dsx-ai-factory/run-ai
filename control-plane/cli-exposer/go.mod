@@ -57,7 +57,7 @@ require (
 	github.com/jackc/pgx/v5 v5.12.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.20.3 // indirect
+	github.com/klauspost/compress v1.20.4 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lithammer/shortuuid/v3 v3.0.7 // indirect
 	github.com/lithammer/shortuuid/v4 v4.3.0 // indirect
