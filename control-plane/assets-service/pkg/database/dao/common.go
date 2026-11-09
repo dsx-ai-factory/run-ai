@@ -35,6 +35,9 @@ type TableAssetIDer interface {
 // DeleteAssetsByScope deletes all the assets under a target scope
 func DeleteAssetsByScope(ctx context.Context, scopeType api.ScopeType, scopeId string) error {
 	db := runaidb.DB().WithContext(ctx)
+	if err := deleteLegacyTemplatesByScope(ctx, db, scopeType, scopeId); err != nil {
+		return err
+	}
 	var err error
 
 	// splitting the assets into 3 layers to avoid foreign key constraints

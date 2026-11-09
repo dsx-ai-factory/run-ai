@@ -6,6 +6,7 @@
 package sqlmock
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
@@ -35,6 +36,9 @@ func assetIDBatch(ids ...string) []struct {
 
 func TestDeleteAssetsByScope(t *testing.T) {
 	m := setupDaoMock(t)
+	m.ExpectTransaction().Begin()
+	m.ExpectQuery(`SELECT id FROM assets_metadata WHERE project_id = ? AND kind = ? AND tenant_id = ? ORDER BY id ASC LIMIT ?`, "proj-1", "workload-template", int32(0), 100).Returns(assetIDBatch())
+	m.ExpectTransaction().Commit()
 
 	const kinds = 17
 	for i := 0; i < kinds; i++ {
@@ -45,6 +49,19 @@ func TestDeleteAssetsByScope(t *testing.T) {
 
 	err := dao.DeleteAssetsByScope(auth.MockAuthInfo(), api.SCOPETYPE_PROJECT, "proj-1")
 	require.Nil(t, err)
+}
+
+func TestDeleteAssetsByScopeLegacyFailure(t *testing.T) {
+	m := setupDaoMock(t)
+	wantErr := errors.New("legacy template deletion failed")
+	m.ExpectTransaction().Begin()
+	m.ExpectQuery(`SELECT id FROM assets_metadata WHERE project_id = ? AND kind = ? AND tenant_id = ? ORDER BY id ASC LIMIT ?`, "proj-1", "workload-template", int32(0), 100).Returns(assetIDBatch("template-1"))
+	m.ExpectExec(`DELETE FROM assets_template_content WHERE template_asset_id IN (?)`, "template-1").Returns(1)
+	m.ExpectExec(`DELETE FROM assets_template WHERE asset_id IN (?)`, "template-1").ReturnsError(wantErr)
+	m.ExpectTransaction().Rollback()
+
+	err := dao.DeleteAssetsByScope(auth.MockAuthInfo(), api.SCOPETYPE_PROJECT, "proj-1")
+	require.ErrorIs(t, err, wantErr)
 }
 
 func TestValidateClaimNameUniqueness(t *testing.T) {
