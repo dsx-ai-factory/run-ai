@@ -5,6 +5,11 @@
 
 package v1
 
+// InferenceEndpointIntegrationV1 declares that the Agent and the Anyworkload
+// networking plugin understand the externalAccess.inference block in the
+// run.ai/endpoints annotation and create an InferenceEndpoint from it.
+const InferenceEndpointIntegrationV1 = "v1"
+
 type RunaiPublic struct {
 	Version           string               `yaml:"version,omitempty"`
 	RunaiConfigStatus *RunaiConfigStatus   `yaml:"runaiConfigStatus,omitempty"`
