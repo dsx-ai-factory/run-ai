@@ -822,6 +822,11 @@ func (h *ExternalWorkloadHandler) appendChildIdIfNeeded(object client.Object, li
 func (h *ExternalWorkloadHandler) handleOwnedObject(ctx context.Context, object client.Object, addedResource bool) error {
 	topOwnerMeta, topOwnerWithHandlerMeta, err := h.getTopResourceOwnerWithHandler(ctx, object)
 	if err != nil {
+		if isOwnedByDroppedKind(err) {
+			log.Debug().Msgf("Dropping owned object <%s> (owned by a kind that shouldn't trigger externalworkload creation)",
+				objectLogStr(object))
+			return h.objectAdditionalHandler(ctx, object, nil, nil)
+		}
 		if errors.IsNotFound(err) {
 			log.Debug().Msgf("External Workload not found %s %s - Assumed deleted. %s.\n",
 				object.GetName(), object.GetNamespace(), err)

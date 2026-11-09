@@ -1016,6 +1016,42 @@ var _ = Describe("TestExternalWorkloadIntegrator", Ordered, func() {
 		})
 	})
 
+	Describe("Test InferenceEndpoint owner: no externalworkload created for the objects it owns", func() {
+		newDeployment := func(name string, uid types.UID, ownerRefs []metav1.OwnerReference) *appsv1.Deployment {
+			deployment := TestDeployment.DeepCopy()
+			deployment.Name = name
+			deployment.UID = uid
+			deployment.OwnerReferences = ownerRefs
+			return deployment
+		}
+
+		It("Deployment owned by an InferenceEndpoint", func() {
+			// the owner is never created: it must be dropped by its reference alone
+			endpointOwnerRef := metav1.OwnerReference{
+				APIVersion:         "inference.platform.run.ai/v1alpha1",
+				Kind:               "InferenceEndpoint",
+				Name:               "inference-owner",
+				UID:                "inference-endpoint-uid",
+				Controller:         ptr.To(true),
+				BlockOwnerDeletion: ptr.To(true),
+			}
+			ownedDeployment := newDeployment("inference-owner-epp", "inference-epp-uid",
+				[]metav1.OwnerReference{endpointOwnerRef})
+			createObject(ctx, ownedDeployment, watchClient, &testCreatedObjects)
+
+			// a Deployment without the InferenceEndpoint owner is still a native workload
+			plainDeployment := newDeployment("plain-deployment", "plain-deployment-uid", nil)
+			createObject(ctx, plainDeployment, watchClient, &testCreatedObjects)
+
+			Eventually(func(g Gomega) {
+				validateExternalWorkloadExistence(g, true, fakeCachedClient, plainDeployment.GetUID(),
+					plainDeployment.GetNamespace(), "Deployment")
+			}, timeout, interval).Should(Succeed())
+			consistentlyValidateExternalWorkloadDoesNotExist(fakeCachedClient, ownedDeployment.GetUID(),
+				ownedDeployment.GetNamespace(), "Deployment")
+		})
+	})
+
 	Describe("Test unrecognized owner with AllowNonSupportedTypes=true", func() {
 		It("Test unrecognized owner - use self as top owned object", func() {
 			// create the top owner object with unrecognized kind
