@@ -345,6 +345,41 @@ var _ = Describe("Department API tests", Ordered, func() {
 			Expect(getDepartments).To(ContainElement(WithTransform(func(dep api.DepartmentForList) string { return dep.Id }, Equal(createdChild.Id))))
 		})
 
+		It("test get departments returns the default node pools", func() {
+			defaultNodePools := []string{"pool2", "pool1", "pool3"}
+			request := getDepartmentCreateRequest(createDepartmentName(), clusterId)
+			request.DefaultNodePools = &defaultNodePools
+			desc := "test description"
+			request.Description = desc
+			createResponse, err := departmentApiService.CreateDepartment(ctx, request)
+			Expect(err).To(BeNil())
+			Expect(createResponse.Code).To(Equal(http.StatusCreated))
+			created := createResponse.Body.(api.Department)
+			departmentIds = append(departmentIds, created.Id)
+			Expect(created.DefaultNodePools).To(Equal(&defaultNodePools))
+
+			getResponse, err := departmentApiService.GetDepartment(ctx, created.Id)
+			Expect(err).To(BeNil())
+			Expect(getResponse.Code).To(Equal(http.StatusOK))
+			Expect(getResponse.Body.(api.Department).DefaultNodePools).To(Equal(&defaultNodePools))
+			Expect(getResponse.Body.(api.Department).Description).To(Equal(desc))
+
+			listResponse, err := departmentApiService.GetDepartments(ctx, []string{fmt.Sprintf("clusterId==%s", clusterId)}, "", "", "", 0, 0)
+			Expect(err).To(BeNil())
+			Expect(listResponse.Code).To(Equal(http.StatusOK))
+
+			listed := listResponse.Body.(api.GetDepartments200Response).Departments
+			var listedDepartment *api.DepartmentForList
+			for i := range listed {
+				if listed[i].Id == created.Id {
+					listedDepartment = &listed[i]
+				}
+			}
+			Expect(listedDepartment).ToNot(BeNil())
+			Expect(listedDepartment.DefaultNodePools).To(Equal(&defaultNodePools))
+			Expect(listedDepartment.Description).To(Equal(desc))
+		})
+
 		It("test create department with existing name", func() {
 			name := "a-" + createDepartmentName()
 			request := getFullDepartmentCreateRequest(name, clusterId)
