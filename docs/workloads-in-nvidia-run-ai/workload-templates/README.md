@@ -101,7 +101,9 @@ Legacy asset-based templates and their automatic migration process have been rem
 
 </Warning>
 
-Templates migrated previously remain available as flexible workload templates. Legacy templates that were not migrated are no longer accessible and are not migrated during upgrade. Recreate any required templates using [Adding a New Template](#adding-a-new-template).
+Templates migrated previously remain available as flexible workload templates. Legacy templates that were not migrated are no longer accessible and are not migrated during upgrade.
+
+Before upgrading from a version that still supports legacy templates, save the definitions of any legacy templates you need. On that version, you can retrieve them with `GET /api/v1/asset/workload-template` and save the response. Use the saved definitions to manually recreate the templates using [Adding a New Template](#adding-a-new-template).
 
 The legacy `/api/v1/asset/workload-template` endpoints are no longer available. Use the workload templates API linked below.
 
