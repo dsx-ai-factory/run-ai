@@ -214,8 +214,8 @@ export default defineComponent({
   },
   computed: {
     isExpiredCertificate(): boolean {
-      if (!this.idp?.samlData?.signingCertificate) return false;
-      return !this.certificateExpirationDate || !idpCommon.iValidCertificateDate(this.certificateExpirationDate);
+      if (!this.certificateExpirationDate) return false;
+      return !idpCommon.iValidCertificateDate(this.certificateExpirationDate);
     },
     isCertificateExpiringSoon(): boolean {
       return !!this.certificateExpirationDate && idpCommon.isCertificateExpiringSoon(this.certificateExpirationDate);

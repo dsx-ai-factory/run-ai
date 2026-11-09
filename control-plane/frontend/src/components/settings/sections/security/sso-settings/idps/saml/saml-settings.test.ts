@@ -160,6 +160,18 @@ describe("saml-settings.vue", () => {
       vi.useRealTimers();
     });
 
+    it("does not report the certificate as expired when its expiration date is unavailable", async () => {
+      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(null);
+
+      const { wrapper } = factory(mockIdp, false);
+      await wrapper.vm.$nextTick();
+      await wrapper.vm.$nextTick();
+
+      expect((wrapper.vm as unknown as { certificateWarningVariant: string | null }).certificateWarningVariant).toBe(
+        null,
+      );
+    });
+
     it("shows no warning when the certificate is valid and not close to expiring", async () => {
       vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
 
