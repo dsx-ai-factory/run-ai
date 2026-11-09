@@ -60,6 +60,7 @@ export const chartUtil = {
   isDottedLineStyle,
   getConnectedChartHoverMarker,
   getConnectedChartAxisPointer,
+  getTooltipPositionAboveXAxis,
   getConnectedTooltipAnchorSeries,
   isConnectedTooltipAnchorSeries,
   getBarSeriesLegendHoverState,
@@ -319,6 +320,28 @@ function getConnectedChartAxisPointer() {
       color: CHART_CROSSHAIR_COLOR,
       type: "solid" as const,
     },
+  };
+}
+
+const TOOLTIP_POINTER_GAP = 10;
+
+// A tooltip shown on a connected chart is anchored to the axis pointer at the bottom of the plot,
+// so ECharts' default placement lands it on the x-axis labels.
+function getTooltipPositionAboveXAxis(gridBottom: number) {
+  return (
+    point: number[],
+    _params: unknown,
+    _dom: unknown,
+    _rect: unknown,
+    size: { contentSize: number[]; viewSize: number[] },
+  ): number[] => {
+    const [tooltipWidth, tooltipHeight] = size.contentSize;
+    const [viewWidth, viewHeight] = size.viewSize;
+    const fitsRightOfPointer = point[0] + TOOLTIP_POINTER_GAP + tooltipWidth <= viewWidth;
+    const x = fitsRightOfPointer ? point[0] + TOOLTIP_POINTER_GAP : point[0] - TOOLTIP_POINTER_GAP - tooltipWidth;
+    const maxY = viewHeight - gridBottom - tooltipHeight - TOOLTIP_POINTER_GAP;
+    const y = Math.min(point[1] + TOOLTIP_POINTER_GAP, maxY);
+    return [Math.max(0, x), Math.max(0, y)];
   };
 }
 
