@@ -79,3 +79,30 @@ exception[rules] {
     input.metadata.name == "runai-jupyter-notebook"
     rules := ["allowed_scc"]
 }
+
+# This hardware reader needs hostPath access with fixed UID, privilege, capability
+# and host-namespace restrictions; its name alone must never exempt an expanded SCC.
+exception[rules] {
+    input.apiVersion == "security.openshift.io/v1"
+    input.kind == "SecurityContextConstraints"
+    input.metadata.name == "gpu-pci-inventory"
+    input.allowHostDirVolumePlugin == true
+    input.allowHostNetwork == false
+    input.allowHostPID == false
+    input.allowHostIPC == false
+    input.allowHostPorts == false
+    input.allowPrivilegedContainer == false
+    input.allowPrivilegeEscalation == false
+    input.defaultAllowPrivilegeEscalation == false
+    input.readOnlyRootFilesystem == true
+    input.allowedCapabilities == []
+    object.get(input, "defaultAddCapabilities", []) == []
+    input.requiredDropCapabilities == ["ALL"]
+    input.runAsUser == {"type": "MustRunAs", "uid": 65532}
+    input.seLinuxContext == {"type": "RunAsAny"}
+    input.seccompProfiles == ["runtime/default"]
+    object.get(input, "users", []) == []
+    object.get(input, "groups", []) == []
+    input.volumes == ["hostPath", "projected", "secret", "configMap", "downwardAPI"]
+    rules := ["allowed_scc"]
+}

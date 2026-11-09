@@ -1939,6 +1939,18 @@ export interface GetPutPatchClusterConfigResponseAllOf {
  */
 export interface GpuInfo {
     /**
+     * NVIDIA PCI device and vendor ID from reported physical hardware; omitted when unknown.
+     * @type {string}
+     * @memberof GpuInfo
+     */
+    'pciDeviceId'?: string;
+    /**
+     * Time the hardware collector observed pciDeviceId. Identity is unknown without a paired observation within five minutes and at most one minute in the future. This timestamp is never replaced by the control-plane ingestion time.
+     * @type {string}
+     * @memberof GpuInfo
+     */
+    'pciDeviceIdObservedAt'?: string | null;
+    /**
      * 
      * @type {string}
      * @memberof GpuInfo
@@ -4095,6 +4107,12 @@ export type NodepoolGPUNetworkAccelerationDetection = typeof NodepoolGPUNetworkA
  * @interface NodepoolGpuTypeDetails
  */
 export interface NodepoolGpuTypeDetails {
+    /**
+     * NVIDIA PCI device and vendor ID from reported physical hardware; omitted when unknown.
+     * @type {string}
+     * @memberof NodepoolGpuTypeDetails
+     */
+    'pciDeviceId'?: string;
     /**
      * The GPU model, as reported by the GPU vendor labels on the node pool\'s nodes.
      * @type {string}

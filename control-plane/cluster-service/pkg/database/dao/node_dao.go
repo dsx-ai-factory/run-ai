@@ -18,6 +18,7 @@ import (
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/datastructs"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi"
 	querydbenrich "github.com/dsx-ai-factory/run-ai/runai-application-packages/queryapi/dbenrich"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
@@ -45,6 +46,8 @@ type UpsertNodeResult struct {
 func prepareNodeForUpsert(node *models.Node) []any {
 	node.ID = uuid.New()
 	node.UpdatedAt = time.Now()
+	node.GpuPciDeviceId, node.GpuPciDeviceIdObservedAt = models.NormalizeGpuPciIdentity(
+		node.GpuPciDeviceId, node.GpuPciDeviceIdObservedAt, node.UpdatedAt)
 
 	// Prepare JSON values
 	conditionsJSON, _ := node.Conditions.Value()
@@ -60,7 +63,7 @@ func prepareNodeForUpsert(node *models.Node) []any {
 		node.GpuType, node.GpuCount, node.GpuMemoryBytes, node.CreatedAt, node.UpdatedAt,
 		node.NvLinkDomainUid, node.NvLinkCliqueId,
 		node.NetworkTopologyLabelValues, networkTopologyLabelsJSON,
-		node.TopologyManagerPolicy,
+		node.TopologyManagerPolicy, node.GpuPciDeviceId, node.GpuPciDeviceIdObservedAt,
 	}
 }
 
@@ -546,11 +549,11 @@ type nodepoolGpuTypeRow struct {
 	NodePool       string
 	GpuType        string
 	GpuMemoryBytes int64
+	PciDeviceId    string
 	TotalDevices   int32
 }
 
-// Grouping on memory as well as model is deliberate: a pool holding one model in two memory
-// variants yields an entry per variant.
+// Keep physical PCI identities and memory variants separate even when product labels match.
 func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes openapi.PermittedScopes,
 	keys []NodepoolKey,
 ) (map[NodepoolKey][]api.NodepoolGpuTypeDetails, *api.Error) {
@@ -559,22 +562,29 @@ func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes o
 		return result, nil
 	}
 
-	requested := make(map[NodepoolKey]bool, len(keys))
+	requested := datastructs.NewSet[NodepoolKey]()
 	clusterUuids := make([]string, 0, len(keys))
 	nodepoolNames := make([]string, 0, len(keys))
 	for _, key := range keys {
-		if requested[key] {
+		if requested.Has(key) {
 			continue
 		}
-		requested[key] = true
+		requested.Add(key)
 		clusterUuids = append(clusterUuids, key.ClusterUuid)
 		nodepoolNames = append(nodepoolNames, key.NodepoolName)
 	}
 
 	rows := []nodepoolGpuTypeRow{}
+	// Bind one clock value for the whole inventory response; a stopped sync cannot refresh evidence.
+	now := time.Now()
+	pciIdentity := "CASE WHEN gpu_pci_device_id ~ ? AND gpu_pci_device_id <> '0000:10de' " +
+		"AND gpu_pci_device_id_observed_at >= ? AND gpu_pci_device_id_observed_at <= ? " +
+		"THEN gpu_pci_device_id ELSE '' END"
 	query := runaidb.DB().WithContext(ctx).
 		Table(models.NodeTable).
-		Select("cluster_uuid, node_pool, gpu_type, gpu_memory_bytes, COALESCE(SUM(gpu_count), 0) as total_devices").
+		Select("cluster_uuid, node_pool, gpu_type, gpu_memory_bytes, "+pciIdentity+" AS pci_device_id, "+
+			"COALESCE(SUM(gpu_count), 0) as total_devices", models.GpuPciDeviceIdPattern,
+			now.Add(-models.GpuPciDeviceIdMaxAge), now.Add(models.GpuPciDeviceIdMaxFutureSkew)).
 		Where("tenant_id = ?", tenantId).
 		Where("gpu_type <> ''").
 		Where("cluster_uuid IN ?", clusterUuids).
@@ -584,7 +594,8 @@ func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes o
 		Group("node_pool").
 		Group("gpu_type").
 		Group("gpu_memory_bytes").
-		Order("gpu_type, gpu_memory_bytes")
+		Group("pci_device_id").
+		Order("gpu_type, gpu_memory_bytes, pci_device_id")
 
 	if _, err := query.Scan(&rows); err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("Failed to get nodepools gpu types, error: %v", err)
@@ -595,12 +606,13 @@ func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes o
 		key := NewNodepoolKey(row.ClusterUuid, row.NodePool)
 		// The two IN clauses match every cluster/name combination, so discard rows for pairs
 		// that were never asked for — same nodepool name in two clusters would otherwise cross over.
-		if !requested[key] {
+		if !requested.Has(key) {
 			continue
 		}
 		result[key] = append(result[key], api.NodepoolGpuTypeDetails{
 			Type:           row.GpuType,
 			GpuMemoryBytes: row.GpuMemoryBytes,
+			PciDeviceId:    row.PciDeviceId,
 			TotalDevices:   row.TotalDevices,
 		})
 	}

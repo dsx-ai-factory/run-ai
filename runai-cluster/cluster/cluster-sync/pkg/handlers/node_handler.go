@@ -342,6 +342,8 @@ func (nodeHandler *NodeHandler) gpuInfoChanged(old swagger.NullableGpuInfo, new 
 	}
 	return oldGpuInfo.GpuType != newGpuInfo.GpuType ||
 		oldGpuInfo.GpuCount != newGpuInfo.GpuCount ||
+		oldGpuInfo.GetPciDeviceId() != newGpuInfo.GetPciDeviceId() ||
+		!oldGpuInfo.GetPciDeviceIdObservedAt().Equal(newGpuInfo.GetPciDeviceIdObservedAt()) ||
 		gpuMemoryBytesChanged(oldGpuInfo.GpuMemoryBytes, newGpuInfo.GpuMemoryBytes)
 }
 

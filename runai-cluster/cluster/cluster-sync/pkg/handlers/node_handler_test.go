@@ -7,6 +7,7 @@ package handlers
 
 import (
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -146,3 +147,39 @@ var _ = Describe("gpuInfoChanged", func() {
 		Expect(handler.gpuInfoChanged(unset, gpuInfo(11996758016))).To(BeTrue())
 	})
 })
+
+func TestGPUIdentityChangeAndRemoval(t *testing.T) {
+	handler := &NodeHandler{}
+	makeInfo := func(id *string) swagger.NullableGpuInfo {
+		return *swagger.NewNullableGpuInfo(&swagger.GpuInfo{GpuType: "Tesla-T4", GpuCount: 1, PciDeviceId: id})
+	}
+	for _, tc := range []struct {
+		name     string
+		old, new *string
+		want     bool
+	}{
+		{"same value", ptr.To("1eb8:10de"), ptr.To("1eb8:10de"), false},
+		{"added", nil, ptr.To("1eb8:10de"), true},
+		{"changed", ptr.To("1eb8:10de"), ptr.To("2330:10de"), true},
+		{"removed", ptr.To("1eb8:10de"), nil, true},
+		{"unknown omitted and empty", nil, ptr.To(""), false},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := handler.gpuInfoChanged(makeInfo(tc.old), makeInfo(tc.new)); got != tc.want {
+				t.Fatalf("changed=%v want %v", got, tc.want)
+			}
+		})
+	}
+}
+
+func TestGPUIdentityHeartbeatIsReported(t *testing.T) {
+	now := time.Now().UTC()
+	oldInfo := swagger.GpuInfo{GpuType: "NVIDIA-A10G", GpuCount: 1, PciDeviceId: ptr.To("2237:10de")}
+	oldInfo.SetPciDeviceIdObservedAt(now)
+	newInfo := oldInfo
+	newInfo.SetPciDeviceIdObservedAt(now.Add(time.Minute))
+	handler := &NodeHandler{}
+	if !handler.gpuInfoChanged(*swagger.NewNullableGpuInfo(&oldInfo), *swagger.NewNullableGpuInfo(&newInfo)) {
+		t.Fatal("fresh hardware observation would not reach control-plane expiry")
+	}
+}

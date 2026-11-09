@@ -16,6 +16,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // checks if the GpuInfo type satisfies the MappedNullable interface at compile time
@@ -23,8 +24,12 @@ var _ MappedNullable = &GpuInfo{}
 
 // GpuInfo struct for GpuInfo
 type GpuInfo struct {
-	GpuType  string `json:"gpuType"`
-	GpuCount int32  `json:"gpuCount"`
+	// NVIDIA PCI device and vendor ID from reported physical hardware; omitted when unknown.
+	PciDeviceId *string `json:"pciDeviceId,omitempty" validate:"regexp=^$|^([1-9a-f][0-9a-f]{3}|0[1-9a-f][0-9a-f]{2}|00[1-9a-f][0-9a-f]|000[1-9a-f]):10de$"`
+	// Time the hardware collector observed pciDeviceId. Identity is unknown without a paired observation within five minutes and at most one minute in the future. This timestamp is never replaced by the control-plane ingestion time.
+	PciDeviceIdObservedAt NullableTime `json:"pciDeviceIdObservedAt,omitempty"`
+	GpuType               string       `json:"gpuType"`
+	GpuCount              int32        `json:"gpuCount"`
 	// Memory of a single GPU device on this node, in bytes, taken from the node's GPU vendor labels. Note this is per device, unlike the TOTAL_GPU_MEMORY_BYTES node telemetry type which reports the node's total across all of its devices. Omitted when the node's GPU labels do not report memory.
 	GpuMemoryBytes *int64 `json:"gpuMemoryBytes,omitempty"`
 }
@@ -48,6 +53,81 @@ func NewGpuInfo(gpuType string, gpuCount int32) *GpuInfo {
 func NewGpuInfoWithDefaults() *GpuInfo {
 	this := GpuInfo{}
 	return &this
+}
+
+// GetPciDeviceId returns the PciDeviceId field value if set, zero value otherwise.
+func (o *GpuInfo) GetPciDeviceId() string {
+	if o == nil || IsNil(o.PciDeviceId) {
+		var ret string
+		return ret
+	}
+	return *o.PciDeviceId
+}
+
+// GetPciDeviceIdOk returns a tuple with the PciDeviceId field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *GpuInfo) GetPciDeviceIdOk() (*string, bool) {
+	if o == nil || IsNil(o.PciDeviceId) {
+		return nil, false
+	}
+	return o.PciDeviceId, true
+}
+
+// HasPciDeviceId returns a boolean if a field has been set.
+func (o *GpuInfo) HasPciDeviceId() bool {
+	if o != nil && !IsNil(o.PciDeviceId) {
+		return true
+	}
+
+	return false
+}
+
+// SetPciDeviceId gets a reference to the given string and assigns it to the PciDeviceId field.
+func (o *GpuInfo) SetPciDeviceId(v string) {
+	o.PciDeviceId = &v
+}
+
+// GetPciDeviceIdObservedAt returns the PciDeviceIdObservedAt field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *GpuInfo) GetPciDeviceIdObservedAt() time.Time {
+	if o == nil || IsNil(o.PciDeviceIdObservedAt.Get()) {
+		var ret time.Time
+		return ret
+	}
+	return *o.PciDeviceIdObservedAt.Get()
+}
+
+// GetPciDeviceIdObservedAtOk returns a tuple with the PciDeviceIdObservedAt field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *GpuInfo) GetPciDeviceIdObservedAtOk() (*time.Time, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.PciDeviceIdObservedAt.Get(), o.PciDeviceIdObservedAt.IsSet()
+}
+
+// HasPciDeviceIdObservedAt returns a boolean if a field has been set.
+func (o *GpuInfo) HasPciDeviceIdObservedAt() bool {
+	if o != nil && o.PciDeviceIdObservedAt.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetPciDeviceIdObservedAt gets a reference to the given NullableTime and assigns it to the PciDeviceIdObservedAt field.
+func (o *GpuInfo) SetPciDeviceIdObservedAt(v time.Time) {
+	o.PciDeviceIdObservedAt.Set(&v)
+}
+
+// SetPciDeviceIdObservedAtNil sets the value for PciDeviceIdObservedAt to be an explicit nil
+func (o *GpuInfo) SetPciDeviceIdObservedAtNil() {
+	o.PciDeviceIdObservedAt.Set(nil)
+}
+
+// UnsetPciDeviceIdObservedAt ensures that no value is present for PciDeviceIdObservedAt, not even an explicit nil
+func (o *GpuInfo) UnsetPciDeviceIdObservedAt() {
+	o.PciDeviceIdObservedAt.Unset()
 }
 
 // GetGpuType returns the GpuType field value
@@ -140,6 +220,12 @@ func (o GpuInfo) MarshalJSON() ([]byte, error) {
 
 func (o GpuInfo) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
+	if !IsNil(o.PciDeviceId) {
+		toSerialize["pciDeviceId"] = o.PciDeviceId
+	}
+	if o.PciDeviceIdObservedAt.IsSet() {
+		toSerialize["pciDeviceIdObservedAt"] = o.PciDeviceIdObservedAt.Get()
+	}
 	toSerialize["gpuType"] = o.GpuType
 	toSerialize["gpuCount"] = o.GpuCount
 	if !IsNil(o.GpuMemoryBytes) {

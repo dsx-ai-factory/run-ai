@@ -11,6 +11,9 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
+
+	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/cluster-sync/pkg/gpuinventory"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils"
 	kaiv1alpha1 "github.com/kai-scheduler/KAI-scheduler/pkg/apis/kai/v1alpha1"
@@ -215,6 +218,11 @@ func (nodeParser *NodeParser) ParseNodeToServerScheme(node *corev1.Node) swagger
 
 	gpuInfo := getGpuInfo(node.Labels, node.Name)
 	if gpuInfo != nil {
+		if observation := gpuinventory.ReportedObservation(node, time.Now()); observation != nil {
+			pciID := observation.Devices[0].PCIDeviceID
+			gpuInfo.PciDeviceId = &pciID
+			gpuInfo.PciDeviceIdObservedAt.Set(&observation.ObservedAt)
+		}
 		nodeInfo.GpuInfo = *swagger.NewNullableGpuInfo(gpuInfo)
 	}
 

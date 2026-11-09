@@ -8,6 +8,7 @@
 - [Repository layout](#repository-layout)
 - [Building and running](#building-and-running)
 - [Testing](#testing)
+- [GPU hardware identity](#gpu-hardware-identity)
 - [Configuration](#configuration)
 - [Code generation](#code-generation)
 
@@ -112,6 +113,22 @@ Pass `--log-level -1` for debug logging.
 | `make test-dev` | Runs `go test -v ./... -coverprofile cover.out` directly on the host. |
 
 Unit tests live next to the code (`*_test.go`). The `test/` directory holds [Ginkgo](https://onsi.github.io/ginkgo/) service tests — one suite per synced resource kind (nodes, projects, workloads, PVCs, secrets, policies, etc.) plus fakes (`fakecachedclient`) and shared helpers (`backend_testing_utils.go`, `util.go`). Individual suites can be run with the `ginkgo` CLI.
+
+## GPU hardware identity
+
+The operator deploys `gpu-pci-inventory` on Linux GPU nodes when cluster-sync is enabled. It uses the cluster-sync image with `GPU_PCI_COLLECTOR=true` and a downward-API `NODE_NAME`. This mode starts only the collector and uses its own Kubernetes service account; it does not load control-plane credentials or start the other sync controllers.
+
+Every minute, the collector associates NVIDIA driver GPU UUIDs, bus addresses and models from `/proc/driver/nvidia/gpus` with the vendor/device IDs in PCI sysfs. Those host directories are mounted read-only. The process runs as non-root, requests no GPUs and needs only node `get`/`patch` permissions. IDs use lowercase `device:vendor`, for example `2237:10de`. They are never inferred from GPU names. GPU count and memory retain their existing NVIDIA-label source; the observation records that label snapshot and rejects mismatches or mixed hardware.
+
+On OpenShift, a dedicated SCC permits hostPath volumes and is bound only to the collector service account. The operator-owned DaemonSet defines the exact read-only host paths; the SCC does not restrict individual host paths. The service account cannot create pods.
+
+The versioned `run.ai/gpu-pci-devices` node annotation binds the observation to the node UID, kernel boot ID and collection time. Failed collection removes the previous observation with a resource-version guard. Missing driver files, unsupported devices, CPU-only nodes and inconsistent observations leave identity unknown; they do not block normal cluster reporting.
+
+Node updates and full sync forward optional `gpuInfo.pciDeviceId` and `gpuInfo.pciDeviceIdObservedAt`. A collector heartbeat updates the observation time even when the ID is unchanged. Evidence expires after five minutes; timestamps more than one minute ahead are rejected. A periodic scan queues expired nodes through the normal retry path even without node events. Cluster-service also enforces expiry on reads, so a stopped cluster-sync cannot keep an old identity visible indefinitely.
+
+Consumers read `pciDeviceId` from existing node or node-pool GPU inventory. Node-pool aggregation keeps fresh identities separate for the same model and memory; unknown identities remain unlabelled and expired identities join the unknown group. Recommendation logic and model metadata are not part of this producer. Consumers must tolerate an omitted ID and must not treat inventory capacity as free or allocatable capacity.
+
+For diagnostics, inspect the `gpu-pci-inventory` pods/logs and the node annotation, then compare the node inventory's ID and observation time. Upgrade the control plane, including the cluster-service schema/migration, before upgrading cluster components (the collector and cluster-sync). Older reporters continue to work with unknown identity. Disabling cluster-sync removes its collector through the operator; any final observation expires without requiring a cleanup command.
 
 ## Configuration
 
