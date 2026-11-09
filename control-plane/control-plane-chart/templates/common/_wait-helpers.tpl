@@ -155,8 +155,9 @@ Input: dict with ctx (Helm root context), containerName, svcHost, svcPort, svcDi
 {{- $top := .ctx }}
 {{- $pgAuth := $top.Values.global.postgresql.auth }}
 {{- $image := $top.Values.global.postgresImage }}
+{{- $registry := include "control-plane.postgresImage.registry" $top }}
 - name: check-postgres-readiness
-  image: "{{ $image.registry }}/{{ $image.repository }}:{{ $image.tag }}"
+  image: "{{ $registry }}/{{ $image.repository }}:{{ $image.tag }}"
   env:
     - name: PGSSLROOTCERT
       value: /etc/ssl/certs/runai-ca.pem
@@ -182,6 +183,7 @@ Input: dict with ctx (Helm root context), containerName, svcHost, svcPort, svcDi
   securityContext:
     allowPrivilegeEscalation: false
     runAsNonRoot: true
+    readOnlyRootFilesystem: true
     {{- /* postgres:16-alpine defaults to root, so vanilla k8s needs an explicit
     non-root uid; OpenShift restricted-v2 rejects uid 70 and injects a
     namespace-range uid when none is set. */}}
