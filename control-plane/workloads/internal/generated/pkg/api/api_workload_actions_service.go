@@ -35,7 +35,7 @@ func NewWorkloadActionsAPIService() *WorkloadActionsAPIService {
 }
 
 // GetWorkloadActionsHistory - Get workload action history.
-func (s *WorkloadActionsAPIService) GetWorkloadActionsHistory(ctx context.Context, workloadId string, offset int32, limit int32) (ImplResponse, error) {
+func (s *WorkloadActionsAPIService) GetWorkloadActionsHistory(ctx context.Context, workloadId string, offset int32, limit int32, sortOrder string, sortBy string, filterBy []string, search string) (ImplResponse, error) {
 	// TODO - update GetWorkloadActionsHistory with the required logic for this service method.
 	// Add api_workload_actions_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
