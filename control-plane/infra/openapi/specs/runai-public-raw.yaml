@@ -48750,6 +48750,8 @@ components:
     SamlData:
       type: object
       nullable: true
+      required:
+        - validateSignature
       properties:
         signingCertificate:
           type: string
@@ -48760,9 +48762,16 @@ components:
         serviceProviderMetadataUrl:
           type: string
           description: Service Provider (SP) metadata url
+        validateSignature:
+          type: boolean
+          description: >-
+            Whether the signature of SAML responses from the identity provider
+            is validated
+        certificateExpirationDate:
+          type: string
+          format: date-time
+          description: The expiration date of the signing certificate
     MandatoryClaim:
-      required:
-        - validateSignature
       type: object
       nullable: true
       required:
@@ -48773,11 +48782,6 @@ components:
           type: string
           pattern: '.*[a-zA-Z].*'
           minLength: 1
-        validateSignature:
-          type: boolean
-          description: >-
-            Whether the signature of SAML responses from the identity provider
-            is validated
           maxLength: 255
         values:
           type: array
@@ -48992,6 +48996,9 @@ components:
           $ref: '#/components/schemas/OcpCreationData'
         mappers:
           $ref: '#/components/schemas/Mappers'
+        dryRun:
+          type: boolean
+          default: false
     IdpPostResponse:
       type: object
       required:
@@ -48999,6 +49006,11 @@ components:
       properties:
         alias:
           type: string
+        samlData:
+          $ref: '#/components/schemas/SamlData'
+          description: >-
+            Parsed SAML identity provider configuration. Returned when dryRun is
+            true. Nothing is stored.
       example:
         alias: oidc
     IdpResources:

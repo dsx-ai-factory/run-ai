@@ -4270,6 +4270,10 @@ components:
         validateSignature:
           type: boolean
           description: Whether the signature of SAML responses from the identity provider is validated
+        certificateExpirationDate:
+          type: string
+          format: date-time
+          description: The expiration date of the signing certificate
     MandatoryClaim:
       type: object
       nullable: true
@@ -4492,6 +4496,9 @@ components:
           $ref: '#/components/schemas/OcpCreationData'
         mappers:
           $ref: '#/components/schemas/Mappers'
+        dryRun:
+          type: boolean
+          default: false
     IdpPostResponse:
       type: object
       required:
@@ -4499,6 +4506,9 @@ components:
       properties:
         alias:
           type: string
+        samlData:
+          $ref: '#/components/schemas/SamlData'
+          description: Parsed SAML identity provider configuration. Returned when dryRun is true. Nothing is stored.
       example:
         alias: oidc
     IdpResources:

@@ -854,6 +854,12 @@ export interface IdpPostResponse {
      * @memberof IdpPostResponse
      */
     'alias': string;
+    /**
+     * 
+     * @type {SamlData}
+     * @memberof IdpPostResponse
+     */
+    'samlData'?: SamlData | null;
 }
 /**
  * 
@@ -1669,6 +1675,12 @@ export interface SamlData {
      * @memberof SamlData
      */
     'validateSignature': boolean;
+    /**
+     * The expiration date of the signing certificate
+     * @type {string}
+     * @memberof SamlData
+     */
+    'certificateExpirationDate'?: string;
 }
 /**
  * 
