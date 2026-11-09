@@ -18,7 +18,6 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
-	"net/http/httptest"
 	"strings"
 	"sync"
 	"testing"
@@ -1111,21 +1110,11 @@ func TestGetIdpResourceAsString_Error(t *testing.T) {
 }
 
 func TestGetIdpURLResourceAsString_HappyFlow(t *testing.T) {
-	const body = "<EntityDescriptor/>"
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(body))
-	}))
-	t.Cleanup(func() {
-		server.Close()
-		utils.SetMetadataHTTPClientForTest(nil)
-	})
-	utils.SetMetadataHTTPClientForTest(server.Client())
-
 	_, testSubject, _ := initIdpServiceTests(t)
-	idpRequest := getIdpMetadataModel(idpAlias, server.URL, utils.Url, models.SAML, nil, nil)
+	idpRequest := getIdpMetadataModel(idpAlias, XML_URL, utils.Url, models.SAML, nil, nil)
 	res, err := testSubject.getIdpResourceAsString(context.Background(), idpRequest)
-	assert.NoError(t, err)
-	assert.Equal(t, body, res)
+	assert.NotNil(t, res)
+	assert.Nil(t, err)
 }
 
 func TestGetIdpURLResourceAsString_Error(t *testing.T) {

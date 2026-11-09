@@ -68,7 +68,6 @@ func parseSigningCertificate(raw string) ([]CertificateData, error) {
 	return certificatesData, nil
 }
 
-
 func signingCertificateParts(raw string) []string {
 	trimmed := strings.TrimSpace(raw)
 	if trimmed == "" {
