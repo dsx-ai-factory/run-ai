@@ -152,6 +152,36 @@ func TestGrantServiceAccountToken_NoEmailVerifiedClaim(t *testing.T) {
 	require.False(t, hasEmail, "service account token must not contain email_verified claim")
 }
 
+func TestGrantServiceAccountToken_AudienceIsArray(t *testing.T) {
+	t.Parallel()
+	ctx := newTestContext()
+	serviceAccountId, err := TestStepsClient.CreateServiceAccount(ctx, BaseRealmName, BaseTenantId, nil)
+	require.NoError(t, err)
+	require.NotNil(t, serviceAccountId)
+	defer clientCleanup(t, ctx, serviceAccountId)
+
+	serviceAccount, err := IamServices.ClientService.GetClient(ctx, BaseRealmName, serviceAccountId)
+	require.NoError(t, err)
+	require.NotNil(t, serviceAccount)
+	ctx = TestStepsClient.SetFakeHostHeader(ctx, OpenapiClient, BaseRealmName)
+
+	tokenRequest := generateClientCredentialsTokenRequest(*serviceAccount.ClientID, *serviceAccount.Secret)
+	token, resp, err := OpenapiClient.TokensAPI.GrantToken(ctx).TokenRequest(tokenRequest).Execute()
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	require.NotNil(t, token)
+
+	parsedToken, _, err := jwt.NewParser().ParseUnverified(*token.AccessToken, &jwt.MapClaims{})
+	require.NoError(t, err)
+
+	claims, ok := parsedToken.Claims.(*jwt.MapClaims)
+	require.True(t, ok)
+
+	aud, ok := (*claims)["aud"].([]interface{})
+	require.Truef(t, ok, "aud claim must be an array, got %T: %v", (*claims)["aud"], (*claims)["aud"])
+	require.Contains(t, aud, "runai-dummy")
+}
+
 func TestGrantServiceAccountToken_InvalidInput(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
