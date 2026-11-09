@@ -6,13 +6,14 @@
 import { afterEach, describe, it, expect, vi } from "vitest";
 import { workloadService } from "./workload.service";
 import { workloadsManagerApi } from "@/services/infra/client-apis/workloads-manager-api/workloads-manager-api";
+import { fileService } from "@/services/file.service/file.service";
 
 // models
 import { ClusterState, type ClustersMinimalData } from "@/swagger-models/cluster-service-client";
 import { EWorkloadType, EExternalWorkloadType, EWorkloadName, Preemptibility } from "@/models/workload.model";
 import type { Project } from "@/swagger-models/org-unit-service-client";
 import { RunState } from "@/swagger-models/workloads-manager-client";
-import { SourceApi, type Workload } from "@/swagger-models/workloads-client";
+import { Phase, SourceApi, type Workload, WorkloadTelemetryType } from "@/swagger-models/workloads-client";
 
 describe("workload.service", () => {
   afterEach(() => {
@@ -321,6 +322,36 @@ describe("workload.service", () => {
         });
         expect(result).toBe(true);
       });
+    });
+  });
+
+  describe("getWorkloadsTelemetryCsv", () => {
+    it("sends the phase filter and the requested file name", async () => {
+      const downloadFileSpy = vi.spyOn(fileService, "downloadFile").mockResolvedValue();
+
+      await workloadService.getWorkloadsTelemetryCsv(
+        WorkloadTelemetryType.WorkloadsCount,
+        "cluster-1",
+        undefined,
+        undefined,
+        undefined,
+        [Phase.Running, Phase.Pending],
+        "workloads.csv",
+      );
+
+      const [, , filename, query] = downloadFileSpy.mock.calls[0];
+      expect(filename).toEqual("workloads.csv");
+      expect(query).toEqual(
+        expect.objectContaining({ clusterId: "cluster-1", filterByPhases: `${Phase.Running},${Phase.Pending}` }),
+      );
+    });
+
+    it("omits the phase filter when no phases are given", async () => {
+      const downloadFileSpy = vi.spyOn(fileService, "downloadFile").mockResolvedValue();
+
+      await workloadService.getWorkloadsTelemetryCsv(WorkloadTelemetryType.WorkloadsCount, "cluster-1");
+
+      expect(downloadFileSpy.mock.calls[0][3]).not.toHaveProperty("filterByPhases");
     });
   });
 });
