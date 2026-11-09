@@ -96,8 +96,9 @@ func (p *Plugin) probeEndpointNetworking(
 	if endpoint != nil && endpoint.ExternalAccess != nil && endpoint.ExternalAccess.Inference != nil {
 		inference := p.probeInferenceEndpoint(ctx, runner, endpoint, k8sClient)
 		return endpointNetworkingProbe{
-			auth:      authProbe,
-			external:  inferenceExternalAccessProbe(inference, endpoint.ExternalAccess.HTTPRoute),
+			auth: authProbe,
+			external: inferenceExternalAccessProbe(inference, endpoint.ExternalAccess.HTTPRoute,
+				endpoint.ExternalAccess.Inference.EffectivePathPrefix()),
 			inference: &inference,
 		}
 	}

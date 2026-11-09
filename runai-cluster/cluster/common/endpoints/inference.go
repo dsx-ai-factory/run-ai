@@ -66,8 +66,8 @@ func (c *InferenceConfig) Validate() error {
 	return err
 }
 
-// pathPrefix returns the configured prefix, or the default when none is set.
-func (c *InferenceConfig) pathPrefix() string {
+// EffectivePathPrefix returns the configured prefix, or the default when none is set.
+func (c *InferenceConfig) EffectivePathPrefix() string {
 	if c.PathPrefix == "" {
 		return DefaultInferencePathPrefix
 	}
@@ -178,7 +178,7 @@ func BuildInferenceEndpoint(runner metav1.Object, cfg *InferenceConfig, target I
 			"hostnames":  hostnames,
 			// Set explicitly so the desired spec equals the live spec, which the
 			// CRD defaults to the same value.
-			"pathPrefix": cfg.pathPrefix(),
+			"pathPrefix": cfg.EffectivePathPrefix(),
 		},
 	}
 	for key, value := range fields {
