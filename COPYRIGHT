@@ -6617,6 +6617,7 @@ Components:
   github.com/cespare/xxhash/v2 v2.3.0
   github.com/klauspost/compress/zstd/internal/xxhash v1.20.1
   github.com/klauspost/compress/zstd/internal/xxhash v1.20.3
+  github.com/klauspost/compress/zstd/internal/xxhash v1.20.4
 
 Copyright (c) 2016 Caleb Spare
 
@@ -7346,7 +7347,7 @@ Copyright ClickHouse, Inc - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/ClickHouse/clickhouse-go/v2 v2.49.0
-  github.com/ClickHouse/clickhouse-go/v2 v2.50.0
+  github.com/ClickHouse/clickhouse-go/v2 v2.51.0
 
 Copyright 2016-2023 ClickHouse, Inc.
 
@@ -7557,6 +7558,7 @@ Copyright ClickHouse, Inc - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/ClickHouse/ch-go v0.74.0
+  github.com/ClickHouse/ch-go v0.75.0
 
 Copyright 2016-2023 ClickHouse, Inc.
                                  Apache License
@@ -13171,6 +13173,7 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/klauspost/compress v1.20.1
   github.com/klauspost/compress v1.20.3
+  github.com/klauspost/compress v1.20.4
 
 Copyright (c) 2012 The Go Authors. All rights reserved.
 Copyright (c) 2019 Klaus Post. All rights reserved.
@@ -13482,6 +13485,7 @@ Copyright Klaus Post, The Snappy-Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/klauspost/compress/s2 v1.20.3
+  github.com/klauspost/compress/s2 v1.20.4
 
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
 Copyright (c) 2019 Klaus Post. All rights reserved.
@@ -16465,6 +16469,7 @@ Copyright Paul Mach - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/paulmach/orb v0.13.0
+  github.com/paulmach/orb v0.14.0
 
 The MIT License (MIT)
 
@@ -24033,7 +24038,9 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/klauspost/compress/internal/snapref v1.20.1
   github.com/klauspost/compress/internal/snapref v1.20.3
+  github.com/klauspost/compress/internal/snapref v1.20.4
   github.com/klauspost/compress/snappy v1.20.3
+  github.com/klauspost/compress/snappy v1.20.4
 
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
 
