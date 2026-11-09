@@ -32,6 +32,7 @@ export interface ICustomHeaderRadioButtonsConfig {
 export type ICustomHeaderConfig = ICustomHeaderRadioButtonsConfig;
 export enum ECustomCell {
   NAME_COL = "name-col",
+  TEMPLATE_NAME_COL = "template-name-col",
   LIST_COL = "list-col",
   LINK_COL = "link-col",
   ROLE_ASSIGMENT_COL = "role-assigment-col",

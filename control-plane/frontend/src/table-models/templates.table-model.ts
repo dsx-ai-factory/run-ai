@@ -38,7 +38,7 @@ export const allTemplateColumnsMap: Record<TemplatesColumnsNames, ITableColumn> 
     sortable: true,
     align: "left",
     display: true,
-    customCell: ECustomCell.NAME_COL,
+    customCell: ECustomCell.TEMPLATE_NAME_COL,
     filter: {
       type: EColumnFilterType.FreeText,
       autocompleteOptionsFn: autocompleteUtil.templates("name", (t) => t.meta.name),

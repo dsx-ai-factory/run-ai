@@ -5,10 +5,15 @@
 
 import { Scope } from "@/swagger-models/assets-service-client";
 import type { PermittedScopes } from "@/swagger-models/authorization-client";
-import type { TemplateMetaFields } from "@/swagger-models/workloads-client";
+import type { SupersetTemplate, TemplateMetaFields } from "@/swagger-models/workloads-client";
+import type { EWorkloadType } from "@/models/workload.model";
+import { TGI_DEPRECATION_MESSAGE_EDIT, TGI_DEPRECATION_MESSAGE_READ } from "@/models/inference.model";
+import { isTgiInference } from "@/common/icon.util";
 
 export const templatesUtil = {
   isPermittedTemplate,
+  isTgiTemplate,
+  getTgiInfoMessage,
 };
 
 function isPermittedTemplate(
@@ -33,4 +38,18 @@ function isPermittedTemplate(
     default:
       return false;
   }
+}
+
+/** Whether the template is an inference template that runs on a TGI server (detected by its image). */
+function isTgiTemplate(template: SupersetTemplate): boolean {
+  const image = template.spec?.image || template.combinedSpec?.image;
+  return isTgiInference(template.meta.workloadType as EWorkloadType, image);
+}
+
+/**
+ * The deprecation notice for a TGI template. Users who can edit the template are told to edit it, everyone else
+ * is told to ask an administrator.
+ */
+function getTgiInfoMessage(canEdit: boolean): string {
+  return canEdit ? TGI_DEPRECATION_MESSAGE_EDIT : TGI_DEPRECATION_MESSAGE_READ;
 }

@@ -4,6 +4,7 @@
  */
 
 import NameCol from "./name-col.vue";
+import TemplateNameCol from "./template-name-col.vue";
 import DefaultCol from "./default-col.vue";
 import ListCol from "./list-col.vue";
 import ServiceAccountsStatusCol from "./service-accounts-status-col.vue";
@@ -36,6 +37,7 @@ import UserDisplayNameCol from "./user-display-name-col.vue";
 export {
   DefaultCol,
   NameCol,
+  TemplateNameCol,
   ListCol,
   ServiceAccountsStatusCol,
   LinkCol,
