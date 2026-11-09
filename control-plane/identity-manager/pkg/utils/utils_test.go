@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/utils"
 	"github.com/stretchr/testify/assert"
@@ -607,6 +608,43 @@ func TestParseSamlIdpConfig(t *testing.T) {
 			assert.Equal(t, tc.entityID, config.EntityId)
 			assert.Equal(t, tc.ssoURL, config.SingleSignOnServiceUrl)
 			assert.Equal(t, tc.cert, config.SigningCertificate)
+			assert.False(t, config.ValidateSignature)
 		})
 	}
+}
+
+func TestParseSamlIdpConfig_ValidateSignature(t *testing.T) {
+	tests := []struct {
+		name     string
+		metadata string
+		want     bool
+	}{
+		{
+			name:     "want authn requests signed",
+			metadata: `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com"><md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.example.com/sso"/></md:IDPSSODescriptor></EntityDescriptor>`,
+			want:     true,
+		},
+		{
+			name:     "attribute false without a signing certificate",
+			metadata: `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com"><IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://idp.example.com/sso"/></IDPSSODescriptor></EntityDescriptor>`,
+			want:     false,
+		},
+		{
+			name:     "signing certificate does not enable validation when the attribute is false",
+			metadata: `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com"><IDPSSODescriptor WantAuthnRequestsSigned="false" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><KeyDescriptor use="signing"><KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#"><X509Data><X509Certificate>sign cert</X509Certificate></X509Data></KeyInfo></KeyDescriptor></IDPSSODescriptor></EntityDescriptor>`,
+			want:     false,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			config := utils.ParseSamlIdpConfig([]byte(tc.metadata))
+			assert.Equal(t, tc.want, config.ValidateSignature)
+		})
+	}
+}
+
+func TestParseSamlIdpConfig_ValidUntil(t *testing.T) {
+	metadata := `<EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" entityID="https://idp.example.com"><IDPSSODescriptor validUntil="2036-10-14T12:25:09Z" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"/></EntityDescriptor>`
+	config := utils.ParseSamlIdpConfig([]byte(metadata))
+	assert.True(t, config.CertificateExpirationDate.Equal(time.Date(2036, time.October, 14, 12, 25, 9, 0, time.UTC)))
 }

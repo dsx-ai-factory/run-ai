@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"net/http/httptest"
 	"strings"
 	"sync"
 	"testing"
@@ -379,6 +380,7 @@ func TestCreateIdp_SamlDryRun_ReturnsConfigWithoutSaving(t *testing.T) {
 	assert.NoError(t, certErr)
 	assert.False(t, res.SamlData.CertificateExpirationDate.IsZero())
 	assert.True(t, res.SamlData.CertificateExpirationDate.After(time.Now()))
+	assert.False(t, res.SamlData.ValidateSignature)
 	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfig")
@@ -851,6 +853,7 @@ func TestGetIdp_saml(t *testing.T) {
 	assert.NotNil(t, idp.Mappers)
 	assert.Equal(t, "https://app.example.com/auth/realms/test/broker/saml-a1b2c3/endpoint/descriptor", idp.SamlData.ServiceProviderMetadataUrl)
 	assert.True(t, idp.SamlData.ValidateSignature)
+	assert.True(t, idp.SamlData.CertificateExpirationDate.IsZero())
 	assert.Equal(t, fmt.Sprintf("https://app.example.com/auth/realms/%s/broker/saml-a1b2c3/endpoint", "test"), idp.RedirectUri)
 	assert.Nil(t, idp.OidcData)
 	assert.Nil(t, idp.OcpData)
@@ -870,6 +873,32 @@ func TestGetIdp_samlValidateSignatureDisabled(t *testing.T) {
 	body, err := json.Marshal(idp.SamlData)
 	assert.NoError(t, err)
 	assert.Contains(t, string(body), `"validateSignature":false`)
+}
+
+func TestGetIdp_samlCertificateExpirationDate(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	iamMock.MockIdpService.On("GetIdpMappers", mock.Anything, mock.Anything, mock.Anything).Return(generateMapperConfigArray(), nil)
+	iamMock.MockIdpService.On("GetSPSamlMetadataUrl", mock.Anything, mock.Anything, mock.Anything).Return("")
+	saml := generateIdentitySamlProviderRepresentation()
+	(*saml.Config)["signingCertificate"] = selfSignedSigningCertificate(t)
+
+	idp := testSubject.iamIdpToApi(ctx, saml, "test")
+	assert.False(t, idp.SamlData.CertificateExpirationDate.IsZero())
+	assert.True(t, idp.SamlData.CertificateExpirationDate.After(time.Now()))
+}
+
+func TestGetIdp_samlExpiredCertificateReturnsExpiration(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+	iamMock.MockIdpService.On("GetIdpMappers", mock.Anything, mock.Anything, mock.Anything).Return(generateMapperConfigArray(), nil)
+	iamMock.MockIdpService.On("GetSPSamlMetadataUrl", mock.Anything, mock.Anything, mock.Anything).Return("")
+	saml := generateIdentitySamlProviderRepresentation()
+	(*saml.Config)["signingCertificate"] = expiredSigningCertificate(t)
+
+	idp := testSubject.iamIdpToApi(ctx, saml, "test")
+	assert.False(t, idp.SamlData.CertificateExpirationDate.IsZero())
+	assert.True(t, idp.SamlData.CertificateExpirationDate.Before(time.Now()))
 }
 
 func TestGetIdp_ocp(t *testing.T) {
@@ -964,6 +993,7 @@ func TestUpdateIdp_DryRun_ReturnsConfigWithoutSaving(t *testing.T) {
 	assert.NoError(t, certErr)
 	assert.False(t, body.SamlData.CertificateExpirationDate.IsZero())
 	assert.True(t, body.SamlData.CertificateExpirationDate.After(time.Now()))
+	assert.False(t, body.SamlData.ValidateSignature)
 	iamMock.MockIdpService.AssertNotCalled(t, "UpdateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
 }
@@ -1074,11 +1104,21 @@ func TestGetIdpResourceAsString_Error(t *testing.T) {
 }
 
 func TestGetIdpURLResourceAsString_HappyFlow(t *testing.T) {
+	const body = "<EntityDescriptor/>"
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte(body))
+	}))
+	t.Cleanup(func() {
+		server.Close()
+		utils.SetMetadataHTTPClientForTest(nil)
+	})
+	utils.SetMetadataHTTPClientForTest(server.Client())
+
 	_, testSubject, _ := initIdpServiceTests(t)
-	idpRequest := getIdpMetadataModel(idpAlias, XML_URL, utils.Url, models.SAML, nil, nil)
+	idpRequest := getIdpMetadataModel(idpAlias, server.URL, utils.Url, models.SAML, nil, nil)
 	res, err := testSubject.getIdpResourceAsString(context.Background(), idpRequest)
-	assert.NotNil(t, res)
-	assert.Nil(t, err)
+	assert.NoError(t, err)
+	assert.Equal(t, body, res)
 }
 
 func TestGetIdpURLResourceAsString_Error(t *testing.T) {

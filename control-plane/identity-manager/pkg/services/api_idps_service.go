@@ -371,12 +371,15 @@ func (s *IdpsApiService) addIdpDataByIdpType(ctx context.Context, res *api.Idp, 
 			res.OidcData.Scopes = strings.Split((*provider.Config)[utils.Scopes], utils.ScopesSeperator)
 		}
 	case providers.SAML:
+		signingCertificate := (*provider.Config)[utils.SigningCertificate]
 		res.SamlData = &api.SamlData{
-			SigningCertificate:     (*provider.Config)[utils.SigningCertificate],
+			SigningCertificate:     signingCertificate,
 			SingleSignOnServiceUrl: (*provider.Config)[utils.SingleSignOnServiceUrl],
 			EntityId:               (*provider.Config)[utils.EntityId],
 			ValidateSignature:      (*provider.Config)[utils.ValidateSignature] == "true",
+			CertificateExpirationDate: utils.SigningCertificateExpiration(signingCertificate),
 		}
+		
 		res.SamlData.ServiceProviderMetadataUrl = s.getSPSamlMetadataUrl(ctx, *provider.Alias)
 	}
 }

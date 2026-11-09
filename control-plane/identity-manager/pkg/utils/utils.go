@@ -321,6 +321,12 @@ func samlDataFromEntity(entity *saml.EntityDescriptor) *api.SamlData {
 		if config.SigningCertificate == "" {
 			config.SigningCertificate = signingCertificate(idp)
 		}
+		if idp.WantAuthnRequestsSigned != nil && *idp.WantAuthnRequestsSigned {
+			config.ValidateSignature = true
+		}
+		if idp.ValidUntil != nil {
+			config.CertificateExpirationDate = *idp.ValidUntil
+		}
 	}
 	return config
 }
