@@ -204,6 +204,51 @@ func (s *NodeService) GetTenantNodes(ctx context.Context, filterBy []string, sor
 	return api.Response(http.StatusOK, response), nil
 }
 
+func (s *NodeService) GetNodeLabelKeys(ctx context.Context, clusterUuid, contains string, offset, limit int32) (api.ImplResponse, error) {
+	tenantId, err := ParseTenantId(ctx)
+	if err != nil {
+		return NewErrorResponse(err), nil
+	}
+	clusterID, parseErr := uuid.Parse(clusterUuid)
+	if parseErr != nil {
+		return NewErrorResponse(api.NewError(http.StatusBadRequest, "Invalid cluster UUID", parseErr)), nil
+	}
+	clusterUuid = clusterID.String()
+	permittedScopes, err := ValidatePermittedClusterScope(ctx, clusterUuid)
+	if err != nil {
+		return NewErrorResponse(err), nil
+	}
+	options, dbErr := dao.GetNodeLabelKeys(ctx, tenantId, clusterUuid, contains, *permittedScopes, offset, limit)
+	if dbErr != nil {
+		return NewErrorResponse(dbErr), nil
+	}
+	return api.Response(http.StatusOK, options), nil
+}
+
+func (s *NodeService) GetNodeLabelValues(ctx context.Context, clusterUuid, key, contains string, offset, limit int32) (api.ImplResponse, error) {
+	if key == "" {
+		return NewErrorResponse(api.NewError(http.StatusBadRequest, "Label key is required", nil)), nil
+	}
+	tenantId, err := ParseTenantId(ctx)
+	if err != nil {
+		return NewErrorResponse(err), nil
+	}
+	clusterID, parseErr := uuid.Parse(clusterUuid)
+	if parseErr != nil {
+		return NewErrorResponse(api.NewError(http.StatusBadRequest, "Invalid cluster UUID", parseErr)), nil
+	}
+	clusterUuid = clusterID.String()
+	permittedScopes, err := ValidatePermittedClusterScope(ctx, clusterUuid)
+	if err != nil {
+		return NewErrorResponse(err), nil
+	}
+	options, dbErr := dao.GetNodeLabelValues(ctx, tenantId, clusterUuid, key, contains, *permittedScopes, offset, limit)
+	if dbErr != nil {
+		return NewErrorResponse(dbErr), nil
+	}
+	return api.Response(http.StatusOK, options), nil
+}
+
 func (s *NodeService) GetNode(ctx context.Context, nodeId string) (api.ImplResponse, error) {
 	tenantId, err := ParseTenantId(ctx)
 	if err != nil {
