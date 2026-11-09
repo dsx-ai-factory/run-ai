@@ -15,7 +15,7 @@ import { EWidgetEntity, type IWidgetWrapperOptions } from "@/models/chart.model"
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import { workloadService } from "@/services/cluster/workload.service/workload.service";
 import { NodeTelemetryType, type TelemetryResponse } from "@/swagger-models/cluster-service-client";
-import { WorkloadTelemetryType } from "@/swagger-models/workloads-client";
+import { WorkloadSortFilterFields, WorkloadTelemetryType } from "@/swagger-models/workloads-client";
 import { widgetUtil } from "@/utils/widget.util";
 import { HttpErrorResponse } from "@/models/http-response.model";
 import { formatUtil } from "@/utils/format.util/format.util";
@@ -117,7 +117,11 @@ export default defineComponent({
     redirectToWorkloads(): void {
       this.$router.push({
         name: WORKLOAD_ROUTE_NAMES.WORKLOAD_INDEX,
-        query: { sortBy: "idleAllocatedGpus", descending: "true" },
+        query: {
+          sortBy: WorkloadSortFilterFields.IdleAllocatedGpus,
+          descending: "true",
+          advancedFilters: widgetUtil.getIdleWorkloadsAdvancedFilters(this.nodePoolName),
+        },
       });
     },
   },
