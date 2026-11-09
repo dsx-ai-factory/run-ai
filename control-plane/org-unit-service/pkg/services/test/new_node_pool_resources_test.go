@@ -6,7 +6,10 @@
 package test
 
 import (
+	"context"
+
 	clusteropenapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
+	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/database/models"
 	"github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/services"
 	. "github.com/onsi/ginkgo/v2"
@@ -33,5 +36,29 @@ var _ = Describe("Department resources for a new node pool", func() {
 		Entry("weights mode gives the default department no quota", weightsMode, true, 0.0, models.DefaultOverQuotaWeight),
 		Entry("ranks mode keeps the weight derived from quota", ranksMode, false, 0.0, 0.0),
 		Entry("ranks mode gives the default department no quota", ranksMode, true, 0.0, 0.0),
+	)
+})
+
+var _ = Describe("Department resources for a node pool omitted from the request", func() {
+	DescribeTable("GPU weight",
+		func(capabilities *clusteropenapi.SchedulingCapabilities, weight float64) {
+			active := ptr.To(clusteropenapi.NODEPOOLPHASE_READY)
+			nodePools := map[string]clusteropenapi.NodepoolMinimal{
+				"1": {Id: "1", Name: "default", Phase: active},
+				"2": {Id: "2", Name: "omitted", Phase: active, SchedulingCapabilities: capabilities},
+			}
+			request := []api.ResourcesNullable{{NodePool: &api.ResourcesNodePool{Id: "1", Name: "default"}}}
+
+			resources, err := services.ApiNewResourcesToModel(context.Background(), request, true, nodePools)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(resources).To(HaveLen(2))
+			Expect(resources[1].NodePoolId).To(Equal("2"))
+			Expect(resources[1].GpuDeserved).To(Equal(ptr.To(0.0)))
+			Expect(resources[1].GpuOverQuotaWeight).To(Equal(ptr.To(weight)))
+		},
+		Entry("unknown capabilities", nil, 0.0),
+		Entry("quota mode", &clusteropenapi.SchedulingCapabilities{Quota: true, Ranks: true}, 0.0),
+		Entry("weights mode", &clusteropenapi.SchedulingCapabilities{AdjustableWeights: true}, models.DefaultOverQuotaWeight),
+		Entry("ranks mode", &clusteropenapi.SchedulingCapabilities{Ranks: true}, 0.0),
 	)
 })

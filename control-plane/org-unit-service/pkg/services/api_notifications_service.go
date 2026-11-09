@@ -323,17 +323,20 @@ func GetDepartmentResourcesToAdd(orgUnitData models.OrgUnitData, setUnlimitedDes
 	capabilities *apiClusters.SchedulingCapabilities,
 ) *models.Resources {
 	if capabilities != nil && !capabilities.Quota {
-		weight := float64(0)
-		if capabilities.AdjustableWeights {
-			weight = models.DefaultOverQuotaWeight
-		}
-		return getResourcesToAdd(orgUnitData, nodePoolId, nodePoolName, 0, weight)
+		return getResourcesToAdd(orgUnitData, nodePoolId, nodePoolName, 0, departmentWeightWithoutQuota(*capabilities))
 	}
 	if setUnlimitedDeserved {
 		return getResourcesToAdd(orgUnitData, nodePoolId, nodePoolName, -1, -1)
 	} else {
 		return getResourcesToAdd(orgUnitData, nodePoolId, nodePoolName, 0, 0)
 	}
+}
+
+func departmentWeightWithoutQuota(capabilities apiClusters.SchedulingCapabilities) float64 {
+	if capabilities.AdjustableWeights {
+		return models.DefaultOverQuotaWeight
+	}
+	return 0
 }
 
 func getResourcesToAdd(orgUnitData models.OrgUnitData, nodePoolId string, nodePoolName string, deserved float64, overQuotaWeight float64) *models.Resources {
