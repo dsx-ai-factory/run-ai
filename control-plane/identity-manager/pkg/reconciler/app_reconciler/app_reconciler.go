@@ -137,7 +137,7 @@ func (cr *AppsReconciler) reconcileServiceAccountsByType(ctx context.Context, re
 	}
 	for _, serviceAccount := range serviceAccounts {
 		var clusterId *string
-		clientType := realm_client.ClientTypeTenantApp
+		clientType := realm_client.ClientTypeServiceAccount
 		if !isExternal {
 			if serviceAccount.Attributes != nil && serviceAccount.Attributes.ClusterId != nil {
 				clusterId = serviceAccount.Attributes.ClusterId

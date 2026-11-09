@@ -68,6 +68,7 @@ var _ = Describe("Node pool resources API tests", Ordered, func() {
 	var departmentService api.DepartmentsAPIServicer
 	var projectService api.ProjectsAPIServicer
 	clusterServiceClient := mocks.IClusterClient{}
+	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, nil)
 
 	clusterId := uuid.New().String()
 	clusterServiceClient.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&openapi.ClustersMinimalData{
@@ -142,6 +143,40 @@ var _ = Describe("Node pool resources API tests", Ordered, func() {
 			projectIds = append(projectIds, project2.Id)
 
 			time.Sleep(time.Duration(2) * time.Millisecond)
+		})
+
+		It("gives departments the default weight on a node pool created without quota", func() {
+			weightsNodepool := openapi.NodepoolMinimal{
+				Name:                   "weights-pool",
+				Id:                     "12",
+				SchedulingCapabilities: npSchedCapabilities(false, true, false, false),
+			}
+			weightsClient := mocks.IClusterClient{}
+			weightsClient.On("GetNodepoolMinimal", mock.Anything, weightsNodepool.Id).Return(&weightsNodepool, nil)
+
+			updated, err := services.NewNotificationsApiService(&weightsClient).NodePoolUpdated(ctx, false, api.NodePool{
+				Id:        weightsNodepool.Id,
+				Name:      weightsNodepool.Name,
+				ClusterId: clusterId,
+				Operation: services.CreatedOperation,
+			})
+			Expect(err).To(BeNil())
+			Expect(updated.Code).To(Equal(http.StatusOK))
+
+			departments, err := dao.GetDepartmentsByCluster(ctx, TestTenant, uuid.MustParse(clusterId), nil, models.SlimVerbosity)
+			Expect(err).To(BeNil())
+			Expect(*departments).NotTo(BeEmpty())
+			for _, department := range *departments {
+				var resources *models.Resources
+				for i := range department.OrgUnitData.Resources {
+					if department.OrgUnitData.Resources[i].NodePoolId == weightsNodepool.Id {
+						resources = &department.OrgUnitData.Resources[i]
+					}
+				}
+				Expect(resources).NotTo(BeNil())
+				Expect(*resources.GpuDeserved).To(Equal(float64(0)))
+				Expect(*resources.GpuOverQuotaWeight).To(Equal(models.DefaultOverQuotaWeight))
+			}
 		})
 
 		It("test create node pool", func() {

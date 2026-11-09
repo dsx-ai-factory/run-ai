@@ -177,6 +177,56 @@ func TestCreateClient_HttpError(t *testing.T) {
 	assert.NotNil(t, err)
 }
 
+func TestCreateClient_CreatedStatus(t *testing.T) {
+	clientServiceMock, testSubject := initIdmService(t)
+	// the server answers 201 Created for a new client
+	clientServiceMock.On("CreateInternalClient", mock.Anything).Return(openapi.ApiCreateInternalClientRequest{})
+	clientServiceMock.On("CreateInternalClientExecute", mock.Anything).
+		Return(&openapi.CreateInternalClient201Response{Id: ptr.To("ID")}, &http.Response{StatusCode: http.StatusCreated}, nil)
+
+	clientId, err := testSubject.CreateClient(context.Background(), "name", "Application", ptr.To("ID"))
+
+	assert.NoError(t, err)
+	assert.Equal(t, "ID", *clientId)
+}
+
+func TestCreateServiceAccountClient_HappyFlow(t *testing.T) {
+	clientServiceMock, testSubject := initIdmService(t)
+	clientServiceMock.On("CreateInternalClient", mock.Anything).Return(openapi.ApiCreateInternalClientRequest{})
+	clientServiceMock.On("CreateInternalClientExecute", mock.Anything).
+		Return(&openapi.CreateInternalClient201Response{Id: ptr.To("ID")}, &http.Response{StatusCode: http.StatusCreated}, nil)
+
+	clientId, err := testSubject.CreateServiceAccountClient(context.Background(), "name", ptr.To("tenant"))
+
+	assert.NoError(t, err)
+	assert.Equal(t, "ID", *clientId)
+}
+
+func TestCreateServiceAccountClient_HttpError(t *testing.T) {
+	clientServiceMock, testSubject := initIdmService(t)
+	clientServiceMock.On("CreateInternalClient", mock.Anything).Return(openapi.ApiCreateInternalClientRequest{})
+	clientServiceMock.On("CreateInternalClientExecute", mock.Anything).
+		Return(&openapi.CreateInternalClient201Response{}, &http.Response{StatusCode: http.StatusInternalServerError}, fmt.Errorf("error"))
+
+	clientId, err := testSubject.CreateServiceAccountClient(context.Background(), "name", ptr.To("tenant"))
+
+	assert.Nil(t, clientId)
+	assert.Error(t, err)
+}
+
+func TestCreateServiceAccountClient_NilTenantId_ErrorDoesNotPanic(t *testing.T) {
+	clientServiceMock, testSubject := initIdmService(t)
+	clientServiceMock.On("CreateInternalClient", mock.Anything).Return(openapi.ApiCreateInternalClientRequest{})
+	clientServiceMock.On("CreateInternalClientExecute", mock.Anything).
+		Return(&openapi.CreateInternalClient201Response{}, &http.Response{StatusCode: http.StatusBadRequest}, fmt.Errorf("error"))
+
+	assert.NotPanics(t, func() {
+		clientId, err := testSubject.CreateServiceAccountClient(context.Background(), "name", nil)
+		assert.Nil(t, clientId)
+		assert.Error(t, err)
+	})
+}
+
 func getExpectedUpdateClientRedirectUrisReq(mock *mocks.ClientsAPI, client openapi.Client, expectedRedirectUris []string) openapi.ApiUpdateRedirectUrisRequest {
 	expectedInnerReq := openapi.NewClientRedirectUrisUpdateRequest(expectedRedirectUris)
 	expectedUpdateUriReq := mock.UpdateRedirectUris(context.Background(), client.ClientId)
