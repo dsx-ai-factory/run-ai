@@ -200,7 +200,7 @@ var _ = Describe("ChangeDesiredStates — V2 proxy routing", func() {
 		} else {
 			Expect(mgr.lastIds).To(ConsistOf(id))
 		}
-		rows, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(id), 0, 0)
+		rows, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(id), 0, 0, "desc", "accepted_at", nil, "")
 		Expect(apiErr).To(BeNil())
 		Expect(rows).To(HaveLen(1))
 		Expect(rows[0].Action).To(Equal(expected))
@@ -269,10 +269,10 @@ var _ = Describe("ChangeDesiredStates — V2 proxy routing", func() {
 		result := response.Body.(workloadsApi.BatchResponse)
 		Expect(result.Succeeded).To(ConsistOf(accepted))
 		Expect(result.Failed).To(ConsistOf(workloadsApi.BatchResponseFailureItem{Id: rejected, Code: http.StatusBadRequest, Message: "rejected"}))
-		rows, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(accepted), 0, 0)
+		rows, _, apiErr := dao.DbGetWorkloadActions(ctx, uuid.MustParse(accepted), 0, 0, "desc", "accepted_at", nil, "")
 		Expect(apiErr).To(BeNil())
 		Expect(rows).To(HaveLen(1))
-		rows, _, apiErr = dao.DbGetWorkloadActions(ctx, uuid.MustParse(rejected), 0, 0)
+		rows, _, apiErr = dao.DbGetWorkloadActions(ctx, uuid.MustParse(rejected), 0, 0, "desc", "accepted_at", nil, "")
 		Expect(apiErr).To(BeNil())
 		Expect(rows).To(BeEmpty())
 	})

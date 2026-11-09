@@ -122,6 +122,7 @@ func updateResourcesPerCluster(ctx context.Context, tenantId string, clusterId u
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("resources sync job: update node pools resources for cluster %s", clusterId.String())
 	nodePoolsIds := []string{}
 	nodePoolsNames := []string{}
+	capabilities := map[string]*clusters_openapi.SchedulingCapabilities{}
 	for _, nodePool := range nodePools {
 		if nodePool.Id == "" || nodePool.Name == "" {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("resources sync job: failed to update resources on cluster %s, invalid node pool %+v", clusterId.String(), nodePool)
@@ -129,9 +130,10 @@ func updateResourcesPerCluster(ctx context.Context, tenantId string, clusterId u
 		}
 		nodePoolsIds = append(nodePoolsIds, nodePool.Id)
 		nodePoolsNames = append(nodePoolsNames, nodePool.Name)
+		capabilities[nodePool.Id] = nodePool.SchedulingCapabilities
 	}
 
-	err := handleMissingResources(ctx, db, tenantId, clusterId, nodePoolsIds, nodePoolsNames, setUnlimitedGpu)
+	err := handleMissingResources(ctx, db, tenantId, clusterId, nodePoolsIds, nodePoolsNames, capabilities, setUnlimitedGpu)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("resources sync job: failed to handle missing resources on cluster %s, err %v", clusterId.String(), err)
 	}
@@ -139,7 +141,7 @@ func updateResourcesPerCluster(ctx context.Context, tenantId string, clusterId u
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("resources sync job: failed to handle deleted resources on cluster %s, err %v", clusterId.String(), err)
 	}
-	err = handleNoResources(ctx, db, tenantId, clusterId, nodePoolsIds, nodePoolsNames, setUnlimitedGpu)
+	err = handleNoResources(ctx, db, tenantId, clusterId, nodePoolsIds, nodePoolsNames, capabilities, setUnlimitedGpu)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("resources sync job: failed to handle no resources on cluster %s, err %v", clusterId.String(), err)
 	}
@@ -289,7 +291,9 @@ func handleDeletedResources(ctx context.Context, db orm.DB, tenantId string, clu
 	return dao.DeleteResources(ctx, resourcesToDelete)
 }
 
-func handleMissingResources(ctx context.Context, db orm.DB, tenantId string, clusterId uuid.UUID, nodePoolsIds []string, nodePoolsNames []string, setUnlimitedGpu bool) error {
+func handleMissingResources(ctx context.Context, db orm.DB, tenantId string, clusterId uuid.UUID, nodePoolsIds []string, nodePoolsNames []string,
+	capabilities map[string]*clusters_openapi.SchedulingCapabilities, setUnlimitedGpu bool,
+) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("resources sync job: handle missing resources for tenant %s and cluster %s", tenantId, clusterId.String())
 	projects, err := getProjectsWithMissingResources(ctx, db, tenantId, clusterId, nodePoolsIds)
 	if err != nil {
@@ -305,7 +309,7 @@ func handleMissingResources(ctx context.Context, db orm.DB, tenantId string, clu
 		resourcesToAdd = append(resourcesToAdd, projectResources...)
 	}
 	for _, department := range *departments {
-		departmentResources := getDepartmentResourcesToAdd(ctx, department.OrgUnitData, nodePoolsIds, nodePoolsNames, department.ID, setUnlimitedGpu && department.Name == services.DefaultDepartmentName)
+		departmentResources := getDepartmentResourcesToAdd(ctx, department.OrgUnitData, nodePoolsIds, nodePoolsNames, capabilities, department.ID, setUnlimitedGpu && department.Name == services.DefaultDepartmentName)
 		resourcesToAdd = append(resourcesToAdd, departmentResources...)
 	}
 
@@ -315,7 +319,9 @@ func handleMissingResources(ctx context.Context, db orm.DB, tenantId string, clu
 	return dao.AddResources(ctx, resourcesToAdd)
 }
 
-func handleNoResources(ctx context.Context, db orm.DB, tenantId string, clusterId uuid.UUID, nodePoolsIds []string, nodePoolsNames []string, setUnlimitedGpu bool) error {
+func handleNoResources(ctx context.Context, db orm.DB, tenantId string, clusterId uuid.UUID, nodePoolsIds []string, nodePoolsNames []string,
+	capabilities map[string]*clusters_openapi.SchedulingCapabilities, setUnlimitedGpu bool,
+) error {
 	logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("resources sync job: handle no resources for tenant %s and cluster %s", tenantId, clusterId.String())
 	projects, err := getProjectsWithNoResources(ctx, db, tenantId, clusterId)
 	if err != nil {
@@ -331,7 +337,7 @@ func handleNoResources(ctx context.Context, db orm.DB, tenantId string, clusterI
 		resourcesToAdd = append(resourcesToAdd, projectResources...)
 	}
 	for _, department := range *departments {
-		departmentResources := getDepartmentResourcesToAdd(ctx, department.OrgUnitData, nodePoolsIds, nodePoolsNames, department.ID, setUnlimitedGpu && department.Name == services.DefaultDepartmentName)
+		departmentResources := getDepartmentResourcesToAdd(ctx, department.OrgUnitData, nodePoolsIds, nodePoolsNames, capabilities, department.ID, setUnlimitedGpu && department.Name == services.DefaultDepartmentName)
 		resourcesToAdd = append(resourcesToAdd, departmentResources...)
 	}
 
@@ -356,7 +362,9 @@ func getProjectResourcesToAdd(ctx context.Context, orgUnitData models.OrgUnitDat
 	return resourcesToAdd
 }
 
-func getDepartmentResourcesToAdd(ctx context.Context, orgUnitData models.OrgUnitData, nodePoolsIds []string, nodePoolsNames []string, departmentId int64, setUnlimitedDeserved bool) []*models.Resources {
+func getDepartmentResourcesToAdd(ctx context.Context, orgUnitData models.OrgUnitData, nodePoolsIds []string, nodePoolsNames []string,
+	capabilities map[string]*clusters_openapi.SchedulingCapabilities, departmentId int64, setUnlimitedDeserved bool,
+) []*models.Resources {
 	resourcesToAdd := []*models.Resources{}
 	resourcesMap := createResourcesMap(orgUnitData)
 	for i := range nodePoolsIds {
@@ -365,7 +373,7 @@ func getDepartmentResourcesToAdd(ctx context.Context, orgUnitData models.OrgUnit
 		if !found || resources == nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Infof("resources sync job: found missing resources for department %d, org-unit-data %s, node pool id: %s name: %s",
 				departmentId, orgUnitData.ID.String(), nodePoolId, nodePoolsNames[i])
-			resourcesToAdd = append(resourcesToAdd, services.GetDepartmentResourcesToAdd(orgUnitData, setUnlimitedDeserved, nodePoolId, nodePoolsNames[i]))
+			resourcesToAdd = append(resourcesToAdd, services.GetDepartmentResourcesToAdd(orgUnitData, setUnlimitedDeserved, nodePoolId, nodePoolsNames[i], capabilities[nodePoolId]))
 		}
 	}
 	return resourcesToAdd
