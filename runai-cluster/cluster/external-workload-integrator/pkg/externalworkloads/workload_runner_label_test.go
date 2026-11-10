@@ -66,8 +66,9 @@ var _ = Describe("setWorkloadRunnerLabel", func() {
 			Name:       "my-cronjob",
 		})
 		ew := newExternalWorkload()
+		handler := &ExternalWorkloadHandler{}
 
-		setWorkloadRunnerLabel(object, ew)
+		handler.setWorkloadRunnerLabel(context.Background(), object, ew)
 
 		Expect(ew.Labels).NotTo(HaveKey(commonconstants.WorkloadRunnerNameLabel))
 	})
@@ -75,8 +76,9 @@ var _ = Describe("setWorkloadRunnerLabel", func() {
 	It("does not set label when there are no owner refs", func() {
 		object := newObjectWithOwnerRefs()
 		ew := newExternalWorkload()
+		handler := &ExternalWorkloadHandler{}
 
-		setWorkloadRunnerLabel(object, ew)
+		handler.setWorkloadRunnerLabel(context.Background(), object, ew)
 
 		Expect(ew.Labels).NotTo(HaveKey(commonconstants.WorkloadRunnerNameLabel))
 	})
@@ -86,9 +88,11 @@ var _ = Describe("setWorkloadRunnerLabel", func() {
 			metav1.OwnerReference{APIVersion: "batch/v1", Kind: "CronJob", Name: "my-cronjob"},
 			wlrOwnerRef(testWlrName),
 		)
+		object.GetObjectKind().SetGroupVersionKind(pytorchGVK)
 		ew := newExternalWorkload()
+		handler, _ := kindHandler(pytorchRunner(testNamespace))
 
-		setWorkloadRunnerLabel(object, ew)
+		handler.setWorkloadRunnerLabel(context.Background(), object, ew)
 
 		Expect(ew.Labels[commonconstants.WorkloadRunnerNameLabel]).To(Equal(testWlrName))
 	})

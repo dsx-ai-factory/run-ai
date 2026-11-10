@@ -389,7 +389,7 @@ func (h *ExternalWorkloadHandler) createExternalWorkloadForObject(ctx context.Co
 		// this is not considered an error, no need to retry
 		return nil
 	}
-	ownerReferences := h.getOwnerReferences(object)
+	ownerReferences := h.getOwnerReferences(ctx, object)
 
 	externalWorkload := &v1alpha1.ExternalWorkload{
 		ObjectMeta: metav1.ObjectMeta{
@@ -424,7 +424,7 @@ func (h *ExternalWorkloadHandler) createExternalWorkloadForObject(ctx context.Co
 		externalWorkload.Annotations[commonconstants.ControlPlaneWorkloadIdAnnotationForWorkload] = workloadId
 	}
 
-	setWorkloadRunnerLabel(object, externalWorkload)
+	h.setWorkloadRunnerLabel(ctx, object, externalWorkload)
 
 	err = h.fillHierarchyInfoForTopOwner(ctx, object, &externalWorkload.Spec)
 	if err != nil {
@@ -482,7 +482,7 @@ func (h *ExternalWorkloadHandler) getOrRebindExternalWorkloadOfObject(ctx contex
 func (h *ExternalWorkloadHandler) rebindExternalWorkloadToObject(ctx context.Context,
 	object client.Object, uid types.UID,
 ) (*v1alpha1.ExternalWorkload, error) {
-	runnerRef := workloadRunnerOwnerRef(object)
+	runnerRef := h.workloadRunnerOf(ctx, object)
 	if runnerRef == nil || runnerRef.UID == "" {
 		return nil, nil
 	}
@@ -533,7 +533,9 @@ func (h *ExternalWorkloadHandler) getOriginalWorkloadUidName(object client.Objec
 	return object.GetUID(), object.GetName(), nil
 }
 
-func (h *ExternalWorkloadHandler) getOwnerReferences(object client.Object) []metav1.OwnerReference {
+func (h *ExternalWorkloadHandler) getOwnerReferences(ctx context.Context,
+	object client.Object,
+) []metav1.OwnerReference {
 	gvk := object.GetObjectKind().GroupVersionKind()
 	gvkHandler, found := h.supportedGVKsHandlers[gvk]
 	if found {
@@ -548,7 +550,7 @@ func (h *ExternalWorkloadHandler) getOwnerReferences(object client.Object) []met
 	}
 
 	// the runner outlives the children it recreates, so it owns the external workload
-	if runnerRef := workloadRunnerOwnerRef(object); runnerRef != nil {
+	if runnerRef := h.workloadRunnerOf(ctx, object); runnerRef != nil {
 		return []metav1.OwnerReference{
 			{
 				APIVersion: runnerRef.APIVersion,
@@ -580,7 +582,7 @@ func (h *ExternalWorkloadHandler) updateExternalWorkloadForObject(ctx context.Co
 
 	originalExternalWorkload := externalWorkloadOfObj.DeepCopy()
 
-	externalWorkloadOfObj.OwnerReferences = h.getOwnerReferences(object)
+	externalWorkloadOfObj.OwnerReferences = h.getOwnerReferences(ctx, object)
 
 	// Copy category and priority labels from the K8s object to the ExternalWorkload (in case they were changed by the API)
 	if categoryLabel := object.GetLabels()[commonconstants.WorkloadCategoryLabel]; categoryLabel != "" {
@@ -591,7 +593,7 @@ func (h *ExternalWorkloadHandler) updateExternalWorkloadForObject(ctx context.Co
 		addToLabels(externalWorkloadOfObj, constants2.PriorityLabelKey, priorityLabel)
 	}
 
-	setWorkloadRunnerLabel(object, externalWorkloadOfObj)
+	h.setWorkloadRunnerLabel(ctx, object, externalWorkloadOfObj)
 
 	err := h.parseObjectToExternalWorkload(ctx, object, externalWorkloadOfObj)
 	if err != nil {
@@ -777,8 +779,10 @@ func (h *ExternalWorkloadHandler) setWorkloadCategory(ctx context.Context, objec
 	}
 }
 
-func setWorkloadRunnerLabel(object client.Object, externalWorkload *v1alpha1.ExternalWorkload) {
-	runnerRef := workloadRunnerOwnerRef(object)
+func (h *ExternalWorkloadHandler) setWorkloadRunnerLabel(ctx context.Context, object client.Object,
+	externalWorkload *v1alpha1.ExternalWorkload,
+) {
+	runnerRef := h.workloadRunnerOf(ctx, object)
 	if runnerRef == nil {
 		return
 	}
@@ -795,6 +799,41 @@ func workloadRunnerOwnerRef(object client.Object) *metav1.OwnerReference {
 		}
 	}
 	return nil
+}
+
+// Stamped on every runner, from its template, by dromos' gvk label mutator.
+const (
+	workloadGroupLabel = "run.ai/workload-group"
+	workloadKindLabel  = "run.ai/workload-kind"
+)
+
+// workloadRunnerOf returns the runner reference of an object that is its
+// runner's workload. A runner also owns what its plugins create, and one that
+// is tracked here, such as a capture's SnapshotJob, is a workload of its own.
+func (h *ExternalWorkloadHandler) workloadRunnerOf(ctx context.Context, object client.Object) *metav1.OwnerReference {
+	runnerRef := workloadRunnerOwnerRef(object)
+	if runnerRef == nil {
+		return nil
+	}
+
+	runner := &dromosv1alpha1.WorkloadRunner{}
+	key := client.ObjectKey{Name: runnerRef.Name, Namespace: object.GetNamespace()}
+	if err := h.cachedClient.Get(ctx, key, runner); err != nil {
+		// Unknown, so keep the behaviour from before kinds were compared.
+		return runnerRef
+	}
+	kind, labelled := runner.Labels[workloadKindLabel]
+	if !labelled {
+		return runnerRef
+	}
+
+	gvk := object.GetObjectKind().GroupVersionKind()
+	if kind != gvk.Kind || runner.Labels[workloadGroupLabel] != gvk.Group {
+		log.Debug().Msgf("%s is owned by WorkloadRunner <%s>, whose workload is a %s, so it is a workload of its own",
+			objectLogStr(object), runnerRef.Name, kind)
+		return nil
+	}
+	return runnerRef
 }
 
 func addToLabels(object client.Object, label, value string) {

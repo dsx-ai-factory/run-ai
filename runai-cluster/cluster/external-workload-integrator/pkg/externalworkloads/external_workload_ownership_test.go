@@ -54,9 +54,9 @@ func newChildObject(uid types.UID, ownerRefs ...metav1.OwnerReference) *metav1.P
 var _ = Describe("ExternalWorkloadHandler.getOwnerReferences", func() {
 	It("returns the WorkloadRunner when the child is owned by one", func() {
 		child := newChildObject("child-uid-1", wlrOwnerRefWithUID(testWlrName, testWlrUID))
-		handler := &ExternalWorkloadHandler{}
+		handler, _ := kindHandler(pytorchRunner(testNamespace))
 
-		ownerRefs := handler.getOwnerReferences(child)
+		ownerRefs := handler.getOwnerReferences(context.Background(), child)
 
 		Expect(ownerRefs).To(HaveLen(1))
 		Expect(ownerRefs[0].Kind).To(Equal("WorkloadRunner"))
@@ -70,7 +70,7 @@ var _ = Describe("ExternalWorkloadHandler.getOwnerReferences", func() {
 		})
 		handler := &ExternalWorkloadHandler{}
 
-		ownerRefs := handler.getOwnerReferences(child)
+		ownerRefs := handler.getOwnerReferences(context.Background(), child)
 
 		Expect(ownerRefs).To(HaveLen(1))
 		Expect(ownerRefs[0].Kind).To(Equal(pytorchGVK.Kind))
@@ -82,7 +82,7 @@ var _ = Describe("ExternalWorkloadHandler.getOwnerReferences", func() {
 		child := newChildObject("child-uid-1")
 		handler := &ExternalWorkloadHandler{}
 
-		ownerRefs := handler.getOwnerReferences(child)
+		ownerRefs := handler.getOwnerReferences(context.Background(), child)
 
 		Expect(ownerRefs).To(HaveLen(1))
 		Expect(ownerRefs[0].Kind).To(Equal(pytorchGVK.Kind))
@@ -93,8 +93,9 @@ var _ = Describe("setWorkloadRunnerLabel UID stamping", func() {
 	It("stamps the runner uid alongside the runner name", func() {
 		child := newChildObject("child-uid-1", wlrOwnerRefWithUID(testWlrName, testWlrUID))
 		ew := newExternalWorkload()
+		handler, _ := kindHandler(pytorchRunner(testNamespace))
 
-		setWorkloadRunnerLabel(child, ew)
+		handler.setWorkloadRunnerLabel(context.Background(), child, ew)
 
 		Expect(ew.Labels[commonconstants.WorkloadRunnerNameLabel]).To(Equal(testWlrName))
 		Expect(ew.Labels[commonconstants.WorkloadRunnerUidLabel]).To(Equal(string(testWlrUID)))
@@ -105,8 +106,9 @@ var _ = Describe("setWorkloadRunnerLabel UID stamping", func() {
 			APIVersion: "batch/v1", Kind: "CronJob", Name: "my-cronjob",
 		})
 		ew := newExternalWorkload()
+		handler := &ExternalWorkloadHandler{}
 
-		setWorkloadRunnerLabel(child, ew)
+		handler.setWorkloadRunnerLabel(context.Background(), child, ew)
 
 		Expect(ew.Labels).NotTo(HaveKey(commonconstants.WorkloadRunnerUidLabel))
 	})
