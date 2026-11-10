@@ -37,6 +37,7 @@ const (
 	SystemMPIJobSpecFormatterName            = "runai-mpiJobSpec"
 	SystemKubeflowRunPolicyFormatterName     = "runai-kubeflowRunPolicy"
 	SystemKubeflowReplicaSpecFormatterName   = "runai-kubeflowReplicaSpec"
+	SystemDynamoComponentSpecFormatterName   = "runai-dynamoComponentSpec"
 	SystemDynamoGraphDeploymentFormatterName = "runai-dynamoGraphDeploymentSpec"
 	SystemRayJobSpecFormatterName            = "runai-rayJobSpec"
 	SystemRayServiceSpecFormatterName        = "runai-rayServiceSpec"
