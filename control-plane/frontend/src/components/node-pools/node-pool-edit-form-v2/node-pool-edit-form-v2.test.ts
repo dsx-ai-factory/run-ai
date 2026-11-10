@@ -6,6 +6,7 @@ import { mount, shallowMount, flushPromises } from "@vue/test-utils";
 import { createTestingPinia } from "@pinia/testing";
 import { Quasar, QSelect, QInput } from "quasar";
 import { describe, it, expect, vi } from "vitest";
+import { nodeLabelsService } from "@/services/control-plane/node-labels.service/node-labels.service";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import RunaiNameValidation from "@/components/common/runai-name-validation/runai-name-validation.vue";
 import RunaiDescriptionInput from "@/components/common/runai-description-input/runai-description-input.vue";
@@ -13,6 +14,9 @@ import NodePoolEditFormV2 from "./node-pool-edit-form-v2.vue";
 import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: { getNodepools: vi.fn().mockResolvedValue([]), createNodepool: vi.fn() },
+}));
+vi.mock("@/services/control-plane/node-labels.service/node-labels.service", () => ({
+  nodeLabelsService: { keys: vi.fn().mockResolvedValue([]), values: vi.fn().mockResolvedValue([]) },
 }));
 describe("Step 1 form", () => {
   it("keeps the new flow disabled by default", () => expect(ENABLE_NODE_POOL_CREATE_FLOW).toBe(false));
@@ -53,6 +57,26 @@ describe("Step 1 form", () => {
       },
     });
   }
+  it("populates the key selector from the cluster API and keeps manual entry available after failure", async () => {
+    const wrapper = renderForm("cluster");
+    await flushPromises();
+    vi.mocked(nodeLabelsService.keys).mockResolvedValueOnce(["gpu-type"]);
+    const key = wrapper.findAllComponents(QSelect).find((input) => input.props("label") === "Key");
+    if (!key) throw new Error("Key selector missing");
+    const update = vi.fn((fn) => fn());
+    key.vm.$emit("filter", "gpu", update);
+    await flushPromises();
+    expect(nodeLabelsService.keys).toHaveBeenLastCalledWith("cluster", { contains: "gpu", offset: 0, limit: 50 });
+    expect(key.props("options")).toContainEqual({ label: "gpu-type", value: "gpu-type", disable: false });
+    expect(update).toHaveBeenCalled();
+    vi.mocked(nodeLabelsService.keys).mockRejectedValueOnce(new Error("404"));
+    key.vm.$emit("filter", "custom-key", update);
+    await flushPromises();
+    expect(key.props("disable")).toBe(false);
+    expect(key.props("hint")).toContain("manually");
+    expect(key.props("options")).toContainEqual({ label: "custom-key (new key)", value: "custom-key", disable: false });
+    wrapper.unmount();
+  });
   it("validates the shared description input before submitting without a debounce delay", async () => {
     const wrapper = renderForm("cluster");
     await flushPromises();
