@@ -6648,6 +6648,7 @@ Components:
   github.com/cespare/xxhash/v2 v2.3.0
   github.com/klauspost/compress/zstd/internal/xxhash v1.20.1
   github.com/klauspost/compress/zstd/internal/xxhash v1.20.3
+  github.com/klauspost/compress/zstd/internal/xxhash v1.20.4
 
 Copyright (c) 2016 Caleb Spare
 
@@ -7378,6 +7379,7 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/ClickHouse/clickhouse-go/v2 v2.49.0
   github.com/ClickHouse/clickhouse-go/v2 v2.50.0
+  github.com/ClickHouse/clickhouse-go/v2 v2.51.0
 
 Copyright 2016-2023 ClickHouse, Inc.
 
@@ -7588,6 +7590,7 @@ Copyright ClickHouse, Inc - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/ClickHouse/ch-go v0.74.0
+  github.com/ClickHouse/ch-go v0.75.0
 
 Copyright 2016-2023 ClickHouse, Inc.
                                  Apache License
@@ -12839,6 +12842,7 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/klauspost/compress v1.20.1
   github.com/klauspost/compress v1.20.3
+  github.com/klauspost/compress v1.20.4
 
 Copyright (c) 2012 The Go Authors. All rights reserved.
 Copyright (c) 2019 Klaus Post. All rights reserved.
@@ -13150,6 +13154,7 @@ Copyright Klaus Post, The Snappy-Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/klauspost/compress/s2 v1.20.3
+  github.com/klauspost/compress/s2 v1.20.4
 
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
 Copyright (c) 2019 Klaus Post. All rights reserved.
@@ -16133,6 +16138,7 @@ Copyright Paul Mach - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
   github.com/paulmach/orb v0.13.0
+  github.com/paulmach/orb v0.14.0
 
 The MIT License (MIT)
 
@@ -18199,14 +18205,17 @@ Components:
   go.uber.org/mock/gomock v0.6.0
   google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/api/expr/v1alpha1 v0.0.0-20261012220534-4341edf3f941
+  google.golang.org/genproto/googleapis/api v0.0.0-20261110000943-09e21b237f2c
+  google.golang.org/genproto/googleapis/api/expr/v1alpha1 v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261104224025-d1e00e9f33ab
+  google.golang.org/genproto/googleapis/api/httpbody v0.0.0-20261110000943-09e21b237f2c
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261012220534-4341edf3f941
   google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab
-  google.golang.org/genproto/googleapis/rpc/status v0.0.0-20261012220534-4341edf3f941
+  google.golang.org/genproto/googleapis/rpc v0.0.0-20261110000943-09e21b237f2c
+  google.golang.org/genproto/googleapis/rpc/status v0.0.0-20261104224025-d1e00e9f33ab
   google.golang.org/genproto/googleapis/type v0.0.0-20260319201613-d00831a3d3e7
-  google.golang.org/genproto/googleapis/type v0.0.0-20261104224025-d1e00e9f33ab
+  google.golang.org/genproto/googleapis/type v0.0.0-20261110000943-09e21b237f2c
   google.golang.org/grpc v1.84.0
   google.golang.org/grpc v1.85.0
   k8s.io/api v0.35.4
@@ -18278,13 +18287,10 @@ Components:
   k8s.io/utils v0.0.0-20251002143259-bc988d571ff4
   k8s.io/utils v0.0.0-20260319190234-28399d86e0b5
   k8s.io/utils v0.0.0-20260507154919-ff6756f316d2
-  k8s.io/utils v0.0.0-20260626114624-be93311217bd
   k8s.io/utils v0.0.0-20260707023825-cf1189d6abe3
   k8s.io/utils v0.0.0-20261023123148-ca04ba58ecab
   k8s.io/utils/ptr v0.0.0-20260507154919-ff6756f316d2
-  k8s.io/utils/ptr v0.0.0-20260707023825-cf1189d6abe3
   k8s.io/utils/ptr v0.0.0-20261023123148-ca04ba58ecab
-  k8s.io/utils/third_party/forked/golang/btree v0.0.0-20260626114624-be93311217bd
   k8s.io/utils/third_party/forked/golang/btree v0.0.0-20260707023825-cf1189d6abe3
   k8s.io/utils/third_party/forked/golang/btree v0.0.0-20261023123148-ca04ba58ecab
   knative.dev/serving/pkg v0.48.1
@@ -18942,6 +18948,7 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/aws/smithy-go/ptr v1.28.5
   github.com/aws/smithy-go/ptr v1.28.8
+  github.com/aws/smithy-go/ptr v1.28.9
   github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363
   github.com/russellhaering/goxmldsig v1.6.1
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
@@ -21158,9 +21165,11 @@ Components:
   golang.org/x/exp v0.0.0-20250103183323-7d7fa50e5329
   golang.org/x/exp v0.0.0-20261014143641-f0251eb4aa3e
   golang.org/x/exp v0.0.0-20261106192419-47ce03d25ef0
+  golang.org/x/exp v0.0.0-20261109185158-a52e3aef5920
   golang.org/x/exp/slices v0.0.0-20260410095643-746e56fc9e2f
   golang.org/x/exp/slices v0.0.0-20261014143641-f0251eb4aa3e
   golang.org/x/exp/slices v0.0.0-20261106192419-47ce03d25ef0
+  golang.org/x/exp/slices v0.0.0-20261109185158-a52e3aef5920
   golang.org/x/mod/semver v0.42.0
   golang.org/x/net v0.56.0
   golang.org/x/net v0.59.0
@@ -21457,7 +21466,6 @@ Components:
   github.com/remyoudompheng/bigfft v0.0.0-20230129092748-24d4a6f8daec
   k8s.io/utils/internal/third_party/forked/golang v0.0.0-20260319190234-28399d86e0b5
   k8s.io/utils/internal/third_party/forked/golang v0.0.0-20260507154919-ff6756f316d2
-  k8s.io/utils/internal/third_party/forked/golang v0.0.0-20260626114624-be93311217bd
   k8s.io/utils/internal/third_party/forked/golang v0.0.0-20260707023825-cf1189d6abe3
   k8s.io/utils/internal/third_party/forked/golang v0.0.0-20261023123148-ca04ba58ecab
   k8s.io/utils/internal/third_party/forked/golang/net v0.0.0-20251002143259-bc988d571ff4
@@ -23723,7 +23731,9 @@ License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   github.com/klauspost/compress/internal/snapref v1.20.1
   github.com/klauspost/compress/internal/snapref v1.20.3
+  github.com/klauspost/compress/internal/snapref v1.20.4
   github.com/klauspost/compress/snappy v1.20.3
+  github.com/klauspost/compress/snappy v1.20.4
 
 Copyright (c) 2011 The Snappy-Go Authors. All rights reserved.
 
@@ -25822,6 +25832,7 @@ NOTICE of github.com/aws/smithy-go, github.com/awslabs/operatorpkg
 Components:
   github.com/aws/smithy-go v1.28.5
   github.com/aws/smithy-go v1.28.8
+  github.com/aws/smithy-go v1.28.9
   github.com/awslabs/operatorpkg v0.0.0-20261006163503-855c7d06c363
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
