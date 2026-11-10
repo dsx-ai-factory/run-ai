@@ -64,13 +64,20 @@
               dense
               label="Key"
               :options="keyOptions"
+              :loading="labels.keys.loading"
+              :hint="labels.keys.error"
+              @virtual-scroll="
+                ({ to }) => {
+                  if (to >= keyOptions.length - 2) void labels.moreKeys();
+                }
+              "
               option-label="value"
               use-input
               fill-input
               hide-selected
               emit-value
               map-options
-              input-debounce="0"
+              input-debounce="250"
               :disable="locked || !draft.clusterId || !!loadError"
               :rules="[validateLabelKey]"
               no-error-icon
@@ -91,13 +98,20 @@
               dense
               label="Value"
               :options="valueOptions"
+              :loading="labels.values.loading"
+              :hint="labels.values.error"
+              @virtual-scroll="
+                ({ to }) => {
+                  if (to >= valueOptions.length - 2) void labels.moreValues();
+                }
+              "
               option-label="value"
               use-input
               fill-input
               hide-selected
               emit-value
               map-options
-              input-debounce="0"
+              input-debounce="250"
               :disable="locked || !!loadError"
               :rules="[validateLabelValue, uniqueLabel]"
               reactive-rules
@@ -152,7 +166,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { computed, onScopeDispose, ref, watch } from "vue";
+import { computed, onScopeDispose, ref, toRef, watch } from "vue";
 import { useQuasar } from "quasar";
 import NodePoolWizardSummary from "@/components/node-pools/node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
@@ -181,6 +195,7 @@ import { errorMessages as nodePoolErrors, errorMessages } from "@/common/error-m
 import { type INodePoolFormDraft } from "@/components/node-pools/node-pool-edit-form-v2/node-pool-edit-form-v2.model";
 
 import { ENodePoolFormDestination } from "./node-pool-edit-form-v2.model";
+import { useNodeLabelOptions } from "@/composables/node-pool/use-node-label-options.composable";
 import { useWizardLayout } from "@/composables/use-wizard-layout.composable";
 import { provideUnsavedChangesGuard } from "@/composables/org-unit/use-unsaved-changes-guard.composable";
 import { UnsavedChangesDialog } from "@/components/org-unit/v2/common/unsaved-changes-dialog";
@@ -250,6 +265,7 @@ async function saveStepChanges() {
     /* Validation keeps the user on the current step. */
   }
 }
+const labels = useNodeLabelOptions(toRef(draft, "clusterId"), toRef(draft, "labelKey"));
 const keySearch = ref("");
 const valueSearch = ref("");
 const unavailableValues = computed(() =>
@@ -258,24 +274,29 @@ const unavailableValues = computed(() =>
     .map((p) => p.labelValue)
     .filter((v): v is string => typeof v === "string"),
 );
-const keyOptions = computed(() =>
+const keyOptions = computed(() => labelOptions(labels.keys.options, keySearch.value, [], "key"));
+const valueOptions = computed(() =>
   labelOptions(
-    [...pools.value.map((p) => p.labelKey).filter((v): v is string => typeof v === "string")],
-    keySearch.value,
-    [],
-    "key",
+    labels.values.options,
+    valueSearch.value,
+    unavailableValues.value.filter((value) => value.includes(valueSearch.value)),
   ),
 );
-const valueOptions = computed(() => labelOptions([], valueSearch.value, unavailableValues.value));
 function filterKeys(value: string, update: (fn: () => void) => void) {
-  update(() => {
-    keySearch.value = value;
-  });
+  keySearch.value = value;
+  void labels.searchKeys(value).then(() =>
+    update(() => {
+      /* Options are supplied reactively by the request. */
+    }),
+  );
 }
 function filterValues(value: string, update: (fn: () => void) => void) {
-  update(() => {
-    valueSearch.value = value;
-  });
+  valueSearch.value = value;
+  void labels.searchValues(value).then(() =>
+    update(() => {
+      /* Options are supplied reactively by the request. */
+    }),
+  );
 }
 function addKey(value: string, done: (value: string, mode: "add-unique") => void) {
   done(value, "add-unique");
