@@ -5978,6 +5978,7 @@ components:
           metadataXmlFile: metadataXmlFile
           metadataXmlType: ""
           entityId: entityId
+        dryRun: false
         name: name
         ocpData:
           clientId: clientId
@@ -6032,8 +6033,8 @@ components:
         mappers:
           $ref: '#/components/schemas/Mappers'
         dryRun:
-          type: boolean
           default: false
+          type: boolean
       required:
       - data
       - type
