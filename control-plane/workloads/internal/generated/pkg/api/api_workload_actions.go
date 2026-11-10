@@ -190,7 +190,39 @@ func (c *WorkloadActionsAPIController) GetWorkloadActionsHistory(w http.Response
 		var param int32 = 50
 		limitParam = param
 	}
-	result, err := c.service.GetWorkloadActionsHistory(r.Context(), workloadIdParam, offsetParam, limitParam)
+	var sortOrderParam string
+	if query.Has("sortOrder") {
+		param := query.Get("sortOrder")
+
+		sortOrderParam = param
+	} else {
+		param := "desc"
+		sortOrderParam = param
+	}
+	var sortByParam string
+	if query.Has("sortBy") {
+		param := query.Get("sortBy")
+
+		sortByParam = param
+	} else {
+	}
+	var filterByParam []string
+	if query.Has("filterBy") {
+		filterByParam = strings.Split(query.Get("filterBy"), ",")
+		////////////////////////// RUNAI START (17) /////////////////////////////////
+		if len(filterByParam) == 1 && filterByParam[0] == "" {
+			filterByParam = []string{}
+		}
+		////////////////////////// RUNAI END /////////////////////////////////
+	}
+	var searchParam string
+	if query.Has("search") {
+		param := query.Get("search")
+
+		searchParam = param
+	} else {
+	}
+	result, err := c.service.GetWorkloadActionsHistory(r.Context(), workloadIdParam, offsetParam, limitParam, sortOrderParam, sortByParam, filterByParam, searchParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

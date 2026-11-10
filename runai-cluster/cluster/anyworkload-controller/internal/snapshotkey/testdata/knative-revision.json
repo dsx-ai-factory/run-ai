@@ -1,0 +1,43 @@
+{
+  "key": "ed5fc5764694",
+  "shape": {
+    "volumes": [
+      {
+        "name": "models"
+      }
+    ],
+    "containers": [
+      {
+        "name": "user-container",
+        "image": "registry.example.com/llama@sha256:abc",
+        "command": [
+          "vllm",
+          "serve"
+        ],
+        "env": [
+          {
+            "name": "MODEL",
+            "value": "llama-3"
+          },
+          {
+            "name": "PORT",
+            "value": "8000"
+          }
+        ],
+        "resources": {
+          "limits": {
+            "nvidia.com/gpu": "1"
+          }
+        },
+        "volumeMounts": [
+          {
+            "name": "models",
+            "mountPath": "/models"
+          }
+        ]
+      }
+    ],
+    "hostname": "llama",
+    "runtimeClassName": "nvidia"
+  }
+}

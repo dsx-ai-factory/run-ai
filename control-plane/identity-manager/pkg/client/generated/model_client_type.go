@@ -18,23 +18,25 @@ import (
 	"fmt"
 )
 
-// ClientType the model 'ClientType'
+// ClientType The kind of client to create. Application is a deprecated alias of ServiceAccount and is kept so existing callers keep working; use ServiceAccount.
 type ClientType string
 
 // List of ClientType
 const (
-	CLIENTTYPE_AGENT          ClientType = "Agent"
-	CLIENTTYPE_WORKLOADS_AUTH ClientType = "WorkloadsAuth"
-	CLIENTTYPE_APPLICATION    ClientType = "Application"
-	CLIENTTYPE_INSTALLER      ClientType = "Installer"
+	CLIENTTYPE_AGENT           ClientType = "Agent"
+	CLIENTTYPE_WORKLOADS_AUTH  ClientType = "WorkloadsAuth"
+	CLIENTTYPE_INSTALLER       ClientType = "Installer"
+	CLIENTTYPE_SERVICE_ACCOUNT ClientType = "ServiceAccount"
+	CLIENTTYPE_APPLICATION     ClientType = "Application"
 )
 
 // All allowed values of ClientType enum
 var AllowedClientTypeEnumValues = []ClientType{
 	"Agent",
 	"WorkloadsAuth",
-	"Application",
 	"Installer",
+	"ServiceAccount",
+	"Application",
 }
 
 func (v *ClientType) UnmarshalJSON(src []byte) error {

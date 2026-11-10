@@ -23,6 +23,9 @@ export const DATE_FORMATS = {
 
   // Full date with month name (eg. Feb 10, 2025)
   FULL_DATE_MONTH_NAME: "MMM dd, yyyy",
+
+  // Filename-safe date time (eg. 2025-02-10_12-00)
+  FILE_NAME_DATE_TIME: "yyyy-MM-dd_HH-mm",
 } as const;
 
 export type DateFormatType = (typeof DATE_FORMATS)[keyof typeof DATE_FORMATS];
