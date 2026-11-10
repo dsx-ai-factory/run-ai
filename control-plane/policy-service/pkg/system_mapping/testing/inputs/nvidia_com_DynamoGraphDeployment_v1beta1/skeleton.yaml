@@ -1,0 +1,40 @@
+apiVersion: nvidia.com/v1beta1
+kind: DynamoGraphDeployment
+metadata:
+  name: test-dynamo
+spec:
+  components:
+  - name: component-a
+    podTemplate:
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+        - image: placeholder
+          name: sidecar
+        initContainers:
+        - image: placeholder
+          name: init
+    replicas: 1
+    type: worker
+  - name: component-b
+    podTemplate:
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+        - image: placeholder
+          name: sidecar
+        initContainers:
+        - image: placeholder
+          name: init
+    replicas: 1
+    type: worker
+  - name: component-c
+    podTemplate:
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+    replicas: 1
+    type: worker

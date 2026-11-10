@@ -1,0 +1,29 @@
+description: Dynamo v1beta1 container policy regression.
+effectiveRules:
+  - field: imagePullPolicy
+    specSelector: allContainers
+    enforcements:
+      - set:
+          value: IfNotPresent
+  - field: resourceLimits
+    specSelector: allMainContainers
+    enforcements:
+      - set:
+          key: nvidia.com/gpu
+          value: "1"
+  - field: image
+    specSelector: componentAppContainerByName
+    selectorParams:
+      componentName: component-b
+      containerName: sidecar
+    enforcements:
+      - set:
+          value: example/sidecar:test
+  - field: image
+    specSelector: componentInitContainerByName
+    selectorParams:
+      componentName: component-b
+      containerName: init
+    enforcements:
+      - set:
+          value: example/init:test

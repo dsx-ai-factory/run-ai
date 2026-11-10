@@ -1,0 +1,28 @@
+description: Dynamo v1beta1 component policy regression.
+effectiveRules:
+  - field: replicas
+    specSelector: allComponentSpecs
+    enforcements:
+      - set:
+          value: 3
+  - field: multinode-nodeCount
+    specSelector: componentSpec
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - set:
+          value: 2
+  - field: globalDynamoNamespace
+    specSelector: componentSpec
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - set:
+          value: true
+  - field: type
+    specSelector: componentSpec
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - set:
+          value: decode

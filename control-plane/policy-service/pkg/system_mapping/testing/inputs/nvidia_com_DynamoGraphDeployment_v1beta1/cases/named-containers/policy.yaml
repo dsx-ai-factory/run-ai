@@ -1,0 +1,55 @@
+description: Select containers globally or by component without modifying unrelated containers. Component-c has no sidecar or init containers.
+effectiveRules:
+  - field: image
+    specSelector: appContainerByName
+    selectorParams:
+      containerName: sidecar
+    enforcements:
+      - set:
+          value: example/sidecar:shared
+  - field: image
+    specSelector: initContainerByName
+    selectorParams:
+      containerName: init
+    enforcements:
+      - set:
+          value: example/init:shared
+  - field: workingDir
+    specSelector: componentContainers
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - set:
+          value: /workspace
+  - field: imagePullPolicy
+    specSelector: componentAppContainers
+    selectorParams:
+      componentName: component-a
+    enforcements:
+      - set:
+          value: IfNotPresent
+  - field: terminationMessage-Path
+    specSelector: componentInitContainers
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - set:
+          value: /tmp/init.log
+  - field: resourceRequests
+    specSelector: componentMainContainer
+    selectorParams:
+      componentName: component-a
+    enforcements:
+      - set:
+          key: nvidia.com/gpu
+          value: "1"
+  - field: stdin
+    specSelector: allAppContainers
+    enforcements:
+      - set:
+          value: false
+  - field: stdin
+    specSelector: allInitContainers
+    enforcements:
+      - set:
+          value: true

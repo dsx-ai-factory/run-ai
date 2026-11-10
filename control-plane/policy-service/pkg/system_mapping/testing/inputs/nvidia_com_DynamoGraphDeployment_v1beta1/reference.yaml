@@ -1,0 +1,721 @@
+apiVersion: nvidia.com/v1beta1
+kind: DynamoGraphDeployment
+metadata:
+  annotations:
+    example.com/annotation: test-value
+  labels:
+    app: test
+  name: test
+spec:
+  backendFramework: vllm
+  components:
+  - globalDynamoNamespace: false
+    multinode:
+      nodeCount: 2
+    name: test
+    podTemplate:
+      metadata:
+        annotations:
+          example.com/annotation: test-value
+        labels:
+          app: test
+      spec:
+        activeDeadlineSeconds: 60
+        affinity:
+          nodeAffinity: {}
+          podAffinity: {}
+          podAntiAffinity: {}
+        automountServiceAccountToken: true
+        containers:
+        - args:
+          - arg-1
+          command:
+          - cmd-1
+          env:
+          - name: AS_VALUE
+            value: somevalue
+          - name: FROM_CM
+            valueFrom:
+              configMapKeyRef:
+                key: key
+                name: cm
+                optional: false
+          - name: FROM_FIELD
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: FROM_RESOURCE
+            valueFrom:
+              resourceFieldRef:
+                containerName: test
+                divisor: "1"
+                resource: limits.cpu
+          - name: FROM_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: key
+                name: secret
+                optional: false
+          envFrom:
+          - configMapRef:
+              name: cm
+              optional: false
+            prefix: cm_
+          - prefix: secret_
+            secretRef:
+              name: secret
+              optional: false
+          image: test
+          imagePullPolicy: IfNotPresent
+          name: test
+          ports:
+          - containerPort: 80
+            hostIP: 127.0.0.1
+            hostPort: 81
+            name: http
+            protocol: TCP
+          resources:
+            claims:
+            - name: claim
+              request: shared-request
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            appArmorProfile:
+              localhostProfile: foo
+              type: Localhost
+            capabilities:
+              add:
+              - NET_BIND_SERVICE
+              drop:
+              - ALL
+            privileged: false
+            procMount: Default
+            readOnlyRootFilesystem: false
+            runAsGroup: 1
+            runAsNonRoot: true
+            runAsUser: 1
+            seccompProfile:
+              localhostProfile: foo
+              type: Localhost
+          stdin: false
+          stdinOnce: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: false
+          volumeMounts:
+          - mountPath: /etc/cm
+            mountPropagation: None
+            name: cm-vol
+            readOnly: true
+            recursiveReadOnly: Disabled
+            subPath: foo
+            subPathExpr: foo
+          workingDir: /tmp
+        - args:
+          - arg-1
+          command:
+          - cmd-1
+          env:
+          - name: AS_VALUE
+            value: somevalue
+          - name: FROM_CM
+            valueFrom:
+              configMapKeyRef:
+                key: key
+                name: cm
+                optional: false
+          - name: FROM_FIELD
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: FROM_RESOURCE
+            valueFrom:
+              resourceFieldRef:
+                containerName: test
+                divisor: "1"
+                resource: limits.cpu
+          - name: FROM_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: key
+                name: secret
+                optional: false
+          envFrom:
+          - configMapRef:
+              name: cm
+              optional: false
+            prefix: cm_
+          - prefix: secret_
+            secretRef:
+              name: secret
+              optional: false
+          image: test
+          imagePullPolicy: IfNotPresent
+          name: main
+          ports:
+          - containerPort: 80
+            hostIP: 127.0.0.1
+            hostPort: 81
+            name: http
+            protocol: TCP
+          resources:
+            claims:
+            - name: claim
+              request: shared-request
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            appArmorProfile:
+              localhostProfile: foo
+              type: Localhost
+            capabilities:
+              add:
+              - NET_BIND_SERVICE
+              drop:
+              - ALL
+            privileged: false
+            procMount: Default
+            readOnlyRootFilesystem: false
+            runAsGroup: 1
+            runAsNonRoot: true
+            runAsUser: 1
+            seccompProfile:
+              localhostProfile: foo
+              type: Localhost
+          stdin: false
+          stdinOnce: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: false
+          volumeMounts:
+          - mountPath: /etc/cm
+            mountPropagation: None
+            name: cm-vol
+            readOnly: true
+            recursiveReadOnly: Disabled
+            subPath: foo
+            subPathExpr: foo
+          workingDir: /tmp
+        dnsConfig:
+          nameservers:
+          - 1.1.1.1
+          options:
+          - name: ndots
+            value: "5"
+          searches:
+          - example.com
+        dnsPolicy: ClusterFirst
+        enableServiceLinks: true
+        hostAliases:
+        - hostnames:
+          - foo
+          ip: 127.0.0.1
+        hostIPC: false
+        hostNetwork: false
+        hostPID: false
+        hostUsers: true
+        hostname: test
+        imagePullSecrets:
+        - name: test
+        initContainers:
+        - args:
+          - init-arg
+          command:
+          - init-cmd
+          env:
+          - name: AS_VALUE
+            value: somevalue
+          envFrom:
+          - configMapRef:
+              name: cm
+              optional: false
+            prefix: cm_
+          image: test
+          imagePullPolicy: IfNotPresent
+          name: test
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+          resources:
+            claims:
+            - name: claim
+              request: shared-request
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsGroup: 1
+            runAsNonRoot: true
+            runAsUser: 1
+          stdin: false
+          stdinOnce: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: false
+          volumeMounts:
+          - mountPath: /etc/cm
+            mountPropagation: None
+            name: cm-vol
+            readOnly: true
+            recursiveReadOnly: Disabled
+            subPath: foo
+            subPathExpr: foo
+          workingDir: /tmp
+        nodeName: test
+        nodeSelector:
+          test: somevalue
+        overhead:
+          cpu: 100m
+          memory: 256Mi
+        preemptionPolicy: PreemptLowerPriority
+        priority: 1
+        priorityClassName: test
+        readinessGates:
+        - conditionType: ContainersReady
+        resourceClaims:
+        - name: claimRefByName
+          resourceClaimName: shared-claim
+        - name: claimRefByTemplate
+          resourceClaimTemplateName: shared-template
+        restartPolicy: Always
+        runtimeClassName: test
+        schedulingGates:
+        - name: example.com/gate
+        securityContext:
+          appArmorProfile:
+            localhostProfile: foo
+            type: Localhost
+          fsGroup: 1
+          fsGroupChangePolicy: OnRootMismatch
+          runAsGroup: 1
+          runAsNonRoot: true
+          runAsUser: 1
+          seccompProfile:
+            localhostProfile: foo
+            type: Localhost
+          supplementalGroups:
+          - 1
+          - 2
+          supplementalGroupsPolicy: Strict
+        serviceAccountName: test
+        setHostnameAsFQDN: false
+        shareProcessNamespace: false
+        subdomain: test
+        terminationGracePeriodSeconds: 30
+        tolerations:
+        - effect: NoSchedule
+          key: test
+          operator: Equal
+          tolerationSeconds: 60
+          value: somevalue
+        volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+            - key: foo
+              path: foo
+            name: cm
+            optional: false
+          name: cm-vol
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+          name: empty-vol
+        - hostPath:
+            path: /tmp
+            type: Directory
+          name: host-vol
+        - name: nfs-vol
+          nfs:
+            path: /export
+            readOnly: false
+            server: 1.1.1.1
+        - name: pvc-vol
+          persistentVolumeClaim:
+            claimName: pvc
+            readOnly: false
+        - name: secret-vol
+          secret:
+            defaultMode: 420
+            items:
+            - key: foo
+              path: foo
+            optional: false
+            secretName: secret
+    replicas: 2
+    type: worker
+  - globalDynamoNamespace: false
+    multinode:
+      nodeCount: 2
+    name: component-b
+    podTemplate:
+      metadata:
+        annotations:
+          example.com/annotation: test-value
+        labels:
+          app: test
+      spec:
+        activeDeadlineSeconds: 60
+        affinity:
+          nodeAffinity: {}
+          podAffinity: {}
+          podAntiAffinity: {}
+        automountServiceAccountToken: true
+        containers:
+        - args:
+          - arg-1
+          command:
+          - cmd-1
+          env:
+          - name: AS_VALUE
+            value: somevalue
+          - name: FROM_CM
+            valueFrom:
+              configMapKeyRef:
+                key: key
+                name: cm
+                optional: false
+          - name: FROM_FIELD
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: FROM_RESOURCE
+            valueFrom:
+              resourceFieldRef:
+                containerName: test
+                divisor: "1"
+                resource: limits.cpu
+          - name: FROM_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: key
+                name: secret
+                optional: false
+          envFrom:
+          - configMapRef:
+              name: cm
+              optional: false
+            prefix: cm_
+          - prefix: secret_
+            secretRef:
+              name: secret
+              optional: false
+          image: test
+          imagePullPolicy: IfNotPresent
+          name: test
+          ports:
+          - containerPort: 80
+            hostIP: 127.0.0.1
+            hostPort: 81
+            name: http
+            protocol: TCP
+          resources:
+            claims:
+            - name: claim
+              request: shared-request
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            appArmorProfile:
+              localhostProfile: foo
+              type: Localhost
+            capabilities:
+              add:
+              - NET_BIND_SERVICE
+              drop:
+              - ALL
+            privileged: false
+            procMount: Default
+            readOnlyRootFilesystem: false
+            runAsGroup: 1
+            runAsNonRoot: true
+            runAsUser: 1
+            seccompProfile:
+              localhostProfile: foo
+              type: Localhost
+          stdin: false
+          stdinOnce: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: false
+          volumeMounts:
+          - mountPath: /etc/cm
+            mountPropagation: None
+            name: cm-vol
+            readOnly: true
+            recursiveReadOnly: Disabled
+            subPath: foo
+            subPathExpr: foo
+          workingDir: /tmp
+        - args:
+          - arg-1
+          command:
+          - cmd-1
+          env:
+          - name: AS_VALUE
+            value: somevalue
+          - name: FROM_CM
+            valueFrom:
+              configMapKeyRef:
+                key: key
+                name: cm
+                optional: false
+          - name: FROM_FIELD
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: metadata.name
+          - name: FROM_RESOURCE
+            valueFrom:
+              resourceFieldRef:
+                containerName: test
+                divisor: "1"
+                resource: limits.cpu
+          - name: FROM_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: key
+                name: secret
+                optional: false
+          envFrom:
+          - configMapRef:
+              name: cm
+              optional: false
+            prefix: cm_
+          - prefix: secret_
+            secretRef:
+              name: secret
+              optional: false
+          image: test
+          imagePullPolicy: IfNotPresent
+          name: main
+          ports:
+          - containerPort: 80
+            hostIP: 127.0.0.1
+            hostPort: 81
+            name: http
+            protocol: TCP
+          resources:
+            claims:
+            - name: claim
+              request: shared-request
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            appArmorProfile:
+              localhostProfile: foo
+              type: Localhost
+            capabilities:
+              add:
+              - NET_BIND_SERVICE
+              drop:
+              - ALL
+            privileged: false
+            procMount: Default
+            readOnlyRootFilesystem: false
+            runAsGroup: 1
+            runAsNonRoot: true
+            runAsUser: 1
+            seccompProfile:
+              localhostProfile: foo
+              type: Localhost
+          stdin: false
+          stdinOnce: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: false
+          volumeMounts:
+          - mountPath: /etc/cm
+            mountPropagation: None
+            name: cm-vol
+            readOnly: true
+            recursiveReadOnly: Disabled
+            subPath: foo
+            subPathExpr: foo
+          workingDir: /tmp
+        dnsConfig:
+          nameservers:
+          - 1.1.1.1
+          options:
+          - name: ndots
+            value: "5"
+          searches:
+          - example.com
+        dnsPolicy: ClusterFirst
+        enableServiceLinks: true
+        hostAliases:
+        - hostnames:
+          - foo
+          ip: 127.0.0.1
+        hostIPC: false
+        hostNetwork: false
+        hostPID: false
+        hostUsers: true
+        hostname: test
+        imagePullSecrets:
+        - name: test
+        initContainers:
+        - args:
+          - init-arg
+          command:
+          - init-cmd
+          env:
+          - name: AS_VALUE
+            value: somevalue
+          envFrom:
+          - configMapRef:
+              name: cm
+              optional: false
+            prefix: cm_
+          image: test
+          imagePullPolicy: IfNotPresent
+          name: test
+          ports:
+          - containerPort: 80
+            name: http
+            protocol: TCP
+          resources:
+            claims:
+            - name: claim
+              request: shared-request
+            limits:
+              cpu: "1"
+              memory: 1Gi
+            requests:
+              cpu: "1"
+              memory: 1Gi
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsGroup: 1
+            runAsNonRoot: true
+            runAsUser: 1
+          stdin: false
+          stdinOnce: false
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          tty: false
+          volumeMounts:
+          - mountPath: /etc/cm
+            mountPropagation: None
+            name: cm-vol
+            readOnly: true
+            recursiveReadOnly: Disabled
+            subPath: foo
+            subPathExpr: foo
+          workingDir: /tmp
+        nodeName: test
+        nodeSelector:
+          test: somevalue
+        overhead:
+          cpu: 100m
+          memory: 256Mi
+        preemptionPolicy: PreemptLowerPriority
+        priority: 1
+        priorityClassName: test
+        readinessGates:
+        - conditionType: ContainersReady
+        resourceClaims:
+        - name: claimRefByName
+          resourceClaimName: shared-claim
+        - name: claimRefByTemplate
+          resourceClaimTemplateName: shared-template
+        restartPolicy: Always
+        runtimeClassName: test
+        schedulingGates:
+        - name: example.com/gate
+        securityContext:
+          appArmorProfile:
+            localhostProfile: foo
+            type: Localhost
+          fsGroup: 1
+          fsGroupChangePolicy: OnRootMismatch
+          runAsGroup: 1
+          runAsNonRoot: true
+          runAsUser: 1
+          seccompProfile:
+            localhostProfile: foo
+            type: Localhost
+          supplementalGroups:
+          - 1
+          - 2
+          supplementalGroupsPolicy: Strict
+        serviceAccountName: test
+        setHostnameAsFQDN: false
+        shareProcessNamespace: false
+        subdomain: test
+        terminationGracePeriodSeconds: 30
+        tolerations:
+        - effect: NoSchedule
+          key: test
+          operator: Equal
+          tolerationSeconds: 60
+          value: somevalue
+        volumes:
+        - configMap:
+            defaultMode: 420
+            items:
+            - key: foo
+              path: foo
+            name: cm
+            optional: false
+          name: cm-vol
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+          name: empty-vol
+        - hostPath:
+            path: /tmp
+            type: Directory
+          name: host-vol
+        - name: nfs-vol
+          nfs:
+            path: /export
+            readOnly: false
+            server: 1.1.1.1
+        - name: pvc-vol
+          persistentVolumeClaim:
+            claimName: pvc
+            readOnly: false
+        - name: secret-vol
+          secret:
+            defaultMode: 420
+            items:
+            - key: foo
+              path: foo
+            optional: false
+            secretName: secret
+    replicas: 2
+    type: worker
+  restart:
+    id: test
+    strategy:
+      type: Sequential

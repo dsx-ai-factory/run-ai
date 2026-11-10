@@ -66,6 +66,7 @@ const (
 	schemaNameJAXJobV1                  = "org.kubeflow.v1.JAXJob"
 	schemaNameLeaderWorkerSetV1         = "io.x-k8s.leaderworkerset.v1.LeaderWorkerSet"
 	schemaNameDynamoGraphDeploymentV1a1 = "com.nvidia.v1alpha1.DynamoGraphDeployment"
+	schemaNameDynamoGraphDeploymentV1b1 = "com.nvidia.v1beta1.DynamoGraphDeployment"
 	schemaNameRayClusterV1              = "io.ray.v1.RayCluster"
 	schemaNameRayJobV1                  = "io.ray.v1.RayJob"
 	schemaNameRayServiceV1              = "io.ray.v1.RayService"
@@ -214,6 +215,14 @@ var dynamoGraphDeploymentConfig = gvkConfig{
 	schemaPath: "testing/crd/dynamographdeployment_nvidia_com_v1alpha1_openapi.json",
 	schemaName: schemaNameDynamoGraphDeploymentV1a1,
 	caseNames:  []string{"workload", "service", "container", "parameterized-dependency"},
+}
+
+var dynamoGraphDeploymentV1beta1Config = gvkConfig{
+	gvk:        api.Gvk{Group: convutils.Ref("nvidia.com"), Kind: "DynamoGraphDeployment", Version: "v1beta1"},
+	inputDir:   "testing/inputs/nvidia_com_DynamoGraphDeployment_v1beta1",
+	schemaPath: "testing/crd/dynamographdeployment_nvidia_com_v1beta1_openapi.json",
+	schemaName: schemaNameDynamoGraphDeploymentV1b1,
+	caseNames:  []string{"workload", "component", "pod", "container", "named-containers", "defaults", "parameterized-dependency", "unknown-component"},
 }
 
 var rayClusterConfig = gvkConfig{

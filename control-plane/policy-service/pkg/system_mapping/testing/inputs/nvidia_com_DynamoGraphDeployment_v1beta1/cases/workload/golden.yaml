@@ -1,0 +1,47 @@
+apiVersion: nvidia.com/v1beta1
+kind: DynamoGraphDeployment
+metadata:
+  labels:
+    team: inference
+  name: test-dynamo
+spec:
+  backendFramework: vllm
+  components:
+  - name: component-a
+    podTemplate:
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+        - image: placeholder
+          name: sidecar
+        initContainers:
+        - image: placeholder
+          name: init
+    replicas: 1
+    type: worker
+  - name: component-b
+    podTemplate:
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+        - image: placeholder
+          name: sidecar
+        initContainers:
+        - image: placeholder
+          name: init
+    replicas: 1
+    type: worker
+  - name: component-c
+    podTemplate:
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+    replicas: 1
+    type: worker
+  restart:
+    id: restart-test
+    strategy:
+      type: Sequential
