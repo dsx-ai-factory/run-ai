@@ -17,7 +17,7 @@ import (
 // pod and GPU are attributed to it.
 func GetSnapshotJobRIConfiguration() source.KartaConfiguration {
 	return source.KartaConfiguration{
-		Category:       "Deploy",
+		Category:       deployCategory,
 		Priority:       "low",
 		Preemptibility: openapi.WORKLOADTYPEPREEMPTIBILITY_PREEMPTIBLE,
 		Kartas: []models.Karta{
@@ -34,7 +34,7 @@ func BuildSnapshotJobV1alpha1() models.Karta {
 					Name: "snapshotjob",
 					Kind: &kartav1alpha1.GroupVersionKind{
 						Group:   "nvidia.com",
-						Version: "v1alpha1",
+						Version: versionV1alpha1,
 						Kind:    "SnapshotJob",
 					},
 					StatusDefinition: buildSnapshotJobStatusDefinition(),
@@ -55,13 +55,19 @@ func BuildSnapshotJobV1alpha1() models.Karta {
 // Running above Failed and Completed, so a capture that failed with its pod Ready
 // would otherwise show as Running.
 func buildSnapshotJobStatusDefinition() *kartav1alpha1.StatusDefinition {
-	notFailed := kartav1alpha1.ExpectedCondition{Type: "Failed", Status: ptr.To("False")}
+	const (
+		running   = "Running"
+		captured  = "Captured"
+		completed = "Completed"
+		failed    = "Failed"
+	)
+	notFailed := kartav1alpha1.ExpectedCondition{Type: failed, Status: ptr.To("False")}
 
 	return &kartav1alpha1.StatusDefinition{
 		ConditionsDefinition: &kartav1alpha1.ConditionsDefinition{
-			Path:             ".status.conditions",
-			TypeFieldName:    "type",
-			StatusFieldName:  "status",
+			Path:             conditionsPath,
+			TypeFieldName:    conditionTypeField,
+			StatusFieldName:  conditionStatusField,
 			MessageFieldName: ptr.To("message"),
 			ReasonFieldName:  ptr.To("reason"),
 		},
@@ -69,8 +75,8 @@ func buildSnapshotJobStatusDefinition() *kartav1alpha1.StatusDefinition {
 			Initializing: []kartav1alpha1.StatusMatcher{
 				// Scheduling and warm-up, before the pod signals it is ready to capture.
 				{ByConditions: []kartav1alpha1.ExpectedCondition{
-					{Type: "Running", Status: ptr.To("False")},
-					{Type: "Captured", Status: ptr.To("False")},
+					{Type: running, Status: ptr.To("False")},
+					{Type: captured, Status: ptr.To("False")},
 					notFailed,
 				}},
 				// Before Snapshot's first status write.
@@ -81,24 +87,24 @@ func buildSnapshotJobStatusDefinition() *kartav1alpha1.StatusDefinition {
 			},
 			Running: []kartav1alpha1.StatusMatcher{
 				{ByConditions: []kartav1alpha1.ExpectedCondition{
-					{Type: "Running", Status: ptr.To("True")},
+					{Type: running, Status: ptr.To("True")},
 					notFailed,
 				}},
 				// Dumped, but the source Job's other containers are still finishing.
 				{ByConditions: []kartav1alpha1.ExpectedCondition{
-					{Type: "Captured", Status: ptr.To("True")},
-					{Type: "Completed", Status: ptr.To("False")},
+					{Type: captured, Status: ptr.To("True")},
+					{Type: completed, Status: ptr.To("False")},
 					notFailed,
 				}},
 			},
 			Completed: []kartav1alpha1.StatusMatcher{
 				{ByConditions: []kartav1alpha1.ExpectedCondition{
-					{Type: "Completed", Status: ptr.To("True")},
+					{Type: completed, Status: ptr.To("True")},
 				}},
 			},
 			Failed: []kartav1alpha1.StatusMatcher{
 				{ByConditions: []kartav1alpha1.ExpectedCondition{
-					{Type: "Failed", Status: ptr.To("True")},
+					{Type: failed, Status: ptr.To("True")},
 				}},
 			},
 		},
