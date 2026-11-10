@@ -520,21 +520,8 @@ func ApiResourcesFromModelSync(modelResources []models.Resources, nodePools map[
 				OverQuotaWeight: apiResourceFromModel.Memory.OverQuotaWeight,
 			}
 		}
-		if !npSchedulingCapabilities.Limits {
-			unlimitResourcesSync(&apiResources[i])
-		}
 	}
 	return apiResources
-}
-
-func unlimitResourcesSync(resources *api.ResourcesSync) {
-	resources.Gpu.Limit = nil
-	if resources.Cpu != nil {
-		resources.Cpu.Limit = ptr.To(float64(-1))
-	}
-	if resources.Memory != nil {
-		resources.Memory.Limit = ptr.To(float64(-1))
-	}
 }
 
 func ApiResourceFromModel(resources models.Resources, adjustableWeightsFlag, cpuQuotaFlag bool, returnClusterUnits bool) api.Resources {
