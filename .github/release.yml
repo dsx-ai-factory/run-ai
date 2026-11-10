@@ -6,45 +6,48 @@
 #
 # GitHub puts each pull request in the FIRST category whose labels match, and
 # renders the categories in the order listed here. So every category above the
-# last one excludes the `renovate` label, and the Renovate updates (opened by
-# devops-runai, always labelled `renovate`) all land in the final section.
+# last one excludes the dependency labels, and all dependency updates land in
+# the final section: Renovate's (opened by devops-runai, always labelled
+# `renovate`) and manual bumps (labelled `type/deps`).
 #
 # The type/* labels come from the PR title's conventional-commit prefix
 # (feat:, fix(scope):, [release-3.0] docs: ...) and are applied by
 # .github/workflows/label-pr-type.yaml. The older GitHub default labels
 # (bug, enhancement, documentation) are honoured too, for PRs labelled by hand.
+#
+# Note: GitHub always reads this file from the default branch.
 
 changelog:
   categories:
     - title: 💥 Breaking Changes
       labels: [type/breaking]
       exclude:
-        labels: [renovate]
+        labels: [renovate, type/deps]
 
     - title: 🚀 Features & Improvements
       labels: [type/feat, type/perf, enhancement]
       exclude:
-        labels: [renovate]
+        labels: [renovate, type/deps]
 
     - title: 🐛 Bug Fixes
       labels: [type/fix, type/revert, bug]
       exclude:
-        labels: [renovate]
+        labels: [renovate, type/deps]
 
     - title: 📚 Documentation
       labels: [type/docs, documentation]
       exclude:
-        labels: [renovate]
+        labels: [renovate, type/deps]
 
     - title: 🛠️ Build, CI, Tests & Chores
       labels: [type/build, type/ci, type/test, type/chore, type/refactor, type/style]
       exclude:
-        labels: [renovate]
+        labels: [renovate, type/deps]
 
     - title: 💬 Other Changes
       labels: ["*"]
       exclude:
-        labels: [renovate]
+        labels: [renovate, type/deps]
 
-    - title: 📦 Dependency Updates (Renovate)
-      labels: [renovate]
+    - title: 📦 Dependency Updates
+      labels: [renovate, type/deps]

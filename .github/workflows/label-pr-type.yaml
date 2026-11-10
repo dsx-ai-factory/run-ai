@@ -3,10 +3,10 @@
 
 name: Label PR type
 
-# Every pull request gets one type/* label taken from the conventional-commit
-# prefix of its title, which is what .github/release.yml groups the generated
-# release notes by. Leading bracket tags such as "[release-3.0] " are skipped,
-# and a "!" before the colon marks a breaking change:
+# Every pull request gets one type/* label taken from its title, which is what
+# .github/release.yml groups the generated release notes by. Leading bracket
+# tags such as "[release-3.0] " are skipped, and a "!" before the colon marks
+# a breaking change:
 #
 #   feat(identity-manager): add ServiceAccount client type   -> type/feat
 #   [release-3.0] docs: add workflow tutorial                -> type/docs
@@ -14,9 +14,22 @@ name: Label PR type
 #   feat(api)!: drop the v1 workloads endpoint               -> type/breaking
 #   Revert "feat(x): ..."                                    -> type/revert
 #
+# Manual dependency bumps get type/deps, so they sit with the Renovate updates
+# at the bottom of the notes instead of among the fixes and features:
+#
+#   chore(deps): bump kai-resource-management to v0.18.4     -> type/deps
+#   fix(frontend): bump follow-redirects to 1.16.2           -> type/deps
+#   chore: bump runai-telemetry to 1.2.29 [main]             -> type/deps
+#   bump runai telemetry v1.1.23                             -> type/deps
+#   update KRM to 0.18.2                                     -> type/deps
+#
+# A bump only counts as a dependency update in an untyped, fix, chore or build
+# title; "feat(...): ... bump client to v1.3.0" or "docs: update Dynamo to
+# 1.5.x" keep their own type.
+#
 # Titles without a known prefix get no type label and show under
-# "Other Changes". Renovate PRs (labelled `renovate`) are left alone; they have
-# their own section at the bottom of the notes.
+# "Other Changes". Renovate PRs (labelled `renovate`) are left alone; they
+# already go to the dependency section.
 #
 # When a title is edited, the old type/* label is swapped for the new one.
 # The workflow never checks out or runs PR code, so pull_request_target is safe
@@ -58,15 +71,29 @@ jobs:
               'feat', 'fix', 'perf', 'docs', 'refactor', 'test',
               'build', 'ci', 'chore', 'style', 'revert',
             ]);
+            // Types under which "bump X" / "update X to vN" means a dependency update.
+            const DEP_TYPES = new Set(['fix', 'chore', 'build']);
+            const BUMP = /^(?:bump|upgrade)\b|^update\b.*(?:\bto v?\d|\bdependenc)/i;
+
+            const stripped = pr.title.replace(/^(?:\s*\[[^\]]*\])*\s*/, '');
+            const m = stripped.match(/^([a-z]+)(?:\(([^)]*)\))?(!)?:\s*(.*)$/i);
+            const known = m && TYPES.has(m[1].toLowerCase());
+            const type = known ? m[1].toLowerCase() : null;
+            const scope = known ? (m[2] || '') : '';
+            const subject = known ? m[4] : stripped;
+            // Also look past a non-conventional prefix, e.g. "fix CVE-123: bump ...".
+            const lastClause = subject.split(/:\s+/).pop();
 
             let wanted = null;
-            if (/^revert\b/i.test(pr.title)) {
+            if (/^revert\b/i.test(stripped)) {
               wanted = 'type/revert';
-            } else {
-              const m = pr.title.match(/^(?:\s*\[[^\]]*\])*\s*([a-z]+)(?:\([^)]*\))?(!)?:/i);
-              if (m && TYPES.has(m[1].toLowerCase())) {
-                wanted = m[2] ? 'type/breaking' : `type/${m[1].toLowerCase()}`;
-              }
+            } else if (known && m[3]) {
+              wanted = 'type/breaking';
+            } else if (/^deps(-dev)?$/i.test(scope)
+              || ((!type || DEP_TYPES.has(type)) && (BUMP.test(subject) || BUMP.test(lastClause)))) {
+              wanted = 'type/deps';
+            } else if (type) {
+              wanted = `type/${type}`;
             }
 
             for (const name of current) {
