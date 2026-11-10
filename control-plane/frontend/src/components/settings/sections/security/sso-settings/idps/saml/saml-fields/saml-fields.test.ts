@@ -12,7 +12,7 @@ import { markRaw } from "vue";
 import SamlFields from "./saml-fields.vue";
 import type { SamlConfigSettings } from "@/models/setting.model";
 import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
-import { idpCommon } from "../../idp-common/idp-common";
+import { idpService } from "@/services/control-plane/idp.service/idp.service";
 
 describe("saml-fields.vue", () => {
   const validSamlSettings: SamlConfigSettings = {
@@ -42,6 +42,12 @@ describe("saml-fields.vue", () => {
 
     return { wrapper };
   };
+
+  const mockDryRun = (expiration: Date, errorMessage?: string) =>
+    vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({
+      samlData: { validateSignature: true, certificateExpirationDate: expiration.toISOString() },
+      errorMessage,
+    });
 
   const fakeMetadataXml =
     '<md:EntityDescriptor xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata"><md:IDPSSODescriptor>' +
@@ -155,7 +161,7 @@ describe("saml-fields.vue", () => {
     });
 
     it("reports the expired-file message for an uploaded file, and hides the date once it's cleared", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
+      mockDryRun(daysFromNow(-1));
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
@@ -172,10 +178,11 @@ describe("saml-fields.vue", () => {
     });
 
     it("reports the expired-URL message when sourced from a URL", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
-
       const { wrapper } = factory(
-        { samlSettings: validSamlSettings, isNewIdp: false },
+        {
+          samlSettings: { ...validSamlSettings, certificateExpirationDate: daysFromNow(-1).toISOString() },
+          isNewIdp: false,
+        },
         { samlSource: SamlCreationDataMetadataXmlTypeEnum.Url },
       );
       await flushPromises();
@@ -186,8 +193,17 @@ describe("saml-fields.vue", () => {
       });
     });
 
+    it("shows the backend validation message when the metadata is rejected", async () => {
+      vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({ errorMessage: "no signing certificate" });
+
+      const { wrapper } = factory({ isNewIdp: true });
+      await uploadFile(wrapper);
+
+      expect(lastCertificateDetails(wrapper)).toMatchObject({ expirationError: "no signing certificate" });
+    });
+
     it("reports no error for a certificate that is still valid", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
+      mockDryRun(daysFromNow(120));
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
@@ -273,11 +289,12 @@ describe("saml-fields.vue", () => {
 
   describe("stale certificate validation guard", () => {
     it("ignores a validation result that resolves after a newer file selection has started", async () => {
-      let resolveStale: (d: Date | null) => void = () => {};
-      const stalePromise = new Promise<Date | null>((resolve) => {
+      type DryRun = Awaited<ReturnType<typeof idpService.validateSamlCertificate>>;
+      let resolveStale: (d: DryRun) => void = () => {};
+      const stalePromise = new Promise<DryRun>((resolve) => {
         resolveStale = resolve;
       });
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockReturnValueOnce(stalePromise);
+      vi.spyOn(idpService, "validateSamlCertificate").mockReturnValueOnce(stalePromise);
 
       const { wrapper } = factory({ isNewIdp: true });
       const vm = wrapper.vm as unknown as {
@@ -293,7 +310,7 @@ describe("saml-fields.vue", () => {
       vm.fileSelectionToken = 1;
 
       // The stale lookup finally resolves with an (irrelevant) expired date.
-      resolveStale(new Date("2020-01-01T00:00:00.000Z"));
+      resolveStale({ samlData: { validateSignature: true, certificateExpirationDate: "2020-01-01T00:00:00.000Z" } });
       await firstCall;
       await wrapper.vm.$nextTick();
 
@@ -312,7 +329,7 @@ describe("saml-fields.vue", () => {
     });
 
     it("is invalid when the uploaded file's certificate is already expired", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
+      mockDryRun(daysFromNow(-1));
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);
@@ -321,7 +338,7 @@ describe("saml-fields.vue", () => {
     });
 
     it("is valid when the uploaded file's certificate is still valid", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
+      mockDryRun(daysFromNow(120));
 
       const { wrapper } = factory({ isNewIdp: true });
       await uploadFile(wrapper);

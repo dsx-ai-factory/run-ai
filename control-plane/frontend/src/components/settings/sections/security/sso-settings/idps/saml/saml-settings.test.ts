@@ -11,7 +11,6 @@ import { setActivePinia } from "pinia";
 import SamlSettings from "./saml-settings.vue";
 import type { Idp, SamlData } from "@/swagger-models/identity-manager-client";
 import { IdpTypeEnum } from "@/swagger-models/identity-manager-client";
-import { idpCommon } from "../idp-common/idp-common";
 
 describe("saml-settings.vue", () => {
   const mockSamlData: SamlData = {
@@ -27,6 +26,11 @@ describe("saml-settings.vue", () => {
     redirectUri: "http://test.com",
     samlData: mockSamlData,
   };
+
+  const idpExpiringAt = (date: Date): Idp => ({
+    ...mockIdp,
+    samlData: { ...mockSamlData, certificateExpirationDate: date.toISOString() },
+  });
 
   const factory = (idp?: Idp, isNewIdp = false) => {
     setActivePinia(createTestingPinia({ createSpy: vi.fn }));
@@ -161,9 +165,7 @@ describe("saml-settings.vue", () => {
     });
 
     it("shows no warning when the certificate is valid and not close to expiring", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
-
-      const { wrapper } = factory(mockIdp, false);
+      const { wrapper } = factory(idpExpiringAt(daysFromNow(120)), false);
       await wrapper.vm.$nextTick();
       await wrapper.vm.$nextTick();
 
@@ -173,9 +175,7 @@ describe("saml-settings.vue", () => {
     });
 
     it("shows a warning banner when the certificate expires within 60 days", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(60));
-
-      const { wrapper } = factory(mockIdp, false);
+      const { wrapper } = factory(idpExpiringAt(daysFromNow(60)), false);
       await wrapper.vm.$nextTick();
       await wrapper.vm.$nextTick();
 
@@ -185,9 +185,7 @@ describe("saml-settings.vue", () => {
     });
 
     it("does not warn when the certificate expires in 61 days", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(61));
-
-      const { wrapper } = factory(mockIdp, false);
+      const { wrapper } = factory(idpExpiringAt(daysFromNow(61)), false);
       await wrapper.vm.$nextTick();
       await wrapper.vm.$nextTick();
 
@@ -197,9 +195,7 @@ describe("saml-settings.vue", () => {
     });
 
     it("shows an error banner when the certificate is already expired", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
-
-      const { wrapper } = factory(mockIdp, false);
+      const { wrapper } = factory(idpExpiringAt(daysFromNow(-1)), false);
       await wrapper.vm.$nextTick();
       await wrapper.vm.$nextTick();
 
@@ -209,9 +205,7 @@ describe("saml-settings.vue", () => {
     });
 
     it("refreshes the expiration date when the signing certificate is replaced", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
-
-      const { wrapper } = factory(mockIdp, false);
+      const { wrapper } = factory(idpExpiringAt(daysFromNow(-1)), false);
       await wrapper.vm.$nextTick();
       await wrapper.vm.$nextTick();
 
@@ -219,14 +213,7 @@ describe("saml-settings.vue", () => {
         "error",
       );
 
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
-
-      await wrapper.setProps({
-        idp: {
-          ...mockIdp,
-          samlData: { ...mockSamlData, signingCertificate: "new-cert" },
-        },
-      });
+      await wrapper.setProps({ idp: idpExpiringAt(daysFromNow(120)) });
       await wrapper.vm.$nextTick();
       await wrapper.vm.$nextTick();
 
@@ -236,9 +223,7 @@ describe("saml-settings.vue", () => {
     });
 
     it("clears the expiration date when the signing certificate is removed", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
-
-      const { wrapper } = factory(mockIdp, false);
+      const { wrapper } = factory(idpExpiringAt(daysFromNow(-1)), false);
       await wrapper.vm.$nextTick();
       await wrapper.vm.$nextTick();
 
@@ -260,9 +245,7 @@ describe("saml-settings.vue", () => {
 
   describe("identity provider details", () => {
     it("shows the identity provider URL, entity ID and expiration date in the saved card", async () => {
-      vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(new Date("2030-05-17T00:00:00.000Z"));
-
-      const { wrapper } = factory(mockIdp, false);
+      const { wrapper } = factory(idpExpiringAt(new Date("2030-05-17T00:00:00.000Z")), false);
       await flushPromises();
 
       const details = wrapper.findComponent({ name: "SamlIdpDetails" });

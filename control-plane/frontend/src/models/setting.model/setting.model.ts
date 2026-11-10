@@ -217,6 +217,7 @@ export interface SamlConfigSettings {
   idpEntityId: string;
   singleSignOnServiceUrl: string;
   signingCertificate: string;
+  certificateExpirationDate?: string;
 }
 
 export interface SamlCertificateDetails {
