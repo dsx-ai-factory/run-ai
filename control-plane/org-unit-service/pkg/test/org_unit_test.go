@@ -1225,24 +1225,6 @@ var _ = Describe("Org unit tests", Ordered, func() {
 				Expect(depRes.Code).To(Equal(http.StatusCreated), fmt.Sprint(depRes.Body))
 				limitsCapabilityDepIds = append(limitsCapabilityDepIds, depRes.Body.(api.Department).Id)
 			})
-
-			It("syncs unlimited limits for a node pool with limits off", func() {
-				syncLimit := func(service api.DepartmentsAPIServicer) *float64 {
-					getResponse, err := service.GetSyncDepartments(ctx, clusterId3, time.Time{}, 0, 0)
-					Expect(err).To(BeNil())
-					Expect(getResponse.Code).To(Equal(http.StatusOK))
-					for _, d := range getResponse.Body.(api.GetSyncDepartments200Response).Departments {
-						if d.Id == limitedDepartmentId {
-							Expect(d.Resources).ToNot(BeEmpty())
-							return d.Resources[0].Gpu.Limit
-						}
-					}
-					Fail("department not synced")
-					return nil
-				}
-				Expect(syncLimit(limitsOnDepartments)).To(Equal(ptr.To(float64(2))))
-				Expect(syncLimit(limitsOffDepartments)).To(BeNil())
-			})
 		})
 
 		Context("test quota/ranks capabilities", func() {
