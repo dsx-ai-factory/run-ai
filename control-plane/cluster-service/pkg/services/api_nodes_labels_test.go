@@ -73,7 +73,7 @@ var _ = Describe("Node labels", func() {
 		Expect(dbErr).To(BeNil())
 		actualLabelsByNode := make(map[string]map[string]string, len(*nodes))
 		for _, node := range *nodes {
-			actualLabelsByNode[node.Name] = map[string]string(node.Labels)
+			actualLabelsByNode[node.Name] = node.Labels
 		}
 		Expect(actualLabelsByNode).To(Equal(expectedLabelsByNode))
 	}
@@ -130,7 +130,7 @@ var _ = Describe("Node labels", func() {
 	It("accepts a new node from an older sender that omits labels", func() {
 		By("Creating a node without the optional labels field")
 		saveNodeLabels(nil)
-		expectStoredLabels(map[string]map[string]string{"node-1": {}})
+		expectStoredLabels(map[string]map[string]string{"node-1": nil})
 	})
 
 	It("clears stored labels when a node update omits the labels field", func() {
@@ -138,8 +138,8 @@ var _ = Describe("Node labels", func() {
 		saveNodeLabels(map[string]string{"gpu-type": "a100"})
 		saveNodeLabels(nil)
 
-		By("Checking that the old labels were replaced with an empty set")
-		expectStoredLabels(map[string]map[string]string{"node-1": {}})
+		By("Checking that the old labels are no longer stored")
+		expectStoredLabels(map[string]map[string]string{"node-1": nil})
 	})
 
 	It("clears stored labels when a full sync omits the labels field", func() {
@@ -149,7 +149,7 @@ var _ = Describe("Node labels", func() {
 			Name:     "node-1",
 			NodeInfo: api.NodeInfo{Status: "Ready", NodePool: "default"},
 		})
-		expectStoredLabels(map[string]map[string]string{"node-1": {}})
+		expectStoredLabels(map[string]map[string]string{"node-1": nil})
 	})
 
 	Context("suggesting labels for node pool creation", func() {
