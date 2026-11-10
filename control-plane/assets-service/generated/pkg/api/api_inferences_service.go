@@ -127,7 +127,7 @@ func (s *InferencesAPIService) CreateInferenceV2(ctx context.Context, inferenceC
 }
 
 // GetInferenceMerged - Get merged inference workload
-func (s *InferencesAPIService) GetInferenceMerged(ctx context.Context, projectId string, workloadId string, templateId string) (ImplResponse, error) {
+func (s *InferencesAPIService) GetInferenceMerged(ctx context.Context, projectId string, workloadId string) (ImplResponse, error) {
 	// TODO - update GetInferenceMerged with the required logic for this service method.
 	// Add api_inferences_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

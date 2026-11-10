@@ -258,22 +258,6 @@ type SynchronizationAPIRouter interface {
 	SyncAssetsResourcesIds(http.ResponseWriter, *http.Request)
 }
 
-// TemplateAPIRouter defines the required methods for binding the api requests to a responses for the TemplateAPI
-// The TemplateAPIRouter implementation should parse necessary information from the http request,
-// pass the data to a TemplateAPIServicer to perform the required actions, then write the service results to the http response.
-type TemplateAPIRouter interface {
-	// Deprecated
-	ListTemplates(http.ResponseWriter, *http.Request)
-	// Deprecated
-	CreateTemplate(http.ResponseWriter, *http.Request)
-	// Deprecated
-	GetTemplateById(http.ResponseWriter, *http.Request)
-	// Deprecated
-	UpdateTemplate(http.ResponseWriter, *http.Request)
-	// Deprecated
-	DeleteTemplateById(http.ResponseWriter, *http.Request)
-}
-
 // TrainingsAPIRouter defines the required methods for binding the api requests to a responses for the TrainingsAPI
 // The TrainingsAPIRouter implementation should parse necessary information from the http request,
 // pass the data to a TrainingsAPIServicer to perform the required actions, then write the service results to the http response.
@@ -453,7 +437,7 @@ type InferencesAPIServicer interface {
 	GetInferenceById(context.Context, string) (ImplResponse, error)
 	DeleteInferenceById(context.Context, string) (ImplResponse, error)
 	CreateInferenceV2(context.Context, InferenceCreationRequestV2) (ImplResponse, error)
-	GetInferenceMerged(context.Context, string, string, string) (ImplResponse, error)
+	GetInferenceMerged(context.Context, string, string) (ImplResponse, error)
 	GetInferenceByIdV2(context.Context, string) (ImplResponse, error)
 	GetHuggingFaceModelInfo(context.Context, HuggingFaceModelInfoRequest) (ImplResponse, error)
 }
@@ -569,23 +553,6 @@ type SynchronizationAPIServicer interface {
 	SyncAssetsResourcesIds(context.Context, AssetResourcesIdsSyncRequest) (ImplResponse, error)
 }
 
-// TemplateAPIServicer defines the api actions for the TemplateAPI service
-// This interface intended to stay up to date with the openapi yaml used to generate it,
-// while the service implementation can be ignored with the .openapi-generator-ignore file
-// and updated with the logic required for the API.
-type TemplateAPIServicer interface {
-	// Deprecated
-	ListTemplates(context.Context, string, string, int32, string, string, string, bool, bool, bool, bool) (ImplResponse, error)
-	// Deprecated
-	CreateTemplate(context.Context, WorkloadTemplateCreationRequest) (ImplResponse, error)
-	// Deprecated
-	GetTemplateById(context.Context, string) (ImplResponse, error)
-	// Deprecated
-	UpdateTemplate(context.Context, string, WorkloadTemplateUpdateRequest) (ImplResponse, error)
-	// Deprecated
-	DeleteTemplateById(context.Context, string) (ImplResponse, error)
-}
-
 // TrainingsAPIServicer defines the api actions for the TrainingsAPI service
 // This interface intended to stay up to date with the openapi yaml used to generate it,
 // while the service implementation can be ignored with the .openapi-generator-ignore file
@@ -600,7 +567,7 @@ type TrainingsAPIServicer interface {
 	SyncDistributedStatus(context.Context, string, []WorkloadStatusUpdate) (ImplResponse, error)
 	DeleteDistributedById(context.Context, string, string) (ImplResponse, error)
 	CreateTraining(context.Context, WorkloadCreationRequest) (ImplResponse, error)
-	GetTrainingMerged(context.Context, string, string, string, bool, bool) (ImplResponse, error)
+	GetTrainingMerged(context.Context, string, string, bool, bool) (ImplResponse, error)
 	CreateTrainingV2(context.Context, TrainingCreationRequestV2) (ImplResponse, error)
 	GetTrainingByIdV2(context.Context, string) (ImplResponse, error)
 }
@@ -625,7 +592,7 @@ type WorkspacesAPIServicer interface {
 	SyncWorkspaceStatus(context.Context, string, []WorkloadStatusUpdate) (ImplResponse, error)
 	DeleteWorkspaceById(context.Context, string, string) (ImplResponse, error)
 	CreateWorkspace(context.Context, WorkloadCreationRequest) (ImplResponse, error)
-	GetWorkspaceMerged(context.Context, string, string, string) (ImplResponse, error)
+	GetWorkspaceMerged(context.Context, string, string) (ImplResponse, error)
 	CreateWorkspaceV2(context.Context, WorkspaceCreationRequestV2) (ImplResponse, error)
 	GetWorkspaceByIdV2(context.Context, string) (ImplResponse, error)
 	// Deprecated

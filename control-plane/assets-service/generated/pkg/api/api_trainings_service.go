@@ -223,7 +223,7 @@ func (s *TrainingsAPIService) CreateTraining(ctx context.Context, workloadCreati
 }
 
 // GetTrainingMerged - Get merged training
-func (s *TrainingsAPIService) GetTrainingMerged(ctx context.Context, projectId string, workloadId string, templateId string, isDistributed bool, isDistributedInference bool) (ImplResponse, error) {
+func (s *TrainingsAPIService) GetTrainingMerged(ctx context.Context, projectId string, workloadId string, isDistributed bool, isDistributedInference bool) (ImplResponse, error) {
 	// TODO - update GetTrainingMerged with the required logic for this service method.
 	// Add api_trainings_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

@@ -22,7 +22,7 @@ import (
 // checks if the SpecificRunInfoFields type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &SpecificRunInfoFields{}
 
-// SpecificRunInfoFields Information about the set of assets which comprises a workspace, training or template, and an optional set of specific run parameters.
+// SpecificRunInfoFields Information about the set of assets which comprises a workspace or training workload, and an optional set of specific run parameters.
 type SpecificRunInfoFields struct {
 	Assets      AssetsRef                 `json:"assets"`
 	SpecificEnv NullableSpecificRunParams `json:"specificEnv,omitempty"`

@@ -424,7 +424,7 @@ Name | Type | Description  | Notes
 
 ## GetInferenceMerged
 
-> InferenceV2 GetInferenceMerged(ctx).ProjectId(projectId).WorkloadId(workloadId).TemplateId(templateId).Execute()
+> InferenceV2 GetInferenceMerged(ctx).ProjectId(projectId).WorkloadId(workloadId).Execute()
 
 Get merged inference workload
 
@@ -445,11 +445,10 @@ import (
 func main() {
 	projectId := "4500001" // string | The id of the project (optional)
 	workloadId := "d73a738f-fab3-430a-8fa3-5241493d7128" // string | The id of the workload (optional)
-	templateId := "d73a738f-fab3-430a-8fa3-5241493d7128" // string | The id of the template (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.InferencesAPI.GetInferenceMerged(context.Background()).ProjectId(projectId).WorkloadId(workloadId).TemplateId(templateId).Execute()
+	resp, r, err := apiClient.InferencesAPI.GetInferenceMerged(context.Background()).ProjectId(projectId).WorkloadId(workloadId).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `InferencesAPI.GetInferenceMerged``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -472,7 +471,6 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **projectId** | **string** | The id of the project | 
  **workloadId** | **string** | The id of the workload | 
- **templateId** | **string** | The id of the template | 
 
 ### Return type
 

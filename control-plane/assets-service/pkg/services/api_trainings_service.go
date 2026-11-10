@@ -131,8 +131,8 @@ func (s *TrainingsApiService) GetTrainingByIdV2(ctx context.Context, id string) 
 	return api.Response(http.StatusOK, response), nil
 }
 
-func (s *TrainingsApiService) GetTrainingMerged(ctx context.Context, projectId string, workloadId string, templateId string, isDistributed bool, isDistributedInference bool) (api.ImplResponse, error) {
-	err := validateMergeParams(projectId, workloadId, templateId, isDistributed)
+func (s *TrainingsApiService) GetTrainingMerged(ctx context.Context, projectId string, workloadId string, isDistributed bool, isDistributedInference bool) (api.ImplResponse, error) {
+	err := validateMergeParams(projectId, workloadId, isDistributed)
 	if err != nil {
 		return api.Response(int(err.Code), err), nil
 	}
@@ -154,47 +154,6 @@ func (s *TrainingsApiService) GetTrainingMerged(ctx context.Context, projectId s
 
 		projectId = training.Meta.ProjectId
 		isDistributed = training.Distributed != nil && training.Distributed.Framework != nil
-	}
-
-	if templateId != "" {
-		template, _, getError := dao.GetTemplateAssetById(ctx, templateId)
-		if getError != nil {
-			return api.Response(int(getError.Code), getError), nil
-		}
-
-		if projectId != "" && template.Meta.ProjectId != nil {
-			projectIdFromTemplate := fmt.Sprintf("%d", *template.Meta.ProjectId)
-			if projectIdFromTemplate != projectId {
-				return api.Response(http.StatusBadRequest, api.NewValidationError(fmt.Sprintf("template is not associated with projectId %s", projectId))), nil
-			}
-		}
-
-		if projectId == "" {
-			if template.Meta.ProjectId == nil {
-				return api.Response(http.StatusBadRequest, api.NewValidationError("projectId must be provided for non-project scoped template")), nil
-			}
-			projectId = fmt.Sprintf("%d", *template.Meta.ProjectId)
-		}
-
-		copyErr := convutils.CopySpecs(&training.SpecificRunParams, template.Spec.SpecificEnv)
-		if copyErr != nil {
-			return api.Response(http.StatusInternalServerError, api.NewError(http.StatusInternalServerError, "failed to load the spec of the template", copyErr)), nil
-		}
-
-		training.Assets = template.Spec.Assets
-
-		if isDistributed {
-			// template that is used by both master and worker we have to copy the specific run params
-			// to the master as well.
-			training.Distributed = &api.DistributedData{
-				Master: &api.DistributedMasterData{
-					SpecificRunParams: training.SpecificRunParams,
-					Assets:            &api.AssetsRefOptional{},
-				},
-			}
-
-			copier.Copy(training.Distributed.Master.Assets, template.Spec.Assets)
-		}
 	}
 
 	workloadType := auth.WorkloadTypeTraining
@@ -443,17 +402,14 @@ func genericToTrainingRunParams(genericParams *api.SpecificRunParams) (*api.Trai
 	return &result, nil
 }
 
-func validateMergeParams(projectId string, workloadId string, templateId string, isDistributed bool) *api.Error {
-	if projectId == "" && workloadId == "" && templateId == "" {
-		return api.NewValidationError("either workloadId, projectId or templateId must be provided")
+func validateMergeParams(projectId string, workloadId string, isDistributed bool) *api.Error {
+	if projectId == "" && workloadId == "" {
+		return api.NewValidationError("either workloadId or projectId must be provided")
 	}
 
 	if workloadId != "" {
 		if projectId != "" {
 			return api.NewValidationError("workloadId and projectId are mutually exclusive")
-		}
-		if templateId != "" {
-			return api.NewValidationError("workloadId and templateId are mutually exclusive")
 		}
 	}
 

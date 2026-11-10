@@ -6,7 +6,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **EnablePolicies** | Pointer to [**GetEnablePolicies**](GetEnablePolicies.md) |  | [optional] 
 **WorkloadSubmissionV2Enabled** | Pointer to [**GetWorkloadSubmissionV2Enabled**](GetWorkloadSubmissionV2Enabled.md) |  | [optional] 
-**EnableTemplatesV2** | Pointer to [**GetEnableTemplatesV2**](GetEnableTemplatesV2.md) |  | [optional] 
 **EnableHybridSubmission** | Pointer to [**GetEnableHybridSubmission**](GetEnableHybridSubmission.md) |  | [optional] 
 **GpuOverProvisioning** | Pointer to [**GetGpuOverProvisioning**](GetGpuOverProvisioning.md) |  | [optional] 
 **ApplicationSubmission** | Pointer to [**GetApplicationSubmission**](GetApplicationSubmission.md) |  | [optional] 
@@ -79,31 +78,6 @@ SetWorkloadSubmissionV2Enabled sets WorkloadSubmissionV2Enabled field to given v
 `func (o *WorkloadsSettingsGetResponse) HasWorkloadSubmissionV2Enabled() bool`
 
 HasWorkloadSubmissionV2Enabled returns a boolean if a field has been set.
-
-### GetEnableTemplatesV2
-
-`func (o *WorkloadsSettingsGetResponse) GetEnableTemplatesV2() GetEnableTemplatesV2`
-
-GetEnableTemplatesV2 returns the EnableTemplatesV2 field if non-nil, zero value otherwise.
-
-### GetEnableTemplatesV2Ok
-
-`func (o *WorkloadsSettingsGetResponse) GetEnableTemplatesV2Ok() (*GetEnableTemplatesV2, bool)`
-
-GetEnableTemplatesV2Ok returns a tuple with the EnableTemplatesV2 field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetEnableTemplatesV2
-
-`func (o *WorkloadsSettingsGetResponse) SetEnableTemplatesV2(v GetEnableTemplatesV2)`
-
-SetEnableTemplatesV2 sets EnableTemplatesV2 field to given value.
-
-### HasEnableTemplatesV2
-
-`func (o *WorkloadsSettingsGetResponse) HasEnableTemplatesV2() bool`
-
-HasEnableTemplatesV2 returns a boolean if a field has been set.
 
 ### GetEnableHybridSubmission
 
