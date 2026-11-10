@@ -22,9 +22,7 @@ get:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              type: string
+            $ref: '../schemas/Nodes/NodeLabelOptions.yaml'
           example: [a100, a30]
     400:
       $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'

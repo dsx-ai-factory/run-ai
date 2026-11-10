@@ -21,9 +21,7 @@ get:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              type: string
+            $ref: '../schemas/Nodes/NodeLabelOptions.yaml'
           example: [gpu-type, nvidia.com/gpu.product]
     400:
       $ref: '../../../../infra/openapi/docs/responses/400BadRequest.yaml'
