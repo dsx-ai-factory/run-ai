@@ -285,6 +285,13 @@ var runAiDistributedConfig = gvkConfig{
 // during execution. Running specs in parallel would cause data races.
 var _ = Describe("system mapping layer 3+4: hand-authored policies and K8s schema validation", Serial, func() {
 	Context("schema loader self-tests", func() {
+		It("accepts a valid Dynamo v1beta1 manifest", func() {
+			schema, err := loadOpenAPISchema(dynamoGraphDeploymentV1beta1Config.schemaPath, dynamoGraphDeploymentV1beta1Config.schemaName)
+			Expect(err).To(BeNil())
+			ref := loadReferenceSpecGinkgo(dynamoGraphDeploymentV1beta1Config.inputDir + "/reference.yaml")
+			Expect(formatOpenAPIErrors(validateAgainstOpenAPI(schema, ref))).To(BeEmpty())
+		})
+
 		It("validates the apps/Deployment/v1 reference manifest", func() {
 			schema, err := loadOpenAPISchema(deploymentConfig.schemaPath, deploymentConfig.schemaName)
 			Expect(err).To(BeNil())
@@ -710,9 +717,9 @@ var _ = Describe("system mapping layer 3+4: hand-authored policies and K8s schem
 		})
 	})
 
-	for _, cfg := range []gvkConfig{deploymentConfig, jobConfig, replicaSetConfig, statefulSetConfig, cronJobConfig, podConfig, nimCacheConfig, nimServiceConfig, pyTorchJobConfig, mpiJobConfig, tfJobConfig, xgBoostJobConfig, jaxJobConfig, leaderWorkerSetConfig, dynamoGraphDeploymentConfig, rayClusterConfig, rayJobConfig, rayServiceConfig, knativeServiceConfig, runAiWorkspaceConfig, runAiDistributedConfig} {
+	for _, cfg := range []gvkConfig{deploymentConfig, jobConfig, replicaSetConfig, statefulSetConfig, cronJobConfig, podConfig, nimCacheConfig, nimServiceConfig, pyTorchJobConfig, mpiJobConfig, tfJobConfig, xgBoostJobConfig, jaxJobConfig, leaderWorkerSetConfig, dynamoGraphDeploymentConfig, dynamoGraphDeploymentV1beta1Config, rayClusterConfig, rayJobConfig, rayServiceConfig, knativeServiceConfig, runAiWorkspaceConfig, runAiDistributedConfig} {
 		cfg := cfg
-		Context(cfg.gvk.Kind, func() {
+		Context(cfg.gvk.Kind+"/"+cfg.gvk.Version, func() {
 			for _, name := range cfg.caseNames {
 				name := name
 				// Discover every policy variant in the case directory

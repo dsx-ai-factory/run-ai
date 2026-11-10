@@ -60,24 +60,26 @@ func buildLayer3Breakdown(gvk api.Gvk) (map[string]any, error) {
 	}
 
 	customFormatters := map[string]map[string]api.FormatterField{
-		sm.SystemPodSpecFormatterName:               sm.BuildSystemPodSpecFormatterFields(),
-		sm.SystemJobSpecFormatterName:               sm.BuildSystemJobSpecFormatterFields(),
-		sm.SystemCronJobSpecFormatterName:           sm.BuildSystemCronJobSpecFormatterFields(),
-		sm.SystemSelectorFormatterName:              sm.BuildSystemSelectorFormatterFields(),
-		sm.SystemMetadataFormatterName:              sm.BuildSystemMetadataFormatterFields(),
-		sm.SystemDeploymentSpecFormatterName:        sm.BuildSystemDeploymentSpecFormatterFields(),
-		sm.SystemStatefulSetSpecFormatterName:       sm.BuildSystemStatefulSetSpecFormatterFields(),
-		sm.SystemNimCacheSpecFormatterName:          sm.BuildSystemNimCacheSpecFormatterFields(),
-		sm.SystemNimServiceSpecFormatterName:        sm.BuildSystemNimServiceSpecFormatterFields(),
-		sm.SystemKubeflowRunPolicyFormatterName:     sm.BuildSystemKubeflowRunPolicyFormatterFields(),
-		sm.SystemKubeflowReplicaSpecFormatterName:   sm.BuildSystemKubeflowReplicaSpecFormatterFields(),
-		sm.SystemPyTorchJobSpecFormatterName:        sm.BuildSystemPyTorchJobSpecFormatterFields(),
-		sm.SystemLeaderWorkerSetFormatterName:       sm.BuildSystemLeaderWorkerSetSpecFormatterFields(),
-		sm.SystemDynamoGraphDeploymentFormatterName: sm.BuildSystemDynamoGraphDeploymentSpecFormatterFields(),
-		sm.SystemRayClusterSpecFormatterName:        sm.BuildSystemRayClusterSpecFormatterFields(),
-		sm.SystemRayJobSpecFormatterName:            sm.BuildSystemRayJobSpecFormatterFields(),
-		sm.SystemRayServiceSpecFormatterName:        sm.BuildSystemRayServiceSpecFormatterFields(),
-		sm.SystemNativeSpecFormatterName:            sm.BuildSystemNativeSpecFormatterFields(),
+		sm.SystemDynamoGraphDeploymentV1beta1SpecFormatterName: sm.BuildSystemDynamoGraphDeploymentV1beta1SpecFormatterFields(),
+		sm.SystemPodSpecFormatterName:                          sm.BuildSystemPodSpecFormatterFields(),
+		sm.SystemJobSpecFormatterName:                          sm.BuildSystemJobSpecFormatterFields(),
+		sm.SystemCronJobSpecFormatterName:                      sm.BuildSystemCronJobSpecFormatterFields(),
+		sm.SystemSelectorFormatterName:                         sm.BuildSystemSelectorFormatterFields(),
+		sm.SystemMetadataFormatterName:                         sm.BuildSystemMetadataFormatterFields(),
+		sm.SystemDeploymentSpecFormatterName:                   sm.BuildSystemDeploymentSpecFormatterFields(),
+		sm.SystemStatefulSetSpecFormatterName:                  sm.BuildSystemStatefulSetSpecFormatterFields(),
+		sm.SystemNimCacheSpecFormatterName:                     sm.BuildSystemNimCacheSpecFormatterFields(),
+		sm.SystemNimServiceSpecFormatterName:                   sm.BuildSystemNimServiceSpecFormatterFields(),
+		sm.SystemKubeflowRunPolicyFormatterName:                sm.BuildSystemKubeflowRunPolicyFormatterFields(),
+		sm.SystemKubeflowReplicaSpecFormatterName:              sm.BuildSystemKubeflowReplicaSpecFormatterFields(),
+		sm.SystemPyTorchJobSpecFormatterName:                   sm.BuildSystemPyTorchJobSpecFormatterFields(),
+		sm.SystemLeaderWorkerSetFormatterName:                  sm.BuildSystemLeaderWorkerSetSpecFormatterFields(),
+		sm.SystemDynamoGraphDeploymentFormatterName:            sm.BuildSystemDynamoGraphDeploymentSpecFormatterFields(),
+		sm.SystemDynamoComponentSpecFormatterName:              sm.BuildSystemDynamoComponentSpecFormatterFields(),
+		sm.SystemRayClusterSpecFormatterName:                   sm.BuildSystemRayClusterSpecFormatterFields(),
+		sm.SystemRayJobSpecFormatterName:                       sm.BuildSystemRayJobSpecFormatterFields(),
+		sm.SystemRayServiceSpecFormatterName:                   sm.BuildSystemRayServiceSpecFormatterFields(),
+		sm.SystemNativeSpecFormatterName:                       sm.BuildSystemNativeSpecFormatterFields(),
 	}
 
 	variations := map[layer3VariationKey]*layer3PartialVariation{}
@@ -225,6 +227,9 @@ func selectGvkSpecSelectors(gvk api.Gvk) (map[string]api.SpecSelector, error) {
 		return sel, nil
 	case group == "nvidia.com" && gvk.Kind == "DynamoGraphDeployment" && gvk.Version == "v1alpha1":
 		_, sel := sm.BuildSystemNvidiaComDynamoGraphDeploymentV1alpha1Mapping()
+		return sel, nil
+	case group == "nvidia.com" && gvk.Kind == "DynamoGraphDeployment" && gvk.Version == "v1beta1":
+		_, sel := sm.BuildSystemNvidiaComDynamoGraphDeploymentV1beta1Mapping()
 		return sel, nil
 	case group == "ray.io" && gvk.Kind == "RayCluster" && gvk.Version == "v1":
 		_, sel := sm.BuildSystemRayIoRayClusterV1Mapping()
