@@ -8,7 +8,6 @@ package knative
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
 	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
@@ -19,6 +18,7 @@ import (
 	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/yaml"
 )
 
 // GetKnativeStatus returns the aggregated PublicStatus for knative and its sub-components
@@ -109,29 +109,44 @@ func validateKnativeFeatureEnabled(cm *corev1.ConfigMap, knativeStatus *runv1.Pu
 	}
 }
 
+// getKnativeConfigMap reads a Knative config-map. A missing config-map is expected on clusters that do not
+// use the feature, so only other errors (API failures, RBAC) are logged.
+func getKnativeConfigMap(ctx context.Context, kbClient client.Client, name string) *corev1.ConfigMap {
+	configMap := &corev1.ConfigMap{}
+	if err := kbClient.Get(ctx, types.NamespacedName{Name: name, Namespace: consts.KnativeNamespace}, configMap); err != nil {
+		if !kerrors.IsNotFound(err) {
+			log.FromContext(ctx).Error(err, "Failed to get knative ConfigMap", "name", name)
+		}
+		return nil
+	}
+	return configMap
+}
+
+// hasExternalGateway reports whether the config-gateway "external-gateways" value is a YAML list with at
+// least one entry. An empty list ("[]") makes Knative fall back to its default Gateway, so it does not count.
+func hasExternalGateway(ctx context.Context, rawExternalGateways string) bool {
+	var gateways []map[string]any
+	if err := yaml.Unmarshal([]byte(rawExternalGateways), &gateways); err != nil {
+		log.FromContext(ctx).Error(err, "Failed to parse knative config-gateway", "key", consts.KnativeExternalGatewaysKey)
+		return false
+	}
+	return len(gateways) > 0
+}
+
 // isGatewayAPIExternalIngressConfigured reports whether Knative routes external traffic through the
 // Gateway API networking layer (net-gateway-api) instead of Kourier: the ingress class selects
 // net-gateway-api and at least one external Gateway is listed.
 func isGatewayAPIExternalIngressConfigured(ctx context.Context, kbClient client.Client) bool {
-	networkCM := &corev1.ConfigMap{}
-	if err := kbClient.Get(ctx, types.NamespacedName{
-		Name:      consts.KnativeNetworkConfigMapName,
-		Namespace: consts.KnativeNamespace,
-	}, networkCM); err != nil {
-		return false
-	}
-	if networkCM.Data["ingress-class"] != consts.KnativeGatewayAPIIngressClass {
+	networkCM := getKnativeConfigMap(ctx, kbClient, consts.KnativeNetworkConfigMapName)
+	if networkCM == nil || networkCM.Data["ingress-class"] != consts.KnativeGatewayAPIIngressClass {
 		return false
 	}
 
-	gatewayCM := &corev1.ConfigMap{}
-	if err := kbClient.Get(ctx, types.NamespacedName{
-		Name:      consts.KnativeGatewayConfigMapName,
-		Namespace: consts.KnativeNamespace,
-	}, gatewayCM); err != nil {
+	gatewayCM := getKnativeConfigMap(ctx, kbClient, consts.KnativeGatewayConfigMapName)
+	if gatewayCM == nil {
 		return false
 	}
-	return strings.TrimSpace(gatewayCM.Data[consts.KnativeExternalGatewaysKey]) != ""
+	return hasExternalGateway(ctx, gatewayCM.Data[consts.KnativeExternalGatewaysKey])
 }
 
 // setKnativeExternalConfigStatus reports the external-access domain configuration under the "kourier"
