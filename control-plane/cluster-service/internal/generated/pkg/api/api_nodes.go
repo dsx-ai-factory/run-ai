@@ -108,6 +108,50 @@ func NewNodesAPIController(s NodesAPIServicer, opts ...NodesAPIOption) *NodesAPI
 // Routes returns all the api routes for the NodesAPIController
 func (c *NodesAPIController) Routes() Routes {
 	return Routes{
+		"GetNodeLabelKeys": Route{
+			strings.ToUpper("Get"),
+			"/api/v1/clusters/{clusterUuid}/nodes/labels/keys",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"nodes",
+						"read",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.GetNodeLabelKeys
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
+		"GetNodeLabelValues": Route{
+			strings.ToUpper("Get"),
+			"/api/v1/clusters/{clusterUuid}/nodes/labels/values",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					return c.authorizationClient.AuthorizeMiddleware(
+						next,
+						"nodes",
+						"read",
+						false,
+						"",
+					)
+				},
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.GetNodeLabelValues
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
 		"CountNodes": Route{
 			strings.ToUpper("Get"),
 			"/api/v1/clusters/{clusterUuid}/nodes/count",
@@ -342,6 +386,221 @@ func (c *NodesAPIController) Routes() Routes {
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
 	}
+}
+
+// GetNodeLabelKeys - Get node label keys.
+func (c *NodesAPIController) GetNodeLabelKeys(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	clusterUuidParam := chi.URLParam(r, "clusterUuid")
+	if clusterUuidParam == "" {
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
+		return
+	}
+	var offsetParam int32
+	if query.Has("offset") {
+		param, err := parseNumericParameter[int32](
+			query.Get("offset"),
+			WithParse[int32](parseInt32),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
+			return
+		}
+
+		offsetParam = param
+	} else {
+	}
+	var limitParam int32
+	if query.Has("limit") {
+		param, err := parseNumericParameter[int32](
+			query.Get("limit"),
+			WithParse[int32](parseInt32),
+			WithMinimum[int32](1),
+			WithMaximum[int32](500),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
+			return
+		}
+
+		limitParam = param
+	} else {
+		var param int32 = 50
+		limitParam = param
+	}
+	var searchParam string
+	if query.Has("search") {
+		param := query.Get("search")
+
+		searchParam = param
+	} else {
+	}
+	result, err := c.service.GetNodeLabelKeys(r.Context(), clusterUuidParam, offsetParam, limitParam, searchParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// GetNodeLabelValues - Get node label values.
+func (c *NodesAPIController) GetNodeLabelValues(w http.ResponseWriter, r *http.Request) {
+	query, err := parseQuery(r.URL.RawQuery)
+	if err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
+		return
+	}
+	clusterUuidParam := chi.URLParam(r, "clusterUuid")
+	if clusterUuidParam == "" {
+		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
+		return
+	}
+	var keyParam string
+	if query.Has("key") {
+		param := query.Get("key")
+
+		keyParam = param
+	} else {
+		c.errorHandler(w, r, &RequiredError{Field: "key"}, nil, nil)
+		return
+	}
+	var offsetParam int32
+	if query.Has("offset") {
+		param, err := parseNumericParameter[int32](
+			query.Get("offset"),
+			WithParse[int32](parseInt32),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
+			return
+		}
+
+		offsetParam = param
+	} else {
+	}
+	var limitParam int32
+	if query.Has("limit") {
+		param, err := parseNumericParameter[int32](
+			query.Get("limit"),
+			WithParse[int32](parseInt32),
+			WithMinimum[int32](1),
+			WithMaximum[int32](500),
+		)
+		if err != nil {
+			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
+			return
+		}
+
+		limitParam = param
+	} else {
+		var param int32 = 50
+		limitParam = param
+	}
+	var searchParam string
+	if query.Has("search") {
+		param := query.Get("search")
+
+		searchParam = param
+	} else {
+	}
+	result, err := c.service.GetNodeLabelValues(r.Context(), clusterUuidParam, keyParam, offsetParam, limitParam, searchParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
 }
 
 // CountNodes - Count nodes

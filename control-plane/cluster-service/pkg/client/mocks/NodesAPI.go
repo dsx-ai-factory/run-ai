@@ -684,6 +684,260 @@ func (_c *NodesAPI_GetNodeInternalExecute_Call) RunAndReturn(run func(r openapi.
 	return _c
 }
 
+// GetNodeLabelKeys provides a mock function for the type NodesAPI
+func (_mock *NodesAPI) GetNodeLabelKeys(ctx context.Context, clusterUuid string) openapi.ApiGetNodeLabelKeysRequest {
+	ret := _mock.Called(ctx, clusterUuid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNodeLabelKeys")
+	}
+
+	var r0 openapi.ApiGetNodeLabelKeysRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) openapi.ApiGetNodeLabelKeysRequest); ok {
+		r0 = returnFunc(ctx, clusterUuid)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiGetNodeLabelKeysRequest)
+	}
+	return r0
+}
+
+// NodesAPI_GetNodeLabelKeys_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNodeLabelKeys'
+type NodesAPI_GetNodeLabelKeys_Call struct {
+	*mock.Call
+}
+
+// GetNodeLabelKeys is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterUuid string
+func (_e *NodesAPI_Expecter) GetNodeLabelKeys(ctx any, clusterUuid any) *NodesAPI_GetNodeLabelKeys_Call {
+	return &NodesAPI_GetNodeLabelKeys_Call{Call: _e.mock.On("GetNodeLabelKeys", ctx, clusterUuid)}
+}
+
+func (_c *NodesAPI_GetNodeLabelKeys_Call) Run(run func(ctx context.Context, clusterUuid string)) *NodesAPI_GetNodeLabelKeys_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *NodesAPI_GetNodeLabelKeys_Call) Return(apiGetNodeLabelKeysRequest openapi.ApiGetNodeLabelKeysRequest) *NodesAPI_GetNodeLabelKeys_Call {
+	_c.Call.Return(apiGetNodeLabelKeysRequest)
+	return _c
+}
+
+func (_c *NodesAPI_GetNodeLabelKeys_Call) RunAndReturn(run func(ctx context.Context, clusterUuid string) openapi.ApiGetNodeLabelKeysRequest) *NodesAPI_GetNodeLabelKeys_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetNodeLabelKeysExecute provides a mock function for the type NodesAPI
+func (_mock *NodesAPI) GetNodeLabelKeysExecute(r openapi.ApiGetNodeLabelKeysRequest) ([]string, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNodeLabelKeysExecute")
+	}
+
+	var r0 []string
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetNodeLabelKeysRequest) ([]string, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetNodeLabelKeysRequest) []string); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiGetNodeLabelKeysRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiGetNodeLabelKeysRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// NodesAPI_GetNodeLabelKeysExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNodeLabelKeysExecute'
+type NodesAPI_GetNodeLabelKeysExecute_Call struct {
+	*mock.Call
+}
+
+// GetNodeLabelKeysExecute is a helper method to define mock.On call
+//   - r openapi.ApiGetNodeLabelKeysRequest
+func (_e *NodesAPI_Expecter) GetNodeLabelKeysExecute(r any) *NodesAPI_GetNodeLabelKeysExecute_Call {
+	return &NodesAPI_GetNodeLabelKeysExecute_Call{Call: _e.mock.On("GetNodeLabelKeysExecute", r)}
+}
+
+func (_c *NodesAPI_GetNodeLabelKeysExecute_Call) Run(run func(r openapi.ApiGetNodeLabelKeysRequest)) *NodesAPI_GetNodeLabelKeysExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiGetNodeLabelKeysRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiGetNodeLabelKeysRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *NodesAPI_GetNodeLabelKeysExecute_Call) Return(strings []string, response *http.Response, err error) *NodesAPI_GetNodeLabelKeysExecute_Call {
+	_c.Call.Return(strings, response, err)
+	return _c
+}
+
+func (_c *NodesAPI_GetNodeLabelKeysExecute_Call) RunAndReturn(run func(r openapi.ApiGetNodeLabelKeysRequest) ([]string, *http.Response, error)) *NodesAPI_GetNodeLabelKeysExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetNodeLabelValues provides a mock function for the type NodesAPI
+func (_mock *NodesAPI) GetNodeLabelValues(ctx context.Context, clusterUuid string) openapi.ApiGetNodeLabelValuesRequest {
+	ret := _mock.Called(ctx, clusterUuid)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNodeLabelValues")
+	}
+
+	var r0 openapi.ApiGetNodeLabelValuesRequest
+	if returnFunc, ok := ret.Get(0).(func(context.Context, string) openapi.ApiGetNodeLabelValuesRequest); ok {
+		r0 = returnFunc(ctx, clusterUuid)
+	} else {
+		r0 = ret.Get(0).(openapi.ApiGetNodeLabelValuesRequest)
+	}
+	return r0
+}
+
+// NodesAPI_GetNodeLabelValues_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNodeLabelValues'
+type NodesAPI_GetNodeLabelValues_Call struct {
+	*mock.Call
+}
+
+// GetNodeLabelValues is a helper method to define mock.On call
+//   - ctx context.Context
+//   - clusterUuid string
+func (_e *NodesAPI_Expecter) GetNodeLabelValues(ctx any, clusterUuid any) *NodesAPI_GetNodeLabelValues_Call {
+	return &NodesAPI_GetNodeLabelValues_Call{Call: _e.mock.On("GetNodeLabelValues", ctx, clusterUuid)}
+}
+
+func (_c *NodesAPI_GetNodeLabelValues_Call) Run(run func(ctx context.Context, clusterUuid string)) *NodesAPI_GetNodeLabelValues_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 context.Context
+		if args[0] != nil {
+			arg0 = args[0].(context.Context)
+		}
+		var arg1 string
+		if args[1] != nil {
+			arg1 = args[1].(string)
+		}
+		run(
+			arg0,
+			arg1,
+		)
+	})
+	return _c
+}
+
+func (_c *NodesAPI_GetNodeLabelValues_Call) Return(apiGetNodeLabelValuesRequest openapi.ApiGetNodeLabelValuesRequest) *NodesAPI_GetNodeLabelValues_Call {
+	_c.Call.Return(apiGetNodeLabelValuesRequest)
+	return _c
+}
+
+func (_c *NodesAPI_GetNodeLabelValues_Call) RunAndReturn(run func(ctx context.Context, clusterUuid string) openapi.ApiGetNodeLabelValuesRequest) *NodesAPI_GetNodeLabelValues_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// GetNodeLabelValuesExecute provides a mock function for the type NodesAPI
+func (_mock *NodesAPI) GetNodeLabelValuesExecute(r openapi.ApiGetNodeLabelValuesRequest) ([]string, *http.Response, error) {
+	ret := _mock.Called(r)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetNodeLabelValuesExecute")
+	}
+
+	var r0 []string
+	var r1 *http.Response
+	var r2 error
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetNodeLabelValuesRequest) ([]string, *http.Response, error)); ok {
+		return returnFunc(r)
+	}
+	if returnFunc, ok := ret.Get(0).(func(openapi.ApiGetNodeLabelValuesRequest) []string); ok {
+		r0 = returnFunc(r)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+	if returnFunc, ok := ret.Get(1).(func(openapi.ApiGetNodeLabelValuesRequest) *http.Response); ok {
+		r1 = returnFunc(r)
+	} else {
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(*http.Response)
+		}
+	}
+	if returnFunc, ok := ret.Get(2).(func(openapi.ApiGetNodeLabelValuesRequest) error); ok {
+		r2 = returnFunc(r)
+	} else {
+		r2 = ret.Error(2)
+	}
+	return r0, r1, r2
+}
+
+// NodesAPI_GetNodeLabelValuesExecute_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetNodeLabelValuesExecute'
+type NodesAPI_GetNodeLabelValuesExecute_Call struct {
+	*mock.Call
+}
+
+// GetNodeLabelValuesExecute is a helper method to define mock.On call
+//   - r openapi.ApiGetNodeLabelValuesRequest
+func (_e *NodesAPI_Expecter) GetNodeLabelValuesExecute(r any) *NodesAPI_GetNodeLabelValuesExecute_Call {
+	return &NodesAPI_GetNodeLabelValuesExecute_Call{Call: _e.mock.On("GetNodeLabelValuesExecute", r)}
+}
+
+func (_c *NodesAPI_GetNodeLabelValuesExecute_Call) Run(run func(r openapi.ApiGetNodeLabelValuesRequest)) *NodesAPI_GetNodeLabelValuesExecute_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		var arg0 openapi.ApiGetNodeLabelValuesRequest
+		if args[0] != nil {
+			arg0 = args[0].(openapi.ApiGetNodeLabelValuesRequest)
+		}
+		run(
+			arg0,
+		)
+	})
+	return _c
+}
+
+func (_c *NodesAPI_GetNodeLabelValuesExecute_Call) Return(strings []string, response *http.Response, err error) *NodesAPI_GetNodeLabelValuesExecute_Call {
+	_c.Call.Return(strings, response, err)
+	return _c
+}
+
+func (_c *NodesAPI_GetNodeLabelValuesExecute_Call) RunAndReturn(run func(r openapi.ApiGetNodeLabelValuesRequest) ([]string, *http.Response, error)) *NodesAPI_GetNodeLabelValuesExecute_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetNodeMetrics provides a mock function for the type NodesAPI
 func (_mock *NodesAPI) GetNodeMetrics(ctx context.Context, nodeId string) openapi.ApiGetNodeMetricsRequest {
 	ret := _mock.Called(ctx, nodeId)
