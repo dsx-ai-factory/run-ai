@@ -378,7 +378,7 @@ Name | Type | Description  | Notes
 
 ## GetNodeLabelKeys
 
-> []string GetNodeLabelKeys(ctx, clusterUuid).Search(search).Offset(offset).Limit(limit).Execute()
+> []string GetNodeLabelKeys(ctx, clusterUuid).Offset(offset).Limit(limit).Search(search).Execute()
 
 Get node label keys.
 
@@ -398,13 +398,13 @@ import (
 
 func main() {
 	clusterUuid := "9f55255e-11ed-47c7-acef-fc4054768dbc" // string | The Universally Unique Identifier (UUID) of the cluster.
-	search := "test project" // string | Filter results by a free text search. (optional)
 	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
 	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+	search := "test project" // string | Filter results by a free text search. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.NodesAPI.GetNodeLabelKeys(context.Background(), clusterUuid).Search(search).Offset(offset).Limit(limit).Execute()
+	resp, r, err := apiClient.NodesAPI.GetNodeLabelKeys(context.Background(), clusterUuid).Offset(offset).Limit(limit).Search(search).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `NodesAPI.GetNodeLabelKeys``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -430,9 +430,9 @@ Other parameters are passed through a pointer to a apiGetNodeLabelKeysRequest st
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **search** | **string** | Filter results by a free text search. | 
  **offset** | **int32** | The offset of the first item returned in the collection. | 
  **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+ **search** | **string** | Filter results by a free text search. | 
 
 ### Return type
 
@@ -454,7 +454,7 @@ Name | Type | Description  | Notes
 
 ## GetNodeLabelValues
 
-> []string GetNodeLabelValues(ctx, clusterUuid).Key(key).Search(search).Offset(offset).Limit(limit).Execute()
+> []string GetNodeLabelValues(ctx, clusterUuid).Key(key).Offset(offset).Limit(limit).Search(search).Execute()
 
 Get node label values.
 
@@ -475,13 +475,13 @@ import (
 func main() {
 	clusterUuid := "9f55255e-11ed-47c7-acef-fc4054768dbc" // string | The Universally Unique Identifier (UUID) of the cluster.
 	key := "gpu-type" // string | The exact label key whose values to return.
-	search := "test project" // string | Filter results by a free text search. (optional)
 	offset := int32(100) // int32 | The offset of the first item returned in the collection. (optional)
 	limit := int32(56) // int32 | The maximum number of entries to return. (optional) (default to 50)
+	search := "test project" // string | Filter results by a free text search. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.NodesAPI.GetNodeLabelValues(context.Background(), clusterUuid).Key(key).Search(search).Offset(offset).Limit(limit).Execute()
+	resp, r, err := apiClient.NodesAPI.GetNodeLabelValues(context.Background(), clusterUuid).Key(key).Offset(offset).Limit(limit).Search(search).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `NodesAPI.GetNodeLabelValues``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -508,9 +508,9 @@ Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
  **key** | **string** | The exact label key whose values to return. | 
- **search** | **string** | Filter results by a free text search. | 
  **offset** | **int32** | The offset of the first item returned in the collection. | 
  **limit** | **int32** | The maximum number of entries to return. | [default to 50]
+ **search** | **string** | Filter results by a free text search. | 
 
 ### Return type
 

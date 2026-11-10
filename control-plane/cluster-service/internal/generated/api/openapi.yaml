@@ -361,15 +361,6 @@ paths:
           minLength: 1
           type: string
         style: simple
-      - description: Filter results by a free text search.
-        explode: true
-        in: query
-        name: search
-        required: false
-        schema:
-          example: test project
-          type: string
-        style: form
       - description: The offset of the first item returned in the collection.
         explode: true
         in: query
@@ -391,6 +382,15 @@ paths:
           maximum: 500
           minimum: 1
           type: integer
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
         style: form
       responses:
         "200":
@@ -483,15 +483,6 @@ paths:
           minLength: 1
           type: string
         style: form
-      - description: Filter results by a free text search.
-        explode: true
-        in: query
-        name: search
-        required: false
-        schema:
-          example: test project
-          type: string
-        style: form
       - description: The offset of the first item returned in the collection.
         explode: true
         in: query
@@ -513,6 +504,15 @@ paths:
           maximum: 500
           minimum: 1
           type: integer
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
         style: form
       responses:
         "200":
@@ -6195,16 +6195,6 @@ components:
       schema:
         type: boolean
       style: form
-    Search:
-      description: Filter results by a free text search.
-      explode: true
-      in: query
-      name: search
-      required: false
-      schema:
-        example: test project
-        type: string
-      style: form
     Offset:
       description: The offset of the first item returned in the collection.
       explode: true
@@ -6228,6 +6218,16 @@ components:
         maximum: 500
         minimum: 1
         type: integer
+      style: form
+    Search:
+      description: Filter results by a free text search.
+      explode: true
+      in: query
+      name: search
+      required: false
+      schema:
+        example: test project
+        type: string
       style: form
     NodeLabelKey:
       description: The exact label key whose values to return.

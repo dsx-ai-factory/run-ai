@@ -1033,15 +1033,9 @@ type ApiGetNodeLabelKeysRequest struct {
 	ctx         context.Context
 	ApiService  NodesAPI
 	clusterUuid string
-	search      *string
 	offset      *int32
 	limit       *int32
-}
-
-// Filter results by a free text search.
-func (r ApiGetNodeLabelKeysRequest) Search(search string) ApiGetNodeLabelKeysRequest {
-	r.search = &search
-	return r
+	search      *string
 }
 
 // The offset of the first item returned in the collection.
@@ -1053,6 +1047,12 @@ func (r ApiGetNodeLabelKeysRequest) Offset(offset int32) ApiGetNodeLabelKeysRequ
 // The maximum number of entries to return.
 func (r ApiGetNodeLabelKeysRequest) Limit(limit int32) ApiGetNodeLabelKeysRequest {
 	r.limit = &limit
+	return r
+}
+
+// Filter results by a free text search.
+func (r ApiGetNodeLabelKeysRequest) Search(search string) ApiGetNodeLabelKeysRequest {
+	r.search = &search
 	return r
 }
 
@@ -1104,9 +1104,6 @@ func (a *NodesAPIService) GetNodeLabelKeysExecute(r ApiGetNodeLabelKeysRequest) 
 		return localVarReturnValue, nil, reportError("clusterUuid must have at least 1 elements")
 	}
 
-	if r.search != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
-	}
 	if r.offset != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
 	}
@@ -1115,6 +1112,9 @@ func (a *NodesAPIService) GetNodeLabelKeysExecute(r ApiGetNodeLabelKeysRequest) 
 	} else {
 		var defaultValue int32 = 50
 		r.limit = &defaultValue
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}
@@ -1229,20 +1229,14 @@ type ApiGetNodeLabelValuesRequest struct {
 	ApiService  NodesAPI
 	clusterUuid string
 	key         *string
-	search      *string
 	offset      *int32
 	limit       *int32
+	search      *string
 }
 
 // The exact label key whose values to return.
 func (r ApiGetNodeLabelValuesRequest) Key(key string) ApiGetNodeLabelValuesRequest {
 	r.key = &key
-	return r
-}
-
-// Filter results by a free text search.
-func (r ApiGetNodeLabelValuesRequest) Search(search string) ApiGetNodeLabelValuesRequest {
-	r.search = &search
 	return r
 }
 
@@ -1255,6 +1249,12 @@ func (r ApiGetNodeLabelValuesRequest) Offset(offset int32) ApiGetNodeLabelValues
 // The maximum number of entries to return.
 func (r ApiGetNodeLabelValuesRequest) Limit(limit int32) ApiGetNodeLabelValuesRequest {
 	r.limit = &limit
+	return r
+}
+
+// Filter results by a free text search.
+func (r ApiGetNodeLabelValuesRequest) Search(search string) ApiGetNodeLabelValuesRequest {
+	r.search = &search
 	return r
 }
 
@@ -1313,9 +1313,6 @@ func (a *NodesAPIService) GetNodeLabelValuesExecute(r ApiGetNodeLabelValuesReque
 	}
 
 	parameterAddToHeaderOrQuery(localVarQueryParams, "key", r.key, "form", "")
-	if r.search != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
-	}
 	if r.offset != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
 	}
@@ -1324,6 +1321,9 @@ func (a *NodesAPIService) GetNodeLabelValuesExecute(r ApiGetNodeLabelValuesReque
 	} else {
 		var defaultValue int32 = 50
 		r.limit = &defaultValue
+	}
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

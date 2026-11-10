@@ -93,9 +93,9 @@ paths:
         - Nodes
       parameters:
         - $ref: '#/components/parameters/ClusterUuid'
-        - $ref: '#/components/parameters/Search'
         - $ref: '#/components/parameters/Offset'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Matching label keys. Returns an empty array when no keys match.
@@ -126,9 +126,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ClusterUuid'
         - $ref: '#/components/parameters/NodeLabelKey'
-        - $ref: '#/components/parameters/Search'
         - $ref: '#/components/parameters/Offset'
         - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
       responses:
         '200':
           description: Matching label values. Returns an empty array when no values match.
@@ -36146,14 +36146,6 @@ components:
         format: uuid
         minLength: 1
         example: 9f55255e-11ed-47c7-acef-fc4054768dbc
-    Search:
-      name: search
-      in: query
-      required: false
-      description: Filter results by a free text search.
-      schema:
-        type: string
-        example: test project
     Offset:
       name: offset
       in: query
@@ -36174,6 +36166,14 @@ components:
         default: 50
         minimum: 1
         maximum: 500
+    Search:
+      name: search
+      in: query
+      required: false
+      description: Filter results by a free text search.
+      schema:
+        type: string
+        example: test project
     NodeLabelKey:
       name: key
       in: query

@@ -9955,13 +9955,13 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
          * Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
          * @summary Get node label keys.
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} [search] Filter results by a free text search.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getNodeLabelKeys: async (clusterUuid: string, search?: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getNodeLabelKeys: async (clusterUuid: string, offset?: number, limit?: number, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'clusterUuid' is not null or undefined
             assertParamExists('getNodeLabelKeys', 'clusterUuid', clusterUuid)
             const localVarPath = `/api/v1/clusters/{clusterUuid}/nodes/labels/keys`
@@ -9981,16 +9981,16 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
             // http bearer authentication required
             await setBearerAuthToObject(localVarHeaderParameter, configuration)
 
-            if (search !== undefined) {
-                localVarQueryParameter['search'] = search;
-            }
-
             if (offset !== undefined) {
                 localVarQueryParameter['offset'] = offset;
             }
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
             }
 
 
@@ -10009,13 +10009,13 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
          * @summary Get node label values.
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
          * @param {string} key The exact label key whose values to return.
-         * @param {string} [search] Filter results by a free text search.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getNodeLabelValues: async (clusterUuid: string, key: string, search?: string, offset?: number, limit?: number, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
+        getNodeLabelValues: async (clusterUuid: string, key: string, offset?: number, limit?: number, search?: string, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'clusterUuid' is not null or undefined
             assertParamExists('getNodeLabelValues', 'clusterUuid', clusterUuid)
             // verify required parameter 'key' is not null or undefined
@@ -10041,16 +10041,16 @@ export const NodesApiAxiosParamCreator = function (configuration?: Configuration
                 localVarQueryParameter['key'] = key;
             }
 
-            if (search !== undefined) {
-                localVarQueryParameter['search'] = search;
-            }
-
             if (offset !== undefined) {
                 localVarQueryParameter['offset'] = offset;
             }
 
             if (limit !== undefined) {
                 localVarQueryParameter['limit'] = limit;
+            }
+
+            if (search !== undefined) {
+                localVarQueryParameter['search'] = search;
             }
 
 
@@ -10467,14 +10467,14 @@ export const NodesApiFp = function(configuration?: Configuration) {
          * Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
          * @summary Get node label keys.
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} [search] Filter results by a free text search.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getNodeLabelKeys(clusterUuid: string, search?: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getNodeLabelKeys(clusterUuid, search, offset, limit, options);
+        async getNodeLabelKeys(clusterUuid: string, offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getNodeLabelKeys(clusterUuid, offset, limit, search, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -10482,14 +10482,14 @@ export const NodesApiFp = function(configuration?: Configuration) {
          * @summary Get node label values.
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
          * @param {string} key The exact label key whose values to return.
-         * @param {string} [search] Filter results by a free text search.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        async getNodeLabelValues(clusterUuid: string, key: string, search?: string, offset?: number, limit?: number, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
-            const localVarAxiosArgs = await localVarAxiosParamCreator.getNodeLabelValues(clusterUuid, key, search, offset, limit, options);
+        async getNodeLabelValues(clusterUuid: string, key: string, offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig): Promise<(axios?: AxiosInstance, basePath?: string) => AxiosPromise<Array<string>>> {
+            const localVarAxiosArgs = await localVarAxiosParamCreator.getNodeLabelValues(clusterUuid, key, offset, limit, search, options);
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
@@ -10644,28 +10644,28 @@ export const NodesApiFactory = function (configuration?: Configuration, basePath
          * Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
          * @summary Get node label keys.
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-         * @param {string} [search] Filter results by a free text search.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getNodeLabelKeys(clusterUuid: string, search?: string, offset?: number, limit?: number, options?: any): AxiosPromise<Array<string>> {
-            return localVarFp.getNodeLabelKeys(clusterUuid, search, offset, limit, options).then((request) => request(axios, basePath));
+        getNodeLabelKeys(clusterUuid: string, offset?: number, limit?: number, search?: string, options?: any): AxiosPromise<Array<string>> {
+            return localVarFp.getNodeLabelKeys(clusterUuid, offset, limit, search, options).then((request) => request(axios, basePath));
         },
         /**
          * Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
          * @summary Get node label values.
          * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
          * @param {string} key The exact label key whose values to return.
-         * @param {string} [search] Filter results by a free text search.
          * @param {number} [offset] The offset of the first item returned in the collection.
          * @param {number} [limit] The maximum number of entries to return.
+         * @param {string} [search] Filter results by a free text search.
          * @param {*} [options] Override http request option.
          * @throws {RequiredError}
          */
-        getNodeLabelValues(clusterUuid: string, key: string, search?: string, offset?: number, limit?: number, options?: any): AxiosPromise<Array<string>> {
-            return localVarFp.getNodeLabelValues(clusterUuid, key, search, offset, limit, options).then((request) => request(axios, basePath));
+        getNodeLabelValues(clusterUuid: string, key: string, offset?: number, limit?: number, search?: string, options?: any): AxiosPromise<Array<string>> {
+            return localVarFp.getNodeLabelValues(clusterUuid, key, offset, limit, search, options).then((request) => request(axios, basePath));
         },
         /**
          * Retrieve the node metrics data by Universally Unique Identifier (UUID).
@@ -10823,15 +10823,15 @@ export class NodesApi extends BaseAPI {
      * Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
      * @summary Get node label keys.
      * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
-     * @param {string} [search] Filter results by a free text search.
      * @param {number} [offset] The offset of the first item returned in the collection.
      * @param {number} [limit] The maximum number of entries to return.
+     * @param {string} [search] Filter results by a free text search.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof NodesApi
      */
-    public getNodeLabelKeys(clusterUuid: string, search?: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
-        return NodesApiFp(this.configuration).getNodeLabelKeys(clusterUuid, search, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    public getNodeLabelKeys(clusterUuid: string, offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig) {
+        return NodesApiFp(this.configuration).getNodeLabelKeys(clusterUuid, offset, limit, search, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**
@@ -10839,15 +10839,15 @@ export class NodesApi extends BaseAPI {
      * @summary Get node label values.
      * @param {string} clusterUuid The Universally Unique Identifier (UUID) of the cluster.
      * @param {string} key The exact label key whose values to return.
-     * @param {string} [search] Filter results by a free text search.
      * @param {number} [offset] The offset of the first item returned in the collection.
      * @param {number} [limit] The maximum number of entries to return.
+     * @param {string} [search] Filter results by a free text search.
      * @param {*} [options] Override http request option.
      * @throws {RequiredError}
      * @memberof NodesApi
      */
-    public getNodeLabelValues(clusterUuid: string, key: string, search?: string, offset?: number, limit?: number, options?: AxiosRequestConfig) {
-        return NodesApiFp(this.configuration).getNodeLabelValues(clusterUuid, key, search, offset, limit, options).then((request) => request(this.axios, this.basePath));
+    public getNodeLabelValues(clusterUuid: string, key: string, offset?: number, limit?: number, search?: string, options?: AxiosRequestConfig) {
+        return NodesApiFp(this.configuration).getNodeLabelValues(clusterUuid, key, offset, limit, search, options).then((request) => request(this.axios, this.basePath));
     }
 
     /**

@@ -296,13 +296,13 @@
             "$ref": "#/components/parameters/ClusterUuid"
           },
           {
-            "$ref": "#/components/parameters/Search"
-          },
-          {
             "$ref": "#/components/parameters/Offset"
           },
           {
             "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
           }
         ],
         "responses": {
@@ -362,13 +362,13 @@
             "$ref": "#/components/parameters/NodeLabelKey"
           },
           {
-            "$ref": "#/components/parameters/Search"
-          },
-          {
             "$ref": "#/components/parameters/Offset"
           },
           {
             "$ref": "#/components/parameters/Limit"
+          },
+          {
+            "$ref": "#/components/parameters/Search"
           }
         ],
         "responses": {
@@ -4360,16 +4360,6 @@
           "type": "boolean"
         }
       },
-      "Search": {
-        "name": "search",
-        "in": "query",
-        "required": false,
-        "description": "Filter results by a free text search.",
-        "schema": {
-          "type": "string",
-          "example": "test project"
-        }
-      },
       "Offset": {
         "name": "offset",
         "in": "query",
@@ -4392,6 +4382,16 @@
           "default": 50,
           "minimum": 1,
           "maximum": 500
+        }
+      },
+      "Search": {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Filter results by a free text search.",
+        "schema": {
+          "type": "string",
+          "example": "test project"
         }
       },
       "NodeLabelKey": {

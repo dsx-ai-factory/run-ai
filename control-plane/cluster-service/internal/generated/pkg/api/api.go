@@ -277,8 +277,8 @@ type NodePoolsAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type NodesAPIServicer interface {
-	GetNodeLabelKeys(context.Context, string, string, int32, int32) (ImplResponse, error)
-	GetNodeLabelValues(context.Context, string, string, string, int32, int32) (ImplResponse, error)
+	GetNodeLabelKeys(context.Context, string, int32, int32, string) (ImplResponse, error)
+	GetNodeLabelValues(context.Context, string, string, int32, int32, string) (ImplResponse, error)
 	CountNodes(context.Context, string, []string, string) (ImplResponse, error)
 	UpsertNode(context.Context, string, string, NodeInfo) (ImplResponse, error)
 	DeleteNode(context.Context, string, string) (ImplResponse, error)

@@ -35,7 +35,7 @@ func NewNodesAPIService() *NodesAPIService {
 }
 
 // GetNodeLabelKeys - Get node label keys.
-func (s *NodesAPIService) GetNodeLabelKeys(ctx context.Context, clusterUuid string, search string, offset int32, limit int32) (ImplResponse, error) {
+func (s *NodesAPIService) GetNodeLabelKeys(ctx context.Context, clusterUuid string, offset int32, limit int32, search string) (ImplResponse, error) {
 	// TODO - update GetNodeLabelKeys with the required logic for this service method.
 	// Add api_nodes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
@@ -61,7 +61,7 @@ func (s *NodesAPIService) GetNodeLabelKeys(ctx context.Context, clusterUuid stri
 }
 
 // GetNodeLabelValues - Get node label values.
-func (s *NodesAPIService) GetNodeLabelValues(ctx context.Context, clusterUuid string, key string, search string, offset int32, limit int32) (ImplResponse, error) {
+func (s *NodesAPIService) GetNodeLabelValues(ctx context.Context, clusterUuid string, key string, offset int32, limit int32, search string) (ImplResponse, error) {
 	// TODO - update GetNodeLabelValues with the required logic for this service method.
 	// Add api_nodes_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
