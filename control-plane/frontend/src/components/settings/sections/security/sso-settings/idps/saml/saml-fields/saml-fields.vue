@@ -112,7 +112,6 @@ import {
   DEFAULT_METADATA_FILE_TYPE,
   idpCommon,
 } from "@/components/settings/sections/security/sso-settings/idps/idp-common/idp-common";
-import { idpService } from "@/services/control-plane/idp.service/idp.service";
 import { urlHintMessage } from "@/models/setting.model";
 import { SettingReadonlyInput } from "@/components/settings/setting-readonly-input";
 import { RunaiBtn } from "@/components/common/runai-btn";
@@ -271,22 +270,14 @@ export default defineComponent({
     // Validates the metadata on the backend (dry run, nothing is saved) and takes the certificate
     // expiration details from its response. Returns false if the file selection changed meanwhile.
     async validateCertificate(metadataXmlFile: string, fileName: string, selectionToken: number): Promise<boolean> {
-      let expirationDate: Date | null = null;
-      let certificateError = "";
-      try {
-        const { samlData, errorMessage } = await idpService.validateSamlCertificate(
-          { metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File, metadataXmlFile, fileName },
-          this.isNewIdp ? undefined : this.idpAlias,
-        );
-        expirationDate = samlData?.certificateExpirationDate ? new Date(samlData.certificateExpirationDate) : null;
-        // With a date, an expired certificate is reported by the date check; the error only covers other rejections.
-        certificateError = expirationDate ? "" : errorMessage || "Could not read the certificate expiration date.";
-      } catch (error: unknown) {
-        certificateError = error instanceof Error ? error.message : "Could not validate the certificate.";
-      }
+      const { expirationDate, error } = await idpCommon.validateSamlMetadata(
+        metadataXmlFile,
+        fileName,
+        this.isNewIdp ? undefined : this.idpAlias,
+      );
       if (selectionToken !== this.fileSelectionToken) return false;
       this.expirationDate = expirationDate;
-      this.certificateError = certificateError;
+      this.certificateError = error;
       return true;
     },
     clearFile(): void {

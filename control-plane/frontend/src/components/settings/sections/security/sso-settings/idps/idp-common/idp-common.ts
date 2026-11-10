@@ -4,13 +4,14 @@
  */
 
 import type { IWrapperBoxSettingMessages } from "@/models/setting.model";
-import { certificateUtil } from "@/utils/certificate.util";
+import { idpService } from "@/services/control-plane/idp.service/idp.service";
+import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
 import { dateUtil, TimeUnit } from "@/utils/date.util";
 import type { ISelectOption } from "@/models/global.model";
 
 export const idpCommon = {
   getSettingsBoxMessages,
-  getCertificateExpirationDate,
+  validateSamlMetadata,
   iValidCertificateDate,
   isCertificateExpiringSoon,
   getDefaultScope,
@@ -35,8 +36,35 @@ function getSettingsBoxMessages(idpName: string, isSSOUser: boolean): IWrapperBo
   };
 }
 
-function getCertificateExpirationDate(certificate: string): Promise<Date | null> {
-  return certificateUtil.getExpirationDate(certificate);
+export interface SamlMetadataValidation {
+  expirationDate: Date | null;
+  error: string;
+}
+
+// Validates the metadata on the backend (dry run, nothing is saved). Pass the alias of an existing IdP to
+// validate against it; omit it for a new IdP.
+async function validateSamlMetadata(
+  metadataXmlFile: string,
+  fileName: string,
+  idpAlias?: string,
+): Promise<SamlMetadataValidation> {
+  try {
+    const { samlData, errorMessage } = await idpService.validateSamlCertificate(
+      { metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File, metadataXmlFile, fileName },
+      idpAlias,
+    );
+    const expirationDate = samlData?.certificateExpirationDate ? new Date(samlData.certificateExpirationDate) : null;
+    // With a date, an expired certificate is reported by the date check; the error only covers other rejections.
+    return {
+      expirationDate,
+      error: expirationDate ? "" : errorMessage || "Could not read the certificate expiration date.",
+    };
+  } catch (error: unknown) {
+    return {
+      expirationDate: null,
+      error: error instanceof Error ? error.message : "Could not validate the certificate.",
+    };
+  }
 }
 
 function iValidCertificateDate(expirationDate: Date): boolean {
