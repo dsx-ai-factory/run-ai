@@ -14,7 +14,7 @@ get:
     - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
     - $ref: '../parameters/query/NodeLabelKey.yaml'
     - $ref: '../parameters/query/NodeLabelContains.yaml'
-    - $ref: '../parameters/query/NodeLabelOffset.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
     - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
   responses:
     200:
