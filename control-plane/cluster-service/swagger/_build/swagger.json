@@ -276,6 +276,7 @@
       }
     },
     "/api/v1/clusters/{clusterUuid}/nodes/labels/keys": {
+      "x-internal": true,
       "get": {
         "summary": "Get node label keys.",
         "description": "Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.",
@@ -339,6 +340,7 @@
       }
     },
     "/api/v1/clusters/{clusterUuid}/nodes/labels/values": {
+      "x-internal": true,
       "get": {
         "summary": "Get node label values.",
         "description": "Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.",

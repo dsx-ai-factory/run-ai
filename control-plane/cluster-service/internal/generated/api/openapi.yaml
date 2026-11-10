@@ -456,6 +456,7 @@ paths:
       x-authorize:
         resource-type: nodes
         action: read
+    x-internal: true
   /api/v1/clusters/{clusterUuid}/nodes/labels/values:
     get:
       description: "Return unique, sorted nonempty values for an exact label key up\
@@ -579,6 +580,7 @@ paths:
       x-authorize:
         resource-type: nodes
         action: read
+    x-internal: true
   /api/v1/clusters/{clusterUuid}/nodes/count:
     get:
       description: Count nodes

@@ -84,71 +84,6 @@ tags:
   - name: Synchronization
     description: Internal interface for synchronizing assets between the clusters and the control plane.
 paths:
-  /api/v1/clusters/{clusterUuid}/nodes/labels/keys:
-    get:
-      summary: Get node label keys.
-      description: Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
-      operationId: get_node_label_keys
-      tags:
-        - Nodes
-      parameters:
-        - $ref: '#/components/parameters/ClusterUuid'
-        - $ref: '#/components/parameters/Offset'
-        - $ref: '#/components/parameters/Limit'
-        - $ref: '#/components/parameters/Search'
-      responses:
-        '200':
-          description: Matching label keys. Returns an empty array when no keys match.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NodeLabelOptions'
-              example:
-                - gpu-type
-                - nvidia.com/gpu.product
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/clusters/{clusterUuid}/nodes/labels/values:
-    get:
-      summary: Get node label values.
-      description: Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
-      operationId: get_node_label_values
-      tags:
-        - Nodes
-      parameters:
-        - $ref: '#/components/parameters/ClusterUuid'
-        - $ref: '#/components/parameters/NodeLabelKey'
-        - $ref: '#/components/parameters/Offset'
-        - $ref: '#/components/parameters/Limit'
-        - $ref: '#/components/parameters/Search'
-      responses:
-        '200':
-          description: Matching label values. Returns an empty array when no values match.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NodeLabelOptions'
-              example:
-                - a100
-                - a30
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '500':
-          $ref: '#/components/responses/500InternalServerError'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/clusters/{clusterUuid}/nodes/count:
     get:
       summary: Count nodes
@@ -13727,10 +13662,6 @@ components:
         updatedAt: '2020-01-02T00:00:00Z'
         lastLiveness: '2020-01-02T00:00:00Z'
         version: 2.15.0
-    NodeLabelOptions:
-      type: array
-      items:
-        type: string
     NodeStatusConditionDetails:
       type: object
       required:
@@ -36174,15 +36105,6 @@ components:
       schema:
         type: string
         example: test project
-    NodeLabelKey:
-      name: key
-      in: query
-      required: true
-      description: The exact label key whose values to return.
-      schema:
-        type: string
-        minLength: 1
-      example: gpu-type
     NodesFilter:
       name: filterBy
       in: query

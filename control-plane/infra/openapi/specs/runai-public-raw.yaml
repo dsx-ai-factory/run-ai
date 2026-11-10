@@ -263,6 +263,7 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   '/api/v1/clusters/{clusterUuid}/nodes/labels/keys':
+    x-internal: true
     get:
       summary: Get node label keys.
       description: >-
@@ -303,6 +304,7 @@ paths:
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
   '/api/v1/clusters/{clusterUuid}/nodes/labels/values':
+    x-internal: true
     get:
       summary: Get node label values.
       description: >-

@@ -40,9 +40,11 @@ paths:
     $ref: "./resources/ClustersInternal.yaml"
 
   /api/v1/clusters/{clusterUuid}/nodes/labels/keys:
+    x-internal: true
     $ref: "./resources/NodeLabelKeys.yaml"
 
   /api/v1/clusters/{clusterUuid}/nodes/labels/values:
+    x-internal: true
     $ref: "./resources/NodeLabelValues.yaml"
 
   /api/v1/clusters/{clusterUuid}/nodes/count:
