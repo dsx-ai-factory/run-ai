@@ -27,6 +27,14 @@ name: Label PR type
 # title; "feat(...): ... bump client to v1.3.0" or "docs: update Dynamo to
 # 1.5.x" keep their own type.
 #
+# A bump, or an otherwise untyped title, that names a security advisory (CVE,
+# GHSA, BDSA) is a fix users need to see, so it gets type/fix and stays under
+# Bug Fixes:
+#
+#   fix(go-operator): bump prometheus to clear GHSA-wg65-...  -> type/fix
+#   fix CVE-2026-111943: bump all Go modules to 1.27.3        -> type/fix
+#   RUN-43188: bump golang.org/x/text and x/crypto to fix CVEs -> type/fix
+#
 # Titles without a known prefix get no type label and show under
 # "Other Changes". Renovate PRs (labelled `renovate`) are left alone; they
 # already go to the dependency section.
@@ -74,6 +82,7 @@ jobs:
             // Types under which "bump X" / "update X to vN" means a dependency update.
             const DEP_TYPES = new Set(['fix', 'chore', 'build']);
             const BUMP = /^(?:bump|upgrade)\b|^update\b.*(?:\bto v?\d|\bdependenc)/i;
+            const SECURITY = /\b(?:CVE|GHSA|BDSA)(?:-|s\b)/i;
 
             const stripped = pr.title.replace(/^(?:\s*\[[^\]]*\])*\s*/, '');
             const m = stripped.match(/^([a-z]+)(?:\(([^)]*)\))?(!)?:\s*(.*)$/i);
@@ -91,9 +100,11 @@ jobs:
               wanted = 'type/breaking';
             } else if (/^deps(-dev)?$/i.test(scope)
               || ((!type || DEP_TYPES.has(type)) && (BUMP.test(subject) || BUMP.test(lastClause)))) {
-              wanted = 'type/deps';
+              wanted = SECURITY.test(pr.title) ? 'type/fix' : 'type/deps';
             } else if (type) {
               wanted = `type/${type}`;
+            } else if (SECURITY.test(pr.title)) {
+              wanted = 'type/fix';
             }
 
             for (const name of current) {
