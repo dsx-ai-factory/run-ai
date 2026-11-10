@@ -396,3 +396,75 @@ func TestKnativeExternalConfiguration(t *testing.T) {
 		})
 	}
 }
+
+func TestKnativeExternalConfigurationGatewayAPI(t *testing.T) {
+	networkCM := func(ingressClass string) *corev1.ConfigMap {
+		return &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{Name: consts.KnativeNetworkConfigMapName, Namespace: consts.KnativeNamespace},
+			Data:       map[string]string{"ingress-class": ingressClass},
+		}
+	}
+	gatewayCM := func(externalGateways string) *corev1.ConfigMap {
+		return &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{Name: consts.KnativeGatewayConfigMapName, Namespace: consts.KnativeNamespace},
+			Data:       map[string]string{consts.KnativeExternalGatewaysKey: externalGateways},
+		}
+	}
+	domainCM := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{Name: consts.KnativeDomainConfigMapName, Namespace: consts.KnativeNamespace},
+		Data:       map[string]string{"mydomain.com": ""},
+	}
+	const externalGateways = "- class: agentgateway\n  gateway: knative-serving/knative-external\n  service: knative-serving/knative-external\n"
+
+	tests := []struct {
+		name           string
+		objects        []client.Object
+		expectedStatus *runv1.PublicStatus // nil: external-config-domain is not reported
+	}{
+		{
+			name:           "gateway api ingress with a domain reports external access available",
+			objects:        []client.Object{networkCM(consts.KnativeGatewayAPIIngressClass), gatewayCM(externalGateways), domainCM},
+			expectedStatus: &runv1.PublicStatus{Available: runv1.AvailableStatus(true)},
+		},
+		{
+			name:           "gateway api ingress without a domain reports external access unavailable",
+			objects:        []client.Object{networkCM(consts.KnativeGatewayAPIIngressClass), gatewayCM(externalGateways)},
+			expectedStatus: &runv1.PublicStatus{Available: runv1.AvailableStatus(false), Reason: fmt.Sprintf(domainNotFoundReason, consts.KnativeNamespace)},
+		},
+		{
+			name:    "gateway api ingress class without an external gateway is not reported",
+			objects: []client.Object{networkCM(consts.KnativeGatewayAPIIngressClass), gatewayCM("  \n"), domainCM},
+		},
+		{
+			name:    "gateway api ingress class without the gateway config-map is not reported",
+			objects: []client.Object{networkCM(consts.KnativeGatewayAPIIngressClass), domainCM},
+		},
+		{
+			name:    "external gateway under another ingress class is not reported",
+			objects: []client.Object{networkCM("istio.ingress.networking.knative.dev"), gatewayCM(externalGateways), domainCM},
+		},
+		{
+			name:    "no network config-map is not reported",
+			objects: []client.Object{gatewayCM(externalGateways), domainCM},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			kourierStatus := &runv1.PublicStatus{Available: runv1.AvailableStatus(false), Reason: "kourier gateway not found in the cluster"}
+
+			setKnativeExternalConfigStatus(&contextMock{}, newFakeClient(tt.objects...), kourierStatus)
+
+			if tt.expectedStatus == nil {
+				assert.Nil(t, kourierStatus.Components)
+				return
+			}
+			actualComponent, exists := kourierStatus.Components["external-config-domain"]
+			assert.True(t, exists)
+			assert.Equal(t, tt.expectedStatus.Available, actualComponent.Available)
+			assert.Equal(t, tt.expectedStatus.Reason, actualComponent.Reason)
+			// Kourier itself stays reported as unavailable: only the external-access component changes.
+			assert.False(t, *kourierStatus.Available)
+		})
+	}
+}
