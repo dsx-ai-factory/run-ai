@@ -60,6 +60,10 @@ func (n *MockIdmClient) CreateClient(_ context.Context, _ string, _ string, _ *s
 	return nil, nil
 }
 
+func (n *MockIdmClient) CreateServiceAccountClient(_ context.Context, _ string, _ *string) (*string, error) {
+	return nil, nil
+}
+
 func (n *MockIdmClient) CreateServiceAccountInternally(_ context.Context, _ string, _ string) (*openapi.ServiceAccountPostResponse, error) {
 	return nil, nil
 }

@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestApplication_GetInstallerApp_NotFoundInNewRealm(t *testing.T) {
+func TestServiceAccount_GetInstallerServiceAccount_NotFoundInNewRealm(t *testing.T) {
 	t.Parallel()
 	ctx := newTestContext()
 

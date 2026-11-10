@@ -667,14 +667,12 @@ func setTimeBasedFairSharePatch(
 func setSchedulingCapabilitiesOnCreateUpdate(ctx context.Context,
 	nodePool *models.Nodepool,
 	fields api.SchedulingCapabilitiesNullable,
-	isCreate bool,
 ) {
 	if nodePool == nil {
 		return
 	}
 
-	// create does not take capabilities from the request yet, so every capability gets its default
-	if isCreate || !isEditableNodepoolCapabilitiesOn() {
+	if !isEditableNodepoolCapabilitiesOn() {
 		fields = api.SchedulingCapabilitiesNullable{}
 	}
 	nodePool.AllowAdjustableWeights = ptr.Deref(fields.AdjustableWeights, isAdjustableWeightsFFOn(ctx))

@@ -81,7 +81,7 @@ function parseEnumToSelectOptions(enumObject: Record<string, string>): IEnumBase
 
 /*Advanced filter query*/
 function getFreeTextFilterQuery(name: string, term: string, label: string, operator: EFilterOperator): string {
-  return `{ "name": "${name}", "term": "${term}", "label": "${label}", "value": "${operator}", "type": "${EColumnFilterType.FreeText}" }`;
+  return JSON.stringify({ name, term, label, value: operator, type: EColumnFilterType.FreeText });
 }
 
 function getNumericFilterQuery(

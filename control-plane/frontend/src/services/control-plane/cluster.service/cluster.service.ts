@@ -45,6 +45,7 @@ export const clusterService = {
   getClusterMetrics,
   getClusterGroupedMetrics,
   getClusterMetricsCsv,
+  getNodepoolMetricsCsv,
   getNodeTelemetry,
   getNodeTelemetryCsv,
   getNodepoolMetrics,
@@ -217,7 +218,41 @@ async function getClusterMetricsCsv(
   end: string,
   metricType: Array<MetricsType>,
   numberOfSamples?: number,
+  filename?: string,
 ): Promise<void> {
+  await fileService.downloadFile(
+    ENDPOINT_V2 + "/" + clusterUuid + "/metrics",
+    FileType.csv,
+    filename,
+    getMetricsCsvQuery(start, end, metricType, numberOfSamples),
+    {},
+  );
+}
+
+async function getNodepoolMetricsCsv(
+  clusterUuid: string,
+  nodepoolName: string,
+  start: string,
+  end: string,
+  metricType: Array<MetricsType>,
+  numberOfSamples?: number,
+  filename?: string,
+): Promise<void> {
+  await fileService.downloadFile(
+    `${ENDPOINT_V2}/${clusterUuid}/nodepools/${encodeURIComponent(nodepoolName)}/metrics`,
+    FileType.csv,
+    filename,
+    getMetricsCsvQuery(start, end, metricType, numberOfSamples),
+    {},
+  );
+}
+
+function getMetricsCsvQuery(
+  start: string,
+  end: string,
+  metricType: Array<MetricsType>,
+  numberOfSamples?: number,
+): Record<string, string | number | Array<string>> {
   const query: Record<string, string | number | Array<string>> = {
     metricType: metricType,
     start: start,
@@ -226,7 +261,7 @@ async function getClusterMetricsCsv(
   if (numberOfSamples) {
     query["numberOfSamples"] = numberOfSamples;
   }
-  await fileService.downloadFile(ENDPOINT_V2 + "/" + clusterUuid + "/metrics", FileType.csv, undefined, query, {});
+  return query;
 }
 
 async function getNodeTelemetry(
@@ -274,6 +309,7 @@ async function getNodeTelemetryCsv(
   clusterId?: string,
   nodepoolName?: string,
   groupBy?: Array<ENodeTelemetryGroupBy>,
+  filename?: string,
 ): Promise<void> {
   try {
     const query: Record<string, string | number | Array<string>> = {
@@ -288,7 +324,7 @@ async function getNodeTelemetryCsv(
     if (groupBy && groupBy.length > 0) {
       query["groupBy"] = groupBy;
     }
-    await fileService.downloadFile(NODE_TELEMETRY_ENDPOINT, FileType.csv, undefined, query, {});
+    await fileService.downloadFile(NODE_TELEMETRY_ENDPOINT, FileType.csv, filename, query, {});
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }

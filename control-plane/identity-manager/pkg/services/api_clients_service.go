@@ -174,7 +174,10 @@ func generateClientByType(ctx context.Context, clientCreationRequest api.ClientC
 		return client, needsEmailScopeDefault, nil
 
 	case api.CLIENTTYPE_APPLICATION:
-		client := createExternalApplicationClient(clientCreationRequest)
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Client type %s is deprecated, use %s.", api.CLIENTTYPE_APPLICATION, api.CLIENTTYPE_SERVICE_ACCOUNT)
+		fallthrough
+	case api.CLIENTTYPE_SERVICE_ACCOUNT:
+		client := createServiceAccountClient(clientCreationRequest)
 		return client, needsEmailScopeDefault, nil
 
 	case api.CLIENTTYPE_INSTALLER:
@@ -187,8 +190,8 @@ func generateClientByType(ctx context.Context, clientCreationRequest api.ClientC
 	}
 }
 
-func createExternalApplicationClient(clientCreationRequest api.ClientCreationRequest) *iamModels.Client {
-	clientHandler := realm_client.NewRunaiServiceAccountClient(clientCreationRequest.ClientId, clientCreationRequest.TenantId, nil, realm_client.ClientTypeTenantApp)
+func createServiceAccountClient(clientCreationRequest api.ClientCreationRequest) *iamModels.Client {
+	clientHandler := realm_client.NewRunaiServiceAccountClient(clientCreationRequest.ClientId, clientCreationRequest.TenantId, nil, realm_client.ClientTypeServiceAccount)
 	return clientHandler.GetClientData(context.Background(), nil)
 }
 

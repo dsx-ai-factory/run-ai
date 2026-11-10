@@ -3,8 +3,8 @@ module github.com/dsx-ai-factory/run-ai/control-plane/metrics-service/pkg/client
 go 1.27.3
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.11
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.32
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/tracing v1.0.33
 	github.com/google/uuid v1.6.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.21.0
@@ -23,7 +23,7 @@ require (
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect

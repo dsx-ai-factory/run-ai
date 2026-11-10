@@ -248,11 +248,12 @@ export default defineComponent({
 
     const getAdvancedFiltersQuery = () => {
       const minValue = isTopAverageMetric.value ? TOP_METRIC_FILTER_VALUE : BOTTOM_METRIC_FILTER_VALUE;
-      const name = isAllocationMetric.value
-        ? EOrgUnitOverTimeColumnName.AverageGpuAllocation
-        : EOrgUnitOverTimeColumnName.AverageGpuUtilization;
+      const allocatedGpusName = isProject.value
+        ? ProjectFilterSortFields.GpuAllocated
+        : DepartmentFilterSortFields.GpuAllocated;
+      const name = isAllocationMetric.value ? allocatedGpusName : EOrgUnitOverTimeColumnName.AverageGpuUtilization;
       const label = isAllocationMetric.value
-        ? EProjectColumnLabel.AverageGpuAllocation
+        ? EProjectColumnLabel.AllocatedGpus
         : EProjectColumnLabel.AverageGpuUtilization;
 
       return `[${filterUtil.getNumericFilterQuery(name, label, EFilterOperator.GreaterThanOrEqual, minValue)}]`;

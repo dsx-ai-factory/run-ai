@@ -21,9 +21,9 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
-	github.com/ClickHouse/ch-go v0.74.0 // indirect
-	github.com/ClickHouse/clickhouse-go/v2 v2.50.0 // indirect
-	github.com/andybalholm/brotli v1.2.8 // indirect
+	github.com/ClickHouse/ch-go v0.75.0 // indirect
+	github.com/ClickHouse/clickhouse-go/v2 v2.51.0 // indirect
+	github.com/andybalholm/brotli v1.3.0 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/felixge/httpsnoop v1.1.0 // indirect
@@ -43,9 +43,9 @@ require (
 	github.com/jackc/puddle/v2 v2.2.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	github.com/klauspost/compress v1.20.3 // indirect
-	github.com/mattn/go-sqlite3 v1.14.52 // indirect
-	github.com/paulmach/orb v0.13.0 // indirect
+	github.com/klauspost/compress v1.20.4 // indirect
+	github.com/mattn/go-sqlite3 v1.14.53 // indirect
+	github.com/paulmach/orb v0.14.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/pierrec/lz4/v4 v4.1.33 // indirect
 	github.com/redis/go-redis/extra/rediscmd/v9 v9.23.0 // indirect
@@ -54,7 +54,7 @@ require (
 	github.com/shopspring/decimal v1.6.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.47.0 // indirect
@@ -62,12 +62,12 @@ require (
 	go.opentelemetry.io/otel/metric v1.47.0 // indirect
 	go.uber.org/atomic v1.12.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/net v0.61.0 // indirect
+	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/sync v0.24.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/text v0.43.0 // indirect
-	google.golang.org/genproto/googleapis/api v0.0.0-20261104224025-d1e00e9f33ab // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20261104224025-d1e00e9f33ab // indirect
+	google.golang.org/genproto/googleapis/api v0.0.0-20261110000943-09e21b237f2c // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20261110000943-09e21b237f2c // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 	gorm.io/driver/clickhouse v0.7.0 // indirect
 	gorm.io/driver/mysql v1.6.0 // indirect

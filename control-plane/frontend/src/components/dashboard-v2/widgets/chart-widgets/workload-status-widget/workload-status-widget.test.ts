@@ -293,4 +293,18 @@ describe("WorkloadStatusWidget component", () => {
       },
     });
   });
+
+  it("exports a CSV with only the statuses shown in the chart", async () => {
+    vi.mocked(workloadService.getWorkloadsTelemetry).mockResolvedValue(WorkloadStatusWidgetMock);
+    createComponent({ nodePoolName: "pool-a" });
+    await flushPromises();
+    await (wrapper.vm as unknown as { exportCsv: () => Promise<void> }).exportCsv();
+
+    const [telemetryType, , nodePoolName, , , phases, filename] = vi.mocked(workloadService.getWorkloadsTelemetryCsv)
+      .mock.calls[0];
+    expect(telemetryType).toEqual(WorkloadTelemetryType.WorkloadsCount);
+    expect(nodePoolName).toEqual("pool-a");
+    expect([...(phases ?? [])].sort()).toEqual([Phase.Failed, Phase.Pending, Phase.Running].sort());
+    expect(filename).toMatch(/^workloads-by-status_pool-a_.*\.csv$/);
+  });
 });

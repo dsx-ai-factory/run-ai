@@ -49,7 +49,7 @@ runai inference nim update <workload-name> --min-replicas 1 --max-replicas 5 --m
       --gpu-memory-portion-request positiveFloat   GPU memory fraction to allocate per device (between 0 and 1, e.g. 0.5).
       --gpu-memory-request string                  Amount of GPU memory to allocate (e.g. 1G, 500M).
       --gpu-request-type string                    Type of GPU request: portion, memory
-  -h, --help                                       help for update
+  -h, --help[=true|false]                          help for update
   -i, --image string                               The container image to use for the workload.
       --image-pull-policy string                   Image pull policy for the container. Valid values: Always, IfNotPresent, Never.
       --image-pull-secret stringArray              Image pull secrets
@@ -80,11 +80,11 @@ runai inference nim update <workload-name> --min-replicas 1 --max-replicas 5 --m
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

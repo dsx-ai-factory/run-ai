@@ -33,7 +33,6 @@ const (
 	KnativeKey                  = "knative"
 	LwsKey                      = "lws"
 	SnapshotKey                 = "snapshot"
-	SnapshotCRDKey              = "snapshotjob-crd"
 )
 
 type Handler struct {
@@ -133,7 +132,7 @@ func (h *Handler) IsSnapshotCRDInstalled() (bool, string, error) {
 		return false, "", fmt.Errorf(ErrorMissingOptional)
 	}
 
-	crdStatus := h.runaiPublic.Dependencies.Optional[SnapshotKey].Components[SnapshotCRDKey]
+	crdStatus := h.runaiPublic.Dependencies.Optional[SnapshotKey].Components[runv1.SnapshotComponentCRD]
 
 	return ptr.Deref(crdStatus.Available, false), crdStatus.Reason, nil
 }

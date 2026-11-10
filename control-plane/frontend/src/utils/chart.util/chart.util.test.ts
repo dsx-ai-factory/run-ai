@@ -1139,4 +1139,21 @@ describe("chartUtil::getResourcesOptions", () => {
       ]),
     );
   });
+
+  describe("getTooltipPositionAboveXAxis", () => {
+    const position = chartUtil.getTooltipPositionAboveXAxis(80);
+    const size = { contentSize: [100, 60], viewSize: [500, 250] };
+
+    test("places the tooltip next to the pointer when it fits above the x-axis", () => {
+      expect(position([50, 40], null, null, null, size)).toEqual([60, 50]);
+    });
+
+    test("keeps the tooltip above the x-axis labels when the pointer is near the bottom", () => {
+      expect(position([50, 240], null, null, null, size)).toEqual([60, 100]);
+    });
+
+    test("flips the tooltip to the left of the pointer near the right edge", () => {
+      expect(position([450, 40], null, null, null, size)).toEqual([340, 50]);
+    });
+  });
 });
