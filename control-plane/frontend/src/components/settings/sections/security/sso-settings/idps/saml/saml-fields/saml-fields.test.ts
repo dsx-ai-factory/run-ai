@@ -193,6 +193,18 @@ describe("saml-fields.vue", () => {
       });
     });
 
+    it("validates against the existing IdP alias when editing, and without one for a new IdP", async () => {
+      const spy = mockDryRun(daysFromNow(120));
+
+      const { wrapper: editWrapper } = factory({ isNewIdp: false, idpAlias: "saml" });
+      await uploadFile(editWrapper);
+      expect(spy).toHaveBeenLastCalledWith(expect.objectContaining({ fileName: "idp.xml" }), "saml");
+
+      const { wrapper: newWrapper } = factory({ isNewIdp: true, idpAlias: "saml" });
+      await uploadFile(newWrapper);
+      expect(spy).toHaveBeenLastCalledWith(expect.objectContaining({ fileName: "idp.xml" }), undefined);
+    });
+
     it("shows the backend validation message when the metadata is rejected", async () => {
       vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({ errorMessage: "no signing certificate" });
 

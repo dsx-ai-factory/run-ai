@@ -22,6 +22,7 @@
         <saml-fields
           :idp-resources="idpResources"
           :is-new-idp="isNewIdp"
+          :idp-alias="idp?.alias"
           :saml-settings="samlConfigSettings"
           @updated="updateSamlFields"
           @certificate-details="onCertificateDetails"

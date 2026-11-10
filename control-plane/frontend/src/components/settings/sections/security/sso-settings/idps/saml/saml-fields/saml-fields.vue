@@ -131,6 +131,10 @@ export default defineComponent({
       type: Object as PropType<IdpResources>,
       required: false,
     },
+    idpAlias: {
+      type: String as PropType<string>,
+      required: false,
+    },
     isNewIdp: {
       type: Boolean as PropType<boolean>,
       required: false,
@@ -270,13 +274,13 @@ export default defineComponent({
       let expirationDate: Date | null = null;
       let certificateError = "";
       try {
-        const { samlData, errorMessage } = await idpService.validateSamlCertificate({
-          metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File,
-          metadataXmlFile,
-          fileName,
-        });
+        const { samlData, errorMessage } = await idpService.validateSamlCertificate(
+          { metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File, metadataXmlFile, fileName },
+          this.isNewIdp ? undefined : this.idpAlias,
+        );
         expirationDate = samlData?.certificateExpirationDate ? new Date(samlData.certificateExpirationDate) : null;
-        certificateError = errorMessage || (expirationDate ? "" : "Could not read the certificate expiration date.");
+        // With a date, an expired certificate is reported by the date check; the error only covers other rejections.
+        certificateError = expirationDate ? "" : errorMessage || "Could not read the certificate expiration date.";
       } catch (error: unknown) {
         certificateError = error instanceof Error ? error.message : "Could not validate the certificate.";
       }

@@ -77,24 +77,28 @@ async function getIdpResource(idp: string): Promise<IdpResources> {
 
 /**
  * Validates SAML metadata on the backend without saving anything (dryRun) and returns the parsed
- * signing certificate details, including its expiration date.
- * The create endpoint is used for both new and existing IdPs: in dry-run mode it only validates and never
- * touches the stored configuration, so no IdP alias is needed.
+ * signing certificate details, including its expiration date. Pass the alias to validate against an
+ * existing IdP (update endpoint); omit it for a new IdP (create endpoint).
  * A rejected configuration (e.g. expired certificate) is returned as a result, not thrown, so the caller can
  * display the expiration details the backend sends back.
  */
-async function validateSamlCertificate(samlData: SamlCreationData): Promise<SamlCertificateValidation> {
+async function validateSamlCertificate(
+  samlData: SamlCreationData,
+  idpAlias?: string,
+): Promise<SamlCertificateValidation> {
+  const request: IdpCreationRequest = { type: IdpCreationRequestTypeEnum.Saml, samlData, dryRun: true };
   try {
-    const response = await identityManagerApi.idpsApi.createIdp({
-      type: IdpCreationRequestTypeEnum.Saml,
-      samlData,
-      dryRun: true,
-    });
-    return { samlData: response.data.samlData };
+    if (idpAlias) {
+      // The generated client types the update response as void, but a dry run returns the parsed config.
+      const response = await identityManagerApi.idpsApi.updateIdp(idpAlias, request);
+      return { samlData: (response.data as unknown as IdpPostResponse | undefined)?.samlData ?? undefined };
+    }
+    const response = await identityManagerApi.idpsApi.createIdp(request);
+    return { samlData: response.data.samlData ?? undefined };
   } catch (err: unknown) {
     if (isAxiosError(err) && err.response?.status === 400) {
       const body = err.response.data as { samlData?: SamlData; message?: string } | undefined;
-      return { samlData: body?.samlData, errorMessage: body?.message || "Invalid SAML metadata" };
+      return { samlData: body?.samlData ?? undefined, errorMessage: body?.message || "Invalid SAML metadata" };
     }
     throw httpService.handleHttpError(err);
   }
