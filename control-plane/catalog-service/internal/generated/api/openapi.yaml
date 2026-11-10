@@ -1442,7 +1442,7 @@ paths:
     x-scope:
     - system
     - tenant
-  /api/v1/inference/right-sizing/recommendation:
+  /api/v1/catalog/right-sizing/recommendation:
     post:
       description: Returns recommendations without deploying or reserving resources.
         Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic

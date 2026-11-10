@@ -908,7 +908,7 @@
         }
       }
     },
-    "/api/v1/inference/right-sizing/recommendation": {
+    "/api/v1/catalog/right-sizing/recommendation": {
       "post": {
         "x-internal": true,
         "summary": "Recommend GPU allocation for a NIM test/dev workload.",

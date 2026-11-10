@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="2440" height="2080" viewBox="0 0 2440 2080">
   <rect x="0" y="0" width="2440" height="2080" rx="0" fill="#F5F7FB" />
   <text x="70" y="74" font-family="Arial, sans-serif" font-size="58" font-weight="700" fill="#132C42" text-anchor="start" dominant-baseline="central">NIM recommendation: request → response</text>
-  <text x="70" y="131" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#52677D" text-anchor="start" dominant-baseline="central">POST /api/v1/inference/right-sizing/recommendation · Current implementation</text>
+  <text x="70" y="131" font-family="Arial, sans-serif" font-size="30" font-weight="400" fill="#52677D" text-anchor="start" dominant-baseline="central">POST /api/v1/catalog/right-sizing/recommendation · Current implementation</text>
   <rect x="70" y="210" width="1430" height="150" rx="20" fill="#EDF5FC" stroke="#176BA7" stroke-width="2" />
   <text x="94" y="246" font-family="Arial, sans-serif" font-size="33" font-weight="700" fill="#176BA7" text-anchor="start" dominant-baseline="central">1. Validate request</text>
   <text x="94" y="291" font-family="Arial, sans-serif" font-size="27" font-weight="400" fill="#132C42" text-anchor="start" dominant-baseline="central">Cluster ID, exact NIM image/tag, optional GPU type.</text>

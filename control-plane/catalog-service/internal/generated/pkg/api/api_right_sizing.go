@@ -108,7 +108,7 @@ func (c *RightSizingAPIController) Routes() Routes {
 	return Routes{
 		"RecommendInferenceResources": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/inference/right-sizing/recommendation",
+			"/api/v1/catalog/right-sizing/recommendation",
 			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
 			BuildHandlerChain(
 				func(next http.HandlerFunc) http.HandlerFunc {

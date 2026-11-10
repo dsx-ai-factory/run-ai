@@ -3,7 +3,7 @@
   "width": 2440,
   "height": 2080,
   "title": "NIM recommendation: request \u2192 response",
-  "subtitle": "POST /api/v1/inference/right-sizing/recommendation \u00b7 Current implementation",
+  "subtitle": "POST /api/v1/catalog/right-sizing/recommendation \u00b7 Current implementation",
   "elements": [
     {
       "op": "box",

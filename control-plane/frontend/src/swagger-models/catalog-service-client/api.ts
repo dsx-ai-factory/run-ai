@@ -2321,7 +2321,7 @@ export const RightSizingApiAxiosParamCreator = function (configuration?: Configu
         recommendInferenceResources: async (recommendationRequest: RecommendationRequest, options: AxiosRequestConfig = {}): Promise<RequestArgs> => {
             // verify required parameter 'recommendationRequest' is not null or undefined
             assertParamExists('recommendInferenceResources', 'recommendationRequest', recommendationRequest)
-            const localVarPath = `/api/v1/inference/right-sizing/recommendation`;
+            const localVarPath = `/api/v1/catalog/right-sizing/recommendation`;
             // use dummy base URL string because the URL constructor only accepts absolute URLs.
             const localVarUrlObj = new URL(localVarPath, DUMMY_BASE_URL);
             let baseOptions;

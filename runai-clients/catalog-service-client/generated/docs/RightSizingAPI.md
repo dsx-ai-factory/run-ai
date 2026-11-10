@@ -4,7 +4,7 @@ All URIs are relative to *http://localhost:8080*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**RecommendInferenceResources**](RightSizingAPI.md#RecommendInferenceResources) | **Post** /api/v1/inference/right-sizing/recommendation | Recommend GPU allocation for a NIM test/dev workload.
+[**RecommendInferenceResources**](RightSizingAPI.md#RecommendInferenceResources) | **Post** /api/v1/catalog/right-sizing/recommendation | Recommend GPU allocation for a NIM test/dev workload.
 
 
 

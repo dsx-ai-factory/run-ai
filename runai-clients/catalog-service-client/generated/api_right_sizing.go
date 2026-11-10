@@ -90,7 +90,7 @@ func (a *RightSizingAPIService) RecommendInferenceResourcesExecute(r ApiRecommen
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/inference/right-sizing/recommendation"
+	localVarPath := localBasePath + "/api/v1/catalog/right-sizing/recommendation"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
