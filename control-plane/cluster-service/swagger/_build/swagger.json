@@ -311,10 +311,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/NodeLabelOptions"
                 },
                 "example": [
                   "gpu-type",
@@ -380,10 +377,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
+                  "$ref": "#/components/schemas/NodeLabelOptions"
                 },
                 "example": [
                   "a100",
@@ -5462,6 +5456,12 @@
           "updatedAt": "2020-01-02T00:00:00Z",
           "lastLiveness": "2020-01-02T00:00:00Z",
           "version": "2.15.0"
+        }
+      },
+      "NodeLabelOptions": {
+        "type": "array",
+        "items": {
+          "type": "string"
         }
       },
       "NodeStatusConditionDetails": {

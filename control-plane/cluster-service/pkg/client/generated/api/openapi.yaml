@@ -400,9 +400,7 @@ paths:
               - gpu-type
               - nvidia.com/gpu.product
               schema:
-                items:
-                  type: string
-                type: array
+                $ref: '#/components/schemas/NodeLabelOptions'
           description: Matching label keys. Returns an empty array when no keys match.
         "400":
           content:
@@ -524,9 +522,7 @@ paths:
               - a100
               - a30
               schema:
-                items:
-                  type: string
-                type: array
+                $ref: '#/components/schemas/NodeLabelOptions'
           description: Matching label values. Returns an empty array when no values
             match.
         "400":
@@ -7283,6 +7279,10 @@ components:
       - tenantId
       - uuid
       type: object
+    NodeLabelOptions:
+      items:
+        type: string
+      type: array
     NodeStatusConditionDetails:
       example:
         reason: KubeletNotReady
