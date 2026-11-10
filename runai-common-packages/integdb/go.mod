@@ -3,7 +3,7 @@ module github.com/dsx-ai-factory/run-ai/runai-common-packages/integdb
 go 1.27.3
 
 require (
-	github.com/aws/smithy-go v1.28.8
+	github.com/aws/smithy-go v1.28.9
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb v1.0.22
 	github.com/stretchr/testify v1.12.1
@@ -37,7 +37,7 @@ require (
 	github.com/go-playground/validator/v10 v10.30.6 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/klauspost/compress v1.20.3 // indirect
+	github.com/klauspost/compress v1.20.4 // indirect
 	github.com/leodido/go-urn v1.5.0 // indirect
 	github.com/lufia/plan9stats v0.0.0-20261101121723-be84dd9509a0 // indirect
 	github.com/magiconair/properties v1.18.12 // indirect
