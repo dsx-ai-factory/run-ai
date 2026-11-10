@@ -6266,6 +6266,14 @@ components:
         format: uuid
         minLength: 1
         example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+    Search:
+      name: search
+      in: query
+      required: false
+      description: Filter results by a free text search.
+      schema:
+        type: string
+        example: test project
     Offset:
       name: offset
       in: query
@@ -6286,14 +6294,6 @@ components:
         default: 50
         minimum: 1
         maximum: 500
-    Search:
-      name: search
-      in: query
-      required: false
-      description: Filter results by a free text search.
-      schema:
-        type: string
-        example: test project
     NodeName:
       name: nodeName
       in: path

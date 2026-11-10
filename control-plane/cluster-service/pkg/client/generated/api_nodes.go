@@ -1033,14 +1033,14 @@ type ApiGetNodeLabelKeysRequest struct {
 	ctx         context.Context
 	ApiService  NodesAPI
 	clusterUuid string
-	contains    *string
+	search      *string
 	offset      *int32
 	limit       *int32
 }
 
-// Return options containing this literal text.
-func (r ApiGetNodeLabelKeysRequest) Contains(contains string) ApiGetNodeLabelKeysRequest {
-	r.contains = &contains
+// Filter results by a free text search.
+func (r ApiGetNodeLabelKeysRequest) Search(search string) ApiGetNodeLabelKeysRequest {
+	r.search = &search
 	return r
 }
 
@@ -1104,8 +1104,8 @@ func (a *NodesAPIService) GetNodeLabelKeysExecute(r ApiGetNodeLabelKeysRequest) 
 		return localVarReturnValue, nil, reportError("clusterUuid must have at least 1 elements")
 	}
 
-	if r.contains != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "contains", r.contains, "form", "")
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
 	}
 	if r.offset != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")
@@ -1229,7 +1229,7 @@ type ApiGetNodeLabelValuesRequest struct {
 	ApiService  NodesAPI
 	clusterUuid string
 	key         *string
-	contains    *string
+	search      *string
 	offset      *int32
 	limit       *int32
 }
@@ -1240,9 +1240,9 @@ func (r ApiGetNodeLabelValuesRequest) Key(key string) ApiGetNodeLabelValuesReque
 	return r
 }
 
-// Return options containing this literal text.
-func (r ApiGetNodeLabelValuesRequest) Contains(contains string) ApiGetNodeLabelValuesRequest {
-	r.contains = &contains
+// Filter results by a free text search.
+func (r ApiGetNodeLabelValuesRequest) Search(search string) ApiGetNodeLabelValuesRequest {
+	r.search = &search
 	return r
 }
 
@@ -1313,8 +1313,8 @@ func (a *NodesAPIService) GetNodeLabelValuesExecute(r ApiGetNodeLabelValuesReque
 	}
 
 	parameterAddToHeaderOrQuery(localVarQueryParams, "key", r.key, "form", "")
-	if r.contains != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "contains", r.contains, "form", "")
+	if r.search != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "search", r.search, "form", "")
 	}
 	if r.offset != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "offset", r.offset, "form", "")

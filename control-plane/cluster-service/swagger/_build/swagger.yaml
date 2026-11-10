@@ -191,7 +191,7 @@ paths:
         - Nodes
       parameters:
         - $ref: '#/components/parameters/ClusterUuid'
-        - $ref: '#/components/parameters/NodeLabelContains'
+        - $ref: '#/components/parameters/Search'
         - $ref: '#/components/parameters/Offset'
         - $ref: '#/components/parameters/Limit'
       responses:
@@ -230,7 +230,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ClusterUuid'
         - $ref: '#/components/parameters/NodeLabelKey'
-        - $ref: '#/components/parameters/NodeLabelContains'
+        - $ref: '#/components/parameters/Search'
         - $ref: '#/components/parameters/Offset'
         - $ref: '#/components/parameters/Limit'
       responses:
@@ -2792,13 +2792,14 @@ components:
       example: true
       schema:
         type: boolean
-    NodeLabelContains:
-      name: contains
+    Search:
+      name: search
       in: query
-      description: Return options containing this literal text.
+      required: false
+      description: Filter results by a free text search.
       schema:
         type: string
-      example: a
+        example: test project
     Offset:
       name: offset
       in: query
@@ -2842,14 +2843,6 @@ components:
         example:
           - name!=some-name
       explode: false
-    Search:
-      name: search
-      in: query
-      required: false
-      description: Filter results by a free text search.
-      schema:
-        type: string
-        example: test project
     NodeName:
       name: nodeName
       in: path

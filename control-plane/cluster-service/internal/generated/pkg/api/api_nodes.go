@@ -400,11 +400,11 @@ func (c *NodesAPIController) GetNodeLabelKeys(w http.ResponseWriter, r *http.Req
 		c.errorHandler(w, r, &RequiredError{"clusterUuid"}, nil, nil)
 		return
 	}
-	var containsParam string
-	if query.Has("contains") {
-		param := query.Get("contains")
+	var searchParam string
+	if query.Has("search") {
+		param := query.Get("search")
 
-		containsParam = param
+		searchParam = param
 	} else {
 	}
 	var offsetParam int32
@@ -439,7 +439,7 @@ func (c *NodesAPIController) GetNodeLabelKeys(w http.ResponseWriter, r *http.Req
 		var param int32 = 50
 		limitParam = param
 	}
-	result, err := c.service.GetNodeLabelKeys(r.Context(), clusterUuidParam, containsParam, offsetParam, limitParam)
+	result, err := c.service.GetNodeLabelKeys(r.Context(), clusterUuidParam, searchParam, offsetParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
@@ -512,11 +512,11 @@ func (c *NodesAPIController) GetNodeLabelValues(w http.ResponseWriter, r *http.R
 		c.errorHandler(w, r, &RequiredError{Field: "key"}, nil, nil)
 		return
 	}
-	var containsParam string
-	if query.Has("contains") {
-		param := query.Get("contains")
+	var searchParam string
+	if query.Has("search") {
+		param := query.Get("search")
 
-		containsParam = param
+		searchParam = param
 	} else {
 	}
 	var offsetParam int32
@@ -551,7 +551,7 @@ func (c *NodesAPIController) GetNodeLabelValues(w http.ResponseWriter, r *http.R
 		var param int32 = 50
 		limitParam = param
 	}
-	result, err := c.service.GetNodeLabelValues(r.Context(), clusterUuidParam, keyParam, containsParam, offsetParam, limitParam)
+	result, err := c.service.GetNodeLabelValues(r.Context(), clusterUuidParam, keyParam, searchParam, offsetParam, limitParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)
