@@ -378,7 +378,6 @@ paths:
         schema:
           example: 100
           format: int32
-          minimum: 0
           type: integer
         style: form
       - description: The maximum number of entries to return.
@@ -503,7 +502,6 @@ paths:
         schema:
           example: 100
           format: int32
-          minimum: 0
           type: integer
         style: form
       - description: The maximum number of entries to return.
@@ -6211,7 +6209,7 @@ components:
       schema:
         type: string
       style: form
-    NodeLabelOffset:
+    Offset:
       description: The offset of the first item returned in the collection.
       explode: true
       in: query
@@ -6220,7 +6218,6 @@ components:
       schema:
         example: 100
         format: int32
-        minimum: 0
         type: integer
       style: form
     Limit:
@@ -6340,17 +6337,6 @@ components:
           type: string
         maxItems: 10
         type: array
-      style: form
-    Offset:
-      description: The offset of the first item returned in the collection.
-      explode: true
-      in: query
-      name: offset
-      required: false
-      schema:
-        example: 100
-        format: int32
-        type: integer
       style: form
     QueryForceDelete:
       description: |

@@ -94,7 +94,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/ClusterUuid'
         - $ref: '#/components/parameters/NodeLabelContains'
-        - $ref: '#/components/parameters/NodeLabelOffset'
+        - $ref: '#/components/parameters/Offset'
         - $ref: '#/components/parameters/Limit'
       responses:
         '200':
@@ -129,7 +129,7 @@ paths:
         - $ref: '#/components/parameters/ClusterUuid'
         - $ref: '#/components/parameters/NodeLabelKey'
         - $ref: '#/components/parameters/NodeLabelContains'
-        - $ref: '#/components/parameters/NodeLabelOffset'
+        - $ref: '#/components/parameters/Offset'
         - $ref: '#/components/parameters/Limit'
       responses:
         '200':
@@ -36153,7 +36153,7 @@ components:
       schema:
         type: string
       example: a
-    NodeLabelOffset:
+    Offset:
       name: offset
       in: query
       required: false
@@ -36161,7 +36161,6 @@ components:
       schema:
         type: integer
         format: int32
-        minimum: 0
         example: 100
     Limit:
       name: limit
@@ -36247,15 +36246,6 @@ components:
         example:
           - name==my-cluster
       explode: false
-    Offset:
-      name: offset
-      in: query
-      required: false
-      description: The offset of the first item returned in the collection.
-      schema:
-        type: integer
-        format: int32
-        example: 100
     QueryForceDelete:
       name: force
       in: query

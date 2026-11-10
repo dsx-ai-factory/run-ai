@@ -412,7 +412,6 @@ func (c *NodesAPIController) GetNodeLabelKeys(w http.ResponseWriter, r *http.Req
 		param, err := parseNumericParameter[int32](
 			query.Get("offset"),
 			WithParse[int32](parseInt32),
-			WithMinimum[int32](0),
 		)
 		if err != nil {
 			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
@@ -525,7 +524,6 @@ func (c *NodesAPIController) GetNodeLabelValues(w http.ResponseWriter, r *http.R
 		param, err := parseNumericParameter[int32](
 			query.Get("offset"),
 			WithParse[int32](parseInt32),
-			WithMinimum[int32](0),
 		)
 		if err != nil {
 			c.errorHandler(w, r, &ParsingError{Param: "offset", Err: err}, nil, nil)
