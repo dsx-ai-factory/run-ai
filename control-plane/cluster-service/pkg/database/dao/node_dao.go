@@ -45,6 +45,10 @@ type UpsertNodeResult struct {
 func prepareNodeForUpsert(node *models.Node) []any {
 	node.ID = uuid.New()
 	node.UpdatedAt = time.Now()
+	// Raw upserts must store an empty JSON object rather than SQL NULL when labels are omitted.
+	if node.Labels == nil {
+		node.Labels = map[string]string{}
+	}
 
 	// Prepare JSON values
 	conditionsJSON, _ := node.Conditions.Value()

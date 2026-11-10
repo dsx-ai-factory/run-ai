@@ -30,7 +30,6 @@ var NodeQueryParser = queryapi.NewParser(nodeColumnMapping())
 type (
 	NodeStatusConditionsDetails  []api.NodeStatusConditionDetails
 	NodeTaints                   []api.NodeTaint
-	NodeLabels                   map[string]string
 	NetworkTopologyLabels        []NetworkTopologyLabel
 	NetworkTopologyLabelsAdapter NetworkTopologyLabels
 )
@@ -60,7 +59,7 @@ func (ta NetworkTopologyLabelsAdapter) ToApiModels() *[]api.NetworkTopologyLabel
 }
 
 type Node struct {
-	Labels                     NodeLabels `gorm:"serializer:json;type:jsonb"`
+	Labels                     map[string]string `gorm:"serializer:json;type:jsonb"`
 	Common                     `gorm:"embedded"`
 	ID                         uuid.UUID `gorm:"primaryKey"`
 	TenantId                   int32
