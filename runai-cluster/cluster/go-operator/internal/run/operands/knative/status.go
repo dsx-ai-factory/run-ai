@@ -8,6 +8,7 @@ package knative
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/internal/run/consts"
 	controller_utils "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/go-operator/pkg/controller-utils"
@@ -108,9 +109,37 @@ func validateKnativeFeatureEnabled(cm *corev1.ConfigMap, knativeStatus *runv1.Pu
 	}
 }
 
+// isGatewayAPIExternalIngressConfigured reports whether Knative routes external traffic through the
+// Gateway API networking layer (net-gateway-api) instead of Kourier: the ingress class selects
+// net-gateway-api and at least one external Gateway is listed.
+func isGatewayAPIExternalIngressConfigured(ctx context.Context, kbClient client.Client) bool {
+	networkCM := &corev1.ConfigMap{}
+	if err := kbClient.Get(ctx, types.NamespacedName{
+		Name:      consts.KnativeNetworkConfigMapName,
+		Namespace: consts.KnativeNamespace,
+	}, networkCM); err != nil {
+		return false
+	}
+	if networkCM.Data["ingress-class"] != consts.KnativeGatewayAPIIngressClass {
+		return false
+	}
+
+	gatewayCM := &corev1.ConfigMap{}
+	if err := kbClient.Get(ctx, types.NamespacedName{
+		Name:      consts.KnativeGatewayConfigMapName,
+		Namespace: consts.KnativeNamespace,
+	}, gatewayCM); err != nil {
+		return false
+	}
+	return strings.TrimSpace(gatewayCM.Data[consts.KnativeExternalGatewaysKey]) != ""
+}
+
+// setKnativeExternalConfigStatus reports the external-access domain configuration under the "kourier"
+// component, the path the dashboard reads to offer external access. The check runs when Kourier is
+// available or when Knative uses the Gateway API as its external ingress.
 func setKnativeExternalConfigStatus(ctx context.Context, kbClient client.Client, kourierStatus *runv1.PublicStatus) {
-	// Only check external configuration if kourier is available
-	if kourierStatus.Available == nil || !*kourierStatus.Available {
+	kourierAvailable := kourierStatus.Available != nil && *kourierStatus.Available
+	if !kourierAvailable && !isGatewayAPIExternalIngressConfigured(ctx, kbClient) {
 		return
 	}
 
