@@ -21,7 +21,7 @@ var _ = Describe("NIM automatic GPU sizing", func() {
 	var service *NimServicesImpl
 	var projectID string
 	var calls int
-	var response *catalog.RightSizingResponse
+	var response *catalog.RecommendationResponse
 	var dependencyError *api.Error
 	BeforeEach(func() {
 		randoms := testutils.NewRandomValues()
@@ -29,9 +29,9 @@ var _ = Describe("NIM automatic GPU sizing", func() {
 		org_unit.SetMock(org_unit.NewSimpleMock().WithRandoms(randoms))
 		calls = 0
 		dependencyError = nil
-		response = &catalog.RightSizingResponse{}
+		response = &catalog.RecommendationResponse{}
 		Expect(json.Unmarshal([]byte(`{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"fp8-profile","gpuMemoryCapacityBytes":80000000000,"recommendation":{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":27000000000}}]}`), response)).To(Succeed())
-		service = &NimServicesImpl{recommendGPU: func(ctx context.Context, request catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+		service = &NimServicesImpl{recommendGPU: func(ctx context.Context, request catalog.RecommendationRequest) (*catalog.RecommendationResponse, *api.Error) {
 			calls++
 			Expect(request.ClusterId).To(Equal(randoms.ClusterId))
 			Expect(request.Image).To(Equal("nvcr.io/nim/meta/llama-3.1-8b-instruct"))
@@ -130,7 +130,7 @@ var _ = Describe("NIM automatic GPU sizing", func() {
 		Expect(err).To(Equal(dependencyError))
 	})
 	It("accepts validated whole-GPU counts returned by the recommendation API", func() {
-		response.Results[0].Recommendation.Set(catalog.NewRightSizingRecommendation(catalog.RIGHTSIZINGALLOCATIONTYPE_GPU_COUNT, 2))
+		response.Results[0].Recommendation.Set(catalog.NewRecommendation(catalog.RECOMMENDATIONALLOCATIONTYPE_GPU_COUNT, 2))
 		spec := newSpec("")
 		_, err := service.resolveNimGPUAllocation(context.Background(), projectID, &spec)
 		Expect(err).To(BeNil())

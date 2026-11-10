@@ -1,0 +1,18 @@
+ngcAuthSecret: ngc-secret
+servingPort:
+  port: 8000
+image: nvidia/nim-llama3-8b-instruct:1.0.0
+modelStore:
+  nimCache:
+    name: nim-cache
+compute:
+  gpuRequestType: memory
+  gpuMemoryRequest: 500Mi
+  gpuMemoryLimit: 524288k
+annotations:
+- name: gpu-memory
+  value: "524"
+- name: gpu-fraction
+  value: "0.75"
+- name: example.com/preserved
+  value: value

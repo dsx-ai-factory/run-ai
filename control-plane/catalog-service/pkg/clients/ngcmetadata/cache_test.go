@@ -9,23 +9,23 @@ import (
 	"io"
 	"net/http"
 	"strings"
-	"testing"
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	cachetesting "github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/testing"
-	"github.com/stretchr/testify/require"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func enableMetadataCache(t *testing.T) {
-	t.Helper()
+func enableMetadataCache() {
+	GinkgoHelper()
 	cachetesting.EnableCache()
-	require.True(t, cache.IsInitialized())
-	t.Cleanup(cachetesting.DisableCache)
+	Expect(cache.IsInitialized()).To(BeTrue())
+	DeferCleanup(cachetesting.DisableCache)
 }
 
-func TestMetadataCacheReusesProfilesAcrossClients(t *testing.T) {
-	enableMetadataCache(t)
+var _ = It("metadata cache reuses profiles across clients", func() {
+	enableMetadataCache()
 	calls := 0
 	httpClient := &http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
@@ -33,17 +33,17 @@ func TestMetadataCacheReusesProfilesAcrossClients(t *testing.T) {
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body))}, nil
 	})}
 	first, err := New(httpClient, 15*time.Minute).Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
-	require.NoError(t, err)
+	Expect(err).To(BeNil())
 	second, err := New(httpClient, 15*time.Minute).Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
-	require.NoError(t, err)
-	require.Equal(t, "upstream-1", first.Profiles[0].ID)
-	require.Equal(t, "upstream-1", second.Profiles[0].ID, "second client must reuse the cached public metadata")
-	require.Equal(t, 1, calls)
-}
+	Expect(err).To(BeNil())
+	Expect(first.Profiles[0].ID).To(Equal("upstream-1"))
+	Expect(second.Profiles[0].ID).To(Equal("upstream-1"), "second client must reuse the cached public metadata")
+	Expect(calls).To(BeNumerically("==", 1))
+})
 
 // Removing the image or tag from the key would reuse another release's profiles.
-func TestMetadataCacheSeparatesImagesAndExactTags(t *testing.T) {
-	enableMetadataCache(t)
+var _ = It("metadata cache separates images and exact tags", func() {
+	enableMetadataCache()
 	calls := 0
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
@@ -57,15 +57,15 @@ func TestMetadataCacheSeparatesImagesAndExactTags(t *testing.T) {
 	} {
 		for range 2 {
 			result, err := client.Get(context.Background(), tc.image, tc.tag)
-			require.NoError(t, err)
-			require.Equal(t, tc.id, result.Profiles[0].ID)
+			Expect(err).To(BeNil())
+			Expect(result.Profiles[0].ID).To(Equal(tc.id))
 		}
 	}
-	require.Equal(t, 3, calls)
-}
+	Expect(calls).To(BeNumerically("==", 3))
+})
 
-func TestMetadataCacheExpiresAndDoesNotServeStaleDataOnFailure(t *testing.T) {
-	enableMetadataCache(t)
+var _ = It("metadata cache expires and does not serve stale data on failure", func() {
+	enableMetadataCache()
 	calls := 0
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
@@ -76,21 +76,21 @@ func TestMetadataCacheExpiresAndDoesNotServeStaleDataOnFailure(t *testing.T) {
 	})}, time.Second)
 	ctx := context.Background()
 	first, err := client.Get(ctx, "nvcr.io/nim/nvidia/example", "latest")
-	require.NoError(t, err)
-	require.Equal(t, "revision-1", first.Profiles[0].ID)
+	Expect(err).To(BeNil())
+	Expect(first.Profiles[0].ID).To(Equal("revision-1"))
 	cached, err := client.Get(ctx, "nvcr.io/nim/nvidia/example", "latest")
-	require.NoError(t, err)
-	require.Equal(t, "revision-1", cached.Profiles[0].ID)
+	Expect(err).To(BeNil())
+	Expect(cached.Profiles[0].ID).To(Equal("revision-1"))
 	time.Sleep(1100 * time.Millisecond)
 	_, err = client.Get(ctx, "nvcr.io/nim/nvidia/example", "latest")
-	require.ErrorContains(t, err, "503")
+	Expect(err).To(MatchError(ContainSubstring("503")))
 	updated, err := client.Get(ctx, "nvcr.io/nim/nvidia/example", "latest")
-	require.NoError(t, err)
-	require.Equal(t, "revision-3", updated.Profiles[0].ID)
-	require.Equal(t, 3, calls)
-}
+	Expect(err).To(BeNil())
+	Expect(updated.Profiles[0].ID).To(Equal("revision-3"))
+	Expect(calls).To(BeNumerically("==", 3))
+})
 
-func TestMetadataCacheSkipsMissingProfilesAndFailures(t *testing.T) {
+var _ = Describe("metadata cache skips missing profiles and failures", func() {
 	for _, tc := range []struct {
 		name      string
 		status    int
@@ -105,8 +105,8 @@ func TestMetadataCacheSkipsMissingProfilesAndFailures(t *testing.T) {
 		{"malformed", 200, `{`, true},
 		{"transport error", 0, "", true},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
-			enableMetadataCache(t)
+		It(tc.name, func() {
+			enableMetadataCache()
 			calls := 0
 			client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 				calls++
@@ -119,27 +119,27 @@ func TestMetadataCacheSkipsMissingProfilesAndFailures(t *testing.T) {
 				return metadataResponse(200, `{"profiles":[{"profile_id":"newly-published"}]}`), nil
 			})}, 15*time.Minute)
 			first, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
-			require.Equal(t, tc.wantError, err != nil)
-			require.Empty(t, first.Profiles)
+			Expect(err != nil).To(Equal(tc.wantError))
+			Expect(first.Profiles).To(BeEmpty())
 			for range 2 {
 				result, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
-				require.NoError(t, err)
-				require.Equal(t, "newly-published", result.Profiles[0].ID)
+				Expect(err).To(BeNil())
+				Expect(result.Profiles[0].ID).To(Equal("newly-published"))
 			}
-			require.Equal(t, 2, calls)
+			Expect(calls).To(BeNumerically("==", 2))
 		})
 	}
-}
+})
 
-func TestMetadataCacheFailuresFallBackToNGC(t *testing.T) {
+var _ = Describe("metadata cache failures fall back to NGC", func() {
 	for _, state := range []string{"disabled", "registration unavailable", "read and write unavailable"} {
-		t.Run(state, func(t *testing.T) {
-			enableMetadataCache(t)
+		It(state, func() {
+			enableMetadataCache()
 			if state == "disabled" {
 				cachetesting.DisableCache()
 			}
 			if state == "registration unavailable" {
-				require.NoError(t, cache.Close())
+				Expect(cache.Close()).To(BeNil())
 			}
 			calls := 0
 			client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
@@ -147,19 +147,19 @@ func TestMetadataCacheFailuresFallBackToNGC(t *testing.T) {
 				return metadataResponse(200, fmt.Sprintf(`{"profiles":[{"profile_id":"fresh-%d"}]}`, calls)), nil
 			})}, 15*time.Minute)
 			if state == "read and write unavailable" {
-				require.NoError(t, cache.Close())
+				Expect(cache.Close()).To(BeNil())
 			}
 			for i := 1; i <= 2; i++ {
 				result, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
-				require.NoError(t, err)
-				require.Equal(t, fmt.Sprintf("fresh-%d", i), result.Profiles[0].ID)
+				Expect(err).To(BeNil())
+				Expect(result.Profiles[0].ID).To(Equal(fmt.Sprintf("fresh-%d", i)))
 			}
 		})
 	}
-}
+})
 
-func TestMetadataCachePreservesLargeProfilesAndIsolatesCallerMutation(t *testing.T) {
-	enableMetadataCache(t)
+var _ = It("metadata cache preserves large profiles and isolates caller mutation", func() {
+	enableMetadataCache()
 	id := strings.Repeat("a", 8192) // Exceeds the shared test cache's default record limit.
 	calls := 0
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
@@ -167,33 +167,34 @@ func TestMetadataCachePreservesLargeProfilesAndIsolatesCallerMutation(t *testing
 		return metadataResponse(200, fmt.Sprintf(`{"profiles":[{"profile_id":%q,"min_vram_per_device_gb":27,"tested_gpu_devices":["2330:10de"]}]}`, id)), nil
 	})}, 15*time.Minute)
 	result, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
-	require.NoError(t, err)
+	Expect(err).To(BeNil())
 	result.Profiles[0].ID = "mutated"
 	*result.Profiles[0].MinimumVRAMPerDeviceGB = 99
 	result.Profiles[0].TestedGPUDevices[0] = "wrong-device"
 	cached, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
-	require.NoError(t, err)
-	require.Equal(t, id, cached.Profiles[0].ID)
-	require.Equal(t, 27.0, *cached.Profiles[0].MinimumVRAMPerDeviceGB)
-	require.Equal(t, []string{"2330:10de"}, cached.Profiles[0].TestedGPUDevices)
-	require.Equal(t, 1, calls)
-}
+	Expect(err).To(BeNil())
+	Expect(cached.Profiles[0].ID).To(Equal(id))
+	Expect(*cached.Profiles[0].MinimumVRAMPerDeviceGB).To(BeNumerically("==", 27.0))
+	Expect(cached.Profiles[0].TestedGPUDevices).To(Equal([]string{"2330:10de"}))
+	Expect(calls).To(BeNumerically("==", 1))
+})
 
-func TestMetadataCacheHonorsCanceledRequestOnHit(t *testing.T) {
-	enableMetadataCache(t)
+var _ = It("metadata cache honors canceled request on hit", func() {
+	enableMetadataCache()
 	calls := 0
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		calls++
 		return metadataResponse(200, `{"profiles":[{"profile_id":"cached"}]}`), nil
 	})}, 15*time.Minute)
 	_, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "latest")
-	require.NoError(t, err)
+	Expect(err).To(BeNil())
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	_, err = client.Get(ctx, "nvcr.io/nim/nvidia/example", "latest")
-	require.ErrorIs(t, err, context.Canceled)
-	require.Equal(t, 1, calls)
-}
+	Expect(err).To(Not(BeNil()))
+	Expect(err.Details).To(ContainSubstring(context.Canceled.Error()))
+	Expect(calls).To(BeNumerically("==", 1))
+})
 
 func metadataResponse(status int, body string) *http.Response {
 	return &http.Response{StatusCode: status, Body: io.NopCloser(strings.NewReader(body))}

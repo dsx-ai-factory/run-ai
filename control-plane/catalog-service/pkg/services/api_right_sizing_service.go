@@ -33,7 +33,7 @@ func NewRightSizingAPIService() *RightSizingAPIService {
 	return &RightSizingAPIService{service: rightsizing.New(inventory, metadata, servicesConfig.WholeGPUCutoffPercent)}
 }
 
-func (s *RightSizingAPIService) RecommendInferenceResources(ctx context.Context, request api.RightSizingRequest) (api.ImplResponse, error) {
+func (s *RightSizingAPIService) RecommendInferenceResources(ctx context.Context, request api.RecommendationRequest) (api.ImplResponse, error) {
 	response, apiErr := s.service.Recommend(ctx, request)
 	if apiErr != nil {
 		return api.Response(int(apiErr.Code), apiErr), nil

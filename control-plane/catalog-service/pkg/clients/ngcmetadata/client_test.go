@@ -7,60 +7,64 @@ package ngcmetadata
 
 import (
 	"context"
-	"errors"
 	"io"
 	"net/http"
 	"strconv"
 	"strings"
-	"testing"
 	"time"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 type transportFunc func(*http.Request) (*http.Response, error)
 
 func (f transportFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }
 
-func TestMetadataPreservesPublishedProfileAndExactTag(t *testing.T) {
+var _ = It("metadata preserves published profile and exact tag", func() {
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
-		if r.URL.Host != "api.ngc.nvidia.com" || r.URL.Path != "/v2/nim/metadata" ||
-			r.URL.Query().Get("resourceId") != "nim/nvidia/example" || r.URL.Query().Get("tag") != "2.1.4" {
-			t.Fatalf("unexpected metadata request: %s", r.URL)
-		}
-		if r.Header.Get("Authorization") != "" {
-			t.Fatal("public NGC lookup must not forward caller credentials")
-		}
+		Expect(r.URL.Host).To(Equal("api.ngc.nvidia.com"))
+		Expect(r.URL.Path).To(Equal("/v2/nim/metadata"))
+		Expect(r.URL.Query().Get("resourceId")).To(Equal("nim/nvidia/example"))
+		Expect(r.URL.Query().Get("tag")).To(Equal("2.1.4"))
+		Expect(r.Header.Get("Authorization")).To(BeEmpty())
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"profiles":[{"profile_id":"published-profile","gpu":"NVIDIA-B200","precision":"bf16","inference_backend":"vllm","tensor_parallel_size":2,"pipeline_parallel_size":1,"max_gpu_count":4,"min_vram_per_device_gb":35,"gpu_device":"2901:10de","tested_gpu_devices":["2901:10de"]}]}`))}, nil
 	})}, 15*time.Minute)
 	metadata, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "2.1.4")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(metadata.Profiles) != 1 {
-		t.Fatalf("profiles = %d", len(metadata.Profiles))
-	}
+	Expect(err).To(BeNil())
+	Expect(metadata.Profiles).To(HaveLen(1))
 	p := metadata.Profiles[0]
-	if p.ID != "published-profile" || p.MinimumVRAMPerDeviceGB == nil || *p.MinimumVRAMPerDeviceGB != 35 ||
-		p.TensorParallelSize == nil || *p.TensorParallelSize != 2 || p.PipelineParallelSize == nil || *p.PipelineParallelSize != 1 ||
-		p.GPU != "NVIDIA-B200" || p.GPUDevice != "2901:10de" || p.Precision != "bf16" ||
-		p.InferenceBackend != "vllm" || len(p.TestedGPUDevices) != 1 || p.MaxGPUCount == nil || *p.MaxGPUCount != 4 {
-		t.Fatalf("profile information lost: %+v", p)
-	}
-}
+	Expect(p.ID).To(Equal("published-profile"))
+	Expect(p.MinimumVRAMPerDeviceGB).NotTo(BeNil())
+	Expect(*p.MinimumVRAMPerDeviceGB).To(BeNumerically("==", 35))
+	Expect(p.TensorParallelSize).NotTo(BeNil())
+	Expect(*p.TensorParallelSize).To(BeNumerically("==", 2))
+	Expect(p.PipelineParallelSize).NotTo(BeNil())
+	Expect(*p.PipelineParallelSize).To(BeNumerically("==", 1))
+	Expect(p.GPU).To(Equal("NVIDIA-B200"))
+	Expect(p.GPUDevice).To(Equal("2901:10de"))
+	Expect(p.Precision).To(Equal("bf16"))
+	Expect(p.InferenceBackend).To(Equal("vllm"))
+	Expect(p.TestedGPUDevices).To(HaveLen(1))
+	Expect(p.MaxGPUCount).NotTo(BeNil())
+	Expect(*p.MaxGPUCount).To(BeNumerically("==", 4))
+})
 
-func TestTagValidationExplainsLengthAndCharacterConstraints(t *testing.T) {
+var _ = It("tag validation explains length and character constraints", func() {
 	image := "nvcr.io/nim/nvidia/example"
-	if err := Validate(image, strings.Repeat("a", 128)); err != nil {
-		t.Fatalf("maximum-length valid tag rejected: %v", err)
+	{
+		err := Validate(image, strings.Repeat("a", 128))
+		Expect(err).To(BeNil())
 	}
 	for _, tag := range []string{strings.Repeat("a", 129), "-bad", "a&b", ""} {
 		err := Validate(image, tag)
-		if err == nil || !strings.Contains(err.Error(), "128") || !strings.Contains(err.Error(), "start") {
-			t.Fatalf("invalid tag %q needs actionable length and character constraints: %v", tag, err)
-		}
+		Expect(err).NotTo(BeNil())
+		Expect(err.Error()).To(ContainSubstring("128"))
+		Expect(err.Error()).To(ContainSubstring("start"))
 	}
-}
+})
 
-func TestOversizedMetadataReportsTheResponseLimit(t *testing.T) {
+var _ = It("oversized metadata reports the response limit", func() {
 	client := New(&http.Client{Transport: transportFunc(func(*http.Request) (*http.Response, error) {
 		return &http.Response{
 			StatusCode: http.StatusOK,
@@ -68,12 +72,11 @@ func TestOversizedMetadataReportsTheResponseLimit(t *testing.T) {
 		}, nil
 	})}, 15*time.Minute)
 	_, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/oversized", "1.0")
-	if err == nil || !strings.Contains(err.Error(), strconv.Itoa(maxResponseBytes)) {
-		t.Fatalf("oversized response must report its byte limit: %v", err)
-	}
-}
+	Expect(err).NotTo(BeNil())
+	Expect(err.Details).To(ContainSubstring(strconv.Itoa(maxResponseBytes)))
+})
 
-func TestMetadataMissingDiffersFromUpstreamFailure(t *testing.T) {
+var _ = Describe("metadata missing differs from upstream failure", func() {
 	for _, tt := range []struct {
 		name      string
 		status    int
@@ -91,38 +94,34 @@ func TestMetadataMissingDiffersFromUpstreamFailure(t *testing.T) {
 		{"null response", 200, `null`, true},
 		{"trailing response", 200, `{"profiles":[]} {}`, true},
 	} {
-		t.Run(tt.name, func(t *testing.T) {
+		It(tt.name, func() {
 			client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 				return &http.Response{StatusCode: tt.status, Body: io.NopCloser(strings.NewReader(tt.body))}, nil
 			})}, 15*time.Minute)
 			result, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "latest")
-			if (err != nil) != tt.wantError {
-				t.Fatalf("error = %v; want error %v", err, tt.wantError)
-			}
-			if !tt.wantError && len(result.Profiles) != 0 {
-				t.Fatalf("expected missing metadata, got %+v", result)
+			Expect((err != nil)).To(Equal(tt.wantError))
+			if !tt.wantError {
+				Expect(result.Profiles).To(HaveLen(0))
 			}
 		})
 	}
-}
+})
 
-func TestMetadataDoesNotInventMissingMemoryOrParallelism(t *testing.T) {
+var _ = It("metadata does not invent missing memory or parallelism", func() {
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(`{"profiles":[{"profile_id":"missing"},{"profile_id":"zero","min_vram_per_device_gb":0}]}`))}, nil
 	})}, 15*time.Minute)
 	result, err := client.Get(context.Background(), "nvcr.io/nim/nvidia/example", "latest")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if result.Profiles[0].MinimumVRAMPerDeviceGB != nil || result.Profiles[0].TensorParallelSize != nil ||
-		result.Profiles[1].MinimumVRAMPerDeviceGB == nil || *result.Profiles[1].MinimumVRAMPerDeviceGB != 0 {
-		t.Fatalf("missing metadata was defaulted: %+v", result)
-	}
-}
+	Expect(err).To(BeNil())
+	Expect(result.Profiles[0].MinimumVRAMPerDeviceGB).To(BeNil())
+	Expect(result.Profiles[0].TensorParallelSize).To(BeNil())
+	Expect(result.Profiles[1].MinimumVRAMPerDeviceGB).NotTo(BeNil())
+	Expect(*result.Profiles[1].MinimumVRAMPerDeviceGB).To(BeNumerically("==", 0))
+})
 
-func TestMetadataRejectsInvalidImageOrTagBeforeNetwork(t *testing.T) {
+var _ = It("metadata rejects invalid image or tag before network", func() {
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
-		t.Fatal("invalid input reached NGC")
+		Fail("invalid input reached NGC")
 		return nil, nil
 	})}, 15*time.Minute)
 	for _, tt := range []struct{ image, tag string }{
@@ -133,20 +132,20 @@ func TestMetadataRejectsInvalidImageOrTagBeforeNetwork(t *testing.T) {
 		{"nvcr.io/nim/nvidia/example", ""},
 		{"nvcr.io/nim/nvidia/example", "a&tag=b"},
 	} {
-		if _, err := client.Get(context.Background(), tt.image, tt.tag); err == nil {
-			t.Errorf("accepted image %q tag %q", tt.image, tt.tag)
+		{
+			_, err := client.Get(context.Background(), tt.image, tt.tag)
+			Expect(err).NotTo(BeNil())
 		}
 	}
-}
+})
 
-func TestMetadataPropagatesCancellation(t *testing.T) {
+var _ = It("metadata propagates cancellation", func() {
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
 	client := New(&http.Client{Transport: transportFunc(func(r *http.Request) (*http.Response, error) {
 		return nil, r.Context().Err()
 	})}, 15*time.Minute)
 	_, err := client.Get(ctx, "nvcr.io/nim/nvidia/example", "latest")
-	if !errors.Is(err, context.Canceled) {
-		t.Fatalf("error = %v", err)
-	}
-}
+	Expect(err).NotTo(BeNil())
+	Expect(err.Details).To(ContainSubstring(context.Canceled.Error()))
+})

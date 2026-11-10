@@ -536,11 +536,11 @@ var _ = Describe("NimServicesImpl", func() {
 			displayed.Status.Set(&status)
 			clustersClient.SetMock(clusterservice.NewSimpleMock().WithCluster(randoms.ClusterId, &displayed).WithDefaultNodePool(randoms.ClusterId))
 			calls = 0
-			nimServicesImpl.recommendGPU = func(ctx context.Context, request catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+			nimServicesImpl.recommendGPU = func(ctx context.Context, request catalog.RecommendationRequest) (*catalog.RecommendationResponse, *api.Error) {
 				calls++
 				Expect(request.ClusterId).To(Equal(randoms.ClusterId))
 				Expect(request.GetGpuType()).To(Equal("NVIDIA-H100-80GB-HBM3"))
-				var response catalog.RightSizingResponse
+				var response catalog.RecommendationResponse
 				Expect(json.Unmarshal([]byte(`{"image":"nvcr.io/nim/meta/llama-3.1-8b-instruct","tag":"1.8.0","results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"fp8-profile","recommendation":{"allocationType":"gpu_count","gpuCount":1}}]}`), &response)).To(Succeed())
 				return &response, nil
 			}
@@ -610,9 +610,9 @@ var _ = Describe("NimServicesImpl", func() {
 			var policy policiesApi.NimServicePolicyDefaultsAndRules
 			Expect(json.Unmarshal([]byte(`{"rules":{"compute":`+rules+`}}`), &policy)).To(Succeed())
 			policiesClient.SetMock(policiesClient.SimpleMockClientFactory{SimpleMockClient: policiesClient.SimpleMockClient{EffectiveUpdatedAt: time.Now(), EffectiveNimServicePolicy: &policy}})
-			nimServicesImpl.recommendGPU = func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+			nimServicesImpl.recommendGPU = func(context.Context, catalog.RecommendationRequest) (*catalog.RecommendationResponse, *api.Error) {
 				calls++
-				var response catalog.RightSizingResponse
+				var response catalog.RecommendationResponse
 				Expect(json.Unmarshal([]byte(`{"results":[{"gpuType":"NVIDIA-H100-80GB-HBM3","status":"recommended","profileId":"profile","recommendation":`+allocation+`}]}`), &response)).To(Succeed())
 				return &response, nil
 			}
@@ -627,8 +627,8 @@ var _ = Describe("NimServicesImpl", func() {
 			Entry("8 devices exceeds 4", `{"allocationType":"gpu_count","gpuCount":8}`, `{"gpuDevicesRequest":{"max":4}}`),
 		)
 		It("returns a synchronous error when there is no recommendation", func() {
-			nimServicesImpl.recommendGPU = func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
-				return &catalog.RightSizingResponse{}, nil
+			nimServicesImpl.recommendGPU = func(context.Context, catalog.RecommendationRequest) (*catalog.RecommendationResponse, *api.Error) {
+				return &catalog.RecommendationResponse{}, nil
 			}
 			toCreate := request()
 			failure := failToCreateNimServiceForTest(router, randoms, &toCreate, http.StatusBadRequest)

@@ -108,14 +108,14 @@ func (c *RightSizingAPIController) Routes() Routes {
 	return Routes{
 		"RecommendInferenceResources": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/inference/right-sizing/recommendation",
+			"/api/v1/catalog/right-sizing/recommendation",
 			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
 			BuildHandlerChain(
 				func(next http.HandlerFunc) http.HandlerFunc {
 					return c.authorizationClient.AuthorizeMiddleware(
 						next,
 						"inferences",
-						"create",
+						"read",
 						false,
 						"",
 					)
@@ -133,7 +133,7 @@ func (c *RightSizingAPIController) Routes() Routes {
 
 // RecommendInferenceResources - Recommend GPU allocation for a NIM test/dev workload.
 func (c *RightSizingAPIController) RecommendInferenceResources(w http.ResponseWriter, r *http.Request) {
-	var rightSizingRequestParam RightSizingRequest
+	var recommendationRequestParam RecommendationRequest
 	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
 	// payloadBody is a per-request local slice, never a shared controller field,
 	// so concurrent requests on the singleton controller cannot race on it.
@@ -148,19 +148,19 @@ func (c *RightSizingAPIController) RecommendInferenceResources(w http.ResponseWr
 	//d := json.NewDecoder(r.Body)
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 	d.DisallowUnknownFields()
-	if err := d.Decode(&rightSizingRequestParam); err != nil {
+	if err := d.Decode(&recommendationRequestParam); err != nil {
 		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
 		return
 	}
-	if err := AssertRightSizingRequestRequired(rightSizingRequestParam); err != nil {
+	if err := AssertRecommendationRequestRequired(recommendationRequestParam); err != nil {
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	if err := AssertRightSizingRequestConstraints(rightSizingRequestParam); err != nil {
+	if err := AssertRecommendationRequestConstraints(recommendationRequestParam); err != nil {
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	result, err := c.service.RecommendInferenceResources(r.Context(), rightSizingRequestParam)
+	result, err := c.service.RecommendInferenceResources(r.Context(), recommendationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

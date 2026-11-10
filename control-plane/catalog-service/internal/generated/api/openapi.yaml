@@ -1442,24 +1442,25 @@ paths:
     x-scope:
     - system
     - tenant
-  /api/v1/inference/right-sizing/recommendation:
+  /api/v1/catalog/right-sizing/recommendation:
     post:
       description: Returns recommendations without deploying or reserving resources.
-        Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing
+        Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic
+        profiles. GPU model compatibility is not verified. Missing trustworthy sizing
         data is a no_recommendation result; upstream retrieval failures are errors.
       operationId: recommend_inference_resources
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RightSizingRequest'
+              $ref: '#/components/schemas/RecommendationRequest'
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RightSizingResponse'
+                $ref: '#/components/schemas/RecommendationResponse'
           description: Results per GPU type and capacity; may contain no recommendations.
         "400":
           content:
@@ -1488,6 +1489,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
           description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
         "503":
           content:
             application/json:
@@ -1503,7 +1513,7 @@ paths:
       x-service: catalog-service
       x-authorize:
         resource-type: inferences
-        action: create
+        action: read
       x-test-coverage:
       - control-plane/catalog-service/pkg/services/rightsizing/service_test.go
 components:
@@ -2339,7 +2349,7 @@ components:
           nullable: true
           type: boolean
       type: object
-    RightSizingRequest:
+    RecommendationRequest:
       example:
         image: image
         clusterId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
@@ -2368,30 +2378,35 @@ components:
       - image
       - tag
       type: object
-    RightSizingStatus:
+    RecommendationStatus:
       enum:
       - recommended
       - no_recommendation
       type: string
-    RightSizingAllocationType:
+    RecommendationAllocationType:
       enum:
       - gpu_memory
       - gpu_count
       type: string
-    RightSizingRecommendation:
-      example:
-        gpuMemoryPerDeviceBytes: 1
-        allocationType: gpu_memory
-        gpuCount: 1
+    Recommendation:
       nullable: true
       properties:
         allocationType:
-          $ref: '#/components/schemas/RightSizingAllocationType'
+          allOf:
+          - $ref: '#/components/schemas/RecommendationAllocationType'
+          description: Whether the allocation requests GPU memory (`gpu_memory`) or
+            whole GPUs (`gpu_count`).
         gpuCount:
+          description: "Number of GPUs used by the allocation. Always 1 for `gpu_memory`;\
+            \ for `gpu_count`, equals the selected profile’s tensor parallel size\
+            \ multiplied by its pipeline parallel size."
           format: int64
           minimum: 1
           type: integer
         gpuMemoryPerDeviceBytes:
+          description: "Recommended memory per GPU, in bytes. For `gpu_memory`, this\
+            \ is the published minimum rounded up to whole bytes. For `gpu_count`,\
+            \ this is the reported capacity of each GPU."
           format: int64
           minimum: 1
           type: integer
@@ -2399,103 +2414,85 @@ components:
       - allocationType
       - gpuCount
       type: object
-    RightSizingResult:
-      example:
-        minimumGpuMemoryPerDeviceGb: 6.027456183070403
-        tensorParallelSize: 1
-        reason: reason
-        pipelineParallelSize: 1
-        gpuMemoryCapacityBytes: 0
-        profileId: profileId
-        precision: precision
-        recommendation:
-          gpuMemoryPerDeviceBytes: 1
-          allocationType: gpu_memory
-          gpuCount: 1
-        gpuType: gpuType
-        status: recommended
-        inferenceBackend: inferenceBackend
+    RecommendationResult:
       properties:
         gpuType:
+          description: Exact GPU type reported by the cluster inventory. Different
+            memory capacities for the same GPU type produce separate results.
           type: string
         gpuMemoryCapacityBytes:
-          description: "Reported per-device capacity, not free memory or a quota guarantee."
+          description: "Reported memory capacity of each GPU, in bytes. Omitted when\
+            \ capacity is unknown. Does not represent free memory or a quota guarantee."
           format: int64
           type: integer
         status:
-          $ref: '#/components/schemas/RightSizingStatus'
+          allOf:
+          - $ref: '#/components/schemas/RecommendationStatus'
+          description: Whether an allocation was recommended for this GPU type and
+            memory capacity.
         minimumGpuMemoryPerDeviceGb:
-          description: "Published NGC minimum for the source profile, before allocation\
-            \ rounding."
+          description: "Published minimum memory per GPU for the selected NGC profile,\
+            \ in decimal GB (1 GB = 1,000,000,000 bytes), before allocation rounding.\
+            \ Omitted when no profile is selected."
           format: double
           type: number
         profileId:
+          description: Identifier of the selected published NGC execution profile.
+            Omitted when no profile is selected.
           type: string
         precision:
+          description: Model precision reported by the selected NGC profile. Omitted
+            when no profile is selected or the profile does not report precision.
           type: string
         inferenceBackend:
+          description: Inference backend reported by the selected NGC profile. Omitted
+            when no profile is selected or the profile does not report a backend.
           type: string
         tensorParallelSize:
-          description: Explicit tensor parallel size from the selected published profile.
+          description: Number of GPUs participating in tensor parallelism in the selected
+            NGC profile. Omitted when no profile is selected.
           format: int64
           minimum: 1
           type: integer
         pipelineParallelSize:
-          description: Explicit pipeline parallel size from the selected published
-            profile.
+          description: Number of pipeline parallel stages in the selected NGC profile.
+            Omitted when no profile is selected.
           format: int64
           minimum: 1
           type: integer
         reason:
-          description: Explanation when sizing cannot be recommended.
+          description: Explanation of why no allocation could be recommended. Omitted
+            for a recommended allocation.
           type: string
         recommendation:
-          $ref: '#/components/schemas/RightSizingRecommendation'
+          allOf:
+          - $ref: '#/components/schemas/Recommendation'
+          description: Recommended allocation for this result. Absent or null when
+            no allocation could be recommended.
       required:
       - gpuType
       - status
       type: object
-    RightSizingResponse:
+    RecommendationResponse:
       example:
         image: image
         tag: tag
         results:
-        - minimumGpuMemoryPerDeviceGb: 6.027456183070403
-          tensorParallelSize: 1
-          reason: reason
-          pipelineParallelSize: 1
-          gpuMemoryCapacityBytes: 0
-          profileId: profileId
-          precision: precision
-          recommendation:
-            gpuMemoryPerDeviceBytes: 1
-            allocationType: gpu_memory
-            gpuCount: 1
-          gpuType: gpuType
-          status: recommended
-          inferenceBackend: inferenceBackend
-        - minimumGpuMemoryPerDeviceGb: 6.027456183070403
-          tensorParallelSize: 1
-          reason: reason
-          pipelineParallelSize: 1
-          gpuMemoryCapacityBytes: 0
-          profileId: profileId
-          precision: precision
-          recommendation:
-            gpuMemoryPerDeviceBytes: 1
-            allocationType: gpu_memory
-            gpuCount: 1
-          gpuType: gpuType
-          status: recommended
-          inferenceBackend: inferenceBackend
+        - ""
+        - ""
       properties:
         image:
+          description: Untagged NIM image reference supplied in the request.
           type: string
         tag:
+          description: Exact NIM image tag supplied in the request.
           type: string
         results:
+          description: One result per evaluated GPU type and per-device memory capacity.
+            Empty when the cluster has no reported GPUs and no GPU type was requested.
           items:
-            $ref: '#/components/schemas/RightSizingResult'
+            allOf:
+            - $ref: '#/components/schemas/RecommendationResult'
           type: array
       required:
       - image

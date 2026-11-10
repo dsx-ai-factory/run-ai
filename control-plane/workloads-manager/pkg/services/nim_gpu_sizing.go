@@ -62,7 +62,7 @@ func (nsi *NimServicesImpl) resolveNimGPUAllocation(ctx context.Context, project
 	if projectErr != nil {
 		return false, api.NewError(int(projectErr.Code), projectErr.Message, nil)
 	}
-	request := catalog.NewRightSizingRequest(project.ClusterId, named.Name(), tagged.Tag())
+	request := catalog.NewRecommendationRequest(project.ClusterId, named.Name(), tagged.Tag())
 	request.SetGpuType(*spec.GpuType)
 	response, apiErr := nsi.recommendGPU(ctx, *request)
 	if apiErr != nil {
@@ -91,8 +91,8 @@ func hasNimGPUAllocation(c *api.NimServiceSpecAllOfCompute) bool {
 		c.GpuMemoryPortionRequest != nil || c.GpuMemoryPortionLimit != nil || c.GpuPortionRequest != nil || c.GpuPortionLimit != nil)
 }
 
-func selectNimSizingResult(response *catalog.RightSizingResponse, gpuType string) (*catalog.RightSizingResult, *api.Error) {
-	var selected *catalog.RightSizingResult
+func selectNimSizingResult(response *catalog.RecommendationResponse, gpuType string) (*catalog.RecommendationResult, *api.Error) {
+	var selected *catalog.RecommendationResult
 	if response != nil {
 		for i := range response.Results {
 			result := &response.Results[i]

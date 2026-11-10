@@ -464,6 +464,89 @@ func TestKeycloakClientRepository_DeleteClient(t *testing.T) {
 	}
 }
 
+func TestKeycloakClientRepository_DisableClient(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name          string
+		mockSetup     func(*authmocks.Auth, *gocloakmocks.GoCloak)
+		expectedError bool
+	}{
+		{
+			name: "disables the client and its direct access grants",
+			mockSetup: func(authMock *authmocks.Auth, kcMock *gocloakmocks.GoCloak) {
+				token := "admin-token"
+				authMock.On("GetAdminToken", mock.Anything).Return(&token, nil)
+				kcMock.On("GetClient", mock.Anything, token, "test-realm", "client-id-123").
+					Return(&gocloak.Client{
+						ID:                        pointer.ToString("client-id-123"),
+						Enabled:                   pointer.ToBool(true),
+						DirectAccessGrantsEnabled: pointer.ToBool(true),
+					}, nil)
+				kcMock.On("UpdateClient", mock.Anything, token, "test-realm", mock.MatchedBy(func(c gocloak.Client) bool {
+					return c.Enabled != nil && !*c.Enabled && c.DirectAccessGrantsEnabled != nil && !*c.DirectAccessGrantsEnabled
+				})).Return(nil)
+			},
+			expectedError: false,
+		},
+		{
+			name: "auth token retrieval fails",
+			mockSetup: func(authMock *authmocks.Auth, kcMock *gocloakmocks.GoCloak) {
+				authMock.On("GetAdminToken", mock.Anything).Return(nil, fmt.Errorf("auth error"))
+			},
+			expectedError: true,
+		},
+		{
+			name: "get client fails",
+			mockSetup: func(authMock *authmocks.Auth, kcMock *gocloakmocks.GoCloak) {
+				token := "admin-token"
+				authMock.On("GetAdminToken", mock.Anything).Return(&token, nil)
+				kcMock.On("GetClient", mock.Anything, token, "test-realm", "client-id-123").
+					Return(nil, &gocloak.APIError{Code: http.StatusNotFound, Message: "client not found"})
+			},
+			expectedError: true,
+		},
+		{
+			name: "update client fails",
+			mockSetup: func(authMock *authmocks.Auth, kcMock *gocloakmocks.GoCloak) {
+				token := "admin-token"
+				authMock.On("GetAdminToken", mock.Anything).Return(&token, nil)
+				kcMock.On("GetClient", mock.Anything, token, "test-realm", "client-id-123").
+					Return(&gocloak.Client{ID: pointer.ToString("client-id-123")}, nil)
+				kcMock.On("UpdateClient", mock.Anything, token, "test-realm", mock.AnythingOfType("gocloak.Client")).
+					Return(&gocloak.APIError{Code: http.StatusBadRequest, Message: "bad request"})
+			},
+			expectedError: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			mockAuth := authmocks.NewAuth(t)
+			mockGoCloakClient := gocloakmocks.NewGoCloak(t)
+			mockRunaiCloak := runaicloakmocks.NewRunAICloakClient(t)
+
+			tt.mockSetup(mockAuth, mockGoCloakClient)
+
+			repo := &KeycloakClientRepository{
+				auth:             mockAuth,
+				kcClient:         mockGoCloakClient,
+				runaicloakClient: mockRunaiCloak,
+			}
+
+			err := repo.DisableClient(context.Background(), "test-realm", "client-id-123")
+
+			if tt.expectedError {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
 func TestKeycloakClientRepository_GetClients(t *testing.T) {
 	t.Parallel()
 

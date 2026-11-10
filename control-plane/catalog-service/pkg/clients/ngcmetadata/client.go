@@ -18,6 +18,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/cache/v2/options"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
@@ -25,9 +26,10 @@ import (
 )
 
 const (
-	metadataURL      = "https://api.ngc.nvidia.com/v2/nim/metadata"
-	maxResponseBytes = 16 << 20
-	maxTagLength     = 128
+	metadataUnavailableMessage = "NGC sizing metadata is not available"
+	metadataURL                = "https://api.ngc.nvidia.com/v2/nim/metadata"
+	maxResponseBytes           = 16 << 20
+	maxTagLength               = 128
 )
 
 var (
@@ -78,24 +80,24 @@ func New(httpClient *http.Client, cacheTTL time.Duration) *Client {
 // Validate checks the image and separate tag before constructing an NGC query.
 // Tags, including latest, are passed verbatim: registry updates do not imply
 // that NGC has republished metadata for that tag.
-func Validate(image, tag string) error {
+func Validate(image, tag string) *api.Error {
 	if !imagePattern.MatchString(image) {
-		return fmt.Errorf("image must be an untagged nvcr.io/nim/<organization>/<model> reference")
+		return api.NewValidationError("image must be an untagged nvcr.io/nim/<organization>/<model> reference")
 	}
 	if !tagPattern.MatchString(tag) {
-		return fmt.Errorf("tag must contain 1 to %d characters, start with an ASCII letter, digit or underscore, and use only ASCII letters, digits, underscores, dots or hyphens", maxTagLength)
+		return api.NewValidationError(fmt.Sprintf("tag must contain 1 to %d characters, start with an ASCII letter, digit or underscore, and use only ASCII letters, digits, underscores, dots or hyphens", maxTagLength))
 	}
 	return nil
 }
 
 // Get returns an empty profile list when metadata is not published (404).
 // Transport, rate-limit, server, and malformed-response failures remain errors.
-func (c *Client) Get(ctx context.Context, image, tag string) (Metadata, error) {
+func (c *Client) Get(ctx context.Context, image, tag string) (Metadata, *api.Error) {
 	if err := Validate(image, tag); err != nil {
 		return Metadata{}, err
 	}
 	if err := ctx.Err(); err != nil {
-		return Metadata{}, err
+		return Metadata{}, api.NewError(http.StatusServiceUnavailable, metadataUnavailableMessage, err)
 	}
 	// Metadata is public and independent of cluster/user identity. Keep the
 	// exact image and tag (including latest) in the versioned cache key.
@@ -113,33 +115,33 @@ func (c *Client) Get(ctx context.Context, image, tag string) (Metadata, error) {
 	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, metadataURL+"?"+query.Encode(), nil)
 	if err != nil {
-		return Metadata{}, fmt.Errorf("create NGC metadata request: %w", err)
+		return Metadata{}, api.NewError(http.StatusServiceUnavailable, metadataUnavailableMessage, fmt.Errorf("create NGC metadata request: %w", err))
 	}
 	req.Header.Set("Accept", "application/json")
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return Metadata{}, fmt.Errorf("retrieve NGC metadata: %w", err)
+		return Metadata{}, api.NewError(http.StatusServiceUnavailable, metadataUnavailableMessage, fmt.Errorf("retrieve NGC metadata: %w", err))
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusNotFound {
 		return Metadata{Profiles: []Profile{}}, nil
 	}
 	if resp.StatusCode != http.StatusOK {
-		return Metadata{}, fmt.Errorf("NGC metadata returned HTTP %d", resp.StatusCode)
+		return Metadata{}, api.NewError(http.StatusServiceUnavailable, metadataUnavailableMessage, fmt.Errorf("NGC metadata returned HTTP %d", resp.StatusCode))
 	}
 	body, err := io.ReadAll(io.LimitReader(resp.Body, maxResponseBytes+1))
 	if err != nil {
-		return Metadata{}, fmt.Errorf("read NGC metadata: %w", err)
+		return Metadata{}, api.NewError(http.StatusServiceUnavailable, metadataUnavailableMessage, fmt.Errorf("read NGC metadata: %w", err))
 	}
 	if len(body) > maxResponseBytes {
-		return Metadata{}, fmt.Errorf("NGC metadata response exceeds the maximum size of %d bytes", maxResponseBytes)
+		return Metadata{}, api.NewError(http.StatusServiceUnavailable, metadataUnavailableMessage, fmt.Errorf("NGC metadata response exceeds the maximum size of %d bytes", maxResponseBytes))
 	}
 	var metadata *Metadata
 	if err := json.Unmarshal(body, &metadata); err != nil {
-		return Metadata{}, fmt.Errorf("decode NGC metadata: %w", err)
+		return Metadata{}, api.NewError(http.StatusServiceUnavailable, metadataUnavailableMessage, fmt.Errorf("decode NGC metadata: %w", err))
 	}
 	if metadata == nil {
-		return Metadata{}, fmt.Errorf("NGC metadata response must be an object")
+		return Metadata{}, api.NewError(http.StatusServiceUnavailable, metadataUnavailableMessage, fmt.Errorf("NGC metadata response must be an object"))
 	}
 	// NGC permits release-only metadata; profiles is an optional section.
 	if metadata.Profiles == nil {

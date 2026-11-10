@@ -8,6 +8,7 @@ package services
 import (
 	"context"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -766,9 +767,26 @@ func TestGetIdp_saml(t *testing.T) {
 	assert.NotNil(t, idp.SamlData)
 	assert.NotNil(t, idp.Mappers)
 	assert.Equal(t, "https://app.example.com/auth/realms/test/broker/saml-a1b2c3/endpoint/descriptor", idp.SamlData.ServiceProviderMetadataUrl)
+	assert.True(t, idp.SamlData.ValidateSignature)
 	assert.Equal(t, fmt.Sprintf("https://app.example.com/auth/realms/%s/broker/saml-a1b2c3/endpoint", "test"), idp.RedirectUri)
 	assert.Nil(t, idp.OidcData)
 	assert.Nil(t, idp.OcpData)
+}
+
+func TestGetIdp_samlValidateSignatureDisabled(t *testing.T) {
+	MocksList, testSubject, ctx := initIdpServiceTests(t)
+	iamMock := MocksList.IamServicesContainerMock
+
+	iamMock.MockIdpService.On("GetIdpMappers", mock.Anything, mock.Anything, mock.Anything).Return(generateMapperConfigArray(), nil)
+	iamMock.MockIdpService.On("GetSPSamlMetadataUrl", mock.Anything, mock.Anything, mock.Anything).Return("")
+	saml := generateIdentitySamlProviderRepresentation()
+	(*saml.Config)["validateSignature"] = "false"
+
+	idp := testSubject.iamIdpToApi(ctx, saml, "test")
+	assert.False(t, idp.SamlData.ValidateSignature)
+	body, err := json.Marshal(idp.SamlData)
+	assert.NoError(t, err)
+	assert.Contains(t, string(body), `"validateSignature":false`)
 }
 
 func TestGetIdp_ocp(t *testing.T) {
@@ -1129,6 +1147,7 @@ func generateIdentitySamlProviderRepresentation() *iamModels.Idp {
 			"signingCertificate":     "signingCertificate",
 			"singleSignOnServiceUrl": "singleSignOnServiceUrl",
 			"entityId":               "entityId",
+			"validateSignature":      "true",
 		},
 	}
 }

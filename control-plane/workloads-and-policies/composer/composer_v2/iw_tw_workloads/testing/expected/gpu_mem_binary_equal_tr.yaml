@@ -1,0 +1,80 @@
+BatchJobTarget:
+  Config: {}
+  Job:
+    apiVersion: batch/v1
+    kind: Job
+    metadata:
+      annotations:
+        example.com/preserved: value
+        gpu-fraction: "0.75"
+        gpu-memory: "524"
+        run.ai/submitted-by: tester
+      labels:
+        app: job
+        createdBy: Job
+        project: test
+        release: gpu_mem_binary_equal
+        run.ai/control-plane-managed: "true"
+        run.ai/converted-from-native: "true"
+        workloadKind: Training
+        workloadName: gpu_mem_binary_equal
+      name: gpu_mem_binary_equal
+      namespace: runai-test
+    spec:
+      backoffLimit: 6
+      template:
+        metadata:
+          annotations:
+            example.com/preserved: value
+            nvidia.com/container.gpu_mem_binary_equal.gpu-memory.limit: 500Mi
+            nvidia.com/container.gpu_mem_binary_equal.gpu-memory.request: 500Mi
+            user: tester
+          labels:
+            app: job
+            createdBy: Job
+            project: test
+            release: gpu_mem_binary_equal
+            workloadKind: Training
+            workloadName: gpu_mem_binary_equal
+        spec:
+          containers:
+          - env:
+            - name: RUNAI_PROJECT
+              value: test
+            - name: RUNAI_JOB_NAME
+              value: gpu_mem_binary_equal
+            image: ubuntu
+            name: gpu_mem_binary_equal
+            resources: {}
+          priorityClassName: low
+          restartPolicy: Never
+          schedulerName: runai-scheduler
+    status: {}
+Notification:
+  clusterId: cluster-123-456
+  createdAt: "0001-01-01T00:00:00Z"
+  departmentId: department-456-123
+  environments:
+  - connections: []
+    id: ""
+    name: ""
+    replicaType: null
+  fullySaasWorkload: true
+  group: run.ai
+  id: 'id-Value: gpu_mem_binary_equal, Rules: , Type: Training'
+  images:
+  - ubuntu
+  name: 'Value: gpu_mem_binary_equal, Rules: , Type: Training'
+  projectId: project-654-321
+  requestedPods:
+    number: 1
+  requestedResources:
+    gpu:
+      request: 1
+    gpuMemory:
+      limit: 500Mi
+      request: 500Mi
+    gpuRequestType: memory
+  submittedBy: test
+  type: Training
+  version: v2alpha1

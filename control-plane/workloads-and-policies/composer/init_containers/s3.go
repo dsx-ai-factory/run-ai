@@ -16,6 +16,7 @@ import (
 )
 
 const (
+	s3DataMountPath   = "/runai-s3"
 	s3ContainerPrefix = "s3-fs"
 	s3VolumePrefix    = "s3"
 
@@ -25,8 +26,10 @@ const (
 
 	s3CADefaultMode int32 = 420
 
-	s3CACertsDir = "/etc/ssl/certs"
-	s3ReadyFile  = "/runai-goofys-ready"
+	s3CACertsDir        = "/etc/ssl/certs"
+	s3ReadyMountPath    = "/runai-goofys"
+	s3ReadyFile         = s3ReadyMountPath + "/ready"
+	s3ReadyVolumePrefix = "s3-ready"
 
 	// goofys gets at most these extra args: --uid <v>, --gid <v>, --endpoint <v>, --ready-file <v>, bucket, path.
 	maxGoofysPerItemArgs = 10
@@ -98,27 +101,36 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 			command = append(command, "--endpoint", item.Url)
 		}
 		// Older and custom images may not implement the readiness flags.
-		mountCheckEnabled := cfg.S3FsMountCheckImage() == image
+		mountCheckEnabled := s3MountCheckEnabled(cfg)
+		mountPath := item.Path
 		var startupProbe *corev1.Probe
 		if mountCheckEnabled {
+			// Keep the sidecar's mount points independent of the application path.
+			mountPath = s3DataMountPath
 			command = append(command, "--ready-file", s3ReadyFile)
 			startupProbe = &corev1.Probe{
 				ProbeHandler: corev1.ProbeHandler{Exec: &corev1.ExecAction{
-					Command: []string{"goofys", "--check-ready", s3ReadyFile, item.Path},
+					Command: []string{"goofys", "--check-ready", s3ReadyFile, mountPath},
 				}},
 				PeriodSeconds:    2,
 				TimeoutSeconds:   2,
 				FailureThreshold: 150,
 			}
 		}
-		command = append(command, item.Bucket, item.Path)
+		command = append(command, item.Bucket, mountPath)
 
 		volumeMounts := []corev1.VolumeMount{
 			{
 				Name:             fmt.Sprintf("%s-%d", s3VolumePrefix, idx),
-				MountPath:        item.Path,
+				MountPath:        mountPath,
 				MountPropagation: &mountBidirectional,
 			},
+		}
+		if mountCheckEnabled {
+			volumeMounts = append(volumeMounts, corev1.VolumeMount{
+				Name:      s3ReadyVolumeName(idx, cfg),
+				MountPath: s3ReadyMountPath,
+			})
 		}
 		if cfg.IsCustomCAS3Enabled() {
 			volumeMounts = append(volumeMounts, s3CAVolumeMount(cfg))
@@ -152,6 +164,20 @@ func BuildS3InitContainers(info *composer.S3Info) ([]corev1.Container, *workload
 	return result, nil
 }
 
+func s3MountCheckEnabled(cfg composer.ClusterStorageConfig) bool {
+	image := cfg.S3FsImage()
+	return image != "" && cfg.S3FsMountCheckImage() == image
+}
+
+// CA Secret names are also Pod volume names; keep readiness volumes distinct.
+func s3ReadyVolumeName(idx int, cfg composer.ClusterStorageConfig) string {
+	name := fmt.Sprintf("%s-%d", s3ReadyVolumePrefix, idx)
+	for name == cfg.CustomCAS3Secret() || name == cfg.CustomCAGitSecret() || name == cfg.CustomCAAuthSecret() {
+		name += "-ready"
+	}
+	return name
+}
+
 func s3CAVolumeMount(cfg composer.ClusterStorageConfig) corev1.VolumeMount {
 	return corev1.VolumeMount{
 		Name:      cfg.CustomCAS3Secret(),
@@ -176,11 +202,15 @@ func BuildS3Volumes(info *composer.S3Info) []corev1.Volume {
 		hasAnyS3 = true
 
 		result = append(result, corev1.Volume{
-			Name: fmt.Sprintf("%s-%d", s3VolumePrefix, idx),
-			VolumeSource: corev1.VolumeSource{
-				EmptyDir: &corev1.EmptyDirVolumeSource{},
-			},
+			Name:         fmt.Sprintf("%s-%d", s3VolumePrefix, idx),
+			VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
 		})
+		if s3MountCheckEnabled(cfg) {
+			result = append(result, corev1.Volume{
+				Name:         s3ReadyVolumeName(idx, cfg),
+				VolumeSource: corev1.VolumeSource{EmptyDir: &corev1.EmptyDirVolumeSource{}},
+			})
+		}
 	}
 
 	if hasAnyS3 && cfg.IsCustomCAS3Enabled() {

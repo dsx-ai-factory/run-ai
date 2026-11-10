@@ -22,10 +22,12 @@ import (
 	k8sObjectsApi "github.com/dsx-ai-factory/run-ai/runai-clients/k8s-objects-tracker-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	"github.com/ghodss/yaml"
+	kairesources "github.com/kai-scheduler/KAI-scheduler/pkg/common/resources"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/stretchr/testify/assert"
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 const assetUuid = "123e4567-e89b-42d3-a456-ab1234567890"
@@ -98,7 +100,8 @@ type ComposerTest struct {
 
 	assetsInfo *composer.ComplimentaryAssetInfo
 
-	clusterVersion string
+	clusterVersion           string
+	validateGpuMemoryWithKai bool
 
 	actualNodePools []clusterApi.Nodepool
 
@@ -233,10 +236,52 @@ var ComposerTests = append([]TableEntry{
 		expectedFname: "auto_deletion_tr",
 	}),
 
-	Entry("labels", ComposerTest{
+	Entry("labels and annotations for workspace", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:     "labels",
+		expectedFname: "labels_ws",
+	}),
+
+	Entry("labels and annotations for training", ComposerTest{
 		workloadType:  string(workloadsApi.WORKLOADTYPE_TRAINING),
 		specFname:     "labels",
 		expectedFname: "labels_tr",
+	}),
+
+	Entry("Kubernetes Job identity labels for workspace", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:     "labels_job_identity",
+		expectedFname: "labels_job_identity_ws",
+	}),
+
+	Entry("Kubernetes Job identity labels for training", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:     "labels_job_identity",
+		expectedFname: "labels_job_identity_tr",
+	}),
+
+	Entry("generated pod identity labels for workspace", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:     "labels_identity_override",
+		expectedFname: "labels_identity_override_ws",
+	}),
+
+	Entry("generated pod identity labels for training", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:     "labels_identity_override",
+		expectedFname: "labels_identity_override_tr",
+	}),
+
+	Entry("generated user annotation without labels for workspace", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_WORKSPACE),
+		specFname:     "annotations_user_override",
+		expectedFname: "annotations_user_override_ws",
+	}),
+
+	Entry("generated user annotation without labels for training", ComposerTest{
+		workloadType:  string(workloadsApi.WORKLOADTYPE_TRAINING),
+		specFname:     "annotations_user_override",
+		expectedFname: "annotations_user_override_tr",
 	}),
 
 	Entry("rich", ComposerTest{
@@ -738,6 +783,19 @@ func RunComposerTest(testDetails ComposerTest, basePath string) {
 	}
 
 	CompareFiles(testDetailsStr, &actualResults, testDetails.expectedFname, basePath)
+
+	if testDetails.validateGpuMemoryWithKai {
+		template := actualResults.BatchJobTarget.Job.Spec.Template
+		pod := &corev1.Pod{ObjectMeta: template.ObjectMeta, Spec: template.Spec}
+		Expect(kairesources.ValidateGPUFractionRequest(pod)).To(Succeed())
+		parsed, parseErr := kairesources.ParsePodGPUFractionRequest(pod)
+		Expect(parseErr).NotTo(HaveOccurred())
+		Expect(parsed.Memory.Cmp(resource.MustParse(*supersetSpec.Compute.Get().GpuMemoryRequest.Get()))).To(BeZero())
+		if limit := supersetSpec.Compute.Get().GpuMemoryLimit.Get(); limit != nil {
+			Expect(parsed.Limit).NotTo(BeNil())
+			Expect(parsed.Limit.Cmp(resource.MustParse(*limit))).To(BeZero())
+		}
+	}
 
 	Expect(actualRequirements).To(Equal(testDetails.expectedRequirements), testDetailsStr)
 }

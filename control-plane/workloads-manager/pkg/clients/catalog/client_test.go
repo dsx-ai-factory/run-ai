@@ -17,8 +17,8 @@ import (
 func TestRecommendUsesGeneratedContract(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		require.Equal(t, http.MethodPost, r.Method)
-		require.Equal(t, "/api/v1/inference/right-sizing/recommendation", r.URL.Path)
-		var request catalog.RightSizingRequest
+		require.Equal(t, "/api/v1/catalog/right-sizing/recommendation", r.URL.Path)
+		var request catalog.RecommendationRequest
 		require.NoError(t, json.NewDecoder(r.Body).Decode(&request))
 		require.Equal(t, "cluster", request.ClusterId)
 		require.Equal(t, "NVIDIA-H100-80GB-HBM3", request.GetGpuType())
@@ -26,7 +26,7 @@ func TestRecommendUsesGeneratedContract(t *testing.T) {
 		_, _ = w.Write([]byte(`{"image":"nvcr.io/nim/meta/model","tag":"1.8.0","results":[]}`))
 	}))
 	defer server.Close()
-	request := catalog.NewRightSizingRequest("cluster", "nvcr.io/nim/meta/model", "1.8.0")
+	request := catalog.NewRecommendationRequest("cluster", "nvcr.io/nim/meta/model", "1.8.0")
 	request.SetGpuType("NVIDIA-H100-80GB-HBM3")
 	response, err := New(server.URL).Recommend(context.Background(), *request)
 	require.Nil(t, err)
@@ -43,7 +43,7 @@ func TestRecommendPreservesDependencyStatus(t *testing.T) {
 				_ = json.NewEncoder(w).Encode(map[string]any{"code": status, "message": "sizing unavailable"})
 			}))
 			defer server.Close()
-			_, err := New(server.URL).Recommend(context.Background(), catalog.RightSizingRequest{})
+			_, err := New(server.URL).Recommend(context.Background(), catalog.RecommendationRequest{})
 			require.NotNil(t, err)
 			require.Equal(t, status, int(err.Code))
 		})
@@ -56,7 +56,7 @@ func TestRecommendRejectsMalformedSuccessfulResponse(t *testing.T) {
 		_, _ = w.Write([]byte(`{"results":`))
 	}))
 	defer server.Close()
-	_, err := New(server.URL).Recommend(context.Background(), catalog.RightSizingRequest{})
+	_, err := New(server.URL).Recommend(context.Background(), catalog.RecommendationRequest{})
 	require.NotNil(t, err)
 	require.Equal(t, http.StatusBadGateway, int(err.Code))
 }

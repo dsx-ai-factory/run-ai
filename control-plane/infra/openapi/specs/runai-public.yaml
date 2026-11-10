@@ -13242,34 +13242,6 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/inference/right-sizing/recommendation:
-    post:
-      summary: Recommend GPU allocation for a NIM test/dev workload.
-      description: Returns recommendations without deploying or reserving resources. Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
-      operationId: recommend_inference_resources
-      tags:
-        - RightSizing
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RightSizingRequest'
-      responses:
-        '200':
-          description: Results per GPU type and capacity; may contain no recommendations.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RightSizingResponse'
-        '400':
-          $ref: '#/components/responses/400BadRequest'
-        '401':
-          $ref: '#/components/responses/401Unauthorized'
-        '403':
-          $ref: '#/components/responses/403Forbidden'
-        '503':
-          $ref: '#/components/responses/503ServiceUnavailable'
 components:
   schemas:
     ClusterIdOptional:
@@ -14284,6 +14256,9 @@ components:
           type: string
           example: v100
           minLength: 1
+        description:
+          type: string
+          description: The description of the node pool.
         labelKey:
           type: string
           description: Label key for associated nodes to the Node Pool (with value as in labelValue)
@@ -14567,6 +14542,11 @@ components:
           example: v100
           minLength: 1
           maxLength: 63
+        description:
+          type: string
+          nullable: true
+          maxLength: 250
+          description: The description of the node pool.
         labelKey:
           description: Label key for associated nodes to the Node Pool (with value as in labelValue)
           example: node-type
@@ -14599,6 +14579,11 @@ components:
     NodepoolUpdateFields:
       type: object
       properties:
+        description:
+          type: string
+          nullable: true
+          maxLength: 250
+          description: The description of the node pool.
         labelKey:
           type: string
           nullable: true
@@ -28350,6 +28335,8 @@ components:
     SamlData:
       type: object
       nullable: true
+      required:
+        - validateSignature
       properties:
         signingCertificate:
           type: string
@@ -28360,6 +28347,9 @@ components:
         serviceProviderMetadataUrl:
           type: string
           description: Service Provider (SP) metadata url
+        validateSignature:
+          type: boolean
+          description: Whether the signature of SAML responses from the identity provider is validated
     MandatoryClaim:
       type: object
       nullable: true
@@ -28582,6 +28572,9 @@ components:
           $ref: '#/components/schemas/OcpCreationData'
         mappers:
           $ref: '#/components/schemas/Mappers'
+        dryRun:
+          type: boolean
+          default: false
     IdpPostResponse:
       type: object
       required:
@@ -35916,109 +35909,6 @@ components:
       $ref: '#/components/schemas/GetBannerConfig'
     Logo:
       $ref: '#/components/schemas/GetLogo'
-    RightSizingRequest:
-      type: object
-      required:
-        - clusterId
-        - image
-        - tag
-      properties:
-        clusterId:
-          type: string
-          format: uuid
-          description: Cluster whose node-pool hardware metadata is evaluated.
-        image:
-          type: string
-          description: Untagged public nvcr.io/nim/organization/model image reference.
-        tag:
-          type: string
-          minLength: 1
-          description: Exact image tag. NGC does not automatically refresh latest metadata.
-        gpuType:
-          type: string
-          nullable: true
-          description: Exact inventory GPU type. Omitted or null evaluates all reported types and capacities.
-    RightSizingStatus:
-      type: string
-      enum:
-        - recommended
-        - no_recommendation
-    RightSizingAllocationType:
-      type: string
-      enum:
-        - gpu_memory
-        - gpu_count
-    RightSizingRecommendation:
-      type: object
-      nullable: true
-      required:
-        - allocationType
-        - gpuCount
-      properties:
-        allocationType:
-          $ref: '#/components/schemas/RightSizingAllocationType'
-        gpuCount:
-          type: integer
-          format: int64
-          minimum: 1
-        gpuMemoryPerDeviceBytes:
-          type: integer
-          format: int64
-          minimum: 1
-    RightSizingResult:
-      type: object
-      required:
-        - gpuType
-        - status
-      properties:
-        gpuType:
-          type: string
-        gpuMemoryCapacityBytes:
-          type: integer
-          format: int64
-          description: Reported per-device capacity, not free memory or a quota guarantee.
-        status:
-          $ref: '#/components/schemas/RightSizingStatus'
-        minimumGpuMemoryPerDeviceGb:
-          type: number
-          format: double
-          description: Published NGC minimum for the source profile, before allocation rounding.
-        profileId:
-          type: string
-        precision:
-          type: string
-        inferenceBackend:
-          type: string
-        tensorParallelSize:
-          type: integer
-          format: int64
-          minimum: 1
-          description: Explicit tensor parallel size from the selected published profile.
-        pipelineParallelSize:
-          type: integer
-          format: int64
-          minimum: 1
-          description: Explicit pipeline parallel size from the selected published profile.
-        reason:
-          type: string
-          description: Explanation when sizing cannot be recommended.
-        recommendation:
-          $ref: '#/components/schemas/RightSizingRecommendation'
-    RightSizingResponse:
-      type: object
-      required:
-        - image
-        - tag
-        - results
-      properties:
-        image:
-          type: string
-        tag:
-          type: string
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/RightSizingResult'
   responses:
     404NotFound:
       description: The specified resource was not found

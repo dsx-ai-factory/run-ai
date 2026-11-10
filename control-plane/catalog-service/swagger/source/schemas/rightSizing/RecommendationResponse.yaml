@@ -1,0 +1,18 @@
+type: object
+required: [image, tag, results]
+properties:
+  image:
+    type: string
+    description: >-
+      Untagged NIM image reference supplied in the request.
+  tag:
+    type: string
+    description: >-
+      Exact NIM image tag supplied in the request.
+  results:
+    type: array
+    items:
+      allOf:
+      - $ref: './RecommendationResult.yaml'
+    description: >-
+      One result per evaluated GPU type and per-device memory capacity. Empty when the cluster has no reported GPUs and no GPU type was requested.

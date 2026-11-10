@@ -45,13 +45,13 @@ const (
 
 type NimServicesImpl struct {
 	workloadsImpl *WorkloadsV2Impl
-	recommendGPU  func(context.Context, catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error)
+	recommendGPU  func(context.Context, catalog.RecommendationRequest) (*catalog.RecommendationResponse, *api.Error)
 }
 
 func NewNimServicesImpl(workloadsImpl *WorkloadsV2Impl) *NimServicesImpl {
 	return &NimServicesImpl{
 		workloadsImpl: workloadsImpl,
-		recommendGPU: func(ctx context.Context, request catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
+		recommendGPU: func(ctx context.Context, request catalog.RecommendationRequest) (*catalog.RecommendationResponse, *api.Error) {
 			return catalogClient.New(config.Get[*ourConfig.Services]().CatalogServiceUrl).Recommend(ctx, request)
 		},
 	}

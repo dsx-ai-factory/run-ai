@@ -17,6 +17,7 @@ type ClientRepository interface {
 	GetClient(ctx context.Context, realm string, ID string) (*models.Client, error)
 	UpdateRedirectUris(ctx context.Context, realm string, ID string, redirectUris []string) error
 	DeleteClient(ctx context.Context, realm string, ID string) error
+	DisableClient(ctx context.Context, realm string, ID string) error
 	GetClients(ctx context.Context, realm string, filter *models.ClientFilter) ([]models.Client, error)
 	GetClientSecret(ctx context.Context, realm string, ID string) (string, error)
 	GetClientByClientId(ctx context.Context, realm string, clientId string) (*models.Client, error)

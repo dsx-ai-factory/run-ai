@@ -1,0 +1,14 @@
+image: ubuntu
+labels:
+  - name: batch.kubernetes.io/controller-uid
+    value: user-value
+  - name: controller-uid
+    value: user-value
+  - name: batch.kubernetes.io/job-name
+    value: user-value
+  - name: job-name
+    value: user-value
+  - name: app.kubernetes.io/part-of
+    value: label-validation
+  - name: batch.kubernetes.io/custom-label
+    value: keep

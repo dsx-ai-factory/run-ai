@@ -22,8 +22,8 @@ func New(baseURL string) *Client {
 	return &Client{api: catalog.NewAPIClient(cfg)}
 }
 
-func (c *Client) Recommend(ctx context.Context, request catalog.RightSizingRequest) (*catalog.RightSizingResponse, *api.Error) {
-	result, response, err := c.api.RightSizingAPI.RecommendInferenceResources(ctx).RightSizingRequest(request).Execute()
+func (c *Client) Recommend(ctx context.Context, request catalog.RecommendationRequest) (*catalog.RecommendationResponse, *api.Error) {
+	result, response, err := c.api.RightSizingAPI.RecommendInferenceResources(ctx).RecommendationRequest(request).Execute()
 	if response != nil && response.Body != nil {
 		defer response.Body.Close()
 	}

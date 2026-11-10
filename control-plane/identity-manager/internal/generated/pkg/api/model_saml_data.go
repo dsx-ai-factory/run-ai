@@ -42,15 +42,35 @@ type SamlData struct {
 	//ServiceProviderMetadataUrl string `json:"serviceProviderMetadataUrl,omitempty"`
 	ServiceProviderMetadataUrl string `json:"serviceProviderMetadataUrl,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Whether the signature of SAML responses from the identity provider is validated
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//ValidateSignature bool `json:"validateSignature"`
+	ValidateSignature bool `json:"validateSignature" gorm:"not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertSamlDataRequired checks if the required fields are not zero-ed
 func AssertSamlDataRequired(obj SamlData) error {
+	elements := map[string]interface{}{
+		"validateSignature": obj.ValidateSignature,
+	}
+	for name, el := range elements {
+		if isZero := IsZeroValue(el); isZero {
+			return &RequiredError{Field: name}
+		}
+	}
+
 	return nil
 }
 
 // AssertSamlDataConstraints checks if the values respects the defined constraints
 func AssertSamlDataConstraints(obj SamlData) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

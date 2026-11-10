@@ -19,7 +19,11 @@ import (
 	gocloakInterface "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/gocloak"
 	"github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/models"
 	helpers "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/internal/iam/repositories/realms/helpers"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 )
+
+const adminCliClientID = "admin-cli"
 
 type KeycloakRealmRepository struct {
 	auth             auth.Auth
@@ -52,7 +56,31 @@ func (k *KeycloakRealmRepository) CreateRealm(ctx context.Context, realm *models
 	if err != nil {
 		return "", fmt.Errorf("failed to create realm. failed creating user profile attributes. err: %s", err.Error())
 	}
+	k.disableDefaultAdminCliClient(ctx, *realm.Name, *token)
 	return *realm.Name, nil
+}
+
+// disableDefaultAdminCliClient disables the admin-cli client (and its direct access grants) that Keycloak creates in every
+// new realm. Run:ai does not use it in tenant realms. Keycloak rejects deleting it with a 400, so it is disabled instead. This is best effort: the clients reconciler disables it as well, so a
+// failure here only leaves it until the next reconcile.
+func (k *KeycloakRealmRepository) disableDefaultAdminCliClient(ctx context.Context, realmName, accessToken string) {
+	clients, err := k.kcClient.GetClients(ctx, accessToken, realmName, gocloak.GetClientsParams{
+		ClientID: gocloak.StringP(adminCliClientID),
+	})
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to look up %s client in new realm %s: %v", adminCliClientID, realmName, err)
+		return
+	}
+	for _, client := range clients {
+		if client.ID == nil {
+			continue
+		}
+		client.Enabled = gocloak.BoolP(false)
+		client.DirectAccessGrantsEnabled = gocloak.BoolP(false)
+		if err := k.kcClient.UpdateClient(ctx, accessToken, realmName, *client); err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Failed to disable %s client in new realm %s: %v", adminCliClientID, realmName, err)
+		}
+	}
 }
 
 func (k *KeycloakRealmRepository) DisableRealm(ctx context.Context, realmName string) error {
