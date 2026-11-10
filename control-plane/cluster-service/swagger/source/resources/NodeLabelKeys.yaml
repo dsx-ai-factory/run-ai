@@ -12,9 +12,9 @@ get:
     - Nodes
   parameters:
     - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
-    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
     - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
     - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
   responses:
     200:
       description: Matching label keys. Returns an empty array when no keys match.

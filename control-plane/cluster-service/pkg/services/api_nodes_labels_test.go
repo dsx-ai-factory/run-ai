@@ -237,7 +237,7 @@ var _ = Describe("Node labels", func() {
 		DescribeTable("returns unique, sorted label keys",
 			func(search string, expected []string) {
 				By("Requesting label keys using the typed text")
-				response, err := nodeService.GetNodeLabelKeys(ctx, clusterID, search, 0, 50)
+				response, err := nodeService.GetNodeLabelKeys(ctx, clusterID, 0, 50, search)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(response.Code).To(Equal(http.StatusOK))
 				Expect(response.Body.([]string)).To(Equal(expected))
@@ -252,7 +252,7 @@ var _ = Describe("Node labels", func() {
 		DescribeTable("returns unique, sorted values for an exact label key",
 			func(key, search string, expected []string) {
 				By("Requesting values for the selected key using the typed text")
-				response, err := nodeService.GetNodeLabelValues(ctx, clusterID, key, search, 0, 50)
+				response, err := nodeService.GetNodeLabelValues(ctx, clusterID, key, 0, 50, search)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(response.Code).To(Equal(http.StatusOK))
 				Expect(response.Body.([]string)).To(Equal(expected))
@@ -405,7 +405,7 @@ var _ = Describe("Node labels", func() {
 		It("matches the selected label key exactly", func() {
 			By("Storing two label keys that share the same starting text but have different values")
 			syncNodes(api.NodeForSync{Name: "node-1", NodeInfo: nodeInfoWithLabels(map[string]string{"gpu": "a100", "gpu-type": "h100"})})
-			response, err := nodeService.GetNodeLabelValues(ctx, clusterID, "gpu", "", 0, 50)
+			response, err := nodeService.GetNodeLabelValues(ctx, clusterID, "gpu", 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Code).To(Equal(http.StatusOK))
 			Expect(response.Body.([]string)).To(Equal([]string{"a100"}))
@@ -431,12 +431,12 @@ var _ = Describe("Node labels", func() {
 				api.NodeForSync{Name: "node-1", NodeInfo: nodeInfoWithLabels(map[string]string{"gpu_type": "b_a"})},
 				api.NodeForSync{Name: "node-2", NodeInfo: nodeInfoWithLabels(map[string]string{"gpu-type": "bxa", "gpu_type": "bxa"})},
 			)
-			response, err := nodeService.GetNodeLabelKeys(ctx, clusterID, "gpu_", 0, 50)
+			response, err := nodeService.GetNodeLabelKeys(ctx, clusterID, 0, 50, "gpu_")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Body.([]string)).To(Equal([]string{"gpu_type"}))
 
 			By("Searching inside values without treating underscore as a wildcard")
-			response, err = nodeService.GetNodeLabelValues(ctx, clusterID, "gpu_type", "_", 0, 50)
+			response, err = nodeService.GetNodeLabelValues(ctx, clusterID, "gpu_type", 0, 50, "_")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Body.([]string)).To(Equal([]string{"b_a"}))
 		})
@@ -446,7 +446,7 @@ var _ = Describe("Node labels", func() {
 			syncNodes(api.NodeForSync{Name: "node-1", NodeInfo: nodeInfoWithLabels(map[string]string{"a": "new"})})
 
 			By("Checking that old values are absent from the dropdown")
-			response, err := nodeService.GetNodeLabelValues(ctx, clusterID, "a", "", 0, 50)
+			response, err := nodeService.GetNodeLabelValues(ctx, clusterID, "a", 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Body.([]string)).To(Equal([]string{"new"}))
 
@@ -476,10 +476,10 @@ var _ = Describe("Node labels", func() {
 			Expect(update.Code).To(Equal(http.StatusNoContent))
 
 			By("Checking that the selected cluster returns only its own keys")
-			response, err := nodeService.GetNodeLabelKeys(ctx, clusterID, "", 0, 50)
+			response, err := nodeService.GetNodeLabelKeys(ctx, clusterID, 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Body.([]string)).To(Equal([]string{"a", "b", "worker"}))
-			response, err = nodeService.GetNodeLabelValues(ctx, clusterID, "other-cluster", "", 0, 50)
+			response, err = nodeService.GetNodeLabelValues(ctx, clusterID, "other-cluster", 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Body.([]string)).To(Equal([]string{}))
 		})
@@ -488,11 +488,11 @@ var _ = Describe("Node labels", func() {
 			By("Requesting the original cluster as a different tenant")
 			otherTenantContext := context.WithValue(ctx, runaictx.CfTenantId, "19452")
 			otherTenantContext = context.WithValue(otherTenantContext, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{Tenants: []string{"19452"}})
-			response, err := nodeService.GetNodeLabelKeys(otherTenantContext, clusterID, "", 0, 50)
+			response, err := nodeService.GetNodeLabelKeys(otherTenantContext, clusterID, 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Code).To(Equal(http.StatusOK))
 			Expect(response.Body.([]string)).To(Equal([]string{}))
-			response, err = nodeService.GetNodeLabelValues(otherTenantContext, clusterID, "a", "", 0, 50)
+			response, err = nodeService.GetNodeLabelValues(otherTenantContext, clusterID, "a", 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Body.([]string)).To(Equal([]string{}))
 		})
@@ -501,12 +501,12 @@ var _ = Describe("Node labels", func() {
 			func(grantedScopes func() *authorization_api.PermittedScopes) {
 				By("Granting access at the selected cluster or system scope")
 				scopedContext := context.WithValue(ctx, authorization_utils.PermittedScopesKey, grantedScopes())
-				keys, err := nodeService.GetNodeLabelKeys(scopedContext, clusterID, "", 0, 50)
+				keys, err := nodeService.GetNodeLabelKeys(scopedContext, clusterID, 0, 50, "")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(keys.Code).To(Equal(http.StatusOK))
 				Expect(keys.Body.([]string)).To(Equal([]string{"a", "b", "worker"}))
 
-				values, err := nodeService.GetNodeLabelValues(scopedContext, clusterID, "a", "", 0, 50)
+				values, err := nodeService.GetNodeLabelValues(scopedContext, clusterID, "a", 0, 50, "")
 				Expect(err).NotTo(HaveOccurred())
 				Expect(values.Code).To(Equal(http.StatusOK))
 				Expect(values.Body.([]string)).To(Equal([]string{"b", "ba", "c"}))
@@ -523,10 +523,10 @@ var _ = Describe("Node labels", func() {
 		It("rejects requests without granted permissions", func() {
 			By("Making the request with a tenant identity but no authorization scopes")
 			unauthorizedContext := context.WithValue(context.Background(), runaictx.CfTenantId, "19451")
-			keys, err := nodeService.GetNodeLabelKeys(unauthorizedContext, clusterID, "", 0, 50)
+			keys, err := nodeService.GetNodeLabelKeys(unauthorizedContext, clusterID, 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(keys.Code).To(Equal(http.StatusForbidden))
-			values, err := nodeService.GetNodeLabelValues(unauthorizedContext, clusterID, "a", "", 0, 50)
+			values, err := nodeService.GetNodeLabelValues(unauthorizedContext, clusterID, "a", 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(values.Code).To(Equal(http.StatusForbidden))
 		})
@@ -534,10 +534,10 @@ var _ = Describe("Node labels", func() {
 		It("rejects requests outside the permitted cluster", func() {
 			By("Granting access only to a different cluster")
 			restrictedContext := context.WithValue(ctx, authorization_utils.PermittedScopesKey, &authorization_api.PermittedScopes{Clusters: []string{"another-cluster"}})
-			response, err := nodeService.GetNodeLabelKeys(restrictedContext, clusterID, "", 0, 50)
+			response, err := nodeService.GetNodeLabelKeys(restrictedContext, clusterID, 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Code).To(Equal(http.StatusForbidden))
-			response, err = nodeService.GetNodeLabelValues(restrictedContext, clusterID, "a", "", 0, 50)
+			response, err = nodeService.GetNodeLabelValues(restrictedContext, clusterID, "a", 0, 50, "")
 			Expect(err).NotTo(HaveOccurred())
 			Expect(response.Code).To(Equal(http.StatusForbidden))
 		})

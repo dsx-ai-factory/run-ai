@@ -204,7 +204,7 @@ func (s *NodeService) GetTenantNodes(ctx context.Context, filterBy []string, sor
 	return api.Response(http.StatusOK, response), nil
 }
 
-func (s *NodeService) GetNodeLabelKeys(ctx context.Context, clusterUuid, search string, offset, limit int32) (api.ImplResponse, error) {
+func (s *NodeService) GetNodeLabelKeys(ctx context.Context, clusterUuid string, offset, limit int32, search string) (api.ImplResponse, error) {
 	if offset < 0 {
 		return NewErrorResponse(api.NewError(http.StatusBadRequest, "Offset must not be negative", nil)), nil
 	}
@@ -228,7 +228,7 @@ func (s *NodeService) GetNodeLabelKeys(ctx context.Context, clusterUuid, search 
 	return api.Response(http.StatusOK, options), nil
 }
 
-func (s *NodeService) GetNodeLabelValues(ctx context.Context, clusterUuid, key, search string, offset, limit int32) (api.ImplResponse, error) {
+func (s *NodeService) GetNodeLabelValues(ctx context.Context, clusterUuid, key string, offset, limit int32, search string) (api.ImplResponse, error) {
 	if key == "" {
 		return NewErrorResponse(api.NewError(http.StatusBadRequest, "Label key is required", nil)), nil
 	}
