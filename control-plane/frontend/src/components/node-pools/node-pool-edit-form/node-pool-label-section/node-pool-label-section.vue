@@ -63,10 +63,7 @@ import { isNotEmpty, isValidRegExp } from "@/common/form.validators";
 import { errorMessages } from "@/common/error-message.constant";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import { RunaiSection } from "@/components/common/runai-section";
-const nodePoolValidationRegexp = {
-  labelKey: "^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?/?([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$",
-  labelValue: "^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$",
-};
+import { NODE_POOL_LABEL_REGEX as nodePoolValidationRegexp } from "@/models/node-pool.model";
 export default defineComponent({
   name: "node-pool-label-section",
   components: { RunaiSection, RunaiExpansionItem },

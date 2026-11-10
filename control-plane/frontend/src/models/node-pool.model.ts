@@ -187,3 +187,74 @@ export const NODE_POOL_NETWORK_DISCOVERY_OPTIONS: ISelectOption[] = [
 ];
 
 export const EMPTY_PRIORITY_LABEL = "empty";
+
+import type { NodepoolCreateFields, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
+// TODO: include limits: false after #4369 merges, including isProportional.
+export const PROPORTIONAL_CAPABILITIES = Object.freeze({
+  adjustableWeights: true,
+  quota: false,
+  ranks: false,
+  cpuQuota: false,
+} satisfies SchedulingCapabilitiesNullable);
+
+// Mirror defaults applied to omitted fields by cluster-service's nodepoolSetDefaults.
+// Keep optional version-gated fields out of the create payload until explicitly selected.
+export const NODE_POOL_CONFIGURATION_DEFAULTS = {
+  gpuNetworkAccelerationDetection: NodepoolGPUNetworkAccelerationDetection.Auto,
+  numaAwareScheduling: false,
+  gpuNodePlacement: PlacementStrategy.Binpack,
+  gpuDevicePlacement: PlacementStrategy.Binpack,
+  cpuNodePlacement: PlacementStrategy.Binpack,
+} as const;
+
+export function isProportional(capabilities?: SchedulingCapabilitiesNullable): boolean {
+  return (
+    capabilities?.adjustableWeights === true &&
+    capabilities.quota === false &&
+    capabilities.ranks === false &&
+    capabilities.cpuQuota === false
+  );
+}
+export interface INodePoolSummaryConfiguration extends NodepoolCreateFields {
+  clusterName?: string;
+  networkTopologyName?: string | null;
+}
+
+// Supplied by inventory/telemetry once available, never inferred from cluster-wide capacity.
+export interface INodePoolSummaryResources {
+  nodes?: number;
+  gpus?: number;
+  gpuMemoryBytes?: number;
+  gpuTypes?: string[];
+}
+
+export const NETWORK_ACCELERATION_LABELS: Record<NodepoolGPUNetworkAccelerationDetection, string> = {
+  [NodepoolGPUNetworkAccelerationDetection.Auto]: "Auto detect",
+  [NodepoolGPUNetworkAccelerationDetection.Use]: "Is present",
+  [NodepoolGPUNetworkAccelerationDetection.DontUse]: "Is not present",
+};
+
+export enum ENodePoolSchedulingMode {
+  Unknown = "Unknown",
+  Guaranteed = "Guaranteed quota",
+  Ranked = "Ranked",
+  Proportional = "Proportional",
+  Custom = "Custom",
+}
+
+export function getSchedulingMode(capabilities?: SchedulingCapabilitiesNullable): ENodePoolSchedulingMode {
+  if (!capabilities) return ENodePoolSchedulingMode.Unknown;
+  if (capabilities.quota) return ENodePoolSchedulingMode.Guaranteed;
+  if (capabilities.quota === false && capabilities.ranks) return ENodePoolSchedulingMode.Ranked;
+  if (isProportional(capabilities)) return ENodePoolSchedulingMode.Proportional;
+  return ENodePoolSchedulingMode.Custom;
+}
+
+export const SCHEDULING_MODE_DESCRIPTIONS: Partial<Record<ENodePoolSchedulingMode, string>> = {
+  Proportional: "GPU resources are distributed proportionally according to each department's and project's weight.",
+};
+
+export const NODE_POOL_LABEL_REGEX = {
+  labelKey: "^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?/?([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]$",
+  labelValue: "^(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])?$",
+};

@@ -4,6 +4,11 @@
  */
 
 export enum errorMessages {
+  NODE_LABEL_SUGGESTIONS_UNAVAILABLE = "Label suggestions are unavailable. You can enter a key or value manually.",
+  NODE_POOL_SAVE_FAILED = "Node pool could not be saved.",
+  NODE_POOL_LABEL_IN_USE = "This key-value pair is already in use by another node pool.",
+  NODE_POOL_LOADING_RETRY = "Retry before creating a node pool.",
+  NODE_POOL_CREATION_IN_PROGRESS = "Wait for node pool creation to finish.",
   VALUE_NOT_EMPTY = "Enter a value",
   SELECT_A_VALUE = "Select a value",
   ENTER_A_PORT = "Enter port",
@@ -21,6 +26,7 @@ export enum errorMessages {
   VALID_K8S_KEY_SHORT = "Enter a key including only a-z, 0-9, - _ . /, allowing only one /", // requires approval
   VALID_FORMAT_VALUE = "Enter a value including only a-z, 0-9, -",
   VALID_NAMESPACE = "Enter a namespace starting with a lowercase letter and including only a-z, 0-9, -",
+  DESCRIPTION_MAX_BYTES = "Description exceeds the 250-byte limit. Some characters use more than one byte.",
   NAME_NOT_EMPTY = "Enter a name",
   ENTRER_IDENTIFIER = "Enter identifier",
   PATH_NOT_EMPTY = "Enter a path",

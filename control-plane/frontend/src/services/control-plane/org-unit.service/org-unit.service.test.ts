@@ -5,10 +5,18 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
+const resetProjectsMock = vi.fn();
+const countProjectsMock = vi.fn();
+const resetDepartmentsMock = vi.fn();
 const batchDeleteReportsMock = vi.fn();
 
 vi.mock("@/services/infra/client-apis/org-unit-service-api/org-unit-service-api", () => ({
   orgUnitServiceApi: {
+    projectsApi: {
+      countProjects: (...args: unknown[]) => countProjectsMock(...args),
+      projectsResetResources: (...args: unknown[]) => resetProjectsMock(...args),
+    },
+    departmentsApi: { departmentsResetResources: (...args: unknown[]) => resetDepartmentsMock(...args) },
     reportsApi: {
       batchDeleteReports: (...args: unknown[]) => batchDeleteReportsMock(...args),
     },
