@@ -191,7 +191,6 @@ func LoadKindParameter(kind string) (*api.AssetKind, *api.Error) {
 		string(api.ASSETKIND_CONFIG_MAP),
 		string(api.ASSETKIND_SECRET_VOLUME),
 		string(api.ASSETKIND_S3),
-		string(api.ASSETKIND_WORKLOAD_TEMPLATE),
 		string(api.ASSETKIND_DOCKER_REGISTRY),
 		string(api.ASSETKIND_NGC_API_KEY):
 		result := api.AssetKind(kind)

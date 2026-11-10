@@ -60,7 +60,7 @@ func prepareNodeForUpsert(node *models.Node) []any {
 		node.GpuType, node.GpuCount, node.GpuMemoryBytes, node.CreatedAt, node.UpdatedAt,
 		node.NvLinkDomainUid, node.NvLinkCliqueId,
 		node.NetworkTopologyLabelValues, networkTopologyLabelsJSON,
-		node.TopologyManagerPolicy,
+		node.TopologyManagerPolicy, node.Labels,
 	}
 }
 
@@ -637,4 +637,82 @@ func DeleteClusterNodes(ctx context.Context, tenantId int32, clusterUuid string)
 	}
 
 	return nil
+}
+
+func GetNodeLabelKeys(
+	ctx context.Context,
+	tenantID int32,
+	clusterID, searchText string,
+	permittedScopes openapi.PermittedScopes,
+	offset, limit int32,
+) ([]string, *api.Error) {
+	const (
+		selectUniqueLabelKeys = "DISTINCT label.key AS label_key"
+		labelKeyContainsText  = "strpos(label.key, ?) > 0"
+	)
+
+	// DISTINCT removes duplicates; strpos matches literal, case-sensitive text.
+	query := nodeLabelsQuery(ctx, tenantID, clusterID, permittedScopes, offset, limit).
+		Select(selectUniqueLabelKeys).
+		Where(labelKeyContainsText, searchText).
+		Order("label_key")
+	return readNodeLabelOptions(query)
+}
+
+func GetNodeLabelValues(
+	ctx context.Context,
+	tenantID int32,
+	clusterID, labelKey, searchText string,
+	permittedScopes openapi.PermittedScopes,
+	offset, limit int32,
+) ([]string, *api.Error) {
+	const (
+		selectUniqueLabelValues             = "DISTINCT label.value AS label_value"
+		nonemptyLabelValueMatchesKeyAndText = "label.key = ? AND label.value <> '' AND strpos(label.value, ?) > 0"
+	)
+
+	// Match the selected key exactly and exclude values that node pool creation cannot use.
+	query := nodeLabelsQuery(ctx, tenantID, clusterID, permittedScopes, offset, limit).
+		Select(selectUniqueLabelValues).
+		Where(nonemptyLabelValueMatchesKeyAndText, labelKey, searchText).
+		Order("label_value")
+	return readNodeLabelOptions(query)
+}
+
+func nodeLabelsQuery(
+	ctx context.Context,
+	tenantID int32,
+	clusterID string,
+	permittedScopes openapi.PermittedScopes,
+	offset, limit int32,
+) orm.DB {
+	// Node pool creation accepts label keys up to 253 characters.
+	const maxNodepoolLabelKeyLength = 253
+
+	query := runaidb.DB().WithContext(ctx).Table(models.NodeTable).
+		Where("cluster_uuid = ?", clusterID).
+		Where(GetPermittedScopesFilter(permittedScopes, "cluster_uuid"))
+	if !runaictx.IsManagementTenant(ctx) {
+		query = query.Where("tenant_id = ? OR tenant_id IS NULL", tenantID)
+	}
+
+	// Labels are stored as a JSON map; expand it so SQL can filter individual keys and values.
+	query = query.
+		Joins("CROSS JOIN LATERAL jsonb_each_text(node.labels) AS label").
+		Where("length(label.key) <= ?", maxNodepoolLabelKeyLength)
+
+	// Return the requested page of options.
+	query = query.Offset(int(offset)).Limit(int(limit))
+
+	return query
+}
+
+func readNodeLabelOptions(query orm.DB) ([]string, *api.Error) {
+	// Keep an empty result as [] in the API response, rather than null.
+	options := []string{}
+	_, err := query.Scan(&options)
+	if err != nil {
+		return nil, api.NewError(http.StatusInternalServerError, "Failed to get node label options", err)
+	}
+	return options, nil
 }

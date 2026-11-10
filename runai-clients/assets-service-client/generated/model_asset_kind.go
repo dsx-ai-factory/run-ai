@@ -35,7 +35,6 @@ const (
 	ASSETKIND_NFS                     AssetKind = "nfs"
 	ASSETKIND_PVC                     AssetKind = "pvc"
 	ASSETKIND_HOST_PATH               AssetKind = "hostPath"
-	ASSETKIND_WORKLOAD_TEMPLATE       AssetKind = "workload-template"
 	ASSETKIND_MODEL                   AssetKind = "model"
 	ASSETKIND_CONFIG_MAP              AssetKind = "config-map"
 	ASSETKIND_SECRET_VOLUME           AssetKind = "secret-volume"
@@ -58,7 +57,6 @@ var AllowedAssetKindEnumValues = []AssetKind{
 	"nfs",
 	"pvc",
 	"hostPath",
-	"workload-template",
 	"model",
 	"config-map",
 	"secret-volume",

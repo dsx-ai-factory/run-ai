@@ -335,11 +335,6 @@ func NewAssetKindTable(router chi.Router) []ginkgo.TableEntry {
 			supportsCleanup:            true,
 		}),
 
-		ginkgo.Entry(string(api.ASSETKIND_WORKLOAD_TEMPLATE), AssetTest{
-			kind: api.ASSETKIND_WORKLOAD_TEMPLATE, factory: NewTemplateTestFactory(router),
-			url: urlTemplate,
-		}),
-
 		ginkgo.Entry(string(api.ASSETKIND_REGISTRY), AssetTest{
 			kind: api.ASSETKIND_REGISTRY, factory: NewRegistryTestFactory(router),
 			url:                       urlRegistry,
@@ -395,7 +390,6 @@ type AssetSpec interface {
 		api.NfsAssetSpec |
 		api.PvcAssetSpec |
 		api.HostPathSpec |
-		api.WorkloadTemplate |
 		api.RegistrySpec |
 		api.ConfigMapAssetSpec |
 		api.GenericSecretSpec |
@@ -465,11 +459,6 @@ func (gt GenericTest[AssetSpec]) validateListContent(router chi.Router, listRequ
 				actualUsedBy.Add(training.Id)
 			}
 		}
-		if entry.UsedBy != nil && entry.UsedBy.Templates != nil {
-			for _, template := range entry.UsedBy.Templates {
-				actualUsedBy.Add(template.Id)
-			}
-		}
 		entry.UsedBy = nil           // clean the usedBy information as this is checked separately
 		entry.Meta.ProjectName = nil // ignore the projectName in the comparison because the expected typically does not have it
 		actual[entry.Meta.Id] = entry
@@ -520,11 +509,6 @@ func validateUsageInfoOfAsset(router chi.Router, getHttpReq *http.Request, expec
 		if getResponse.UsedBy.Trainings != nil {
 			for _, training := range getResponse.UsedBy.Trainings {
 				actualUsedBy.Add(training.Id)
-			}
-		}
-		if getResponse.UsedBy.Templates != nil {
-			for _, temp := range getResponse.UsedBy.Templates {
-				actualUsedBy.Add(temp.Id)
 			}
 		}
 	}

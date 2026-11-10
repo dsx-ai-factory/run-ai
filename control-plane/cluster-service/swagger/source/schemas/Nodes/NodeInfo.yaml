@@ -4,6 +4,12 @@ required:
   - nodePool
   - createdAt
 properties:
+  labels:
+    writeOnly: true
+    type: object
+    additionalProperties:
+      type: string
+    description: Labels assigned to the node.
   status:
     type: string
     enum:

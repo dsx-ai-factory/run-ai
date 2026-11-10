@@ -35,6 +35,9 @@ type TableAssetIDer interface {
 // DeleteAssetsByScope deletes all the assets under a target scope
 func DeleteAssetsByScope(ctx context.Context, scopeType api.ScopeType, scopeId string) error {
 	db := runaidb.DB().WithContext(ctx)
+	if err := deleteLegacyTemplatesByScope(ctx, db, scopeType, scopeId); err != nil {
+		return err
+	}
 	var err error
 
 	// splitting the assets into 3 layers to avoid foreign key constraints
@@ -42,7 +45,6 @@ func DeleteAssetsByScope(ctx context.Context, scopeType api.ScopeType, scopeId s
 	// Note that workloads are deleted before invoking this function
 	layerThree := []api.AssetKind{
 		api.ASSETKIND_MODEL,
-		api.ASSETKIND_WORKLOAD_TEMPLATE,
 	}
 	layerTwo := []api.AssetKind{
 		api.ASSETKIND_PVC,
@@ -129,12 +131,11 @@ func deleteAssetsByScope(ctx context.Context, db orm.DB, kind api.AssetKind, sco
 
 func deleteAssetsFromBookkeepingTable(tx orm.DB, paginatedIDs []string) error {
 	// list of bookkeeping tables that need to be cleaned up
-	// workloads_assets and workload template are deleted as part of the main flow
+	// workloads_assets is deleted as part of the main flow
 	tables := []TableAssetIDer{
 		dbmodel.WorkloadSupportedTypesRec{},
 		dbmodel.LastUsedByWorkloadRecord{},
 		dbmodel.PolicyComplianceRecord{},
-		dbmodel.TemplateContentRec{},
 	}
 
 	for _, table := range tables {

@@ -121,13 +121,9 @@ async function getPolicy(projectId: number): Promise<InferencePolicyV2> {
   return policyService.getInferencePolicyByScope({ scope: ScopeType.Project, projectId });
 }
 
-async function getInferenceMergedWithPolicy(
-  projectId?: string,
-  workloadId?: string,
-  templateId?: string,
-): Promise<InferenceV2> {
+async function getInferenceMergedWithPolicy(projectId?: string, workloadId?: string): Promise<InferenceV2> {
   try {
-    const response = await assetsServiceApi.inferenceApi.getInferenceMerged(projectId, workloadId, templateId);
+    const response = await assetsServiceApi.inferenceApi.getInferenceMerged(projectId, workloadId);
     return response.data;
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);

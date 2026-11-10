@@ -81,7 +81,7 @@ func run() error {
 		log.Info().
 			Str("agentNodeSelector", cfg.SnapshotAgentNodeSelector).
 			Msg("snapshot integration enabled")
-		options = append(options, app.WithManagerSetup(snapshotrestore.NewSetup()))
+		options = append(options, app.WithManagerSetup(snapshotrestore.NewSetup(cfg.AgentNodeSelector())))
 	} else {
 		log.Debug().Msg("snapshot integration inactive")
 	}

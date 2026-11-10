@@ -48,7 +48,6 @@ export enum SettingKeys {
   EnableHybridSubmission = "tenant.enable_hybrid_submission",
   EnableDataVolumes = "tenant.enable_data_volumes",
   AutoRedirectToSSO = "tenant.auto_redirect_to_sso",
-  EnableTemplatesV2 = "tenant.enable_templates_v2",
   EnableNgcIntegration = "tenant.enable_ngc_integration",
   YamlSubmission = "yamlSubmission",
   ApplicationSubmission = "applicationSubmission",
@@ -146,8 +145,6 @@ export interface IEnablePoliciesSetting extends IFlagSetting {}
 
 export interface IEnableHybridSubmissionSetting extends IFlagSetting {}
 
-export interface IEnableTemplatesV2Setting extends IFlagSetting {}
-
 export interface IGpuOverProvisioningSetting extends IFlagSetting {}
 
 export interface IEnableNgcIntegrationSetting extends IFlagSetting {}
@@ -175,7 +172,6 @@ export interface IWorkloadsSectionSettings {
   nim?: Setting;
   hybridSubmission?: Setting;
   dataVolumes?: Setting;
-  templatesV2?: Setting;
   ngcIntegration?: Setting;
   yamlSubmission?: Setting;
   applicationSubmission?: Setting;

@@ -232,31 +232,6 @@ var _ = Describe("TestSecretVolumeAsset", func() {
 			})
 		})
 
-		Context("delete Secret Storage asset used by template(s)", func() {
-			It("should fail on precondition ", func() {
-				env, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-				secret, _, _ := createSecretVolumeAsset(&randoms.ClusterId, testing.BuildRandomProjectSecretVolumeAsset(randoms, nil), router, headerForAdmin(randoms))
-
-				templatePayload := buildRandomProjectTemplate(randoms, env.Meta.Id)
-				templatePayload.Spec.Assets.Datasources = []api.AssetIdAndKind{
-					{
-						Kind: api.ASSETKIND_SECRET_VOLUME,
-						Id:   secret.Meta.Id,
-					},
-				}
-				template, _, _ := createTemplateAsset(templatePayload, router, headerForAdmin(randoms))
-
-				deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlSecretVolume, secret.Meta.Id), nil)
-				Expect(err).To(BeNil())
-				deleteHttpReq.Header = *headerForAdmin(randoms)
-
-				deleteHttpResp := httptest.NewRecorder()
-				router.ServeHTTP(deleteHttpResp, deleteHttpReq)
-				Expect(deleteHttpResp.Code).To(Equal(http.StatusPreconditionFailed))
-				Expect(deleteHttpResp.Body.String()).To(ContainSubstring(fmt.Sprintf("the requested %s asset is being used by template '%s'", api.ASSETKIND_SECRET_VOLUME, template.Meta.Name)))
-			})
-		})
-
 		Context("Fail to create secret in non-implemented scopes", func() {
 			It("tenant scope", func() {
 				request := testing.BuildRandomTenantSecretVolumeAsset()

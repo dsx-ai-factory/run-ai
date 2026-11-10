@@ -12,7 +12,6 @@ import {
   type EnvironmentAsset,
   type Training,
   type WorkloadCreationRequest,
-  type WorkloadTemplate,
   GpuRequestType,
   type TrainingV2,
 } from "@/swagger-models/assets-service-client";
@@ -535,52 +534,6 @@ const trainingAssetsEditMockedData = {
       allocatedGpus: 0,
     },
   ] as IProjectResources[],
-  loadedTemplates: [
-    {
-      meta: {
-        name: "test-template",
-        scope: "project",
-        clusterId: "37b28c5a-d60c-40eb-b4a8-ff9ab4d28b81",
-        projectId: 1,
-        id: "d3481435-996e-4ca2-9e52-00f8d8203725",
-        kind: "workload-template",
-        tenantId: 1,
-        createdBy: "test@run.ai",
-        createdAt: "2023-03-15T15:29:13.340953Z",
-        updatedBy: "test@run.ai",
-        updatedAt: "2023-03-15T15:29:13.340953Z",
-        projectName: "rotem-test-1",
-      },
-      spec: {
-        assets: {
-          environment: {
-            id: "3c6fc0e5-effa-4a55-85f9-5adb6278ce50",
-            name: "test-template-1",
-            toolTypes: ["jupyter-notebook", "mlflow", "rstudio"],
-          },
-          compute: {
-            id: "ed644ac3-1a72-4419-9dc5-e424950d02ef",
-            name: "cpu-only",
-          },
-        },
-        specificEnv: {
-          command: "cmd-1",
-          args: "arg-1",
-          environmentVariables: [
-            {
-              name: "var-1",
-              value: "12",
-            },
-          ],
-          connections: [],
-          runAsUid: 5,
-          runAsGid: 3,
-          supplementalGroups: "5,5,5",
-          allowOverQuota: false,
-        },
-      },
-    },
-  ] as WorkloadTemplate[],
   loadedPolicy: {
     effective: {
       defaults: {
@@ -1741,42 +1694,6 @@ const loadedTrainingMergedWithPolicy: TrainingV2 = {
   },
 };
 
-const loadedWorkloadTemplateById: WorkloadTemplate = {
-  meta: {
-    name: "temp-to-copy",
-    scope: "project",
-    clusterId: "4d724d30-3ae0-4771-8e19-4421c0ea9ab0",
-    projectId: 3,
-    id: "20071a79-9f07-42a6-9ddc-390f2ab9e1ac",
-    kind: "workload-template",
-    tenantId: 1,
-    createdBy: "test@run.ai",
-    createdAt: "2023-03-14T08:44:34.240673Z",
-    updatedBy: "test@run.ai",
-    updatedAt: "2023-03-14T08:44:34.240673Z",
-    projectName: "project-1",
-  },
-  spec: {
-    assets: {
-      environment: {
-        id: "75eb8c42-d8b8-47c6-9644-b3c17985ef8d",
-        name: "jupyter-lab",
-      },
-      compute: {
-        id: "3d617a5a-a905-4e20-83d3-05694eab9cd4",
-        name: "cpu-only",
-      },
-    },
-    specificEnv: {
-      command: "start-notebook.sh",
-      args: "--NotebookApp.base_url=/${RUNAI_PROJECT}/${RUNAI_JOB_NAME} --NotebookApp.token=''",
-      environmentVariables: [],
-      connections: [],
-      allowOverQuota: false,
-    },
-  },
-};
-
 const trainingCreateMock: WorkloadCreationRequest = {
   name: "test-mock-ws",
   clusterId: "",
@@ -1793,6 +1710,5 @@ export {
   loadedTrainingById,
   loadedTrainingByIdV2,
   loadedTrainingMergedWithPolicy,
-  loadedWorkloadTemplateById,
   trainingCreateMock,
 };

@@ -23,7 +23,6 @@ api_resource_claim_templates.go
 api_s3.go
 api_secret.go
 api_synchronization.go
-api_template.go
 api_trainings.go
 api_workload.go
 api_workspaces.go
@@ -433,7 +432,6 @@ docs/SpecificRunAutoScaling.md
 docs/SpecificRunAutoScalingAutoScaling.md
 docs/SpecificRunConnectionInfo.md
 docs/SpecificRunConnections.md
-docs/SpecificRunCreationFields.md
 docs/SpecificRunInfoFields.md
 docs/SpecificRunMetricFields.md
 docs/SpecificRunParamAttrDefaults.md
@@ -452,7 +450,6 @@ docs/SupersetSpecAllOfSecurity.md
 docs/SupersetSpecAllOfStorage.md
 docs/SynchronizationAPI.md
 docs/SystemInfo.md
-docs/TemplateAPI.md
 docs/Toleration.md
 docs/TolerationEffect.md
 docs/TolerationEffectOptions.md
@@ -485,10 +482,6 @@ docs/WorkloadRefAndStatus.md
 docs/WorkloadState.md
 docs/WorkloadStatusUpdate.md
 docs/WorkloadSupportedTypes.md
-docs/WorkloadTemplate.md
-docs/WorkloadTemplateCreationRequest.md
-docs/WorkloadTemplateListResponse.md
-docs/WorkloadTemplateUpdateRequest.md
 docs/WorkloadType.md
 docs/Workspace.md
 docs/WorkspaceCreationRequestV2.md
@@ -884,7 +877,6 @@ model_specific_run_auto_scaling.go
 model_specific_run_auto_scaling_auto_scaling.go
 model_specific_run_connection_info.go
 model_specific_run_connections.go
-model_specific_run_creation_fields.go
 model_specific_run_info_fields.go
 model_specific_run_metric_fields.go
 model_specific_run_param_attr_defaults.go
@@ -932,10 +924,6 @@ model_workload_ref_and_status.go
 model_workload_state.go
 model_workload_status_update.go
 model_workload_supported_types.go
-model_workload_template.go
-model_workload_template_creation_request.go
-model_workload_template_list_response.go
-model_workload_template_update_request.go
 model_workload_type.go
 model_workspace.go
 model_workspace_creation_request_v2.go
@@ -963,7 +951,6 @@ test/api_resource_claim_templates_test.go
 test/api_s3_test.go
 test/api_secret_test.go
 test/api_synchronization_test.go
-test/api_template_test.go
 test/api_trainings_test.go
 test/api_workload_test.go
 test/api_workspaces_test.go

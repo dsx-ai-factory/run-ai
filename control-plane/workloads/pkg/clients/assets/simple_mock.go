@@ -31,8 +31,6 @@ type AssetSpecToFlatKey struct {
 type SimpleMock struct {
 	AssetMeta map[string]*assetsService.AssetMeta
 
-	Templates map[string]*assetsService.SpecificRunInfoFields
-
 	AssetSpecToFlat map[AssetSpecToFlatKey]*assetsService.SupersetSpec
 
 	Credentials []assetsService.CredentialsListResponseEntry
@@ -42,7 +40,6 @@ func NewSimpleMock() *SimpleMock {
 	return &SimpleMock{
 		AssetSpecToFlat: make(map[AssetSpecToFlatKey]*assetsService.SupersetSpec),
 		AssetMeta:       make(map[string]*assetsService.AssetMeta),
-		Templates:       make(map[string]*assetsService.SpecificRunInfoFields),
 		Credentials:     make([]assetsService.CredentialsListResponseEntry, 0),
 	}
 }
@@ -52,13 +49,6 @@ func (smc *SimpleMock) WithMapping(workloadType api.WorkloadType, assetId string
 		WorkloadType: assetsService.WorkloadType(workloadType),
 		AssetId:      assetId,
 	}] = flatFormat
-
-	return smc
-}
-
-func (smc *SimpleMock) WithTemplate(template assetsService.WorkloadTemplate) *SimpleMock {
-	smc.AssetMeta[template.Meta.Id] = &template.Meta
-	smc.Templates[template.Meta.Id] = &template.Spec
 
 	return smc
 }
@@ -140,21 +130,6 @@ func (smc *SimpleMock) RequestAssetFlatFormat(ctx context.Context, request asset
 	}
 
 	return &response, nil
-}
-
-func (smc *SimpleMock) ListTemplatesOfTenant(_ context.Context) (*assetsService.WorkloadTemplateListResponse, *assetsService.Error) {
-	result := assetsService.WorkloadTemplateListResponse{
-		Entries: make([]assetsService.WorkloadTemplate, 0),
-	}
-
-	for assetId, spec := range smc.Templates {
-		result.Entries = append(result.Entries, assetsService.WorkloadTemplate{
-			Meta: *smc.AssetMeta[assetId],
-			Spec: *spec,
-		})
-	}
-
-	return &result, nil
 }
 
 func (smc *SimpleMock) ListCredentialsAssets(_ context.Context, privateOnly bool) (*assetsService.CredentialsListResponse, *assetsService.Error) {
