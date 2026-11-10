@@ -7,123 +7,100 @@ import (
 	"context"
 	"encoding/json"
 	"os"
-	"testing"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/internal/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/gpuinventory"
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/ngcmetadata"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func TestExactLlamaTagSelectsPrecisionPerHardware(t *testing.T) {
-	data, err := os.ReadFile("testdata/llama-3.1-8b-instruct-2.0.13.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	var metadata ngcmetadata.Metadata
-	if err = json.Unmarshal(data, &metadata); err != nil {
-		t.Fatal(err)
-	}
-	capacity := int64(80_000_000_000)
-	for _, tc := range []struct {
-		gpu, precision, profile string
-		minimum                 float64
-	}{
-		{"NVIDIA-A100-SXM4-40GB", "bf16", "092ed4213624e774d24cdaf84e3b6222839bab2008a21d3c214ab46626366f90", 33},
-		{"NVIDIA-A100-SXM4-80GB", "bf16", "092ed4213624e774d24cdaf84e3b6222839bab2008a21d3c214ab46626366f90", 33},
-		{"NVIDIA-H100-80GB-HBM3", "fp8", "4d9fed9cb9fa4c5694b793a6421b62077b812e4e0326a10032b948cc9ddc0712", 27},
-		{"NVIDIA-B200", "nvfp4", "20739fe3e660205a0a64339c06bf2aa5c90f4935dd5e547b2b22d96f9c91fbc4", 24},
-	} {
-		t.Run(tc.gpu, func(t *testing.T) {
-			r := recommendForHardware(gpuinventory.Hardware{Type: tc.gpu, MemoryBytes: &capacity, MaxDevicesPerNode: 8}, metadata.Profiles, 90)
-			if r.Status != "recommended" || r.ProfileId != tc.profile || r.Precision != tc.precision || r.InferenceBackend != "vllm" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum {
-				t.Fatalf("wrong profile: %+v", r)
-			}
+var _ = Describe("GPU-agnostic exact-tag sizing", func() {
+	for _, gpuType := range []string{"NVIDIA-A100-SXM4-40GB", "NVIDIA-A100-SXM4-80GB", "NVIDIA-H100-80GB-HBM3", "NVIDIA-B200", "unmapped-product"} {
+		It("uses the generic profile for "+gpuType, func() {
+			data, err := os.ReadFile("testdata/llama-3.1-8b-instruct-2.0.13.json")
+			Expect(err).NotTo(HaveOccurred())
+			var metadata ngcmetadata.Metadata
+			Expect(json.Unmarshal(data, &metadata)).To(Succeed())
+			capacity := int64(80_000_000_000)
+			result := recommendForHardware(gpuinventory.Hardware{Type: gpuType, MemoryBytes: &capacity, MaxDevicesPerNode: 8}, metadata.Profiles, 90)
+			Expect(string(result.Status)).To(Equal("recommended"))
+			Expect(result.ProfileId).To(Equal("20739fe3e660205a0a64339c06bf2aa5c90f4935dd5e547b2b22d96f9c91fbc4"))
+			Expect(result.Precision).To(Equal("nvfp4"))
+			Expect(result.InferenceBackend).To(Equal("vllm"))
+			Expect(result.MinimumGpuMemoryPerDeviceGb).To(Equal(24.0))
 		})
 	}
-}
+})
 
 func sizingProfile(id string, minimum float64) ngcmetadata.Profile {
 	one := 1
 	return ngcmetadata.Profile{ID: id, MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &one, PipelineParallelSize: &one}
 }
 
-func TestNGCTargetingTiersAndFit(t *testing.T) {
-	direct := sizingProfile("direct", 36)
-	direct.GPUDevice = "20b2:10de"
-	tested := sizingProfile("tested", 30)
-	tested.GPU = "another-name"
-	tested.TestedGPUDevices = []string{"20b2:10de"}
-	generic := sizingProfile("generic", 20)
-	genericEmpty := generic
-	genericEmpty.TestedGPUDevices = []string{}
-	foreign := sizingProfile("foreign", 10)
-	foreign.GPUDevice = "2330:10de"
-	named := sizingProfile("named", 10)
-	named.GPU = "NVIDIA-A100-SXM4-80GB"
-	oversized := sizingProfile("oversized", 81)
-	oversized.GPUDevice = "20b2:10de"
-	noMinimum := direct
-	noMinimum.MinimumVRAMPerDeviceGB = nil
-	capacity := int64(80_000_000_000)
-	for _, tc := range []struct {
-		name, gpu, want string
-		profiles        []ngcmetadata.Profile
-	}{
-		{"direct with empty tested list wins", "NVIDIA-A100-SXM4-80GB", "direct", []ngcmetadata.Profile{generic, tested, direct}},
-		{"tested wins over generic", "NVIDIA-A100-SXM4-80GB", "tested", []ngcmetadata.Profile{generic, tested}},
-		{"generic with empty tested list", "NVIDIA-A100-SXM4-80GB", "generic", []ngcmetadata.Profile{genericEmpty}},
-		{"generic with no tested list", "NVIDIA-A100-SXM4-80GB", "generic", []ngcmetadata.Profile{generic}},
-		{"unknown PCI still permits generic", "unknown-GPU", "generic", []ngcmetadata.Profile{direct, generic}},
-		{"ambiguous PCI still permits generic", "NVIDIA-B200", "generic", []ngcmetadata.Profile{direct, generic}},
-		{"no matching target", "NVIDIA-A100-SXM4-80GB", "", []ngcmetadata.Profile{foreign}},
-		{"display name alone cannot match", "NVIDIA-A100-SXM4-80GB", "", []ngcmetadata.Profile{named}},
-		{"fitting fallback survives oversized direct", "NVIDIA-A100-SXM4-80GB", "generic", []ngcmetadata.Profile{oversized, generic}},
-		{"missing minimum permits tested fallback", "NVIDIA-A100-SXM4-80GB", "tested", []ngcmetadata.Profile{noMinimum, tested}},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			r := recommendForHardware(gpuinventory.Hardware{Type: tc.gpu, MemoryBytes: &capacity, MaxDevicesPerNode: 8}, tc.profiles, 90)
-			if r.ProfileId != tc.want {
-				t.Fatalf("profile=%q want=%q; result=%+v", r.ProfileId, tc.want, r)
+var _ = Describe("GPU-agnostic profile applicability", func() {
+	DescribeTable("does not infer hardware identity from product names or tested devices",
+		func(targetGPU, targetDevice string, testedDevices []string, eligible bool) {
+			profile := sizingProfile("published", 33)
+			profile.GPU, profile.GPUDevice, profile.TestedGPUDevices = targetGPU, targetDevice, testedDevices
+			capacity := int64(80_000_000_000)
+			result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{profile}, 90)
+			if eligible {
+				Expect(string(result.Status)).To(Equal("recommended"))
+				Expect(result.ProfileId).To(Equal("published"))
+				Expect(result.Recommendation).NotTo(BeNil())
+			} else {
+				Expect(string(result.Status)).To(Equal("no_recommendation"))
+				Expect(result.Reason).To(ContainSubstring("GPU-agnostic"))
+				Expect(result.Recommendation).To(BeNil())
 			}
-			if tc.want == "" && (r.Status != "no_recommendation" || r.Reason == "" || r.Recommendation != nil) {
-				t.Fatalf("missing recommendation reason: %+v", r)
-			}
-		})
-	}
-}
+		},
+		Entry("no hardware fields", "", "", nil, true),
+		Entry("empty tested-device list", "", "", []string{}, true),
+		Entry("matching tested device does not change eligibility", "", "", []string{"20b2:10de"}, true),
+		Entry("unrelated tested device does not restrict a generic profile", "", "", []string{"2901:10de"}, true),
+		Entry("matching product name remains explicitly targeted", "NVIDIA-A100-SXM4-80GB", "", nil, false),
+		Entry("matching device ID remains explicitly targeted", "", "20b2:10de", nil, false),
+		Entry("matching tested device does not enable a targeted profile", "another-product", "", []string{"20b2:10de"}, false),
+	)
+})
 
-func TestMixedInventoryAndExplicitGPUType(t *testing.T) {
+var _ = It("keeps inventory GPU type filtering separate from profile selection", func() {
 	small, large := int64(40_000_000_000), int64(80_000_000_000)
-	a := sizingProfile("a100", 33)
-	a.GPUDevice = "20b2:10de"
-	a.Precision = "bf16"
-	h := sizingProfile("h100", 27)
-	h.GPUDevice = "2330:10de"
-	h.Precision = "fp8"
-	s := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, error) {
+	generic := sizingProfile("generic", 60)
+	targeted := sizingProfile("targeted", 10)
+	targeted.GPUDevice = "20b2:10de"
+	service := New(inventoryFunc(func(context.Context, string) ([]gpuinventory.Hardware, *api.Error) {
 		return []gpuinventory.Hardware{
-			{Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &small, MaxDevicesPerNode: 8}, {Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &large, MaxDevicesPerNode: 8},
-			{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &large, MaxDevicesPerNode: 8}, {Type: "unmatched", MemoryBytes: &large, MaxDevicesPerNode: 8}}, nil
-	}),
-		metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, error) {
-			return ngcmetadata.Metadata{Profiles: []ngcmetadata.Profile{a, h}}, nil
-		}), 90)
+			{Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &small, MaxDevicesPerNode: 8},
+			{Type: "NVIDIA-A100-SXM4-80GB", MemoryBytes: &large, MaxDevicesPerNode: 8},
+			{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &large, MaxDevicesPerNode: 8},
+			{Type: "unmapped-product", MemoryBytes: &large, MaxDevicesPerNode: 8},
+		}, nil
+	}), metadataFunc(func(context.Context, string, string) (ngcmetadata.Metadata, *api.Error) {
+		return ngcmetadata.Metadata{Profiles: []ngcmetadata.Profile{targeted, generic}}, nil
+	}), 90)
 	request := validRequest()
-	r, err := s.Recommend(context.Background(), request)
-	if err != nil {
-		t.Fatal(err)
+	response, err := service.Recommend(context.Background(), request)
+	Expect(err).To(BeNil())
+	Expect(response.Results).To(HaveLen(4))
+	Expect(string(response.Results[0].Status)).To(Equal("no_recommendation"))
+	for _, result := range response.Results[1:] {
+		Expect(result.ProfileId).To(Equal("generic"))
 	}
-	if len(r.Results) != 4 || r.Results[0].ProfileId != "a100" || r.Results[1].ProfileId != "a100" || r.Results[2].ProfileId != "h100" || r.Results[3].Status != "no_recommendation" {
-		t.Fatalf("mixed inventory: %+v", r)
+	gpuType := "NVIDIA-A100-SXM4-80GB"
+	request.GpuType = &gpuType
+	response, err = service.Recommend(context.Background(), request)
+	Expect(err).To(BeNil())
+	Expect(response.Results).To(HaveLen(2))
+	Expect(string(response.Results[0].Status)).To(Equal("no_recommendation"))
+	Expect(response.Results[1].ProfileId).To(Equal("generic"))
+	for _, result := range response.Results {
+		Expect(result.GpuType).To(Equal(gpuType))
 	}
-	gpu := "NVIDIA-A100-SXM4-80GB"
-	request.GpuType = &gpu
-	r, err = s.Recommend(context.Background(), request)
-	if err != nil || len(r.Results) != 2 || r.Results[0].ProfileId != "a100" || r.Results[1].ProfileId != "a100" {
-		t.Fatalf("explicit type: %+v error=%v", r, err)
-	}
-}
+})
 
-func TestRecommendationAllocationBoundaries(t *testing.T) {
+var _ = Describe("recommendation allocation boundaries", func() {
 	capacity := int64(100_000_000_000)
 	for _, tc := range []struct {
 		name          string
@@ -138,12 +115,15 @@ func TestRecommendationAllocationBoundaries(t *testing.T) {
 		{"exactly capacity", 100, 90, "gpu_count", 1, 100_000_000_000},
 		{"configured 80 percent", 85, 80, "gpu_count", 1, 100_000_000_000},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
+		It(tc.name, func() {
 			r := recommendForHardware(gpuinventory.Hardware{Type: "unknown", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{sizingProfile("generic", tc.minimum)}, tc.cutoff)
 			a := r.Recommendation
-			if r.Status != "recommended" || r.MinimumGpuMemoryPerDeviceGb != tc.minimum || a == nil || string(a.AllocationType) != tc.allocation || a.GpuCount != tc.count || a.GpuMemoryPerDeviceBytes != tc.memory {
-				t.Fatalf("allocation=%+v result=%+v", a, r)
-			}
+			Expect(string(r.Status)).To(Equal("recommended"))
+			Expect(r.MinimumGpuMemoryPerDeviceGb).To(Equal(tc.minimum))
+			Expect(a).NotTo(BeNil())
+			Expect(string(a.AllocationType)).To(Equal(tc.allocation))
+			Expect(a.GpuCount).To(Equal(tc.count))
+			Expect(a.GpuMemoryPerDeviceBytes).To(Equal(tc.memory))
 		})
 	}
-}
+})

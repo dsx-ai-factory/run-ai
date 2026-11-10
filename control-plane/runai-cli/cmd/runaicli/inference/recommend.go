@@ -30,7 +30,7 @@ func newRecommendCommand() *cobra.Command {
 		// notices or restart the CLI after the response. Keep transaction reporting.
 		PersistentPostRunE: reporter.Report,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			request := catalog.NewRightSizingRequest(instance.GetConfigValue(config.ClusterUUID), image, tag)
+			request := catalog.NewRecommendationRequest(instance.GetConfigValue(config.ClusterUUID), image, tag)
 			if cmd.Flags().Changed("gpu-type") {
 				request.SetGpuType(gpuType)
 			}
@@ -54,7 +54,7 @@ func newRecommendCommand() *cobra.Command {
 	return command
 }
 
-func runRecommendation(ctx context.Context, baseURL, token string, request catalog.RightSizingRequest, out io.Writer) error {
+func runRecommendation(ctx context.Context, baseURL, token string, request catalog.RecommendationRequest, out io.Writer) error {
 	client, err := sizingclient.NewClient(baseURL, token)
 	if err != nil {
 		return fmt.Errorf("configure sizing API: %w", err)

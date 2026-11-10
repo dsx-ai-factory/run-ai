@@ -7,26 +7,26 @@ import (
 	"encoding/json"
 	"math"
 	"os"
-	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/gpuinventory"
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/pkg/clients/ngcmetadata"
-	"github.com/stretchr/testify/require"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func TestScalarMemoryFloorDoesNotEstablishParallelLayout(t *testing.T) {
+var _ = It("scalar memory floor does not establish parallel layout", func() {
 	capacity, minimum, one := int64(80_000_000_000), 380.0, 1
 	result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8},
 		[]ngcmetadata.Profile{{ID: "tp1-floor", TensorParallelSize: &one, PipelineParallelSize: &one, MinimumVRAMPerDeviceGB: &minimum}}, 90)
-	require.Equal(t, "no_recommendation", string(result.Status))
-	require.Nil(t, result.Recommendation, "neither five nor eight GPUs is justified by this scalar TP1 floor")
-}
+	Expect(string(result.Status)).To(Equal("no_recommendation"))
+	Expect(result.Recommendation).To(BeNil(), "neither five nor eight GPUs is justified by this scalar TP1 floor")
+})
 
 func publishedParallelProfile(id string, minimum float64, tp, pp int) ngcmetadata.Profile {
 	return ngcmetadata.Profile{ID: id, Precision: "bf16", InferenceBackend: "vllm", MinimumVRAMPerDeviceGB: &minimum, TensorParallelSize: &tp, PipelineParallelSize: &pp}
 }
 
-func TestParallelProfilesChooseFewestGPUsWithinMemoryAndNodeLimits(t *testing.T) {
+var _ = It("parallel profiles choose fewest GPUs within memory and node limits", func() {
 	profiles := []ngcmetadata.Profile{
 		publishedParallelProfile("four", 31, 4, 1),
 		publishedParallelProfile("eight", 18, 8, 1),
@@ -43,121 +43,119 @@ func TestParallelProfilesChooseFewestGPUsWithinMemoryAndNodeLimits(t *testing.T)
 		capacity := tc.capacity * 1_000_000_000
 		result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: tc.nodeCount}, profiles, 90)
 		if tc.profile == "" {
-			require.Equal(t, "no_recommendation", string(result.Status))
-			require.Nil(t, result.Recommendation)
+			Expect(string(result.Status)).To(Equal("no_recommendation"))
+			Expect(result.Recommendation).To(BeNil())
 			continue
 		}
-		require.Equal(t, "recommended", string(result.Status))
-		require.Equal(t, tc.profile, result.ProfileId)
-		require.NotNil(t, result.Recommendation)
-		require.Equal(t, tc.count, result.Recommendation.GpuCount)
-		require.Equal(t, "gpu_count", string(result.Recommendation.AllocationType))
-		require.Equal(t, capacity, result.Recommendation.GpuMemoryPerDeviceBytes)
-		require.Equal(t, tc.count, result.TensorParallelSize)
-		require.Equal(t, int64(1), result.PipelineParallelSize)
+		Expect(string(result.Status)).To(Equal("recommended"))
+		Expect(result.ProfileId).To(Equal(tc.profile))
+		Expect(result.Recommendation).To(Not(BeNil()))
+		Expect(result.Recommendation.GpuCount).To(Equal(tc.count))
+		Expect(string(result.Recommendation.AllocationType)).To(Equal("gpu_count"))
+		Expect(result.Recommendation.GpuMemoryPerDeviceBytes).To(Equal(capacity))
+		Expect(result.TensorParallelSize).To(Equal(tc.count))
+		Expect(result.PipelineParallelSize).To(Equal(int64(1)))
 	}
-}
+})
 
-func TestPublishedCountRetainsNonPowerOfTwoAndPipelineLayout(t *testing.T) {
+var _ = It("published count retains non power of two and pipeline layout", func() {
 	capacity := int64(80_000_000_000)
 	result := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8},
 		[]ngcmetadata.Profile{publishedParallelProfile("tp3-pp2", 30, 3, 2)}, 90)
-	require.Equal(t, "recommended", string(result.Status))
-	require.Equal(t, int64(6), result.Recommendation.GpuCount)
-	require.Equal(t, int64(3), result.TensorParallelSize)
-	require.Equal(t, int64(2), result.PipelineParallelSize)
-}
+	Expect(string(result.Status)).To(Equal("recommended"))
+	Expect(result.Recommendation.GpuCount).To(Equal(int64(6)))
+	Expect(result.TensorParallelSize).To(Equal(int64(3)))
+	Expect(result.PipelineParallelSize).To(Equal(int64(2)))
+})
 
-func TestParallelSelectionFiltersFitBeforeHardwareTierThenUsesDeterministicTies(t *testing.T) {
+var _ = It("ranks fitting generic parallel profiles by count, memory and stable ID", func() {
 	capacity := int64(80_000_000_000)
 	hardware := gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 4}
-	direct := publishedParallelProfile("direct", 70, 4, 1)
-	direct.GPUDevice = "2330:10de"
+	targeted := publishedParallelProfile("targeted", 70, 4, 1)
+	targeted.GPUDevice = "2330:10de"
 	tested := publishedParallelProfile("tested", 30, 2, 1)
 	tested.TestedGPUDevices = []string{"2330:10de"}
 	generic := publishedParallelProfile("generic", 10, 2, 1)
-	for _, profiles := range [][]ngcmetadata.Profile{{generic, tested, direct}, {direct, tested, generic}} {
-		r := recommendForHardware(hardware, profiles, 90)
-		require.Equal(t, "direct", r.ProfileId)
+	for _, profiles := range [][]ngcmetadata.Profile{{generic, tested, targeted}, {targeted, tested, generic}} {
+		result := recommendForHardware(hardware, profiles, 90)
+		Expect(result.ProfileId).To(Equal("generic"))
 	}
-	tooMany := direct
-	eight := 8
-	tooMany.TensorParallelSize = &eight
-	r := recommendForHardware(hardware, []ngcmetadata.Profile{generic, tested, tooMany}, 90)
-	require.Equal(t, "tested", r.ProfileId, "an oversized targeted profile cannot hide a fitting tested profile")
-	tie := tested
-	tie.ID = "a-tested"
-	r = recommendForHardware(hardware, []ngcmetadata.Profile{tested, tie}, 90)
-	require.Equal(t, "a-tested", r.ProfileId)
-	smaller := tested
-	smaller.ID = "smaller"
-	minimum := 29.0
-	smaller.MinimumVRAMPerDeviceGB = &minimum
-	r = recommendForHardware(hardware, []ngcmetadata.Profile{tie, smaller}, 90)
-	require.Equal(t, "smaller", r.ProfileId)
-}
+	tooMany := publishedParallelProfile("too-many", 1, 8, 1)
+	result := recommendForHardware(hardware, []ngcmetadata.Profile{generic, tested, tooMany}, 90)
+	Expect(result.ProfileId).To(Equal("generic"))
+	tie := generic
+	tie.ID = "a-generic"
+	result = recommendForHardware(hardware, []ngcmetadata.Profile{generic, tie}, 90)
+	Expect(result.ProfileId).To(Equal("a-generic"))
+	smaller := publishedParallelProfile("smaller", 9, 2, 1)
+	result = recommendForHardware(hardware, []ngcmetadata.Profile{tie, smaller}, 90)
+	Expect(result.ProfileId).To(Equal("smaller"))
+	fewer := publishedParallelProfile("fewer", 70, 2, 1)
+	more := publishedParallelProfile("more", 1, 4, 1)
+	result = recommendForHardware(hardware, []ngcmetadata.Profile{more, fewer}, 90)
+	Expect(result.ProfileId).To(Equal("fewer"))
+})
 
-func TestFittingSingleDeviceBaselineKeepsExistingSharingPolicy(t *testing.T) {
+var _ = It("fitting single device baseline keeps existing sharing policy", func() {
 	capacity := int64(80_000_000_000)
-	direct := publishedParallelProfile("parallel-direct", 20, 2, 1)
-	direct.GPUDevice = "2330:10de"
+	parallel := publishedParallelProfile("parallel", 20, 2, 1)
 	for _, tc := range []struct {
 		minimum float64
 		kind    string
 	}{{71.9, "gpu_memory"}, {72, "gpu_count"}, {80, "gpu_count"}} {
 		r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8},
-			[]ngcmetadata.Profile{direct, publishedParallelProfile("one", tc.minimum, 1, 1)}, 90)
-		require.Equal(t, "one", r.ProfileId)
-		require.Equal(t, tc.kind, string(r.Recommendation.AllocationType))
-		require.Equal(t, int64(1), r.Recommendation.GpuCount)
+			[]ngcmetadata.Profile{parallel, publishedParallelProfile("one", tc.minimum, 1, 1)}, 90)
+		Expect(r.ProfileId).To(Equal("one"))
+		Expect(string(r.Recommendation.AllocationType)).To(Equal(tc.kind))
+		Expect(r.Recommendation.GpuCount).To(Equal(int64(1)))
 	}
-}
+})
 
-func TestParallelLayoutsRequireExplicitPositiveNonOverflowingValues(t *testing.T) {
+var _ = It("parallel layouts require explicit positive non overflowing values", func() {
 	capacity := int64(80_000_000_000)
 	for _, tc := range []struct{ tp, pp int }{{0, 1}, {-1, 2}, {2, 0}, {2, -1}, {math.MaxInt, 2}} {
 		r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8},
 			[]ngcmetadata.Profile{publishedParallelProfile("bad-layout", 1, tc.tp, tc.pp)}, 90)
-		require.Equal(t, "no_recommendation", string(r.Status))
-		require.Nil(t, r.Recommendation)
+		Expect(string(r.Status)).To(Equal("no_recommendation"))
+		Expect(r.Recommendation).To(BeNil())
 	}
 	absent := publishedParallelProfile("missing-pp", 20, 2, 1)
 	absent.PipelineParallelSize = nil
 	r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, []ngcmetadata.Profile{absent}, 90)
-	require.Equal(t, "no_recommendation", string(r.Status))
-}
+	Expect(string(r.Status)).To(Equal("no_recommendation"))
+})
 
-func TestProfileMaximumGPUCountIsRespected(t *testing.T) {
+var _ = It("profile maximum GPU count is respected", func() {
 	var profiles []ngcmetadata.Profile
-	require.NoError(t, json.Unmarshal([]byte(`[
+	Expect(json.Unmarshal([]byte(`[
       {"profile_id":"invalid-two","tensor_parallel_size":2,"pipeline_parallel_size":1,"min_vram_per_device_gb":20,"max_gpu_count":1},
       {"profile_id":"valid-four","tensor_parallel_size":4,"pipeline_parallel_size":1,"min_vram_per_device_gb":30,"max_gpu_count":4}
-    ]`), &profiles))
+    ]`), &profiles)).To(BeNil())
 	capacity := int64(80_000_000_000)
 	r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, profiles, 90)
-	require.Equal(t, "valid-four", r.ProfileId)
-}
+	Expect(r.ProfileId).To(Equal("valid-four"))
+})
 
-func TestUnknownNodeCountDoesNotProduceAllocation(t *testing.T) {
+var _ = It("unknown node count does not produce allocation", func() {
 	capacity := int64(80_000_000_000)
 	r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity},
 		[]ngcmetadata.Profile{publishedParallelProfile("one", 30, 1, 1)}, 90)
-	require.Equal(t, "no_recommendation", string(r.Status))
-	require.Contains(t, r.Reason, "single-node GPU count")
-	require.Nil(t, r.Recommendation)
-}
+	Expect(string(r.Status)).To(Equal("no_recommendation"))
+	Expect(r.Reason).To(ContainSubstring("single-node GPU count"))
+	Expect(r.Recommendation).To(BeNil())
+})
 
-func TestExactLlama70BProfileFitsTwoH100sInsteadOfRescalingTP1(t *testing.T) {
+var _ = It("exact Llama 70B generic profile fits two devices without rescaling TP1", func() {
 	data, err := os.ReadFile("testdata/llama-3.1-70b-instruct-2.0.13.json")
-	require.NoError(t, err)
+	Expect(err).To(BeNil())
 	var metadata ngcmetadata.Metadata
-	require.NoError(t, json.Unmarshal(data, &metadata))
+	Expect(json.Unmarshal(data, &metadata)).To(BeNil())
 	capacity := int64(80_000_000_000)
 	r := recommendForHardware(gpuinventory.Hardware{Type: "NVIDIA-H100-80GB-HBM3", MemoryBytes: &capacity, MaxDevicesPerNode: 8}, metadata.Profiles, 90)
-	require.Equal(t, "74dc099acf027ca44ed08bf7f182582f4f20bef8c9be768908a3a11f55a4803d", r.ProfileId)
-	require.Equal(t, "fp8", r.Precision)
-	require.Equal(t, 57.0, r.MinimumGpuMemoryPerDeviceGb)
-	require.Equal(t, int64(2), r.Recommendation.GpuCount)
-	require.Equal(t, int64(2), r.TensorParallelSize)
-	require.Equal(t, int64(1), r.PipelineParallelSize)
-}
+	Expect(r.ProfileId).To(Equal("313ac0ae8b3d63007c5c3af22b90e3371d99332aff7a8d19162c0a5dfaaeade5"))
+	Expect(r.Precision).To(Equal("nvfp4"))
+	Expect(r.MinimumGpuMemoryPerDeviceGb).To(BeNumerically("==", 43.0))
+	Expect(r.Recommendation.GpuCount).To(Equal(int64(2)))
+	Expect(r.TensorParallelSize).To(Equal(int64(2)))
+	Expect(r.PipelineParallelSize).To(Equal(int64(1)))
+})

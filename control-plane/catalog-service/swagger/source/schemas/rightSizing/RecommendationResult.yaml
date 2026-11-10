@@ -1,0 +1,55 @@
+type: object
+required: [gpuType, status]
+properties:
+  gpuType:
+    type: string
+    description: >-
+      Exact GPU type reported by the cluster inventory. Different memory capacities for the same GPU type produce separate results.
+  gpuMemoryCapacityBytes:
+    type: integer
+    format: int64
+    description: >-
+      Reported memory capacity of each GPU, in bytes. Omitted when capacity is unknown. Does not represent free memory or a quota guarantee.
+  status:
+    allOf:
+      - $ref: './RecommendationStatus.yaml'
+    description: >-
+      Whether an allocation was recommended for this GPU type and memory capacity.
+  minimumGpuMemoryPerDeviceGb:
+    type: number
+    format: double
+    description: >-
+      Published minimum memory per GPU for the selected NGC profile, in decimal GB (1 GB = 1,000,000,000 bytes), before allocation rounding. Omitted when no profile is selected.
+  profileId:
+    type: string
+    description: >-
+      Identifier of the selected published NGC execution profile. Omitted when no profile is selected.
+  precision:
+    type: string
+    description: >-
+      Model precision reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report precision.
+  inferenceBackend:
+    type: string
+    description: >-
+      Inference backend reported by the selected NGC profile. Omitted when no profile is selected or the profile does not report a backend.
+  tensorParallelSize:
+    type: integer
+    format: int64
+    minimum: 1
+    description: >-
+      Number of GPUs participating in tensor parallelism in the selected NGC profile. Omitted when no profile is selected.
+  pipelineParallelSize:
+    type: integer
+    format: int64
+    minimum: 1
+    description: >-
+      Number of pipeline parallel stages in the selected NGC profile. Omitted when no profile is selected.
+  reason:
+    type: string
+    description: >-
+      Explanation of why no allocation could be recommended. Omitted for a recommended allocation.
+  recommendation:
+    allOf:
+      - $ref: './Recommendation.yaml'
+    description: >-
+      Recommended allocation for this result. Absent or null when no allocation could be recommended.

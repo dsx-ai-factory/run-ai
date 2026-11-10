@@ -27737,19 +27737,21 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
-  /api/v1/inference/right-sizing/recommendation:
+  /api/v1/catalog/right-sizing/recommendation:
     post:
+      x-internal: true
       summary: Recommend GPU allocation for a NIM test/dev workload.
       description: >-
         Returns recommendations without deploying or reserving resources.
-        Evaluates cluster hardware for the exact image tag. Missing trustworthy
-        sizing data is a no_recommendation result; upstream retrieval failures
-        are errors.
+        Evaluates cluster memory and GPU counts for the exact image tag using
+        GPU-agnostic profiles. GPU model compatibility is not verified. Missing
+        trustworthy sizing data is a no_recommendation result; upstream
+        retrieval failures are errors.
       operationId: recommend_inference_resources
       x-service: catalog-service
       x-authorize:
         resource-type: inferences
-        action: create
+        action: read
       x-test-coverage:
         - control-plane/catalog-service/pkg/services/rightsizing/service_test.go
       tags:
@@ -27759,20 +27761,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RightSizingRequest'
+              $ref: '#/components/schemas/RecommendationRequest'
       responses:
         '200':
           description: Results per GPU type and capacity; may contain no recommendations.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RightSizingResponse'
+                $ref: '#/components/schemas/RecommendationResponse'
         '400':
           $ref: '#/components/responses/400BadRequest'
         '401':
           $ref: '#/components/responses/401Unauthorized'
         '403':
           $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
 components:
@@ -61399,7 +61403,7 @@ components:
           nullable: true
       example:
         enabled: false
-    RightSizingRequest:
+    RecommendationRequest:
       type: object
       required:
         - clusterId
@@ -61423,17 +61427,17 @@ components:
           description: >-
             Exact inventory GPU type. Omitted or null evaluates all reported
             types and capacities.
-    RightSizingStatus:
+    RecommendationStatus:
       type: string
       enum:
         - recommended
         - no_recommendation
-    RightSizingAllocationType:
+    RecommendationAllocationType:
       type: string
       enum:
         - gpu_memory
         - gpu_count
-    RightSizingRecommendation:
+    Recommendation:
       type: object
       nullable: true
       required:
@@ -61441,16 +61445,28 @@ components:
         - gpuCount
       properties:
         allocationType:
-          $ref: '#/components/schemas/RightSizingAllocationType'
+          allOf:
+            - $ref: '#/components/schemas/RecommendationAllocationType'
+          description: >-
+            Whether the allocation requests GPU memory (`gpu_memory`) or whole
+            GPUs (`gpu_count`).
         gpuCount:
           type: integer
           format: int64
           minimum: 1
+          description: >-
+            Number of GPUs used by the allocation. Always 1 for `gpu_memory`;
+            for `gpu_count`, equals the selected profile’s tensor parallel size
+            multiplied by its pipeline parallel size.
         gpuMemoryPerDeviceBytes:
           type: integer
           format: int64
           minimum: 1
-    RightSizingResult:
+          description: >-
+            Recommended memory per GPU, in bytes. For `gpu_memory`, this is the
+            published minimum rounded up to whole bytes. For `gpu_count`, this
+            is the reported capacity of each GPU.
+    RecommendationResult:
       type: object
       required:
         - gpuType
@@ -61458,40 +61474,70 @@ components:
       properties:
         gpuType:
           type: string
+          description: >-
+            Exact GPU type reported by the cluster inventory. Different memory
+            capacities for the same GPU type produce separate results.
         gpuMemoryCapacityBytes:
           type: integer
           format: int64
-          description: 'Reported per-device capacity, not free memory or a quota guarantee.'
+          description: >-
+            Reported memory capacity of each GPU, in bytes. Omitted when
+            capacity is unknown. Does not represent free memory or a quota
+            guarantee.
         status:
-          $ref: '#/components/schemas/RightSizingStatus'
+          allOf:
+            - $ref: '#/components/schemas/RecommendationStatus'
+          description: >-
+            Whether an allocation was recommended for this GPU type and memory
+            capacity.
         minimumGpuMemoryPerDeviceGb:
           type: number
           format: double
           description: >-
-            Published NGC minimum for the source profile, before allocation
-            rounding.
+            Published minimum memory per GPU for the selected NGC profile, in
+            decimal GB (1 GB = 1,000,000,000 bytes), before allocation rounding.
+            Omitted when no profile is selected.
         profileId:
           type: string
+          description: >-
+            Identifier of the selected published NGC execution profile. Omitted
+            when no profile is selected.
         precision:
           type: string
+          description: >-
+            Model precision reported by the selected NGC profile. Omitted when
+            no profile is selected or the profile does not report precision.
         inferenceBackend:
           type: string
+          description: >-
+            Inference backend reported by the selected NGC profile. Omitted when
+            no profile is selected or the profile does not report a backend.
         tensorParallelSize:
           type: integer
           format: int64
           minimum: 1
-          description: Explicit tensor parallel size from the selected published profile.
+          description: >-
+            Number of GPUs participating in tensor parallelism in the selected
+            NGC profile. Omitted when no profile is selected.
         pipelineParallelSize:
           type: integer
           format: int64
           minimum: 1
-          description: Explicit pipeline parallel size from the selected published profile.
+          description: >-
+            Number of pipeline parallel stages in the selected NGC profile.
+            Omitted when no profile is selected.
         reason:
           type: string
-          description: Explanation when sizing cannot be recommended.
+          description: >-
+            Explanation of why no allocation could be recommended. Omitted for a
+            recommended allocation.
         recommendation:
-          $ref: '#/components/schemas/RightSizingRecommendation'
-    RightSizingResponse:
+          allOf:
+            - $ref: '#/components/schemas/Recommendation'
+          description: >-
+            Recommended allocation for this result. Absent or null when no
+            allocation could be recommended.
+    RecommendationResponse:
       type: object
       required:
         - image
@@ -61500,12 +61546,19 @@ components:
       properties:
         image:
           type: string
+          description: Untagged NIM image reference supplied in the request.
         tag:
           type: string
+          description: Exact NIM image tag supplied in the request.
         results:
           type: array
           items:
-            $ref: '#/components/schemas/RightSizingResult'
+            allOf:
+              - $ref: '#/components/schemas/RecommendationResult'
+          description: >-
+            One result per evaluated GPU type and per-device memory capacity.
+            Empty when the cluster has no reported GPUs and no GPU type was
+            requested.
     EnableNgcIntegrationSetting:
       type: object
       properties:

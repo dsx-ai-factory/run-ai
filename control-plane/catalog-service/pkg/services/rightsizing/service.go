@@ -17,11 +17,11 @@ import (
 )
 
 type Inventory interface {
-	Get(context.Context, string) ([]gpuinventory.Hardware, error)
+	Get(context.Context, string) ([]gpuinventory.Hardware, *api.Error)
 }
 
 type Metadata interface {
-	Get(context.Context, string, string) (ngcmetadata.Metadata, error)
+	Get(context.Context, string, string) (ngcmetadata.Metadata, *api.Error)
 }
 
 type Service struct {
@@ -38,128 +38,66 @@ func New(inventory Inventory, metadata Metadata, cutoffPercent int64) *Service {
 	}
 }
 
-func (s *Service) Recommend(ctx context.Context, request api.RightSizingRequest) (api.RightSizingResponse, *api.Error) {
-	response := api.RightSizingResponse{
+// Recommend evaluates installed GPU capacity, not currently free resources.
+// Read fresh requested hardware, load the exact image/tag profiles (which may be
+// cached), then construct one result per GPU type/capacity variant. Missing sizing
+// evidence yields no_recommendation; retrieval/access failures are API errors.
+func (s *Service) Recommend(ctx context.Context, request api.RecommendationRequest) (api.RecommendationResponse, *api.Error) {
+	response := api.RecommendationResponse{
 		Image:   request.Image,
 		Tag:     request.Tag,
-		Results: []api.RightSizingResult{},
+		Results: []api.RecommendationResult{},
 	}
-	if err := uuid.Validate(request.ClusterId); err != nil {
-		return response, api.NewError(http.StatusBadRequest, "Invalid cluster ID", err)
+	if err := validateRequest(request); err != nil {
+		return response, err
 	}
-	if err := ngcmetadata.Validate(request.Image, request.Tag); err != nil {
-		return response, api.NewError(http.StatusBadRequest, err.Error(), nil)
-	}
-	if request.GpuType != nil && strings.TrimSpace(*request.GpuType) == "" {
-		return response, api.NewError(http.StatusBadRequest, "GPU type must be nonempty or null", nil)
-	}
-	hardware, err := s.inventory.Get(ctx, request.ClusterId)
+	hardware, err := s.loadRequestedHardware(ctx, request.ClusterId, request.GpuType)
 	if err != nil {
-		return response, api.NewError(http.StatusServiceUnavailable, "Cluster GPU inventory unavailable", err)
+		return response, err
 	}
-	selected := make([]gpuinventory.Hardware, 0, len(hardware))
-	for _, gpu := range hardware {
-		if request.GpuType == nil || gpu.Type == *request.GpuType {
-			selected = append(selected, gpu)
-		}
-	}
-	if request.GpuType != nil && len(selected) == 0 {
-		return response, api.NewError(http.StatusBadRequest, "Requested GPU type is not reported by the cluster", nil)
-	}
-	if len(selected) == 0 {
+	// An existing cluster without GPUs has no variants to evaluate, so no
+	// metadata lookup is needed. An explicitly requested absent type fails above.
+	if len(hardware) == 0 {
 		return response, nil
 	}
 	metadata, err := s.metadata.Get(ctx, request.Image, request.Tag)
 	if err != nil {
-		return response, api.NewError(http.StatusServiceUnavailable, "NGC sizing metadata unavailable", err)
+		return response, err
 	}
-	for _, gpu := range selected {
+	for _, gpu := range hardware {
 		response.Results = append(response.Results, recommendForHardware(gpu, metadata.Profiles, s.cutoffPercent))
 	}
 	return response, nil
 }
 
-func recommendForHardware(gpu gpuinventory.Hardware, profiles []ngcmetadata.Profile, cutoffPercent int64) api.RightSizingResult {
-	result := api.RightSizingResult{
-		GpuType: gpu.Type,
-		Status:  api.RIGHTSIZINGSTATUS_NO_RECOMMENDATION,
+func validateRequest(request api.RecommendationRequest) *api.Error {
+	if err := uuid.Validate(request.ClusterId); err != nil {
+		return api.NewError(http.StatusBadRequest, "Invalid cluster ID", err)
 	}
-	if gpu.MemoryBytes == nil || *gpu.MemoryBytes <= 0 {
-		result.Reason = "GPU memory capacity is not reported by the cluster"
-		return result
+	if err := ngcmetadata.Validate(request.Image, request.Tag); err != nil {
+		return err
 	}
-	result.GpuMemoryCapacityBytes = *gpu.MemoryBytes
-	if gpu.MaxDevicesPerNode <= 0 {
-		result.Reason = "Matching single-node GPU count is not reported by the cluster"
-		return result
+	if request.GpuType != nil && strings.TrimSpace(*request.GpuType) == "" {
+		return api.NewError(http.StatusBadRequest, "GPU type must be nonempty or null", nil)
 	}
-	pciDevice, pciError := gpuinventory.ResolvePCIDevice(gpu.Type)
-	chosen := selectProfile(profiles, pciDevice, *gpu.MemoryBytes, gpu.MaxDevicesPerNode)
-	if chosen == nil {
-		result.Reason = "No applicable published profile with explicit TP/PP and a positive minimum fits per-device memory and the matching GPU count on one node"
-		if pciError != nil {
-			result.Reason += "; " + pciError.Error()
-		}
-		return result
-	}
-	profile := chosen.profile
-	result.MinimumGpuMemoryPerDeviceGb = *profile.MinimumVRAMPerDeviceGB
-	result.ProfileId = profile.ID
-	result.Precision = profile.Precision
-	result.InferenceBackend = profile.InferenceBackend
-	result.TensorParallelSize = int64(*profile.TensorParallelSize)
-	result.PipelineParallelSize = int64(*profile.PipelineParallelSize)
-	if chosen.count > 1 {
-		result.Status = api.RIGHTSIZINGSTATUS_RECOMMENDED
-		result.Recommendation = &api.RightSizingRecommendation{
-			AllocationType:          api.RIGHTSIZINGALLOCATIONTYPE_GPU_COUNT,
-			GpuCount:                chosen.count,
-			GpuMemoryPerDeviceBytes: *gpu.MemoryBytes,
-		}
-		return result
-	}
-	allocation, err := SingleGPUAllocation(chosen.minimumBytes, *gpu.MemoryBytes, cutoffPercent)
-	if err != nil {
-		result.Reason = "GPU allocation sharing policy is invalid"
-		return result
-	}
-	result.Status = api.RIGHTSIZINGSTATUS_RECOMMENDED
-	allocationType := api.RIGHTSIZINGALLOCATIONTYPE_GPU_MEMORY
-	if allocation.WholeGPU {
-		allocationType = api.RIGHTSIZINGALLOCATIONTYPE_GPU_COUNT
-	}
-	result.Recommendation = &api.RightSizingRecommendation{
-		AllocationType:          allocationType,
-		GpuCount:                1,
-		GpuMemoryPerDeviceBytes: allocation.AllocatedMemoryBytes,
-	}
-	return result
+	return nil
 }
 
-type hardwareMatch int
-
-const (
-	directHardwareMatch hardwareMatch = iota
-	testedHardwareMatch
-	genericHardwareMatch
-	noHardwareMatch
-)
-
-func matchHardware(profile ngcmetadata.Profile, pciDevice string) hardwareMatch {
-	if pciDevice != "" {
-		if strings.EqualFold(profile.GPUDevice, pciDevice) {
-			return directHardwareMatch
-		}
-		for _, tested := range profile.TestedGPUDevices {
-			if strings.EqualFold(tested, pciDevice) {
-				return testedHardwareMatch
-			}
+// loadRequestedHardware retains each capacity variant of the requested type.
+// Inventory lookup establishes cluster access/existence before type selection.
+func (s *Service) loadRequestedHardware(ctx context.Context, clusterID string, gpuType *string) ([]gpuinventory.Hardware, *api.Error) {
+	hardware, err := s.inventory.Get(ctx, clusterID)
+	if err != nil {
+		return nil, err
+	}
+	selected := make([]gpuinventory.Hardware, 0, len(hardware))
+	for _, gpu := range hardware {
+		if gpuType == nil || gpu.Type == *gpuType {
+			selected = append(selected, gpu)
 		}
 	}
-	// NGC treats an untargeted profile as GPU-agnostic. A tested-device list
-	// records validation history; it does not turn this into a SKU allowlist.
-	if profile.GPU == "" && profile.GPUDevice == "" {
-		return genericHardwareMatch
+	if gpuType != nil && len(selected) == 0 {
+		return nil, api.NewError(http.StatusBadRequest, "Requested GPU type is not reported by the cluster", nil)
 	}
-	return noHardwareMatch
+	return selected, nil
 }

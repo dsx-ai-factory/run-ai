@@ -576,8 +576,7 @@ func GetNodepoolsGpuTypes(ctx context.Context, tenantId int32, permittedScopes o
 	rows := []nodepoolGpuTypeRow{}
 	query := runaidb.DB().WithContext(ctx).
 		Table(models.NodeTable).
-		Select("cluster_uuid, node_pool, gpu_type, gpu_memory_bytes, COALESCE(SUM(gpu_count), 0) as total_devices, "+
-			"COALESCE(MAX(gpu_count), 0) as max_devices_per_node").
+		Select("cluster_uuid, node_pool, gpu_type, gpu_memory_bytes, COALESCE(SUM(gpu_count), 0) as total_devices, COALESCE(MAX(gpu_count), 0) as max_devices_per_node").
 		Where("tenant_id = ?", tenantId).
 		Where("gpu_type <> ''").
 		Where("cluster_uuid IN ?", clusterUuids).

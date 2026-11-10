@@ -28,7 +28,7 @@ type RightSizingAPI interface {
 	/*
 		RecommendInferenceResources Recommend GPU allocation for a NIM test/dev workload.
 
-		Returns recommendations without deploying or reserving resources. Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+		Returns recommendations without deploying or reserving resources. Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic profiles. GPU model compatibility is not verified. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 		@return ApiRecommendInferenceResourcesRequest
@@ -36,32 +36,32 @@ type RightSizingAPI interface {
 	RecommendInferenceResources(ctx context.Context) ApiRecommendInferenceResourcesRequest
 
 	// RecommendInferenceResourcesExecute executes the request
-	//  @return RightSizingResponse
-	RecommendInferenceResourcesExecute(r ApiRecommendInferenceResourcesRequest) (*RightSizingResponse, *http.Response, error)
+	//  @return RecommendationResponse
+	RecommendInferenceResourcesExecute(r ApiRecommendInferenceResourcesRequest) (*RecommendationResponse, *http.Response, error)
 }
 
 // RightSizingAPIService RightSizingAPI service
 type RightSizingAPIService service
 
 type ApiRecommendInferenceResourcesRequest struct {
-	ctx                context.Context
-	ApiService         RightSizingAPI
-	rightSizingRequest *RightSizingRequest
+	ctx                   context.Context
+	ApiService            RightSizingAPI
+	recommendationRequest *RecommendationRequest
 }
 
-func (r ApiRecommendInferenceResourcesRequest) RightSizingRequest(rightSizingRequest RightSizingRequest) ApiRecommendInferenceResourcesRequest {
-	r.rightSizingRequest = &rightSizingRequest
+func (r ApiRecommendInferenceResourcesRequest) RecommendationRequest(recommendationRequest RecommendationRequest) ApiRecommendInferenceResourcesRequest {
+	r.recommendationRequest = &recommendationRequest
 	return r
 }
 
-func (r ApiRecommendInferenceResourcesRequest) Execute() (*RightSizingResponse, *http.Response, error) {
+func (r ApiRecommendInferenceResourcesRequest) Execute() (*RecommendationResponse, *http.Response, error) {
 	return r.ApiService.RecommendInferenceResourcesExecute(r)
 }
 
 /*
 RecommendInferenceResources Recommend GPU allocation for a NIM test/dev workload.
 
-Returns recommendations without deploying or reserving resources. Evaluates cluster hardware for the exact image tag. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
+Returns recommendations without deploying or reserving resources. Evaluates cluster memory and GPU counts for the exact image tag using GPU-agnostic profiles. GPU model compatibility is not verified. Missing trustworthy sizing data is a no_recommendation result; upstream retrieval failures are errors.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@return ApiRecommendInferenceResourcesRequest
@@ -74,14 +74,14 @@ func (a *RightSizingAPIService) RecommendInferenceResources(ctx context.Context)
 }
 
 // Execute executes the request
-//  @return RightSizingResponse
+//  @return RecommendationResponse
 ///////// RUNAI (remove isResponseFile filter on pointer)//////////
-func (a *RightSizingAPIService) RecommendInferenceResourcesExecute(r ApiRecommendInferenceResourcesRequest) (*RightSizingResponse, *http.Response, error) {
+func (a *RightSizingAPIService) RecommendInferenceResourcesExecute(r ApiRecommendInferenceResourcesRequest) (*RecommendationResponse, *http.Response, error) {
 	var (
 		localVarHTTPMethod  = http.MethodPost
 		localVarPostBody    interface{}
 		formFiles           []formFile
-		localVarReturnValue *RightSizingResponse
+		localVarReturnValue *RecommendationResponse
 	)
 	///////////////////////////
 
@@ -90,13 +90,13 @@ func (a *RightSizingAPIService) RecommendInferenceResourcesExecute(r ApiRecommen
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
-	localVarPath := localBasePath + "/api/v1/inference/right-sizing/recommendation"
+	localVarPath := localBasePath + "/api/v1/catalog/right-sizing/recommendation"
 
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.rightSizingRequest == nil {
-		return localVarReturnValue, nil, reportError("rightSizingRequest is required and must be specified")
+	if r.recommendationRequest == nil {
+		return localVarReturnValue, nil, reportError("recommendationRequest is required and must be specified")
 	}
 
 	// to determine the Content-Type header
@@ -117,7 +117,7 @@ func (a *RightSizingAPIService) RecommendInferenceResourcesExecute(r ApiRecommen
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.rightSizingRequest
+	localVarPostBody = r.recommendationRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return localVarReturnValue, nil, err
@@ -163,6 +163,17 @@ func (a *RightSizingAPIService) RecommendInferenceResourcesExecute(r ApiRecommen
 			return localVarReturnValue, localVarHTTPResponse, newErr
 		}
 		if localVarHTTPResponse.StatusCode == 403 {
+			var v Error
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+			newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+			newErr.model = v
+			return localVarReturnValue, localVarHTTPResponse, newErr
+		}
+		if localVarHTTPResponse.StatusCode == 404 {
 			var v Error
 			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
 			if err != nil {

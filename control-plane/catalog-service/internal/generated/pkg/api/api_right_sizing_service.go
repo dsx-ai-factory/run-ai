@@ -35,12 +35,12 @@ func NewRightSizingAPIService() *RightSizingAPIService {
 }
 
 // RecommendInferenceResources - Recommend GPU allocation for a NIM test/dev workload.
-func (s *RightSizingAPIService) RecommendInferenceResources(ctx context.Context, rightSizingRequest RightSizingRequest) (ImplResponse, error) {
+func (s *RightSizingAPIService) RecommendInferenceResources(ctx context.Context, recommendationRequest RecommendationRequest) (ImplResponse, error) {
 	// TODO - update RecommendInferenceResources with the required logic for this service method.
 	// Add api_right_sizing_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
-	// TODO: Uncomment the next line to return response Response(200, RightSizingResponse{}) or use other options such as http.Ok ...
-	// return Response(200, RightSizingResponse{}), nil
+	// TODO: Uncomment the next line to return response Response(200, RecommendationResponse{}) or use other options such as http.Ok ...
+	// return Response(200, RecommendationResponse{}), nil
 
 	// TODO: Uncomment the next line to return response Response(400, Error{}) or use other options such as http.Ok ...
 	// return Response(400, Error{}), nil
@@ -50,6 +50,9 @@ func (s *RightSizingAPIService) RecommendInferenceResources(ctx context.Context,
 
 	// TODO: Uncomment the next line to return response Response(403, Error{}) or use other options such as http.Ok ...
 	// return Response(403, Error{}), nil
+
+	// TODO: Uncomment the next line to return response Response(404, Error{}) or use other options such as http.Ok ...
+	// return Response(404, Error{}), nil
 
 	// TODO: Uncomment the next line to return response Response(503, Error{}) or use other options such as http.Ok ...
 	// return Response(503, Error{}), nil

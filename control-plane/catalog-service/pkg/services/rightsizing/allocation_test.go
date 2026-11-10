@@ -9,12 +9,13 @@ import (
 	"errors"
 	"math"
 	"net/http"
-	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/catalog-service/internal/generated/pkg/api"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
-func TestSingleGPUAllocationUsesNinetyPercentCutoff(t *testing.T) {
+var _ = Describe("single GPU allocation uses ninety percent cutoff", func() {
 	for _, tt := range []struct {
 		name     string
 		minimum  int64
@@ -29,26 +30,21 @@ func TestSingleGPUAllocationUsesNinetyPercentCutoff(t *testing.T) {
 		{"first byte above fractional cutoff", 91, 101, true},
 		{"large capacity does not overflow", math.MaxInt64, math.MaxInt64, true},
 	} {
-		t.Run(tt.name, func(t *testing.T) {
+		It(tt.name, func() {
 			got, err := SingleGPUAllocation(tt.minimum, tt.capacity, 90)
-			if err != nil {
-				t.Fatal(err)
-			}
-			if got.WholeGPU != tt.whole || got.MinimumMemoryBytes != tt.minimum {
-				t.Fatalf("unexpected allocation: %+v", got)
-			}
+			Expect(err).To(BeNil())
+			Expect(got.WholeGPU).To(Equal(tt.whole))
+			Expect(got.MinimumMemoryBytes).To(Equal(tt.minimum))
 			wantMemory := tt.minimum
 			if tt.whole {
 				wantMemory = tt.capacity
 			}
-			if got.AllocatedMemoryBytes != wantMemory {
-				t.Fatalf("allocated memory = %d; want %d", got.AllocatedMemoryBytes, wantMemory)
-			}
+			Expect(got.AllocatedMemoryBytes).To(Equal(wantMemory))
 		})
 	}
-}
+})
 
-func TestAllocationFailuresUseAPIValidationErrors(t *testing.T) {
+var _ = Describe("allocation failures use API validation errors", func() {
 	for _, testCase := range []struct {
 		name                      string
 		minimum, capacity, cutoff int64
@@ -57,32 +53,53 @@ func TestAllocationFailuresUseAPIValidationErrors(t *testing.T) {
 		{"missing memory", 0, 80, 90},
 		{"oversized requirement", 81, 80, 90},
 	} {
-		t.Run(testCase.name, func(t *testing.T) {
+		It(testCase.name, func() {
 			_, err := SingleGPUAllocation(testCase.minimum, testCase.capacity, testCase.cutoff)
 			var apiError *api.Error
-			if !errors.As(err, &apiError) {
-				t.Fatalf("allocation validation must preserve the service error contract: %v", err)
-			}
-			if apiError.Code != http.StatusBadRequest || apiError.Message == "" {
-				t.Fatalf("unexpected validation error: %+v", apiError)
-			}
+			Expect(errors.As(err, &apiError)).To(BeTrue())
+			Expect(apiError.Code).To(BeNumerically("==", http.StatusBadRequest))
+			Expect(apiError.Message).NotTo(BeEmpty())
 		})
 	}
-}
+})
 
-func TestSingleGPUAllocationNeverRoundsOversizedRequirementDown(t *testing.T) {
+var _ = It("single GPU allocation never rounds oversized requirement down", func() {
 	_, err := SingleGPUAllocation(80_000_000_001, 80_000_000_000, 90)
-	if !errors.Is(err, ErrDoesNotFitSingleGPU) {
-		t.Fatalf("oversized requirement must not become one whole GPU: %v", err)
-	}
-}
+	Expect(errors.Is(err, ErrDoesNotFitSingleGPU)).To(BeTrue())
+})
 
-func TestSingleGPUAllocationRejectsMissingOrInvalidMemory(t *testing.T) {
+var _ = It("single GPU allocation rejects missing or invalid memory", func() {
 	for _, tt := range []struct{ minimum, capacity int64 }{
 		{0, 80}, {-1, 80}, {32, 0}, {32, -1},
 	} {
-		if _, err := SingleGPUAllocation(tt.minimum, tt.capacity, 90); err == nil {
-			t.Errorf("accepted minimum %d capacity %d", tt.minimum, tt.capacity)
+		{
+			_, err := SingleGPUAllocation(tt.minimum, tt.capacity, 90)
+			Expect(err).NotTo(BeNil())
 		}
 	}
-}
+})
+
+var _ = It("single GPU allocation uses configured sharing cutoff", func() {
+	for _, tc := range []struct {
+		name            string
+		minimum, cutoff int64
+		whole           bool
+	}{
+		{"below configured cutoff", 79, 80, false}, {"at configured cutoff", 80, 80, true},
+		{"above configured cutoff", 85, 80, true}, {"same minimum below default cutoff", 85, 90, false},
+		{"100 percent permits sharing below capacity", 99, 100, false}, {"100 percent exact fit", 100, 100, true},
+	} {
+		By(tc.name)
+		func() {
+			got, err := SingleGPUAllocation(tc.minimum, 100, tc.cutoff)
+			Expect(err).To(BeNil())
+			Expect(got.WholeGPU).To(Equal(tc.whole))
+		}()
+	}
+	for _, cutoff := range []int64{-1, 0, 101} {
+		{
+			_, err := SingleGPUAllocation(20, 100, cutoff)
+			Expect(err).NotTo(BeNil())
+		}
+	}
+})

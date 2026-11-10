@@ -23,8 +23,8 @@ func NewClient(baseURL, token string) (*Client, error) {
 	return &Client{apiClient: catalog.NewAPIClient(configuration)}, nil
 }
 
-func (c *Client) Recommend(ctx context.Context, request catalog.RightSizingRequest) (*catalog.RightSizingResponse, error) {
-	result, response, err := c.apiClient.RightSizingAPI.RecommendInferenceResources(ctx).RightSizingRequest(request).Execute()
+func (c *Client) Recommend(ctx context.Context, request catalog.RecommendationRequest) (*catalog.RecommendationResponse, error) {
+	result, response, err := c.apiClient.RightSizingAPI.RecommendInferenceResources(ctx).RecommendationRequest(request).Execute()
 	if response != nil && response.Body != nil {
 		defer response.Body.Close()
 	}

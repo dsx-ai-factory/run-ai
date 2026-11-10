@@ -26,7 +26,7 @@ func TestRecommendationHTTPContract(t *testing.T) {
 	for _, status := range []int{http.StatusOK, http.StatusServiceUnavailable} {
 		t.Run(http.StatusText(status), func(t *testing.T) {
 			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				if r.Method != http.MethodPost || r.URL.Path != "/api/v1/inference/right-sizing/recommendation" {
+				if r.Method != http.MethodPost || r.URL.Path != "/api/v1/catalog/right-sizing/recommendation" {
 					t.Errorf("wrong route: %s %s", r.Method, r.URL.Path)
 				}
 				if r.Header.Get("Authorization") != "Bearer <test-token>" {
@@ -48,7 +48,7 @@ func TestRecommendationHTTPContract(t *testing.T) {
 				_, _ = w.Write([]byte(`{"image":"nvcr.io/nim/nvidia/example","tag":"1.2.3","results":[{"gpuType":"A100","status":"recommended","minimumGpuMemoryPerDeviceGb":36,"recommendation":{"allocationType":"gpu_memory","gpuCount":1,"gpuMemoryPerDeviceBytes":36000000000}},{"gpuType":"T4","status":"no_recommendation","reason":"Missing capacity"}]}`))
 			}))
 			defer server.Close()
-			request := catalog.NewRightSizingRequest("cluster-id", "nvcr.io/nim/nvidia/example", "1.2.3")
+			request := catalog.NewRecommendationRequest("cluster-id", "nvcr.io/nim/nvidia/example", "1.2.3")
 			request.SetGpuType("A100")
 			var output bytes.Buffer
 			err := runRecommendation(context.Background(), server.URL, "<test-token>", *request, &output)
@@ -140,7 +140,7 @@ func TestRecommendationJSONPreservesResults(t *testing.T) {
 				}
 			}))
 			defer server.Close()
-			request := catalog.NewRightSizingRequest("cluster-id", "nvcr.io/nim/nvidia/example", "1.2.3")
+			request := catalog.NewRecommendationRequest("cluster-id", "nvcr.io/nim/nvidia/example", "1.2.3")
 			var output bytes.Buffer
 			if err := runRecommendation(context.Background(), server.URL, "<test-token>", *request, &output); err != nil {
 				t.Fatal(err)

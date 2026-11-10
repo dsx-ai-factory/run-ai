@@ -142,7 +142,7 @@ type RegistriesAPIServicer interface {
 // while the service implementation can be ignored with the .openapi-generator-ignore file
 // and updated with the logic required for the API.
 type RightSizingAPIServicer interface {
-	RecommendInferenceResources(context.Context, RightSizingRequest) (ImplResponse, error)
+	RecommendInferenceResources(context.Context, RecommendationRequest) (ImplResponse, error)
 }
 
 // SettingsAPIServicer defines the api actions for the SettingsAPI service
