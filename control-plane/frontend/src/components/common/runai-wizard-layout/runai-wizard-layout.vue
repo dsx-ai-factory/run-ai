@@ -7,6 +7,7 @@
   <runai-panels-layout
     v-if="orientation === 'vertical'"
     :width="width"
+    :responsive="responsive"
     :margin-top="marginTop"
     :left-width="leftWidth"
     :right-width="rightWidth"

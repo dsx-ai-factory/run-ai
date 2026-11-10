@@ -10,8 +10,8 @@ import {
   validateDescription,
   validateLabelKey,
   validateLabelValue,
-  PROPORTIONAL_CAPABILITIES,
-} from "./node-pool-create-flow.model";
+} from "@/utils/node-pool.util/node-pool.util";
+import { PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
 
 describe("node pool creation fields", () => {
   it("initializes independent drafts without sending omitted version-gated defaults", () => {
@@ -41,7 +41,10 @@ describe("node pool creation fields", () => {
   it("accepts qualified Kubernetes keys and rejects malformed keys", () => {
     expect(validateLabelKey("nvidia.com/gpu.product")).toBe(true);
     expect(validateLabelKey("node-type")).toBe(true);
-    expect(validateLabelKey("")).toBe("Select a key");
+    expect(validateLabelKey("/node-type")).toBe(true);
+    expect(validateLabelKey("a/b/c")).not.toBe(true);
+    expect(validateLabelKey("a/-b")).not.toBe(true);
+    expect(validateLabelKey("")).toBe("Enter a key");
     expect(validateLabelKey("test@run.ai")).not.toBe(true);
     expect(validateLabelKey("a".repeat(254))).not.toBe(true);
   });

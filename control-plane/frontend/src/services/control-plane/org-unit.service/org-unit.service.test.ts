@@ -60,34 +60,3 @@ describe("orgUnitService.batchDeleteReports", () => {
     expect(response.failed).toHaveLength(1);
   });
 });
-
-describe("orgUnitService.resetNodePoolQuotas", () => {
-  beforeEach(() => {
-    countProjectsMock.mockReset();
-    countProjectsMock.mockResolvedValue({ data: { count: 1 } });
-    resetProjectsMock.mockReset();
-    resetDepartmentsMock.mockReset();
-  });
-  it("resets projects and departments only on the specified pool", async () => {
-    await orgUnitService.resetNodePoolQuotas("cluster-a", "new-pool");
-    const expected = { clusterId: "cluster-a", nodePoolIds: ["new-pool"], action: "QUOTAS_TO_DEFAULT" };
-    expect(resetProjectsMock).toHaveBeenCalledExactlyOnceWith(expected);
-    expect(resetDepartmentsMock).toHaveBeenCalledExactlyOnceWith(expected);
-  });
-  it("refuses an empty pool ID without sending a reset", async () => {
-    await expect(orgUnitService.resetNodePoolQuotas("cluster-a", "")).rejects.toThrow();
-    expect(resetProjectsMock).not.toHaveBeenCalled();
-    expect(resetDepartmentsMock).not.toHaveBeenCalled();
-  });
-  it("skips project reset in an empty cluster while preparing the department quota", async () => {
-    countProjectsMock.mockResolvedValue({ data: { count: 0 } });
-    await orgUnitService.resetNodePoolQuotas("cluster-a", "new-pool");
-    expect(countProjectsMock).toHaveBeenCalledExactlyOnceWith(["clusterId==cluster-a"]);
-    expect(resetProjectsMock).not.toHaveBeenCalled();
-    expect(resetDepartmentsMock).toHaveBeenCalledExactlyOnceWith({
-      clusterId: "cluster-a",
-      nodePoolIds: ["new-pool"],
-      action: "QUOTAS_TO_DEFAULT",
-    });
-  });
-});

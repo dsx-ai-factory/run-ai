@@ -2,28 +2,33 @@
  * SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
  * SPDX-License-Identifier: Apache-2.0
  */
-import { computed, reactive, ref, watch, onScopeDispose } from "vue";
+import { reactive, ref, watch, onScopeDispose } from "vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
-import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { ErrorAlert } from "@/utils/error-alert.util/error-alert.util";
+import { ConflictError } from "@/models/http-response.model";
+import { errorMessages } from "@/common/error-message.constant";
 import { deepCopy } from "@/utils/common.util";
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { NodepoolSortFilterFields, type Nodepool } from "@/swagger-models/cluster-service-client";
-import { errorMessages } from "@/common/error-message.constant";
-import { isProportional, PROPORTIONAL_CAPABILITIES, createNodePoolDraft } from "./node-pool-create-flow.model";
+import { createNodePoolDraft } from "@/utils/node-pool.util/node-pool.util";
 
-export function useNodePoolCreation(clusterId: string) {
+export function useNodePoolForm(clusterId: string) {
   const draft = reactive(createNodePoolDraft(clusterId));
   const pools = ref<Nodepool[]>([]);
   const loading = ref(false);
   const loadError = ref("");
   const submitError = ref("");
   const submitting = ref(false);
+  const nameConflict = ref(false);
+  watch(
+    () => draft.name,
+    () => {
+      nameConflict.value = false;
+    },
+  );
   const created = ref<Nodepool>();
-  const modeMismatch = computed(() => !!created.value && !isProportional(created.value.schedulingCapabilities));
   let requestId = 0;
   let disposed = false;
-  let quotasPrepared = false;
   onScopeDispose(() => {
     disposed = true;
     requestId++;
@@ -46,7 +51,7 @@ export function useNodePoolCreation(clusterId: string) {
       if (currentRequest === requestId) {
         const fallback = ErrorAlert.failedLoadingMessage("node pools");
         const { message } = new ErrorAlert({ generalMessage: fallback }).getNotification(error);
-        loadError.value = `${message || fallback}. Retry before creating a node pool.`;
+        loadError.value = `${message || fallback}. ${errorMessages.NODE_POOL_LOADING_RETRY}`;
       }
     } finally {
       if (currentRequest === requestId) loading.value = false;
@@ -58,6 +63,7 @@ export function useNodePoolCreation(clusterId: string) {
       draft.labelKey = "";
       draft.labelValue = "";
       submitError.value = "";
+      nameConflict.value = false;
       void loadPools();
     },
     { immediate: true },
@@ -70,46 +76,28 @@ export function useNodePoolCreation(clusterId: string) {
   );
   async function create() {
     if (submitting.value || loading.value || loadError.value || !draft.clusterId || disposed) return;
-    if (created.value && !modeMismatch.value) return created.value;
+    if (created.value) return created.value;
     submitting.value = true;
     submitError.value = "";
     const payload = deepCopy(draft);
     try {
-      if (!created.value) {
-        if (!(await clusterService.isNodePoolNameUnique(payload.clusterId, payload.name))) {
-          submitError.value = errorMessages.NAME_ALREADY_EXIST;
-          return;
-        }
-        if (disposed) return;
-        created.value = await clusterService.createNodepool(payload);
-      }
+      created.value = await clusterService.createNodepool(payload);
       if (disposed) return;
-      // Creation currently ignores capabilities. Retain the ID so setup retries cannot create duplicate pools.
-      if (modeMismatch.value) {
-        // New pools inherit department quotas, which block disabling quota. Scope preparation to this new ID.
-        if (created.value.schedulingCapabilities?.quota && !quotasPrepared) {
-          await orgUnitService.resetNodePoolQuotas(payload.clusterId, created.value.id);
-          quotasPrepared = true;
-        }
-        if (disposed) return;
-        created.value = await clusterService.patchNodepool(created.value.id, {
-          schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES },
-        });
-        if (modeMismatch.value) {
-          submitError.value = `Node pool ${payload.name} was created, but the server did not save Proportional settings. Retry setup.`;
-          return;
-        }
-      }
       return created.value;
     } catch (error) {
-      const context = created.value
-        ? `Node pool ${payload.name} was created, but Proportional settings couldn't be applied. Retry setup.`
-        : ErrorAlert.failedCreateMessage(`node pool ${payload.name}`);
+      if (disposed) return;
+      // Duplicate names currently arrive as a generic server error. Refresh the
+      // cluster snapshot after failure so the field can show a name conflict.
+      await loadPools();
+      nameConflict.value =
+        pools.value.some((pool) => pool.name === payload.name) ||
+        (error instanceof ConflictError && /name/i.test(error.message));
+      const context = ErrorAlert.failedCreateMessage(`node pool ${payload.name}`);
       const { message } = new ErrorAlert({ generalMessage: context }).getNotification(error);
       submitError.value = typeof message === "string" && message !== context ? `${context} ${message}` : context;
     } finally {
       submitting.value = false;
     }
   }
-  return { draft, pools, loading, loadError, submitError, submitting, created, modeMismatch, loadPools, create };
+  return { draft, pools, loading, loadError, submitError, submitting, created, nameConflict, loadPools, create };
 }

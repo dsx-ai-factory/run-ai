@@ -3,10 +3,11 @@
   SPDX-License-Identifier: Apache-2.0
 -->
 <template>
-  <div class="node-pool-create-flow">
+  <div class="node-pool-edit-form-v2">
     <runai-wizard-layout
       :steps="steps"
-      active-step="identity"
+      :active-step="activeStep"
+      @step-click="onStepClick"
       width="1000px"
       margin-top="26px"
       left-width="200px"
@@ -30,11 +31,13 @@
               v-model="draft.name"
               class="name-field"
               aid="node-pool-name"
+              :debounce="0"
               dense
               :disable="locked"
-              :rules="[validateName, uniqueName]"
+              :rules="[validateName, uniqueName, nameConflictRule]"
               :maxlength="40"
             />
+            <!-- maxlength is the shared character cap; the rule also enforces the API UTF-8 byte limit. -->
             <runai-description-input
               v-model="draft.description"
               class="description-field q-mt-lg"
@@ -105,7 +108,7 @@
               <template #option="scope">
                 <q-item v-bind="scope.itemProps">
                   <q-item-section>{{ scope.opt.label }}</q-item-section>
-                  <q-tooltip v-if="scope.opt.disable">{{ USED_LABEL_MESSAGE }}</q-tooltip>
+                  <q-tooltip v-if="scope.opt.disable">{{ nodePoolErrors.NODE_POOL_LABEL_IN_USE }}</q-tooltip>
                 </q-item>
               </template>
             </q-select>
@@ -114,24 +117,23 @@
       </runai-form-wrapper>
       <template #content-footer>
         <div class="creation-footer">
-          <q-banner v-if="submitError" class="bg-red-1 text-negative q-mb-md" role="alert">{{ submitError }}</q-banner>
           <div class="row justify-end q-gutter-md">
             <runai-btn
               aid="create-node-pool-close"
               :label="created ? 'Close' : 'Create node pool & close'"
               flat
               color="primary"
-              :loading="submitting && destination === 'close'"
+              :loading="submitting && destination === ENodePoolFormDestination.Close"
               :disable="busy"
               @click="close"
             />
             <runai-btn
               aid="create-node-pool-continue"
-              :label="created ? 'Retry Proportional setup' : 'Create node pool & continue'"
+              label="Create node pool & continue"
               color="primary"
-              :loading="submitting && destination === 'continue'"
+              :loading="submitting && destination === ENodePoolFormDestination.Continue"
               :disable="busy"
-              @click="submit(created ? destination : 'continue')"
+              @click="submit(ENodePoolFormDestination.Continue)"
             />
           </div>
         </div>
@@ -140,10 +142,17 @@
         <node-pool-wizard-summary :pool="created ?? draft" :cluster-name="clusterName" />
       </template>
     </runai-wizard-layout>
+    <unsaved-changes-dialog
+      v-if="unsavedGuard.dialog.isOpen.value"
+      :model-value="true"
+      @update:model-value="unsavedGuard.cancelPending()"
+      @save="saveStepChanges"
+      @discard="unsavedGuard.confirmAction('discard')"
+    />
   </div>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onScopeDispose, ref, watch } from "vue";
 import { useQuasar } from "quasar";
 import NodePoolWizardSummary from "@/components/node-pools/node-pool-wizard-summary/node-pool-wizard-summary.vue";
 import RunaiWizardLayout from "@/components/common/runai-wizard-layout/runai-wizard-layout.vue";
@@ -160,33 +169,36 @@ import { useNodePoolStore } from "@/stores/node-pool.store";
 import { alertUtil } from "@/utils/alert.util";
 import { deepCopy } from "@/utils/common.util";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
-import { useNodePoolCreation } from "./use-node-pool-creation.composable";
+import { useNodePoolForm } from "@/composables/node-pool/use-node-pool-form.composable";
 import {
   labelOptions,
   validateName,
   validateDescription,
   validateLabelKey,
   validateLabelValue,
-  USED_LABEL_MESSAGE,
-  type NodePoolCreationDraft,
-} from "./node-pool-create-flow.model";
-import { errorMessages } from "@/common/error-message.constant";
-import { NODE_POOL_LABEL_SUGGESTIONS } from "./node-pool-labels.mock";
+} from "@/utils/node-pool.util/node-pool.util";
+import { errorMessages as nodePoolErrors, errorMessages } from "@/common/error-message.constant";
+import { type INodePoolFormDraft } from "@/components/node-pools/node-pool-edit-form-v2/node-pool-edit-form-v2.model";
 
+import { ENodePoolFormDestination } from "./node-pool-edit-form-v2.model";
+import { useWizardLayout } from "@/composables/use-wizard-layout.composable";
+import { provideUnsavedChangesGuard } from "@/composables/org-unit/use-unsaved-changes-guard.composable";
+import { UnsavedChangesDialog } from "@/components/org-unit/v2/common/unsaved-changes-dialog";
 const props = withDefaults(defineProps<{ initialClusterId?: string }>(), { initialClusterId: "" });
 const emit = defineEmits<{
   "leave-approved": [];
   "busy-change": [busy: boolean];
-  created: [pool: Nodepool, draft: NodePoolCreationDraft, destination: "close" | "continue"];
+  created: [pool: Nodepool, draft: INodePoolFormDraft, destination: ENodePoolFormDestination];
 }>();
-const { draft, pools, loading, loadError, submitError, submitting, created, modeMismatch, loadPools, create } =
-  useNodePoolCreation(props.initialClusterId);
+const { draft, pools, loading, loadError, submitError, submitting, created, nameConflict, loadPools, create } =
+  useNodePoolForm(props.initialClusterId);
 const clusterStore = useClusterStore();
 const nodePoolStore = useNodePoolStore();
 const $q = useQuasar();
 const form = ref<InstanceType<typeof RunaiFormWrapper>>();
+const nameConflictRule = computed(() => (nameConflict.value ? () => errorMessages.NAME_ALREADY_EXIST : () => true));
 const validating = ref(false);
-const destination = ref<"close" | "continue">("continue");
+const destination = ref<ENodePoolFormDestination>(ENodePoolFormDestination.Continue);
 // Disabling a Quasar field clears its validation errors, so lock only once saving starts.
 const locked = computed(() => submitting.value || !!created.value);
 const busy = computed(() => validating.value || submitting.value || loading.value || !!loadError.value);
@@ -196,11 +208,48 @@ watch(
   { flush: "sync" },
 );
 const clusterName = computed(() => clusterStore.clusterList.find((c) => c.uuid === draft.clusterId)?.name);
-const steps = computed(() => [
-  { name: "identity", title: "Cluster & name", done: !!created.value && !modeMismatch.value },
-  { name: "scheduling", title: "Scheduling mode", done: false, disabled: true },
-  { name: "topology", title: "Topology & placement", done: false, disabled: true },
-]);
+const { steps, activeStep, handleStepClick, markStepComplete } = useWizardLayout(
+  [
+    { name: "identity", title: "Cluster & name", done: false },
+    { name: "scheduling", title: "Scheduling mode", done: false, disabled: true },
+    { name: "topology", title: "Topology & placement", done: false, disabled: true },
+  ],
+  "identity",
+);
+watch(created, (pool) => {
+  if (pool) markStepComplete("identity");
+});
+const unsavedGuard = provideUnsavedChangesGuard();
+const initialDraft = deepCopy(draft);
+const unregisterGuard = unsavedGuard.registerStepGuard("identity", {
+  isDirty: () => !!form.value?.isDirty,
+  save: async () => {
+    await submit(ENodePoolFormDestination.Continue);
+    if (!created.value) throw new Error(errorMessages.NODE_POOL_SAVE_FAILED);
+  },
+  discard: () => {
+    Object.assign(draft, deepCopy(initialDraft));
+    form.value?.initFirstState();
+    form.value?.updateDirtyState();
+  },
+});
+onScopeDispose(unregisterGuard);
+async function onStepClick(payload: Parameters<typeof handleStepClick>[0]) {
+  if (
+    payload.name === activeStep.value ||
+    busy.value ||
+    !steps.value.some((step) => step.name === payload.name && !step.disabled)
+  )
+    return;
+  await unsavedGuard.requestAction({ stepName: activeStep.value, onProceed: () => handleStepClick(payload) });
+}
+async function saveStepChanges() {
+  try {
+    await unsavedGuard.confirmAction("save");
+  } catch {
+    /* Validation keeps the user on the current step. */
+  }
+}
 const keySearch = ref("");
 const valueSearch = ref("");
 const unavailableValues = computed(() =>
@@ -211,18 +260,13 @@ const unavailableValues = computed(() =>
 );
 const keyOptions = computed(() =>
   labelOptions(
-    [
-      ...Object.keys(NODE_POOL_LABEL_SUGGESTIONS),
-      ...pools.value.map((p) => p.labelKey).filter((v): v is string => typeof v === "string"),
-    ],
+    [...pools.value.map((p) => p.labelKey).filter((v): v is string => typeof v === "string")],
     keySearch.value,
     [],
     "key",
   ),
 );
-const valueOptions = computed(() =>
-  labelOptions(NODE_POOL_LABEL_SUGGESTIONS[draft.labelKey] || [], valueSearch.value, unavailableValues.value),
-);
+const valueOptions = computed(() => labelOptions([], valueSearch.value, unavailableValues.value));
 function filterKeys(value: string, update: (fn: () => void) => void) {
   update(() => {
     keySearch.value = value;
@@ -240,17 +284,17 @@ function addValue(value: string, done: (value: string, mode: "add-unique") => vo
   if (!unavailableValues.value.includes(value)) done(value, "add-unique");
 }
 function uniqueLabel(value: string) {
-  return !unavailableValues.value.includes(value) || USED_LABEL_MESSAGE;
+  return !unavailableValues.value.includes(value) || nodePoolErrors.NODE_POOL_LABEL_IN_USE;
 }
 function uniqueName(value: string) {
   return !pools.value.some((p) => p.name === value) || errorMessages.NAME_ALREADY_EXIST;
 }
 function close() {
   if (busy.value) return;
-  if (created.value) emit("created", created.value, deepCopy(draft), "close");
-  else void submit("close");
+  if (created.value) emit("created", created.value, deepCopy(draft), ENodePoolFormDestination.Close);
+  else void submit(ENodePoolFormDestination.Close);
 }
-async function submit(target: "close" | "continue") {
+async function submit(target: ENodePoolFormDestination) {
   if (busy.value) return;
   destination.value = target;
   if (!created.value) {
@@ -269,13 +313,16 @@ async function submit(target: "close" | "continue") {
     form.value?.initFirstState();
     form.value?.updateDirtyState();
   }
-  if (!result) return;
+  if (!result) {
+    if (submitError.value) $q.notify(alertUtil.getError(`Node pool ${draft.name} couldn't be created`));
+    return;
+  }
   $q.notify(alertUtil.getSuccess(`Node pool ${draft.name} created`));
   emit("created", result, deepCopy(draft), target);
 }
 </script>
 <style scoped lang="scss">
-.node-pool-create-flow {
+.node-pool-edit-form-v2 {
   padding: 0 20px 26px;
 }
 .cluster-field {

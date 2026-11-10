@@ -22,17 +22,17 @@
 import { computed } from "vue";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 import { memoryFormat } from "@/utils/format.util";
-import { NODE_POOL_CONFIGURATION_DEFAULTS as defaults } from "@/components/node-pools/node-pool-create-flow/node-pool-create-flow.model";
 import {
+  NODE_POOL_CONFIGURATION_DEFAULTS as defaults,
   getSchedulingMode,
   NETWORK_ACCELERATION_LABELS,
   SCHEDULING_MODE_DESCRIPTIONS,
-  type NodePoolSummaryConfiguration,
+  type INodePoolSummaryConfiguration,
   type INodePoolSummaryResources,
-} from "./node-pool-wizard-summary.model";
+} from "@/models/node-pool.model";
 
 const props = defineProps<{
-  pool: NodePoolSummaryConfiguration;
+  pool: INodePoolSummaryConfiguration;
   clusterName?: string;
   resources?: INodePoolSummaryResources;
 }>();

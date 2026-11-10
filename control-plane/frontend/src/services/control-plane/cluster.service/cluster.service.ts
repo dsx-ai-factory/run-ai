@@ -57,7 +57,6 @@ export const clusterService = {
   getTenantNodes,
   createNodepool,
   updateNodepool,
-  patchNodepool,
   isNodePoolNameUnique,
   countNodepools,
   countTenantNodes,
@@ -383,15 +382,6 @@ async function createNodepool(nodepool: NodepoolCreateFields): Promise<Nodepool>
 async function updateNodepool(nodepoolId: string, nodepool: NodepoolUpdateFields): Promise<Nodepool> {
   try {
     const response = await clusterServiceApi.nodePoolsApi.updateNodepool(nodepoolId, nodepool);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function patchNodepool(nodepoolId: string, nodepool: NodepoolUpdateFields): Promise<Nodepool> {
-  try {
-    const response = await clusterServiceApi.nodePoolsApi.patchNodepool(nodepoolId, nodepool);
     return response.data;
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
