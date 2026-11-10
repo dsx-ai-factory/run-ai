@@ -26,6 +26,7 @@ import { policyService } from "@/services/control-plane/policy.service/policy.se
 import { policyUtil } from "@/utils/policy.util/policy.util";
 import {
   PolicySyncStatusOfClusterStatusEnum,
+  PolicyPhase,
   PolicyType,
   ScopeType,
   type PolicyListEntry,
@@ -34,7 +35,7 @@ import {
 // model + filter service the grid uses, so they prove behavior rather than re-implement it.
 import { filterService } from "@/services/filter.service/filter.service";
 import { allPolicyColumnsMap, policyIndexColumns } from "@/table-models/policy.table-model";
-import { getField } from "@/utils/table-format.util";
+import { getField, getFieldContent } from "@/utils/table-format.util";
 import type { ITableColumn } from "@/models/table.model";
 import type { IFilterModel } from "@/models/filter.model";
 
@@ -79,6 +80,7 @@ function gvkEntry(
     clusterId?: string;
     date?: string;
     status?: PolicyListEntry["status"];
+    availability?: PolicyListEntry["availability"];
   } = {},
 ): PolicyListEntry {
   const group = over.group ?? "apps";
@@ -98,6 +100,7 @@ function gvkEntry(
       updatedAt: date,
     },
     status: over.status,
+    availability: over.availability,
   } as PolicyListEntry;
 }
 
@@ -231,24 +234,95 @@ describe("policies grid — sort & filter through the real column model (unified
   });
 });
 
-describe("policies grid — Status column renders the unified per-cluster status", () => {
+describe("policies grid — Status column uses GVK availability", () => {
   function statusOf(row: IPolicy) {
-    return allPolicyColumnsMap.status.format?.(row.status, row);
+    return getFieldContent(allPolicyColumnsMap.status, row);
   }
 
-  it("renders 'Ready' (green) for a GVK row whose selected cluster reports Ready", () => {
+  it.each([
+    [PolicyPhase.Ready, "Ready", "success"],
+    [PolicyPhase.Degraded, "Degraded", "warning"],
+    [PolicyPhase.PendingUpdate, "Pending update", "warning"],
+  ])("renders availability %s even when cluster sync reports Ready", (phase, status, color) => {
     const row = toPolicy(
-      gvkEntry({ clusterId: "cluster-a", status: { clusters: [{ clusterId: "cluster-a", status: READY }] } }),
+      gvkEntry({
+        status: { clusters: [{ clusterId: "cluster-a", status: READY }] },
+        availability: { phase, issues: [] },
+      }),
       "cluster-a",
     );
-    const opts = statusOf(row);
-    expect(opts?.status).toBe("Ready");
-    expect(opts?.color).toBe("success");
+    expect(statusOf(row)).toMatchObject({ status, color, displayAnimation: false });
   });
 
-  it("falls back to '-' when no cluster is selected", () => {
-    const row = toPolicy(gvkEntry({ status: { clusters: [{ clusterId: "cluster-a", status: READY }] } }), "");
-    expect(statusOf(row)?.status).toBe("-");
+  it("shows GVK availability without a selected cluster or sync status", () => {
+    const row = toPolicy(gvkEntry({ availability: { phase: PolicyPhase.Degraded } }), "");
+    expect(statusOf(row).status).toBe("Degraded");
+  });
+
+  it.each([undefined, null, {}])("does not claim Ready when GVK availability is %s", (availability) => {
+    const row = toPolicy(
+      gvkEntry({ availability, status: { clusters: [{ clusterId: "cluster-a", status: READY }] } }),
+      "cluster-a",
+    );
+    expect(statusOf(row).status).toBe("-");
+  });
+
+  it("shows all backend issues as text in the status information popup", () => {
+    const row = toPolicy(
+      gvkEntry({
+        availability: {
+          phase: PolicyPhase.Degraded,
+          issues: ["specSelector <port> & name is not defined", "itemSelector worker is not defined"],
+        },
+      }),
+      "cluster-a",
+    );
+    const content = document.createElement("div");
+    content.innerHTML = statusOf(row).tooltipText;
+    expect(content.querySelector("port")).toBeNull();
+    expect(content.textContent).toContain("specSelector <port> & name is not defined");
+    expect(content.textContent).toContain("itemSelector worker is not defined");
+  });
+
+  it("does not show an issue popup for Ready availability without issues", () => {
+    const row = toPolicy(gvkEntry({ availability: { phase: PolicyPhase.Ready } }), "cluster-a");
+    expect(statusOf(row).tooltipText).toBe("");
+  });
+
+  it("keeps native sync failures and error details", () => {
+    const row = toPolicy(
+      nativeEntry({
+        status: {
+          clusters: [
+            { clusterId: "cluster-a", status: PolicySyncStatusOfClusterStatusEnum.Failed, errorMessage: "sync failed" },
+          ],
+        },
+      }),
+      "cluster-a",
+    );
+    expect(statusOf(row)).toMatchObject({ status: "Failed", color: "negative", tooltipText: "sync failed" });
+  });
+
+  it("keeps native '-' without a selected cluster", () => {
+    const row = toPolicy(nativeEntry({ status: { clusters: [{ clusterId: "cluster-a", status: READY }] } }), "");
+    expect(statusOf(row).status).toBe("-");
+  });
+
+  it("filters and sorts GVK and native rows by their displayed status", () => {
+    const rows = [
+      toPolicy(gvkEntry({ availability: { phase: PolicyPhase.PendingUpdate } }), "cluster-a"),
+      toPolicy(nativeEntry({ status: { clusters: [{ clusterId: "cluster-a", status: READY }] } }), "cluster-a"),
+      toPolicy(gvkEntry({ availability: { phase: PolicyPhase.Degraded } }), "cluster-a"),
+    ];
+    const col = allPolicyColumnsMap.status;
+    const filter = (term: string) =>
+      filterService.filterByColumns(rows, [{ name: col.name, term, field: col.field }], policyIndexColumns);
+    expect(filter("degraded")).toEqual([rows[2]]);
+    expect(filter("pending")).toEqual([rows[0]]);
+    expect(filter("ready")).toEqual([rows[1]]);
+    const sortValues = rows.map((row) => getField(col, row as unknown as Record<string, unknown>));
+    expect(sortValues).toEqual(["Pending update", "Ready", "Degraded"]);
+    expect(sortValues.sort()).toEqual(["Degraded", "Pending update", "Ready"]);
   });
 });
 
