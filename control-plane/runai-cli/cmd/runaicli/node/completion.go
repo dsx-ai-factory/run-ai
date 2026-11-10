@@ -7,6 +7,8 @@ package node
 
 import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/completion"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/controlplane/nodepool"
+	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/pkg/config"
 	"github.com/spf13/cobra"
 )
 
@@ -26,4 +28,11 @@ func getNodeNames(_ *cobra.Command) ([]string, error) {
 		names = append(names, brief.Name)
 	}
 	return names, nil
+}
+
+func GetGPUTypesForFlag(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return completion.GetFlagCompletionFn(completion.GPUType, initNodeInstance, getGPUTypes)(cmd, args, toComplete)
+}
+func getGPUTypes(_ *cobra.Command) ([]string, error) {
+	return nodepool.GetGPUTypes(instance.GetTxn().GetCtx(), instance.GetConfigValue(config.ControlPlaneUrl), instance.GetToken(), instance.GetConfigValue(config.ClusterUUID))
 }

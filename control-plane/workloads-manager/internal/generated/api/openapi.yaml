@@ -2051,7 +2051,7 @@ components:
             storage: 1Gi
         accessModes:
         - ReadWriteOnce
-        volumeMode: ""
+        volumeMode: volumeMode
       properties:
         accessModes:
           description: Access modes the volume should support. At least one is required.
@@ -2079,6 +2079,7 @@ components:
           allOf:
           - $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcVolumeMode'
           nullable: true
+          type: string
       required:
       - accessModes
       - resources
@@ -2103,7 +2104,7 @@ components:
               storage: 1Gi
           accessModes:
           - ReadWriteOnce
-          volumeMode: ""
+          volumeMode: volumeMode
       properties:
         metadata:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcMetadata'
@@ -2146,7 +2147,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2160,7 +2161,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2174,7 +2175,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2188,7 +2189,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         - metadata:
             name: my-pytorch-pvc
             annotations:
@@ -2202,7 +2203,7 @@ components:
                 storage: 1Gi
             accessModes:
             - ReadWriteOnce
-            volumeMode: ""
+            volumeMode: volumeMode
         userCredentials:
           sources:
           - ref: my-hf-token-abc1234567
@@ -2458,7 +2459,6 @@ components:
           maxItems: 1000
           nullable: true
           type: array
-          x-internal: true
         pvcsConfig:
           $ref: '#/components/schemas/WorkloadV2UpdateConfigurationPvcsConfig'
       type: object
@@ -2481,7 +2481,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2495,7 +2495,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2509,7 +2509,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2523,7 +2523,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -2537,7 +2537,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           userCredentials:
             sources:
             - ref: my-hf-token-abc1234567
@@ -2875,7 +2875,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2889,7 +2889,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2903,7 +2903,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2917,7 +2917,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -2931,7 +2931,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -3438,7 +3438,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3452,7 +3452,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3466,7 +3466,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3480,7 +3480,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           - metadata:
               name: my-pytorch-pvc
               annotations:
@@ -3494,7 +3494,7 @@ components:
                   storage: 1Gi
               accessModes:
               - ReadWriteOnce
-              volumeMode: ""
+              volumeMode: volumeMode
           userCredentials:
             sources:
             - ref: my-hf-token-abc1234567
@@ -3790,7 +3790,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3804,7 +3804,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3818,7 +3818,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3832,7 +3832,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -3846,7 +3846,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -4251,7 +4251,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4265,7 +4265,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4279,7 +4279,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4293,7 +4293,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               - metadata:
                   name: my-pytorch-pvc
                   annotations:
@@ -4307,7 +4307,7 @@ components:
                       storage: 1Gi
                   accessModes:
                   - ReadWriteOnce
-                  volumeMode: ""
+                  volumeMode: volumeMode
               userCredentials:
                 sources:
                 - ref: my-hf-token-abc1234567
@@ -5574,6 +5574,17 @@ components:
       maxItems: 1000
       nullable: true
       type: array
+    GpuType:
+      description: "Exact nvidia.com/gpu.product node label for NIM Service placement.\
+        \ When GPU allocation is omitted from both the request and policy defaults,\
+        \ the backend requests a minimum allocation for this GPU type and the exact\
+        \ NIM image tag. If automatic sizing is unavailable, submission fails before\
+        \ creating a workload."
+      maxLength: 63
+      minLength: 1
+      nullable: true
+      pattern: "^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$"
+      type: string
     Image:
       description: "Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images).\
         \ The image name is mandatory for creating a workload."
@@ -6310,6 +6321,8 @@ components:
             $ref: '#/components/schemas/NimServiceSpec_allOf_compute'
           environmentVariables:
             $ref: '#/components/schemas/EnvironmentVariables'
+          gpuType:
+            $ref: '#/components/schemas/GpuType'
           image:
             $ref: '#/components/schemas/Image'
           imagePullPolicy:
@@ -6592,6 +6605,7 @@ components:
         - my-node-pool-a
         - my-node-pool-b
         category: null
+        gpuType: null
     NimServiceCreateRequest:
       example:
         metadata:
@@ -6849,6 +6863,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          gpuType: null
       properties:
         metadata:
           $ref: '#/components/schemas/NIMServiceMetadataCreateParams'
@@ -6879,7 +6894,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6893,7 +6908,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6907,7 +6922,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6921,7 +6936,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             - metadata:
                 name: my-pytorch-pvc
                 annotations:
@@ -6935,7 +6950,7 @@ components:
                     storage: 1Gi
                 accessModes:
                 - ReadWriteOnce
-                volumeMode: ""
+                volumeMode: volumeMode
             userCredentials:
               sources:
               - ref: my-hf-token-abc1234567
@@ -7437,6 +7452,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          gpuType: null
       properties:
         metadata:
           $ref: '#/components/schemas/WorkloadV2Metadata'
@@ -7502,6 +7518,7 @@ components:
       - annotations
       - labels
       - tolerations
+      - gpuType
       - nodePools
       - imagePullSecrets
       type: string
@@ -7761,6 +7778,7 @@ components:
           - my-node-pool-a
           - my-node-pool-b
           category: null
+          gpuType: null
       properties:
         spec:
           $ref: '#/components/schemas/NimServiceSpec'

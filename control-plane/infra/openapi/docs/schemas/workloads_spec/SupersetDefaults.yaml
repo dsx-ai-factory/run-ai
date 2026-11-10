@@ -35,6 +35,8 @@ allOf:
       $ref: ./container/EnvironmentVariablesDefaults.yaml
     exposedUrls:
       $ref: ./connectivity/ExposedUrlsDefaults.yaml
+    gpuType:
+      $ref: ./resources/GpuType.yaml
     image:
       $ref: ./container/Image.yaml
     imagePullPolicy:

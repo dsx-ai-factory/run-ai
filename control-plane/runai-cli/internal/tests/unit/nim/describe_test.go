@@ -45,7 +45,9 @@ var _ = Describe("NIM Describe Test", Ordered, func() {
 	It("describes the new GPU fields from the NIM response", func() {
 		fixtures := describeMocker.GetFixtures()
 		original := fixtures.NimSpec.Spec.Compute
-		defer func() { fixtures.NimSpec.Spec.Compute = original }()
+		originalType := fixtures.NimSpec.Spec.GpuType
+		defer func() { fixtures.NimSpec.Spec.Compute = original; fixtures.NimSpec.Spec.GpuType = originalType }()
+		fixtures.NimSpec.Spec.SetGpuType("NVIDIA-H100-80GB-HBM3")
 		compute := nimclient.NewNimServiceSpecAllOfCompute()
 		compute.SetGpuMemoryPortionRequest(0.25)
 		compute.SetGpuMemoryPortionLimit(0.5)
@@ -59,6 +61,7 @@ var _ = Describe("NIM Describe Test", Ordered, func() {
 		output, err := clients.CaptureDescribeTableOutput(result)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(output).To(MatchRegexp(`GPU Compute Mode:\s+sm-sharing`))
+		Expect(output).To(MatchRegexp(`GPU Type:\s+NVIDIA-H100-80GB-HBM3`))
 	})
 
 	Context("Describe NIM Workload - Table Output", func() {

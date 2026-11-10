@@ -13242,6 +13242,12 @@ export interface SupersetSpec {
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
     /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof SupersetSpec
+     */
+    'gpuType'?: string | null;
+    /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}
      * @memberof SupersetSpec
@@ -13483,6 +13489,12 @@ export interface SupersetSpecAllOf {
      * @memberof SupersetSpecAllOf
      */
     'exposedUrls'?: Array<ExposedUrl> | null;
+    /**
+     * Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+     * @type {string}
+     * @memberof SupersetSpecAllOf
+     */
+    'gpuType'?: string | null;
     /**
      * Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
      * @type {string}

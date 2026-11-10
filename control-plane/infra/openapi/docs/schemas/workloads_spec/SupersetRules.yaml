@@ -35,6 +35,8 @@ allOf:
       $ref: ../policy_rules/InstancesRules.yaml
     exposedUrls:
       $ref: ./connectivity/ExposedUrlsRules.yaml
+    gpuType:
+      $ref: ../policy_rules/StringRules.yaml
     image:
       $ref: ../policy_rules/StringRules.yaml
     imagePullPolicy:

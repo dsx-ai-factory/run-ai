@@ -240,6 +240,7 @@ func (wd *WorkloadDisplayer) DisplayDistributedInference() {
 
 func (wd *WorkloadDisplayer) DisplayNim() {
 	basicFields := []displayer.DisplayField{
+		{Name: "GPU Type", Value: field.StringOrEmpty(wd.workload.Nim.GpuType)},
 		{Name: nim.FieldNgcAuthSecret, Value: field.StringOrEmpty(wd.workload.Nim.NgcAuthSecret)},
 		{Name: nim.FieldReplicasRequested, Value: field.Int32OrEmpty(wd.workload.Nim.ReplicasRequested)},
 		{Name: nim.FieldReplicasReady, Value: field.Int32OrEmpty(wd.workload.Nim.ReplicasReady)},

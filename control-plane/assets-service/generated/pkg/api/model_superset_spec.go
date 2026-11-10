@@ -167,6 +167,12 @@ type SupersetSpec struct {
 	ExposedUrls *[]ExposedUrl `json:"exposedUrls,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// Exact nvidia.com/gpu.product node label for NIM Service placement. When GPU allocation is omitted from both the request and policy defaults, the backend requests a minimum allocation for this GPU type and the exact NIM image tag. If automatic sizing is unavailable, submission fails before creating a workload.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//GpuType *string `json:"gpuType,omitempty" validate:"regexp=^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$"`
+	GpuType *string `json:"gpuType,omitempty" gorm:"" validate:"regexp=^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	// Docker image name. For more information, see [Images](https://kubernetes.io/docs/concepts/containers/images). The image name is mandatory for creating a workload.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Image *string `json:"image,omitempty" validate:"regexp=.*"`
@@ -690,6 +696,20 @@ func AssertSupersetSpecConstraints(obj SupersetSpec) error {
 			}
 		}
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	if patternErr := runaihttp.AssertPattern(obj.GpuType, "GpuType", "/^[a-zA-Z0-9]([a-zA-Z0-9_.-]*[a-zA-Z0-9])?$/"); patternErr != nil {
+		return &ParsingError{Param: "GpuType", Err: patternErr}
+	}
+	if minLengthErr := runaihttp.AssertMinLength(obj.GpuType, "GpuType", 1); minLengthErr != nil {
+		return &ParsingError{Param: "GpuType", Err: minLengthErr}
+	}
+	if maxLengthErr := runaihttp.AssertMaxLength(obj.GpuType, "GpuType", 63); maxLengthErr != nil {
+		return &ParsingError{Param: "GpuType", Err: maxLengthErr}
+	}
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if patternErr := runaihttp.AssertPattern(obj.Image, "Image", "/.*/"); patternErr != nil {
 		return &ParsingError{Param: "Image", Err: patternErr}
