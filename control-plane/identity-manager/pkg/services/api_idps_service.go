@@ -82,7 +82,7 @@ func (s *IdpsApiService) CreateIdp(ctx context.Context, idpCreationRequest api.I
 
 	config, err := s.validateIdpConfig(ctx, idpCreationRequest)
 	if err != nil {
-		return api.Response(http.StatusBadRequest, api.IdpPostResponse{Alias: idpCreationRequest.Name, SamlData: config}), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
+		return api.Response(http.StatusBadRequest, api.IdpPostResponse{Alias: idpCreationRequest.Name, SamlData: config}), nil
 	}
 	if idpCreationRequest.DryRun {
 		return api.Response(http.StatusOK, api.IdpPostResponse{Alias: idpCreationRequest.Name, SamlData: config}), nil
