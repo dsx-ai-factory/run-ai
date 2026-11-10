@@ -19,6 +19,37 @@ _yaml_anchor_definitions:
 # !**/* is needed to prevent the "no globs" case from matching all files, which would cause all PRs to be labeled with all labels that use these anchors.
 
 # =============================================================================
+# E2E
+# =============================================================================
+
+e2e:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'e2e/**'
+
+phoenix:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'e2e/src/test/suites/playwright/parallel/phoenix/**'
+    - 'e2e/src/test/suites/playwright/serial/phoenix/**'
+    - 'e2e/src/test/suites/playwright/serial/regression/phoenix/**'
+
+viper:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'e2e/src/test/suites/playwright/parallel/viper/**'
+    - 'e2e/src/test/suites/playwright/serial/regression/viper/**'
+    - 'e2e/src/test/suites/playwright/parallel/suricata/**'
+    - 'e2e/src/test/suites/playwright/serial/regression/suricata/**'
+    - 'e2e/src/test/suites/playwright/serial/regression/00-suricata-pre/**'
+
+loong:
+- changed-files:
+  - any-glob-to-any-file:
+    - 'e2e/src/test/suites/playwright/parallel/nv/**'
+    - 'e2e/src/test/suites/playwright/serial/nv/**'
+
+# =============================================================================
 # DevOps & Infrastructure
 # =============================================================================
 
