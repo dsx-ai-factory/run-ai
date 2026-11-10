@@ -436,6 +436,14 @@ func TestKnativeExternalConfigurationGatewayAPI(t *testing.T) {
 			objects: []client.Object{networkCM(consts.KnativeGatewayAPIIngressClass), gatewayCM("  \n"), domainCM},
 		},
 		{
+			name:    "gateway api ingress class with an empty external gateway list is not reported",
+			objects: []client.Object{networkCM(consts.KnativeGatewayAPIIngressClass), gatewayCM("[]"), domainCM},
+		},
+		{
+			name:    "gateway api ingress class with an unparsable external gateway value is not reported",
+			objects: []client.Object{networkCM(consts.KnativeGatewayAPIIngressClass), gatewayCM("not: [a list"), domainCM},
+		},
+		{
 			name:    "gateway api ingress class without the gateway config-map is not reported",
 			objects: []client.Object{networkCM(consts.KnativeGatewayAPIIngressClass), domainCM},
 		},
