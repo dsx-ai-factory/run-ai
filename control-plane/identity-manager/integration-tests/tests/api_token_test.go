@@ -833,6 +833,7 @@ func TestExternalTokenExchange_ApplicationFlow(t *testing.T) {
 	ctx := TestStepsClient.SetContextValues(context.Background(), BaseTenantId)
 	client, clientId, _, _, cleanup := setupExternalTokenExchangeTest(t, ctx, "external-token-app")
 	defer cleanup()
+	removeClientProtocolMapper(t, MasterRealmName, *client.ID, "SubToClientId Mapper")
 
 	tokenURL := fmt.Sprintf(keycloakTokenEndpoint, MasterRealmName)
 	clientToken, err := GetKeycloakToken(tokenURL, clientId, *client.Secret, "", "", "client_credentials")
