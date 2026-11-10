@@ -13,6 +13,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbmodel"
@@ -379,6 +380,12 @@ func validateSelectorParams(prefix string, params map[string]interface{}, specSe
 		}
 	}
 
+	for _, paramName := range validArgs.Keys() {
+		if value, exists := params[paramName]; !exists || value == nil {
+			return api.NewValidationError(fmt.Sprintf("%s: selectorParam %q is required", prefix, paramName))
+		}
+	}
+
 	for paramName, paramValue := range params {
 		if enumValues, hasEnum := specSel.ArgsEnum[paramName]; hasEnum {
 			strVal := fmt.Sprintf("%v", paramValue)
@@ -396,6 +403,11 @@ func validateSelectorParams(prefix string, params map[string]interface{}, specSe
 		}
 
 		argType, hasType := specSel.ArgsInfo[paramName]
+		if hasType && argType == api.MAPPINGFIELDTYPE_STRING {
+			if _, ok := paramValue.(string); !ok {
+				return api.NewValidationError(fmt.Sprintf("%s: selectorParam %q must be a string", prefix, paramName))
+			}
+		}
 		if !hasType {
 			argType = api.MAPPINGFIELDTYPE_STRING
 		}
@@ -661,6 +673,9 @@ func validateEnforcementValues(prefix string, enforcement api.PolicyRuleEnforcem
 				CollectArgsNamedReferences(q, setExprArgs)
 			}
 
+			if len(setExprArgs) == 1 && setExprArgs.Has("value") && values["value"] == nil {
+				return api.NewValidationError(fmt.Sprintf("%s: %s requires a non-null value", prefix, enforcementName))
+			}
 			for paramName := range values {
 				if !setExprArgs.Has(paramName) {
 					return validationErrorWithDetails(
@@ -695,6 +710,9 @@ func validateEnforcementValues(prefix string, enforcement api.PolicyRuleEnforcem
 					return err
 				}
 			}
+			if err := validateSetExpressionValues(prefix, enforcementName, *formatter.SetExpr, values); err != nil {
+				return err
+			}
 		default:
 			return api.NewValidationError(fmt.Sprintf(
 				"%s: %s is only valid when the field uses the KeyValue built-in formatter or a formatter with setExpr; this field's formatter has neither",
@@ -712,6 +730,37 @@ func validateEnforcementValues(prefix string, enforcement api.PolicyRuleEnforcem
 	}
 
 	return nil
+}
+
+// SET and DEFAULT expressions run against an empty object at application time,
+// so their argument-dependent failures can be rejected before storing a policy.
+func validateSetExpressionValues(prefix, enforcementName, expression string, values map[string]interface{}) *api.Error {
+	parsed, err := gojq.Parse(expression)
+	if err != nil {
+		return api.NewValidationError(fmt.Sprintf("%s: invalid formatter expression: %v", prefix, err))
+	}
+	if err := validateParsedJQSafety(parsed); err != nil {
+		return api.NewValidationError(fmt.Sprintf("%s: unsafe formatter expression: %v", prefix, err))
+	}
+	code, err := gojq.Compile(parsed, gojq.WithVariables([]string{"$ARGS"}))
+	if err != nil {
+		return api.NewValidationError(fmt.Sprintf("%s: invalid formatter expression: %v", prefix, err))
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Millisecond)
+	defer cancel()
+	iter := code.RunWithContext(ctx, map[string]any{}, map[string]any{"named": values})
+	for count := 0; ; count++ {
+		result, ok := iter.Next()
+		if !ok {
+			return nil
+		}
+		if err, ok := result.(error); ok {
+			return api.NewValidationError(fmt.Sprintf("%s: %s arguments cannot be applied: %v", prefix, enforcementName, err))
+		}
+		if count >= 1000 {
+			return api.NewValidationError(fmt.Sprintf("%s: %s expression produced too many values", prefix, enforcementName))
+		}
+	}
 }
 
 // validateRangeEnforcement checks that the numeric range is internally
@@ -901,6 +950,12 @@ func validateValueForType(prefix string, value interface{}, fieldType api.Mappin
 			return api.NewValidationError(fmt.Sprintf("%s: expected boolean, got %q", prefix, strVal))
 		}
 	case api.MAPPINGFIELDTYPE_INTEGER:
+		switch number := value.(type) {
+		case float64:
+			strVal = strconv.FormatFloat(number, 'f', -1, 64)
+		case float32:
+			strVal = strconv.FormatFloat(float64(number), 'f', -1, 32)
+		}
 		if _, err := strconv.ParseInt(strVal, 10, 64); err != nil {
 			return api.NewValidationError(fmt.Sprintf("%s: expected integer, got %q", prefix, strVal))
 		}

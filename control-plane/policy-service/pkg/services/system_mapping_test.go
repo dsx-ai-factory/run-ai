@@ -282,6 +282,37 @@ var _ = Describe("SystemMappingTest", func() {
 		})
 	})
 
+	Context("Dynamo system mappings", func() {
+		DescribeTable("seeds each API version with its own pod schema", func(version, description, podPath, otherPodPath string) {
+			db := runaidb.DB()
+			ms := MappingApiService{}
+			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
+			handleSystemFormatters(sysAdminCtx, ms, cv)
+			handleSystemFieldGroups(sysAdminCtx, db, ms, cv)
+			handleSystemMappings(sysAdminCtx, db, ms, cv)
+
+			gvk := api.Gvk{Group: convutils.Ref("nvidia.com"), Kind: "DynamoGraphDeployment", Version: version}
+			mapping, err := ms.getMapping(sysAdminCtx, gvk)
+			Expect(err).To(BeNil())
+			Expect(mapping.Scope).To(Equal(api.MAPPINGSCOPE_SYSTEM))
+			Expect(mapping.Description).NotTo(BeNil())
+			Expect(*mapping.Description).To(Equal(description))
+			Expect(mapping.SpecSelectors).To(HaveKey("allPodSpecs"))
+			podSelector := mapping.SpecSelectors["allPodSpecs"]
+			Expect(podSelector.Query).To(ContainSubstring(podPath))
+			Expect(podSelector.Query).NotTo(ContainSubstring(otherPodPath))
+			Expect(podSelector.FieldGroups).To(ConsistOf(sm.SystemPodSpecFgName, sm.SystemPodSpecAndContainerFgName))
+			if version == "v1beta1" {
+				Expect(mapping.SpecSelectors).To(HaveKey("componentPodSpec"))
+				Expect(mapping.SpecSelectors["componentPodSpec"].ArgsInfo).To(HaveKeyWithValue("componentName", api.MAPPINGFIELDTYPE_STRING))
+				Expect(mapping.SpecSelectors["componentSpec"].FieldGroups).To(ConsistOf(sm.SystemDynamoComponentSpecFgName))
+			}
+		},
+			Entry("v1alpha1 service specs", "v1alpha1", systemDynamoGraphDeploymentMappingDesc, ".spec.services", ".spec.components"),
+			Entry("v1beta1 component pod templates", "v1beta1", systemDynamoGraphDeploymentV1beta1MappingDesc, ".spec.components", ".spec.services"),
+		)
+	})
+
 	Context("system workload mapping description versioning", func() {
 		It("does not update mapping when description is unchanged (skips seed)", func() {
 			db := runaidb.DB()
@@ -566,12 +597,12 @@ var _ = Describe("SystemMappingTest", func() {
 					}
 				}
 				return map[string]api.FieldGroupField{
-					"keep":     field("keepSpec", "keptSel"),
-					"movesTo":  field("movesSpec", "keptSel"),
-					"newField": field("newSpec"),
-				}, map[string]api.ItemSelector{
-					"keptSel": {Query: `.kept[]`},
-				}
+						"keep":     field("keepSpec", "keptSel"),
+						"movesTo":  field("movesSpec", "keptSel"),
+						"newField": field("newSpec"),
+					}, map[string]api.ItemSelector{
+						"keptSel": {Query: `.kept[]`},
+					}
 			}
 
 			cv := NewMappingConsistencyValidator(sysAdminCtx, api.MAPPINGSCOPE_SYSTEM)
