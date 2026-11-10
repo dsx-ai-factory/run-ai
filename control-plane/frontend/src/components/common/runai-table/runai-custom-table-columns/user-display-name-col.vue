@@ -6,7 +6,7 @@
 <template>
   <q-td :aid="column.name" class="user-display-name-col" :class="column.classes" :style="column.style">
     <runai-user-display-name v-if="shouldRenderDisplayName" :username="username" />
-    <span v-else>{{ fallbackText }}</span>
+    <span v-else class="block ellipsis" :title="fallbackText">{{ fallbackText }}</span>
   </q-td>
 </template>
 

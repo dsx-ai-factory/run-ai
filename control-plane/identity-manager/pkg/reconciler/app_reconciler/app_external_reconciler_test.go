@@ -71,16 +71,16 @@ func TestSameVersionExternal_NeedToReconcile(t *testing.T) {
 	versionsDaoMock.On("GetReconcilerVersionsByTenantId", mock.Anything, TenantId).Return(&versionRes, nil)
 	versionsDaoMock.On("UpdateServiceAccountsReconcilerVersions", mock.Anything, TenantId, testSubject.version).Return(nil)
 
-	externalApps := test_utils.GetServiceAccountsArray()
-	defaultIamMockSetup(iamMock, externalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(externalApps, nil)
+	serviceAccounts := test_utils.GetServiceAccountsArray()
+	defaultIamMockSetup(iamMock, serviceAccounts, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(serviceAccounts, nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, false)
 	assert.Nil(t, err)
 	tenantResolverMock.AssertNumberOfCalls(t, "CreateApp", 0)
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	iamMock.MockClientService.AssertNumberOfCalls(t, "GetClients", 1)
-	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(externalApps))
+	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(serviceAccounts))
 }
 
 func TestMissingVersionExternal_NeedToReconcile(t *testing.T) {
@@ -94,16 +94,16 @@ func TestMissingVersionExternal_NeedToReconcile(t *testing.T) {
 	versionsDaoMock.On("GetReconcilerVersionsByTenantId", mock.Anything, TenantId).Return(&versionRes, nil)
 	versionsDaoMock.On("UpdateServiceAccountsReconcilerVersions", mock.Anything, TenantId, testSubject.version).Return(nil)
 
-	externalApps := test_utils.GetServiceAccountsArray()
-	defaultIamMockSetup(iamMock, externalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(externalApps, nil)
+	serviceAccounts := test_utils.GetServiceAccountsArray()
+	defaultIamMockSetup(iamMock, serviceAccounts, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(serviceAccounts, nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, false)
 	assert.Nil(t, err)
 	tenantResolverMock.AssertNumberOfCalls(t, "CreateApp", 0)
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	iamMock.MockClientService.AssertNumberOfCalls(t, "GetClients", 1)
-	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(externalApps))
+	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(serviceAccounts))
 }
 
 func TestErrorVersionExternal_NeedToReconcile(t *testing.T) {
@@ -115,14 +115,14 @@ func TestErrorVersionExternal_NeedToReconcile(t *testing.T) {
 	versionsDaoMock.On("GetReconcilerVersionsByTenantId", mock.Anything, TenantId).Return(nil, errors.New("error"))
 	versionsDaoMock.On("UpdateServiceAccountsReconcilerVersions", mock.Anything, TenantId, testSubject.version).Return(nil)
 
-	externalApps := test_utils.GetServiceAccountsArray()
-	defaultIamMockSetup(iamMock, externalApps, realmName, true)
-	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(externalApps, nil)
+	serviceAccounts := test_utils.GetServiceAccountsArray()
+	defaultIamMockSetup(iamMock, serviceAccounts, realmName, true)
+	iamMock.MockClientService.On("GetClients", mock.Anything, mock.Anything, &iamModels.ClientFilter{IsExternal: ptr.To(true)}).Return(serviceAccounts, nil)
 
 	err := testSubject.Reconcile(context.Background(), realmName, false)
 	assert.Nil(t, err)
 	tenantResolverMock.AssertNumberOfCalls(t, "CreateApp", 0)
 	tenantResolverMock.AssertNumberOfCalls(t, "GetRealmTenantId", 1)
 	iamMock.MockClientService.AssertNumberOfCalls(t, "GetClients", 1)
-	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(externalApps))
+	iamMock.MockClientService.AssertNumberOfCalls(t, "UpdateClient", len(serviceAccounts))
 }

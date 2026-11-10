@@ -153,7 +153,12 @@ describe("IdleAllocatedGpuWidget component", () => {
       await clickOnGridLink();
       expect(mockRouter.push).toHaveBeenCalledWith({
         name: WORKLOAD_ROUTE_NAMES.WORKLOAD_INDEX,
-        query: { sortBy: "idleAllocatedGpus", descending: "true" },
+        query: {
+          sortBy: "idleAllocatedGpus",
+          descending: "true",
+          advancedFilters:
+            '[{ "name": "idleAllocatedGpus", "minValue": "0.01", "maxValue": "0", "label": "Idle GPU devices", "operator": ">=", "type": "Numeric" }]',
+        },
       });
     });
 

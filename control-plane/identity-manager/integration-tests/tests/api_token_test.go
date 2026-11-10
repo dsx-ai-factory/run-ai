@@ -60,7 +60,7 @@ func TestGrantServiceAccountToken_HappyFlow(t *testing.T) {
 
 	if claims, ok := parsedToken.Claims.(*jwt.MapClaims); ok {
 		require.Contains(t, (*claims)["azp"], *serviceAccount.ClientID)
-		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeTenantApp)
+		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeServiceAccount)
 	}
 }
 
@@ -92,7 +92,7 @@ func TestGrantAccessKeyToken_HappyFlow(t *testing.T) {
 
 	if claims, ok := parsedToken.Claims.(*jwt.MapClaims); ok {
 		require.Contains(t, (*claims)["sub"], *accessKey.Attributes.CreatedBy)
-		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeUserApp)
+		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeAccessKey)
 	}
 }
 
@@ -150,6 +150,36 @@ func TestGrantServiceAccountToken_NoEmailVerifiedClaim(t *testing.T) {
 	require.True(t, ok)
 	_, hasEmail := (*claims)["email_verified"]
 	require.False(t, hasEmail, "service account token must not contain email_verified claim")
+}
+
+func TestGrantServiceAccountToken_AudienceIsArray(t *testing.T) {
+	t.Parallel()
+	ctx := newTestContext()
+	serviceAccountId, err := TestStepsClient.CreateServiceAccount(ctx, BaseRealmName, BaseTenantId, nil)
+	require.NoError(t, err)
+	require.NotNil(t, serviceAccountId)
+	defer clientCleanup(t, ctx, serviceAccountId)
+
+	serviceAccount, err := IamServices.ClientService.GetClient(ctx, BaseRealmName, serviceAccountId)
+	require.NoError(t, err)
+	require.NotNil(t, serviceAccount)
+	ctx = TestStepsClient.SetFakeHostHeader(ctx, OpenapiClient, BaseRealmName)
+
+	tokenRequest := generateClientCredentialsTokenRequest(*serviceAccount.ClientID, *serviceAccount.Secret)
+	token, resp, err := OpenapiClient.TokensAPI.GrantToken(ctx).TokenRequest(tokenRequest).Execute()
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	require.NotNil(t, token)
+
+	parsedToken, _, err := jwt.NewParser().ParseUnverified(*token.AccessToken, &jwt.MapClaims{})
+	require.NoError(t, err)
+
+	claims, ok := parsedToken.Claims.(*jwt.MapClaims)
+	require.True(t, ok)
+
+	aud, ok := (*claims)["aud"].([]interface{})
+	require.Truef(t, ok, "aud claim must be an array, got %T: %v", (*claims)["aud"], (*claims)["aud"])
+	require.Contains(t, aud, "runai-dummy")
 }
 
 func TestGrantServiceAccountToken_InvalidInput(t *testing.T) {
@@ -829,9 +859,9 @@ func TestExternalTokenExchange_UserFlow(t *testing.T) {
 	require.Equal(t, username, *exchangedUser.Email)
 }
 
-func TestExternalTokenExchange_ApplicationFlow(t *testing.T) {
+func TestExternalTokenExchange_ClientCredentialsFlow(t *testing.T) {
 	ctx := TestStepsClient.SetContextValues(context.Background(), BaseTenantId)
-	client, clientId, _, _, cleanup := setupExternalTokenExchangeTest(t, ctx, "external-token-app")
+	client, clientId, _, _, cleanup := setupExternalTokenExchangeTest(t, ctx, "external-token-client-credentials")
 	defer cleanup()
 
 	tokenURL := fmt.Sprintf(keycloakTokenEndpoint, MasterRealmName)
@@ -839,10 +869,10 @@ func TestExternalTokenExchange_ApplicationFlow(t *testing.T) {
 	require.NoError(t, err)
 	require.NotEmpty(t, clientToken)
 
-	exchangedAppToken, resp, err := exchangeExternalToken(ctx, clientToken)
+	exchangedToken, resp, err := exchangeExternalToken(ctx, clientToken)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
-	require.NotNil(t, exchangedAppToken)
+	require.NotNil(t, exchangedToken)
 }
 
 func TestGrantTokenV2_ExternalTokenExchange_UserFlow(t *testing.T) {
