@@ -118,7 +118,7 @@ func TestSAMLIdp_Update_NotFound(t *testing.T) {
 	alias, entityId, metadataUrl, mappers := newRandomSamlIdpTestDataWithRealm()
 	idpRequest := makeSamlIdpRequest(alias, entityId, metadataUrl, mappers)
 	httpResp, err := OpenapiClient.IdpsAPI.UpdateIdp(ctx, alias).IdpCreationRequest(idpRequest).Execute()
-	requireApiError(t, err, httpResp, http.StatusInternalServerError)
+	requireApiError(t, err, httpResp, http.StatusNotFound)
 }
 
 func TestSAMLIdp_Update_Invalid(t *testing.T) {
