@@ -1,6 +1,0 @@
-name: contains
-in: query
-description: Return options containing this literal text.
-schema:
-  type: string
-example: a

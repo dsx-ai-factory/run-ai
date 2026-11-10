@@ -235,9 +235,9 @@ var _ = Describe("Node labels", func() {
 		)
 
 		DescribeTable("returns unique, sorted label keys",
-			func(contains string, expected []string) {
+			func(search string, expected []string) {
 				By("Requesting label keys using the typed text")
-				response, err := nodeService.GetNodeLabelKeys(ctx, clusterID, contains, 0, 50)
+				response, err := nodeService.GetNodeLabelKeys(ctx, clusterID, search, 0, 50)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(response.Code).To(Equal(http.StatusOK))
 				Expect(response.Body.([]string)).To(Equal(expected))
@@ -250,9 +250,9 @@ var _ = Describe("Node labels", func() {
 		)
 
 		DescribeTable("returns unique, sorted values for an exact label key",
-			func(key, contains string, expected []string) {
+			func(key, search string, expected []string) {
 				By("Requesting values for the selected key using the typed text")
-				response, err := nodeService.GetNodeLabelValues(ctx, clusterID, key, contains, 0, 50)
+				response, err := nodeService.GetNodeLabelValues(ctx, clusterID, key, search, 0, 50)
 				Expect(err).NotTo(HaveOccurred())
 				Expect(response.Code).To(Equal(http.StatusOK))
 				Expect(response.Body.([]string)).To(Equal(expected))
@@ -309,10 +309,10 @@ var _ = Describe("Node labels", func() {
 					Expect(suggestions).To(Equal(expected))
 				}
 			},
-			Entry("keys endpoint matches text inside a key", "keys?contains=ork", http.StatusOK, []string{"worker"}),
-			Entry("values endpoint filters values for the selected key", "values?key=a&contains=a", http.StatusOK, []string{"ba"}),
+			Entry("keys endpoint matches text inside a key", "keys?search=ork", http.StatusOK, []string{"worker"}),
+			Entry("values endpoint filters values for the selected key", "values?key=a&search=a", http.StatusOK, []string{"ba"}),
 			Entry("keys endpoint skips already returned keys", "keys?offset=1&limit=1", http.StatusOK, []string{"b"}),
-			Entry("values endpoint paginates after substring filtering and duplicate removal", "values?key=a&contains=b&offset=1&limit=1", http.StatusOK, []string{"ba"}),
+			Entry("values endpoint paginates after substring filtering and duplicate removal", "values?key=a&search=b&offset=1&limit=1", http.StatusOK, []string{"ba"}),
 			Entry("returns an empty page past the final value", "values?key=a&offset=10&limit=1", http.StatusOK, []string{}),
 			Entry("keys endpoint rejects more than 500 items", "keys?limit=501", http.StatusBadRequest, []string(nil)),
 			Entry("values endpoint rejects more than 500 items", "values?key=a&limit=501", http.StatusBadRequest, []string(nil)),
@@ -354,8 +354,8 @@ var _ = Describe("Node labels", func() {
 					Expect(suggestions).To(Equal(expected[page.start:page.end]))
 				}
 			},
-			Entry("label keys", "keys?contains=item-"),
-			Entry("label values", "values?key=chosen-key&contains=item-"),
+			Entry("label keys", "keys?search=item-"),
+			Entry("label values", "values?key=chosen-key&search=item-"),
 		)
 
 		It("paginates after excluding empty label values", func() {

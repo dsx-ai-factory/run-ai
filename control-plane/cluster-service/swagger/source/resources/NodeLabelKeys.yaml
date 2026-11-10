@@ -12,7 +12,7 @@ get:
     - Nodes
   parameters:
     - $ref: "../../../../infra/openapi/docs/parameters/path/ClusterUuid.yaml"
-    - $ref: '../parameters/query/NodeLabelContains.yaml'
+    - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Search.yaml'
     - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Offset.yaml'
     - $ref: '../../../../infra/openapi/docs/parameters/query/optional/Limit.yaml'
   responses:
