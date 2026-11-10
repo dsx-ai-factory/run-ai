@@ -11,7 +11,7 @@ import type {
   SamlCreationData,
   SamlData,
 } from "@/swagger-models/identity-manager-client";
-import { IdpCreationRequestTypeEnum } from "@/swagger-models/identity-manager-client";
+import { IdpCreationRequestTypeEnum, IdpTypeEnum } from "@/swagger-models/identity-manager-client";
 import { isAxiosError } from "axios";
 import { identityManagerApi } from "@/services/infra/client-apis/identity-manager-api/identity-manager-api";
 import { httpService } from "@/services/infra/https.service/http.service";
@@ -75,10 +75,14 @@ async function getIdpResource(idp: string): Promise<IdpResources> {
   }
 }
 
+// Alias used to validate metadata for an IdP that does not exist yet: a dry run never looks the IdP up or stores it.
+const NEW_IDP_DRY_RUN_ALIAS = IdpTypeEnum.Saml;
+
 /**
  * Validates SAML metadata on the backend without saving anything (dryRun) and returns the parsed
- * signing certificate details, including its expiration date. Pass the alias to validate against an
- * existing IdP (update endpoint); omit it for a new IdP (create endpoint).
+ * signing certificate details, including its expiration date.
+ * It always uses the update endpoint: unlike create, a rejected update still returns the parsed config
+ * (with the expiration date) in the response body. Pass the alias of the IdP being edited; omit it for a new IdP.
  * A rejected configuration (e.g. expired certificate) is returned as a result, not thrown, so the caller can
  * display the expiration details the backend sends back.
  */
@@ -88,13 +92,9 @@ async function validateSamlCertificate(
 ): Promise<SamlCertificateValidation> {
   const request: IdpCreationRequest = { type: IdpCreationRequestTypeEnum.Saml, samlData, dryRun: true };
   try {
-    if (idpAlias) {
-      // The generated client types the update response as void, but a dry run returns the parsed config.
-      const response = await identityManagerApi.idpsApi.updateIdp(idpAlias, request);
-      return { samlData: (response.data as unknown as IdpPostResponse | undefined)?.samlData ?? undefined };
-    }
-    const response = await identityManagerApi.idpsApi.createIdp(request);
-    return { samlData: response.data.samlData ?? undefined };
+    // The generated client types the update response as void, but a dry run returns the parsed config.
+    const response = await identityManagerApi.idpsApi.updateIdp(idpAlias || NEW_IDP_DRY_RUN_ALIAS, request);
+    return { samlData: (response.data as unknown as IdpPostResponse | undefined)?.samlData ?? undefined };
   } catch (err: unknown) {
     if (isAxiosError(err) && err.response?.status === 400) {
       const body = err.response.data as { samlData?: SamlData; message?: string } | undefined;
