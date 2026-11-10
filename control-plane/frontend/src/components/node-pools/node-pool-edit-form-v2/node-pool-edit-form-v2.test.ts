@@ -9,15 +9,15 @@ import { describe, it, expect, vi } from "vitest";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
 import RunaiNameValidation from "@/components/common/runai-name-validation/runai-name-validation.vue";
 import RunaiDescriptionInput from "@/components/common/runai-description-input/runai-description-input.vue";
-import NodePoolCreateFlow from "./node-pool-create-flow.vue";
-import { ENABLE_NODE_POOL_CREATE_FLOW } from "./node-pool-create-flow.model";
+import NodePoolEditFormV2 from "./node-pool-edit-form-v2.vue";
+import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
 vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
   clusterService: { getNodepools: vi.fn().mockResolvedValue([]), createNodepool: vi.fn() },
 }));
 describe("Step 1 form", () => {
   it("keeps the new flow disabled by default", () => expect(ENABLE_NODE_POOL_CREATE_FLOW).toBe(false));
   it("shows description and reveals the value field only after a key is selected", async () => {
-    const wrapper = shallowMount(NodePoolCreateFlow, {
+    const wrapper = shallowMount(NodePoolEditFormV2, {
       global: {
         plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
         renderStubDefaultSlot: true,
@@ -35,7 +35,7 @@ describe("Step 1 form", () => {
     wrapper.unmount();
   });
   function renderForm(initialClusterId = "") {
-    return mount(NodePoolCreateFlow, {
+    return mount(NodePoolEditFormV2, {
       props: { initialClusterId },
       global: {
         plugins: [Quasar, createTestingPinia({ createSpy: vi.fn })],
@@ -81,7 +81,7 @@ describe("Step 1 form", () => {
     await flushPromises();
     await wrapper.find('[aid="create-node-pool-continue"]').trigger("click");
     await flushPromises();
-    expect(wrapper.text()).toContain("Select a key");
+    expect(wrapper.text()).toContain("Enter a key");
     wrapper
       .findAllComponents(QSelect)
       .find((c) => c.props("label") === "Key")

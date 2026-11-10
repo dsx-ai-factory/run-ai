@@ -4,8 +4,16 @@
 -->
 
 <template>
+  <node-pool-scheduling v-if="schedulingFlowEnabled" />
+  <node-pool-edit-form-v2
+    v-else-if="newFlowEnabled"
+    :initial-cluster-id="initialClusterId"
+    @created="onCreatedV2"
+    @leave-approved="leaveApproved = true"
+    @busy-change="savingV2 = $event"
+  />
   <node-pool-edit-form
-    v-if="nodePool"
+    v-else-if="nodePool"
     :loading="loading"
     :node-pool="nodePool"
     :is-new-node-pool="isNewNodePool"
@@ -17,7 +25,13 @@
   />
 </template>
 <script lang="ts">
-import { defineComponent } from "vue";
+import { computed, defineAsyncComponent, defineComponent, ref } from "vue";
+import { useRoute, useRouter, onBeforeRouteLeave } from "vue-router";
+import { useQuasar } from "quasar";
+import { NodePoolEditFormV2, ENodePoolFormDestination } from "@/components/node-pools/node-pool-edit-form-v2";
+import { ENABLE_NODE_POOL_CREATE_FLOW } from "@/constants/node-pool.constants";
+import { errorMessages } from "@/common/error-message.constant";
+import type { INodePoolFormDraft } from "@/components/node-pools/node-pool-edit-form-v2";
 import NodePoolEditForm from "@/components/node-pools/node-pool-edit-form/node-pool-edit-form.vue";
 import { useAppStore } from "@/stores/app.store";
 import { useNodePoolStore } from "@/stores/node-pool.store";
@@ -42,7 +56,11 @@ import { DEFAULT_GPU_NETWORK_ACCELERATION_LABEL_KEY } from "@/models/node-pool.m
 
 export default defineComponent({
   name: "node-pool-edit",
-  components: { NodePoolEditForm },
+  components: {
+    NodePoolEditForm,
+    NodePoolEditFormV2,
+    NodePoolScheduling: defineAsyncComponent(() => import("../node-pool-scheduling/node-pool-scheduling.vue")),
+  },
   data() {
     return {
       appStore: useAppStore(),
@@ -55,7 +73,49 @@ export default defineComponent({
       nodePools: [] as Nodepool[],
     };
   },
+  setup() {
+    const route = useRoute();
+    const router = useRouter();
+    const $q = useQuasar();
+    const savingV2 = ref(false);
+    const leaveApproved = ref(false);
+    const newFlowEnabled = computed(
+      () => ENABLE_NODE_POOL_CREATE_FLOW && route.name === NODE_POOL_ROUTE_NAMES.NODE_POOL_NEW,
+    );
+    const schedulingFlowEnabled = computed(
+      () =>
+        ENABLE_NODE_POOL_CREATE_FLOW &&
+        route.name === NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT &&
+        route.query.stepName === "scheduling",
+    );
+    const initialClusterId = typeof route.query.clusterId === "string" ? route.query.clusterId : "";
+    onBeforeRouteLeave(() => {
+      if (!newFlowEnabled.value) return true;
+      if (savingV2.value) {
+        leaveApproved.value = false;
+        $q.notify(alertUtil.getInfo(errorMessages.NODE_POOL_CREATION_IN_PROGRESS));
+        return false;
+      }
+      return leaveApproved.value || requestToLeave();
+    });
+    async function onCreatedV2(pool: Nodepool, _draft: INodePoolFormDraft, destination: ENodePoolFormDestination) {
+      useClusterStore().setSelectedClusterById(pool.clusterId);
+      await router.push(
+        destination === ENodePoolFormDestination.Close
+          ? {
+              name: NODE_POOL_ROUTE_NAMES.NODE_POOL_INDEX,
+              query: { createdEntityId: pool.id, clusterId: pool.clusterId },
+            }
+          : { name: NODE_POOL_ROUTE_NAMES.NODE_POOL_EDIT, params: { id: pool.id }, query: { stepName: "scheduling" } },
+      );
+    }
+    return { schedulingFlowEnabled, newFlowEnabled, initialClusterId, onCreatedV2, savingV2, leaveApproved };
+  },
   async created() {
+    if (this.newFlowEnabled || this.schedulingFlowEnabled) {
+      this.appStore.setPageLoading(false);
+      return;
+    }
     this.clusterId = (this.$route.query.clusterId as string) || null;
     await this.loadNodePool();
     if (this.clusterId) {
@@ -70,6 +130,11 @@ export default defineComponent({
     },
     nodePoolId(): string {
       return this.$route.params.id as string;
+    },
+  },
+  watch: {
+    schedulingFlowEnabled(enabled: boolean) {
+      if (!enabled && !this.newFlowEnabled && !this.nodePool) void this.loadNodePool();
     },
   },
   methods: {

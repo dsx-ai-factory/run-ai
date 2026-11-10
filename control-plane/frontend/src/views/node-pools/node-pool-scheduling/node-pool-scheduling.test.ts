@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import View from "./node-pool-scheduling.vue";
 import Step from "@/components/node-pools/node-pool-scheduling-step/node-pool-scheduling-step.vue";
 import { clusterService } from "@/services/control-plane/cluster.service/cluster.service";
-import { createNodePoolDraft } from "@/components/node-pools/node-pool-create-flow/node-pool-create-flow.model";
+import { createNodePoolDraft } from "@/utils/node-pool.util/node-pool.util";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
 import { useAppStore } from "@/stores/app.store";
@@ -20,7 +20,6 @@ vi.mock("@/services/control-plane/cluster.service/cluster.service", () => ({
     getNodepoolMetrics: vi.fn().mockResolvedValue({ measurements: [] }),
     getNodepool: vi.fn(),
     createNodepool: vi.fn(),
-    patchNodepool: vi.fn(),
     updateNodepool: vi.fn(),
   },
 }));
@@ -102,7 +101,6 @@ describe("scheduling route", () => {
     expect(clusterService.getNodepool).toHaveBeenCalledWith("one");
     expect(wrapper.findComponent(Step).props("pool")).toEqual(pool);
     expect(clusterService.createNodepool).not.toHaveBeenCalled();
-    expect(clusterService.patchNodepool).not.toHaveBeenCalled();
     expect(clusterService.updateNodepool).not.toHaveBeenCalled();
     wrapper.unmount();
   });

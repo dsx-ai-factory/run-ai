@@ -5,9 +5,9 @@
 import { mount } from "@vue/test-utils";
 import { describe, expect, it } from "vitest";
 import { Quasar } from "quasar";
-import { getSchedulingMode } from "./node-pool-wizard-summary.model";
+import { getSchedulingMode } from "@/models/node-pool.model";
 import NodePoolWizardSummary from "./node-pool-wizard-summary.vue";
-import { createNodePoolDraft } from "@/components/node-pools/node-pool-create-flow/node-pool-create-flow.model";
+import { createNodePoolDraft } from "@/utils/node-pool.util/node-pool.util";
 import { NodepoolGPUNetworkAccelerationDetection, PlacementStrategy } from "@/swagger-models/cluster-service-client";
 
 describe("node pool wizard summary", () => {

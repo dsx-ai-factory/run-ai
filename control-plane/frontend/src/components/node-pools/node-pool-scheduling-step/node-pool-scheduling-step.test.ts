@@ -12,7 +12,7 @@ import Table from "./node-pool-department-table.vue";
 import { RunaiBaseDialog } from "@/components/common/runai-base-dialog";
 import NodePoolSchedulingStep from "./node-pool-scheduling-step.vue";
 import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-summary.vue";
-import { createNodePoolDraft } from "../node-pool-create-flow/node-pool-create-flow.model";
+import { createNodePoolDraft } from "@/utils/node-pool.util/node-pool.util";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 
 const pool = {

@@ -5,7 +5,10 @@
 
 <template>
   <div class="runai-panels-layout-wrapper" :style="layoutStyle">
-    <section class="runai-panels-layout" :class="{ 'runai-panels-layout--hide-right': hideRight }">
+    <section
+      class="runai-panels-layout"
+      :class="{ 'runai-panels-layout--hide-right': hideRight, 'runai-panels-layout--responsive': responsiveLayout }"
+    >
       <!-- Track focus from slotted controls so keyboard users can expand the rail too. -->
       <!-- eslint-disable-next-line vuejs-accessibility/no-static-element-interactions -->
       <aside
@@ -53,6 +56,7 @@ defineOptions({
 
 const props = withDefaults(defineProps<IRunaiPanelsLayoutProps>(), {
   marginTop: "24px",
+  responsive: false,
   width: "820px", // 1300px - 220 * 2( side panels ) - 20 * 2 (gap)  = 820px main panel width
   leftWidth: "220px",
   rightWidth: "220px",
@@ -82,6 +86,9 @@ const onLeftFocusOut = (event: FocusEvent) => {
   leftFocused.value = (event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null);
 };
 
+const responsiveLayout = computed(
+  () => props.responsive || props.hideRightOnSmallScreen || props.collapseLeftOnSmallScreen,
+);
 const layoutStyle = computed(() => ({
   "--layout-width": `calc(${collapseLeft.value ? props.collapsedLeftWidth : props.leftWidth} + ${props.width} + ${hideRight.value ? "20px" : `${props.rightWidth} + 40px`})`,
   "--layout-left-width": collapseLeft.value ? props.collapsedLeftWidth : props.leftWidth,
@@ -96,7 +103,7 @@ const layoutStyle = computed(() => ({
   width: var(--layout-width);
   max-width: 100%;
   margin-inline: auto;
-  min-width: 0;
+  min-width: v-bind("responsiveLayout ? '0' : '1300px'");
   display: flex;
   justify-content: center;
 }
@@ -117,7 +124,8 @@ const layoutStyle = computed(() => ({
 
 .panel-main {
   grid-column: 2;
-  min-width: 0;
+  min-width: v-bind("responsiveLayout ? '0' : '600px'");
+  width: v-bind("responsiveLayout ? 'auto' : props.width");
 }
 
 .panel-left {

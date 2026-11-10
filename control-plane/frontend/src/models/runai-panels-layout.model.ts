@@ -5,6 +5,7 @@
 
 export interface IRunaiPanelsLayoutProps {
   marginTop?: string;
+  responsive?: boolean;
   /** Preferred content width; shrinks when the available space is smaller. */
   width?: string;
   leftWidth?: string;

@@ -4,6 +4,10 @@
  */
 
 export enum errorMessages {
+  NODE_POOL_SAVE_FAILED = "Node pool could not be saved.",
+  NODE_POOL_LABEL_IN_USE = "This key-value pair is already in use by another node pool.",
+  NODE_POOL_LOADING_RETRY = "Retry before creating a node pool.",
+  NODE_POOL_CREATION_IN_PROGRESS = "Wait for node pool creation to finish.",
   VALUE_NOT_EMPTY = "Enter a value",
   SELECT_A_VALUE = "Select a value",
   ENTER_A_PORT = "Enter port",

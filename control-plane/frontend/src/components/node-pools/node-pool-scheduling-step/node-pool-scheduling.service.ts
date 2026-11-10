@@ -7,7 +7,7 @@ import { orgUnitService } from "@/services/control-plane/org-unit.service/org-un
 import { filterUtil } from "@/utils/filter.util/filter.util";
 import { metricUtil } from "@/utils/metric.util";
 import { MetricsType, type MetricsResponse } from "@/swagger-models/cluster-service-client";
-import type { INodePoolSummaryResources } from "../node-pool-wizard-summary/node-pool-wizard-summary.model";
+import type { INodePoolSummaryResources } from "@/models/node-pool.model";
 export interface SchedulingScope {
   poolId: string;
   clusterId: string;

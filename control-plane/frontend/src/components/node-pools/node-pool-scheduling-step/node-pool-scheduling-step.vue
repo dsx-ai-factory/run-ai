@@ -173,7 +173,7 @@ import NodePoolWizardSummary from "../node-pool-wizard-summary/node-pool-wizard-
 import {
   getSchedulingMode,
   type INodePoolSummaryResources,
-} from "../node-pool-wizard-summary/node-pool-wizard-summary.model";
+} from "@/models/node-pool.model";
 import type { Nodepool } from "@/swagger-models/cluster-service-client";
 
 const props = withDefaults(

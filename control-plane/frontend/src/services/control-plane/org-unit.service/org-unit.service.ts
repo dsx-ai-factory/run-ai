@@ -15,7 +15,6 @@ import {
   DepartmentFilterSortFields,
   ProjectFilterSortFields,
   ReportFilterAndSortFields,
-  ResourcesResetAction,
   Verbosity,
   type DeletionTypes,
   type Department,
@@ -95,23 +94,7 @@ export const orgUnitService = {
   countDepartmentNodePoolResources,
   getDepartmentMetrics,
   getProjectMetrics,
-  resetNodePoolQuotas,
 };
-
-async function resetNodePoolQuotas(clusterId: string, nodePoolId: string): Promise<void> {
-  if (!clusterId || !nodePoolId) throw new Error("A cluster and node pool are required to reset quotas");
-  const request = { clusterId, nodePoolIds: [nodePoolId], action: ResourcesResetAction.QuotasToDefault };
-  try {
-    const projects = await orgUnitServiceApi.projectsApi.countProjects([
-      filterUtil.getEqualsFilterString(ProjectFilterSortFields.ClusterId, clusterId),
-    ]);
-    // The reset endpoint rejects empty clusters, even for admins.
-    if (projects.data.count > 0) await orgUnitServiceApi.projectsApi.projectsResetResources(request);
-    await orgUnitServiceApi.departmentsApi.departmentsResetResources(request);
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
 
 //******** ProjectsApi ************
 /**

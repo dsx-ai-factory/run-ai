@@ -15,7 +15,7 @@ import type { Nodepool } from "@/swagger-models/cluster-service-client";
 import type { DepartmentNodePoolResources } from "@/swagger-models/org-unit-service-client";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 import { ENTITY_PRIORITY_SELECT_OPTIONS } from "@/models/org-unit.model";
-import type { INodePoolSummaryResources } from "../node-pool-wizard-summary/node-pool-wizard-summary.model";
+import type { INodePoolSummaryResources } from "@/models/node-pool.model";
 import {
   loadSchedulingDepartmentSnapshot,
   loadSchedulingPool,

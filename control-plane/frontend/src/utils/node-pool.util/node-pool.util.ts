@@ -226,3 +226,57 @@ function getNodePoolUpdateRequest(nodePool: Nodepool): NodepoolUpdateFields {
     networkTopologyId: nodePool.networkTopologyId,
   };
 }
+
+import { isValidRegExp } from "@/common/form.validators";
+import { errorMessages } from "@/common/error-message.constant";
+import {
+  NODE_POOL_LABEL_REGEX,
+  PROPORTIONAL_CAPABILITIES,
+  NODE_POOL_CONFIGURATION_DEFAULTS,
+} from "@/models/node-pool.model";
+import type { INodePoolFormDraft } from "@/components/node-pools/node-pool-edit-form-v2/node-pool-edit-form-v2.model";
+export function createNodePoolDraft(clusterId = ""): INodePoolFormDraft {
+  const pool = getEmptyNodePool(clusterId);
+  return {
+    ...pool,
+    description: "",
+    schedulingCapabilities: { ...PROPORTIONAL_CAPABILITIES },
+    schedulingConfiguration: {
+      ...pool.schedulingConfiguration,
+      gpuPodsPlacementStrategy: { node: NODE_POOL_CONFIGURATION_DEFAULTS.gpuNodePlacement },
+      cpuPodsPlacementStrategy: { node: NODE_POOL_CONFIGURATION_DEFAULTS.cpuNodePlacement },
+    },
+  };
+}
+
+export function validateDescription(value: string): true | string {
+  // The API's shared max-length validator counts UTF-8 bytes rather than characters.
+  return new TextEncoder().encode(value).length <= 250 || errorMessages.DESCRIPTION_MAX_BYTES;
+}
+export function validateName(value: string): true | string {
+  if (!value) return errorMessages.NAME_NOT_EMPTY;
+  return (value.length <= 40 && /^[a-z][a-z0-9-]*$/.test(value) && !value.endsWith("-")) || errorMessages.VALID_FORMAT;
+}
+export function validateLabelKey(value: string): true | string {
+  if (!value) return errorMessages.KEY_NOT_EMPTY;
+  return (
+    (value.length <= 253 && isValidRegExp(value, NODE_POOL_LABEL_REGEX.labelKey)) ||
+    errorMessages.KEY_REGEXP_VALIDATION + " " + NODE_POOL_LABEL_REGEX.labelKey
+  );
+}
+export function validateLabelValue(value: string): true | string {
+  if (!value) return errorMessages.SELECT_A_VALUE;
+  return (
+    (value.length <= 63 && isValidRegExp(value, NODE_POOL_LABEL_REGEX.labelValue)) ||
+    errorMessages.VALUE_REGEXP_VALIDATION + " " + NODE_POOL_LABEL_REGEX.labelValue
+  );
+}
+export function labelOptions(values: string[], search: string, unavailable: string[], kind = "value") {
+  const options = [...new Set([...values, ...unavailable])]
+    .filter((value) => value.toLowerCase().includes(search.toLowerCase()))
+    .map((value) => ({ label: value, value, disable: unavailable.includes(value) }));
+  if (search && ![...values, ...unavailable].includes(search)) {
+    options.push({ label: `${search} (new ${kind})`, value: search, disable: false });
+  }
+  return options;
+}
