@@ -1,0 +1,80 @@
+# SPDX-FileCopyrightText: Copyright (c) 2026 NVIDIA CORPORATION & AFFILIATES. All rights reserved.
+# SPDX-License-Identifier: Apache-2.0
+
+name: Cursor issue triage
+
+on:
+  issues:
+    types: [opened, reopened]
+
+permissions: {}
+
+concurrency:
+  group: cursor-issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  forward:
+    name: Notify the Cursor cloud triage agent
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@ab7a9404c0f3da075243ca237b5fac12c98deaa5 # v2
+        with:
+          egress-policy: audit
+
+      - name: Forward issue to Cursor
+        env:
+          CURSOR_WEBHOOK_KEY: ${{ secrets.CURSOR_ISSUE_TRIAGE_WEBHOOK_KEY }}
+          CURSOR_WEBHOOK_URL: https://api2.cursor.sh/automations/webhook/984bd623-dce7-11f1-ba91-f63b1661ac50
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          import sys
+          import time
+          import urllib.error
+          import urllib.request
+
+          key = os.environ.get("CURSOR_WEBHOOK_KEY", "").strip()
+          if not key:
+              sys.exit("Configure the CURSOR_ISSUE_TRIAGE_WEBHOOK_KEY repository secret first.")
+          if key.lower().startswith("bearer "):
+              key = key[7:].strip()
+
+          with open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8") as stream:
+              event = json.load(stream)
+          issue = event["issue"]
+          if "pull_request" in issue:
+              sys.exit("Pull requests are outside this workflow's scope.")
+
+          payload = json.dumps({
+              "event": "github.issue." + event["action"],
+              "event_id": os.environ["GITHUB_RUN_ID"],
+              "repository": event["repository"]["full_name"],
+              "issue_number": issue["number"],
+              "issue_url": issue["html_url"],
+          }).encode("utf-8")
+          request = urllib.request.Request(
+              os.environ["CURSOR_WEBHOOK_URL"],
+              data=payload,
+              headers={
+                  "Authorization": "Bearer " + key,
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+          for attempt in range(3):
+              try:
+                  with urllib.request.urlopen(request, timeout=30) as response:
+                      print("Cursor accepted the issue event (HTTP " + str(response.status) + ").")
+                  break
+              except urllib.error.HTTPError as error:
+                  if error.code not in (429, 502, 503, 504) or attempt == 2:
+                      sys.exit("Cursor rejected the issue event (HTTP " + str(error.code) + "). Check the automation and its scoped webhook key.")
+              except urllib.error.URLError:
+                  if attempt == 2:
+                      sys.exit("Could not reach Cursor after three attempts.")
+              time.sleep(2 ** attempt)
+          PY
