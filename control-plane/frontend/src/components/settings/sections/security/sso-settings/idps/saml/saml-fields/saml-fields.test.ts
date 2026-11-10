@@ -216,6 +216,17 @@ describe("saml-fields.vue", () => {
       expect(lastCertificateDetails(wrapper)).toMatchObject({ expirationError: "no signing certificate" });
     });
 
+    it("reports no expiration error while the backend is still validating the file", async () => {
+      vi.spyOn(idpCommon, "validateSamlMetadata").mockReturnValue(new Promise(() => {}));
+
+      const { wrapper } = factory({ isNewIdp: true });
+      void uploadFile(wrapper);
+      await flushPromises();
+
+      expect(lastCertificateDetails(wrapper)).toMatchObject({ showExpirationDate: true, expirationError: "" });
+      expect((wrapper.vm as unknown as { isValidInput: () => boolean }).isValidInput()).toBe(false);
+    });
+
     it("reports no error for a certificate that is still valid", async () => {
       mockDryRun(daysFromNow(120));
 

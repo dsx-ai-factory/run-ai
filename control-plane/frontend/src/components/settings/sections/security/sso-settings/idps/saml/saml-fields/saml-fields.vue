@@ -154,6 +154,7 @@ export default defineComponent({
       samlFields: {} as SamlCreationData,
       expirationDate: null as Date | null,
       certificateError: "",
+      isValidatingCertificate: false,
       samlSource: SamlCreationDataMetadataXmlTypeEnum.File as SamlCreationDataMetadataXmlTypeEnum,
       metadataFile: null as File | null,
       originalSamlFields: {} as SamlCreationData,
@@ -257,7 +258,8 @@ export default defineComponent({
         : this.isValidUrl(this.samlFields.metadataXmlUrl || "") === true;
     },
     iValidCertificateDate(): boolean | string {
-      if (this.isValidCertificate) return true;
+      // Nothing to report while the backend is still validating the metadata.
+      if (this.isValidatingCertificate || this.isValidCertificate) return true;
       if (this.certificateError) return this.certificateError;
       return this.isFileSource
         ? "Certificate expired. Replace the metadata file above."
@@ -270,12 +272,14 @@ export default defineComponent({
     // Validates the metadata on the backend (dry run, nothing is saved) and takes the certificate
     // expiration details from its response. Returns false if the file selection changed meanwhile.
     async validateCertificate(metadataXmlFile: string, fileName: string, selectionToken: number): Promise<boolean> {
+      this.isValidatingCertificate = true;
       const { expirationDate, error } = await idpCommon.validateSamlMetadata(
         metadataXmlFile,
         fileName,
         this.isNewIdp ? undefined : this.idpAlias,
       );
       if (selectionToken !== this.fileSelectionToken) return false;
+      this.isValidatingCertificate = false;
       this.expirationDate = expirationDate;
       this.certificateError = error;
       return true;
@@ -283,6 +287,7 @@ export default defineComponent({
     clearFile(): void {
       this.fileSelectionToken++;
       this.metadataFile = null;
+      this.isValidatingCertificate = false;
       this.samlFields.metadataXmlUrl = "";
       this.clearFileContent();
       (this.$refs.metadataFileInput as typeof QFile)?.validate();
@@ -295,6 +300,7 @@ export default defineComponent({
       this.samlFields.fileName = "";
       this.expirationDate = null;
       this.certificateError = "";
+      this.isValidatingCertificate = true;
       (this.$refs.metadataFileInput as typeof QFile)?.validate();
       this.onUpdated();
       const reader = new FileReader();
