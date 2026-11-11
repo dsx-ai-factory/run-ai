@@ -35,6 +35,7 @@ const clusterId = "34234-322-sdfs323";
 
 interface GpuAllocationRatioWidgetTestVm {
   allocationClusterByNodePoolArray: IChartArrayItemConfig[];
+  allocationDepartmentsByNodePoolArray: IChartArrayItemConfig[];
   breadcrumbPath: Array<{ label: string }>;
   chartOption: unknown;
   handleAxisCategoryClick: (category: string) => void;
@@ -271,5 +272,48 @@ describe("GpuAllocationRatioWidget component", () => {
     const tooltipHtml = formatter(mockParams);
     expect(tooltipHtml).toContain("Unlimited");
     expect(tooltipHtml).toContain("GPU allocation ratio: <b>-</b>");
+  });
+
+  describe("node pool names", () => {
+    const resource = (nodepoolName: string, quota: number, allocated: number, projectName?: string) => ({
+      numberOfPendingWorkloads: 0,
+      gpu: { quota, allocated },
+      cpu: { quota: 0, allocated: 0 },
+      memory: { quota: 0, allocated: 0 },
+      nodepoolName,
+      ...(projectName ? { projectName } : {}),
+    });
+    const metricsFor = (departmentName: string, nodepoolNames: string[]) => ({
+      metadata: { departmentId: 1, departmentName, clusterId, clusterName: "cluster-a" },
+      current: {
+        resources: nodepoolNames.map((nodepoolName) => resource(nodepoolName, 4, 2)),
+        projectResources: nodepoolNames.map((nodepoolName) => resource(nodepoolName, 4, 2, "proj")),
+      },
+    });
+    const seriesById = (id: string) => getTestVm().allocationDepartmentsByNodePoolArray.find((s) => s.id === id);
+
+    it("keeps the real node pool when another pool name plus the department name looks like it", async () => {
+      vi.mocked(departmentService.getDepartmentsMetric).mockResolvedValue({
+        data: [metricsFor("a-b", ["pool-a", "pool"])],
+      } as unknown as DepartmentsMetricData);
+      createComponent({}, true);
+      await flushPromises();
+
+      expect(seriesById("projects-pool-a-b")?.name).toEqual("pool");
+      expect(seriesById("projects-pool-a-a-b")?.name).toEqual("pool-a");
+    });
+
+    it("does not rename a node pool whose name starts with another pool's name", async () => {
+      vi.mocked(departmentService.getDepartmentsMetric).mockResolvedValue({
+        data: [metricsFor("default", ["default", "default-a"])],
+      } as unknown as DepartmentsMetricData);
+      createComponent();
+      await flushPromises();
+
+      const names = getTestVm()
+        .allocationDepartmentsByNodePoolArray.map((series) => series.name)
+        .sort();
+      expect(names).toEqual(["default", "default-a"]);
+    });
   });
 });
