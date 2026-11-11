@@ -7,6 +7,7 @@ package system_mapping
 
 import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
+	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/pkg/database/dbmodel"
 )
 
 const (
@@ -22,11 +23,12 @@ func BuildSystemDynamoComponentSpecFg() (map[string]api.FieldGroupField, map[str
 }
 
 func dynamoComponentSpecFgFields() []SystemFgField {
+	keyValue := dbmodel.BuiltinFormatterKeyValue
 	formatter := SystemDynamoComponentSpecFormatterName
 	return []SystemFgField{
 		{
 			Name:      dynamoReplicasField,
-			Formatter: formatter,
+			Formatter: keyValue,
 			Type:      api.MAPPINGFIELDTYPE_INTEGER,
 		},
 		{
@@ -36,12 +38,12 @@ func dynamoComponentSpecFgFields() []SystemFgField {
 		},
 		{
 			Name:      dynamoGlobalNamespaceField,
-			Formatter: formatter,
+			Formatter: keyValue,
 			Type:      api.MAPPINGFIELDTYPE_BOOLEAN,
 		},
 		{
 			Name:      dynamoMultinodeNodeCountField,
-			Formatter: formatter,
+			Formatter: keyValue,
 			SpecRef:   strRef("multinode.nodeCount"),
 			Type:      api.MAPPINGFIELDTYPE_INTEGER,
 		},
