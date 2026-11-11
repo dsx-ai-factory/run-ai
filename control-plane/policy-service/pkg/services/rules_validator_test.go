@@ -2362,3 +2362,82 @@ var _ = Describe("possibleEnforcementsForField", func() {
 		}))
 	})
 })
+
+var _ = Describe("Set expression argument validation", func() {
+	It("rejects conversions that fail for supplied arguments", func() {
+		err := validateSetExpressionValues("rule", "set", `{"replicas": ($ARGS.named.value | tonumber)}`, map[string]any{"value": "invalid"})
+		Expect(err).NotTo(BeNil())
+		Expect(err.Message).To(ContainSubstring("arguments cannot be applied"))
+	})
+	It("accepts omitted optional formatter arguments", func() {
+		err := validateSetExpressionValues("rule", "default", `{"name": $ARGS.named.name, "readOnly": ($ARGS.named.readOnly // false)}`, map[string]any{"name": "cache"})
+		Expect(err).To(BeNil())
+	})
+	It("uses an empty input object like workload application", func() {
+		err := validateSetExpressionValues("rule", "set", `if . == {} then {"replicas": $ARGS.named.value} else error("unexpected input") end`, map[string]any{"value": 2})
+		Expect(err).To(BeNil())
+	})
+	It("rejects unsafe formatter expressions before executing them", func() {
+		err := validateSetExpressionValues("rule", "set", `recurse | .x`, nil)
+		Expect(err).NotTo(BeNil())
+		Expect(err.Message).To(ContainSubstring("unsafe"))
+	})
+})
+
+var _ = Describe("Policy argument validation regressions", func() {
+	selector := api.BreakdownSpecSelector{
+		Query:    `.spec.containers[] | select(.name == $ARGS.named.containerName)`,
+		ArgsInfo: map[string]api.MappingFieldType{"containerName": api.MAPPINGFIELDTYPE_STRING},
+	}
+	DescribeTable("validates named selector arguments", func(params map[string]interface{}, wantError bool) {
+		err := validateSelectorParams("rule", params, selector, "")
+		if wantError {
+			Expect(err).NotTo(BeNil())
+		} else {
+			Expect(err).To(BeNil())
+		}
+	},
+		Entry("missing argument", nil, true),
+		Entry("null argument", map[string]interface{}{"containerName": nil}, true),
+		Entry("numeric name", map[string]interface{}{"containerName": 1}, true),
+		Entry("boolean name", map[string]interface{}{"containerName": false}, true),
+		Entry("string name", map[string]interface{}{"containerName": "worker"}, false),
+	)
+	DescribeTable("validates integral JSON numbers", func(value interface{}, wantError bool) {
+		err := validateValueForType("value", value, api.MAPPINGFIELDTYPE_INTEGER)
+		if wantError {
+			Expect(err).NotTo(BeNil())
+		} else {
+			Expect(err).To(BeNil())
+		}
+	},
+		Entry("large JSON integer", float64(2147483647), false),
+		Entry("large float32 integer", float32(10000000), false),
+		Entry("fractional JSON number", float64(1.5), true),
+		Entry("integer string", "2147483647", false),
+	)
+	for _, mode := range []string{"set", "default"} {
+		for _, tc := range []struct {
+			name  string
+			value map[string]interface{}
+		}{
+			{"missing", map[string]interface{}{}},
+			{"null", map[string]interface{}{"value": nil}},
+			{"non-numeric", map[string]interface{}{"value": "not-a-number"}},
+		} {
+			It("rejects "+tc.name+" single-value formatter arguments for "+mode, func() {
+				formatter := api.BreakdownFormatter{
+					SetExpr:  convutils.Ref(`{"replicas": ($ARGS.named.value | tonumber)}`),
+					ArgsInfo: map[string]api.MappingFieldType{"value": api.MAPPINGFIELDTYPE_INTEGER},
+				}
+				enforcement := api.PolicyRuleEnforcement{}
+				if mode == "set" {
+					enforcement.Set = tc.value
+				} else {
+					enforcement.Default = tc.value
+				}
+				Expect(validateEnforcementValues("rule", enforcement, formatter, api.MAPPINGFIELDTYPE_INTEGER)).NotTo(BeNil())
+			})
+		}
+	}
+})
