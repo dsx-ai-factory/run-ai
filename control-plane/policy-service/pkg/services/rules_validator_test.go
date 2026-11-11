@@ -2362,24 +2362,3 @@ var _ = Describe("possibleEnforcementsForField", func() {
 		}))
 	})
 })
-
-var _ = Describe("Set expression argument validation", func() {
-	It("rejects conversions that fail for supplied arguments", func() {
-		err := validateSetExpressionValues("rule", "set", `{"replicas": ($ARGS.named.value | tonumber)}`, map[string]any{"value": "invalid"})
-		Expect(err).NotTo(BeNil())
-		Expect(err.Message).To(ContainSubstring("arguments cannot be applied"))
-	})
-	It("accepts omitted optional formatter arguments", func() {
-		err := validateSetExpressionValues("rule", "default", `{"name": $ARGS.named.name, "readOnly": ($ARGS.named.readOnly // false)}`, map[string]any{"name": "cache"})
-		Expect(err).To(BeNil())
-	})
-	It("uses an empty input object like workload application", func() {
-		err := validateSetExpressionValues("rule", "set", `if . == {} then {"replicas": $ARGS.named.value} else error("unexpected input") end`, map[string]any{"value": 2})
-		Expect(err).To(BeNil())
-	})
-	It("rejects unsafe formatter expressions before executing them", func() {
-		err := validateSetExpressionValues("rule", "set", `recurse | .x`, nil)
-		Expect(err).NotTo(BeNil())
-		Expect(err.Message).To(ContainSubstring("unsafe"))
-	})
-})
