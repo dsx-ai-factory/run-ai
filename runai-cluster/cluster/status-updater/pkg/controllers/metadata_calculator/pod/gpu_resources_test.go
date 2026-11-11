@@ -40,6 +40,8 @@ func TestGetDeviceComputePortions_RTXPro6000(t *testing.T) {
 	assert.Equal(t, float64(4), portion)
 }
 
+// newRunningMigPod returns a running pod scheduled on mixed-node that requests quantity of migResource in its limits
+// (no MIG request when migResource is empty).
 func newRunningMigPod(annotations map[string]string, migResource string, quantity string) *v1.Pod {
 	pod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{Name: "mig-pod", Namespace: "ns", Annotations: annotations},
@@ -60,6 +62,7 @@ func newRunningMigPod(annotations map[string]string, migResource string, quantit
 	return pod
 }
 
+// TestGetDeviceComputePortions_Blackwell checks the compute slices per GPU product against the NVIDIA MIG user guide.
 func TestGetDeviceComputePortions_Blackwell(t *testing.T) {
 	// Compute slices per GPU from the NVIDIA MIG user guide (supported MIG profiles).
 	tests := map[string]float64{
@@ -80,6 +83,8 @@ func TestGetDeviceComputePortions_Blackwell(t *testing.T) {
 	}
 }
 
+// TestCalcPodGpuResources_MigOnMixedNode covers MIG accounting on a mig.strategy=mixed node, where the scheduler may
+// leave the runai-mig-device annotation empty and the allocation comes from the requested MIG resources.
 func TestCalcPodGpuResources_MigOnMixedNode(t *testing.T) {
 	mig := map[string]string{receivedResourceAnnotationName: receivedTypeMigInstance}
 	withDevice := func(device string) map[string]string {

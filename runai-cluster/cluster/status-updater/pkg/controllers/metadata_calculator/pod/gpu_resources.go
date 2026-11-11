@@ -152,6 +152,8 @@ func GetRequestedMigDevices(pod *v1.Pod) map[string]int64 {
 	return requestedMigDevices
 }
 
+// getAllocatedMigPortion returns the fraction of a whole GPU allocated to the pod through MIG devices: the compute
+// slices of every allocated profile, times its count, divided by the compute slices of the node's GPU product.
 func getAllocatedMigPortion(ctx context.Context, pod *v1.Pod, kubeClient client.Client) (float64, error) {
 	if len(pod.Spec.NodeName) == 0 { // Can't match metric if the pod isn't scheduled to a pod
 		return 0, nil
@@ -184,14 +186,16 @@ func getAllocatedMigPortion(ctx context.Context, pod *v1.Pod, kubeClient client.
 	return migGPUs, nil
 }
 
+// migDevice is a MIG profile resource name (e.g. nvidia.com/mig-1g.24gb) and how many of them the pod uses.
 type migDevice struct {
 	name  string
 	count float64
 }
 
+// getMigDevices returns the MIG devices of the pod from the runai-mig-device annotation. The scheduler may leave the
+// annotation empty for pods that request a MIG profile directly in their resources (mig.strategy=mixed), so an empty
+// annotation, or one without a device name, falls back to the MIG resources requested by the pod.
 func getMigDevices(pod *v1.Pod) ([]migDevice, error) {
-	// The scheduler may set an empty mig-device annotation for pods that request a MIG profile directly in their
-	// resources (mig.strategy=mixed), so an empty value falls back to the requested resources as well.
 	deviceJsonStr := pod.Annotations[migDeviceAnnotationName]
 	if deviceJsonStr == "" {
 		log.Log.V(1).Info("No mig-device annotation, using the requested MIG resources",
