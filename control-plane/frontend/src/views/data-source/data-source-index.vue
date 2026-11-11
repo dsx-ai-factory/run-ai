@@ -357,17 +357,15 @@ export default defineComponent({
       return "Action for the selected data source is not authorized";
     },
     disableDelete(): boolean {
-      if (!this.canDeleteDataSource || this.isPvcDeletable === false) return true;
-      const usedByTemplates = !!this.selectedRows[0]?.usedBy?.templates?.length;
-      return usedByTemplates;
+      return !this.canDeleteDataSource || this.isPvcDeletable === false;
     },
     deleteBtnTooltip(): string {
-      if (!this.canCreateDataSource) {
+      if (!this.canDeleteDataSource) {
         return this.noActionPermissionText;
       } else if (this.isPvcDeletable === false) {
         return "The selected PVC can’t be deleted because it is being used by a data volume. To perform the action, first delete the data volume.";
       } else {
-        return "The selected data source is being used by at least one template and therefore can't be deleted";
+        return "";
       }
     },
     disableClone(): boolean {

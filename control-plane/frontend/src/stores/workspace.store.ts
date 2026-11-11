@@ -27,7 +27,6 @@ import type { THybridFormState } from "@/models/workload-hybrid.model";
 export const useWorkspaceStore = defineStore("Workspace", {
   state: () => ({
     workspace: workloadUtil.getEmptyUIWorkloadCreation() as IUIWorkloadCreation,
-    templateId: null as string | null,
     selectedWorkspace: null as WorkspaceV2 | null,
     actionPermissionsByScopes: {} as Record<Action, PermittedScopes>,
 
@@ -63,11 +62,7 @@ export const useWorkspaceStore = defineStore("Workspace", {
     setWorkspace(workspace: IUIWorkloadCreation): void {
       this.workspace = workspace;
     },
-    setTemplate(templateId: string | null): void {
-      this.templateId = templateId;
-    },
     resetCreateWorkspaceData(): void {
-      this.templateId = null;
       this.loadedWorkspaceModelWithDefaultsAndPolicy = null;
       this.workspace = workloadUtil.getEmptyUIWorkloadCreation();
     },

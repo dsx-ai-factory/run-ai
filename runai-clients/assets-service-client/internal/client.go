@@ -260,38 +260,6 @@ func (c *AssetsClient) K8sObjectsSyncUpdates(ctx context.Context, clusterId stri
 		"no response from assets-service and no transport error")
 }
 
-func (c *AssetsClient) ListTemplatesOfTenant(ctx context.Context) (*openapi.WorkloadTemplateListResponse, *openapi.Error) {
-	resp, httpResp, err := c.ApiClient.TemplateAPI.ListTemplates(ctx).Execute()
-	if httpResp != nil {
-		if httpResp.Body != nil {
-			defer httpResp.Body.Close()
-		}
-
-		if httpResp.StatusCode != http.StatusOK {
-			// Read the body
-			body, err := io.ReadAll(httpResp.Body)
-			if err != nil {
-				return nil, openapi.NewError(http.StatusInternalServerError, fmt.Sprintf("failed to read response payload of list templates: %v", err.Error()))
-			}
-
-			var apiError openapi.Error
-
-			jsonErr := json.Unmarshal(body, &apiError)
-			if jsonErr != nil {
-				return nil, openapi.NewError(int32(httpResp.StatusCode), string(body))
-			} else {
-				return nil, &apiError
-			}
-		}
-
-		if resp != nil {
-			return resp, nil
-		}
-	}
-
-	return nil, openapi.NewError(http.StatusServiceUnavailable, fmt.Sprintf("failed to request list of templates: %v", err))
-}
-
 func (c *AssetsClient) ListCredentialsAssets(ctx context.Context, privateOnly bool) (*openapi.CredentialsListResponse, *openapi.Error) {
 	resp, httpResp, err := c.ApiClient.CredentialsAPI.ListCredentialsAssets(ctx).PrivateOnly(privateOnly).Execute()
 	if httpResp != nil {

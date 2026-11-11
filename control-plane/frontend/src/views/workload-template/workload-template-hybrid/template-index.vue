@@ -515,7 +515,6 @@ export default defineComponent({
         await this.refreshList();
         this.$q.notify(alertUtil.getSuccess(`Template ${this.selectedWorkloadTemplate.meta.name} deleted`));
         this.isDeleteModalOpen = false;
-        await this.workloadTemplateStore.loadWorkloadTemplates(this.filterBy);
       } catch (e: unknown) {
         console.error(e);
         this.$q.notify(alertUtil.getError(`Template ${this.selectedWorkloadTemplate.meta.name} couldn't be deleted`));

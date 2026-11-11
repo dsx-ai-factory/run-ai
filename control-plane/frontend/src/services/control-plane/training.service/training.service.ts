@@ -77,16 +77,10 @@ async function getById(trainingId: string): Promise<TrainingV2> {
 async function getTrainingMergedWithPolicy(
   projectId?: string,
   workloadId?: string,
-  templateId?: string,
   isDistibuted?: boolean,
 ): Promise<TrainingV2> {
   try {
-    const response = await assetsServiceApi.trainingApi.getTrainingMerged(
-      projectId,
-      workloadId,
-      templateId,
-      isDistibuted,
-    );
+    const response = await assetsServiceApi.trainingApi.getTrainingMerged(projectId, workloadId, isDistibuted);
     return response.data;
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
