@@ -5,8 +5,8 @@ go 1.27.4
 require (
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants v0.0.0-00010101000000-000000000000
 	github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/dra v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261111150635-cae27cc83bba
-	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261111150635-cae27cc83bba
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants v0.0.0-20261111161025-458db923a809
+	github.com/dsx-ai-factory/run-ai/runai-cluster/common/priority v0.0.0-20261111161025-458db923a809
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.6
 	github.com/dyson/certman v0.2.1
 	github.com/golang/mock v1.6.0
@@ -93,7 +93,7 @@ require (
 	go.uber.org/multierr v1.11.0 // indirect
 	go.yaml.in/yaml/v2 v2.4.5 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/crypto v0.59.0 // indirect
 	golang.org/x/net v0.62.0 // indirect
 	golang.org/x/oauth2 v0.38.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
