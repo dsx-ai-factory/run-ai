@@ -56,7 +56,6 @@ async function validateSamlMetadata(
   try {
     const { samlData, errorMessage } = await dryRunSamlMetadata(metadataXmlFile, fileName, idpAlias);
     const expirationDate = parseExpirationDate(samlData?.certificateExpirationDate);
-    // An expired certificate is reported by the date check; any other rejection (e.g. not yet valid) keeps its error.
     const isExpired = !!expirationDate && !iValidCertificateDate(expirationDate);
     return {
       expirationDate,
@@ -72,8 +71,7 @@ async function validateSamlMetadata(
   }
 }
 
-// A rejected config (e.g. an expired certificate) is returned, not thrown, because the 400 body still carries
-// the parsed certificate expiration date to show.
+// A 400 is returned, not thrown: its body still carries the certificate expiration date.
 async function dryRunSamlMetadata(
   metadataXmlFile: string,
   fileName: string,
@@ -100,7 +98,7 @@ async function dryRunSamlMetadata(
   }
 }
 
-// The backend sends Go's zero time (year 1) when it cannot parse the certificate, which means "unknown".
+// Go's zero time (year 1) means the certificate could not be parsed.
 function parseExpirationDate(value?: string | null): Date | null {
   if (!value) return null;
   const date = new Date(value);

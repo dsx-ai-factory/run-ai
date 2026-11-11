@@ -178,7 +178,6 @@ export default defineComponent({
       return SamlCreationDataMetadataXmlTypeEnum;
     },
     certificateDetails(): SamlCertificateDetails {
-      // The stored certificate no longer applies once the user types a replacement URL, which is not validated here.
       const isStoredCertificateShown = !!this.samlSettings?.signingCertificate && !this.samlFields.metadataXmlUrl;
       const showExpirationDate = this.isFileSource ? !!this.metadataFile : isStoredCertificateShown;
       const validity = this.iValidCertificateDate();
@@ -231,7 +230,6 @@ export default defineComponent({
         this.samlSource = this.getSourceType;
         if (this.samlSource === SamlCreationDataMetadataXmlTypeEnum.File) {
           this.metadataFile = new File([this.idpResources.resource as string], this.idpResources.resourceName as string);
-          // The stored certificate date is already known, so skip the dry run unless it is missing.
           await this.setFileContent(
             this.idpResources.resourceName as string,
             this.idpResources.resource as string,
@@ -276,7 +274,6 @@ export default defineComponent({
     setStoredCertificateExpiration(): void {
       this.expirationDate = idpCommon.parseExpirationDate(this.samlSettings?.certificateExpirationDate);
     },
-    // Returns false when the file selection changed while waiting, so a stale result is ignored.
     async validateCertificate(metadataXmlFile: string, fileName: string, selectionToken: number): Promise<boolean> {
       this.isValidatingCertificate = true;
       const { expirationDate, error } = await idpCommon.validateSamlMetadata(

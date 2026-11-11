@@ -24,8 +24,7 @@ async function getIdps(): Promise<Idp[]> {
   }
 }
 
-// A dry run validates the request without saving. Its rejections are rethrown raw because the 400 body carries the
-// parsed config (e.g. the certificate expiration date) that the caller shows.
+// A dry run rethrows the raw error: the 400 body carries the parsed config.
 async function addIdp(idp: IdpCreationRequest, dryRun = false): Promise<IdpPostResponse> {
   try {
     const response = await identityManagerApi.idpsApi.createIdp(dryRun ? { ...idp, dryRun } : idp);
