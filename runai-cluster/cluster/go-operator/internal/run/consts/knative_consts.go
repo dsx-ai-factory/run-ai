@@ -21,7 +21,8 @@ const (
 	KnativeFeaturePodSpecInitContainers        = "kubernetes.podspec-init-containers"
 
 	// Autoscaler configmap features
-	KnativeFeatureEnableScaleToZero = "enable-scale-to-zero"
+	KnativeFeatureEnableScaleToZero     = "enable-scale-to-zero"
+	KnativeFeatureAllowZeroInitialScale = "allow-zero-initial-scale"
 
 	// External configuration features
 	KnativeExternalDomainSuffix = "example.com"
@@ -30,11 +31,13 @@ const (
 	KnativeFeatureValueEnabled  = "enabled"
 	KnativeFeatureValueDisabled = "disabled"
 	KnativeFeatureValueTrue     = "true"
+	KnativeFeatureValueFalse    = "false"
 )
 
 var (
 	// Default values for features
 	KnativeFeatureDefaultValueTrue     = KnativeFeatureValueTrue
+	KnativeFeatureDefaultValueFalse    = KnativeFeatureValueFalse
 	KnativeFeatureDefaultValueEnabled  = KnativeFeatureValueEnabled
 	KnativeFeatureDefaultValueDisabled = KnativeFeatureValueDisabled
 )
@@ -97,6 +100,11 @@ var KnativeFeaturesConfigMap = map[string]KnativeFeatureConfig{
 
 // KnativeAutoscalerConfigMap contains the configuration for features in the autoscaler configmap
 var KnativeAutoscalerConfigMap = map[string]KnativeFeatureConfig{
+	KnativeFeatureAllowZeroInitialScale: {
+		Required:      false,
+		ExpectedValue: KnativeFeatureValueTrue,
+		DefaultValue:  &KnativeFeatureDefaultValueFalse,
+	},
 	KnativeFeatureEnableScaleToZero: {
 		Required:      false,
 		ExpectedValue: KnativeFeatureValueTrue,

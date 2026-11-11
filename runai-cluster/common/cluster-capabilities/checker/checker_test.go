@@ -177,6 +177,22 @@ var _ = Describe("Cluster capabilities checker", func() {
 		})
 	})
 
+	DescribeTable("preserves reported zero-initial-scale availability",
+		func(components *map[string]openapi.ClusterDependencyStatus, expected *bool) {
+			randoms := testutils.NewRandomValues()
+			cluster.SetMock(cluster.NewSimpleMockClient().WithCluster(randoms.ClusterId,
+				buildDisplayedClusterWithKnative(randoms, "2.26.0", true, components)))
+			configuration, err := NewClusterCapabilitiesChecker(randoms.ClusterId).ClusterConfiguration(context.Background())
+			Expect(err).NotTo(HaveOccurred())
+			Expect(configuration.KnativeAvailable).To(BeTrue())
+			Expect(configuration.KnativeZeroInitialScaleAvailable).To(Equal(expected))
+		},
+		Entry("old cluster without subcomponents", nil, nil),
+		Entry("old cluster without the feature", &map[string]openapi.ClusterDependencyStatus{}, nil),
+		Entry("enabled", &map[string]openapi.ClusterDependencyStatus{ZeroInitialScaleDependency: {Available: true}}, convutils.Ref(true)),
+		Entry("disabled", &map[string]openapi.ClusterDependencyStatus{ZeroInitialScaleDependency: {Available: false}}, convutils.Ref(false)),
+	)
+
 	Context("knative availability and scale-to-zero capability", func() {
 		It("should handle missing knative sub components", func() {
 			cluster.SetMock(cluster.NewSimpleMockClient().

@@ -15,6 +15,7 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/composer/composer_v2/inference_workloads"
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/models_crud"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils/gojsonq"
 	workloadMgrApi "github.com/dsx-ai-factory/run-ai/runai-clients/workloads-manager-client/generated"
@@ -68,6 +69,10 @@ func (s *AnyWorkloadSubmitterInference) Create(ctx context.Context, wc *workload
 
 	if composerErr := composer.Compose(ctx, wc.inferenceSpec, target)(); composerErr != nil {
 		return nil, workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
+	}
+
+	if err := services_utils.CheckZeroInitialReplicas(ctx, wc.create.createParams.Response.ClusterId, wc.inferenceSpec.Autoscaling.Get()); err != nil {
+		return nil, ToSubmissionError(err)
 	}
 
 	manifest, err := gojsonq.LoadJson(target.Service)
@@ -177,6 +182,10 @@ func (s *AnyWorkloadSubmitterInference) Update(ctx context.Context, wc *workload
 	if composerErr := composer.Compose(ctx, inferenceSpec, target)(); composerErr != nil {
 		// No native fallback on update — surface composer errors (e.g. 501 for unsupported features).
 		return nil, workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
+	}
+
+	if err := services_utils.CheckZeroInitialReplicas(ctx, clusterId, inferenceSpec.Autoscaling.Get()); err != nil {
+		return nil, ToSubmissionError(err)
 	}
 
 	manifest, err := gojsonq.LoadJson(target.Service)

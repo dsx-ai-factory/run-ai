@@ -17,6 +17,7 @@ import (
 	workloadsApi "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/database/dao_crud"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_integration"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/services_utils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	dinfwv1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/distributedinferenceworkload/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/workload-controller/pkg/api/jobs"
@@ -119,6 +120,10 @@ func composeInferenceNative(ctx context.Context, wc *workloadContext) (composer.
 	}
 	if composerErr != nil {
 		return composer.WorkloadRequirements{}, workloadsApi.NewSubmissionErrorV2(composerErr.Code, composerErr.Message)
+	}
+
+	if err := services_utils.CheckZeroInitialReplicas(ctx, wc.create.createParams.Response.ClusterId, wc.spec.Autoscaling.Get()); err != nil {
+		return composer.WorkloadRequirements{}, ToSubmissionError(err)
 	}
 
 	return jobSpecComposer.WorkloadRequirements, nil
