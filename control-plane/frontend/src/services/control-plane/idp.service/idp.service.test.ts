@@ -15,6 +15,7 @@ vi.mock("@/services/infra/client-apis/identity-manager-api/identity-manager-api"
 describe("idpService.validateSamlCertificate", () => {
   const samlData = { metadataXmlFile: "xml", fileName: "idp.xml" };
   const updateIdp = vi.mocked(identityManagerApi.idpsApi.updateIdp);
+  const createIdp = vi.mocked(identityManagerApi.idpsApi.createIdp);
 
   const badRequest = (data: unknown) =>
     new AxiosError("Bad Request", "ERR_BAD_REQUEST", undefined, undefined, {
@@ -34,30 +35,34 @@ describe("idpService.validateSamlCertificate", () => {
     const result = await idpService.validateSamlCertificate(samlData, "my-idp");
 
     expect(updateIdp).toHaveBeenCalledWith("my-idp", expect.objectContaining({ dryRun: true, samlData }));
-    expect(identityManagerApi.idpsApi.createIdp).not.toHaveBeenCalled();
+    expect(createIdp).not.toHaveBeenCalled();
     expect(result.samlData?.certificateExpirationDate).toBe("2030-01-01");
   });
 
-  it("still uses the update endpoint, with the default alias, for a new IdP", async () => {
-    updateIdp.mockResolvedValue({ data: {} } as never);
-
-    await idpService.validateSamlCertificate(samlData);
-
-    expect(updateIdp).toHaveBeenCalledWith("saml", expect.objectContaining({ dryRun: true }));
-    expect(identityManagerApi.idpsApi.createIdp).not.toHaveBeenCalled();
-  });
-
-  it("returns the parsed config of a rejected (400) configuration instead of throwing", async () => {
-    updateIdp.mockRejectedValue(badRequest({ alias: "saml", samlData: { certificateExpirationDate: "2020-01-01" } }));
+  it("calls the create endpoint as a dry run for a new IdP", async () => {
+    createIdp.mockResolvedValue({ data: { samlData: { certificateExpirationDate: "2031-01-01" } } } as never);
 
     const result = await idpService.validateSamlCertificate(samlData);
+
+    expect(createIdp).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true, samlData }));
+    expect(updateIdp).not.toHaveBeenCalled();
+    expect(result.samlData?.certificateExpirationDate).toBe("2031-01-01");
+  });
+
+  it.each([
+    ["new", undefined, createIdp],
+    ["existing", "my-idp", updateIdp],
+  ])("returns the parsed config of a rejected (400) %s IdP instead of throwing", async (_name, alias, api) => {
+    api.mockRejectedValue(badRequest({ alias: "saml", samlData: { certificateExpirationDate: "2020-01-01" } }));
+
+    const result = await idpService.validateSamlCertificate(samlData, alias);
 
     expect(result.samlData?.certificateExpirationDate).toBe("2020-01-01");
     expect(result.errorMessage).toBe("Invalid SAML metadata");
   });
 
   it("prefers the backend message when the 400 has one", async () => {
-    updateIdp.mockRejectedValue(badRequest({ code: 400, message: "saml idp requires metadata" }));
+    createIdp.mockRejectedValue(badRequest({ code: 400, message: "saml idp requires metadata" }));
 
     expect((await idpService.validateSamlCertificate(samlData)).errorMessage).toBe("saml idp requires metadata");
   });
