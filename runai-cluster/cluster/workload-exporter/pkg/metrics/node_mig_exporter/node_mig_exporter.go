@@ -23,9 +23,14 @@ const (
 
 	DefaultMigStrategy = MigStrategyNone
 
-	// MIG device families
-	A100 = "A100"
-	H100 = "H100"
+	// MIG device families, per the NVIDIA MIG user guide (supported GPUs)
+	A100       = "A100"
+	H100       = "H100"
+	H200       = "H200"
+	B200       = "B200" // also matches GB200
+	B300       = "B300"
+	RTXPro5000 = "RTX-PRO-5000"
+	RTXPro6000 = "RTX-PRO-6000"
 )
 
 type NodeMigExporter struct {
@@ -90,5 +95,5 @@ func (ne *NodeMigExporter) supportMIG() bool {
 
 // GetMigDeviceFamilies returns the list of GPU device families that support MIG.
 func GetMigDeviceFamilies() []string {
-	return []string{A100, H100}
+	return []string{A100, H100, H200, B200, B300, RTXPro5000, RTXPro6000}
 }
