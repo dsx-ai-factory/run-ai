@@ -46,10 +46,5 @@ spec:
       metadata:
         labels:
           app: inference
-      spec:
-        containers:
-        - image: placeholder
-          name: main
-        serviceAccountName: inference-sa
     replicas: 1
     type: worker

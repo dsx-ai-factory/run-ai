@@ -35,10 +35,5 @@ spec:
     replicas: 3
     type: decode
   - name: component-c
-    podTemplate:
-      spec:
-        containers:
-        - image: placeholder
-          name: main
     replicas: 3
     type: worker

@@ -36,11 +36,5 @@ spec:
       metadata:
         labels:
           app: inference
-      spec:
-        containers:
-        - image: placeholder
-          name: main
-        priorityClassName: high-priority
-        serviceAccountName: inference-sa
     replicas: 1
     type: worker

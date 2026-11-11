@@ -1,4 +1,4 @@
-description: Dynamo v1beta1 parameterized-dependency policy regression.
+description: Create component metadata without creating a pod spec when the template is omitted.
 effectiveRules:
   - field: serviceAccountName
     specSelector: componentPodSpec

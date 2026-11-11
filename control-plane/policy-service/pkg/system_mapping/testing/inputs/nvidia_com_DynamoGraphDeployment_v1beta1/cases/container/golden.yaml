@@ -44,14 +44,5 @@ spec:
     replicas: 1
     type: worker
   - name: component-c
-    podTemplate:
-      spec:
-        containers:
-        - image: placeholder
-          imagePullPolicy: IfNotPresent
-          name: main
-          resources:
-            limits:
-              nvidia.com/gpu: "1"
     replicas: 1
     type: worker

@@ -47,11 +47,5 @@ spec:
     replicas: 1
     type: worker
   - name: component-c
-    podTemplate:
-      spec:
-        containers:
-        - image: placeholder
-          name: main
-          stdin: false
     replicas: 1
     type: worker

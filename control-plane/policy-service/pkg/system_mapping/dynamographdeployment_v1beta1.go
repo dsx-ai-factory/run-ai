@@ -26,15 +26,14 @@ const (
 	dynamoAllInitContainersSelector   = "allInitContainers"
 	dynamoAllComponentSpecsSelector   = "allComponentSpecs"
 	dynamoComponentSpecSelector       = "componentSpec"
-
-	dynamoPodSpecQuery       = `.podTemplate.spec | if . == null then error("Dynamo pod policies require an explicit podTemplate.spec with containers") else . end`
-	dynamoContainerSpecQuery = `.podTemplate.spec | if any(.containers[]?; .name == "main") then . else error("Dynamo container policies require an explicit main container in podTemplate.spec.containers") end`
 )
 
 func BuildSystemNvidiaComDynamoGraphDeploymentV1beta1Mapping() (api.Gvk, map[string]api.SpecSelector) {
 	return api.Gvk{Group: convutils.Ref("nvidia.com"), Kind: "DynamoGraphDeployment", Version: "v1beta1"}, buildDynamoGraphDeploymentV1beta1SpecSelectors()
 }
 
+// Skip missing pod specs: creating an empty spec would be invalid because
+// containers are required. Only pod metadata is created through dependencies.
 func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelector {
 	componentArgsInfo := map[string]api.MappingFieldType{
 		dynamoComponentNameArg: api.MAPPINGFIELDTYPE_STRING,
@@ -77,7 +76,7 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		},
 		dynamoAllPodSpecsSelector: {
 			Description: convutils.Ref("pod template specs across all components"),
-			Query:       `.spec.components[]? | ` + dynamoPodSpecQuery,
+			Query:       `.spec.components[]? | .podTemplate.spec | select(.)`,
 			FieldGroups: []string{SystemPodSpecFgName, SystemPodSpecAndContainerFgName},
 		},
 		dynamoAllPodMetadataSelector: {
@@ -91,12 +90,12 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		},
 		dynamoAllContainersSelector: {
 			Description: convutils.Ref("app and init containers across all components"),
-			Query:       `.spec.components[]? | ` + dynamoContainerSpecQuery + ` | (.containers[]?, .initContainers[]?) | select(.)`,
+			Query:       `.spec.components[]? | .podTemplate.spec | (.containers[]?, .initContainers[]?) | select(.)`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 		},
 		dynamoAllAppContainersSelector: {
 			Description: convutils.Ref("app containers across all components"),
-			Query:       `.spec.components[]? | ` + dynamoContainerSpecQuery + ` | .containers[]? | select(.)`,
+			Query:       `.spec.components[]? | .podTemplate.spec | .containers[]? | select(.)`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 		},
 		dynamoAllInitContainersSelector: {
@@ -106,12 +105,12 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		},
 		"allMainContainers": {
 			Description: convutils.Ref("containers named main across all components"),
-			Query:       `.spec.components[]? | ` + dynamoContainerSpecQuery + ` | .containers[]? | select(.name == "main") | select(.)`,
+			Query:       `.spec.components[]? | .podTemplate.spec | .containers[]? | select(.name == "main") | select(.)`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 		},
 		dynamoAppContainerByNameSelector: {
 			Description: convutils.Ref("app containers selected by name across all components"),
-			Query:       `.spec.components[]? | if $ARGS.named.containerName == "main" then (` + dynamoContainerSpecQuery + `) else .podTemplate.spec end | .containers[]? | select(.name == $ARGS.named.containerName)`,
+			Query:       `.spec.components[]? | .podTemplate.spec.containers[]? | select(.name == $ARGS.named.containerName)`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 			ArgsInfo:    containerArgsInfo,
 		},
@@ -123,7 +122,7 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		},
 		"componentPodSpec": {
 			Description: convutils.Ref("the pod template spec of a component selected by name"),
-			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | ` + dynamoPodSpecQuery,
+			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | .podTemplate.spec | select(.)`,
 			FieldGroups: []string{SystemPodSpecFgName, SystemPodSpecAndContainerFgName},
 			ArgsInfo:    componentArgsInfo,
 		},
@@ -139,13 +138,13 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		},
 		"componentContainers": {
 			Description: convutils.Ref("app and init containers in a component selected by name"),
-			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | ` + dynamoContainerSpecQuery + ` | (.containers[]?, .initContainers[]?) | select(.)`,
+			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | .podTemplate.spec | (.containers[]?, .initContainers[]?) | select(.)`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 			ArgsInfo:    componentArgsInfo,
 		},
 		"componentAppContainers": {
 			Description: convutils.Ref("app containers in a component selected by name"),
-			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | ` + dynamoContainerSpecQuery + ` | .containers[]? | select(.)`,
+			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | .podTemplate.spec | .containers[]? | select(.)`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 			ArgsInfo:    componentArgsInfo,
 		},
@@ -157,13 +156,13 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		},
 		"componentMainContainer": {
 			Description: convutils.Ref("the container named main in a component selected by name"),
-			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | ` + dynamoContainerSpecQuery + ` | .containers[]? | select(.name == "main") | select(.)`,
+			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | .podTemplate.spec | .containers[]? | select(.name == "main") | select(.)`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 			ArgsInfo:    componentArgsInfo,
 		},
 		"componentAppContainerByName": {
 			Description: convutils.Ref("an app container selected by component name and container name"),
-			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | if $ARGS.named.containerName == "main" then (` + dynamoContainerSpecQuery + `) else .podTemplate.spec end | .containers[]? | select(.name == $ARGS.named.containerName)`,
+			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | .podTemplate.spec.containers[]? | select(.name == $ARGS.named.containerName)`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 			ArgsInfo:    componentAndContainerArgsInfo,
 		},

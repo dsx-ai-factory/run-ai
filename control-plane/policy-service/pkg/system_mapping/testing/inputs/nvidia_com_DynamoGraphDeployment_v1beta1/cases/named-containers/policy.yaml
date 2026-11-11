@@ -1,4 +1,4 @@
-description: Select containers globally or by component without modifying unrelated containers. Component-c has no sidecar or init containers.
+description: Select containers globally or by component without modifying unrelated containers. Component-c has no pod template.
 effectiveRules:
   - field: image
     specSelector: appContainerByName

@@ -37,11 +37,5 @@ spec:
     type: worker
   - globalDynamoNamespace: true
     name: component-c
-    podTemplate:
-      spec:
-        containers:
-        - image: placeholder
-          name: main
-        serviceAccountName: inference-sa
     replicas: 1
     type: worker
