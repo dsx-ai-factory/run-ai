@@ -7,7 +7,6 @@ package asset_cluster_status
 
 import (
 	"context"
-	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/services/response_patching"
@@ -15,11 +14,6 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
-
-func TestAssetClusterStatus(t *testing.T) {
-	RegisterFailHandler(Fail)
-	RunSpecs(t, "asset cluster status suite")
-}
 
 func secretsPatchingInfo(ids ...string) map[string]response_patching.ResponsePatchingPtrs {
 	patchingInfo := make(map[string]response_patching.ResponsePatchingPtrs, len(ids))
