@@ -100,6 +100,7 @@
 import type { PropType } from "vue";
 import { defineComponent } from "vue";
 import { isValidUrl } from "@/common/form.validators";
+import { errorMessages } from "@/common/error-message.constant";
 import type { QFile, QInput } from "quasar";
 import type { IdpResources, SamlCreationData } from "@/swagger-models/identity-manager-client";
 import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
@@ -317,7 +318,7 @@ export default defineComponent({
       reader.onerror = () => {
         if (selectionToken !== this.fileSelectionToken) return;
         this.isValidatingCertificate = false;
-        this.certificateError = "Could not read the file.";
+        this.certificateError = errorMessages.SAML_METADATA_FILE_UNREADABLE;
         this.onUpdated();
       };
       reader.readAsText(file);

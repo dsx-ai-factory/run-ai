@@ -8,6 +8,7 @@ import type {
   ISamlMetadataValidation,
   IWrapperBoxSettingMessages,
 } from "@/models/setting.model";
+import { errorMessages } from "@/common/error-message.constant";
 import { extractErrorMessages } from "@/utils/error-alert.util";
 import { idpService } from "@/services/control-plane/idp.service/idp.service";
 import Axios from "axios";
@@ -59,12 +60,14 @@ async function validateSamlMetadata(
     const isExpired = !!expirationDate && !iValidCertificateDate(expirationDate);
     return {
       expirationDate,
-      error: isExpired ? "" : errorMessage || (expirationDate ? "" : "Could not read the certificate expiration date."),
+      error: isExpired
+        ? ""
+        : errorMessage || (expirationDate ? "" : errorMessages.SAML_CERTIFICATE_EXPIRATION_UNREADABLE),
     };
   } catch (error: unknown) {
     return {
       expirationDate: null,
-      error: extractErrorMessages(error, "Could not validate the certificate.").join(" "),
+      error: extractErrorMessages(error, errorMessages.SAML_CERTIFICATE_VALIDATION_FAILED).join(" "),
     };
   }
 }
@@ -88,7 +91,10 @@ async function dryRunSamlMetadata(
   } catch (err: unknown) {
     if (Axios.isAxiosError(err) && err.response?.status === 400) {
       const body = err.response.data as { samlData?: SamlData; message?: string } | undefined;
-      return { samlData: body?.samlData ?? undefined, errorMessage: body?.message || "Invalid SAML metadata" };
+      return {
+        samlData: body?.samlData ?? undefined,
+        errorMessage: body?.message || errorMessages.SAML_METADATA_INVALID,
+      };
     }
     throw err;
   }
