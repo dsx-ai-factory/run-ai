@@ -18385,7 +18385,7 @@ Components:
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
-  cloud.google.com/go/auth v0.24.3
+  cloud.google.com/go/auth v0.24.4
   cloud.google.com/go/auth/oauth2adapt v0.2.8
   cloud.google.com/go/auth/oauth2adapt v0.3.1
   cloud.google.com/go/compute/metadata v0.10.0
@@ -21502,7 +21502,7 @@ Components:
   golang.org/x/time/rate v0.16.0
   golang.org/x/time/rate v0.9.0
   golang.org/x/tools v0.52.0
-  golang.org/x/tools v0.52.1-0.20261109220859-588ada3c4d4d
+  golang.org/x/tools v0.52.1-0.20261110220427-86b298ceb416
 
 Copyright 2009 The Go Authors.
 
