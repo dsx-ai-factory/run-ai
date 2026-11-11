@@ -1,0 +1,11 @@
+.gitignore
+.openapi-generator-ignore
+api.ts
+api/apis.ts
+api/cLIApi.ts
+api/healthApi.ts
+git_push.sh
+model/command.ts
+model/modelError.ts
+model/models.ts
+model/version.ts
