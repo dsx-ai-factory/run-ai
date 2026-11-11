@@ -18,7 +18,6 @@ import {
   HF_HOME_DEFAULT_PATH,
   HOME_DEFAULT_PATH,
   LLM_IMAGE_FOR_HUGGING_FACE,
-  LLM_IMAGE_FOR_TGI,
   MAX_REPLICAS_DEFAULT_VALUE,
   MIN_REPLICAS_DEFAULT_VALUE,
   NIM_IMAGE_PREFIX,
@@ -180,10 +179,8 @@ export const inferenceWorkloadUtil = {
   _ensureDefaultEnvVar,
 };
 
-function getHFArgsForModel(image: string, modelName: string): string {
-  return image.includes(LLM_IMAGE_FOR_TGI)
-    ? `${ARGS_PREFIX_FOR_TGI} ${modelName}`
-    : `${ARGS_PREFIX_FOR_VLLM} ${modelName}`;
+function getHFArgsForModel(modelName: string): string {
+  return `${ARGS_PREFIX_FOR_VLLM} ${modelName}`;
 }
 
 function getHFModelNameFromArgs(args: string): string {
@@ -426,8 +423,7 @@ function getHFInferenceWorkloadCreationRequest(
     throw new Error("Missing server type: The workload object must include a valid 'serverType' property.");
   }
 
-  const modelFlag = workload.serverType === EServerType.TGI ? "--model-id" : "--model";
-  workloadCreationRequest.spec.args = `${modelFlag} ${workload.modelName} ${
+  workloadCreationRequest.spec.args = `${ARGS_PREFIX_FOR_VLLM} ${workload.modelName} ${
     workloadCreationRequest.spec.args || ""
   }`.trim();
   workloadCreationRequest.spec.image = workload.image;

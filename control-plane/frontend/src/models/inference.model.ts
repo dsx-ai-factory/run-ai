@@ -55,17 +55,22 @@ export const NIM_WORKLOAD_LABEL = "run.ai/nim-workload";
 export const VLLM_WORKLOAD_LABEL = "run.ai/vllm-workload";
 export const NIM_IMAGE_FOR_HF_MODELS = "nvcr.io/nim/nvidia/llm-nim:1.12";
 
+const TGI_DEPRECATION_BASE_MESSAGE =
+  "This template uses a TGI server. TGI is deprecated by Hugging Face and no longer supported. Workloads created from this template may stop working without notice. To avoid this,";
+const TGI_DEPRECATION_ACTION = "change the image path to a vLLM image and update the runtime settings arguments.";
+export const TGI_DEPRECATION_MESSAGE_READ = `${TGI_DEPRECATION_BASE_MESSAGE} ask your administrator to ${TGI_DEPRECATION_ACTION}`;
+export const TGI_DEPRECATION_MESSAGE_EDIT = `${TGI_DEPRECATION_BASE_MESSAGE} edit the template and ${TGI_DEPRECATION_ACTION}`;
+
 export const ARGS_PREFIX_FOR_TGI = "--model-id";
 export const ARGS_PREFIX_FOR_VLLM = "--model";
 
 export enum EServerType {
   VLLM = "vLLM",
-  TGI = "TGI",
   Nim = "NVIDIA NIM",
   Custom = "Custom",
 }
 
-export type TInferenceServerSelection = EServerType.Custom | EServerType.Nim | EServerType.VLLM | EServerType.TGI;
+export type TInferenceServerSelection = EServerType.Custom | EServerType.Nim | EServerType.VLLM;
 
 // old values
 export const OLD_LLM_ENVIRONMENT_FOR_HUGGING_FACE = "llm-server";

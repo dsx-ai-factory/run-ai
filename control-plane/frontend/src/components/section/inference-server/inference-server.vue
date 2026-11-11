@@ -89,8 +89,6 @@ export default defineComponent({
       switch (this.modelValue) {
         case EServerType.VLLM:
           return EServerType.VLLM;
-        case EServerType.TGI:
-          return EServerType.TGI;
         case EServerType.Nim:
           return "NVIDIA NIM";
         default:
@@ -113,10 +111,12 @@ export default defineComponent({
         });
       }
       if (this.settingStore.isFeatureEnabled(SettingKeys.EnableModelCatalog)) {
-        options.push(
-          { aid: "vllm-option", icon: allWorkloadsIconsMap.VLLM, value: EServerType.VLLM, label: EServerType.VLLM },
-          { aid: "tgi-option", icon: allWorkloadsIconsMap.TGI, value: EServerType.TGI, label: EServerType.TGI },
-        );
+        options.push({
+          aid: "vllm-option",
+          icon: allWorkloadsIconsMap.VLLM,
+          value: EServerType.VLLM,
+          label: EServerType.VLLM,
+        });
       }
       options.push({
         aid: "custom-option",

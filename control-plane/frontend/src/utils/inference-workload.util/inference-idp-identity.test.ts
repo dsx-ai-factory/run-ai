@@ -49,7 +49,7 @@ function unifiedWorkload(identity = resolvedIdentity): UnifiedWorkload {
 
 const forms = [
   { name: "custom inference", applyDefaults: inferenceWorkloadUtil.setInferenceUIDefaults },
-  { name: "Hugging Face vLLM/TGI", applyDefaults: inferenceWorkloadUtil.setInferenceHuggingFaceUIDefaults },
+  { name: "Hugging Face vLLM", applyDefaults: inferenceWorkloadUtil.setInferenceHuggingFaceUIDefaults },
   { name: "NIM", applyDefaults: inferenceWorkloadUtil.setInferenceNIMUIDefaults },
 ];
 

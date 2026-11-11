@@ -6,6 +6,17 @@
 <template>
   <runai-select-card :value="isSelected" @clicked="$emit('card-clicked')" :aid="getAid(data.meta.name)">
     <div class="template-card workload-card-content">
+      <runai-tooltip
+        v-if="isDeprecatedTgi"
+        class="template-card-deprecation"
+        aid="template-card-tgi-deprecation"
+        icon="ph-bold ph-warning-circle"
+        color="warning"
+        width="300px"
+        tooltip-position="right"
+        :tooltip-text="tgiDeprecationTooltip"
+        @click.stop
+      />
       <section class="top-content q-mb-md">
         <div class="template-card-icon">
           <runai-svg-icon v-for="(icon, idx) in icons.slice(0, 4)" :name="icon" :key="idx" size="47" />
@@ -55,13 +66,14 @@ import { defineComponent, type PropType } from "vue";
 // cmp
 import { RunaiSvgIcon } from "@/components/common/runai-svg-icon";
 import { RunaiSelectCard } from "@/components/common/runai-select-card";
+import { RunaiTooltip } from "@/components/common/runai-tooltip";
 
 // models
 import type { DistributedFramework } from "@/swagger-models/assets-service-client";
 
 // icons
 import { distFrameworkIconsMap, toolTypeIconsMap } from "@/common/icons.constant";
-import { getHuggingFaceIcon, getNimIconIfNimImage, getNvidiaImageBasedIcon } from "@/common/icon.util";
+import { getHuggingFaceIcon, getNimIconIfNimImage, getNvidiaImageBasedIcon, isTgiInference } from "@/common/icon.util";
 
 // utils
 import { spaceToDash, toLowerCase } from "@/utils/string.util";
@@ -69,6 +81,7 @@ import type { SupersetTemplate } from "@/swagger-models/workloads-client";
 import { workloadHybridUtil } from "@/utils/workload-hybrid.util/workload-hybrid.util";
 import { computeResourceUtil } from "@/utils/compute-resource.util";
 import type { EWorkloadType } from "@/models/workload.model";
+import { TGI_DEPRECATION_MESSAGE_READ } from "@/models/inference.model";
 
 const STORAGE_TYPE_LABELS = [
   { key: "pvc", label: "PVC" },
@@ -85,6 +98,7 @@ export default defineComponent({
   components: {
     RunaiSvgIcon,
     RunaiSelectCard,
+    RunaiTooltip,
   },
   emits: ["card-clicked"],
   props: {
@@ -98,6 +112,12 @@ export default defineComponent({
     },
   },
   computed: {
+    tgiDeprecationTooltip(): string {
+      return TGI_DEPRECATION_MESSAGE_READ;
+    },
+    isDeprecatedTgi(): boolean {
+      return isTgiInference(this.data.meta.workloadType as EWorkloadType, this.imageSummary);
+    },
     imageSummary(): string {
       return this.data.spec?.image || this.data.combinedSpec?.image || "-";
     },
@@ -189,3 +209,16 @@ export default defineComponent({
   },
 });
 </script>
+
+<style lang="scss" scoped>
+.template-card {
+  position: relative;
+}
+
+.template-card-deprecation {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+</style>
