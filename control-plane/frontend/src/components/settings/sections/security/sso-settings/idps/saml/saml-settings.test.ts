@@ -244,6 +244,16 @@ describe("saml-settings.vue", () => {
   });
 
   describe("identity provider details", () => {
+    it("does not show a year-1 date when the backend returns the zero time for an unparsable certificate", async () => {
+      const { wrapper } = factory(
+        { ...mockIdp, samlData: { ...mockSamlData, certificateExpirationDate: "0001-01-01T00:00:00Z" } },
+        false,
+      );
+      await flushPromises();
+
+      expect((wrapper.vm as unknown as { certificateExpirationDate: Date | null }).certificateExpirationDate).toBeNull();
+    });
+
     it("shows the identity provider URL, entity ID and expiration date in the saved card", async () => {
       const { wrapper } = factory(idpExpiringAt(new Date("2030-05-17T00:00:00.000Z")), false);
       await flushPromises();

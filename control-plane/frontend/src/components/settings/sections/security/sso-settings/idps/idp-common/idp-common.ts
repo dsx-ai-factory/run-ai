@@ -12,6 +12,7 @@ import type { ISelectOption } from "@/models/global.model";
 export const idpCommon = {
   getSettingsBoxMessages,
   validateSamlMetadata,
+  parseExpirationDate,
   iValidCertificateDate,
   isCertificateExpiringSoon,
   getDefaultScope,
@@ -51,11 +52,12 @@ async function validateSamlMetadata(
       { metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File, metadataXmlFile, fileName },
       idpAlias,
     );
-    const expirationDate = samlData?.certificateExpirationDate ? new Date(samlData.certificateExpirationDate) : null;
-    // With a date, an expired certificate is reported by the date check; the error only covers other rejections.
+    const expirationDate = parseExpirationDate(samlData?.certificateExpirationDate);
+    // An expired certificate is reported by the date check; any other rejection (e.g. not yet valid) keeps its error.
+    const isExpired = !!expirationDate && !iValidCertificateDate(expirationDate);
     return {
       expirationDate,
-      error: expirationDate ? "" : errorMessage || "Could not read the certificate expiration date.",
+      error: isExpired ? "" : errorMessage || (expirationDate ? "" : "Could not read the certificate expiration date."),
     };
   } catch (error: unknown) {
     return {
@@ -63,6 +65,13 @@ async function validateSamlMetadata(
       error: error instanceof Error ? error.message : "Could not validate the certificate.",
     };
   }
+}
+
+// The backend sends Go's zero time (year 1) when it cannot parse the certificate, which means "unknown".
+function parseExpirationDate(value?: string | null): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) || date.getFullYear() <= 1 ? null : date;
 }
 
 function iValidCertificateDate(expirationDate: Date): boolean {

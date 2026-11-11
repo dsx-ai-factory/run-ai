@@ -265,8 +265,7 @@ export default defineComponent({
         : "Certificate expired. Replace the metadata URL above.";
     },
     setStoredCertificateExpiration(): void {
-      const storedExpiration = this.samlSettings?.certificateExpirationDate;
-      this.expirationDate = storedExpiration ? new Date(storedExpiration) : null;
+      this.expirationDate = idpCommon.parseExpirationDate(this.samlSettings?.certificateExpirationDate);
     },
     // Returns false when the file selection changed while waiting, so a stale result is ignored.
     async validateCertificate(metadataXmlFile: string, fileName: string, selectionToken: number): Promise<boolean> {

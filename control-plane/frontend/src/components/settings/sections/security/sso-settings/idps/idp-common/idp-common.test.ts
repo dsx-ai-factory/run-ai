@@ -96,6 +96,25 @@ describe("validateSamlMetadata", () => {
     expect(result.error).toBe("");
   });
 
+  test("keeps the backend rejection when the certificate is not expired (e.g. not yet valid)", async () => {
+    vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({
+      samlData: { validateSignature: true, certificateExpirationDate: "2099-01-01T00:00:00.000Z" },
+      errorMessage: "Invalid SAML metadata",
+    });
+    const result = await idpCommon.validateSamlMetadata("xml", "idp.xml");
+    expect(result.expirationDate).toEqual(new Date("2099-01-01T00:00:00.000Z"));
+    expect(result.error).toBe("Invalid SAML metadata");
+  });
+
+  test("treats the backend's zero time as an unknown expiration date", async () => {
+    vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({
+      samlData: { validateSignature: true, certificateExpirationDate: "0001-01-01T00:00:00Z" },
+    });
+    const result = await idpCommon.validateSamlMetadata("xml", "idp.xml");
+    expect(result.expirationDate).toBeNull();
+    expect(result.error).toBe("Could not read the certificate expiration date.");
+  });
+
   test("returns the backend message when there is no date", async () => {
     vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({ errorMessage: "no signing certificate" });
     expect(await idpCommon.validateSamlMetadata("xml", "idp.xml")).toEqual({

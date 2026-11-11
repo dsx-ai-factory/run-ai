@@ -323,8 +323,7 @@ export default defineComponent({
       }
     },
     refreshCertificateExpiration(): void {
-      const expirationDate = this.idp?.samlData?.certificateExpirationDate;
-      this.certificateExpirationDate = expirationDate ? new Date(expirationDate) : null;
+      this.certificateExpirationDate = idpCommon.parseExpirationDate(this.idp?.samlData?.certificateExpirationDate);
       this.$emit("certificate-status", {
         expired: this.isExpiredCertificate,
         expiringSoon: this.isCertificateExpiringSoon,
