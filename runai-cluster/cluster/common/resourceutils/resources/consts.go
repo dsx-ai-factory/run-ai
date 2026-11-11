@@ -14,4 +14,6 @@ const (
 	A100                   = "A100"
 	H100                   = "H100"
 	defaultComputePortions = float64(7)
+	RTXPro6000             = "RTX-PRO-6000"
+	rtxPro6000Portions     = float64(4)
 )

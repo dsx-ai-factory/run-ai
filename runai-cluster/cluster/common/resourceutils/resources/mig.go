@@ -138,5 +138,8 @@ func getDeviceComputePortions(gpuProduct string) (float64, error) {
 	if strings.Contains(gpuProduct, A100) || strings.Contains(gpuProduct, H100) {
 		return defaultComputePortions, nil
 	}
+	if strings.Contains(gpuProduct, RTXPro6000) {
+		return rtxPro6000Portions, nil
+	}
 	return -1, fmt.Errorf("cannot calculate device portion for gpu product %s", gpuProduct)
 }
