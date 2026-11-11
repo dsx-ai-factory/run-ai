@@ -6991,7 +6991,6 @@ Apache license:
 Copyright Canonical Ltd, Kirill Simonov, staring in when the project was ported over - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
   go.yaml.in/yaml/v3 v3.0.6
   gopkg.in/yaml.v3 v3.0.1
@@ -10837,7 +10836,6 @@ SOFTWARE.
 Copyright Ernest Micklei - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
-  github.com/emicklei/go-restful/v3 v3.12.2
   github.com/emicklei/go-restful/v3 v3.13.0
   github.com/emicklei/go-restful/v3 v3.14.0
 
@@ -21355,7 +21353,6 @@ Copyright The Go Authors - BSD-3-Clause
 License Text(https://spdx.org/licenses/BSD-3-Clause.html)
 Components:
   google.golang.org/protobuf v1.36.12
-  google.golang.org/protobuf v1.36.8
 
 Copyright (c) 2018 The Go Authors. All rights reserved.
 
@@ -25121,7 +25118,6 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/envoyproxy/go-control-plane/envoy v1.37.0
   github.com/envoyproxy/go-control-plane/envoy v1.40.0
-  github.com/go-logr/logr v1.4.3
   github.com/go-logr/logr v1.4.4
   github.com/go-logr/zapr v1.3.0
   github.com/go-logr/zerologr v1.2.3
@@ -35239,7 +35235,6 @@ Components:
   go.yaml.in/yaml/v2 v2.4.3
   go.yaml.in/yaml/v2 v2.4.4
   go.yaml.in/yaml/v2 v2.4.5
-  go.yaml.in/yaml/v3 v3.0.4
   go.yaml.in/yaml/v3 v3.0.5
   go.yaml.in/yaml/v3 v3.0.6
   gopkg.in/yaml.v2 v2.4.0
