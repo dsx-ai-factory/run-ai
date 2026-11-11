@@ -228,7 +228,13 @@ export default defineComponent({
         this.samlSource = this.getSourceType;
         if (this.samlSource === SamlCreationDataMetadataXmlTypeEnum.File) {
           this.metadataFile = new File([this.idpResources.resource as string], this.idpResources.resourceName as string);
-          await this.setFileContent(this.idpResources.resourceName as string, this.idpResources.resource as string);
+          // The stored certificate date is already known, so skip the dry run unless it is missing.
+          await this.setFileContent(
+            this.idpResources.resourceName as string,
+            this.idpResources.resource as string,
+            undefined,
+            !this.expirationDate,
+          );
         } else {
           // For URL sources the backend may return the downloaded metadata XML as the resource, not the URL itself.
           const resource = this.idpResources.resource as string;
@@ -306,14 +312,27 @@ export default defineComponent({
         const fileContent = e.target?.result as string;
         void this.setFileContent(file.name, fileContent, selectionToken);
       };
+      reader.onerror = () => {
+        if (selectionToken !== this.fileSelectionToken) return;
+        this.isValidatingCertificate = false;
+        this.certificateError = "Could not read the file.";
+        this.onUpdated();
+      };
       reader.readAsText(file);
     },
-    async setFileContent(fileName: string, fileContent: string, selectionToken?: number): Promise<void> {
+    async setFileContent(
+      fileName: string,
+      fileContent: string,
+      selectionToken?: number,
+      shouldValidate = true,
+    ): Promise<void> {
       const token = selectionToken ?? this.fileSelectionToken;
       if (token !== this.fileSelectionToken) return;
       const metadataXmlFile = stringUtil.stringToBase64(fileContent);
-      const isCurrent = await this.validateCertificate(metadataXmlFile, fileName, token);
-      if (!isCurrent || token !== this.fileSelectionToken) return;
+      if (shouldValidate) {
+        const isCurrent = await this.validateCertificate(metadataXmlFile, fileName, token);
+        if (!isCurrent || token !== this.fileSelectionToken) return;
+      }
       this.samlFields.metadataXmlFile = metadataXmlFile;
       this.samlFields.fileName = fileName;
       this.samlFields.metadataXmlType = SamlCreationDataMetadataXmlTypeEnum.File;

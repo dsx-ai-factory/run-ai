@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { Mappers } from "@/swagger-models/identity-manager-client";
+import type { Mappers, SamlData } from "@/swagger-models/identity-manager-client";
 import type { Setting as ServerSetting } from "@/swagger-models/temp-backend-settings-client";
 
 export interface Setting
@@ -214,6 +214,16 @@ export interface SamlConfigSettings {
   singleSignOnServiceUrl: string;
   signingCertificate: string;
   certificateExpirationDate?: string;
+}
+
+export interface ISamlMetadataValidation {
+  expirationDate: Date | null;
+  error: string;
+}
+
+export interface ISamlCertificateValidation {
+  samlData?: SamlData;
+  errorMessage?: string;
 }
 
 export interface SamlCertificateDetails {

@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { IWrapperBoxSettingMessages } from "@/models/setting.model";
+import type { ISamlMetadataValidation, IWrapperBoxSettingMessages } from "@/models/setting.model";
+import { extractErrorMessages } from "@/utils/error-alert.util";
 import { idpService } from "@/services/control-plane/idp.service/idp.service";
 import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
 import { dateUtil, TimeUnit } from "@/utils/date.util";
@@ -37,16 +38,11 @@ function getSettingsBoxMessages(idpName: string, isSSOUser: boolean): IWrapperBo
   };
 }
 
-export interface SamlMetadataValidation {
-  expirationDate: Date | null;
-  error: string;
-}
-
 async function validateSamlMetadata(
   metadataXmlFile: string,
   fileName: string,
   idpAlias?: string,
-): Promise<SamlMetadataValidation> {
+): Promise<ISamlMetadataValidation> {
   try {
     const { samlData, errorMessage } = await idpService.validateSamlCertificate(
       { metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File, metadataXmlFile, fileName },
@@ -62,7 +58,7 @@ async function validateSamlMetadata(
   } catch (error: unknown) {
     return {
       expirationDate: null,
-      error: error instanceof Error ? error.message : "Could not validate the certificate.",
+      error: extractErrorMessages(error, "Could not validate the certificate.").join(" "),
     };
   }
 }

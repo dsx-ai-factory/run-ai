@@ -12,7 +12,8 @@ import type {
   SamlData,
 } from "@/swagger-models/identity-manager-client";
 import { IdpCreationRequestTypeEnum } from "@/swagger-models/identity-manager-client";
-import { isAxiosError } from "axios";
+import Axios from "axios";
+import type { ISamlCertificateValidation } from "@/models/setting.model";
 import { identityManagerApi } from "@/services/infra/client-apis/identity-manager-api/identity-manager-api";
 import { httpService } from "@/services/infra/https.service/http.service";
 
@@ -24,11 +25,6 @@ export const idpService = {
   getIdpResource,
   validateSamlCertificate,
 };
-
-export interface SamlCertificateValidation {
-  samlData?: SamlData;
-  errorMessage?: string;
-}
 
 async function getIdps(): Promise<Idp[]> {
   try {
@@ -80,7 +76,7 @@ async function getIdpResource(idp: string): Promise<IdpResources> {
 async function validateSamlCertificate(
   samlData: SamlCreationData,
   idpAlias?: string,
-): Promise<SamlCertificateValidation> {
+): Promise<ISamlCertificateValidation> {
   const request: IdpCreationRequest = { type: IdpCreationRequestTypeEnum.Saml, samlData, dryRun: true };
   try {
     if (idpAlias) {
@@ -91,7 +87,7 @@ async function validateSamlCertificate(
     const response = await identityManagerApi.idpsApi.createIdp(request);
     return { samlData: response.data.samlData ?? undefined };
   } catch (err: unknown) {
-    if (isAxiosError(err) && err.response?.status === 400) {
+    if (Axios.isAxiosError(err) && err.response?.status === 400) {
       const body = err.response.data as { samlData?: SamlData; message?: string } | undefined;
       return { samlData: body?.samlData ?? undefined, errorMessage: body?.message || "Invalid SAML metadata" };
     }
