@@ -3657,6 +3657,9 @@
         "x-service": "org-unit-service",
         "description": "Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their\nsettings and demand, and for the node pool's scheduling capabilities. It shows the node pool when it is fully busy:\nevery project without a demand in the request asks for the most it can get. The calculation covers every org unit of\nthe node pool; the response holds the ones the caller can read. Nothing is saved.\n",
         "x-no-authorization": true,
+        "x-test-coverage": [
+          "control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go"
+        ],
         "tags": [
           "Org unit"
         ],

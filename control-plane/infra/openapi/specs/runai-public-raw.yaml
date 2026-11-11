@@ -5081,6 +5081,9 @@ paths:
         the node pool; the response holds the ones the caller can read. Nothing
         is saved.
       x-no-authorization: true
+      x-test-coverage:
+        - >-
+          control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
       tags:
         - Org unit
       parameters:

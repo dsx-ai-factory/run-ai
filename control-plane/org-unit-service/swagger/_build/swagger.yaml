@@ -2321,6 +2321,8 @@ paths:
         every project without a demand in the request asks for the most it can get. The calculation covers every org unit of
         the node pool; the response holds the ones the caller can read. Nothing is saved.
       x-no-authorization: true
+      x-test-coverage:
+        - control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
       tags:
         - Org unit
       parameters:

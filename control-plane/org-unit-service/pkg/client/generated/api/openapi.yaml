@@ -5439,6 +5439,8 @@ paths:
       - Org unit
       x-service: org-unit-service
       x-no-authorization: true
+      x-test-coverage:
+      - control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
     x-internal: true
   /api/v1/org-unit/projects/node-pool-resources:
     get:
