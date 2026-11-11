@@ -153,6 +153,10 @@ export enum errorMessages {
   ENFORCEMENT_FIELD_NOT_READY = "Finish configuring the field and selectors before saving the rule",
   SAVE_OR_CANCEL_OPEN_RULE = "Save or cancel rule before saving the policy",
   UNSAVED_RULE_CHANGES = "Unsaved changes",
+  SAML_CERTIFICATE_EXPIRATION_UNREADABLE = "Could not read the certificate expiration date.",
+  SAML_CERTIFICATE_VALIDATION_FAILED = "Could not validate the certificate.",
+  SAML_METADATA_INVALID = "Invalid SAML metadata",
+  SAML_METADATA_FILE_UNREADABLE = "Could not read the file.",
 }
 
 export const errorMessagesUtils = {
