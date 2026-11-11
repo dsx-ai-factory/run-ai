@@ -30,7 +30,7 @@ data:
   {{- if or ($top.Values.global.postgresql.auth.dbReadPort) ($top.Values.auditService.config.dbReadPort) }}
   DB_READ_PORT: {{ $top.Values.auditService.config.dbReadPort | default $top.Values.global.postgresql.auth.readPort | quote }}
   {{- end }}
-  AUDIT_RECORED_CLEANER_ENABLED: {{ $top.Values.auditService.config.auditRecordCleanerEnabled | quote }}
+  AUDIT_RECORD_CLEANER_ENABLED: {{ $top.Values.auditService.config.auditRecordCleanerEnabled | quote }}
   AUDIT_RECORD_CLEANER_INTERVAL_HOURS: {{ $top.Values.auditService.config.auditRecordCleanerIntervalHours | quote }}
   AUDIT_RECORD_TTL_DAYS: {{ $top.Values.auditService.config.auditRecordTtlDays | quote }}
 {{- end }}
