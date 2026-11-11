@@ -105,7 +105,7 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		},
 		"allMainContainers": {
 			Description: convutils.Ref("containers named main across all components"),
-			Query:       `.spec.components[]? | .podTemplate.spec | .containers[]? | select(.name == "main") | select(.)`,
+			Query:       `.spec.components[]? | .podTemplate.spec | .containers[]? | select(.name == "main")`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 		},
 		dynamoAppContainerByNameSelector: {
@@ -156,7 +156,7 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		},
 		"componentMainContainer": {
 			Description: convutils.Ref("the container named main in a component selected by name"),
-			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | .podTemplate.spec | .containers[]? | select(.name == "main") | select(.)`,
+			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName) | .podTemplate.spec | .containers[]? | select(.name == "main")`,
 			FieldGroups: []string{SystemPodSpecContainerFgName, SystemPodSpecAndContainerFgName},
 			ArgsInfo:    componentArgsInfo,
 		},
