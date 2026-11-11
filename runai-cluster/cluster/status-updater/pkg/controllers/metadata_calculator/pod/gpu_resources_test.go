@@ -128,8 +128,19 @@ func TestCalcPodGpuResources_MigOnMixedNode(t *testing.T) {
 		"whole gpu profile": {
 			annotations: mig, migResource: "nvidia.com/mig-4g.96gb", quantity: "1", expected: 1,
 		},
-		"profile with media extensions suffix": {
-			annotations: mig, migResource: "nvidia.com/mig-1g.24gb+me", quantity: "1", expected: 0.25,
+		"annotation profile with media extensions suffix": {
+			annotations: withDevice(`{"name":"nvidia.com/mig-1g.24gb+me"}`),
+			migResource: "nvidia.com/mig-1g.24gb.me", quantity: "1", expected: 0.25,
+		},
+		// the NVIDIA device plugin publishes "+" as "." in the resource name (strings.ReplaceAll in internal/rm)
+		"requested profile with media extensions suffix": {
+			annotations: mig, migResource: "nvidia.com/mig-1g.24gb.me", quantity: "1", expected: 0.25,
+		},
+		"requested profile with all media extensions suffix": {
+			annotations: mig, migResource: "nvidia.com/mig-2g.48gb.me.all", quantity: "1", expected: 0.5,
+		},
+		"requested profile without media extensions suffix": {
+			annotations: mig, migResource: "nvidia.com/mig-1g.24gb-me", quantity: "1", expected: 0.25,
 		},
 		"seven slice gpu": {
 			gpuProduct:  "NVIDIA-B200",

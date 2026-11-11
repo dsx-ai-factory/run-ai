@@ -44,8 +44,9 @@ const (
 	amdNodeGpuMemoryLabelValuePattern = "(\\d+.*)"
 	amdNodeGpuMemoryValueFactor       = 1000000
 
-	// Blackwell GPUs also publish profiles with media extensions, e.g. nvidia.com/mig-1g.24gb+me or +me.all.
-	migExtractionRegex      = `^nvidia.com/mig-(\d+)g\.(\d+)gb(?:\+[a-z]+(?:\.[a-z]+)?)?$`
+	// Blackwell profiles may carry a media extensions suffix: "+me" / "+me.all" in the profile name (annotation) and
+	// ".me" / ".me.all" in the resource name, since the NVIDIA device plugin replaces "+" with "."; "-me" excludes them.
+	migExtractionRegex      = `^nvidia.com/mig-(\d+)g\.(\d+)gb(?:[+.-][a-z]+(?:\.[a-z]+)?)?$`
 	migRegexNumOfOutputs    = 3
 	migDeviceAnnotationName = "runai-mig-device"
 	deviceNameKey           = "name"
