@@ -17,13 +17,11 @@ import (
 	"net/url"
 	"os"
 	"sync"
-	"testing"
 	"time"
 
 	openapi "github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/logging"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -161,54 +159,4 @@ func GetDefaultIDPMappers() *openapi.Mappers {
 		FirstName:           StrPtr("firstName"),
 		LastName:            StrPtr("lastName"),
 	}
-}
-
-func removeClientProtocolMapper(t *testing.T, realm, clientUUID, mapperName string) {
-	t.Helper()
-	httpClient := NewLocalhostOverrideClient()
-	base := "http://" + KeycloakDomain + ":8090/auth"
-
-	tokenResp, err := httpClient.PostForm(base+"/realms/master/protocol/openid-connect/token", url.Values{
-		"client_id":  {"admin-cli"},
-		"username":   {iamUsername},
-		"password":   {iamPassword},
-		"grant_type": {"password"},
-	})
-	require.NoError(t, err)
-	defer tokenResp.Body.Close()
-	var token struct {
-		AccessToken string `json:"access_token"`
-	}
-	require.NoError(t, json.NewDecoder(tokenResp.Body).Decode(&token))
-	require.NotEmpty(t, token.AccessToken)
-
-	mappersURL := fmt.Sprintf("%s/admin/realms/%s/clients/%s/protocol-mappers/models", base, realm, clientUUID)
-	do := func(method, target string) *http.Response {
-		req, reqErr := http.NewRequest(method, target, nil) //nolint:noctx // integration test helper, no context available
-		require.NoError(t, reqErr)
-		req.Header.Set("Authorization", "Bearer "+token.AccessToken)
-		resp, doErr := httpClient.Do(req)
-		require.NoError(t, doErr)
-		return resp
-	}
-
-	listResp := do(http.MethodGet, mappersURL)
-	defer listResp.Body.Close()
-	require.Equal(t, http.StatusOK, listResp.StatusCode)
-	var mappers []struct {
-		ID   string `json:"id"`
-		Name string `json:"name"`
-	}
-	require.NoError(t, json.NewDecoder(listResp.Body).Decode(&mappers))
-
-	for _, mapper := range mappers {
-		if mapper.Name != mapperName {
-			continue
-		}
-		delResp := do(http.MethodDelete, mappersURL+"/"+mapper.ID)
-		delResp.Body.Close()
-		require.Equal(t, http.StatusNoContent, delResp.StatusCode)
-		return
-	}
-	require.Failf(t, "protocol mapper not found", "%s on client %s", mapperName, clientUUID)
 }
