@@ -66,12 +66,12 @@ func buildDynamoGraphDeploymentV1beta1SpecSelectors() map[string]api.SpecSelecto
 		dynamoAllComponentSpecsSelector: {
 			Description: convutils.Ref("all component specs in the spec.components list"),
 			Query:       `.spec.components[]?`,
-			FieldGroups: []string{SystemDynamoComponentSpecFgName},
+			FieldGroups: []string{SystemDynamoComponentV1beta1SpecFgName},
 		},
 		dynamoComponentSpecSelector: {
 			Description: convutils.Ref("the spec of a component selected by name"),
 			Query:       `.spec.components[]? | select(.name == $ARGS.named.componentName)`,
-			FieldGroups: []string{SystemDynamoComponentSpecFgName},
+			FieldGroups: []string{SystemDynamoComponentV1beta1SpecFgName},
 			ArgsInfo:    componentArgsInfo,
 		},
 		dynamoAllPodSpecsSelector: {

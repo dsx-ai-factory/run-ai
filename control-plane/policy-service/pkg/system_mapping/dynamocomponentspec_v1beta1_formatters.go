@@ -10,9 +10,9 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 )
 
-func BuildSystemDynamoComponentSpecFormatterFields() map[string]api.FormatterField {
+func BuildSystemDynamoComponentV1beta1SpecFormatterFields() map[string]api.FormatterField {
 	return map[string]api.FormatterField{
-		dynamoComponentTypeField: {
+		dynamoComponentV1beta1TypeField: {
 			GetExpr:  convutils.Ref(`.type`),
 			SetExpr:  convutils.Ref(`{"type": $ARGS.named.value}`),
 			ArgsInfo: map[string]api.MappingFieldType{"value": api.MAPPINGFIELDTYPE_STRING},

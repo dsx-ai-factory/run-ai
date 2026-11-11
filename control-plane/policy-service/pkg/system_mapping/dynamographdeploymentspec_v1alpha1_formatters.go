@@ -9,8 +9,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
 )
 
-// BuildSystemDynamoGraphDeploymentSpecFormatterFields returns the formatter fields for DynamoGraphDeployment.
-func BuildSystemDynamoGraphDeploymentSpecFormatterFields() map[string]api.FormatterField {
+// BuildSystemDynamoGraphDeploymentV1alpha1SpecFormatterFields returns the formatter fields for DynamoGraphDeployment v1alpha1.
+func BuildSystemDynamoGraphDeploymentV1alpha1SpecFormatterFields() map[string]api.FormatterField {
 	m := make(map[string]api.FormatterField)
 
 	// Workload-level fields
@@ -104,23 +104,4 @@ func BuildSystemDynamoGraphDeploymentSpecFormatterFields() map[string]api.Format
 	}`, nil, nil)
 
 	return m
-}
-
-func addDynamoFormatterField(
-	dst map[string]api.FormatterField,
-	name string,
-	setExpr string,
-	argsInfo map[string]api.MappingFieldType,
-	argsEnum map[string][]string,
-) {
-	ff := api.FormatterField{
-		SetExpr: &setExpr,
-	}
-	if len(argsInfo) > 0 {
-		ff.ArgsInfo = argsInfo
-	}
-	if len(argsEnum) > 0 {
-		ff.ArgsEnum = argsEnum
-	}
-	dst[name] = ff
 }
