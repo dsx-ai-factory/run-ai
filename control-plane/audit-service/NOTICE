@@ -131,9 +131,9 @@ Dependencies
 | `golang.org/x/crypto` | v0.58.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.58.0?tab=licenses |
 | `golang.org/x/exp/slices` | v0.0.0-20261109185158-a52e3aef5920 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261109185158-a52e3aef5920?tab=licenses |
 | `golang.org/x/net` | v0.62.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.62.0?tab=licenses |
-| `golang.org/x/sync/semaphore` | v0.24.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.24.0?tab=licenses |
-| `golang.org/x/sys` | v0.49.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.49.0?tab=licenses |
-| `golang.org/x/text` | v0.43.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.43.0?tab=licenses |
+| `golang.org/x/sync/semaphore` | v0.25.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.25.0?tab=licenses |
+| `golang.org/x/sys` | v0.50.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.50.0?tab=licenses |
+| `golang.org/x/text` | v0.44.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.44.0?tab=licenses |
 | `google.golang.org/genproto/googleapis/api/httpbody` | v0.0.0-20261110000943-09e21b237f2c | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261110000943-09e21b237f2c?tab=licenses |
 | `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261110000943-09e21b237f2c | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261110000943-09e21b237f2c?tab=licenses |
 | `google.golang.org/grpc` | v1.85.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.85.0?tab=licenses |
