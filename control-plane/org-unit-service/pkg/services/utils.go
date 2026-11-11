@@ -7,6 +7,7 @@ package services
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"sync"
@@ -16,13 +17,26 @@ import (
 	"k8s.io/utils/ptr"
 )
 
+// roundNumber rounds a quota value to three decimal places. Callers compare the
+// rounded values because quotas travel through float64 arithmetic and JSON,
+// where the same quantity comes back a fraction below the value it was stored
+// as: 1.001 * 1000 is 1000.9999999999999. Truncating that product turned 1.001
+// into 1 and 1.005 into 1.004, so quantities that differ were compared as
+// equal. Rounding through float64 also keeps the int overflow this conversion
+// used to have from coming back.
 func roundNumber(num *float64) float64 {
 	if num == nil || *num == 0 {
 		return 0
 	}
 
-	rounded := int64(*num * 1000)
-	return float64(rounded) / 1000
+	rounded := math.Round(*num*1000) / 1000
+	// Rounding a tiny negative value lands on a negative zero, which marshals
+	// and renders as "-0" in the quota the UI shows.
+	if rounded == 0 {
+		return 0
+	}
+
+	return rounded
 }
 
 func getQuotaStatusesMap(projectResources []models.Resources) map[string]models.Resources {
