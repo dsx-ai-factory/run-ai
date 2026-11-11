@@ -177,7 +177,9 @@ export default defineComponent({
       return SamlCreationDataMetadataXmlTypeEnum;
     },
     certificateDetails(): SamlCertificateDetails {
-      const showExpirationDate = this.isFileSource ? !!this.metadataFile : !!this.samlSettings?.signingCertificate;
+      // The stored certificate no longer applies once the user types a replacement URL, which is not validated here.
+      const isStoredCertificateShown = !!this.samlSettings?.signingCertificate && !this.samlFields.metadataXmlUrl;
+      const showExpirationDate = this.isFileSource ? !!this.metadataFile : isStoredCertificateShown;
       const validity = this.iValidCertificateDate();
       return {
         showExpirationDate,

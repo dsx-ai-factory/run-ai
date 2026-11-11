@@ -192,6 +192,24 @@ describe("saml-fields.vue", () => {
       });
     });
 
+    it("hides the stored certificate message once the URL is replaced", async () => {
+      const { wrapper } = factory(
+        {
+          samlSettings: { ...validSamlSettings, certificateExpirationDate: daysFromNow(-1).toISOString() },
+          isNewIdp: false,
+        },
+        { samlSource: SamlCreationDataMetadataXmlTypeEnum.Url },
+      );
+      await flushPromises();
+
+      (wrapper.vm as unknown as { updateMetadataXmlUrl: (url: string) => void }).updateMetadataXmlUrl(
+        "https://idp.example.com/metadata.xml",
+      );
+      await wrapper.vm.$nextTick();
+
+      expect(lastCertificateDetails(wrapper)).toMatchObject({ showExpirationDate: false, expirationError: "" });
+    });
+
     it("validates against the existing IdP alias when editing, and without one for a new IdP", async () => {
       const spy = mockDryRun(daysFromNow(120));
 
