@@ -75,13 +75,8 @@ async function getIdpResource(idp: string): Promise<IdpResources> {
   }
 }
 
-/**
- * Validates SAML metadata on the backend without saving anything (dryRun) and returns the parsed
- * signing certificate details, including its expiration date. Pass the alias of the IdP being edited
- * (update endpoint); omit it for a new IdP (create endpoint).
- * A rejected configuration (e.g. expired certificate) is returned as a result, not thrown, so the caller can
- * display the expiration details the backend sends back in the 400 body.
- */
+// Dry run: nothing is saved. A rejected config (e.g. an expired certificate) is returned, not thrown,
+// because the 400 body still carries the parsed certificate expiration date to show.
 async function validateSamlCertificate(
   samlData: SamlCreationData,
   idpAlias?: string,

@@ -258,7 +258,6 @@ export default defineComponent({
         : this.isValidUrl(this.samlFields.metadataXmlUrl || "") === true;
     },
     iValidCertificateDate(): boolean | string {
-      // Nothing to report while the backend is still validating the metadata.
       if (this.isValidatingCertificate || this.isValidCertificate) return true;
       if (this.certificateError) return this.certificateError;
       return this.isFileSource
@@ -269,8 +268,7 @@ export default defineComponent({
       const storedExpiration = this.samlSettings?.certificateExpirationDate;
       this.expirationDate = storedExpiration ? new Date(storedExpiration) : null;
     },
-    // Validates the metadata on the backend (dry run, nothing is saved) and takes the certificate
-    // expiration details from its response. Returns false if the file selection changed meanwhile.
+    // Returns false when the file selection changed while waiting, so a stale result is ignored.
     async validateCertificate(metadataXmlFile: string, fileName: string, selectionToken: number): Promise<boolean> {
       this.isValidatingCertificate = true;
       const { expirationDate, error } = await idpCommon.validateSamlMetadata(

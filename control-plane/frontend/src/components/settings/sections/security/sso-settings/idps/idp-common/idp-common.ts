@@ -41,8 +41,6 @@ export interface SamlMetadataValidation {
   error: string;
 }
 
-// Validates the metadata on the backend (dry run, nothing is saved). Pass the alias of an existing IdP to
-// validate against it; omit it for a new IdP.
 async function validateSamlMetadata(
   metadataXmlFile: string,
   fileName: string,
