@@ -5917,6 +5917,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 --------------------------------------------------------------------------------
+Copyright Brett Vickers - BSD-2-Clause
+License Text(https://spdx.org/licenses/BSD-2-Clause.html)
+Components:
+  github.com/beevik/etree v1.8.1
+
+Copyright 2015-2024 Brett Vickers. All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+   1. Redistributions of source code must retain the above copyright
+      notice, this list of conditions and the following disclaimer.
+
+   2. Redistributions in binary form must reproduce the above copyright
+      notice, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY COPYRIGHT HOLDER ``AS IS'' AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
+OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+--------------------------------------------------------------------------------
 Copyright Brian Goff - MIT
 License Text(https://spdx.org/licenses/MIT.html)
 Components:
@@ -17409,6 +17440,36 @@ IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 --------------------------------------------------------------------------------
+Copyright Ross Kinder - BSD-2-Clause
+License Text(https://spdx.org/licenses/BSD-2-Clause.html)
+Components:
+  github.com/crewjam/saml v0.5.1
+
+Copyright (c) 2015, Ross Kinder
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+--------------------------------------------------------------------------------
 Copyright Russ Ross - BSD-2-Clause
 License Text(https://spdx.org/licenses/BSD-2-Clause.html)
 Components:
@@ -18794,7 +18855,7 @@ the license terms, and this copy of it was never filled in, so it is omitted
 here rather than reproduced with unresolved placeholders.]
 
 --------------------------------------------------------------------------------
-Copyright the authors of contrib.go.opencensus.io/exporter/ocagent, contrib.go.opencensus.io/exporter/prometheus, github.com/NVIDIA/k8s-nim-operator and 46 others - Apache-2.0
+Copyright the authors of contrib.go.opencensus.io/exporter/ocagent, contrib.go.opencensus.io/exporter/prometheus, github.com/NVIDIA/k8s-nim-operator and 47 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   contrib.go.opencensus.io/exporter/ocagent v0.7.1-0.20200907061046-05415f1de66d
@@ -18811,6 +18872,7 @@ Components:
   github.com/go-openapi/jsonpointer v1.0.2
   github.com/kai-scheduler/kai-resource-management-api/kai/v1alpha1 v0.1.3
   github.com/kserve/kserve/pkg v0.17.1
+  github.com/mattermost/xml-roundtrip-validator v0.1.0
   github.com/moby/docker-image-spec/specs-go/v1 v1.3.1
   github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd
   github.com/modern-go/reflect2 v1.0.3-0.20250322232337-35a7c28c31ee
@@ -19248,12 +19310,13 @@ the license terms, and this copy of it was never filled in, so it is omitted
 here rather than reproduced with unresolved placeholders.]
 
 --------------------------------------------------------------------------------
-Copyright the authors of github.com/aws/smithy-go/ptr, github.com/awslabs/operatorpkg, github.com/santhosh-tekuri/jsonschema/v6 and 3 others - Apache-2.0
+Copyright the authors of github.com/aws/smithy-go/ptr, github.com/awslabs/operatorpkg, github.com/russellhaering/goxmldsig and 4 others - Apache-2.0
 License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/aws/smithy-go/ptr v1.28.5
   github.com/aws/smithy-go/ptr v1.28.9
   github.com/awslabs/operatorpkg v0.0.0-20261030165915-63f6f735c934
+  github.com/russellhaering/goxmldsig v1.6.1
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.2
   github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
   github.com/xdg-go/pbkdf2 v1.0.0
@@ -25220,6 +25283,7 @@ License Text(https://spdx.org/licenses/Apache-2.0.html)
 Components:
   github.com/coreos/go-oidc/v3/oidc v3.11.0
   github.com/distribution/reference v0.6.0
+  github.com/jonboulle/clockwork v0.5.0
   gopkg.in/validator.v2 v2.0.1
 
 Apache License
