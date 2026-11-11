@@ -18,7 +18,8 @@ spec:
         initContainers:
         - image: placeholder
           name: init
-    replicas: 1
+        serviceAccountName: custom-sa
+    replicas: 0
     type: worker
   - name: component-b
     podTemplate:

@@ -15,6 +15,7 @@ spec:
         initContainers:
         - image: placeholder
           name: init
+        serviceAccountName: custom-sa
     replicas: 3
     type: worker
   - globalDynamoNamespace: true

@@ -16,8 +16,8 @@ spec:
         initContainers:
         - image: placeholder
           name: init
-        serviceAccountName: inference-sa
-    replicas: 1
+        serviceAccountName: custom-sa
+    replicas: 0
     type: worker
   - globalDynamoNamespace: true
     name: component-b

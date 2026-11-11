@@ -19,7 +19,7 @@ spec:
         - image: placeholder
           name: init
         serviceAccountName: inference-sa
-    replicas: 1
+    replicas: 0
     type: worker
   - name: component-b
     podTemplate:
