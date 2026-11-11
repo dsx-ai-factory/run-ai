@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/control-plane-chart/tests/integrity
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/gruntwork-io/terratest v1.0.1
