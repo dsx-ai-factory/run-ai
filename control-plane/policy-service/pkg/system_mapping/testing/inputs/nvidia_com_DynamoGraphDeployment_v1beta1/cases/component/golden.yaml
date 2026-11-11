@@ -17,8 +17,11 @@ spec:
           name: init
         serviceAccountName: custom-sa
     replicas: 3
+    sharedMemorySize: "0"
     type: worker
   - globalDynamoNamespace: true
+    modelRef:
+      name: inference-model
     multinode:
       nodeCount: 2
     name: component-b

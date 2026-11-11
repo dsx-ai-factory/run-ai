@@ -10,6 +10,9 @@ spec:
   backendFramework: vllm
   components:
   - globalDynamoNamespace: false
+    modelRef:
+      name: example-model
+    sharedMemorySize: 8Gi
     multinode:
       nodeCount: 2
     name: test
@@ -363,6 +366,9 @@ spec:
     replicas: 2
     type: worker
   - globalDynamoNamespace: false
+    modelRef:
+      name: example-model
+    sharedMemorySize: 8Gi
     multinode:
       nodeCount: 2
     name: component-b

@@ -26,3 +26,17 @@ effectiveRules:
     enforcements:
       - set:
           value: decode
+  - field: sharedMemorySize
+    specSelector: componentSpec
+    selectorParams:
+      componentName: component-a
+    enforcements:
+      - set:
+          value: "0"
+  - field: modelRef-name
+    specSelector: componentSpec
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - set:
+          value: inference-model

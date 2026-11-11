@@ -16,6 +16,8 @@ const (
 	dynamoComponentTypeField        = "type"
 	dynamoGlobalNamespaceField      = "globalDynamoNamespace"
 	dynamoMultinodeNodeCountField   = "multinode-nodeCount"
+	dynamoSharedMemorySizeField     = "sharedMemorySize"
+	dynamoModelRefNameField         = "modelRef-name"
 )
 
 func BuildSystemDynamoComponentSpecFg() (map[string]api.FieldGroupField, map[string]api.ItemSelector) {
@@ -46,6 +48,17 @@ func dynamoComponentSpecFgFields() []SystemFgField {
 			Formatter: keyValue,
 			SpecRef:   strRef("multinode.nodeCount"),
 			Type:      api.MAPPINGFIELDTYPE_INTEGER,
+		},
+		{
+			Name:      dynamoSharedMemorySizeField,
+			Formatter: keyValue,
+			Type:      api.MAPPINGFIELDTYPE_STRING,
+		},
+		{
+			Name:      dynamoModelRefNameField,
+			Formatter: keyValue,
+			SpecRef:   strRef("modelRef.name"),
+			Type:      api.MAPPINGFIELDTYPE_STRING,
 		},
 	}
 }
