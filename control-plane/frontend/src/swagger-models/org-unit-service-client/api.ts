@@ -2351,7 +2351,7 @@ export interface FailedNodePoolResourcesPatchRequest {
     'message'?: string;
 }
 /**
- * GPU settings that replace the stored ones. Omitted fields keep their stored values.
+ * GPU settings that replace the stored ones. Omitted or null fields keep their stored values.
  * @export
  * @interface FairShareSimulationGpuSettings
  */
@@ -2361,19 +2361,19 @@ export interface FairShareSimulationGpuSettings {
      * @type {number}
      * @memberof FairShareSimulationGpuSettings
      */
-    'deserved'?: number;
+    'deserved'?: number | null;
     /**
      * The maximum GPU allocation; -1 means unlimited.
      * @type {number}
      * @memberof FairShareSimulationGpuSettings
      */
-    'limit'?: number;
+    'limit'?: number | null;
     /**
      * 
      * @type {number}
      * @memberof FairShareSimulationGpuSettings
      */
-    'overQuotaWeight'?: number;
+    'overQuotaWeight'?: number | null;
 }
 /**
  * 
@@ -2398,19 +2398,19 @@ export interface FairShareSimulationOrgUnit {
      * @type {string}
      * @memberof FairShareSimulationOrgUnit
      */
-    'rank'?: string;
+    'rank'?: string | null;
     /**
      * 
-     * @type {FairShareSimulationGpuSettings}
+     * @type {FairShareSimulationOrgUnitGpu}
      * @memberof FairShareSimulationOrgUnit
      */
-    'gpu'?: FairShareSimulationGpuSettings;
+    'gpu'?: FairShareSimulationOrgUnitGpu | null;
     /**
      * 
      * @type {FairShareSimulationOrgUnitDemand}
      * @memberof FairShareSimulationOrgUnit
      */
-    'demand'?: FairShareSimulationOrgUnitDemand;
+    'demand'?: FairShareSimulationOrgUnitDemand | null;
 }
 
 export const FairShareSimulationOrgUnitTypeEnum = {
@@ -2434,6 +2434,31 @@ export interface FairShareSimulationOrgUnitDemand {
     'gpu': number;
 }
 /**
+ * 
+ * @export
+ * @interface FairShareSimulationOrgUnitGpu
+ */
+export interface FairShareSimulationOrgUnitGpu {
+    /**
+     * The GPU quota; -1 means unlimited.
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'deserved'?: number | null;
+    /**
+     * The maximum GPU allocation; -1 means unlimited.
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'limit'?: number | null;
+    /**
+     * 
+     * @type {number}
+     * @memberof FairShareSimulationOrgUnitGpu
+     */
+    'overQuotaWeight'?: number | null;
+}
+/**
  * A scenario of unsaved changes. An empty body simulates the node pool as saved.
  * @export
  * @interface FairShareSimulationRequest
@@ -2444,7 +2469,7 @@ export interface FairShareSimulationRequest {
      * @type {FairShareSimulationRequestNodePool}
      * @memberof FairShareSimulationRequest
      */
-    'nodePool'?: FairShareSimulationRequestNodePool;
+    'nodePool'?: FairShareSimulationRequestNodePool | null;
     /**
      * Org units that differ from their stored values. Every other org unit keeps its stored values and asks for the most it can get.
      * @type {Array<FairShareSimulationOrgUnit>}
@@ -2463,13 +2488,13 @@ export interface FairShareSimulationRequestNodePool {
      * @type {FairShareSimulationRequestNodePoolCapacity}
      * @memberof FairShareSimulationRequestNodePool
      */
-    'capacity'?: FairShareSimulationRequestNodePoolCapacity;
+    'capacity'?: FairShareSimulationRequestNodePoolCapacity | null;
     /**
      * 
-     * @type {FairShareSimulationSchedulingCapabilities}
+     * @type {FairShareSimulationRequestNodePoolSchedulingCapabilities}
      * @memberof FairShareSimulationRequestNodePool
      */
-    'schedulingCapabilities'?: FairShareSimulationSchedulingCapabilities;
+    'schedulingCapabilities'?: FairShareSimulationRequestNodePoolSchedulingCapabilities | null;
 }
 /**
  * Resources to split. Defaults to the node pool\'s capacity.
@@ -2483,6 +2508,37 @@ export interface FairShareSimulationRequestNodePoolCapacity {
      * @memberof FairShareSimulationRequestNodePoolCapacity
      */
     'gpu': number;
+}
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationRequestNodePoolSchedulingCapabilities
+ */
+export interface FairShareSimulationRequestNodePoolSchedulingCapabilities {
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationRequestNodePoolSchedulingCapabilities
+     */
+    'quota': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationRequestNodePoolSchedulingCapabilities
+     */
+    'ranks': boolean;
+    /**
+     * 
+     * @type {boolean}
+     * @memberof FairShareSimulationRequestNodePoolSchedulingCapabilities
+     */
+    'adjustableWeights': boolean;
+    /**
+     * Whether GPU limits apply. Only allowed when quota is true.
+     * @type {boolean}
+     * @memberof FairShareSimulationRequestNodePoolSchedulingCapabilities
+     */
+    'limits': boolean;
 }
 /**
  * 

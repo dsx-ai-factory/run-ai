@@ -10857,11 +10857,6 @@ components:
     FairShareSimulationSchedulingCapabilities:
       description: The node pool's scheduling capabilities to simulate. Defaults to
         the node pool's saved capabilities.
-      example:
-        adjustableWeights: true
-        ranks: true
-        quota: true
-        limits: true
       properties:
         quota:
           type: boolean
@@ -10879,26 +10874,25 @@ components:
       - ranks
       type: object
     FairShareSimulationGpuSettings:
-      description: GPU settings that replace the stored ones. Omitted fields keep
-        their stored values.
-      example:
-        overQuotaWeight: 2
-        limit: -1
-        deserved: 4
+      description: GPU settings that replace the stored ones. Omitted or null fields
+        keep their stored values.
       properties:
         deserved:
           description: The GPU quota; -1 means unlimited.
           example: 4
           format: double
+          nullable: true
           type: number
         limit:
           description: The maximum GPU allocation; -1 means unlimited.
           example: -1
           format: double
+          nullable: true
           type: number
         overQuotaWeight:
           example: 2
           format: double
+          nullable: true
           type: number
       type: object
     FairShareSimulationOrgUnit:
@@ -10906,10 +10900,7 @@ components:
         rank: High
         id: "4500014"
         type: department
-        gpu:
-          overQuotaWeight: 2
-          limit: -1
-          deserved: 4
+        gpu: ""
         demand: ""
       properties:
         id:
@@ -10923,14 +10914,18 @@ components:
         rank:
           description: Replaces the stored rank.
           example: High
+          nullable: true
           type: string
         gpu:
-          $ref: '#/components/schemas/FairShareSimulationGpuSettings'
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
+          nullable: true
         demand:
           allOf:
           - $ref: '#/components/schemas/FairShareSimulationResources'
           description: "GPUs the org unit asks for. Without it, the most it can get;\
             \ for a department, the sum of its projects' demand."
+          nullable: true
       required:
       - id
       - type
@@ -10940,52 +10935,33 @@ components:
         pool as saved.
       example:
         nodePool:
-          schedulingCapabilities:
-            adjustableWeights: true
-            ranks: true
-            quota: true
-            limits: true
+          schedulingCapabilities: ""
           capacity: ""
         orgUnits:
         - rank: High
           id: "4500014"
           type: department
-          gpu:
-            overQuotaWeight: 2
-            limit: -1
-            deserved: 4
+          gpu: ""
           demand: ""
         - rank: High
           id: "4500014"
           type: department
-          gpu:
-            overQuotaWeight: 2
-            limit: -1
-            deserved: 4
+          gpu: ""
           demand: ""
         - rank: High
           id: "4500014"
           type: department
-          gpu:
-            overQuotaWeight: 2
-            limit: -1
-            deserved: 4
+          gpu: ""
           demand: ""
         - rank: High
           id: "4500014"
           type: department
-          gpu:
-            overQuotaWeight: 2
-            limit: -1
-            deserved: 4
+          gpu: ""
           demand: ""
         - rank: High
           id: "4500014"
           type: department
-          gpu:
-            overQuotaWeight: 2
-            limit: -1
-            deserved: 4
+          gpu: ""
           demand: ""
       properties:
         nodePool:
@@ -14362,19 +14338,19 @@ components:
       type: object
     FairShareSimulationRequest_nodePool:
       example:
-        schedulingCapabilities:
-          adjustableWeights: true
-          ranks: true
-          quota: true
-          limits: true
+        schedulingCapabilities: ""
         capacity: ""
+      nullable: true
       properties:
         capacity:
           allOf:
           - $ref: '#/components/schemas/FairShareSimulationResources'
           description: Resources to split. Defaults to the node pool's capacity.
+          nullable: true
         schedulingCapabilities:
-          $ref: '#/components/schemas/FairShareSimulationSchedulingCapabilities'
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationSchedulingCapabilities'
+          nullable: true
       type: object
     NodePoolAssignedResourcesV1Response_nodePool:
       description: The node pool which the assigned resources refer to.

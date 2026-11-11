@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**NodePool** | Pointer to [**FairShareSimulationRequestNodePool**](FairShareSimulationRequestNodePool.md) |  | [optional] 
+**NodePool** | Pointer to [**NullableFairShareSimulationRequestNodePool**](FairShareSimulationRequestNodePool.md) |  | [optional] 
 **OrgUnits** | Pointer to [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | Org units that differ from their stored values. Every other org unit keeps its stored values and asks for the most it can get. | [optional] 
 
 ## Methods
@@ -51,6 +51,16 @@ SetNodePool sets NodePool field to given value.
 
 HasNodePool returns a boolean if a field has been set.
 
+### SetNodePoolNil
+
+`func (o *FairShareSimulationRequest) SetNodePoolNil(b bool)`
+
+ SetNodePoolNil sets the value for NodePool to be an explicit nil
+
+### UnsetNodePool
+`func (o *FairShareSimulationRequest) UnsetNodePool()`
+
+UnsetNodePool ensures that no value is present for NodePool, not even an explicit nil
 ### GetOrgUnits
 
 `func (o *FairShareSimulationRequest) GetOrgUnits() []FairShareSimulationOrgUnit`

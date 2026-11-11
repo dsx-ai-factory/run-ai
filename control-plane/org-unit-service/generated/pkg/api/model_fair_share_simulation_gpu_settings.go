@@ -20,24 +20,24 @@ var dummyFairShareSimulationGpuSettings = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationGpuSettings - GPU settings that replace the stored ones. Omitted fields keep their stored values.
+// FairShareSimulationGpuSettings - GPU settings that replace the stored ones. Omitted or null fields keep their stored values.
 type FairShareSimulationGpuSettings struct {
 
 	// The GPU quota; -1 means unlimited.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Deserved float64 `json:"deserved,omitempty"`
-	Deserved float64 `json:"deserved,omitempty" gorm:"not null;"`
+	//Deserved *float64 `json:"deserved,omitempty"`
+	Deserved *float64 `json:"deserved,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// The maximum GPU allocation; -1 means unlimited.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Limit float64 `json:"limit,omitempty"`
-	Limit float64 `json:"limit,omitempty" gorm:"not null;"`
+	//Limit *float64 `json:"limit,omitempty"`
+	Limit *float64 `json:"limit,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//OverQuotaWeight float64 `json:"overQuotaWeight,omitempty"`
-	OverQuotaWeight float64 `json:"overQuotaWeight,omitempty" gorm:"not null;"`
+	//OverQuotaWeight *float64 `json:"overQuotaWeight,omitempty"`
+	OverQuotaWeight *float64 `json:"overQuotaWeight,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 

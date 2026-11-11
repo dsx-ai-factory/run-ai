@@ -27,10 +27,10 @@ type FairShareSimulationOrgUnit struct {
 	Id   string `json:"id"`
 	Type string `json:"type"`
 	// Replaces the stored rank.
-	Rank *string                         `json:"rank,omitempty"`
-	Gpu  *FairShareSimulationGpuSettings `json:"gpu,omitempty"`
+	Rank NullableString                         `json:"rank,omitempty"`
+	Gpu  NullableFairShareSimulationGpuSettings `json:"gpu,omitempty"`
 	// GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
-	Demand *FairShareSimulationResources `json:"demand,omitempty"`
+	Demand NullableFairShareSimulationResources `json:"demand,omitempty"`
 }
 
 type _FairShareSimulationOrgUnit FairShareSimulationOrgUnit
@@ -102,100 +102,133 @@ func (o *FairShareSimulationOrgUnit) SetType(v string) {
 	o.Type = v
 }
 
-// GetRank returns the Rank field value if set, zero value otherwise.
+// GetRank returns the Rank field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *FairShareSimulationOrgUnit) GetRank() string {
-	if o == nil || IsNil(o.Rank) {
+	if o == nil || IsNil(o.Rank.Get()) {
 		var ret string
 		return ret
 	}
-	return *o.Rank
+	return *o.Rank.Get()
 }
 
 // GetRankOk returns a tuple with the Rank field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationOrgUnit) GetRankOk() (*string, bool) {
-	if o == nil || IsNil(o.Rank) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Rank, true
+	return o.Rank.Get(), o.Rank.IsSet()
 }
 
 // HasRank returns a boolean if a field has been set.
 func (o *FairShareSimulationOrgUnit) HasRank() bool {
-	if o != nil && !IsNil(o.Rank) {
+	if o != nil && o.Rank.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetRank gets a reference to the given string and assigns it to the Rank field.
+// SetRank gets a reference to the given NullableString and assigns it to the Rank field.
 func (o *FairShareSimulationOrgUnit) SetRank(v string) {
-	o.Rank = &v
+	o.Rank.Set(&v)
 }
 
-// GetGpu returns the Gpu field value if set, zero value otherwise.
+// SetRankNil sets the value for Rank to be an explicit nil
+func (o *FairShareSimulationOrgUnit) SetRankNil() {
+	o.Rank.Set(nil)
+}
+
+// UnsetRank ensures that no value is present for Rank, not even an explicit nil
+func (o *FairShareSimulationOrgUnit) UnsetRank() {
+	o.Rank.Unset()
+}
+
+// GetGpu returns the Gpu field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *FairShareSimulationOrgUnit) GetGpu() FairShareSimulationGpuSettings {
-	if o == nil || IsNil(o.Gpu) {
+	if o == nil || IsNil(o.Gpu.Get()) {
 		var ret FairShareSimulationGpuSettings
 		return ret
 	}
-	return *o.Gpu
+	return *o.Gpu.Get()
 }
 
 // GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationOrgUnit) GetGpuOk() (*FairShareSimulationGpuSettings, bool) {
-	if o == nil || IsNil(o.Gpu) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Gpu, true
+	return o.Gpu.Get(), o.Gpu.IsSet()
 }
 
 // HasGpu returns a boolean if a field has been set.
 func (o *FairShareSimulationOrgUnit) HasGpu() bool {
-	if o != nil && !IsNil(o.Gpu) {
+	if o != nil && o.Gpu.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetGpu gets a reference to the given FairShareSimulationGpuSettings and assigns it to the Gpu field.
+// SetGpu gets a reference to the given NullableFairShareSimulationGpuSettings and assigns it to the Gpu field.
 func (o *FairShareSimulationOrgUnit) SetGpu(v FairShareSimulationGpuSettings) {
-	o.Gpu = &v
+	o.Gpu.Set(&v)
 }
 
-// GetDemand returns the Demand field value if set, zero value otherwise.
+// SetGpuNil sets the value for Gpu to be an explicit nil
+func (o *FairShareSimulationOrgUnit) SetGpuNil() {
+	o.Gpu.Set(nil)
+}
+
+// UnsetGpu ensures that no value is present for Gpu, not even an explicit nil
+func (o *FairShareSimulationOrgUnit) UnsetGpu() {
+	o.Gpu.Unset()
+}
+
+// GetDemand returns the Demand field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *FairShareSimulationOrgUnit) GetDemand() FairShareSimulationResources {
-	if o == nil || IsNil(o.Demand) {
+	if o == nil || IsNil(o.Demand.Get()) {
 		var ret FairShareSimulationResources
 		return ret
 	}
-	return *o.Demand
+	return *o.Demand.Get()
 }
 
 // GetDemandOk returns a tuple with the Demand field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationOrgUnit) GetDemandOk() (*FairShareSimulationResources, bool) {
-	if o == nil || IsNil(o.Demand) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Demand, true
+	return o.Demand.Get(), o.Demand.IsSet()
 }
 
 // HasDemand returns a boolean if a field has been set.
 func (o *FairShareSimulationOrgUnit) HasDemand() bool {
-	if o != nil && !IsNil(o.Demand) {
+	if o != nil && o.Demand.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetDemand gets a reference to the given FairShareSimulationResources and assigns it to the Demand field.
+// SetDemand gets a reference to the given NullableFairShareSimulationResources and assigns it to the Demand field.
 func (o *FairShareSimulationOrgUnit) SetDemand(v FairShareSimulationResources) {
-	o.Demand = &v
+	o.Demand.Set(&v)
+}
+
+// SetDemandNil sets the value for Demand to be an explicit nil
+func (o *FairShareSimulationOrgUnit) SetDemandNil() {
+	o.Demand.Set(nil)
+}
+
+// UnsetDemand ensures that no value is present for Demand, not even an explicit nil
+func (o *FairShareSimulationOrgUnit) UnsetDemand() {
+	o.Demand.Unset()
 }
 
 func (o FairShareSimulationOrgUnit) MarshalJSON() ([]byte, error) {
@@ -210,14 +243,14 @@ func (o FairShareSimulationOrgUnit) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
 	toSerialize["type"] = o.Type
-	if !IsNil(o.Rank) {
-		toSerialize["rank"] = o.Rank
+	if o.Rank.IsSet() {
+		toSerialize["rank"] = o.Rank.Get()
 	}
-	if !IsNil(o.Gpu) {
-		toSerialize["gpu"] = o.Gpu
+	if o.Gpu.IsSet() {
+		toSerialize["gpu"] = o.Gpu.Get()
 	}
-	if !IsNil(o.Demand) {
-		toSerialize["demand"] = o.Demand
+	if o.Demand.IsSet() {
+		toSerialize["demand"] = o.Demand.Get()
 	}
 	return toSerialize, nil
 }

@@ -14,10 +14,14 @@ properties:
   rank:
     type: string
     description: Replaces the stored rank.
+    nullable: true
     example: High
   gpu:
-    $ref: "./FairShareSimulationGpuSettings.yaml"
+    nullable: true
+    allOf:
+      - $ref: "./FairShareSimulationGpuSettings.yaml"
   demand:
     description: GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
+    nullable: true
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"

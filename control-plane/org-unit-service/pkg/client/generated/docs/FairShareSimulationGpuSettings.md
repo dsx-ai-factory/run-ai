@@ -4,9 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Deserved** | Pointer to **float64** | The GPU quota; -1 means unlimited. | [optional] 
-**Limit** | Pointer to **float64** | The maximum GPU allocation; -1 means unlimited. | [optional] 
-**OverQuotaWeight** | Pointer to **float64** |  | [optional] 
+**Deserved** | Pointer to **NullableFloat64** | The GPU quota; -1 means unlimited. | [optional] 
+**Limit** | Pointer to **NullableFloat64** | The maximum GPU allocation; -1 means unlimited. | [optional] 
+**OverQuotaWeight** | Pointer to **NullableFloat64** |  | [optional] 
 
 ## Methods
 
@@ -52,6 +52,16 @@ SetDeserved sets Deserved field to given value.
 
 HasDeserved returns a boolean if a field has been set.
 
+### SetDeservedNil
+
+`func (o *FairShareSimulationGpuSettings) SetDeservedNil(b bool)`
+
+ SetDeservedNil sets the value for Deserved to be an explicit nil
+
+### UnsetDeserved
+`func (o *FairShareSimulationGpuSettings) UnsetDeserved()`
+
+UnsetDeserved ensures that no value is present for Deserved, not even an explicit nil
 ### GetLimit
 
 `func (o *FairShareSimulationGpuSettings) GetLimit() float64`
@@ -77,6 +87,16 @@ SetLimit sets Limit field to given value.
 
 HasLimit returns a boolean if a field has been set.
 
+### SetLimitNil
+
+`func (o *FairShareSimulationGpuSettings) SetLimitNil(b bool)`
+
+ SetLimitNil sets the value for Limit to be an explicit nil
+
+### UnsetLimit
+`func (o *FairShareSimulationGpuSettings) UnsetLimit()`
+
+UnsetLimit ensures that no value is present for Limit, not even an explicit nil
 ### GetOverQuotaWeight
 
 `func (o *FairShareSimulationGpuSettings) GetOverQuotaWeight() float64`
@@ -102,6 +122,16 @@ SetOverQuotaWeight sets OverQuotaWeight field to given value.
 
 HasOverQuotaWeight returns a boolean if a field has been set.
 
+### SetOverQuotaWeightNil
+
+`func (o *FairShareSimulationGpuSettings) SetOverQuotaWeightNil(b bool)`
+
+ SetOverQuotaWeightNil sets the value for OverQuotaWeight to be an explicit nil
+
+### UnsetOverQuotaWeight
+`func (o *FairShareSimulationGpuSettings) UnsetOverQuotaWeight()`
+
+UnsetOverQuotaWeight ensures that no value is present for OverQuotaWeight, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

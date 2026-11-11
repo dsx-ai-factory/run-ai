@@ -8216,22 +8216,25 @@
       },
       "FairShareSimulationGpuSettings": {
         "type": "object",
-        "description": "GPU settings that replace the stored ones. Omitted fields keep their stored values.",
+        "description": "GPU settings that replace the stored ones. Omitted or null fields keep their stored values.",
         "properties": {
           "deserved": {
             "type": "number",
             "format": "double",
             "description": "The GPU quota; -1 means unlimited.",
+            "nullable": true,
             "example": 4
           },
           "limit": {
             "type": "number",
             "format": "double",
             "description": "The maximum GPU allocation; -1 means unlimited.",
+            "nullable": true,
             "example": -1
           },
           "overQuotaWeight": {
             "type": "number",
+            "nullable": true,
             "format": "double",
             "example": 2
           }
@@ -8258,13 +8261,20 @@
           "rank": {
             "type": "string",
             "description": "Replaces the stored rank.",
+            "nullable": true,
             "example": "High"
           },
           "gpu": {
-            "$ref": "#/components/schemas/FairShareSimulationGpuSettings"
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FairShareSimulationGpuSettings"
+              }
+            ]
           },
           "demand": {
             "description": "GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.",
+            "nullable": true,
             "allOf": [
               {
                 "$ref": "#/components/schemas/FairShareSimulationResources"
@@ -8279,9 +8289,11 @@
         "properties": {
           "nodePool": {
             "type": "object",
+            "nullable": true,
             "properties": {
               "capacity": {
                 "description": "Resources to split. Defaults to the node pool's capacity.",
+                "nullable": true,
                 "allOf": [
                   {
                     "$ref": "#/components/schemas/FairShareSimulationResources"
@@ -8289,7 +8301,12 @@
                 ]
               },
               "schedulingCapabilities": {
-                "$ref": "#/components/schemas/FairShareSimulationSchedulingCapabilities"
+                "nullable": true,
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/FairShareSimulationSchedulingCapabilities"
+                  }
+                ]
               }
             }
           },

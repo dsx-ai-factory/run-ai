@@ -6,9 +6,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
 **Type** | **string** |  | 
-**Rank** | Pointer to **string** | Replaces the stored rank. | [optional] 
-**Gpu** | Pointer to [**FairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
-**Demand** | Pointer to [**FairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects&#39; demand. | [optional] 
+**Rank** | Pointer to **NullableString** | Replaces the stored rank. | [optional] 
+**Gpu** | Pointer to [**NullableFairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
+**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects&#39; demand. | [optional] 
 
 ## Methods
 
@@ -94,6 +94,16 @@ SetRank sets Rank field to given value.
 
 HasRank returns a boolean if a field has been set.
 
+### SetRankNil
+
+`func (o *FairShareSimulationOrgUnit) SetRankNil(b bool)`
+
+ SetRankNil sets the value for Rank to be an explicit nil
+
+### UnsetRank
+`func (o *FairShareSimulationOrgUnit) UnsetRank()`
+
+UnsetRank ensures that no value is present for Rank, not even an explicit nil
 ### GetGpu
 
 `func (o *FairShareSimulationOrgUnit) GetGpu() FairShareSimulationGpuSettings`
@@ -119,6 +129,16 @@ SetGpu sets Gpu field to given value.
 
 HasGpu returns a boolean if a field has been set.
 
+### SetGpuNil
+
+`func (o *FairShareSimulationOrgUnit) SetGpuNil(b bool)`
+
+ SetGpuNil sets the value for Gpu to be an explicit nil
+
+### UnsetGpu
+`func (o *FairShareSimulationOrgUnit) UnsetGpu()`
+
+UnsetGpu ensures that no value is present for Gpu, not even an explicit nil
 ### GetDemand
 
 `func (o *FairShareSimulationOrgUnit) GetDemand() FairShareSimulationResources`
@@ -144,6 +164,16 @@ SetDemand sets Demand field to given value.
 
 HasDemand returns a boolean if a field has been set.
 
+### SetDemandNil
+
+`func (o *FairShareSimulationOrgUnit) SetDemandNil(b bool)`
+
+ SetDemandNil sets the value for Demand to be an explicit nil
+
+### UnsetDemand
+`func (o *FairShareSimulationOrgUnit) UnsetDemand()`
+
+UnsetDemand ensures that no value is present for Demand, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

@@ -20,13 +20,13 @@ import (
 // checks if the FairShareSimulationGpuSettings type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationGpuSettings{}
 
-// FairShareSimulationGpuSettings GPU settings that replace the stored ones. Omitted fields keep their stored values.
+// FairShareSimulationGpuSettings GPU settings that replace the stored ones. Omitted or null fields keep their stored values.
 type FairShareSimulationGpuSettings struct {
 	// The GPU quota; -1 means unlimited.
-	Deserved *float64 `json:"deserved,omitempty"`
+	Deserved NullableFloat64 `json:"deserved,omitempty"`
 	// The maximum GPU allocation; -1 means unlimited.
-	Limit           *float64 `json:"limit,omitempty"`
-	OverQuotaWeight *float64 `json:"overQuotaWeight,omitempty"`
+	Limit           NullableFloat64 `json:"limit,omitempty"`
+	OverQuotaWeight NullableFloat64 `json:"overQuotaWeight,omitempty"`
 }
 
 // NewFairShareSimulationGpuSettings instantiates a new FairShareSimulationGpuSettings object
@@ -46,100 +46,133 @@ func NewFairShareSimulationGpuSettingsWithDefaults() *FairShareSimulationGpuSett
 	return &this
 }
 
-// GetDeserved returns the Deserved field value if set, zero value otherwise.
+// GetDeserved returns the Deserved field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *FairShareSimulationGpuSettings) GetDeserved() float64 {
-	if o == nil || IsNil(o.Deserved) {
+	if o == nil || IsNil(o.Deserved.Get()) {
 		var ret float64
 		return ret
 	}
-	return *o.Deserved
+	return *o.Deserved.Get()
 }
 
 // GetDeservedOk returns a tuple with the Deserved field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationGpuSettings) GetDeservedOk() (*float64, bool) {
-	if o == nil || IsNil(o.Deserved) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Deserved, true
+	return o.Deserved.Get(), o.Deserved.IsSet()
 }
 
 // HasDeserved returns a boolean if a field has been set.
 func (o *FairShareSimulationGpuSettings) HasDeserved() bool {
-	if o != nil && !IsNil(o.Deserved) {
+	if o != nil && o.Deserved.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetDeserved gets a reference to the given float64 and assigns it to the Deserved field.
+// SetDeserved gets a reference to the given NullableFloat64 and assigns it to the Deserved field.
 func (o *FairShareSimulationGpuSettings) SetDeserved(v float64) {
-	o.Deserved = &v
+	o.Deserved.Set(&v)
 }
 
-// GetLimit returns the Limit field value if set, zero value otherwise.
+// SetDeservedNil sets the value for Deserved to be an explicit nil
+func (o *FairShareSimulationGpuSettings) SetDeservedNil() {
+	o.Deserved.Set(nil)
+}
+
+// UnsetDeserved ensures that no value is present for Deserved, not even an explicit nil
+func (o *FairShareSimulationGpuSettings) UnsetDeserved() {
+	o.Deserved.Unset()
+}
+
+// GetLimit returns the Limit field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *FairShareSimulationGpuSettings) GetLimit() float64 {
-	if o == nil || IsNil(o.Limit) {
+	if o == nil || IsNil(o.Limit.Get()) {
 		var ret float64
 		return ret
 	}
-	return *o.Limit
+	return *o.Limit.Get()
 }
 
 // GetLimitOk returns a tuple with the Limit field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationGpuSettings) GetLimitOk() (*float64, bool) {
-	if o == nil || IsNil(o.Limit) {
+	if o == nil {
 		return nil, false
 	}
-	return o.Limit, true
+	return o.Limit.Get(), o.Limit.IsSet()
 }
 
 // HasLimit returns a boolean if a field has been set.
 func (o *FairShareSimulationGpuSettings) HasLimit() bool {
-	if o != nil && !IsNil(o.Limit) {
+	if o != nil && o.Limit.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetLimit gets a reference to the given float64 and assigns it to the Limit field.
+// SetLimit gets a reference to the given NullableFloat64 and assigns it to the Limit field.
 func (o *FairShareSimulationGpuSettings) SetLimit(v float64) {
-	o.Limit = &v
+	o.Limit.Set(&v)
 }
 
-// GetOverQuotaWeight returns the OverQuotaWeight field value if set, zero value otherwise.
+// SetLimitNil sets the value for Limit to be an explicit nil
+func (o *FairShareSimulationGpuSettings) SetLimitNil() {
+	o.Limit.Set(nil)
+}
+
+// UnsetLimit ensures that no value is present for Limit, not even an explicit nil
+func (o *FairShareSimulationGpuSettings) UnsetLimit() {
+	o.Limit.Unset()
+}
+
+// GetOverQuotaWeight returns the OverQuotaWeight field value if set, zero value otherwise (both if not set or set to explicit null).
 func (o *FairShareSimulationGpuSettings) GetOverQuotaWeight() float64 {
-	if o == nil || IsNil(o.OverQuotaWeight) {
+	if o == nil || IsNil(o.OverQuotaWeight.Get()) {
 		var ret float64
 		return ret
 	}
-	return *o.OverQuotaWeight
+	return *o.OverQuotaWeight.Get()
 }
 
 // GetOverQuotaWeightOk returns a tuple with the OverQuotaWeight field value if set, nil otherwise
 // and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationGpuSettings) GetOverQuotaWeightOk() (*float64, bool) {
-	if o == nil || IsNil(o.OverQuotaWeight) {
+	if o == nil {
 		return nil, false
 	}
-	return o.OverQuotaWeight, true
+	return o.OverQuotaWeight.Get(), o.OverQuotaWeight.IsSet()
 }
 
 // HasOverQuotaWeight returns a boolean if a field has been set.
 func (o *FairShareSimulationGpuSettings) HasOverQuotaWeight() bool {
-	if o != nil && !IsNil(o.OverQuotaWeight) {
+	if o != nil && o.OverQuotaWeight.IsSet() {
 		return true
 	}
 
 	return false
 }
 
-// SetOverQuotaWeight gets a reference to the given float64 and assigns it to the OverQuotaWeight field.
+// SetOverQuotaWeight gets a reference to the given NullableFloat64 and assigns it to the OverQuotaWeight field.
 func (o *FairShareSimulationGpuSettings) SetOverQuotaWeight(v float64) {
-	o.OverQuotaWeight = &v
+	o.OverQuotaWeight.Set(&v)
+}
+
+// SetOverQuotaWeightNil sets the value for OverQuotaWeight to be an explicit nil
+func (o *FairShareSimulationGpuSettings) SetOverQuotaWeightNil() {
+	o.OverQuotaWeight.Set(nil)
+}
+
+// UnsetOverQuotaWeight ensures that no value is present for OverQuotaWeight, not even an explicit nil
+func (o *FairShareSimulationGpuSettings) UnsetOverQuotaWeight() {
+	o.OverQuotaWeight.Unset()
 }
 
 func (o FairShareSimulationGpuSettings) MarshalJSON() ([]byte, error) {
@@ -152,14 +185,14 @@ func (o FairShareSimulationGpuSettings) MarshalJSON() ([]byte, error) {
 
 func (o FairShareSimulationGpuSettings) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if !IsNil(o.Deserved) {
-		toSerialize["deserved"] = o.Deserved
+	if o.Deserved.IsSet() {
+		toSerialize["deserved"] = o.Deserved.Get()
 	}
-	if !IsNil(o.Limit) {
-		toSerialize["limit"] = o.Limit
+	if o.Limit.IsSet() {
+		toSerialize["limit"] = o.Limit.Get()
 	}
-	if !IsNil(o.OverQuotaWeight) {
-		toSerialize["overQuotaWeight"] = o.OverQuotaWeight
+	if o.OverQuotaWeight.IsSet() {
+		toSerialize["overQuotaWeight"] = o.OverQuotaWeight.Get()
 	}
 	return toSerialize, nil
 }

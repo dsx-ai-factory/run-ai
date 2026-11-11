@@ -34,19 +34,19 @@ type FairShareSimulationOrgUnit struct {
 
 	// Replaces the stored rank.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Rank string `json:"rank,omitempty"`
-	Rank string `json:"rank,omitempty" gorm:"not null;"`
+	//Rank *string `json:"rank,omitempty"`
+	Rank *string `json:"rank,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Gpu FairShareSimulationGpuSettings `json:"gpu,omitempty"`
-	Gpu FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty"`
+	Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Demand FairShareSimulationResources `json:"demand,omitempty"`
-	Demand FairShareSimulationResources `json:"demand,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
+	//Demand *FairShareSimulationResources `json:"demand,omitempty"`
+	Demand *FairShareSimulationResources `json:"demand,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
@@ -62,11 +62,15 @@ func AssertFairShareSimulationOrgUnitRequired(obj FairShareSimulationOrgUnit) er
 		}
 	}
 
-	if err := AssertFairShareSimulationGpuSettingsRequired(obj.Gpu); err != nil {
-		return err
+	if obj.Gpu != nil {
+		if err := AssertFairShareSimulationGpuSettingsRequired(*obj.Gpu); err != nil {
+			return err
+		}
 	}
-	if err := AssertFairShareSimulationResourcesRequired(obj.Demand); err != nil {
-		return err
+	if obj.Demand != nil {
+		if err := AssertFairShareSimulationResourcesRequired(*obj.Demand); err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -93,16 +97,20 @@ func AssertFairShareSimulationOrgUnitConstraints(obj FairShareSimulationOrgUnit)
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertFairShareSimulationGpuSettingsConstraints(obj.Gpu); err != nil {
-		return err
+	if obj.Gpu != nil {
+		if err := AssertFairShareSimulationGpuSettingsConstraints(*obj.Gpu); err != nil {
+			return err
+		}
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertFairShareSimulationResourcesConstraints(obj.Demand); err != nil {
-		return err
+	if obj.Demand != nil {
+		if err := AssertFairShareSimulationResourcesConstraints(*obj.Demand); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Capacity** | Pointer to [**FairShareSimulationResources**](FairShareSimulationResources.md) | Resources to split. Defaults to the node pool&#39;s capacity. | [optional] 
-**SchedulingCapabilities** | Pointer to [**FairShareSimulationSchedulingCapabilities**](FairShareSimulationSchedulingCapabilities.md) |  | [optional] 
+**Capacity** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | Resources to split. Defaults to the node pool&#39;s capacity. | [optional] 
+**SchedulingCapabilities** | Pointer to [**NullableFairShareSimulationSchedulingCapabilities**](FairShareSimulationSchedulingCapabilities.md) |  | [optional] 
 
 ## Methods
 
@@ -51,6 +51,16 @@ SetCapacity sets Capacity field to given value.
 
 HasCapacity returns a boolean if a field has been set.
 
+### SetCapacityNil
+
+`func (o *FairShareSimulationRequestNodePool) SetCapacityNil(b bool)`
+
+ SetCapacityNil sets the value for Capacity to be an explicit nil
+
+### UnsetCapacity
+`func (o *FairShareSimulationRequestNodePool) UnsetCapacity()`
+
+UnsetCapacity ensures that no value is present for Capacity, not even an explicit nil
 ### GetSchedulingCapabilities
 
 `func (o *FairShareSimulationRequestNodePool) GetSchedulingCapabilities() FairShareSimulationSchedulingCapabilities`
@@ -76,6 +86,16 @@ SetSchedulingCapabilities sets SchedulingCapabilities field to given value.
 
 HasSchedulingCapabilities returns a boolean if a field has been set.
 
+### SetSchedulingCapabilitiesNil
+
+`func (o *FairShareSimulationRequestNodePool) SetSchedulingCapabilitiesNil(b bool)`
+
+ SetSchedulingCapabilitiesNil sets the value for SchedulingCapabilities to be an explicit nil
+
+### UnsetSchedulingCapabilities
+`func (o *FairShareSimulationRequestNodePool) UnsetSchedulingCapabilities()`
+
+UnsetSchedulingCapabilities ensures that no value is present for SchedulingCapabilities, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

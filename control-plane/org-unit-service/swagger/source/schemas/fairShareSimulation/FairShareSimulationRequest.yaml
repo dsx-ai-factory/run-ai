@@ -3,13 +3,17 @@ description: A scenario of unsaved changes. An empty body simulates the node poo
 properties:
   nodePool:
     type: object
+    nullable: true
     properties:
       capacity:
         description: Resources to split. Defaults to the node pool's capacity.
+        nullable: true
         allOf:
           - $ref: "./FairShareSimulationResources.yaml"
       schedulingCapabilities:
-        $ref: "./FairShareSimulationSchedulingCapabilities.yaml"
+        nullable: true
+        allOf:
+          - $ref: "./FairShareSimulationSchedulingCapabilities.yaml"
   orgUnits:
     type: array
     maxItems: 100
