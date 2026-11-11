@@ -80,6 +80,9 @@ func (pe *PodExporter) GetGpuIndex() (string, error) {
 	}
 
 	if pe.isMIG() {
+		if pe.isMIGDeviceUnknown() {
+			return unknownDevice, nil
+		}
 		device, err := pe.getMIGDeviceInfo()
 		if err != nil {
 			return "", err
@@ -122,6 +125,9 @@ func stripCDIDevicePrefix(gpuIndex string) string {
 func (pe *PodExporter) GetGpuInstanceId() (string, error) {
 	if !pe.isMIG() {
 		return "", nil
+	}
+	if pe.isMIGDeviceUnknown() {
+		return unknownDevice, nil
 	}
 	device, err := pe.getMIGDeviceInfo()
 	if err != nil {
@@ -262,6 +268,13 @@ func (pe *PodExporter) getMIGDeviceInfo() (*utils.MigDeviceInfo, error) {
 			allocatedMigDeviceAnnotationName, err)
 	}
 	return &migDeviceInfo, nil
+}
+
+// isMIGDeviceUnknown reports whether the MIG device annotation is present but empty, which is what the scheduler
+// writes for pods on mig.strategy=mixed nodes: the GPU index and GPU instance id are not known.
+func (pe *PodExporter) isMIGDeviceUnknown() bool {
+	migData, found := pe.pod.Annotations[allocatedMigDeviceAnnotationName]
+	return found && migData == ""
 }
 
 func (pe *PodExporter) getGpuGroup() string {
