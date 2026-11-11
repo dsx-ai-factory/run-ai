@@ -108,6 +108,7 @@ func TestAllowGPT2Model_TransformToResponse(t *testing.T) {
 				},
 				DisplayName: "Allow GPT-2 model",
 				Description: "GPT2 model - present OpenAI's GPT2 model in the catalog in favor of demos. This model's compute requirements are relatively low (CPU resources are sufficient for it). The underlying image of this model also consists of a Chatbot UI",
+				Stage:       "Alpha",
 			},
 		},
 		{
@@ -121,6 +122,7 @@ func TestAllowGPT2Model_TransformToResponse(t *testing.T) {
 				},
 				DisplayName: "Allow GPT-2 model",
 				Description: "GPT2 model - present OpenAI's GPT2 model in the catalog in favor of demos. This model's compute requirements are relatively low (CPU resources are sufficient for it). The underlying image of this model also consists of a Chatbot UI",
+				Stage:       "Alpha",
 			},
 		},
 	}
