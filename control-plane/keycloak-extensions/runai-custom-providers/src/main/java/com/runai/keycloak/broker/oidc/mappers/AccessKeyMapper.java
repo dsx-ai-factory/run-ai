@@ -22,7 +22,7 @@ public class AccessKeyMapper extends AbstractOIDCProtocolMapper
     implements OIDCAccessTokenMapper, OIDCIDTokenMapper, UserInfoTokenMapper {
 
     public static final String PROVIDER_ID = "runai-access-key-attribute-mapper";
-    private static final String DEFAULT_CLAIM_NAME = "user_app_groups";
+    private static final String DEFAULT_CLAIM_NAME = "access_key_groups";
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(AccessKeyMapper.class);
     private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
 

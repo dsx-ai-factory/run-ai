@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package app_reconciler
+package service_account_reconciler
 
 import (
 	"context"
@@ -25,14 +25,14 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-func initInternalAppReconcilerTest(t *testing.T) (iamServicesContainerMock *iamMock.MockServicesContainer, tenantResolverMock *reconciler_mocks.TenantResolver, reconcilerVersionsDalMock *dal_mocks.ReconcilerVersionsDal, testSubject *AppsReconciler) {
+func initInternalAppReconcilerTest(t *testing.T) (iamServicesContainerMock *iamMock.MockServicesContainer, tenantResolverMock *reconciler_mocks.TenantResolver, reconcilerVersionsDalMock *dal_mocks.ReconcilerVersionsDal, testSubject *ServiceAccountsReconciler) {
 	mockIamServicesContainer := iamMock.NewMockServicesContainer()
 	tenantResolverMock = reconciler_mocks.NewTenantResolver(t)
 	reconcilerVersionsDalMock = dal_mocks.NewReconcilerVersionsDal(t)
-	testSubject = &AppsReconciler{
+	testSubject = &ServiceAccountsReconciler{
 		iamServices:           *mockIamServicesContainer.ToServicesContainer(),
 		reconcilerVersionsDal: reconcilerVersionsDalMock,
-		config: AppsReconcilerConfig{
+		config: ServiceAccountsReconcilerConfig{
 			hostTemplate: "example-host.com",
 			appHost:      "example-app-host.com",
 		},

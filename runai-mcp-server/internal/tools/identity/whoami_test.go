@@ -54,14 +54,14 @@ func TestWhoamiRun(t *testing.T) {
 				"given_name":  "Bob",
 				"family_name": "Builder",
 				"tenant_id":   "tenant-2",
-				"token_type":  "Application",
+				"token_type":  "AccessKey",
 			}),
 			want: whoamiOutput{
 				Subject:   "user-456",
 				Username:  "bob",
 				Name:      "Bob Builder",
 				TenantID:  "tenant-2",
-				TokenType: "Application",
+				TokenType: "AccessKey",
 			},
 		},
 		{

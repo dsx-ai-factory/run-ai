@@ -131,7 +131,7 @@ func (k *KeycloakAuthenticator) setAppLogin(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	err = k.setAppAdminSecret(ctx, *idOfClient)
+	err = k.setAdminClientSecret(ctx, *idOfClient)
 	if err != nil {
 		return err
 	}
@@ -147,7 +147,7 @@ func (k *KeycloakAuthenticator) getAppAdminClientID(ctx context.Context) (*strin
 	if client != nil {
 		return client.ID, nil
 	}
-	clientID, err := k.createNewAppAdminClient(ctx)
+	clientID, err := k.createAdminClient(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("%s. error: %w", "failed to create admin client", err)
 	}
@@ -201,14 +201,14 @@ func (k *KeycloakAuthenticator) setNewAppSecret(ctx context.Context) error {
 	if client == nil {
 		return fmt.Errorf("error: %s", "admin client not found")
 	}
-	err = k.setAppAdminSecret(ctx, *client.ID)
+	err = k.setAdminClientSecret(ctx, *client.ID)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (k *KeycloakAuthenticator) setAppAdminSecret(ctx context.Context, IdOfClient string) error {
+func (k *KeycloakAuthenticator) setAdminClientSecret(ctx context.Context, IdOfClient string) error {
 	secret, err := k.KcClient.GetClientSecret(ctx, k.userAuth.userToken.AccessToken, MasterRealmName, IdOfClient)
 	if err != nil || secret.Value == nil {
 		return fmt.Errorf("%s. error: %w", "failed to get admin client secret", err)
@@ -235,7 +235,7 @@ func (k *KeycloakAuthenticator) appAdminLogin(ctx context.Context) error {
 	return nil
 }
 
-func (k *KeycloakAuthenticator) createNewAppAdminClient(ctx context.Context) (string, error) {
+func (k *KeycloakAuthenticator) createAdminClient(ctx context.Context) (string, error) {
 	client := gocloak.Client{
 		ClientID:                  gocloak.StringP(ServiceClientID),
 		Name:                      gocloak.StringP(ServiceClientID),

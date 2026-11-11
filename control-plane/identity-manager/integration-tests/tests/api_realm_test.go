@@ -229,7 +229,7 @@ func TestReconcile_ServiceAccount_HappyFlow_ValidateFields(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, serviceAccountId)
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("apps")
+	reconcilerType, err := openapi.NewReconcilerTypeFromValue("serviceAccounts")
 	require.NoError(t, err)
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)
@@ -254,7 +254,7 @@ func TestReconcile_ServiceAccount_NoServiceAccounts(t *testing.T) {
 	defer realmCleanup(t, ctx, realmName, true)
 	require.NoError(t, err)
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("apps")
+	reconcilerType, err := openapi.NewReconcilerTypeFromValue("serviceAccounts")
 	require.NoError(t, err)
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)
@@ -293,7 +293,7 @@ func TestReconcile_ServiceAccount_RunReconcileAfterUpdate(t *testing.T) {
 	err = IamServices.ClientService.UpdateClient(ctx, realmName, updatedServiceAccountClient)
 	require.NoError(t, err)
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("apps")
+	reconcilerType, err := openapi.NewReconcilerTypeFromValue("serviceAccounts")
 	require.NoError(t, err)
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)
@@ -321,7 +321,7 @@ func TestReconcile_InternalClients_HappyFlow_ValidateFields(t *testing.T) {
 	require.NotNil(t, internalClients)
 	require.Len(t, internalClients, 1)
 
-	reconcilerType, err := openapi.NewReconcilerTypeFromValue("internalApps")
+	reconcilerType, err := openapi.NewReconcilerTypeFromValue("internalServiceAccounts")
 	require.NoError(t, err)
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)

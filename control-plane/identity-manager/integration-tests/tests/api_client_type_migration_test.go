@@ -71,7 +71,7 @@ func TestReconcile_LegacyServiceAccount_RewrittenToCurrentType(t *testing.T) {
 	require.Contains(t, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeServiceAccount), id)
 	require.Equal(t, "tenant-application", grantClientCredentialsClaims(t, ctx, realmName, id)["client_type"])
 
-	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, ptr.To(openapi.RECONCILERTYPE_APPS)))
+	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, ptr.To(openapi.RECONCILERTYPE_SERVICE_ACCOUNTS)))
 
 	require.Equal(t, "service-account", clientTypeOf(t, ctx, realmName, id))
 	require.Equal(t, "service-account", grantClientCredentialsClaims(t, ctx, realmName, id)["client_type"])
@@ -97,7 +97,7 @@ func TestReconcile_LegacyAccessKey_RewrittenToCurrentType(t *testing.T) {
 	require.Equal(t, "user-application", legacyClaims["client_type"])
 	require.Equal(t, createdByUser, legacyClaims["sub"])
 
-	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, ptr.To(openapi.RECONCILERTYPE_USER_APPS)))
+	require.NoError(t, TestStepsClient.ReconcileRealmForced(ctx, realmName, ptr.To(openapi.RECONCILERTYPE_ACCESS_KEYS)))
 
 	require.Equal(t, "access-key", clientTypeOf(t, ctx, realmName, id))
 	claims := grantClientCredentialsClaims(t, ctx, realmName, id)
@@ -127,8 +127,8 @@ func TestReconcile_MixedLegacyAndMigratedClients_AllEndOnCurrentTypeAndRerunIsSt
 	require.ElementsMatch(t, []string{legacyKeyId, migratedKeyId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeAccessKey))
 	require.ElementsMatch(t, []string{legacyAccountId, migratedAccountId}, clientIdsOfType(t, ctx, realmName, realm_client.ClientTypeServiceAccount))
 
-	serviceAccountsReconciler := ptr.To(openapi.RECONCILERTYPE_APPS)
-	accessKeysReconciler := ptr.To(openapi.RECONCILERTYPE_USER_APPS)
+	serviceAccountsReconciler := ptr.To(openapi.RECONCILERTYPE_SERVICE_ACCOUNTS)
+	accessKeysReconciler := ptr.To(openapi.RECONCILERTYPE_ACCESS_KEYS)
 
 	// the reconcile can run more than once: the second pass must neither fail nor drop clients
 	for run := 1; run <= 2; run++ {
