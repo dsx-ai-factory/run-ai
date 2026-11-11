@@ -18,18 +18,16 @@ func addResourceClaimTemplateToPod(workloadInitials, workloadName string, resour
 	addResourceClaimTemplateToPodClaims(resourceClaims, claimName, templateName)
 
 	if container != nil {
-		addResourceClaimToContainer(container, claimName)
+		addResourceClaimToResources(&container.Resources, claimName)
 	}
 }
 
-// addResourceClaimToContainer ensures the container has the required DRA
-// resource claim reference.
-func addResourceClaimToContainer(container *corev1.Container, claimName string) {
-	if containerResourceClaimExists(container.Resources.Claims, claimName) {
+func addResourceClaimToResources(resources *corev1.ResourceRequirements, claimName string) {
+	if containerResourceClaimExists(resources.Claims, claimName) {
 		return
 	}
-	container.Resources.Claims = append(
-		container.Resources.Claims,
+	resources.Claims = append(
+		resources.Claims,
 		corev1.ResourceClaim{Name: claimName},
 	)
 }
