@@ -801,12 +801,6 @@ func workloadRunnerOwnerRef(object client.Object) *metav1.OwnerReference {
 	return nil
 }
 
-// Stamped on every runner, from its template, by dromos' gvk label mutator.
-const (
-	workloadGroupLabel = "run.ai/workload-group"
-	workloadKindLabel  = "run.ai/workload-kind"
-)
-
 // workloadRunnerOf returns the runner reference of an object that is its
 // runner's workload. A runner also owns what its plugins create, and one that
 // is tracked here, such as a capture's SnapshotJob, is a workload of its own.
@@ -819,18 +813,19 @@ func (h *ExternalWorkloadHandler) workloadRunnerOf(ctx context.Context, object c
 	runner := &dromosv1alpha1.WorkloadRunner{}
 	key := client.ObjectKey{Name: runnerRef.Name, Namespace: object.GetNamespace()}
 	if err := h.cachedClient.Get(ctx, key, runner); err != nil {
-		// Unknown, so keep the behaviour from before kinds were compared.
+		// Unknown, so keep the behaviour from before the workload was compared.
 		return runnerRef
 	}
-	kind, labelled := runner.Labels[workloadKindLabel]
-	if !labelled {
+	workload := parseWorkloadRunnerTemplate(runner)
+	if workload == nil || workload.GetName() == "" || workload.GetKind() == "" {
 		return runnerRef
 	}
 
-	gvk := object.GetObjectKind().GroupVersionKind()
-	if kind != gvk.Kind || runner.Labels[workloadGroupLabel] != gvk.Group {
-		log.Debug().Msgf("%s is owned by WorkloadRunner <%s>, whose workload is a %s, so it is a workload of its own",
-			objectLogStr(object), runnerRef.Name, kind)
+	// dromos creates exactly the template's object, and its name and kind can't change.
+	if workload.GetName() != object.GetName() ||
+		workload.GroupVersionKind().GroupKind() != object.GetObjectKind().GroupVersionKind().GroupKind() {
+		log.Debug().Msgf("%s is owned by WorkloadRunner <%s>, whose workload is %s <%s>, so it is a workload of its own",
+			objectLogStr(object), runnerRef.Name, workload.GetKind(), workload.GetName())
 		return nil
 	}
 	return runnerRef

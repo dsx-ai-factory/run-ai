@@ -7,6 +7,7 @@ package externalworkloads
 
 import (
 	"context"
+	"fmt"
 
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/external-workload-integrator/pkg/cachedclient"
@@ -40,15 +41,17 @@ const (
 	captureNamespace = "runai-proj"
 )
 
-// pytorchRunner is a runner as dromos leaves it: labelled with its workload's kind.
+// pytorchRunner runs the PyTorchJob that newChildObject builds.
 func pytorchRunner(namespace string) *dromosv1alpha1.WorkloadRunner {
 	return &dromosv1alpha1.WorkloadRunner{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      testWlrName,
 			Namespace: namespace,
 			UID:       testWlrUID,
-			Labels:    map[string]string{workloadGroupLabel: pytorchGVK.Group, workloadKindLabel: pytorchGVK.Kind},
 		},
+		Spec: dromosv1alpha1.WorkloadRunnerSpec{Template: runtime.RawExtension{Raw: []byte(fmt.Sprintf(
+			`{"apiVersion":%q,"kind":%q,"metadata":{"name":%q,"namespace":%q}}`,
+			pytorchGVK.GroupVersion().String(), pytorchGVK.Kind, testJobName, namespace))}},
 	}
 }
 
@@ -147,9 +150,26 @@ var _ = Describe("ExternalWorkloadHandler.workloadRunnerOf", func() {
 		Expect(handler.workloadRunnerOf(ctx, lookalike)).To(BeNil())
 	})
 
-	It("keeps the runner when it carries no kind labels", func() {
+	It("returns nothing for another kind with the workload's name", func() {
+		handler, _ := kindHandler(pytorchRunner(testNamespace))
+		other := newChildObject(newChildUID, wlrOwnerRefWithUID(testWlrName, testWlrUID))
+		other.GetObjectKind().SetGroupVersionKind(
+			schema.GroupVersionKind{Group: pytorchGVK.Group, Version: pytorchGVK.Version, Kind: "TFJob"})
+
+		Expect(handler.workloadRunnerOf(ctx, other)).To(BeNil())
+	})
+
+	It("returns nothing for another object of the workload's kind", func() {
+		handler, _ := kindHandler(pytorchRunner(testNamespace))
+		sibling := newChildObject(newChildUID, wlrOwnerRefWithUID(testWlrName, testWlrUID))
+		sibling.Name = testJobName + "-aux"
+
+		Expect(handler.workloadRunnerOf(ctx, sibling)).To(BeNil())
+	})
+
+	It("keeps the runner when its template can't be read", func() {
 		runner := pytorchRunner(testNamespace)
-		runner.Labels = nil
+		runner.Spec.Template = runtime.RawExtension{}
 		handler, _ := kindHandler(runner)
 
 		Expect(handler.workloadRunnerOf(ctx, capture(testNamespace))).NotTo(BeNil())
@@ -229,7 +249,7 @@ var _ = Describe("a capture owned by the serving workload's runner", func() {
 	})
 })
 
-// #873's restart flow, with a runner whose kind labels are read and compared.
+// #873's restart flow, with a runner whose template is read and compared.
 var _ = Describe("a runner's own workload", func() {
 	var ctx context.Context
 
