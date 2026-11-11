@@ -18085,7 +18085,7 @@ Components:
   cel.dev/expr v0.25.2
   cel.dev/expr v0.25.3
   cloud.google.com/go/auth v0.20.0
-  cloud.google.com/go/auth v0.24.3
+  cloud.google.com/go/auth v0.24.4
   cloud.google.com/go/auth/oauth2adapt v0.2.8
   cloud.google.com/go/auth/oauth2adapt v0.3.1
   cloud.google.com/go/compute/metadata v0.10.0
