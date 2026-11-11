@@ -104,7 +104,10 @@
       "groupName": "keycloak",
       "groupSlug": "keycloak",
       "automerge": false,
-      "branchName": "{{{branchPrefix}}}keycloak"
+      "branchName": "{{{branchPrefix}}}keycloak",
+      "group": {
+        "commitMessageTopic": "keycloak"
+      }
     },
     {
       "matchPackageNames": [
