@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/control-plane/tenants-manager
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/aws/smithy-go v1.28.9
