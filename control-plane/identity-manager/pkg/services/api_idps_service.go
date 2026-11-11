@@ -79,6 +79,15 @@ func (s *IdpsApiService) CreateIdp(ctx context.Context, idpCreationRequest api.I
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp url for tenant: %v. err: %v", *realm, err.Error())
 		return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
 	}
+
+	config, err := s.validateIdpConfig(ctx, idpCreationRequest)
+	if err != nil {
+		return api.Response(http.StatusBadRequest, api.IdpPostResponse{Alias: idpCreationRequest.Name, SamlData: config}), nil
+	}
+	if idpCreationRequest.DryRun {
+		return api.Response(http.StatusOK, api.IdpPostResponse{Alias: idpCreationRequest.Name, SamlData: config}), nil
+	}
+
 	idpRequest, err := models.GenerateIdpData(idpCreationRequest.Name, idpCreationRequest, false)
 	if err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to create idp with configuration %v for tenant %s. err: %v", idpCreationRequest, *realm, err.Error())
@@ -92,8 +101,10 @@ func (s *IdpsApiService) CreateIdp(ctx context.Context, idpCreationRequest api.I
 			return api.Response(http.StatusConflict, fmt.Errorf(errMsg, idpRequest.Alias, *realm, "name already exists")),
 				utils.Error{Code: http.StatusBadRequest, Message: fmt.Sprintf(errMsg, idpRequest.Alias, *realm, "name already exists")}
 		}
+
+		statusCode, message := utils.GetHttpStatusCodeAndMessage(err)
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf(errMsg, idpRequest.Alias, *realm, err.Error())
-		return api.Response(http.StatusInternalServerError, nil), utils.Error{Code: http.StatusInternalServerError, Message: ""}
+		return api.Response(statusCode, nil), utils.Error{Code: statusCode, Message: message}
 	}
 
 	if shouldSaveIdpResources(idpRequest.Resource) {
@@ -122,6 +133,16 @@ func (s *IdpsApiService) UpdateIdp(ctx context.Context, idpAlias string, idpUpda
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp url for tenant: %v. err: %v", *realm, err.Error())
 			return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
 		}
+
+		config, err := s.validateIdpConfig(ctx, idpUpdateRequest)
+		if err != nil {
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp configuration for tenant: %v. err: %v", *realm, err.Error())
+			return api.Response(http.StatusBadRequest, api.IdpPostResponse{Alias: idpAlias, SamlData: config}), nil
+		}
+		if idpUpdateRequest.DryRun {
+			return api.Response(http.StatusOK, api.IdpPostResponse{Alias: idpAlias, SamlData: config}), nil
+		}
+
 		idpRequest, err := models.GenerateIdpData(idpAlias, idpUpdateRequest, true)
 		if err != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to update idp with configuration %v for tenant %s. err: %v", idpUpdateRequest, *realm, err.Error())
@@ -130,8 +151,9 @@ func (s *IdpsApiService) UpdateIdp(ctx context.Context, idpAlias string, idpUpda
 		audit.AuditFromCtx(ctx).WithEntityName(idpRequest.Alias)
 		err = s.updateIdp(ctx, *realm, idpRequest)
 		if err != nil {
+			statusCode, message := utils.GetHttpStatusCodeAndMessage(err)
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to update idp with alias %s for tenant %s. err: %s", idpRequest.Alias, *realm, err.Error())
-			return api.Response(http.StatusInternalServerError, nil), utils.Error{Code: http.StatusInternalServerError, Message: ""}
+			return api.Response(statusCode, nil), utils.Error{Code: statusCode, Message: message}
 		}
 		defer s.idpsCacheWrapper.InvalidateCache(ctx, *realm, idpAlias)
 		if shouldSaveIdpResources(idpRequest.Resource) {
@@ -349,14 +371,50 @@ func (s *IdpsApiService) addIdpDataByIdpType(ctx context.Context, res *api.Idp, 
 			res.OidcData.Scopes = strings.Split((*provider.Config)[utils.Scopes], utils.ScopesSeperator)
 		}
 	case providers.SAML:
+		signingCertificate := (*provider.Config)[utils.SigningCertificate]
 		res.SamlData = &api.SamlData{
-			SigningCertificate:     (*provider.Config)[utils.SigningCertificate],
-			SingleSignOnServiceUrl: (*provider.Config)[utils.SingleSignOnServiceUrl],
-			EntityId:               (*provider.Config)[utils.EntityId],
-			ValidateSignature:      (*provider.Config)[utils.ValidateSignature] == "true",
+			SigningCertificate:        signingCertificate,
+			SingleSignOnServiceUrl:    (*provider.Config)[utils.SingleSignOnServiceUrl],
+			EntityId:                  (*provider.Config)[utils.EntityId],
+			ValidateSignature:         (*provider.Config)[utils.ValidateSignature] == "true",
+			CertificateExpirationDate: utils.SigningCertificateExpiration(signingCertificate),
 		}
+
 		res.SamlData.ServiceProviderMetadataUrl = s.getSPSamlMetadataUrl(ctx, *provider.Alias)
 	}
+}
+
+func (s *IdpsApiService) validateIdpConfig(ctx context.Context, request api.IdpCreationRequest) (*api.SamlData, error) {
+	if request.Type != api.IdpCreationRequestTypeEnum(models.SAML) {
+		return nil, nil
+	}
+	if request.SamlData == nil {
+		return nil, utils.Error{Code: http.StatusBadRequest, Message: "saml idp requires metadata"}
+	}
+
+	metadata, err := utils.LoadSamlMetadata(ctx, string(request.SamlData.MetadataXmlType), request.SamlData.MetadataXmlFile, request.SamlData.MetadataXmlUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := utils.ValidateSamlMetadata(metadata); err != nil {
+		return nil, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml metadata"}, err)
+	}
+
+	config := utils.ParseSamlIdpConfig(metadata)
+	if config.SigningCertificate == "" {
+		return config, utils.Error{Code: http.StatusBadRequest, Message: "saml metadata requires a signing certificate"}
+	}
+
+	certificates, err := utils.ValidateSigningCertificate(config.SigningCertificate)
+	if len(certificates) > 0 {
+		config.CertificateExpirationDate = certificates[0].ExpirationDate
+	}
+	if err != nil {
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("rejected saml signing certificate for idp %s. err: %s", request.Name, err.Error())
+		return config, fmt.Errorf("%w:%w", utils.Error{Code: http.StatusBadRequest, Message: "invalid saml signing certificate"}, err)
+	}
+	return config, nil
 }
 
 func (s *IdpsApiService) createIdp(ctx context.Context, realm string, idpRequest *models.IdpData) (identity_provider.IdpRepresentationer, error) {
@@ -365,16 +423,16 @@ func (s *IdpsApiService) createIdp(ctx context.Context, realm string, idpRequest
 		return nil, err
 	}
 	config, err := s.getIdpConfig(ctx, realm, idpRequest)
-	config[utils.Scopes] = (*idpRequest.Config)[utils.Scopes]
 	if err != nil {
 		return nil, err
 	}
+	config[utils.Scopes] = (*idpRequest.Config)[utils.Scopes]
 	idpRep := rep.GetRepresentation(ctx, idpRequest, &config)
 	_, err = s.iamIdps.CreateIdp(ctx, realm, *idpRep)
 	if err == nil {
 		exchangeError := s.enableTokenExchangeForIdpIfSupported(ctx, realm, idpRep)
 		if exchangeError != nil {
-			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to enable token exchange for identity provider with alias %s in realm %s. err: %s", idpRequest.Alias, realm, err.Error())
+			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to enable token exchange for identity provider with alias %s in realm %s. err: %s", idpRequest.Alias, realm, exchangeError.Error())
 		}
 		s.idpsCacheWrapper.InvalidateCache(ctx, realm, idpRequest.Alias)
 	}

@@ -21,12 +21,13 @@ import (
 )
 
 var (
-	ErrNotFound     = errors.New("not found")
-	ErrInvalidInput = errors.New("invalid input")
-	ErrInternal     = errors.New("internal error")
-	ErrUnauthorized = errors.New("unauthorized")
-	ErrForbidden    = errors.New("forbidden")
-	ErrConflict     = errors.New("conflict")
+	ErrNotFound            = errors.New("not found")
+	ErrInvalidInput        = errors.New("invalid input")
+	ErrUnsignedCertificate = errors.New("unsigned certificate")
+	ErrInternal            = errors.New("internal error")
+	ErrUnauthorized        = errors.New("unauthorized")
+	ErrForbidden           = errors.New("forbidden")
+	ErrConflict            = errors.New("conflict")
 )
 
 type Error struct {
@@ -88,6 +89,10 @@ func IsBadRequest(err error) bool {
 		getErrorStatusCode(err) == http.StatusBadRequest || parseSettingPkgError(err) == ErrInvalidInput
 }
 
+func IsUnsignedCertificate(err error) bool {
+	return errors.Is(err, ErrUnsignedCertificate)
+}
+
 func IsUnauthorized(err error) bool {
 	return strings.Contains(err.Error(), "401") ||
 		errors.Is(err, ErrUnauthorized) || errors.Is(err, iamError.ErrUnauthorized) ||
@@ -111,6 +116,33 @@ func getErrorStatusCode(err error) int {
 		return errorHandler.Code
 	}
 	return http.StatusInternalServerError
+}
+
+func GetHttpStatusCodeAndMessage(err error) (int, string) {
+	if err == nil {
+		return http.StatusOK, "ok"
+	}
+
+	if IsBadRequest(err) {
+		return http.StatusBadRequest, "bad request"
+	}
+	if IsUnsignedCertificate(err) {
+		return http.StatusBadRequest, "bad request: unsigned certificate"
+	}
+	if IsConflict(err) {
+		return http.StatusConflict, "already exists"
+	}
+	if IsNotFound(err) {
+		return http.StatusNotFound, "not found"
+	}
+	if IsUnauthorized(err) {
+		return http.StatusUnauthorized, "unauthorized"
+	}
+	if IsForbidden(err) {
+		return http.StatusForbidden, "forbidden"
+	}
+
+	return http.StatusInternalServerError, "internal server error"
 }
 
 func parseSettingPkgError(err error) error {
