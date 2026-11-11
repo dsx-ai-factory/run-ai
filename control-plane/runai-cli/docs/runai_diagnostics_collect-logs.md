@@ -26,20 +26,20 @@ runai diagnostics collect-logs --namespaces runai,runai-backend
 ### Options
 
 ```
-  -h, --help                   help for collect-logs
-      --namespaces enumSlice   Comma-separated list of namespaces to collect logs from (default [runai,runai-reservation,runai-backend,training-operator,knative,gpu-operator,nim-operator])
-      --no-previous            Do not collect previous logs from pods
-      --output-dir string      Directory to output the archive file (default "./")
+  -h, --help[=true|false]          help for collect-logs
+      --namespaces enumSlice       Comma-separated list of namespaces to collect logs from (default [runai,runai-reservation,runai-backend,training-operator,knative,gpu-operator,nim-operator])
+      --no-previous[=true|false]   Do not collect previous logs from pods
+      --output-dir string          Directory to output the archive file (default "./")
 ```
 
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

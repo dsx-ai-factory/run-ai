@@ -1,14 +1,14 @@
 module github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/init-ca
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/cert-manager/cert-manager v1.21.2
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/cert-utils v0.0.0-00010101000000-000000000000
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.5
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/fips v1.0.6
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.44.0
-	github.com/spf13/pflag v1.0.10
+	github.com/spf13/pflag v1.1.0
 	go.uber.org/zap v1.28.0
 	gotest.tools v2.2.0+incompatible
 	k8s.io/api v0.36.4
@@ -22,8 +22,8 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dsx-ai-factory/run-ai/runai-cluster/common/utils v0.0.0-00010101000000-000000000000 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.3 // indirect
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.19 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4 // indirect
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/logging v1.0.20 // indirect
 	github.com/emicklei/go-restful/v3 v3.14.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.9.11 // indirect
 	github.com/fsnotify/fsnotify v1.10.1 // indirect

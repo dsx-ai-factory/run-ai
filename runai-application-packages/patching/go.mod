@@ -1,11 +1,11 @@
 module github.com/dsx-ai-factory/run-ai/runai-application-packages/patching
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/PaesslerAG/jsonpath v0.1.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils v1.0.9
-	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.9
+	github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils v1.0.10
 	github.com/onsi/ginkgo/v2 v2.34.0
 	github.com/onsi/gomega v1.44.0
 	sigs.k8s.io/yaml v1.6.0
@@ -17,7 +17,7 @@ require (
 	github.com/go-logr/logr v1.4.4 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
-	github.com/google/pprof v0.0.0-20261105003125-4bf881d7fb0b // indirect
+	github.com/google/pprof v0.0.0-20261111065629-49901cbc7227 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/shopspring/decimal v1.6.0 // indirect
 	github.com/stretchr/testify v1.12.1 // indirect

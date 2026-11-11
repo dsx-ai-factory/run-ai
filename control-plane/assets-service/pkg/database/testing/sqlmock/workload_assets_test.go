@@ -20,7 +20,7 @@ import (
 const (
 	wlaFind     = `SELECT * FROM assets_metadata WHERE id IN (?) AND assets_metadata.deleted_at IS NULL`
 	wlaCredFind = `SELECT * FROM assets_metadata WHERE id IN (NULL) AND assets_metadata.deleted_at IS NULL`
-	vcaMetaFind = `SELECT assets_metadata.*, assets_supported_workload_types.* FROM assets_metadata left join assets_supported_workload_types on assets_supported_workload_types.asset_id = assets_metadata.id WHERE COALESCE(assets_metadata.private, FALSE) = false AND (assets_metadata.scope = ? OR assets_metadata.tenant_id = ?) AND id IN (?) AND assets_metadata.deleted_at IS NULL`
+	vcaMetaFind = `SELECT assets_metadata.*, assets_supported_workload_types.* FROM assets_metadata left join assets_supported_workload_types on assets_supported_workload_types.asset_id = assets_metadata.id WHERE COALESCE(assets_metadata.private, FALSE) = false AND assets_metadata.kind <> ? AND (assets_metadata.scope = ? OR assets_metadata.tenant_id = ?) AND id IN (?) AND assets_metadata.deleted_at IS NULL`
 )
 
 func TestListWorkloadAssets(t *testing.T) {
@@ -36,7 +36,7 @@ func TestListWorkloadAssets(t *testing.T) {
 
 func TestValidateContainedAssets(t *testing.T) {
 	m := setupDaoMock(t)
-	m.ExpectQuery(vcaMetaFind, dbtesting.AnyArg(), dbtesting.AnyArg(), dbtesting.AnyArg()).Returns([]dbmodel.CombinedRec{{
+	m.ExpectQuery(vcaMetaFind, "workload-template", dbtesting.AnyArg(), dbtesting.AnyArg(), dbtesting.AnyArg()).Returns([]dbmodel.CombinedRec{{
 		AssetMeta: api.AssetMeta{Id: "env-1", Kind: api.ASSETKIND_ENVIRONMENT, Scope: api.SCOPE_TENANT},
 	}})
 	ids, apiErr := dao.ValidateContainedAssets(auth.MockAuthInfo(), nil, api.SCOPE_TENANT,

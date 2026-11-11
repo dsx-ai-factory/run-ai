@@ -243,7 +243,7 @@ func TestReconcile_ServiceAccount_HappyFlow_ValidateFields(t *testing.T) {
 	require.NotNil(t, serviceAccount.Attributes.UpdatedAt)
 	require.NotNil(t, serviceAccount.Attributes.CreatedAt)
 	require.Nil(t, serviceAccount.Attributes.LastLogin)
-	require.Equal(t, realm_client.ClientTypeTenantApp, *serviceAccount.Attributes.ClientType)
+	require.Equal(t, realm_client.ClientTypeServiceAccount, *serviceAccount.Attributes.ClientType)
 	require.Equal(t, createdByUser, *serviceAccount.Attributes.CreatedBy)
 }
 
@@ -259,7 +259,7 @@ func TestReconcile_ServiceAccount_NoServiceAccounts(t *testing.T) {
 	err = TestStepsClient.ReconcileRealm(ctx, realmName, reconcilerType)
 	require.NoError(t, err)
 
-	serviceAccounts, err := IamServices.ClientService.GetClients(ctx, realmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeTenantApp), IsTenantAdmin: true})
+	serviceAccounts, err := IamServices.ClientService.GetClients(ctx, realmName, &models.ClientFilter{ClientType: ptr.To(realm_client.ClientTypeServiceAccount), IsTenantAdmin: true})
 	require.NoError(t, err)
 	require.Empty(t, serviceAccounts)
 }
@@ -286,7 +286,7 @@ func TestReconcile_ServiceAccount_RunReconcileAfterUpdate(t *testing.T) {
 		TenantId: ptr.To(tenantId),
 		Attributes: &models.ClientAttributes{
 			IsExternal: nil,
-			ClientType: ptr.To(realm_client.ClientTypeTenantApp),
+			ClientType: ptr.To(realm_client.ClientTypeServiceAccount),
 			CreatedBy:  ptr.To("test1@run.ai"),
 		},
 	}
@@ -301,7 +301,7 @@ func TestReconcile_ServiceAccount_RunReconcileAfterUpdate(t *testing.T) {
 	updatedServiceAccount, err := IamServices.ClientService.GetClient(ctx, realmName, serviceAccountId)
 	require.NoError(t, err)
 	require.True(t, *updatedServiceAccount.Attributes.IsExternal)
-	require.Equal(t, realm_client.ClientTypeTenantApp, *updatedServiceAccount.Attributes.ClientType)
+	require.Equal(t, realm_client.ClientTypeServiceAccount, *updatedServiceAccount.Attributes.ClientType)
 	require.Equal(t, "test1@run.ai", *updatedServiceAccount.Attributes.CreatedBy)
 }
 

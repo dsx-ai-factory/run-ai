@@ -10,6 +10,7 @@ import (
 	crand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html"
 	"io"
@@ -60,7 +61,7 @@ func TestGrantServiceAccountToken_HappyFlow(t *testing.T) {
 
 	if claims, ok := parsedToken.Claims.(*jwt.MapClaims); ok {
 		require.Contains(t, (*claims)["azp"], *serviceAccount.ClientID)
-		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeTenantApp)
+		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeServiceAccount)
 	}
 }
 
@@ -92,7 +93,7 @@ func TestGrantAccessKeyToken_HappyFlow(t *testing.T) {
 
 	if claims, ok := parsedToken.Claims.(*jwt.MapClaims); ok {
 		require.Contains(t, (*claims)["sub"], *accessKey.Attributes.CreatedBy)
-		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeUserApp)
+		require.Contains(t, (*claims)["client_type"], realm_client.ClientTypeAccessKey)
 	}
 }
 
@@ -150,6 +151,36 @@ func TestGrantServiceAccountToken_NoEmailVerifiedClaim(t *testing.T) {
 	require.True(t, ok)
 	_, hasEmail := (*claims)["email_verified"]
 	require.False(t, hasEmail, "service account token must not contain email_verified claim")
+}
+
+func TestGrantServiceAccountToken_AudienceIsArray(t *testing.T) {
+	t.Parallel()
+	ctx := newTestContext()
+	serviceAccountId, err := TestStepsClient.CreateServiceAccount(ctx, BaseRealmName, BaseTenantId, nil)
+	require.NoError(t, err)
+	require.NotNil(t, serviceAccountId)
+	defer clientCleanup(t, ctx, serviceAccountId)
+
+	serviceAccount, err := IamServices.ClientService.GetClient(ctx, BaseRealmName, serviceAccountId)
+	require.NoError(t, err)
+	require.NotNil(t, serviceAccount)
+	ctx = TestStepsClient.SetFakeHostHeader(ctx, OpenapiClient, BaseRealmName)
+
+	tokenRequest := generateClientCredentialsTokenRequest(*serviceAccount.ClientID, *serviceAccount.Secret)
+	token, resp, err := OpenapiClient.TokensAPI.GrantToken(ctx).TokenRequest(tokenRequest).Execute()
+	require.NoError(t, err)
+	require.Equal(t, http.StatusOK, resp.StatusCode)
+	require.NotNil(t, token)
+
+	parsedToken, _, err := jwt.NewParser().ParseUnverified(*token.AccessToken, &jwt.MapClaims{})
+	require.NoError(t, err)
+
+	claims, ok := parsedToken.Claims.(*jwt.MapClaims)
+	require.True(t, ok)
+
+	aud, ok := (*claims)["aud"].([]interface{})
+	require.Truef(t, ok, "aud claim must be an array, got %T: %v", (*claims)["aud"], (*claims)["aud"])
+	require.Contains(t, aud, "runai-dummy")
 }
 
 func TestGrantServiceAccountToken_InvalidInput(t *testing.T) {
@@ -829,20 +860,21 @@ func TestExternalTokenExchange_UserFlow(t *testing.T) {
 	require.Equal(t, username, *exchangedUser.Email)
 }
 
-func TestExternalTokenExchange_ApplicationFlow(t *testing.T) {
+func TestExternalTokenExchange_ClientCredentialsFlow(t *testing.T) {
 	ctx := TestStepsClient.SetContextValues(context.Background(), BaseTenantId)
-	client, clientId, _, _, cleanup := setupExternalTokenExchangeTest(t, ctx, "external-token-app")
+	client, clientId, _, _, cleanup := setupExternalTokenExchangeTest(t, ctx, "external-token-client-credentials")
 	defer cleanup()
+	removeClientProtocolMapper(t, MasterRealmName, *client.ID, "SubToClientId Mapper")
 
 	tokenURL := fmt.Sprintf(keycloakTokenEndpoint, MasterRealmName)
 	clientToken, err := GetKeycloakToken(tokenURL, clientId, *client.Secret, "", "", "client_credentials")
 	require.NoError(t, err)
 	require.NotEmpty(t, clientToken)
 
-	exchangedAppToken, resp, err := exchangeExternalToken(ctx, clientToken)
+	exchangedToken, resp, err := exchangeExternalToken(ctx, clientToken)
 	require.NoError(t, err)
 	require.Equal(t, http.StatusOK, resp.StatusCode)
-	require.NotNil(t, exchangedAppToken)
+	require.NotNil(t, exchangedToken)
 }
 
 func TestGrantTokenV2_ExternalTokenExchange_UserFlow(t *testing.T) {
@@ -1278,4 +1310,54 @@ func simulateKeycloakBrowserLogin(t *testing.T, authorizeURL, username, password
 	require.NotEmpty(t, code, "authorization code not found in callback URL: %s", callbackURL)
 
 	return code
+}
+
+func removeClientProtocolMapper(t *testing.T, realm, clientUUID, mapperName string) {
+	t.Helper()
+	httpClient := NewLocalhostOverrideClient()
+	base := "http://" + KeycloakDomain + ":8090/auth"
+
+	tokenResp, err := httpClient.PostForm(base+"/realms/master/protocol/openid-connect/token", url.Values{
+		"client_id":  {"admin-cli"},
+		"username":   {iamUsername},
+		"password":   {iamPassword},
+		"grant_type": {"password"},
+	})
+	require.NoError(t, err)
+	defer tokenResp.Body.Close()
+	var token struct {
+		AccessToken string `json:"access_token"`
+	}
+	require.NoError(t, json.NewDecoder(tokenResp.Body).Decode(&token))
+	require.NotEmpty(t, token.AccessToken)
+
+	mappersURL := fmt.Sprintf("%s/admin/realms/%s/clients/%s/protocol-mappers/models", base, realm, clientUUID)
+	do := func(method, target string) *http.Response {
+		req, reqErr := http.NewRequest(method, target, nil)
+		require.NoError(t, reqErr)
+		req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+		resp, doErr := httpClient.Do(req)
+		require.NoError(t, doErr)
+		return resp
+	}
+
+	listResp := do(http.MethodGet, mappersURL)
+	defer listResp.Body.Close()
+	require.Equal(t, http.StatusOK, listResp.StatusCode)
+	var mappers []struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+	require.NoError(t, json.NewDecoder(listResp.Body).Decode(&mappers))
+
+	for _, mapper := range mappers {
+		if mapper.Name != mapperName {
+			continue
+		}
+		delResp := do(http.MethodDelete, mappersURL+"/"+mapper.ID)
+		delResp.Body.Close()
+		require.Equal(t, http.StatusNoContent, delResp.StatusCode)
+		return
+	}
+	require.Failf(t, "protocol mapper not found", "%s on client %s", mapperName, clientUUID)
 }

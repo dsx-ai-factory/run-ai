@@ -138,6 +138,8 @@ Class | Method | HTTP request | Description
 *NodesAPI* | [**DeleteNode**](docs/NodesAPI.md#deletenode) | **Delete** /api/v1/clusters/{clusterUuid}/nodes/{nodeName} | Delete a node from a cluster.
 *NodesAPI* | [**GetNode**](docs/NodesAPI.md#getnode) | **Get** /api/v1/nodes/{nodeId} | Get a node by ID.
 *NodesAPI* | [**GetNodeInternal**](docs/NodesAPI.md#getnodeinternal) | **Get** /internal/clusters/{clusterUuid}/nodes/{nodeName} | Get node internal data by cluster UUID and name
+*NodesAPI* | [**GetNodeLabelKeys**](docs/NodesAPI.md#getnodelabelkeys) | **Get** /api/v1/clusters/{clusterUuid}/nodes/labels/keys | Get node label keys.
+*NodesAPI* | [**GetNodeLabelValues**](docs/NodesAPI.md#getnodelabelvalues) | **Get** /api/v1/clusters/{clusterUuid}/nodes/labels/values | Get node label values.
 *NodesAPI* | [**GetNodeMetrics**](docs/NodesAPI.md#getnodemetrics) | **Get** /api/v1/nodes/{nodeId}/metrics | Get the node metrics data.
 *NodesAPI* | [**GetNodeTelemetry**](docs/NodesAPI.md#getnodetelemetry) | **Get** /api/v1/nodes/telemetry | Get node telemetry data.
 *NodesAPI* | [**GetTenantNodes**](docs/NodesAPI.md#gettenantnodes) | **Get** /api/v1/nodes | Get a list of nodes.

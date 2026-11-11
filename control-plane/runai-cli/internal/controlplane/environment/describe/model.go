@@ -101,7 +101,6 @@ type AssetUsageInfo struct {
 	Trainings   []WorkloadRefAndStatus `json:"trainings,omitempty" yaml:"trainings,omitempty"`
 	Distributed []WorkloadRefAndStatus `json:"distributed,omitempty" yaml:"distributed,omitempty"`
 	Inferences  []WorkloadRefAndStatus `json:"inferences,omitempty" yaml:"inferences,omitempty"`
-	Templates   []AssetRef             `json:"templates,omitempty" yaml:"templates,omitempty"`
 }
 
 type WorkloadRefAndStatus struct {
@@ -374,16 +373,6 @@ func toAssetUsageInfo(usedBy *openapi.AssetUsageInfo) *AssetUsageInfo {
 		result.Inferences = make([]WorkloadRefAndStatus, 0, len(usedBy.Inferences))
 		for _, i := range usedBy.Inferences {
 			result.Inferences = append(result.Inferences, toWorkloadRefAndStatus(i))
-		}
-	}
-
-	if len(usedBy.Templates) > 0 {
-		result.Templates = make([]AssetRef, 0, len(usedBy.Templates))
-		for _, tmpl := range usedBy.Templates {
-			result.Templates = append(result.Templates, AssetRef{
-				Name: tmpl.Name,
-				Id:   tmpl.Id,
-			})
 		}
 	}
 

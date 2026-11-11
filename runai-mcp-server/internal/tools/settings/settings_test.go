@@ -245,7 +245,7 @@ func TestUpdateSystemSettings_SetWhenUnset(t *testing.T) {
 // none. The BFF spells enableNIM as "enableNim".
 func listAllHandlers(mux *http.ServeMux) {
 	mux.HandleFunc(wlSettingsAll, settingsGetAll(true, true, true,
-		"enablePolicies", "workloadSubmissionV2Enabled", "enableTemplatesV2", "enableHybridSubmission", "gpuOverProvisioning", "applicationSubmission"))
+		"enablePolicies", "workloadSubmissionV2Enabled", "enableHybridSubmission", "gpuOverProvisioning", "applicationSubmission"))
 	mux.HandleFunc(authzSettingsAll, settingsGetAll(false, false, false, "enableScopedAuthorization"))
 	mux.HandleFunc(clusterSettingAll, settingsGetAll(false, true, true, "enableAdvancedGpuMetrics"))
 	mux.HandleFunc(orgUnitSettingAll, settingsGetAll(false, false, true, "limitQuotaOverSubscription"))
@@ -264,7 +264,7 @@ func TestListSystemSettings(t *testing.T) {
 	require.NoError(t, err)
 	assert.Empty(t, out.Warnings)
 	// 6 workloads + 1 authorization + 1 cluster + 1 org-unit + 1 catalog + 1 datavolumes + 2 node-pool + 4 workloads-manager
-	assert.Len(t, out.Settings, 17)
+	assert.Len(t, out.Settings, 16)
 	byKey := map[string]systemSetting{}
 	for _, s := range out.Settings {
 		byKey[s.Key] = s

@@ -58,8 +58,6 @@ const (
 	PVCAssetClaimNameColumn = "claim_name"
 
 	TableNameAssetsHostPath            = "assets_host_path"
-	TableNameAssetsTemplate            = "assets_template"
-	TableNameAssetsTemplateContent     = "assets_template_content"
 	AssetsTemplateContentColumnAssetId = "template_asset_id"
 	TableNameAssetsConfigMap           = "assets_config_map"
 	TableNameAssetsGenericSecret       = "assets_generic_secret"

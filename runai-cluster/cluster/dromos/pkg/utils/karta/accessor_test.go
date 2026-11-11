@@ -225,6 +225,24 @@ var _ = Describe("UpdateComponent", func() {
 })
 
 var _ = Describe("HasGPU", func() {
+	const dynamoGPUResourceName = "gpu"
+	DescribeTable("fragmented resources and singular containers",
+		func(resources *corev1.ResourceRequirements, container *corev1.Container, want bool) {
+			Expect(HasGPU(kartaresource.ExtractedInstance{FragmentedPodSpec: &kartaresource.FragmentedPodSpec{Resources: resources, Container: container}})).To(Equal(want))
+		},
+		Entry("Dynamo service GPU limits", &corev1.ResourceRequirements{Limits: corev1.ResourceList{dynamoGPUResourceName: resource.MustParse("1")}}, nil, true),
+		Entry("Dynamo service GPU requests", &corev1.ResourceRequirements{Requests: corev1.ResourceList{dynamoGPUResourceName: resource.MustParse("1")}}, nil, true),
+		Entry("zero Dynamo service GPU limits", &corev1.ResourceRequirements{Limits: corev1.ResourceList{dynamoGPUResourceName: resource.MustParse("0")}}, nil, false),
+		Entry("zero Dynamo service GPU requests", &corev1.ResourceRequirements{Requests: corev1.ResourceList{dynamoGPUResourceName: resource.MustParse("0")}}, nil, false),
+
+		Entry("fragmented NVIDIA resources", &corev1.ResourceRequirements{Limits: corev1.ResourceList{nvidiaGPUResourceName: resource.MustParse("1")}}, nil, true),
+		Entry("singular NVIDIA container", nil, &corev1.Container{Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{nvidiaGPUResourceName: resource.MustParse("1")}}}, true),
+		Entry("CPU resources", &corev1.ResourceRequirements{Limits: corev1.ResourceList{"cpu": resource.MustParse("1")}}, nil, false),
+		Entry("non-NVIDIA GPU resources", &corev1.ResourceRequirements{Limits: corev1.ResourceList{"amd.com/gpu": resource.MustParse("1")}}, nil, false),
+		Entry("shorthand is not a container resource", nil, &corev1.Container{Resources: corev1.ResourceRequirements{Limits: corev1.ResourceList{dynamoGPUResourceName: resource.MustParse("1")}}}, false),
+		Entry("empty fragment", nil, nil, false),
+	)
+
 	DescribeTable("for different Karta pod definition types",
 		func(testFunc func(kartaresource.ExtractedInstance), container corev1.Container) {
 			instance := newExtractedInstanceWithPodTemplate(container)

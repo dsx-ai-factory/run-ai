@@ -32,7 +32,6 @@ import { Action, ResourceType } from "@/swagger-models/authorization-client";
 import { MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION } from "@/common/version.constant";
 import { useClusterStore } from "./cluster.store";
 import { useSettingStore } from "./setting.store";
-import { SettingKeys } from "@/models/setting.model";
 import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
 
@@ -999,10 +998,7 @@ export const useGuidedTourStore = defineStore("GuidedTour", {
         useClusterStore().isAllClustersSupportSpecificVersion(MIN_CLUSTER_VERSION_FOR_HYBRID_SUBMISSION) &&
         settingStore.isHybridSubmissionEnabled;
 
-      // check that flex templates enabled
-      const flexTemplatesEnabled = settingStore.isFeatureEnabled(SettingKeys.EnableTemplatesV2);
-
-      if (!flexSubmissionSupported || !flexTemplatesEnabled) {
+      if (!flexSubmissionSupported) {
         this.workloadTourAllowed = false;
         return;
       }

@@ -20,7 +20,7 @@ var dummyAssetsRef = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// AssetsRef - Reference information about a set of assets. used to describe - assets comprising a workspace - assets comprising a workspace template - assets that use other assets (e.g. s3 asset which uses access key).
+// AssetsRef - Reference information about a set of assets. used to describe - assets comprising a workspace - assets that use other assets (e.g. s3 asset which uses access key).
 type AssetsRef struct {
 
 	// environment asset.

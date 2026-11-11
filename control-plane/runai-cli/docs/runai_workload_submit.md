@@ -40,7 +40,7 @@ runai workload submit --file workload.yaml --project my-project --mnnvl Required
 ```
       --category string                 Set workload category
   -f, --file string                     Path to the workload manifest YAML file (required)
-  -h, --help                            help for submit
+  -h, --help[=true|false]               help for submit
       --mnnvl mnnvl                     Enable MNNVL (Multi-Node NVLink) mode. Valid values: Required|None
       --name-prefix string              Use the provided name as a prefix (generates random suffix). Mutually exclusive with [NAME] argument
       --preemptibility preemptibility   Specify whether the workload can be preempted by higher-priority workloads. Valid values: preemptible, semi-preemptible, non-preemptible. Overrides the default preemptibility for the workload type.
@@ -52,11 +52,11 @@ runai workload submit --file workload.yaml --project my-project --mnnvl Required
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

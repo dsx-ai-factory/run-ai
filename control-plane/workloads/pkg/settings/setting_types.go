@@ -52,28 +52,6 @@ func (e *WorkloadSubmissionV2Enabled) TransformForMigration(v interface{}) inter
 	return v
 }
 
-type EnableTemplatesV2 struct {
-	Enabled bool `json:"enabled"`
-}
-
-func (e *EnableTemplatesV2) Category() string { return WorkloadsCategory }
-func (e *EnableTemplatesV2) Description() string {
-	return "Enable to create workload templates via the new flexible form. For more information, see the <a data-doc-key='workloadTemplates' target='_blank'>Workload Templates guide</a>"
-}
-func (e *EnableTemplatesV2) DisplayName() string { return "Flexible workload templates" }
-func (e *EnableTemplatesV2) Key() string {
-	return string(api.WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2)
-}
-func (e *EnableTemplatesV2) SetDefault()                 { e.Enabled = true }
-func (e *EnableTemplatesV2) Stage() setting_pkg.Stage    { return setting_pkg.GA }
-func (e *EnableTemplatesV2) Validate(_ interface{}) bool { return true }
-func (e *EnableTemplatesV2) TransformForMigration(v interface{}) interface{} {
-	if b, ok := v.(bool); ok {
-		return EnableTemplatesV2{Enabled: b}
-	}
-	return v
-}
-
 type EnableHybridSubmission struct {
 	Enabled bool `json:"enabled"`
 }

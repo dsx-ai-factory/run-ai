@@ -1,9 +1,9 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/metricsctr
 
-go 1.27.3
+go 1.27.4
 
 require (
-	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.9
+	github.com/dsx-ai-factory/run-ai/runai-common-packages/metrics v1.2.10
 	sigs.k8s.io/controller-runtime v0.25.2
 )
 
@@ -45,7 +45,7 @@ require (
 	github.com/sagikazarmark/locafero v0.12.0 // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect
-	github.com/spf13/pflag v1.0.10 // indirect
+	github.com/spf13/pflag v1.1.0 // indirect
 	github.com/spf13/viper v1.21.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect

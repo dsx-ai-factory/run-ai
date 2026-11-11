@@ -1,6 +1,5 @@
 description: Reference information about a set of assets. used to describe
   - assets comprising a workspace
-  - assets comprising a workspace template
   - assets that use other assets (e.g. s3 asset which uses access key).
 required:
   - environment

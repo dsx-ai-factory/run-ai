@@ -25,6 +25,13 @@ const (
 	KnativeFeaturesConfigMapName   = "config-features"
 	KnativeAutoScalerConfigMapName = "config-autoscaler"
 	KnativeDomainConfigMapName     = "config-domain"
+	KnativeNetworkConfigMapName    = "config-network"
+	KnativeGatewayConfigMapName    = "config-gateway"
+
+	// KnativeGatewayAPIIngressClass is the Knative ingress class of the net-gateway-api networking layer.
+	KnativeGatewayAPIIngressClass = "gateway-api.ingress.networking.knative.dev"
+	// KnativeExternalGatewaysKey is the config-gateway key that lists the Gateways serving external traffic.
+	KnativeExternalGatewaysKey = "external-gateways"
 
 	// Service Names
 	DCGMExporterServiceName = "dcgm-exporter"

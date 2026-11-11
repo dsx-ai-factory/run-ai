@@ -398,19 +398,20 @@ func (s *DepartmentApiService) GetDepartments(
 		}
 
 		apiDepartments[index] = api.DepartmentForList{
-			Description:    tempDepartment.Description,
-			Resources:      tempDepartment.Resources,
-			Name:           tempDepartment.Name,
-			ClusterId:      tempDepartment.ClusterId,
-			Id:             tempDepartment.Id,
-			CreatedAt:      tempDepartment.CreatedAt,
-			UpdatedAt:      tempDepartment.UpdatedAt,
-			CreatedBy:      tempDepartment.CreatedBy,
-			UpdatedBy:      tempDepartment.UpdatedBy,
-			Children:       tempDepartment.Children,
-			Status:         status,
-			TotalResources: tempDepartment.TotalResources,
-			OvertimeData:   tempDepartment.OvertimeData,
+			Description:      tempDepartment.Description,
+			Resources:        tempDepartment.Resources,
+			Name:             tempDepartment.Name,
+			ClusterId:        tempDepartment.ClusterId,
+			Id:               tempDepartment.Id,
+			CreatedAt:        tempDepartment.CreatedAt,
+			UpdatedAt:        tempDepartment.UpdatedAt,
+			CreatedBy:        tempDepartment.CreatedBy,
+			UpdatedBy:        tempDepartment.UpdatedBy,
+			Children:         tempDepartment.Children,
+			Status:           status,
+			TotalResources:   tempDepartment.TotalResources,
+			OvertimeData:     tempDepartment.OvertimeData,
+			DefaultNodePools: tempDepartment.DefaultNodePools,
 		}
 	}
 

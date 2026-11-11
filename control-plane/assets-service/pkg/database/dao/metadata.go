@@ -502,6 +502,11 @@ func filterAssetMeta(ctx context.Context, tx orm.DB, query dbmodel.AssetMetaRec,
 		return nil, filterError
 	}
 
+	// Legacy template rows can remain after upgrades but must no longer be exposed as assets.
+	if query.Kind == "" {
+		result.Where(fmt.Sprintf("%s.%s <> ?", dbtables.TableNameAssetsMeta, dbtables.AssetMetaColumnKind), "workload-template")
+	}
+
 	filterAllowedOrgUnits(ctx, result, queryParams)
 
 	return result, nil
