@@ -20,10 +20,10 @@ import (
 // checks if the FairShareSimulationRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationRequest{}
 
-// FairShareSimulationRequest struct for FairShareSimulationRequest
+// FairShareSimulationRequest A scenario of unsaved changes. An empty body simulates the node pool as saved.
 type FairShareSimulationRequest struct {
-	NodePool NullableFairShareSimulationRequestNodePool `json:"nodePool,omitempty"`
-	// Org units to simulate with other values than their stored ones. Others keep their stored values and ask for the most GPUs they can get.
+	NodePool *FairShareSimulationRequestNodePool `json:"nodePool,omitempty"`
+	// Org units that differ from their stored values. Every other org unit keeps its stored values and asks for the most it can get.
 	OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits,omitempty"`
 }
 
@@ -44,47 +44,36 @@ func NewFairShareSimulationRequestWithDefaults() *FairShareSimulationRequest {
 	return &this
 }
 
-// GetNodePool returns the NodePool field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetNodePool returns the NodePool field value if set, zero value otherwise.
 func (o *FairShareSimulationRequest) GetNodePool() FairShareSimulationRequestNodePool {
-	if o == nil || IsNil(o.NodePool.Get()) {
+	if o == nil || IsNil(o.NodePool) {
 		var ret FairShareSimulationRequestNodePool
 		return ret
 	}
-	return *o.NodePool.Get()
+	return *o.NodePool
 }
 
 // GetNodePoolOk returns a tuple with the NodePool field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationRequest) GetNodePoolOk() (*FairShareSimulationRequestNodePool, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.NodePool) {
 		return nil, false
 	}
-	return o.NodePool.Get(), o.NodePool.IsSet()
+	return o.NodePool, true
 }
 
 // HasNodePool returns a boolean if a field has been set.
 func (o *FairShareSimulationRequest) HasNodePool() bool {
-	if o != nil && o.NodePool.IsSet() {
+	if o != nil && !IsNil(o.NodePool) {
 		return true
 	}
 
 	return false
 }
 
-// SetNodePool gets a reference to the given NullableFairShareSimulationRequestNodePool and assigns it to the NodePool field.
+// SetNodePool gets a reference to the given FairShareSimulationRequestNodePool and assigns it to the NodePool field.
 func (o *FairShareSimulationRequest) SetNodePool(v FairShareSimulationRequestNodePool) {
-	o.NodePool.Set(&v)
-}
-
-// SetNodePoolNil sets the value for NodePool to be an explicit nil
-func (o *FairShareSimulationRequest) SetNodePoolNil() {
-	o.NodePool.Set(nil)
-}
-
-// UnsetNodePool ensures that no value is present for NodePool, not even an explicit nil
-func (o *FairShareSimulationRequest) UnsetNodePool() {
-	o.NodePool.Unset()
+	o.NodePool = &v
 }
 
 // GetOrgUnits returns the OrgUnits field value if set, zero value otherwise.
@@ -129,8 +118,8 @@ func (o FairShareSimulationRequest) MarshalJSON() ([]byte, error) {
 
 func (o FairShareSimulationRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.NodePool.IsSet() {
-		toSerialize["nodePool"] = o.NodePool.Get()
+	if !IsNil(o.NodePool) {
+		toSerialize["nodePool"] = o.NodePool
 	}
 	if !IsNil(o.OrgUnits) {
 		toSerialize["orgUnits"] = o.OrgUnits

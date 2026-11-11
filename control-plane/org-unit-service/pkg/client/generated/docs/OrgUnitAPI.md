@@ -462,7 +462,7 @@ Name | Type | Description  | Notes
 
 ## SimulateNodePoolFairShare
 
-> FairShareSimulationResponse SimulateNodePoolFairShare(ctx, nodepoolId).FairShareSimulationRequest(fairShareSimulationRequest).OrgUnitType(orgUnitType).ParentId(parentId).Execute()
+> FairShareSimulationResponse SimulateNodePoolFairShare(ctx, nodepoolId).OrgUnitType(orgUnitType).FairShareSimulationRequest(fairShareSimulationRequest).ParentId(parentId).SortBy(sortBy).SortOrder(sortOrder).Limit(limit).Execute()
 
 Simulate the fair share of a node pool's org units
 
@@ -482,13 +482,16 @@ import (
 
 func main() {
 	nodepoolId := "17" // string | The unique id identifying the Node Pool.
+	orgUnitType := "orgUnitType_example" // string | The org unit type.
 	fairShareSimulationRequest := *openapiclient.NewFairShareSimulationRequest() // FairShareSimulationRequest | 
-	orgUnitType := "orgUnitType_example" // string | Return only org units of this type. (optional)
-	parentId := "parentId_example" // string | Return only projects of this department. (optional)
+	parentId := "parentId_example" // string | The department whose projects to return. Required when orgUnitType is project. (optional)
+	sortBy := "sortBy_example" // string | The field to sort the org units by. Defaults to id. (optional)
+	sortOrder := "sortOrder_example" // string | Sort results in descending or ascending order. (optional) (default to "asc")
+	limit := int32(56) // int32 | The maximum number of org units to return. Without it, all of them. (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	resp, r, err := apiClient.OrgUnitAPI.SimulateNodePoolFairShare(context.Background(), nodepoolId).FairShareSimulationRequest(fairShareSimulationRequest).OrgUnitType(orgUnitType).ParentId(parentId).Execute()
+	resp, r, err := apiClient.OrgUnitAPI.SimulateNodePoolFairShare(context.Background(), nodepoolId).OrgUnitType(orgUnitType).FairShareSimulationRequest(fairShareSimulationRequest).ParentId(parentId).SortBy(sortBy).SortOrder(sortOrder).Limit(limit).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `OrgUnitAPI.SimulateNodePoolFairShare``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -514,9 +517,12 @@ Other parameters are passed through a pointer to a apiSimulateNodePoolFairShareR
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
+ **orgUnitType** | **string** | The org unit type. | 
  **fairShareSimulationRequest** | [**FairShareSimulationRequest**](FairShareSimulationRequest.md) |  | 
- **orgUnitType** | **string** | Return only org units of this type. | 
- **parentId** | **string** | Return only projects of this department. | 
+ **parentId** | **string** | The department whose projects to return. Required when orgUnitType is project. | 
+ **sortBy** | **string** | The field to sort the org units by. Defaults to id. | 
+ **sortOrder** | **string** | Sort results in descending or ascending order. | [default to &quot;asc&quot;]
+ **limit** | **int32** | The maximum number of org units to return. Without it, all of them. | 
 
 ### Return type
 

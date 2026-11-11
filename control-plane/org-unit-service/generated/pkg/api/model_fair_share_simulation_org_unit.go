@@ -32,22 +32,21 @@ type FairShareSimulationOrgUnit struct {
 	Type string `json:"type" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Sent together with resources. Replaces the stored rank.
+	// Replaces the stored rank.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Rank string `json:"rank,omitempty"`
 	Rank string `json:"rank,omitempty" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Sent together with rank. Replaces the stored resources; -1 means unlimited.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Resources *ResourcesPerNodePool `json:"resources,omitempty"`
-	Resources *ResourcesPerNodePool `json:"resources,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//Gpu FairShareSimulationGpuSettings `json:"gpu,omitempty"`
+	Gpu FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Resources a project asks for. Without it the project asks for the most it can get. Not allowed on departments, which ask for the sum of their projects' demand.
+	// GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Demand *QuotaStatusResource `json:"demand,omitempty"`
-	Demand *QuotaStatusResource `json:"demand,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//Demand FairShareSimulationResources `json:"demand,omitempty"`
+	Demand FairShareSimulationResources `json:"demand,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
@@ -63,15 +62,11 @@ func AssertFairShareSimulationOrgUnitRequired(obj FairShareSimulationOrgUnit) er
 		}
 	}
 
-	if obj.Resources != nil {
-		if err := AssertResourcesPerNodePoolRequired(*obj.Resources); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationGpuSettingsRequired(obj.Gpu); err != nil {
+		return err
 	}
-	if obj.Demand != nil {
-		if err := AssertQuotaStatusResourceRequired(*obj.Demand); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationResourcesRequired(obj.Demand); err != nil {
+		return err
 	}
 	return nil
 }
@@ -98,20 +93,16 @@ func AssertFairShareSimulationOrgUnitConstraints(obj FairShareSimulationOrgUnit)
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if obj.Resources != nil {
-		if err := AssertResourcesPerNodePoolConstraints(*obj.Resources); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationGpuSettingsConstraints(obj.Gpu); err != nil {
+		return err
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if obj.Demand != nil {
-		if err := AssertQuotaStatusResourceConstraints(*obj.Demand); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationResourcesConstraints(obj.Demand); err != nil {
+		return err
 	}
 	return nil
 }

@@ -4,7 +4,6 @@ required:
   - quota
   - ranks
   - adjustableWeights
-  - cpuQuota
   - limits
 properties:
   quota:
@@ -13,8 +12,6 @@ properties:
     type: boolean
   adjustableWeights:
     type: boolean
-  cpuQuota:
-    type: boolean
   limits:
     type: boolean
-    description: Whether GPU, CPU and memory limits apply. Only allowed when quota is true.
+    description: Whether GPU limits apply. Only allowed when quota is true.

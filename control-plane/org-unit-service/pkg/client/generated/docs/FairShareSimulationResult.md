@@ -10,13 +10,14 @@ Name | Type | Description | Notes
 **FairShare** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | Resources the scheduler would give the org unit when the node pool is fully busy, the sum of guaranteed and overQuota. | 
 **Guaranteed** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The part of the fair share that comes from the org unit&#39;s quota. | 
 **OverQuota** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The part of the fair share above the org unit&#39;s quota. | 
-**Unmet** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | Demand the fair share does not cover. | 
+**Unmet** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | Demand the fair share does not cover. Without a demand, measured against the org unit&#39;s limit, else its parent&#39;s limit, else the node pool&#39;s capacity. | 
+**WeightShareInRank** | **float64** | The org unit&#39;s over-quota weight divided by the total weight of its rank among its siblings, including the ones the caller can&#39;t read. With ranks off, among all its siblings. | 
 
 ## Methods
 
 ### NewFairShareSimulationResult
 
-`func NewFairShareSimulationResult(id string, type_ string, fairShare FairShareSimulationResources, guaranteed FairShareSimulationResources, overQuota FairShareSimulationResources, unmet FairShareSimulationResources, ) *FairShareSimulationResult`
+`func NewFairShareSimulationResult(id string, type_ string, fairShare FairShareSimulationResources, guaranteed FairShareSimulationResources, overQuota FairShareSimulationResources, unmet FairShareSimulationResources, weightShareInRank float64, ) *FairShareSimulationResult`
 
 NewFairShareSimulationResult instantiates a new FairShareSimulationResult object
 This constructor will assign default values to properties that have it defined,
@@ -184,6 +185,26 @@ and a boolean to check if the value has been set.
 `func (o *FairShareSimulationResult) SetUnmet(v FairShareSimulationResources)`
 
 SetUnmet sets Unmet field to given value.
+
+
+### GetWeightShareInRank
+
+`func (o *FairShareSimulationResult) GetWeightShareInRank() float64`
+
+GetWeightShareInRank returns the WeightShareInRank field if non-nil, zero value otherwise.
+
+### GetWeightShareInRankOk
+
+`func (o *FairShareSimulationResult) GetWeightShareInRankOk() (*float64, bool)`
+
+GetWeightShareInRankOk returns a tuple with the WeightShareInRank field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetWeightShareInRank
+
+`func (o *FairShareSimulationResult) SetWeightShareInRank(v float64)`
+
+SetWeightShareInRank sets WeightShareInRank field to given value.
 
 
 

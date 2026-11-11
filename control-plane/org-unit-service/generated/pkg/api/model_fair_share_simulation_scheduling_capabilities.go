@@ -38,12 +38,7 @@ type FairShareSimulationSchedulingCapabilities struct {
 	AdjustableWeights bool `json:"adjustableWeights" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//CpuQuota bool `json:"cpuQuota"`
-	CpuQuota bool `json:"cpuQuota" gorm:"not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Whether GPU, CPU and memory limits apply. Only allowed when quota is true.
+	// Whether GPU limits apply. Only allowed when quota is true.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Limits bool `json:"limits"`
 	Limits bool `json:"limits" gorm:"not null;"`
@@ -56,7 +51,6 @@ func AssertFairShareSimulationSchedulingCapabilitiesRequired(obj FairShareSimula
 		"quota":             obj.Quota,
 		"ranks":             obj.Ranks,
 		"adjustableWeights": obj.AdjustableWeights,
-		"cpuQuota":          obj.CpuQuota,
 		"limits":            obj.Limits,
 	}
 	for name, el := range elements {
@@ -70,11 +64,6 @@ func AssertFairShareSimulationSchedulingCapabilitiesRequired(obj FairShareSimula
 
 // AssertFairShareSimulationSchedulingCapabilitiesConstraints checks if the values respects the defined constraints
 func AssertFairShareSimulationSchedulingCapabilitiesConstraints(obj FairShareSimulationSchedulingCapabilities) error {
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

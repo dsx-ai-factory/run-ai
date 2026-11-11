@@ -1,21 +1,18 @@
 type: object
+description: A scenario of unsaved changes. An empty body simulates the node pool as saved.
 properties:
   nodePool:
     type: object
-    nullable: true
     properties:
       capacity:
         description: Resources to split. Defaults to the node pool's capacity.
-        nullable: true
         allOf:
-          - $ref: "../QuotaStatusResource.yaml"
+          - $ref: "./FairShareSimulationResources.yaml"
       schedulingCapabilities:
-        nullable: true
-        allOf:
-          - $ref: "./FairShareSimulationSchedulingCapabilities.yaml"
+        $ref: "./FairShareSimulationSchedulingCapabilities.yaml"
   orgUnits:
     type: array
     maxItems: 100
-    description: Org units to simulate with other values than their stored ones. Others keep their stored values and ask for the most GPUs they can get.
+    description: Org units that differ from their stored values. Every other org unit keeps its stored values and asks for the most it can get.
     items:
       $ref: "./FairShareSimulationOrgUnit.yaml"

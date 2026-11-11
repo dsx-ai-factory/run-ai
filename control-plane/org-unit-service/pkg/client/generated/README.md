@@ -218,6 +218,7 @@ Class | Method | HTTP request | Description
  - [DeservedResource](docs/DeservedResource.md)
  - [Error](docs/Error.md)
  - [FailedNodePoolResourcesPatchRequest](docs/FailedNodePoolResourcesPatchRequest.md)
+ - [FairShareSimulationGpuSettings](docs/FairShareSimulationGpuSettings.md)
  - [FairShareSimulationOrgUnit](docs/FairShareSimulationOrgUnit.md)
  - [FairShareSimulationRequest](docs/FairShareSimulationRequest.md)
  - [FairShareSimulationRequestNodePool](docs/FairShareSimulationRequestNodePool.md)

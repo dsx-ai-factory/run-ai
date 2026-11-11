@@ -13,15 +13,11 @@ properties:
       - project
   rank:
     type: string
-    description: Sent together with resources. Replaces the stored rank.
+    description: Replaces the stored rank.
     example: High
-  resources:
-    description: Sent together with rank. Replaces the stored resources; -1 means unlimited.
-    nullable: true
-    allOf:
-      - $ref: "../ResourcesPerNodePool.yaml"
+  gpu:
+    $ref: "./FairShareSimulationGpuSettings.yaml"
   demand:
-    description: Resources a project asks for. Without it the project asks for the most it can get. Not allowed on departments, which ask for the sum of their projects' demand.
-    nullable: true
+    description: GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
     allOf:
-      - $ref: "../QuotaStatusResource.yaml"
+      - $ref: "./FairShareSimulationResources.yaml"

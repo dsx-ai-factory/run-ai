@@ -1,0 +1,17 @@
+type: object
+description: GPU settings that replace the stored ones. Omitted fields keep their stored values.
+properties:
+  deserved:
+    type: number
+    format: double
+    description: The GPU quota; -1 means unlimited.
+    example: 4
+  limit:
+    type: number
+    format: double
+    description: The maximum GPU allocation; -1 means unlimited.
+    example: -1
+  overQuotaWeight:
+    type: number
+    format: double
+    example: 2

@@ -82,6 +82,7 @@ pkg/api/model_descendants.go
 pkg/api/model_deserved_resource.go
 pkg/api/model_error.go
 pkg/api/model_failed_node_pool_resources_patch_request.go
+pkg/api/model_fair_share_simulation_gpu_settings.go
 pkg/api/model_fair_share_simulation_org_unit.go
 pkg/api/model_fair_share_simulation_request.go
 pkg/api/model_fair_share_simulation_request_node_pool.go

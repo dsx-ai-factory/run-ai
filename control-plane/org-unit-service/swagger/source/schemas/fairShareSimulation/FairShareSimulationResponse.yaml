@@ -7,6 +7,11 @@ properties:
     description: The resources the simulation split.
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"
+  parent:
+    description: With parentId, the department's own result. Its projects' fair shares add up to it.
+    nullable: true
+    allOf:
+      - $ref: "./FairShareSimulationResult.yaml"
   orgUnits:
     type: array
     items:

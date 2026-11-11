@@ -33,8 +33,10 @@ type FairShareSimulationResult struct {
 	Guaranteed FairShareSimulationResources `json:"guaranteed"`
 	// The part of the fair share above the org unit's quota.
 	OverQuota FairShareSimulationResources `json:"overQuota"`
-	// Demand the fair share does not cover.
+	// Demand the fair share does not cover. Without a demand, measured against the org unit's limit, else its parent's limit, else the node pool's capacity.
 	Unmet FairShareSimulationResources `json:"unmet"`
+	// The org unit's over-quota weight divided by the total weight of its rank among its siblings, including the ones the caller can't read. With ranks off, among all its siblings.
+	WeightShareInRank float64 `json:"weightShareInRank"`
 }
 
 type _FairShareSimulationResult FairShareSimulationResult
@@ -43,7 +45,7 @@ type _FairShareSimulationResult FairShareSimulationResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFairShareSimulationResult(id string, type_ string, fairShare FairShareSimulationResources, guaranteed FairShareSimulationResources, overQuota FairShareSimulationResources, unmet FairShareSimulationResources) *FairShareSimulationResult {
+func NewFairShareSimulationResult(id string, type_ string, fairShare FairShareSimulationResources, guaranteed FairShareSimulationResources, overQuota FairShareSimulationResources, unmet FairShareSimulationResources, weightShareInRank float64) *FairShareSimulationResult {
 	this := FairShareSimulationResult{}
 	this.Id = id
 	this.Type = type_
@@ -51,6 +53,7 @@ func NewFairShareSimulationResult(id string, type_ string, fairShare FairShareSi
 	this.Guaranteed = guaranteed
 	this.OverQuota = overQuota
 	this.Unmet = unmet
+	this.WeightShareInRank = weightShareInRank
 	return &this
 }
 
@@ -249,6 +252,30 @@ func (o *FairShareSimulationResult) SetUnmet(v FairShareSimulationResources) {
 	o.Unmet = v
 }
 
+// GetWeightShareInRank returns the WeightShareInRank field value
+func (o *FairShareSimulationResult) GetWeightShareInRank() float64 {
+	if o == nil {
+		var ret float64
+		return ret
+	}
+
+	return o.WeightShareInRank
+}
+
+// GetWeightShareInRankOk returns a tuple with the WeightShareInRank field value
+// and a boolean to check if the value has been set.
+func (o *FairShareSimulationResult) GetWeightShareInRankOk() (*float64, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.WeightShareInRank, true
+}
+
+// SetWeightShareInRank sets field value
+func (o *FairShareSimulationResult) SetWeightShareInRank(v float64) {
+	o.WeightShareInRank = v
+}
+
 func (o FairShareSimulationResult) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -268,6 +295,7 @@ func (o FairShareSimulationResult) ToMap() (map[string]interface{}, error) {
 	toSerialize["guaranteed"] = o.Guaranteed
 	toSerialize["overQuota"] = o.OverQuota
 	toSerialize["unmet"] = o.Unmet
+	toSerialize["weightShareInRank"] = o.WeightShareInRank
 	return toSerialize, nil
 }
 
@@ -284,6 +312,7 @@ func (o *FairShareSimulationResult) UnmarshalJSON(data []byte) (err error) {
 	//  	"guaranteed",
 	//  	"overQuota",
 	//  	"unmet",
+	//  	"weightShareInRank",
 	// }
 
 	allProperties := make(map[string]interface{})

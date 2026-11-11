@@ -6,6 +6,7 @@ required:
   - guaranteed
   - overQuota
   - unmet
+  - weightShareInRank
 properties:
   id:
     type: string
@@ -31,6 +32,11 @@ properties:
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"
   unmet:
-    description: Demand the fair share does not cover.
+    description: Demand the fair share does not cover. Without a demand, measured against the org unit's limit, else its parent's limit, else the node pool's capacity.
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"
+  weightShareInRank:
+    type: number
+    format: double
+    description: The org unit's over-quota weight divided by the total weight of its rank among its siblings, including the ones the caller can't read. With ranks off, among all its siblings.
+    example: 0.25

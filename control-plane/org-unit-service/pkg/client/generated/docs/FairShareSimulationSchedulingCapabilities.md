@@ -7,14 +7,13 @@ Name | Type | Description | Notes
 **Quota** | **bool** |  | 
 **Ranks** | **bool** |  | 
 **AdjustableWeights** | **bool** |  | 
-**CpuQuota** | **bool** |  | 
-**Limits** | **bool** | Whether GPU, CPU and memory limits apply. Only allowed when quota is true. | 
+**Limits** | **bool** | Whether GPU limits apply. Only allowed when quota is true. | 
 
 ## Methods
 
 ### NewFairShareSimulationSchedulingCapabilities
 
-`func NewFairShareSimulationSchedulingCapabilities(quota bool, ranks bool, adjustableWeights bool, cpuQuota bool, limits bool, ) *FairShareSimulationSchedulingCapabilities`
+`func NewFairShareSimulationSchedulingCapabilities(quota bool, ranks bool, adjustableWeights bool, limits bool, ) *FairShareSimulationSchedulingCapabilities`
 
 NewFairShareSimulationSchedulingCapabilities instantiates a new FairShareSimulationSchedulingCapabilities object
 This constructor will assign default values to properties that have it defined,
@@ -87,26 +86,6 @@ and a boolean to check if the value has been set.
 `func (o *FairShareSimulationSchedulingCapabilities) SetAdjustableWeights(v bool)`
 
 SetAdjustableWeights sets AdjustableWeights field to given value.
-
-
-### GetCpuQuota
-
-`func (o *FairShareSimulationSchedulingCapabilities) GetCpuQuota() bool`
-
-GetCpuQuota returns the CpuQuota field if non-nil, zero value otherwise.
-
-### GetCpuQuotaOk
-
-`func (o *FairShareSimulationSchedulingCapabilities) GetCpuQuotaOk() (*bool, bool)`
-
-GetCpuQuotaOk returns a tuple with the CpuQuota field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetCpuQuota
-
-`func (o *FairShareSimulationSchedulingCapabilities) SetCpuQuota(v bool)`
-
-SetCpuQuota sets CpuQuota field to given value.
 
 
 ### GetLimits

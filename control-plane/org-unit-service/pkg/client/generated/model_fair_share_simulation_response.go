@@ -26,7 +26,9 @@ var _ MappedNullable = &FairShareSimulationResponse{}
 type FairShareSimulationResponse struct {
 	// The resources the simulation split.
 	Capacity FairShareSimulationResources `json:"capacity"`
-	OrgUnits []FairShareSimulationResult  `json:"orgUnits"`
+	// With parentId, the department's own result. Its projects' fair shares add up to it.
+	Parent   NullableFairShareSimulationResult `json:"parent,omitempty"`
+	OrgUnits []FairShareSimulationResult       `json:"orgUnits"`
 }
 
 type _FairShareSimulationResponse FairShareSimulationResponse
@@ -74,6 +76,49 @@ func (o *FairShareSimulationResponse) SetCapacity(v FairShareSimulationResources
 	o.Capacity = v
 }
 
+// GetParent returns the Parent field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *FairShareSimulationResponse) GetParent() FairShareSimulationResult {
+	if o == nil || IsNil(o.Parent.Get()) {
+		var ret FairShareSimulationResult
+		return ret
+	}
+	return *o.Parent.Get()
+}
+
+// GetParentOk returns a tuple with the Parent field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *FairShareSimulationResponse) GetParentOk() (*FairShareSimulationResult, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Parent.Get(), o.Parent.IsSet()
+}
+
+// HasParent returns a boolean if a field has been set.
+func (o *FairShareSimulationResponse) HasParent() bool {
+	if o != nil && o.Parent.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetParent gets a reference to the given NullableFairShareSimulationResult and assigns it to the Parent field.
+func (o *FairShareSimulationResponse) SetParent(v FairShareSimulationResult) {
+	o.Parent.Set(&v)
+}
+
+// SetParentNil sets the value for Parent to be an explicit nil
+func (o *FairShareSimulationResponse) SetParentNil() {
+	o.Parent.Set(nil)
+}
+
+// UnsetParent ensures that no value is present for Parent, not even an explicit nil
+func (o *FairShareSimulationResponse) UnsetParent() {
+	o.Parent.Unset()
+}
+
 // GetOrgUnits returns the OrgUnits field value
 func (o *FairShareSimulationResponse) GetOrgUnits() []FairShareSimulationResult {
 	if o == nil {
@@ -109,6 +154,9 @@ func (o FairShareSimulationResponse) MarshalJSON() ([]byte, error) {
 func (o FairShareSimulationResponse) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["capacity"] = o.Capacity
+	if o.Parent.IsSet() {
+		toSerialize["parent"] = o.Parent.Get()
+	}
 	toSerialize["orgUnits"] = o.OrgUnits
 	return toSerialize, nil
 }

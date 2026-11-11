@@ -28,6 +28,12 @@ type FairShareSimulationResponse struct {
 	Capacity FairShareSimulationResources `json:"capacity" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// With parentId, the department's own result. Its projects' fair shares add up to it.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Parent *FairShareSimulationResult `json:"parent,omitempty"`
+	Parent *FairShareSimulationResult `json:"parent,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OrgUnits []FairShareSimulationResult `json:"orgUnits"`
 	OrgUnits []FairShareSimulationResult `json:"orgUnits" gorm:"serializer:json; type:jsonb;not null;"`
@@ -49,6 +55,11 @@ func AssertFairShareSimulationResponseRequired(obj FairShareSimulationResponse) 
 	if err := AssertFairShareSimulationResourcesRequired(obj.Capacity); err != nil {
 		return err
 	}
+	if obj.Parent != nil {
+		if err := AssertFairShareSimulationResultRequired(*obj.Parent); err != nil {
+			return err
+		}
+	}
 	for _, el := range obj.OrgUnits {
 		if err := AssertFairShareSimulationResultRequired(el); err != nil {
 			return err
@@ -66,6 +77,16 @@ func AssertFairShareSimulationResponseConstraints(obj FairShareSimulationRespons
 	//////////////////////// RUNAI END //////////////////////////
 	if err := AssertFairShareSimulationResourcesConstraints(obj.Capacity); err != nil {
 		return err
+	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Parent != nil {
+		if err := AssertFairShareSimulationResultConstraints(*obj.Parent); err != nil {
+			return err
+		}
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////

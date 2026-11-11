@@ -266,7 +266,7 @@ type OrgUnitAPIServicer interface {
 	GetInternalDeletedOrgUnits(context.Context, time.Time) (ImplResponse, error)
 	GetOrgTree(context.Context) (ImplResponse, error)
 	GetRanks(context.Context) (ImplResponse, error)
-	SimulateNodePoolFairShare(context.Context, string, FairShareSimulationRequest, string, string) (ImplResponse, error)
+	SimulateNodePoolFairShare(context.Context, string, string, FairShareSimulationRequest, string, string, string, int32) (ImplResponse, error)
 }
 
 // ProjectsAPIServicer defines the api actions for the ProjectsAPI service

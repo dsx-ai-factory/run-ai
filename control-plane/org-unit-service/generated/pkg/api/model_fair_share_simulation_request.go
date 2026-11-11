@@ -20,14 +20,15 @@ var dummyFairShareSimulationRequest = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
+// FairShareSimulationRequest - A scenario of unsaved changes. An empty body simulates the node pool as saved.
 type FairShareSimulationRequest struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//NodePool *FairShareSimulationRequestNodePool `json:"nodePool,omitempty"`
-	NodePool *FairShareSimulationRequestNodePool `json:"nodePool,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//NodePool FairShareSimulationRequestNodePool `json:"nodePool,omitempty"`
+	NodePool FairShareSimulationRequestNodePool `json:"nodePool,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Org units to simulate with other values than their stored ones. Others keep their stored values and ask for the most GPUs they can get.
+	// Org units that differ from their stored values. Every other org unit keeps its stored values and asks for the most it can get.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits,omitempty"`
 	OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
@@ -36,10 +37,8 @@ type FairShareSimulationRequest struct {
 
 // AssertFairShareSimulationRequestRequired checks if the required fields are not zero-ed
 func AssertFairShareSimulationRequestRequired(obj FairShareSimulationRequest) error {
-	if obj.NodePool != nil {
-		if err := AssertFairShareSimulationRequestNodePoolRequired(*obj.NodePool); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationRequestNodePoolRequired(obj.NodePool); err != nil {
+		return err
 	}
 	for _, el := range obj.OrgUnits {
 		if err := AssertFairShareSimulationOrgUnitRequired(el); err != nil {
@@ -56,10 +55,8 @@ func AssertFairShareSimulationRequestConstraints(obj FairShareSimulationRequest)
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if obj.NodePool != nil {
-		if err := AssertFairShareSimulationRequestNodePoolConstraints(*obj.NodePool); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationRequestNodePoolConstraints(obj.NodePool); err != nil {
+		return err
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if maxItemsErr := runaihttp.AssertMaxItems(obj.OrgUnits, "OrgUnits", 100); maxItemsErr != nil {

@@ -23,8 +23,8 @@ var _ MappedNullable = &FairShareSimulationRequestNodePool{}
 // FairShareSimulationRequestNodePool struct for FairShareSimulationRequestNodePool
 type FairShareSimulationRequestNodePool struct {
 	// Resources to split. Defaults to the node pool's capacity.
-	Capacity               NullableQuotaStatusResource                       `json:"capacity,omitempty"`
-	SchedulingCapabilities NullableFairShareSimulationSchedulingCapabilities `json:"schedulingCapabilities,omitempty"`
+	Capacity               *FairShareSimulationResources              `json:"capacity,omitempty"`
+	SchedulingCapabilities *FairShareSimulationSchedulingCapabilities `json:"schedulingCapabilities,omitempty"`
 }
 
 // NewFairShareSimulationRequestNodePool instantiates a new FairShareSimulationRequestNodePool object
@@ -44,90 +44,68 @@ func NewFairShareSimulationRequestNodePoolWithDefaults() *FairShareSimulationReq
 	return &this
 }
 
-// GetCapacity returns the Capacity field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *FairShareSimulationRequestNodePool) GetCapacity() QuotaStatusResource {
-	if o == nil || IsNil(o.Capacity.Get()) {
-		var ret QuotaStatusResource
+// GetCapacity returns the Capacity field value if set, zero value otherwise.
+func (o *FairShareSimulationRequestNodePool) GetCapacity() FairShareSimulationResources {
+	if o == nil || IsNil(o.Capacity) {
+		var ret FairShareSimulationResources
 		return ret
 	}
-	return *o.Capacity.Get()
+	return *o.Capacity
 }
 
 // GetCapacityOk returns a tuple with the Capacity field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FairShareSimulationRequestNodePool) GetCapacityOk() (*QuotaStatusResource, bool) {
-	if o == nil {
+func (o *FairShareSimulationRequestNodePool) GetCapacityOk() (*FairShareSimulationResources, bool) {
+	if o == nil || IsNil(o.Capacity) {
 		return nil, false
 	}
-	return o.Capacity.Get(), o.Capacity.IsSet()
+	return o.Capacity, true
 }
 
 // HasCapacity returns a boolean if a field has been set.
 func (o *FairShareSimulationRequestNodePool) HasCapacity() bool {
-	if o != nil && o.Capacity.IsSet() {
+	if o != nil && !IsNil(o.Capacity) {
 		return true
 	}
 
 	return false
 }
 
-// SetCapacity gets a reference to the given NullableQuotaStatusResource and assigns it to the Capacity field.
-func (o *FairShareSimulationRequestNodePool) SetCapacity(v QuotaStatusResource) {
-	o.Capacity.Set(&v)
+// SetCapacity gets a reference to the given FairShareSimulationResources and assigns it to the Capacity field.
+func (o *FairShareSimulationRequestNodePool) SetCapacity(v FairShareSimulationResources) {
+	o.Capacity = &v
 }
 
-// SetCapacityNil sets the value for Capacity to be an explicit nil
-func (o *FairShareSimulationRequestNodePool) SetCapacityNil() {
-	o.Capacity.Set(nil)
-}
-
-// UnsetCapacity ensures that no value is present for Capacity, not even an explicit nil
-func (o *FairShareSimulationRequestNodePool) UnsetCapacity() {
-	o.Capacity.Unset()
-}
-
-// GetSchedulingCapabilities returns the SchedulingCapabilities field value if set, zero value otherwise (both if not set or set to explicit null).
+// GetSchedulingCapabilities returns the SchedulingCapabilities field value if set, zero value otherwise.
 func (o *FairShareSimulationRequestNodePool) GetSchedulingCapabilities() FairShareSimulationSchedulingCapabilities {
-	if o == nil || IsNil(o.SchedulingCapabilities.Get()) {
+	if o == nil || IsNil(o.SchedulingCapabilities) {
 		var ret FairShareSimulationSchedulingCapabilities
 		return ret
 	}
-	return *o.SchedulingCapabilities.Get()
+	return *o.SchedulingCapabilities
 }
 
 // GetSchedulingCapabilitiesOk returns a tuple with the SchedulingCapabilities field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
 func (o *FairShareSimulationRequestNodePool) GetSchedulingCapabilitiesOk() (*FairShareSimulationSchedulingCapabilities, bool) {
-	if o == nil {
+	if o == nil || IsNil(o.SchedulingCapabilities) {
 		return nil, false
 	}
-	return o.SchedulingCapabilities.Get(), o.SchedulingCapabilities.IsSet()
+	return o.SchedulingCapabilities, true
 }
 
 // HasSchedulingCapabilities returns a boolean if a field has been set.
 func (o *FairShareSimulationRequestNodePool) HasSchedulingCapabilities() bool {
-	if o != nil && o.SchedulingCapabilities.IsSet() {
+	if o != nil && !IsNil(o.SchedulingCapabilities) {
 		return true
 	}
 
 	return false
 }
 
-// SetSchedulingCapabilities gets a reference to the given NullableFairShareSimulationSchedulingCapabilities and assigns it to the SchedulingCapabilities field.
+// SetSchedulingCapabilities gets a reference to the given FairShareSimulationSchedulingCapabilities and assigns it to the SchedulingCapabilities field.
 func (o *FairShareSimulationRequestNodePool) SetSchedulingCapabilities(v FairShareSimulationSchedulingCapabilities) {
-	o.SchedulingCapabilities.Set(&v)
-}
-
-// SetSchedulingCapabilitiesNil sets the value for SchedulingCapabilities to be an explicit nil
-func (o *FairShareSimulationRequestNodePool) SetSchedulingCapabilitiesNil() {
-	o.SchedulingCapabilities.Set(nil)
-}
-
-// UnsetSchedulingCapabilities ensures that no value is present for SchedulingCapabilities, not even an explicit nil
-func (o *FairShareSimulationRequestNodePool) UnsetSchedulingCapabilities() {
-	o.SchedulingCapabilities.Unset()
+	o.SchedulingCapabilities = &v
 }
 
 func (o FairShareSimulationRequestNodePool) MarshalJSON() ([]byte, error) {
@@ -140,11 +118,11 @@ func (o FairShareSimulationRequestNodePool) MarshalJSON() ([]byte, error) {
 
 func (o FairShareSimulationRequestNodePool) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.Capacity.IsSet() {
-		toSerialize["capacity"] = o.Capacity.Get()
+	if !IsNil(o.Capacity) {
+		toSerialize["capacity"] = o.Capacity
 	}
-	if o.SchedulingCapabilities.IsSet() {
-		toSerialize["schedulingCapabilities"] = o.SchedulingCapabilities.Get()
+	if !IsNil(o.SchedulingCapabilities) {
+		toSerialize["schedulingCapabilities"] = o.SchedulingCapabilities
 	}
 	return toSerialize, nil
 }

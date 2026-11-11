@@ -206,6 +206,8 @@ FairShareSimulationSchedulingCapabilities:
   $ref: "./fairShareSimulation/FairShareSimulationSchedulingCapabilities.yaml"
 FairShareSimulationOrgUnit:
   $ref: "./fairShareSimulation/FairShareSimulationOrgUnit.yaml"
+FairShareSimulationGpuSettings:
+  $ref: "./fairShareSimulation/FairShareSimulationGpuSettings.yaml"
 FairShareSimulationResponse:
   $ref: "./fairShareSimulation/FairShareSimulationResponse.yaml"
 FairShareSimulationResult:

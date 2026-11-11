@@ -6,9 +6,9 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
 **Type** | **string** |  | 
-**Rank** | Pointer to **string** | Sent together with resources. Replaces the stored rank. | [optional] 
-**Resources** | Pointer to [**NullableResourcesPerNodePool**](ResourcesPerNodePool.md) | Sent together with rank. Replaces the stored resources; -1 means unlimited. | [optional] 
-**Demand** | Pointer to [**NullableQuotaStatusResource**](QuotaStatusResource.md) | Resources a project asks for. Without it the project asks for the most it can get. Not allowed on departments, which ask for the sum of their projects&#39; demand. | [optional] 
+**Rank** | Pointer to **string** | Replaces the stored rank. | [optional] 
+**Gpu** | Pointer to [**FairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
+**Demand** | Pointer to [**FairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects&#39; demand. | [optional] 
 
 ## Methods
 
@@ -94,57 +94,47 @@ SetRank sets Rank field to given value.
 
 HasRank returns a boolean if a field has been set.
 
-### GetResources
+### GetGpu
 
-`func (o *FairShareSimulationOrgUnit) GetResources() ResourcesPerNodePool`
+`func (o *FairShareSimulationOrgUnit) GetGpu() FairShareSimulationGpuSettings`
 
-GetResources returns the Resources field if non-nil, zero value otherwise.
+GetGpu returns the Gpu field if non-nil, zero value otherwise.
 
-### GetResourcesOk
+### GetGpuOk
 
-`func (o *FairShareSimulationOrgUnit) GetResourcesOk() (*ResourcesPerNodePool, bool)`
+`func (o *FairShareSimulationOrgUnit) GetGpuOk() (*FairShareSimulationGpuSettings, bool)`
 
-GetResourcesOk returns a tuple with the Resources field if it's non-nil, zero value otherwise
+GetGpuOk returns a tuple with the Gpu field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetResources
+### SetGpu
 
-`func (o *FairShareSimulationOrgUnit) SetResources(v ResourcesPerNodePool)`
+`func (o *FairShareSimulationOrgUnit) SetGpu(v FairShareSimulationGpuSettings)`
 
-SetResources sets Resources field to given value.
+SetGpu sets Gpu field to given value.
 
-### HasResources
+### HasGpu
 
-`func (o *FairShareSimulationOrgUnit) HasResources() bool`
+`func (o *FairShareSimulationOrgUnit) HasGpu() bool`
 
-HasResources returns a boolean if a field has been set.
+HasGpu returns a boolean if a field has been set.
 
-### SetResourcesNil
-
-`func (o *FairShareSimulationOrgUnit) SetResourcesNil(b bool)`
-
- SetResourcesNil sets the value for Resources to be an explicit nil
-
-### UnsetResources
-`func (o *FairShareSimulationOrgUnit) UnsetResources()`
-
-UnsetResources ensures that no value is present for Resources, not even an explicit nil
 ### GetDemand
 
-`func (o *FairShareSimulationOrgUnit) GetDemand() QuotaStatusResource`
+`func (o *FairShareSimulationOrgUnit) GetDemand() FairShareSimulationResources`
 
 GetDemand returns the Demand field if non-nil, zero value otherwise.
 
 ### GetDemandOk
 
-`func (o *FairShareSimulationOrgUnit) GetDemandOk() (*QuotaStatusResource, bool)`
+`func (o *FairShareSimulationOrgUnit) GetDemandOk() (*FairShareSimulationResources, bool)`
 
 GetDemandOk returns a tuple with the Demand field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetDemand
 
-`func (o *FairShareSimulationOrgUnit) SetDemand(v QuotaStatusResource)`
+`func (o *FairShareSimulationOrgUnit) SetDemand(v FairShareSimulationResources)`
 
 SetDemand sets Demand field to given value.
 
@@ -154,16 +144,6 @@ SetDemand sets Demand field to given value.
 
 HasDemand returns a boolean if a field has been set.
 
-### SetDemandNil
-
-`func (o *FairShareSimulationOrgUnit) SetDemandNil(b bool)`
-
- SetDemandNil sets the value for Demand to be an explicit nil
-
-### UnsetDemand
-`func (o *FairShareSimulationOrgUnit) UnsetDemand()`
-
-UnsetDemand ensures that no value is present for Demand, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

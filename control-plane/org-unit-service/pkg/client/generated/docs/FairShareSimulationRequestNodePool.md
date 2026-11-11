@@ -4,8 +4,8 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Capacity** | Pointer to [**NullableQuotaStatusResource**](QuotaStatusResource.md) | Resources to split. Defaults to the node pool&#39;s capacity. | [optional] 
-**SchedulingCapabilities** | Pointer to [**NullableFairShareSimulationSchedulingCapabilities**](FairShareSimulationSchedulingCapabilities.md) |  | [optional] 
+**Capacity** | Pointer to [**FairShareSimulationResources**](FairShareSimulationResources.md) | Resources to split. Defaults to the node pool&#39;s capacity. | [optional] 
+**SchedulingCapabilities** | Pointer to [**FairShareSimulationSchedulingCapabilities**](FairShareSimulationSchedulingCapabilities.md) |  | [optional] 
 
 ## Methods
 
@@ -28,20 +28,20 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetCapacity
 
-`func (o *FairShareSimulationRequestNodePool) GetCapacity() QuotaStatusResource`
+`func (o *FairShareSimulationRequestNodePool) GetCapacity() FairShareSimulationResources`
 
 GetCapacity returns the Capacity field if non-nil, zero value otherwise.
 
 ### GetCapacityOk
 
-`func (o *FairShareSimulationRequestNodePool) GetCapacityOk() (*QuotaStatusResource, bool)`
+`func (o *FairShareSimulationRequestNodePool) GetCapacityOk() (*FairShareSimulationResources, bool)`
 
 GetCapacityOk returns a tuple with the Capacity field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetCapacity
 
-`func (o *FairShareSimulationRequestNodePool) SetCapacity(v QuotaStatusResource)`
+`func (o *FairShareSimulationRequestNodePool) SetCapacity(v FairShareSimulationResources)`
 
 SetCapacity sets Capacity field to given value.
 
@@ -51,16 +51,6 @@ SetCapacity sets Capacity field to given value.
 
 HasCapacity returns a boolean if a field has been set.
 
-### SetCapacityNil
-
-`func (o *FairShareSimulationRequestNodePool) SetCapacityNil(b bool)`
-
- SetCapacityNil sets the value for Capacity to be an explicit nil
-
-### UnsetCapacity
-`func (o *FairShareSimulationRequestNodePool) UnsetCapacity()`
-
-UnsetCapacity ensures that no value is present for Capacity, not even an explicit nil
 ### GetSchedulingCapabilities
 
 `func (o *FairShareSimulationRequestNodePool) GetSchedulingCapabilities() FairShareSimulationSchedulingCapabilities`
@@ -86,16 +76,6 @@ SetSchedulingCapabilities sets SchedulingCapabilities field to given value.
 
 HasSchedulingCapabilities returns a boolean if a field has been set.
 
-### SetSchedulingCapabilitiesNil
-
-`func (o *FairShareSimulationRequestNodePool) SetSchedulingCapabilitiesNil(b bool)`
-
- SetSchedulingCapabilitiesNil sets the value for SchedulingCapabilities to be an explicit nil
-
-### UnsetSchedulingCapabilities
-`func (o *FairShareSimulationRequestNodePool) UnsetSchedulingCapabilities()`
-
-UnsetSchedulingCapabilities ensures that no value is present for SchedulingCapabilities, not even an explicit nil
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

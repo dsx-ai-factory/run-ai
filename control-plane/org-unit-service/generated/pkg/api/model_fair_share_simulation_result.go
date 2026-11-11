@@ -55,22 +55,29 @@ type FairShareSimulationResult struct {
 	OverQuota FairShareSimulationResources `json:"overQuota" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Demand the fair share does not cover.
+	// Demand the fair share does not cover. Without a demand, measured against the org unit's limit, else its parent's limit, else the node pool's capacity.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Unmet FairShareSimulationResources `json:"unmet"`
 	Unmet FairShareSimulationResources `json:"unmet" gorm:"serializer:json; type:jsonb;not null;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The org unit's over-quota weight divided by the total weight of its rank among its siblings, including the ones the caller can't read. With ranks off, among all its siblings.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//WeightShareInRank float64 `json:"weightShareInRank"`
+	WeightShareInRank float64 `json:"weightShareInRank" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertFairShareSimulationResultRequired checks if the required fields are not zero-ed
 func AssertFairShareSimulationResultRequired(obj FairShareSimulationResult) error {
 	elements := map[string]interface{}{
-		"id":         obj.Id,
-		"type":       obj.Type,
-		"fairShare":  obj.FairShare,
-		"guaranteed": obj.Guaranteed,
-		"overQuota":  obj.OverQuota,
-		"unmet":      obj.Unmet,
+		"id":                obj.Id,
+		"type":              obj.Type,
+		"fairShare":         obj.FairShare,
+		"guaranteed":        obj.Guaranteed,
+		"overQuota":         obj.OverQuota,
+		"unmet":             obj.Unmet,
+		"weightShareInRank": obj.WeightShareInRank,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -142,5 +149,10 @@ func AssertFairShareSimulationResultConstraints(obj FairShareSimulationResult) e
 	if err := AssertFairShareSimulationResourcesConstraints(obj.Unmet); err != nil {
 		return err
 	}
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	return nil
 }

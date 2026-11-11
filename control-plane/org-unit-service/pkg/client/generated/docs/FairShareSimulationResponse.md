@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Capacity** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The resources the simulation split. | 
+**Parent** | Pointer to [**NullableFairShareSimulationResult**](FairShareSimulationResult.md) | With parentId, the department&#39;s own result. Its projects&#39; fair shares add up to it. | [optional] 
 **OrgUnits** | [**[]FairShareSimulationResult**](FairShareSimulationResult.md) |  | 
 
 ## Methods
@@ -46,6 +47,41 @@ and a boolean to check if the value has been set.
 SetCapacity sets Capacity field to given value.
 
 
+### GetParent
+
+`func (o *FairShareSimulationResponse) GetParent() FairShareSimulationResult`
+
+GetParent returns the Parent field if non-nil, zero value otherwise.
+
+### GetParentOk
+
+`func (o *FairShareSimulationResponse) GetParentOk() (*FairShareSimulationResult, bool)`
+
+GetParentOk returns a tuple with the Parent field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetParent
+
+`func (o *FairShareSimulationResponse) SetParent(v FairShareSimulationResult)`
+
+SetParent sets Parent field to given value.
+
+### HasParent
+
+`func (o *FairShareSimulationResponse) HasParent() bool`
+
+HasParent returns a boolean if a field has been set.
+
+### SetParentNil
+
+`func (o *FairShareSimulationResponse) SetParentNil(b bool)`
+
+ SetParentNil sets the value for Parent to be an explicit nil
+
+### UnsetParent
+`func (o *FairShareSimulationResponse) UnsetParent()`
+
+UnsetParent ensures that no value is present for Parent, not even an explicit nil
 ### GetOrgUnits
 
 `func (o *FairShareSimulationResponse) GetOrgUnits() []FairShareSimulationResult`

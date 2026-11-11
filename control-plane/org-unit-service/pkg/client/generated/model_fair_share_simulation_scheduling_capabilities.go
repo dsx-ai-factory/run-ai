@@ -27,8 +27,7 @@ type FairShareSimulationSchedulingCapabilities struct {
 	Quota             bool `json:"quota"`
 	Ranks             bool `json:"ranks"`
 	AdjustableWeights bool `json:"adjustableWeights"`
-	CpuQuota          bool `json:"cpuQuota"`
-	// Whether GPU, CPU and memory limits apply. Only allowed when quota is true.
+	// Whether GPU limits apply. Only allowed when quota is true.
 	Limits bool `json:"limits"`
 }
 
@@ -38,12 +37,11 @@ type _FairShareSimulationSchedulingCapabilities FairShareSimulationSchedulingCap
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFairShareSimulationSchedulingCapabilities(quota bool, ranks bool, adjustableWeights bool, cpuQuota bool, limits bool) *FairShareSimulationSchedulingCapabilities {
+func NewFairShareSimulationSchedulingCapabilities(quota bool, ranks bool, adjustableWeights bool, limits bool) *FairShareSimulationSchedulingCapabilities {
 	this := FairShareSimulationSchedulingCapabilities{}
 	this.Quota = quota
 	this.Ranks = ranks
 	this.AdjustableWeights = adjustableWeights
-	this.CpuQuota = cpuQuota
 	this.Limits = limits
 	return &this
 }
@@ -128,30 +126,6 @@ func (o *FairShareSimulationSchedulingCapabilities) SetAdjustableWeights(v bool)
 	o.AdjustableWeights = v
 }
 
-// GetCpuQuota returns the CpuQuota field value
-func (o *FairShareSimulationSchedulingCapabilities) GetCpuQuota() bool {
-	if o == nil {
-		var ret bool
-		return ret
-	}
-
-	return o.CpuQuota
-}
-
-// GetCpuQuotaOk returns a tuple with the CpuQuota field value
-// and a boolean to check if the value has been set.
-func (o *FairShareSimulationSchedulingCapabilities) GetCpuQuotaOk() (*bool, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.CpuQuota, true
-}
-
-// SetCpuQuota sets field value
-func (o *FairShareSimulationSchedulingCapabilities) SetCpuQuota(v bool) {
-	o.CpuQuota = v
-}
-
 // GetLimits returns the Limits field value
 func (o *FairShareSimulationSchedulingCapabilities) GetLimits() bool {
 	if o == nil {
@@ -189,7 +163,6 @@ func (o FairShareSimulationSchedulingCapabilities) ToMap() (map[string]interface
 	toSerialize["quota"] = o.Quota
 	toSerialize["ranks"] = o.Ranks
 	toSerialize["adjustableWeights"] = o.AdjustableWeights
-	toSerialize["cpuQuota"] = o.CpuQuota
 	toSerialize["limits"] = o.Limits
 	return toSerialize, nil
 }
@@ -204,7 +177,6 @@ func (o *FairShareSimulationSchedulingCapabilities) UnmarshalJSON(data []byte) (
 	//  	"quota",
 	//  	"ranks",
 	//  	"adjustableWeights",
-	//  	"cpuQuota",
 	//  	"limits",
 	// }
 

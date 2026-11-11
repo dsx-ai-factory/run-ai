@@ -24,27 +24,23 @@ type FairShareSimulationRequestNodePool struct {
 
 	// Resources to split. Defaults to the node pool's capacity.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Capacity *QuotaStatusResource `json:"capacity,omitempty"`
-	Capacity *QuotaStatusResource `json:"capacity,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//Capacity FairShareSimulationResources `json:"capacity,omitempty"`
+	Capacity FairShareSimulationResources `json:"capacity,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//SchedulingCapabilities *FairShareSimulationSchedulingCapabilities `json:"schedulingCapabilities,omitempty"`
-	SchedulingCapabilities *FairShareSimulationSchedulingCapabilities `json:"schedulingCapabilities,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//SchedulingCapabilities FairShareSimulationSchedulingCapabilities `json:"schedulingCapabilities,omitempty"`
+	SchedulingCapabilities FairShareSimulationSchedulingCapabilities `json:"schedulingCapabilities,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertFairShareSimulationRequestNodePoolRequired checks if the required fields are not zero-ed
 func AssertFairShareSimulationRequestNodePoolRequired(obj FairShareSimulationRequestNodePool) error {
-	if obj.Capacity != nil {
-		if err := AssertQuotaStatusResourceRequired(*obj.Capacity); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationResourcesRequired(obj.Capacity); err != nil {
+		return err
 	}
-	if obj.SchedulingCapabilities != nil {
-		if err := AssertFairShareSimulationSchedulingCapabilitiesRequired(*obj.SchedulingCapabilities); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationSchedulingCapabilitiesRequired(obj.SchedulingCapabilities); err != nil {
+		return err
 	}
 	return nil
 }
@@ -56,20 +52,16 @@ func AssertFairShareSimulationRequestNodePoolConstraints(obj FairShareSimulation
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if obj.Capacity != nil {
-		if err := AssertQuotaStatusResourceConstraints(*obj.Capacity); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationResourcesConstraints(obj.Capacity); err != nil {
+		return err
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if obj.SchedulingCapabilities != nil {
-		if err := AssertFairShareSimulationSchedulingCapabilitiesConstraints(*obj.SchedulingCapabilities); err != nil {
-			return err
-		}
+	if err := AssertFairShareSimulationSchedulingCapabilitiesConstraints(obj.SchedulingCapabilities); err != nil {
+		return err
 	}
 	return nil
 }

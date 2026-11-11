@@ -26,12 +26,11 @@ var _ MappedNullable = &FairShareSimulationOrgUnit{}
 type FairShareSimulationOrgUnit struct {
 	Id   string `json:"id"`
 	Type string `json:"type"`
-	// Sent together with resources. Replaces the stored rank.
-	Rank *string `json:"rank,omitempty"`
-	// Sent together with rank. Replaces the stored resources; -1 means unlimited.
-	Resources NullableResourcesPerNodePool `json:"resources,omitempty"`
-	// Resources a project asks for. Without it the project asks for the most it can get. Not allowed on departments, which ask for the sum of their projects' demand.
-	Demand NullableQuotaStatusResource `json:"demand,omitempty"`
+	// Replaces the stored rank.
+	Rank *string                         `json:"rank,omitempty"`
+	Gpu  *FairShareSimulationGpuSettings `json:"gpu,omitempty"`
+	// GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
+	Demand *FairShareSimulationResources `json:"demand,omitempty"`
 }
 
 type _FairShareSimulationOrgUnit FairShareSimulationOrgUnit
@@ -135,90 +134,68 @@ func (o *FairShareSimulationOrgUnit) SetRank(v string) {
 	o.Rank = &v
 }
 
-// GetResources returns the Resources field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *FairShareSimulationOrgUnit) GetResources() ResourcesPerNodePool {
-	if o == nil || IsNil(o.Resources.Get()) {
-		var ret ResourcesPerNodePool
+// GetGpu returns the Gpu field value if set, zero value otherwise.
+func (o *FairShareSimulationOrgUnit) GetGpu() FairShareSimulationGpuSettings {
+	if o == nil || IsNil(o.Gpu) {
+		var ret FairShareSimulationGpuSettings
 		return ret
 	}
-	return *o.Resources.Get()
+	return *o.Gpu
 }
 
-// GetResourcesOk returns a tuple with the Resources field value if set, nil otherwise
+// GetGpuOk returns a tuple with the Gpu field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FairShareSimulationOrgUnit) GetResourcesOk() (*ResourcesPerNodePool, bool) {
-	if o == nil {
+func (o *FairShareSimulationOrgUnit) GetGpuOk() (*FairShareSimulationGpuSettings, bool) {
+	if o == nil || IsNil(o.Gpu) {
 		return nil, false
 	}
-	return o.Resources.Get(), o.Resources.IsSet()
+	return o.Gpu, true
 }
 
-// HasResources returns a boolean if a field has been set.
-func (o *FairShareSimulationOrgUnit) HasResources() bool {
-	if o != nil && o.Resources.IsSet() {
+// HasGpu returns a boolean if a field has been set.
+func (o *FairShareSimulationOrgUnit) HasGpu() bool {
+	if o != nil && !IsNil(o.Gpu) {
 		return true
 	}
 
 	return false
 }
 
-// SetResources gets a reference to the given NullableResourcesPerNodePool and assigns it to the Resources field.
-func (o *FairShareSimulationOrgUnit) SetResources(v ResourcesPerNodePool) {
-	o.Resources.Set(&v)
+// SetGpu gets a reference to the given FairShareSimulationGpuSettings and assigns it to the Gpu field.
+func (o *FairShareSimulationOrgUnit) SetGpu(v FairShareSimulationGpuSettings) {
+	o.Gpu = &v
 }
 
-// SetResourcesNil sets the value for Resources to be an explicit nil
-func (o *FairShareSimulationOrgUnit) SetResourcesNil() {
-	o.Resources.Set(nil)
-}
-
-// UnsetResources ensures that no value is present for Resources, not even an explicit nil
-func (o *FairShareSimulationOrgUnit) UnsetResources() {
-	o.Resources.Unset()
-}
-
-// GetDemand returns the Demand field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *FairShareSimulationOrgUnit) GetDemand() QuotaStatusResource {
-	if o == nil || IsNil(o.Demand.Get()) {
-		var ret QuotaStatusResource
+// GetDemand returns the Demand field value if set, zero value otherwise.
+func (o *FairShareSimulationOrgUnit) GetDemand() FairShareSimulationResources {
+	if o == nil || IsNil(o.Demand) {
+		var ret FairShareSimulationResources
 		return ret
 	}
-	return *o.Demand.Get()
+	return *o.Demand
 }
 
 // GetDemandOk returns a tuple with the Demand field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FairShareSimulationOrgUnit) GetDemandOk() (*QuotaStatusResource, bool) {
-	if o == nil {
+func (o *FairShareSimulationOrgUnit) GetDemandOk() (*FairShareSimulationResources, bool) {
+	if o == nil || IsNil(o.Demand) {
 		return nil, false
 	}
-	return o.Demand.Get(), o.Demand.IsSet()
+	return o.Demand, true
 }
 
 // HasDemand returns a boolean if a field has been set.
 func (o *FairShareSimulationOrgUnit) HasDemand() bool {
-	if o != nil && o.Demand.IsSet() {
+	if o != nil && !IsNil(o.Demand) {
 		return true
 	}
 
 	return false
 }
 
-// SetDemand gets a reference to the given NullableQuotaStatusResource and assigns it to the Demand field.
-func (o *FairShareSimulationOrgUnit) SetDemand(v QuotaStatusResource) {
-	o.Demand.Set(&v)
-}
-
-// SetDemandNil sets the value for Demand to be an explicit nil
-func (o *FairShareSimulationOrgUnit) SetDemandNil() {
-	o.Demand.Set(nil)
-}
-
-// UnsetDemand ensures that no value is present for Demand, not even an explicit nil
-func (o *FairShareSimulationOrgUnit) UnsetDemand() {
-	o.Demand.Unset()
+// SetDemand gets a reference to the given FairShareSimulationResources and assigns it to the Demand field.
+func (o *FairShareSimulationOrgUnit) SetDemand(v FairShareSimulationResources) {
+	o.Demand = &v
 }
 
 func (o FairShareSimulationOrgUnit) MarshalJSON() ([]byte, error) {
@@ -236,11 +213,11 @@ func (o FairShareSimulationOrgUnit) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.Rank) {
 		toSerialize["rank"] = o.Rank
 	}
-	if o.Resources.IsSet() {
-		toSerialize["resources"] = o.Resources.Get()
+	if !IsNil(o.Gpu) {
+		toSerialize["gpu"] = o.Gpu
 	}
-	if o.Demand.IsSet() {
-		toSerialize["demand"] = o.Demand.Get()
+	if !IsNil(o.Demand) {
+		toSerialize["demand"] = o.Demand
 	}
 	return toSerialize, nil
 }

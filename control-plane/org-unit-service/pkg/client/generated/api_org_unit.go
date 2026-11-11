@@ -118,10 +118,10 @@ type OrgUnitAPI interface {
 	/*
 		SimulateNodePoolFairShare Simulate the fair share of a node pool's org units
 
-		Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their
-	settings and demand, and for the node pool's scheduling capabilities. It shows the node pool when it is fully busy:
-	every project without a demand in the request asks for the most it can get. The calculation covers every org unit of
-	the node pool; the response holds the ones the caller can read. Nothing is saved.
+		Computes the GPUs the scheduler would give the departments of a node pool, or the projects of one department, for a
+	scenario of unsaved changes. It shows the node pool when it is fully busy: every org unit without a demand in the
+	request asks for the most it can get, and a department asks for the sum of its projects' demand. The calculation covers
+	every org unit of the node pool; the response holds the ones of the requested level the caller can read. Nothing is saved.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1168,9 +1168,18 @@ type ApiSimulateNodePoolFairShareRequest struct {
 	ctx                        context.Context
 	ApiService                 OrgUnitAPI
 	nodepoolId                 string
-	fairShareSimulationRequest *FairShareSimulationRequest
 	orgUnitType                *string
+	fairShareSimulationRequest *FairShareSimulationRequest
 	parentId                   *string
+	sortBy                     *string
+	sortOrder                  *string
+	limit                      *int32
+}
+
+// The org unit type.
+func (r ApiSimulateNodePoolFairShareRequest) OrgUnitType(orgUnitType string) ApiSimulateNodePoolFairShareRequest {
+	r.orgUnitType = &orgUnitType
+	return r
 }
 
 func (r ApiSimulateNodePoolFairShareRequest) FairShareSimulationRequest(fairShareSimulationRequest FairShareSimulationRequest) ApiSimulateNodePoolFairShareRequest {
@@ -1178,15 +1187,27 @@ func (r ApiSimulateNodePoolFairShareRequest) FairShareSimulationRequest(fairShar
 	return r
 }
 
-// Return only org units of this type.
-func (r ApiSimulateNodePoolFairShareRequest) OrgUnitType(orgUnitType string) ApiSimulateNodePoolFairShareRequest {
-	r.orgUnitType = &orgUnitType
+// The department whose projects to return. Required when orgUnitType is project.
+func (r ApiSimulateNodePoolFairShareRequest) ParentId(parentId string) ApiSimulateNodePoolFairShareRequest {
+	r.parentId = &parentId
 	return r
 }
 
-// Return only projects of this department.
-func (r ApiSimulateNodePoolFairShareRequest) ParentId(parentId string) ApiSimulateNodePoolFairShareRequest {
-	r.parentId = &parentId
+// The field to sort the org units by. Defaults to id.
+func (r ApiSimulateNodePoolFairShareRequest) SortBy(sortBy string) ApiSimulateNodePoolFairShareRequest {
+	r.sortBy = &sortBy
+	return r
+}
+
+// Sort results in descending or ascending order.
+func (r ApiSimulateNodePoolFairShareRequest) SortOrder(sortOrder string) ApiSimulateNodePoolFairShareRequest {
+	r.sortOrder = &sortOrder
+	return r
+}
+
+// The maximum number of org units to return. Without it, all of them.
+func (r ApiSimulateNodePoolFairShareRequest) Limit(limit int32) ApiSimulateNodePoolFairShareRequest {
+	r.limit = &limit
 	return r
 }
 
@@ -1197,10 +1218,10 @@ func (r ApiSimulateNodePoolFairShareRequest) Execute() (*FairShareSimulationResp
 /*
 SimulateNodePoolFairShare Simulate the fair share of a node pool's org units
 
-Computes the GPUs the scheduler would give each department and project of a node pool, for unsaved changes to their
-settings and demand, and for the node pool's scheduling capabilities. It shows the node pool when it is fully busy:
-every project without a demand in the request asks for the most it can get. The calculation covers every org unit of
-the node pool; the response holds the ones the caller can read. Nothing is saved.
+Computes the GPUs the scheduler would give the departments of a node pool, or the projects of one department, for a
+scenario of unsaved changes. It shows the node pool when it is fully busy: every org unit without a demand in the
+request asks for the most it can get, and a department asks for the sum of its projects' demand. The calculation covers
+every org unit of the node pool; the response holds the ones of the requested level the caller can read. Nothing is saved.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param nodepoolId The unique id identifying the Node Pool.
@@ -1237,15 +1258,28 @@ func (a *OrgUnitAPIService) SimulateNodePoolFairShareExecute(r ApiSimulateNodePo
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
+	if r.orgUnitType == nil {
+		return localVarReturnValue, nil, reportError("orgUnitType is required and must be specified")
+	}
 	if r.fairShareSimulationRequest == nil {
 		return localVarReturnValue, nil, reportError("fairShareSimulationRequest is required and must be specified")
 	}
 
-	if r.orgUnitType != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "orgUnitType", r.orgUnitType, "form", "")
-	}
+	parameterAddToHeaderOrQuery(localVarQueryParams, "orgUnitType", r.orgUnitType, "form", "")
 	if r.parentId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "parentId", r.parentId, "form", "")
+	}
+	if r.sortBy != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sortBy", r.sortBy, "form", "")
+	}
+	if r.sortOrder != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "sortOrder", r.sortOrder, "form", "")
+	} else {
+		var defaultValue string = "asc"
+		r.sortOrder = &defaultValue
+	}
+	if r.limit != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "limit", r.limit, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{"application/json"}
