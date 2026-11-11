@@ -3,17 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type {
-  Idp,
-  IdpCreationRequest,
-  IdpPostResponse,
-  IdpResources,
-  SamlCreationData,
-  SamlData,
-} from "@/swagger-models/identity-manager-client";
-import { IdpCreationRequestTypeEnum } from "@/swagger-models/identity-manager-client";
-import Axios from "axios";
-import type { ISamlCertificateValidation } from "@/models/setting.model";
+import type { Idp, IdpCreationRequest, IdpPostResponse, IdpResources } from "@/swagger-models/identity-manager-client";
 import { identityManagerApi } from "@/services/infra/client-apis/identity-manager-api/identity-manager-api";
 import { httpService } from "@/services/infra/https.service/http.service";
 
@@ -23,7 +13,6 @@ export const idpService = {
   addIdp,
   updateIdp,
   getIdpResource,
-  validateSamlCertificate,
 };
 
 async function getIdps(): Promise<Idp[]> {
@@ -35,21 +24,29 @@ async function getIdps(): Promise<Idp[]> {
   }
 }
 
-async function addIdp(idp: IdpCreationRequest): Promise<IdpPostResponse> {
+// A dry run validates the request without saving. Its rejections are rethrown raw because the 400 body carries the
+// parsed config (e.g. the certificate expiration date) that the caller shows.
+async function addIdp(idp: IdpCreationRequest, dryRun = false): Promise<IdpPostResponse> {
   try {
-    const response = await identityManagerApi.idpsApi.createIdp(idp);
+    const response = await identityManagerApi.idpsApi.createIdp(dryRun ? { ...idp, dryRun } : idp);
     return response.data;
   } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
+    throw dryRun ? err : httpService.handleHttpError(err);
   }
 }
 
-async function updateIdp(idpAlias: string, idpCreationRequest: IdpCreationRequest): Promise<void> {
+async function updateIdp(
+  idpAlias: string,
+  idpCreationRequest: IdpCreationRequest,
+  dryRun = false,
+): Promise<IdpPostResponse | undefined> {
   try {
-    const response = await identityManagerApi.idpsApi.updateIdp(idpAlias, idpCreationRequest);
-    return response.data;
+    const request = dryRun ? { ...idpCreationRequest, dryRun } : idpCreationRequest;
+    const response = await identityManagerApi.idpsApi.updateIdp(idpAlias, request);
+    // The generated client types the update response as void, but a dry run returns the parsed config.
+    return response.data as unknown as IdpPostResponse | undefined;
   } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
+    throw dryRun ? err : httpService.handleHttpError(err);
   }
 }
 
@@ -67,30 +64,6 @@ async function getIdpResource(idp: string): Promise<IdpResources> {
     const response = await identityManagerApi.idpsApi.getIdpResources(idp);
     return response.data;
   } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-// Dry run: nothing is saved. A rejected config (e.g. an expired certificate) is returned, not thrown,
-// because the 400 body still carries the parsed certificate expiration date to show.
-async function validateSamlCertificate(
-  samlData: SamlCreationData,
-  idpAlias?: string,
-): Promise<ISamlCertificateValidation> {
-  const request: IdpCreationRequest = { type: IdpCreationRequestTypeEnum.Saml, samlData, dryRun: true };
-  try {
-    if (idpAlias) {
-      // The generated client types the update response as void, but a dry run returns the parsed config.
-      const response = await identityManagerApi.idpsApi.updateIdp(idpAlias, request);
-      return { samlData: (response.data as unknown as IdpPostResponse | undefined)?.samlData ?? undefined };
-    }
-    const response = await identityManagerApi.idpsApi.createIdp(request);
-    return { samlData: response.data.samlData ?? undefined };
-  } catch (err: unknown) {
-    if (Axios.isAxiosError(err) && err.response?.status === 400) {
-      const body = err.response.data as { samlData?: SamlData; message?: string } | undefined;
-      return { samlData: body?.samlData ?? undefined, errorMessage: body?.message || "Invalid SAML metadata" };
-    }
     throw httpService.handleHttpError(err);
   }
 }

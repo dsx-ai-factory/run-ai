@@ -6,64 +6,64 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AxiosError } from "axios";
 import { idpService } from "./idp.service";
+import { IdpCreationRequestTypeEnum } from "@/swagger-models/identity-manager-client";
 import { identityManagerApi } from "@/services/infra/client-apis/identity-manager-api/identity-manager-api";
 
 vi.mock("@/services/infra/client-apis/identity-manager-api/identity-manager-api", () => ({
   identityManagerApi: { idpsApi: { updateIdp: vi.fn(), createIdp: vi.fn() } },
 }));
 
-describe("idpService.validateSamlCertificate", () => {
-  const samlData = { metadataXmlFile: "xml", fileName: "idp.xml" };
+describe("idpService dry run", () => {
+  const request = { type: IdpCreationRequestTypeEnum.Saml, samlData: { metadataXmlFile: "xml", fileName: "idp.xml" } };
   const updateIdp = vi.mocked(identityManagerApi.idpsApi.updateIdp);
   const createIdp = vi.mocked(identityManagerApi.idpsApi.createIdp);
 
   const badRequest = (data: unknown) =>
-    new AxiosError("Bad Request", "ERR_BAD_REQUEST", undefined, undefined, {
-      status: 400,
-      data,
-    } as never);
+    new AxiosError("Bad Request", "ERR_BAD_REQUEST", undefined, undefined, { status: 400, data } as never);
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it("calls the update endpoint as a dry run with the given alias", async () => {
+  it("updateIdp sends dryRun to the update endpoint and returns the parsed config", async () => {
     updateIdp.mockResolvedValue({
       data: { alias: "my-idp", samlData: { certificateExpirationDate: "2030-01-01" } },
     } as never);
 
-    const result = await idpService.validateSamlCertificate(samlData, "my-idp");
+    const result = await idpService.updateIdp("my-idp", request, true);
 
-    expect(updateIdp).toHaveBeenCalledWith("my-idp", expect.objectContaining({ dryRun: true, samlData }));
+    expect(updateIdp).toHaveBeenCalledWith("my-idp", { ...request, dryRun: true });
     expect(createIdp).not.toHaveBeenCalled();
-    expect(result.samlData?.certificateExpirationDate).toBe("2030-01-01");
+    expect(result?.samlData?.certificateExpirationDate).toBe("2030-01-01");
   });
 
-  it("calls the create endpoint as a dry run for a new IdP", async () => {
-    createIdp.mockResolvedValue({ data: { samlData: { certificateExpirationDate: "2031-01-01" } } } as never);
+  it("addIdp sends dryRun to the create endpoint", async () => {
+    createIdp.mockResolvedValue({
+      data: { alias: "saml", samlData: { certificateExpirationDate: "2031-01-01" } },
+    } as never);
 
-    const result = await idpService.validateSamlCertificate(samlData);
+    const result = await idpService.addIdp(request, true);
 
-    expect(createIdp).toHaveBeenCalledWith(expect.objectContaining({ dryRun: true, samlData }));
+    expect(createIdp).toHaveBeenCalledWith({ ...request, dryRun: true });
     expect(updateIdp).not.toHaveBeenCalled();
     expect(result.samlData?.certificateExpirationDate).toBe("2031-01-01");
   });
 
-  it.each([
-    ["new", undefined, createIdp],
-    ["existing", "my-idp", updateIdp],
-  ])("returns the parsed config of a rejected (400) %s IdP instead of throwing", async (_name, alias, api) => {
-    api.mockRejectedValue(badRequest({ alias: "saml", samlData: { certificateExpirationDate: "2020-01-01" } }));
+  it("does not add dryRun to a regular request", async () => {
+    createIdp.mockResolvedValue({ data: { alias: "saml" } } as never);
 
-    const result = await idpService.validateSamlCertificate(samlData, alias);
+    await idpService.addIdp(request);
 
-    expect(result.samlData?.certificateExpirationDate).toBe("2020-01-01");
-    expect(result.errorMessage).toBe("Invalid SAML metadata");
+    expect(createIdp).toHaveBeenCalledWith(request);
   });
 
-  it("prefers the backend message when the 400 has one", async () => {
-    createIdp.mockRejectedValue(badRequest({ code: 400, message: "saml idp requires metadata" }));
+  it.each([
+    ["addIdp", () => idpService.addIdp(request, true), createIdp],
+    ["updateIdp", () => idpService.updateIdp("my-idp", request, true), updateIdp],
+  ])("%s rethrows the raw 400 on a dry run so the body stays readable", async (_name, call, api) => {
+    const error = badRequest({ alias: "saml", samlData: { certificateExpirationDate: "2020-01-01" } });
+    api.mockRejectedValue(error);
 
-    expect((await idpService.validateSamlCertificate(samlData)).errorMessage).toBe("saml idp requires metadata");
+    await expect(call()).rejects.toBe(error);
   });
 });

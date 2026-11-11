@@ -5,6 +5,7 @@
 
 // scopeUtil.test.ts
 import { afterEach, beforeEach, describe, test, expect, vi } from "vitest";
+import { AxiosError } from "axios";
 import { idpService } from "@/services/control-plane/idp.service/idp.service";
 import { idpCommon } from "@/components/settings/sections/security/sso-settings/idps/idp-common/idp-common";
 
@@ -73,41 +74,65 @@ describe("isCertificateExpiringSoon", () => {
 });
 
 describe("validateSamlMetadata", () => {
+  const badRequest = (data: unknown) =>
+    new AxiosError("Bad Request", "ERR_BAD_REQUEST", undefined, undefined, { status: 400, data } as never);
+
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  test("returns the expiration date from the backend dry run and forwards the alias", async () => {
-    const spy = vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({
+  test("returns the expiration date from the backend dry run and updates an existing IdP by alias", async () => {
+    const spy = vi.spyOn(idpService, "updateIdp").mockResolvedValue({
+      alias: "saml",
       samlData: { validateSignature: true, certificateExpirationDate: "2030-05-17T00:00:00.000Z" },
     });
+    const addSpy = vi.spyOn(idpService, "addIdp");
     const result = await idpCommon.validateSamlMetadata("xml", "idp.xml", "saml");
     expect(result).toEqual({ expirationDate: new Date("2030-05-17T00:00:00.000Z"), error: "" });
-    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ metadataXmlFile: "xml", fileName: "idp.xml" }), "saml");
+    expect(spy).toHaveBeenCalledWith(
+      "saml",
+      expect.objectContaining({ samlData: expect.objectContaining({ metadataXmlFile: "xml", fileName: "idp.xml" }) }),
+      true,
+    );
+    expect(addSpy).not.toHaveBeenCalled();
+  });
+
+  test("uses the create dry run for a new IdP", async () => {
+    const spy = vi.spyOn(idpService, "addIdp").mockResolvedValue({
+      alias: "saml",
+      samlData: { validateSignature: true, certificateExpirationDate: "2030-05-17T00:00:00.000Z" },
+    });
+    await idpCommon.validateSamlMetadata("xml", "idp.xml");
+    expect(spy).toHaveBeenCalledWith(expect.anything(), true);
   });
 
   test("keeps the date and drops the error when the backend rejects an expired certificate", async () => {
-    vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({
-      samlData: { validateSignature: true, certificateExpirationDate: "2020-01-01T00:00:00.000Z" },
-      errorMessage: "invalid saml metadata",
-    });
+    vi.spyOn(idpService, "addIdp").mockRejectedValue(
+      badRequest({
+        alias: "saml",
+        samlData: { validateSignature: true, certificateExpirationDate: "2020-01-01T00:00:00.000Z" },
+      }),
+    );
     const result = await idpCommon.validateSamlMetadata("xml", "idp.xml");
     expect(result.expirationDate).toEqual(new Date("2020-01-01T00:00:00.000Z"));
     expect(result.error).toBe("");
   });
 
   test("keeps the backend rejection when the certificate is not expired (e.g. not yet valid)", async () => {
-    vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({
-      samlData: { validateSignature: true, certificateExpirationDate: "2099-01-01T00:00:00.000Z" },
-      errorMessage: "Invalid SAML metadata",
-    });
+    vi.spyOn(idpService, "addIdp").mockRejectedValue(
+      badRequest({
+        alias: "saml",
+        samlData: { validateSignature: true, certificateExpirationDate: "2099-01-01T00:00:00.000Z" },
+      }),
+    );
     const result = await idpCommon.validateSamlMetadata("xml", "idp.xml");
     expect(result.expirationDate).toEqual(new Date("2099-01-01T00:00:00.000Z"));
     expect(result.error).toBe("Invalid SAML metadata");
   });
 
   test("treats the backend's zero time as an unknown expiration date", async () => {
-    vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({
+    vi.spyOn(idpService, "addIdp").mockResolvedValue({
+      alias: "saml",
       samlData: { validateSignature: true, certificateExpirationDate: "0001-01-01T00:00:00Z" },
     });
     const result = await idpCommon.validateSamlMetadata("xml", "idp.xml");
@@ -116,7 +141,7 @@ describe("validateSamlMetadata", () => {
   });
 
   test("returns the backend message when there is no date", async () => {
-    vi.spyOn(idpService, "validateSamlCertificate").mockResolvedValue({ errorMessage: "no signing certificate" });
+    vi.spyOn(idpService, "addIdp").mockRejectedValue(badRequest({ code: 400, message: "no signing certificate" }));
     expect(await idpCommon.validateSamlMetadata("xml", "idp.xml")).toEqual({
       expirationDate: null,
       error: "no signing certificate",
@@ -124,7 +149,7 @@ describe("validateSamlMetadata", () => {
   });
 
   test("returns an error instead of throwing when the request fails", async () => {
-    vi.spyOn(idpService, "validateSamlCertificate").mockRejectedValue(new Error("Network Error"));
+    vi.spyOn(idpService, "addIdp").mockRejectedValue(new Error("Network Error"));
     expect(await idpCommon.validateSamlMetadata("xml", "idp.xml")).toEqual({
       expirationDate: null,
       error: "Network Error",

@@ -3,10 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { ISamlMetadataValidation, IWrapperBoxSettingMessages } from "@/models/setting.model";
+import type {
+  ISamlCertificateValidation,
+  ISamlMetadataValidation,
+  IWrapperBoxSettingMessages,
+} from "@/models/setting.model";
 import { extractErrorMessages } from "@/utils/error-alert.util";
 import { idpService } from "@/services/control-plane/idp.service/idp.service";
-import { SamlCreationDataMetadataXmlTypeEnum } from "@/swagger-models/identity-manager-client";
+import Axios from "axios";
+import type { IdpCreationRequest, SamlData } from "@/swagger-models/identity-manager-client";
+import {
+  IdpCreationRequestTypeEnum,
+  SamlCreationDataMetadataXmlTypeEnum,
+} from "@/swagger-models/identity-manager-client";
 import { dateUtil, TimeUnit } from "@/utils/date.util";
 import type { ISelectOption } from "@/models/global.model";
 
@@ -44,10 +53,7 @@ async function validateSamlMetadata(
   idpAlias?: string,
 ): Promise<ISamlMetadataValidation> {
   try {
-    const { samlData, errorMessage } = await idpService.validateSamlCertificate(
-      { metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File, metadataXmlFile, fileName },
-      idpAlias,
-    );
+    const { samlData, errorMessage } = await dryRunSamlMetadata(metadataXmlFile, fileName, idpAlias);
     const expirationDate = parseExpirationDate(samlData?.certificateExpirationDate);
     // An expired certificate is reported by the date check; any other rejection (e.g. not yet valid) keeps its error.
     const isExpired = !!expirationDate && !iValidCertificateDate(expirationDate);
@@ -60,6 +66,31 @@ async function validateSamlMetadata(
       expirationDate: null,
       error: extractErrorMessages(error, "Could not validate the certificate.").join(" "),
     };
+  }
+}
+
+// A rejected config (e.g. an expired certificate) is returned, not thrown, because the 400 body still carries
+// the parsed certificate expiration date to show.
+async function dryRunSamlMetadata(
+  metadataXmlFile: string,
+  fileName: string,
+  idpAlias?: string,
+): Promise<ISamlCertificateValidation> {
+  const request: IdpCreationRequest = {
+    type: IdpCreationRequestTypeEnum.Saml,
+    samlData: { metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File, metadataXmlFile, fileName },
+  };
+  try {
+    const response = idpAlias
+      ? await idpService.updateIdp(idpAlias, request, true)
+      : await idpService.addIdp(request, true);
+    return { samlData: response?.samlData ?? undefined };
+  } catch (err: unknown) {
+    if (Axios.isAxiosError(err) && err.response?.status === 400) {
+      const body = err.response.data as { samlData?: SamlData; message?: string } | undefined;
+      return { samlData: body?.samlData ?? undefined, errorMessage: body?.message || "Invalid SAML metadata" };
+    }
+    throw err;
   }
 }
 
