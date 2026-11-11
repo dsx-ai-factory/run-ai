@@ -9,12 +9,12 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"strings"
-	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	dromosv1alpha1 "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -28,158 +28,101 @@ import (
 
 var optIn = map[string]string{optInAnnotation: "true"}
 
-func TestStatus(t *testing.T) {
+var _ = Describe("Status", func() {
+	var ctx context.Context
+
+	BeforeEach(func() {
+		ctx = context.Background()
+	})
+
 	gpu := gpuContainer("main")
 	ownProfile := corev1.SeccompProfile{Type: corev1.SeccompProfileTypeRuntimeDefault}
 
-	tests := []struct {
-		name      string
-		karta     *kartav1alpha1.Karta
-		workload  *unstructured.Unstructured
-		wantPhase dromosv1alpha1.PluginPhase
-		// wantIssue is part of the warning; empty means no warning at all.
-		wantIssue string
-	}{
-		{
-			name:      "not opted in",
-			karta:     deploymentKarta(),
-			workload:  deployment(t, nil, gpu),
-			wantPhase: dromosv1alpha1.PluginPhaseDisabled,
-		},
-		{
-			// The signal is on the workload (REQ-02-1); a pod label alone is not it.
-			name:      "only a pod label",
-			karta:     deploymentKarta(),
-			workload:  withPodLabel(t, deployment(t, nil, gpu), constants.SnapshotOptInLabel, "true"),
-			wantPhase: dromosv1alpha1.PluginPhaseDisabled,
-		},
-		{
-			name:      "eligible",
-			karta:     deploymentKarta(),
-			workload:  deployment(t, optIn, gpu),
-			wantPhase: dromosv1alpha1.PluginPhaseReady,
-		},
-		{
-			name:      "two pod templates",
-			karta:     pairKarta(),
-			workload:  pair(t, optIn, gpu),
-			wantPhase: dromosv1alpha1.PluginPhaseDisabled,
-			wantIssue: "2 pod templates",
-		},
-		{
-			name:      "pods cannot carry labels",
-			karta:     bareKarta(),
-			workload:  bare(t, optIn, gpu),
-			wantPhase: dromosv1alpha1.PluginPhaseDisabled,
-			wantIssue: "cannot carry labels",
-		},
-		{
-			name:      "no GPU container",
-			karta:     deploymentKarta(),
-			workload:  deployment(t, optIn, corev1.Container{Name: "main", Image: "busybox"}),
-			wantPhase: dromosv1alpha1.PluginPhaseDisabled,
-			wantIssue: "no container requests",
-		},
-		{
-			name:      "two GPU containers",
-			karta:     deploymentKarta(),
-			workload:  deployment(t, optIn, gpu, gpuContainer("sidecar")),
-			wantPhase: dromosv1alpha1.PluginPhaseDisabled,
-			wantIssue: "both request",
-		},
-		{
-			name:      "own seccomp profile",
-			karta:     deploymentKarta(),
-			workload:  deployment(t, optIn, withSeccomp(gpu, ownProfile)),
-			wantPhase: dromosv1alpha1.PluginPhaseDisabled,
-			wantIssue: "seccomp",
-		},
-	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			plugin := newPlugin(kartaStub{karta: tc.karta}, true)
+	// wantIssue is part of the warning; empty means no warning at all.
+	DescribeTable("reports the phase, with a warning when an opt-in can't be honoured",
+		func(karta *kartav1alpha1.Karta, workload func() *unstructured.Unstructured,
+			wantPhase dromosv1alpha1.PluginPhase, wantIssue string) {
+			plugin := newPlugin(kartaStub{karta: karta}, true)
 			status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
 			state := reconcile.New()
 
-			if err := plugin.Status(context.Background(), runnerFor(t, tc.workload), nil, status, state); err != nil {
-				t.Fatalf("Status: %v", err)
-			}
+			Expect(plugin.Status(ctx, runnerFor(workload()), nil, status, state)).To(Succeed())
 
-			if status.Phase != tc.wantPhase {
-				t.Errorf("phase = %s, want %s", status.Phase, tc.wantPhase)
-			}
+			Expect(status.Phase).To(Equal(wantPhase))
 			issues := state.PluginIssues(plugin)
-			if tc.wantIssue == "" {
-				if len(issues) != 0 {
-					t.Errorf("issues = %v, want none", issues)
-				}
+			if wantIssue == "" {
+				Expect(issues).To(BeEmpty())
 				return
 			}
-			if len(issues) != 1 {
-				t.Fatalf("issues = %v, want one warning", issues)
-			}
-			if issues[0].IsCritical {
-				t.Error("the warning is critical; an ineligible workload's phase must not change")
-			}
-			if !strings.Contains(issues[0].Error(), tc.wantIssue) {
-				t.Errorf("warning %q does not mention %q", issues[0].Error(), tc.wantIssue)
-			}
-		})
-	}
-}
+			Expect(issues).To(HaveLen(1))
+			Expect(issues[0].IsCritical).To(BeFalse(), "an ineligible workload's phase must not change")
+			Expect(issues[0].Error()).To(ContainSubstring(wantIssue))
+		},
+		Entry("not opted in", deploymentKarta(),
+			func() *unstructured.Unstructured { return deployment(nil, gpu) },
+			dromosv1alpha1.PluginPhaseDisabled, ""),
+		// The signal is on the workload (REQ-02-1); a pod label alone is not it.
+		Entry("only a pod label", deploymentKarta(),
+			func() *unstructured.Unstructured {
+				return withPodLabel(deployment(nil, gpu), constants.SnapshotOptInLabel, "true")
+			},
+			dromosv1alpha1.PluginPhaseDisabled, ""),
+		Entry("eligible", deploymentKarta(),
+			func() *unstructured.Unstructured { return deployment(optIn, gpu) },
+			dromosv1alpha1.PluginPhaseReady, ""),
+		Entry("two pod templates", pairKarta(),
+			func() *unstructured.Unstructured { return pair(optIn, gpu) },
+			dromosv1alpha1.PluginPhaseDisabled, "2 pod templates"),
+		Entry("pods cannot carry labels", bareKarta(),
+			func() *unstructured.Unstructured { return bare(optIn, gpu) },
+			dromosv1alpha1.PluginPhaseDisabled, "cannot carry labels"),
+		Entry("no GPU container", deploymentKarta(),
+			func() *unstructured.Unstructured {
+				return deployment(optIn, corev1.Container{Name: "main", Image: "busybox"})
+			},
+			dromosv1alpha1.PluginPhaseDisabled, "no container requests"),
+		Entry("two GPU containers", deploymentKarta(),
+			func() *unstructured.Unstructured { return deployment(optIn, gpu, gpuContainer("sidecar")) },
+			dromosv1alpha1.PluginPhaseDisabled, "both request"),
+		Entry("own seccomp profile", deploymentKarta(),
+			func() *unstructured.Unstructured { return deployment(optIn, withSeccomp(gpu, ownProfile)) },
+			dromosv1alpha1.PluginPhaseDisabled, "seccomp"),
+	)
 
-// The framework starts a plugin at Unknown, which holds the workload in
-// Initializing; a failed lookup must not leave it there.
-func TestStatusIsDisabledWhenTheLookupFails(t *testing.T) {
-	plugin := newPlugin(kartaStub{err: errors.New("cache not synced")}, true)
-	status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
+	// The framework starts a plugin at Unknown, which holds the workload in
+	// Initializing; a failed lookup must not leave it there.
+	It("is Disabled when the lookup fails", func() {
+		plugin := newPlugin(kartaStub{err: errors.New("cache not synced")}, true)
+		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
 
-	err := plugin.Status(context.Background(), runnerFor(t, deployment(t, optIn, gpuContainer("main"))),
-		nil, status, reconcile.New())
+		err := plugin.Status(ctx, runnerFor(deployment(optIn, gpu)), nil, status, reconcile.New())
 
-	if err == nil {
-		t.Fatal("Status succeeded, want the lookup error")
-	}
-	if status.Phase != dromosv1alpha1.PluginPhaseDisabled {
-		t.Errorf("phase = %s, want %s", status.Phase, dromosv1alpha1.PluginPhaseDisabled)
-	}
-}
+		Expect(err).To(HaveOccurred())
+		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseDisabled))
+	})
 
-// The plugin runs for every workload, so one that never opted in must not get
-// an issue from a lookup it doesn't need.
-func TestStatusSkipsTheLookupWhenNotOptedIn(t *testing.T) {
-	plugin := newPlugin(kartaStub{err: errors.New("cache not synced")}, true)
-	status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
+	// The plugin runs for every workload, so one that never opted in must not get
+	// an issue from a lookup it doesn't need.
+	It("skips the lookup when not opted in", func() {
+		plugin := newPlugin(kartaStub{err: errors.New("cache not synced")}, true)
+		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
 
-	err := plugin.Status(context.Background(), runnerFor(t, deployment(t, nil, gpuContainer("main"))),
-		nil, status, reconcile.New())
+		Expect(plugin.Status(ctx, runnerFor(deployment(nil, gpu)), nil, status, reconcile.New())).To(Succeed())
 
-	if err != nil {
-		t.Fatalf("Status: %v", err)
-	}
-	if status.Phase != dromosv1alpha1.PluginPhaseDisabled {
-		t.Errorf("phase = %s, want %s", status.Phase, dromosv1alpha1.PluginPhaseDisabled)
-	}
-}
+		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseDisabled))
+	})
 
-func TestStatusIsDisabledWithoutSnapshot(t *testing.T) {
-	plugin := newPlugin(kartaStub{karta: deploymentKarta()}, false)
-	status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
-	state := reconcile.New()
+	It("is Disabled without Snapshot, with no warning", func() {
+		plugin := newPlugin(kartaStub{karta: deploymentKarta()}, false)
+		status := &dromosv1alpha1.PluginStatus{Phase: dromosv1alpha1.PluginPhaseUnknown}
+		state := reconcile.New()
 
-	err := plugin.Status(context.Background(), runnerFor(t, deployment(t, optIn, gpuContainer("main"))),
-		nil, status, state)
+		Expect(plugin.Status(ctx, runnerFor(deployment(optIn, gpu)), nil, status, state)).To(Succeed())
 
-	if err != nil {
-		t.Fatalf("Status: %v", err)
-	}
-	if status.Phase != dromosv1alpha1.PluginPhaseDisabled {
-		t.Errorf("phase = %s, want %s", status.Phase, dromosv1alpha1.PluginPhaseDisabled)
-	}
-	if issues := state.PluginIssues(plugin); len(issues) != 0 {
-		t.Errorf("issues = %v, want none", issues)
-	}
-}
+		Expect(status.Phase).To(Equal(dromosv1alpha1.PluginPhaseDisabled))
+		Expect(state.PluginIssues(plugin)).To(BeEmpty())
+	})
+})
 
 type kartaStub struct {
 	karta *kartav1alpha1.Karta
@@ -190,12 +133,9 @@ func (s kartaStub) GetKartaForGVK(context.Context, schema.GroupVersionKind) (*ka
 	return s.karta, s.err
 }
 
-func runnerFor(t *testing.T, workload *unstructured.Unstructured) *dromosv1alpha1.WorkloadRunner {
-	t.Helper()
+func runnerFor(workload *unstructured.Unstructured) *dromosv1alpha1.WorkloadRunner {
 	raw, err := json.Marshal(workload.Object)
-	if err != nil {
-		t.Fatalf("marshal workload: %v", err)
-	}
+	Expect(err).NotTo(HaveOccurred())
 	return &dromosv1alpha1.WorkloadRunner{
 		ObjectMeta: metav1.ObjectMeta{Name: "llama", Namespace: "runai-proj"},
 		Spec:       dromosv1alpha1.WorkloadRunnerSpec{Template: runtime.RawExtension{Raw: raw}},
@@ -247,9 +187,8 @@ func kartaWith(root kartav1alpha1.ComponentDefinition, children ...kartav1alpha1
 
 // deployment is a Deployment whose own annotations carry the opt-in, and whose
 // pod template has a label of its own, so stamping can be seen to keep it.
-func deployment(t *testing.T, annotations map[string]string, containers ...corev1.Container) *unstructured.Unstructured {
-	t.Helper()
-	return toUnstructured(t, &appsv1.Deployment{
+func deployment(annotations map[string]string, containers ...corev1.Container) *unstructured.Unstructured {
+	return toUnstructured(&appsv1.Deployment{
 		TypeMeta:   metav1.TypeMeta{APIVersion: "apps/v1", Kind: "Deployment"},
 		ObjectMeta: metav1.ObjectMeta{Name: "llama", Namespace: "runai-proj", Annotations: annotations},
 		Spec: appsv1.DeploymentSpec{Template: corev1.PodTemplateSpec{
@@ -259,17 +198,13 @@ func deployment(t *testing.T, annotations map[string]string, containers ...corev
 	})
 }
 
-func withPodLabel(t *testing.T, workload *unstructured.Unstructured, key, value string) *unstructured.Unstructured {
-	t.Helper()
-	if err := unstructured.SetNestedField(workload.Object, value, "spec", "template", "metadata", "labels", key); err != nil {
-		t.Fatalf("set pod label: %v", err)
-	}
+func withPodLabel(workload *unstructured.Unstructured, key, value string) *unstructured.Unstructured {
+	Expect(unstructured.SetNestedField(workload.Object, value, "spec", "template", "metadata", "labels", key)).To(Succeed())
 	return workload
 }
 
-func pair(t *testing.T, annotations map[string]string, containers ...corev1.Container) *unstructured.Unstructured {
-	t.Helper()
-	template := toMap(t, &corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: containers}})
+func pair(annotations map[string]string, containers ...corev1.Container) *unstructured.Unstructured {
+	template := toMap(&corev1.PodTemplateSpec{Spec: corev1.PodSpec{Containers: containers}})
 	workload := &unstructured.Unstructured{Object: map[string]any{
 		"apiVersion": "example.com/v1",
 		"kind":       "Pair",
@@ -280,29 +215,24 @@ func pair(t *testing.T, annotations map[string]string, containers ...corev1.Cont
 	return workload
 }
 
-func bare(t *testing.T, annotations map[string]string, containers ...corev1.Container) *unstructured.Unstructured {
-	t.Helper()
+func bare(annotations map[string]string, containers ...corev1.Container) *unstructured.Unstructured {
 	workload := &unstructured.Unstructured{Object: map[string]any{
 		"apiVersion": "example.com/v1",
 		"kind":       "Bare",
 		"metadata":   map[string]any{"name": "llama", "namespace": "runai-proj"},
-		"spec":       map[string]any{"podSpec": toMap(t, &corev1.PodSpec{Containers: containers})},
+		"spec":       map[string]any{"podSpec": toMap(&corev1.PodSpec{Containers: containers})},
 	}}
 	workload.SetAnnotations(annotations)
 	return workload
 }
 
-func toUnstructured(t *testing.T, object runtime.Object) *unstructured.Unstructured {
-	t.Helper()
-	return &unstructured.Unstructured{Object: toMap(t, object)}
+func toUnstructured(object runtime.Object) *unstructured.Unstructured {
+	return &unstructured.Unstructured{Object: toMap(object)}
 }
 
-func toMap(t *testing.T, object any) map[string]any {
-	t.Helper()
+func toMap(object any) map[string]any {
 	converted, err := runtime.DefaultUnstructuredConverter.ToUnstructured(object)
-	if err != nil {
-		t.Fatalf("convert %T: %v", object, err)
-	}
+	Expect(err).NotTo(HaveOccurred())
 	return converted
 }
 

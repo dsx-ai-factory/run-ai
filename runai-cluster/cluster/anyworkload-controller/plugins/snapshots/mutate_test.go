@@ -7,86 +7,65 @@ package snapshots
 
 import (
 	"context"
-	"fmt"
-	"reflect"
-	"testing"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/dromos/pkg/reconcile"
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 	kartav1alpha1 "github.com/run-ai/karta/pkg/api/runai/v1alpha1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// Stamped with or without Snapshot, so installing or removing it never rolls a workload.
-func TestMutateResourceStampsAnEligibleWorkload(t *testing.T) {
-	for _, installed := range []bool{true, false} {
-		t.Run(fmt.Sprintf("snapshot installed=%t", installed), func(t *testing.T) {
-			workload := deployment(t, optIn, gpuContainer("main"))
-			want := withPodLabel(t, withPodLabel(t, workload.DeepCopy(),
+var _ = Describe("MutateResource", func() {
+	var ctx context.Context
+
+	BeforeEach(func() {
+		ctx = context.Background()
+	})
+
+	gpu := gpuContainer("main")
+
+	// Stamped with or without Snapshot, so installing or removing it never rolls a workload.
+	DescribeTable("stamps an eligible workload",
+		func(installed bool) {
+			workload := deployment(optIn, gpu)
+			want := withPodLabel(withPodLabel(workload.DeepCopy(),
 				constants.SnapshotOptInLabel, "true"), commonconstants.WorkloadRunnerNameLabel, "llama")
 
 			// Every reconcile stamps again; the second time must change nothing.
 			for range 2 {
-				mutate(t, newPlugin(kartaStub{}, installed), workload, deploymentKarta())
+				mutate(ctx, newPlugin(kartaStub{}, installed), workload, deploymentKarta())
 			}
 
-			if !reflect.DeepEqual(workload.Object, want.Object) {
-				t.Errorf("workload = %v\nwant %v", workload.Object, want.Object)
-			}
-		})
-	}
-}
-
-func TestMutateResourceLeavesOtherWorkloadsUnchanged(t *testing.T) {
-	gpu := gpuContainer("main")
-
-	tests := []struct {
-		name     string
-		karta    *kartav1alpha1.Karta
-		workload *unstructured.Unstructured
-	}{
-		{
-			name:     "not opted in",
-			karta:    deploymentKarta(),
-			workload: deployment(t, nil, gpu),
+			Expect(workload.Object).To(Equal(want.Object))
 		},
-		{
-			name:     "ineligible",
-			karta:    deploymentKarta(),
-			workload: deployment(t, optIn, gpu, gpuContainer("sidecar")),
-		},
-		{
-			name:     "two pod templates",
-			karta:    pairKarta(),
-			workload: pair(t, optIn, gpu),
-		},
-		{
-			name:     "pods cannot carry labels",
-			karta:    bareKarta(),
-			workload: bare(t, optIn, gpu),
-		},
-	}
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			want := tc.workload.DeepCopy()
+		Entry("with Snapshot installed", true),
+		Entry("without Snapshot", false),
+	)
 
-			mutate(t, newPlugin(kartaStub{}, true), tc.workload, tc.karta)
+	DescribeTable("leaves other workloads unchanged",
+		func(karta *kartav1alpha1.Karta, workload func() *unstructured.Unstructured) {
+			got := workload()
+			want := got.DeepCopy()
 
-			if !reflect.DeepEqual(tc.workload.Object, want.Object) {
-				t.Errorf("workload = %v\nwant it unchanged: %v", tc.workload.Object, want.Object)
-			}
-		})
-	}
-}
+			mutate(ctx, newPlugin(kartaStub{}, true), got, karta)
 
-func mutate(t *testing.T, plugin *Plugin, workload *unstructured.Unstructured, karta *kartav1alpha1.Karta) {
-	t.Helper()
+			Expect(got.Object).To(Equal(want.Object))
+		},
+		Entry("not opted in", deploymentKarta(),
+			func() *unstructured.Unstructured { return deployment(nil, gpu) }),
+		Entry("ineligible", deploymentKarta(),
+			func() *unstructured.Unstructured { return deployment(optIn, gpu, gpuContainer("sidecar")) }),
+		Entry("two pod templates", pairKarta(),
+			func() *unstructured.Unstructured { return pair(optIn, gpu) }),
+		Entry("pods cannot carry labels", bareKarta(),
+			func() *unstructured.Unstructured { return bare(optIn, gpu) }),
+	)
+})
+
+func mutate(ctx context.Context, plugin *Plugin, workload *unstructured.Unstructured, karta *kartav1alpha1.Karta) {
 	state := reconcile.New()
-	if err := plugin.MutateResource(context.Background(), runnerFor(t, workload), workload, karta, state); err != nil {
-		t.Fatalf("MutateResource: %v", err)
-	}
-	if issues := state.PluginIssues(plugin); len(issues) != 0 {
-		t.Fatalf("issues = %v, want none", issues)
-	}
+	Expect(plugin.MutateResource(ctx, runnerFor(workload), workload, karta, state)).To(Succeed())
+	Expect(state.PluginIssues(plugin)).To(BeEmpty())
 }
