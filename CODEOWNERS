@@ -300,12 +300,15 @@ control-plane/infra/openapi/scripts/openapi-scanner @dsx-ai-factory/appsec-guild
 **/Makefile  @dsx-ai-factory/infra 
 
 # E2E rules follow the generic file rules so package and build files retain owners.
+# Pegasus owns all E2E code during the migration.
 /e2e/** @dsx-ai-factory/e2e
-/e2e/src/test/suites/playwright/parallel/phoenix/ @dsx-ai-factory/infra
-/e2e/src/test/suites/playwright/serial/phoenix/ @dsx-ai-factory/infra
-/e2e/src/test/suites/playwright/serial/regression/phoenix/ @dsx-ai-factory/infra
-/e2e/src/test/suites/playwright/parallel/viper/ @dsx-ai-factory/workloads
-/e2e/src/test/suites/playwright/serial/regression/viper/ @dsx-ai-factory/workloads
-/e2e/src/test/suites/playwright/parallel/suricata/ @dsx-ai-factory/workloads
-/e2e/src/test/suites/playwright/serial/regression/suricata/ @dsx-ai-factory/workloads
-/e2e/src/test/suites/playwright/serial/regression/00-suricata-pre/ @dsx-ai-factory/workloads
+
+# Future team ownership, enable when ownership is transferred from Pegasus.
+# /e2e/src/test/suites/playwright/parallel/phoenix/ @dsx-ai-factory/infra
+# /e2e/src/test/suites/playwright/serial/phoenix/ @dsx-ai-factory/infra
+# /e2e/src/test/suites/playwright/serial/regression/phoenix/ @dsx-ai-factory/infra
+# /e2e/src/test/suites/playwright/parallel/viper/ @dsx-ai-factory/workloads
+# /e2e/src/test/suites/playwright/serial/regression/viper/ @dsx-ai-factory/workloads
+# /e2e/src/test/suites/playwright/parallel/suricata/ @dsx-ai-factory/workloads
+# /e2e/src/test/suites/playwright/serial/regression/suricata/ @dsx-ai-factory/workloads
+# /e2e/src/test/suites/playwright/serial/regression/00-suricata-pre/ @dsx-ai-factory/workloads
