@@ -150,14 +150,9 @@ func getAllocatedMigPortion(ctx context.Context, pod *v1.Pod, kubeClient client.
 		return 0, nil
 	}
 
-	deviceTypeName, deviceCount, err := getMigDevice(pod)
+	devices, err := getMigDevices(pod)
 	if err != nil {
 		return 0, err
-	}
-	migCompute, _, err := extractGpuAndMemoryFromMigResourceName(deviceTypeName)
-	if err != nil {
-		return 0, fmt.Errorf("failed to extract mig device type from %s in annotation %s, pod %s/%s. %w",
-			deviceTypeName, migDeviceAnnotationName, pod.Namespace, pod.Name, err)
 	}
 	gpuProduct, err := getNodeGpuType(ctx, pod, kubeClient)
 	if err != nil {
@@ -170,29 +165,41 @@ func getAllocatedMigPortion(ctx context.Context, pod *v1.Pod, kubeClient client.
 			pod.Spec.NodeName, pod.Namespace, pod.Name, err)
 	}
 
-	migGPUs := deviceCount * float64(migCompute) / wholeGpuNumOfPortions
+	migGPUs := float64(0)
+	for _, device := range devices {
+		migCompute, _, err := extractGpuAndMemoryFromMigResourceName(device.name)
+		if err != nil {
+			return 0, fmt.Errorf("failed to extract mig device type from %s in annotation %s, pod %s/%s. %w",
+				device.name, migDeviceAnnotationName, pod.Namespace, pod.Name, err)
+		}
+		migGPUs += device.count * float64(migCompute) / wholeGpuNumOfPortions
+	}
 	return migGPUs, nil
 }
 
-// getMigDeviceTypeName returns the mig device name from the mig-device annotation, falling back to
-// the first nvidia.com/mig-* resource requested by the pod's containers.
-func getMigDevice(pod *v1.Pod) (string, float64, error) {
+type migDevice struct {
+	name  string
+	count float64
+}
+
+func getMigDevices(pod *v1.Pod) ([]migDevice, error) {
 	// The scheduler may set an empty mig-device annotation for pods that request a MIG profile directly in their
-	// resources (mig.strategy=mixed), so an empty value falls back to the requested resource as well.
+	// resources (mig.strategy=mixed), so an empty value falls back to the requested resources as well.
 	deviceJsonStr := pod.Annotations[migDeviceAnnotationName]
 	if deviceJsonStr == "" {
-		return getRequestedMigResource(pod)
+		return getRequestedMigResources(pod)
 	}
 
 	var deviceJson map[string]any
 	if err := json.Unmarshal([]byte(deviceJsonStr), &deviceJson); err != nil {
-		return "", 0, fmt.Errorf("failed to decode mig-device json from annotation %s, pod %s/%s. %w",
+		return nil, fmt.Errorf("failed to decode mig-device json from annotation %s, pod %s/%s. %w",
 			migDeviceAnnotationName, pod.Namespace, pod.Name, err)
 	}
-	return fmt.Sprintf("%v", deviceJson[deviceNameKey]), 1, nil
+	return []migDevice{{name: fmt.Sprintf("%v", deviceJson[deviceNameKey]), count: 1}}, nil
 }
 
-func getRequestedMigResource(pod *v1.Pod) (string, float64, error) {
+// getRequestedMigResources returns every MIG profile requested by the pod with its quantity, in a stable order.
+func getRequestedMigResources(pod *v1.Pod) ([]migDevice, error) {
 	// Extended resources may be set only in limits; the API server copies them to requests.
 	req, limits := resourcehelper.PodRequestsAndLimits(pod)
 	for _, resourceList := range []v1.ResourceList{req, limits} {
@@ -205,11 +212,15 @@ func getRequestedMigResource(pod *v1.Pod) (string, float64, error) {
 		if len(names) == 0 {
 			continue
 		}
-		sort.Strings(names) // deterministic pick when a pod requests more than one MIG profile
-		quantity := resourceList[v1.ResourceName(names[0])]
-		return names[0], float64(quantity.Value()), nil
+		sort.Strings(names)
+		devices := make([]migDevice, 0, len(names))
+		for _, name := range names {
+			quantity := resourceList[v1.ResourceName(name)]
+			devices = append(devices, migDevice{name: name, count: float64(quantity.Value())})
+		}
+		return devices, nil
 	}
-	return "", 0, fmt.Errorf("pod %s/%s has no %s annotation and no mig resource request",
+	return nil, fmt.Errorf("pod %s/%s has no %s annotation and no mig resource request",
 		pod.Namespace, pod.Name, migDeviceAnnotationName)
 }
 

@@ -67,7 +67,9 @@ func TestCalcPodGpuResources_MigOnMixedRTXPro6000Node(t *testing.T) {
 		annotations map[string]string
 		migResource string
 		quantity    string
-		expected    float64
+		// second MIG profile requested by the same container, with quantity 1
+		extraMigResource string
+		expected         float64
 	}{
 		"mig-device annotation": {
 			annotations: map[string]string{
@@ -87,6 +89,11 @@ func TestCalcPodGpuResources_MigOnMixedRTXPro6000Node(t *testing.T) {
 			},
 			migResource: "nvidia.com/mig-2g.48gb", quantity: "1", expected: 0.5,
 		},
+		"every requested mig profile is summed": {
+			annotations: map[string]string{receivedResourceAnnotationName: receivedTypeMigInstance},
+			migResource: "nvidia.com/mig-1g.24gb", quantity: "1", extraMigResource: "nvidia.com/mig-2g.48gb",
+			expected: 0.75,
+		},
 		"requested quantity is taken into account": {
 			annotations: map[string]string{receivedResourceAnnotationName: receivedTypeMigInstance},
 			migResource: "nvidia.com/mig-1g.24gb", quantity: "2", expected: 0.5,
@@ -95,6 +102,9 @@ func TestCalcPodGpuResources_MigOnMixedRTXPro6000Node(t *testing.T) {
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
 			pod := newRunningMigPod(tc.annotations, tc.migResource, tc.quantity)
+			if tc.extraMigResource != "" {
+				pod.Spec.Containers[0].Resources.Limits[v1.ResourceName(tc.extraMigResource)] = resource.MustParse("1")
+			}
 			podMeta := metadata.PodMetadata{Status: TranslatePodStatus(pod)}
 
 			err := CalcPodGpuResources(context.Background(), pod, &podMeta, kubeClient)
