@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	SystemDynamoComponentV1beta1SpecFgName        = "dynamoComponentSpec"
+	SystemDynamoComponentV1beta1SpecFgName        = "dynamoComponentV1beta1Spec"
 	dynamoComponentV1beta1ReplicasField           = "replicas"
 	dynamoComponentV1beta1TypeField               = "type"
 	dynamoComponentV1beta1GlobalNamespaceField    = "globalDynamoNamespace"
