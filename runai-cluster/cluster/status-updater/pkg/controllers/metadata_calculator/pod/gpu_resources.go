@@ -44,7 +44,8 @@ const (
 	amdNodeGpuMemoryLabelValuePattern = "(\\d+.*)"
 	amdNodeGpuMemoryValueFactor       = 1000000
 
-	migExtractionRegex      = `^nvidia.com/mig-(\d+)g\.(\d+)gb$`
+	// Blackwell GPUs also publish profiles with media extensions, e.g. nvidia.com/mig-1g.24gb+me or +me.all.
+	migExtractionRegex      = `^nvidia.com/mig-(\d+)g\.(\d+)gb(?:\+[a-z]+(?:\.[a-z]+)?)?$`
 	migRegexNumOfOutputs    = 3
 	migDeviceAnnotationName = "runai-mig-device"
 	deviceNameKey           = "name"
@@ -52,8 +53,13 @@ const (
 	nodeGpuTypeLabelName   = "nvidia.com/gpu.product"
 	A100                   = "A100"
 	H100                   = "H100"
+	H200                   = "H200"
+	B200                   = "B200" // also matches GB200
+	B300                   = "B300"
+	RTXPro5000             = "RTX-PRO-5000"
 	RTXPro6000             = "RTX-PRO-6000"
 	defaultComputePortions = float64(7)
+	rtxPro5000Portions     = float64(2)
 	rtxPro6000Portions     = float64(4)
 
 	migResourcePrefix = "nvidia.com/mig-"
@@ -187,6 +193,8 @@ func getMigDevices(pod *v1.Pod) ([]migDevice, error) {
 	// resources (mig.strategy=mixed), so an empty value falls back to the requested resources as well.
 	deviceJsonStr := pod.Annotations[migDeviceAnnotationName]
 	if deviceJsonStr == "" {
+		log.Log.V(1).Info("No mig-device annotation, using the requested MIG resources",
+			"namespace", pod.Namespace, "pod", pod.Name)
 		return getRequestedMigResources(pod)
 	}
 
@@ -195,7 +203,13 @@ func getMigDevices(pod *v1.Pod) ([]migDevice, error) {
 		return nil, fmt.Errorf("failed to decode mig-device json from annotation %s, pod %s/%s. %w",
 			migDeviceAnnotationName, pod.Namespace, pod.Name, err)
 	}
-	return []migDevice{{name: fmt.Sprintf("%v", deviceJson[deviceNameKey]), count: 1}}, nil
+	deviceName, ok := deviceJson[deviceNameKey].(string)
+	if !ok || deviceName == "" {
+		log.Log.V(1).Info("mig-device annotation has no device name, using the requested MIG resources",
+			"namespace", pod.Namespace, "pod", pod.Name)
+		return getRequestedMigResources(pod)
+	}
+	return []migDevice{{name: deviceName, count: 1}}, nil
 }
 
 // getRequestedMigResources returns every MIG profile requested by the pod with its quantity, in a stable order.
@@ -362,12 +376,19 @@ func getNodeGpuType(ctx context.Context, pod *v1.Pod, kubeClient client.Client) 
 	return nodeGpuType, nil
 }
 
+// getDeviceComputePortions returns the number of MIG compute slices of a whole GPU, per the NVIDIA MIG user guide
+// (supported MIG profiles).
 func getDeviceComputePortions(gpuProduct string) (float64, error) {
-	if strings.Contains(gpuProduct, A100) || strings.Contains(gpuProduct, H100) {
-		return defaultComputePortions, nil
+	for _, product := range []string{A100, H100, H200, B200, B300} {
+		if strings.Contains(gpuProduct, product) {
+			return defaultComputePortions, nil
+		}
 	}
 	if strings.Contains(gpuProduct, RTXPro6000) {
 		return rtxPro6000Portions, nil
+	}
+	if strings.Contains(gpuProduct, RTXPro5000) {
+		return rtxPro5000Portions, nil
 	}
 	return -1, fmt.Errorf("cannot calculate device portion for gpu product %s", gpuProduct)
 }
