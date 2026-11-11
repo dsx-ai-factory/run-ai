@@ -1,0 +1,36 @@
+type: object
+required:
+  - id
+  - type
+  - fairShare
+  - guaranteed
+  - overQuota
+  - unmet
+properties:
+  id:
+    type: string
+    example: "4500014"
+  type:
+    type: string
+    enum:
+      - department
+      - project
+  parentId:
+    type: string
+    nullable: true
+  fairShare:
+    description: Resources the scheduler would give the org unit when the node pool is fully busy, the sum of guaranteed and overQuota.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  guaranteed:
+    description: The part of the fair share that comes from the org unit's quota.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  overQuota:
+    description: The part of the fair share above the org unit's quota.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  unmet:
+    description: Demand the fair share does not cover.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
