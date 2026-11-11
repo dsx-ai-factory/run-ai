@@ -173,15 +173,15 @@ func (acs *AssetClusterStatus) LoadAssetsStatus(ctx context.Context, assetKind a
 		}
 	}
 
-	if acs.assetIdsPerKind[assetKind] != nil {
-		if len(acs.assetIdsPerKind) != len(assetIdsOfThisKind) {
+	if assetIds, ok := acs.assetIdsPerKind[assetKind]; ok {
+		// Compare the two sets of asset ids. The length of the map is the number
+		// of kinds loaded so far, so using it here rejected a repeated load of
+		// the same assets whenever their number differed from it, and accepted a
+		// shrunken set when the two counts happened to match.
+		if !assetIds.EqualTo(assetIdsOfThisKind) {
 			return api.NewError(http.StatusInternalServerError, "patchingInfo contains assets that were not loaded", nil)
 		}
-		for assetId := range assetIdsOfThisKind {
-			if !acs.assetIdsPerKind[assetKind].Has(assetId) {
-				return api.NewError(http.StatusInternalServerError, "patchingInfo contains assets that were not loaded", nil)
-			}
-		}
+
 		return nil // all assets of this kind were already loaded, nothing else to do
 	}
 
