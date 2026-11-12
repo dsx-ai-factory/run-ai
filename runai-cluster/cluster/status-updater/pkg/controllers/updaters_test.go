@@ -17,6 +17,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"sigs.k8s.io/controller-runtime/pkg/client/interceptor"
 
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/status-updater/pkg/controllers/patcher"
 )
@@ -47,6 +48,35 @@ func TestUpdatePodWritesStatusOnGpuCalcError(t *testing.T) {
 	assert.Equal(t, "Running", updated.Annotations[patcher.PodStatusAnnotationName])
 	assert.NotContains(t, updated.Annotations, patcher.PodAllocatedGPUsAnnotationName)
 	assert.NotContains(t, updated.Annotations, patcher.PodAllocatedMigGPUsAnnotationName)
+}
+
+// TestUpdatePodPatchErrorIsNotContinuable checks that when both the GPU calculation and the status patch
+// fail, updatePod returns the patch error without the gpuCalcError marker, so Reconcile returns early.
+func TestUpdatePodPatchErrorIsNotContinuable(t *testing.T) {
+	pod := &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "pod",
+			Namespace: "ns",
+			Annotations: map[string]string{
+				"received-resource-type":        "UnknownType",
+				patcher.PodStatusAnnotationName: "Pending",
+			},
+		},
+		Status: v1.PodStatus{Phase: v1.PodRunning},
+	}
+	patchErr := errors.New("patch failed")
+	kubeClient := fake.NewClientBuilder().WithScheme(clientgoscheme.Scheme).WithObjects(pod.DeepCopy()).
+		WithInterceptorFuncs(interceptor.Funcs{
+			Patch: func(context.Context, client.WithWatch, client.Object, client.Patch, ...client.PatchOption) error {
+				return patchErr
+			},
+		}).Build()
+
+	err := updatePod(context.Background(), pod.DeepCopy(), kubeClient)
+
+	require.ErrorIs(t, err, patchErr)
+	var gpuErr *gpuCalcError
+	assert.False(t, errors.As(err, &gpuErr), "a failed status patch must not be continuable: %v", err)
 }
 
 // TestUpdatePodWritesAllAnnotations checks that a pod without a GPU calculation error still gets

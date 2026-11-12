@@ -68,7 +68,8 @@ func updatePod(ctx context.Context, pod *v1.Pod, kubeClient client.Client) error
 }
 
 // updatePodStatusOnGpuCalcError writes only the status annotation of a pod whose GPU resources could not be
-// calculated, and returns the calculation error wrapped in a *gpuCalcError.
+// calculated, and returns the calculation error wrapped in a *gpuCalcError. When the status patch also fails,
+// it returns the joined errors without the *gpuCalcError marker, so the caller stops as on any other update error.
 func updatePodStatusOnGpuCalcError(ctx context.Context, pod *v1.Pod, status string, calcErr error,
 	kubeClient client.Client) error {
 	gpuErr := &gpuCalcError{err: fmt.Errorf("failed to calculate gpu resources for pod: <%v/%v> with error : %w",
@@ -78,7 +79,7 @@ func updatePodStatusOnGpuCalcError(ctx context.Context, pod *v1.Pod, status stri
 	}
 
 	if err := patcher.UpdatePodStatusAnnotation(ctx, pod, status, kubeClient); err != nil {
-		return errors.Join(gpuErr, err)
+		return errors.Join(gpuErr.err, err)
 	}
 
 	log.FromContext(ctx).V(1).Info(fmt.Sprintf("Updated pod status: <%v/%v> status: %s", pod.Namespace,
