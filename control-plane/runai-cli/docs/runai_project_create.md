@@ -43,7 +43,7 @@ runai project create unlimited-over-quota \
 ```
       --department string     Department for the project (default "default")
       --description string    Description for the project
-  -h, --help                  help for create
+  -h, --help[=true|false]     help for create
       --namespace string      Namespace for the project
       --resources resources   Resources for the project (can be specified multiple times). Format: nodepool=<name>,gpu-deserved=<num>,gpu-limit=<num>,rank=<level> (priority=<level> is accepted as an alias for rank)
 ```
@@ -51,11 +51,11 @@ runai project create unlimited-over-quota \
 ### Options inherited from parent commands
 
 ```
-      --config-file string   config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
-      --config-path string   config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
-  -d, --debug                enable debug mode
-  -q, --quiet                enable quiet mode, suppress all output except error messages
-      --verbose              enable verbose mode
+      --config-file string     config file name; can be set by environment variable RUNAI_CLI_CONFIG_FILE (default "config.json")
+      --config-path string     config path; can be set by environment variable RUNAI_CLI_CONFIG_PATH
+  -d, --debug[=true|false]     enable debug mode
+  -q, --quiet[=true|false]     enable quiet mode, suppress all output except error messages
+      --verbose[=true|false]   enable verbose mode
 ```
 
 ### SEE ALSO

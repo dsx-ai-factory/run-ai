@@ -90,11 +90,6 @@ func (s *ModelApiService) DeleteModelAssetById(ctx context.Context, modelId stri
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
 	}
 
-	validationError := validateNotBeingUsedByTemplate(ctx, modelId, assetKind)
-	if validationError != nil {
-		return NewErrorResponse(validationError), nil
-	}
-
 	actionError := dao.DeleteModelAssetById(ctx, modelId, dao.HardDelete)
 	if actionError != nil {
 		return NewErrorResponse(actionError), nil

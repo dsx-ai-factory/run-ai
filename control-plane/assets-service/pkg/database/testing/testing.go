@@ -30,8 +30,6 @@ func cleanTables(db *gorm.DB, objects ...interface{}) {
 func CleanTables() {
 	forceCleanTables(
 		runaidb.DB().Actual().WithContext(context.Background()),
-		dbmodel.TemplateAssetRec{},
-		dbmodel.TemplateContentRec{},
 
 		dbmodel.ComputeAssetRec{},
 		dbmodel.EnvironmentAssetRec{},

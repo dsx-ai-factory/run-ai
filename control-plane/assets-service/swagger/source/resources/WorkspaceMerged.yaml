@@ -13,7 +13,6 @@ get:
   parameters:
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/ProjectIdOptional.yaml"
     - $ref: "../../../../infra/openapi/docs/parameters/query/optional/WorkloadIdOptional.yaml"
-    - $ref: "../../../../infra/openapi/docs/parameters/query/optional/TemplateIdOptional.yaml"
   responses:
     200:
       description: Request completed successfully.

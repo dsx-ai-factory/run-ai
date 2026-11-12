@@ -644,6 +644,8 @@ async function getWorkloadsTelemetryCsv(
   nodepoolName?: string,
   departmentId?: string,
   groupBy?: Array<EWorkloadTelemetryGroupBy>,
+  phases?: Array<Phase>,
+  filename?: string,
 ): Promise<void> {
   try {
     const query: Record<string, string | number | Array<string>> = {
@@ -661,7 +663,10 @@ async function getWorkloadsTelemetryCsv(
     if (groupBy && groupBy.length > 0) {
       query["groupBy"] = groupBy;
     }
-    await fileService.downloadFile(WORKLOADS_TELEMETRY_ENDPOINT, FileType.csv, undefined, query, {});
+    if (phases && phases.length > 0) {
+      query["filterByPhases"] = phases.join(",");
+    }
+    await fileService.downloadFile(WORKLOADS_TELEMETRY_ENDPOINT, FileType.csv, filename, query, {});
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }

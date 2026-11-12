@@ -151,7 +151,6 @@ export default defineComponent({
       }
       if (!this.isHybridSubmissionEnabled) {
         settings.dataVolumes = {};
-        settings.templatesV2 = {};
       }
       if (this.showYamlSubmissionSetting && this.yamlSubmissionSetting) {
         settings.yamlSubmission = { value: String(Boolean(this.yamlSubmissionSetting.enabled)) };
@@ -201,10 +200,6 @@ export default defineComponent({
         return this.isHybridSubmissionEnabled;
       }
 
-      if (key === SettingKeys.EnableTemplatesV2) {
-        return this.isHybridSubmissionEnabled;
-      }
-
       if (key === SettingKeys.YamlSubmission) {
         return false;
       }
@@ -230,10 +225,7 @@ export default defineComponent({
     async onUpdateSetting(key: SettingKeys, value: boolean): Promise<void> {
       if (key === SettingKeys.EnableHybridSubmission && value === false) {
         try {
-          await Promise.all([
-            this.settingStore.refreshLocalSetting(SettingKeys.EnableTemplatesV2),
-            this.settingStore.refreshLocalSetting(SettingKeys.EnableDataVolumes),
-          ]);
+          await this.settingStore.refreshLocalSetting(SettingKeys.EnableDataVolumes);
         } catch (err) {
           console.error(err);
         }

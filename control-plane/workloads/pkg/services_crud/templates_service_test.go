@@ -25,7 +25,6 @@ import (
 	assetsApi "github.com/dsx-ai-factory/run-ai/runai-clients/assets-service-client/generated"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	"github.com/google/uuid"
-	"github.com/stretchr/testify/mock"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/authorization"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/orgunit"
@@ -125,8 +124,6 @@ var _ = Describe("template validations", Serial, func() {
 
 		authorization.SetMock(authMock)
 		orgunit.SetMock(authMock.OrgUnitMock())
-
-		mockTenantSettingsClient.On("GetHybridSubmissionEnabled", mock.Anything).Return(false, nil)
 
 		router = createRouterInt(mockTenantSettingsClient)
 
