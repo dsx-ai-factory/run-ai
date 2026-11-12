@@ -7748,6 +7748,7 @@ components:
       description: The action to apply
       enum:
       - CPU_QUOTAS_TO_DEFAULT
+      - LIMITS_TO_DEFAULT
       type: string
     OrgUnitsNodepoolResourcesResetRequest:
       example:

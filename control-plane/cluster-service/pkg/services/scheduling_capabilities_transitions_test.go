@@ -15,6 +15,8 @@ import (
 	"github.com/stretchr/testify/mock"
 	"k8s.io/utils/ptr"
 
+	authorization_api "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/generated"
+	authorization_mocks "github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client/mocks"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 	bc_mocks "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/mocks/pkg/clients/backend"
 	cluster_config "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/config"
@@ -34,6 +36,7 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 	var clusterId string
 	var createdNodepools []api.Nodepool
 	var orgClient *org_unit_service_client_mock.IOrgUnitClient
+	var authorizationClient *authorization_mocks.IAuthorizationClient
 	var nodepoolService api.NodePoolsAPIServicer
 
 	BeforeAll(func() {
@@ -64,7 +67,8 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		tenantSettingsClient.On("GetOPRSetting", mock.Anything).Return(true, nil)
 		orgClient = org_unit_service_client_mock.NewIOrgUnitClient(GinkgoT())
 		orgClient.On("NodePoolCreated", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-		nodepoolService = services.NewNodePoolsApiService(tenantSettingsClient, orgClient)
+		authorizationClient = authorization_mocks.NewIAuthorizationClient(GinkgoT())
+		nodepoolService = services.NewNodePoolsApiService(tenantSettingsClient, orgClient, authorizationClient)
 	})
 
 	createNodepool := func(onCluster string) api.Nodepool {
@@ -96,6 +100,11 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 
 	expectReset := func(nodepoolId string, action openapi.NodepoolResourcesResetAction, err error) {
 		orgClient.On("NodePoolResetResources", mock.Anything, clusterId, nodepoolId, action).Return(err).Once()
+	}
+
+	permitUpdate := func(resourceType authorization_api.ResourceType, scopes authorization_api.PermittedScopes) {
+		authorizationClient.On("GetPermittedScopes", mock.Anything, resourceType, ptr.To(authorization_api.ACTION_UPDATE)).
+			Return(&authorization_api.PermittedScopesActions{Update: scopes}, http.StatusOK, nil).Once()
 	}
 
 	turnOnCpuQuotaAndWeights := func(nodepoolId string) {
@@ -250,7 +259,6 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)
 		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA, nil, nil)
-		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, nil, nil)
 		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_CPU_QUOTAS_TO_DEFAULT, nil)
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(false), Limits: ptr.To(false)})
@@ -262,17 +270,42 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(stored.Limits).To(BeFalse())
 	})
 
-	It("refuses to turn limits off while org units have limits, and lists them", func() {
+	withLimits := []openapi.OrgUnitsNodepoolSummaryInner{{Type: ptr.To("project"), Name: ptr.To("team-c")}}
+
+	It("resets the org units' limits when limits turns off and the caller may update every department and project", func() {
 		np := createNodepool(clusterId)
-		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, []openapi.OrgUnitsNodepoolSummaryInner{
-			{Type: ptr.To("project"), Name: ptr.To("team-c")},
-		}, nil)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, withLimits, nil)
+		permitUpdate(authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.PermittedScopes{Clusters: []string{clusterId}})
+		permitUpdate(authorization_api.RESOURCETYPE_PROJECT, authorization_api.PermittedScopes{Tenants: []string{tenantIdStr}})
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_LIMITS_TO_DEFAULT, nil)
 
 		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Limits: ptr.To(false)})
-		Expect(response.Code).To(Equal(http.StatusBadRequest))
-		message := response.Body.(api.Error).Message
-		Expect(message).To(ContainSubstring("project team-c"))
-		Expect(message).To(ContainSubstring("LIMITS_TO_DEFAULT"))
+		Expect(response.Code).To(Equal(http.StatusOK))
+		Expect(storedCapabilities(np.Id).Limits).To(BeFalse())
+	})
+
+	It("refuses to turn limits off when the caller can't update every project in the cluster, and lists the org units", func() {
+		np := createNodepool(clusterId)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, withLimits, nil)
+		permitUpdate(authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		permitUpdate(authorization_api.RESOURCETYPE_PROJECT, authorization_api.PermittedScopes{Departments: []string{"4500001"}})
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusForbidden))
+		Expect(response.Body.(api.Error).Message).To(ContainSubstring("project team-c"))
+		orgClient.AssertNotCalled(GinkgoT(), "NodePoolResetResources", mock.Anything, mock.Anything, mock.Anything, mock.Anything)
+		Expect(storedCapabilities(np.Id).Limits).To(BeTrue())
+	})
+
+	It("does not save the nodepool when the limits reset fails", func() {
+		np := createNodepool(clusterId)
+		expectSummary(np.Id, openapi.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT, withLimits, nil)
+		permitUpdate(authorization_api.RESOURCETYPE_DEPARTMENT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		permitUpdate(authorization_api.RESOURCETYPE_PROJECT, authorization_api.PermittedScopes{System: ptr.To(true)})
+		expectReset(np.Id, openapi.NODEPOOLRESOURCESRESETACTION_LIMITS_TO_DEFAULT, errors.New("boom"))
+
+		response := patchCapabilities(np.Id, api.SchedulingCapabilitiesNullable{Limits: ptr.To(false)})
+		Expect(response.Code).To(Equal(http.StatusServiceUnavailable))
 		Expect(storedCapabilities(np.Id).Limits).To(BeTrue())
 	})
 

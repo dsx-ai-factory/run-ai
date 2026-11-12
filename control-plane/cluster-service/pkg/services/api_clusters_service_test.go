@@ -168,7 +168,7 @@ func prepareMocksExt(mockClusterDeleter bool) {
 	helmActions := &cluster_installation_mocks.HelmActions{}
 	clusterInstaller := cluster_installation.NewClusterInstallService(helmActions)
 	// Setup service
-	nodepoolService := services.NewNodePoolsApiService(mocks.tenantSettingsClient, mocks.orgUnitClient)
+	nodepoolService := services.NewNodePoolsApiService(mocks.tenantSettingsClient, mocks.orgUnitClient, nil)
 	clustersApiService = services.NewClustersApiService(mocks.clusterStateCalculator, mocks.idmClient,
 		clusterDeleter,
 		clusterInstaller,

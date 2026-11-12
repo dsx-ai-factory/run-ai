@@ -43,7 +43,7 @@ var _ = Describe("GetNodepoolsWithFields tests", Ordered, func() {
 	orgClient.On("NodePoolDeleted", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 	orgClient.On("DefaultNodePoolCreated", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-	nodepoolService := services.NewNodePoolsApiService(tenantSettingsClient, orgClient)
+	nodepoolService := services.NewNodePoolsApiService(tenantSettingsClient, orgClient, nil)
 
 	var metadataTestClusterId string
 	var metadataTestCluster2Id string

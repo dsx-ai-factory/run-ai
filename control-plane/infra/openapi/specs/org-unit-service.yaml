@@ -3639,6 +3639,7 @@ components:
       x-internal: true
       enum:
         - CPU_QUOTAS_TO_DEFAULT
+        - LIMITS_TO_DEFAULT
     OrgUnitsNodepoolResourcesResetRequest:
       type: object
       required:
