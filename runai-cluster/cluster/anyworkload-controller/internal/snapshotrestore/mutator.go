@@ -22,9 +22,9 @@ import (
 
 // Reasons a pod cold-starts, never reported as failures.
 var (
+	ErrUnplaceable       = errors.New("the workload's placement excludes every node the agent runs on")
 	errNoReader          = errors.New("no API reader to look up the snapshot")
 	errSnapshotNotUsable = errors.New("snapshot is not ready, or is marked failed")
-	errUnplaceable       = errors.New("the workload's placement excludes every node the agent runs on")
 	errNoAgentNodes      = errors.New("no nodes are known to run Snapshot's agent")
 	errOwnStartupProbe   = errors.New("the target container defines its own startup probe")
 )
@@ -127,7 +127,7 @@ func (m *Mutator) restore(ctx context.Context, pod *corev1.Pod, key string) (*co
 		return nil, err
 	}
 
-	if err := requireNodeSelector(&restored.Spec, m.agentNodeSelector); err != nil {
+	if err := RequireNodeSelector(&restored.Spec, m.agentNodeSelector); err != nil {
 		// Admitting an unplaceable pod would strand the replica in Pending;
 		// cold-starting runs it where the workload asked.
 		return nil, err
