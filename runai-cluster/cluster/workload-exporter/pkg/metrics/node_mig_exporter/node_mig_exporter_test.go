@@ -12,6 +12,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// TestIsMigNodeByGpuProduct checks MIG node detection for every MIG capable product family, with L40S as a GPU
+// without MIG.
 func TestIsMigNodeByGpuProduct(t *testing.T) {
 	tests := []struct {
 		gpuProduct string

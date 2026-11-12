@@ -74,6 +74,8 @@ func (pe *PodExporter) GetMigDeviceName() (string, error) {
 	return device.Name, nil
 }
 
+// GetGpuIndex returns the index of the GPU the pod runs on, or unknownDevice when it cannot be known (a device
+// chosen by the scheduler, or a MIG device whose annotation is empty on a mig.strategy=mixed node).
 func (pe *PodExporter) GetGpuIndex() (string, error) {
 	if !pe.IsBound() {
 		return "", nil
@@ -122,6 +124,8 @@ func stripCDIDevicePrefix(gpuIndex string) string {
 	return strings.Join(parts, ",")
 }
 
+// GetGpuInstanceId returns the MIG GPU instance id of the pod, or unknownDevice when the MIG device annotation is empty
+// on a mig.strategy=mixed node.
 func (pe *PodExporter) GetGpuInstanceId() (string, error) {
 	if !pe.isMIG() {
 		return "", nil

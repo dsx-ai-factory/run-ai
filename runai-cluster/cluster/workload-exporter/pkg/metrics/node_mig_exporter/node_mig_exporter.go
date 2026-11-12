@@ -80,6 +80,7 @@ func (ne *NodeMigExporter) isMigEnabledLabeled() bool {
 	return found && isMigEnabled == TrueLabelValue
 }
 
+// supportMIG reports whether the node GPU product (nvidia.com/gpu.product) belongs to a MIG capable device family.
 func (ne *NodeMigExporter) supportMIG() bool {
 	gpuProduct, found := ne.node.Labels[GpuProductLabel]
 	if !found {
