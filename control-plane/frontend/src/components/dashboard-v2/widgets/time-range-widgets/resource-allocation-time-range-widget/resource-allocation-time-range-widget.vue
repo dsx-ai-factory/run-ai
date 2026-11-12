@@ -216,8 +216,15 @@ export default defineComponent({
     },
   },
   methods: {
+    /**
+     * Starts the periodic refresh. A tick is skipped while a request is still in flight, so a slow response is not
+     * superseded by every tick; selection changes call loadChartData directly and still supersede pending work.
+     */
     startRefreshLoadData(): void {
-      intervalUtil.startInterval(EIntervalLabels.ResourceAllocationTimeRangeWidget, this.loadChartData);
+      intervalUtil.startInterval(EIntervalLabels.ResourceAllocationTimeRangeWidget, () => {
+        if (this.loading) return;
+        this.loadChartData();
+      });
     },
     stopRefreshLoadData(): void {
       intervalUtil.stopInterval(EIntervalLabels.ResourceAllocationTimeRangeWidget);
@@ -409,12 +416,20 @@ export default defineComponent({
         return await clusterService.getClusterMetrics(this.clusterId, start, end, metricType, samples);
       }
     },
+    /**
+     * Exports the current selection as CSV. Waits until the latest pending metrics request settles (re-checking if a
+     * newer request superseded the awaited one) so the CSV columns match the selected date range.
+     */
     async exportCsv(): Promise<void> {
       if (this.orgUnitMetricSource) {
         this.$q.notify(dashboardUtil.getCsvErrorMessage());
         return;
       }
-      await this.pendingChartData;
+      let awaitedChartData: Promise<void> | null;
+      do {
+        awaitedChartData = this.pendingChartData;
+        await awaitedChartData;
+      } while (awaitedChartData !== this.pendingChartData);
       const metricType: Array<MetricsType> = [MetricsType.TotalGpu, MetricsType.AllocatedGpu];
       if (this.hasGpuQuotaData) {
         metricType.push(MetricsType.GpuQuota);
