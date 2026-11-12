@@ -68,17 +68,26 @@ const gatewayAPIGroupVersion = "gateway.networking.k8s.io/v1"
 
 func NewRunaiPublic(operandName string, kbClient kc.HybridClient, runaiConfig runv1.RunaiConfig) *RunaiPublic {
 	return &RunaiPublic{
-		operandName: operandName,
-		kbClient:    kbClient,
-		runaiConfig: &runaiConfig,
+		operandName:        operandName,
+		kbClient:           kbClient,
+		localClusterReader: kbClient,
+		runaiConfig:        &runaiConfig,
 	}
 }
 
+// WithLocalClusterReader sets the reader for operands that run in the local
+// (management) cluster. In a single-cluster setup it is the same cluster as kbClient.
+func (rp *RunaiPublic) WithLocalClusterReader(reader client.Reader) *RunaiPublic {
+	rp.localClusterReader = reader
+	return rp
+}
+
 type RunaiPublic struct {
-	operandName string
-	kbClient    kc.HybridClient
-	runaiConfig *runv1.RunaiConfig
-	kubeVersion string
+	operandName        string
+	kbClient           kc.HybridClient
+	localClusterReader client.Reader
+	runaiConfig        *runv1.RunaiConfig
+	kubeVersion        string
 }
 
 func (rp *RunaiPublic) OperandName() string {
@@ -168,6 +177,9 @@ func (rp *RunaiPublic) Object(ctx context.Context) (client.Object, error) {
 	if gw := rp.runaiConfig.Spec.Global.GatewayAPI; gw != nil && gatewayAPIEnabled {
 		configuration.GatewayName = &gw.Name
 		configuration.GatewayNamespace = &gw.Namespace
+	}
+	if rp.inferenceEndpointIntegrationAvailable(ctx) {
+		configuration.InferenceEndpointSchemaVersion = ptr.To(runv1.InferenceEndpointIntegrationV1)
 	}
 
 	if selector := snapshotsAgentNodeSelector(ctx, rp.kbClient, rp.runaiConfig); selector != "" {

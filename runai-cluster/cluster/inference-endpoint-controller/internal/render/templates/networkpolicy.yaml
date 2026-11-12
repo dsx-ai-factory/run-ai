@@ -1,0 +1,37 @@
+# Derived from test/testdata/golden/08-epp-networkpolicy.yaml. Type is core Kubernetes, the instance is ours.
+# Ingress to the EPP Pod is limited to the two callers that need it. Egress is left open on purpose:
+# the API-server address and the CNI behaviour differ per cluster, and the EPP must scrape the model
+# Pods on {{ .Port }} and reach DNS, so a correct egress allow-list is a follow-up.
+# The policy only takes effect where the CNI enforces NetworkPolicy.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ printf "%s-epp" .Name | toJSON }}
+  namespace: {{ .Namespace | toJSON }}
+spec:
+  podSelector:
+    matchLabels:                      # the labels epp.yaml puts on the EPP Pod
+      inferencepool: {{ printf "%s-epp" .Name | toJSON }}
+      inference.networking.k8s.io/igw-mode: inferencepool
+  policyTypes:
+  - Ingress
+  ingress:
+  # The Gateway dials ext_proc on 9002 and may gRPC-health-check on 9003. Kubelet probes are not
+  # subject to NetworkPolicy, so 9003 is opened for the Gateway namespace only.
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .GatewayNamespace | toJSON }}
+    ports:
+    - protocol: TCP
+      port: 9002
+    - protocol: TCP
+      port: 9003
+  # Prometheus scrapes EPP metrics on 9090 from the metrics namespace.
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: {{ .MetricsNamespace | toJSON }}
+    ports:
+    - protocol: TCP
+      port: 9090
