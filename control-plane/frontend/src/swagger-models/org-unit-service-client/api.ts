@@ -2441,7 +2441,7 @@ export interface FairShareSimulationNodePool {
     'schedulingCapabilities': FairShareSimulationSchedulingCapabilities;
 }
 /**
- * GPUs to split. 0 is valid and gives every org unit 0.
+ * GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them.
  * @export
  * @interface FairShareSimulationNodePoolCapacity
  */

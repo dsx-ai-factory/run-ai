@@ -4,7 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Capacity** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | GPUs to split. 0 is valid and gives every org unit 0. | 
+**Capacity** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them. | 
 **SchedulingCapabilities** | [**FairShareSimulationSchedulingCapabilities**](FairShareSimulationSchedulingCapabilities.md) |  | 
 
 ## Methods

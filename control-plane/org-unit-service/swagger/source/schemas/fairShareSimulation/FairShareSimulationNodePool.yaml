@@ -5,7 +5,7 @@ required:
   - schedulingCapabilities
 properties:
   capacity:
-    description: GPUs to split. 0 is valid and gives every org unit 0.
+    description: GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them.
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"
   schedulingCapabilities:

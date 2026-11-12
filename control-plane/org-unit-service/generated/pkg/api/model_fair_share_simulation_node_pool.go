@@ -23,7 +23,7 @@ var dummyFairShareSimulationNodePool = runaihttp.AssertPattern
 // FairShareSimulationNodePool - The node pool as it is in the form.
 type FairShareSimulationNodePool struct {
 
-	// GPUs to split. 0 is valid and gives every org unit 0.
+	// GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Capacity FairShareSimulationResources `json:"capacity"`
 	Capacity FairShareSimulationResources `json:"capacity" gorm:"serializer:json; type:jsonb;not null;"`

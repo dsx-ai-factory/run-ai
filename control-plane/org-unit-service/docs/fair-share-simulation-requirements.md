@@ -100,7 +100,7 @@ The code is KAI's `pkg/fairshare` (merged, kai-scheduler/KAI-Scheduler#2572; not
 
 - Required in every request: `nodePool.capacity`, `nodePool.schedulingCapabilities`, `assumptions`, `orgUnitType`, at least one row. No server-side fallback to saved values.
 - Row edits merge over stored values field by field (`rank`, `gpu.deserved`, `gpu.limit`, `gpu.overQuotaWeight`, `demand`), each optional.
-- 400 for: `limits` on with `quota` off; a `limit` on a row while `limits` is off; a `rank` while `ranks` is off; a duplicate id; an id not in the pool or not readable (same message); a row outside the focus department; `idle` without a focus; `capacity < 0`; `demand < 0`. A demand above the limit is capped, not rejected. `capacity = 0` is valid (a pool with no nodes yet): every row 0.
+- 400 for: `limits` on with `quota` off; a `limit` on a row while `limits` is off; a `rank` while `ranks` is off; a duplicate id; an id not in the pool or not readable (same message); a row outside the focus department; `idle` without a focus; `capacity < 0`; `demand < 0`. A demand above the limit is capped, not rejected. `capacity = 0` is valid (a pool with no nodes yet): the quota phase still runs, so each org unit gets its quota (capped by demand and limit) and nothing above it.
 - Response per row: `fairShare`, `guaranteed`, `overQuota`, `unmet`, `demand` (effective), `weightShareInRank`. Values may be fractional; the client rounds.
 - Cost per call: the pool's departments (hundreds) plus, for the department forms, one department's projects (up to ~1.2k), two permitted-scopes calls, and KAI's division.
 
