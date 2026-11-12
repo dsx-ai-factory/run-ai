@@ -73,6 +73,21 @@ var _ = Describe("Administrator inference endpoint defaults", func() {
 			Expect(defaults).To(Equal(&Defaults{GatewayName: "inference", GatewayNamespace: "gateways", EPPProfile: "gie-v1.5"}))
 		})
 
+		It("accepts a cluster that does not report the integration version during a component rollout", func() {
+			status.Config.Get().InferenceEndpointSchemaVersion.Unset()
+			defaults, err := ResolveDefaultsForUpdate(status)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(defaults).To(Equal(&Defaults{GatewayName: "inference", GatewayNamespace: "gateways", EPPProfile: EPPProfileGIEv15}))
+		})
+
+		It("still rejects a cluster that reports no version and no Gateway", func() {
+			status.Config.Get().InferenceEndpointSchemaVersion.Unset()
+			status.Config.Get().GatewayAPIEnabled.Unset()
+			defaults, err := ResolveDefaultsForUpdate(status)
+			Expect(err).To(MatchError(ContainSubstring("Gateway")))
+			Expect(defaults).To(BeNil())
+		})
+
 		It("still rejects a future contract and incomplete Gateway defaults", func() {
 			status.Config.Get().GatewayName.Unset()
 			defaults, err := ResolveDefaultsForUpdate(status)

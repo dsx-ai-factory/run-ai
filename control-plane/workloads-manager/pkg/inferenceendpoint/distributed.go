@@ -35,7 +35,7 @@ const distributedInferenceKind = "distributed inference"
 // Only the public HTTP, root-hostname topology is representable in this version.
 func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.NetworkingEndpoint, defaults *Defaults) (*api.ExternalAccessInference, error) {
 	if !validDefaults(defaults) {
-		return nil, fmt.Errorf("distributed inference requires valid administrator Gateway defaults and the gie-v1.5 EPP profile")
+		return nil, fmt.Errorf("distributed inference requires valid administrator Gateway defaults and the %s EPP profile", EPPProfileGIEv15)
 	}
 	if lws == nil || lws.Name == "" || lws.Namespace == "" || lws.Spec.LeaderWorkerTemplate.LeaderTemplate == nil ||
 		len(lws.Spec.LeaderWorkerTemplate.LeaderTemplate.Spec.Containers) == 0 {
@@ -53,7 +53,7 @@ func BuildDistributedInferenceIntent(lws *lwsv1.LeaderWorkerSet, endpoint api.Ne
 
 func validDefaults(defaults *Defaults) bool {
 	return defaults != nil && defaults.GatewayName != "" && len(validation.IsDNS1123Subdomain(defaults.GatewayName)) == 0 &&
-		defaults.GatewayNamespace != "" && len(validation.IsDNS1123Label(defaults.GatewayNamespace)) == 0 && defaults.EPPProfile == "gie-v1.5"
+		defaults.GatewayNamespace != "" && len(validation.IsDNS1123Label(defaults.GatewayNamespace)) == 0 && defaults.EPPProfile == EPPProfileGIEv15
 }
 
 func newInferenceIntent(defaults *Defaults) *api.ExternalAccessInference {
