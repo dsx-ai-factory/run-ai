@@ -46,7 +46,7 @@ func TestPack_TextOutput_UsesHumanTitles(t *testing.T) {
 	res := run(t, packConfig(t), harness.TestLock(), true)
 	require.NoError(t, res.err)
 
-	assert.Contains(t, res.stdout, "# Air-gapped bundle")
+	assert.Regexp(t, `(?m)^\S+ Air-gapped bundle$`, res.stdout)
 	assert.Contains(t, res.stdout, "Air-gapped bundle creation")
 	assert.Contains(t, res.stdout, "Resolving artifact inventory")
 	assert.Contains(t, res.stdout, "Downloading container images")
