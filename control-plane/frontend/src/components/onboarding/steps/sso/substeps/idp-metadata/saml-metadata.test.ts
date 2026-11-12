@@ -59,7 +59,7 @@ describe("saml-metadata.vue (onboarding)", () => {
   });
 
   it("shows the certificate error and blocks the form when the uploaded certificate is expired", async () => {
-    vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(-1));
+    vi.spyOn(idpCommon, "validateSamlMetadata").mockResolvedValue({ expirationDate: daysFromNow(-1), error: "" });
     const wrapper = mountInForm();
     await uploadMetadataFile(wrapper);
 
@@ -69,7 +69,7 @@ describe("saml-metadata.vue (onboarding)", () => {
   });
 
   it("shows the expiration date and accepts the form when the certificate is valid", async () => {
-    vi.spyOn(idpCommon, "getCertificateExpirationDate").mockResolvedValue(daysFromNow(120));
+    vi.spyOn(idpCommon, "validateSamlMetadata").mockResolvedValue({ expirationDate: daysFromNow(120), error: "" });
     const wrapper = mountInForm();
     await uploadMetadataFile(wrapper);
 

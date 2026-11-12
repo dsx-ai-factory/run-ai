@@ -10,6 +10,7 @@ import (
 	crand "crypto/rand"
 	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"html"
 	"io"
@@ -863,6 +864,7 @@ func TestExternalTokenExchange_ClientCredentialsFlow(t *testing.T) {
 	ctx := TestStepsClient.SetContextValues(context.Background(), BaseTenantId)
 	client, clientId, _, _, cleanup := setupExternalTokenExchangeTest(t, ctx, "external-token-client-credentials")
 	defer cleanup()
+	removeClientProtocolMapper(t, MasterRealmName, *client.ID, "SubToClientId Mapper")
 
 	tokenURL := fmt.Sprintf(keycloakTokenEndpoint, MasterRealmName)
 	clientToken, err := GetKeycloakToken(tokenURL, clientId, *client.Secret, "", "", "client_credentials")
@@ -1308,4 +1310,54 @@ func simulateKeycloakBrowserLogin(t *testing.T, authorizeURL, username, password
 	require.NotEmpty(t, code, "authorization code not found in callback URL: %s", callbackURL)
 
 	return code
+}
+
+func removeClientProtocolMapper(t *testing.T, realm, clientUUID, mapperName string) {
+	t.Helper()
+	httpClient := NewLocalhostOverrideClient()
+	base := "http://" + KeycloakDomain + ":8090/auth"
+
+	tokenResp, err := httpClient.PostForm(base+"/realms/master/protocol/openid-connect/token", url.Values{
+		"client_id":  {"admin-cli"},
+		"username":   {iamUsername},
+		"password":   {iamPassword},
+		"grant_type": {"password"},
+	})
+	require.NoError(t, err)
+	defer tokenResp.Body.Close()
+	var token struct {
+		AccessToken string `json:"access_token"`
+	}
+	require.NoError(t, json.NewDecoder(tokenResp.Body).Decode(&token))
+	require.NotEmpty(t, token.AccessToken)
+
+	mappersURL := fmt.Sprintf("%s/admin/realms/%s/clients/%s/protocol-mappers/models", base, realm, clientUUID)
+	do := func(method, target string) *http.Response {
+		req, reqErr := http.NewRequest(method, target, nil)
+		require.NoError(t, reqErr)
+		req.Header.Set("Authorization", "Bearer "+token.AccessToken)
+		resp, doErr := httpClient.Do(req)
+		require.NoError(t, doErr)
+		return resp
+	}
+
+	listResp := do(http.MethodGet, mappersURL)
+	defer listResp.Body.Close()
+	require.Equal(t, http.StatusOK, listResp.StatusCode)
+	var mappers []struct {
+		ID   string `json:"id"`
+		Name string `json:"name"`
+	}
+	require.NoError(t, json.NewDecoder(listResp.Body).Decode(&mappers))
+
+	for _, mapper := range mappers {
+		if mapper.Name != mapperName {
+			continue
+		}
+		delResp := do(http.MethodDelete, mappersURL+"/"+mapper.ID)
+		delResp.Body.Close()
+		require.Equal(t, http.StatusNoContent, delResp.StatusCode)
+		return
+	}
+	require.Failf(t, "protocol mapper not found", "%s on client %s", mapperName, clientUUID)
 }

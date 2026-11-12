@@ -3,14 +3,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import type { IWrapperBoxSettingMessages } from "@/models/setting.model";
-import { certificateUtil } from "@/utils/certificate.util";
+import type {
+  ISamlCertificateValidation,
+  ISamlMetadataValidation,
+  IWrapperBoxSettingMessages,
+} from "@/models/setting.model";
+import { errorMessages } from "@/common/error-message.constant";
+import { extractErrorMessages } from "@/utils/error-alert.util";
+import { idpService } from "@/services/control-plane/idp.service/idp.service";
+import Axios from "axios";
+import type { IdpCreationRequest, SamlData } from "@/swagger-models/identity-manager-client";
+import {
+  IdpCreationRequestTypeEnum,
+  SamlCreationDataMetadataXmlTypeEnum,
+} from "@/swagger-models/identity-manager-client";
 import { dateUtil, TimeUnit } from "@/utils/date.util";
 import type { ISelectOption } from "@/models/global.model";
 
 export const idpCommon = {
   getSettingsBoxMessages,
-  getCertificateExpirationDate,
+  validateSamlMetadata,
+  parseExpirationDate,
   iValidCertificateDate,
   isCertificateExpiringSoon,
   getDefaultScope,
@@ -35,8 +48,61 @@ function getSettingsBoxMessages(idpName: string, isSSOUser: boolean): IWrapperBo
   };
 }
 
-function getCertificateExpirationDate(certificate: string): Promise<Date | null> {
-  return certificateUtil.getExpirationDate(certificate);
+async function validateSamlMetadata(
+  metadataXmlFile: string,
+  fileName: string,
+  idpAlias?: string,
+): Promise<ISamlMetadataValidation> {
+  try {
+    const { samlData, errorMessage } = await dryRunSamlMetadata(metadataXmlFile, fileName, idpAlias);
+    const expirationDate = parseExpirationDate(samlData?.certificateExpirationDate);
+    const isExpired = !!expirationDate && !iValidCertificateDate(expirationDate);
+    return {
+      expirationDate,
+      error: isExpired
+        ? ""
+        : errorMessage || (expirationDate ? "" : errorMessages.SAML_CERTIFICATE_EXPIRATION_UNREADABLE),
+    };
+  } catch (error: unknown) {
+    return {
+      expirationDate: null,
+      error: extractErrorMessages(error, errorMessages.SAML_CERTIFICATE_VALIDATION_FAILED).join(" "),
+    };
+  }
+}
+
+// A 400 is returned, not thrown: its body still carries the certificate expiration date.
+async function dryRunSamlMetadata(
+  metadataXmlFile: string,
+  fileName: string,
+  idpAlias?: string,
+): Promise<ISamlCertificateValidation> {
+  const request: IdpCreationRequest = {
+    type: IdpCreationRequestTypeEnum.Saml,
+    samlData: { metadataXmlType: SamlCreationDataMetadataXmlTypeEnum.File, metadataXmlFile, fileName },
+  };
+  try {
+    const response = idpAlias
+      ? await idpService.updateIdp(idpAlias, request, true)
+      : await idpService.addIdp(request, true);
+    return { samlData: response?.samlData ?? undefined };
+  } catch (err: unknown) {
+    if (Axios.isAxiosError(err) && err.response?.status === 400) {
+      const body = err.response.data as { samlData?: SamlData; message?: string } | undefined;
+      return {
+        samlData: body?.samlData ?? undefined,
+        errorMessage: body?.message || errorMessages.SAML_METADATA_INVALID,
+      };
+    }
+    throw err;
+  }
+}
+
+// Go's zero time (year 1) means the certificate could not be parsed.
+function parseExpirationDate(value?: string | null): Date | null {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) || date.getFullYear() <= 1 ? null : date;
 }
 
 function iValidCertificateDate(expirationDate: Date): boolean {
