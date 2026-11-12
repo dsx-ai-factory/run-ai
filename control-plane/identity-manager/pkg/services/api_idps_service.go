@@ -74,8 +74,8 @@ func (s *IdpsApiService) CreateIdp(ctx context.Context, idpCreationRequest api.I
 	if err != nil {
 		return s.handleSystemScopeError(err, fmt.Sprintf("failed to create idp: %s for tenant: %s", idpCreationRequest.Type, tenantId))
 	}
-	
-	al :=audit.AuditFromCtx(ctx).WithEntityType(utils.AuditEntityTypeIdp)
+
+	al := audit.AuditFromCtx(ctx).WithEntityType(utils.AuditEntityTypeIdp)
 	if idpCreationRequest.DryRun {
 		al.Drop()
 	}
