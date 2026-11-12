@@ -177,6 +177,7 @@ export default defineComponent({
       error: false as boolean,
       loading: false as boolean,
       pendingChartData: null as Promise<void> | null,
+      latestChartRequestId: 0 as number,
       isInitialLoader: true as boolean,
       gpuQuotaTitle: "GPU quota (All departments)",
       timeframes: [] as Array<string>,
@@ -334,25 +335,35 @@ export default defineComponent({
       this.pendingChartData = markRaw(this.fetchChartData());
       return this.pendingChartData;
     },
+    /**
+     * Fetches metrics for the current selection and renders them. A response that resolves after a newer
+     * request has started belongs to an outdated selection (e.g. a previous date range) and is discarded.
+     */
     async fetchChartData(): Promise<void> {
       if (this.chartOptions === null) return;
 
+      const requestId = ++this.latestChartRequestId;
       try {
         this.loading = true;
         this.chartOptions.xAxis = this.getXAxisOptions();
         this.timeframes = chartUtil.getTimeFrames(this.filterByDates.dateStart, this.filterByDates.dateEnd);
         const metricsResponse: MetricsResponse = await this.getMetric();
+        if (requestId !== this.latestChartRequestId) return;
 
         this.measurementMap = metricUtil.mapMeasurementsToMap(metricsResponse);
         this.error = false;
         this.setSeries();
       } catch (error: unknown) {
+        if (requestId !== this.latestChartRequestId) return;
         this.error = true;
         console.error(error);
       } finally {
-        this.loading = false;
-        this.isInitialLoader = false;
+        if (requestId === this.latestChartRequestId) {
+          this.loading = false;
+          this.isInitialLoader = false;
+        }
       }
+      if (requestId !== this.latestChartRequestId) return;
 
       this.$nextTick(() => {
         if (!this.error) {
