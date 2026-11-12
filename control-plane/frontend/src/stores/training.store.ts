@@ -28,7 +28,6 @@ import { deepCopy } from "@/utils/common.util/common.util";
 export const useTrainingStore = defineStore("Training", {
   state: () => ({
     training: workloadUtil.getEmptyUIWorkloadCreation() as IUIWorkloadCreation,
-    templateId: null as string | null,
     selectedTraining: null as TrainingV2 | null,
     actionPermissionsByScopes: {} as Record<Action, PermittedScopes>,
 
@@ -87,11 +86,7 @@ export const useTrainingStore = defineStore("Training", {
     setTraining(training: IUIWorkloadCreation): void {
       this.training = training;
     },
-    setTemplate(templateId: string | null): void {
-      this.templateId = templateId;
-    },
     resetCreateTrainingData(): void {
-      this.templateId = null;
       this.loadedTrainingModelWithDefaultsAndPolicy = null;
       this.training = workloadUtil.getEmptyUIWorkloadCreation();
     },

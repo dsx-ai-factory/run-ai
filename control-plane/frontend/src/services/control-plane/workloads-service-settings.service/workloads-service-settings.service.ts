@@ -10,20 +10,17 @@ import {
   type WorkloadsSettingsGetResponse,
   type GetEnablePolicies,
   type GetEnableHybridSubmission,
-  type GetEnableTemplatesV2,
   type GetGpuOverProvisioning,
 } from "@/swagger-models/workloads-client";
 import type {
   IEnablePoliciesSetting,
   IEnableHybridSubmissionSetting,
-  IEnableTemplatesV2Setting,
   IGpuOverProvisioningSetting,
 } from "@/models/setting.model";
 
 export interface IWorkloadsServiceSettings {
   enablePolicies: IEnablePoliciesSetting;
   enableHybridSubmission: IEnableHybridSubmissionSetting;
-  enableTemplatesV2: IEnableTemplatesV2Setting;
   gpuOverProvisioning: IGpuOverProvisioningSetting;
 }
 
@@ -33,8 +30,6 @@ export const workloadsServiceSettingsService = {
   updateEnablePolicies,
   getEnableHybridSubmission,
   updateEnableHybridSubmission,
-  getEnableTemplatesV2,
-  updateEnableTemplatesV2,
   getGpuOverProvisioning,
   updateGpuOverProvisioning,
 };
@@ -56,12 +51,6 @@ async function getAll(): Promise<IWorkloadsServiceSettings> {
         displayName: data.enableHybridSubmission?.displayName,
         description: data.enableHybridSubmission?.description,
         stage: data.enableHybridSubmission?.stage,
-      },
-      enableTemplatesV2: {
-        value: Boolean(data.enableTemplatesV2?.value?.enabled),
-        displayName: data.enableTemplatesV2?.displayName,
-        description: data.enableTemplatesV2?.description,
-        stage: data.enableTemplatesV2?.stage,
       },
       gpuOverProvisioning: {
         value: Boolean(data.gpuOverProvisioning?.value?.enabled),
@@ -125,33 +114,6 @@ async function updateEnableHybridSubmission(enabled: boolean): Promise<void> {
       WorkloadsSettingsKeyEnum.EnableHybridSubmission,
       { enabled },
     );
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function getEnableTemplatesV2(): Promise<IEnableTemplatesV2Setting> {
-  try {
-    const response = await workloadServiceApi.settingsApi.getWorkloadsServiceSettingByKey(
-      WorkloadsSettingsKeyEnum.EnableTemplatesV2,
-    );
-    const data = response.data as GetEnableTemplatesV2;
-    return {
-      value: Boolean(data.value?.enabled),
-      displayName: data.displayName,
-      description: data.description,
-      stage: data.stage,
-    };
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function updateEnableTemplatesV2(enabled: boolean): Promise<void> {
-  try {
-    await workloadServiceApi.settingsApi.updateWorkloadsServiceSettingByKey(WorkloadsSettingsKeyEnum.EnableTemplatesV2, {
-      enabled,
-    });
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }

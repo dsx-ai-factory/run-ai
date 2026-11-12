@@ -24,9 +24,6 @@
     "control-plane/control-plane-chart/**",
     "build/makefile/**"
   ],
-  "ignorePaths": [
-    "runai-cluster/cluster/runai-crd-upgrader/**"
-  ],
   "prConcurrentLimit": 60,
   "prHourlyLimit": 40,
   "packageRules": [
@@ -88,7 +85,8 @@
         "control-plane/control-plane-chart/Chart.yaml"
       ],
       "matchPackageNames": [
-        "!keycloakx"
+        "!keycloakx",
+        "!runai-telemetry"
       ],
       "enabled": false
     },
@@ -107,6 +105,18 @@
       "groupSlug": "keycloak",
       "automerge": false,
       "branchName": "{{{branchPrefix}}}keycloak"
+    },
+    {
+      "matchPackageNames": [
+        "runai-telemetry"
+      ],
+      "separateMinorPatch": true,
+      "minor": {
+        "enabled": false
+      },
+      "major": {
+        "enabled": false
+      }
     }
   ]
 }

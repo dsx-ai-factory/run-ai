@@ -30,9 +30,7 @@ type AssetUsageInfo struct {
 	Distributed []WorkloadRefAndStatus `json:"distributed,omitempty"`
 	// inferences that rely on this asset.
 	Inferences []WorkloadRefAndStatus `json:"inferences,omitempty"`
-	// templates that rely on this asset.
-	Templates []AssetRef      `json:"templates,omitempty"`
-	Assets    *AssetsUsageRef `json:"assets,omitempty"`
+	Assets     *AssetsUsageRef        `json:"assets,omitempty"`
 	// whether the asset is used by data volumes.
 	UsedByDataVolumes NullableBool `json:"usedByDataVolumes,omitempty"`
 }
@@ -182,38 +180,6 @@ func (o *AssetUsageInfo) SetInferences(v []WorkloadRefAndStatus) {
 	o.Inferences = v
 }
 
-// GetTemplates returns the Templates field value if set, zero value otherwise.
-func (o *AssetUsageInfo) GetTemplates() []AssetRef {
-	if o == nil || IsNil(o.Templates) {
-		var ret []AssetRef
-		return ret
-	}
-	return o.Templates
-}
-
-// GetTemplatesOk returns a tuple with the Templates field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-func (o *AssetUsageInfo) GetTemplatesOk() ([]AssetRef, bool) {
-	if o == nil || IsNil(o.Templates) {
-		return nil, false
-	}
-	return o.Templates, true
-}
-
-// HasTemplates returns a boolean if a field has been set.
-func (o *AssetUsageInfo) HasTemplates() bool {
-	if o != nil && !IsNil(o.Templates) {
-		return true
-	}
-
-	return false
-}
-
-// SetTemplates gets a reference to the given []AssetRef and assigns it to the Templates field.
-func (o *AssetUsageInfo) SetTemplates(v []AssetRef) {
-	o.Templates = v
-}
-
 // GetAssets returns the Assets field value if set, zero value otherwise.
 func (o *AssetUsageInfo) GetAssets() AssetsUsageRef {
 	if o == nil || IsNil(o.Assets) {
@@ -310,9 +276,6 @@ func (o AssetUsageInfo) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Inferences) {
 		toSerialize["inferences"] = o.Inferences
-	}
-	if !IsNil(o.Templates) {
-		toSerialize["templates"] = o.Templates
 	}
 	if !IsNil(o.Assets) {
 		toSerialize["assets"] = o.Assets

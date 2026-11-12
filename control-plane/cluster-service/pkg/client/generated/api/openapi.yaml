@@ -344,6 +344,243 @@ paths:
       x-test-coverage:
       - cluster-service/pkg/services/api_clusters_service_test.go
     x-internal: true
+  /api/v1/clusters/{clusterUuid}/nodes/labels/keys:
+    get:
+      description: "Return unique, sorted label keys up to 253 characters long from\
+        \ nodes in the selected cluster."
+      operationId: get_node_label_keys
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - gpu-type
+              - nvidia.com/gpu.product
+              schema:
+                $ref: '#/components/schemas/NodeLabelOptions'
+          description: Matching label keys. Returns an empty array when no keys match.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get node label keys.
+      tags:
+      - Nodes
+      x-service: cluster-service
+      x-test-coverage:
+      - control-plane/cluster-service/pkg/services/api_nodes_labels_test.go
+      x-authorize:
+        resource-type: nodes
+        action: read
+    x-internal: true
+  /api/v1/clusters/{clusterUuid}/nodes/labels/values:
+    get:
+      description: "Return unique, sorted nonempty values for an exact label key up\
+        \ to 253 characters long from nodes in the selected cluster."
+      operationId: get_node_label_values
+      parameters:
+      - description: The Universally Unique Identifier (UUID) of the cluster.
+        explode: false
+        in: path
+        name: clusterUuid
+        required: true
+        schema:
+          example: 9f55255e-11ed-47c7-acef-fc4054768dbc
+          format: uuid
+          minLength: 1
+          type: string
+        style: simple
+      - description: The exact label key whose values to return.
+        example: gpu-type
+        explode: true
+        in: query
+        name: key
+        required: true
+        schema:
+          minLength: 1
+          type: string
+        style: form
+      - description: The offset of the first item returned in the collection.
+        explode: true
+        in: query
+        name: offset
+        required: false
+        schema:
+          example: 100
+          format: int32
+          type: integer
+        style: form
+      - description: The maximum number of entries to return.
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          format: int32
+          maximum: 500
+          minimum: 1
+          type: integer
+        style: form
+      - description: Filter results by a free text search.
+        explode: true
+        in: query
+        name: search
+        required: false
+        schema:
+          example: test project
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+              - a100
+              - a30
+              schema:
+                $ref: '#/components/schemas/NodeLabelOptions'
+          description: Matching label values. Returns an empty array when no values
+            match.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "500":
+          content:
+            application/json:
+              example:
+                code: 500
+                message: Something went wrong.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Get node label values.
+      tags:
+      - Nodes
+      x-service: cluster-service
+      x-test-coverage:
+      - control-plane/cluster-service/pkg/services/api_nodes_labels_test.go
+      x-authorize:
+        resource-type: nodes
+        action: read
+    x-internal: true
   /api/v1/clusters/{clusterUuid}/nodes/count:
     get:
       description: Count nodes
@@ -5960,6 +6197,51 @@ components:
       schema:
         type: boolean
       style: form
+    Offset:
+      description: The offset of the first item returned in the collection.
+      explode: true
+      in: query
+      name: offset
+      required: false
+      schema:
+        example: 100
+        format: int32
+        type: integer
+      style: form
+    Limit:
+      description: The maximum number of entries to return.
+      explode: true
+      in: query
+      name: limit
+      required: false
+      schema:
+        default: 50
+        format: int32
+        maximum: 500
+        minimum: 1
+        type: integer
+      style: form
+    Search:
+      description: Filter results by a free text search.
+      explode: true
+      in: query
+      name: search
+      required: false
+      schema:
+        example: test project
+        type: string
+      style: form
+    NodeLabelKey:
+      description: The exact label key whose values to return.
+      example: gpu-type
+      explode: true
+      in: query
+      name: key
+      required: true
+      schema:
+        minLength: 1
+        type: string
+      style: form
     NodesFilter:
       description: "Filter results by a parameter. Use the format field-name operator\
         \ value. Operators are == Equals, != Not equals, <= Less than or equal, >=\
@@ -5978,16 +6260,6 @@ components:
           type: string
         maxItems: 10
         type: array
-      style: form
-    Search:
-      description: Filter results by a free text search.
-      explode: true
-      in: query
-      name: search
-      required: false
-      schema:
-        example: test project
-        type: string
       style: form
     NodeName:
       description: The node name.
@@ -6053,30 +6325,6 @@ components:
           type: string
         maxItems: 10
         type: array
-      style: form
-    Offset:
-      description: The offset of the first item returned in the collection.
-      explode: true
-      in: query
-      name: offset
-      required: false
-      schema:
-        example: 100
-        format: int32
-        type: integer
-      style: form
-    Limit:
-      description: The maximum number of entries to return.
-      explode: true
-      in: query
-      name: limit
-      required: false
-      schema:
-        default: 50
-        format: int32
-        maximum: 500
-        minimum: 1
-        type: integer
       style: form
     QueryForceDelete:
       description: |
@@ -7023,6 +7271,10 @@ components:
       - tenantId
       - uuid
       type: object
+    NodeLabelOptions:
+      items:
+        type: string
+      type: array
     NodeStatusConditionDetails:
       example:
         reason: KubeletNotReady
@@ -7186,8 +7438,16 @@ components:
           gpuType: Tesla-V100
         nvLinkDomainUid: nvlink-domain-uid
         nvLinkCliqueId: clique-id
+        labels:
+          key: labels
         status: Ready
       properties:
+        labels:
+          additionalProperties:
+            type: string
+          description: Labels assigned to the node.
+          type: object
+          writeOnly: true
         status:
           description: The calculated status of the node.
           enum:
@@ -7293,6 +7553,8 @@ components:
             gpuType: Tesla-V100
           nvLinkDomainUid: nvlink-domain-uid
           nvLinkCliqueId: clique-id
+          labels:
+            key: labels
           status: Ready
       x-schema-name: NodeForSync
     NodesSyncRequest:
@@ -7329,6 +7591,8 @@ components:
               gpuType: Tesla-V100
             nvLinkDomainUid: nvlink-domain-uid
             nvLinkCliqueId: clique-id
+            labels:
+              key: labels
             status: Ready
         - name: worker-node-1
           nodeInfo:
@@ -7361,6 +7625,8 @@ components:
               gpuType: Tesla-V100
             nvLinkDomainUid: nvlink-domain-uid
             nvLinkCliqueId: clique-id
+            labels:
+              key: labels
             status: Ready
         from: worker-node-0
         to: worker-node-3
@@ -7553,6 +7819,7 @@ components:
         cpuQuota: false
         ranks: false
         quota: false
+        limits: false
       properties:
         adjustableWeights:
           default: false
@@ -7579,6 +7846,13 @@ components:
           example: false
           nullable: true
           type: boolean
+        limits:
+          default: true
+          description: "Whether to allow GPU, CPU and memory limits for the nodepool's\
+            \ resources. Only allowed when quota=true."
+          example: false
+          nullable: true
+          type: boolean
       type: object
     DefaultNodepoolConfig:
       example:
@@ -7587,6 +7861,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
       properties:
         schedulingCapabilities:
           $ref: '#/components/schemas/SchedulingCapabilitiesNullable'
@@ -7599,6 +7874,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
         domain: domain
         name: name
         tenantId: 171976544
@@ -7910,6 +8186,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         name: name
         id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
         operation: Create
@@ -7933,6 +8210,7 @@ components:
         cpuQuota: false
         ranks: false
         quota: false
+        limits: false
       properties:
         adjustableWeights:
           default: false
@@ -7955,9 +8233,16 @@ components:
             allowed when allowQuota=true.
           example: false
           type: boolean
+        limits:
+          default: true
+          description: "Whether to allow GPU, CPU and memory limits for the nodepool's\
+            \ resources. Only allowed when quota=true."
+          example: false
+          type: boolean
       required:
       - adjustableWeights
       - cpuQuota
+      - limits
       - quota
       - ranks
       type: object
@@ -8500,6 +8785,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         clusterName: prod-cluster
         id: "5"
         updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -8598,6 +8884,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         name: v100
         id: "5"
         clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -8712,6 +8999,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         name: v100
         schedulingConfiguration:
           numaAwareScheduling: true
@@ -8800,6 +9088,7 @@ components:
           cpuQuota: false
           ranks: false
           quota: false
+          limits: false
         schedulingConfiguration:
           numaAwareScheduling: true
           placementStrategy:
@@ -9470,6 +9759,8 @@ components:
           gpuCount: 0
           gpuType: Tesla-V100
         nvLinkCliqueId: clique-id
+        labels:
+          key: labels
         nodePool: node-pool-1
         createdAt: 2000-01-23T04:56:07.000+00:00
         networkTopologyLabels:
@@ -9508,6 +9799,8 @@ components:
             gpuCount: 0
             gpuType: Tesla-V100
           nvLinkCliqueId: clique-id
+          labels:
+            key: labels
           nodePool: node-pool-1
           createdAt: 2000-01-23T04:56:07.000+00:00
           networkTopologyLabels:
@@ -9542,6 +9835,8 @@ components:
             gpuCount: 0
             gpuType: Tesla-V100
           nvLinkCliqueId: clique-id
+          labels:
+            key: labels
           nodePool: node-pool-1
           createdAt: 2000-01-23T04:56:07.000+00:00
           networkTopologyLabels:
@@ -9640,6 +9935,8 @@ components:
           gpuCount: 0
           gpuType: Tesla-V100
         nvLinkCliqueId: clique-id
+        labels:
+          key: labels
         nodePool: node-pool-1
         createdAt: 2000-01-23T04:56:07.000+00:00
         networkTopologyLabels:
@@ -10589,6 +10886,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           clusterName: prod-cluster
           id: "5"
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -10696,6 +10994,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           clusterName: prod-cluster
           id: "5"
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -10791,6 +11090,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           name: v100
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -10810,6 +11110,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           name: v100
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -10859,6 +11160,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           clusterName: prod-cluster
           id: "5"
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -10966,6 +11268,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           clusterName: prod-cluster
           id: "5"
           updatedAt: 2000-01-23T04:56:07.000+00:00
@@ -11062,6 +11365,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           name: v100
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210
@@ -11081,6 +11385,7 @@ components:
             cpuQuota: false
             ranks: false
             quota: false
+            limits: false
           name: v100
           id: "5"
           clusterId: 71f69d83-ba66-4822-adf5-55ce55efd210

@@ -435,6 +435,9 @@ func getAllEmptyResources(allClusterNodePools map[string]openapi.NodepoolMinimal
 				if highestMemoryLimit == -1 {
 					maxAllowedMemory = nil
 				}
+				if nodePool.SchedulingCapabilities != nil && !nodePool.SchedulingCapabilities.Limits {
+					maxAllowedGpu, maxAllowedCpu, maxAllowedMemory = nil, nil, nil
+				}
 				emptyResource := createEmptyResources(nodePool, isDepartment, maxAllowedGpu, maxAllowedCpu, maxAllowedMemory)
 				emptyResources = append(emptyResources, emptyResource)
 			}
@@ -468,6 +471,9 @@ func createEmptyResources(nodePoolMetadata openapi.NodepoolMinimal, isDepartment
 		emptyResources.GpuOverQuotaWeight = ptr.To(gpuDeserved)
 		emptyResources.CpuOverQuotaWeight = ptr.To(unlimited)
 		emptyResources.MemoryOverQuotaWeight = ptr.To(unlimited)
+		if capabilities := nodePoolMetadata.SchedulingCapabilities; capabilities != nil && !capabilities.Quota {
+			emptyResources.GpuOverQuotaWeight = ptr.To(departmentWeightWithoutQuota(*capabilities))
+		}
 	}
 	return emptyResources
 }

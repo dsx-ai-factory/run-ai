@@ -1,6 +1,6 @@
 # assets-service-client
 
-Generated Go client for the Run:ai **assets-service** API ("An API for managing assets"). It is the typed, versioned Go module that other control-plane and cluster services import to talk to assets-service over HTTP — listing and creating compute, environment, model, datasource, credentials and workload-template assets, and driving the internal cluster-sync / events endpoints. The bulk of the package is produced by [OpenAPI Generator](https://openapi-generator.tech) from the assets-service OpenAPI spec and **must not be edited by hand**; a thin hand-written wrapper adds an ergonomic, interface-based facade on top of the generated code.
+Generated Go client for the Run:ai **assets-service** API ("An API for managing assets"). It is the typed, versioned Go module that other control-plane and cluster services import to talk to assets-service over HTTP — listing and creating compute, environment, model, datasource and credentials assets, and driving the internal cluster-sync / events endpoints. The bulk of the package is produced by [OpenAPI Generator](https://openapi-generator.tech) from the assets-service OpenAPI spec and **must not be edited by hand**; a thin hand-written wrapper adds an ergonomic, interface-based facade on top of the generated code.
 
 ## Contents
 

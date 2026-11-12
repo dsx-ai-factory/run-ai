@@ -174,6 +174,9 @@ func generateClientByType(ctx context.Context, clientCreationRequest api.ClientC
 		return client, needsEmailScopeDefault, nil
 
 	case api.CLIENTTYPE_APPLICATION:
+		logging.WithCtx(runaictx.LoggerHook(ctx)).Warnf("Client type %s is deprecated, use %s.", api.CLIENTTYPE_APPLICATION, api.CLIENTTYPE_SERVICE_ACCOUNT)
+		fallthrough
+	case api.CLIENTTYPE_SERVICE_ACCOUNT:
 		client := createServiceAccountClient(clientCreationRequest)
 		return client, needsEmailScopeDefault, nil
 

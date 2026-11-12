@@ -17,6 +17,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"time"
 )
 
 // checks if the SamlData type satisfies the MappedNullable interface at compile time
@@ -31,6 +32,8 @@ type SamlData struct {
 	ServiceProviderMetadataUrl *string `json:"serviceProviderMetadataUrl,omitempty"`
 	// Whether the signature of SAML responses from the identity provider is validated
 	ValidateSignature bool `json:"validateSignature"`
+	// The expiration date of the signing certificate
+	CertificateExpirationDate *time.Time `json:"certificateExpirationDate,omitempty"`
 }
 
 type _SamlData SamlData
@@ -205,6 +208,38 @@ func (o *SamlData) SetValidateSignature(v bool) {
 	o.ValidateSignature = v
 }
 
+// GetCertificateExpirationDate returns the CertificateExpirationDate field value if set, zero value otherwise.
+func (o *SamlData) GetCertificateExpirationDate() time.Time {
+	if o == nil || IsNil(o.CertificateExpirationDate) {
+		var ret time.Time
+		return ret
+	}
+	return *o.CertificateExpirationDate
+}
+
+// GetCertificateExpirationDateOk returns a tuple with the CertificateExpirationDate field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SamlData) GetCertificateExpirationDateOk() (*time.Time, bool) {
+	if o == nil || IsNil(o.CertificateExpirationDate) {
+		return nil, false
+	}
+	return o.CertificateExpirationDate, true
+}
+
+// HasCertificateExpirationDate returns a boolean if a field has been set.
+func (o *SamlData) HasCertificateExpirationDate() bool {
+	if o != nil && !IsNil(o.CertificateExpirationDate) {
+		return true
+	}
+
+	return false
+}
+
+// SetCertificateExpirationDate gets a reference to the given time.Time and assigns it to the CertificateExpirationDate field.
+func (o *SamlData) SetCertificateExpirationDate(v time.Time) {
+	o.CertificateExpirationDate = &v
+}
+
 func (o SamlData) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -228,6 +263,9 @@ func (o SamlData) ToMap() (map[string]interface{}, error) {
 		toSerialize["serviceProviderMetadataUrl"] = o.ServiceProviderMetadataUrl
 	}
 	toSerialize["validateSignature"] = o.ValidateSignature
+	if !IsNil(o.CertificateExpirationDate) {
+		toSerialize["certificateExpirationDate"] = o.CertificateExpirationDate
+	}
 	return toSerialize, nil
 }
 

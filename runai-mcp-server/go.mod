@@ -1,6 +1,6 @@
 module github.com/dsx-ai-factory/run-ai/runai-mcp-server
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
@@ -8,7 +8,7 @@ require (
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.1.1
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.10
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
-	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.0.21
+	github.com/dsx-ai-factory/run-ai/control-plane/identity-manager/pkg/client v1.3.0
 	github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client v0.0.0
 	github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/client v0.0.1
 	github.com/dsx-ai-factory/run-ai/runai-application-packages/jsonutils v1.0.11
@@ -76,11 +76,11 @@ require (
 	go.opentelemetry.io/otel/metric v1.47.0 // indirect
 	go.opentelemetry.io/otel/trace v1.47.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/crypto v0.58.0 // indirect
-	golang.org/x/oauth2 v0.37.0 // indirect
-	golang.org/x/sync v0.24.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/crypto v0.59.0 // indirect
+	golang.org/x/oauth2 v0.38.0 // indirect
+	golang.org/x/sync v0.25.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 	golang.org/x/time v0.16.0 // indirect
 	google.golang.org/protobuf v1.36.12 // indirect
 )

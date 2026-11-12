@@ -3616,6 +3616,7 @@ components:
       enum:
         - HAS_QUOTA
         - NON_DEFAULT_RANK
+        - HAS_LIMIT
     OrgUnitsNodepoolSummary:
       type: array
       description: Projects/departments in this node pool that match the requested summary type
@@ -3638,6 +3639,7 @@ components:
       x-internal: true
       enum:
         - CPU_QUOTAS_TO_DEFAULT
+        - LIMITS_TO_DEFAULT
     OrgUnitsNodepoolResourcesResetRequest:
       type: object
       required:
@@ -5199,6 +5201,7 @@ components:
         - RANKS_TO_DEFAULT
         - WEIGHTS_TO_DEFAULT
         - WEIGHTS_TO_DESERVED
+        - LIMITS_TO_DEFAULT
     DepartmentsResourcesResetRequest:
       type: object
       required:

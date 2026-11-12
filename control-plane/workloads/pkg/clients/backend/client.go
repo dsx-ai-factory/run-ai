@@ -20,9 +20,6 @@ const (
 	// Product team, they decided to call it "GPU Resource Optimization", hence the name of the constant.
 	TenantSettingGpuResourceOptimization = "tenant.gpu_over_provisioning"
 
-	// TenantSettingHybridSubmission indicates tenant is working with hybrid submission
-	TenantSettingHybridSubmission = "tenant.enable_hybrid_submission"
-
 	// TenantSettingAdvancedGpuMetrics indicates tenant has advanced GPU metrics enabled
 	TenantSettingAdvancedGpuMetrics = "tenant.enable_advanced_gpu_metrics"
 )
@@ -31,8 +28,6 @@ type TenantSettingsClient interface {
 	GetAdvancedGpuMetricsSetting(ctx context.Context) (bool, error)
 
 	GetGpuResourceOptimization(ctx context.Context) (bool, error)
-
-	GetHybridSubmissionEnabled(ctx context.Context) (bool, error)
 }
 
 type DefaultTenantSettingsClient struct {
@@ -51,8 +46,4 @@ func (client *DefaultTenantSettingsClient) GetAdvancedGpuMetricsSetting(ctx cont
 
 func (client *DefaultTenantSettingsClient) GetGpuResourceOptimization(ctx context.Context) (bool, error) {
 	return client.settingsClient.GetTenantSettingsByKey(ctx, TenantSettingGpuResourceOptimization)
-}
-
-func (client *DefaultTenantSettingsClient) GetHybridSubmissionEnabled(ctx context.Context) (bool, error) {
-	return client.settingsClient.GetTenantSettingsByKey(ctx, TenantSettingHybridSubmission)
 }

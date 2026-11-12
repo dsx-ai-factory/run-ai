@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import type { SupersetTemplate } from "@/swagger-models/workloads-client";
 import { ETableFilters, type ITableColumn } from "@/models/table.model";
 import type { IPolicy } from "@/stores/policy.store";
 import type {
@@ -10,7 +11,6 @@ import type {
   CredentialsListResponseEntry,
   DatasourceListResponseEntry,
   EnvironmentAsset,
-  WorkloadTemplate,
 } from "@/swagger-models/assets-service-client";
 import type { IDepartmentTable } from "@/models/department.model";
 import { EDepartmentColumnName } from "@/models/department.model";
@@ -93,7 +93,6 @@ export enum EIndexPages {
   DATA_SOURCE = "dataSource",
   ENVIRONMENT = "environment",
   CREDENTIAL = "credential",
-  WORKLOAD_TEMPLATE = "workloadTemplate",
   POLICY = "policy",
   APPLICATION = "application",
 }
@@ -141,12 +140,6 @@ export const useTableDataIndexMapper: Record<EIndexPages, IIndexTableInfo> = {
     getEntityId: (e: CredentialsListResponseEntry) => e.meta?.id || "",
     intervalLabel: EIntervalLabels.CredentialsIndex,
     intervalLabelPostCreation: EIntervalLabels.IndexPostCreationRefreshRate,
-  },
-  [EIndexPages.WORKLOAD_TEMPLATE]: {
-    storageFilterKey: ETableFilters.TEMPLATE,
-    sortByDefault: "template",
-    entityText: "templates",
-    getEntityId: (e: WorkloadTemplate) => e.meta?.id || "",
   },
   [EIndexPages.POLICY]: {
     storageFilterKey: ETableFilters.POLICY,
@@ -257,7 +250,7 @@ const advancedTableDataIndexConfig: Record<EAdvancedIndexPages, IAdvancedIndexTa
     storageFilterKey: ETableFilters.TEMPLATE_V2,
     sortByDefault: "name",
     entityText: "templates",
-    getEntityId: (e: WorkloadTemplate) => e.meta?.id || "",
+    getEntityId: (e: SupersetTemplate) => e.meta?.id || "",
     intervalLabel: EIntervalLabels.TemplatesIndex,
     getEntityCount: (filterBy?: Array<string>, search?: string) => {
       const distFilterStr = "workloadType!=Distributed";

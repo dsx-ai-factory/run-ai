@@ -7,9 +7,6 @@ import { INFERENCE_TEMPLATE_ROUTE_NAMES } from "./inference-routes/inference-tem
 
 export enum WORKLOAD_TEMPLATE_ROUTE_NAMES {
   WORKLOAD_TEMPLATE_INDEX = "workload-template-index",
-  WORKLOAD_TEMPLATE_NEW = "workload-template-new",
-  WORKLOAD_TEMPLATE_NEW_APP = "workload-template-new-app",
-  WORKLOAD_TEMPLATE_ASSETS_APP = "workload-template-assets-app",
   WORKLOAD_TEMPLATE_WORKSPACE_NEW = "workload-template-workspace-new",
   WORKLOAD_TEMPLATE_TRAINING_NEW = "workload-template-training-new",
   WORKLOAD_TEMPLATE_WORKSPACE_HYBRID = "workload-template-workspace-hybrid",

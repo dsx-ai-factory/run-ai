@@ -25,12 +25,14 @@ type OrgUnitsNodepoolSummaryType string
 const (
 	ORGUNITSNODEPOOLSUMMARYTYPE_HAS_QUOTA        OrgUnitsNodepoolSummaryType = "HAS_QUOTA"
 	ORGUNITSNODEPOOLSUMMARYTYPE_NON_DEFAULT_RANK OrgUnitsNodepoolSummaryType = "NON_DEFAULT_RANK"
+	ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT        OrgUnitsNodepoolSummaryType = "HAS_LIMIT"
 )
 
 // All allowed values of OrgUnitsNodepoolSummaryType enum
 var AllowedOrgUnitsNodepoolSummaryTypeEnumValues = []OrgUnitsNodepoolSummaryType{
 	"HAS_QUOTA",
 	"NON_DEFAULT_RANK",
+	"HAS_LIMIT",
 }
 
 func (v *OrgUnitsNodepoolSummaryType) UnmarshalJSON(src []byte) error {

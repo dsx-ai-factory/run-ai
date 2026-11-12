@@ -27,6 +27,7 @@ const (
 	RESOURCESRESETACTION_RANKS_TO_DEFAULT    ResourcesResetAction = "RANKS_TO_DEFAULT"
 	RESOURCESRESETACTION_WEIGHTS_TO_DEFAULT  ResourcesResetAction = "WEIGHTS_TO_DEFAULT"
 	RESOURCESRESETACTION_WEIGHTS_TO_DESERVED ResourcesResetAction = "WEIGHTS_TO_DESERVED"
+	RESOURCESRESETACTION_LIMITS_TO_DEFAULT   ResourcesResetAction = "LIMITS_TO_DEFAULT"
 )
 
 // All allowed values of ResourcesResetAction enum
@@ -35,6 +36,7 @@ var AllowedResourcesResetActionEnumValues = []ResourcesResetAction{
 	"RANKS_TO_DEFAULT",
 	"WEIGHTS_TO_DEFAULT",
 	"WEIGHTS_TO_DESERVED",
+	"LIMITS_TO_DEFAULT",
 }
 
 func (v *ResourcesResetAction) UnmarshalJSON(src []byte) error {

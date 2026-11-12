@@ -18,9 +18,48 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/internal/generated/pkg/api"
 	smocks "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/mocks/pkg/services"
 	clients_local "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/clients"
+	cluster_config "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/dao"
 	"github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/database/models"
+	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
 )
+
+var _ = Describe("setSchedulingCapabilitiesOnCreateUpdate", func() {
+	proportional := api.SchedulingCapabilitiesNullable{
+		AdjustableWeights: ptr.To(true), Quota: ptr.To(false), Ranks: ptr.To(false), CpuQuota: ptr.To(false),
+	}
+
+	setGate := func(enabled bool) {
+		Expect(runai_config.Set(&cluster_config.EditableNodepoolCapabilities{Enabled: enabled})).To(Succeed())
+	}
+
+	AfterEach(func() { setGate(false) })
+
+	It("applies the requested capabilities to a new nodepool while the gate is on", func() {
+		setGate(true)
+		nodepool := models.Nodepool{}
+		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, proportional)
+		Expect(nodepool.GetSchedulingCapabilities()).To(Equal(api.SchedulingCapabilities{
+			AdjustableWeights: true, Quota: false, Ranks: false, CpuQuota: false,
+		}))
+	})
+
+	It("keeps the defaults for omitted capabilities", func() {
+		setGate(true)
+		nodepool := models.Nodepool{}
+		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, api.SchedulingCapabilitiesNullable{})
+		Expect(nodepool.AllowQuota).To(Equal(models.DefaultAllowQuota))
+		Expect(nodepool.AllowRanks).To(Equal(models.DefaultAllowRanks))
+	})
+
+	It("ignores the requested capabilities while the gate is off", func() {
+		setGate(false)
+		nodepool := models.Nodepool{}
+		setSchedulingCapabilitiesOnCreateUpdate(context.Background(), &nodepool, proportional)
+		Expect(nodepool.AllowQuota).To(BeTrue())
+		Expect(nodepool.AllowRanks).To(BeTrue())
+	})
+})
 
 var _ = Describe("stripUnsupportedSchedulingFields", func() {
 	var (
@@ -127,5 +166,21 @@ var _ = Describe("validateSchedulingCapabilities on update and patch", func() {
 		checker := smocks.NewClusterCapabilityChecker(GinkgoT())
 		err := validatePatchParams(context.Background(), models.Nodepool{}, conflicting, checker)
 		Expect(err).To(MatchError(ContainSubstring("CpuQuota can only be enabled when SchedulingCapabilities.Quota is enabled")))
+	})
+
+	limitsWithoutQuota := api.NodepoolUpdateFields{
+		SchedulingCapabilities: api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), Limits: ptr.To(true)},
+	}
+
+	It("refuses limits on with quota off in a PUT", func() {
+		checker := smocks.NewClusterCapabilityChecker(GinkgoT())
+		err := validateUpdateParams(context.Background(), limitsWithoutQuota, checker)
+		Expect(err).To(MatchError(ContainSubstring("Limits can only be enabled when SchedulingCapabilities.Quota is enabled")))
+	})
+
+	It("refuses limits on with quota off in a PATCH", func() {
+		checker := smocks.NewClusterCapabilityChecker(GinkgoT())
+		err := validatePatchParams(context.Background(), models.Nodepool{}, limitsWithoutQuota, checker)
+		Expect(err).To(MatchError(ContainSubstring("Limits can only be enabled when SchedulingCapabilities.Quota is enabled")))
 	})
 })

@@ -10,18 +10,13 @@ import (
 	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads/internal/generated/pkg/api"
-	clients "github.com/dsx-ai-factory/run-ai/control-plane/workloads/pkg/clients/backend"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 )
 
-type TemplatesService struct {
-	tenantSettingsClient clients.TenantSettingsClient
-}
+type TemplatesService struct{}
 
-func NewTemplatesService(tenantSettingsClient clients.TenantSettingsClient) api.WorkloadTemplatesAPIServicer {
-	return &TemplatesService{
-		tenantSettingsClient: tenantSettingsClient,
-	}
+func NewTemplatesService() api.WorkloadTemplatesAPIServicer {
+	return &TemplatesService{}
 }
 
 func (ts *TemplatesService) CountTemplates(ctx context.Context, filterByParam []string, searchParam string, includeAncestors bool) (api.ImplResponse, error) {

@@ -114,7 +114,7 @@ var _ = Describe("Nodepool gpu types", Ordered, func() {
 		orgClient.On("NodePoolDeleted", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		orgClient.On("DefaultNodePoolCreated", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 
-		nodepoolService = services.NewNodePoolsApiService(tenantSettingsClient, orgClient)
+		nodepoolService = services.NewNodePoolsApiService(tenantSettingsClient, orgClient, nil)
 		nodeService = services.NewNodeService(tenantSettingsClient, nil)
 
 		var dbErr *api.Error

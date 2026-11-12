@@ -477,6 +477,24 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			Expect(orgUnitsNodepoolSummaryNp2).ToNot(ContainElement(api.OrgUnitsNodepoolSummaryInner{Id: projRankNoQuota_np2NoQuotaNoRank.Id, Name: projRankNoQuota_np2NoQuotaNoRank.Name, Type: "project"}))
 		})
 
+		It("test nodepool hasLimit summary", func() {
+			sumRes, err := orgUnitApiService.OrgsNodePoolSummary(ctx, fmt.Sprint(defaultNodePoolId), api.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT)
+			Expect(err).To(BeNil())
+			Expect(sumRes.Code).To(Equal(http.StatusOK))
+			orgUnitsNodepoolSummary := sumRes.Body.(api.OrgsNodePoolSummary200Response).OrgUnitsNodepoolSummary
+			// sum-dep-both has a CPU limit on the default nodepool
+			Expect(orgUnitsNodepoolSummary).To(ContainElement(api.OrgUnitsNodepoolSummaryInner{Id: depRankAndQuota_np2RankNoQuota.Id, Name: depRankAndQuota_np2RankNoQuota.Name, Type: "department"}))
+			Expect(orgUnitsNodepoolSummary).ToNot(ContainElement(api.OrgUnitsNodepoolSummaryInner{Id: projRankNoQuota_np2NoQuotaNoRank.Id, Name: projRankNoQuota_np2NoQuotaNoRank.Name, Type: "project"}))
+
+			sumResNp2, err := orgUnitApiService.OrgsNodePoolSummary(ctx, nodePoolId2, api.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT)
+			Expect(err).To(BeNil())
+			Expect(sumResNp2.Code).To(Equal(http.StatusOK))
+			orgUnitsNodepoolSummaryNp2 := sumResNp2.Body.(api.OrgsNodePoolSummary200Response).OrgUnitsNodepoolSummary
+			Expect(orgUnitsNodepoolSummaryNp2).To(ContainElement(api.OrgUnitsNodepoolSummaryInner{Id: projQuotaNoRank_np2RankAndQuota.Id, Name: projQuotaNoRank_np2RankAndQuota.Name, Type: "project"}))
+			Expect(orgUnitsNodepoolSummaryNp2).ToNot(ContainElement(api.OrgUnitsNodepoolSummaryInner{Id: depRankAndQuota_np2RankNoQuota.Id, Name: depRankAndQuota_np2RankNoQuota.Name, Type: "department"}))
+			Expect(orgUnitsNodepoolSummaryNp2).ToNot(ContainElement(api.OrgUnitsNodepoolSummaryInner{Id: projRankNoQuota_np2NoQuotaNoRank.Id, Name: projRankNoQuota_np2NoQuotaNoRank.Name, Type: "project"}))
+		})
+
 		It("test nodepool nonDefaultRank summary", func() {
 			// call OrgsNodePoolSummary for NON_DEFAULT_RANK
 			sumRes, err := orgUnitApiService.OrgsNodePoolSummary(ctx, fmt.Sprint(defaultNodePoolId), api.ORGUNITSNODEPOOLSUMMARYTYPE_NON_DEFAULT_RANK)
@@ -1138,6 +1156,75 @@ var _ = Describe("Org unit tests", Ordered, func() {
 			Expect(err).To(BeNil())
 			Expect(pRes.Code).To(Equal(http.StatusBadRequest))
 			Expect(pRes.Body.(api.Error).Message).To(ContainSubstring("over quota feature is off"))
+		})
+
+		Context("test limits capability", func() {
+			var (
+				clusterId3             string
+				limitsOnDepartments    api.DepartmentsAPIServicer
+				limitsOffDepartments   api.DepartmentsAPIServicer
+				limitedDepartmentId    string
+				limitsCapabilityDepIds []string
+			)
+
+			departmentsServiceWithLimits := func(limits bool) api.DepartmentsAPIServicer {
+				capabilities := npSchedCapabilities(false, false, true, true)
+				capabilities.Limits = limits
+				clusterServiceClient3 := mocks.IClusterClient{}
+				clusterServiceClient3.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
+					Uuid:    clusterId3,
+					Version: *clustersOpenapi.NewNullableString(ptr.To("2.22")),
+				}, nil)
+				clusterServiceClient3.On("GetNodePoolsMinimalByCluster", mock.Anything, mock.Anything).Return(&clustersOpenapi.GetNodepoolsMinimal200Response{
+					Nodepools: []clustersOpenapi.NodepoolMinimal{{
+						Name:                   "default",
+						Id:                     fmt.Sprint(defaultNodePoolId),
+						Phase:                  ptr.To(clustersOpenapi.NODEPOOLPHASE_READY),
+						SchedulingCapabilities: capabilities,
+					}},
+				}, nil)
+				return departments.NewDepartmentApiService(&clusterServiceClient3, nil)
+			}
+
+			BeforeAll(func() {
+				clusterId3 = uuid.New().String()
+				limitsOnDepartments = departmentsServiceWithLimits(true)
+				limitsOffDepartments = departmentsServiceWithLimits(false)
+
+				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId3)
+				depReq.Resources = []api.ResourcesNullable{CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default")}
+				depRes, err := limitsOnDepartments.CreateDepartment(ctx, depReq)
+				Expect(err).To(BeNil())
+				Expect(depRes.Code).To(Equal(http.StatusCreated), fmt.Sprint(depRes.Body))
+				limitedDepartmentId = depRes.Body.(api.Department).Id
+				limitsCapabilityDepIds = append(limitsCapabilityDepIds, limitedDepartmentId)
+			})
+
+			AfterAll(func() {
+				for _, id := range limitsCapabilityDepIds {
+					_, _ = limitsOnDepartments.DeleteDepartment(ctx, id)
+				}
+			})
+
+			It("rejects a limit on a node pool with limits off", func() {
+				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId3)
+				depReq.Resources = []api.ResourcesNullable{CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default")}
+				depRes, err := limitsOffDepartments.CreateDepartment(ctx, depReq)
+				Expect(err).To(BeNil())
+				Expect(depRes.Code).To(Equal(http.StatusBadRequest))
+				Expect(fmt.Sprint(depRes.Body)).To(ContainSubstring("limits are not enabled"))
+			})
+
+			It("accepts unlimited limits on a node pool with limits off", func() {
+				depReq := getDepartmentCreateRequest(createDepartmentName(), clusterId3)
+				resources := CreateNodePoolApiResources(false, fmt.Sprint(defaultNodePoolId), "default")
+				resources.Gpu.Limit = ptr.To(float64(-1))
+				depReq.Resources = []api.ResourcesNullable{resources}
+				depRes, err := limitsOffDepartments.CreateDepartment(ctx, depReq)
+				Expect(err).To(BeNil())
+				Expect(depRes.Code).To(Equal(http.StatusCreated), fmt.Sprint(depRes.Body))
+				limitsCapabilityDepIds = append(limitsCapabilityDepIds, depRes.Body.(api.Department).Id)
+			})
 		})
 
 		Context("test quota/ranks capabilities", func() {

@@ -33,7 +33,6 @@ packages:
       S3API: {}
       SecretAPI: {}
       SynchronizationAPI: {}
-      TemplateAPI: {}
       TrainingsAPI: {}
       WorkloadAPI: {}
       WorkspacesAPI: {}

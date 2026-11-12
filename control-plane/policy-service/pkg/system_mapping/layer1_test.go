@@ -50,34 +50,36 @@ import (
 // than reused) so this test stays decoupled from the seeding code paths and
 // from the database — Layer 1 is a pure in-memory check.
 var systemFieldGroupBuilders = map[string]sm.SystemFieldGroupBuilder{
-	sm.SystemPodSpecFgName:                   sm.BuildSystemPodSpecFg,
-	sm.SystemPodSpecContainerFgName:          sm.BuildSystemPodSpecContainerFg,
-	sm.SystemPodSpecAndContainerFgName:       sm.BuildSystemPodSpecAndContainerFg,
-	sm.SystemJobSpecFgName:                   sm.BuildSystemJobSpecFg,
-	sm.SystemCronJobSpecFgName:               sm.BuildSystemCronJobSpecFg,
-	sm.SystemSelectorFgName:                  sm.BuildSystemSelectorFg,
-	sm.SystemDeploymentSpecFgName:            sm.BuildSystemDeploymentSpecFg,
-	sm.SystemReplicaSetSpecFgName:            sm.BuildSystemReplicaSetSpecFg,
-	sm.SystemStatefulSetSpecFgName:           sm.BuildSystemStatefulSetSpecFg,
-	sm.SystemMetadataFgName:                  sm.BuildSystemMetadataFg,
-	sm.SystemNimCacheSpecFgName:              sm.BuildSystemNimCacheSpecFg,
-	sm.SystemNimCacheContainerFgName:         sm.BuildSystemNimCacheContainerFg,
-	sm.SystemNimServiceSpecFgName:            sm.BuildSystemNimServiceSpecFg,
-	sm.SystemNimServiceContainerFgName:       sm.BuildSystemNimServiceContainerFg,
-	sm.SystemKubeflowRunPolicyFgName:         sm.BuildSystemKubeflowRunPolicyFg,
-	sm.SystemKubeflowReplicaSpecFgName:       sm.BuildSystemKubeflowReplicaSpecFg,
-	sm.SystemPyTorchJobSpecFgName:            sm.BuildSystemPyTorchJobSpecFg,
-	sm.SystemMPIJobSpecFgName:                sm.BuildSystemMPIJobSpecFg,
-	sm.SystemLeaderWorkerSetSpecFgName:       sm.BuildSystemLeaderWorkerSetSpecFg,
-	sm.SystemLeaderWorkerTemplateFgName:      sm.BuildSystemLeaderWorkerTemplateFg,
-	sm.SystemDynamoGraphDeploymentSpecFgName: sm.BuildSystemDynamoGraphDeploymentSpecFg,
-	sm.SystemDynamoServiceSpecFgName:         sm.BuildSystemDynamoServiceSpecFg,
-	sm.SystemRayClusterSpecFgName:            sm.BuildSystemRayClusterSpecFg,
-	sm.SystemRayWorkerGroupSpecFgName:        sm.BuildSystemRayWorkerGroupSpecFg,
-	sm.SystemRayJobSpecFgName:                sm.BuildSystemRayJobSpecFg,
-	sm.SystemRayServiceSpecFgName:            sm.BuildSystemRayServiceSpecFg,
-	sm.SystemNativeSpecFgName:                sm.BuildSystemNativeSpecFg,
-	sm.SystemNativeDistributedSpecFgName:     sm.BuildSystemNativeDistributedSpecFg,
+	sm.SystemDynamoGraphDeploymentV1beta1SpecFgName:  sm.BuildSystemDynamoGraphDeploymentV1beta1SpecFg,
+	sm.SystemDynamoComponentV1beta1SpecFgName:        sm.BuildSystemDynamoComponentV1beta1SpecFg,
+	sm.SystemPodSpecFgName:                           sm.BuildSystemPodSpecFg,
+	sm.SystemPodSpecContainerFgName:                  sm.BuildSystemPodSpecContainerFg,
+	sm.SystemPodSpecAndContainerFgName:               sm.BuildSystemPodSpecAndContainerFg,
+	sm.SystemJobSpecFgName:                           sm.BuildSystemJobSpecFg,
+	sm.SystemCronJobSpecFgName:                       sm.BuildSystemCronJobSpecFg,
+	sm.SystemSelectorFgName:                          sm.BuildSystemSelectorFg,
+	sm.SystemDeploymentSpecFgName:                    sm.BuildSystemDeploymentSpecFg,
+	sm.SystemReplicaSetSpecFgName:                    sm.BuildSystemReplicaSetSpecFg,
+	sm.SystemStatefulSetSpecFgName:                   sm.BuildSystemStatefulSetSpecFg,
+	sm.SystemMetadataFgName:                          sm.BuildSystemMetadataFg,
+	sm.SystemNimCacheSpecFgName:                      sm.BuildSystemNimCacheSpecFg,
+	sm.SystemNimCacheContainerFgName:                 sm.BuildSystemNimCacheContainerFg,
+	sm.SystemNimServiceSpecFgName:                    sm.BuildSystemNimServiceSpecFg,
+	sm.SystemNimServiceContainerFgName:               sm.BuildSystemNimServiceContainerFg,
+	sm.SystemKubeflowRunPolicyFgName:                 sm.BuildSystemKubeflowRunPolicyFg,
+	sm.SystemKubeflowReplicaSpecFgName:               sm.BuildSystemKubeflowReplicaSpecFg,
+	sm.SystemPyTorchJobSpecFgName:                    sm.BuildSystemPyTorchJobSpecFg,
+	sm.SystemMPIJobSpecFgName:                        sm.BuildSystemMPIJobSpecFg,
+	sm.SystemLeaderWorkerSetSpecFgName:               sm.BuildSystemLeaderWorkerSetSpecFg,
+	sm.SystemLeaderWorkerTemplateFgName:              sm.BuildSystemLeaderWorkerTemplateFg,
+	sm.SystemDynamoGraphDeploymentV1alpha1SpecFgName: sm.BuildSystemDynamoGraphDeploymentV1alpha1SpecFg,
+	sm.SystemDynamoServiceV1alpha1SpecFgName:         sm.BuildSystemDynamoServiceV1alpha1SpecFg,
+	sm.SystemRayClusterSpecFgName:                    sm.BuildSystemRayClusterSpecFg,
+	sm.SystemRayWorkerGroupSpecFgName:                sm.BuildSystemRayWorkerGroupSpecFg,
+	sm.SystemRayJobSpecFgName:                        sm.BuildSystemRayJobSpecFg,
+	sm.SystemRayServiceSpecFgName:                    sm.BuildSystemRayServiceSpecFg,
+	sm.SystemNativeSpecFgName:                        sm.BuildSystemNativeSpecFg,
+	sm.SystemNativeDistributedSpecFgName:             sm.BuildSystemNativeDistributedSpecFg,
 }
 
 var _ = Describe("system mapping layer 1: structural validation against reference spec", func() {
@@ -130,6 +132,16 @@ var _ = Describe("system mapping layer 1: structural validation against referenc
 			Expect(report.TypeMismatch).To(HaveLen(1))
 			Expect(report.TypeMismatch[0].field).To(Equal("shouldBeInt"))
 			Expect(report.NeverResolved).To(BeEmpty())
+		})
+	})
+
+	Context("nvidia.com/DynamoGraphDeployment/v1beta1", func() {
+		It("resolves fields against native component pod templates", func() {
+			_, selectors := sm.BuildSystemNvidiaComDynamoGraphDeploymentV1beta1Mapping()
+			ref := loadReferenceSpecGinkgo(dynamoGraphDeploymentV1beta1Config.inputDir + "/reference.yaml")
+			report, err := runLayer1(selectors, systemFieldGroupBuilders, ref)
+			Expect(err).To(BeNil())
+			Expect(formatReport(report)).To(BeEmpty())
 		})
 	})
 

@@ -25,7 +25,6 @@ type WorkloadsSettingsKeyEnum string
 const (
 	WORKLOADSSETTINGSKEYENUM_ENABLE_POLICIES                WorkloadsSettingsKeyEnum = "enablePolicies"
 	WORKLOADSSETTINGSKEYENUM_WORKLOAD_SUBMISSION_V2_ENABLED WorkloadsSettingsKeyEnum = "workloadSubmissionV2Enabled"
-	WORKLOADSSETTINGSKEYENUM_ENABLE_TEMPLATES_V2            WorkloadsSettingsKeyEnum = "enableTemplatesV2"
 	WORKLOADSSETTINGSKEYENUM_ENABLE_HYBRID_SUBMISSION       WorkloadsSettingsKeyEnum = "enableHybridSubmission"
 	WORKLOADSSETTINGSKEYENUM_GPU_OVER_PROVISIONING          WorkloadsSettingsKeyEnum = "gpuOverProvisioning"
 	WORKLOADSSETTINGSKEYENUM_APPLICATION_SUBMISSION         WorkloadsSettingsKeyEnum = "applicationSubmission"
@@ -35,7 +34,6 @@ const (
 var AllowedWorkloadsSettingsKeyEnumEnumValues = []WorkloadsSettingsKeyEnum{
 	"enablePolicies",
 	"workloadSubmissionV2Enabled",
-	"enableTemplatesV2",
 	"enableHybridSubmission",
 	"gpuOverProvisioning",
 	"applicationSubmission",

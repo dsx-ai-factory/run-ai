@@ -115,11 +115,6 @@ func (s *SecretVolumeApiService) DeleteSecretAssetById(ctx context.Context, asse
 		return NewErrorResponse(api.NewError(int(rbacErr.Code), rbacErr.Message, errors.New(rbacErr.Details))), nil
 	}
 
-	validationError := validateNotBeingUsedByTemplate(ctx, assetId, assetKind)
-	if validationError != nil {
-		return NewErrorResponse(validationError), nil
-	}
-
 	actionError := s.dbAccessor.DeleteSecretVolumeAsset(ctx, assetMeta, dao.HardDelete)
 	if actionError != nil {
 		return NewErrorResponse(actionError), nil
