@@ -329,6 +329,11 @@ spec:
                                   resource.
                                 minLength: 1
                                 type: string
+                              sectionName:
+                                description: |-
+                                  SectionName is the name of the Gateway listener to attach the route to.
+                                  When empty, the route attaches to every compatible listener of the Gateway.
+                                type: string
                             type: object
                             x-kubernetes-validations:
                             - message: both name and namespace are required when gatewayAPI
@@ -1919,6 +1924,11 @@ spec:
                       namespace:
                         description: Namespace is the namespace of the Gateway resource.
                         minLength: 1
+                        type: string
+                      sectionName:
+                        description: |-
+                          SectionName is the name of the Gateway listener to attach the route to.
+                          When empty, the route attaches to every compatible listener of the Gateway.
                         type: string
                     type: object
                     x-kubernetes-validations:
@@ -3639,6 +3649,11 @@ spec:
                         type: string
                       namespace:
                         description: Namespace is the namespace of the Gateway resource.
+                        type: string
+                      sectionName:
+                        description: |-
+                          SectionName is the name of the Gateway listener to attach routes to.
+                          When empty, routes attach to every compatible listener of the Gateway.
                         type: string
                     type: object
                     x-kubernetes-validations:
@@ -21880,6 +21895,11 @@ spec:
                       namespace:
                         description: Namespace is the namespace of the Gateway resource.
                         minLength: 1
+                        type: string
+                      sectionName:
+                        description: |-
+                          SectionName is the name of the Gateway listener to attach the route to.
+                          When empty, the route attaches to every compatible listener of the Gateway.
                         type: string
                     type: object
                     x-kubernetes-validations:

@@ -166,6 +166,11 @@ type GatewayRef struct {
 	// Namespace is the namespace of the Gateway resource.
 	// +kubebuilder:validation:MinLength=1
 	Namespace string `json:"namespace,omitempty"`
+
+	// SectionName is the name of the Gateway listener to attach the route to.
+	// When empty, the route attaches to every compatible listener of the Gateway.
+	// +optional
+	SectionName string `json:"sectionName,omitempty"`
 }
 
 type CustomCA struct {
