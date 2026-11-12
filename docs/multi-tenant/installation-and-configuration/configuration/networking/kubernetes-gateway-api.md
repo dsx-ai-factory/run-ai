@@ -236,6 +236,16 @@ spec:
 
 The policy must be in the same namespace as the Gateway. If you are using a different conformant controller, refer to its documentation to enable WebSocket upgrades.
 
+If a `ListenerPolicy` that sets `httpSettings` is already attached to the Gateway, add `upgradeConfig` to that policy instead of creating a new one. KGateway enforces only the first created `ListenerPolicy` that defines the same top-level policy for a Gateway and ignores later ones.
+
+<Note>
+
+**Note**
+
+With KGateway 2.2.1, Firefox can fail to open WebSocket connections, for example for workload logs and terminals, on an HTTPS listener. The listener advertises HTTP/2 by default, Firefox can send WebSocket requests over HTTP/2, and this version cannot enable the `allowConnect` HTTP/2 option that accepts them. To avoid this, set the `kgateway.dev/alpn-protocols: http/1.1` TLS option on the Gateway listener (`tls.options`), which disables HTTP/2 on that listener. KGateway 2.4.0 and later support `httpSettings.http2ProtocolOptions.allowConnect` in the `ListenerPolicy` to keep HTTP/2 enabled.
+
+</Note>
+
 ## Standard Inference Routing with Gateway API
 
 <Note>
