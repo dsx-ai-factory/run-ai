@@ -15,8 +15,8 @@ func BuildSystemDynamoComponentV1beta1SpecFormatterFields() map[string]api.Forma
 		dynamoComponentV1beta1TypeField: {
 			GetExpr:  convutils.Ref(`.type`),
 			SetExpr:  convutils.Ref(`{"type": $ARGS.named.value}`),
-			ArgsInfo: map[string]api.MappingFieldType{"value": api.MAPPINGFIELDTYPE_STRING},
-			ArgsEnum: map[string][]string{"value": {"frontend", "worker", "prefill", "decode", "planner", "epp"}},
+			ArgsInfo: map[string]api.MappingFieldType{dynamoFormatterValueArg: api.MAPPINGFIELDTYPE_STRING},
+			ArgsEnum: map[string][]string{dynamoFormatterValueArg: {"frontend", "worker", "prefill", "decode", "planner", "epp"}},
 		},
 	}
 }

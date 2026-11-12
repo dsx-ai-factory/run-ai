@@ -7,17 +7,19 @@ package system_mapping
 
 import "github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
 
+const dynamoParallelRestartStrategy = "Parallel"
+
 func BuildSystemDynamoGraphDeploymentV1beta1SpecFormatterFields() map[string]api.FormatterField {
 	fields := make(map[string]api.FormatterField)
 	addDynamoFormatterField(fields, dynamoBackendFrameworkField, `{
   "backendFramework": $ARGS.named.value
  }`, nil, map[string][]string{
-		"value": {"vllm", "sglang", "trtllm"},
+		dynamoFormatterValueArg: {"vllm", "sglang", "trtllm"},
 	})
 	addDynamoFormatterField(fields, dynamoRestartStrategyTypeField, `{
   "restart": {"strategy": {"type": $ARGS.named.value}}
  }`, nil, map[string][]string{
-		"value": {"Sequential", "Parallel"},
+		dynamoFormatterValueArg: {"Sequential", dynamoParallelRestartStrategy},
 	})
 	return fields
 }

@@ -9,6 +9,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/control-plane/policy-service/generated/pkg/api"
 )
 
+const dynamoFormatterValueArg = "value"
+
 func addDynamoFormatterField(
 	dst map[string]api.FormatterField,
 	name string,
