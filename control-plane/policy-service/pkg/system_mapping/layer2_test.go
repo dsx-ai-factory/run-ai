@@ -89,6 +89,16 @@ var _ = Describe("system mapping layer 2: GET-side correctness", func() {
 		})
 	})
 
+	Context("nvidia.com/DynamoGraphDeployment/v1beta1", func() {
+		It("resolves fields against native component pod templates", func() {
+			_, selectors := sm.BuildSystemNvidiaComDynamoGraphDeploymentV1beta1Mapping()
+			ref := loadReferenceSpecGinkgo(dynamoGraphDeploymentV1beta1Config.inputDir + "/reference.yaml")
+			report, err := runLayer2(selectors, systemFieldGroupBuilders, ref)
+			Expect(err).To(BeNil())
+			Expect(formatLayer2Report(report)).To(BeEmpty())
+		})
+	})
+
 	Context("apps/Deployment/v1", func() {
 		It("getExpr retrieves correct values from reference spec", func() {
 			_, specSelectors := sm.BuildSystemAppsDeploymentV1Mapping()

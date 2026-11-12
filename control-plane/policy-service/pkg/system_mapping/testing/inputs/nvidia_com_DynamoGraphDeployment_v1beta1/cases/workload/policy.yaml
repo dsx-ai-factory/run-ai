@@ -1,0 +1,23 @@
+description: Dynamo v1beta1 workload policy regression.
+effectiveRules:
+  - field: backendFramework
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          value: vllm
+  - field: labels
+    specSelector: workloadMetadata
+    enforcements:
+      - set:
+          key: team
+          value: inference
+  - field: restart-id
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          value: restart-test
+  - field: restart-strategy-type
+    specSelector: workloadSpec
+    enforcements:
+      - set:
+          value: Sequential

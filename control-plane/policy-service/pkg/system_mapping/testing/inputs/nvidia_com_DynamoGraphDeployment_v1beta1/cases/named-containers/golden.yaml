@@ -1,0 +1,51 @@
+apiVersion: nvidia.com/v1beta1
+kind: DynamoGraphDeployment
+metadata:
+  name: test-dynamo
+spec:
+  components:
+  - name: component-a
+    podTemplate:
+      spec:
+        containers:
+        - image: placeholder
+          imagePullPolicy: IfNotPresent
+          name: main
+          resources:
+            requests:
+              nvidia.com/gpu: "1"
+          stdin: false
+        - image: example/sidecar:shared
+          imagePullPolicy: IfNotPresent
+          name: sidecar
+          stdin: false
+        initContainers:
+        - image: example/init:shared
+          name: init
+          stdin: true
+        serviceAccountName: custom-sa
+    replicas: 0
+    type: worker
+  - name: component-b
+    podTemplate:
+      spec:
+        containers:
+        - image: placeholder
+          name: main
+          stdin: false
+          workingDir: /workspace
+        - image: example/sidecar:shared
+          name: sidecar
+          stdin: false
+          workingDir: /workspace
+        initContainers:
+        - image: example/init:shared
+          name: init
+          stdin: true
+          terminationMessagePath: /tmp/init.log
+          workingDir: /workspace
+    replicas: 1
+    type: worker
+  - name: component-c
+    replicas: 1
+    type: worker

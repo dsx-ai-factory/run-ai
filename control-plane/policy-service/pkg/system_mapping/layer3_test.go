@@ -66,6 +66,7 @@ const (
 	schemaNameJAXJobV1                  = "org.kubeflow.v1.JAXJob"
 	schemaNameLeaderWorkerSetV1         = "io.x-k8s.leaderworkerset.v1.LeaderWorkerSet"
 	schemaNameDynamoGraphDeploymentV1a1 = "com.nvidia.v1alpha1.DynamoGraphDeployment"
+	schemaNameDynamoGraphDeploymentV1b1 = "com.nvidia.v1beta1.DynamoGraphDeployment"
 	schemaNameRayClusterV1              = "io.ray.v1.RayCluster"
 	schemaNameRayJobV1                  = "io.ray.v1.RayJob"
 	schemaNameRayServiceV1              = "io.ray.v1.RayService"
@@ -208,12 +209,20 @@ var leaderWorkerSetConfig = gvkConfig{
 	caseNames:  []string{"workload", "template", "pod", "container"},
 }
 
-var dynamoGraphDeploymentConfig = gvkConfig{
+var dynamoGraphDeploymentV1alpha1Config = gvkConfig{
 	gvk:        api.Gvk{Group: convutils.Ref("nvidia.com"), Kind: "DynamoGraphDeployment", Version: "v1alpha1"},
 	inputDir:   "testing/inputs/nvidia_com_DynamoGraphDeployment_v1alpha1",
 	schemaPath: "testing/crd/dynamographdeployment_nvidia_com_v1alpha1_openapi.json",
 	schemaName: schemaNameDynamoGraphDeploymentV1a1,
 	caseNames:  []string{"workload", "service", "container", "parameterized-dependency"},
+}
+
+var dynamoGraphDeploymentV1beta1Config = gvkConfig{
+	gvk:        api.Gvk{Group: convutils.Ref("nvidia.com"), Kind: "DynamoGraphDeployment", Version: "v1beta1"},
+	inputDir:   "testing/inputs/nvidia_com_DynamoGraphDeployment_v1beta1",
+	schemaPath: "testing/crd/dynamographdeployment_nvidia_com_v1beta1_openapi.json",
+	schemaName: schemaNameDynamoGraphDeploymentV1b1,
+	caseNames:  []string{"workload", "component", "pod", "container", "named-containers", "defaults", "parameterized-dependency", "unknown-component"},
 }
 
 var rayClusterConfig = gvkConfig{
@@ -276,6 +285,13 @@ var runAiDistributedConfig = gvkConfig{
 // during execution. Running specs in parallel would cause data races.
 var _ = Describe("system mapping layer 3+4: hand-authored policies and K8s schema validation", Serial, func() {
 	Context("schema loader self-tests", func() {
+		It("accepts a valid Dynamo v1beta1 manifest", func() {
+			schema, err := loadOpenAPISchema(dynamoGraphDeploymentV1beta1Config.schemaPath, dynamoGraphDeploymentV1beta1Config.schemaName)
+			Expect(err).To(BeNil())
+			ref := loadReferenceSpecGinkgo(dynamoGraphDeploymentV1beta1Config.inputDir + "/reference.yaml")
+			Expect(formatOpenAPIErrors(validateAgainstOpenAPI(schema, ref))).To(BeEmpty())
+		})
+
 		It("validates the apps/Deployment/v1 reference manifest", func() {
 			schema, err := loadOpenAPISchema(deploymentConfig.schemaPath, deploymentConfig.schemaName)
 			Expect(err).To(BeNil())
@@ -417,10 +433,10 @@ var _ = Describe("system mapping layer 3+4: hand-authored policies and K8s schem
 		})
 
 		It("validates the nvidia.com/DynamoGraphDeployment/v1alpha1 reference manifest", func() {
-			schema, err := loadOpenAPISchema(dynamoGraphDeploymentConfig.schemaPath, dynamoGraphDeploymentConfig.schemaName)
+			schema, err := loadOpenAPISchema(dynamoGraphDeploymentV1alpha1Config.schemaPath, dynamoGraphDeploymentV1alpha1Config.schemaName)
 			Expect(err).To(BeNil())
 
-			ref := loadReferenceSpecGinkgo(dynamoGraphDeploymentConfig.inputDir + "/reference.yaml")
+			ref := loadReferenceSpecGinkgo(dynamoGraphDeploymentV1alpha1Config.inputDir + "/reference.yaml")
 			errs := validateAgainstOpenAPI(schema, ref)
 			Expect(formatOpenAPIErrors(errs)).To(BeEmpty(),
 				"reference manifest used by Layer 1/2 should already be K8s-valid")
@@ -701,9 +717,9 @@ var _ = Describe("system mapping layer 3+4: hand-authored policies and K8s schem
 		})
 	})
 
-	for _, cfg := range []gvkConfig{deploymentConfig, jobConfig, replicaSetConfig, statefulSetConfig, cronJobConfig, podConfig, nimCacheConfig, nimServiceConfig, pyTorchJobConfig, mpiJobConfig, tfJobConfig, xgBoostJobConfig, jaxJobConfig, leaderWorkerSetConfig, dynamoGraphDeploymentConfig, rayClusterConfig, rayJobConfig, rayServiceConfig, knativeServiceConfig, runAiWorkspaceConfig, runAiDistributedConfig} {
+	for _, cfg := range []gvkConfig{deploymentConfig, jobConfig, replicaSetConfig, statefulSetConfig, cronJobConfig, podConfig, nimCacheConfig, nimServiceConfig, pyTorchJobConfig, mpiJobConfig, tfJobConfig, xgBoostJobConfig, jaxJobConfig, leaderWorkerSetConfig, dynamoGraphDeploymentV1alpha1Config, dynamoGraphDeploymentV1beta1Config, rayClusterConfig, rayJobConfig, rayServiceConfig, knativeServiceConfig, runAiWorkspaceConfig, runAiDistributedConfig} {
 		cfg := cfg
-		Context(cfg.gvk.Kind, func() {
+		Context(cfg.gvk.Kind+"/"+cfg.gvk.Version, func() {
 			for _, name := range cfg.caseNames {
 				name := name
 				// Discover every policy variant in the case directory

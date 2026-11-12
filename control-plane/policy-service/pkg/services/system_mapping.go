@@ -112,11 +112,17 @@ const (
 	systemLeaderWorkerSetMappingName       = "leaderworkerset.x-k8s.io/LeaderWorkerSet/v1"
 	systemLeaderWorkerSetMappingDesc       = "leaderworkerset.x-k8s.io/LeaderWorkerSet/v1 mapping (v4)"
 
-	systemDynamoGraphDeploymentFormatterDesc = "formatter for dynamoGraphDeploymentSpec fields (v2)"
-	systemDynamoGraphDeploymentSpecFgDesc    = "dynamoGraphDeploymentSpec fields (v2)"
-	systemDynamoServiceSpecFgDesc            = "dynamoServiceSpec fields (v2)"
-	systemDynamoGraphDeploymentMappingName   = "nvidia.com/DynamoGraphDeployment/v1alpha1"
-	systemDynamoGraphDeploymentMappingDesc   = "nvidia.com/DynamoGraphDeployment/v1alpha1 mapping (v4)"
+	systemDynamoGraphDeploymentV1alpha1SpecFormatterDesc = "formatter for dynamoGraphDeploymentSpec fields (v2)"
+	systemDynamoGraphDeploymentV1beta1SpecFormatterDesc  = "formatter for dynamoGraphDeploymentV1beta1Spec fields (v1)"
+	systemDynamoGraphDeploymentV1beta1SpecFgDesc         = "dynamoGraphDeploymentV1beta1Spec fields (v1)"
+	systemDynamoComponentV1beta1SpecFormatterDesc        = "formatter for dynamoComponentV1beta1Spec fields (v1)"
+	systemDynamoGraphDeploymentV1alpha1SpecFgDesc        = "dynamoGraphDeploymentSpec fields (v2)"
+	systemDynamoServiceV1alpha1SpecFgDesc                = "dynamoServiceSpec fields (v2)"
+	systemDynamoGraphDeploymentV1alpha1MappingName       = "nvidia.com/DynamoGraphDeployment/v1alpha1"
+	systemDynamoGraphDeploymentV1alpha1MappingDesc       = "nvidia.com/DynamoGraphDeployment/v1alpha1 mapping (v4)"
+	systemDynamoComponentV1beta1SpecFgDesc               = "dynamoComponentV1beta1Spec fields (v1)"
+	systemDynamoGraphDeploymentV1beta1MappingName        = "nvidia.com/DynamoGraphDeployment/v1beta1"
+	systemDynamoGraphDeploymentV1beta1MappingDesc        = "nvidia.com/DynamoGraphDeployment/v1beta1 mapping (v1)"
 
 	systemRayClusterSpecFgDesc        = "rayClusterSpec fields (v2)"
 	systemRayClusterSpecFormatterDesc = "formatter for rayClusterSpec fields (v2)"
@@ -185,7 +191,9 @@ var systemFormatterSeeds = []systemFormatterSeed{
 	{sm.SystemKubeflowReplicaSpecFormatterName, systemKubeflowReplicaSpecFormatterDesc, sm.BuildSystemKubeflowReplicaSpecFormatterFields},
 	{sm.SystemPyTorchJobSpecFormatterName, systemPyTorchJobSpecFormatterDesc, sm.BuildSystemPyTorchJobSpecFormatterFields},
 	{sm.SystemLeaderWorkerSetFormatterName, systemLeaderWorkerSetSpecFormatterDesc, sm.BuildSystemLeaderWorkerSetSpecFormatterFields},
-	{sm.SystemDynamoGraphDeploymentFormatterName, systemDynamoGraphDeploymentFormatterDesc, sm.BuildSystemDynamoGraphDeploymentSpecFormatterFields},
+	{sm.SystemDynamoGraphDeploymentV1alpha1SpecFormatterName, systemDynamoGraphDeploymentV1alpha1SpecFormatterDesc, sm.BuildSystemDynamoGraphDeploymentV1alpha1SpecFormatterFields},
+	{sm.SystemDynamoGraphDeploymentV1beta1SpecFormatterName, systemDynamoGraphDeploymentV1beta1SpecFormatterDesc, sm.BuildSystemDynamoGraphDeploymentV1beta1SpecFormatterFields},
+	{sm.SystemDynamoComponentV1beta1SpecFormatterName, systemDynamoComponentV1beta1SpecFormatterDesc, sm.BuildSystemDynamoComponentV1beta1SpecFormatterFields},
 	{sm.SystemRayClusterSpecFormatterName, systemRayClusterSpecFormatterDesc, sm.BuildSystemRayClusterSpecFormatterFields},
 	{sm.SystemRayJobSpecFormatterName, systemRayJobSpecFormatterDesc, sm.BuildSystemRayJobSpecFormatterFields},
 	{sm.SystemRayServiceSpecFormatterName, systemRayServiceSpecFormatterDesc, sm.BuildSystemRayServiceSpecFormatterFields},
@@ -227,8 +235,10 @@ var systemFieldGroupSeeds = []systemFieldGroupSeed{
 	{sm.SystemMPIJobSpecFgName, systemMPIJobSpecFgDesc, sm.BuildSystemMPIJobSpecFg},
 	{sm.SystemLeaderWorkerSetSpecFgName, systemLeaderWorkerSetSpecFgDesc, sm.BuildSystemLeaderWorkerSetSpecFg},
 	{sm.SystemLeaderWorkerTemplateFgName, systemLeaderWorkerTemplateFgDesc, sm.BuildSystemLeaderWorkerTemplateFg},
-	{sm.SystemDynamoGraphDeploymentSpecFgName, systemDynamoGraphDeploymentSpecFgDesc, sm.BuildSystemDynamoGraphDeploymentSpecFg},
-	{sm.SystemDynamoServiceSpecFgName, systemDynamoServiceSpecFgDesc, sm.BuildSystemDynamoServiceSpecFg},
+	{sm.SystemDynamoGraphDeploymentV1alpha1SpecFgName, systemDynamoGraphDeploymentV1alpha1SpecFgDesc, sm.BuildSystemDynamoGraphDeploymentV1alpha1SpecFg},
+	{sm.SystemDynamoServiceV1alpha1SpecFgName, systemDynamoServiceV1alpha1SpecFgDesc, sm.BuildSystemDynamoServiceV1alpha1SpecFg},
+	{sm.SystemDynamoGraphDeploymentV1beta1SpecFgName, systemDynamoGraphDeploymentV1beta1SpecFgDesc, sm.BuildSystemDynamoGraphDeploymentV1beta1SpecFg},
+	{sm.SystemDynamoComponentV1beta1SpecFgName, systemDynamoComponentV1beta1SpecFgDesc, sm.BuildSystemDynamoComponentV1beta1SpecFg},
 	{sm.SystemRayClusterSpecFgName, systemRayClusterSpecFgDesc, sm.BuildSystemRayClusterSpecFg},
 	{sm.SystemRayWorkerGroupSpecFgName, systemRayWorkerGroupSpecFgDesc, sm.BuildSystemRayWorkerGroupSpecFg},
 	{sm.SystemRayJobSpecFgName, systemRayJobSpecFgDesc, sm.BuildSystemRayJobSpecFg},
@@ -272,7 +282,8 @@ var systemWorkloadMappingSeeds = []systemWorkloadMappingSeed{
 	{systemXGBoostJobMappingName, systemXGBoostJobMappingDesc, sm.BuildSystemKubeflowOrgXGBoostJobV1Mapping},
 	{systemJAXJobMappingName, systemJAXJobMappingDesc, sm.BuildSystemKubeflowOrgJAXJobV1Mapping},
 	{systemLeaderWorkerSetMappingName, systemLeaderWorkerSetMappingDesc, sm.BuildSystemLeaderWorkerSetXK8sIoV1Mapping},
-	{systemDynamoGraphDeploymentMappingName, systemDynamoGraphDeploymentMappingDesc, sm.BuildSystemNvidiaComDynamoGraphDeploymentV1alpha1Mapping},
+	{systemDynamoGraphDeploymentV1alpha1MappingName, systemDynamoGraphDeploymentV1alpha1MappingDesc, sm.BuildSystemNvidiaComDynamoGraphDeploymentV1alpha1Mapping},
+	{systemDynamoGraphDeploymentV1beta1MappingName, systemDynamoGraphDeploymentV1beta1MappingDesc, sm.BuildSystemNvidiaComDynamoGraphDeploymentV1beta1Mapping},
 	{systemRayClusterMappingName, systemRayClusterMappingDesc, sm.BuildSystemRayIoRayClusterV1Mapping},
 	{systemRayJobMappingName, systemRayJobMappingDesc, sm.BuildSystemRayIoRayJobV1Mapping},
 	{systemRayServiceMappingName, systemRayServiceMappingDesc, sm.BuildSystemRayIoRayServiceV1Mapping},
