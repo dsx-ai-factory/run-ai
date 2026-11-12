@@ -48,6 +48,23 @@ func TestSetDefaultsWhereNeeded(t *testing.T) {
 		require.Equal(t, "1.2.3", *config.Image.Tag)
 	})
 
+	t.Run("defaults replicas to one and does not follow global.replicaCount", func(t *testing.T) {
+		config := &ClusterRedis{}
+
+		config.SetDefaultsWhereNeeded(&internal.Internal{}, &global.Global{ReplicaCount: ptr.To[int32](2)})
+
+		require.NotNil(t, config.Replicas)
+		require.Equal(t, int32(1), *config.Replicas)
+	})
+
+	t.Run("preserves an explicit replicas override", func(t *testing.T) {
+		config := &ClusterRedis{Replicas: ptr.To[int32](2)}
+
+		config.SetDefaultsWhereNeeded(&internal.Internal{}, &global.Global{ReplicaCount: ptr.To[int32](3)})
+
+		require.Equal(t, int32(2), *config.Replicas)
+	})
+
 	t.Run("defaults enabled to true", func(t *testing.T) {
 		config := &ClusterRedis{}
 

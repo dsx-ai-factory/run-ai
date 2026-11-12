@@ -54,7 +54,7 @@ type ClusterRedis struct {
 }
 
 // SetDefaultsWhereNeeded sets default for unset fields
-func (r *ClusterRedis) SetDefaultsWhereNeeded(internalSpec *internal.Internal, global *global.Global) {
+func (r *ClusterRedis) SetDefaultsWhereNeeded(_ *internal.Internal, _ *global.Global) {
 	if r.Enabled == nil {
 		r.Enabled = ptr.To[bool](true)
 	}
@@ -64,11 +64,12 @@ func (r *ClusterRedis) SetDefaultsWhereNeeded(internalSpec *internal.Internal, g
 	}
 	r.Image.SetDefaultsWhereNeeded(common.ThirdPartyImage("VALKEY"))
 	if r.Replicas == nil {
-		if global.ReplicaCount != nil {
-			r.Replicas = ptr.To[int32](*global.ReplicaCount)
-		} else {
-			r.Replicas = ptr.To[int32](1)
-		}
+		// cluster-redis is a single-instance cache: extra replicas are independent
+		// instances rather than replicas of one data set, so a session written to one
+		// pod is missing from the other and the workspace login loops (reported in
+		// #3943). It must therefore not follow global.replicaCount; an explicit
+		// spec.cluster-redis.replicas is still honoured.
+		r.Replicas = ptr.To[int32](1)
 	}
 	if r.Resources == nil {
 		r.Resources = &Resources{}
