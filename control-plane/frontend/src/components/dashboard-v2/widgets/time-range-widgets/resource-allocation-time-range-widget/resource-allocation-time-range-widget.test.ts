@@ -442,7 +442,7 @@ describe("resource-allocation-time-range-widget.vue", () => {
     });
 
     it("skips an interval refresh while a request is still pending", async () => {
-      const startInterval = vi.spyOn(intervalUtil, "startInterval").mockImplementation(() => undefined);
+      const startInterval = vi.spyOn(intervalUtil, "startInterval").mockReturnValue(0);
       const wrapper = mountWithNodePool();
       await flushPromises();
       vi.mocked(clusterService.getClusterMetrics).mockClear();
