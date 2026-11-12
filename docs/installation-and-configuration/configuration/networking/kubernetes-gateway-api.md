@@ -320,7 +320,7 @@ The following steps install Knative Serving and configure the HTTPRoute to conne
 
 <Tab title="Kubernetes">
 
-1.  Install Knative Serving. Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release that supports the Knative Serving version you are using:
+1.  Install Knative Serving. Follow the [Installing Knative](https://knative.dev/docs/install/operator/knative-with-operators/) instructions or run the following, updating `{VERSION}` with a `knative-operator` release in the [supported Knative Serving range](../../support-matrix.md) (operator and Serving versions match):
 
     ```bash
     helm repo add knative-operator https://knative.github.io/operator
