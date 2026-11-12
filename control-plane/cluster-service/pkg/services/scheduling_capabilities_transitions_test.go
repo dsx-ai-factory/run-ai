@@ -103,6 +103,29 @@ var _ = Describe("Nodepool scheduling capability transitions", Ordered, func() {
 		Expect(response.Code).To(Equal(http.StatusOK))
 	}
 
+	It("creates a nodepool with the requested capabilities", func() {
+		fields := nodepoolCreateFields(clusterId, fmt.Sprintf("-capabilities-%d", len(createdNodepools)), nil)
+		fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{
+			AdjustableWeights: ptr.To(true), Quota: ptr.To(false), Ranks: ptr.To(false), CpuQuota: ptr.To(false),
+		}
+		response, err := nodepoolService.CreateNodepool(ctx, *fields)
+		Expect(err).To(BeNil())
+		Expect(response.Code).To(Equal(http.StatusCreated))
+		np := response.Body.(api.Nodepool)
+		createdNodepools = append(createdNodepools, np)
+
+		Expect(np.SchedulingCapabilities).To(Equal(api.SchedulingCapabilities{AdjustableWeights: true}))
+		Expect(storedCapabilities(np.Id)).To(Equal(api.SchedulingCapabilities{AdjustableWeights: true}))
+	})
+
+	It("refuses to create a nodepool with cpuQuota on and quota off", func() {
+		fields := nodepoolCreateFields(clusterId, fmt.Sprintf("-capabilities-%d", len(createdNodepools)), nil)
+		fields.SchedulingCapabilities = api.SchedulingCapabilitiesNullable{Quota: ptr.To(false), CpuQuota: ptr.To(true)}
+		response, err := nodepoolService.CreateNodepool(ctx, *fields)
+		Expect(err).To(BeNil())
+		Expect(response.Code).To(Equal(http.StatusBadRequest))
+	})
+
 	It("turns flags on without any org-unit call", func() {
 		np := createNodepool(clusterId)
 		turnOnCpuQuotaAndWeights(np.Id)

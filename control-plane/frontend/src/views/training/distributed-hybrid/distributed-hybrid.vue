@@ -131,7 +131,6 @@ import { useDataSourceStore } from "@/stores/data-source.store";
 import type { TDataSourceKinds } from "@/models/data-source.model";
 import { useWorkloadStore } from "@/stores/workload.store";
 import { MIN_CLUSTER_VERSION_CLEAN_POD_POLICY } from "@/common/version.constant";
-import { SettingKeys } from "@/models/setting.model";
 import { useWorkloadPriorities } from "@/composables/use-workload-priorities.composable";
 import { useRoute } from "vue-router";
 import { orgUnitService } from "@/services/control-plane/org-unit.service/org-unit.service";
@@ -234,7 +233,7 @@ const DistributedHybrid = defineComponent({
     if (!!fromCopyId || !!templateId)
       this.trainingStore.setDistFlatFromContext({
         fromCopyId: fromCopyId?.toString() || null,
-        templateId: this.supportsTemplatesV2 && templateId ? templateId.toString() : null,
+        templateId: templateId ? templateId.toString() : null,
       });
 
     const distPolicyFromStore = this.trainingStore.getDistPolicyFlat();
@@ -354,9 +353,6 @@ const DistributedHybrid = defineComponent({
         ...this.distributedMetaInfo,
       };
     },
-    supportsTemplatesV2(): boolean {
-      return this.settingStore.isFeatureEnabled(SettingKeys.EnableTemplatesV2);
-    },
     supportPreemptibility(): boolean {
       return this.clusterStore.isClusterVersionSufficient(
         this.workerContext.hybridWorkloadModel.value.clusterId,
@@ -440,8 +436,7 @@ const DistributedHybrid = defineComponent({
       }
       // if its clone operation OR its based on a template and master exists - do nothing we dont want to alter the original data
       if (
-        (this.trainingStore.distFlatFromContext.fromCopyId ||
-          (this.trainingStore.distFlatFromContext.templateId && this.supportsTemplatesV2)) &&
+        (this.trainingStore.distFlatFromContext.fromCopyId || this.trainingStore.distFlatFromContext.templateId) &&
         this.workerContext.hybridWorkloadModel.value.masterSpec
       ) {
         // see comment below this condition for more details
@@ -579,7 +574,7 @@ const DistributedHybrid = defineComponent({
           clusterId,
         };
 
-        if (this.supportsTemplatesV2 && templateId) {
+        if (templateId) {
           request.templateId = templateId;
           this.triggerValidationOnStartUp = true;
         } else request.assetId = templateId;

@@ -291,7 +291,12 @@ rules:
   - apiGroups: [inference.platform.run.ai]
     resources: [inferenceendpoints]
     verbs: [get, list, watch]
-
+  - apiGroups:
+      - nvidia.com
+    resources:
+      - podsnapshots
+    verbs:
+      - get
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role

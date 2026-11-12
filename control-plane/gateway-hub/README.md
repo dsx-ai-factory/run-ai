@@ -66,7 +66,7 @@ Validates the Bearer JWT carried by the client request, then returns the identit
 | `X-Runai-UID` | `uid` | |
 | `X-Runai-Session-Id` | `sid` | |
 | `X-Runai-Is-Management-Tenant` | `MANAGEMENT_REALM` env | `"true"` when realm equals the management realm |
-| `X-Runai-Client-Id` | `client_id` | Set only for `personal-application` service accounts |
+| `X-Runai-Client-Id` | `client_id` | Set only for `access-key` service accounts |
 
 Returns `401` on any validation failure.
 

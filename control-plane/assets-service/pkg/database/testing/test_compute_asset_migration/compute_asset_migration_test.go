@@ -388,7 +388,7 @@ func injectTemplateContent(ctx context.Context, template_id string, asset_id str
 		INSERT INTO assets_metadata (id, name, scope, kind, created_by, created_at, updated_by, updated_at, tenant_id)
 		VALUES (?, ?, 'tenant', ?, 'test', NOW(), 'test', NOW(), ?);
 	`
-	result = runaidb.DB().Actual().WithContext(ctx).Exec(sql, template_id, name, string(api.ASSETKIND_WORKLOAD_TEMPLATE), tenantId)
+	result = runaidb.DB().Actual().WithContext(ctx).Exec(sql, template_id, name, "workload-template", tenantId)
 
 	if result.Error != nil {
 		return fmt.Errorf("failed to insert asset: %w", result.Error)

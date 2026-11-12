@@ -366,7 +366,7 @@ func (w *WorkloadsDao) DbCountWorkloads(ctx context.Context, tenantId uint, perm
 		query = query.Where("deleted_at IS NULL")
 	}
 
-	query = query.WithEnricher(querydbenrich.Filters(filterBy))
+	query = query.WithEnricher(workloadFilters(filterBy))
 
 	if search != "" {
 		query = query.WithEnricher(dbenrich.TSSearch(search, "search_vector"))
@@ -572,7 +572,7 @@ func (w *WorkloadsDao) DbGetWorkloads(
 		query = query.Unscoped().Where("deleted_at IS NOT NULL")
 	}
 
-	query = query.WithEnricher(querydbenrich.Filters(filterBy))
+	query = query.WithEnricher(workloadFilters(filterBy))
 
 	if sortBy != "" {
 		query = query.Order(querydbenrich.FormatSortClause(sortBy, sortOrder))
@@ -871,6 +871,42 @@ func applyRequestedNodepoolFilter(query orm.DB, nodepoolName string) orm.DB {
 // Includes workloads that are currently running in the specified nodepool.
 func applyCurrentNodepoolFilter(query orm.DB, nodepoolName string) orm.DB {
 	return query.Where("? = ANY(current_nodepools)", nodepoolName)
+}
+
+var negatedNodepoolOperators = map[string]string{
+	"is distinct from": "=",
+	"NOT ILIKE":        "ILIKE",
+}
+
+func workloadFilters(filters []queryapi.Filter) orm.Enricher {
+	return func(db orm.DB) orm.DB {
+		var otherFilters []queryapi.Filter
+		for _, filter := range filters {
+			if filter.Field != models.NodepoolFilterColumn || len(filter.Values) == 0 {
+				otherFilters = append(otherFilters, filter)
+				continue
+			}
+			db = applyNodepoolFilter(db, filter)
+		}
+		return querydbenrich.Filters(otherFilters)(db)
+	}
+}
+
+func applyNodepoolFilter(db orm.DB, filter queryapi.Filter) orm.DB {
+	const matchAnyNodepool = "EXISTS (SELECT 1 FROM unnest(current_nodepools) AS np WHERE np %s ?)"
+	condition := fmt.Sprintf(matchAnyNodepool, filter.Operator)
+	if operator, negated := negatedNodepoolOperators[filter.Operator]; negated {
+		condition = "NOT " + fmt.Sprintf(matchAnyNodepool, operator)
+	}
+
+	orConditions := clause.OrConditions{}
+	for _, value := range filter.Values {
+		if filter.ValueFormat != "" {
+			value = fmt.Sprintf(filter.ValueFormat, value)
+		}
+		orConditions.Exprs = append(orConditions.Exprs, clause.Expr{SQL: condition, Vars: []interface{}{value}})
+	}
+	return db.Where(clause.Where{Exprs: []clause.Expression{orConditions}})
 }
 
 // buildTelemetryQuery builds a base query with common filters and GROUP BY for telemetry queries.

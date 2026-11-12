@@ -291,9 +291,6 @@ var _ = Describe("datasources specific tests", func() {
 					for _, training := range entry.UsedBy.Trainings {
 						actualUsage[kind].Add(training.Name)
 					}
-					for _, template := range entry.UsedBy.Templates {
-						actualUsage[kind].Add(template.Name)
-					}
 				}
 			}
 

@@ -468,6 +468,9 @@ func createEmptyResources(nodePoolMetadata openapi.NodepoolMinimal, isDepartment
 		emptyResources.GpuOverQuotaWeight = ptr.To(gpuDeserved)
 		emptyResources.CpuOverQuotaWeight = ptr.To(unlimited)
 		emptyResources.MemoryOverQuotaWeight = ptr.To(unlimited)
+		if capabilities := nodePoolMetadata.SchedulingCapabilities; capabilities != nil && !capabilities.Quota {
+			emptyResources.GpuOverQuotaWeight = ptr.To(departmentWeightWithoutQuota(*capabilities))
+		}
 	}
 	return emptyResources
 }

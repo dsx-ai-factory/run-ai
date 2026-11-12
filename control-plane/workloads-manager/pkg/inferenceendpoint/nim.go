@@ -27,7 +27,7 @@ const nimServiceKind = "NIM service"
 // caller must establish both, because gRPC serving is not visible in the endpoint.
 func BuildNIMServiceIntent(endpoint api.NetworkingEndpoint, workloadName string, defaults *Defaults) (*api.ExternalAccessInference, error) {
 	if !validDefaults(defaults) {
-		return nil, fmt.Errorf("NIM service requires valid administrator Gateway defaults and the gie-v1.5 EPP profile")
+		return nil, fmt.Errorf("NIM service requires valid administrator Gateway defaults and the %s EPP profile", EPPProfileGIEv15)
 	}
 	if endpoint.Services == nil || len(*endpoint.Services) != 1 {
 		return nil, fmt.Errorf("NIM service requires exactly one referenced serving Service")

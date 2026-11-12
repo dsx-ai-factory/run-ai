@@ -24,9 +24,6 @@
     "control-plane/control-plane-chart/**",
     "build/makefile/**"
   ],
-  "ignorePaths": [
-    "runai-cluster/cluster/runai-crd-upgrader/**"
-  ],
   "prConcurrentLimit": 60,
   "prHourlyLimit": 40,
   "packageRules": [

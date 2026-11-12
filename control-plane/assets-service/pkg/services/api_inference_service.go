@@ -10,9 +10,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/policy_compliance"
 	runai_config "github.com/dsx-ai-factory/run-ai/runai-common-packages/config"
-	"net/http"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/flat_workloads"
 	policies "github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
@@ -265,8 +266,8 @@ func (s *InferencesApiService) GetHuggingFaceModelInfo(ctx context.Context, hugg
 	}
 }
 
-func (s *InferencesApiService) GetInferenceMerged(ctx context.Context, projectId string, workloadId string, templateId string) (api.ImplResponse, error) {
-	err := validateMergeParams(projectId, workloadId, templateId, false)
+func (s *InferencesApiService) GetInferenceMerged(ctx context.Context, projectId string, workloadId string) (api.ImplResponse, error) {
+	err := validateMergeParams(projectId, workloadId, false)
 	if err != nil {
 		return api.Response(int(err.Code), err), nil
 	}
@@ -287,34 +288,6 @@ func (s *InferencesApiService) GetInferenceMerged(ctx context.Context, projectId
 		}
 
 		projectId = inference.Meta.ProjectId
-	}
-
-	if templateId != "" {
-		template, _, getError := dao.GetTemplateAssetById(ctx, templateId)
-		if getError != nil {
-			return api.Response(int(getError.Code), getError), nil
-		}
-
-		if projectId != "" && template.Meta.ProjectId != nil {
-			projectIdFromTemplate := fmt.Sprintf("%d", *template.Meta.ProjectId)
-			if projectIdFromTemplate != projectId {
-				return api.Response(http.StatusBadRequest, api.NewValidationError(fmt.Sprintf("template is not associated with projectId %s", projectId))), nil
-			}
-		}
-
-		if projectId == "" {
-			if template.Meta.ProjectId == nil {
-				return api.Response(http.StatusBadRequest, api.NewValidationError("projectId must be provided for non-project scoped template")), nil
-			}
-			projectId = fmt.Sprintf("%d", *template.Meta.ProjectId)
-		}
-
-		copyErr := convutils.CopySpecs(&inference.SpecificRunParams, template.Spec.SpecificEnv)
-		if copyErr != nil {
-			return api.Response(http.StatusInternalServerError, api.NewError(http.StatusInternalServerError, "failed to load the spec of the template", copyErr)), nil
-		}
-
-		inference.Assets = template.Spec.Assets
 	}
 
 	effectivePolicy, policyErr := policy_compliance.GetEffectivePolicyOfProject(ctx, policies.Get().Client(), projectId, auth.WorkloadTypeInference)

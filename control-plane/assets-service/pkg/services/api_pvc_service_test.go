@@ -339,31 +339,6 @@ var _ = Describe("TestPVCAsset", func() {
 		})
 	})
 
-	Context("delete pvc asset used by template(s)", func() {
-		It("should fail on precondition ", func() {
-			env, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			pvc, _, _ := createPVCAsset(testing.BuildRandomProjectPVCAsset(randoms), router, headerForAdmin(randoms))
-
-			templatePayload := buildRandomProjectTemplate(randoms, env.Meta.Id)
-			templatePayload.Spec.Assets.Datasources = []api.AssetIdAndKind{
-				{
-					Kind: api.ASSETKIND_PVC,
-					Id:   pvc.Meta.Id,
-				},
-			}
-			template, _, _ := createTemplateAsset(templatePayload, router, headerForAdmin(randoms))
-
-			deleteHttpReq, err := http.NewRequest("DELETE", fmt.Sprintf("%s/%s", urlPVC, pvc.Meta.Id), nil)
-			Expect(err).To(BeNil())
-			deleteHttpReq.Header = *headerForAdmin(randoms)
-
-			deleteHttpResp := httptest.NewRecorder()
-			router.ServeHTTP(deleteHttpResp, deleteHttpReq)
-			Expect(deleteHttpResp.Code).To(Equal(http.StatusPreconditionFailed))
-			Expect(deleteHttpResp.Body.String()).To(ContainSubstring(fmt.Sprintf("the requested pvc asset is being used by template '%s'", template.Meta.Name)))
-		})
-	})
-
 	Context("delete pvc asset used by datavolume(s)", func() {
 		It("should fail on precondition", func() {
 			pvc, _, _ := createPVCAsset(testing.BuildRandomProjectPVCAsset(randoms), router, headerForAdmin(randoms))

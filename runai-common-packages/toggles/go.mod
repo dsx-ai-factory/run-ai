@@ -1,10 +1,10 @@
 module github.com/dsx-ai-factory/run-ai/runai-common-packages/toggles
 
-go 1.27.3
+go 1.27.4
 
 require (
 	github.com/Unleash/unleash-client-go/v3 v3.9.2
-	github.com/aws/smithy-go v1.28.8
+	github.com/aws/smithy-go v1.28.9
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/config v1.3.4
 	github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx v1.1.12
 	github.com/stretchr/testify v1.12.1
@@ -31,7 +31,7 @@ require (
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/twmb/murmur3 v1.2.2 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
-	golang.org/x/crypto v0.58.0 // indirect
-	golang.org/x/sys v0.49.0 // indirect
-	golang.org/x/text v0.43.0 // indirect
+	golang.org/x/crypto v0.59.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
+	golang.org/x/text v0.44.0 // indirect
 )

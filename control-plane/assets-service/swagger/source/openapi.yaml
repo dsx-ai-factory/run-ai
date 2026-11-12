@@ -127,10 +127,6 @@ paths:
   /api/v1/asset/datasource/s3/{AssetId}:
     $ref: './resources/S3ById.yaml'
 
-  /api/v1/asset/workload-template:
-    $ref: './resources/WorkloadTemplate.yaml'
-  /api/v1/asset/workload-template/{AssetId}:
-    $ref: './resources/WorkloadTemplateById.yaml'
 
   /v1/k8s/clusters/{clusterUuid}/workspaces:
     $ref: './resources/V1/WorkspaceList.yaml'

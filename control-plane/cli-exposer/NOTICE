@@ -30,7 +30,7 @@ Dependencies
 | `github.com/Rican7/retry` | v0.3.1 | MIT | https://github.com/Rican7/retry/blob/v0.3.1/LICENSE |
 | `github.com/ThreeDotsLabs/watermill` | v1.5.3 | MIT | https://github.com/ThreeDotsLabs/watermill/blob/v1.5.3/LICENSE |
 | `github.com/ThreeDotsLabs/watermill-redisstream/pkg/redisstream` | v1.4.5 | MIT | https://github.com/ThreeDotsLabs/watermill-redisstream/blob/v1.4.5/LICENSE |
-| `github.com/aws/smithy-go/ptr` | v1.28.8 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.8/LICENSE |
+| `github.com/aws/smithy-go/ptr` | v1.28.9 | Apache-2.0 | https://github.com/aws/smithy-go/blob/v1.28.9/LICENSE |
 | `github.com/beorn7/perks/quantile` | v1.0.1 | MIT | https://github.com/beorn7/perks/blob/v1.0.1/LICENSE |
 | `github.com/cenkalti/backoff/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v4@v4.3.0?tab=licenses |
 | `github.com/cenkalti/backoff/v5` | v5.0.3 | MIT | https://pkg.go.dev/github.com/cenkalti/backoff/v5@v5.0.3?tab=licenses |
@@ -49,15 +49,15 @@ Dependencies
 | `github.com/grpc-ecosystem/grpc-gateway/v2` | v2.33.0 | BSD-3-Clause | https://pkg.go.dev/github.com/grpc-ecosystem/grpc-gateway/v2@v2.33.0?tab=licenses |
 | `github.com/jackc/pgpassfile` | v1.0.0 | MIT | https://github.com/jackc/pgpassfile/blob/v1.0.0/LICENSE |
 | `github.com/jackc/pgservicefile` | v0.0.0-20240606120523-5a60cdf6a761 | MIT | https://github.com/jackc/pgservicefile/blob/5a60cdf6a761/LICENSE |
-| `github.com/jackc/pgx/v5` | v5.12.0 | MIT | https://pkg.go.dev/github.com/jackc/pgx/v5@v5.12.0?tab=licenses |
+| `github.com/jackc/pgx/v5` | v5.13.0 | MIT | https://pkg.go.dev/github.com/jackc/pgx/v5@v5.13.0?tab=licenses |
 | `github.com/jinzhu/inflection` | v1.0.0 | MIT | https://github.com/jinzhu/inflection/blob/v1.0.0/LICENSE |
 | `github.com/jinzhu/now` | v1.1.5 | MIT | https://github.com/jinzhu/now/blob/v1.1.5/License |
 | `github.com/joho/godotenv` | v1.5.1 | MIT | https://github.com/joho/godotenv/blob/v1.5.1/LICENCE |
-| `github.com/klauspost/compress` | v1.20.3 | Apache-2.0 | https://github.com/klauspost/compress/blob/v1.20.3/LICENSE |
-| `github.com/klauspost/compress/internal/snapref` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/internal/snapref/LICENSE |
-| `github.com/klauspost/compress/s2` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/s2/LICENSE |
-| `github.com/klauspost/compress/snappy` | v1.20.3 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.3/snappy/LICENSE |
-| `github.com/klauspost/compress/zstd/internal/xxhash` | v1.20.3 | MIT | https://github.com/klauspost/compress/blob/v1.20.3/zstd/internal/xxhash/LICENSE.txt |
+| `github.com/klauspost/compress` | v1.20.4 | Apache-2.0 | https://github.com/klauspost/compress/blob/v1.20.4/LICENSE |
+| `github.com/klauspost/compress/internal/snapref` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/internal/snapref/LICENSE |
+| `github.com/klauspost/compress/s2` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/s2/LICENSE |
+| `github.com/klauspost/compress/snappy` | v1.20.4 | BSD-3-Clause | https://github.com/klauspost/compress/blob/v1.20.4/snappy/LICENSE |
+| `github.com/klauspost/compress/zstd/internal/xxhash` | v1.20.4 | MIT | https://github.com/klauspost/compress/blob/v1.20.4/zstd/internal/xxhash/LICENSE.txt |
 | `github.com/leodido/go-urn` | v1.5.0 | MIT | https://github.com/leodido/go-urn/blob/v1.5.0/LICENSE |
 | `github.com/lithammer/shortuuid/v3` | v3.0.7 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v3@v3.0.7?tab=licenses |
 | `github.com/lithammer/shortuuid/v4` | v4.3.0 | MIT | https://pkg.go.dev/github.com/lithammer/shortuuid/v4@v4.3.0?tab=licenses |
@@ -108,14 +108,14 @@ Dependencies
 | `go.opentelemetry.io/proto/otlp` | v1.11.1 | Apache-2.0 | https://pkg.go.dev/go.opentelemetry.io/proto/otlp@v1.11.1?tab=licenses |
 | `go.uber.org/atomic` | v1.12.0 | MIT | https://pkg.go.dev/go.uber.org/atomic@v1.12.0?tab=licenses |
 | `go.yaml.in/yaml/v3` | v3.0.6 | MIT | https://pkg.go.dev/go.yaml.in/yaml/v3@v3.0.6?tab=licenses |
-| `golang.org/x/crypto` | v0.58.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.58.0?tab=licenses |
-| `golang.org/x/exp/slices` | v0.0.0-20261106192419-47ce03d25ef0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261106192419-47ce03d25ef0?tab=licenses |
-| `golang.org/x/mod/semver` | v0.42.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/mod@v0.42.0?tab=licenses |
-| `golang.org/x/net` | v0.61.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.61.0?tab=licenses |
-| `golang.org/x/sys` | v0.49.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.49.0?tab=licenses |
-| `golang.org/x/text` | v0.43.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.43.0?tab=licenses |
-| `google.golang.org/genproto/googleapis/api/httpbody` | v0.0.0-20261104224025-d1e00e9f33ab | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261104224025-d1e00e9f33ab?tab=licenses |
-| `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261104224025-d1e00e9f33ab | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261104224025-d1e00e9f33ab?tab=licenses |
+| `golang.org/x/crypto` | v0.59.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/crypto@v0.59.0?tab=licenses |
+| `golang.org/x/exp/slices` | v0.0.0-20261109185158-a52e3aef5920 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/exp@v0.0.0-20261109185158-a52e3aef5920?tab=licenses |
+| `golang.org/x/mod/semver` | v0.43.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/mod@v0.43.0?tab=licenses |
+| `golang.org/x/net` | v0.62.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/net@v0.62.0?tab=licenses |
+| `golang.org/x/sys` | v0.50.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.50.0?tab=licenses |
+| `golang.org/x/text` | v0.44.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.44.0?tab=licenses |
+| `google.golang.org/genproto/googleapis/api/httpbody` | v0.0.0-20261110000943-09e21b237f2c | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261110000943-09e21b237f2c?tab=licenses |
+| `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261110000943-09e21b237f2c | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261110000943-09e21b237f2c?tab=licenses |
 | `google.golang.org/grpc` | v1.85.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.85.0?tab=licenses |
 | `google.golang.org/protobuf` | v1.36.12 | BSD-3-Clause | https://pkg.go.dev/google.golang.org/protobuf@v1.36.12?tab=licenses |
 | `gorm.io/gorm` | v1.31.2 | MIT | https://pkg.go.dev/gorm.io/gorm@v1.31.2?tab=licenses |
@@ -3110,7 +3110,7 @@ section 4(d) of the Apache License, Version 2.0 requires.
 
 --------------------------------------------------------------------------------
 Notice of:
-  - `github.com/aws/smithy-go` v1.28.8
+  - `github.com/aws/smithy-go` v1.28.9
 --------------------------------------------------------------------------------
 
 Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.

@@ -42,6 +42,7 @@ var _ = Describe("Org unit sync tests", Ordered, func() {
 	defaultNodePoolName := "default"
 	defaultNodePoolId := float32(1)
 	clusterServiceClient := mocks.IClusterClient{}
+	clusterServiceClient.On("GetNodepoolMinimal", mock.Anything, mock.Anything).Return(nil, nil)
 	clusterServiceClient.On("GetClusterMinimalDataById", mock.Anything, mock.Anything).Return(&clustersOpenapi.ClustersMinimalData{
 		Uuid:    clusterId,
 		Version: *clustersOpenapi.NewNullableString(ptr.To("2.21")),

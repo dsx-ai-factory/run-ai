@@ -33,11 +33,6 @@ type WorkloadsSettingsGetResponse struct {
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//EnableTemplatesV2 GetEnableTemplatesV2 `json:"enableTemplatesV2,omitempty"`
-	EnableTemplatesV2 GetEnableTemplatesV2 `json:"enableTemplatesV2,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//EnableHybridSubmission GetEnableHybridSubmission `json:"enableHybridSubmission,omitempty"`
 	EnableHybridSubmission GetEnableHybridSubmission `json:"enableHybridSubmission,omitempty" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
@@ -59,9 +54,6 @@ func AssertWorkloadsSettingsGetResponseRequired(obj WorkloadsSettingsGetResponse
 		return err
 	}
 	if err := AssertGetWorkloadSubmissionV2EnabledRequired(obj.WorkloadSubmissionV2Enabled); err != nil {
-		return err
-	}
-	if err := AssertGetEnableTemplatesV2Required(obj.EnableTemplatesV2); err != nil {
 		return err
 	}
 	if err := AssertGetEnableHybridSubmissionRequired(obj.EnableHybridSubmission); err != nil {
@@ -92,14 +84,6 @@ func AssertWorkloadsSettingsGetResponseConstraints(obj WorkloadsSettingsGetRespo
 
 	//////////////////////// RUNAI END //////////////////////////
 	if err := AssertGetWorkloadSubmissionV2EnabledConstraints(obj.WorkloadSubmissionV2Enabled); err != nil {
-		return err
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertGetEnableTemplatesV2Constraints(obj.EnableTemplatesV2); err != nil {
 		return err
 	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////

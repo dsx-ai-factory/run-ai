@@ -183,23 +183,20 @@ describe("WorkloadsSection - sectionSubHeader counts", () => {
     expect(wrapper.vm.sectionSubHeader).toBe("Enabled (1) / Disabled (0)");
   });
 
-  it("excludes dataVolumes and templatesV2 from count when hybridSubmission is disabled", () => {
+  it("excludes dataVolumes from count when hybridSubmission is disabled", () => {
     const wrapper = createWrapper({
       hybridSubmission: { key: "hybridSubmission", value: "false" },
       dataVolumes: { key: "dataVolumes", value: "false" },
-      templatesV2: { key: "templatesV2", value: "false" },
     });
     expect(wrapper.vm.sectionSubHeader).toBe("Enabled (0) / Disabled (1)");
   });
 
-  it("includes dataVolumes and templatesV2 in count when hybridSubmission is enabled", () => {
+  it("includes dataVolumes in count when hybridSubmission is enabled", () => {
     const wrapper = createWrapper({
       hybridSubmission: { key: "hybridSubmission", value: "true" },
       dataVolumes: { key: "dataVolumes", value: "false" },
-      templatesV2: { key: "templatesV2", value: "true" },
     });
-    // hybridSubmission(enabled) + templatesV2(enabled) = 2, dataVolumes(disabled) = 1
-    expect(wrapper.vm.sectionSubHeader).toBe("Enabled (2) / Disabled (1)");
+    expect(wrapper.vm.sectionSubHeader).toBe("Enabled (1) / Disabled (1)");
   });
 
   it("includes applicationSubmission as enabled when setting is enabled and feature flag is on", () => {

@@ -180,7 +180,6 @@ import { EHybridFormTypes } from "@/composables/helpers/use-hybrid-templates.map
 import { useHybridTemplates } from "@/composables/use-hybrid-templates.composable";
 import { useDataSourceStore } from "@/stores/data-source.store";
 import { useWorkloadStore } from "@/stores/workload.store";
-import { SettingKeys } from "@/models/setting.model";
 import { useSettingStore } from "@/stores/setting.store";
 import { useImagePullSecrets } from "@/composables/use-image-pull-secrets.composable";
 import { useWorkloadPriorities } from "@/composables/use-workload-priorities.composable";
@@ -445,9 +444,6 @@ const WorkspaceHybrid = defineComponent({
       );
     },
 
-    supportsTemplatesV2(): boolean {
-      return this.settingStore.isFeatureEnabled(SettingKeys.EnableTemplatesV2);
-    },
     workloadPriorityData(): IWorkloadPriorityData {
       const totalGpuRequest = workloadHybridUtil.calculateTotalGpuRequest({
         specCompute: this.workspaceModel.spec?.compute,
@@ -533,7 +529,7 @@ const WorkspaceHybrid = defineComponent({
           clusterId,
         };
 
-        if (this.supportsTemplatesV2 && templateId) {
+        if (templateId) {
           request.templateId = templateId;
           this.triggerValidationOnStartUp = true;
         } else request.assetId = templateId;

@@ -4,21 +4,12 @@
  */
 
 // services
-import { pick } from "@/utils/common.util";
-import { assetsServiceApi } from "@/services/infra/client-apis/assets-service-api/assets-service-api";
 import { workloadServiceApi } from "@/services/infra/client-apis/workloads-service-api/workloads-service-api";
 import { httpService } from "@/services/infra/https.service/http.service";
 
 // models
-import {
-  WorkloadType,
-  type HttpResponse,
-  type WorkloadTemplate,
-  type WorkloadTemplateCreationRequest,
-  type WorkloadTemplateUpdateRequest,
-} from "@/swagger-models/assets-service-client";
-import { EFilterOperator, type IAssetsFilter } from "@/models/filter.model";
-import type { IUIWorkloadTemplateCreationRequestModel } from "@/models/workload-template.model";
+import { WorkloadType } from "@/swagger-models/workloads-client";
+import { EFilterOperator } from "@/models/filter.model";
 import type {
   CountResponse,
   DistributedTemplate,
@@ -42,14 +33,6 @@ import type {
 import { HttpErrorResponse } from "@/models/http-response.model";
 
 export const workloadTemplateService = {
-  // legacy assets templates
-  list,
-  getById,
-  remove,
-  create,
-  update,
-  getEmptyWorkloadTemplateModel,
-  // hybrid templates
   createWorkspaceTemplateFlat,
   updateWorkspaceTemplateFlat,
   createTrainingTemplateFlat,
@@ -75,75 +58,6 @@ export const workloadTemplateService = {
 };
 
 // api calls
-
-async function list(filterBy: IAssetsFilter): Promise<Array<WorkloadTemplate>> {
-  const filters: IAssetsFilter = pick(
-    filterBy,
-    "sortBy",
-    "page",
-    "rowsPerPage",
-    "scope",
-    "projectId",
-    "clusterUuid",
-    "isWorkspace",
-    "isTraining",
-    "isDistributed",
-    "distributedFramework",
-  );
-  try {
-    return assetsServiceApi.templateApi
-      .listTemplates(
-        undefined,
-        filters.scope,
-        Number(filters.projectId) || undefined,
-        filters.departmentId || undefined,
-        filterBy.clusterUuid || undefined,
-        filters.distributedFramework || undefined,
-        filters.isDistributed,
-        filters.isTraining,
-        filters.isWorkspace,
-      )
-      .then((res) => res.data.entries);
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function getById(id: string): Promise<WorkloadTemplate> {
-  try {
-    const response = await assetsServiceApi.templateApi.getTemplateById(id);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function create(workloadTemplate: WorkloadTemplateCreationRequest): Promise<WorkloadTemplate> {
-  try {
-    const response = await assetsServiceApi.templateApi.createTemplate(workloadTemplate);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function remove(workloadTemplate: WorkloadTemplate): Promise<HttpResponse> {
-  try {
-    const response = await assetsServiceApi.templateApi.deleteTemplateById(workloadTemplate.meta.id);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
-
-async function update(templateId: string, template: WorkloadTemplateUpdateRequest): Promise<WorkloadTemplate> {
-  try {
-    const response = await assetsServiceApi.templateApi.updateTemplate(templateId, template);
-    return response.data;
-  } catch (err: unknown) {
-    throw httpService.handleHttpError(err);
-  }
-}
 
 async function getWorkspaceTemplateById(id: string): Promise<WorkspaceTemplate> {
   try {
@@ -505,34 +419,4 @@ async function deleteFlatInferenceTemplate(id: string): Promise<void> {
   } catch (err: unknown) {
     throw httpService.handleHttpError(err);
   }
-}
-
-// helpers
-function getEmptyWorkloadTemplateModel(): IUIWorkloadTemplateCreationRequestModel {
-  return {
-    meta: {
-      name: "",
-      description: null,
-      scope: null,
-      clusterId: null,
-      projectId: null,
-    },
-    spec: {
-      assets: {
-        environment: "",
-        compute: null,
-        datasources: [],
-      },
-      specificEnv: {
-        allowOverQuota: false,
-        args: "",
-        command: "",
-        environmentVariables: [],
-        connections: [],
-        runAsGid: null,
-        runAsUid: null,
-        backoffLimit: 6,
-      },
-    },
-  };
 }

@@ -3,8 +3,8 @@
 Assets Service is the control-plane service (owned by the **Viper** team) that
 manages **workload assets** for Run:ai — the reusable building blocks users
 reference when they submit workloads. It owns environments, compute profiles,
-data sources, credentials, models, inference/training/workspace definitions and
-workload templates, persists them in its own PostgreSQL schema, and keeps the
+data sources, credentials, models, and inference/training/workspace definitions,
+persists them in its own PostgreSQL schema, and keeps the
 control-plane copy in sync with what actually exists on the clusters. It exposes
 a stable HTTP/REST API generated from an OpenAPI specification.
 
@@ -34,7 +34,6 @@ The service is responsible for:
   and stored in Kubernetes Secrets in the configured namespace.
 - **Models & inference** — model assets, Hugging Face model info lookups, and
   the v2 inference / training / workspace merged asset definitions.
-- **Workload templates** — reusable templates that bundle the above assets.
 - **Flat workloads** — the denormalised (`flat_workloads`) view used for fast
   workload listing and querying.
 - **Synchronization** — the internal `Synchronization` API and agent-sync flow

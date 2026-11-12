@@ -176,6 +176,85 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/clusters/{clusterUuid}/nodes/labels/keys:
+    x-internal: true
+    get:
+      summary: Get node label keys.
+      description: Return unique, sorted label keys up to 253 characters long from nodes in the selected cluster.
+      operationId: get_node_label_keys
+      x-service: cluster-service
+      x-test-coverage:
+        - control-plane/cluster-service/pkg/services/api_nodes_labels_test.go
+      x-authorize:
+        resource-type: nodes
+        action: read
+      tags:
+        - Nodes
+      parameters:
+        - $ref: '#/components/parameters/ClusterUuid'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Matching label keys. Returns an empty array when no keys match.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeLabelOptions'
+              example:
+                - gpu-type
+                - nvidia.com/gpu.product
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/clusters/{clusterUuid}/nodes/labels/values:
+    x-internal: true
+    get:
+      summary: Get node label values.
+      description: Return unique, sorted nonempty values for an exact label key up to 253 characters long from nodes in the selected cluster.
+      operationId: get_node_label_values
+      x-service: cluster-service
+      x-test-coverage:
+        - control-plane/cluster-service/pkg/services/api_nodes_labels_test.go
+      x-authorize:
+        resource-type: nodes
+        action: read
+      tags:
+        - Nodes
+      parameters:
+        - $ref: '#/components/parameters/ClusterUuid'
+        - $ref: '#/components/parameters/NodeLabelKey'
+        - $ref: '#/components/parameters/Offset'
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Matching label values. Returns an empty array when no values match.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NodeLabelOptions'
+              example:
+                - a100
+                - a30
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '500':
+          $ref: '#/components/responses/500InternalServerError'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
   /api/v1/clusters/{clusterUuid}/nodes/count:
     get:
       summary: Count nodes
@@ -2715,6 +2794,43 @@ components:
       example: true
       schema:
         type: boolean
+    Offset:
+      name: offset
+      in: query
+      required: false
+      description: The offset of the first item returned in the collection.
+      schema:
+        type: integer
+        format: int32
+        example: 100
+    Limit:
+      name: limit
+      in: query
+      required: false
+      description: The maximum number of entries to return.
+      schema:
+        type: integer
+        format: int32
+        default: 50
+        minimum: 1
+        maximum: 500
+    Search:
+      name: search
+      in: query
+      required: false
+      description: Filter results by a free text search.
+      schema:
+        type: string
+        example: test project
+    NodeLabelKey:
+      name: key
+      in: query
+      required: true
+      description: The exact label key whose values to return.
+      schema:
+        type: string
+        minLength: 1
+      example: gpu-type
     NodesFilter:
       name: filterBy
       in: query
@@ -2729,14 +2845,6 @@ components:
         example:
           - name!=some-name
       explode: false
-    Search:
-      name: search
-      in: query
-      required: false
-      description: Filter results by a free text search.
-      schema:
-        type: string
-        example: test project
     NodeName:
       name: nodeName
       in: path
@@ -2791,26 +2899,6 @@ components:
         example:
           - name==my-cluster
       explode: false
-    Offset:
-      name: offset
-      in: query
-      required: false
-      description: The offset of the first item returned in the collection.
-      schema:
-        type: integer
-        format: int32
-        example: 100
-    Limit:
-      name: limit
-      in: query
-      required: false
-      description: The maximum number of entries to return.
-      schema:
-        type: integer
-        format: int32
-        default: 50
-        minimum: 1
-        maximum: 500
     QueryForceDelete:
       name: force
       in: query
@@ -3563,6 +3651,10 @@ components:
         updatedAt: '2020-01-02T00:00:00Z'
         lastLiveness: '2020-01-02T00:00:00Z'
         version: 2.15.0
+    NodeLabelOptions:
+      type: array
+      items:
+        type: string
     NodeStatusConditionDetails:
       type: object
       required:
@@ -3671,6 +3763,12 @@ components:
         - nodePool
         - createdAt
       properties:
+        labels:
+          writeOnly: true
+          type: object
+          additionalProperties:
+            type: string
+          description: Labels assigned to the node.
         status:
           type: string
           enum:

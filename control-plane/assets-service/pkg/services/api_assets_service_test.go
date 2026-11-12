@@ -12,14 +12,17 @@ import (
 	"net/http/httptest"
 	"time"
 
+	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/database/dbmodel"
+	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaidb"
+
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/pkg/clients/org_unit"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/policies"
-	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 	checkerClusterClient "github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/clients/cluster"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 
+	"github.com/dsx-ai-factory/run-ai/runai-application-packages/convutils"
 	"github.com/dsx-ai-factory/run-ai/runai-application-packages/testutils"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/assets-service/generated/pkg/api"
@@ -58,6 +61,64 @@ var _ = Describe("assets validation", func() {
 			SimpleMockClient: policies.SimpleMockClient{
 				EffectiveUpdatedAt: time.Now(),
 			},
+		})
+	})
+
+	Context("legacy template retirement", func() {
+		DescribeTable("does not serve legacy endpoints", func(method, path string) {
+			request := httptest.NewRequest(method, path, nil)
+			request.Header = *headerForAdmin(randoms)
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, request)
+			Expect(response.Code).To(Equal(http.StatusNotFound))
+		},
+			Entry("list", http.MethodGet, "/api/v1/asset/workload-template"),
+			Entry("create", http.MethodPost, "/api/v1/asset/workload-template"),
+			Entry("get", http.MethodGet, "/api/v1/asset/workload-template/"+uuid.NewString()),
+			Entry("update", http.MethodPut, "/api/v1/asset/workload-template/"+uuid.NewString()),
+			Entry("delete", http.MethodDelete, "/api/v1/asset/workload-template/"+uuid.NewString()),
+		)
+
+		It("hides retained legacy metadata from asset lookup and conversion", func() {
+			legacy := dbmodel.AssetMetaRec{AssetMeta: dbmodel.AssetMeta{
+				Id: uuid.NewString(), Name: "retired-template", Kind: "workload-template",
+				Scope: api.SCOPE_TENANT, TenantId: convutils.Ref(int32(randoms.TenantId)),
+			}}
+			Expect(runaidb.DB().Actual().Create(&legacy).Error).To(Succeed())
+
+			lookup := httptest.NewRequest(http.MethodGet, urlAssets+"?id="+legacy.Id, nil)
+			lookup.Header = *headerForAdmin(randoms)
+			lookupResponse := httptest.NewRecorder()
+			router.ServeHTTP(lookupResponse, lookup)
+			Expect(lookupResponse.Code).To(Equal(http.StatusOK))
+			var listed api.AssetListByIdsResponse
+			Expect(json.Unmarshal(lookupResponse.Body.Bytes(), &listed)).To(Succeed())
+			Expect(listed.Entries).To(BeEmpty())
+
+			request := httptest.NewRequest(http.MethodPost, urlToFlat, makePayload(api.AssetFlatRequest{
+				AssetId: legacy.Id, WorkloadType: api.WORKLOADTYPE_WORKSPACE,
+				ClusterId: randoms.ClusterId, ProjectId: randoms.ProjectIdStr,
+			}))
+			request.Header = *headerForAdmin(randoms)
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, request)
+			Expect(response.Code).To(Equal(http.StatusNotFound))
+		})
+
+		It("allows deleting an asset referenced by retained legacy template content", func() {
+			environment, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
+			templateID := uuid.NewString()
+			db := runaidb.DB().Actual()
+			Expect(db.Exec("INSERT INTO assets_template_content (template_asset_id, contained_asset_id) VALUES (?, ?)", templateID, environment.Meta.Id).Error).To(Succeed())
+			DeferCleanup(func() {
+				Expect(db.Exec("DELETE FROM assets_template_content WHERE template_asset_id = ?", templateID).Error).To(Succeed())
+			})
+
+			request := httptest.NewRequest(http.MethodDelete, urlEnvironment+"/"+environment.Meta.Id, nil)
+			request.Header = *headerForAdmin(randoms)
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, request)
+			Expect(response.Code).To(Equal(http.StatusAccepted))
 		})
 	})
 
@@ -180,67 +241,6 @@ var _ = Describe("assets validation", func() {
 			Expect((*flatResponse.Master.Storage.Pvc)[0].ClaimName).To(Equal(pvcAsset.Spec.ClaimName))
 		})
 
-		It("template asset returned correctly", func() {
-			envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-			computeAsset, _, _ := createComputeAsset(buildRandomTenantCompute(), router, headerForAdmin(randoms))
-			pvcAsset, _, _ := createPVCAsset(testing.BuildRandomProjectPVCAsset(randoms), router, headerForAdmin(randoms))
-
-			templateReq := buildRandomTemplate(api.SCOPE_PROJECT, randoms, envAsset.Meta.Id, computeAsset.Meta, pvcAsset.Meta)
-			templateReq.Spec.SpecificEnv = &api.SpecificRunParams{
-				Annotations: &[]api.Annotation{
-					{
-						Name:  convutils.Ref("annotation_1"),
-						Value: convutils.Ref("value_1"),
-					},
-					{
-						Name:  convutils.Ref("annotation_2"),
-						Value: convutils.Ref("value_2"),
-					},
-				},
-				Command: convutils.Ref("command-spec"),
-			}
-			templateAsset, _, _ := createTemplateAsset(templateReq, router, headerForAdmin(randoms))
-
-			flatRequestPayload := api.AssetFlatRequest{
-				AssetId:      templateAsset.Meta.Id,
-				WorkloadType: api.WORKLOADTYPE_WORKSPACE,
-				ClusterId:    randoms.ClusterId,
-				ProjectId:    randoms.ProjectIdStr,
-			}
-
-			flatRequest, err := http.NewRequest("POST", urlToFlat, makePayload(flatRequestPayload))
-			Expect(err).To(BeNil())
-			flatRequest.Header = *headerForAdmin(randoms)
-
-			response := httptest.NewRecorder()
-			router.ServeHTTP(response, flatRequest)
-			Expect(response.Code).To(Equal(http.StatusOK))
-
-			var flatResponse api.AssetFlatResponse
-			jsonErr := json.Unmarshal(response.Body.Bytes(), &flatResponse)
-			Expect(jsonErr).To(BeNil())
-
-			Expect(flatResponse.Worker).NotTo(BeNil())
-			Expect(flatResponse.Worker.Storage).NotTo(BeNil())
-			Expect(flatResponse.Worker.Storage.Pvc).NotTo(BeNil())
-
-			Expect((*flatResponse.Worker.Storage.Pvc)[0].Path).To(Equal(pvcAsset.Spec.Path))
-			Expect(*(*flatResponse.Worker.Storage.Pvc)[0].ExistingPvc).To(Equal(true))
-			Expect((*flatResponse.Worker.Storage.Pvc)[0].ClaimName).To(Equal(pvcAsset.Spec.ClaimName))
-
-			Expect(flatResponse.Worker.Image).To(Equal(envAsset.Spec.Image))
-
-			Expect(flatResponse.Worker.Command).NotTo(BeNil())
-			Expect(*flatResponse.Worker.Command).To(Equal(*templateReq.Spec.SpecificEnv.Command))
-
-			Expect(flatResponse.Worker.Annotations).NotTo(BeNil())
-			Expect(len(*flatResponse.Worker.Annotations)).To(Equal(2))
-
-			Expect(flatResponse.Worker.Compute).NotTo(BeNil())
-			Expect(flatResponse.Worker.Compute.CpuMemoryLimit).To(Equal(computeAsset.Spec.CpuMemoryLimit))
-			Expect(flatResponse.Worker.Compute.ExtendedResources).NotTo(BeNil())
-			Expect(len(*flatResponse.Worker.Compute.ExtendedResources)).To(Equal(len(*computeAsset.Spec.ExtendedResources)))
-		})
 	})
 
 	Context("validations", func() {
@@ -358,28 +358,6 @@ var _ = Describe("assets validation", func() {
 		})
 
 		Context("Validations", func() {
-			It("template and assets cannot be provided together", func() {
-				envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
-
-				templateReq := buildRandomTemplate(api.SCOPE_TENANT, randoms, envAsset.Meta.Id)
-				templateAsset, _, _ := createTemplateAsset(templateReq, router, headerForAdmin(randoms))
-
-				flatRequestPayload := api.AssetFlatRequest{
-					AssetIds:     []string{templateAsset.Meta.Id, envAsset.Meta.Id},
-					WorkloadType: api.WORKLOADTYPE_WORKSPACE,
-					ClusterId:    randoms.ClusterId,
-					ProjectId:    randoms.ProjectIdStr,
-				}
-
-				flatRequest, err := http.NewRequest("POST", urlToFlat, makePayload(flatRequestPayload))
-				Expect(err).To(BeNil())
-				flatRequest.Header = *headerForAdmin(randoms)
-
-				response := httptest.NewRecorder()
-				router.ServeHTTP(response, flatRequest)
-				Expect(response.Code).To(Equal(http.StatusBadRequest))
-				Expect(response.Body.Bytes()).To(ContainSubstring("multiple assetIds cannot be provided when assetId of a workload template is specified"))
-			})
 
 			It("multiple defined asset", func() {
 				envAsset, _, _ := createEnvironmentAsset(buildRandomTenantEnvironmentAsset(randoms), router, headerForAdmin(randoms))
