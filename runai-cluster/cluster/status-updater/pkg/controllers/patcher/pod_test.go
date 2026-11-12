@@ -47,7 +47,7 @@ func TestShouldUpdatePodAnnotations(t *testing.T) {
 				&v1.Pod{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							podStatusAnnotationName:             "Pending",
+							PodStatusAnnotationName:             "Pending",
 							PodAllocatedGPUsAnnotationName:      "0",
 							PodAllocatedGpuMemoryAnnotationName: "0",
 							PodAllocatedMigGPUsAnnotationName:   "0",
@@ -69,7 +69,7 @@ func TestShouldUpdatePodAnnotations(t *testing.T) {
 				&v1.Pod{
 					ObjectMeta: metav1.ObjectMeta{
 						Annotations: map[string]string{
-							podStatusAnnotationName:             "Pending",
+							PodStatusAnnotationName:             "Pending",
 							PodAllocatedGPUsAnnotationName:      "0",
 							PodAllocatedGpuMemoryAnnotationName: "0",
 							PodAllocatedMigGPUsAnnotationName:   "0",
@@ -128,7 +128,7 @@ func TestUpdatePodAnnotations(t *testing.T) {
 			},
 			false,
 			map[string]string{
-				podStatusAnnotationName:             "Pending",
+				PodStatusAnnotationName:             "Pending",
 				PodAllocatedGPUsAnnotationName:      "0",
 				PodAllocatedGpuMemoryAnnotationName: "0",
 				PodAllocatedMigGPUsAnnotationName:   "0",
@@ -180,7 +180,7 @@ func Test_transformToPodAnnotations(t *testing.T) {
 				},
 			},
 			map[string]string{
-				podStatusAnnotationName:             "Pending",
+				PodStatusAnnotationName:             "Pending",
 				PodAllocatedGPUsAnnotationName:      "0",
 				PodAllocatedGpuMemoryAnnotationName: "0",
 				PodAllocatedMigGPUsAnnotationName:   "0",
@@ -197,7 +197,7 @@ func Test_transformToPodAnnotations(t *testing.T) {
 				},
 			},
 			map[string]string{
-				podStatusAnnotationName:             "Running",
+				PodStatusAnnotationName:             "Running",
 				PodAllocatedGPUsAnnotationName:      "0.5001",
 				PodAllocatedGpuMemoryAnnotationName: "0",
 				PodAllocatedMigGPUsAnnotationName:   "0",
@@ -214,7 +214,7 @@ func Test_transformToPodAnnotations(t *testing.T) {
 				},
 			},
 			map[string]string{
-				podStatusAnnotationName:             "Running",
+				PodStatusAnnotationName:             "Running",
 				PodAllocatedGPUsAnnotationName:      "0.1",
 				PodAllocatedGpuMemoryAnnotationName: "1000",
 				PodAllocatedMigGPUsAnnotationName:   "0",
@@ -231,7 +231,7 @@ func Test_transformToPodAnnotations(t *testing.T) {
 				},
 			},
 			map[string]string{
-				podStatusAnnotationName:             "Running",
+				PodStatusAnnotationName:             "Running",
 				PodAllocatedGPUsAnnotationName:      "0",
 				PodAllocatedGpuMemoryAnnotationName: "0",
 				PodAllocatedMigGPUsAnnotationName:   "0.275",
@@ -245,4 +245,27 @@ func Test_transformToPodAnnotations(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestUpdatePodStatusAnnotation checks that only the status annotation is patched and that other
+// annotations on the pod are kept as they are.
+func TestUpdatePodStatusAnnotation(t *testing.T) {
+	ctx := context.TODO()
+	pod := &v1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        "t1",
+			Namespace:   "namespaceT1",
+			Annotations: map[string]string{PodStatusAnnotationName: "Pending", "other": "value"},
+		},
+	}
+	kubeClient := fake.NewClientBuilder().WithScheme(clientgoscheme.Scheme).WithObjects(pod.DeepCopy()).Build()
+
+	err := UpdatePodStatusAnnotation(ctx, pod, "Running", kubeClient)
+	assert.NoError(t, err)
+
+	patchedPod := &v1.Pod{}
+	err = kubeClient.Get(ctx, client.ObjectKeyFromObject(pod), patchedPod)
+	assert.NoError(t, err)
+	assert.Equal(t, map[string]string{PodStatusAnnotationName: "Running", "other": "value"},
+		patchedPod.Annotations)
 }
