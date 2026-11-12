@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/dsx-ai-factory/run-ai/runai-installer/installer/internal/yamldoc"
 	"gopkg.in/yaml.v3"
 )
 
@@ -25,6 +26,9 @@ func Load(path string) (*Config, error) {
 
 	var cfg Config
 	if err := dec.Decode(&cfg); err != nil {
+		return nil, fmt.Errorf("parse config %q: %w", path, err)
+	}
+	if err := yamldoc.EnsureNoExtraDocuments(dec); err != nil {
 		return nil, fmt.Errorf("parse config %q: %w", path, err)
 	}
 	return &cfg, nil
