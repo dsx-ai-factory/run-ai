@@ -37,6 +37,7 @@ pkg/api/model_environment_variable_secret.go
 pkg/api/model_environment_variable_user_credential.go
 pkg/api/model_error.go
 pkg/api/model_external_access.go
+pkg/api/model_external_access_inference.go
 pkg/api/model_get_yaml_submission.go
 pkg/api/model_get_yaml_submission_value.go
 pkg/api/model_gpu_compute_mode.go
@@ -93,6 +94,7 @@ pkg/api/model_toleration_operator.go
 pkg/api/model_workload_run_state_request.go
 pkg/api/model_workload_v2.go
 pkg/api/model_workload_v2_configuration.go
+pkg/api/model_workload_v2_configuration_inference_routing.go
 pkg/api/model_workload_v2_create_request.go
 pkg/api/model_workload_v2_get_response.go
 pkg/api/model_workload_v2_metadata.go

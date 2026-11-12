@@ -1554,6 +1554,12 @@ export interface DistributedInferenceCommonDefaultsV2 {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonDefaultsV2
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonDefaultsV2
@@ -1615,6 +1621,12 @@ export interface DistributedInferenceCommonDefaultsV2AllOf {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonDefaultsV2AllOf
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonDefaultsV2AllOf
@@ -1657,6 +1669,12 @@ export interface DistributedInferenceCommonRulesV2 {
      * @memberof DistributedInferenceCommonRulesV2
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceCommonRulesV2
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -1720,6 +1738,12 @@ export interface DistributedInferenceCommonRulesV2AllOf {
     'category'?: StringRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceCommonRulesV2AllOf
+     */
+    'loadAwareRouting'?: BooleanRules | null;
+    /**
+     * 
      * @type {ArrayRules}
      * @memberof DistributedInferenceCommonRulesV2AllOf
      */
@@ -1761,6 +1785,12 @@ export interface DistributedInferenceDefaultsV2 {
      * @memberof DistributedInferenceDefaultsV2
      */
     'category'?: string | null;
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof DistributedInferenceDefaultsV2
+     */
+    'loadAwareRouting'?: boolean | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -2663,6 +2693,12 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Defaults {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Defaults
@@ -2735,6 +2771,12 @@ export interface DistributedInferencePolicyDefaultsAndRulesV2Rules {
      * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferencePolicyDefaultsAndRulesV2Rules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -2967,6 +3009,12 @@ export interface DistributedInferenceRulesV2 {
      * @memberof DistributedInferenceRulesV2
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof DistributedInferenceRulesV2
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -5175,6 +5223,12 @@ export interface FallbackPolicyDefaultsAndRulesDefaults {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof FallbackPolicyDefaultsAndRulesDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof FallbackPolicyDefaultsAndRulesDefaults
@@ -5482,6 +5536,12 @@ export interface FallbackPolicyDefaultsAndRulesRules {
      * @memberof FallbackPolicyDefaultsAndRulesRules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof FallbackPolicyDefaultsAndRulesRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArrayRules}
@@ -9662,6 +9722,12 @@ export interface NimServiceDefaults {
      */
     'labels'?: LabelsDefaults | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof NimServiceDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
      * @memberof NimServiceDefaults
@@ -9788,6 +9854,12 @@ export interface NimServiceDefaultsAllOf {
      * @memberof NimServiceDefaultsAllOf
      */
     'labels'?: LabelsDefaults | null;
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof NimServiceDefaultsAllOf
+     */
+    'loadAwareRouting'?: boolean | null;
     /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
@@ -10191,6 +10263,12 @@ export interface NimServicePolicyDefaultsAndRulesDefaults {
      */
     'labels'?: LabelsDefaults | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof NimServicePolicyDefaultsAndRulesDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * 
      * @type {NimServiceDefaultsAllOfModelStore}
      * @memberof NimServicePolicyDefaultsAndRulesDefaults
@@ -10317,6 +10395,12 @@ export interface NimServicePolicyDefaultsAndRulesRules {
      * @memberof NimServicePolicyDefaultsAndRulesRules
      */
     'labels'?: InstancesRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof NimServicePolicyDefaultsAndRulesRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {NimServiceRulesAllOfModelStore}
@@ -10496,6 +10580,12 @@ export interface NimServiceRules {
     'labels'?: InstancesRules | null;
     /**
      * 
+     * @type {BooleanRules}
+     * @memberof NimServiceRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
+    /**
+     * 
      * @type {NimServiceRulesAllOfModelStore}
      * @memberof NimServiceRules
      */
@@ -10621,6 +10711,12 @@ export interface NimServiceRulesAllOf {
      * @memberof NimServiceRulesAllOf
      */
     'labels'?: InstancesRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof NimServiceRulesAllOf
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {NimServiceRulesAllOfModelStore}
@@ -15204,6 +15300,12 @@ export interface SupersetDefaults {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof SupersetDefaults
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof SupersetDefaults
@@ -16035,6 +16137,12 @@ export interface SupersetRules {
      * @memberof SupersetRules
      */
     'category'?: StringRules | null;
+    /**
+     * 
+     * @type {BooleanRules}
+     * @memberof SupersetRules
+     */
+    'loadAwareRouting'?: BooleanRules | null;
     /**
      * 
      * @type {ArrayRules}

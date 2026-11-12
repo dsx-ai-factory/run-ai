@@ -4331,6 +4331,12 @@ export interface DistributedInferenceCommonSpec {
      */
     'category'?: string | null;
     /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonSpec
+     */
+    'loadAwareRouting'?: boolean | null;
+    /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
      * @memberof DistributedInferenceCommonSpec
@@ -4391,6 +4397,12 @@ export interface DistributedInferenceCommonSpecAllOf {
      * @memberof DistributedInferenceCommonSpecAllOf
      */
     'category'?: string | null;
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof DistributedInferenceCommonSpecAllOf
+     */
+    'loadAwareRouting'?: boolean | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}
@@ -13083,6 +13095,12 @@ export interface SupersetSpec {
      * @memberof SupersetSpec
      */
     'category'?: string | null;
+    /**
+     * Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.
+     * @type {boolean}
+     * @memberof SupersetSpec
+     */
+    'loadAwareRouting'?: boolean | null;
     /**
      * A prioritized list of node pools for the scheduler to run the workload on. The scheduler will always try to use the first node pool before moving to the next one if the first is not available.
      * @type {Array<string>}

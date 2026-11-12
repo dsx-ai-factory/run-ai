@@ -33,6 +33,8 @@ func TestValidateNetworkingEndpoints(t *testing.T) {
 		{name: "route only", input: `[{"externalAccess":{"route":{}}}]`},
 		{name: "HTTPRoute only", input: `[{"externalAccess":{"httpRoute":{}}}]`},
 		{name: "NIM reference with authorization", input: `[{"services":[{"ref":{"name":"nim","port":8000},"authorization":{"authorizationType":"authenticatedUsers"}}],"externalAccess":{"ingress":{},"httpRoute":{}}}]`},
+		{name: "server-set inference", input: `[{"services":[{"spec":{"name":"one","selector":{"app":"one"},"ports":[{"port":80}]}}],"externalAccess":{"httpRoute":{},"inference":{"epp":{"profile":"gie-v1.5"}}}}]`, wantErr: "networking[0].externalAccess.inference is set by the server and cannot be submitted"},
+		{name: "server-set inference on a later endpoint", input: `[{"services":[{"ref":{"name":"one","port":80}}]},{"externalAccess":{"httpRoute":{},"inference":{"epp":{"profile":"gie-v1.5"}}}}]`, wantErr: "networking[1].externalAccess.inference is set by the server"},
 		{name: "multiple endpoints", input: `[{"services":[{"ref":{"name":"one","port":80}}]},{"services":[{"ref":{"name":"two","port":80}}]}]`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

@@ -155,6 +155,38 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 			Entry("only worker uses IdP", api.UIDGIDSOURCE_CUSTOM, api.UIDGIDSOURCE_FROM_IDP_TOKEN),
 		)
 
+		DescribeTable("rejects load-aware routing on the native submission path",
+			func(name string, mutate func(*api.DistributedInferenceSpecSpec), expectedCode int) {
+				request := api.DistributedInferenceCreationRequest{
+					Name:      name,
+					ProjectId: randoms.ProjectIdStr,
+					ClusterId: randoms.ClusterId,
+					Spec: api.DistributedInferenceSpecSpec{
+						ServingPort: &api.DistributedInferenceServingPort{
+							Port:     convutils.Ref(int32(8080)),
+							Protocol: convutils.Ref(api.DISTRIBUTEDINFERENCESERVINGPORTPROTOCOL_HTTP),
+						},
+						Workers:  convutils.Ref(int32(1)),
+						Replicas: convutils.Ref(int32(1)),
+						Leader:   &api.DistributedInferenceLeaderWorkerSpec{Image: convutils.Ref("leader-image")},
+						Worker:   &api.DistributedInferenceLeaderWorkerSpec{Image: convutils.Ref("worker-image")},
+					},
+				}
+				mutate(&request.Spec)
+
+				response, err := distributedInferencesService.CreateDistributedInference(ctx, request)
+				Expect(err).NotTo(HaveOccurred())
+				Expect(response.Code).To(Equal(expectedCode), "%v", response.Body)
+				if expectedCode == http.StatusBadRequest {
+					raw, marshalErr := json.Marshal(response.Body)
+					Expect(marshalErr).NotTo(HaveOccurred())
+					Expect(string(raw)).To(ContainSubstring(loadAwareRoutingUnavailableMessage))
+				}
+			},
+			Entry("loadAwareRouting true", "routing-native-load-aware", func(spec *api.DistributedInferenceSpecSpec) { spec.LoadAwareRouting = convutils.Ref(true) }, http.StatusBadRequest),
+			Entry("loadAwareRouting false keeps native submission", "routing-native-not-opted-in", func(spec *api.DistributedInferenceSpecSpec) { spec.LoadAwareRouting = convutils.Ref(false) }, http.StatusAccepted),
+		)
+
 		It("should create distributed inference with security fields (hostIpc, hostNetwork) on leader and worker", func() {
 			request := api.DistributedInferenceCreationRequest{
 				Name:      "dist-inf-security",
@@ -715,6 +747,66 @@ var _ = Describe("distributed inference service validations", Ordered, func() {
 			Expect(generatedClientResponse.DesiredPhase).To(Equal(workloadsApi.WORKLOADDESIREDPHASE_RUNNING))
 			expectWorkloadActions(ctx, workloadID.String(), "update")
 		})
+
+		DescribeTable("sends the stored spec's inference routing with the replaced configuration",
+			func(mutate func(*workloadsApi.SupersetSpec), expectedRouting string) {
+				displayedCluster := testing.BuildDisplayedClusterWithLWS(randoms.ClusterId, "3.0.0", true)
+				displayedCluster.SetDomain("https://mock-q7z3k.example.com")
+				checkerClusterClient.SetMock(checkerClusterClient.NewSimpleMockClient().WithCluster(randoms.ClusterId, displayedCluster))
+				checker.InitClusterCapabilitiesChecker("", testing.GetDefaultClustersCacheConfig(), "")
+				clusterservice.SetMock(clientsclusterservice.NewSimpleMock().
+					WithCluster(randoms.ClusterId, &displayedCluster).
+					WithDefaultNodePool(randoms.ClusterId))
+
+				workloadID := uuid.New()
+				spec := workloadsApi.NewSupersetSpec()
+				spec.SetReplicas(1)
+				leader := workloadsApi.NewDistributedInferenceLeaderWorkerSpec()
+				leader.SetImage("leader-image:v1")
+				spec.SetLeader(*leader)
+				servingPort := workloadsApi.NewSupersetServingPort()
+				servingPort.SetPort(8080)
+				servingPort.SetContainer(8080)
+				servingPort.SetAuthorizationType(string(workloadsApi.DISTRIBUTEDINFERENCESERVINGPORTACCESSAUTHORIZATIONTYPEENUM_PUBLIC))
+				spec.SetServingPort(*servingPort)
+				mutate(spec)
+
+				snapshot := workloadV2SnapshotForTest(workloadID, api.WORKLOADTYPE_DISTRIBUTED_INFERENCE, randoms)
+				snapshot.Name = "distributed-inference-routing"
+				snapshot.RequestedName = snapshot.Name
+				snapshot.Namespace = "runai-project"
+				snapshot.Spec = spec
+				Expect(dao_crud.DbUpsertWorkloadV2Snapshot(ctx, snapshot)).To(BeNil())
+
+				updatedWorkload, copyErr := workloadManagerUpdateResultForSnapshot(snapshot, constants.LwsGroup, constants.LwsVersion, constants.LwsKind, "lws-existing")
+				Expect(copyErr).NotTo(HaveOccurred())
+				mgr := &workloadsMgrMock{
+					getResponse:    workloadsMgrApi.NewWorkloadV2GetResponse(*updatedWorkload),
+					updateResponse: updatedWorkload,
+				}
+				originalWorkloadsManager := workloadsMgrClient.Get()
+				workloadsMgrClient.SetMock(mgr)
+				DeferCleanup(func() { workloadsMgrClient.SetMock(originalWorkloadsManager) })
+
+				updateResponse, _ := distributedInferencesService.UpdateDistributedInferenceSpec(ctx, workloadID.String(), api.UpdateRequest{
+					Spec: api.UpdateSpecSpec{Replicas: convutils.Ref(int32(3))},
+				})
+
+				Expect(updateResponse.Code).To(Equal(http.StatusAccepted), "response body: %#v", updateResponse.Body)
+				Expect(mgr.updateRequest).NotTo(BeNil())
+				configuration := mgr.updateRequest.Metadata.Configuration.Get()
+				Expect(configuration).NotTo(BeNil())
+				if expectedRouting == "" {
+					Expect(configuration.HasInferenceRouting()).To(BeFalse())
+					return
+				}
+				raw, marshalErr := json.Marshal(configuration.GetInferenceRouting())
+				Expect(marshalErr).NotTo(HaveOccurred())
+				Expect(raw).To(MatchJSON(expectedRouting))
+			},
+			Entry("opted in", func(spec *workloadsApi.SupersetSpec) { spec.SetLoadAwareRouting(true) }, `{"loadAwareRouting":true}`),
+			Entry("not opted in", func(spec *workloadsApi.SupersetSpec) { spec.SetLoadAwareRouting(false) }, ""),
+		)
 
 		It("should update replicas field successfully", func() {
 			// Create a distributed inference workload first

@@ -16091,6 +16091,12 @@
           }
         }
       },
+      "LoadAwareRouting": {
+        "description": "Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created.",
+        "type": "boolean",
+        "default": false,
+        "nullable": true
+      },
       "DistributedInferenceRestartPolicy": {
         "description": "Determines the behavior when a pod fails.\n- `RecreateGroupOnPodRestart`: Restarts all pods in the group if any pod fails.\n- `None`: No automatic restart behavior is applied.\n",
         "type": "string",
@@ -16249,6 +16255,9 @@
             "properties": {
               "category": {
                 "$ref": "#/components/schemas/Category"
+              },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/LoadAwareRouting"
               },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
@@ -21522,6 +21531,9 @@
               "category": {
                 "$ref": "#/components/schemas/Category"
               },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/LoadAwareRouting"
+              },
               "nodePools": {
                 "$ref": "#/components/schemas/NodePools"
               },
@@ -23363,6 +23375,9 @@
             "properties": {
               "category": {
                 "$ref": "#/components/schemas/StringRules"
+              },
+              "loadAwareRouting": {
+                "$ref": "#/components/schemas/BooleanRules"
               },
               "nodePools": {
                 "$ref": "#/components/schemas/ArrayRules"

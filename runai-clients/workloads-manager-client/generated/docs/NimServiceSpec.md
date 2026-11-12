@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **ImagePullPolicy** | Pointer to [**NullableImagePullPolicy**](ImagePullPolicy.md) |  | [optional] 
 **ImagePullSecrets** | Pointer to [**[]ImagePullSecret**](ImagePullSecret.md) | A list of references to Kubernetes secrets in the same namespace used for pulling container images. | [optional] 
 **Labels** | Pointer to [**[]Label**](Label.md) | Set of labels to populate into the container running the workload. | [optional] 
+**LoadAwareRouting** | Pointer to **NullableBool** | Route requests to the serving port through the endpoint picker, which picks a Pod by load. It can be set only when the workload is created. | [optional] [default to false]
 **ModelStore** | Pointer to [**NullableNimServiceSpecAllOfModelStore**](NimServiceSpecAllOfModelStore.md) |  | [optional] 
 **MultiNode** | Pointer to [**NullableNimServiceMultiNode**](NimServiceMultiNode.md) |  | [optional] 
 **NgcAuthSecret** | Pointer to **NullableString** | The name of a Kubernetes secret containing the NGC access credentials. The secret must contain a key named NGC_API_KEY with the API key as the value. | [optional] 
@@ -359,6 +360,41 @@ HasLabels returns a boolean if a field has been set.
 `func (o *NimServiceSpec) UnsetLabels()`
 
 UnsetLabels ensures that no value is present for Labels, not even an explicit nil
+### GetLoadAwareRouting
+
+`func (o *NimServiceSpec) GetLoadAwareRouting() bool`
+
+GetLoadAwareRouting returns the LoadAwareRouting field if non-nil, zero value otherwise.
+
+### GetLoadAwareRoutingOk
+
+`func (o *NimServiceSpec) GetLoadAwareRoutingOk() (*bool, bool)`
+
+GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetLoadAwareRouting
+
+`func (o *NimServiceSpec) SetLoadAwareRouting(v bool)`
+
+SetLoadAwareRouting sets LoadAwareRouting field to given value.
+
+### HasLoadAwareRouting
+
+`func (o *NimServiceSpec) HasLoadAwareRouting() bool`
+
+HasLoadAwareRouting returns a boolean if a field has been set.
+
+### SetLoadAwareRoutingNil
+
+`func (o *NimServiceSpec) SetLoadAwareRoutingNil(b bool)`
+
+ SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+
+### UnsetLoadAwareRouting
+`func (o *NimServiceSpec) UnsetLoadAwareRouting()`
+
+UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
 ### GetModelStore
 
 `func (o *NimServiceSpec) GetModelStore() NimServiceSpecAllOfModelStore`

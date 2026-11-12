@@ -525,6 +525,199 @@ var _ = Describe("NimServicesImpl", func() {
 		})
 	})
 
+	Context("load-aware routing", func() {
+		// setRoutingCluster replaces the project's cluster with one that declares the
+		// InferenceEndpoint integration behind the administrator Gateway.
+		setRoutingCluster := func(ingressEnabled *bool) {
+			cluster := inferenceIntegrationClusterForTest()
+			cluster.Uuid = randoms.ClusterId
+			cluster.Domain.Set(convutils.Ref("https://example.com"))
+			cluster.Version.Set(convutils.Ref(testutils.DefaultClusterVersionForTesting))
+			config := cluster.Status.Get().Config.Get()
+			config.IngressClass = *clustersApi.NewNullableString(convutils.Ref("nginx"))
+			config.IngressEnabled = *clustersApi.NewNullableBool(ingressEnabled)
+			mockClient := clusterservice.NewSimpleMock()
+			mockClient.WithCluster(randoms.ClusterId, cluster)
+			mockClient.WithDefaultNodePool(randoms.ClusterId)
+			clustersClient.SetMock(mockClient)
+		}
+		publicServingPort := func() *api.NimServiceServingPort {
+			return &api.NimServiceServingPort{
+				Port:             convutils.Ref(int32(8000)),
+				ExposeExternally: convutils.Ref(true),
+				ExposedUrl:       convutils.Ref("https://my-nim.example.com"),
+			}
+		}
+		routedSpec := func() api.NimServiceSpec {
+			spec := sampleNimServiceSpec
+			spec.ServingPort = publicServingPort()
+			spec.LoadAwareRouting = convutils.Ref(true)
+			return spec
+		}
+		createRequest := func(name string, spec api.NimServiceSpec) *api.NimServiceCreateRequest {
+			return &api.NimServiceCreateRequest{
+				Metadata: api.NimServiceMetadataCreateParams{Name: name, ProjectId: randoms.ProjectIdStr},
+				Spec:     spec,
+			}
+		}
+		servingEndpoint := func(id string) api.NetworkingEndpoint {
+			updates := getUpdatesForTest(createRouterForTest(), randoms, 0, 50, emptyClusterReports)
+			for _, update := range updates.Workloads {
+				if update.Id == id {
+					Expect(update.Configuration.NetworkingEndpoints).NotTo(BeNil())
+					Expect(*update.Configuration.NetworkingEndpoints).To(HaveLen(1))
+					return (*update.Configuration.NetworkingEndpoints)[0]
+				}
+			}
+			Fail("the workload has no cluster update")
+			return api.NetworkingEndpoint{}
+		}
+
+		It("routes an opted-in public NIM through the inference endpoint", func() {
+			setRoutingCluster(convutils.Ref(false))
+			id, _ := createNimServiceForTest(router, randoms, createRequest("nim-routed", routedSpec()))
+
+			endpoint := servingEndpoint(id)
+			Expect(*endpoint.Services).To(Equal([]api.NetworkingService{{Ref: &api.ServiceRef{Name: "nim-routed", Port: 8000}}}))
+			Expect(endpoint.ExternalAccess.HttpRoute).NotTo(BeNil())
+			Expect(endpoint.ExternalAccess.Ingress).To(BeNil())
+			Expect(endpoint.ExternalAccess.Route).To(BeNil())
+			inference, err := json.Marshal(endpoint.ExternalAccess.Inference)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(inference).To(MatchJSON(`{"epp": {"profile": "gie-v1.5"}, "pathPrefix": "/v1"}`))
+		})
+
+		It("keeps the networking of a public NIM that did not opt in", func() {
+			setRoutingCluster(convutils.Ref(false))
+			spec := sampleNimServiceSpec
+			spec.ServingPort = publicServingPort()
+			id, _ := createNimServiceForTest(router, randoms, createRequest("nim-plain", spec))
+
+			endpoint := servingEndpoint(id)
+			Expect(endpoint.Services).To(BeNil())
+			Expect(endpoint.ExternalAccess.HttpRoute).NotTo(BeNil())
+			Expect(endpoint.ExternalAccess.Inference).To(BeNil())
+		})
+
+		It("rejects an opt-in on a protected serving port", func() {
+			setRoutingCluster(convutils.Ref(false))
+			spec := routedSpec()
+			spec.ServingPort.AuthorizationType = convutils.Ref(api.NIMSERVICESERVINGPORTAUTHORIZATIONTYPE_AUTHENTICATED_USERS)
+			err := failToCreateNimServiceForTest(router, randoms, createRequest("nim-protected", spec), http.StatusBadRequest)
+			Expect(err.Message).To(Equal(nimLoadAwareRoutingProtectedMessage))
+		})
+
+		It("rejects an opt-in on a cluster without the integration", func() {
+			// The default test cluster exposes NIM through Ingress only.
+			err := failToCreateNimServiceForTest(router, randoms, createRequest("nim-ingress", routedSpec()), http.StatusBadRequest)
+			Expect(err.Message).To(Equal(loadAwareRoutingUnavailableMessage))
+		})
+
+		It("rejects an opt-in when the cluster also exposes the NIM through Ingress", func() {
+			setRoutingCluster(nil)
+			err := failToCreateNimServiceForTest(router, randoms, createRequest("nim-ingress-gateway", routedSpec()), http.StatusBadRequest)
+			Expect(err.Message).To(Equal("load-aware routing: NIM service requires an external Gateway HTTPRoute without Ingress or OpenShift Route"))
+		})
+
+		It("rejects an opt-in on a path-based URL", func() {
+			setRoutingCluster(convutils.Ref(false))
+			spec := routedSpec()
+			spec.ServingPort.ExposedUrl = convutils.Ref("https://example.com/project/nim-path")
+			err := failToCreateNimServiceForTest(router, randoms, createRequest("nim-path", spec), http.StatusBadRequest)
+			Expect(err.Message).To(Equal("load-aware routing: NIM service requires a host-based URL; path-based URLs are not supported"))
+		})
+
+		It("still rejects inferenceRouting submitted through the public workloads API", func() {
+			setRoutingCluster(convutils.Ref(false))
+			request := api.WorkloadV2CreateRequest{
+				Metadata: api.WorkloadV2MetadataCreateParams{
+					Name:      "nim-direct",
+					ProjectId: randoms.ProjectIdStr,
+					Configuration: api.WorkloadV2Configuration{
+						InferenceRouting: &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: convutils.Ref(true)},
+					},
+				},
+				Manifest: map[string]interface{}{
+					"apiVersion": nimServiceAPIVersion,
+					"kind":       nimServiceKind,
+					"metadata":   map[string]interface{}{"name": "nim-direct"},
+					"spec":       map[string]interface{}{"image": map[string]interface{}{"repository": "nvidia/nim", "tag": "latest"}},
+				},
+			}
+			createReq, err := http.NewRequest("POST", fmt.Sprintf("%s/api/v2/workloads", testHost), makePayload(request))
+			Expect(err).To(BeNil())
+			createReq.Header = *headerForAdmin(randoms)
+			createResp := httptest.NewRecorder()
+			createRouterForTest().ServeHTTP(createResp, createReq)
+
+			Expect(createResp.Code).To(Equal(http.StatusBadRequest))
+			var errs []api.SubmissionErrorV2
+			Expect(json.Unmarshal(createResp.Body.Bytes(), &errs)).To(Succeed())
+			Expect(errs).To(ContainElement(HaveField("Message", inferenceRoutingNotSubmittableMessage)))
+		})
+
+		It("keeps the routing on an update that keeps the opt-in", func() {
+			setRoutingCluster(convutils.Ref(false))
+			id, _ := createNimServiceForTest(router, randoms, createRequest("nim-routed-update", routedSpec()))
+
+			updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{
+				Spec: api.NimServiceSpec{Replicas: convutils.Ref(int32(3))},
+			})
+
+			endpoint := servingEndpoint(id)
+			Expect(*endpoint.Services).To(Equal([]api.NetworkingService{{Ref: &api.ServiceRef{Name: "nim-routed-update", Port: 8000}}}))
+			Expect(endpoint.ExternalAccess.Inference).NotTo(BeNil())
+			Expect(endpoint.ExternalAccess.Inference.PathPrefix).To(Equal("/v1"))
+		})
+
+		DescribeTable("rejects an update that turns the routing on or off",
+			func(createSpec func() api.NimServiceSpec, update api.NimServiceUpdateRequest) {
+				setRoutingCluster(convutils.Ref(false))
+				id, _ := createNimServiceForTest(router, randoms, createRequest("nim-flip", createSpec()))
+
+				resp := tryToUpdateNimServiceForTest(router, randoms, id, &update)
+				Expect(resp.Code).To(Equal(http.StatusBadRequest))
+				var apiErr api.Error
+				Expect(json.Unmarshal(resp.Body.Bytes(), &apiErr)).To(Succeed())
+				Expect(apiErr.Message).To(Equal(inferenceRoutingFixedAtCreationMessage))
+			},
+			Entry("opt out", func() api.NimServiceSpec {
+				spec := sampleNimServiceSpec
+				spec.ServingPort = publicServingPort()
+				spec.LoadAwareRouting = convutils.Ref(true)
+				return spec
+			}, api.NimServiceUpdateRequest{Spec: api.NimServiceSpec{LoadAwareRouting: convutils.Ref(false)}}),
+			Entry("opt in", func() api.NimServiceSpec {
+				spec := sampleNimServiceSpec
+				spec.ServingPort = publicServingPort()
+				return spec
+			}, api.NimServiceUpdateRequest{Spec: api.NimServiceSpec{LoadAwareRouting: convutils.Ref(true)}}),
+		)
+
+		It("keeps an opt-in from the project policy defaults on update", func() {
+			setRoutingCluster(convutils.Ref(false))
+			policiesClient.SetMock(policiesClient.SimpleMockClientFactory{
+				SimpleMockClient: policiesClient.SimpleMockClient{
+					EffectiveUpdatedAt: time.Now(),
+					EffectiveNimServicePolicy: &policiesApi.NimServicePolicyDefaultsAndRules{
+						Defaults: *policiesApi.NewNullableNimServiceDefaults(&policiesApi.NimServiceDefaults{
+							LoadAwareRouting: *policiesApi.NewNullableBool(convutils.Ref(true)),
+						}),
+					},
+				},
+			})
+			spec := sampleNimServiceSpec
+			spec.ServingPort = publicServingPort()
+			id, _ := createNimServiceForTest(router, randoms, createRequest("nim-policy-routed", spec))
+			Expect(servingEndpoint(id).ExternalAccess.Inference).NotTo(BeNil())
+
+			updateNimServiceForTest(router, randoms, id, &api.NimServiceUpdateRequest{
+				Spec: api.NimServiceSpec{Image: convutils.Ref("nvidia/nim:updated")},
+			})
+			Expect(servingEndpoint(id).ExternalAccess.Inference).NotTo(BeNil())
+		})
+	})
+
 	Context("composer failure", func() {
 		It("should return error when composer fails", func() {
 			// Create invalid spec that will cause composer to fail

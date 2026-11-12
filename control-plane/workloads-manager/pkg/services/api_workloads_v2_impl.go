@@ -100,6 +100,10 @@ type CreateWorkloadV2Options struct {
 	CheckYamlSubmissionFlag bool
 	TranslatedFromV1        bool
 	RecordAction            bool
+	// TrustedNIMService marks the in-process NIM API call. That caller derives
+	// configuration.inferenceRouting from the policy-mutated NIM spec, so the field
+	// is accepted from it. The public workloads API never sets this.
+	TrustedNIMService bool
 }
 
 // Public v2/YAML and in-process NIM updates use skipAuth=false and recordAction=true.
@@ -147,6 +151,8 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 	if apiErr != nil {
 		validationErrors.Add(ToSubmissionErrorV2(api.NewValidationError(apiErr.Error())))
 	}
+
+	validationErrors.Add(validateInferenceRoutingOrigin(&request.Metadata.Configuration, options.TranslatedFromV1 || options.TrustedNIMService))
 
 	// Validate manifest first - if invalid, we can't proceed with other validations
 	manifest, manifestErr := w.validateManifest(ctx, request.Manifest, request.ManifestBase64Encoded)
@@ -231,6 +237,13 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 		validationErrors.Add(configErr)
 		return nil, validationErrors.ToSubmissionErrors()
 	}
+	inferenceRouting := request.Metadata.Configuration.InferenceRouting
+	routingAdapter := inferenceRoutingAdapterFor(trustedConvertedFromNative, options.TrustedNIMService, manifestResourceInfo)
+	inferenceDefaults, routingErr := resolveInferenceRoutingDefaults(ctx, inferenceRouting, project.ClusterId, routingAdapter)
+	if routingErr != nil {
+		validationErrors.Add(routingErr)
+		return nil, validationErrors.ToSubmissionErrors()
+	}
 
 	// For dryRun, return effective metadata without creating workload
 	if options.DryRun {
@@ -242,6 +255,11 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 			Configuration:     configuration,
 		}
 		enableNetworkingOwnershipContract(&dryRunRecord.Configuration)
+		// Run the same serving topology checks as submission, before the ownership
+		// binding adds the workload ID to the serving Service selector.
+		if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, dryRunRecord.EffectiveManifest, dryRunRecord.Configuration, name); routingErr != nil {
+			validationErrors.Add(routingErr)
+		}
 		if bindingErr := applyNetworkingOwnershipBinding(ctx, dryRunRecord, workloadType); bindingErr != nil {
 			validationErrors.Add(NewConfigurationError(fmt.Sprintf("failed to apply networking ownership binding: %v", bindingErr)))
 		}
@@ -282,6 +300,12 @@ func (w *WorkloadsV2Impl) CreateWorkloadV2WithDryRun(ctx context.Context, reques
 	resourceInfo, resourceErr := w.k8sUtil.GetResourceInfo(effectiveManifest)
 	if resourceErr != nil {
 		return nil, SingleError(NewManifestError(fmt.Sprintf("failed to extract resource info: %v", resourceErr)))
+	}
+
+	// Build the intent from the effective manifest, before the ownership binding
+	// adds the workload ID to the serving Service selector.
+	if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, effectiveManifest, configuration, name); routingErr != nil {
+		return nil, SingleError(routingErr)
 	}
 
 	// Get request path and body from context
@@ -687,6 +711,10 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 	if err != nil {
 		return nil, api.NewError(http.StatusBadRequest, fmt.Sprintf("manifest validation failed: %v", err), nil)
 	}
+	// Only the internal update path may carry the field; it is resolved with the configuration below.
+	if routingErr := validateInferenceRoutingOrigin(request.Metadata.Configuration, options.skipAuth); routingErr != nil {
+		return nil, SubmissionErrorToApiError(routingErr)
+	}
 
 	tenantId, apiErr := runaictx.ParseTenantId(ctx)
 	if apiErr != nil {
@@ -846,6 +874,21 @@ func (w *WorkloadsV2Impl) updateWorkloadV2(ctx context.Context, workloadId strin
 		configuration, configErr := w.buildConfiguration(ctx, *request.Metadata.Configuration, project, workloadType, manifestResourceInfo, qRecord.Name, networkingSubmissionProfileForRecord(qRecord))
 		if configErr != nil {
 			return nil, SubmissionErrorToApiError(configErr)
+		}
+		// The routing path is fixed at creation, so the replaced configuration keeps
+		// externalAccess.inference exactly when the existing workload has it.
+		inferenceRouting := request.Metadata.Configuration.InferenceRouting
+		if routingErr := validateInferenceRoutingUnchanged(qRecord.Configuration, inferenceRouting); routingErr != nil {
+			return nil, SubmissionErrorToApiError(routingErr)
+		}
+		trustedConvertedFromNative := options.skipAuth && qRecord.TranslatedFromV1 && isConvertedFromNativeWorkload(manifestResourceInfo.Labels)
+		routingAdapter := inferenceRoutingAdapterFor(trustedConvertedFromNative, false, manifestResourceInfo)
+		inferenceDefaults, routingErr := resolveInferenceRoutingDefaultsForUpdate(ctx, inferenceRouting, qRecord.ClusterId, routingAdapter)
+		if routingErr != nil {
+			return nil, SubmissionErrorToApiError(routingErr)
+		}
+		if routingErr := applyInferenceRouting(routingAdapter, inferenceRouting, inferenceDefaults, effectiveManifest, configuration, qRecord.Name); routingErr != nil {
+			return nil, SubmissionErrorToApiError(routingErr)
 		}
 		qRecord.Configuration = configuration
 	}
@@ -1276,6 +1319,11 @@ func (w *WorkloadsV2Impl) UpdateWorkloadNetworkingConfig(ctx context.Context, wo
 	if dbErr != nil {
 		return dbErr
 	}
+	// This path has no inferenceRouting to resolve the block again, and the
+	// caller cannot submit one; replacing the networking would drop it.
+	if hasInferenceRouting(qRecord.Configuration) {
+		return SubmissionErrorToApiError(NewConfigurationError(inferenceRoutingNetworkingOnlyUpdateMessage))
+	}
 
 	if networkingErr := validateWorkloadV2NetworkingForCluster(ctx, qRecord.ClusterId, qRecord.Name, netCfg, networkingSubmissionProfileForRecord(qRecord)); networkingErr != nil {
 		return SubmissionErrorToApiError(networkingErr)
@@ -1358,6 +1406,12 @@ func validateNetworkingEndpoints(endpoints []api.NetworkingEndpoint) *api.Submis
 		field := fmt.Sprintf("metadata.configuration.networking[%d]", i)
 		hasService := endpoint.Services != nil && len(*endpoint.Services) > 0
 		access := endpoint.ExternalAccess
+		if access != nil && access.Inference != nil {
+			// Workloads Manager resolves inference routing after validation. A
+			// caller-supplied block would bypass project policy (objective priority,
+			// model rewrites) and the administrator's Gateway and EPP defaults.
+			return NewConfigurationError(field + ".externalAccess.inference is set by the server and cannot be submitted")
+		}
 		hasExposure := access != nil && (access.Ingress != nil || access.Route != nil || access.HttpRoute != nil)
 		if !hasService && !hasExposure {
 			return NewConfigurationError(field + " must contain a service or externalAccess with an Ingress, Route, or HTTPRoute")
@@ -1406,6 +1460,7 @@ func cloneExternalAccess(access *api.ExternalAccess) *api.ExternalAccess {
 		Ingress:   cloneInterfaceMapPtr(access.Ingress),
 		Route:     cloneInterfaceMapPtr(access.Route),
 		HttpRoute: cloneInterfaceMapPtr(access.HttpRoute),
+		Inference: cloneExternalAccessInference(access.Inference),
 	}
 }
 
@@ -1484,6 +1539,13 @@ func cloneStringMapPtr(in *map[string]string) *map[string]string {
 		out[key] = value
 	}
 	return &out
+}
+
+func cloneExternalAccessInference(in *api.ExternalAccessInference) *api.ExternalAccessInference {
+	if in == nil {
+		return nil
+	}
+	return &api.ExternalAccessInference{Epp: cloneInterfaceMap(in.Epp), PathPrefix: in.PathPrefix}
 }
 
 func cloneInterfaceMapPtr(in *map[string]interface{}) *map[string]interface{} {

@@ -826,6 +826,12 @@ export interface ClusterNotification {
  */
 export interface ClusterReportedConfig {
     /**
+     * InferenceEndpoint integration contract declared by the operator when Agent, Anyworkload and inference-endpoint-controller are enabled. v1 means the Agent and the Anyworkload networking plugin understand the externalAccess.inference block in networking endpoints. Omitted by older clusters. Operand readiness and administrator Gateway settings must also be checked before enabling new workloads.
+     * @type {string}
+     * @memberof ClusterReportedConfig
+     */
+    'inferenceEndpointSchemaVersion'?: string | null;
+    /**
      * indicates if the cluster workload ownership protection is enabled
      * @type {boolean}
      * @memberof ClusterReportedConfig

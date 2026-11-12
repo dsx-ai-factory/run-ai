@@ -22,6 +22,8 @@ import (
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/common/cluster-capabilities/checker"
 )
 
+const loadAwareRoutingUnavailableMessage = "load-aware routing is not available on this cluster"
+
 // AnyWorkloadSubmitterDinf handles submission decisions for Distributed Inference workloads (LeaderWorkerSet).
 type AnyWorkloadSubmitterDinf struct{}
 
@@ -85,6 +87,7 @@ func (s *AnyWorkloadSubmitterDinf) Create(ctx context.Context, wc *workloadConte
 	if metadataErr := composeDinfConnectionMetadata(ctx, wc, spec); metadataErr != nil {
 		return nil, metadataErr
 	}
+	setDinfInferenceRouting(spec, &target.Config)
 
 	return &Submission{
 		Request: workloadMgrApi.WorkloadV2CreateRequest{
@@ -216,6 +219,10 @@ func (s *AnyWorkloadSubmitterDinf) Update(ctx context.Context, wc *workloadConte
 	if err != nil {
 		return nil, workloadsApi.NewSubmissionErrorV2(http.StatusInternalServerError, err.Error())
 	}
+	// The update replaces the whole configuration, so it must carry the routing
+	// again; workloads-manager rejects an update whose opt-in differs from the
+	// one the workload was created with.
+	setDinfInferenceRouting(spec, &target.Config)
 
 	return &Update{
 		Request: workloadMgrApi.WorkloadV2UpdateRequest{
@@ -226,6 +233,34 @@ func (s *AnyWorkloadSubmitterDinf) Update(ctx context.Context, wc *workloadConte
 		},
 		Requirements: dinfComposer.WorkloadRequirements,
 	}, nil
+}
+
+// dinfLoadAwareRoutingRequested is the opt-in rule that workloads-manager applies
+// to inferenceRouting.
+func dinfLoadAwareRoutingRequested(spec *workloadsApi.DistributedInferenceSpecSpec) bool {
+	return spec != nil && convutils.Deref(spec.LoadAwareRouting.Get(), false)
+}
+
+// setDinfInferenceRouting sets the inferenceRouting carrier on the request
+// configuration when the workload opts in.
+func setDinfInferenceRouting(spec *workloadsApi.DistributedInferenceSpecSpec, configuration *workloadMgrApi.WorkloadV2Configuration) {
+	if routing := dinfInferenceRouting(spec); routing != nil {
+		configuration.SetInferenceRouting(*routing)
+	}
+}
+
+// dinfInferenceRouting carries the policy-validated spec fields that workloads-manager
+// needs to build the InferenceEndpoint intent. It returns nil when the workload did
+// not opt in, so the request stays unchanged.
+func dinfInferenceRouting(spec *workloadsApi.DistributedInferenceSpecSpec) *workloadMgrApi.WorkloadV2ConfigurationInferenceRouting {
+	if !dinfLoadAwareRoutingRequested(spec) {
+		return nil
+	}
+	routing := workloadMgrApi.NewWorkloadV2ConfigurationInferenceRouting()
+	if loadAwareRouting := spec.LoadAwareRouting.Get(); loadAwareRouting != nil {
+		routing.SetLoadAwareRouting(*loadAwareRouting)
+	}
+	return routing
 }
 
 func manifestName(manifest map[string]interface{}) (string, bool) {

@@ -22,15 +22,16 @@ var _ MappedNullable = &DistributedInferenceRulesV2{}
 
 // DistributedInferenceRulesV2 struct for DistributedInferenceRulesV2
 type DistributedInferenceRulesV2 struct {
-	Category       NullableStringRules                                              `json:"category,omitempty"`
-	NodePools      NullableArrayRules                                               `json:"nodePools,omitempty"`
-	Preemptibility NullablePreemptibilityRules                                      `json:"preemptibility,omitempty"`
-	PriorityClass  NullableStringRules                                              `json:"priorityClass,omitempty"`
-	RestartPolicy  NullableDistributedInferenceRestartPolicyRules                   `json:"restartPolicy,omitempty"`
-	ServingPort    NullableDistributedInferenceServingPortRules                     `json:"servingPort,omitempty"`
-	StartupPolicy  NullableDistributedInferenceStartupPolicyFieldRulesStartupPolicy `json:"startupPolicy,omitempty"`
-	Workers        NullableIntegerRules                                             `json:"workers,omitempty"`
-	Replicas       NullableIntegerRules                                             `json:"replicas,omitempty"`
+	Category         NullableStringRules                                              `json:"category,omitempty"`
+	LoadAwareRouting NullableBooleanRules                                             `json:"loadAwareRouting,omitempty"`
+	NodePools        NullableArrayRules                                               `json:"nodePools,omitempty"`
+	Preemptibility   NullablePreemptibilityRules                                      `json:"preemptibility,omitempty"`
+	PriorityClass    NullableStringRules                                              `json:"priorityClass,omitempty"`
+	RestartPolicy    NullableDistributedInferenceRestartPolicyRules                   `json:"restartPolicy,omitempty"`
+	ServingPort      NullableDistributedInferenceServingPortRules                     `json:"servingPort,omitempty"`
+	StartupPolicy    NullableDistributedInferenceStartupPolicyFieldRulesStartupPolicy `json:"startupPolicy,omitempty"`
+	Workers          NullableIntegerRules                                             `json:"workers,omitempty"`
+	Replicas         NullableIntegerRules                                             `json:"replicas,omitempty"`
 	// Defines the pod specification for the leader. Must always be provided, regardless of the number of workers.
 	Leader NullableDistributedInferenceLeaderWorkerRulesV2 `json:"leader,omitempty"`
 	// Defines the pod specification for the workers. Required only if the number of workers is greater than 0.
@@ -95,6 +96,49 @@ func (o *DistributedInferenceRulesV2) SetCategoryNil() {
 // UnsetCategory ensures that no value is present for Category, not even an explicit nil
 func (o *DistributedInferenceRulesV2) UnsetCategory() {
 	o.Category.Unset()
+}
+
+// GetLoadAwareRouting returns the LoadAwareRouting field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *DistributedInferenceRulesV2) GetLoadAwareRouting() BooleanRules {
+	if o == nil || IsNil(o.LoadAwareRouting.Get()) {
+		var ret BooleanRules
+		return ret
+	}
+	return *o.LoadAwareRouting.Get()
+}
+
+// GetLoadAwareRoutingOk returns a tuple with the LoadAwareRouting field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *DistributedInferenceRulesV2) GetLoadAwareRoutingOk() (*BooleanRules, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.LoadAwareRouting.Get(), o.LoadAwareRouting.IsSet()
+}
+
+// HasLoadAwareRouting returns a boolean if a field has been set.
+func (o *DistributedInferenceRulesV2) HasLoadAwareRouting() bool {
+	if o != nil && o.LoadAwareRouting.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetLoadAwareRouting gets a reference to the given NullableBooleanRules and assigns it to the LoadAwareRouting field.
+func (o *DistributedInferenceRulesV2) SetLoadAwareRouting(v BooleanRules) {
+	o.LoadAwareRouting.Set(&v)
+}
+
+// SetLoadAwareRoutingNil sets the value for LoadAwareRouting to be an explicit nil
+func (o *DistributedInferenceRulesV2) SetLoadAwareRoutingNil() {
+	o.LoadAwareRouting.Set(nil)
+}
+
+// UnsetLoadAwareRouting ensures that no value is present for LoadAwareRouting, not even an explicit nil
+func (o *DistributedInferenceRulesV2) UnsetLoadAwareRouting() {
+	o.LoadAwareRouting.Unset()
 }
 
 // GetNodePools returns the NodePools field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -539,6 +583,9 @@ func (o DistributedInferenceRulesV2) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	if o.Category.IsSet() {
 		toSerialize["category"] = o.Category.Get()
+	}
+	if o.LoadAwareRouting.IsSet() {
+		toSerialize["loadAwareRouting"] = o.LoadAwareRouting.Get()
 	}
 	if o.NodePools.IsSet() {
 		toSerialize["nodePools"] = o.NodePools.Get()
