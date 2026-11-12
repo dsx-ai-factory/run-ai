@@ -37,25 +37,28 @@ func NewCleanupSetup() func(context.Context, ctrl.Manager) error {
 			// Catches a runner deleted while the controller was down.
 			Watches(&snapshotv1alpha1.SnapshotJob{}, toRunner, builder.WithPredicates(onlyCreates())).
 			Watches(&snapshotv1alpha1.PodSnapshot{}, toRunner, builder.WithPredicates(onlyCreates())).
-			Complete(&cleaner{client: mgr.GetClient()})
+			Complete(&cleaner{client: mgr.GetClient(), apiReader: mgr.GetAPIReader()})
 	}
 }
 
 type cleaner struct {
-	client client.Client
+	client    client.Client
+	apiReader client.Reader
 }
 
 // Reconcile deletes what was made for a runner of this name other than the
 // current one.
 func (r *cleaner) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
-	current := &dromosv1alpha1.WorkloadRunner{}
-	if err := r.client.Get(ctx, request.NamespacedName, current); client.IgnoreNotFound(err) != nil {
-		return ctrl.Result{}, fmt.Errorf("get runner: %w", err)
-	}
-
 	made, err := madeFor(ctx, r.client, request.NamespacedName)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	// After the listing, and uncached, so the runner is never older than what
+	// was listed: a stale "not found" or UID would delete a live runner's captures.
+	current := &dromosv1alpha1.WorkloadRunner{}
+	if err := r.apiReader.Get(ctx, request.NamespacedName, current); client.IgnoreNotFound(err) != nil {
+		return ctrl.Result{}, fmt.Errorf("get runner: %w", err)
 	}
 	for _, object := range made {
 		// current.UID is empty when no runner has this name, so all of it goes.

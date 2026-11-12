@@ -53,12 +53,13 @@ const knativeLabelPrefix = "serving.knative.dev/"
 
 // droppedLabels are labels a replica carries that its capture copy must not: the
 // opt-in and key, so the restore webhook and this plugin pass the copy by; the
-// runner's name, so it isn't counted as a replica; and the identity labels, so
-// its GPU isn't attributed to the serving workload.
+// runner's name and UID, so it isn't counted as a replica; and the identity
+// labels, so its GPU isn't attributed to the serving workload.
 var droppedLabels = []string{
 	constants.SnapshotOptInLabel,
 	constants.SnapshotKeyLabel,
 	commonconstants.WorkloadRunnerNameLabel,
+	commonconstants.WorkloadRunnerUidLabel,
 	commonconstants.TopOwnerWorkloadIdLabel,
 	commonconstants.TopOwnerUidLabel, //nolint:staticcheck // deprecated, but metrics-exporter still attributes GPUs by it
 	commonconstants.ClusterTopOwnerUidLabel,
@@ -162,7 +163,11 @@ func runnerSnapshotJobs(ctx context.Context, c client.Reader,
 func readyReplicas(ctx context.Context, c client.Reader, runner *dromosv1alpha1.WorkloadRunner) ([]corev1.Pod, error) {
 	pods := &corev1.PodList{}
 	if err := c.List(ctx, pods, client.InNamespace(runner.Namespace),
-		client.MatchingLabels{constants.SnapshotOptInLabel: "true", commonconstants.WorkloadRunnerNameLabel: runner.Name},
+		client.MatchingLabels{
+			constants.SnapshotOptInLabel:            "true",
+			commonconstants.WorkloadRunnerNameLabel: runner.Name,
+			commonconstants.WorkloadRunnerUidLabel:  string(runner.UID),
+		},
 		client.HasLabels{constants.SnapshotKeyLabel}); err != nil {
 		return nil, fmt.Errorf("list replicas: %w", err)
 	}

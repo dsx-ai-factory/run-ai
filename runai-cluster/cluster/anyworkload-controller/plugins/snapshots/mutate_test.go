@@ -30,8 +30,9 @@ var _ = Describe("MutateResource", func() {
 	DescribeTable("stamps an eligible workload",
 		func(installed bool) {
 			workload := deployment(optIn, gpu)
-			want := withPodLabel(withPodLabel(workload.DeepCopy(),
-				constants.SnapshotOptInLabel, "true"), commonconstants.WorkloadRunnerNameLabel, "llama")
+			want := withPodLabel(withPodLabel(withPodLabel(workload.DeepCopy(),
+				constants.SnapshotOptInLabel, "true"), commonconstants.WorkloadRunnerNameLabel, "llama"),
+				commonconstants.WorkloadRunnerUidLabel, "runner-uid")
 
 			// Every reconcile stamps again; the second time must change nothing.
 			for range 2 {

@@ -58,6 +58,11 @@ func checkEligibility(ctx context.Context, template *unstructured.Unstructured, 
 			return fmt.Errorf("%w: container %q sets its own seccomp profile, which a restore pod cannot keep",
 				errIneligible, target)
 		}
+		// Same for a startup probe: the restore gate replaces it.
+		if container.Name == target && container.StartupProbe != nil {
+			return fmt.Errorf("%w: container %q defines its own startup probe, which a restore pod cannot keep",
+				errIneligible, target)
+		}
 	}
 	return nil
 }

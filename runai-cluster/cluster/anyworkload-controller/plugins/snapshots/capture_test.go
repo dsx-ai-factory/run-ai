@@ -87,6 +87,18 @@ var _ = Describe("HandleAdditionalResources", func() {
 		Expect(hasSnapshotJob(ctx, c, keyOf(ready))).To(BeTrue(), "the replica was not captured")
 	})
 
+	// The earlier runner's pods can outlive it, under the same name.
+	It("ignores an earlier runner's replicas", func() {
+		earlier := replica("llama-old", "rs-old", 100, true, func(pod *corev1.Pod) {
+			pod.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
+		})
+		c := captureClient(earlier)
+
+		handle(ctx, capturePlugin(), c, optedIn())
+
+		Expect(snapshotJobs(ctx, c)).To(BeEmpty())
+	})
+
 	It("needs a Ready replica", func() {
 		c := captureClient(replica("llama-cold", "rs-1", 100, false))
 
@@ -287,6 +299,7 @@ func replica(name, replicaSet string, created int64, ready bool, mutate ...func(
 			Labels: map[string]string{
 				constants.SnapshotOptInLabel:            "true",
 				commonconstants.WorkloadRunnerNameLabel: "llama",
+				commonconstants.WorkloadRunnerUidLabel:  "runner-uid",
 				"app":                                   "llama",
 			},
 			OwnerReferences: []metav1.OwnerReference{{

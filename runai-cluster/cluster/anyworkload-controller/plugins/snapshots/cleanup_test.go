@@ -32,7 +32,7 @@ var _ = Describe("cleanup", func() {
 	// cleanUp reconciles testRunner's name.
 	cleanUp := func(c client.Client) {
 		request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "runai-proj", Name: "llama"}}
-		_, err := (&cleaner{client: c}).Reconcile(ctx, request)
+		_, err := (&cleaner{client: c, apiReader: c}).Reconcile(ctx, request)
 		Expect(err).NotTo(HaveOccurred())
 	}
 	named := func(key string) gomegatypes.GomegaMatcher {
@@ -71,6 +71,34 @@ var _ = Describe("cleanup", func() {
 		Expect(podSnapshots(ctx, c)).To(ConsistOf(named("k1")))
 	})
 
+	// The workload is resubmitted, and its new runner captures, while the old
+	// runner's captures are being cleaned up.
+	DescribeTable("leaves a capture made by a new runner during the cleanup",
+		func(beforeLookup bool) {
+			earlier := capturedJob("old-key", true)
+			earlier.Labels[commonconstants.WorkloadRunnerUidLabel] = "earlier-runner-uid"
+			c := captureClient(earlier)
+			resubmit := func() {
+				Expect(c.Create(ctx, testRunner())).To(Succeed())
+				Expect(c.Create(ctx, capturedJob("k1", true))).To(Succeed())
+			}
+			lookup := lookupHook{Reader: c, before: func() {}, after: func() {}}
+			if beforeLookup {
+				lookup.before = resubmit
+			} else {
+				lookup.after = resubmit
+			}
+
+			request := ctrl.Request{NamespacedName: types.NamespacedName{Namespace: "runai-proj", Name: "llama"}}
+			_, err := (&cleaner{client: c, apiReader: lookup}).Reconcile(ctx, request)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(snapshotJobs(ctx, c)).To(ConsistOf(named("k1")))
+		},
+		Entry("between the listing and the runner lookup", true),
+		Entry("right after the runner lookup", false),
+	)
+
 	It("leaves what the plugin didn't make, and other runners'", func() {
 		unlabelled := capturedJob("k1", true)
 		delete(unlabelled.Labels, commonconstants.WorkloadRunnerUidLabel)
@@ -107,6 +135,18 @@ var _ = Describe("cleanup", func() {
 		Expect(creates.Delete(event.DeleteEvent{Object: job})).To(BeFalse())
 	})
 })
+
+// lookupHook runs before and after each read it passes on.
+type lookupHook struct {
+	client.Reader
+	before, after func()
+}
+
+func (h lookupHook) Get(ctx context.Context, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+	h.before()
+	defer h.after()
+	return h.Reader.Get(ctx, key, obj, opts...)
+}
 
 // capturedPodSnapshot is the PodSnapshot Snapshot creates for a capture of key,
 // with the labels the SnapshotJob passes on.
