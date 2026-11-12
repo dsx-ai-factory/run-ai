@@ -353,6 +353,9 @@ func validateSchedulingCapabilities(sc api.SchedulingCapabilitiesNullable) error
 	if sc.CpuQuota != nil && *sc.CpuQuota && sc.Quota != nil && !*sc.Quota {
 		return fmt.Errorf("SchedulingCapabilities.CpuQuota can only be enabled when SchedulingCapabilities.Quota is enabled")
 	}
+	if sc.Limits != nil && *sc.Limits && sc.Quota != nil && !*sc.Quota {
+		return fmt.Errorf("SchedulingCapabilities.Limits can only be enabled when SchedulingCapabilities.Quota is enabled")
+	}
 
 	// not checking min version for "ranks" - will be enforced in the org-unit-service
 
@@ -679,10 +682,14 @@ func setSchedulingCapabilitiesOnCreateUpdate(ctx context.Context,
 	nodePool.AllowQuota = ptr.Deref(fields.Quota, models.DefaultAllowQuota)
 	nodePool.AllowRanks = ptr.Deref(fields.Ranks, models.DefaultAllowRanks)
 	nodePool.AllowCpuQuota = ptr.Deref(fields.CpuQuota, isCpuQuotaFFOn(ctx))
+	nodePool.AllowLimits = ptr.Deref(fields.Limits, models.DefaultAllowLimits)
 
-	// an explicit cpuQuota with quota off is left for validateSchedulingMode to reject
+	// an explicit cpuQuota or limits with quota off is left for validateSchedulingMode to reject
 	if !nodePool.AllowQuota && fields.CpuQuota == nil {
 		nodePool.AllowCpuQuota = false
+	}
+	if !nodePool.AllowQuota && fields.Limits == nil {
+		nodePool.AllowLimits = false
 	}
 }
 
@@ -703,6 +710,9 @@ func setSchedulingCapabilitiesOnPatch(dbNodepool *models.Nodepool, fields api.Sc
 	}
 	if fields.CpuQuota != nil {
 		dbNodepool.AllowCpuQuota = *fields.CpuQuota
+	}
+	if fields.Limits != nil {
+		dbNodepool.AllowLimits = *fields.Limits
 	}
 }
 

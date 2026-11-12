@@ -5867,6 +5867,13 @@
             "example": false,
             "default": false,
             "nullable": true
+          },
+          "limits": {
+            "type": "boolean",
+            "description": "Whether to allow GPU, CPU and memory limits for the nodepool's resources. Only allowed when quota=true.",
+            "example": false,
+            "default": true,
+            "nullable": true
           }
         }
       },
@@ -6217,7 +6224,8 @@
           "adjustableWeights",
           "ranks",
           "quota",
-          "cpuQuota"
+          "cpuQuota",
+          "limits"
         ],
         "properties": {
           "adjustableWeights": {
@@ -6243,6 +6251,12 @@
             "description": "Whether to allow CPU quota for the nodepool's resources. Only allowed when allowQuota=true.",
             "example": false,
             "default": false
+          },
+          "limits": {
+            "type": "boolean",
+            "description": "Whether to allow GPU, CPU and memory limits for the nodepool's resources. Only allowed when quota=true.",
+            "example": false,
+            "default": true
           }
         }
       },

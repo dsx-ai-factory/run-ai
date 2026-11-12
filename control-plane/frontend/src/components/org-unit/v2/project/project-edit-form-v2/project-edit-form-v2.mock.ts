@@ -210,6 +210,7 @@ export const mockCpuEnabledNodePool: NodepoolMinimal = {
     ranks: true,
     quota: true,
     cpuQuota: true,
+    limits: true,
   },
 };
 
@@ -225,6 +226,7 @@ export const mockCpuDisabledNodePool: NodepoolMinimal = {
     ranks: true,
     quota: true,
     cpuQuota: false,
+    limits: true,
   },
 };
 
@@ -240,6 +242,7 @@ export const mockGpuQuotaDisabledNodePool: NodepoolMinimal = {
     ranks: true,
     quota: false,
     cpuQuota: true,
+    limits: false,
   },
 };
 export const mockGpuQuotaDisabledNodePool2: NodepoolMinimal = {
@@ -251,6 +254,7 @@ export const mockGpuQuotaDisabledNodePool2: NodepoolMinimal = {
     ranks: true,
     quota: false,
     cpuQuota: true,
+    limits: false,
   },
 };
 

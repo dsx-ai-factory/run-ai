@@ -4792,6 +4792,12 @@ export interface SchedulingCapabilities {
      * @memberof SchedulingCapabilities
      */
     'cpuQuota': boolean;
+    /**
+     * Whether to allow GPU, CPU and memory limits for the nodepool\'s resources. Only allowed when quota=true.
+     * @type {boolean}
+     * @memberof SchedulingCapabilities
+     */
+    'limits': boolean;
 }
 /**
  * 
@@ -4823,6 +4829,12 @@ export interface SchedulingCapabilitiesNullable {
      * @memberof SchedulingCapabilitiesNullable
      */
     'cpuQuota'?: boolean | null;
+    /**
+     * Whether to allow GPU, CPU and memory limits for the nodepool\'s resources. Only allowed when quota=true.
+     * @type {boolean}
+     * @memberof SchedulingCapabilitiesNullable
+     */
+    'limits'?: boolean | null;
 }
 /**
  * 

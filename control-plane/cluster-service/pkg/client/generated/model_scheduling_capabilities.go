@@ -31,6 +31,8 @@ type SchedulingCapabilities struct {
 	Quota bool `json:"quota"`
 	// Whether to allow CPU quota for the nodepool's resources. Only allowed when allowQuota=true.
 	CpuQuota bool `json:"cpuQuota"`
+	// Whether to allow GPU, CPU and memory limits for the nodepool's resources. Only allowed when quota=true.
+	Limits bool `json:"limits"`
 }
 
 type _SchedulingCapabilities SchedulingCapabilities
@@ -39,12 +41,13 @@ type _SchedulingCapabilities SchedulingCapabilities
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewSchedulingCapabilities(adjustableWeights bool, ranks bool, quota bool, cpuQuota bool) *SchedulingCapabilities {
+func NewSchedulingCapabilities(adjustableWeights bool, ranks bool, quota bool, cpuQuota bool, limits bool) *SchedulingCapabilities {
 	this := SchedulingCapabilities{}
 	this.AdjustableWeights = adjustableWeights
 	this.Ranks = ranks
 	this.Quota = quota
 	this.CpuQuota = cpuQuota
+	this.Limits = limits
 	return &this
 }
 
@@ -61,6 +64,8 @@ func NewSchedulingCapabilitiesWithDefaults() *SchedulingCapabilities {
 	this.Quota = quota
 	var cpuQuota bool = false
 	this.CpuQuota = cpuQuota
+	var limits bool = true
+	this.Limits = limits
 	return &this
 }
 
@@ -160,6 +165,30 @@ func (o *SchedulingCapabilities) SetCpuQuota(v bool) {
 	o.CpuQuota = v
 }
 
+// GetLimits returns the Limits field value
+func (o *SchedulingCapabilities) GetLimits() bool {
+	if o == nil {
+		var ret bool
+		return ret
+	}
+
+	return o.Limits
+}
+
+// GetLimitsOk returns a tuple with the Limits field value
+// and a boolean to check if the value has been set.
+func (o *SchedulingCapabilities) GetLimitsOk() (*bool, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Limits, true
+}
+
+// SetLimits sets field value
+func (o *SchedulingCapabilities) SetLimits(v bool) {
+	o.Limits = v
+}
+
 func (o SchedulingCapabilities) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -174,6 +203,7 @@ func (o SchedulingCapabilities) ToMap() (map[string]interface{}, error) {
 	toSerialize["ranks"] = o.Ranks
 	toSerialize["quota"] = o.Quota
 	toSerialize["cpuQuota"] = o.CpuQuota
+	toSerialize["limits"] = o.Limits
 	return toSerialize, nil
 }
 
@@ -188,6 +218,7 @@ func (o *SchedulingCapabilities) UnmarshalJSON(data []byte) (err error) {
 	//  	"ranks",
 	//  	"quota",
 	//  	"cpuQuota",
+	//  	"limits",
 	// }
 
 	allProperties := make(map[string]interface{})

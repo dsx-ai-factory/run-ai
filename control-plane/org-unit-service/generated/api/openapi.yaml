@@ -7736,6 +7736,7 @@ components:
       enum:
       - HAS_QUOTA
       - NON_DEFAULT_RANK
+      - HAS_LIMIT
       type: string
     OrgUnitsNodepoolSummary:
       description: Projects/departments in this node pool that match the requested
@@ -7747,6 +7748,7 @@ components:
       description: The action to apply
       enum:
       - CPU_QUOTAS_TO_DEFAULT
+      - LIMITS_TO_DEFAULT
       type: string
     OrgUnitsNodepoolResourcesResetRequest:
       example:
@@ -10428,6 +10430,7 @@ components:
       - RANKS_TO_DEFAULT
       - WEIGHTS_TO_DEFAULT
       - WEIGHTS_TO_DESERVED
+      - LIMITS_TO_DEFAULT
       type: string
     DepartmentsResourcesResetRequest:
       example:

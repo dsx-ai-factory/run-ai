@@ -143,6 +143,13 @@ var _ = Describe("Resources DAO SQL", func() {
 			err := ResetResources(context.Background(), testTenantID, testClusterID().String(), "", []string{testNodePoolID}, api.RESOURCESRESETACTION_WEIGHTS_TO_DESERVED, true)
 			Expect(err).NotTo(HaveOccurred())
 		})
+		It("limits to default", func() {
+			mocker := setupSQLMock()
+			mocker.ExpectExec(`UPDATE resources SET gpu_limit = NULL, cpu_limit = NULL, memory_limit = NULL, updated_at=now() FROM project WHERE project.org_unit_data_id = resources.org_unit_data_id AND ((gpu_limit <> -1 OR cpu_limit <> -1 OR memory_limit <> -1) AND resources.node_pool_id IN (?)) AND project.tenant_id = ? AND project.cluster_id = ? AND project.deleted_at is NULL and resources.deleted_at is NULL;`).Returns(1)
+
+			err := ResetResources(context.Background(), testTenantID, testClusterID().String(), "", []string{testNodePoolID}, api.RESOURCESRESETACTION_LIMITS_TO_DEFAULT, true)
+			Expect(err).NotTo(HaveOccurred())
+		})
 	})
 	Describe("GetOrgUnitsNodepoolSummary", func() {
 		It("succeeds", func() {
@@ -157,6 +164,18 @@ var _ = Describe("Resources DAO SQL", func() {
 			Expect(got).To(HaveLen(2))
 			Expect(got[0].Type).To(Equal(models.ProjectTable))
 			Expect(got[1].Type).To(Equal(models.DepartmentTable))
+		})
+		It("has limit", func() {
+			mocker := setupSQLMock()
+			mocker.ExpectQuery(`SELECT o.id, o.name FROM project AS o JOIN resources on o.org_unit_data_id = resources.org_unit_data_id WHERE o.tenant_id = ? AND o.deleted_at IS NULL AND resources.deleted_at IS NULL AND resources.node_pool_id = ? AND ((gpu_limit <> -1 OR cpu_limit <> -1 OR memory_limit <> -1)) ORDER BY o.id ASC LIMIT ?`, testTenantID, testNodePoolID, 1000).
+				Returns([]api.OrgUnitsNodepoolSummaryInner{{Id: "22", Name: "proj-a"}})
+			mocker.ExpectQuery(`SELECT o.id, o.name FROM department AS o JOIN resources on o.org_unit_data_id = resources.org_unit_data_id WHERE o.tenant_id = ? AND o.deleted_at IS NULL AND resources.deleted_at IS NULL AND resources.node_pool_id = ? AND ((gpu_limit <> -1 OR cpu_limit <> -1 OR memory_limit <> -1)) ORDER BY o.id ASC LIMIT ?`, testTenantID, testNodePoolID, 1000).
+				Returns([]api.OrgUnitsNodepoolSummaryInner{})
+
+			got, err := GetOrgUnitsNodepoolSummary(context.Background(), testTenantID, testNodePoolID, api.ORGUNITSNODEPOOLSUMMARYTYPE_HAS_LIMIT)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(got).To(HaveLen(1))
+			Expect(got[0].Type).To(Equal(models.ProjectTable))
 		})
 		It("invalid type", func() {
 			setupSQLMock()
