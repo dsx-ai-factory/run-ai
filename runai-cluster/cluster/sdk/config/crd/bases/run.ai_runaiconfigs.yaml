@@ -341,6 +341,9 @@ spec:
                               rule: '!has(self.name) && !has(self.__namespace__) ||
                                 (has(self.name) && self.name != '''' && has(self.__namespace__)
                                 && self.__namespace__ != '''')'
+                            - message: sectionName requires name and namespace in
+                                a gatewayAPI override
+                              rule: '!has(self.sectionName) || has(self.name)'
                           mgmtPrometheusIngress:
                             description: Ingress defines configuration of the researcher-service
                               ingress
@@ -1937,6 +1940,9 @@ spec:
                       rule: '!has(self.name) && !has(self.__namespace__) || (has(self.name)
                         && self.name != '''' && has(self.__namespace__) && self.__namespace__
                         != '''')'
+                    - message: sectionName requires name and namespace in a gatewayAPI
+                        override
+                      rule: '!has(self.sectionName) || has(self.name)'
                   idleTimeout:
                     description: IdleTimeout specifies the time in seconds for router
                       idle timeout
@@ -21908,6 +21914,9 @@ spec:
                       rule: '!has(self.name) && !has(self.__namespace__) || (has(self.name)
                         && self.name != '''' && has(self.__namespace__) && self.__namespace__
                         != '''')'
+                    - message: sectionName requires name and namespace in a gatewayAPI
+                        override
+                      rule: '!has(self.sectionName) || has(self.name)'
                   image:
                     description: Image is the configuration of the researcher-service
                       image

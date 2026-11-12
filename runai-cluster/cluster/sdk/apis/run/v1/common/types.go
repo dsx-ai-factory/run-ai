@@ -156,8 +156,11 @@ func (r *Route) SetDefaultsWhereNeeded() {
 }
 
 // GatewayRef specifies a reference to a Gateway resource for per-operand override.
-// When provided, both Name and Namespace must be non-empty.
+// When provided, both Name and Namespace must be non-empty. SectionName is only
+// accepted together with Name and Namespace, so a section-only override is rejected
+// instead of being silently ignored in favor of the global Gateway.
 // +kubebuilder:validation:XValidation:rule="!has(self.name) && !has(self.__namespace__) || (has(self.name) && self.name != '' && has(self.__namespace__) && self.__namespace__ != '')",message="both name and namespace are required when gatewayAPI override is specified"
+// +kubebuilder:validation:XValidation:rule="!has(self.sectionName) || has(self.name)",message="sectionName requires name and namespace in a gatewayAPI override"
 type GatewayRef struct {
 	// Name is the name of the Gateway resource.
 	// +kubebuilder:validation:MinLength=1
