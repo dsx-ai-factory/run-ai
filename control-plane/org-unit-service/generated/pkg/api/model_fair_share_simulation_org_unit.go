@@ -20,6 +20,7 @@ var dummyFairShareSimulationOrgUnit = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
+// FairShareSimulationOrgUnit - A requested org unit. Each field replaces the stored value on its own; omitted fields keep it.
 type FairShareSimulationOrgUnit struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -27,12 +28,7 @@ type FairShareSimulationOrgUnit struct {
 	Id string `json:"id" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Type string `json:"type"`
-	Type string `json:"type" gorm:"not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Replaces the stored rank.
+	// Highest … Lowest. Only while ranks is on.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Rank *string `json:"rank,omitempty"`
 	Rank *string `json:"rank,omitempty" gorm:""`
@@ -43,7 +39,7 @@ type FairShareSimulationOrgUnit struct {
 	Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
+	// GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Demand *FairShareSimulationResources `json:"demand,omitempty"`
 	Demand *FairShareSimulationResources `json:"demand,omitempty" gorm:"serializer:json; type:jsonb;"`
@@ -53,8 +49,7 @@ type FairShareSimulationOrgUnit struct {
 // AssertFairShareSimulationOrgUnitRequired checks if the required fields are not zero-ed
 func AssertFairShareSimulationOrgUnitRequired(obj FairShareSimulationOrgUnit) error {
 	elements := map[string]interface{}{
-		"id":   obj.Id,
-		"type": obj.Type,
+		"id": obj.Id,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -77,11 +72,6 @@ func AssertFairShareSimulationOrgUnitRequired(obj FairShareSimulationOrgUnit) er
 
 // AssertFairShareSimulationOrgUnitConstraints checks if the values respects the defined constraints
 func AssertFairShareSimulationOrgUnitConstraints(obj FairShareSimulationOrgUnit) error {
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

@@ -4,14 +4,16 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**NodePool** | Pointer to [**NullableFairShareSimulationRequestNodePool**](FairShareSimulationRequestNodePool.md) |  | [optional] 
-**OrgUnits** | Pointer to [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | Org units that differ from their stored values. Every other org unit keeps its stored values and asks for the most it can get. | [optional] 
+**NodePool** | [**FairShareSimulationNodePool**](FairShareSimulationNodePool.md) |  | 
+**Assumptions** | [**FairShareSimulationAssumptions**](FairShareSimulationAssumptions.md) |  | 
+**OrgUnitType** | **string** | The type of the requested org units. One type per request. | 
+**OrgUnits** | [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | The org units to return, with their unsaved changes. Send the rows the screen shows. | 
 
 ## Methods
 
 ### NewFairShareSimulationRequest
 
-`func NewFairShareSimulationRequest() *FairShareSimulationRequest`
+`func NewFairShareSimulationRequest(nodePool FairShareSimulationNodePool, assumptions FairShareSimulationAssumptions, orgUnitType string, orgUnits []FairShareSimulationOrgUnit, ) *FairShareSimulationRequest`
 
 NewFairShareSimulationRequest instantiates a new FairShareSimulationRequest object
 This constructor will assign default values to properties that have it defined,
@@ -28,39 +30,64 @@ but it doesn't guarantee that properties required by API are set
 
 ### GetNodePool
 
-`func (o *FairShareSimulationRequest) GetNodePool() FairShareSimulationRequestNodePool`
+`func (o *FairShareSimulationRequest) GetNodePool() FairShareSimulationNodePool`
 
 GetNodePool returns the NodePool field if non-nil, zero value otherwise.
 
 ### GetNodePoolOk
 
-`func (o *FairShareSimulationRequest) GetNodePoolOk() (*FairShareSimulationRequestNodePool, bool)`
+`func (o *FairShareSimulationRequest) GetNodePoolOk() (*FairShareSimulationNodePool, bool)`
 
 GetNodePoolOk returns a tuple with the NodePool field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetNodePool
 
-`func (o *FairShareSimulationRequest) SetNodePool(v FairShareSimulationRequestNodePool)`
+`func (o *FairShareSimulationRequest) SetNodePool(v FairShareSimulationNodePool)`
 
 SetNodePool sets NodePool field to given value.
 
-### HasNodePool
 
-`func (o *FairShareSimulationRequest) HasNodePool() bool`
+### GetAssumptions
 
-HasNodePool returns a boolean if a field has been set.
+`func (o *FairShareSimulationRequest) GetAssumptions() FairShareSimulationAssumptions`
 
-### SetNodePoolNil
+GetAssumptions returns the Assumptions field if non-nil, zero value otherwise.
 
-`func (o *FairShareSimulationRequest) SetNodePoolNil(b bool)`
+### GetAssumptionsOk
 
- SetNodePoolNil sets the value for NodePool to be an explicit nil
+`func (o *FairShareSimulationRequest) GetAssumptionsOk() (*FairShareSimulationAssumptions, bool)`
 
-### UnsetNodePool
-`func (o *FairShareSimulationRequest) UnsetNodePool()`
+GetAssumptionsOk returns a tuple with the Assumptions field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
 
-UnsetNodePool ensures that no value is present for NodePool, not even an explicit nil
+### SetAssumptions
+
+`func (o *FairShareSimulationRequest) SetAssumptions(v FairShareSimulationAssumptions)`
+
+SetAssumptions sets Assumptions field to given value.
+
+
+### GetOrgUnitType
+
+`func (o *FairShareSimulationRequest) GetOrgUnitType() string`
+
+GetOrgUnitType returns the OrgUnitType field if non-nil, zero value otherwise.
+
+### GetOrgUnitTypeOk
+
+`func (o *FairShareSimulationRequest) GetOrgUnitTypeOk() (*string, bool)`
+
+GetOrgUnitTypeOk returns a tuple with the OrgUnitType field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetOrgUnitType
+
+`func (o *FairShareSimulationRequest) SetOrgUnitType(v string)`
+
+SetOrgUnitType sets OrgUnitType field to given value.
+
+
 ### GetOrgUnits
 
 `func (o *FairShareSimulationRequest) GetOrgUnits() []FairShareSimulationOrgUnit`
@@ -80,11 +107,6 @@ and a boolean to check if the value has been set.
 
 SetOrgUnits sets OrgUnits field to given value.
 
-### HasOrgUnits
-
-`func (o *FairShareSimulationRequest) HasOrgUnits() bool`
-
-HasOrgUnits returns a boolean if a field has been set.
 
 
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)

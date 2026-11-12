@@ -5,16 +5,15 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
-**Type** | **string** |  | 
-**Rank** | Pointer to **NullableString** | Replaces the stored rank. | [optional] 
+**Rank** | Pointer to **NullableString** | Highest … Lowest. Only while ranks is on. | [optional] 
 **Gpu** | Pointer to [**NullableFairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
-**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects&#39; demand. | [optional] 
+**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand. | [optional] 
 
 ## Methods
 
 ### NewFairShareSimulationOrgUnit
 
-`func NewFairShareSimulationOrgUnit(id string, type_ string, ) *FairShareSimulationOrgUnit`
+`func NewFairShareSimulationOrgUnit(id string, ) *FairShareSimulationOrgUnit`
 
 NewFairShareSimulationOrgUnit instantiates a new FairShareSimulationOrgUnit object
 This constructor will assign default values to properties that have it defined,
@@ -47,26 +46,6 @@ and a boolean to check if the value has been set.
 `func (o *FairShareSimulationOrgUnit) SetId(v string)`
 
 SetId sets Id field to given value.
-
-
-### GetType
-
-`func (o *FairShareSimulationOrgUnit) GetType() string`
-
-GetType returns the Type field if non-nil, zero value otherwise.
-
-### GetTypeOk
-
-`func (o *FairShareSimulationOrgUnit) GetTypeOk() (*string, bool)`
-
-GetTypeOk returns a tuple with the Type field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetType
-
-`func (o *FairShareSimulationOrgUnit) SetType(v string)`
-
-SetType sets Type field to given value.
 
 
 ### GetRank

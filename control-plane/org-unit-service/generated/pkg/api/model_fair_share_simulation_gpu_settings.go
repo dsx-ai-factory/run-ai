@@ -29,7 +29,7 @@ type FairShareSimulationGpuSettings struct {
 	Deserved *float64 `json:"deserved,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The maximum GPU allocation; -1 means unlimited.
+	// The maximum GPU allocation; -1 means unlimited. Only while limits is on.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Limit *float64 `json:"limit,omitempty"`
 	Limit *float64 `json:"limit,omitempty" gorm:""`

@@ -24,7 +24,7 @@ var _ MappedNullable = &FairShareSimulationGpuSettings{}
 type FairShareSimulationGpuSettings struct {
 	// The GPU quota; -1 means unlimited.
 	Deserved NullableFloat64 `json:"deserved,omitempty"`
-	// The maximum GPU allocation; -1 means unlimited.
+	// The maximum GPU allocation; -1 means unlimited. Only while limits is on.
 	Limit           NullableFloat64 `json:"limit,omitempty"`
 	OverQuotaWeight NullableFloat64 `json:"overQuotaWeight,omitempty"`
 }

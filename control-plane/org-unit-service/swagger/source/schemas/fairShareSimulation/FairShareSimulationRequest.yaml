@@ -1,22 +1,27 @@
 type: object
-description: A scenario of unsaved changes. An empty body simulates the node pool as saved.
+description: |
+  A scenario to simulate. The node pool values and the assumptions are always sent, so the result never depends on
+  what is saved or on who is asking.
+required:
+  - nodePool
+  - assumptions
+  - orgUnitType
+  - orgUnits
 properties:
   nodePool:
-    type: object
-    nullable: true
-    properties:
-      capacity:
-        description: Resources to split. Defaults to the node pool's capacity.
-        nullable: true
-        allOf:
-          - $ref: "./FairShareSimulationResources.yaml"
-      schedulingCapabilities:
-        nullable: true
-        allOf:
-          - $ref: "./FairShareSimulationSchedulingCapabilities.yaml"
+    $ref: "./FairShareSimulationNodePool.yaml"
+  assumptions:
+    $ref: "./FairShareSimulationAssumptions.yaml"
+  orgUnitType:
+    type: string
+    description: The type of the requested org units. One type per request.
+    enum:
+      - department
+      - project
   orgUnits:
     type: array
-    maxItems: 100
-    description: Org units that differ from their stored values. Every other org unit keeps its stored values and asks for the most it can get.
+    minItems: 1
+    maxItems: 500
+    description: The org units to return, with their unsaved changes. Send the rows the screen shows.
     items:
       $ref: "./FairShareSimulationOrgUnit.yaml"

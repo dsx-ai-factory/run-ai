@@ -1,27 +1,24 @@
 type: object
+description: A requested org unit. Each field replaces the stored value on its own; omitted fields keep it.
 required:
   - id
-  - type
 properties:
   id:
     type: string
     example: "4500014"
-  type:
-    type: string
-    enum:
-      - department
-      - project
   rank:
     type: string
-    description: Replaces the stored rank.
     nullable: true
+    description: Highest … Lowest. Only while ranks is on.
     example: High
   gpu:
+    type: object
     nullable: true
     allOf:
       - $ref: "./FairShareSimulationGpuSettings.yaml"
   demand:
-    description: GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
+    type: object
     nullable: true
+    description: GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand.
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"

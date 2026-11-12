@@ -4,9 +4,9 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Capacity** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The resources the simulation split. | 
-**Parent** | Pointer to [**NullableFairShareSimulationResult**](FairShareSimulationResult.md) | With parentId, the department&#39;s own result. Its projects&#39; fair shares add up to it. | [optional] 
-**OrgUnits** | [**[]FairShareSimulationResult**](FairShareSimulationResult.md) |  | 
+**Capacity** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The GPUs the simulation split. | 
+**Parent** | Pointer to [**NullableFairShareSimulationResult**](FairShareSimulationResult.md) | When the requested org units are projects: their department&#39;s own result. Null when the caller can&#39;t read the department.  | [optional] 
+**OrgUnits** | [**[]FairShareSimulationResult**](FairShareSimulationResult.md) | One result per requested org unit, in the request&#39;s order. | 
 
 ## Methods
 

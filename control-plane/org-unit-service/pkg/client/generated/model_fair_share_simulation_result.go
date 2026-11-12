@@ -22,20 +22,20 @@ import (
 // checks if the FairShareSimulationResult type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationResult{}
 
-// FairShareSimulationResult struct for FairShareSimulationResult
+// FairShareSimulationResult Values may be fractional, as in the scheduler; the client rounds.
 type FairShareSimulationResult struct {
-	Id       string         `json:"id"`
-	Type     string         `json:"type"`
-	ParentId NullableString `json:"parentId,omitempty"`
-	// Resources the scheduler would give the org unit when the node pool is fully busy, the sum of guaranteed and overQuota.
+	Id string `json:"id"`
+	// The GPUs the org unit asked for in this scenario, after the default and the limit were applied.
+	Demand FairShareSimulationResources `json:"demand"`
+	// GPUs the scheduler would give the org unit, the sum of guaranteed and overQuota.
 	FairShare FairShareSimulationResources `json:"fairShare"`
-	// The part of the fair share that comes from the org unit's quota.
+	// The part of the fair share within the org unit's quota.
 	Guaranteed FairShareSimulationResources `json:"guaranteed"`
 	// The part of the fair share above the org unit's quota.
 	OverQuota FairShareSimulationResources `json:"overQuota"`
-	// Demand the fair share does not cover. Without a demand, measured against the org unit's limit, else its parent's limit, else the node pool's capacity.
+	// demand minus fairShare.
 	Unmet FairShareSimulationResources `json:"unmet"`
-	// The org unit's over-quota weight divided by the total weight of its rank among its siblings, including the ones the caller can't read. With ranks off, among all its siblings.
+	// The org unit's over-quota weight divided by the total weight of its rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
 	WeightShareInRank float64 `json:"weightShareInRank"`
 }
 
@@ -45,10 +45,10 @@ type _FairShareSimulationResult FairShareSimulationResult
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFairShareSimulationResult(id string, type_ string, fairShare FairShareSimulationResources, guaranteed FairShareSimulationResources, overQuota FairShareSimulationResources, unmet FairShareSimulationResources, weightShareInRank float64) *FairShareSimulationResult {
+func NewFairShareSimulationResult(id string, demand FairShareSimulationResources, fairShare FairShareSimulationResources, guaranteed FairShareSimulationResources, overQuota FairShareSimulationResources, unmet FairShareSimulationResources, weightShareInRank float64) *FairShareSimulationResult {
 	this := FairShareSimulationResult{}
 	this.Id = id
-	this.Type = type_
+	this.Demand = demand
 	this.FairShare = fairShare
 	this.Guaranteed = guaranteed
 	this.OverQuota = overQuota
@@ -89,71 +89,28 @@ func (o *FairShareSimulationResult) SetId(v string) {
 	o.Id = v
 }
 
-// GetType returns the Type field value
-func (o *FairShareSimulationResult) GetType() string {
+// GetDemand returns the Demand field value
+func (o *FairShareSimulationResult) GetDemand() FairShareSimulationResources {
 	if o == nil {
-		var ret string
+		var ret FairShareSimulationResources
 		return ret
 	}
 
-	return o.Type
+	return o.Demand
 }
 
-// GetTypeOk returns a tuple with the Type field value
+// GetDemandOk returns a tuple with the Demand field value
 // and a boolean to check if the value has been set.
-func (o *FairShareSimulationResult) GetTypeOk() (*string, bool) {
+func (o *FairShareSimulationResult) GetDemandOk() (*FairShareSimulationResources, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return &o.Type, true
+	return &o.Demand, true
 }
 
-// SetType sets field value
-func (o *FairShareSimulationResult) SetType(v string) {
-	o.Type = v
-}
-
-// GetParentId returns the ParentId field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *FairShareSimulationResult) GetParentId() string {
-	if o == nil || IsNil(o.ParentId.Get()) {
-		var ret string
-		return ret
-	}
-	return *o.ParentId.Get()
-}
-
-// GetParentIdOk returns a tuple with the ParentId field value if set, nil otherwise
-// and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FairShareSimulationResult) GetParentIdOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return o.ParentId.Get(), o.ParentId.IsSet()
-}
-
-// HasParentId returns a boolean if a field has been set.
-func (o *FairShareSimulationResult) HasParentId() bool {
-	if o != nil && o.ParentId.IsSet() {
-		return true
-	}
-
-	return false
-}
-
-// SetParentId gets a reference to the given NullableString and assigns it to the ParentId field.
-func (o *FairShareSimulationResult) SetParentId(v string) {
-	o.ParentId.Set(&v)
-}
-
-// SetParentIdNil sets the value for ParentId to be an explicit nil
-func (o *FairShareSimulationResult) SetParentIdNil() {
-	o.ParentId.Set(nil)
-}
-
-// UnsetParentId ensures that no value is present for ParentId, not even an explicit nil
-func (o *FairShareSimulationResult) UnsetParentId() {
-	o.ParentId.Unset()
+// SetDemand sets field value
+func (o *FairShareSimulationResult) SetDemand(v FairShareSimulationResources) {
+	o.Demand = v
 }
 
 // GetFairShare returns the FairShare field value
@@ -287,10 +244,7 @@ func (o FairShareSimulationResult) MarshalJSON() ([]byte, error) {
 func (o FairShareSimulationResult) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
-	toSerialize["type"] = o.Type
-	if o.ParentId.IsSet() {
-		toSerialize["parentId"] = o.ParentId.Get()
-	}
+	toSerialize["demand"] = o.Demand
 	toSerialize["fairShare"] = o.FairShare
 	toSerialize["guaranteed"] = o.Guaranteed
 	toSerialize["overQuota"] = o.OverQuota
@@ -307,7 +261,7 @@ func (o *FairShareSimulationResult) UnmarshalJSON(data []byte) (err error) {
 	// requiredProperties := []string{
 	//
 	//  	"id",
-	//  	"type",
+	//  	"demand",
 	//  	"fairShare",
 	//  	"guaranteed",
 	//  	"overQuota",

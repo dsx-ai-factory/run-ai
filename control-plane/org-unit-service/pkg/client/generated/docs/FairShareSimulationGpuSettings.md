@@ -5,7 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Deserved** | Pointer to **NullableFloat64** | The GPU quota; -1 means unlimited. | [optional] 
-**Limit** | Pointer to **NullableFloat64** | The maximum GPU allocation; -1 means unlimited. | [optional] 
+**Limit** | Pointer to **NullableFloat64** | The maximum GPU allocation; -1 means unlimited. Only while limits is on. | [optional] 
 **OverQuotaWeight** | Pointer to **NullableFloat64** |  | [optional] 
 
 ## Methods

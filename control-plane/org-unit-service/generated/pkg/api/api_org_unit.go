@@ -703,23 +703,9 @@ func (c *OrgUnitAPIController) GetRanks(w http.ResponseWriter, r *http.Request) 
 
 // SimulateNodePoolFairShare - Simulate the fair share of a node pool's org units
 func (c *OrgUnitAPIController) SimulateNodePoolFairShare(w http.ResponseWriter, r *http.Request) {
-	query, err := parseQuery(r.URL.RawQuery)
-	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Err: err}, nil, nil)
-		return
-	}
 	nodepoolIdParam := chi.URLParam(r, "nodepoolId")
 	if nodepoolIdParam == "" {
 		c.errorHandler(w, r, &RequiredError{"nodepoolId"}, nil, nil)
-		return
-	}
-	var orgUnitTypeParam string
-	if query.Has("orgUnitType") {
-		param := query.Get("orgUnitType")
-
-		orgUnitTypeParam = param
-	} else {
-		c.errorHandler(w, r, &RequiredError{Field: "orgUnitType"}, nil, nil)
 		return
 	}
 	var fairShareSimulationRequestParam FairShareSimulationRequest
@@ -749,46 +735,7 @@ func (c *OrgUnitAPIController) SimulateNodePoolFairShare(w http.ResponseWriter, 
 		c.errorHandler(w, r, err, nil, nil)
 		return
 	}
-	var parentIdParam string
-	if query.Has("parentId") {
-		param := query.Get("parentId")
-
-		parentIdParam = param
-	} else {
-	}
-	var sortByParam string
-	if query.Has("sortBy") {
-		param := query.Get("sortBy")
-
-		sortByParam = param
-	} else {
-	}
-	var sortOrderParam string
-	if query.Has("sortOrder") {
-		param := query.Get("sortOrder")
-
-		sortOrderParam = param
-	} else {
-		param := "asc"
-		sortOrderParam = param
-	}
-	var limitParam int32
-	if query.Has("limit") {
-		param, err := parseNumericParameter[int32](
-			query.Get("limit"),
-			WithParse[int32](parseInt32),
-			WithMinimum[int32](1),
-			WithMaximum[int32](500),
-		)
-		if err != nil {
-			c.errorHandler(w, r, &ParsingError{Param: "limit", Err: err}, nil, nil)
-			return
-		}
-
-		limitParam = param
-	} else {
-	}
-	result, err := c.service.SimulateNodePoolFairShare(r.Context(), nodepoolIdParam, orgUnitTypeParam, fairShareSimulationRequestParam, parentIdParam, sortByParam, sortOrderParam, limitParam)
+	result, err := c.service.SimulateNodePoolFairShare(r.Context(), nodepoolIdParam, fairShareSimulationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

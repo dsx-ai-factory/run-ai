@@ -1,0 +1,29 @@
+type: object
+description: What the simulation assumes about org units the user didn't set.
+required:
+  - defaultDemand
+  - otherDepartments
+properties:
+  defaultDemand:
+    description: |
+      GPUs every org unit without a demand in the request asks for, capped by its limit. The node pool form sends
+      half the node pool's capacity. In the node pool form it is also a department's demand; in the department and
+      project forms a department asks for the sum of its projects' demand.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  otherDepartments:
+    type: string
+    description: |
+      What departments other than focusDepartmentId ask for. `default`: the default demand. `idle`: nothing, so the
+      focus department can take the whole node pool up to its limit. The department and project forms send `idle`
+      and say so in a footnote.
+    enum:
+      - default
+      - idle
+  focusDepartmentId:
+    type: string
+    nullable: true
+    description: |
+      The department the requested org units belong to. Required with `idle` and when orgUnitType is project; the
+      requested org units must belong to it.
+    example: "4500014"

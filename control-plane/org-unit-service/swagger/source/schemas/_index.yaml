@@ -208,6 +208,10 @@ FairShareSimulationOrgUnit:
   $ref: "./fairShareSimulation/FairShareSimulationOrgUnit.yaml"
 FairShareSimulationGpuSettings:
   $ref: "./fairShareSimulation/FairShareSimulationGpuSettings.yaml"
+FairShareSimulationNodePool:
+  $ref: "./fairShareSimulation/FairShareSimulationNodePool.yaml"
+FairShareSimulationAssumptions:
+  $ref: "./fairShareSimulation/FairShareSimulationAssumptions.yaml"
 FairShareSimulationResponse:
   $ref: "./fairShareSimulation/FairShareSimulationResponse.yaml"
 FairShareSimulationResult:

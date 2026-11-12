@@ -18,8 +18,7 @@ import (
 
 var _ = Describe("SimulateNodePoolFairShare", func() {
 	It("returns 501 until the simulation is implemented", func() {
-		response, err := services.OrgUnitApiService{}.SimulateNodePoolFairShare(context.Background(), "1", "department",
-			api.FairShareSimulationRequest{}, "", "", "", 0)
+		response, err := services.OrgUnitApiService{}.SimulateNodePoolFairShare(context.Background(), "1", api.FairShareSimulationRequest{})
 		Expect(err).ToNot(HaveOccurred())
 		Expect(response.Code).To(Equal(http.StatusNotImplemented))
 	})

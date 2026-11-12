@@ -22,14 +22,13 @@ import (
 // checks if the FairShareSimulationOrgUnit type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationOrgUnit{}
 
-// FairShareSimulationOrgUnit struct for FairShareSimulationOrgUnit
+// FairShareSimulationOrgUnit A requested org unit. Each field replaces the stored value on its own; omitted fields keep it.
 type FairShareSimulationOrgUnit struct {
-	Id   string `json:"id"`
-	Type string `json:"type"`
-	// Replaces the stored rank.
+	Id string `json:"id"`
+	// Highest … Lowest. Only while ranks is on.
 	Rank NullableString                         `json:"rank,omitempty"`
 	Gpu  NullableFairShareSimulationGpuSettings `json:"gpu,omitempty"`
-	// GPUs the org unit asks for. Without it, the most it can get; for a department, the sum of its projects' demand.
+	// GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand.
 	Demand NullableFairShareSimulationResources `json:"demand,omitempty"`
 }
 
@@ -39,10 +38,9 @@ type _FairShareSimulationOrgUnit FairShareSimulationOrgUnit
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFairShareSimulationOrgUnit(id string, type_ string) *FairShareSimulationOrgUnit {
+func NewFairShareSimulationOrgUnit(id string) *FairShareSimulationOrgUnit {
 	this := FairShareSimulationOrgUnit{}
 	this.Id = id
-	this.Type = type_
 	return &this
 }
 
@@ -76,30 +74,6 @@ func (o *FairShareSimulationOrgUnit) GetIdOk() (*string, bool) {
 // SetId sets field value
 func (o *FairShareSimulationOrgUnit) SetId(v string) {
 	o.Id = v
-}
-
-// GetType returns the Type field value
-func (o *FairShareSimulationOrgUnit) GetType() string {
-	if o == nil {
-		var ret string
-		return ret
-	}
-
-	return o.Type
-}
-
-// GetTypeOk returns a tuple with the Type field value
-// and a boolean to check if the value has been set.
-func (o *FairShareSimulationOrgUnit) GetTypeOk() (*string, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Type, true
-}
-
-// SetType sets field value
-func (o *FairShareSimulationOrgUnit) SetType(v string) {
-	o.Type = v
 }
 
 // GetRank returns the Rank field value if set, zero value otherwise (both if not set or set to explicit null).
@@ -242,7 +216,6 @@ func (o FairShareSimulationOrgUnit) MarshalJSON() ([]byte, error) {
 func (o FairShareSimulationOrgUnit) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["id"] = o.Id
-	toSerialize["type"] = o.Type
 	if o.Rank.IsSet() {
 		toSerialize["rank"] = o.Rank.Get()
 	}
@@ -263,7 +236,6 @@ func (o *FairShareSimulationOrgUnit) UnmarshalJSON(data []byte) (err error) {
 	// requiredProperties := []string{
 	//
 	//  	"id",
-	//  	"type",
 	// }
 
 	allProperties := make(map[string]interface{})

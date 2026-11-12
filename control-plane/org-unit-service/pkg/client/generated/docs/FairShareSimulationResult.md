@@ -5,19 +5,18 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Id** | **string** |  | 
-**Type** | **string** |  | 
-**ParentId** | Pointer to **NullableString** |  | [optional] 
-**FairShare** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | Resources the scheduler would give the org unit when the node pool is fully busy, the sum of guaranteed and overQuota. | 
-**Guaranteed** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The part of the fair share that comes from the org unit&#39;s quota. | 
+**Demand** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The GPUs the org unit asked for in this scenario, after the default and the limit were applied. | 
+**FairShare** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the scheduler would give the org unit, the sum of guaranteed and overQuota. | 
+**Guaranteed** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The part of the fair share within the org unit&#39;s quota. | 
 **OverQuota** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | The part of the fair share above the org unit&#39;s quota. | 
-**Unmet** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | Demand the fair share does not cover. Without a demand, measured against the org unit&#39;s limit, else its parent&#39;s limit, else the node pool&#39;s capacity. | 
-**WeightShareInRank** | **float64** | The org unit&#39;s over-quota weight divided by the total weight of its rank among its siblings, including the ones the caller can&#39;t read. With ranks off, among all its siblings. | 
+**Unmet** | [**FairShareSimulationResources**](FairShareSimulationResources.md) | demand minus fairShare. | 
+**WeightShareInRank** | **float64** | The org unit&#39;s over-quota weight divided by the total weight of its rank among its siblings, including ones the caller can&#39;t read. With ranks off, among all siblings. | 
 
 ## Methods
 
 ### NewFairShareSimulationResult
 
-`func NewFairShareSimulationResult(id string, type_ string, fairShare FairShareSimulationResources, guaranteed FairShareSimulationResources, overQuota FairShareSimulationResources, unmet FairShareSimulationResources, weightShareInRank float64, ) *FairShareSimulationResult`
+`func NewFairShareSimulationResult(id string, demand FairShareSimulationResources, fairShare FairShareSimulationResources, guaranteed FairShareSimulationResources, overQuota FairShareSimulationResources, unmet FairShareSimulationResources, weightShareInRank float64, ) *FairShareSimulationResult`
 
 NewFairShareSimulationResult instantiates a new FairShareSimulationResult object
 This constructor will assign default values to properties that have it defined,
@@ -52,61 +51,26 @@ and a boolean to check if the value has been set.
 SetId sets Id field to given value.
 
 
-### GetType
+### GetDemand
 
-`func (o *FairShareSimulationResult) GetType() string`
+`func (o *FairShareSimulationResult) GetDemand() FairShareSimulationResources`
 
-GetType returns the Type field if non-nil, zero value otherwise.
+GetDemand returns the Demand field if non-nil, zero value otherwise.
 
-### GetTypeOk
+### GetDemandOk
 
-`func (o *FairShareSimulationResult) GetTypeOk() (*string, bool)`
+`func (o *FairShareSimulationResult) GetDemandOk() (*FairShareSimulationResources, bool)`
 
-GetTypeOk returns a tuple with the Type field if it's non-nil, zero value otherwise
+GetDemandOk returns a tuple with the Demand field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
-### SetType
+### SetDemand
 
-`func (o *FairShareSimulationResult) SetType(v string)`
+`func (o *FairShareSimulationResult) SetDemand(v FairShareSimulationResources)`
 
-SetType sets Type field to given value.
+SetDemand sets Demand field to given value.
 
 
-### GetParentId
-
-`func (o *FairShareSimulationResult) GetParentId() string`
-
-GetParentId returns the ParentId field if non-nil, zero value otherwise.
-
-### GetParentIdOk
-
-`func (o *FairShareSimulationResult) GetParentIdOk() (*string, bool)`
-
-GetParentIdOk returns a tuple with the ParentId field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetParentId
-
-`func (o *FairShareSimulationResult) SetParentId(v string)`
-
-SetParentId sets ParentId field to given value.
-
-### HasParentId
-
-`func (o *FairShareSimulationResult) HasParentId() bool`
-
-HasParentId returns a boolean if a field has been set.
-
-### SetParentIdNil
-
-`func (o *FairShareSimulationResult) SetParentIdNil(b bool)`
-
- SetParentIdNil sets the value for ParentId to be an explicit nil
-
-### UnsetParentId
-`func (o *FairShareSimulationResult) UnsetParentId()`
-
-UnsetParentId ensures that no value is present for ParentId, not even an explicit nil
 ### GetFairShare
 
 `func (o *FairShareSimulationResult) GetFairShare() FairShareSimulationResources`

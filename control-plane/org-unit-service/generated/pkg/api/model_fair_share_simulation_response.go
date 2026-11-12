@@ -22,18 +22,19 @@ var dummyFairShareSimulationResponse = runaihttp.AssertPattern
 
 type FairShareSimulationResponse struct {
 
-	// The resources the simulation split.
+	// The GPUs the simulation split.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Capacity FairShareSimulationResources `json:"capacity"`
 	Capacity FairShareSimulationResources `json:"capacity" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// With parentId, the department's own result. Its projects' fair shares add up to it.
+	// When the requested org units are projects: their department's own result. Null when the caller can't read the department.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Parent *FairShareSimulationResult `json:"parent,omitempty"`
 	Parent *FairShareSimulationResult `json:"parent,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// One result per requested org unit, in the request's order.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OrgUnits []FairShareSimulationResult `json:"orgUnits"`
 	OrgUnits []FairShareSimulationResult `json:"orgUnits" gorm:"serializer:json; type:jsonb;not null;"`

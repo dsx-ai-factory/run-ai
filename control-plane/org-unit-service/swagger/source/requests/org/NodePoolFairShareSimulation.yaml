@@ -3,10 +3,11 @@ post:
   operationId: simulate_node_pool_fair_share
   x-service: org-unit-service
   description: |
-    Computes the GPUs the scheduler would give the departments of a node pool, or the projects of one department, for a
-    scenario of unsaved changes. It shows the node pool when it is fully busy: every org unit without a demand in the
-    request asks for the most it can get, and a department asks for the sum of its projects' demand. The calculation covers
-    every org unit of the node pool; the response holds the ones of the requested level the caller can read. Nothing is saved.
+    Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
+    scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation
+    covers every department and project of the node pool, including ones the caller can't read; the response holds only
+    the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand.
+    Nothing is saved. The same scenario gives the same result for every caller.
   x-no-authorization: true
   x-test-coverage:
     - control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
@@ -14,33 +15,6 @@ post:
     - Org unit
   parameters:
     - $ref: "../../parameters/NodepoolId.yaml"
-    - $ref: "../../parameters/OrgUnitType.yaml"
-    - name: parentId
-      in: query
-      required: false
-      description: The department whose projects to return. Required when orgUnitType is project.
-      schema:
-        type: string
-    - name: sortBy
-      in: query
-      required: false
-      description: The field to sort the org units by. Defaults to id.
-      schema:
-        type: string
-        enum:
-          - id
-          - fairShare
-          - unmet
-    - $ref: "../../../../../infra/openapi/docs/parameters/query/optional/SortOrder.yaml"
-    - name: limit
-      in: query
-      required: false
-      description: The maximum number of org units to return. Without it, all of them.
-      schema:
-        type: integer
-        format: int32
-        minimum: 1
-        maximum: 500
   requestBody:
     required: true
     content:
@@ -49,7 +23,7 @@ post:
           $ref: "../../schemas/fairShareSimulation/FairShareSimulationRequest.yaml"
   responses:
     200:
-      description: The simulated fair share of each org unit.
+      description: The simulated fair share of each requested org unit.
       content:
         application/json:
           schema:

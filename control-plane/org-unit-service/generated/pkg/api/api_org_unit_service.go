@@ -208,7 +208,7 @@ func (s *OrgUnitAPIService) GetRanks(ctx context.Context) (ImplResponse, error) 
 }
 
 // SimulateNodePoolFairShare - Simulate the fair share of a node pool&#39;s org units
-func (s *OrgUnitAPIService) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string, orgUnitType string, fairShareSimulationRequest FairShareSimulationRequest, parentId string, sortBy string, sortOrder string, limit int32) (ImplResponse, error) {
+func (s *OrgUnitAPIService) SimulateNodePoolFairShare(ctx context.Context, nodepoolId string, fairShareSimulationRequest FairShareSimulationRequest) (ImplResponse, error) {
 	// TODO - update SimulateNodePoolFairShare with the required logic for this service method.
 	// Add api_org_unit_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

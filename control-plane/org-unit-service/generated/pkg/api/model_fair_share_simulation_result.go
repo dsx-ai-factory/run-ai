@@ -20,6 +20,7 @@ var dummyFairShareSimulationResult = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
+// FairShareSimulationResult - Values may be fractional, as in the scheduler; the client rounds.
 type FairShareSimulationResult struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
@@ -27,23 +28,19 @@ type FairShareSimulationResult struct {
 	Id string `json:"id" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
+	// The GPUs the org unit asked for in this scenario, after the default and the limit were applied.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Type string `json:"type"`
-	Type string `json:"type" gorm:"not null;"`
+	//Demand FairShareSimulationResources `json:"demand"`
+	Demand FairShareSimulationResources `json:"demand" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//ParentId *string `json:"parentId,omitempty"`
-	ParentId *string `json:"parentId,omitempty" gorm:""`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// Resources the scheduler would give the org unit when the node pool is fully busy, the sum of guaranteed and overQuota.
+	// GPUs the scheduler would give the org unit, the sum of guaranteed and overQuota.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//FairShare FairShareSimulationResources `json:"fairShare"`
 	FairShare FairShareSimulationResources `json:"fairShare" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The part of the fair share that comes from the org unit's quota.
+	// The part of the fair share within the org unit's quota.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Guaranteed FairShareSimulationResources `json:"guaranteed"`
 	Guaranteed FairShareSimulationResources `json:"guaranteed" gorm:"serializer:json; type:jsonb;not null;"`
@@ -55,13 +52,13 @@ type FairShareSimulationResult struct {
 	OverQuota FairShareSimulationResources `json:"overQuota" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// Demand the fair share does not cover. Without a demand, measured against the org unit's limit, else its parent's limit, else the node pool's capacity.
+	// demand minus fairShare.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Unmet FairShareSimulationResources `json:"unmet"`
 	Unmet FairShareSimulationResources `json:"unmet" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The org unit's over-quota weight divided by the total weight of its rank among its siblings, including the ones the caller can't read. With ranks off, among all its siblings.
+	// The org unit's over-quota weight divided by the total weight of its rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//WeightShareInRank float64 `json:"weightShareInRank"`
 	WeightShareInRank float64 `json:"weightShareInRank" gorm:"not null;"`
@@ -72,7 +69,7 @@ type FairShareSimulationResult struct {
 func AssertFairShareSimulationResultRequired(obj FairShareSimulationResult) error {
 	elements := map[string]interface{}{
 		"id":                obj.Id,
-		"type":              obj.Type,
+		"demand":            obj.Demand,
 		"fairShare":         obj.FairShare,
 		"guaranteed":        obj.Guaranteed,
 		"overQuota":         obj.OverQuota,
@@ -85,6 +82,9 @@ func AssertFairShareSimulationResultRequired(obj FairShareSimulationResult) erro
 		}
 	}
 
+	if err := AssertFairShareSimulationResourcesRequired(obj.Demand); err != nil {
+		return err
+	}
 	if err := AssertFairShareSimulationResourcesRequired(obj.FairShare); err != nil {
 		return err
 	}
@@ -112,11 +112,9 @@ func AssertFairShareSimulationResultConstraints(obj FairShareSimulationResult) e
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
+	if err := AssertFairShareSimulationResourcesConstraints(obj.Demand); err != nil {
+		return err
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

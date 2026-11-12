@@ -10,11 +10,11 @@ properties:
   limit:
     type: number
     format: double
-    description: The maximum GPU allocation; -1 means unlimited.
+    description: The maximum GPU allocation; -1 means unlimited. Only while limits is on.
     nullable: true
     example: -1
   overQuotaWeight:
     type: number
-    nullable: true
     format: double
+    nullable: true
     example: 2

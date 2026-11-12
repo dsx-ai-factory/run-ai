@@ -73,10 +73,11 @@ docs/Descendants.md
 docs/DeservedResource.md
 docs/Error.md
 docs/FailedNodePoolResourcesPatchRequest.md
+docs/FairShareSimulationAssumptions.md
 docs/FairShareSimulationGpuSettings.md
+docs/FairShareSimulationNodePool.md
 docs/FairShareSimulationOrgUnit.md
 docs/FairShareSimulationRequest.md
-docs/FairShareSimulationRequestNodePool.md
 docs/FairShareSimulationResources.md
 docs/FairShareSimulationResponse.md
 docs/FairShareSimulationResult.md
@@ -289,10 +290,11 @@ model_descendants.go
 model_deserved_resource.go
 model_error.go
 model_failed_node_pool_resources_patch_request.go
+model_fair_share_simulation_assumptions.go
 model_fair_share_simulation_gpu_settings.go
+model_fair_share_simulation_node_pool.go
 model_fair_share_simulation_org_unit.go
 model_fair_share_simulation_request.go
-model_fair_share_simulation_request_node_pool.go
 model_fair_share_simulation_resources.go
 model_fair_share_simulation_response.go
 model_fair_share_simulation_result.go

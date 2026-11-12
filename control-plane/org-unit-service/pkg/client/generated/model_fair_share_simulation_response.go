@@ -24,11 +24,12 @@ var _ MappedNullable = &FairShareSimulationResponse{}
 
 // FairShareSimulationResponse struct for FairShareSimulationResponse
 type FairShareSimulationResponse struct {
-	// The resources the simulation split.
+	// The GPUs the simulation split.
 	Capacity FairShareSimulationResources `json:"capacity"`
-	// With parentId, the department's own result. Its projects' fair shares add up to it.
-	Parent   NullableFairShareSimulationResult `json:"parent,omitempty"`
-	OrgUnits []FairShareSimulationResult       `json:"orgUnits"`
+	// When the requested org units are projects: their department's own result. Null when the caller can't read the department.
+	Parent NullableFairShareSimulationResult `json:"parent,omitempty"`
+	// One result per requested org unit, in the request's order.
+	OrgUnits []FairShareSimulationResult `json:"orgUnits"`
 }
 
 type _FairShareSimulationResponse FairShareSimulationResponse

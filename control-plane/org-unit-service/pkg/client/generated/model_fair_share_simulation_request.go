@@ -14,25 +14,36 @@ Contact: support@run.ai
 package openapi
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 // checks if the FairShareSimulationRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationRequest{}
 
-// FairShareSimulationRequest A scenario of unsaved changes. An empty body simulates the node pool as saved.
+// FairShareSimulationRequest A scenario to simulate. The node pool values and the assumptions are always sent, so the result never depends on what is saved or on who is asking.
 type FairShareSimulationRequest struct {
-	NodePool NullableFairShareSimulationRequestNodePool `json:"nodePool,omitempty"`
-	// Org units that differ from their stored values. Every other org unit keeps its stored values and asks for the most it can get.
-	OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits,omitempty"`
+	NodePool    FairShareSimulationNodePool    `json:"nodePool"`
+	Assumptions FairShareSimulationAssumptions `json:"assumptions"`
+	// The type of the requested org units. One type per request.
+	OrgUnitType string `json:"orgUnitType"`
+	// The org units to return, with their unsaved changes. Send the rows the screen shows.
+	OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits"`
 }
+
+type _FairShareSimulationRequest FairShareSimulationRequest
 
 // NewFairShareSimulationRequest instantiates a new FairShareSimulationRequest object
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFairShareSimulationRequest() *FairShareSimulationRequest {
+func NewFairShareSimulationRequest(nodePool FairShareSimulationNodePool, assumptions FairShareSimulationAssumptions, orgUnitType string, orgUnits []FairShareSimulationOrgUnit) *FairShareSimulationRequest {
 	this := FairShareSimulationRequest{}
+	this.NodePool = nodePool
+	this.Assumptions = assumptions
+	this.OrgUnitType = orgUnitType
+	this.OrgUnits = orgUnits
 	return &this
 }
 
@@ -44,77 +55,98 @@ func NewFairShareSimulationRequestWithDefaults() *FairShareSimulationRequest {
 	return &this
 }
 
-// GetNodePool returns the NodePool field value if set, zero value otherwise (both if not set or set to explicit null).
-func (o *FairShareSimulationRequest) GetNodePool() FairShareSimulationRequestNodePool {
-	if o == nil || IsNil(o.NodePool.Get()) {
-		var ret FairShareSimulationRequestNodePool
+// GetNodePool returns the NodePool field value
+func (o *FairShareSimulationRequest) GetNodePool() FairShareSimulationNodePool {
+	if o == nil {
+		var ret FairShareSimulationNodePool
 		return ret
 	}
-	return *o.NodePool.Get()
+
+	return o.NodePool
 }
 
-// GetNodePoolOk returns a tuple with the NodePool field value if set, nil otherwise
+// GetNodePoolOk returns a tuple with the NodePool field value
 // and a boolean to check if the value has been set.
-// NOTE: If the value is an explicit nil, `nil, true` will be returned
-func (o *FairShareSimulationRequest) GetNodePoolOk() (*FairShareSimulationRequestNodePool, bool) {
+func (o *FairShareSimulationRequest) GetNodePoolOk() (*FairShareSimulationNodePool, bool) {
 	if o == nil {
 		return nil, false
 	}
-	return o.NodePool.Get(), o.NodePool.IsSet()
+	return &o.NodePool, true
 }
 
-// HasNodePool returns a boolean if a field has been set.
-func (o *FairShareSimulationRequest) HasNodePool() bool {
-	if o != nil && o.NodePool.IsSet() {
-		return true
+// SetNodePool sets field value
+func (o *FairShareSimulationRequest) SetNodePool(v FairShareSimulationNodePool) {
+	o.NodePool = v
+}
+
+// GetAssumptions returns the Assumptions field value
+func (o *FairShareSimulationRequest) GetAssumptions() FairShareSimulationAssumptions {
+	if o == nil {
+		var ret FairShareSimulationAssumptions
+		return ret
 	}
 
-	return false
+	return o.Assumptions
 }
 
-// SetNodePool gets a reference to the given NullableFairShareSimulationRequestNodePool and assigns it to the NodePool field.
-func (o *FairShareSimulationRequest) SetNodePool(v FairShareSimulationRequestNodePool) {
-	o.NodePool.Set(&v)
+// GetAssumptionsOk returns a tuple with the Assumptions field value
+// and a boolean to check if the value has been set.
+func (o *FairShareSimulationRequest) GetAssumptionsOk() (*FairShareSimulationAssumptions, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.Assumptions, true
 }
 
-// SetNodePoolNil sets the value for NodePool to be an explicit nil
-func (o *FairShareSimulationRequest) SetNodePoolNil() {
-	o.NodePool.Set(nil)
+// SetAssumptions sets field value
+func (o *FairShareSimulationRequest) SetAssumptions(v FairShareSimulationAssumptions) {
+	o.Assumptions = v
 }
 
-// UnsetNodePool ensures that no value is present for NodePool, not even an explicit nil
-func (o *FairShareSimulationRequest) UnsetNodePool() {
-	o.NodePool.Unset()
+// GetOrgUnitType returns the OrgUnitType field value
+func (o *FairShareSimulationRequest) GetOrgUnitType() string {
+	if o == nil {
+		var ret string
+		return ret
+	}
+
+	return o.OrgUnitType
 }
 
-// GetOrgUnits returns the OrgUnits field value if set, zero value otherwise.
+// GetOrgUnitTypeOk returns a tuple with the OrgUnitType field value
+// and a boolean to check if the value has been set.
+func (o *FairShareSimulationRequest) GetOrgUnitTypeOk() (*string, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return &o.OrgUnitType, true
+}
+
+// SetOrgUnitType sets field value
+func (o *FairShareSimulationRequest) SetOrgUnitType(v string) {
+	o.OrgUnitType = v
+}
+
+// GetOrgUnits returns the OrgUnits field value
 func (o *FairShareSimulationRequest) GetOrgUnits() []FairShareSimulationOrgUnit {
-	if o == nil || IsNil(o.OrgUnits) {
+	if o == nil {
 		var ret []FairShareSimulationOrgUnit
 		return ret
 	}
+
 	return o.OrgUnits
 }
 
-// GetOrgUnitsOk returns a tuple with the OrgUnits field value if set, nil otherwise
+// GetOrgUnitsOk returns a tuple with the OrgUnits field value
 // and a boolean to check if the value has been set.
 func (o *FairShareSimulationRequest) GetOrgUnitsOk() ([]FairShareSimulationOrgUnit, bool) {
-	if o == nil || IsNil(o.OrgUnits) {
+	if o == nil {
 		return nil, false
 	}
 	return o.OrgUnits, true
 }
 
-// HasOrgUnits returns a boolean if a field has been set.
-func (o *FairShareSimulationRequest) HasOrgUnits() bool {
-	if o != nil && !IsNil(o.OrgUnits) {
-		return true
-	}
-
-	return false
-}
-
-// SetOrgUnits gets a reference to the given []FairShareSimulationOrgUnit and assigns it to the OrgUnits field.
+// SetOrgUnits sets field value
 func (o *FairShareSimulationRequest) SetOrgUnits(v []FairShareSimulationOrgUnit) {
 	o.OrgUnits = v
 }
@@ -129,13 +161,58 @@ func (o FairShareSimulationRequest) MarshalJSON() ([]byte, error) {
 
 func (o FairShareSimulationRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
-	if o.NodePool.IsSet() {
-		toSerialize["nodePool"] = o.NodePool.Get()
-	}
-	if !IsNil(o.OrgUnits) {
-		toSerialize["orgUnits"] = o.OrgUnits
-	}
+	toSerialize["nodePool"] = o.NodePool
+	toSerialize["assumptions"] = o.Assumptions
+	toSerialize["orgUnitType"] = o.OrgUnitType
+	toSerialize["orgUnits"] = o.OrgUnits
 	return toSerialize, nil
+}
+
+func (o *FairShareSimulationRequest) UnmarshalJSON(data []byte) (err error) {
+	// This validates that all required properties are included in the JSON object
+	// by unmarshalling the object into a generic map with string keys and checking
+	// that every required field exists as a key in the generic map.
+	// RUNAI
+	// requiredProperties := []string{
+	//
+	//  	"nodePool",
+	//  	"assumptions",
+	//  	"orgUnitType",
+	//  	"orgUnits",
+	// }
+
+	allProperties := make(map[string]interface{})
+
+	err = json.Unmarshal(data, &allProperties)
+
+	if err != nil {
+		return err
+	}
+
+	// RUNAI
+	//  for _, requiredProperty := range(requiredProperties) {
+	//  	if _, exists := allProperties[requiredProperty]; !exists {
+	//  		return fmt.Errorf("no value given for required property %v", requiredProperty)
+	//  	}
+	//  }
+	//
+	fmt.Sprintf("dummy")
+
+	varFairShareSimulationRequest := _FairShareSimulationRequest{}
+
+	decoder := json.NewDecoder(bytes.NewReader(data))
+	// RUNAI
+	// decoder.DisallowUnknownFields()
+	//
+	err = decoder.Decode(&varFairShareSimulationRequest)
+
+	if err != nil {
+		return err
+	}
+
+	*o = FairShareSimulationRequest(varFairShareSimulationRequest)
+
+	return err
 }
 
 type NullableFairShareSimulationRequest struct {

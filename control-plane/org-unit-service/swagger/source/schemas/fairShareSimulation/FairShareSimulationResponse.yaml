@@ -4,15 +4,18 @@ required:
   - orgUnits
 properties:
   capacity:
-    description: The resources the simulation split.
+    description: The GPUs the simulation split.
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"
   parent:
-    description: With parentId, the department's own result. Its projects' fair shares add up to it.
+    description: |
+      When the requested org units are projects: their department's own result. Null when the caller can't read the
+      department.
     nullable: true
     allOf:
       - $ref: "./FairShareSimulationResult.yaml"
   orgUnits:
     type: array
+    description: One result per requested org unit, in the request's order.
     items:
       $ref: "./FairShareSimulationResult.yaml"
