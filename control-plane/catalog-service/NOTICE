@@ -139,7 +139,7 @@ Dependencies
 | `golang.org/x/sync` | v0.25.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sync@v0.25.0?tab=licenses |
 | `golang.org/x/sys` | v0.50.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/sys@v0.50.0?tab=licenses |
 | `golang.org/x/text` | v0.44.0 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/text@v0.44.0?tab=licenses |
-| `golang.org/x/tools` | v0.52.1-0.20261112194858-d8abf824d126 | BSD-3-Clause | https://pkg.go.dev/golang.org/x/tools@v0.52.1-0.20261112194858-d8abf824d126?tab=licenses |
+| `golang.org/x/tools` | v0.52.1-0.20261112212842-4dd740f845db | BSD-3-Clause | https://pkg.go.dev/golang.org/x/tools@v0.52.1-0.20261112212842-4dd740f845db?tab=licenses |
 | `google.golang.org/genproto/googleapis/api/httpbody` | v0.0.0-20261110000943-09e21b237f2c | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/api@v0.0.0-20261110000943-09e21b237f2c?tab=licenses |
 | `google.golang.org/genproto/googleapis/rpc` | v0.0.0-20261110000943-09e21b237f2c | Apache-2.0 | https://pkg.go.dev/google.golang.org/genproto/googleapis/rpc@v0.0.0-20261110000943-09e21b237f2c?tab=licenses |
 | `google.golang.org/grpc` | v1.85.0 | Apache-2.0 | https://pkg.go.dev/google.golang.org/grpc@v1.85.0?tab=licenses |
