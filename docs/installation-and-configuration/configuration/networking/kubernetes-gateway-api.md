@@ -210,6 +210,32 @@ spec:
         name: runai-cluster-domain-tls-secret
 ```
 
+## Enable WebSocket Support
+
+The NVIDIA Run:ai UI uses WebSocket connections, for example to stream workload logs and to open a terminal to a workload. Some Gateway controllers do not allow WebSocket upgrades by default. Make sure that your Gateway controller allows WebSocket upgrades on the Gateway, whether you use host-based or path-based routing.
+
+When using **KGateway**, create a `ListenerPolicy` that enables WebSocket upgrades on all listeners of the Gateway:
+
+```yaml
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: ListenerPolicy
+metadata:
+  name: runai-gateway-websocket
+  namespace: runai
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: runai-gateway
+  default:
+    httpSettings:
+      upgradeConfig:
+        enabledUpgrades:
+        - websocket
+```
+
+The policy must be in the same namespace as the Gateway. If you are using a different conformant controller, refer to its documentation to enable WebSocket upgrades.
+
 ## Standard Inference Routing with Gateway API
 
 <Note>
