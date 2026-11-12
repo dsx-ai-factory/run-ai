@@ -413,6 +413,33 @@ var _ = Describe("RI Migrations testing", func() {
 			Expect(row.Count).To(Equal(int64(1)))
 		})
 
+		It("registers SnapshotJob with its scheduling defaults", func() {
+			Expect(InitInternalKartas(context.Background())).To(Succeed())
+
+			row := struct {
+				Category       *string
+				Priority       *string
+				Preemptibility string
+				Kartas         int64
+			}{}
+			// Category and priority resolve by name in a subquery, so a typo stores
+			// NULL instead of failing the migration.
+			err := runaidb.DB().Raw(`SELECT c.name, p.name, cfg.preemptibility,
+					(SELECT COUNT(1) FROM workload_type_kartas k WHERE k.workload_type_id = wt.id AND k.version = ?)
+				FROM external_workloads_type_config cfg
+				JOIN workload_types wt ON wt.id = cfg.workload_type_id
+				LEFT JOIN workloads_categories c ON c.id = cfg.category_id
+				LEFT JOIN priorities p ON p.id = cfg.priority_id
+				WHERE wt.name = ? AND wt."group" = ? AND cfg.scope_type = ?`,
+				"v1alpha1", "SnapshotJob", "nvidia.com", dao.SystemScopeType).
+				Row().Scan(&row.Category, &row.Priority, &row.Preemptibility, &row.Kartas)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(row.Category).To(HaveValue(Equal("Deploy")))
+			Expect(row.Priority).To(HaveValue(Equal("low")))
+			Expect(row.Preemptibility).To(Equal(string(openapi.WORKLOADTYPEPREEMPTIBILITY_PREEMPTIBLE)))
+			Expect(row.Kartas).To(Equal(int64(1)))
+		})
+
 		It("upgrades the built-in KServe status mappings once", func() {
 			Expect(InitInternalKartas(context.Background())).To(Succeed())
 			wt, apiErr := dao.DbGetWorkloadTypeByNameGroup(context.Background(), "InferenceService", "serving.kserve.io")
