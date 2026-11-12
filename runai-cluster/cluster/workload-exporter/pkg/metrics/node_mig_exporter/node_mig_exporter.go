@@ -28,6 +28,9 @@ const (
 	H100 = "H100"
 )
 
+// MigCapableLabel is set to "true" by GPU Feature Discovery on nodes whose GPUs support MIG.
+const MigCapableLabel = "nvidia.com/mig.capable"
+
 type NodeMigExporter struct {
 	node *v1.Node
 }
@@ -40,8 +43,9 @@ func (ne *NodeMigExporter) IsMigNode() bool {
 	return ne.getMigStrategy() != MigStrategyNone
 }
 
+// getMigStrategy returns the node MIG strategy, or none when the node GPUs do not support MIG.
 func (ne *NodeMigExporter) getMigStrategy() string {
-	if !ne.supportMIG() {
+	if !ne.isMigCapableLabeled() && !ne.supportMIG() {
 		return DefaultMigStrategy
 	}
 
@@ -73,6 +77,12 @@ func (ne *NodeMigExporter) getMigStrategyFromLabel() string {
 func (ne *NodeMigExporter) isMigEnabledLabeled() bool {
 	isMigEnabled, found := ne.node.Labels[MigEnabledLabel]
 	return found && isMigEnabled == TrueLabelValue
+}
+
+// isMigCapableLabeled reports whether GPU Feature Discovery labeled the node with nvidia.com/mig.capable=true.
+// When the label is absent or not "true", the caller falls back to the product family list in supportMIG.
+func (ne *NodeMigExporter) isMigCapableLabeled() bool {
+	return ne.node.Labels[MigCapableLabel] == TrueLabelValue
 }
 
 func (ne *NodeMigExporter) supportMIG() bool {
