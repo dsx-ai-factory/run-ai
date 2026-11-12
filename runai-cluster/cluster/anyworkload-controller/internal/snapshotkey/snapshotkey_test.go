@@ -390,21 +390,41 @@ func TestMatchesOnAnUnstampedPod(t *testing.T) {
 
 func TestSnapshotNameIsAValidLabelValue(t *testing.T) {
 	key := keyOrFail(t, gpuPod())
-	name := SnapshotName(key)
+	suffix := "-snapshot-" + key
+	// The longest workload name that fits whole.
+	fits := strings.Repeat("a", validation.DNS1123LabelMaxLength-len(suffix))
 
-	if len(name) > validation.DNS1123LabelMaxLength {
-		t.Errorf("name %q is %d characters, want at most %d",
-			name, len(name), validation.DNS1123LabelMaxLength)
+	tests := []struct {
+		name         string
+		workloadName string
+		want         string
+	}{
+		{name: "short", workloadName: "llama", want: "llama" + suffix},
+		{name: "exactly fits", workloadName: fits, want: fits + suffix},
+		{name: "too long", workloadName: fits + "bc", want: fits + suffix},
+		{name: "cut on a dash", workloadName: fits[1:] + "-b", want: fits[1:] + suffix},
+		{name: "cut on a dot", workloadName: fits[1:] + ".b", want: fits[1:] + suffix},
 	}
-	if errs := validation.IsValidLabelValue(name); len(errs) > 0 {
-		t.Errorf("name %q is not a valid label value: %v", name, errs)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			name := SnapshotName(key, tc.workloadName)
+
+			if name != tc.want {
+				t.Errorf("SnapshotName = %q, want %q", name, tc.want)
+			}
+			if errs := validation.IsValidLabelValue(name); len(errs) > 0 {
+				t.Errorf("name %q is not a valid label value: %v", name, errs)
+			}
+			if errs := validation.IsDNS1123Subdomain(name); len(errs) > 0 {
+				t.Errorf("name %q is not a valid object name: %v", name, errs)
+			}
+		})
 	}
-	if errs := validation.IsDNS1123Subdomain(name); len(errs) > 0 {
-		t.Errorf("name %q is not a valid object name: %v", name, errs)
-	}
-	if !strings.Contains(name, key) {
-		t.Errorf("name %q does not contain the key %q", name, key)
-	}
+}
+
+// A key read back from a pod label can be longer than any name allows.
+func TestSnapshotNameDoesNotPanicOnAnOversizedKey(t *testing.T) {
+	SnapshotName(strings.Repeat("a", validation.DNS1123LabelMaxLength), "llama")
 }
 
 // TargetContainer duplicates karta's unexported per-container GPU predicate,

@@ -271,7 +271,7 @@ func buildSnapshotJob(runner *dromosv1alpha1.WorkloadRunner, replica *corev1.Pod
 	}
 	return &snapshotv1alpha1.SnapshotJob{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      snapshotkey.SnapshotName(in.key),
+			Name:      snapshotkey.SnapshotName(in.key, runner.Name),
 			Namespace: replica.Namespace,
 			Labels:    identity,
 		},

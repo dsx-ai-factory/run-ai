@@ -36,7 +36,7 @@ var _ = Describe("cleanup", func() {
 		Expect(err).NotTo(HaveOccurred())
 	}
 	named := func(key string) gomegatypes.GomegaMatcher {
-		return HaveField("ObjectMeta.Name", snapshotkey.SnapshotName(key))
+		return HaveField("ObjectMeta.Name", snapshotkey.SnapshotName(key, "llama"))
 	}
 
 	It("deletes a deleted runner's SnapshotJobs and PodSnapshots", func() {
@@ -112,7 +112,7 @@ var _ = Describe("cleanup", func() {
 // with the labels the SnapshotJob passes on.
 func capturedPodSnapshot(key, runnerUID string) *snapshotv1alpha1.PodSnapshot {
 	return &snapshotv1alpha1.PodSnapshot{ObjectMeta: metav1.ObjectMeta{
-		Name:      snapshotkey.SnapshotName(key),
+		Name:      snapshotkey.SnapshotName(key, "llama"),
 		Namespace: "runai-proj",
 		Labels: map[string]string{
 			constants.SnapshotKeyLabel:              key,

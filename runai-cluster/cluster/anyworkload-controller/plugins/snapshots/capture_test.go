@@ -47,7 +47,7 @@ var _ = Describe("HandleAdditionalResources", func() {
 
 		jobs := snapshotJobs(ctx, c)
 		Expect(jobs).To(HaveLen(1))
-		Expect(jobs[0].Name).To(Equal(snapshotkey.SnapshotName(keyOf(newer))), "want the newest key")
+		Expect(jobs[0].Name).To(Equal(snapshotkey.SnapshotName(keyOf(newer), "llama")), "want the newest key")
 		Expect(jobs[0].Labels).To(HaveKeyWithValue(commonconstants.WorkloadRunnerUidLabel, "runner-uid"))
 		Expect(jobs[0].OwnerReferences).To(BeEmpty())
 	})
@@ -204,8 +204,8 @@ var _ = Describe("buildSnapshotJob", func() {
 		Expect(err).NotTo(HaveOccurred())
 	})
 
-	It("names the job after the key, in the replica's namespace", func() {
-		Expect(job.Name).To(Equal(snapshotkey.SnapshotName("k1")))
+	It("names the job after the runner and the key, in the replica's namespace", func() {
+		Expect(job.Name).To(Equal(snapshotkey.SnapshotName("k1", "llama")))
 		Expect(job.Namespace).To(Equal("runai-proj"))
 	})
 
@@ -311,7 +311,7 @@ func replica(name, replicaSet string, created int64, ready bool, mutate ...func(
 // capturedJob is testRunner's capture of key.
 func capturedJob(key string, finished bool) *snapshotv1alpha1.SnapshotJob {
 	job := &snapshotv1alpha1.SnapshotJob{ObjectMeta: metav1.ObjectMeta{
-		Name:      snapshotkey.SnapshotName(key),
+		Name:      snapshotkey.SnapshotName(key, "llama"),
 		Namespace: "runai-proj",
 		Labels: map[string]string{
 			constants.SnapshotKeyLabel:              key,
@@ -357,7 +357,7 @@ func snapshotJobs(ctx context.Context, c client.Client) []snapshotv1alpha1.Snaps
 
 func hasSnapshotJob(ctx context.Context, c client.Client, key string) bool {
 	for _, job := range snapshotJobs(ctx, c) {
-		if job.Name == snapshotkey.SnapshotName(key) {
+		if job.Name == snapshotkey.SnapshotName(key, "llama") {
 			return true
 		}
 	}

@@ -13,6 +13,7 @@ import (
 	"github.com/ai-dynamo/snapshot/api/podcontract"
 	snapshotv1alpha1 "github.com/ai-dynamo/snapshot/api/v1alpha1"
 	"github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/anyworkload-controller/internal/snapshotkey"
+	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/common/constants"
 	admissionv1 "k8s.io/api/admission/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -26,6 +27,7 @@ var (
 	errNoReader          = errors.New("no API reader to look up the snapshot")
 	errSnapshotNotUsable = errors.New("snapshot is not ready, or is marked failed")
 	errNoAgentNodes      = errors.New("no nodes are known to run Snapshot's agent")
+	errNoWorkloadName    = errors.New("the pod does not name its workload runner")
 	errOwnStartupProbe   = errors.New("the target container defines its own startup probe")
 )
 
@@ -92,8 +94,13 @@ func (m *Mutator) restore(ctx context.Context, pod *corev1.Pod, key string) (*co
 		return nil, errNoAgentNodes
 	}
 
+	workloadName := pod.Labels[commonconstants.WorkloadRunnerNameLabel]
+	if workloadName == "" {
+		return nil, errNoWorkloadName
+	}
+
 	snapshot := &snapshotv1alpha1.PodSnapshot{}
-	name := types.NamespacedName{Name: snapshotkey.SnapshotName(key), Namespace: pod.Namespace}
+	name := types.NamespacedName{Name: snapshotkey.SnapshotName(key, workloadName), Namespace: pod.Namespace}
 	if err := m.apiReader.Get(ctx, name, snapshot); err != nil {
 		// Not found is ordinary: this key has no snapshot yet.
 		return nil, err
