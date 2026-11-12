@@ -74,7 +74,11 @@ func (s *IdpsApiService) CreateIdp(ctx context.Context, idpCreationRequest api.I
 	if err != nil {
 		return s.handleSystemScopeError(err, fmt.Sprintf("failed to create idp: %s for tenant: %s", idpCreationRequest.Type, tenantId))
 	}
-	audit.AuditFromCtx(ctx).WithEntityType(utils.AuditEntityTypeIdp)
+
+	al := audit.AuditFromCtx(ctx).WithEntityType(utils.AuditEntityTypeIdp)
+	if idpCreationRequest.DryRun {
+		al.Drop()
+	}
 	if err := validateIdpURLs(idpCreationRequest); err != nil {
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp url for tenant: %v. err: %v", *realm, err.Error())
 		return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: err.Error()}
@@ -93,7 +97,7 @@ func (s *IdpsApiService) CreateIdp(ctx context.Context, idpCreationRequest api.I
 		logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to create idp with configuration %v for tenant %s. err: %v", idpCreationRequest, *realm, err.Error())
 		return api.Response(http.StatusBadRequest, err), utils.Error{Code: http.StatusBadRequest, Message: ""}
 	}
-	audit.AuditFromCtx(ctx).WithEntityName(idpRequest.Alias)
+	al.WithEntityName(idpRequest.Alias)
 	rep, err := s.createIdp(ctx, *realm, idpRequest)
 	if err != nil {
 		errMsg := "failed to create idp with alias %s for tenant %s. err: %s"
@@ -128,6 +132,9 @@ func (s *IdpsApiService) UpdateIdp(ctx context.Context, idpAlias string, idpUpda
 		return s.handleSystemScopeError(err, fmt.Sprintf("failed to update idp: %s for tenant: %s", idpUpdateRequest.Type, tenantId))
 	}
 	audit.AuditFromCtx(ctx).WithEntityType(utils.AuditEntityTypeIdp)
+	if idpUpdateRequest.DryRun {
+		audit.AuditFromCtx(ctx).Drop()
+	}
 	if !isEmptyIdpData(idpUpdateRequest) {
 		if err := validateIdpURLs(idpUpdateRequest); err != nil {
 			logging.WithCtx(runaictx.LoggerHook(ctx)).Errorf("failed to validate idp url for tenant: %v. err: %v", *realm, err.Error())
