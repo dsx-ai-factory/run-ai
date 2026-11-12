@@ -884,7 +884,11 @@ var _ = Describe("TestPVCAsset", func() {
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusConflict))
-			Expect(createHttpResp.Body.String()).To(ContainSubstring("already exists in the project scope in the cluster"))
+			body := createHttpResp.Body.String()
+			Expect(body).To(ContainSubstring("PersistentVolumeClaim named '" + claimName + "' already exists in the cluster"))
+			Expect(body).To(ContainSubstring(fmt.Sprintf("for project %d", randoms.ProjectId)))
+			Expect(body).To(ContainSubstring("(origin: assets)"))
+			Expect(body).To(ContainSubstring("existingPvc=true"))
 
 			// Reset mock to avoid affecting other tests
 			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient())

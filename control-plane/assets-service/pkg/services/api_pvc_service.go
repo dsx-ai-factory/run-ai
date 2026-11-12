@@ -741,6 +741,8 @@ func validatePvcAssetVsClusterResource(ctx context.Context, meta *dbmodel.AssetM
 
 // validateClaimNameVsClusterResource checks if a PVC with the given claim name already exists in the cluster.
 // This is used to prevent creating a non-existing PVC asset when a PVC with that name already exists in the cluster.
+// The conflict error names the tracked PVC's scope id and origin and points to existingPvc=true, so callers can tell
+// it apart from the asset-to-asset claim name conflict.
 func validateClaimNameVsClusterResource(ctx context.Context, meta *dbmodel.AssetMeta, claimName *string) *api.Error {
 	if claimName == nil {
 		return nil
@@ -756,7 +758,14 @@ func validateClaimNameVsClusterResource(ctx context.Context, meta *dbmodel.Asset
 	}
 
 	if len(resp.Pvcs) > 0 {
-		return api.NewError(http.StatusConflict, fmt.Sprintf("PVC resource '%s' already exists in the %s scope in the cluster", *claimName, scopeInfo.Scope), nil)
+		origin := "unknown"
+		if convutils.HasValue(resp.Pvcs[0].Origin) {
+			origin = string(*resp.Pvcs[0].Origin.Get())
+		}
+		msg := fmt.Sprintf("a PersistentVolumeClaim named '%s' already exists in the cluster for %s %s (origin: %s); "+
+			"use existingPvc=true to attach it or choose another claimName",
+			*claimName, scopeInfo.Scope, scopeInfo.ScopeId, origin)
+		return api.NewError(http.StatusConflict, msg, nil)
 	}
 
 	return nil
