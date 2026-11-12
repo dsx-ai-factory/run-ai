@@ -275,8 +275,8 @@ func (p *Plugin) applyInferenceEndpoint(
 		return fmt.Errorf("own InferenceEndpoint: %w", err)
 	}
 	if err := k8sClient.Create(ctx, desired, client.FieldValidation(metav1.FieldValidationStrict)); err != nil {
-		// The Get above reads the informer cache, which can lag a Create that already
-		// succeeded. The Owns watch delivers the object and the next reconcile converges.
+		// Another reconcile created the endpoint between the Get above and this Create.
+		// The Owns watch delivers the object and the next reconcile converges.
 		if apierrors.IsAlreadyExists(err) {
 			return nil
 		}
@@ -297,6 +297,12 @@ func (p *Plugin) deleteInferenceEndpoint(
 			return nil
 		}
 		return err
+	}
+	// Every reconcile of every runner gets here, and the Get below is an API read:
+	// the client reads unstructured objects live. A runner that never reported
+	// InferenceEndpointReady never created an endpoint, so skip the read for it.
+	if !hasInferenceEndpointCondition(runner) {
+		return nil
 	}
 	name, err := endpoints.InferenceEndpointName(runner)
 	if err != nil {

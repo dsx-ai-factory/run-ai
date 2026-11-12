@@ -137,6 +137,7 @@ func main() {
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme:                 scheme,
+		Cache:                  controller.ChildCacheOptions(),
 		Metrics:                metricsServerOptions,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,

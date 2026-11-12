@@ -170,6 +170,15 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		err := k8sClient.Get(ctx, client.ObjectKey{Namespace: testNamespace, Name: testInferenceEndpointID}, obj)
 		return obj, err
 	}
+	// reportInferenceStatus records what the status pass writes to the runner after it
+	// created an endpoint; the delete path only looks for an endpoint after that.
+	reportInferenceStatus := func() {
+		status := newPluginStatus()
+		status.SetCondition(metav1.Condition{
+			Type: endpoints.InferenceEndpointReadyCondition, Status: metav1.ConditionFalse, Reason: "RouteNotAccepted",
+		})
+		runner.Status.Plugins = map[string]*dromosv1alpha1.PluginStatus{PluginName: status}
+	}
 	httpRoutes := func() []gatewayv1.HTTPRoute {
 		list := &gatewayv1.HTTPRouteList{}
 		Expect(k8sClient.List(ctx, list)).To(Succeed())
@@ -245,6 +254,7 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 		_, err = getInferenceEndpoint()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(httpRoutes()).To(BeEmpty())
+		reportInferenceStatus()
 
 		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 8000, nil))
 		Expect(reconcileRunner()).To(Succeed())
@@ -256,10 +266,26 @@ var _ = Describe("Inference routing (endpoints path)", func() {
 
 	It("deletes the InferenceEndpoint when the endpoints annotation is removed", func() {
 		Expect(reconcileRunner()).To(Succeed())
+		reportInferenceStatus()
 		delete(runner.Annotations, endpoints.Annotation)
 		Expect(reconcileRunner()).To(Succeed())
 		_, err := getInferenceEndpoint()
 		Expect(apierrors.IsNotFound(err)).To(BeTrue())
+	})
+
+	It("does not read InferenceEndpoints for a runner that never reported inference routing", func() {
+		reads := 0
+		k8sClient = interceptor.NewClient(k8sClient.(client.WithWatch), interceptor.Funcs{
+			Get: func(ctx context.Context, c client.WithWatch, key client.ObjectKey, obj client.Object, opts ...client.GetOption) error {
+				if obj.GetObjectKind().GroupVersionKind() == endpoints.InferenceEndpointGVK {
+					reads++
+				}
+				return c.Get(ctx, key, obj, opts...)
+			},
+		})
+		setRunnerEndpoints(runner, inferenceEndpointConfig(false, 8000, nil))
+		Expect(reconcileRunner()).To(Succeed())
+		Expect(reads).To(BeZero())
 	})
 
 	It("updates the spec while preserving unrelated metadata and status", func() {
