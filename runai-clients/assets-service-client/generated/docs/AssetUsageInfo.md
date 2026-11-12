@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 **Trainings** | Pointer to [**[]WorkloadRefAndStatus**](WorkloadRefAndStatus.md) | trainings that rely on this asset. | [optional] 
 **Distributed** | Pointer to [**[]WorkloadRefAndStatus**](WorkloadRefAndStatus.md) | distributed trainings that rely on this asset. | [optional] 
 **Inferences** | Pointer to [**[]WorkloadRefAndStatus**](WorkloadRefAndStatus.md) | inferences that rely on this asset. | [optional] 
-**Templates** | Pointer to [**[]AssetRef**](AssetRef.md) | templates that rely on this asset. | [optional] 
 **Assets** | Pointer to [**AssetsUsageRef**](AssetsUsageRef.md) |  | [optional] 
 **UsedByDataVolumes** | Pointer to **NullableBool** | whether the asset is used by data volumes. | [optional] 
 
@@ -130,31 +129,6 @@ SetInferences sets Inferences field to given value.
 `func (o *AssetUsageInfo) HasInferences() bool`
 
 HasInferences returns a boolean if a field has been set.
-
-### GetTemplates
-
-`func (o *AssetUsageInfo) GetTemplates() []AssetRef`
-
-GetTemplates returns the Templates field if non-nil, zero value otherwise.
-
-### GetTemplatesOk
-
-`func (o *AssetUsageInfo) GetTemplatesOk() (*[]AssetRef, bool)`
-
-GetTemplatesOk returns a tuple with the Templates field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetTemplates
-
-`func (o *AssetUsageInfo) SetTemplates(v []AssetRef)`
-
-SetTemplates sets Templates field to given value.
-
-### HasTemplates
-
-`func (o *AssetUsageInfo) HasTemplates() bool`
-
-HasTemplates returns a boolean if a field has been set.
 
 ### GetAssets
 

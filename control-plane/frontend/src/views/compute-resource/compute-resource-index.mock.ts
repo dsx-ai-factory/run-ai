@@ -139,7 +139,6 @@ export const computeResourceIndexMock = {
       "cpu-cores",
       "cpu-memory",
       "workspaces",
-      "templates",
     ],
     usageInfo: true,
   },

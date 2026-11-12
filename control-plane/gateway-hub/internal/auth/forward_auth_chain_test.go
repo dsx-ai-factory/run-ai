@@ -11,6 +11,8 @@ import (
 	"testing"
 	"time"
 
+	audit "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client"
+	auditconfig "github.com/dsx-ai-factory/run-ai/control-plane/audit-service/pkg/client/config"
 	"github.com/dsx-ai-factory/run-ai/control-plane/gateway-hub/internal/auth"
 	"github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx"
 	runaictxhttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaictx/http"
@@ -162,6 +164,55 @@ func TestForwardAuth_GroupNameContainingComma_RoundTripsThroughRealMiddleware(t 
 	runaictxhttp.ContextMiddleware(next).ServeHTTP(httptest.NewRecorder(), upstream)
 
 	assert.Equal(t, []string{"x%2Crunai-admins"}, gotGroups, "comma in group name must not be split into extra groups")
+}
+
+func TestForwardAuth_AccessKeyClientIdIsAudited(t *testing.T) {
+	kp := generateKeyPair(t)
+	keycloak := keycloakServer(t, "runai", kp)
+	defer keycloak.Close()
+
+	h := auth.NewHandler(keycloak.URL, "")
+	issuer := keycloak.URL + "/realms/runai"
+
+	cases := []struct {
+		name       string
+		extra      map[string]any
+		wantClient string
+	}{
+		{
+			name:       "access key",
+			extra:      map[string]any{"client_id": "app-abc123", "client_type": "access-key"},
+			wantClient: "app-abc123",
+		},
+		{
+			name:       "other service account",
+			extra:      map[string]any{"client_id": "app-abc123", "client_type": "tenant-application"},
+			wantClient: "",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			token, err := kp.signRS256(makeClaims(issuer, "app-abc123", 1, time.Hour, tc.extra))
+			require.NoError(t, err)
+
+			req := httptest.NewRequest(http.MethodGet, "/api/something", nil)
+			req.Header.Set("Authorization", "Bearer "+token)
+
+			allowed, _, upstream := applyForwardAuth(h, req)
+			require.True(t, allowed)
+			assert.Equal(t, tc.wantClient, upstream.Header.Get(auth.HeaderClientId))
+
+			var got string
+			next := http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+				log := audit.NewAuditLog().WithCtx(r.Context())
+				got = log.Log.GetMetadata()[auditconfig.ClientIdMetadataKey]
+			})
+			runaictxhttp.ContextMiddleware(next).ServeHTTP(httptest.NewRecorder(), upstream)
+
+			assert.Equal(t, tc.wantClient, got)
+		})
+	}
 }
 
 func TestForwardAuth_Unauthenticated_Returns401(t *testing.T) {

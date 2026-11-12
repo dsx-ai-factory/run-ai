@@ -1,0 +1,34 @@
+description: DEFAULT fills missing fields and preserves explicitly supplied component and container settings.
+effectiveRules:
+  - field: replicas
+    specSelector: allComponentSpecs
+    enforcements:
+      - default:
+          value: 5
+  - field: type
+    specSelector: allComponentSpecs
+    enforcements:
+      - default:
+          value: decode
+  - field: globalDynamoNamespace
+    specSelector: allComponentSpecs
+    enforcements:
+      - default:
+          value: true
+  - field: image
+    specSelector: allContainers
+    enforcements:
+      - default:
+          value: example/default:test
+  - field: serviceAccountName
+    specSelector: allPodSpecs
+    enforcements:
+      - default:
+          value: inference-sa
+  - field: priorityClassName
+    specSelector: componentPodSpec
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - default:
+          value: medium

@@ -151,7 +151,7 @@ func (s *WorkspacesAPIService) CreateWorkspace(ctx context.Context, workloadCrea
 }
 
 // GetWorkspaceMerged - Get merged workspace
-func (s *WorkspacesAPIService) GetWorkspaceMerged(ctx context.Context, projectId string, workloadId string, templateId string) (ImplResponse, error) {
+func (s *WorkspacesAPIService) GetWorkspaceMerged(ctx context.Context, projectId string, workloadId string) (ImplResponse, error) {
 	// TODO - update GetWorkspaceMerged with the required logic for this service method.
 	// Add api_workspaces_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

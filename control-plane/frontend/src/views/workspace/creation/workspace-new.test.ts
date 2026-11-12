@@ -14,6 +14,8 @@ import { Quasar } from "quasar";
 import { assetService } from "@/services/control-plane/asset.service/asset.service";
 import { loadedWorkspaceMergedWithPolicy } from "./workspace-assets-edit.mock";
 import { WORKSPACE_ROUTE_NAMES } from "@/router/workspace.routes/workspace.routes.names";
+import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
+import { useSettingStore } from "@/stores/setting.store";
 import { useClusterStore } from "@/stores/cluster.store";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
@@ -38,12 +40,15 @@ vi.mock("@/services/infra/unleash.service/unleash.service");
 vi.mock("@/services/control-plane/workload-template.service/workload-template.service");
 
 // Mock the useQuickSubmission composable
-vi.mock("@/composables/use-quick-submission.composable", () => ({
-  useQuickSubmission: vi.fn(() => ({
-    isLoading: { value: false },
-    onQuickSubmit: vi.fn(),
-  })),
-}));
+vi.mock("@/composables/use-quick-submission.composable", async () => {
+  const { ref } = await import("vue");
+  return {
+    useQuickSubmission: vi.fn(() => ({
+      isLoading: ref(false),
+      onQuickSubmit: vi.fn(),
+    })),
+  };
+});
 
 let pinia = createTestingPinia({ createSpy: vi.fn });
 let clusterStore = useClusterStore(pinia);
@@ -83,6 +88,11 @@ describe("workspace-new.vue", () => {
     });
 
     vi.mocked(clusterStore.getClusterById).mockReturnValue(clusters[0]);
+    vi.mocked(workloadTemplateService.workspaceTemplatesList).mockResolvedValue({
+      entries: [],
+      pagination: { limit: 5 },
+    });
+    vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
     vi.mocked(workspaceService.getWorkspaceMergedWithPolicy).mockResolvedValue(loadedWorkspaceMergedWithPolicy);
     vi.mocked(workloadService.canSubmitWorkload).mockReturnValue(null);
     setActivePinia(pinia);
@@ -116,16 +126,19 @@ describe("workspace-new.vue", () => {
   });
 
   test("if a project is not selected template and name sections are hidden", async () => {
-    expect(workspaceNewCmp.find("[aid=template-section]").exists()).toBe(false);
+    expect(workspaceNewCmp.find("[aid=template-section-v2]").exists()).toBe(false);
     expect(workspaceNewCmp.find("[aid=ws-name-section]").exists()).toBe(false);
   });
 
   test("selecting a project will reveal and template and name section", async () => {
+    useSettingStore(pinia).enableHybridSubmission = { value: true };
+    vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(true);
+    await workspaceNewCmp.setData({ selectedClusterId: "test-cluster" });
     await flushPromises();
     const selectedProject = mockData.loadedProjectsMetasV2[0];
     await workspaceNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
     await workspaceNewCmp.vm.$nextTick();
-    expect(workspaceNewCmp.find("[aid=template-section]").exists()).toBe(true);
+    expect(workspaceNewCmp.find("[aid=template-section-v2]").exists()).toBe(true);
     expect(workspaceNewCmp.find("[aid=ws-name-section]").exists()).toBe(true);
   });
 
@@ -151,13 +164,16 @@ describe("workspace-new.vue", () => {
   });
 
   test("updates the templateId in the component data when a new value is emitted by template-section component", async () => {
+    useSettingStore(pinia).enableHybridSubmission = { value: true };
+    vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(true);
+    await workspaceNewCmp.setData({ selectedClusterId: "test-cluster" });
     await flushPromises();
     const selectedProject = mockData.loadedProjectsMetasV2[0];
     await workspaceNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
     await flushPromises();
     expect(workspaceNewCmp.vm.selectedTemplateId).toBe("-1"); // the id for 'Start from scratch' which is automatically selected if there are no templates
     const newTemplateId = "test-id-1";
-    const nameSectionCmp = workspaceNewCmp.findComponent<DefineComponent>("[aid=template-section]");
+    const nameSectionCmp = workspaceNewCmp.findComponent<DefineComponent>("[aid=template-section-v2]");
 
     nameSectionCmp.vm.$emit("template-changed", newTemplateId);
     await workspaceNewCmp.vm.$nextTick();
@@ -206,15 +222,36 @@ describe("workspace-new.vue", () => {
     expect(workspaceNewCmp.vm.$router).toContainEqual(expectedPush);
   });
 
-  describe("Templates V2 Functionality", () => {
+  test.each([
+    { enabled: true, supported: true },
+    { enabled: false, supported: true },
+    { enabled: true, supported: false },
+  ])(
+    "loads flexible templates only when submission is supported ($enabled, $supported)",
+    async ({ enabled, supported }) => {
+      await flushPromises();
+      useSettingStore(pinia).enableHybridSubmission = { value: enabled };
+      vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(supported);
+      await workspaceNewCmp.setData({ selectedClusterId: "compatibility-cluster", selectedProjectId: 123 });
+      const list = vi.fn().mockResolvedValue(undefined);
+      workspaceNewCmp.vm.list = list;
+
+      await workspaceNewCmp.vm.loadTemplates();
+
+      expect(list).toHaveBeenCalledTimes(enabled && supported ? 1 : 0);
+      expect(workspaceNewCmp.find("[aid=template-section-v2]").exists()).toBe(enabled && supported);
+    },
+  );
+
+  describe("Flexible templates", () => {
     beforeEach(() => {
-      Object.defineProperty(workspaceNewCmp.vm, "showTemplatesV2", {
+      Object.defineProperty(workspaceNewCmp.vm, "isHybridSupported", {
         get: () => true,
         configurable: true,
       });
     });
 
-    test("loads flat templates when showTemplatesV2 is true and project is selected", async () => {
+    test("loads flat templates when isHybridSupported is true and project is selected", async () => {
       await flushPromises();
 
       // Mock the flat templates gallery functions
@@ -228,8 +265,8 @@ describe("workspace-new.vue", () => {
       expect(mockList).toHaveBeenCalled();
     });
 
-    test("regular template section is rendered when showTemplatesV2 is false", async () => {
-      Object.defineProperty(workspaceNewCmp.vm, "showTemplatesV2", {
+    test("template selection is hidden when flexible submission is unavailable", async () => {
+      Object.defineProperty(workspaceNewCmp.vm, "isHybridSupported", {
         get: () => false,
         configurable: true,
       });
@@ -239,14 +276,13 @@ describe("workspace-new.vue", () => {
       await workspaceNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click");
       await workspaceNewCmp.vm.$nextTick();
 
-      expect(workspaceNewCmp.find("[aid=template-section]").exists()).toBe(true);
       expect(workspaceNewCmp.find("[aid=template-section-v2]").exists()).toBe(false);
     });
   });
 
   describe("Template Filtering and Loading", () => {
-    test("loadTemplates uses flat templates when showTemplatesV2 is true", async () => {
-      Object.defineProperty(workspaceNewCmp.vm, "showTemplatesV2", {
+    test("loadTemplates uses flat templates when isHybridSupported is true", async () => {
+      Object.defineProperty(workspaceNewCmp.vm, "isHybridSupported", {
         get: () => true,
         configurable: true,
       });
@@ -268,22 +304,19 @@ describe("workspace-new.vue", () => {
       );
     });
 
-    test("loadTemplates uses workload template store when showTemplatesV2 is false", async () => {
-      Object.defineProperty(workspaceNewCmp.vm, "showTemplatesV2", {
+    test("skips template listing when flexible submission is unavailable", async () => {
+      Object.defineProperty(workspaceNewCmp.vm, "isHybridSupported", {
         get: () => false,
         configurable: true,
       });
-
-      const mockLoadWorkloadTemplates = vi.fn();
-      workspaceNewCmp.vm.workloadTemplateStore.loadWorkloadTemplates = mockLoadWorkloadTemplates;
+      const list = vi.fn();
+      workspaceNewCmp.vm.list = list;
       workspaceNewCmp.vm.selectedProjectId = 123;
 
       await workspaceNewCmp.vm.loadTemplates();
 
-      expect(mockLoadWorkloadTemplates).toHaveBeenCalledWith({
-        projectId: 123,
-        isWorkspace: true,
-      });
+      expect(list).not.toHaveBeenCalled();
+      expect(workspaceNewCmp.vm.selectedTemplateId).toBe("-1");
     });
 
     test("onTemplatesListQueryChanged updates query and loads templates", async () => {
@@ -385,23 +418,16 @@ describe("workspace-new.vue", () => {
   describe("Template Selection Integration", () => {
     test("onSelectedTemplate method updates template selection", async () => {
       const templateId = "test-template-123";
-      const mockSetTemplate = vi.fn();
 
-      workspaceNewCmp.vm.workspaceStore.setTemplate = mockSetTemplate;
       workspaceNewCmp.vm.onSelectedTemplate(templateId);
 
       expect(workspaceNewCmp.vm.selectedTemplateId).toBe(templateId);
-      expect(mockSetTemplate).toHaveBeenCalledWith(templateId);
     });
 
     test("onSelectedTemplate handles null template selection", async () => {
-      const mockSetTemplate = vi.fn();
-
-      workspaceNewCmp.vm.workspaceStore.setTemplate = mockSetTemplate;
       workspaceNewCmp.vm.onSelectedTemplate(null);
 
       expect(workspaceNewCmp.vm.selectedTemplateId).toBeNull();
-      expect(mockSetTemplate).toHaveBeenCalledWith(null);
     });
   });
 });

@@ -24,7 +24,7 @@ import (
 const (
 	subjectTypeUser           = "User"
 	subjectTypeServiceAccount = "ServiceAccount"
-	clientTypePersonalApp     = "personal-application"
+	clientTypeAccessKey       = "access-key"
 
 	maxBearerTokenLen = 16 * 1024
 )
@@ -102,7 +102,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func setResponseHeaders(w http.ResponseWriter, ctx context.Context, claims *RunaiClaims, isManagement bool) {
 	clientId := ""
-	if isPersonalApp(claims) {
+	if isAccessKey(claims) {
 		clientId = claims.ClientId
 	}
 
@@ -223,8 +223,8 @@ func subjectType(c *RunaiClaims) string {
 	return subjectTypeUser
 }
 
-func isPersonalApp(c *RunaiClaims) bool {
-	return subjectType(c) == subjectTypeServiceAccount && c.ClientType == clientTypePersonalApp
+func isAccessKey(c *RunaiClaims) bool {
+	return subjectType(c) == subjectTypeServiceAccount && c.ClientType == clientTypeAccessKey
 }
 
 func intSliceToStr(ints []int) string {

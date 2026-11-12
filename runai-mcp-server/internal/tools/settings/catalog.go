@@ -63,7 +63,7 @@ func rw(names ...string) []settingKey {
 }
 
 var categoryDefs = []categoryDef{
-	{catWorkloads, rw("enablePolicies", "workloadSubmissionV2Enabled", "enableTemplatesV2", "enableHybridSubmission", "gpuOverProvisioning", "applicationSubmission")},
+	{catWorkloads, rw("enablePolicies", "workloadSubmissionV2Enabled", "enableHybridSubmission", "gpuOverProvisioning", "applicationSubmission")},
 	{catAuthorization, []settingKey{{"enableScopedAuthorization", true}}},
 	{catCluster, rw("enableAdvancedGpuMetrics")},
 	{catOrgUnit, rw("limitQuotaOverSubscription")},

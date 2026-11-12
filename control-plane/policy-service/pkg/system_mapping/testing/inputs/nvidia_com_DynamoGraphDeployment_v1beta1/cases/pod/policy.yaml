@@ -1,0 +1,28 @@
+description: Apply shared pod settings to every component; target a single component for overrides and metadata.
+effectiveRules:
+  - field: serviceAccountName
+    specSelector: allPodSpecs
+    enforcements:
+      - set:
+          value: inference-sa
+  - field: labels
+    specSelector: allPodMetadata
+    enforcements:
+      - set:
+          key: app
+          value: inference
+  - field: priorityClassName
+    specSelector: componentPodSpec
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - set:
+          value: high-priority
+  - field: annotations
+    specSelector: componentPodMetadata
+    selectorParams:
+      componentName: component-b
+    enforcements:
+      - set:
+          key: example.com/component
+          value: worker-b

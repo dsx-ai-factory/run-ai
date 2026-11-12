@@ -471,8 +471,6 @@ func (ts *TemplatesService) ListTemplatesUnified(ctx context.Context, workloadTy
 		return nil, apiErr
 	}
 
-	migrateAssetTemplatesIfNeeded(ctx, ts.tenantSettingsClient)
-
 	limitParam = setDefaultLimit(limitParam)
 
 	// for list, we need to allow adding filtering for all the org units the user is allowed to see.
