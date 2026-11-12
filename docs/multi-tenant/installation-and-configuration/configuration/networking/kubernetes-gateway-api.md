@@ -236,7 +236,7 @@ spec:
 
 The policy must be in the same namespace as the Gateway. If you are using a different conformant controller, refer to its documentation to enable WebSocket upgrades.
 
-If a `ListenerPolicy` that sets `httpSettings` is already attached to the Gateway, add `upgradeConfig` to that policy instead of creating a new one. KGateway enforces only the first created `ListenerPolicy` that defines the same top-level policy for a Gateway and ignores later ones.
+If a `ListenerPolicy` that sets `httpSettings` is already attached to the Gateway, add `upgradeConfig` to that policy instead of creating a new one. KGateway enforces only the first created `ListenerPolicy` that defines the same top-level policy for a Gateway and ignores later ones. If that policy has a `perPort` entry for a port that serves the UI, such as 443, also add `upgradeConfig` to that entry's `listener.httpSettings`. A `perPort` entry replaces `default` for that port, so it does not inherit `upgradeConfig` from `default`.
 
 <Note>
 
