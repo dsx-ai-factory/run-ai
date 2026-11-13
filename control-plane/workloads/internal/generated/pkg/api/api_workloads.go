@@ -333,7 +333,7 @@ func (c *WorkloadsAPIController) Routes() Routes {
 					return c.authorizationClient.AuthorizeMiddleware(
 						next,
 						"workloads",
-						"update",
+						"sync",
 						true,
 						"workloadId",
 					)
