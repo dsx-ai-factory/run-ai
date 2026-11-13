@@ -9,6 +9,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -42,31 +43,21 @@ func RunCommandWithContext(ctx context.Context, command string, env map[string]s
 	config.GetInstance().Reload()
 	settings.GetInstance().Reload()
 
-	cmdSplit := strings.Split(command, " ")
-	os.Args = []string{}
-	os.Args = append(os.Args, cmdSplit...)
-	cmd := runaicli.RootCmd.Root()
+	// One buffer for both streams keeps the chronological interleaving legacy callers expect.
 	actual := new(bytes.Buffer)
-	cmd.SetArgs(cmdSplit)
-	cmd.SetOut(actual)
-	cmd.SetErr(actual)
-
-	// staring from root command resetting each flags for each subcommand.
-	resetCmd := runaicli.RootCmd.Root()
-	commandList := resetCmd.Commands()
-	resetSubCommandFlags(resetCmd)
-	resetCommandFlags(commandList, cmdSplit)
-
-	closer := tempEnvironmentSetter(env)
-	defer closer()
-
-	_, err := cmd.ExecuteContextC(ctx)
-
-	cmd.SetOut(nil)
-	cmd.SetErr(nil)
-
-	// TODO have a func that separate the stdout and errors
+	err := executeCommand(ctx, strings.Split(command, " "), env, actual, actual)
 	return actual.String(), err
+}
+
+// RunCommandSeparate is like RunCommandWithContext but captures stdout and stderr
+// independently, so tests can assert which stream a message went to.
+func RunCommandSeparate(ctx context.Context, command string, env map[string]string) (stdout, stderr string, err error) {
+	config.GetInstance().Reload()
+	settings.GetInstance().Reload()
+
+	outBuf, errBuf := new(bytes.Buffer), new(bytes.Buffer)
+	err = executeCommand(ctx, strings.Split(command, " "), env, outBuf, errBuf)
+	return outBuf.String(), errBuf.String(), err
 }
 
 func RunCommand(command string, env map[string]string) (string, error) {
@@ -74,19 +65,23 @@ func RunCommand(command string, env map[string]string) (string, error) {
 }
 
 func RunCommandStringSplit(ctx context.Context, command []string, env map[string]string) (string, error) {
-	os.Args = []string{}
-	os.Args = command
-	cmd := runaicli.RootCmd.Root()
 	actual := new(bytes.Buffer)
-	cmd.SetArgs(command)
-	cmd.SetOut(actual)
-	cmd.SetErr(actual)
+	err := executeCommand(ctx, command, env, actual, actual)
+	return actual.String(), err
+}
 
-	// staring from root command resetting each flags for each subcommand.
-	resetCmd := runaicli.RootCmd.Root()
-	commandList := resetCmd.Commands()
-	resetSubCommandFlags(resetCmd)
-	resetCommandFlags(commandList, command)
+// executeCommand runs the root command with args, resetting flag state left over
+// from previous tests and applying env only for the duration of the call.
+func executeCommand(ctx context.Context, args []string, env map[string]string, stdout, stderr io.Writer) error {
+	os.Args = append([]string{}, args...)
+	cmd := runaicli.RootCmd.Root()
+	cmd.SetArgs(args)
+	cmd.SetOut(stdout)
+	cmd.SetErr(stderr)
+
+	// starting from root command resetting each flags for each subcommand.
+	resetSubCommandFlags(cmd)
+	resetCommandFlags(cmd.Commands(), args)
 
 	closer := tempEnvironmentSetter(env)
 	defer closer()
@@ -96,8 +91,7 @@ func RunCommandStringSplit(ctx context.Context, command []string, env map[string
 	cmd.SetOut(nil)
 	cmd.SetErr(nil)
 
-	// TODO have a func that separate the stdout and errors
-	return actual.String(), err
+	return err
 }
 
 // resetCommandFlags known issue with CLI with unit tests
