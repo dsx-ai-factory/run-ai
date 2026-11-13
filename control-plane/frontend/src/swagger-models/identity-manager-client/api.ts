@@ -1503,9 +1503,9 @@ export interface RealmReconcileRequest {
 export const ReconcilerType = {
     Realms: 'realms',
     Clients: 'clients',
-    Apps: 'apps',
-    InternalApps: 'internalApps',
-    UserApps: 'userApps',
+    ServiceAccounts: 'serviceAccounts',
+    InternalServiceAccounts: 'internalServiceAccounts',
+    AccessKeys: 'accessKeys',
     WorkloadAuth: 'workloadAuth'
 } as const;
 

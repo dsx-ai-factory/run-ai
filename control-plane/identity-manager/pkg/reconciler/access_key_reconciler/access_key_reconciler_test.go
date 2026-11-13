@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-package app_reconciler_by_type
+package access_key_reconciler
 
 import (
 	"context"
@@ -28,17 +28,17 @@ const (
 	testRealm    = "test-realm"
 )
 
-func initTest(t *testing.T) (*iamMock.MockServicesContainer, *reconciler_mocks.TenantResolver, *dal_mocks.ReconcilerVersionsDal, *AppsReconciler) {
+func initTest(t *testing.T) (*iamMock.MockServicesContainer, *reconciler_mocks.TenantResolver, *dal_mocks.ReconcilerVersionsDal, *AccessKeysReconciler) {
 	mockContainer := iamMock.NewMockServicesContainer()
 	tenantResolverMock := reconciler_mocks.NewTenantResolver(t)
 	versionsDalMock := dal_mocks.NewReconcilerVersionsDal(t)
 
-	subject := &AppsReconciler{
+	subject := &AccessKeysReconciler{
 		iamServices:           *mockContainer.ToServicesContainer(),
 		tenantResolver:        tenantResolverMock,
 		reconcilerVersionsDal: versionsDalMock,
 		version:               testVersion,
-		config: AppsReconcilerConfig{
+		config: AccessKeysReconcilerConfig{
 			hostTemplate: "example-host.com",
 			appHost:      "example-app-host.com",
 		},

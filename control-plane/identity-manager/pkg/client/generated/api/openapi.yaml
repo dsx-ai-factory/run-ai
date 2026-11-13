@@ -7226,9 +7226,9 @@ components:
       enum:
       - realms
       - clients
-      - apps
-      - internalApps
-      - userApps
+      - serviceAccounts
+      - internalServiceAccounts
+      - accessKeys
       - workloadAuth
       nullable: true
       type: string

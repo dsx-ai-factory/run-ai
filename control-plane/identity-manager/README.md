@@ -34,8 +34,8 @@ The service is responsible for:
   refresh, and logout.
 
 It also runs **reconcilers** that bring Keycloak state in line with the desired
-state stored in the service's own database (realms, clients, apps, internal
-apps, user apps, workload auth).
+state stored in the service's own database (realms, clients, service accounts,
+internal service accounts, access keys, workload auth).
 
 The API surface is described in [`swagger/source/openapi.yaml`](swagger/source/openapi.yaml)
 and bundled into [`swagger/_build/swagger.yaml`](swagger/_build/swagger.yaml).
@@ -54,7 +54,7 @@ and bundled into [`swagger/_build/swagger.yaml`](swagger/_build/swagger.yaml).
 │   ├── models/                # Domain models
 │   ├── pubsub/                # Pub/sub integration
 │   ├── realm/                 # Realm-related abstractions
-│   ├── reconciler/            # Reconcilers (realms, clients, apps, …)
+│   ├── reconciler/            # Reconcilers (realms, clients, service accounts, …)
 │   ├── router/                # HTTP router wiring
 │   ├── services/              # API service implementations
 │   ├── settings/              # Typed setting definitions

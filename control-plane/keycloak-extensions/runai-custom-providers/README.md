@@ -30,7 +30,7 @@ Run tests:
 | `runai-oidc-user-attribute-idp-mapper` | Identity Provider Mapper | Maps an OIDC claim (string, list, or map) to a Keycloak user attribute |
 | `runai-oidc-custom-groups-mapper` | OIDC Protocol Mapper | Emits a token claim containing the user's local groups, with optional intersection against an external authorization service |
 | `runai-counter-mapper` | OIDC Protocol Mapper | Emits a token claim containing the count of a user attribute list |
-| `runai-user-app-attribute-mapper` | OIDC Protocol Mapper | For service-account tokens: resolves the real user via `runai.created.by` and emits one of their attributes (groups, uid, gid, supplementarygroups, ...) |
+| `runai-access-key-attribute-mapper` | OIDC Protocol Mapper | For service-account tokens: resolves the real user via `runai.created.by` and emits one of their attributes (groups, uid, gid, supplementarygroups, ...) |
 | `last-login-event` | Event Listener | Records `runai.login.time` on users and clients after every login |
 | `password-audit-event` | Event Listener | Posts an audit log entry to the audit service whenever a user resets or sets their password |
 | `runaienteties` | Admin REST Resource | Adds a paginated, filterable, sortable `/admin/realms/{realm}/runaienteties/users` endpoint |
@@ -109,7 +109,7 @@ If the attribute is absent or empty, the claim is **not added** to the token —
 
 ---
 
-### UserAppsMapper (`runai-user-app-attribute-mapper`)
+### AccessKeyMapper (`runai-access-key-attribute-mapper`)
 
 Designed for **service-account tokens**. A service account in Run:ai represents an application created on behalf of a real user. This mapper reads the `runai.created.by` attribute on the OIDC client to find the real user, then copies a configurable attribute of that user (e.g. groups, uid, gid, supplementarygroups) into the token — with the same optional intersection logic as `CustomGroupsMapper` when mapping groups.
 
@@ -125,7 +125,7 @@ Skips non-service-account sessions with a `WARN` log.
 | `groups.user.attribute` | Yes | — | User attribute to copy from the real user (e.g. `GROUPS`, `UID`, `GID`, `SUPPLEMENTARYGROUPS`) |
 | `multivalued` | No | `true` | If `true`, emits the claim as a list; if `false`, emits only the first value as a scalar string |
 | `groups.intersection.enabled` | No | `true` | Intersect with external groups when count > 10 (only meaningful when mapping groups) |
-| Token claim name | No | `user_app_groups` | Name of the claim written to the token |
+| Token claim name | No | `access_key_groups` | Name of the claim written to the token |
 
 **Error handling:** when fetching external groups fails, the exception is caught and an empty list/empty scalar is emitted instead of aborting token issuance (contrast with `CustomGroupsMapper`, which propagates a 500).
 
@@ -242,7 +242,7 @@ Service-account users and users without an email address are excluded from resul
 
 ### Authorization service
 
-`CustomGroupsMapper` and `UserAppsMapper` call the Run:ai authorization service to fetch the list of known groups when performing intersection.
+`CustomGroupsMapper` and `AccessKeyMapper` call the Run:ai authorization service to fetch the list of known groups when performing intersection.
 
 | Variable | Default | Description |
 |---|---|---|
