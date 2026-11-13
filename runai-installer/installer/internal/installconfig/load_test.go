@@ -163,3 +163,39 @@ cluster:
 	assert.Equal(t, "/etc/runai/cp-password", cfg.Cluster.ControlPlaneCredentials.PasswordPath)
 	assert.Empty(t, cfg.Cluster.UID)
 }
+
+func TestLoad_ExtraDocumentRejected(t *testing.T) {
+	cases := map[string]string{
+		"mapping":        "{}\n---\nunexpectedField: true\n",
+		"scalar":         "{}\n---\nhello\n",
+		"explicit null":  "{}\n---\nnull\n",
+		"tilde null":     "{}\n---\n~\n",
+		"malformed yaml": "{}\n---\nfoo: [\n",
+	}
+	for name, contents := range cases {
+		t.Run(name, func(t *testing.T) {
+			path := writeConfig(t, contents)
+			_, err := Load(path)
+			require.Error(t, err)
+			assert.Contains(t, err.Error(), path)
+		})
+	}
+}
+
+func TestLoad_TrailingEmptyDocumentsAccepted(t *testing.T) {
+	cases := map[string]string{
+		"single document":        "install:\n  mode: full_installation\n",
+		"trailing separator":     "install:\n  mode: full_installation\n---\n",
+		"trailing comment":       "install:\n  mode: full_installation\n# done\n",
+		"comment-only document":  "install:\n  mode: full_installation\n---\n# nothing here\n",
+		"several empty trailers": "install:\n  mode: full_installation\n---\n---\n# end\n",
+		"document end marker":    "install:\n  mode: full_installation\n...\n",
+	}
+	for name, contents := range cases {
+		t.Run(name, func(t *testing.T) {
+			cfg, err := Load(writeConfig(t, contents))
+			require.NoError(t, err)
+			assert.Equal(t, "full_installation", cfg.Install.Mode)
+		})
+	}
+}
