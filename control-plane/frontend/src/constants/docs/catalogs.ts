@@ -33,7 +33,7 @@ export const DOCS_CATALOG_V1 = {
   policies: "platform-management/policies/policies-and-rules",
   schedulingRules: "platform-management/policies/scheduling-rules",
   schedulingConcepts: "platform-management/runai-scheduler/scheduling/concepts-and-principles",
-  dynamicFractions: "platform-management/runai-scheduler/resource-optimization/dynamic-fractions",
+  dynamicFractions: "platform-management/runai-scheduler/resource-optimization/gpu-fractions/dynamic-memory-fractions",
   nodePools: "platform-management/aiinitiatives/resources/node-pools",
   reports: "platform-management/monitor-performance/reports",
   dataVolumes: "workloads-in-nvidia-run-ai/assets/data-volumes",
