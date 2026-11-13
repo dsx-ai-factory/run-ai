@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -30,6 +31,11 @@ const (
 	numberOfDevicesAnnotationName     = "gpu-fraction-num-devices"
 
 	receivedResourceTypeAnnotationName = "received-resource-type"
+
+	cdiContainerAnnotationPrefix      = "nvidia.cdi.k8s.io/container."
+	runaiGpuVisibleDevicesPrefix      = "run.ai/gpu-visible-devices-"
+	nvfractionsContainerDevicesPrefix = "nvidia.com/container."
+	nvfractionsContainerDevicesSuffix = ".gpus.devices"
 
 	unknownDevice                 = "unknown"
 	nodeSchedulerControlledDevice = "all"
@@ -308,8 +314,72 @@ func (pe *PodExporter) extractGPUIndex() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if nvidiaVisibleDevicesValue != "" {
+		return nvidiaVisibleDevicesValue, nil
+	}
 
-	return nvidiaVisibleDevicesValue, nil
+	return pe.extractGPUIndexFromAnnotations(), nil
+}
+
+// extractGPUIndexFromAnnotations extracts the GPU device identifier from
+// container-scoped pod annotations written by CDI, Run:AI, or nvfractions.
+// When the pod declares named containers, only annotations matching those
+// container names are considered; the sorted key-prefix scan is used only
+// when no container in the pod has a non-empty name.
+func (pe *PodExporter) extractGPUIndexFromAnnotations() string {
+	if len(pe.pod.Annotations) == 0 {
+		return ""
+	}
+
+	containers := make([]v1.Container, 0, len(pe.pod.Spec.Containers)+len(pe.pod.Spec.InitContainers))
+	containers = append(containers, pe.pod.Spec.Containers...)
+	containers = append(containers, pe.pod.Spec.InitContainers...)
+
+	hasNamedContainer := false
+	for _, container := range containers {
+		if container.Name == "" {
+			continue
+		}
+		hasNamedContainer = true
+		for _, key := range []string{
+			cdiContainerAnnotationPrefix + container.Name,
+			runaiGpuVisibleDevicesPrefix + container.Name,
+			nvfractionsContainerDevicesPrefix + container.Name + nvfractionsContainerDevicesSuffix,
+		} {
+			if val := strings.TrimSpace(pe.pod.Annotations[key]); val != "" {
+				return val
+			}
+		}
+	}
+
+	if hasNamedContainer {
+		return ""
+	}
+
+	keys := make([]string, 0, len(pe.pod.Annotations))
+	for k := range pe.pod.Annotations {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, match := range []func(string) bool{
+		func(k string) bool { return strings.HasPrefix(k, cdiContainerAnnotationPrefix) },
+		func(k string) bool { return strings.HasPrefix(k, runaiGpuVisibleDevicesPrefix) },
+		func(k string) bool {
+			return strings.HasPrefix(k, nvfractionsContainerDevicesPrefix) &&
+				strings.HasSuffix(k, nvfractionsContainerDevicesSuffix)
+		},
+	} {
+		for _, k := range keys {
+			if match(k) {
+				if val := strings.TrimSpace(pe.pod.Annotations[k]); val != "" {
+					return val
+				}
+			}
+		}
+	}
+
+	return ""
 }
 
 func (pe *PodExporter) extractGPUIndexFromEnv() (string, error) {
