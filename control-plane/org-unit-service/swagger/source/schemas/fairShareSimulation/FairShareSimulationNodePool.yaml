@@ -1,0 +1,12 @@
+type: object
+description: The node pool as it is in the form.
+required:
+  - capacity
+  - schedulingCapabilities
+properties:
+  capacity:
+    description: GPUs to split. 0 is valid; quotas are still granted, as the scheduler does, and nothing is given above them.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  schedulingCapabilities:
+    $ref: "./FairShareSimulationSchedulingCapabilities.yaml"

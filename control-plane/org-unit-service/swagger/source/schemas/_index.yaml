@@ -200,3 +200,21 @@ ProjectNodePoolResourcesFilterSortFields:
   $ref: "./nodePoolResources/ProjectNodePoolResourcesFilterSortFields.yaml"
 SumResponse:
   $ref: "./nodePoolResources/SumResponse.yaml"
+FairShareSimulationRequest:
+  $ref: "./fairShareSimulation/FairShareSimulationRequest.yaml"
+FairShareSimulationSchedulingCapabilities:
+  $ref: "./fairShareSimulation/FairShareSimulationSchedulingCapabilities.yaml"
+FairShareSimulationOrgUnit:
+  $ref: "./fairShareSimulation/FairShareSimulationOrgUnit.yaml"
+FairShareSimulationGpuSettings:
+  $ref: "./fairShareSimulation/FairShareSimulationGpuSettings.yaml"
+FairShareSimulationNodePool:
+  $ref: "./fairShareSimulation/FairShareSimulationNodePool.yaml"
+FairShareSimulationAssumptions:
+  $ref: "./fairShareSimulation/FairShareSimulationAssumptions.yaml"
+FairShareSimulationResponse:
+  $ref: "./fairShareSimulation/FairShareSimulationResponse.yaml"
+FairShareSimulationResult:
+  $ref: "./fairShareSimulation/FairShareSimulationResult.yaml"
+FairShareSimulationResources:
+  $ref: "./fairShareSimulation/FairShareSimulationResources.yaml"

@@ -5339,6 +5339,91 @@ paths:
       x-test-coverage:
       - control-plane/org-unit-service/pkg/test/node_pool_resources_api_test.go
     x-internal: true
+  /api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation:
+    post:
+      description: |
+        Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
+        scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation
+        covers every department and project of the node pool, including ones the caller can't read; the response holds only
+        the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand.
+        Nothing is saved. The same scenario gives the same result for every caller.
+      operationId: simulate_node_pool_fair_share
+      parameters:
+      - description: The unique id identifying the Node Pool.
+        explode: false
+        in: path
+        name: nodepoolId
+        required: true
+        schema:
+          example: "17"
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FairShareSimulationRequest'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FairShareSimulationResponse'
+          description: The simulated fair share of each requested org unit.
+        "400":
+          content:
+            application/json:
+              example:
+                code: 400
+                message: Required parameter is missing
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request.
+        "401":
+          content:
+            application/json:
+              example:
+                code: 401
+                message: Issuer is not familiar.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "403":
+          content:
+            application/json:
+              example:
+                code: 403
+                message: You do not have sufficient permissions.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                code: 404
+                message: Resource id not found.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: The specified resource was not found
+        "503":
+          content:
+            application/json:
+              example:
+                code: 503
+                message: Please try again in few minutes.
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: unexpected error
+      summary: Simulate the fair share of a node pool's org units
+      tags:
+      - Org unit
+      x-service: org-unit-service
+      x-no-authorization: true
+      x-test-coverage:
+      - control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
+    x-internal: true
   /api/v1/org-unit/projects/node-pool-resources:
     get:
       description: List projects node pool resources
@@ -10707,6 +10792,304 @@ components:
       required:
       - deservedSum
       - weightsSum
+      type: object
+    FairShareSimulationResources:
+      properties:
+        gpu:
+          example: 4
+          format: double
+          type: number
+      required:
+      - gpu
+      type: object
+    FairShareSimulationSchedulingCapabilities:
+      description: The node pool's scheduling capabilities to simulate. Defaults to
+        the node pool's saved capabilities.
+      example:
+        adjustableWeights: true
+        ranks: true
+        quota: true
+        limits: true
+      properties:
+        quota:
+          type: boolean
+        ranks:
+          type: boolean
+        adjustableWeights:
+          type: boolean
+        limits:
+          description: Whether GPU limits apply. Only allowed when quota is true.
+          type: boolean
+      required:
+      - adjustableWeights
+      - limits
+      - quota
+      - ranks
+      type: object
+    FairShareSimulationNodePool:
+      description: The node pool as it is in the form.
+      example:
+        schedulingCapabilities:
+          adjustableWeights: true
+          ranks: true
+          quota: true
+          limits: true
+        capacity: ""
+      properties:
+        capacity:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: "GPUs to split. 0 is valid; quotas are still granted, as the\
+            \ scheduler does, and nothing is given above them."
+        schedulingCapabilities:
+          $ref: '#/components/schemas/FairShareSimulationSchedulingCapabilities'
+      required:
+      - capacity
+      - schedulingCapabilities
+      type: object
+    FairShareSimulationAssumptions:
+      description: What the simulation assumes about org units the user didn't set.
+      example:
+        defaultDemand: ""
+        focusDepartmentId: "4500014"
+        otherDepartments: default
+      properties:
+        defaultDemand:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: |
+            GPUs every org unit without a demand in the request asks for, capped by its limit. The node pool form sends
+            half the node pool's capacity. In the node pool form it is also a department's demand; in the department and
+            project forms a department asks for the sum of its projects' demand.
+        otherDepartments:
+          description: |
+            What departments other than focusDepartmentId ask for. `default`: the default demand. `idle`: nothing, so the
+            focus department can take the whole node pool up to its limit. The department and project forms send `idle`
+            and say so in a footnote.
+          enum:
+          - default
+          - idle
+          type: string
+        focusDepartmentId:
+          description: |
+            The department the requested org units belong to. Required with `idle` and when orgUnitType is project; the
+            requested org units must belong to it.
+          example: "4500014"
+          nullable: true
+          type: string
+      required:
+      - defaultDemand
+      - otherDepartments
+      type: object
+    FairShareSimulationGpuSettings:
+      description: GPU settings that replace the stored ones. Omitted or null fields
+        keep their stored values.
+      properties:
+        deserved:
+          description: The GPU quota; -1 means unlimited.
+          example: 4
+          format: double
+          nullable: true
+          type: number
+        limit:
+          description: The maximum GPU allocation; -1 means unlimited. Only while
+            limits is on.
+          example: -1
+          format: double
+          nullable: true
+          type: number
+        overQuotaWeight:
+          example: 2
+          format: double
+          nullable: true
+          type: number
+      type: object
+    FairShareSimulationOrgUnit:
+      description: A requested org unit. Each field replaces the stored value on its
+        own; omitted fields keep it.
+      example:
+        rank: High
+        id: "4500014"
+        gpu: "{}"
+        demand: "{}"
+      properties:
+        id:
+          example: "4500014"
+          type: string
+        rank:
+          description: Highest … Lowest. Only while ranks is on.
+          example: High
+          nullable: true
+          type: string
+        gpu:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
+          nullable: true
+          type: object
+        demand:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: "GPUs the org unit asks for (the dragged slider). Above the\
+            \ limit it is capped. Without it, the default demand."
+          nullable: true
+          type: object
+      required:
+      - id
+      type: object
+    FairShareSimulationRequest:
+      description: |
+        A scenario to simulate. The node pool values and the assumptions are always sent, so the result never depends on
+        what is saved or on who is asking.
+      example:
+        nodePool:
+          schedulingCapabilities:
+            adjustableWeights: true
+            ranks: true
+            quota: true
+            limits: true
+          capacity: ""
+        orgUnits:
+        - rank: High
+          id: "4500014"
+          gpu: "{}"
+          demand: "{}"
+        - rank: High
+          id: "4500014"
+          gpu: "{}"
+          demand: "{}"
+        - rank: High
+          id: "4500014"
+          gpu: "{}"
+          demand: "{}"
+        - rank: High
+          id: "4500014"
+          gpu: "{}"
+          demand: "{}"
+        - rank: High
+          id: "4500014"
+          gpu: "{}"
+          demand: "{}"
+        orgUnitType: department
+        assumptions:
+          defaultDemand: ""
+          focusDepartmentId: "4500014"
+          otherDepartments: default
+      properties:
+        nodePool:
+          $ref: '#/components/schemas/FairShareSimulationNodePool'
+        assumptions:
+          $ref: '#/components/schemas/FairShareSimulationAssumptions'
+        orgUnitType:
+          description: The type of the requested org units. One type per request.
+          enum:
+          - department
+          - project
+          type: string
+        orgUnits:
+          description: "The org units to return, with their unsaved changes. Send\
+            \ the rows the screen shows."
+          items:
+            $ref: '#/components/schemas/FairShareSimulationOrgUnit'
+          maxItems: 500
+          minItems: 1
+          type: array
+      required:
+      - assumptions
+      - nodePool
+      - orgUnitType
+      - orgUnits
+      type: object
+    FairShareSimulationResult:
+      description: "Values may be fractional, as in the scheduler; the client rounds."
+      example:
+        fairShare: ""
+        overQuota: ""
+        unmet: ""
+        guaranteed: ""
+        weightShareInRank: 0.25
+        id: "4500014"
+        demand: ""
+      properties:
+        id:
+          example: "4500014"
+          type: string
+        demand:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: "The GPUs the org unit asked for in this scenario, after the\
+            \ default and the limit were applied."
+        fairShare:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: "GPUs the scheduler would give the org unit, the sum of guaranteed\
+            \ and overQuota."
+        guaranteed:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: The part of the fair share within the org unit's quota.
+        overQuota:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: The part of the fair share above the org unit's quota.
+        unmet:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: demand minus fairShare.
+        weightShareInRank:
+          description: "The org unit's over-quota weight divided by the total weight\
+            \ of its rank among its siblings, including ones the caller can't read.\
+            \ With ranks off, among all siblings."
+          example: 0.25
+          format: double
+          type: number
+      required:
+      - demand
+      - fairShare
+      - guaranteed
+      - id
+      - overQuota
+      - unmet
+      - weightShareInRank
+      type: object
+    FairShareSimulationResponse:
+      example:
+        parent: ""
+        orgUnits:
+        - fairShare: ""
+          overQuota: ""
+          unmet: ""
+          guaranteed: ""
+          weightShareInRank: 0.25
+          id: "4500014"
+          demand: ""
+        - fairShare: ""
+          overQuota: ""
+          unmet: ""
+          guaranteed: ""
+          weightShareInRank: 0.25
+          id: "4500014"
+          demand: ""
+        capacity: ""
+      properties:
+        capacity:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResources'
+          description: The GPUs the simulation split.
+        parent:
+          allOf:
+          - $ref: '#/components/schemas/FairShareSimulationResult'
+          description: |
+            When the requested org units are projects: their department's own result. Null when the caller can't read the
+            department.
+          nullable: true
+        orgUnits:
+          description: "One result per requested org unit, in the request's order."
+          items:
+            $ref: '#/components/schemas/FairShareSimulationResult'
+          type: array
+      required:
+      - capacity
+      - orgUnits
       type: object
     ProjectNodePoolResourcesFilterSortFields:
       enum:

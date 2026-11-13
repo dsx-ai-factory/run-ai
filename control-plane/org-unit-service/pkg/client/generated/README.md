@@ -117,6 +117,7 @@ Class | Method | HTTP request | Description
 *OrgUnitAPI* | [**GetRanks**](docs/OrgUnitAPI.md#getranks) | **Get** /api/v1/org-unit/ranks | Get ranks
 *OrgUnitAPI* | [**NodePoolResetResources**](docs/OrgUnitAPI.md#nodepoolresetresources) | **Post** /internal/org-unit/node-pools/resources/reset | Reset resources of a specific nodepool for all departments and projects in the cluster.
 *OrgUnitAPI* | [**OrgsNodePoolSummary**](docs/OrgUnitAPI.md#orgsnodepoolsummary) | **Get** /internal/org-unit/node-pools/{nodepoolId}/summary | Get org units summary per nodepool
+*OrgUnitAPI* | [**SimulateNodePoolFairShare**](docs/OrgUnitAPI.md#simulatenodepoolfairshare) | **Post** /api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation | Simulate the fair share of a node pool&#39;s org units
 *OrgUnitAPI* | [**UpdateOrgUnitSettings**](docs/OrgUnitAPI.md#updateorgunitsettings) | **Post** /internal/org-unit/settings | 
 *ProjectsAPI* | [**BatchPatchProjectNodePoolResources**](docs/ProjectsAPI.md#batchpatchprojectnodepoolresources) | **Post** /api/v1/org-unit/projects/node-pool-resources/batch-patch | Patch multiple projects node pool resources in batch.
 *ProjectsAPI* | [**CountInternalProjects**](docs/ProjectsAPI.md#countinternalprojects) | **Get** /internal/org-unit/projects/count | Count internal projects
@@ -217,6 +218,15 @@ Class | Method | HTTP request | Description
  - [DeservedResource](docs/DeservedResource.md)
  - [Error](docs/Error.md)
  - [FailedNodePoolResourcesPatchRequest](docs/FailedNodePoolResourcesPatchRequest.md)
+ - [FairShareSimulationAssumptions](docs/FairShareSimulationAssumptions.md)
+ - [FairShareSimulationGpuSettings](docs/FairShareSimulationGpuSettings.md)
+ - [FairShareSimulationNodePool](docs/FairShareSimulationNodePool.md)
+ - [FairShareSimulationOrgUnit](docs/FairShareSimulationOrgUnit.md)
+ - [FairShareSimulationRequest](docs/FairShareSimulationRequest.md)
+ - [FairShareSimulationResources](docs/FairShareSimulationResources.md)
+ - [FairShareSimulationResponse](docs/FairShareSimulationResponse.md)
+ - [FairShareSimulationResult](docs/FairShareSimulationResult.md)
+ - [FairShareSimulationSchedulingCapabilities](docs/FairShareSimulationSchedulingCapabilities.md)
  - [GetDepartmentNodePoolResources200Response](docs/GetDepartmentNodePoolResources200Response.md)
  - [GetDepartments200Response](docs/GetDepartments200Response.md)
  - [GetDepartmentsRanking200Response](docs/GetDepartmentsRanking200Response.md)

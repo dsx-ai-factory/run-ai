@@ -11,6 +11,7 @@ Method | HTTP request | Description
 [**GetRanks**](OrgUnitAPI.md#GetRanks) | **Get** /api/v1/org-unit/ranks | Get ranks
 [**NodePoolResetResources**](OrgUnitAPI.md#NodePoolResetResources) | **Post** /internal/org-unit/node-pools/resources/reset | Reset resources of a specific nodepool for all departments and projects in the cluster.
 [**OrgsNodePoolSummary**](OrgUnitAPI.md#OrgsNodePoolSummary) | **Get** /internal/org-unit/node-pools/{nodepoolId}/summary | Get org units summary per nodepool
+[**SimulateNodePoolFairShare**](OrgUnitAPI.md#SimulateNodePoolFairShare) | **Post** /api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation | Simulate the fair share of a node pool&#39;s org units
 [**UpdateOrgUnitSettings**](OrgUnitAPI.md#UpdateOrgUnitSettings) | **Post** /internal/org-unit/settings | 
 
 
@@ -452,6 +453,78 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
 - **Content-Type**: Not defined
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## SimulateNodePoolFairShare
+
+> FairShareSimulationResponse SimulateNodePoolFairShare(ctx, nodepoolId).FairShareSimulationRequest(fairShareSimulationRequest).Execute()
+
+Simulate the fair share of a node pool's org units
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/dsx-ai-factory/run-ai/control-plane/org-unit-service/pkg/client"
+)
+
+func main() {
+	nodepoolId := "17" // string | The unique id identifying the Node Pool.
+	fairShareSimulationRequest := *openapiclient.NewFairShareSimulationRequest(*openapiclient.NewFairShareSimulationNodePool(*openapiclient.NewFairShareSimulationResources(float64(4)), *openapiclient.NewFairShareSimulationSchedulingCapabilities(false, false, false, false)), *openapiclient.NewFairShareSimulationAssumptions(*openapiclient.NewFairShareSimulationResources(float64(4)), "OtherDepartments_example"), "OrgUnitType_example", []openapiclient.FairShareSimulationOrgUnit{*openapiclient.NewFairShareSimulationOrgUnit("4500014")}) // FairShareSimulationRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.OrgUnitAPI.SimulateNodePoolFairShare(context.Background(), nodepoolId).FairShareSimulationRequest(fairShareSimulationRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `OrgUnitAPI.SimulateNodePoolFairShare``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `SimulateNodePoolFairShare`: FairShareSimulationResponse
+	fmt.Fprintf(os.Stdout, "Response from `OrgUnitAPI.SimulateNodePoolFairShare`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+**ctx** | **context.Context** | context for authentication, logging, cancellation, deadlines, tracing, etc.
+**nodepoolId** | **string** | The unique id identifying the Node Pool. | 
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiSimulateNodePoolFairShareRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+
+ **fairShareSimulationRequest** | [**FairShareSimulationRequest**](FairShareSimulationRequest.md) |  | 
+
+### Return type
+
+[**FairShareSimulationResponse**](FairShareSimulationResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
 - **Accept**: application/json
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)

@@ -1,0 +1,39 @@
+type: object
+description: Values may be fractional, as in the scheduler; the client rounds.
+required:
+  - id
+  - demand
+  - fairShare
+  - guaranteed
+  - overQuota
+  - unmet
+  - weightShareInRank
+properties:
+  id:
+    type: string
+    example: "4500014"
+  demand:
+    description: The GPUs the org unit asked for in this scenario, after the default and the limit were applied.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  fairShare:
+    description: GPUs the scheduler would give the org unit, the sum of guaranteed and overQuota.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  guaranteed:
+    description: The part of the fair share within the org unit's quota.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  overQuota:
+    description: The part of the fair share above the org unit's quota.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  unmet:
+    description: demand minus fairShare.
+    allOf:
+      - $ref: "./FairShareSimulationResources.yaml"
+  weightShareInRank:
+    type: number
+    format: double
+    description: The org unit's over-quota weight divided by the total weight of its rank among its siblings, including ones the caller can't read. With ranks off, among all siblings.
+    example: 0.25

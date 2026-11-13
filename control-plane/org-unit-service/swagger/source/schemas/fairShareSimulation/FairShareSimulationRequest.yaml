@@ -1,0 +1,27 @@
+type: object
+description: |
+  A scenario to simulate. The node pool values and the assumptions are always sent, so the result never depends on
+  what is saved or on who is asking.
+required:
+  - nodePool
+  - assumptions
+  - orgUnitType
+  - orgUnits
+properties:
+  nodePool:
+    $ref: "./FairShareSimulationNodePool.yaml"
+  assumptions:
+    $ref: "./FairShareSimulationAssumptions.yaml"
+  orgUnitType:
+    type: string
+    description: The type of the requested org units. One type per request.
+    enum:
+      - department
+      - project
+  orgUnits:
+    type: array
+    minItems: 1
+    maxItems: 500
+    description: The org units to return, with their unsaved changes. Send the rows the screen shows.
+    items:
+      $ref: "./FairShareSimulationOrgUnit.yaml"

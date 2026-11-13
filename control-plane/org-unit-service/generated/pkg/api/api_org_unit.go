@@ -213,6 +213,19 @@ func (c *OrgUnitAPIController) Routes() Routes {
 			),
 			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
 		},
+		"SimulateNodePoolFairShare": Route{
+			strings.ToUpper("Post"),
+			"/api/v1/org-unit/node-pools/{nodepoolId}/fair-share-simulation",
+			////////////////////////////// RUNAI START (11.4) ///////////////////////////////
+			BuildHandlerChain(
+				func(next http.HandlerFunc) http.HandlerFunc {
+					////////////////////////////// RUNAI END (11.4) ///////////////////////////////
+					return c.SimulateNodePoolFairShare
+					////////////////////////////// RUNAI START (11.5) ///////////////////////////////
+				},
+			),
+			////////////////////////////// RUNAI END (11.5) ///////////////////////////////
+		},
 	}
 }
 
@@ -637,6 +650,92 @@ func (c *OrgUnitAPIController) GetOrgTree(w http.ResponseWriter, r *http.Request
 // GetRanks - Get ranks
 func (c *OrgUnitAPIController) GetRanks(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.GetRanks(r.Context())
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result, nil)
+		return
+	}
+	////////////////////////////// RUNAI START (9.3) ///////////////////////////////
+
+	if result.Code == 200 {
+		// generated from status code: 200
+		acceptHeader := r.Header.Get("Accept")
+		acceptTypes := strings.Split(acceptHeader, ",")
+
+		var contentTypeHandler func(interface{}, *int, http.ResponseWriter) error
+
+		for _, acceptType := range acceptTypes {
+			// Trim spaces and handle quality values (e.g., "text/html;q=0.9")
+			acceptType = strings.TrimSpace(strings.Split(acceptType, ";")[0])
+
+			switch acceptType {
+			case "*/*":
+				// fallback to default server defined value
+				contentTypeHandler = nil
+			case "application/json", "application/*":
+				contentTypeHandler = EncodeJSONResponse
+			}
+
+			if contentTypeHandler != nil {
+				break
+			}
+		}
+
+		// If no acceptable content type was found, default to server defined default
+		if contentTypeHandler == nil {
+		}
+
+		// If no default content type was found, default to application/json
+		if contentTypeHandler == nil {
+			contentTypeHandler = EncodeJSONResponse
+		}
+		contentTypeHandler(result.Body, &result.Code, w)
+
+		return
+	}
+
+	////////////////////////////// RUNAI END ///////////////////////////////
+
+	// If no error, encode the body and the result code
+	EncodeJSONResponse(result.Body, &result.Code, w)
+
+}
+
+// SimulateNodePoolFairShare - Simulate the fair share of a node pool's org units
+func (c *OrgUnitAPIController) SimulateNodePoolFairShare(w http.ResponseWriter, r *http.Request) {
+	nodepoolIdParam := chi.URLParam(r, "nodepoolId")
+	if nodepoolIdParam == "" {
+		c.errorHandler(w, r, &RequiredError{"nodepoolId"}, nil, nil)
+		return
+	}
+	var fairShareSimulationRequestParam FairShareSimulationRequest
+	//////////////////////////////////// RUNAI START (12) ///////////////////////////////////////////
+	// payloadBody is a per-request local slice, never a shared controller field,
+	// so concurrent requests on the singleton controller cannot race on it.
+	payloadBody, readError := io.ReadAll(r.Body)
+	if readError != nil {
+		// Handle the error
+		http.Error(w, "Failed to read request body", http.StatusServiceUnavailable)
+		return
+	}
+	jsonReader := bytes.NewReader(payloadBody)
+	d := json.NewDecoder(jsonReader)
+	//d := json.NewDecoder(r.Body)
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+	d.DisallowUnknownFields()
+	if err := d.Decode(&fairShareSimulationRequestParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil, payloadBody)
+		return
+	}
+	if err := AssertFairShareSimulationRequestRequired(fairShareSimulationRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	if err := AssertFairShareSimulationRequestConstraints(fairShareSimulationRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil, nil)
+		return
+	}
+	result, err := c.service.SimulateNodePoolFairShare(r.Context(), nodepoolIdParam, fairShareSimulationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result, nil)

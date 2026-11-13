@@ -1,0 +1,17 @@
+type: object
+description: The node pool's scheduling capabilities to simulate. Defaults to the node pool's saved capabilities.
+required:
+  - quota
+  - ranks
+  - adjustableWeights
+  - limits
+properties:
+  quota:
+    type: boolean
+  ranks:
+    type: boolean
+  adjustableWeights:
+    type: boolean
+  limits:
+    type: boolean
+    description: Whether GPU limits apply. Only allowed when quota is true.
