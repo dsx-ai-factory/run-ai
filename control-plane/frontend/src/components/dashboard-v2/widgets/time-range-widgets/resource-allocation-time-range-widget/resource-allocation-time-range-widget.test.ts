@@ -17,6 +17,7 @@ import { mockClusterMetricsValues } from "./resource-allocation-time-range-widge
 import type { MetricsResponse } from "@/swagger-models/cluster-service-client";
 import type { IRangeDates } from "@/utils/date.util";
 import { useClusterStore } from "@/stores/cluster.store";
+import { intervalUtil } from "@/utils/interval.util";
 import type { TMeasurementsTimeAndValue } from "@/models/chart.model";
 
 vi.mock("@/services/control-plane/cluster.service/cluster.service");
@@ -366,6 +367,94 @@ describe("resource-allocation-time-range-widget.vue", () => {
         "ALLOCATED_GPU",
         "GPU_QUOTA",
       ]);
+    });
+
+    it("ignores a stale date-range response that resolves after the current one", async () => {
+      const wrapper = mountWithNodePool();
+      await flushPromises();
+
+      let resolveOldRange: (value: MetricsResponse) => void = () => undefined;
+      let resolveNewRange: (value: MetricsResponse) => void = () => undefined;
+      vi.mocked(clusterService.getClusterMetrics)
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveOldRange = resolve;
+          }),
+        )
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveNewRange = resolve;
+          }),
+        );
+
+      const sevenDaysStart = new Date(dateEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+      await wrapper.setProps({ filterByDates: { ...filterByDates, label: "Last 24 hours" } });
+      await wrapper.setProps({ filterByDates: { dateStart: sevenDaysStart, dateEnd, label: "Last 7 days" } });
+
+      resolveNewRange({ measurements: [{ type: "GPU_QUOTA", values: quotaMeasurements("8") }] } as MetricsResponse);
+      await flushPromises();
+      resolveOldRange({ measurements: [{ type: "GPU_QUOTA", values: quotaMeasurements("-1") }] } as MetricsResponse);
+      await flushPromises();
+
+      expect(wrapper.vm.measurementMap.GPU_QUOTA?.[0]?.value).toEqual("8");
+      expect(wrapper.vm.resourceAllocationLegendItems.map((item) => item.name)).toContain("GPU quota (All departments)");
+      await wrapper.vm.exportCsv();
+      expect(vi.mocked(clusterService.getClusterMetricsCsv).mock.calls[0][3]).toEqual([
+        "TOTAL_GPU",
+        "ALLOCATED_GPU",
+        "GPU_QUOTA",
+      ]);
+    });
+    it("re-checks the pending metrics when a newer request supersedes the awaited one", async () => {
+      const wrapper = mountWithNodePool();
+      await flushPromises();
+      wrapper.vm.measurementMap = { GPU_QUOTA: quotaMeasurements("-1") };
+
+      let resolveOldRange: (value: MetricsResponse) => void = () => undefined;
+      let resolveNewRange: (value: MetricsResponse) => void = () => undefined;
+      vi.mocked(clusterService.getClusterMetrics)
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveOldRange = resolve;
+          }),
+        )
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            resolveNewRange = resolve;
+          }),
+        );
+
+      await wrapper.setProps({ filterByDates: { ...filterByDates, label: "Last 24 hours" } });
+      const exported = wrapper.vm.exportCsv();
+      const sevenDaysStart = new Date(dateEnd.getTime() - 7 * 24 * 60 * 60 * 1000);
+      await wrapper.setProps({ filterByDates: { dateStart: sevenDaysStart, dateEnd, label: "Last 7 days" } });
+
+      resolveOldRange({ measurements: [] } as MetricsResponse);
+      await flushPromises();
+      resolveNewRange({ measurements: [{ type: "GPU_QUOTA", values: quotaMeasurements("8") }] } as MetricsResponse);
+      await exported;
+
+      expect(vi.mocked(clusterService.getClusterMetricsCsv).mock.calls[0][3]).toEqual([
+        "TOTAL_GPU",
+        "ALLOCATED_GPU",
+        "GPU_QUOTA",
+      ]);
+    });
+
+    it("skips an interval refresh while a request is still pending", async () => {
+      const startInterval = vi.spyOn(intervalUtil, "startInterval").mockReturnValue(0);
+      const wrapper = mountWithNodePool();
+      await flushPromises();
+      vi.mocked(clusterService.getClusterMetrics).mockClear();
+      vi.mocked(clusterService.getClusterMetrics).mockReturnValue(new Promise(() => undefined));
+
+      wrapper.vm.startRefreshLoadData();
+      const refresh = startInterval.mock.calls[0][1] as () => void;
+      refresh();
+      refresh();
+      await flushPromises();
+
+      expect(clusterService.getClusterMetrics).toHaveBeenCalledTimes(1);
     });
   });
 });

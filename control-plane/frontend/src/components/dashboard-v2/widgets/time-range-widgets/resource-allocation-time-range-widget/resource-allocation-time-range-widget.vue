@@ -177,6 +177,7 @@ export default defineComponent({
       error: false as boolean,
       loading: false as boolean,
       pendingChartData: null as Promise<void> | null,
+      latestChartRequestId: 0 as number,
       isInitialLoader: true as boolean,
       gpuQuotaTitle: "GPU quota (All departments)",
       timeframes: [] as Array<string>,
@@ -215,8 +216,15 @@ export default defineComponent({
     },
   },
   methods: {
+    /**
+     * Starts the periodic refresh. A tick is skipped while a request is still in flight, so a slow response is not
+     * superseded by every tick; selection changes call loadChartData directly and still supersede pending work.
+     */
     startRefreshLoadData(): void {
-      intervalUtil.startInterval(EIntervalLabels.ResourceAllocationTimeRangeWidget, this.loadChartData);
+      intervalUtil.startInterval(EIntervalLabels.ResourceAllocationTimeRangeWidget, () => {
+        if (this.loading) return;
+        this.loadChartData();
+      });
     },
     stopRefreshLoadData(): void {
       intervalUtil.stopInterval(EIntervalLabels.ResourceAllocationTimeRangeWidget);
@@ -334,25 +342,35 @@ export default defineComponent({
       this.pendingChartData = markRaw(this.fetchChartData());
       return this.pendingChartData;
     },
+    /**
+     * Fetches metrics for the current selection and renders them. A response that resolves after a newer
+     * request has started belongs to an outdated selection (e.g. a previous date range) and is discarded.
+     */
     async fetchChartData(): Promise<void> {
       if (this.chartOptions === null) return;
 
+      const requestId = ++this.latestChartRequestId;
       try {
         this.loading = true;
         this.chartOptions.xAxis = this.getXAxisOptions();
         this.timeframes = chartUtil.getTimeFrames(this.filterByDates.dateStart, this.filterByDates.dateEnd);
         const metricsResponse: MetricsResponse = await this.getMetric();
+        if (requestId !== this.latestChartRequestId) return;
 
         this.measurementMap = metricUtil.mapMeasurementsToMap(metricsResponse);
         this.error = false;
         this.setSeries();
       } catch (error: unknown) {
+        if (requestId !== this.latestChartRequestId) return;
         this.error = true;
         console.error(error);
       } finally {
-        this.loading = false;
-        this.isInitialLoader = false;
+        if (requestId === this.latestChartRequestId) {
+          this.loading = false;
+          this.isInitialLoader = false;
+        }
       }
+      if (requestId !== this.latestChartRequestId) return;
 
       this.$nextTick(() => {
         if (!this.error) {
@@ -398,12 +416,20 @@ export default defineComponent({
         return await clusterService.getClusterMetrics(this.clusterId, start, end, metricType, samples);
       }
     },
+    /**
+     * Exports the current selection as CSV. Waits until the latest pending metrics request settles (re-checking if a
+     * newer request superseded the awaited one) so the CSV columns match the selected date range.
+     */
     async exportCsv(): Promise<void> {
       if (this.orgUnitMetricSource) {
         this.$q.notify(dashboardUtil.getCsvErrorMessage());
         return;
       }
-      await this.pendingChartData;
+      let awaitedChartData: Promise<void> | null;
+      do {
+        awaitedChartData = this.pendingChartData;
+        await awaitedChartData;
+      } while (awaitedChartData !== this.pendingChartData);
       const metricType: Array<MetricsType> = [MetricsType.TotalGpu, MetricsType.AllocatedGpu];
       if (this.hasGpuQuotaData) {
         metricType.push(MetricsType.GpuQuota);
