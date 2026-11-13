@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { describe, beforeEach, it, expect, vi } from "vitest";
+import { describe, beforeEach, afterEach, it, expect, vi } from "vitest";
 import { mount, type VueWrapper } from "@vue/test-utils";
 import { createTestingPinia, type TestingPinia } from "@pinia/testing";
 import { setActivePinia } from "pinia";
@@ -134,6 +134,18 @@ describe("workload-logs-header.vue", () => {
   });
 
   describe("downloadLogs method", () => {
+    const fixedNow = new Date("2026-11-04T10:00:00.000Z");
+    const expectedFallback = "test-pod-1_container-1_2026-11-04T10-00-00-000Z.txt";
+
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(fixedNow);
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
     it("should use cluster API when supportClusterApiLogs is true", async () => {
       const mockResponse = {
         data: new Blob(["log content"], { type: "text/plain" }),
@@ -163,7 +175,7 @@ describe("workload-logs-header.vue", () => {
 
       expect(researcherService.downloadLogs).toHaveBeenCalledWith(mockLogParams);
       expect(clusterApiService.downloadLogsClusterApi).not.toHaveBeenCalled();
-      expect(createDownloadLink).toHaveBeenCalledWith(mockBlob, "logs.txt");
+      expect(createDownloadLink).toHaveBeenCalledWith(mockBlob, expectedFallback);
     });
 
     it("should extract filename from content-disposition header", async () => {
@@ -180,7 +192,7 @@ describe("workload-logs-header.vue", () => {
       expect(createDownloadLink).toHaveBeenCalledWith(mockResponse.data, "custom-filename_2024-01-01T12:00:00Z.txt");
     });
 
-    it("should use default filename when content-disposition header is missing", async () => {
+    it("should use pod/container/timestamp fallback when content-disposition header is missing", async () => {
       const mockResponse = {
         data: new Blob(["log content"], { type: "text/plain" }),
         headers: {
@@ -191,7 +203,7 @@ describe("workload-logs-header.vue", () => {
 
       await wrapper.vm.downloadLogs();
 
-      expect(createDownloadLink).toHaveBeenCalledWith(mockResponse.data, "logs.txt");
+      expect(createDownloadLink).toHaveBeenCalledWith(mockResponse.data, expectedFallback);
     });
 
     it("should handle filenames with quotes in content-disposition header", async () => {
@@ -265,7 +277,82 @@ describe("workload-logs-header.vue", () => {
       await wrapper.vm.downloadLogs();
 
       expect(clusterApiService.downloadLogsClusterApi).toHaveBeenCalledWith(mockExternalLogParams);
-      expect(createDownloadLink).toHaveBeenCalledWith(mockResponse.data, "logs.txt");
+      expect(createDownloadLink).toHaveBeenCalledWith(mockResponse.data, expectedFallback);
+    });
+
+    it("should give different containers distinct fallback names", async () => {
+      vi.mocked(clusterApiService.downloadLogsClusterApi).mockResolvedValue({ data: new Blob(["a"]), headers: {} });
+
+      await wrapper.vm.downloadLogs();
+      await wrapper.setProps({ logParams: { ...mockLogParams, container: "container-2" } });
+      await wrapper.vm.downloadLogs();
+
+      const names = vi.mocked(createDownloadLink).mock.calls.map(([, name]) => name);
+      expect(names).toEqual([expectedFallback, "test-pod-1_container-2_2026-11-04T10-00-00-000Z.txt"]);
+    });
+
+    it("should use the legacy fallback with the first container when none is selected", async () => {
+      await wrapper.setProps({ supportClusterApiLogs: false, logParams: { ...mockLogParams, container: undefined } });
+      const mockBlob = new Blob(["log content"], { type: "text/plain" });
+      vi.mocked(researcherService.downloadLogs).mockResolvedValue(mockBlob);
+
+      await wrapper.vm.downloadLogs();
+
+      expect(createDownloadLink).toHaveBeenCalledWith(mockBlob, expectedFallback);
+    });
+
+    it("should pass the downloaded blob through unchanged", async () => {
+      const mockBlob = new Blob(["unchanged"], { type: "text/plain" });
+      vi.mocked(clusterApiService.downloadLogsClusterApi).mockResolvedValue({ data: mockBlob, headers: {} });
+
+      await wrapper.vm.downloadLogs();
+
+      expect(vi.mocked(createDownloadLink).mock.calls[0][0]).toBe(mockBlob);
+    });
+  });
+
+  describe("buildFallbackFilename method", () => {
+    beforeEach(() => {
+      vi.useFakeTimers({ toFake: ["Date"] });
+      vi.setSystemTime(new Date("2026-11-04T10:00:00.000Z"));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("should build a filename-safe name from pod, container and timestamp", async () => {
+      await wrapper.setProps({
+        pods: [{ ...mockPods[0], name: "training-pod", containers: [{ name: "worker", image: "img" }] }],
+        logParams: { ...mockLogParams, podName: "training-pod", container: "worker" },
+      });
+
+      expect(wrapper.vm.buildFallbackFilename()).toBe("training-pod_worker_2026-11-04T10-00-00-000Z.txt");
+    });
+
+    it("should default missing pod and container names", async () => {
+      await wrapper.setProps({ pods: [], logParams: { ...mockLogParams, podName: "", container: undefined } });
+
+      expect(wrapper.vm.buildFallbackFilename()).toBe("pod_container_2026-11-04T10-00-00-000Z.txt");
+    });
+
+    it("should sanitize unsafe characters and path separators", async () => {
+      await wrapper.setProps({
+        pods: [{ ...mockPods[0], name: "../evil pod", containers: [{ name: 'a/b\\c:"d"', image: "img" }] }],
+        logParams: { ...mockLogParams, podName: "../evil pod", container: 'a/b\\c:"d"' },
+      });
+
+      expect(wrapper.vm.buildFallbackFilename()).toBe("evil-pod_a-b-c-d_2026-11-04T10-00-00-000Z.txt");
+    });
+
+    it("should bound long name components", async () => {
+      const longName = "p".repeat(253);
+      await wrapper.setProps({
+        pods: [{ ...mockPods[0], name: longName }],
+        logParams: { ...mockLogParams, podName: longName },
+      });
+
+      expect(wrapper.vm.buildFallbackFilename()).toBe(`${"p".repeat(64)}_container-1_2026-11-04T10-00-00-000Z.txt`);
     });
   });
 
@@ -287,28 +374,56 @@ describe("workload-logs-header.vue", () => {
 
       const filename = wrapper.vm.extractFilenameFromHeaders(headers);
 
-      expect(filename).toBeDefined();
-      expect(filename).not.toBe("logs.txt");
+      expect(filename).toBe("quoted-filename.txt");
     });
 
-    it("should return default filename when content-disposition is missing", () => {
+    it("should return null when content-disposition is missing", () => {
       const headers: AxiosResponse["headers"] = {
         "Content-Type": "text/plain",
       };
 
       const filename = wrapper.vm.extractFilenameFromHeaders(headers);
 
-      expect(filename).toBe("logs.txt");
+      expect(filename).toBeNull();
     });
 
-    it("should return default filename when content-disposition has wrong format", () => {
+    it("should return null when content-disposition has wrong format", () => {
       const headers: AxiosResponse["headers"] = {
         "content-disposition": "inline; no-filename-here",
       };
 
       const filename = wrapper.vm.extractFilenameFromHeaders(headers);
 
-      expect(filename).toBe("logs.txt");
+      expect(filename).toBeNull();
+    });
+  });
+
+  describe("extractFilenameFromHeaders robustness", () => {
+    it.each([
+      ["unquoted filename", "attachment; filename=plain.txt", "plain.txt"],
+      ["filename containing '='", 'attachment; filename="a=b.txt"', "a=b.txt"],
+      ["filename containing ';'", 'attachment; filename="a;b.txt"', "a;b.txt"],
+      ["extra parameters", 'attachment; filename="x.txt"; size=12', "x.txt"],
+      [
+        "RFC 5987 encoded name preferred",
+        "attachment; filename=\"fallback.txt\"; filename*=UTF-8''r%C3%A9sum%C3%A9.txt",
+        "résumé.txt",
+      ],
+      ["case-insensitive", 'ATTACHMENT; FILENAME="upper.txt"', "upper.txt"],
+      ["path stripped", 'attachment; filename="../../etc/passwd"', "passwd"],
+      ["malformed encoding falls back to plain", "attachment; filename=\"ok.txt\"; filename*=UTF-8''%E0%A4%A", "ok.txt"],
+    ])("should handle %s", (_, header, expected) => {
+      expect(wrapper.vm.extractFilenameFromHeaders({ "content-disposition": header })).toBe(expected);
+    });
+
+    it.each([
+      ["inline disposition", 'inline; filename="x.txt"'],
+      ["empty filename", 'attachment; filename=""'],
+      ["dot-dot filename", 'attachment; filename=".."'],
+      ["no headers", undefined],
+    ])("should return null for %s", (_, header) => {
+      const headers = header === undefined ? undefined : { "content-disposition": header };
+      expect(wrapper.vm.extractFilenameFromHeaders(headers)).toBeNull();
     });
   });
 
