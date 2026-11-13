@@ -6,6 +6,7 @@
 package completion
 
 import (
+	"slices"
 	"strings"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/runai-cli/internal/consts"
@@ -76,6 +77,9 @@ func GetFlagCompletionFn(
 
 			filtered = append(filtered, option)
 		}
+		// sort and dedupe so equivalent API results always give the same menu; filtered is ours, the source slice is untouched
+		slices.Sort(filtered)
+		filtered = slices.Compact(filtered)
 
 		if resourceType == ExistingPvc {
 			return filtered, cobra.ShellCompDirectiveNoSpace
