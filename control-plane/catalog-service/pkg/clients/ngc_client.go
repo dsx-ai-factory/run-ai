@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -27,16 +28,18 @@ import (
 
 // ngcClient implements the NGCClient interface
 type ngcClient struct {
-	httpClient *http.Client
+	httpClient  *http.Client
+	lookupHost  func(context.Context, string) ([]net.IP, error)
+	dialContext func(context.Context, string, string) (net.Conn, error)
 }
 
 // NewNGCClient creates a new NGC client instance
 func NewNGCClient() *ngcClient {
 	ngcTimeout := time.Duration(config.Get[*catalogConfig.NGC]().RequestTimeoutSec) * time.Second
 
-	return &ngcClient{
-		httpClient: &http.Client{Timeout: ngcTimeout},
-	}
+	client := &ngcClient{}
+	client.httpClient = newRegistryHTTPClient(client, ngcTimeout)
+	return client
 }
 
 const (
@@ -139,6 +142,10 @@ func buildImagesCacheKey(registryUrl string, search string) string {
 }
 
 func (c *ngcClient) sendNgcImagesRequest(ctx context.Context, registryUrl string, apiKey string, search string, isNgcCatalog bool) ([]string, error) {
+	if err := c.validateRegistryBaseURL(ctx, registryUrl); err != nil {
+		return nil, err
+	}
+
 	query := map[string]interface{}{
 		"pageSize": ngcImagesPageSize,
 		"page":     0,
@@ -309,7 +316,7 @@ func (c *ngcClient) ngcGetRequest(ctx context.Context, url string, apiKey string
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return body, resp.StatusCode, fmt.Errorf("NGC API returned status %d: %s", resp.StatusCode, body)
+		return nil, resp.StatusCode, fmt.Errorf("NGC API returned status %d", resp.StatusCode)
 	}
 
 	return body, http.StatusOK, nil
