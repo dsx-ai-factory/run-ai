@@ -210,6 +210,42 @@ spec:
         name: runai-cluster-domain-tls-secret
 ```
 
+## Enable WebSocket Support
+
+The NVIDIA Run:ai UI uses WebSocket connections, for example to stream workload logs and to open a terminal to a workload. Some Gateway controllers do not allow WebSocket upgrades by default. Make sure that your Gateway controller allows WebSocket upgrades on the Gateway, whether you use host-based or path-based routing.
+
+When using **KGateway**, create a `ListenerPolicy` that enables WebSocket upgrades on all listeners of the Gateway:
+
+```yaml
+apiVersion: gateway.kgateway.dev/v1alpha1
+kind: ListenerPolicy
+metadata:
+  name: runai-gateway-websocket
+  namespace: runai
+spec:
+  targetRefs:
+  - group: gateway.networking.k8s.io
+    kind: Gateway
+    name: runai-gateway
+  default:
+    httpSettings:
+      upgradeConfig:
+        enabledUpgrades:
+        - websocket
+```
+
+The policy must be in the same namespace as the Gateway. If you are using a different conformant controller, refer to its documentation to enable WebSocket upgrades.
+
+If a `ListenerPolicy` that sets `httpSettings` is already attached to the Gateway, add `upgradeConfig` to that policy instead of creating a new one. KGateway merges all `ListenerPolicy` resources attached to the same Gateway field by field, and when two of them set the same field, such as `httpSettings.upgradeConfig`, the oldest policy wins, so keeping the settings in one policy avoids surprises. If that policy has a `perPort` entry for a port that serves the UI, such as 443, also add `upgradeConfig` to that entry's `listener.httpSettings`. A `perPort` entry replaces `default` for that port, so it does not inherit `upgradeConfig` from `default`.
+
+<Note>
+
+**Note**
+
+With KGateway 2.2.1, Firefox can fail to open WebSocket connections, for example for workload logs and terminals, on an HTTPS listener. The listener advertises HTTP/2 by default, Firefox can send WebSocket requests over HTTP/2, and this version cannot enable the `allowConnect` HTTP/2 option that accepts them. To avoid this, set the `kgateway.dev/alpn-protocols: http/1.1` TLS option on the Gateway listener (`tls.options`), which disables HTTP/2 on that listener. KGateway 2.4.0 and later support `httpSettings.http2ProtocolOptions.allowConnect` in the `ListenerPolicy` to keep HTTP/2 enabled.
+
+</Note>
+
 ## Standard Inference Routing with Gateway API
 
 <Note>
