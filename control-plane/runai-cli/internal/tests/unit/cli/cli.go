@@ -79,7 +79,7 @@ func executeCommand(ctx context.Context, args []string, env map[string]string, s
 	cmd.SetOut(stdout)
 	cmd.SetErr(stderr)
 
-	// staring from root command resetting each flags for each subcommand.
+	// starting from root command resetting each flags for each subcommand.
 	resetSubCommandFlags(cmd)
 	resetCommandFlags(cmd.Commands(), args)
 
