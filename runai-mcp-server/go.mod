@@ -4,7 +4,7 @@ go 1.27.4
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
-	github.com/MicahParks/keyfunc/v3 v3.9.1
+	github.com/MicahParks/keyfunc/v3 v3.9.2
 	github.com/dsx-ai-factory/run-ai/control-plane/authorization/pkg/client v1.0.3
 	github.com/dsx-ai-factory/run-ai/control-plane/bff-service/pkg/client v1.0.10
 	github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client v1.0.1
