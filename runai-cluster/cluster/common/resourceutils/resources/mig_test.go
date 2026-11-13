@@ -376,6 +376,17 @@ func Test_getDeviceComputePortions(t *testing.T) {
 			false,
 		},
 		{
+			"RTX PRO 6000",
+			"NVIDIA-RTX-PRO-6000-Blackwell-Max-Q-Workstation-Edition",
+			rtxPro6000Portions,
+			false,
+		},
+		{"H200", "NVIDIA-H200", defaultComputePortions, false},
+		{"B200", "NVIDIA-B200", defaultComputePortions, false},
+		{"GB200", "NVIDIA-GB200", defaultComputePortions, false},
+		{"B300", "NVIDIA-B300-SXM6-AC", defaultComputePortions, false},
+		{"RTX PRO 5000", "NVIDIA-RTX-PRO-5000-Blackwell", rtxPro5000Portions, false},
+		{
 			"nonDevice",
 			"nonDevice",
 			-1,

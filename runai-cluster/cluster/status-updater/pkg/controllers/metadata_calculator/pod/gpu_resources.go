@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -43,7 +44,9 @@ const (
 	amdNodeGpuMemoryLabelValuePattern = "(\\d+.*)"
 	amdNodeGpuMemoryValueFactor       = 1000000
 
-	migExtractionRegex      = `^nvidia.com/mig-(\d+)g\.(\d+)gb$`
+	// Blackwell profiles may carry a media extensions suffix: "+me" / "+me.all" in the profile name (annotation) and
+	// ".me" / ".me.all" in the resource name, since the NVIDIA device plugin replaces "+" with "."; "-me" excludes them.
+	migExtractionRegex      = `^nvidia.com/mig-(\d+)g\.(\d+)gb(?:[+.-][a-z]+(?:\.[a-z]+)?)?$`
 	migRegexNumOfOutputs    = 3
 	migDeviceAnnotationName = "runai-mig-device"
 	deviceNameKey           = "name"
@@ -51,7 +54,14 @@ const (
 	nodeGpuTypeLabelName   = "nvidia.com/gpu.product"
 	A100                   = "A100"
 	H100                   = "H100"
+	H200                   = "H200"
+	B200                   = "B200" // also matches GB200
+	B300                   = "B300"
+	RTXPro5000             = "RTX-PRO-5000"
+	RTXPro6000             = "RTX-PRO-6000"
 	defaultComputePortions = float64(7)
+	rtxPro5000Portions     = float64(2)
+	rtxPro6000Portions     = float64(4)
 
 	migResourcePrefix = "nvidia.com/mig-"
 
@@ -142,24 +152,16 @@ func GetRequestedMigDevices(pod *v1.Pod) map[string]int64 {
 	return requestedMigDevices
 }
 
+// getAllocatedMigPortion returns the fraction of a whole GPU allocated to the pod through MIG devices: the compute
+// slices of every allocated profile, times its count, divided by the compute slices of the node's GPU product.
 func getAllocatedMigPortion(ctx context.Context, pod *v1.Pod, kubeClient client.Client) (float64, error) {
 	if len(pod.Spec.NodeName) == 0 { // Can't match metric if the pod isn't scheduled to a pod
 		return 0, nil
 	}
 
-	deviceJsonStr := pod.Annotations[migDeviceAnnotationName]
-	var deviceJson map[string]any
-	err := json.Unmarshal([]byte(deviceJsonStr), &deviceJson)
+	devices, err := getMigDevices(pod)
 	if err != nil {
-		return 0, fmt.Errorf("failed to decode mig-device json from annotation %s, pod %s/%s. %w",
-			migDeviceAnnotationName, pod.Namespace, pod.Name, err)
-	}
-
-	deviceTypeName := fmt.Sprintf("%v", deviceJson[deviceNameKey])
-	migCompute, _, err := extractGpuAndMemoryFromMigResourceName(deviceTypeName)
-	if err != nil {
-		return 0, fmt.Errorf("failed to extract mig device type from %s in annotation %s, pod %s/%s. %w",
-			deviceTypeName, migDeviceAnnotationName, pod.Namespace, pod.Name, err)
+		return 0, err
 	}
 	gpuProduct, err := getNodeGpuType(ctx, pod, kubeClient)
 	if err != nil {
@@ -172,8 +174,73 @@ func getAllocatedMigPortion(ctx context.Context, pod *v1.Pod, kubeClient client.
 			pod.Spec.NodeName, pod.Namespace, pod.Name, err)
 	}
 
-	migGPUs := float64(migCompute) / wholeGpuNumOfPortions
+	migGPUs := float64(0)
+	for _, device := range devices {
+		migCompute, _, err := extractGpuAndMemoryFromMigResourceName(device.name)
+		if err != nil {
+			return 0, fmt.Errorf("failed to extract mig device type from %s in annotation %s, pod %s/%s. %w",
+				device.name, migDeviceAnnotationName, pod.Namespace, pod.Name, err)
+		}
+		migGPUs += device.count * float64(migCompute) / wholeGpuNumOfPortions
+	}
 	return migGPUs, nil
+}
+
+// migDevice is a MIG profile resource name (e.g. nvidia.com/mig-1g.24gb) and how many of them the pod uses.
+type migDevice struct {
+	name  string
+	count float64
+}
+
+// getMigDevices returns the MIG devices of the pod from the runai-mig-device annotation. The scheduler may leave the
+// annotation empty for pods that request a MIG profile directly in their resources (mig.strategy=mixed), so an empty
+// annotation, or one without a device name, falls back to the MIG resources requested by the pod.
+func getMigDevices(pod *v1.Pod) ([]migDevice, error) {
+	deviceJsonStr := pod.Annotations[migDeviceAnnotationName]
+	if deviceJsonStr == "" {
+		log.Log.V(1).Info("No mig-device annotation, using the requested MIG resources",
+			"namespace", pod.Namespace, "pod", pod.Name)
+		return getRequestedMigResources(pod)
+	}
+
+	var deviceJson map[string]any
+	if err := json.Unmarshal([]byte(deviceJsonStr), &deviceJson); err != nil {
+		return nil, fmt.Errorf("failed to decode mig-device json from annotation %s, pod %s/%s. %w",
+			migDeviceAnnotationName, pod.Namespace, pod.Name, err)
+	}
+	deviceName, ok := deviceJson[deviceNameKey].(string)
+	if !ok || deviceName == "" {
+		log.Log.V(1).Info("mig-device annotation has no device name, using the requested MIG resources",
+			"namespace", pod.Namespace, "pod", pod.Name)
+		return getRequestedMigResources(pod)
+	}
+	return []migDevice{{name: deviceName, count: 1}}, nil
+}
+
+// getRequestedMigResources returns every MIG profile requested by the pod with its quantity, in a stable order.
+func getRequestedMigResources(pod *v1.Pod) ([]migDevice, error) {
+	// Extended resources may be set only in limits; the API server copies them to requests.
+	req, limits := resourcehelper.PodRequestsAndLimits(pod)
+	for _, resourceList := range []v1.ResourceList{req, limits} {
+		names := make([]string, 0, len(resourceList))
+		for rName, quantity := range resourceList {
+			if isMigResource(string(rName)) && !quantity.IsZero() {
+				names = append(names, string(rName))
+			}
+		}
+		if len(names) == 0 {
+			continue
+		}
+		sort.Strings(names)
+		devices := make([]migDevice, 0, len(names))
+		for _, name := range names {
+			quantity := resourceList[v1.ResourceName(name)]
+			devices = append(devices, migDevice{name: name, count: float64(quantity.Value())})
+		}
+		return devices, nil
+	}
+	return nil, fmt.Errorf("pod %s/%s has no %s annotation and no mig resource request",
+		pod.Namespace, pod.Name, migDeviceAnnotationName)
 }
 
 // matchAllMetrics recalibrates the gpu metrics in podMetrics, so they will match to each other.
@@ -314,9 +381,19 @@ func getNodeGpuType(ctx context.Context, pod *v1.Pod, kubeClient client.Client) 
 	return nodeGpuType, nil
 }
 
+// getDeviceComputePortions returns the number of MIG compute slices of a whole GPU, per the NVIDIA MIG user guide
+// (supported MIG profiles).
 func getDeviceComputePortions(gpuProduct string) (float64, error) {
-	if strings.Contains(gpuProduct, A100) || strings.Contains(gpuProduct, H100) {
-		return defaultComputePortions, nil
+	for _, product := range []string{A100, H100, H200, B200, B300} {
+		if strings.Contains(gpuProduct, product) {
+			return defaultComputePortions, nil
+		}
+	}
+	if strings.Contains(gpuProduct, RTXPro6000) {
+		return rtxPro6000Portions, nil
+	}
+	if strings.Contains(gpuProduct, RTXPro5000) {
+		return rtxPro5000Portions, nil
 	}
 	return -1, fmt.Errorf("cannot calculate device portion for gpu product %s", gpuProduct)
 }
