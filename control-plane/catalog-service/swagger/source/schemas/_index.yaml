@@ -39,3 +39,15 @@ CatalogSettingsGetResponse:
   $ref: './Settings/CatalogSettingsGetResponse.yaml'
 UpdateCatalogSettingByKeyRequest:
   $ref: './Settings/UpdateCatalogSettingByKeyRequest.yaml'
+RecommendationRequest:
+  $ref: './rightSizing/RecommendationRequest.yaml'
+RecommendationResponse:
+  $ref: './rightSizing/RecommendationResponse.yaml'
+RecommendationResult:
+  $ref: './rightSizing/RecommendationResult.yaml'
+Recommendation:
+  $ref: './rightSizing/Recommendation.yaml'
+RecommendationStatus:
+  $ref: './rightSizing/RecommendationStatus.yaml'
+RecommendationAllocationType:
+  $ref: './rightSizing/RecommendationAllocationType.yaml'

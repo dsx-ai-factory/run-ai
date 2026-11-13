@@ -101,6 +101,10 @@
         "operationSelection": {
           "excludeTags": ["Health", "Version"]
         }
+      },
+      {
+        "inputFile": "../../specs/catalog-service.yaml",
+        "operationSelection": {"includeTags": ["RightSizing"]}
       }
     ],
     "output": "../_build/runaiApi.swagger.yaml"

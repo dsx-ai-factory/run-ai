@@ -236,12 +236,17 @@ func (client *ClusterClient) GetNodePoolsByCluster(ctx context.Context, clusterU
 func (client *ClusterClient) GetClusterMinimalDataById(ctx context.Context, clusterId string) (*openapi.ClustersMinimalData, error) {
 	clusterMinimalData, response, err := client.ApiClient.ClustersAPI.GetClusterMinimalDataById(ctx, clusterId).
 		Execute()
+	if response != nil && response.Body != nil {
+		defer response.Body.Close()
+	}
+	if response != nil && response.StatusCode != http.StatusOK {
+		return nil, openapi.NewErrorFromResponse(response, err)
+	}
 	if err != nil {
 		return nil, err
 	}
-	if response.StatusCode != http.StatusOK {
-		err = errors.New(fmt.Sprintf("Failed to get cluster minimal data. status is %s", response.Status))
-		return nil, err
+	if response == nil || clusterMinimalData == nil {
+		return nil, fmt.Errorf("cluster minimal data returned no response")
 	}
 	return clusterMinimalData, nil
 }
@@ -259,19 +264,36 @@ func (client *ClusterClient) GetClustersMinimalData(ctx context.Context) (*opena
 	return clusters, nil
 }
 
+// minimalNodepoolPageSize matches the API's default page size. A full page
+// must be followed by another request, including when the last page is empty.
+const minimalNodepoolPageSize int32 = 50
+
 func (client *ClusterClient) GetNodePoolsMinimalByCluster(ctx context.Context, clusterUUID string) (*openapi.GetNodepoolsMinimal200Response, error) {
-	nodePools, response, err := client.ApiClient.NodePoolsAPI.
-		GetNodepoolsMinimal(ctx).
-		FilterBy([]string{"clusterId==" + clusterUUID}).
-		Execute()
-	if err != nil {
-		return nil, err
+	result := &openapi.GetNodepoolsMinimal200Response{Nodepools: []openapi.NodepoolMinimal{}}
+	for offset := int32(0); ; offset += minimalNodepoolPageSize {
+		page, response, err := client.ApiClient.NodePoolsAPI.
+			GetNodepoolsMinimal(ctx).
+			FilterBy([]string{"clusterId==" + clusterUUID}).
+			Offset(offset).
+			Limit(minimalNodepoolPageSize).
+			Execute()
+		if response != nil && response.Body != nil {
+			response.Body.Close()
+		}
+		if response != nil && response.StatusCode != http.StatusOK {
+			return nil, fmt.Errorf("get nodepools minimal at offset %d: %w", offset, openapi.NewErrorFromResponse(response, err))
+		}
+		if err != nil {
+			return nil, fmt.Errorf("get nodepools minimal at offset %d: %w", offset, err)
+		}
+		if response == nil || response.StatusCode != http.StatusOK || page == nil {
+			return nil, fmt.Errorf("invalid nodepools minimal response at offset %d", offset)
+		}
+		result.Nodepools = append(result.Nodepools, page.Nodepools...)
+		if len(page.Nodepools) < int(minimalNodepoolPageSize) {
+			return result, nil
+		}
 	}
-	if response.StatusCode != http.StatusOK {
-		err = errors.New(fmt.Sprintf("Failed to get nodepools minimal data. status is %s", response.Status))
-		return nil, err
-	}
-	return nodePools, nil
 }
 
 func (client *ClusterClient) GetNodepoolMinimal(ctx context.Context, nodepoolId string) (*openapi.NodepoolMinimal, error) {

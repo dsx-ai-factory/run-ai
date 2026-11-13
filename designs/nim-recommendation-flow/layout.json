@@ -1,0 +1,456 @@
+{
+  "name": "nim-recommendation-flow",
+  "width": 2440,
+  "height": 2080,
+  "title": "NIM recommendation: request \u2192 response",
+  "subtitle": "POST /api/v1/catalog/right-sizing/recommendation \u00b7 Current implementation",
+  "elements": [
+    {
+      "op": "box",
+      "args": [
+        70,
+        210,
+        1430,
+        150,
+        "1. Validate request",
+        [
+          "Cluster ID, exact NIM image/tag, optional GPU type."
+        ],
+        "blue"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        1700,
+        210,
+        630,
+        150,
+        "400 \u00b7 Invalid request",
+        [
+          "Reject before dependency calls."
+        ],
+        "red"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        70,
+        430,
+        1430,
+        190,
+        "2. Read requested cluster GPUs",
+        [
+          "Check cluster access/existence, then read fresh node-pool inventory.",
+          "Keep each GPU type/capacity variant and its maximum count on one node.",
+          "If provided, filter by the exact requested GPU type."
+        ],
+        "blue"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        1700,
+        430,
+        630,
+        190,
+        "Request fails",
+        [
+          "Absent requested type: 400",
+          "Cluster access/existence: 401/403/404",
+          "Other dependency failure: 503"
+        ],
+        "red"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        1700,
+        680,
+        630,
+        150,
+        "200 \u00b7 Empty results",
+        [
+          "Existing cluster without GPUs,",
+          "when no GPU type was requested."
+        ],
+        "amber"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        70,
+        870,
+        1430,
+        150,
+        "3. Load exact-tag NGC profiles",
+        [
+          "Fetch published requirements; nonempty metadata may be cached for 15 minutes.",
+          "404 / missing profiles means no sizing evidence, not a dependency failure."
+        ],
+        "blue"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        1700,
+        870,
+        630,
+        150,
+        "503 \u00b7 Metadata failure",
+        [
+          "Transport, non-404 HTTP failure,",
+          "or malformed response."
+        ],
+        "red"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        70,
+        1110,
+        1430,
+        190,
+        "4. Select a fitting profile for each hardware variant",
+        [
+          "Only GPU-agnostic profiles with explicit TP/PP and a valid per-device minimum.",
+          "Check memory per GPU and TP \u00d7 PP against the single-node count and profile limit.",
+          "Prefer fewer GPUs, then lower published minimum, then profile ID."
+        ],
+        "blue"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        1700,
+        1110,
+        630,
+        190,
+        "Result: no_recommendation",
+        [
+          "Missing hardware capacity/count",
+          "or no eligible profile fits.",
+          "Return a reason."
+        ],
+        "amber"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        70,
+        1390,
+        1430,
+        190,
+        "5. Record profile evidence, then choose allocation",
+        [
+          "Parallel profile: exactly TP \u00d7 PP whole GPUs.",
+          "Single GPU: below cutoff \u2192 minimum memory; at/above cutoff \u2192 whole GPU.",
+          "Default cutoff: 90%. No extra memory headroom is added."
+        ],
+        "blue"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        1700,
+        1390,
+        630,
+        190,
+        "Result: no_recommendation",
+        [
+          "Invalid single-GPU sharing policy.",
+          "Keep selected profile evidence;",
+          "return a reason without allocation."
+        ],
+        "amber"
+      ]
+    },
+    {
+      "op": "box",
+      "args": [
+        70,
+        1780,
+        1430,
+        150,
+        "6. Return recommendation response",
+        [
+          "Echo image/tag; include one result per hardware variant.",
+          "Recommended entries include profile evidence and memory/GPU-count allocation."
+        ],
+        "green"
+      ]
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            785,
+            360
+          ],
+          [
+            785,
+            430
+          ]
+        ]
+      ],
+      "kwargs": {}
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            785,
+            620
+          ],
+          [
+            785,
+            870
+          ]
+        ]
+      ],
+      "kwargs": {}
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            785,
+            1020
+          ],
+          [
+            785,
+            1110
+          ]
+        ]
+      ],
+      "kwargs": {}
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            785,
+            1300
+          ],
+          [
+            785,
+            1390
+          ]
+        ]
+      ],
+      "kwargs": {}
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            785,
+            1580
+          ],
+          [
+            785,
+            1780
+          ]
+        ]
+      ],
+      "kwargs": {}
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            1500,
+            285
+          ],
+          [
+            1700,
+            285
+          ]
+        ]
+      ],
+      "kwargs": {
+        "color": "#B32D42"
+      }
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            1500,
+            510
+          ],
+          [
+            1700,
+            510
+          ]
+        ]
+      ],
+      "kwargs": {
+        "color": "#B32D42"
+      }
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            1500,
+            945
+          ],
+          [
+            1700,
+            945
+          ]
+        ]
+      ],
+      "kwargs": {
+        "color": "#B32D42"
+      }
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            1450,
+            620
+          ],
+          [
+            1450,
+            755
+          ],
+          [
+            1700,
+            755
+          ]
+        ]
+      ],
+      "kwargs": {
+        "label": "No variants",
+        "labelpos": [
+          1555,
+          755
+        ],
+        "color": "#986313"
+      }
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            1500,
+            1190
+          ],
+          [
+            1700,
+            1190
+          ]
+        ]
+      ],
+      "kwargs": {
+        "color": "#986313"
+      }
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            1500,
+            1470
+          ],
+          [
+            1700,
+            1470
+          ]
+        ]
+      ],
+      "kwargs": {
+        "color": "#986313"
+      }
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            2330,
+            1205
+          ],
+          [
+            2380,
+            1205
+          ],
+          [
+            2380,
+            1710
+          ],
+          [
+            1400,
+            1710
+          ],
+          [
+            1400,
+            1780
+          ]
+        ]
+      ],
+      "kwargs": {
+        "color": "#986313"
+      }
+    },
+    {
+      "op": "arrow",
+      "args": [
+        [
+          [
+            2330,
+            1485
+          ],
+          [
+            2380,
+            1485
+          ]
+        ]
+      ],
+      "kwargs": {
+        "color": "#986313"
+      }
+    },
+    {
+      "op": "text",
+      "args": [
+        70,
+        1990,
+        "Solid cards = implemented behavior. Blue: processing \u00b7 Green: response \u00b7 Amber: valid negative result \u00b7 Red: request failure",
+        25
+      ]
+    },
+    {
+      "op": "text",
+      "args": [
+        70,
+        2035,
+        "Installed hardware fit only: no PCI/model compatibility check, free-GPU reservation, scheduling guarantee or model-startup validation.",
+        25
+      ]
+    }
+  ]
+}

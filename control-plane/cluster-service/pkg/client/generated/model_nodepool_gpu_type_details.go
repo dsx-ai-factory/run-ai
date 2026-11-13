@@ -29,6 +29,8 @@ type NodepoolGpuTypeDetails struct {
 	GpuMemoryBytes *int64 `json:"gpuMemoryBytes,omitempty"`
 	// Total number of GPU devices of this type across the node pool's nodes.
 	TotalDevices int32 `json:"totalDevices"`
+	// Largest installed GPU count on a single node for this exact GPU type and per-device memory capacity. Not a sum across nodes or a free-device count. Omitted when per-node count evidence is unavailable.
+	MaxDevicesPerNode *int64 `json:"maxDevicesPerNode,omitempty"`
 }
 
 type _NodepoolGpuTypeDetails NodepoolGpuTypeDetails
@@ -132,6 +134,38 @@ func (o *NodepoolGpuTypeDetails) SetTotalDevices(v int32) {
 	o.TotalDevices = v
 }
 
+// GetMaxDevicesPerNode returns the MaxDevicesPerNode field value if set, zero value otherwise.
+func (o *NodepoolGpuTypeDetails) GetMaxDevicesPerNode() int64 {
+	if o == nil || IsNil(o.MaxDevicesPerNode) {
+		var ret int64
+		return ret
+	}
+	return *o.MaxDevicesPerNode
+}
+
+// GetMaxDevicesPerNodeOk returns a tuple with the MaxDevicesPerNode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *NodepoolGpuTypeDetails) GetMaxDevicesPerNodeOk() (*int64, bool) {
+	if o == nil || IsNil(o.MaxDevicesPerNode) {
+		return nil, false
+	}
+	return o.MaxDevicesPerNode, true
+}
+
+// HasMaxDevicesPerNode returns a boolean if a field has been set.
+func (o *NodepoolGpuTypeDetails) HasMaxDevicesPerNode() bool {
+	if o != nil && !IsNil(o.MaxDevicesPerNode) {
+		return true
+	}
+
+	return false
+}
+
+// SetMaxDevicesPerNode gets a reference to the given int64 and assigns it to the MaxDevicesPerNode field.
+func (o *NodepoolGpuTypeDetails) SetMaxDevicesPerNode(v int64) {
+	o.MaxDevicesPerNode = &v
+}
+
 func (o NodepoolGpuTypeDetails) MarshalJSON() ([]byte, error) {
 	toSerialize, err := o.ToMap()
 	if err != nil {
@@ -147,6 +181,9 @@ func (o NodepoolGpuTypeDetails) ToMap() (map[string]interface{}, error) {
 		toSerialize["gpuMemoryBytes"] = o.GpuMemoryBytes
 	}
 	toSerialize["totalDevices"] = o.TotalDevices
+	if !IsNil(o.MaxDevicesPerNode) {
+		toSerialize["maxDevicesPerNode"] = o.MaxDevicesPerNode
+	}
 	return toSerialize, nil
 }
 

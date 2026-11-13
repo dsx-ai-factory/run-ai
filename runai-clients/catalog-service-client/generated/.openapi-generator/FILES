@@ -8,6 +8,7 @@ api_helm_repos.go
 api_images.go
 api_inferences.go
 api_registries.go
+api_right_sizing.go
 api_settings.go
 client.go
 configuration.go
@@ -35,11 +36,18 @@ docs/ImageTags.md
 docs/ImagesAPI.md
 docs/ImagesListResponse.md
 docs/InferencesAPI.md
+docs/Recommendation.md
+docs/RecommendationAllocationType.md
+docs/RecommendationRequest.md
+docs/RecommendationResponse.md
+docs/RecommendationResult.md
+docs/RecommendationStatus.md
 docs/RegistriesAPI.md
 docs/RegistryIntegration.md
 docs/RegistryIntegrationCreationRequest.md
 docs/RegistryIntegrationListResponse.md
 docs/RegistryIntegrationUpdateRequest.md
+docs/RightSizingAPI.md
 docs/ScopeType.md
 docs/SettingsAPI.md
 docs/SubmissionError.md
@@ -67,6 +75,12 @@ model_hugging_face_model_item.go
 model_hugging_face_model_search_results.go
 model_image_tags.go
 model_images_list_response.go
+model_recommendation.go
+model_recommendation_allocation_type.go
+model_recommendation_request.go
+model_recommendation_response.go
+model_recommendation_result.go
+model_recommendation_status.go
 model_registry_integration.go
 model_registry_integration_creation_request.go
 model_registry_integration_list_response.go
@@ -80,5 +94,6 @@ test/api_helm_repos_test.go
 test/api_images_test.go
 test/api_inferences_test.go
 test/api_registries_test.go
+test/api_right_sizing_test.go
 test/api_settings_test.go
 utils.go
