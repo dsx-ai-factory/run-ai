@@ -884,7 +884,43 @@ var _ = Describe("TestPVCAsset", func() {
 			createHttpResp := httptest.NewRecorder()
 			router.ServeHTTP(createHttpResp, createHttpReq)
 			Expect(createHttpResp.Code).To(Equal(http.StatusConflict))
-			Expect(createHttpResp.Body.String()).To(ContainSubstring("already exists in the project scope in the cluster"))
+			body := createHttpResp.Body.String()
+			Expect(body).To(ContainSubstring("PersistentVolumeClaim named '" + claimName + "' already exists in the cluster"))
+			Expect(body).To(ContainSubstring(fmt.Sprintf("for project %d", randoms.ProjectId)))
+			Expect(body).To(ContainSubstring("(origin: assets)"))
+			Expect(body).To(ContainSubstring("choose another claimName"))
+			Expect(body).NotTo(ContainSubstring("existingPvc=true"))
+			Expect(body).NotTo(ContainSubstring("dataSharing"))
+
+			// Reset mock to avoid affecting other tests
+			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient())
+		})
+
+		It("should point to attaching when the claim name belongs to an existing cluster PVC", func() {
+			claimName := "existing-k8s-pvc-" + testutils.RandString(10)
+
+			// Mock k8s tracker to return a PVC with origin existing for this claim name
+			mockPvcReq := testing.BuildRandomProjectPVCAsset(randoms)
+			mockPvcReq.Spec.ClaimName = convutils.Ref(claimName)
+			mockPvcReq.Spec.ExistingPvc = convutils.Ref(true)
+			mockTracker := k8sObjectsTracker.NewSimpleMockClient().WithPvc(randoms.ClusterId, &mockPvcReq, nil)
+			k8sObjectsTracker.SetMock(mockTracker)
+
+			pvcReq := testing.BuildRandomProjectPVCAsset(randoms)
+			pvcReq.Meta.Name = "new-pvc-asset"
+			pvcReq.Spec.ClaimName = convutils.Ref(claimName)
+
+			createHttpReq, err := http.NewRequest("POST", urlPVC, makePayload(pvcReq))
+			Expect(err).To(BeNil())
+			createHttpReq.Header = *headerForAdmin(randoms)
+
+			createHttpResp := httptest.NewRecorder()
+			router.ServeHTTP(createHttpResp, createHttpReq)
+			Expect(createHttpResp.Code).To(Equal(http.StatusConflict))
+			body := createHttpResp.Body.String()
+			Expect(body).To(ContainSubstring("(origin: existing)"))
+			Expect(body).To(ContainSubstring("use existingPvc=true without claimInfo and with dataSharing disabled to attach it"))
+			Expect(body).To(ContainSubstring("choose another claimName"))
 
 			// Reset mock to avoid affecting other tests
 			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient())
