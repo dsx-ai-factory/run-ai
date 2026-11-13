@@ -244,6 +244,48 @@ func TestDialRegistryUsesCheckedAddress(t *testing.T) {
 	require.Error(t, err)
 }
 
+func TestDialRegistryFallsBackToNextCheckedAddress(t *testing.T) {
+	lookups := 0
+	var dialed []string
+	clientConn, serverConn := net.Pipe()
+	t.Cleanup(func() {
+		_ = clientConn.Close()
+		_ = serverConn.Close()
+	})
+	client := &ngcClient{
+		lookupHost: func(context.Context, string) ([]net.IP, error) {
+			lookups++
+			return []net.IP{net.ParseIP("2001:db8::1"), net.ParseIP("8.8.8.8")}, nil
+		},
+		dialContext: func(_ context.Context, _ string, addr string) (net.Conn, error) {
+			dialed = append(dialed, addr)
+			if len(dialed) == 1 {
+				return nil, fmt.Errorf("unreachable")
+			}
+			return clientConn, nil
+		},
+	}
+	conn, err := client.dialRegistry(context.Background(), "tcp", "registry.example:443")
+	require.NoError(t, err)
+	require.Equal(t, clientConn, conn)
+	assert.Equal(t, []string{"[2001:db8::1]:443", "8.8.8.8:443"}, dialed)
+	assert.Equal(t, 1, lookups)
+
+	canceled, cancel := context.WithCancel(context.Background())
+	cancel()
+	stopped := &ngcClient{
+		lookupHost: func(context.Context, string) ([]net.IP, error) {
+			return []net.IP{net.ParseIP("8.8.8.8"), net.ParseIP("1.1.1.1")}, nil
+		},
+		dialContext: func(context.Context, string, string) (net.Conn, error) {
+			t.Fatal("dialed after the deadline")
+			return nil, nil
+		},
+	}
+	_, err = stopped.dialRegistry(canceled, "tcp", "registry.example:443")
+	require.Error(t, err)
+}
+
 func TestRegistryClientBlocksRedirectToLoopback(t *testing.T) {
 	client := newRegistryHTTPClient(&ngcClient{}, time.Second)
 	req, err := http.NewRequest(http.MethodGet, "http://127.0.0.1/next", nil)

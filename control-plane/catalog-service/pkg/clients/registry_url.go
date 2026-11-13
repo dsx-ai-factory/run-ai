@@ -93,14 +93,14 @@ func (c *ngcClient) lookupRegistryIPs(ctx context.Context, host string) ([]net.I
 func (c *ngcClient) dialRegistry(ctx context.Context, network, addr string) (net.Conn, error) {
 	host, port, err := net.SplitHostPort(addr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parse registry address: %w", err)
 	}
 	if blockedRegistryHost(host) {
 		return nil, fmt.Errorf("registry host is not allowed")
 	}
 	ips, err := c.lookupRegistryIPs(ctx, host)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("resolve registry host: %w", err)
 	}
 	for _, ip := range ips {
 		if blockedRegistryIP(ip) {
@@ -110,11 +110,29 @@ func (c *ngcClient) dialRegistry(ctx context.Context, network, addr string) (net
 	if len(ips) == 0 {
 		return nil, fmt.Errorf("registry host resolved to no addresses")
 	}
-	target := net.JoinHostPort(ips[0].String(), port)
-	if c.dialContext != nil {
-		return c.dialContext(ctx, network, target)
+
+	// One lookup, then each address that passed it. The request context is
+	// the deadline for every attempt, so a later address is not dialed after
+	// the caller has given up.
+	dialer := &net.Dialer{Timeout: 10 * time.Second}
+	var lastErr error
+	for _, ip := range ips {
+		if err = ctx.Err(); err != nil {
+			return nil, fmt.Errorf("dial registry: %w", err)
+		}
+		target := net.JoinHostPort(ip.String(), port)
+		var conn net.Conn
+		if c.dialContext != nil {
+			conn, err = c.dialContext(ctx, network, target)
+		} else {
+			conn, err = dialer.DialContext(ctx, network, target)
+		}
+		if err == nil {
+			return conn, nil
+		}
+		lastErr = err
 	}
-	return (&net.Dialer{Timeout: 10 * time.Second}).DialContext(ctx, network, target)
+	return nil, fmt.Errorf("dial registry: %w", lastErr)
 }
 
 func blockedRegistryHost(host string) bool {
