@@ -890,6 +890,7 @@ var _ = Describe("TestPVCAsset", func() {
 			Expect(body).To(ContainSubstring("(origin: assets)"))
 			Expect(body).To(ContainSubstring("choose another claimName"))
 			Expect(body).NotTo(ContainSubstring("existingPvc=true"))
+			Expect(body).NotTo(ContainSubstring("dataSharing"))
 
 			// Reset mock to avoid affecting other tests
 			k8sObjectsTracker.SetMock(k8sObjectsTracker.NewSimpleMockClient())
@@ -918,7 +919,7 @@ var _ = Describe("TestPVCAsset", func() {
 			Expect(createHttpResp.Code).To(Equal(http.StatusConflict))
 			body := createHttpResp.Body.String()
 			Expect(body).To(ContainSubstring("(origin: existing)"))
-			Expect(body).To(ContainSubstring("use existingPvc=true without claimInfo to attach it"))
+			Expect(body).To(ContainSubstring("use existingPvc=true without claimInfo and with dataSharing disabled to attach it"))
 			Expect(body).To(ContainSubstring("choose another claimName"))
 
 			// Reset mock to avoid affecting other tests

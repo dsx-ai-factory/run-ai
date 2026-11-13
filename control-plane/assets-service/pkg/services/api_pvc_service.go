@@ -742,8 +742,9 @@ func validatePvcAssetVsClusterResource(ctx context.Context, meta *dbmodel.AssetM
 // validateClaimNameVsClusterResource checks if a PVC with the given claim name already exists in the cluster.
 // This is used to prevent creating a non-existing PVC asset when a PVC with that name already exists in the cluster.
 // The conflict error names the tracked PVC's scope id and origin, so callers can tell it apart from the asset-to-asset
-// claim name conflict. It points to existingPvc=true without claimInfo only when the origin allows attaching (the same
-// rule as validatePvcAssetVsClusterResource); otherwise it only suggests another claimName.
+// claim name conflict. It points to existingPvc=true without claimInfo and with dataSharing disabled (both are rejected
+// by validatePvcSpec when existingPvc is true) only when the origin allows attaching (the same rule as
+// validatePvcAssetVsClusterResource); otherwise it only suggests another claimName.
 func validateClaimNameVsClusterResource(ctx context.Context, meta *dbmodel.AssetMeta, claimName *string) *api.Error {
 	if claimName == nil {
 		return nil
@@ -760,7 +761,7 @@ func validateClaimNameVsClusterResource(ctx context.Context, meta *dbmodel.Asset
 
 	if len(resp.Pvcs) > 0 {
 		origin := "unknown"
-		guidance := "use existingPvc=true without claimInfo to attach it or choose another claimName"
+		guidance := "use existingPvc=true without claimInfo and with dataSharing disabled to attach it or choose another claimName"
 		if convutils.HasValue(resp.Pvcs[0].Origin) {
 			trackedOrigin := *resp.Pvcs[0].Origin.Get()
 			origin = string(trackedOrigin)
