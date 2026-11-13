@@ -30,19 +30,21 @@ func GetEnvironmentVariablesDisplay(environmentVariables *map[string]string, col
 	var envVarsBuilder strings.Builder
 	envVarsBuilder.WriteString("[")
 
+	keys := lo.Keys(*environmentVariables)
+	slices.Sort(keys)
+	// Render only the first MaxDisplayEnvVarsCount sorted keys; the notice below keeps the full total.
+	displayedKeys := keys[:min(len(keys), MaxDisplayEnvVarsCount)]
+
 	maxKeyLength := 0
-	for key := range *environmentVariables {
+	for _, key := range displayedKeys {
 		if len(key) > maxKeyLength {
 			maxKeyLength = len(key)
 		}
 	}
 
-	keys := lo.Keys(*environmentVariables)
-	slices.Sort(keys)
-
 	valueColumnIndent := strings.Repeat(" ", columnPadding+1)
 
-	for i, key := range keys {
+	for i, key := range displayedKeys {
 		keyValuePart := fmt.Sprintf("%-*s: %s", maxKeyLength, key, (*environmentVariables)[key])
 		if i == 0 {
 			envVarsBuilder.WriteString(keyValuePart)
