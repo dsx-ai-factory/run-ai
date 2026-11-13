@@ -46,6 +46,22 @@ func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) run
 	}
 
 	if status != "False" {
+		// Ready is also True when the fractioning daemons have no node to run on (their node selector
+		// matches none), and then no node can run fractions: report that instead of "available", or
+		// every GPU node shows a missing fractions prerequisite and counts as not ready.
+		noTargetNodes, err := daemonsHaveNoTargetNodes(config)
+		if err != nil {
+			return runv1.PublicStatus{
+				Available: runv1.AvailableStatus(false),
+				Reason:    fmt.Sprintf("unable to read GpuFractioningConfig %q conditions: %v", gpuFractioningConfigName, err),
+			}
+		}
+		if noTargetNodes {
+			return runv1.PublicStatus{
+				Available: runv1.AvailableStatus(false),
+				Reason:    "GPU fractions are not deployed on any node: kai-gpu-fractioning has no target nodes",
+			}
+		}
 		return runv1.PublicStatus{Available: runv1.AvailableStatus(true)}
 	}
 
@@ -60,6 +76,49 @@ func CheckGpuFractioningReadiness(ctx context.Context, reader client.Reader) run
 }
 
 var validConditionStatuses = map[string]bool{"True": true, "False": true, "Unknown": true}
+
+const noTargetNodesReason = "NoTargetNodes"
+
+// daemonsHaveNoTargetNodes reports whether both fractioning daemons have no node to run on.
+func daemonsHaveNoTargetNodes(config *unstructured.Unstructured) (bool, error) {
+	fractiondReason, err := conditionReason(config, "FractiondReady")
+	if err != nil {
+		return false, err
+	}
+	mpsdReason, err := conditionReason(config, "MpsdReady")
+	if err != nil {
+		return false, err
+	}
+	return fractiondReason == noTargetNodesReason && mpsdReason == noTargetNodesReason, nil
+}
+
+// conditionReason returns the reason of the condition of that type, or "" when there is none; a type or
+// reason that is not a string is an error.
+func conditionReason(config *unstructured.Unstructured, conditionType string) (string, error) {
+	conditions, ok, err := unstructured.NestedSlice(config.Object, "status", "conditions")
+	if err != nil || !ok {
+		return "", err
+	}
+	for _, c := range conditions {
+		condMap, ok := c.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		condType, _, err := unstructured.NestedString(condMap, "type")
+		if err != nil {
+			return "", fmt.Errorf("condition type: %w", err)
+		}
+		if condType != conditionType {
+			continue
+		}
+		reason, _, err := unstructured.NestedString(condMap, "reason")
+		if err != nil {
+			return "", fmt.Errorf("condition %s reason: %w", conditionType, err)
+		}
+		return reason, nil
+	}
+	return "", nil
+}
 
 func readyCondition(config *unstructured.Unstructured) (status, message string, found bool) {
 	conditions, ok, err := unstructured.NestedSlice(config.Object, "status", "conditions")
