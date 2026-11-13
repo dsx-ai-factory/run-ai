@@ -7,13 +7,18 @@ package dra
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
 	resourcev1 "k8s.io/api/resource/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	draclient "k8s.io/dynamic-resource-allocation/client"
+	"k8s.io/dynamic-resource-allocation/resourceclaim"
+	"k8s.io/utils/ptr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logger "sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -42,15 +47,91 @@ func NewDRAParser(cachedReader client.Reader, kubeClient kubernetes.Interface) *
 	}
 }
 
-// ResolveDRAGpuCount resolves the total NVIDIA GPU count from pod-level resource claims
-// by fetching the referenced ResourceClaim or ResourceClaimTemplate objects from the cluster.
+// ErrClaimDeleted reports that a claim or template of a finished Pod no longer exists.
+// Kubernetes can delete generated claims once their Pod finishes, so this is permanent and callers must not retry.
+var ErrClaimDeleted = errors.New("the claim or template of a finished Pod no longer exists")
+
+// ResolvePodRequestedGpuCount returns the NVIDIA GPU count requested through DRA.
+// It reads claims referenced directly by the Pod, or claims created from
+// templates. Before a generated claim is named in the Pod's status, it reads
+// the template. Each claim is counted once, and lookup errors are returned.
+// A claim or template that is missing for an active Pod is a lookup error to retry; for a Pod that
+// finished (Succeeded or Failed) the error wraps ErrClaimDeleted, which must not be retried.
+func (p *DRAParser) ResolvePodRequestedGpuCount(ctx context.Context, pod *corev1.Pod) (int64, error) {
+	var totalGpuCount int64
+	countedClaims := map[string]struct{}{}
+	for _, claimRef := range pod.Spec.ResourceClaims {
+		claimKey, claimSpec, err := p.fetchPodClaimSpec(ctx, pod, claimRef)
+		if err != nil {
+			return 0, err
+		}
+		if claimSpec == nil {
+			continue
+		}
+		if _, found := countedClaims[claimKey]; found {
+			continue
+		}
+		countedClaims[claimKey] = struct{}{}
+		totalGpuCount += extractGpuCountFromClaimSpec(*claimSpec)
+	}
+	return totalGpuCount, nil
+}
+
+// ResolveDRAGpuCount resolves the total NVIDIA GPU count from pod-level resource claims.
+// Deprecated: prefer ResolvePodRequestedGpuCount, which de-duplicates claims and returns errors.
 func (p *DRAParser) ResolveDRAGpuCount(ctx context.Context, namespace string, podResourceClaims []corev1.PodResourceClaim) int64 {
 	var totalGpuCount int64
 	for _, prc := range podResourceClaims {
-		gpuCount := p.ResolveNamedClaimGpuCount(ctx, namespace, prc.ResourceClaimName, prc.ResourceClaimTemplateName)
-		totalGpuCount += gpuCount
+		totalGpuCount += p.ResolveNamedClaimGpuCount(ctx, namespace, prc.ResourceClaimName, prc.ResourceClaimTemplateName)
 	}
 	return totalGpuCount
+}
+
+// fetchPodClaimSpec reads the requested resource specification from a claim
+// or template. It also returns a key used to prevent counting the same request twice.
+func (p *DRAParser) fetchPodClaimSpec(ctx context.Context, pod *corev1.Pod, claimRef corev1.PodResourceClaim) (string, *resourcev1.ResourceClaimSpec, error) {
+	claimName, mustCheckOwner, err := resourceclaim.Name(pod, &claimRef)
+	if err != nil && !errors.Is(err, resourceclaim.ErrClaimNotFound) {
+		return "", nil, err
+	}
+
+	if err == nil {
+		if claimName == nil {
+			// Kubernetes intentionally did not create a claim for this reference.
+			return "", nil, nil
+		}
+		// A claim that is named but not readable yet (for example, not in the cache) is returned as an error so the caller retries.
+		claim, getErr := p.draClient.ResourceClaims(pod.Namespace).Get(ctx, *claimName, metav1.GetOptions{})
+		if getErr != nil {
+			return "", nil, claimReadError(pod, "ResourceClaim", *claimName, getErr)
+		}
+		if mustCheckOwner {
+			if ownerErr := resourceclaim.IsForPod(pod, claim); ownerErr != nil {
+				return "", nil, ownerErr
+			}
+		}
+		return "claim/" + *claimName, &claim.Spec, nil
+	}
+
+	// The Pod's status does not name a generated claim yet, so the template describes the request.
+	if templateName := ptr.Deref(claimRef.ResourceClaimTemplateName, ""); templateName != "" {
+		template, getErr := p.draClient.ResourceClaimTemplates(pod.Namespace).Get(ctx, templateName, metav1.GetOptions{})
+		if getErr != nil {
+			return "", nil, claimReadError(pod, "ResourceClaimTemplate", templateName, getErr)
+		}
+		return "template/" + claimRef.Name, &template.Spec.Spec, nil
+	}
+
+	return "", nil, nil
+}
+
+// claimReadError classifies a failed read of a claim or template. A missing object of a finished Pod is
+// permanent (ErrClaimDeleted). Every other failure, including a missing object of an active Pod, is a lookup error to retry.
+func claimReadError(pod *corev1.Pod, kind, name string, err error) error {
+	if apierrors.IsNotFound(err) && (pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed) {
+		return fmt.Errorf("%s %s/%s: %w", kind, pod.Namespace, name, ErrClaimDeleted)
+	}
+	return fmt.Errorf("getting %s %s/%s: %w", kind, pod.Namespace, name, err)
 }
 
 // ResolveNamedClaimGpuCount resolves GPU count from an explicit ResourceClaim name or ResourceClaimTemplate name.

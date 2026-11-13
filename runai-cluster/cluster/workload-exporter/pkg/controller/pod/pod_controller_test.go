@@ -11,6 +11,7 @@ import (
 	commonconstants "github.com/dsx-ai-factory/run-ai/runai-cluster/cluster/common/constants"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 func makeRunaiPod(labels map[string]string, annotations map[string]string) *corev1.Pod {
@@ -137,6 +138,73 @@ func TestFilterUpdateEvents_ElementLabels(t *testing.T) {
 			got := filterUpdateEvents(tt.old, tt.new)
 			if got != tt.want {
 				t.Errorf("filterUpdateEvents() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestFilterUpdateEvents_AllocationAnnotations(t *testing.T) {
+	tests := []struct {
+		name            string
+		oldAnnotations  map[string]string
+		newAnnotations  map[string]string
+		shouldReconcile bool
+	}{
+		{"GPU allocation annotation added: triggers reconciliation",
+			map[string]string{}, map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, true},
+		{"GPU allocation annotation changed: triggers reconciliation",
+			map[string]string{commonconstants.PodAllocatedGpusAnnotation: "1"}, map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, true},
+		{"GPU allocation annotation removed: triggers reconciliation",
+			map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, map[string]string{}, true},
+		{"GPU memory allocation annotation added: triggers reconciliation",
+			map[string]string{}, map[string]string{commonconstants.PodAllocatedGpuMemoryAnnotation: "1000"}, true},
+		{"GPU memory allocation annotation changed: triggers reconciliation",
+			map[string]string{commonconstants.PodAllocatedGpuMemoryAnnotation: "1000"}, map[string]string{commonconstants.PodAllocatedGpuMemoryAnnotation: "2000"}, true},
+		{"GPU memory allocation annotation removed: triggers reconciliation",
+			map[string]string{commonconstants.PodAllocatedGpuMemoryAnnotation: "1000"}, map[string]string{}, true},
+		{"Allocation annotations unchanged: does not trigger reconciliation",
+			map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, map[string]string{commonconstants.PodAllocatedGpusAnnotation: "2"}, false},
+		{"Unrelated annotation changed: does not trigger reconciliation",
+			map[string]string{"foo": "a"}, map[string]string{"foo": "b"}, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := filterUpdateEvents(makeRunaiPod(nil, tt.oldAnnotations), makeRunaiPod(nil, tt.newAnnotations)); got != tt.shouldReconcile {
+				t.Errorf("filterUpdateEvents() = %v, want %v", got, tt.shouldReconcile)
+			}
+		})
+	}
+}
+
+func TestFilterUpdateEvents_ResourceClaimStatuses(t *testing.T) {
+	generatedClaimStatuses := func(claimName string) []corev1.PodResourceClaimStatus {
+		return []corev1.PodResourceClaimStatus{{Name: "gpu", ResourceClaimName: ptr.To(claimName)}}
+	}
+	tests := []struct {
+		name            string
+		oldStatuses     []corev1.PodResourceClaimStatus
+		newStatuses     []corev1.PodResourceClaimStatus
+		shouldReconcile bool
+	}{
+		{"Generated claim name recorded in the Pod status: triggers reconciliation",
+			nil, generatedClaimStatuses("pod-gpu-abcde"), true},
+		{"Generated claim name changed: triggers reconciliation",
+			generatedClaimStatuses("pod-gpu-abcde"), generatedClaimStatuses("pod-gpu-fghij"), true},
+		{"Generated claim status removed: triggers reconciliation",
+			generatedClaimStatuses("pod-gpu-abcde"), nil, true},
+		{"Generated claim status unchanged: does not trigger reconciliation",
+			generatedClaimStatuses("pod-gpu-abcde"), generatedClaimStatuses("pod-gpu-abcde"), false},
+		{"No claim statuses on either Pod: does not trigger reconciliation",
+			nil, nil, false},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			oldPod := makeRunaiPod(nil, nil)
+			oldPod.Status.ResourceClaimStatuses = tt.oldStatuses
+			newPod := makeRunaiPod(nil, nil)
+			newPod.Status.ResourceClaimStatuses = tt.newStatuses
+			if got := filterUpdateEvents(oldPod, newPod); got != tt.shouldReconcile {
+				t.Errorf("filterUpdateEvents() = %v, want %v", got, tt.shouldReconcile)
 			}
 		})
 	}
