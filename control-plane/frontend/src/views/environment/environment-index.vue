@@ -300,10 +300,7 @@ export default defineComponent({
       return this.permissionStore.hasPermission(ResourceType.Environments, Action.Delete);
     },
     disableDelete(): boolean {
-      if (!this.canDeleteEnvironment) return true;
-      if (this.selectedEnvironments[0]?.meta.scope === Scope.System) return true;
-      const usedByTemplates = !!this.selectedEnvironments[0]?.usedBy?.templates?.length;
-      return usedByTemplates;
+      return !this.canDeleteEnvironment || this.selectedEnvironments[0]?.meta.scope === Scope.System;
     },
     disableRename(): boolean {
       return !this.permissionStore.hasPermission(ResourceType.Environments, Action.Update);
@@ -319,12 +316,12 @@ export default defineComponent({
       return "Action for the selected environment is not authorized";
     },
     deleteBtnTooltip(): string {
-      if (!this.canCreateEnvironment) {
+      if (!this.canDeleteEnvironment) {
         return this.noActionPermissionText;
       } else if (this.selectedEnvironments[0]?.meta.scope === Scope.System) {
         return "The selected environment can’t be deleted";
       } else {
-        return "The selected environment is being used by at least one template and therefore can't be deleted.";
+        return "";
       }
     },
     disableClone(): boolean {

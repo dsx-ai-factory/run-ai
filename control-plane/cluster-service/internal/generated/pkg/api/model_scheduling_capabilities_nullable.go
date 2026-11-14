@@ -44,6 +44,12 @@ type SchedulingCapabilitiesNullable struct {
 	//CpuQuota *bool `json:"cpuQuota,omitempty"`
 	CpuQuota *bool `json:"cpuQuota,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// Whether to allow GPU, CPU and memory limits for the nodepool's resources. Only allowed when quota=true.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Limits *bool `json:"limits,omitempty"`
+	Limits *bool `json:"limits,omitempty" gorm:""`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
 // AssertSchedulingCapabilitiesNullableRequired checks if the required fields are not zero-ed
@@ -53,6 +59,11 @@ func AssertSchedulingCapabilitiesNullableRequired(obj SchedulingCapabilitiesNull
 
 // AssertSchedulingCapabilitiesNullableConstraints checks if the values respects the defined constraints
 func AssertSchedulingCapabilitiesNullableConstraints(obj SchedulingCapabilitiesNullable) error {
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

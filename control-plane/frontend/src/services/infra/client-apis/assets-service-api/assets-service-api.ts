@@ -17,7 +17,6 @@ import {
   S3Api,
   SecretApi,
   SynchronizationApi,
-  TemplateApi,
   TrainingsApi,
   WorkloadApi,
   WorkspacesApi,
@@ -36,7 +35,6 @@ class AssetsServiceApi {
   dataSourceApi: DatasourcesApi;
   computeApi: ComputeApi;
   credentialApi: CredentialsApi;
-  templateApi: TemplateApi;
   workloadApi: WorkloadApi;
   workspaceApi: WorkspacesApi;
   trainingApi: TrainingsApi;
@@ -60,7 +58,6 @@ class AssetsServiceApi {
     this.dataSourceApi = new DatasourcesApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.computeApi = new ComputeApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.credentialApi = new CredentialsApi(this.configuration, this.baseUrl, authenticatedAxios);
-    this.templateApi = new TemplateApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.workloadApi = new WorkloadApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.workspaceApi = new WorkspacesApi(this.configuration, this.baseUrl, authenticatedAxios);
     this.trainingApi = new TrainingsApi(this.configuration, this.baseUrl, authenticatedAxios);

@@ -53,7 +53,7 @@ var _ = Describe("ApiNodepoolsSettings - node pool settings from package", Order
 		orgClient.On("NodePoolCreated", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		orgClient.On("NodePoolDeleted", mock.Anything, mock.Anything, mock.Anything).Return(nil)
 		orgClient.On("DefaultNodePoolCreated", mock.Anything, mock.Anything, mock.Anything).Return(nil)
-		nodepoolService = services.NewNodePoolsApiService(tenantSettingsClient, orgClient)
+		nodepoolService = services.NewNodePoolsApiService(tenantSettingsClient, orgClient, nil)
 
 		cluster, err := dao.CreateCluster(ctx, &models.Cluster{
 			Name:     "cluster-for-np-setting",

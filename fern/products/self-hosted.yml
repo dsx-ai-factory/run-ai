@@ -415,11 +415,8 @@ navigation:
     - section: Workload Templates
       path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/README.md
       contents:
-      - section: Workspace Templates
+      - page: Workspace Templates
         path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/README.md
-        contents:
-        - page: Workspace Templates (Legacy)
-          path: ../../docs/workloads-in-nvidia-run-ai/workload-templates/workspace-templates/workspace-templates-legacy.md
       - section: Training Templates
         contents:
         - page: Standard Training Templates
@@ -751,8 +748,6 @@ navigation:
             summary: ../../docs/rest-api/self-hosted/tags/config-map.md
         - secret:
             summary: ../../docs/rest-api/self-hosted/tags/secret.md
-        - template:
-            summary: ../../docs/rest-api/self-hosted/tags/template.md
       - section: Policies
         contents:
         - policy:

@@ -1047,7 +1047,6 @@ type ApiGetInferenceMergedRequest struct {
 	ApiService InferencesAPI
 	projectId  *string
 	workloadId *string
-	templateId *string
 }
 
 // The id of the project
@@ -1059,12 +1058,6 @@ func (r ApiGetInferenceMergedRequest) ProjectId(projectId string) ApiGetInferenc
 // The id of the workload
 func (r ApiGetInferenceMergedRequest) WorkloadId(workloadId string) ApiGetInferenceMergedRequest {
 	r.workloadId = &workloadId
-	return r
-}
-
-// The id of the template
-func (r ApiGetInferenceMergedRequest) TemplateId(templateId string) ApiGetInferenceMergedRequest {
-	r.templateId = &templateId
 	return r
 }
 
@@ -1115,9 +1108,6 @@ func (a *InferencesAPIService) GetInferenceMergedExecute(r ApiGetInferenceMerged
 	}
 	if r.workloadId != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "workloadId", r.workloadId, "form", "")
-	}
-	if r.templateId != nil {
-		parameterAddToHeaderOrQuery(localVarQueryParams, "templateId", r.templateId, "form", "")
 	}
 	// to determine the Content-Type header
 	localVarHTTPContentTypes := []string{}

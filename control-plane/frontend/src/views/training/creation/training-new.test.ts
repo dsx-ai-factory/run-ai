@@ -14,6 +14,8 @@ import { Quasar } from "quasar";
 import { DistributedFramework } from "@/swagger-models/assets-service-client";
 import { assetService } from "@/services/control-plane/asset.service/asset.service";
 import { TRAINING_ROUTE_NAMES } from "@/router/training.routes/training.routes.names";
+import { workloadTemplateService } from "@/services/control-plane/workload-template.service/workload-template.service";
+import { useSettingStore } from "@/stores/setting.store";
 import { useClusterStore } from "@/stores/cluster.store";
 import { WORKLOAD_ROUTE_NAMES } from "@/router/workloads.routes/workloads.routes.names";
 import { requestToLeave } from "@/services/infra/router.service/router.service";
@@ -38,12 +40,15 @@ vi.mock("@/services/infra/unleash.service/unleash.service");
 vi.mock("@/services/control-plane/workload-template.service/workload-template.service");
 
 // Mock the useQuickSubmission composable
-vi.mock("@/composables/use-quick-submission.composable", () => ({
-  useQuickSubmission: vi.fn(() => ({
-    isLoading: { value: false },
-    onQuickSubmit: vi.fn(),
-  })),
-}));
+vi.mock("@/composables/use-quick-submission.composable", async () => {
+  const { ref } = await import("vue");
+  return {
+    useQuickSubmission: vi.fn(() => ({
+      isLoading: ref(false),
+      onQuickSubmit: vi.fn(),
+    })),
+  };
+});
 
 let pinia = createTestingPinia({ createSpy: vi.fn });
 let clusterStore = useClusterStore(pinia);
@@ -83,6 +88,15 @@ describe("training-new.vue", () => {
     });
 
     vi.mocked(clusterStore.getClusterById).mockReturnValue(clusters[0]);
+    vi.mocked(workloadTemplateService.trainingTemplatesList).mockResolvedValue({
+      entries: [],
+      pagination: { limit: 5 },
+    });
+    vi.mocked(workloadTemplateService.distributedTemplatesList).mockResolvedValue({
+      entries: [],
+      pagination: { limit: 5 },
+    });
+    vi.mocked(workloadTemplateService.templatesCount).mockResolvedValue(0);
     vi.mocked(trainingService.getTrainingMergedWithPolicy).mockResolvedValue(loadedTrainingMergedWithPolicy);
     vi.mocked(workloadService.canSubmitWorkload).mockReturnValue(null);
     setActivePinia(pinia);
@@ -116,16 +130,19 @@ describe("training-new.vue", () => {
   });
 
   test("if a project is not selected template and name sections are hidden", async () => {
-    expect(trainingNewCmp.find("[aid=template-section]").exists()).toBe(false);
+    expect(trainingNewCmp.find("[aid=template-section-v2]").exists()).toBe(false);
     expect(trainingNewCmp.find("[aid=training-name-section]").exists()).toBe(false);
   });
 
   test("selecting a project will reveal and template and name section", async () => {
+    useSettingStore(pinia).enableHybridSubmission = { value: true };
+    vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(true);
+    await trainingNewCmp.setData({ selectedClusterId: "test-cluster" });
     await flushPromises();
     const selectedProject = trainingAssetsEditMockedData.loadedProjectsMetasV2[0];
     await trainingNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
     await trainingNewCmp.vm.$nextTick();
-    expect(trainingNewCmp.find("[aid=template-section]").exists()).toBe(true);
+    expect(trainingNewCmp.find("[aid=template-section-v2]").exists()).toBe(true);
     expect(trainingNewCmp.find("[aid=training-name-section]").exists()).toBe(true);
   });
 
@@ -151,13 +168,16 @@ describe("training-new.vue", () => {
   });
 
   test("updates the templateId in the component data when a new value is emitted by template-section component", async () => {
+    useSettingStore(pinia).enableHybridSubmission = { value: true };
+    vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(true);
+    await trainingNewCmp.setData({ selectedClusterId: "test-cluster" });
     await flushPromises();
     const selectedProject = trainingAssetsEditMockedData.loadedProjectsMetasV2[0];
     await trainingNewCmp.find(`[aid=${selectedProject.name}-card]`).trigger("click"); // selecting a project to reveal the other sections
     await flushPromises();
     expect(trainingNewCmp.vm.selectedTemplateId).toBe("-1"); // the id for 'Start from scratch' which is automatically selected if there are no templates
     const newTemplateId = "test-id-1";
-    const nameSectionCmp = trainingNewCmp.findComponent<DefineComponent>("[aid=template-section]");
+    const nameSectionCmp = trainingNewCmp.findComponent<DefineComponent>("[aid=template-section-v2]");
 
     nameSectionCmp.vm.$emit("template-changed", newTemplateId);
     await trainingNewCmp.vm.$nextTick();
@@ -207,15 +227,36 @@ describe("training-new.vue", () => {
     expect(trainingNewCmp.vm.$router).toContainEqual(expectedPush);
   });
 
-  describe("Templates V2 Functionality", () => {
+  test.each([
+    { enabled: true, supported: true },
+    { enabled: false, supported: true },
+    { enabled: true, supported: false },
+  ])(
+    "loads flexible templates only when submission is supported ($enabled, $supported)",
+    async ({ enabled, supported }) => {
+      await flushPromises();
+      useSettingStore(pinia).enableHybridSubmission = { value: enabled };
+      vi.mocked(clusterStore.isClusterVersionSufficient).mockReturnValue(supported);
+      await trainingNewCmp.setData({ selectedClusterId: "compatibility-cluster", selectedProjectId: 123 });
+      const list = vi.fn().mockResolvedValue(undefined);
+      trainingNewCmp.vm.list = list;
+
+      await trainingNewCmp.vm.loadTemplates();
+
+      expect(list).toHaveBeenCalledTimes(enabled && supported ? 1 : 0);
+      expect(trainingNewCmp.find("[aid=template-section-v2]").exists()).toBe(enabled && supported);
+    },
+  );
+
+  describe("Flexible templates", () => {
     beforeEach(() => {
-      Object.defineProperty(trainingNewCmp.vm, "showTemplatesV2", {
+      Object.defineProperty(trainingNewCmp.vm, "isHybridSupported", {
         get: () => true,
         configurable: true,
       });
     });
 
-    test("loads flat templates when showTemplatesV2 is true and project is selected", async () => {
+    test("loads flat templates when isHybridSupported is true and project is selected", async () => {
       await flushPromises();
       // Mock the flat templates gallery functions
       const mockList = vi.fn().mockResolvedValue(undefined);
@@ -231,6 +272,7 @@ describe("training-new.vue", () => {
 
   describe("Workload Architecture Selection", () => {
     test("setDistributedDetails method sets distributed details correctly for distributed workload", async () => {
+      Object.defineProperty(trainingNewCmp.vm, "isHybridSupported", { get: () => true, configurable: true });
       trainingNewCmp.vm.setDistributedDetails(true);
 
       expect(trainingNewCmp.vm.selectedDistributedDetails).toEqual({
@@ -318,33 +360,6 @@ describe("training-new.vue", () => {
   });
 
   describe("Template Filtering and Loading", () => {
-    test("templatesFilter includes correct filters when distributed is selected", async () => {
-      const mockFramework = DistributedFramework.PyTorch;
-
-      trainingNewCmp.vm.selectedProjectId = 123;
-      trainingNewCmp.vm.setDistributedDetails(true);
-      trainingNewCmp.vm.setDistributedFramework(mockFramework);
-
-      const filter = trainingNewCmp.vm.templatesFilter;
-
-      expect(filter.projectId).toBe(123);
-      expect(filter.isTraining).toBe(true);
-      expect(filter.isDistributed).toBe(true);
-      expect(filter.distributedFramework).toBe(mockFramework);
-    });
-
-    test("templatesFilter does not include distributed filters when not distributed", async () => {
-      trainingNewCmp.vm.selectedProjectId = 123;
-      trainingNewCmp.vm.selectedDistributedDetails = null;
-
-      const filter = trainingNewCmp.vm.templatesFilter;
-
-      expect(filter.projectId).toBe(123);
-      expect(filter.isTraining).toBe(true);
-      expect(filter.isDistributed).toBeUndefined();
-      expect(filter.distributedFramework).toBeUndefined();
-    });
-
     test("onTemplatesListQueryChanged updates query and loads templates", async () => {
       const mockSetQuery = vi.fn();
       const mockLoadTemplates = vi.fn();
@@ -431,7 +446,7 @@ describe("training-new.vue", () => {
         },
       ]);
 
-      Object.defineProperty(trainingNewCmp.vm, "showTemplatesV2", {
+      Object.defineProperty(trainingNewCmp.vm, "isHybridSupported", {
         get: () => true,
         configurable: true,
       });

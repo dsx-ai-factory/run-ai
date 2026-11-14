@@ -74,7 +74,7 @@ func CreateRouter() chi.Router {
 	RevisionsApiService := services.NewRevisionsService()
 	RevisionsAPIController := api.NewRevisionsAPIController(RevisionsApiService)
 
-	TemplatesService := services_crud.NewTemplatesService(tenantSettingsClient)
+	TemplatesService := services_crud.NewTemplatesService()
 	TemplatesAPIController := api.NewWorkloadTemplatesAPIController(TemplatesService)
 
 	ApplicationsService := services.NewAIApplicationsService()

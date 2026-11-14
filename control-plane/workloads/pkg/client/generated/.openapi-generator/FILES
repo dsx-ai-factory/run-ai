@@ -200,7 +200,6 @@ docs/EmptyDirsDefaults.md
 docs/EmptyDirsRules.md
 docs/EnableHybridSubmissionSetting.md
 docs/EnablePoliciesSetting.md
-docs/EnableTemplatesV2Setting.md
 docs/Endpoint.md
 docs/EndpointSync.md
 docs/EndpointSyncAllOfSourceRef.md
@@ -232,7 +231,6 @@ docs/GetAvailablePrioritiesAndCategories200Response.md
 docs/GetEnableHybridSubmission.md
 docs/GetEnablePolicies.md
 docs/GetEnableSettingsValue.md
-docs/GetEnableTemplatesV2.md
 docs/GetGpuOverProvisioning.md
 docs/GetInferenceWorkloadRevisions200Response.md
 docs/GetRevisionPods200Response.md
@@ -830,7 +828,6 @@ model_empty_dirs_defaults.go
 model_empty_dirs_rules.go
 model_enable_hybrid_submission_setting.go
 model_enable_policies_setting.go
-model_enable_templates_v2_setting.go
 model_endpoint.go
 model_endpoint_sync.go
 model_endpoint_sync_all_of_source_ref.go
@@ -861,7 +858,6 @@ model_get_available_priorities_and_categories_200_response.go
 model_get_enable_hybrid_submission.go
 model_get_enable_policies.go
 model_get_enable_settings_value.go
-model_get_enable_templates_v2.go
 model_get_gpu_over_provisioning.go
 model_get_inference_workload_revisions_200_response.go
 model_get_revision_pods_200_response.go

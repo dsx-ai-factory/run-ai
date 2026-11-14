@@ -289,15 +289,13 @@ export default defineComponent({
       return this.permissionStore.hasPermission(ResourceType.ComputeResources, Action.Delete);
     },
     disableDelete(): boolean {
-      if (!this.canDeleteCompute) return true;
-      const usedByTemplates = !!this.selectedRows[0]?.usedBy?.templates?.length;
-      return usedByTemplates;
+      return !this.canDeleteCompute;
     },
     deleteBtnTooltip(): string {
       if (!this.canDeleteCompute) {
         return this.noActionPermissionText;
       } else {
-        return "The selected compute resource is being used by at least one template and therefore can't be deleted.";
+        return "";
       }
     },
     disableClone(): boolean {

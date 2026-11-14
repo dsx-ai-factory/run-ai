@@ -153,7 +153,6 @@ import { getPolicyViewDetails, type IPolicyViewDetails } from "@/utils/policy.ut
 import { type UnifiedPolicyInfoPerReplicaType, type UnifiedProjectInfo } from "@/swagger-models/workloads-client";
 import { useWorkloadStore } from "@/stores/workload.store";
 import { useDataSourceStore } from "@/stores/data-source.store";
-import { SettingKeys } from "@/models/setting.model";
 import {
   MIN_CLUSTER_VERSION_FOR_CONFIG_MAP_ENV_VAR,
   MIN_CLUSTER_VERSION_FOR_MULTI_FRACTION_GPU,
@@ -443,9 +442,6 @@ const TrainingHybrid = defineComponent({
       );
     },
 
-    supportsTemplatesV2(): boolean {
-      return this.settingStore.isFeatureEnabled(SettingKeys.EnableTemplatesV2);
-    },
     supportPreemptibility(): boolean {
       return this.clusterStore.isClusterVersionSufficient(
         this.trainingModel.clusterId,
@@ -537,7 +533,7 @@ const TrainingHybrid = defineComponent({
           clusterId,
         };
 
-        if (this.supportsTemplatesV2 && templateId) {
+        if (templateId) {
           request.templateId = templateId;
           this.triggerValidationOnStartUp = true;
         } else request.assetId = templateId;

@@ -397,9 +397,11 @@ func TestCreateIdp_SamlDryRun_ExpiredCertificateRejected(t *testing.T) {
 
 	response, err := testSubject.CreateIdp(ctx, request, "")
 
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	assert.Equal(t, http.StatusBadRequest, response.Code)
 	body := response.Body.(api.IdpPostResponse)
+	assert.Equal(t, "saml-idp", body.Alias)
+	assert.NotEmpty(t, body.SamlData.SigningCertificate)
 	assert.False(t, body.SamlData.CertificateExpirationDate.IsZero())
 	assert.True(t, body.SamlData.CertificateExpirationDate.Before(time.Now()))
 	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
@@ -415,8 +417,13 @@ func TestCreateIdp_ExpiredCertificateRejected(t *testing.T) {
 	metadata := samlMetadataWithCertificate(t, "https://idp.example.com", "https://idp.example.com/sso", expiredSigningCertificate(t))
 	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, base64.StdEncoding.EncodeToString(metadata)), "")
 
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	assert.Equal(t, http.StatusBadRequest, response.Code)
+	body := response.Body.(api.IdpPostResponse)
+	assert.Equal(t, "saml-idp", body.Alias)
+	assert.NotEmpty(t, body.SamlData.SigningCertificate)
+	assert.False(t, body.SamlData.CertificateExpirationDate.IsZero())
+	assert.True(t, body.SamlData.CertificateExpirationDate.Before(time.Now()))
 	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
 }
@@ -432,8 +439,12 @@ func TestCreateIdp_SamlDryRun_MetadataWithoutCertificate_Rejected(t *testing.T) 
 	request.DryRun = true
 	response, err := testSubject.CreateIdp(ctx, request, "")
 
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	assert.Equal(t, http.StatusBadRequest, response.Code)
+	body := response.Body.(api.IdpPostResponse)
+	assert.Equal(t, "saml-idp", body.Alias)
+	assert.Equal(t, "https://idp.example.com", body.SamlData.EntityId)
+	assert.Empty(t, body.SamlData.SigningCertificate)
 	iamMock.MockIdpService.AssertNotCalled(t, "CreateIdp")
 	iamMock.MockIdpService.AssertNotCalled(t, "GetIdpConfigFromFile")
 }
@@ -458,9 +469,9 @@ func TestCreateIdp_InvalidBase64MetadataFile(t *testing.T) {
 
 	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, INVALID_XML_FILE), "")
 
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	assert.Equal(t, http.StatusBadRequest, response.Code)
-	assert.Equal(t, http.StatusBadRequest, err.(utils.Error).Code)
+	assert.Nil(t, response.Body.(api.IdpPostResponse).SamlData)
 }
 
 func TestCreateIdp_NonSamlMetadataFile(t *testing.T) {
@@ -470,9 +481,9 @@ func TestCreateIdp_NonSamlMetadataFile(t *testing.T) {
 
 	response, err := testSubject.CreateIdp(ctx, getSAMLIdpCreationRequest(utils.File, NON_SAML_XML_FILE), "")
 
-	assert.NotNil(t, err)
+	assert.Nil(t, err)
 	assert.Equal(t, http.StatusBadRequest, response.Code)
-	assert.Equal(t, http.StatusBadRequest, err.(utils.Error).Code)
+	assert.Nil(t, response.Body.(api.IdpPostResponse).SamlData)
 }
 
 func TestCreateIdp_MetadataRejectedByKeycloak(t *testing.T) {

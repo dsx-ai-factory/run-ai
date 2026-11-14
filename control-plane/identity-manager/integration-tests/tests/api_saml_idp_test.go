@@ -353,6 +353,31 @@ func TestSAMLIdp_CreateDryRun_ExpiredCertificate(t *testing.T) {
 	require.Empty(t, samlSigningCertificate(t, ctx, alias))
 }
 
+func TestSAMLIdp_CreateDryRun_InvalidSamlReturnsParsedBody(t *testing.T) {
+	t.Parallel()
+	ctx, _, _ := TestStepsClient.NewTestContextWithRealm("saml-idp-dry-run-invalid-body")
+	alias := GenerateRandomString("saml-idp-dry-run-invalid-body")
+	entityID := "https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml"
+	ssoURL := entityID + "/protocol/saml"
+	idpRequest := makeSamlIdpFileRequest(alias, entityID, "metadata.xml", expiredSamlMetadata, GetDefaultIDPMappers())
+	idpRequest.SetDryRun(true)
+
+	_, httpResp, err := OpenapiClient.IdpsAPI.CreateIdp(ctx).IdpCreationRequest(idpRequest).Execute()
+	requireApiError(t, err, httpResp, http.StatusBadRequest)
+	body, readErr := io.ReadAll(httpResp.Body)
+	require.NoError(t, readErr)
+	var resp openapi.IdpPostResponse
+	require.NoError(t, json.Unmarshal(body, &resp))
+	require.Equal(t, alias, resp.GetAlias())
+	samlData := resp.GetSamlData()
+	require.Equal(t, entityID, samlData.GetEntityId())
+	require.Equal(t, ssoURL, samlData.GetSingleSignOnServiceUrl())
+	require.Equal(t, expiredSamlSigningCertificate, samlData.GetSigningCertificate())
+	require.True(t, samlData.GetValidateSignature())
+	require.True(t, samlData.GetCertificateExpirationDate().Equal(time.Date(2025, time.January, 2, 0, 0, 0, 0, time.UTC)))
+	require.Empty(t, samlSigningCertificate(t, ctx, alias))
+}
+
 func TestSAMLIdp_Create_DryRun_MetadataWithoutSigningCertificate(t *testing.T) {
 	t.Parallel()
 	ctx, _, _ := TestStepsClient.NewTestContextWithRealm("saml-idp-dry-run-no-cert")
@@ -580,3 +605,7 @@ func deleteIDP(t *testing.T, ctx context.Context, alias string) {
 	err := TestStepsClient.DeleteIDP(ctx, alias)
 	require.NoError(t, err)
 }
+
+const expiredSamlSigningCertificate = "MIIClzCCAX+gAwIBAgIBATANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDDARzYW1sMB4XDTI1MDEwMTAwMDAwMFoXDTI1MDEwMjAwMDAwMFowDzENMAsGA1UEAwwEc2FtbDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMFzjVhXt5Jc8h9qE8+767WxOHj3umxMBqDmR4l7wzN4cLNB32q5Oc45jwwVlctCf3ropsc6EyblJaSoIfSVq90joOzPOnLMtHBZ/Sp+Z05rqssQ7xXBm/p9MhMvaGxbkgCqqvj6VCHdbNlQCz5jHV45KySkAZ7ETwSPoGB9L5ioYbI+zai4nNlKTlqfm/KKG0C2snK2Ep2sMNeKl/wDtk8cXOKrbPfCpseBU73iETJmgAURv9vGEjRSXo99kBGX+xfSJtEgFdPu9NdLNLkzopvtSjc9AsM1PL3i+y1WofSbN/PplVbgM0oQ+fCoKwEqwAmR3d9NEUYoPuJnf9AZuekCAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAH9TgB1kIUCuf5kWjGj8Pa5VQHxXMslrUKjvAUt0XnR2YNExCIlCezyP9N7ht+nRy1tIAWa4rqOIyY4NIziGKtKiAWigWicA3j3aFxJhajL8Z33UQlY6vUPGvK2zxpZQXaeQiUrrSBlNBBISZjgkHg7TfzR+TYQhpnoik52q4zspZ722q6zmqzayaGD+zPDu9IwoY9Z7Px6BNAwzJGU/4G4IPnqeVh3uGduQ3eslAoFxvADXhMPBwSCTHSFVWwZBgRyTzQQlrToQGDp26jDLzJTcqMQu75hIbe7ICxBmAXqpK7Z23j1AiH3TYN7e3T07pIi9ZtB1K/6DAjYMd6uIyrg=="
+
+const expiredSamlMetadata = `<md:EntityDescriptor xmlns="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:md="urn:oasis:names:tc:SAML:2.0:metadata" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" entityID="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml"><md:IDPSSODescriptor WantAuthnRequestsSigned="true" protocolSupportEnumeration="urn:oasis:names:tc:SAML:2.0:protocol"><md:KeyDescriptor use="signing"><ds:KeyInfo><ds:KeyName>2KUdnE6VSX0MRZEuGyTp3uGiRf2yNDwwlWhhmopbuc4</ds:KeyName><ds:X509Data><ds:X509Certificate>` + expiredSamlSigningCertificate + `</ds:X509Certificate></ds:X509Data></ds:KeyInfo></md:KeyDescriptor><md:ArtifactResolutionService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml/resolve" index="0"></md:ArtifactResolutionService><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml"></md:SingleLogoutService><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml"></md:SingleLogoutService><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml"></md:SingleLogoutService><md:SingleLogoutService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml"></md:SingleLogoutService><md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:persistent</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:2.0:nameid-format:transient</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:unspecified</md:NameIDFormat><md:NameIDFormat>urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress</md:NameIDFormat><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml"></md:SingleSignOnService><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml"></md:SingleSignOnService><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:SOAP" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml"></md:SingleSignOnService><md:SingleSignOnService Binding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Artifact" Location="https://ci-84de-saml-signature-valida.runailabs.com/auth/realms/saml/protocol/saml"></md:SingleSignOnService></md:IDPSSODescriptor></md:EntityDescriptor>`

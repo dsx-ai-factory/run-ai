@@ -108,40 +108,6 @@ func WorkloadRecToAssetsRef(assetsRef *api.AssetsRef, workloadAssets []dbmodel.C
 	return assetRecToAssetRef(assetsRef, assets, assetOverridesById)
 }
 
-func templateAssetsRecToMap(containment []dbmodel.TemplateAssetsCombinedRec, envIdToTools EnvironmentToolsMap) (TemplateToAssetsMap, *api.Error) {
-	resultMap := make(TemplateToAssetsMap)
-	for _, record := range containment {
-		var curTemplate api.AssetsRef
-		if _, ok := resultMap[record.TemplateAssetId]; ok {
-			curTemplate = resultMap[record.TemplateAssetId]
-		}
-		switch record.AssetMeta.Kind {
-		case api.ASSETKIND_ENVIRONMENT:
-			curTemplate.Environment = api.EnvironmentAssetRef{Id: record.AssetMeta.Id, Name: record.AssetMeta.Name}
-			toolTypes := envIdToTools[record.AssetMeta.Id]
-			if toolTypes != nil {
-				curTemplate.Environment.ToolTypes = &toolTypes
-			}
-		case api.ASSETKIND_COMPUTE:
-			curTemplate.Compute = &api.AssetsRefCompute{Id: record.AssetMeta.Id, Name: record.AssetMeta.Name}
-		case api.ASSETKIND_PVC:
-			if convutils.Deref(record.AssetMeta.AutoDelete, DefaultAutoDelete) {
-				curTemplate.WorkloadVolumes = appendToWorkloadVolumes(curTemplate.WorkloadVolumes, record.AssetMeta.Id)
-			} else {
-				curTemplate.Datasources = appendToDatasourceRef(curTemplate.Datasources, record.AssetMeta, nil)
-			}
-		case api.ASSETKIND_S3, api.ASSETKIND_GIT, api.ASSETKIND_NFS, api.ASSETKIND_HOST_PATH, api.ASSETKIND_CONFIG_MAP, api.ASSETKIND_SECRET_VOLUME:
-			curTemplate.Datasources = appendToDatasourceRef(curTemplate.Datasources, record.AssetMeta, nil)
-		default:
-			return nil, api.NewError(http.StatusServiceUnavailable, fmt.Sprintf("unsupported asset kind %s: asset %s template %s",
-				record.AssetMeta.Kind, record.AssetMeta.Id, record.TemplateAssetId), nil)
-		}
-
-		resultMap[record.TemplateAssetId] = curTemplate
-	}
-	return resultMap, nil
-}
-
 func appendContainedAsset(allAssetIds []string, kindToIds *dbmodel.AssetKindToIdsMap, id *string, kind api.AssetKind) []string {
 	if id != nil {
 		allAssetIds = append(allAssetIds, *id)

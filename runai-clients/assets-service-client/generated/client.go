@@ -96,8 +96,6 @@ type APIClient struct {
 
 	SynchronizationAPI SynchronizationAPI
 
-	TemplateAPI TemplateAPI
-
 	TrainingsAPI TrainingsAPI
 
 	WorkloadAPI WorkloadAPI
@@ -141,7 +139,6 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.S3API = (*S3APIService)(&c.common)
 	c.SecretAPI = (*SecretAPIService)(&c.common)
 	c.SynchronizationAPI = (*SynchronizationAPIService)(&c.common)
-	c.TemplateAPI = (*TemplateAPIService)(&c.common)
 	c.TrainingsAPI = (*TrainingsAPIService)(&c.common)
 	c.WorkloadAPI = (*WorkloadAPIService)(&c.common)
 	c.WorkspacesAPI = (*WorkspacesAPIService)(&c.common)

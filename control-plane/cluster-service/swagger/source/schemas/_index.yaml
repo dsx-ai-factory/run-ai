@@ -13,6 +13,8 @@ NodeNumaForSync:
   $ref: "./Nodes/NodeNumaForSync.yaml"
 Nodes:
   $ref: "./Nodes/Nodes.yaml"
+NodeLabelOptions:
+  $ref: "./Nodes/NodeLabelOptions.yaml"
 NodesSyncRequest:
   $ref: "./Nodes/NodesSyncRequest.yaml"
 NodeInfo:
