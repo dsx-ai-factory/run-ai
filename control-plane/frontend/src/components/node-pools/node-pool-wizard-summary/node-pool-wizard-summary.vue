@@ -7,7 +7,15 @@
     <div class="summary-heading">Cluster</div>
     <div>{{ pool.clusterName || clusterName || "None" }}</div>
     <q-separator class="q-my-md" />
-    <div class="summary-heading">Resources</div>
+    <div class="summary-heading resources-heading">
+      Resources
+      <runai-tooltip
+        class="resources-help"
+        size="xs"
+        tooltip-text="All the resources available for matching labeled nodes within the node pool"
+        aria-label="Node pool resources"
+      />
+    </div>
     <div v-for="row in resourceRows" :key="row.label">{{ row.label }}: {{ row.value }}</div>
     <q-separator class="q-my-md" />
     <div class="summary-heading">Scheduling mode</div>
@@ -20,6 +28,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from "vue";
+import { RunaiTooltip } from "@/components/common/runai-tooltip";
 import { nodePoolUtil } from "@/utils/node-pool.util/node-pool.util";
 import { memoryFormat } from "@/utils/format.util";
 import {
@@ -82,6 +91,20 @@ const configurationRows = computed(() => {
   font-size: 12px;
   line-height: 1.4;
   overflow-wrap: anywhere;
+}
+.resources-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.resources-help {
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  padding: 0;
+}
+.resources-help :deep(.q-icon) {
+  font-size: 16px;
 }
 .summary-heading {
   color: var(--b-text-sub);

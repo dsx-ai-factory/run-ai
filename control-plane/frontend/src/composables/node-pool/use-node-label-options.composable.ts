@@ -42,7 +42,7 @@ export function useNodeLabelOptions(clusterId: Readonly<Ref<string>>, key: Reado
     const version = page.version;
     page.loading = true;
     page.error = "";
-    const query = { contains: page.search, offset: page.offset, limit: PAGE_SIZE };
+    const query = { search: page.search, offset: page.offset, limit: PAGE_SIZE };
     try {
       const result = await (kind === "keys"
         ? nodeLabelsService.keys(clusterId.value, query)

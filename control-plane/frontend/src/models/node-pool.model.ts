@@ -189,8 +189,8 @@ export const NODE_POOL_NETWORK_DISCOVERY_OPTIONS: ISelectOption[] = [
 export const EMPTY_PRIORITY_LABEL = "empty";
 
 import type { NodepoolCreateFields, SchedulingCapabilitiesNullable } from "@/swagger-models/cluster-service-client";
-// TODO: include limits: false after #4369 merges, including isProportional.
 export const PROPORTIONAL_CAPABILITIES = Object.freeze({
+  limits: false,
   adjustableWeights: true,
   quota: false,
   ranks: false,
@@ -212,7 +212,8 @@ export function isProportional(capabilities?: SchedulingCapabilitiesNullable): b
     capabilities?.adjustableWeights === true &&
     capabilities.quota === false &&
     capabilities.ranks === false &&
-    capabilities.cpuQuota === false
+    capabilities.cpuQuota === false &&
+    capabilities.limits !== true
   );
 }
 export interface INodePoolSummaryConfiguration extends NodepoolCreateFields {

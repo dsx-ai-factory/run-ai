@@ -66,7 +66,7 @@ describe("Step 1 form", () => {
     const update = vi.fn((fn) => fn());
     key.vm.$emit("filter", "gpu", update);
     await flushPromises();
-    expect(nodeLabelsService.keys).toHaveBeenLastCalledWith("cluster", { contains: "gpu", offset: 0, limit: 50 });
+    expect(nodeLabelsService.keys).toHaveBeenLastCalledWith("cluster", { search: "gpu", offset: 0, limit: 50 });
     expect(key.props("options")).toContainEqual({ label: "gpu-type", value: "gpu-type", disable: false });
     expect(update).toHaveBeenCalled();
     vi.mocked(nodeLabelsService.keys).mockRejectedValueOnce(new Error("404"));

@@ -11,7 +11,7 @@ import {
   validateLabelKey,
   validateLabelValue,
 } from "@/utils/node-pool.util/node-pool.util";
-import { PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
+import { isProportional, PROPORTIONAL_CAPABILITIES } from "@/models/node-pool.model";
 
 describe("node pool creation fields", () => {
   it("initializes independent drafts without sending omitted version-gated defaults", () => {
@@ -60,7 +60,17 @@ describe("node pool creation fields", () => {
     expect(options[0]).toMatchObject({ value: "T5", disable: true });
     expect(labelOptions(["T4"], "H100", [])).toEqual([{ label: "H100 (new value)", value: "H100", disable: false }]);
   });
+  it("does not classify a pool with limits enabled as Proportional", () => {
+    expect(isProportional({ ...PROPORTIONAL_CAPABILITIES, limits: true })).toBe(false);
+    expect(isProportional(PROPORTIONAL_CAPABILITIES)).toBe(true);
+  });
   it("defines Proportional as weights only", () => {
-    expect(PROPORTIONAL_CAPABILITIES).toEqual({ adjustableWeights: true, quota: false, ranks: false, cpuQuota: false });
+    expect(PROPORTIONAL_CAPABILITIES).toEqual({
+      adjustableWeights: true,
+      quota: false,
+      ranks: false,
+      cpuQuota: false,
+      limits: false,
+    });
   });
 });
