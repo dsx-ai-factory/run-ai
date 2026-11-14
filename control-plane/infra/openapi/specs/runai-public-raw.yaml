@@ -27641,6 +27641,48 @@ paths:
           $ref: '#/components/responses/500InternalServerError'
         '503':
           $ref: '#/components/responses/503ServiceUnavailable'
+  /api/v1/catalog/right-sizing/recommendation:
+    post:
+      x-internal: true
+      summary: Recommend GPU allocation for a NIM test/dev workload.
+      description: >-
+        Returns recommendations without deploying or reserving resources.
+        Evaluates cluster memory and GPU counts for the exact image tag using
+        GPU-agnostic profiles. GPU model compatibility is not verified. Missing
+        trustworthy sizing data is a no_recommendation result; upstream
+        retrieval failures are errors.
+      operationId: recommend_inference_resources
+      x-service: catalog-service
+      x-authorize:
+        resource-type: inferences
+        action: read
+      x-test-coverage:
+        - control-plane/catalog-service/pkg/services/rightsizing/service_test.go
+      tags:
+        - RightSizing
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationRequest'
+      responses:
+        '200':
+          description: Results per GPU type and capacity; may contain no recommendations.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        '401':
+          $ref: '#/components/responses/401Unauthorized'
+        '403':
+          $ref: '#/components/responses/403Forbidden'
+        '404':
+          $ref: '#/components/responses/404NotFound'
+        '503':
+          $ref: '#/components/responses/503ServiceUnavailable'
 components:
   schemas:
     ClusterIdOptional:
@@ -29236,6 +29278,16 @@ components:
             Total number of GPU devices of this type across the node pool's
             nodes.
           example: 16
+        maxDevicesPerNode:
+          type: integer
+          format: int64
+          minimum: 1
+          description: >-
+            Largest installed GPU count on a single node for this exact GPU type
+            and per-device memory capacity. Not a sum across nodes or a
+            free-device count. Omitted when per-node count evidence is
+            unavailable.
+          example: 8
       x-schema-name: NodepoolGpuTypeDetails
     NodepoolGpuTypes:
       type: array
@@ -60877,6 +60929,516 @@ components:
       $ref: '#/components/schemas/GetBannerConfig'
     Logo:
       $ref: '#/components/schemas/GetLogo'
+    RegistryIntegration:
+      type: object
+      required:
+        - createdAt
+        - updatedAt
+        - createdBy
+        - updatedBy
+        - scopeType
+        - id
+        - name
+        - url
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the registry integration was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the registry integration was updated.
+        createdBy:
+          type: string
+          description: The user who created the registry integration.
+        updatedBy:
+          type: string
+          description: The user who updated the registry integration.
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+          nullable: true
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+          nullable: true
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+          nullable: true
+        departmentId:
+          $ref: '#/components/schemas/DepartmentId'
+          nullable: true
+        projectId:
+          $ref: '#/components/schemas/ProjectId'
+          nullable: true
+        id:
+          type: string
+          format: uuid
+          description: The ID of the registry integration.
+        name:
+          type: string
+          description: The name of the registry integration.
+        url:
+          type: string
+          description: The type of the registry integration.
+        description:
+          type: string
+          description: The description of the registry integration.
+    RegistryIntegrations:
+      type: array
+      description: The list of registry-integrations.
+      items:
+        $ref: '#/components/schemas/RegistryIntegration'
+    RegistryIntegrationListResponse:
+      required:
+        - registries
+      properties:
+        registries:
+          $ref: '#/components/schemas/RegistryIntegrations'
+    RegistryIntegrationCreationRequest:
+      type: object
+      required:
+        - name
+        - url
+        - scopeType
+        - scopeId
+      properties:
+        name:
+          type: string
+          description: The name of the registry integration.
+        url:
+          type: string
+          description: The URL of the registry integration.
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+          description: The ID of the scope. Mandatory for non-system scope registries.
+          nullable: true
+        description:
+          type: string
+          description: The description of the registry integration.
+        version:
+          type: string
+          description: The version of the registry integration.
+          x-internal: true
+    RegistryIntegrationUpdateRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          description: The URL of the registry integration.
+        name:
+          type: string
+          description: The name of the registry integration.
+    Image1:
+      type: string
+      description: The image name.
+    Images:
+      type: array
+      description: The list of images.
+      items:
+        $ref: '#/components/schemas/Image1'
+    ImagesListResponse:
+      required:
+        - images
+      properties:
+        images:
+          $ref: '#/components/schemas/Images'
+        prefix:
+          type: string
+          description: The prefix of the image names.
+          nullable: true
+    ImageTags:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the image
+        tags:
+          type: array
+          description: The tags of the image
+          items:
+            type: string
+      required:
+        - tags
+        - name
+    HelmRepo:
+      type: object
+      required:
+        - createdAt
+        - updatedAt
+        - createdBy
+        - updatedBy
+        - scopeType
+        - id
+        - name
+        - url
+        - isPrivate
+      properties:
+        createdAt:
+          type: string
+          format: date-time
+          description: The date and time the helm repo was created.
+        updatedAt:
+          type: string
+          format: date-time
+          description: The date and time the helm repo was updated.
+        createdBy:
+          type: string
+          description: The user who created the helm repo.
+        updatedBy:
+          type: string
+          description: The user who updated the helm repo.
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+          nullable: true
+        tenantId:
+          $ref: '#/components/schemas/TenantId'
+          nullable: true
+        clusterId:
+          $ref: '#/components/schemas/ClusterId'
+          nullable: true
+        departmentId:
+          $ref: '#/components/schemas/DepartmentId'
+          nullable: true
+        projectId:
+          $ref: '#/components/schemas/ProjectId'
+          nullable: true
+        id:
+          type: string
+          format: uuid
+          description: The ID of the helm repo.
+        name:
+          type: string
+          description: The name of the helm repo.
+        url:
+          type: string
+          description: The URL of the helm repo.
+        isPrivate:
+          type: boolean
+          description: Whether the helm repo requires authentication to browse.
+        description:
+          type: string
+          description: The description of the helm repo.
+    HelmRepos:
+      type: array
+      description: The list of helm repos.
+      items:
+        $ref: '#/components/schemas/HelmRepo'
+    HelmRepoListResponse:
+      required:
+        - helmRepos
+      properties:
+        helmRepos:
+          $ref: '#/components/schemas/HelmRepos'
+    HelmRepoCreationRequest:
+      type: object
+      required:
+        - name
+        - url
+        - scopeType
+        - scopeId
+      properties:
+        name:
+          type: string
+          description: The name of the helm repo.
+        url:
+          type: string
+          description: The URL of the helm repo.
+        isPrivate:
+          type: boolean
+          description: Whether the helm repo requires authentication to browse.
+        scopeType:
+          $ref: '#/components/schemas/ScopeType'
+        scopeId:
+          $ref: '#/components/schemas/ScopeId'
+          description: The ID of the scope. Mandatory for non-system scope helm repos.
+          nullable: true
+        description:
+          type: string
+          description: The description of the helm repo.
+    HelmRepoUpdateRequest:
+      type: object
+      properties:
+        url:
+          type: string
+          description: The URL of the helm repo.
+        name:
+          type: string
+          description: The name of the helm repo.
+        isPrivate:
+          type: boolean
+          nullable: true
+          description: Whether the helm repo requires authentication to browse.
+    HelmChartVersion:
+      type: object
+      required:
+        - version
+      properties:
+        version:
+          type: string
+          description: The version of the chart (SemVer).
+        appVersion:
+          type: string
+          description: The application version the chart represents.
+        description:
+          type: string
+          description: A one-line description of the chart version.
+        created:
+          type: string
+          format: date-time
+          description: The date and time this chart version was created.
+    HelmChart:
+      type: object
+      required:
+        - name
+        - versions
+      properties:
+        name:
+          type: string
+          description: The name of the helm chart.
+        versions:
+          type: array
+          description: The list of available versions for this chart.
+          items:
+            $ref: '#/components/schemas/HelmChartVersion'
+    HelmChartListResponse:
+      type: object
+      required:
+        - charts
+      properties:
+        charts:
+          type: array
+          description: The list of charts in the helm repo.
+          items:
+            $ref: '#/components/schemas/HelmChart'
+    HuggingFaceModelItem:
+      type: object
+      properties:
+        id:
+          type: string
+          example: meta-llama/Llama-3.1-405B-Instruct
+          description: the huggingface model id
+        gated:
+          type: boolean
+          example: false
+        downloads:
+          type: integer
+          example: 558919
+        trending:
+          type: boolean
+          description: indicates if the model is trending
+          example: true
+    HuggingFaceModelSearchResults:
+      type: object
+      properties:
+        resources:
+          type: array
+          items:
+            $ref: '#/components/schemas/HuggingFaceModelItem'
+    GetEnableNgcIntegration:
+      type: object
+      properties:
+        value:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+              nullable: true
+        displayName:
+          type: string
+          readOnly: true
+        description:
+          type: string
+          readOnly: true
+        stage:
+          type: string
+          readOnly: true
+    CatalogSettingsGetResponse:
+      type: object
+      properties:
+        enableNgcIntegration:
+          $ref: '#/components/schemas/GetEnableNgcIntegration'
+    CatalogSettingsKeyEnum:
+      type: string
+      enum:
+        - enableNgcIntegration
+    UpdateCatalogSettingByKeyRequest:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+      example:
+        enabled: false
+    RecommendationRequest:
+      type: object
+      required:
+        - clusterId
+        - image
+        - tag
+      properties:
+        clusterId:
+          type: string
+          format: uuid
+          description: Cluster whose node-pool hardware metadata is evaluated.
+        image:
+          type: string
+          description: Untagged public nvcr.io/nim/organization/model image reference.
+        tag:
+          type: string
+          minLength: 1
+          description: Exact image tag. NGC does not automatically refresh latest metadata.
+        gpuType:
+          type: string
+          nullable: true
+          description: >-
+            Exact inventory GPU type. Omitted or null evaluates all reported
+            types and capacities.
+    RecommendationStatus:
+      type: string
+      enum:
+        - recommended
+        - no_recommendation
+    RecommendationAllocationType:
+      type: string
+      enum:
+        - gpu_memory
+        - gpu_count
+    Recommendation:
+      type: object
+      nullable: true
+      required:
+        - allocationType
+        - gpuCount
+      properties:
+        allocationType:
+          allOf:
+            - $ref: '#/components/schemas/RecommendationAllocationType'
+          description: >-
+            Whether the allocation requests GPU memory (`gpu_memory`) or whole
+            GPUs (`gpu_count`).
+        gpuCount:
+          type: integer
+          format: int64
+          minimum: 1
+          description: >-
+            Number of GPUs used by the allocation. Always 1 for `gpu_memory`;
+            for `gpu_count`, equals the selected profile’s tensor parallel size
+            multiplied by its pipeline parallel size.
+        gpuMemoryPerDeviceBytes:
+          type: integer
+          format: int64
+          minimum: 1
+          description: >-
+            Recommended memory per GPU, in bytes. For `gpu_memory`, this is the
+            published minimum rounded up to whole bytes. For `gpu_count`, this
+            is the reported capacity of each GPU.
+    RecommendationResult:
+      type: object
+      required:
+        - gpuType
+        - status
+      properties:
+        gpuType:
+          type: string
+          description: >-
+            Exact GPU type reported by the cluster inventory. Different memory
+            capacities for the same GPU type produce separate results.
+        gpuMemoryCapacityBytes:
+          type: integer
+          format: int64
+          description: >-
+            Reported memory capacity of each GPU, in bytes. Omitted when
+            capacity is unknown. Does not represent free memory or a quota
+            guarantee.
+        status:
+          allOf:
+            - $ref: '#/components/schemas/RecommendationStatus'
+          description: >-
+            Whether an allocation was recommended for this GPU type and memory
+            capacity.
+        minimumGpuMemoryPerDeviceGb:
+          type: number
+          format: double
+          description: >-
+            Published minimum memory per GPU for the selected NGC profile, in
+            decimal GB (1 GB = 1,000,000,000 bytes), before allocation rounding.
+            Omitted when no profile is selected.
+        profileId:
+          type: string
+          description: >-
+            Identifier of the selected published NGC execution profile. Omitted
+            when no profile is selected.
+        precision:
+          type: string
+          description: >-
+            Model precision reported by the selected NGC profile. Omitted when
+            no profile is selected or the profile does not report precision.
+        inferenceBackend:
+          type: string
+          description: >-
+            Inference backend reported by the selected NGC profile. Omitted when
+            no profile is selected or the profile does not report a backend.
+        tensorParallelSize:
+          type: integer
+          format: int64
+          minimum: 1
+          description: >-
+            Number of GPUs participating in tensor parallelism in the selected
+            NGC profile. Omitted when no profile is selected.
+        pipelineParallelSize:
+          type: integer
+          format: int64
+          minimum: 1
+          description: >-
+            Number of pipeline parallel stages in the selected NGC profile.
+            Omitted when no profile is selected.
+        reason:
+          type: string
+          description: >-
+            Explanation of why no allocation could be recommended. Omitted for a
+            recommended allocation.
+        recommendation:
+          allOf:
+            - $ref: '#/components/schemas/Recommendation'
+          description: >-
+            Recommended allocation for this result. Absent or null when no
+            allocation could be recommended.
+    RecommendationResponse:
+      type: object
+      required:
+        - image
+        - tag
+        - results
+      properties:
+        image:
+          type: string
+          description: Untagged NIM image reference supplied in the request.
+        tag:
+          type: string
+          description: Exact NIM image tag supplied in the request.
+        results:
+          type: array
+          items:
+            allOf:
+              - $ref: '#/components/schemas/RecommendationResult'
+          description: >-
+            One result per evaluated GPU type and per-device memory capacity.
+            Empty when the cluster has no reported GPUs and no GPU type was
+            requested.
+    EnableNgcIntegrationSetting:
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          nullable: true
+      example:
+        enabled: false
   responses:
     404NotFound:
       description: The specified resource was not found
@@ -64333,6 +64895,60 @@ components:
       description: Identifier of the branding setting to retrieve or update
       schema:
         $ref: '#/components/schemas/brandingSettingsKeyEnum'
+    RegistryIntegrationId:
+      name: RegistryIntegrationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        description: The ID of the registry integration.
+    AssetIdOptional:
+      name: assetId
+      in: query
+      required: false
+      description: >-
+        The asset ID to use for accessing resources that require API key
+        authentication
+      schema:
+        type: string
+    ImageName:
+      name: ImageName
+      in: query
+      required: true
+      description: The name of the image to get the tags for
+      example: 'runai/viper-catalog-service:latest'
+      schema:
+        type: string
+    HelmRepoId:
+      name: HelmRepoId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+        description: The ID of the helm repo.
+    HuggingFaceSearchQuery:
+      name: query
+      in: query
+      required: false
+      description: >-
+        Search query used to look up Hugging Face models. Accepts a full
+        repository ID (`org/model`), a standalone model name, or a partial match
+        string.
+      example: >-
+        meta-llama/Llama-3.1-405B-Instruct or Llama-3.1-405B-Instruct or
+        Llama-3.1-405B
+      schema:
+        type: string
+        pattern: '^/?[A-Za-z0-9._-/]+$'
+    CatalogSettingsKey:
+      name: key
+      in: path
+      required: true
+      description: The settings key
+      schema:
+        $ref: '#/components/schemas/CatalogSettingsKeyEnum'
   securitySchemes:
     bearerAuth:
       type: http
