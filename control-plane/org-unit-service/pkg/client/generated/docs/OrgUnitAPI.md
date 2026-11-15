@@ -482,7 +482,7 @@ import (
 
 func main() {
 	nodepoolId := "17" // string | The unique id identifying the Node Pool.
-	fairShareSimulationRequest := *openapiclient.NewFairShareSimulationRequest(*openapiclient.NewFairShareSimulationNodePool(*openapiclient.NewFairShareSimulationResources(float64(4)), *openapiclient.NewFairShareSimulationSchedulingCapabilities(false, false, false, false)), *openapiclient.NewFairShareSimulationAssumptions(*openapiclient.NewFairShareSimulationResources(float64(4)), "OtherDepartments_example"), "OrgUnitType_example", []openapiclient.FairShareSimulationOrgUnit{*openapiclient.NewFairShareSimulationOrgUnit("4500014")}) // FairShareSimulationRequest | 
+	fairShareSimulationRequest := *openapiclient.NewFairShareSimulationRequest(*openapiclient.NewFairShareSimulationNodePool(*openapiclient.NewFairShareSimulationResources(float64(4)), *openapiclient.NewFairShareSimulationSchedulingCapabilities(false, false, false, false)), "OrgUnitType_example", []openapiclient.FairShareSimulationOrgUnit{*openapiclient.NewFairShareSimulationOrgUnit("4500014")}) // FairShareSimulationRequest | 
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)

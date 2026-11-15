@@ -19,6 +19,6 @@ properties:
   demand:
     type: object
     nullable: true
-    description: GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand.
+    description: GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool's capacity.
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"

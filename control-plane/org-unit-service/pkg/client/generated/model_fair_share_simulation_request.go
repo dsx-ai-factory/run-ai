@@ -22,13 +22,13 @@ import (
 // checks if the FairShareSimulationRequest type satisfies the MappedNullable interface at compile time
 var _ MappedNullable = &FairShareSimulationRequest{}
 
-// FairShareSimulationRequest A scenario to simulate. The node pool values and the assumptions are always sent, so the result never depends on what is saved or on who is asking.
+// FairShareSimulationRequest A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects' demand.
 type FairShareSimulationRequest struct {
-	NodePool    FairShareSimulationNodePool    `json:"nodePool"`
-	Assumptions FairShareSimulationAssumptions `json:"assumptions"`
+	NodePool FairShareSimulationNodePool `json:"nodePool"`
 	// The type of the requested org units. One type per request.
-	OrgUnitType string `json:"orgUnitType"`
-	// The org units to return, with their unsaved changes. Send the rows the screen shows.
+	OrgUnitType string                            `json:"orgUnitType"`
+	Parent      NullableFairShareSimulationParent `json:"parent,omitempty"`
+	// The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row.
 	OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits"`
 }
 
@@ -38,10 +38,9 @@ type _FairShareSimulationRequest FairShareSimulationRequest
 // This constructor will assign default values to properties that have it defined,
 // and makes sure properties required by API are set, but the set of arguments
 // will change when the set of required properties is changed
-func NewFairShareSimulationRequest(nodePool FairShareSimulationNodePool, assumptions FairShareSimulationAssumptions, orgUnitType string, orgUnits []FairShareSimulationOrgUnit) *FairShareSimulationRequest {
+func NewFairShareSimulationRequest(nodePool FairShareSimulationNodePool, orgUnitType string, orgUnits []FairShareSimulationOrgUnit) *FairShareSimulationRequest {
 	this := FairShareSimulationRequest{}
 	this.NodePool = nodePool
-	this.Assumptions = assumptions
 	this.OrgUnitType = orgUnitType
 	this.OrgUnits = orgUnits
 	return &this
@@ -79,30 +78,6 @@ func (o *FairShareSimulationRequest) SetNodePool(v FairShareSimulationNodePool) 
 	o.NodePool = v
 }
 
-// GetAssumptions returns the Assumptions field value
-func (o *FairShareSimulationRequest) GetAssumptions() FairShareSimulationAssumptions {
-	if o == nil {
-		var ret FairShareSimulationAssumptions
-		return ret
-	}
-
-	return o.Assumptions
-}
-
-// GetAssumptionsOk returns a tuple with the Assumptions field value
-// and a boolean to check if the value has been set.
-func (o *FairShareSimulationRequest) GetAssumptionsOk() (*FairShareSimulationAssumptions, bool) {
-	if o == nil {
-		return nil, false
-	}
-	return &o.Assumptions, true
-}
-
-// SetAssumptions sets field value
-func (o *FairShareSimulationRequest) SetAssumptions(v FairShareSimulationAssumptions) {
-	o.Assumptions = v
-}
-
 // GetOrgUnitType returns the OrgUnitType field value
 func (o *FairShareSimulationRequest) GetOrgUnitType() string {
 	if o == nil {
@@ -125,6 +100,49 @@ func (o *FairShareSimulationRequest) GetOrgUnitTypeOk() (*string, bool) {
 // SetOrgUnitType sets field value
 func (o *FairShareSimulationRequest) SetOrgUnitType(v string) {
 	o.OrgUnitType = v
+}
+
+// GetParent returns the Parent field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *FairShareSimulationRequest) GetParent() FairShareSimulationParent {
+	if o == nil || IsNil(o.Parent.Get()) {
+		var ret FairShareSimulationParent
+		return ret
+	}
+	return *o.Parent.Get()
+}
+
+// GetParentOk returns a tuple with the Parent field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *FairShareSimulationRequest) GetParentOk() (*FairShareSimulationParent, bool) {
+	if o == nil {
+		return nil, false
+	}
+	return o.Parent.Get(), o.Parent.IsSet()
+}
+
+// HasParent returns a boolean if a field has been set.
+func (o *FairShareSimulationRequest) HasParent() bool {
+	if o != nil && o.Parent.IsSet() {
+		return true
+	}
+
+	return false
+}
+
+// SetParent gets a reference to the given NullableFairShareSimulationParent and assigns it to the Parent field.
+func (o *FairShareSimulationRequest) SetParent(v FairShareSimulationParent) {
+	o.Parent.Set(&v)
+}
+
+// SetParentNil sets the value for Parent to be an explicit nil
+func (o *FairShareSimulationRequest) SetParentNil() {
+	o.Parent.Set(nil)
+}
+
+// UnsetParent ensures that no value is present for Parent, not even an explicit nil
+func (o *FairShareSimulationRequest) UnsetParent() {
+	o.Parent.Unset()
 }
 
 // GetOrgUnits returns the OrgUnits field value
@@ -162,8 +180,10 @@ func (o FairShareSimulationRequest) MarshalJSON() ([]byte, error) {
 func (o FairShareSimulationRequest) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["nodePool"] = o.NodePool
-	toSerialize["assumptions"] = o.Assumptions
 	toSerialize["orgUnitType"] = o.OrgUnitType
+	if o.Parent.IsSet() {
+		toSerialize["parent"] = o.Parent.Get()
+	}
 	toSerialize["orgUnits"] = o.OrgUnits
 	return toSerialize, nil
 }
@@ -176,7 +196,6 @@ func (o *FairShareSimulationRequest) UnmarshalJSON(data []byte) (err error) {
 	// requiredProperties := []string{
 	//
 	//  	"nodePool",
-	//  	"assumptions",
 	//  	"orgUnitType",
 	//  	"orgUnits",
 	// }

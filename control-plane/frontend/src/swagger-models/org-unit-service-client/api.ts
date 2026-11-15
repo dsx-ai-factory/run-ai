@@ -2351,52 +2351,6 @@ export interface FailedNodePoolResourcesPatchRequest {
     'message'?: string;
 }
 /**
- * What the simulation assumes about org units the user didn\'t set.
- * @export
- * @interface FairShareSimulationAssumptions
- */
-export interface FairShareSimulationAssumptions {
-    /**
-     * 
-     * @type {FairShareSimulationAssumptionsDefaultDemand}
-     * @memberof FairShareSimulationAssumptions
-     */
-    'defaultDemand': FairShareSimulationAssumptionsDefaultDemand;
-    /**
-     * What departments other than focusDepartmentId ask for. `default`: the default demand. `idle`: nothing, so the focus department can take the whole node pool up to its limit. The department and project forms send `idle` and say so in a footnote. 
-     * @type {string}
-     * @memberof FairShareSimulationAssumptions
-     */
-    'otherDepartments': FairShareSimulationAssumptionsOtherDepartmentsEnum;
-    /**
-     * The department the requested org units belong to. Required with `idle` and when orgUnitType is project; the requested org units must belong to it. 
-     * @type {string}
-     * @memberof FairShareSimulationAssumptions
-     */
-    'focusDepartmentId'?: string | null;
-}
-
-export const FairShareSimulationAssumptionsOtherDepartmentsEnum = {
-    Default: 'default',
-    Idle: 'idle'
-} as const;
-
-export type FairShareSimulationAssumptionsOtherDepartmentsEnum = typeof FairShareSimulationAssumptionsOtherDepartmentsEnum[keyof typeof FairShareSimulationAssumptionsOtherDepartmentsEnum];
-
-/**
- * GPUs every org unit without a demand in the request asks for, capped by its limit. The node pool form sends half the node pool\'s capacity. In the node pool form it is also a department\'s demand; in the department and project forms a department asks for the sum of its projects\' demand. 
- * @export
- * @interface FairShareSimulationAssumptionsDefaultDemand
- */
-export interface FairShareSimulationAssumptionsDefaultDemand {
-    /**
-     * 
-     * @type {number}
-     * @memberof FairShareSimulationAssumptionsDefaultDemand
-     */
-    'gpu': number;
-}
-/**
  * GPU settings that replace the stored ones. Omitted or null fields keep their stored values.
  * @export
  * @interface FairShareSimulationGpuSettings
@@ -2473,10 +2427,10 @@ export interface FairShareSimulationOrgUnit {
     'rank'?: string | null;
     /**
      * 
-     * @type {FairShareSimulationOrgUnitGpu}
+     * @type {FairShareSimulationParentGpu}
      * @memberof FairShareSimulationOrgUnit
      */
-    'gpu'?: FairShareSimulationOrgUnitGpu | null;
+    'gpu'?: FairShareSimulationParentGpu | null;
     /**
      * 
      * @type {FairShareSimulationOrgUnitDemand}
@@ -2485,7 +2439,7 @@ export interface FairShareSimulationOrgUnit {
     'demand'?: FairShareSimulationOrgUnitDemand | null;
 }
 /**
- * GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand.
+ * GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool\'s capacity.
  * @export
  * @interface FairShareSimulationOrgUnitDemand
  */
@@ -2498,32 +2452,57 @@ export interface FairShareSimulationOrgUnitDemand {
     'gpu': number;
 }
 /**
+ * The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not allowed for departments. Each field replaces the stored value on its own; omitted fields keep it. 
+ * @export
+ * @interface FairShareSimulationParent
+ */
+export interface FairShareSimulationParent {
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationParent
+     */
+    'id': string;
+    /**
+     * Highest … Lowest. Only while ranks is on.
+     * @type {string}
+     * @memberof FairShareSimulationParent
+     */
+    'rank'?: string | null;
+    /**
+     * 
+     * @type {FairShareSimulationParentGpu}
+     * @memberof FairShareSimulationParent
+     */
+    'gpu'?: FairShareSimulationParentGpu | null;
+}
+/**
  * 
  * @export
- * @interface FairShareSimulationOrgUnitGpu
+ * @interface FairShareSimulationParentGpu
  */
-export interface FairShareSimulationOrgUnitGpu {
+export interface FairShareSimulationParentGpu {
     /**
      * The GPU quota; -1 means unlimited.
      * @type {number}
-     * @memberof FairShareSimulationOrgUnitGpu
+     * @memberof FairShareSimulationParentGpu
      */
     'deserved'?: number | null;
     /**
      * The maximum GPU allocation; -1 means unlimited. Only while limits is on.
      * @type {number}
-     * @memberof FairShareSimulationOrgUnitGpu
+     * @memberof FairShareSimulationParentGpu
      */
     'limit'?: number | null;
     /**
      * 
      * @type {number}
-     * @memberof FairShareSimulationOrgUnitGpu
+     * @memberof FairShareSimulationParentGpu
      */
     'overQuotaWeight'?: number | null;
 }
 /**
- * A scenario to simulate. The node pool values and the assumptions are always sent, so the result never depends on what is saved or on who is asking. 
+ * A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool\'s capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects\' demand. 
  * @export
  * @interface FairShareSimulationRequest
  */
@@ -2535,19 +2514,19 @@ export interface FairShareSimulationRequest {
      */
     'nodePool': FairShareSimulationNodePool;
     /**
-     * 
-     * @type {FairShareSimulationAssumptions}
-     * @memberof FairShareSimulationRequest
-     */
-    'assumptions': FairShareSimulationAssumptions;
-    /**
      * The type of the requested org units. One type per request.
      * @type {string}
      * @memberof FairShareSimulationRequest
      */
     'orgUnitType': FairShareSimulationRequestOrgUnitTypeEnum;
     /**
-     * The org units to return, with their unsaved changes. Send the rows the screen shows.
+     * 
+     * @type {FairShareSimulationRequestParent}
+     * @memberof FairShareSimulationRequest
+     */
+    'parent'?: FairShareSimulationRequestParent | null;
+    /**
+     * The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row.
      * @type {Array<FairShareSimulationOrgUnit>}
      * @memberof FairShareSimulationRequest
      */
@@ -2561,6 +2540,31 @@ export const FairShareSimulationRequestOrgUnitTypeEnum = {
 
 export type FairShareSimulationRequestOrgUnitTypeEnum = typeof FairShareSimulationRequestOrgUnitTypeEnum[keyof typeof FairShareSimulationRequestOrgUnitTypeEnum];
 
+/**
+ * 
+ * @export
+ * @interface FairShareSimulationRequestParent
+ */
+export interface FairShareSimulationRequestParent {
+    /**
+     * 
+     * @type {string}
+     * @memberof FairShareSimulationRequestParent
+     */
+    'id': string;
+    /**
+     * Highest … Lowest. Only while ranks is on.
+     * @type {string}
+     * @memberof FairShareSimulationRequestParent
+     */
+    'rank'?: string | null;
+    /**
+     * 
+     * @type {FairShareSimulationParentGpu}
+     * @memberof FairShareSimulationRequestParent
+     */
+    'gpu'?: FairShareSimulationParentGpu | null;
+}
 /**
  * 
  * @export
@@ -2581,85 +2585,11 @@ export interface FairShareSimulationResources {
  */
 export interface FairShareSimulationResponse {
     /**
-     * 
-     * @type {FairShareSimulationResponseCapacity}
-     * @memberof FairShareSimulationResponse
-     */
-    'capacity': FairShareSimulationResponseCapacity;
-    /**
-     * 
-     * @type {FairShareSimulationResponseParent}
-     * @memberof FairShareSimulationResponse
-     */
-    'parent'?: FairShareSimulationResponseParent | null;
-    /**
      * One result per requested org unit, in the request\'s order.
      * @type {Array<FairShareSimulationResult>}
      * @memberof FairShareSimulationResponse
      */
     'orgUnits': Array<FairShareSimulationResult>;
-}
-/**
- * The GPUs the simulation split.
- * @export
- * @interface FairShareSimulationResponseCapacity
- */
-export interface FairShareSimulationResponseCapacity {
-    /**
-     * 
-     * @type {number}
-     * @memberof FairShareSimulationResponseCapacity
-     */
-    'gpu': number;
-}
-/**
- * When the requested org units are projects: their department\'s own result. Null when the caller can\'t read the department. 
- * @export
- * @interface FairShareSimulationResponseParent
- */
-export interface FairShareSimulationResponseParent {
-    /**
-     * 
-     * @type {string}
-     * @memberof FairShareSimulationResponseParent
-     */
-    'id': string;
-    /**
-     * 
-     * @type {FairShareSimulationResultDemand}
-     * @memberof FairShareSimulationResponseParent
-     */
-    'demand': FairShareSimulationResultDemand;
-    /**
-     * 
-     * @type {FairShareSimulationResultFairShare}
-     * @memberof FairShareSimulationResponseParent
-     */
-    'fairShare': FairShareSimulationResultFairShare;
-    /**
-     * 
-     * @type {FairShareSimulationResultGuaranteed}
-     * @memberof FairShareSimulationResponseParent
-     */
-    'guaranteed': FairShareSimulationResultGuaranteed;
-    /**
-     * 
-     * @type {FairShareSimulationResultOverQuota}
-     * @memberof FairShareSimulationResponseParent
-     */
-    'overQuota': FairShareSimulationResultOverQuota;
-    /**
-     * 
-     * @type {FairShareSimulationResultUnmet}
-     * @memberof FairShareSimulationResponseParent
-     */
-    'unmet': FairShareSimulationResultUnmet;
-    /**
-     * The org unit\'s over-quota weight divided by the total weight of its rank among its siblings, including ones the caller can\'t read. With ranks off, among all siblings.
-     * @type {number}
-     * @memberof FairShareSimulationResponseParent
-     */
-    'weightShareInRank': number;
 }
 /**
  * Values may be fractional, as in the scheduler; the client rounds.
@@ -2711,7 +2641,7 @@ export interface FairShareSimulationResult {
     'weightShareInRank': number;
 }
 /**
- * The GPUs the org unit asked for in this scenario, after the default and the limit were applied.
+ * The GPUs the org unit asked for in this scenario, after the default demand and the limit were applied.
  * @export
  * @interface FairShareSimulationResultDemand
  */
@@ -10880,7 +10810,7 @@ export const OrgUnitApiAxiosParamCreator = function (configuration?: Configurati
             };
         },
         /**
-         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool\'s capacity and scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation covers every department and project of the node pool, including ones the caller can\'t read; the response holds only the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand. Nothing is saved. The same scenario gives the same result for every caller. 
+         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool\'s capacity and scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every department of the node pool, and for projects every project of the parent, including ones the caller can\'t read; the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing is saved. The same scenario gives the same result for every caller. 
          * @summary Simulate the fair share of a node pool\'s org units
          * @param {string} nodepoolId The unique id identifying the Node Pool.
          * @param {FairShareSimulationRequest} fairShareSimulationRequest 
@@ -11049,7 +10979,7 @@ export const OrgUnitApiFp = function(configuration?: Configuration) {
             return createRequestFunction(localVarAxiosArgs, globalAxios, BASE_PATH, configuration);
         },
         /**
-         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool\'s capacity and scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation covers every department and project of the node pool, including ones the caller can\'t read; the response holds only the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand. Nothing is saved. The same scenario gives the same result for every caller. 
+         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool\'s capacity and scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every department of the node pool, and for projects every project of the parent, including ones the caller can\'t read; the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing is saved. The same scenario gives the same result for every caller. 
          * @summary Simulate the fair share of a node pool\'s org units
          * @param {string} nodepoolId The unique id identifying the Node Pool.
          * @param {FairShareSimulationRequest} fairShareSimulationRequest 
@@ -11150,7 +11080,7 @@ export const OrgUnitApiFactory = function (configuration?: Configuration, basePa
             return localVarFp.orgsNodePoolSummary(nodepoolId, nodepoolSummaryType, options).then((request) => request(axios, basePath));
         },
         /**
-         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool\'s capacity and scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation covers every department and project of the node pool, including ones the caller can\'t read; the response holds only the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand. Nothing is saved. The same scenario gives the same result for every caller. 
+         * Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool\'s capacity and scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every department of the node pool, and for projects every project of the parent, including ones the caller can\'t read; the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing is saved. The same scenario gives the same result for every caller. 
          * @summary Simulate the fair share of a node pool\'s org units
          * @param {string} nodepoolId The unique id identifying the Node Pool.
          * @param {FairShareSimulationRequest} fairShareSimulationRequest 
@@ -11263,7 +11193,7 @@ export class OrgUnitApi extends BaseAPI {
     }
 
     /**
-     * Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool\'s capacity and scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation covers every department and project of the node pool, including ones the caller can\'t read; the response holds only the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand. Nothing is saved. The same scenario gives the same result for every caller. 
+     * Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool\'s capacity and scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every department of the node pool, and for projects every project of the parent, including ones the caller can\'t read; the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing is saved. The same scenario gives the same result for every caller. 
      * @summary Simulate the fair share of a node pool\'s org units
      * @param {string} nodepoolId The unique id identifying the Node Pool.
      * @param {FairShareSimulationRequest} fairShareSimulationRequest 

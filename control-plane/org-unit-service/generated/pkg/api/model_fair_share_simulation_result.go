@@ -28,7 +28,7 @@ type FairShareSimulationResult struct {
 	Id string `json:"id" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The GPUs the org unit asked for in this scenario, after the default and the limit were applied.
+	// The GPUs the org unit asked for in this scenario, after the default demand and the limit were applied.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Demand FairShareSimulationResources `json:"demand"`
 	Demand FairShareSimulationResources `json:"demand" gorm:"serializer:json; type:jsonb;not null;"`

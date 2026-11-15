@@ -22,18 +22,6 @@ var dummyFairShareSimulationResponse = runaihttp.AssertPattern
 
 type FairShareSimulationResponse struct {
 
-	// The GPUs the simulation split.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Capacity FairShareSimulationResources `json:"capacity"`
-	Capacity FairShareSimulationResources `json:"capacity" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	// When the requested org units are projects: their department's own result. Null when the caller can't read the department.
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Parent *FairShareSimulationResult `json:"parent,omitempty"`
-	Parent *FairShareSimulationResult `json:"parent,omitempty" gorm:"serializer:json; type:jsonb;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
 	// One result per requested org unit, in the request's order.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OrgUnits []FairShareSimulationResult `json:"orgUnits"`
@@ -44,7 +32,6 @@ type FairShareSimulationResponse struct {
 // AssertFairShareSimulationResponseRequired checks if the required fields are not zero-ed
 func AssertFairShareSimulationResponseRequired(obj FairShareSimulationResponse) error {
 	elements := map[string]interface{}{
-		"capacity": obj.Capacity,
 		"orgUnits": obj.OrgUnits,
 	}
 	for name, el := range elements {
@@ -53,14 +40,6 @@ func AssertFairShareSimulationResponseRequired(obj FairShareSimulationResponse) 
 		}
 	}
 
-	if err := AssertFairShareSimulationResourcesRequired(obj.Capacity); err != nil {
-		return err
-	}
-	if obj.Parent != nil {
-		if err := AssertFairShareSimulationResultRequired(*obj.Parent); err != nil {
-			return err
-		}
-	}
 	for _, el := range obj.OrgUnits {
 		if err := AssertFairShareSimulationResultRequired(el); err != nil {
 			return err
@@ -71,24 +50,6 @@ func AssertFairShareSimulationResponseRequired(obj FairShareSimulationResponse) 
 
 // AssertFairShareSimulationResponseConstraints checks if the values respects the defined constraints
 func AssertFairShareSimulationResponseConstraints(obj FairShareSimulationResponse) error {
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertFairShareSimulationResourcesConstraints(obj.Capacity); err != nil {
-		return err
-	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	if obj.Parent != nil {
-		if err := AssertFairShareSimulationResultConstraints(*obj.Parent); err != nil {
-			return err
-		}
-	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////

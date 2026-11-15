@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **Id** | **string** |  | 
 **Rank** | Pointer to **NullableString** | Highest … Lowest. Only while ranks is on. | [optional] 
 **Gpu** | Pointer to [**NullableFairShareSimulationGpuSettings**](FairShareSimulationGpuSettings.md) |  | [optional] 
-**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand. | [optional] 
+**Demand** | Pointer to [**NullableFairShareSimulationResources**](FairShareSimulationResources.md) | GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool&#39;s capacity. | [optional] 
 
 ## Methods
 

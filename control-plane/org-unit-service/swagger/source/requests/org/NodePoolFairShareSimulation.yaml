@@ -4,10 +4,10 @@ post:
   x-service: org-unit-service
   description: |
     Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
-    scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation
-    covers every department and project of the node pool, including ones the caller can't read; the response holds only
-    the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand.
-    Nothing is saved. The same scenario gives the same result for every caller.
+    scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every
+    department of the node pool, and for projects every project of the parent, including ones the caller can't read;
+    the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing
+    is saved. The same scenario gives the same result for every caller.
   x-no-authorization: true
   x-test-coverage:
     - control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go

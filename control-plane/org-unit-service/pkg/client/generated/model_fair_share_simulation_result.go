@@ -25,7 +25,7 @@ var _ MappedNullable = &FairShareSimulationResult{}
 // FairShareSimulationResult Values may be fractional, as in the scheduler; the client rounds.
 type FairShareSimulationResult struct {
 	Id string `json:"id"`
-	// The GPUs the org unit asked for in this scenario, after the default and the limit were applied.
+	// The GPUs the org unit asked for in this scenario, after the default demand and the limit were applied.
 	Demand FairShareSimulationResources `json:"demand"`
 	// GPUs the scheduler would give the org unit, the sum of guaranteed and overQuota.
 	FairShare FairShareSimulationResources `json:"fairShare"`

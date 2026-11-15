@@ -16,37 +16,34 @@ package api
 ////////////////////////// RUNAI START (18.1) ////////////////////////////
 import runaihttp "github.com/dsx-ai-factory/run-ai/runai-common-packages/runaihttp"
 
-var dummyFairShareSimulationAssumptions = runaihttp.AssertPattern
+var dummyFairShareSimulationParent = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationAssumptions - What the simulation assumes about org units the user didn't set.
-type FairShareSimulationAssumptions struct {
+// FairShareSimulationParent - The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not allowed for departments. Each field replaces the stored value on its own; omitted fields keep it.
+type FairShareSimulationParent struct {
 
-	// GPUs every org unit without a demand in the request asks for, capped by its limit. The node pool form sends half the node pool's capacity. In the node pool form it is also a department's demand; in the department and project forms a department asks for the sum of its projects' demand.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//DefaultDemand FairShareSimulationResources `json:"defaultDemand"`
-	DefaultDemand FairShareSimulationResources `json:"defaultDemand" gorm:"serializer:json; type:jsonb;not null;"`
+	//Id string `json:"id"`
+	Id string `json:"id" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// What departments other than focusDepartmentId ask for. `default`: the default demand. `idle`: nothing, so the focus department can take the whole node pool up to its limit. The department and project forms send `idle` and say so in a footnote.
+	// Highest … Lowest. Only while ranks is on.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//OtherDepartments string `json:"otherDepartments"`
-	OtherDepartments string `json:"otherDepartments" gorm:"not null;"`
+	//Rank *string `json:"rank,omitempty"`
+	Rank *string `json:"rank,omitempty" gorm:""`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The department the requested org units belong to. Required with `idle` and when orgUnitType is project; the requested org units must belong to it.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//FocusDepartmentId *string `json:"focusDepartmentId,omitempty"`
-	FocusDepartmentId *string `json:"focusDepartmentId,omitempty" gorm:""`
+	//Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty"`
+	Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 }
 
-// AssertFairShareSimulationAssumptionsRequired checks if the required fields are not zero-ed
-func AssertFairShareSimulationAssumptionsRequired(obj FairShareSimulationAssumptions) error {
+// AssertFairShareSimulationParentRequired checks if the required fields are not zero-ed
+func AssertFairShareSimulationParentRequired(obj FairShareSimulationParent) error {
 	elements := map[string]interface{}{
-		"defaultDemand":    obj.DefaultDemand,
-		"otherDepartments": obj.OtherDepartments,
+		"id": obj.Id,
 	}
 	for name, el := range elements {
 		if isZero := IsZeroValue(el); isZero {
@@ -54,31 +51,35 @@ func AssertFairShareSimulationAssumptionsRequired(obj FairShareSimulationAssumpt
 		}
 	}
 
-	if err := AssertFairShareSimulationResourcesRequired(obj.DefaultDemand); err != nil {
-		return err
+	if obj.Gpu != nil {
+		if err := AssertFairShareSimulationGpuSettingsRequired(*obj.Gpu); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-// AssertFairShareSimulationAssumptionsConstraints checks if the values respects the defined constraints
-func AssertFairShareSimulationAssumptionsConstraints(obj FairShareSimulationAssumptions) error {
+// AssertFairShareSimulationParentConstraints checks if the values respects the defined constraints
+func AssertFairShareSimulationParentConstraints(obj FairShareSimulationParent) error {
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertFairShareSimulationResourcesConstraints(obj.DefaultDemand); err != nil {
-		return err
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (18.2) //////////////////////////
+	//////////////////////// RUNAI END //////////////////////////
+	//////////////////////// RUNAI START (2.1) //////////////////////////
+
+	//////////////////////// RUNAI END //////////////////////////
+	if obj.Gpu != nil {
+		if err := AssertFairShareSimulationGpuSettingsConstraints(*obj.Gpu); err != nil {
+			return err
+		}
 	}
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (18.2) //////////////////////////
-	//////////////////////// RUNAI END //////////////////////////
-	//////////////////////// RUNAI START (2.1) //////////////////////////
-
-	//////////////////////// RUNAI END //////////////////////////
 	return nil
 }

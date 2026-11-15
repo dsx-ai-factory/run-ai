@@ -5,15 +5,15 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **NodePool** | [**FairShareSimulationNodePool**](FairShareSimulationNodePool.md) |  | 
-**Assumptions** | [**FairShareSimulationAssumptions**](FairShareSimulationAssumptions.md) |  | 
 **OrgUnitType** | **string** | The type of the requested org units. One type per request. | 
-**OrgUnits** | [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | The org units to return, with their unsaved changes. Send the rows the screen shows. | 
+**Parent** | Pointer to [**NullableFairShareSimulationParent**](FairShareSimulationParent.md) |  | [optional] 
+**OrgUnits** | [**[]FairShareSimulationOrgUnit**](FairShareSimulationOrgUnit.md) | The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row. | 
 
 ## Methods
 
 ### NewFairShareSimulationRequest
 
-`func NewFairShareSimulationRequest(nodePool FairShareSimulationNodePool, assumptions FairShareSimulationAssumptions, orgUnitType string, orgUnits []FairShareSimulationOrgUnit, ) *FairShareSimulationRequest`
+`func NewFairShareSimulationRequest(nodePool FairShareSimulationNodePool, orgUnitType string, orgUnits []FairShareSimulationOrgUnit, ) *FairShareSimulationRequest`
 
 NewFairShareSimulationRequest instantiates a new FairShareSimulationRequest object
 This constructor will assign default values to properties that have it defined,
@@ -48,26 +48,6 @@ and a boolean to check if the value has been set.
 SetNodePool sets NodePool field to given value.
 
 
-### GetAssumptions
-
-`func (o *FairShareSimulationRequest) GetAssumptions() FairShareSimulationAssumptions`
-
-GetAssumptions returns the Assumptions field if non-nil, zero value otherwise.
-
-### GetAssumptionsOk
-
-`func (o *FairShareSimulationRequest) GetAssumptionsOk() (*FairShareSimulationAssumptions, bool)`
-
-GetAssumptionsOk returns a tuple with the Assumptions field if it's non-nil, zero value otherwise
-and a boolean to check if the value has been set.
-
-### SetAssumptions
-
-`func (o *FairShareSimulationRequest) SetAssumptions(v FairShareSimulationAssumptions)`
-
-SetAssumptions sets Assumptions field to given value.
-
-
 ### GetOrgUnitType
 
 `func (o *FairShareSimulationRequest) GetOrgUnitType() string`
@@ -88,6 +68,41 @@ and a boolean to check if the value has been set.
 SetOrgUnitType sets OrgUnitType field to given value.
 
 
+### GetParent
+
+`func (o *FairShareSimulationRequest) GetParent() FairShareSimulationParent`
+
+GetParent returns the Parent field if non-nil, zero value otherwise.
+
+### GetParentOk
+
+`func (o *FairShareSimulationRequest) GetParentOk() (*FairShareSimulationParent, bool)`
+
+GetParentOk returns a tuple with the Parent field if it's non-nil, zero value otherwise
+and a boolean to check if the value has been set.
+
+### SetParent
+
+`func (o *FairShareSimulationRequest) SetParent(v FairShareSimulationParent)`
+
+SetParent sets Parent field to given value.
+
+### HasParent
+
+`func (o *FairShareSimulationRequest) HasParent() bool`
+
+HasParent returns a boolean if a field has been set.
+
+### SetParentNil
+
+`func (o *FairShareSimulationRequest) SetParentNil(b bool)`
+
+ SetParentNil sets the value for Parent to be an explicit nil
+
+### UnsetParent
+`func (o *FairShareSimulationRequest) UnsetParent()`
+
+UnsetParent ensures that no value is present for Parent, not even an explicit nil
 ### GetOrgUnits
 
 `func (o *FairShareSimulationRequest) GetOrgUnits() []FairShareSimulationOrgUnit`

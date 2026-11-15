@@ -1,0 +1,20 @@
+type: object
+description: |
+  The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not
+  allowed for departments. Each field replaces the stored value on its own; omitted fields keep it.
+required:
+  - id
+properties:
+  id:
+    type: string
+    example: "4500014"
+  rank:
+    type: string
+    nullable: true
+    description: Highest … Lowest. Only while ranks is on.
+    example: High
+  gpu:
+    type: object
+    nullable: true
+    allOf:
+      - $ref: "./FairShareSimulationGpuSettings.yaml"

@@ -13,7 +13,7 @@ properties:
     type: string
     example: "4500014"
   demand:
-    description: The GPUs the org unit asked for in this scenario, after the default and the limit were applied.
+    description: The GPUs the org unit asked for in this scenario, after the default demand and the limit were applied.
     allOf:
       - $ref: "./FairShareSimulationResources.yaml"
   fairShare:

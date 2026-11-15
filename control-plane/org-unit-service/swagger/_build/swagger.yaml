@@ -2317,10 +2317,10 @@ paths:
       x-service: org-unit-service
       description: |
         Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
-        scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation
-        covers every department and project of the node pool, including ones the caller can't read; the response holds only
-        the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand.
-        Nothing is saved. The same scenario gives the same result for every caller.
+        scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every
+        department of the node pool, and for projects every project of the parent, including ones the caller can't read;
+        the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing
+        is saved. The same scenario gives the same result for every caller.
       x-no-authorization: true
       x-test-coverage:
         - control-plane/org-unit-service/pkg/services/test/fair_share_simulation_test.go
@@ -5529,36 +5529,6 @@ components:
             - $ref: '#/components/schemas/FairShareSimulationResources'
         schedulingCapabilities:
           $ref: '#/components/schemas/FairShareSimulationSchedulingCapabilities'
-    FairShareSimulationAssumptions:
-      type: object
-      description: What the simulation assumes about org units the user didn't set.
-      required:
-        - defaultDemand
-        - otherDepartments
-      properties:
-        defaultDemand:
-          description: |
-            GPUs every org unit without a demand in the request asks for, capped by its limit. The node pool form sends
-            half the node pool's capacity. In the node pool form it is also a department's demand; in the department and
-            project forms a department asks for the sum of its projects' demand.
-          allOf:
-            - $ref: '#/components/schemas/FairShareSimulationResources'
-        otherDepartments:
-          type: string
-          description: |
-            What departments other than focusDepartmentId ask for. `default`: the default demand. `idle`: nothing, so the
-            focus department can take the whole node pool up to its limit. The department and project forms send `idle`
-            and say so in a footnote.
-          enum:
-            - default
-            - idle
-        focusDepartmentId:
-          type: string
-          nullable: true
-          description: |
-            The department the requested org units belong to. Required with `idle` and when orgUnitType is project; the
-            requested org units must belong to it.
-          example: '4500014'
     FairShareSimulationGpuSettings:
       type: object
       description: GPU settings that replace the stored ones. Omitted or null fields keep their stored values.
@@ -5580,6 +5550,27 @@ components:
           format: double
           nullable: true
           example: 2
+    FairShareSimulationParent:
+      type: object
+      description: |
+        The department whose projects are simulated, with its unsaved changes. Required when orgUnitType is project; not
+        allowed for departments. Each field replaces the stored value on its own; omitted fields keep it.
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          example: '4500014'
+        rank:
+          type: string
+          nullable: true
+          description: Highest … Lowest. Only while ranks is on.
+          example: High
+        gpu:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationGpuSettings'
     FairShareSimulationOrgUnit:
       type: object
       description: A requested org unit. Each field replaces the stored value on its own; omitted fields keep it.
@@ -5602,35 +5593,38 @@ components:
         demand:
           type: object
           nullable: true
-          description: GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand.
+          description: GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool's capacity.
           allOf:
             - $ref: '#/components/schemas/FairShareSimulationResources'
     FairShareSimulationRequest:
       type: object
       description: |
-        A scenario to simulate. The node pool values and the assumptions are always sent, so the result never depends on
-        what is saved or on who is asking.
+        A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved
+        changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For
+        departments, every department competes. For projects, the other departments ask for nothing, and the parent asks
+        for the sum of its projects' demand.
       required:
         - nodePool
-        - assumptions
         - orgUnitType
         - orgUnits
       properties:
         nodePool:
           $ref: '#/components/schemas/FairShareSimulationNodePool'
-        assumptions:
-          $ref: '#/components/schemas/FairShareSimulationAssumptions'
         orgUnitType:
           type: string
           description: The type of the requested org units. One type per request.
           enum:
             - department
             - project
+        parent:
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/FairShareSimulationParent'
         orgUnits:
           type: array
           minItems: 1
           maxItems: 500
-          description: The org units to return, with their unsaved changes. Send the rows the screen shows.
+          description: The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row.
           items:
             $ref: '#/components/schemas/FairShareSimulationOrgUnit'
     FairShareSimulationResult:
@@ -5649,7 +5643,7 @@ components:
           type: string
           example: '4500014'
         demand:
-          description: The GPUs the org unit asked for in this scenario, after the default and the limit were applied.
+          description: The GPUs the org unit asked for in this scenario, after the default demand and the limit were applied.
           allOf:
             - $ref: '#/components/schemas/FairShareSimulationResources'
         fairShare:
@@ -5676,20 +5670,8 @@ components:
     FairShareSimulationResponse:
       type: object
       required:
-        - capacity
         - orgUnits
       properties:
-        capacity:
-          description: The GPUs the simulation split.
-          allOf:
-            - $ref: '#/components/schemas/FairShareSimulationResources'
-        parent:
-          description: |
-            When the requested org units are projects: their department's own result. Null when the caller can't read the
-            department.
-          nullable: true
-          allOf:
-            - $ref: '#/components/schemas/FairShareSimulationResult'
         orgUnits:
           type: array
           description: One result per requested org unit, in the request's order.

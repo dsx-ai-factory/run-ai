@@ -119,10 +119,10 @@ type OrgUnitAPI interface {
 		SimulateNodePoolFairShare Simulate the fair share of a node pool's org units
 
 		Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
-	scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation
-	covers every department and project of the node pool, including ones the caller can't read; the response holds only
-	the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand.
-	Nothing is saved. The same scenario gives the same result for every caller.
+	scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every
+	department of the node pool, and for projects every project of the parent, including ones the caller can't read;
+	the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing
+	is saved. The same scenario gives the same result for every caller.
 
 
 		@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
@@ -1185,10 +1185,10 @@ func (r ApiSimulateNodePoolFairShareRequest) Execute() (*FairShareSimulationResp
 SimulateNodePoolFairShare Simulate the fair share of a node pool's org units
 
 Computes the GPUs the scheduler would give org units of a node pool for a scenario: the node pool's capacity and
-scheduling capabilities, demand assumptions, and the org units to return with their unsaved changes. The calculation
-covers every department and project of the node pool, including ones the caller can't read; the response holds only
-the requested org units. Every org unit not in the request keeps its stored values and asks for the default demand.
-Nothing is saved. The same scenario gives the same result for every caller.
+scheduling capabilities and the org units to return with their unsaved changes. The calculation covers every
+department of the node pool, and for projects every project of the parent, including ones the caller can't read;
+the response holds only the requested org units. Every org unit not in the request keeps its stored values. Nothing
+is saved. The same scenario gives the same result for every caller.
 
 	@param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
 	@param nodepoolId The unique id identifying the Node Pool.

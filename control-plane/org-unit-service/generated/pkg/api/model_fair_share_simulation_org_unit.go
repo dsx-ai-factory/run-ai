@@ -39,7 +39,7 @@ type FairShareSimulationOrgUnit struct {
 	Gpu *FairShareSimulationGpuSettings `json:"gpu,omitempty" gorm:"serializer:json; type:jsonb;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand.
+	// GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool's capacity.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//Demand *FairShareSimulationResources `json:"demand,omitempty"`
 	Demand *FairShareSimulationResources `json:"demand,omitempty" gorm:"serializer:json; type:jsonb;"`

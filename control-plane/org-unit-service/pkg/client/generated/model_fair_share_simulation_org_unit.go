@@ -28,7 +28,7 @@ type FairShareSimulationOrgUnit struct {
 	// Highest … Lowest. Only while ranks is on.
 	Rank NullableString                         `json:"rank,omitempty"`
 	Gpu  NullableFairShareSimulationGpuSettings `json:"gpu,omitempty"`
-	// GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, the default demand.
+	// GPUs the org unit asks for (the dragged slider). Above the limit it is capped. Without it, half the node pool's capacity.
 	Demand NullableFairShareSimulationResources `json:"demand,omitempty"`
 }
 

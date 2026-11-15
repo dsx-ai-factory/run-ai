@@ -1,6 +1,6 @@
 # Fair share simulation: requirements
 
-Draft, 2026-11-12; open questions 1–5 answered by Barak the same day; design review applied (focus department, one demand rule, parent visibility, effective demand). Gathered from the Figma (V3 - Node Pools, Approved Version), the GitHub issues (#2949, #4107, #4112, #4114, #4250, #4350), Slack (Chen's 2026-10-29 meeting summary, Shiri's 2026-11-04 permission answer, Shiri's 2026-11-12 decisions and questions) and KAI's scheduler code.
+Draft, 2026-11-12; open questions 1–5 answered by Barak the same day; design review applied (focus department, one demand rule, parent visibility, effective demand); contract simplified with Edith on 2026-11-15 (assumptions fixed per form, `parent` in the request). Gathered from the Figma (V3 - Node Pools, Approved Version), the GitHub issues (#2949, #4107, #4112, #4114, #4250, #4350), Slack (Chen's 2026-10-29 meeting summary, Shiri's 2026-11-04 permission answer, Shiri's 2026-11-12 decisions and questions) and KAI's scheduler code.
 
 Legend: **D** decided · **O** open, needs product · **T** technical fact we verified.
 
@@ -41,7 +41,7 @@ Shiri 2026-11-04, Figma frames 18523:1090082 / 18523:1090764, #4114:
 - Read but no **edit** on departments: the step is read-only; the user sees the mode and the split, including the simulation, but can't change anything.
 - Switches that reset department values (CPU quota, Max GPU allocation) are disabled for users who can't edit all departments and projects in the cluster (Shiri 2026-11-12).
 - A user may see only some of the departments or projects (RBAC). **Hidden org units still compete** and must count in the calculation; their individual values must not be returned. Aggregate leakage is accepted: `weightShareInRank` reveals a rank's total weight, and a unit's own fair share already depends on hidden units.
-- The parent department's own result is returned only when the caller can read that department.
+- The parent department's own result is not returned; a project's reader can simulate without read on the parent.
 
 ## 5. The calculation (T)
 
@@ -60,10 +60,10 @@ The code is KAI's `pkg/fairshare` (merged, kai-scheduler/KAI-Scheduler#2572; not
 | # | Assumption | Status |
 |---|---|---|
 | 6.1 | Every org unit the user didn't drag asks for a default demand. Dragged values are exact. | **D** |
-| 6.2 | Default demand for an untouched org unit: **50% of the node pool's capacity**, capped by its limit. Applies to departments and projects alike, including hidden ones. The client sends it as a GPU count (it owns the rounding). | **D** |
+| 6.2 | Default demand for an untouched org unit: **50% of the node pool's capacity**, capped by its limit. Applies to departments and projects alike, including hidden ones. The backend applies it; the client doesn't send it (Edith, 2026-11-15). | **D** |
 | 6.3 | A department's demand is the sum of its projects' demands **only when its projects are the simulated level** (department and project forms). In the node pool form, a department's demand is its slider, else the default. So the node pool form needs no project data. | **D** (review) |
-| 6.4 | In the department and project forms, the other departments are **idle: demand 0**, with a footnote. The focus department is named explicitly in the request; it still competes under the pool's rules, so it gets at most its limit, else the capacity. | **D** |
-| 6.5 | The assumption must not depend on who's looking or on which rows were requested: two requests with the same scenario give the same numbers. Assumptions and the focus department are explicit request parameters, never inferred from permissions or from the rows. | **D** (review) |
+| 6.4 | In the department and project forms, the other departments are **idle: demand 0**, with a footnote. The request names the `parent` (with its unsaved edits); it still competes under the pool's rules, so it gets at most its limit, else the capacity. | **D** |
+| 6.5 | The assumption must not depend on who's looking or on which rows were requested: two requests with the same scenario give the same numbers. The assumptions are fixed per `orgUnitType` in the backend, never inferred from permissions or from the rows. | **D** (review, simplified 2026-11-15) |
 | 6.7 | A department with no projects asks for 0 in the department forms, so it gets 0 even with quota (scheduler behaviour). The row stays, with `demand: 0`. | **T** |
 | 6.6 | Possible later addition: a second number per unit, "up to, when the others use only their quota". | Deferred |
 
@@ -98,10 +98,11 @@ The code is KAI's `pkg/fairshare` (merged, kai-scheduler/KAI-Scheduler#2572; not
 
 ## 11. Contract rules (from the design review)
 
-- Required in every request: `nodePool.capacity`, `nodePool.schedulingCapabilities`, `assumptions`, `orgUnitType`, at least one row. No server-side fallback to saved values.
+- Required in every request: `nodePool.capacity`, `nodePool.schedulingCapabilities`, `orgUnitType`, at least one row; `parent` (id and optional rank and GPU edits) for projects only. No server-side fallback to saved node pool values.
 - Row edits merge over stored values field by field (`rank`, `gpu.deserved`, `gpu.limit`, `gpu.overQuotaWeight`, `demand`), each optional.
-- 400 for: `limits` on with `quota` off; a `limit` on a row while `limits` is off; a `rank` while `ranks` is off; a duplicate id; an id not in the pool or not readable (same message); a row outside the focus department; `idle` without a focus; `capacity < 0`; `demand < 0`. A demand above the limit is capped, not rejected. `capacity = 0` is valid (a pool with no nodes yet): the quota phase still runs, so each org unit gets its quota (capped by demand and limit) and nothing above it.
-- Response per row: `fairShare`, `guaranteed`, `overQuota`, `unmet`, `demand` (effective), `weightShareInRank`. Values may be fractional; the client rounds.
+- 400 for: `limits` on with `quota` off; a `limit` on a row while `limits` is off; a `rank` while `ranks` is off; a duplicate id; an id not in the pool or not readable (same message); a row outside the parent; `parent` missing for projects or set for departments; a parent limit below its quota; `capacity < 0`; `demand < 0`. A demand above the limit is capped, not rejected. `capacity = 0` is valid (a pool with no nodes yet): the quota phase still runs, so each org unit gets its quota (capped by demand and limit) and nothing above it.
+- Response: only `orgUnits`. Per row: `fairShare`, `guaranteed`, `overQuota`, `unmet`, `demand` (effective), `weightShareInRank`. Values may be fractional; the client rounds. The parent's own result isn't returned: with the other departments idle it repeats its capped demand, and no form shows it.
+- The parent needn't be readable, so a project's reader can open the project form; an unknown parent gets the same 400 as an unknown project.
 - Cost per call: the pool's departments (hundreds) plus, for the department forms, one department's projects (up to ~1.2k), two permitted-scopes calls, and KAI's division.
 
 ## 12. Decisions taken on the open questions (2026-11-12)
@@ -114,4 +115,4 @@ The code is KAI's `pkg/fairshare` (merged, kai-scheduler/KAI-Scheduler#2572; not
 
 Still open:
 6. Confirm with UX that unmet = demand − allocation, capped by the limit (the Figma tooltip's numbers don't add up).
-7. In the department and project forms, is the parent department's own share shown (header or footnote)? The API returns it either way.
+7. ~~In the department and project forms, is the parent department's own share shown?~~ Dropped from the API (2026-11-15); can be added back as an optional field.

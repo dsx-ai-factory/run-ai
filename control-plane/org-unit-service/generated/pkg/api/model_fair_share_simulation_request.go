@@ -20,17 +20,12 @@ var dummyFairShareSimulationRequest = runaihttp.AssertPattern
 
 ////////////////////////// RUNAI END ////////////////////////////
 
-// FairShareSimulationRequest - A scenario to simulate. The node pool values and the assumptions are always sent, so the result never depends on what is saved or on who is asking.
+// FairShareSimulationRequest - A scenario to simulate: the node pool as it is in the form and the org units the form shows, with their unsaved changes. Every org unit without a demand asks for half the node pool's capacity, capped by its limit. For departments, every department competes. For projects, the other departments ask for nothing, and the parent asks for the sum of its projects' demand.
 type FairShareSimulationRequest struct {
 
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//NodePool FairShareSimulationNodePool `json:"nodePool"`
 	NodePool FairShareSimulationNodePool `json:"nodePool" gorm:"serializer:json; type:jsonb;not null;"`
-	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
-
-	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
-	//Assumptions FairShareSimulationAssumptions `json:"assumptions"`
-	Assumptions FairShareSimulationAssumptions `json:"assumptions" gorm:"serializer:json; type:jsonb;not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
 	// The type of the requested org units. One type per request.
@@ -39,7 +34,12 @@ type FairShareSimulationRequest struct {
 	OrgUnitType string `json:"orgUnitType" gorm:"not null;"`
 	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
 
-	// The org units to return, with their unsaved changes. Send the rows the screen shows.
+	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
+	//Parent *FairShareSimulationParent `json:"parent,omitempty"`
+	Parent *FairShareSimulationParent `json:"parent,omitempty" gorm:"serializer:json; type:jsonb;"`
+	//////////////////////////////////// RUNAI END ///////////////////////////////////////////
+
+	// The org units to return, with their unsaved changes. Send the rows the screen shows and every edited row.
 	//////////////////////////////////// RUNAI START (19) ///////////////////////////////////////////
 	//OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits"`
 	OrgUnits []FairShareSimulationOrgUnit `json:"orgUnits" gorm:"serializer:json; type:jsonb;not null;"`
@@ -50,7 +50,6 @@ type FairShareSimulationRequest struct {
 func AssertFairShareSimulationRequestRequired(obj FairShareSimulationRequest) error {
 	elements := map[string]interface{}{
 		"nodePool":    obj.NodePool,
-		"assumptions": obj.Assumptions,
 		"orgUnitType": obj.OrgUnitType,
 		"orgUnits":    obj.OrgUnits,
 	}
@@ -63,8 +62,10 @@ func AssertFairShareSimulationRequestRequired(obj FairShareSimulationRequest) er
 	if err := AssertFairShareSimulationNodePoolRequired(obj.NodePool); err != nil {
 		return err
 	}
-	if err := AssertFairShareSimulationAssumptionsRequired(obj.Assumptions); err != nil {
-		return err
+	if obj.Parent != nil {
+		if err := AssertFairShareSimulationParentRequired(*obj.Parent); err != nil {
+			return err
+		}
 	}
 	for _, el := range obj.OrgUnits {
 		if err := AssertFairShareSimulationOrgUnitRequired(el); err != nil {
@@ -89,14 +90,16 @@ func AssertFairShareSimulationRequestConstraints(obj FairShareSimulationRequest)
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
-	if err := AssertFairShareSimulationAssumptionsConstraints(obj.Assumptions); err != nil {
-		return err
-	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	//////////////////////// RUNAI END //////////////////////////
 	//////////////////////// RUNAI START (2.1) //////////////////////////
 
 	//////////////////////// RUNAI END //////////////////////////
+	if obj.Parent != nil {
+		if err := AssertFairShareSimulationParentConstraints(*obj.Parent); err != nil {
+			return err
+		}
+	}
 	//////////////////////// RUNAI START (18.2) //////////////////////////
 	if minItemsErr := runaihttp.AssertMinItems(obj.OrgUnits, "OrgUnits", 1); minItemsErr != nil {
 		return &ParsingError{Param: "OrgUnits", Err: minItemsErr}
