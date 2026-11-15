@@ -6,6 +6,7 @@
 package inferenceendpoint
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/internal/generated/pkg/api"
@@ -38,7 +39,7 @@ func BuildNIMServiceIntent(endpoint api.NetworkingEndpoint, workloadName string,
 		return nil, fmt.Errorf("NIM service requires a reference to the serving port of the operator Service %q", workloadName)
 	}
 	if service.Authorization != nil {
-		return nil, fmt.Errorf("NIM service with a protected serving port is not supported yet")
+		return nil, errors.New(AuthNotSupportedMessage)
 	}
 	if _, err := servingHostname(nimServiceKind, endpoint.ExternalAccess, service.Ref.Name, service.Ref.Port, defaults); err != nil {
 		return nil, err

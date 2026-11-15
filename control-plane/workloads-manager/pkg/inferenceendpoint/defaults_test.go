@@ -51,6 +51,21 @@ var _ = Describe("Administrator inference endpoint defaults", func() {
 		Expect(defaults).To(BeNil())
 	})
 
+	It("rejects a cluster that is not a Gateway cluster, with or without the integration version", func() {
+		status.Config.Get().GatewayAPIEnabled.Set(ptr.To(false))
+		for _, withVersion := range []bool{true, false} {
+			if !withVersion {
+				status.Config.Get().InferenceEndpointSchemaVersion.Unset()
+			}
+			defaults, err := ResolveDefaults(status)
+			Expect(err).To(MatchError(GatewayClusterRequiredMessage))
+			Expect(defaults).To(BeNil())
+			defaults, err = ResolveDefaultsForUpdate(status)
+			Expect(err).To(MatchError(GatewayClusterRequiredMessage))
+			Expect(defaults).To(BeNil())
+		}
+	})
+
 	It("rejects a future contract instead of interpreting it as v1", func() {
 		status.Config.Get().InferenceEndpointSchemaVersion.Set(ptr.To("v2"))
 		defaults, err := ResolveDefaults(status)

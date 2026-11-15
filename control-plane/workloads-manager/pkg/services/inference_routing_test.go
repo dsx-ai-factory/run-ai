@@ -149,6 +149,19 @@ var _ = Describe("inference routing", func() {
 			Expect(err.Message).To(Equal(loadAwareRoutingUnavailableMessage))
 		})
 
+		It("rejects an opt-in on a cluster that is not a Gateway cluster", func() {
+			cluster := inferenceIntegrationClusterForTest()
+			cluster.Status.Get().Config.Get().GatewayAPIEnabled.Set(ptr.To(false))
+			clusterMock.WithCluster(inferenceRoutingTestCluster, cluster)
+			for _, adapter := range []inferenceRoutingAdapter{inferenceRoutingDistributedInference, inferenceRoutingNIMService} {
+				resolved, err := resolveInferenceRoutingDefaults(context.Background(), optedIn, inferenceRoutingTestCluster, adapter)
+				Expect(resolved).To(BeNil())
+				Expect(err).NotTo(BeNil())
+				Expect(err.Code).To(BeEquivalentTo(http.StatusBadRequest))
+				Expect(err.Message).To(Equal("load-aware routing: " + inferenceendpoint.GatewayClusterRequiredMessage))
+			}
+		})
+
 		It("rejects an opt-in with the integration error", func() {
 			cluster := inferenceIntegrationClusterForTest()
 			(*cluster.Status.Get().Operands)["inference-endpoint-controller"] = clustersapi.ClusterReportedStatusOperandsValue{Ready: false}
@@ -228,7 +241,7 @@ var _ = Describe("inference routing", func() {
 			routing := &api.WorkloadV2ConfigurationInferenceRouting{LoadAwareRouting: ptr.To(true)}
 			err := applyInferenceRouting(inferenceRoutingDistributedInference, routing, defaults, manifest, configuration, "model")
 			Expect(err).NotTo(BeNil())
-			Expect(err.Message).To(ContainSubstring("public distributed inference must not target the auth proxy port"))
+			Expect(err.Message).To(ContainSubstring(inferenceendpoint.AuthNotSupportedMessage))
 		})
 
 		It("rejects a workload without one serving endpoint", func() {

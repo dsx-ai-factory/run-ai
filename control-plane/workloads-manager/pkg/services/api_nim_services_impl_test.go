@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-and-policies/clients/clusterservice"
+	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/inferenceendpoint"
 	"github.com/dsx-ai-factory/run-ai/control-plane/workloads-manager/pkg/settings"
 	setting_pkg "github.com/dsx-ai-factory/run-ai/runai-common-packages/setting"
 
@@ -608,9 +609,9 @@ var _ = Describe("NimServicesImpl", func() {
 		})
 
 		It("rejects an opt-in on a cluster without the integration", func() {
-			// The default test cluster exposes NIM through Ingress only.
+			// The default test cluster exposes NIM through Ingress only, so it is not a Gateway cluster.
 			err := failToCreateNimServiceForTest(router, randoms, createRequest("nim-ingress", routedSpec()), http.StatusBadRequest)
-			Expect(err.Message).To(Equal(loadAwareRoutingUnavailableMessage))
+			Expect(err.Message).To(Equal("load-aware routing: " + inferenceendpoint.GatewayClusterRequiredMessage))
 		})
 
 		It("rejects an opt-in when the cluster also exposes the NIM through Ingress", func() {

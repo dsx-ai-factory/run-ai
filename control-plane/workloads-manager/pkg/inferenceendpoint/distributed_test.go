@@ -134,7 +134,7 @@ var _ = Describe("Distributed inference endpoint intent", func() {
 		Expect(*service.Spec.Ports[0].TargetPort).To(Equal(composer.Oauth2ContainerDefaultPort))
 
 		_, err := BuildDistributedInferenceIntent(composed, resolved, defaults)
-		Expect(err).To(MatchError(ContainSubstring("public distributed inference must not target the auth proxy port")))
+		Expect(err).To(MatchError(ContainSubstring(AuthNotSupportedMessage)))
 	})
 
 	It("accepts additional bound selectors that the leader template carries", func() {

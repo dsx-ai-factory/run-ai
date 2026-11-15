@@ -6,6 +6,7 @@
 package inferenceendpoint
 
 import (
+	"errors"
 	"fmt"
 
 	clustersapi "github.com/dsx-ai-factory/run-ai/control-plane/cluster-service/pkg/client/generated"
@@ -20,6 +21,14 @@ const PathPrefix = "/v1"
 // EPPProfileGIEv15 is the endpoint picker profile backed by the pinned Gateway API
 // Inference Extension v1.5 image; it is the only profile the control plane accepts.
 const EPPProfileGIEv15 = "gie-v1.5"
+
+// GatewayClusterRequiredMessage is returned when a workload opts in on a cluster
+// that has no administrator-enabled Gateway, for example an Ingress-only cluster.
+const GatewayClusterRequiredMessage = "requires a Gateway cluster, but this cluster has no administrator-enabled Gateway"
+
+// AuthNotSupportedMessage is returned when a workload opts in with an authorized
+// serving port. Remove it with the change that supports authorization.
+const AuthNotSupportedMessage = "an authorized serving port is not supported yet"
 
 // Defaults are cluster administrator choices shared by supported workload
 // adapters. They do not establish runtime, authentication or URL compatibility.
@@ -52,6 +61,9 @@ func resolveDefaults(status *clustersapi.ClusterReportedStatus, forUpdate bool) 
 		return nil, nil
 	}
 	config := status.Config.Get()
+	if enabled := config.GatewayAPIEnabled.Get(); enabled == nil || !*enabled {
+		return nil, errors.New(GatewayClusterRequiredMessage)
+	}
 	version := config.InferenceEndpointSchemaVersion.Get()
 	if version == nil && !forUpdate {
 		return nil, nil
@@ -68,9 +80,6 @@ func resolveDefaults(status *clustersapi.ClusterReportedStatus, forUpdate bool) 
 				return nil, fmt.Errorf("inference endpoint integration requires ready operand %s", name)
 			}
 		}
-	}
-	if enabled := config.GatewayAPIEnabled.Get(); enabled == nil || !*enabled {
-		return nil, fmt.Errorf("inference endpoint integration requires an administrator-enabled Gateway")
 	}
 	name, namespace := config.GetGatewayName(), config.GetGatewayNamespace()
 	if name == "" || len(validation.IsDNS1123Subdomain(name)) != 0 || namespace == "" || len(validation.IsDNS1123Label(namespace)) != 0 {
