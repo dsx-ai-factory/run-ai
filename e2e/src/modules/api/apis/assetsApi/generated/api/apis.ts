@@ -44,16 +44,8 @@ export * from './workloadApi';
 import { WorkloadApi } from './workloadApi';
 export * from './workspacesApi';
 import { WorkspacesApi } from './workspacesApi';
-import * as http from 'http';
-
-export class HttpError extends Error {
-    constructor (public response: http.IncomingMessage, public body: any, public statusCode?: number, requestOptions?: any) {
-        /////Start: Modified by @Run.AI /////
-        super(`HTTP request failed with the following statusCode ${statusCode},\n Request: ${JSON.stringify(requestOptions)},\n Response: ${JSON.stringify(body)}`);
-        /////End: Modified by @Run.AI /////
-        this.name = 'HttpError';
-    }
-}
+import { HttpError } from './httpError';
+export { HttpError };
 
 export type { RequestFile } from '../model/models';
 

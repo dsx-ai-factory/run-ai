@@ -17,7 +17,7 @@ import {
     BaseWorkload,
     projectResourcesUtils
 } from '..';
-import { Project } from '../../api/apis/projectsDepartmentsApi/generated/model/project';
+import { Project } from '../../api/apis/projectsDepartmentsApi';
 import { V1Pod } from '@kubernetes/client-node';
 
 export class SchedulingUtils {

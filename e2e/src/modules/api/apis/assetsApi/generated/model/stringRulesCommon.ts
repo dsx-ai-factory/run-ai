@@ -23,6 +23,10 @@ export class StringRulesCommon {
     * Whether the value of the field is editable, default to true
     */
     'canEdit'?: boolean | null;
+    /**
+    * Blocks the field to prevent workloads from specifying any value for it.
+    */
+    'blocked'?: boolean | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -40,6 +44,11 @@ export class StringRulesCommon {
         {
             "name": "canEdit",
             "baseName": "canEdit",
+            "type": "boolean"
+        },
+        {
+            "name": "blocked",
+            "baseName": "blocked",
             "type": "boolean"
         }    ];
 

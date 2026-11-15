@@ -25,7 +25,7 @@ export class EnvironmentVariable {
     */
     'name'?: string | null;
     /**
-    * The value of the environment variable. (mutually exclusive with secret, credential, configMap and podFieldRef)
+    * The value of the environment variable. (mutually exclusive with secret, userCredential, configMap and podFieldRef)
     */
     'value'?: string | null;
     'secret'?: EnvironmentVariableSecret | null;

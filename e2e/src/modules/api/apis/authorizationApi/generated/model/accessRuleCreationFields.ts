@@ -19,7 +19,6 @@ export class AccessRuleCreationFields {
     * The unique identifier of the subject (e.g., user, group, or app).
     */
     'subjectId': string;
-    'subjectType': SubjectType;
     /**
     * The numeric ID of the assigned role.
     */
@@ -33,6 +32,7 @@ export class AccessRuleCreationFields {
     * The id of the cluster.
     */
     'clusterId'?: string;
+    'subjectType': SubjectType;
 
     static discriminator: string | undefined = undefined;
 
@@ -41,11 +41,6 @@ export class AccessRuleCreationFields {
             "name": "subjectId",
             "baseName": "subjectId",
             "type": "string"
-        },
-        {
-            "name": "subjectType",
-            "baseName": "subjectType",
-            "type": "SubjectType"
         },
         {
             "name": "roleId",
@@ -66,6 +61,11 @@ export class AccessRuleCreationFields {
             "name": "clusterId",
             "baseName": "clusterId",
             "type": "string"
+        },
+        {
+            "name": "subjectType",
+            "baseName": "subjectType",
+            "type": "SubjectType"
         }    ];
 
     static getAttributeTypeMap() {

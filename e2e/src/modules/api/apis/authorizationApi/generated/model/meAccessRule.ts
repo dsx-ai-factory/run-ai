@@ -12,14 +12,13 @@
 
 import { RequestFile } from './models';
 import { ScopeType } from './scopeType';
-import { SubjectType } from './subjectType';
+import { SubjectTypeExtended } from './subjectTypeExtended';
 
 export class MeAccessRule {
     /**
     * The unique identifier of the subject (e.g., user, group, or app).
     */
     'subjectId': string;
-    'subjectType': SubjectType;
     /**
     * The numeric ID of the assigned role.
     */
@@ -33,6 +32,7 @@ export class MeAccessRule {
     * The id of the cluster.
     */
     'clusterId'?: string;
+    'subjectType': SubjectTypeExtended;
     /**
     * The name of the assigned role (e.g., admin, viewer).
     */
@@ -56,11 +56,6 @@ export class MeAccessRule {
             "type": "string"
         },
         {
-            "name": "subjectType",
-            "baseName": "subjectType",
-            "type": "SubjectType"
-        },
-        {
             "name": "roleId",
             "baseName": "roleId",
             "type": "number"
@@ -79,6 +74,11 @@ export class MeAccessRule {
             "name": "clusterId",
             "baseName": "clusterId",
             "type": "string"
+        },
+        {
+            "name": "subjectType",
+            "baseName": "subjectType",
+            "type": "SubjectTypeExtended"
         },
         {
             "name": "roleName",

@@ -49,6 +49,7 @@ export class AuditLogsUtils {
             startTime,
             endTime,
             fileType,
+            undefined,
             numberOfSamples,
             filterBy,
             {

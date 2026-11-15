@@ -3,16 +3,10 @@
 api.ts
 api/adminCLIApi.ts
 api/apis.ts
-api/applicationsApi.ts
 api/auditApi.ts
-api/authenticationApi.ts
-api/authorizationApi.ts
-api/clustersApi.ts
 api/departmentsApi.ts
-api/jobsApi.ts
 api/nodeTypesApi.ts
 api/projectsApi.ts
-api/settingApi.ts
 git_push.sh
 model/appSecret.ts
 model/application.ts
@@ -30,6 +24,11 @@ model/department.ts
 model/departmentAllOf.ts
 model/departmentUserDefinedProperties.ts
 model/displayedJob.ts
+model/grafanaData.ts
+model/grafanaMetric.ts
+model/grafanaResponse.ts
+model/grafanaResult.ts
+model/grafanaResultValueInner.ts
 model/jobsNodeAffinity.ts
 model/modelError.ts
 model/models.ts
@@ -42,8 +41,5 @@ model/projectCreateRequest.ts
 model/resource.ts
 model/resourcePermissions.ts
 model/role.ts
-model/tenantSetting.ts
-model/updateClusterLivenessRequest.ts
 model/user.ts
 model/userAllOf.ts
-model/v1K8sClustersUuidDelete200Response.ts

@@ -18,10 +18,8 @@ model/metricStore.ts
 model/metricStoreEndpoint.ts
 model/metricStoreEndpointAuth.ts
 model/metricStoreEndpointAuthBasic.ts
-model/metricStorePatchRequest.ts
 model/modelError.ts
 model/models.ts
-model/postTenantEulaRequest.ts
 model/roles.ts
 model/submissionError.ts
 model/tenant.ts

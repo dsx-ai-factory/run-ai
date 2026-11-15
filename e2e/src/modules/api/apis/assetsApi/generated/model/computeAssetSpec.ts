@@ -13,7 +13,6 @@
 import { RequestFile } from './models';
 import { ExtendedResource } from './extendedResource';
 import { GpuRequestType } from './gpuRequestType';
-import { MigProfile } from './migProfile';
 
 export class ComputeAssetSpec {
     /**
@@ -37,7 +36,7 @@ export class ComputeAssetSpec {
     */
     'extendedResources'?: Array<ExtendedResource> | null;
     /**
-    * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory, gpuPortion or migProfile [deprecated].
+    * Requested number of GPU devices. Currently if more than one device is requested, it is not possible to provide values for gpuMemory or gpuPortion.
     */
     'gpuDevicesRequest'?: number | null;
     /**
@@ -61,7 +60,6 @@ export class ComputeAssetSpec {
     * A large /dev/shm device to mount into a container running the created workload. An shm is a shared file system mounted on RAM.
     */
     'largeShmRequest'?: boolean | null;
-    'migProfile'?: MigProfile;
 
     static discriminator: string | undefined = undefined;
 
@@ -125,11 +123,6 @@ export class ComputeAssetSpec {
             "name": "largeShmRequest",
             "baseName": "largeShmRequest",
             "type": "boolean"
-        },
-        {
-            "name": "migProfile",
-            "baseName": "migProfile",
-            "type": "MigProfile"
         }    ];
 
     static getAttributeTypeMap() {

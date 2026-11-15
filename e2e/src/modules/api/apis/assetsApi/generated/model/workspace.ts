@@ -19,7 +19,7 @@ export class Workspace {
     'meta': WorkloadMetaV1;
     'spec': SpecificRunInfoFields;
     /**
-    * An interactive workload ready for submission at the cluster.
+    * An interactive workload ready for submission at the cluster. Further details at https://github.com/dsx-ai-factory/run-ai/runai-cluster/tree/master/workload-controller/config/crd\"
     */
     'workload'?: object;
     'job'?: DisplayedJob;

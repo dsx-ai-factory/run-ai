@@ -25,6 +25,10 @@ export class PreemptibilityRules {
     */
     'canEdit'?: boolean | null;
     /**
+    * Blocks the field to prevent workloads from specifying any value for it.
+    */
+    'blocked'?: boolean | null;
+    /**
     * Limit the permitted values for preemptibility to a given set of values.
     */
     'options'?: Array<PreemptibilityOptionsOptionsInner> | null;
@@ -45,6 +49,11 @@ export class PreemptibilityRules {
         {
             "name": "canEdit",
             "baseName": "canEdit",
+            "type": "boolean"
+        },
+        {
+            "name": "blocked",
+            "baseName": "blocked",
             "type": "boolean"
         },
         {

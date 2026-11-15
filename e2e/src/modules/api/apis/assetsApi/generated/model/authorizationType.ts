@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* The authorization type for the connection. If unspecified, authorization is determined by the existence of authorizedUsers or authorizedGroups field. (authenticatedUsers - if none specified, users or groups - depending on the one which is specified, error if both specified) If set to authenticatedUsers, authorizedUsers and authorizedGroups are ignored. If set to authorizedUsers or authorizedGroups, only users or groups specified in authorizedUsers or authorizedGroups are allowed to access the URL, accordingly.
+* Specifies who can access the connection URL: - `authenticatedUsers`: Any authenticated user or service account can access the URL; the authorizedUsers and authorizedGroups fields are ignored. - `authorizedUsers`: Only users listed in the authorizedUsers field are allowed to access the URL; the authorizedGroups field is ignored. - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field are allowed to access the URL; the authorizedUsers field is ignored. If not specified, authorization is determined by whether authorizedUsers or authorizedGroups is present. If both fields are set, this results in an error. If neither is set, any authenticatedUser can access. 
 */
 export enum AuthorizationType {
     AuthenticatedUsers = <any> 'authenticatedUsers',

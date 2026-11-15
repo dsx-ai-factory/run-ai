@@ -25,6 +25,10 @@ export class S3AccessKey {
     * The key to use for loading the secret key from the secret. The default is `SecretKey`. For more information, see [Credentials access keys](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html).
     */
     'secretKeyOfSecretKey'?: string | null;
+    /**
+    * An AWS session token. It should be provided (in addition to the access key ID and secret access key) to authenticate to a bucket that is configured to use AWS Security Token Service (STS).
+    */
+    'awsSessionToken'?: string | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -42,6 +46,11 @@ export class S3AccessKey {
         {
             "name": "secretKeyOfSecretKey",
             "baseName": "secretKeyOfSecretKey",
+            "type": "string"
+        },
+        {
+            "name": "awsSessionToken",
+            "baseName": "awsSessionToken",
             "type": "string"
         }    ];
 

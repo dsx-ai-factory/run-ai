@@ -11,19 +11,21 @@
  */
 
 import { RequestFile } from './models';
+import { PolicyRuleEnum } from './policyRuleEnum';
 
 /**
-* A reason explaining why the asset does not comply with workloads creation for a given project.
+* An issue preventing the use of a template or asset for creating workloads in a given project.
 */
 export class ComplianceInfoReason {
     /**
-    * for policy related issues, includes a json path to the field in the policy for which the message applies.
+    * For policy related issues, includes a json path to the field in the policy for which the issue applies.
     */
     'field'?: string | null;
     /**
-    * explanation of the reason for rejecting the asset.
+    * Explanation of the issue.
     */
     'details': string;
+    'rule'?: PolicyRuleEnum | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -37,6 +39,11 @@ export class ComplianceInfoReason {
             "name": "details",
             "baseName": "details",
             "type": "string"
+        },
+        {
+            "name": "rule",
+            "baseName": "rule",
+            "type": "PolicyRuleEnum"
         }    ];
 
     static getAttributeTypeMap() {

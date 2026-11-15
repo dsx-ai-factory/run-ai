@@ -17,6 +17,9 @@ import { DistributedInferenceServingPortAuthorizationTypeRules } from './distrib
 import { IntegerRules } from './integerRules';
 import { StringRules } from './stringRules';
 
+/**
+* Defines the configuration for the inference serving endpoint. This determines how applications or services can send inference requests to the workload.
+*/
 export class DistributedInferenceServingPortRules {
     'port'?: IntegerRules | null;
     'protocol'?: StringRules | null;

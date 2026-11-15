@@ -13,8 +13,8 @@
 import { RequestFile } from './models';
 
 export class AuditLog {
-    'id': string;
-    'timestamp': Date;
+    'id'?: string;
+    'timestamp'?: Date;
     /**
     * the ID of the tenant
     */
@@ -24,19 +24,19 @@ export class AuditLog {
     */
     'subject': string;
     'subjectType': AuditLog.SubjectTypeEnum = AuditLog.SubjectTypeEnum.User;
-    'sourceIp': string;
+    'sourceIp'?: string;
     'action': AuditLog.ActionEnum;
-    'httpMethod': AuditLog.HttpMethodEnum;
-    'url': string;
-    'entityType': string;
-    'entityName': string;
-    'entityId': string;
+    'httpMethod'?: AuditLog.HttpMethodEnum;
+    'url'?: string;
+    'entityType'?: string;
+    'entityName'?: string;
+    'entityId'?: string;
     'result': AuditLog.ResultEnum;
-    'httpStatusCode': number;
+    'httpStatusCode'?: number;
     'clusterName'?: string;
     'clusterId'?: string;
     'requestId'?: string;
-    'metadata': { [key: string]: string; };
+    'metadata'?: { [key: string]: string; };
 
     static discriminator: string | undefined = undefined;
 

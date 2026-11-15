@@ -27,7 +27,7 @@ export class DistributedInferenceCommonSpec {
     'nodePools'?: Array<string> | null;
     'preemptibility'?: Preemptibility | null;
     /**
-    * Specifies the priority class for the workload.  The default value depends on the workload type:  high for workspace workloads, low for training/distributed training workloads, and very-high for inference workloads. You can change it to any of the following valid values to adjust the workload\'s scheduling behavior: very-low, low, medium-low, medium, medium-high, high, very-high.
+    * Specifies the priority class for the workload, which determines its scheduling behavior. Valid values are: very-low, low, medium-low, medium, medium-high, high, and very-high. Each workload type has a default priority. To view the default priority for each workload type, use the GET /workload-types endpoint. Once you change the priority from the default value defined for that workload type, the preemptibility field is not automatically updated. Make sure to set the desired preemptibility value.
     */
     'priorityClass'?: string | null;
     'restartPolicy'?: DistributedInferenceRestartPolicy | null;

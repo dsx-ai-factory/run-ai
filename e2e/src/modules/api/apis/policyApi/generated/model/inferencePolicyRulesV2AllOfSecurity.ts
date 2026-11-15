@@ -20,6 +20,8 @@ import { UidGidSourceRules } from './uidGidSourceRules';
 
 export class InferencePolicyRulesV2AllOfSecurity {
     'capabilities'?: ArrayRules | null;
+    'hostIpc'?: BooleanRules | null;
+    'hostNetwork'?: BooleanRules | null;
     'readOnlyRootFilesystem'?: BooleanRules | null;
     'runAsGid'?: IntegerRulesOptional | null;
     'runAsNonRoot'?: BooleanRules | null;
@@ -35,6 +37,16 @@ export class InferencePolicyRulesV2AllOfSecurity {
             "name": "capabilities",
             "baseName": "capabilities",
             "type": "ArrayRules"
+        },
+        {
+            "name": "hostIpc",
+            "baseName": "hostIpc",
+            "type": "BooleanRules"
+        },
+        {
+            "name": "hostNetwork",
+            "baseName": "hostNetwork",
+            "type": "BooleanRules"
         },
         {
             "name": "readOnlyRootFilesystem",

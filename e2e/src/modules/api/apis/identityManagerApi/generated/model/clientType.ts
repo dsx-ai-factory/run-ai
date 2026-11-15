@@ -15,5 +15,6 @@ import { RequestFile } from './models';
 export enum ClientType {
     Agent = <any> 'Agent',
     WorkloadsAuth = <any> 'WorkloadsAuth',
-    Application = <any> 'Application'
+    Application = <any> 'Application',
+    Installer = <any> 'Installer'
 }

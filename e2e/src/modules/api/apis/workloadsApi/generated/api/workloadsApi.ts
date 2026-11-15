@@ -362,6 +362,121 @@ export class WorkloadsApi {
         });
     }
     /**
+     * Internal endpoint to retrieve workload data by telemetry type. Optionally filter by specific workload phases.  Telemetry Types: - WORKLOADS_COUNT: Count of workloads - GPU_ALLOCATION: GPU allocation metrics - PENDING_TIME_DISTRIBUTION: Distribution of workloads by current pending time (time since entering Pending phase).   For this type, results are automatically grouped by 4 time buckets and any additional groupBy parameters. - IDLE_ALLOCATED_GPUS: Sum of idle allocated GPU devices across workloads 
+     * @summary Get the internal workloads telemetry.
+     * @param telemetryType Specifies the telemetry type.
+     * @param clusterId Filter using the Universally Unique Identifier (UUID) of the cluster.
+     * @param nodepoolName Filter using the nodepool.
+     * @param departmentId Filter using the department id.
+     * @param projectId project id to filter by
+     * @param groupBy Group workloads by field.
+     * @param filterByPhases Filter workloads by specific phases. If not specified, all phases are included.
+     * @param filterBy Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal. Dates are in ISO 8601 timestamp format.
+     */
+    public async getInternalWorkloadsTelemetry (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, filterBy?: Array<string>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: TelemetryResponse;  }> {
+        const localVarPath = this.basePath + '/internal/workloads/telemetry';
+        let localVarQueryParameters: any = {};
+        let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
+        const produces = ['application/json'];
+        // give precedence to 'application/json'
+        if (produces.indexOf('application/json') >= 0) {
+            localVarHeaderParams.Accept = 'application/json';
+        } else {
+            localVarHeaderParams.Accept = produces.join(',');
+        }
+        let localVarFormParams: any = {};
+
+        // verify required parameter 'telemetryType' is not null or undefined
+        if (telemetryType === null || telemetryType === undefined) {
+            throw new Error('Required parameter telemetryType was null or undefined when calling getInternalWorkloadsTelemetry.');
+        }
+
+        if (clusterId !== undefined) {
+            localVarQueryParameters['clusterId'] = ObjectSerializer.serialize(clusterId, "string");
+        }
+
+        if (nodepoolName !== undefined) {
+            localVarQueryParameters['nodepoolName'] = ObjectSerializer.serialize(nodepoolName, "string");
+        }
+
+        if (departmentId !== undefined) {
+            localVarQueryParameters['departmentId'] = ObjectSerializer.serialize(departmentId, "string");
+        }
+
+        if (projectId !== undefined) {
+            localVarQueryParameters['projectId'] = ObjectSerializer.serialize(projectId, "string");
+        }
+
+        if (groupBy !== undefined) {
+            localVarQueryParameters['groupBy'] = ObjectSerializer.serialize(groupBy, "Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>");
+        }
+
+        if (telemetryType !== undefined) {
+            localVarQueryParameters['telemetryType'] = ObjectSerializer.serialize(telemetryType, "WorkloadTelemetryType");
+        }
+
+        if (filterByPhases !== undefined) {
+            localVarQueryParameters['filterByPhases'] = ObjectSerializer.serialize(filterByPhases, "Array<Phase>");
+        }
+
+        if (filterBy !== undefined) {
+            localVarQueryParameters['filterBy'] = ObjectSerializer.serialize(filterBy, "Array<string>");
+        }
+
+        (<any>Object).assign(localVarHeaderParams, options.headers);
+
+        let localVarUseFormData = false;
+
+        let localVarRequestOptions: localVarRequest.Options = {
+            method: 'GET',
+            qs: localVarQueryParameters,
+            headers: localVarHeaderParams,
+            uri: localVarPath,
+            useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
+            json: true,
+        };
+
+        let authenticationPromise = Promise.resolve();
+        if (this.authentications.bearerAuth.accessToken) {
+            authenticationPromise = authenticationPromise.then(() => this.authentications.bearerAuth.applyToRequest(localVarRequestOptions));
+        }
+        authenticationPromise = authenticationPromise.then(() => this.authentications.default.applyToRequest(localVarRequestOptions));
+
+        let interceptorPromise = authenticationPromise;
+        for (const interceptor of this.interceptors) {
+            interceptorPromise = interceptorPromise.then(() => interceptor(localVarRequestOptions));
+        }
+
+        return interceptorPromise.then(() => {
+            if (Object.keys(localVarFormParams).length) {
+                if (localVarUseFormData) {
+                    (<any>localVarRequestOptions).formData = localVarFormParams;
+                } else {
+                    localVarRequestOptions.form = localVarFormParams;
+                }
+            }
+            return new Promise<{ response: http.IncomingMessage; body: TelemetryResponse;  }>((resolve, reject) => {
+                localVarRequest(localVarRequestOptions, (error, response, body) => {
+                    if (error) {
+                        reject(error);
+                    } else {
+                        if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
+                            body = ObjectSerializer.deserialize(body, "TelemetryResponse");
+                            resolve({ response: response, body: body });
+                        } else {
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
+                        }
+                    }
+                });
+            });
+        });
+    }
+    /**
      * Retrieve workload data using a `workloadId`.
      * @summary Get a workload.
      * @param workloadId The  Universally Unique Identifier (UUID) of the workload.
@@ -1109,8 +1224,9 @@ export class WorkloadsApi {
      * @param projectId project id to filter by
      * @param groupBy Group workloads by field.
      * @param filterByPhases Filter workloads by specific phases. If not specified, all phases are included.
+     * @param filterBy Filter results by a parameter. Use the format field-name operator value. Operators are &#x3D;&#x3D; Equals, !&#x3D; Not equals, &lt;&#x3D; Less than or equal, &gt;&#x3D; Greater than or equal. Dates are in ISO 8601 timestamp format.
      */
-    public async getWorkloadsTelemetry (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>, filterByPhases?: Array<Phase>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: TelemetryResponse;  }> {
+    public async getWorkloadsTelemetry (telemetryType: WorkloadTelemetryType, clusterId?: string, nodepoolName?: string, departmentId?: string, projectId?: string, groupBy?: Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>, filterByPhases?: Array<Phase>, filterBy?: Array<string>, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: TelemetryResponse;  }> {
         const localVarPath = this.basePath + '/api/v1/workloads/telemetry';
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -1145,7 +1261,7 @@ export class WorkloadsApi {
         }
 
         if (groupBy !== undefined) {
-            localVarQueryParameters['groupBy'] = ObjectSerializer.serialize(groupBy, "Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category'>");
+            localVarQueryParameters['groupBy'] = ObjectSerializer.serialize(groupBy, "Array<'ClusterId' | 'DepartmentId' | 'ProjectId' | 'Type' | 'CurrentNodepools' | 'RequestedNodepools' | 'Phase' | 'Category' | 'Source'>");
         }
 
         if (telemetryType !== undefined) {
@@ -1154,6 +1270,10 @@ export class WorkloadsApi {
 
         if (filterByPhases !== undefined) {
             localVarQueryParameters['filterByPhases'] = ObjectSerializer.serialize(filterByPhases, "Array<Phase>");
+        }
+
+        if (filterBy !== undefined) {
+            localVarQueryParameters['filterBy'] = ObjectSerializer.serialize(filterBy, "Array<string>");
         }
 
         (<any>Object).assign(localVarHeaderParams, options.headers);

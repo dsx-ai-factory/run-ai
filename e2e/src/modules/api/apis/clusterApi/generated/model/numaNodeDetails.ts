@@ -14,31 +14,31 @@ import { RequestFile } from './models';
 
 export class NumaNodeDetails {
     /**
-    * The NUMA node zone name reported by NodeResourceTopology.
+    * The identifier of the NUMA node (for example, node-0).
     */
     'name': string;
     /**
-    * Total CPU in cores available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    * Total CPU cores on this NUMA node that are available for allocation.
     */
     'totalCpuCores': number;
     /**
-    * Allocated CPU in cores, calculated as allocatable minus available.
+    * CPU cores currently allocated to workloads on this NUMA node.
     */
     'allocatedCpuCores': number;
     /**
-    * Total CPU memory in bytes available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    * Total CPU memory on this NUMA node that is available for allocation.
     */
     'totalCpuMemoryBytes': number;
     /**
-    * Allocated memory in bytes, calculated as allocatable minus available.
+    * CPU memory currently allocated to workloads on this NUMA node, in bytes.
     */
     'allocatedCpuMemoryBytes': number;
     /**
-    * Total GPUs available for allocation, taken from the allocatable value reported by NodeResourceTopology.
+    * Total GPU devices on this NUMA node that are available for allocation.
     */
     'totalGpus': number;
     /**
-    * Allocated GPUs, calculated as allocatable minus available.
+    * GPU devices currently allocated to workloads on this NUMA node.
     */
     'allocatedGpus': number;
 

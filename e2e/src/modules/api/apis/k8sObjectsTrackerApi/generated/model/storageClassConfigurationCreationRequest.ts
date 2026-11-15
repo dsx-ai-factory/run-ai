@@ -21,11 +21,11 @@ export class StorageClassConfigurationCreationRequest {
     */
     'scopeType': StorageClassConfigurationCreationRequest.ScopeTypeEnum = StorageClassConfigurationCreationRequest.ScopeTypeEnum.Cluster;
     /**
-    * The id of the tenant, cluster, department or project, depending on the scope type.
+    * The ID of the cluster.
     */
     'scopeId': string;
     /**
-    * The name of the storage class to apply the configuration to.
+    * The name of the storage class to which the configuration applies.
     */
     'name': string;
     'permissions'?: StorageClassPermissions | null;

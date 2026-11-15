@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* The authorization type for serving port URL access. Defaults to public, which means no authorization is required. If set to authenticatedUsers, only authenticated Run:ai users are allowed to access the URL. If set to authorizedUsers or authorizedGroups, only users or groups specified in authorizedUsers or authorizedGroups are allowed to access the URL, accordingly. authorizedUsersOrGroups requires either authorizedUsers or authorizedGroups to be provided, otherwise mutual exclusion error is reported. Supported from cluster version 2.19.
+* Specifies who can send inference requests to the serving endpoint:  Possible values: - `public`: No authorization is required. (Default) - `authenticatedUsers`: Any NVIDIA Run:ai authenticated user and service account can send requests. - `authorizedUsers`: Only users listed in the authorizedUsers field can send requests. - `authorizedGroups`: Only members of user groups listed in the authorizedGroups field can send requests. - `authorizedUsersOrGroups`: Requires either authorizedUsers or authorizedGroups to be provided; if neither is set, or if both are set, a mutual exclusion error is reported. Supported from cluster version 2.19. 
 */
 export enum ServingPortAccessAuthorizationTypeEnum {
     Public = <any> 'public',

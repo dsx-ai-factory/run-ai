@@ -14,9 +14,12 @@ import { RequestFile } from './models';
 import { PvcVolumeMode } from './pvcVolumeMode';
 import { VolumeModeCustomizationSupportedValues } from './volumeModeCustomizationSupportedValues';
 
+/**
+* Defines whether the volumeMode field is required when creating PVCs and specifies default and supported modes for the storage class.
+*/
 export class VolumeModeCustomization {
     /**
-    * whether volumeMode field is mandatory
+    * Indicates whether the volumeMode field is mandatory when creating a PVC.
     */
     'required'?: boolean | null;
     '_default'?: PvcVolumeMode | null;

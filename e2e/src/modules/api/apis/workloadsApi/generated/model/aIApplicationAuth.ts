@@ -17,6 +17,10 @@ import { RequestFile } from './models';
 */
 export class AIApplicationAuth {
     /**
+    * Indicates whether the asset is a user credential owned by the caller. When omitted or false, the asset is treated as a shared credential.
+    */
+    'userCredential'?: boolean | null;
+    /**
     * The ID of the asset to use for authentication.
     */
     'assetId'?: string;
@@ -24,6 +28,11 @@ export class AIApplicationAuth {
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
+        {
+            "name": "userCredential",
+            "baseName": "userCredential",
+            "type": "boolean"
+        },
         {
             "name": "assetId",
             "baseName": "assetId",

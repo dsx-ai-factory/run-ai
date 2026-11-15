@@ -24,11 +24,11 @@ import { PortsRules } from './portsRules';
 import { PreemptibilityRules } from './preemptibilityRules';
 import { ProbesRules } from './probesRules';
 import { RelatedUrlsRules } from './relatedUrlsRules';
-import { ReplicaRulesV2Security } from './replicaRulesV2Security';
 import { ReplicaRulesV2Storage } from './replicaRulesV2Storage';
 import { RestartPolicyRule } from './restartPolicyRule';
 import { StringRules } from './stringRules';
 import { SupersetRulesAllOfCompute } from './supersetRulesAllOfCompute';
+import { SupersetRulesAllOfSecurity } from './supersetRulesAllOfSecurity';
 import { TolerationsRules } from './tolerationsRules';
 
 export class ReplicaRulesV2 {
@@ -56,7 +56,7 @@ export class ReplicaRulesV2 {
     'probes'?: ProbesRules | null;
     'relatedUrls'?: RelatedUrlsRules | null;
     'restartPolicy'?: RestartPolicyRule | null;
-    'security'?: ReplicaRulesV2Security | null;
+    'security'?: SupersetRulesAllOfSecurity | null;
     'stdin'?: BooleanRules | null;
     'storage'?: ReplicaRulesV2Storage | null;
     'terminateAfterPreemption'?: BooleanRules | null;
@@ -191,7 +191,7 @@ export class ReplicaRulesV2 {
         {
             "name": "security",
             "baseName": "security",
-            "type": "ReplicaRulesV2Security"
+            "type": "SupersetRulesAllOfSecurity"
         },
         {
             "name": "stdin",

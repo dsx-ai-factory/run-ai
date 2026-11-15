@@ -4,6 +4,7 @@ api.ts
 api/apis.ts
 api/auditLogsApi.ts
 api/healthApi.ts
+api/internalAuditLogsApi.ts
 git_push.sh
 model/auditLog.ts
 model/getAuditLogs200Response.ts

@@ -13,19 +13,19 @@
 import { RequestFile } from './models';
 
 /**
-* Supported access modes for a given storage class
+* Defines the access modes supported by the given storage class. These values indicate which access configurations can be used when creating PVCs with this class.
 */
 export class PvcSupportedAccessModes {
     /**
-    * Whether readWriteOnce access mode is supported for a given storage class
+    * Indicates whether the readWriteOnce access mode is supported. This mode allows a volume to be mounted as read/write by a single node.
     */
     'readWriteOnce'?: boolean | null = true;
     /**
-    * Whether readOnlyMany access mode is supported for a given storage class
+    * Indicates whether the readOnlyMany access mode is supported. This mode allows a volume to be mounted as read-only by many nodes.
     */
     'readOnlyMany'?: boolean | null = true;
     /**
-    * Whether readWriteMany access mode is supported for a given storage class
+    * Indicates whether the readWriteMany access mode is supported. This mode allows a volume to be mounted as read/write by many nodes.
     */
     'readWriteMany'?: boolean | null = true;
 

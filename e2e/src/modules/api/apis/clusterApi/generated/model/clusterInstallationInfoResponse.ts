@@ -17,7 +17,7 @@ export class ClusterInstallationInfoResponse {
     'repositoryName': string;
     'chartRepoURL': string;
     /**
-    * Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set cluster.bootstrapToken=<token>. 
+    * Short-lived JWT (2h TTL) for the installer service account. Pass to the Helm hook via --set controlPlane.bootstrapToken=<token>. 
     */
     'bootstrapToken': string;
     /**

@@ -11,11 +11,12 @@
  */
 
 import { RequestFile } from './models';
+import { NimServiceServingPortAuthorizationType } from './nimServiceServingPortAuthorizationType';
 import { ServingPortExposedProtocol } from './servingPortExposedProtocol';
 import { ServingPortServiceType } from './servingPortServiceType';
 
 /**
-* A port for accessing the inference service
+* A port for accessing the inference service. Authorization fields (authorizationType, authorizedUsers, authorizedGroups) are supported for cluster version 2.25 and above. 
 */
 export class NimServiceServingPort {
     'serviceType'?: ServingPortServiceType | null;
@@ -32,7 +33,7 @@ export class NimServiceServingPort {
     */
     'metricsPort'?: number | null;
     /**
-    * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](https://run-ai-docs.nvidia.com/self-hosted/latest/getting-started/installation/system-requirements#inference). section.
+    * Indicates whether the inference serving endpoint should be accessible outside the cluster. If set to true, the endpoint will be exposed externally. To enable external access, your administrator must configure the cluster as described in the [inference requirements](/run-ai/self-hosted/documentation/installation-and-configuration/system-requirements/networking-setup#standard-inference-wildcard-certificate). section.
     */
     'exposeExternally'?: boolean | null = true;
     /**
@@ -40,6 +41,15 @@ export class NimServiceServingPort {
     */
     'exposedUrl'?: string | null;
     'exposedProtocol'?: ServingPortExposedProtocol | null;
+    'authorizationType'?: NimServiceServingPortAuthorizationType | null;
+    /**
+    * A list of users and service accounts allowed to send requests to the serving endpoint. `Note:` Cannot be used together with authorizedGroups.
+    */
+    'authorizedUsers'?: Array<string> | null;
+    /**
+    * A list of user groups allowed to send requests to the serving endpoint. `Note:` Cannot be used together with authorizedUsers.
+    */
+    'authorizedGroups'?: Array<string> | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -78,6 +88,21 @@ export class NimServiceServingPort {
             "name": "exposedProtocol",
             "baseName": "exposedProtocol",
             "type": "ServingPortExposedProtocol"
+        },
+        {
+            "name": "authorizationType",
+            "baseName": "authorizationType",
+            "type": "NimServiceServingPortAuthorizationType"
+        },
+        {
+            "name": "authorizedUsers",
+            "baseName": "authorizedUsers",
+            "type": "Array<string>"
+        },
+        {
+            "name": "authorizedGroups",
+            "baseName": "authorizedGroups",
+            "type": "Array<string>"
         }    ];
 
     static getAttributeTypeMap() {

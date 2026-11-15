@@ -1,6 +1,6 @@
 /**
  * cli-exposer
- * An API for managing RunAI researcher CLI
+ * An API for managing RunAI Researcher Command Line Interface
  *
  * The version of the OpenAPI document: 2.0.0
  * Contact: support@run.ai

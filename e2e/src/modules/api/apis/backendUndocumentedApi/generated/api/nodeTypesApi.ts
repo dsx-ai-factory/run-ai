@@ -1,3 +1,4 @@
+
 /**
  * RUN:AI API
  * RUN:AI API for managing clusters, departments, projects and users.
@@ -20,7 +21,8 @@ import { NodeType } from '../model/nodeType';
 import { ObjectSerializer, Authentication, VoidAuth, Interceptor } from '../model/models';
 import { HttpBasicAuth, HttpBearerAuth, ApiKeyAuth, OAuth } from '../model/models';
 
-import { HttpError, RequestFile } from './apis';
+import { RequestFile } from './apis';
+import { HttpError } from './httpError';
 
 let defaultBasePath = 'http://localhost';
 
@@ -95,11 +97,11 @@ export class NodeTypesApi {
     /**
      * Get a list of all the node types in the cluster.
      * @summary Get all cluster\'s NodeTypes.
-     * @param clusterId The unique uuid identifying the cluster.
+     * @param clusterUuid 
      */
-    public async v1K8sClustersClusterIdNodetypesGet (clusterId: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<NodeType>;  }> {
+    public async v1K8sClustersClusterIdNodetypesGet (clusterUuid: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: Array<NodeType>;  }> {
         const localVarPath = this.basePath + '/v1/k8s/clusters/{clusterId}/nodetypes'
-            .replace('{' + 'clusterId' + '}', encodeURIComponent(String(clusterId)));
+            .replace('{' + 'clusterUuid' + '}', encodeURIComponent(String(clusterUuid)));
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
         const produces = ['application/json'];
@@ -111,6 +113,11 @@ export class NodeTypesApi {
         }
         let localVarFormParams: any = {};
 
+        // verify required parameter 'clusterUuid' is not null or undefined
+        if (clusterUuid === null || clusterUuid === undefined) {
+            throw new Error('Required parameter clusterUuid was null or undefined when calling v1K8sClustersClusterIdNodetypesGet.');
+        }
+
         (<any>Object).assign(localVarHeaderParams, options.headers);
 
         let localVarUseFormData = false;
@@ -121,6 +128,9 @@ export class NodeTypesApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             json: true,
         };
 
@@ -152,7 +162,9 @@ export class NodeTypesApi {
                             body = ObjectSerializer.deserialize(body, "Array<NodeType>");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });
@@ -162,16 +174,21 @@ export class NodeTypesApi {
     /**
      * Delete a NodeType by ID.
      * @summary Delete a NodeType.
-     * @param clusterId The unique uuid identifying the cluster.
-     * @param nodeTypeId
+     * @param clusterUuid 
+     * @param nodeTypeId 
      */
-    public async v1K8sClustersClusterIdNodetypesNodeTypeIdDelete (clusterId: string, nodeTypeId: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
+    public async v1K8sClustersClusterIdNodetypesNodeTypeIdDelete (clusterUuid: string, nodeTypeId: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body?: any;  }> {
         const localVarPath = this.basePath + '/v1/k8s/clusters/{clusterId}/nodetypes/{nodeTypeId}'
-            .replace('{' + 'clusterId' + '}', encodeURIComponent(String(clusterId)))
+            .replace('{' + 'clusterUuid' + '}', encodeURIComponent(String(clusterUuid)))
             .replace('{' + 'nodeTypeId' + '}', encodeURIComponent(String(nodeTypeId)));
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
         let localVarFormParams: any = {};
+
+        // verify required parameter 'clusterUuid' is not null or undefined
+        if (clusterUuid === null || clusterUuid === undefined) {
+            throw new Error('Required parameter clusterUuid was null or undefined when calling v1K8sClustersClusterIdNodetypesNodeTypeIdDelete.');
+        }
 
         // verify required parameter 'nodeTypeId' is not null or undefined
         if (nodeTypeId === null || nodeTypeId === undefined) {
@@ -188,6 +205,9 @@ export class NodeTypesApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             json: true,
         };
 
@@ -218,7 +238,9 @@ export class NodeTypesApi {
                         if (response.statusCode && response.statusCode >= 200 && response.statusCode <= 299) {
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });
@@ -228,11 +250,12 @@ export class NodeTypesApi {
     /**
      * Get a NodeType by ID.
      * @summary Get a NodeType.
+     * @param clusterUuid 
      * @param nodeTypeId 
-     * @param UNKNOWN_PARAMETER_NAME 
      */
-    public async v1K8sClustersClusterIdNodetypesNodeTypeIdGet (nodeTypeId: string, UNKNOWN_PARAMETER_NAME?, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: NodeType;  }> {
+    public async v1K8sClustersClusterIdNodetypesNodeTypeIdGet (clusterUuid: string, nodeTypeId: string, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: NodeType;  }> {
         const localVarPath = this.basePath + '/v1/k8s/clusters/{clusterId}/nodetypes/{nodeTypeId}'
+            .replace('{' + 'clusterUuid' + '}', encodeURIComponent(String(clusterUuid)))
             .replace('{' + 'nodeTypeId' + '}', encodeURIComponent(String(nodeTypeId)));
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -244,6 +267,11 @@ export class NodeTypesApi {
             localVarHeaderParams.Accept = produces.join(',');
         }
         let localVarFormParams: any = {};
+
+        // verify required parameter 'clusterUuid' is not null or undefined
+        if (clusterUuid === null || clusterUuid === undefined) {
+            throw new Error('Required parameter clusterUuid was null or undefined when calling v1K8sClustersClusterIdNodetypesNodeTypeIdGet.');
+        }
 
         // verify required parameter 'nodeTypeId' is not null or undefined
         if (nodeTypeId === null || nodeTypeId === undefined) {
@@ -260,6 +288,9 @@ export class NodeTypesApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             json: true,
         };
 
@@ -291,7 +322,9 @@ export class NodeTypesApi {
                             body = ObjectSerializer.deserialize(body, "NodeType");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });
@@ -301,12 +334,13 @@ export class NodeTypesApi {
     /**
      * Update a NodeType by ID.
      * @summary Update a NodeType.
+     * @param clusterUuid 
      * @param nodeTypeId 
      * @param nodeType The NodeType to update
-     * @param UNKNOWN_PARAMETER_NAME 
      */
-    public async v1K8sClustersClusterIdNodetypesNodeTypeIdPut (nodeTypeId: string, nodeType: NodeType, UNKNOWN_PARAMETER_NAME?, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: NodeType;  }> {
+    public async v1K8sClustersClusterIdNodetypesNodeTypeIdPut (clusterUuid: string, nodeTypeId: string, nodeType: NodeType, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: NodeType;  }> {
         const localVarPath = this.basePath + '/v1/k8s/clusters/{clusterId}/nodetypes/{nodeTypeId}'
+            .replace('{' + 'clusterUuid' + '}', encodeURIComponent(String(clusterUuid)))
             .replace('{' + 'nodeTypeId' + '}', encodeURIComponent(String(nodeTypeId)));
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
@@ -318,6 +352,11 @@ export class NodeTypesApi {
             localVarHeaderParams.Accept = produces.join(',');
         }
         let localVarFormParams: any = {};
+
+        // verify required parameter 'clusterUuid' is not null or undefined
+        if (clusterUuid === null || clusterUuid === undefined) {
+            throw new Error('Required parameter clusterUuid was null or undefined when calling v1K8sClustersClusterIdNodetypesNodeTypeIdPut.');
+        }
 
         // verify required parameter 'nodeTypeId' is not null or undefined
         if (nodeTypeId === null || nodeTypeId === undefined) {
@@ -339,6 +378,9 @@ export class NodeTypesApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             json: true,
             body: ObjectSerializer.serialize(nodeType, "NodeType")
         };
@@ -371,7 +413,9 @@ export class NodeTypesApi {
                             body = ObjectSerializer.deserialize(body, "NodeType");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });
@@ -381,12 +425,12 @@ export class NodeTypesApi {
     /**
      * Create a new NodeType in the cluster.
      * @summary Create a new NodeType.
-     * @param clusterId The unique uuid identifying the cluster.
+     * @param clusterUuid 
      * @param nodeType The NodeType to create.
      */
-    public async v1K8sClustersClusterIdNodetypesPost (clusterId: string, nodeType: NodeType, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: NodeType;  }> {
+    public async v1K8sClustersClusterIdNodetypesPost (clusterUuid: string, nodeType: NodeType, options: {headers: {[name: string]: string}} = {headers: {}}) : Promise<{ response: http.IncomingMessage; body: NodeType;  }> {
         const localVarPath = this.basePath + '/v1/k8s/clusters/{clusterId}/nodetypes'
-            .replace('{' + 'clusterId' + '}', encodeURIComponent(String(clusterId)));
+            .replace('{' + 'clusterUuid' + '}', encodeURIComponent(String(clusterUuid)));
         let localVarQueryParameters: any = {};
         let localVarHeaderParams: any = (<any>Object).assign({}, this._defaultHeaders);
         const produces = ['application/json'];
@@ -397,6 +441,11 @@ export class NodeTypesApi {
             localVarHeaderParams.Accept = produces.join(',');
         }
         let localVarFormParams: any = {};
+
+        // verify required parameter 'clusterUuid' is not null or undefined
+        if (clusterUuid === null || clusterUuid === undefined) {
+            throw new Error('Required parameter clusterUuid was null or undefined when calling v1K8sClustersClusterIdNodetypesPost.');
+        }
 
         // verify required parameter 'nodeType' is not null or undefined
         if (nodeType === null || nodeType === undefined) {
@@ -413,6 +462,9 @@ export class NodeTypesApi {
             headers: localVarHeaderParams,
             uri: localVarPath,
             useQuerystring: this._useQuerystring,
+            /////Start: Modified by @Run.AI /////
+            qsStringifyOptions: { arrayFormat: 'comma' },
+            /////End: Modified by @Run.AI /////
             json: true,
             body: ObjectSerializer.serialize(nodeType, "NodeType")
         };
@@ -445,7 +497,9 @@ export class NodeTypesApi {
                             body = ObjectSerializer.deserialize(body, "NodeType");
                             resolve({ response: response, body: body });
                         } else {
-                            reject(new HttpError(response, body, response.statusCode));
+                            /////Start: Modified by @Run.AI /////
+                            reject(new HttpError(response, body, response.statusCode, localVarRequestOptions));
+                            /////End: Modified by @Run.AI /////
                         }
                     }
                 });

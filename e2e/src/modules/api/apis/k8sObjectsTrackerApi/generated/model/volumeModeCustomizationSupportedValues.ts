@@ -12,13 +12,16 @@
 
 import { RequestFile } from './models';
 
+/**
+* Lists which volume modes are supported for this storage class.
+*/
 export class VolumeModeCustomizationSupportedValues {
     /**
-    * whether filesystem is supported
+    * Indicates whether filesystem mode is supported. Filesystem allows the volume to be mounted as a filesystem, enabling the usage of directories and files.
     */
     'filesystem'?: boolean | null = true;
     /**
-    * whether block is supported
+    * Indicates whether block mode is supported. Exposes the volume as a block storage, which can be formatted or used by applications directly without a filesystem.
     */
     'block'?: boolean | null = true;
 

@@ -25,6 +25,10 @@ export class WorkloadV2Update {
     */
     'name': string;
     /**
+    * Immutable subject ID of the user who created the workload
+    */
+    'createdBy': string;
+    /**
     * The id of the project.
     */
     'projectId'?: string;
@@ -51,6 +55,11 @@ export class WorkloadV2Update {
         {
             "name": "name",
             "baseName": "name",
+            "type": "string"
+        },
+        {
+            "name": "createdBy",
+            "baseName": "createdBy",
             "type": "string"
         },
         {

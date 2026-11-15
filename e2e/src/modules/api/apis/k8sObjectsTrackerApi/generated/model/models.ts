@@ -14,6 +14,8 @@ export * from './configMapListInfo';
 export * from './configMaps';
 export * from './configMapsListResponse';
 export * from './createClusterWidePvcV1Request';
+export * from './deviceClass';
+export * from './deviceClasses';
 export * from './issue';
 export * from './modelError';
 export * from './origin';
@@ -85,6 +87,8 @@ import { ConfigMapListInfo } from './configMapListInfo';
 import { ConfigMaps } from './configMaps';
 import { ConfigMapsListResponse } from './configMapsListResponse';
 import { CreateClusterWidePvcV1Request } from './createClusterWidePvcV1Request';
+import { DeviceClass } from './deviceClass';
+import { DeviceClasses } from './deviceClasses';
 import { Issue } from './issue';
 import { ModelError } from './modelError';
 import { Origin } from './origin';
@@ -167,6 +171,8 @@ let typeMap: {[index: string]: any} = {
     "ConfigMaps": ConfigMaps,
     "ConfigMapsListResponse": ConfigMapsListResponse,
     "CreateClusterWidePvcV1Request": CreateClusterWidePvcV1Request,
+    "DeviceClass": DeviceClass,
+    "DeviceClasses": DeviceClasses,
     "Issue": Issue,
     "ModelError": ModelError,
     "PVC": PVC,

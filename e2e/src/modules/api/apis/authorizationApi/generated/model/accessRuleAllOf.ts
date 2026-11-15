@@ -11,18 +11,18 @@
  */
 
 import { RequestFile } from './models';
-import { AccessRuleStatusResponse } from './accessRuleStatusResponse';
+import { SubjectTypeExtended } from './subjectTypeExtended';
 
 export class AccessRuleAllOf {
-    'status'?: AccessRuleStatusResponse;
+    'subjectType': SubjectTypeExtended;
 
     static discriminator: string | undefined = undefined;
 
     static attributeTypeMap: Array<{name: string, baseName: string, type: string}> = [
         {
-            "name": "status",
-            "baseName": "status",
-            "type": "AccessRuleStatusResponse"
+            "name": "subjectType",
+            "baseName": "subjectType",
+            "type": "SubjectTypeExtended"
         }    ];
 
     static getAttributeTypeMap() {

@@ -1,7 +1,5 @@
 export * from './accessKeysApi';
 import { AccessKeysApi } from './accessKeysApi';
-export * from './applicationsApi';
-import { ApplicationsApi } from './applicationsApi';
 export * from './clientsApi';
 import { ClientsApi } from './clientsApi';
 export * from './configApi';
@@ -24,8 +22,6 @@ export * from './settingsApi';
 import { SettingsApi } from './settingsApi';
 export * from './tokensApi';
 import { TokensApi } from './tokensApi';
-export * from './userApplicationsApi';
-import { UserApplicationsApi } from './userApplicationsApi';
 export * from './usersApi';
 import { UsersApi } from './usersApi';
 import { HttpError } from './httpError';
@@ -33,6 +29,6 @@ export { HttpError };
 
 export type { RequestFile } from '../model/models';
 
-export const APIS = [AccessKeysApi, ApplicationsApi, ClientsApi, ConfigApi, HealthApi, IdpsApi, LoginsApi, LogoutApi, OpenIDConnectApi, RealmApi, ServiceAccountsApi, SettingsApi, TokensApi, UserApplicationsApi, UsersApi];
+export const APIS = [AccessKeysApi, ClientsApi, ConfigApi, HealthApi, IdpsApi, LoginsApi, LogoutApi, OpenIDConnectApi, RealmApi, ServiceAccountsApi, SettingsApi, TokensApi, UsersApi];
 
 

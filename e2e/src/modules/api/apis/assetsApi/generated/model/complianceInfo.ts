@@ -14,7 +14,7 @@ import { RequestFile } from './models';
 import { ComplianceInfoReason } from './complianceInfoReason';
 
 /**
-* Compliance of the asset with creation of workloads in the given project.
+* Compliance of an asset with creation of workloads in a given project.
 */
 export class ComplianceInfo {
     /**

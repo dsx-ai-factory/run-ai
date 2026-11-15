@@ -2,6 +2,7 @@
 .openapi-generator-ignore
 api.ts
 api/apis.ts
+api/bootConfigApi.ts
 api/healthApi.ts
 api/settingsApi.ts
 api/systemNotificationApi.ts
@@ -9,6 +10,14 @@ api/versionApi.ts
 git_push.sh
 model/appearanceSettingsGetAllResponse.ts
 model/appearanceSettingsKeyEnum.ts
+model/bootConfig.ts
+model/bootConfigCapabilities.ts
+model/bootConfigDistributionAssets.ts
+model/bootConfigDocs.ts
+model/bootConfigSupport.ts
+model/bootConfigUnleashConfig.ts
+model/bootConfigVersion.ts
+model/bootConfigWhatsNew.ts
 model/brandingSettingsGetAllResponse.ts
 model/brandingSettingsKeyEnum.ts
 model/complianceIssues.ts

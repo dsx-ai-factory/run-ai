@@ -12,22 +12,28 @@
 
 import { RequestFile } from './models';
 
+/**
+* Defines the default, supported units, and range constraints for PVC claim sizes. These settings control the requested storage capacity when creating a PVC using this storage class.
+*/
 export class ClaimSizeCustomization {
     /**
     * Requested size for the PVC. Mandatory when existingPvc is false. Recommended sizes: TB/GB/MB/TIB/GIB/MIB
     */
     '_default'?: string | null;
+    /**
+    * Units supported for specifying PVC sizes. Valid values: \"MB\", \"MiB\", \"GB\", \"GiB\", \"TB\", \"TiB\".
+    */
     'supportedUnits'?: Array<ClaimSizeCustomization.SupportedUnitsEnum>;
     /**
-    * Requested size for the PVC. Mandatory when existingPvc is false. Recommended sizes: TB/GB/MB/TIB/GIB/MIB
+    * Minimum claim size allowed for PVCs created with this storage class. Mandatory when existingPvc = false. Recommended values: TB, GB, MB, TIB, GIB, MIB.
     */
     'min'?: string | null;
     /**
-    * Requested size for the PVC. Mandatory when existingPvc is false. Recommended sizes: TB/GB/MB/TIB/GIB/MIB
+    * Maximum claim size allowed for PVCs created with this storage class. Mandatory when existingPvc = false. Recommended values: TB, GB, MB, TIB, GIB, MIB.
     */
     'max'?: string | null;
     /**
-    * Requested size for the PVC. Mandatory when existingPvc is false. Recommended sizes: TB/GB/MB/TIB/GIB/MIB
+    * Defines the incremental step between allowed numeric values (for example, 1, 0.1).
     */
     'step'?: string | null;
 

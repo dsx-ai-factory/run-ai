@@ -13,9 +13,10 @@
 import { RequestFile } from './models';
 
 /**
-* Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
+* Specifies whether the workload can be preempted by higher-priority workloads. Valid values are preemptible, semi-preemptible and non-preemptible. If explicitly set, this value takes precedence. If not set, the system derives the preemptibility from the priorityClassName field, ensuring backward compatibility. Each workload type has a default preemptibility. To view the default preemptibility for each workload type, use the GET /workload-types endpoint.
 */
 export enum Preemptibility {
     Preemptible = <any> 'preemptible',
+    SemiPreemptible = <any> 'semi-preemptible',
     NonPreemptible = <any> 'non-preemptible'
 }

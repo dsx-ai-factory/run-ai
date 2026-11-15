@@ -16,7 +16,7 @@ import { ServingPortAccessAuthorizationTypeEnum } from './servingPortAccessAutho
 export class ServingPortAccess {
     'authorizationType'?: ServingPortAccessAuthorizationTypeEnum | null;
     /**
-    * List of users that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
+    * List of users or service accounts that are allowed to access the URL. Note that authorizedUsers and authorizedGroups are mutually exclusive.
     */
     'authorizedUsers'?: Array<string> | null;
     /**

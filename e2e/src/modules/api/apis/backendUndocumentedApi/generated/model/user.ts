@@ -11,10 +11,8 @@
  */
 
 import { RequestFile } from './models';
-import { AuthEntity } from './authEntity';
 import { AuthEntityType } from './authEntityType';
 import { Role } from './role';
-import { UserAllOf } from './userAllOf';
 
 export class User {
     'entityType'?: AuthEntityType;

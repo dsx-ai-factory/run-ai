@@ -14,7 +14,7 @@ import { RequestFile } from './models';
 import { ArrayRules } from './arrayRules';
 import { DistributedInferenceLeaderRulesFieldsLeader } from './distributedInferenceLeaderRulesFieldsLeader';
 import { DistributedInferenceRestartPolicyRules } from './distributedInferenceRestartPolicyRules';
-import { DistributedInferenceServingPortRules2 } from './distributedInferenceServingPortRules2';
+import { DistributedInferenceServingPortRules } from './distributedInferenceServingPortRules';
 import { DistributedInferenceStartupPolicyFieldRulesStartupPolicy } from './distributedInferenceStartupPolicyFieldRulesStartupPolicy';
 import { DistributedInferenceWorkerRulesFieldsWorker } from './distributedInferenceWorkerRulesFieldsWorker';
 import { IntegerRules } from './integerRules';
@@ -27,7 +27,7 @@ export class DistributedInferenceRulesV2 {
     'preemptibility'?: PreemptibilityRules | null;
     'priorityClass'?: StringRules | null;
     'restartPolicy'?: DistributedInferenceRestartPolicyRules | null;
-    'servingPort'?: DistributedInferenceServingPortRules2 | null;
+    'servingPort'?: DistributedInferenceServingPortRules | null;
     'startupPolicy'?: DistributedInferenceStartupPolicyFieldRulesStartupPolicy | null;
     'workers'?: IntegerRules | null;
     'replicas'?: IntegerRules | null;
@@ -65,7 +65,7 @@ export class DistributedInferenceRulesV2 {
         {
             "name": "servingPort",
             "baseName": "servingPort",
-            "type": "DistributedInferenceServingPortRules2"
+            "type": "DistributedInferenceServingPortRules"
         },
         {
             "name": "startupPolicy",

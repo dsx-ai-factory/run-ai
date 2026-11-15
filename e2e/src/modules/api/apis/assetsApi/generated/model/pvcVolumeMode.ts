@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* The volume mode required by the claim. Choose Filesystem (default) or Block.
+* Default volume mode for the PVC. Choose between Filesystem (default) or Block.
 */
 export enum PvcVolumeMode {
     Filesystem = <any> 'Filesystem',

@@ -33,6 +33,10 @@ export class SecretListInfo {
     'name': string;
     'type': SecretType;
     'origin': Origin | null;
+    /**
+    * Whether the secret is private (user-credential).
+    */
+    '_private'?: boolean | null = false;
 
     static discriminator: string | undefined = undefined;
 
@@ -66,6 +70,11 @@ export class SecretListInfo {
             "name": "origin",
             "baseName": "origin",
             "type": "Origin"
+        },
+        {
+            "name": "_private",
+            "baseName": "private",
+            "type": "boolean"
         }    ];
 
     static getAttributeTypeMap() {

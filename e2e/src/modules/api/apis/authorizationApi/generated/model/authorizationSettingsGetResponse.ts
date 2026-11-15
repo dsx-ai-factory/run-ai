@@ -12,11 +12,9 @@
 
 import { RequestFile } from './models';
 import { EnableScopedAuthorizationSetting } from './enableScopedAuthorizationSetting';
-import { TenantIsCspManagedSetting } from './tenantIsCspManagedSetting';
 
 export class AuthorizationSettingsGetResponse {
     'enableScopedAuthorization'?: EnableScopedAuthorizationSetting;
-    'tenantIsCspManaged'?: TenantIsCspManagedSetting;
 
     static discriminator: string | undefined = undefined;
 
@@ -25,11 +23,6 @@ export class AuthorizationSettingsGetResponse {
             "name": "enableScopedAuthorization",
             "baseName": "enableScopedAuthorization",
             "type": "EnableScopedAuthorizationSetting"
-        },
-        {
-            "name": "tenantIsCspManaged",
-            "baseName": "tenantIsCspManaged",
-            "type": "TenantIsCspManagedSetting"
         }    ];
 
     static getAttributeTypeMap() {

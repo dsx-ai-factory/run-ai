@@ -2,10 +2,13 @@ import localVarRequest from 'request';
 
 export * from './accessRule';
 export * from './accessRuleAllOf';
+export * from './accessRuleAllOf1';
 export * from './accessRuleById';
 export * from './accessRuleByIdAllOf';
 export * from './accessRuleClusterPhase';
 export * from './accessRuleCreationFields';
+export * from './accessRuleCreationFieldsAllOf';
+export * from './accessRuleCreationFieldsInternal';
 export * from './accessRuleDeletionBatchResponse';
 export * from './accessRuleDeletionBatchResponseFailureItem';
 export * from './accessRuleForSync';
@@ -32,6 +35,7 @@ export * from './accessRulesMigrateDeprecatedResponseSucceeded';
 export * from './accessRulesSortFilterFields';
 export * from './action';
 export * from './allowedInternalCreateRoles';
+export * from './authenticatedUsersAccessRuleCreationFields';
 export * from './authorizationSettingsGetResponse';
 export * from './authorizationSettingsKeyEnum';
 export * from './backendEvaluationRequest';
@@ -75,12 +79,11 @@ export * from './roleCreationFieldsKubernetesPermissions';
 export * from './roleEnabledDisabledFields';
 export * from './rolePermission';
 export * from './rolePermissionSet';
-export * from './roleV1';
 export * from './rolesSortFilterFields';
 export * from './scopeType';
 export * from './subjectType';
+export * from './subjectTypeExtended';
 export * from './submissionError';
-export * from './tenantIsCspManagedSetting';
 export * from './updateAuthorizationSettingByKeyRequest';
 export * from './updateScopeAccessRulesRequest';
 
@@ -99,10 +102,13 @@ export type RequestFile = string | Buffer | fs.ReadStream | RequestDetailedFile;
 
 import { AccessRule } from './accessRule';
 import { AccessRuleAllOf } from './accessRuleAllOf';
+import { AccessRuleAllOf1 } from './accessRuleAllOf1';
 import { AccessRuleById } from './accessRuleById';
 import { AccessRuleByIdAllOf } from './accessRuleByIdAllOf';
 import { AccessRuleClusterPhase } from './accessRuleClusterPhase';
 import { AccessRuleCreationFields } from './accessRuleCreationFields';
+import { AccessRuleCreationFieldsAllOf } from './accessRuleCreationFieldsAllOf';
+import { AccessRuleCreationFieldsInternal } from './accessRuleCreationFieldsInternal';
 import { AccessRuleDeletionBatchResponse } from './accessRuleDeletionBatchResponse';
 import { AccessRuleDeletionBatchResponseFailureItem } from './accessRuleDeletionBatchResponseFailureItem';
 import { AccessRuleForSync } from './accessRuleForSync';
@@ -129,6 +135,7 @@ import { AccessRulesMigrateDeprecatedResponseSucceeded } from './accessRulesMigr
 import { AccessRulesSortFilterFields } from './accessRulesSortFilterFields';
 import { Action } from './action';
 import { AllowedInternalCreateRoles } from './allowedInternalCreateRoles';
+import { AuthenticatedUsersAccessRuleCreationFields } from './authenticatedUsersAccessRuleCreationFields';
 import { AuthorizationSettingsGetResponse } from './authorizationSettingsGetResponse';
 import { AuthorizationSettingsKeyEnum } from './authorizationSettingsKeyEnum';
 import { BackendEvaluationRequest } from './backendEvaluationRequest';
@@ -172,12 +179,11 @@ import { RoleCreationFieldsKubernetesPermissions } from './roleCreationFieldsKub
 import { RoleEnabledDisabledFields } from './roleEnabledDisabledFields';
 import { RolePermission } from './rolePermission';
 import { RolePermissionSet } from './rolePermissionSet';
-import { RoleV1 } from './roleV1';
 import { RolesSortFilterFields } from './rolesSortFilterFields';
 import { ScopeType } from './scopeType';
 import { SubjectType } from './subjectType';
+import { SubjectTypeExtended } from './subjectTypeExtended';
 import { SubmissionError } from './submissionError';
-import { TenantIsCspManagedSetting } from './tenantIsCspManagedSetting';
 import { UpdateAuthorizationSettingByKeyRequest } from './updateAuthorizationSettingByKeyRequest';
 import { UpdateScopeAccessRulesRequest } from './updateScopeAccessRulesRequest';
 
@@ -201,6 +207,7 @@ let enumsMap: {[index: string]: any} = {
         "AccessRulesSortFilterFields": AccessRulesSortFilterFields,
         "Action": Action,
         "AllowedInternalCreateRoles": AllowedInternalCreateRoles,
+        "AuthenticatedUsersAccessRuleCreationFields.ScopeTypeEnum": AuthenticatedUsersAccessRuleCreationFields.ScopeTypeEnum,
         "AuthorizationSettingsKeyEnum": AuthorizationSettingsKeyEnum,
         "GetPermittedScopesRequest.ActionEnum": GetPermittedScopesRequest.ActionEnum,
         "PermissionAction": PermissionAction,
@@ -211,18 +218,21 @@ let enumsMap: {[index: string]: any} = {
         "RoleCreationFields.ScopeTypeEnum": RoleCreationFields.ScopeTypeEnum,
         "RoleCreationFieldsInternal.ScopeTypeEnum": RoleCreationFieldsInternal.ScopeTypeEnum,
         "RoleEnabledDisabledFields.ScopeTypeEnum": RoleEnabledDisabledFields.ScopeTypeEnum,
-        "RoleV1.ScopeTypeEnum": RoleV1.ScopeTypeEnum,
         "RolesSortFilterFields": RolesSortFilterFields,
         "ScopeType": ScopeType,
         "SubjectType": SubjectType,
+        "SubjectTypeExtended": SubjectTypeExtended,
 }
 
 let typeMap: {[index: string]: any} = {
     "AccessRule": AccessRule,
     "AccessRuleAllOf": AccessRuleAllOf,
+    "AccessRuleAllOf1": AccessRuleAllOf1,
     "AccessRuleById": AccessRuleById,
     "AccessRuleByIdAllOf": AccessRuleByIdAllOf,
     "AccessRuleCreationFields": AccessRuleCreationFields,
+    "AccessRuleCreationFieldsAllOf": AccessRuleCreationFieldsAllOf,
+    "AccessRuleCreationFieldsInternal": AccessRuleCreationFieldsInternal,
     "AccessRuleDeletionBatchResponse": AccessRuleDeletionBatchResponse,
     "AccessRuleDeletionBatchResponseFailureItem": AccessRuleDeletionBatchResponseFailureItem,
     "AccessRuleForSync": AccessRuleForSync,
@@ -244,6 +254,7 @@ let typeMap: {[index: string]: any} = {
     "AccessRulesMigrateDeprecatedFields": AccessRulesMigrateDeprecatedFields,
     "AccessRulesMigrateDeprecatedResponse": AccessRulesMigrateDeprecatedResponse,
     "AccessRulesMigrateDeprecatedResponseSucceeded": AccessRulesMigrateDeprecatedResponseSucceeded,
+    "AuthenticatedUsersAccessRuleCreationFields": AuthenticatedUsersAccessRuleCreationFields,
     "AuthorizationSettingsGetResponse": AuthorizationSettingsGetResponse,
     "BackendEvaluationRequest": BackendEvaluationRequest,
     "BatchResponse": BatchResponse,
@@ -283,9 +294,7 @@ let typeMap: {[index: string]: any} = {
     "RoleEnabledDisabledFields": RoleEnabledDisabledFields,
     "RolePermission": RolePermission,
     "RolePermissionSet": RolePermissionSet,
-    "RoleV1": RoleV1,
     "SubmissionError": SubmissionError,
-    "TenantIsCspManagedSetting": TenantIsCspManagedSetting,
     "UpdateAuthorizationSettingByKeyRequest": UpdateAuthorizationSettingByKeyRequest,
     "UpdateScopeAccessRulesRequest": UpdateScopeAccessRulesRequest,
 }

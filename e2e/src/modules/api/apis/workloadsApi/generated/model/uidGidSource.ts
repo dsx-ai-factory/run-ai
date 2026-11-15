@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 
 /**
-* Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](https://run-ai-docs.nvidia.com/self-hosted/latest/infrastructure-setup/advanced-setup/container-access/user-identity-in-containers).
+* Indicate the way to determine the user and group ids of the container. The options are a. `fromTheImage` - user and group ids are determined by the docker image that the container runs. this is the default option. b. `custom` - user and group ids can be specified in the environment asset and/or the workload creation request. c. `idpToken` - user and group IDs are automatically taken from the identity provider (IdP) token (available only in SSO-enabled installations). For more information, see [User Identity](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers).
 */
 export enum UidGidSource {
     FromTheImage = <any> 'fromTheImage',

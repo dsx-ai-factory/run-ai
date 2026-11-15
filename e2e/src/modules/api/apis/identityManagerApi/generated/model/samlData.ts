@@ -20,6 +20,14 @@ export class SamlData {
     * Service Provider (SP) metadata url
     */
     'serviceProviderMetadataUrl'?: string;
+    /**
+    * Whether the signature of SAML responses from the identity provider is validated
+    */
+    'validateSignature': boolean;
+    /**
+    * The expiration date of the signing certificate
+    */
+    'certificateExpirationDate'?: Date;
 
     static discriminator: string | undefined = undefined;
 
@@ -43,6 +51,16 @@ export class SamlData {
             "name": "serviceProviderMetadataUrl",
             "baseName": "serviceProviderMetadataUrl",
             "type": "string"
+        },
+        {
+            "name": "validateSignature",
+            "baseName": "validateSignature",
+            "type": "boolean"
+        },
+        {
+            "name": "certificateExpirationDate",
+            "baseName": "certificateExpirationDate",
+            "type": "Date"
         }    ];
 
     static getAttributeTypeMap() {

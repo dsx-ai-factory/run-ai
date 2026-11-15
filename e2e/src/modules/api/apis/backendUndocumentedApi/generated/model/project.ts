@@ -13,8 +13,6 @@
 import { RequestFile } from './models';
 import { AssignedResources } from './assignedResources';
 import { JobsNodeAffinity } from './jobsNodeAffinity';
-import { ProjectAllOf } from './projectAllOf';
-import { ProjectCreateRequest } from './projectCreateRequest';
 import { ResourcePermissions } from './resourcePermissions';
 
 export class Project {

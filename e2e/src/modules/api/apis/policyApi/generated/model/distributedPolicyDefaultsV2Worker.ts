@@ -26,10 +26,10 @@ import { PortsDefaults } from './portsDefaults';
 import { Preemptibility } from './preemptibility';
 import { Probes } from './probes';
 import { RelatedUrlsDefaults } from './relatedUrlsDefaults';
-import { ReplicaDefaultsV2Security } from './replicaDefaultsV2Security';
 import { ReplicaDefaultsV2Storage } from './replicaDefaultsV2Storage';
 import { RestartPolicy } from './restartPolicy';
 import { SupersetDefaultsAllOfCompute } from './supersetDefaultsAllOfCompute';
+import { SupersetDefaultsAllOfSecurity } from './supersetDefaultsAllOfSecurity';
 import { TolerationsDefaults } from './tolerationsDefaults';
 
 export class DistributedPolicyDefaultsV2Worker {
@@ -74,7 +74,7 @@ export class DistributedPolicyDefaultsV2Worker {
     */
     'nodePools'?: Array<string> | null;
     /**
-    * Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
+    * Deprecated: use a workload policy node selector to target node types instead. Nodes (machines), or a group of nodes on which the workload will run. To use this feature, your Administrator will need to label nodes. For more information, see [Group Nodes](https://docs.run.ai/latest/admin/researcher-setup/limit-to-node-group). When using this flag with with Project-based affinity, it refines the list of allowable node groups set in the Project. For more information, see [Projects](https://docshub.run.ai/guides/platform-management/aiinitiatives/organization/projects).
     */
     'nodeType'?: string | null;
     'podAffinity'?: PodAffinity | null;
@@ -87,7 +87,7 @@ export class DistributedPolicyDefaultsV2Worker {
     'probes'?: Probes | null;
     'relatedUrls'?: RelatedUrlsDefaults | null;
     'restartPolicy'?: RestartPolicy | null;
-    'security'?: ReplicaDefaultsV2Security | null;
+    'security'?: SupersetDefaultsAllOfSecurity | null;
     /**
     * Whether this container should allocate a buffer for stdin in the container runtime. If this is not set, reads from stdin in the container will always result in EOF
     */
@@ -260,7 +260,7 @@ export class DistributedPolicyDefaultsV2Worker {
         {
             "name": "security",
             "baseName": "security",
-            "type": "ReplicaDefaultsV2Security"
+            "type": "SupersetDefaultsAllOfSecurity"
         },
         {
             "name": "stdin",

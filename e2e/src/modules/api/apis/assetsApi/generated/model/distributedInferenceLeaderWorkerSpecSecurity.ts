@@ -20,6 +20,14 @@ export class DistributedInferenceLeaderWorkerSpecSecurity {
     * Add POSIX capabilities to running containers. Defaults to the default set of capabilities granted by the container runtime.
     */
     'capabilities'?: Array<Capability> | null;
+    /**
+    * Whether to enable host IPC. Defaults to false.
+    */
+    'hostIpc'?: boolean | null;
+    /**
+    * Whether to enable host networking. Default to false.
+    */
+    'hostNetwork'?: boolean | null;
     'privileged'?: boolean;
     /**
     * If true, mounts the container\'s root filesystem as read-only.
@@ -51,6 +59,16 @@ export class DistributedInferenceLeaderWorkerSpecSecurity {
             "name": "capabilities",
             "baseName": "capabilities",
             "type": "Array<Capability>"
+        },
+        {
+            "name": "hostIpc",
+            "baseName": "hostIpc",
+            "type": "boolean"
+        },
+        {
+            "name": "hostNetwork",
+            "baseName": "hostNetwork",
+            "type": "boolean"
         },
         {
             "name": "privileged",

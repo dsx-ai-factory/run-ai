@@ -58,6 +58,10 @@ export class ClusterReportedConfig {
     */
     's3FileSystemImage'?: string | null;
     's3FileSystemResources'?: ClusterReportedResourceRequirements | null;
+    /**
+    * The exact S3 image reference that supports goofys --ready-file and --check-ready. Omitted when support is unknown or disabled.
+    */
+    's3FileSystemMountCheckImage'?: string | null;
     'fipsMode'?: FipsModeEnum | null;
     /**
     * the fully qualified runai oauth2-proxy image reference used by init containers (format \"registry/name:tag\")
@@ -159,6 +163,11 @@ export class ClusterReportedConfig {
             "name": "s3FileSystemResources",
             "baseName": "s3FileSystemResources",
             "type": "ClusterReportedResourceRequirements"
+        },
+        {
+            "name": "s3FileSystemMountCheckImage",
+            "baseName": "s3FileSystemMountCheckImage",
+            "type": "string"
         },
         {
             "name": "fipsMode",

@@ -13,7 +13,7 @@
 import { RequestFile } from './models';
 import { ArrayRules } from './arrayRules';
 import { DistributedInferenceRestartPolicyRules } from './distributedInferenceRestartPolicyRules';
-import { DistributedInferenceServingPortRules2 } from './distributedInferenceServingPortRules2';
+import { DistributedInferenceServingPortRules } from './distributedInferenceServingPortRules';
 import { PreemptibilityRules } from './preemptibilityRules';
 import { StringRules } from './stringRules';
 
@@ -23,7 +23,7 @@ export class DistributedInferenceCommonRulesV2AllOf {
     'preemptibility'?: PreemptibilityRules | null;
     'priorityClass'?: StringRules | null;
     'restartPolicy'?: DistributedInferenceRestartPolicyRules | null;
-    'servingPort'?: DistributedInferenceServingPortRules2 | null;
+    'servingPort'?: DistributedInferenceServingPortRules | null;
 
     static discriminator: string | undefined = undefined;
 
@@ -56,7 +56,7 @@ export class DistributedInferenceCommonRulesV2AllOf {
         {
             "name": "servingPort",
             "baseName": "servingPort",
-            "type": "DistributedInferenceServingPortRules2"
+            "type": "DistributedInferenceServingPortRules"
         }    ];
 
     static getAttributeTypeMap() {

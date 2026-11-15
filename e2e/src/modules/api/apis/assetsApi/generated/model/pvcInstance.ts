@@ -24,7 +24,7 @@ export class PvcInstance {
     'path'?: string | null;
     'claimInfo'?: ClaimInfo | null;
     /**
-    * Verify existing PVC. PVC is assumed to exist when set to `true`. If set to `false`, the PVC will be created, if it does not exist.
+    * Verify existing PVC. PVC is assumed to exist when set to `true`. If set to `false`, the PVC will be created, if it does not exist. Cannot be set to `true` when `dataSharing` is `true`.
     */
     'existingPvc'?: boolean | null = false;
     /**
@@ -40,7 +40,7 @@ export class PvcInstance {
     */
     'ephemeral'?: boolean | null = false;
     /**
-    * use `true` to share the PVC data to all projects under the selected scope.
+    * Use `true` to share the PVC data to all projects under the selected scope. Cannot be set to `true` when `existingPvc` is `true`.
     */
     'dataSharing'?: boolean | null = false;
     /**

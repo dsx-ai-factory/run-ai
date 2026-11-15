@@ -19,6 +19,10 @@ export class SecretCreationRequest {
     'type': SecretType;
     'origin'?: Origin | null;
     /**
+    * Whether the secret is private (user-credential).
+    */
+    '_private'?: boolean | null = false;
+    /**
     * list of issues that was found while syncing the resource to the cluster
     */
     'issues'?: Array<Issue>;
@@ -35,6 +39,11 @@ export class SecretCreationRequest {
             "name": "origin",
             "baseName": "origin",
             "type": "Origin"
+        },
+        {
+            "name": "_private",
+            "baseName": "private",
+            "type": "boolean"
         },
         {
             "name": "issues",

@@ -15,7 +15,7 @@ import { NumaNodeDetails } from './numaNodeDetails';
 
 export class NumaInfoExtendedAllOf {
     /**
-    * NUMA nodes reported in the node\'s NodeResourceTopology object.
+    * The list of NUMA nodes on the physical machine and their resource availability.
     */
     'nodes': Array<NumaNodeDetails>;
 

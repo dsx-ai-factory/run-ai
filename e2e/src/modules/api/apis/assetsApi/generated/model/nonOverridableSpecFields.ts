@@ -20,7 +20,7 @@ import { UidGidSource } from './uidGidSource';
 
 export class NonOverridableSpecFields {
     /**
-    * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the User Identity in Container guide at https://docs.run.ai/admin/runai-setup/config/non-root-containers/
+    * Allow the container running the workload and all launched processes to gain additional privileges after the workload starts. For more information consult the [User Identity in Container guide](/run-ai/self-hosted/documentation/installation-and-configuration/configuration/security/user-identity-in-containers)
     */
     'allowPrivilegeEscalation'?: boolean | null;
     /**
