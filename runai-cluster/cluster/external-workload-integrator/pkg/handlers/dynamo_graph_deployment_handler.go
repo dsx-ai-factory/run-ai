@@ -193,14 +193,16 @@ func (h *DynamoGraphDeploymentTopOwnerHandler) parseSpecV1beta1(ctx context.Cont
 			h.cachedClient, externalWorkload)
 	}
 
-	if len(totalResources.Requests) > 0 || len(totalResources.Limits) > 0 {
+	noPodsRequested := totalReplicas == 0
+	hasResourceDetails := len(totalResources.Requests) > 0 || len(totalResources.Limits) > 0
+
+	// Save totals when resource details are available, or clear old totals when no pods are requested.
+	if noPodsRequested || hasResourceDetails {
 		externalWorkload.Spec.RequestedResources = totalResources
 	}
 
 	// Set total replicas
-	if totalReplicas > 0 {
-		externalWorkload.Spec.RequestedPods.Replicas = ptr.To(totalReplicas)
-	}
+	externalWorkload.Spec.RequestedPods.Replicas = ptr.To(totalReplicas)
 
 	// Set default node pools
 	commonparsers.FillDefaultNodePoolIfNeeded(externalWorkload)
